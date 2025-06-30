@@ -333,7 +333,7 @@ export class ExploreEmbeddable
         dateColumns: VisColumn[],
         styleOpts: any
       ) => {
-        return rule.toExpression!(
+        return rule?.toExpression?.(
           transformedData,
           numericalColumns,
           categoricalColumns,

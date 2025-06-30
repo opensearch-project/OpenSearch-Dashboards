@@ -11,7 +11,6 @@ import {
   createTimeMarkerLayer,
   applyAxisStyling,
   getStrokeDash,
-  ValueAxisPosition,
 } from '../line/line_chart_utils';
 
 /**

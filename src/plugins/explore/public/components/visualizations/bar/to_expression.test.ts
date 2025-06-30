@@ -5,7 +5,7 @@
 
 import { createBarSpec, createStackedBarSpec } from './to_expression';
 import { defaultBarChartStyles } from './bar_vis_config';
-import { Positions, VisColumn, VisFieldType, VEGASCHEMA } from '../types';
+import { VisColumn, VisFieldType, VEGASCHEMA } from '../types';
 
 describe('bar to_expression', () => {
   // Create mock VisColumn objects
@@ -34,15 +34,6 @@ describe('bar to_expression', () => {
     schema: VisFieldType.Categorical,
     validValuesCount: 100,
     uniqueValuesCount: 10,
-  };
-
-  const mockDateColumn: VisColumn = {
-    id: 4,
-    name: 'Date',
-    column: 'date',
-    schema: VisFieldType.Date,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
   };
 
   // Sample data for testing

@@ -32,6 +32,8 @@ describe('to_expression', () => {
       name: 'value',
       schema: VisFieldType.Numerical,
       column: 'field-1',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
     },
   ];
 
@@ -41,6 +43,8 @@ describe('to_expression', () => {
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'field-2',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
     },
   ];
 
@@ -50,6 +54,8 @@ describe('to_expression', () => {
       name: 'date',
       schema: VisFieldType.Date,
       column: 'field-0',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
     },
   ];
 

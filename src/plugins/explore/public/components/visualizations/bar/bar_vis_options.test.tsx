@@ -10,10 +10,6 @@ import { defaultBarChartStyles } from './bar_vis_config';
 import { Positions, VisColumn, VisFieldType } from '../types';
 import { EuiTabbedContent } from '@elastic/eui';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
-import { ThresholdOptions } from '../style_panel/threshold_options';
-import { GridOptionsPanel } from '../style_panel/grid_options';
-import { AxesOptions } from '../style_panel/axes_options';
 
 // Mock the child components
 jest.mock('../style_panel/general_vis_options', () => ({

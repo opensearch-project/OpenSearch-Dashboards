@@ -138,13 +138,34 @@ const mockVisualizationData: VisualizationTypeResult<'line'> = {
     { date: '2024-01-04', value: 180, category: 'B' },
   ],
   numericalColumns: [
-    { id: 1, column: 'value', name: 'Sales Value', schema: VisFieldType.Numerical },
+    {
+      id: 1,
+      column: 'value',
+      name: 'Sales Value',
+      schema: VisFieldType.Numerical,
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
   ],
   categoricalColumns: [
-    { id: 2, column: 'category', name: 'Product Category', schema: VisFieldType.Categorical },
+    {
+      id: 2,
+      column: 'category',
+      name: 'Product Category',
+      schema: VisFieldType.Categorical,
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
   ],
   dateColumns: [
-    { id: 3, column: VisFieldType.Date, name: VisFieldType.Date, schema: VisFieldType.Categorical },
+    {
+      id: 3,
+      column: VisFieldType.Date,
+      name: VisFieldType.Date,
+      schema: VisFieldType.Categorical,
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
   ],
 };
 
@@ -198,8 +219,22 @@ MultipleAxes.args = {
   visualizationData: {
     ...mockVisualizationData,
     numericalColumns: [
-      { id: 1, column: 'value1', name: 'Revenue', schema: VisFieldType.Numerical },
-      { id: 2, column: 'value2', name: 'Profit', schema: VisFieldType.Numerical },
+      {
+        id: 1,
+        column: 'value1',
+        name: 'Revenue',
+        schema: VisFieldType.Numerical,
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+      {
+        id: 2,
+        column: 'value2',
+        name: 'Profit',
+        schema: VisFieldType.Numerical,
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
     ],
   },
   styleOptions: {
