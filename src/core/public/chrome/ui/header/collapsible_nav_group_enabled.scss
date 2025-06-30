@@ -82,7 +82,9 @@ $sizeForSelectedSubMenu: 5px;
     }
 
     .leftNavMenuIcon {
-      display: inline-block;
+      > svg {
+        display: inline-block;
+      }
     }
 
     // Show the customized icon

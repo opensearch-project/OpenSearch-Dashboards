@@ -80,7 +80,7 @@ export function NavGroups({
       buttonClassName: 'nav-link-item-btn',
       'data-test-subj': euiListItem['data-test-subj'],
       'aria-label': link.title,
-      icon,
+      icon: icon ? <span className="leftNavMenuIcon">{icon}</span> : undefined,
     };
   };
   const createSideNavItem = (
