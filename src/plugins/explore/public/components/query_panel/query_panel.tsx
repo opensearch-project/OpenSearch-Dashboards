@@ -329,7 +329,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   };
 
   const handleRunClick = () => {
-    if (isDualEditor) {
+    if (isDualEditor && isPromptReadOnly) {
       handleRun();
     } else {
       handlePromptRun();

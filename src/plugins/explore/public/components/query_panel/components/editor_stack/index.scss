@@ -113,7 +113,7 @@ $customSize10: 10px;
         }
 
         // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-        .euiButtonContent > * + * {
+        .euiButtonContent>*+* {
           margin-inline-start: 4px;
         }
       }
@@ -240,7 +240,7 @@ $customSize10: 10px;
           }
 
           // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-          .euiButtonContent > * + * {
+          .euiButtonContent>*+* {
             margin-inline-start: 4px;
           }
         }
@@ -261,8 +261,4 @@ $customSize10: 10px;
       }
     }
   }
-}
-
-.queryPanel__editorStack__progress {
-  position: relative;
 }
