@@ -19,7 +19,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
 
-export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar' | 'area';
+export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar' | 'area' | 'logs';
 
 export interface ChartStyleControlMap {
   line: LineChartStyleControls;
@@ -29,6 +29,9 @@ export interface ChartStyleControlMap {
   scatter: ScatterChartStyleControls;
   bar: BarChartStyleControls;
   area: AreaChartStyleControls;
+  // NOTE: Log table does not have style controls.
+  // log is one of chart types?
+  logs: {};
 }
 
 export type AllChartStyleControls =
