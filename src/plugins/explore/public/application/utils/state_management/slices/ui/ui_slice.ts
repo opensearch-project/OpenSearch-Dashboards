@@ -42,8 +42,8 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setUiState: (_, action: PayloadAction<UIState>) => {
-      return { ...action.payload };
+    setUiState: (state, action: PayloadAction<Partial<UIState>>) => {
+      return { ...state, ...action.payload };
     },
     setActiveTab: (state, action: PayloadAction<string>) => {
       state.activeTabId = action.payload;
