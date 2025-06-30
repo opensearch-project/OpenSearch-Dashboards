@@ -25,6 +25,8 @@ import {
   useVisualizationRegistry,
   VisualizationTypeResult,
 } from './utils/use_visualization_types';
+import { setChartType, setStyleOptions } from '../../application/utils/state_management/slices';
+import { CHART_METADATA } from './constants';
 
 interface VisualizationEmptyStateProps {
   visualizationData: VisualizationTypeResult<ChartType>;
@@ -117,8 +119,12 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     value: col.name,
     text: col.name,
   });
-  const allColumnOptions = [numericalColumns, categoricalColumns, dateColumns].map((columns) =>
-    columns.map(convertToSelectOption)
+  const allColumnOptions = useMemo(
+    () =>
+      [numericalColumns, categoricalColumns, dateColumns].map((columns) =>
+        columns.map(convertToSelectOption)
+      ),
+    [numericalColumns, categoricalColumns, dateColumns]
   );
   const [numericalColumnOptions, categoricalColumnOptions, dateColumnOptions] = allColumnOptions;
 
@@ -150,6 +156,11 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
           rules: chartType.rules.filter((rule) => {
             const [numCount, cateCount, dateCount] = rule.matchIndex || [0, 0, 0];
 
+            // Special condition for metric type
+            if (type === CHART_METADATA.metric.type && numericalColumnOptions.length > 0) {
+              return numericalColumnOptions[0].column.validValuesCount === 1;
+            }
+
             return (
               numericalColumnOptions.length >= numCount &&
               categoricalColumnOptions.length >= cateCount &&
@@ -166,7 +177,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     );
   }, [
     baseChartTypeMapping,
-    numericalColumnOptions.length,
+    numericalColumnOptions,
     categoricalColumnOptions.length,
     dateColumnOptions.length,
   ]);
@@ -202,6 +213,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
           currChartTypeOption?.value!
         );
         dispatch(setStyleOptions(visualizationType.ui.style.defaults));
+        dispatch(setChartType(visualizationType.type));
 
         setVisualizationData({
           ...originalVisualizationData.current,
@@ -390,11 +402,24 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                                     value={selectedColumn.name}
                                     options={allColumnOptions[index].filter(
                                       // Filter out the fields already selected but keet the current one
-                                      (col) =>
-                                        col.column.name === selectedColumn.name ||
-                                        !selectedColumns.some(
+                                      (col) => {
+                                        const isCurrentColumn =
+                                          col.column.name === selectedColumn.name;
+                                        const isAlreadySelected = selectedColumns.some(
                                           (selected) => selected.name === col.column.name
-                                        )
+                                        );
+                                        // Only display as an available option when there is only one value
+                                        // Avoiding render multiple overlapped values as metric
+                                        const isValidForMetric =
+                                          currChartTypeId === 'metric'
+                                            ? col.column.validValuesCount === 1
+                                            : true;
+
+                                        return (
+                                          (isCurrentColumn || !isAlreadySelected) &&
+                                          isValidForMetric
+                                        );
+                                      }
                                     )}
                                     onChange={(e) => {
                                       replaceFieldSelection(
