@@ -12,7 +12,7 @@ import { ExploreServices } from '../../types';
 import { IndexPattern } from '../../../../data/common/index_patterns';
 import { EditorStack } from './components/editor_stack';
 import { QueryPanelFooter } from './components/footer';
-import { RecentQueriesTable } from '../../../../data/public';
+import { RecentQueriesTable, SavedQuery } from '../../../../data/public';
 import { useEditorMode } from './hooks/useEditorMode';
 import { QueryTypeDetector } from './utils/type_detection';
 import { LanguageType, Query, TimeRange } from './types';
@@ -34,7 +34,7 @@ import {
 } from '../../application/utils/state_management/actions/transaction_actions';
 import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
-import { setSavedQuery } from '../../application/utils/state_management/slices/legacy_slice';
+import { setSavedQuery } from '../../application/utils/state_management/slices';
 
 export interface QueryPanelProps {
   services: ExploreServices;
