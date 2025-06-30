@@ -60,7 +60,7 @@ export interface SearchProps {
     filters: Filter[] | undefined;
     timeRange: TimeRange | undefined;
   };
-  chartType?: ChartType;
+  chartType?: ChartType | 'logs';
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
