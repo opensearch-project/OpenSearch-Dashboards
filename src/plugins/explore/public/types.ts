@@ -139,7 +139,7 @@ export interface ExploreServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedExploreById: (id?: string) => Promise<SavedExplore | undefined>;
+  getSavedExploreById: (id?: string) => Promise<SavedExplore>;
   getSavedExploreUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
