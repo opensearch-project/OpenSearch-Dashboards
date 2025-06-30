@@ -223,6 +223,7 @@ export function CollapsibleNavGroupEnabled({
             categoryCollapsible={currentNavGroupId === ALL_USE_CASE_ID}
             currentWorkspaceId={currentWorkspace?.id}
             isNavOpen={isNavOpen}
+            basePath={basePath}
           />
         </EuiPanel>
         <div
