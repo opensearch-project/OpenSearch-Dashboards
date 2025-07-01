@@ -13,9 +13,14 @@ import {
   useOpenSearchDashboards,
 } from '../../../../../opensearch_dashboards_react/public';
 import { defaultPrepareQuery } from '../state_management/actions/query_actions';
-import { uiInitialState, uiReducer } from '../state_management/slices/ui_slice';
-import { resultsInitialState, resultsReducer } from '../state_management/slices/results_slice';
-import { queryInitialState, queryReducer } from '../state_management/slices/query_slice';
+import {
+  uiInitialState,
+  uiReducer,
+  resultsInitialState,
+  resultsReducer,
+  queryInitialState,
+  queryReducer,
+} from '../state_management/slices';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { ExploreServices } from '../../../types';
 

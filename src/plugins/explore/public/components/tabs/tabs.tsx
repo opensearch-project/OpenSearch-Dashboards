@@ -7,10 +7,6 @@ import './tabs.scss';
 import React, { useCallback, memo } from 'react';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  beginTransaction,
-  finishTransaction,
-} from '../../application/utils/state_management/actions/transaction_actions';
 import { setActiveTab } from '../../application/utils/state_management/slices';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 import { selectActiveTab } from '../../application/utils/state_management/selectors';
@@ -33,13 +29,8 @@ export const ExploreTabsComponent = () => {
 
   const onTabsClick = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
-      dispatch(beginTransaction());
-      try {
-        dispatch(setActiveTab(selectedTab.id));
-        dispatch(executeQueries({ services }));
-      } finally {
-        dispatch(finishTransaction());
-      }
+      dispatch(setActiveTab(selectedTab.id));
+      dispatch(executeQueries({ services }));
     },
     [dispatch, services]
   );
