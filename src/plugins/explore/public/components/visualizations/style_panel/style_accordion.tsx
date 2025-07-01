@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiText, EuiPanel, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
+import { EuiText, EuiPanel, EuiAccordion, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 export interface StyleAccordionProps {
@@ -33,6 +33,7 @@ export const StyleAccordion: React.FC<StyleAccordionProps> = ({
           {children}
         </EuiPanel>
       </EuiAccordion>
+      <EuiSpacer size="m" />
       <EuiHorizontalRule margin="none" />{' '}
     </EuiPanel>
   );
