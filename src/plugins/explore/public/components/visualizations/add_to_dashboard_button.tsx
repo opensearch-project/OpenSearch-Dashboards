@@ -18,7 +18,7 @@ import { ExecutionContextSearch } from '../../../../expressions/common';
 import { IndexPattern, useSyncQueryStateWithUrl } from '../../../../data/public';
 import { saveStateToSavedObject } from '../../saved_explore/transforms';
 import { addToDashboard } from './utils/add_to_dashboard';
-import { saveSavedExplore } from './utils/save_explore';
+import { saveSavedExplore } from '../../helpers/save_explore';
 import { useCurrentExploreId } from '../../application/utils/hooks/use_current_explore_id';
 import { useFlavorId } from '../../../public/helpers/use_flavor_id';
 

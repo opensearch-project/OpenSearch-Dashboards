@@ -21,7 +21,7 @@ import {
   SaveResult,
   showSaveModal,
 } from '../../../../../../saved_objects/public';
-import { saveSavedExplore } from '../../../visualizations/utils/save_explore';
+import { saveSavedExplore } from '../../../../helpers/save_explore';
 
 export const saveTopNavData: TopNavMenuIconUIData = {
   tooltip: i18n.translate('explore.topNav.saveTitle', {

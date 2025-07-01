@@ -4,10 +4,6 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {
-  ChartStyleControlMap,
-  ChartType,
-} from '../../../../../components/visualizations/utils/use_visualization_types';
 
 export interface UIState {
   activeTabId: string;

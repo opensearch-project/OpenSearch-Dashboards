@@ -5,14 +5,14 @@
 
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'src/core/public';
-import { SavedExplore } from '../../../saved_explore';
-import { ExploreServices } from '../../../types';
-import { ExecutionContextSearch } from '../../../../../expressions/common';
-
-import { Query } from '../../../../../data/common';
-import { SaveResult } from '../../../../../saved_objects/public';
-import { LegacyState, setSavedSearch } from '../../../application/utils/state_management/slices';
-import { updateLegacyPropertiesInSavedObject } from '../../../saved_explore/transforms';
+import { SavedExplore } from '../saved_explore';
+import { ExploreServices } from '../types';
+import { ExecutionContextSearch } from '../../../expressions/common';
+import { getRootBreadcrumbs } from '../application/legacy/discover/application/helpers/breadcrumbs';
+import { Query } from '../../../data/common';
+import { SaveResult } from '../../../saved_objects/public';
+import { LegacyState, setSavedSearch } from '../application/utils/state_management/slices';
+import { updateLegacyPropertiesInSavedObject } from '../saved_explore/transforms';
 
 export async function saveSavedExplore({
   savedExplore,
@@ -72,13 +72,12 @@ export async function saveSavedExplore({
         'data-test-subj': 'savedExploreSuccess',
       });
     }
-    // toast only display when creating new savedExplore objects, not updating existing ones.
     if (id !== originalId) {
       history().push(`/view/${encodeURIComponent(id)}`);
     } else {
       // Update browser title and breadcrumbs
       chrome.docTitle.change(newTitle);
-      chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: newTitle }]);
+      chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedExplore.title }]);
     }
 
     store.dispatch(setSavedSearch(id));
@@ -88,7 +87,7 @@ export async function saveSavedExplore({
     return { id };
   } catch (error) {
     toastNotifications.addDanger({
-      title: i18n.translate('explore.explore.discover.notifications.notSavedExploreTitle', {
+      title: i18n.translate('explore.notifications.notSavedExploreTitle', {
         defaultMessage: `Search '{savedExploreTitle}' was not saved.`,
         values: {
           savedExploreTitle: savedExplore.title,
