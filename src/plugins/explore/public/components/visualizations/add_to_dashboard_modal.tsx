@@ -24,23 +24,23 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useState } from 'react';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DebouncedText } from './style_panel/utils';
-import { SavedExplore } from '../../saved_explore';
 import { OnSaveProps, DashboardInterface } from './add_to_dashboard_button';
+import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
 
 interface AddToDashboardModalProps {
   savedObjectsClient: SavedObjectsClientContract;
   onConfirm: (props: OnSaveProps) => void;
   onCancel: () => void;
-  savedExplore: SavedExplore;
+  savedExploreId: string | undefined;
 }
 
 export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
-  savedExplore,
+  savedExploreId,
   savedObjectsClient,
   onConfirm,
   onCancel,
 }) => {
-  const [isSaveExploreExisting] = useState<boolean>(savedExplore?.id ? true : false);
+  const [isSaveExploreExisting] = useState<boolean>(savedExploreId !== undefined ? true : false);
   const [selectedOption, setSelectedOption] = useState<'existing' | 'new'>('existing');
   const [existingDashboard, setExistingDashboard] = useState<DashboardInterface[]>([]);
   const [selectDashboard, setSelectDashboard] = useState<DashboardInterface | null>(null);
@@ -50,7 +50,17 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const [isTitleOrDashboardTitleDupilcate, setIsTitleOrDashboardTitleDupilcate] = useState<boolean>(
     false
   );
-  const [title, setTitle] = useState<string>(savedExplore?.title || '');
+
+  // const savedExploreIdFromUrl = useCurrentExploreId();
+  const { savedExplore } = useSavedExplore(savedExploreId);
+
+  const [title, setTitle] = useState<string>('');
+
+  useEffect(() => {
+    if (savedExplore) {
+      setTitle(savedExplore.title);
+    }
+  }, [savedExplore]);
 
   const enableButton =
     title &&
@@ -74,15 +84,17 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const handleSave = async () => {
     if (isLoading) return;
     setisLoading(true);
-    await onConfirm({
-      savedExplore,
-      newTitle: title,
-      isTitleDuplicateConfirmed: isTitleOrDashboardTitleDupilcate,
-      onTitleDuplicate: handleTitleDuplicate,
-      mode: selectedOption,
-      selectDashboard,
-      newDashboardName,
-    });
+    if (savedExplore) {
+      await onConfirm({
+        savedExplore,
+        newTitle: title,
+        isTitleDuplicateConfirmed: isTitleOrDashboardTitleDupilcate,
+        onTitleDuplicate: handleTitleDuplicate,
+        mode: selectedOption,
+        selectDashboard,
+        newDashboardName,
+      });
+    }
   };
 
   const handleTitleDuplicate = () => {

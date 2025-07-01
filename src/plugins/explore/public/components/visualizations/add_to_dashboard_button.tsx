@@ -19,7 +19,6 @@ import { IndexPattern, useSyncQueryStateWithUrl } from '../../../../data/public'
 import { saveStateToSavedObject } from '../../saved_explore/transforms';
 import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from './utils/save_explore';
-import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
 import { useCurrentExploreId } from '../../application/utils/hooks/use_current_explore_id';
 import { useFlavorId } from '../../../public/helpers/use_flavor_id';
 
@@ -69,23 +68,12 @@ export const SaveAndAddButtonWithModal = ({
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
   const savedExploreIdFromUrl = useCurrentExploreId();
-  const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
+  // const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
   const flavorId = useFlavorId();
-
-  const savedExploreWithState = savedExplore
-    ? saveStateToSavedObject(
-        savedExplore,
-        flavorId ?? 'logs',
-        tabDefinition!,
-        uiState,
-        indexPattern
-      )
-    : undefined;
 
   const saveObjectsClient = savedObjects.client;
 
   const handleSave = async ({
-    // eslint-disable-next-line no-shadow
     savedExplore,
     newTitle,
     isTitleDuplicateConfirmed,
@@ -94,13 +82,21 @@ export const SaveAndAddButtonWithModal = ({
     selectDashboard,
     newDashboardName,
   }: OnSaveProps) => {
+    const savedExploreWithState = saveStateToSavedObject(
+      savedExplore,
+      flavorId ?? 'logs',
+      tabDefinition!,
+      uiState,
+      indexPattern
+    );
+
     const saveOptions = {
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     };
     try {
       const result = await saveSavedExplore({
-        savedExplore,
+        savedExplore: savedExploreWithState,
         newTitle,
         saveOptions,
         searchContext,
@@ -198,9 +194,9 @@ export const SaveAndAddButtonWithModal = ({
           defaultMessage: 'Add to dashboard',
         })}
       </EuiButton>
-      {showAddToDashboardModal && savedExploreWithState && (
+      {showAddToDashboardModal && (
         <AddToDashboardModal
-          savedExplore={savedExploreWithState}
+          savedExploreId={savedExploreIdFromUrl}
           savedObjectsClient={saveObjectsClient}
           onCancel={() => setShowAddToDashboardModal(false)}
           onConfirm={handleSave}

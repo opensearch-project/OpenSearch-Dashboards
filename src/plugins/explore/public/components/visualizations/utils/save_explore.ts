@@ -11,11 +11,7 @@ import { ExecutionContextSearch } from '../../../../../expressions/common';
 import { IndexPattern } from '../../../../../data/public';
 import { Query } from '../../../../../data/common';
 import { SaveResult } from '../../../../../saved_objects/public';
-import {
-  LegacyState,
-  setSavedSearch,
-  setSavedSearchName,
-} from '../../../application/utils/state_management/slices';
+import { LegacyState, setSavedSearch } from '../../../application/utils/state_management/slices';
 
 export async function saveSavedExplore({
   savedExplore,
@@ -50,7 +46,6 @@ export async function saveSavedExplore({
     savedExplore.copyOnSave = newCopyOnSave;
   }
 
-  // @ts-expect-error TODO: Fix me
   const state: LegacyState = store.getState().legacy; // store is defined before the view is loaded
   savedExplore.columns = state.columns;
   savedExplore.sort = state.sort;
@@ -86,8 +81,7 @@ export async function saveSavedExplore({
       chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: newTitle }]);
     }
 
-    store!.dispatch(setSavedSearch(id));
-    store!.dispatch(setSavedSearchName(newTitle));
+    store.dispatch(setSavedSearch(id));
 
     // starts syncing `_g` portion of url with query services
     startSyncingQueryStateWithUrl();

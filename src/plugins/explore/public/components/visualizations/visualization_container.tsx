@@ -33,6 +33,8 @@ import {
   selectChartType,
 } from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
+import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
+import { ExecutionContextSearch } from '../../../../expressions/common/';
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();

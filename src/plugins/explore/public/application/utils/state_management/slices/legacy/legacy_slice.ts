@@ -14,8 +14,6 @@ export interface LegacyState {
   // Saved search ID (matches discover format - just string, not object)
   savedSearch?: string;
 
-  savedSearchName?: string;
-
   // Column configuration
   columns: string[];
 
@@ -43,7 +41,6 @@ const initialState: LegacyState = {
   savedQuery: undefined,
   isDirty: false,
   lineCount: undefined,
-  savedSearchName: undefined,
 };
 
 const legacySlice = createSlice({

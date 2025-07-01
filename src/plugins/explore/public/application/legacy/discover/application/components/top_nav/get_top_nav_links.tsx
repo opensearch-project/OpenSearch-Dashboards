@@ -19,12 +19,7 @@ import {
   OpenSearchDashboardsContextProvider,
   toMountPoint,
 } from '../../../../../../../../opensearch_dashboards_react/public';
-<<<<<<< HEAD
 import { LegacyState, setSavedSearch } from '../../../../../utils/state_management/slices';
-=======
-import { LegacyState, setSavedSearch } from '../../../../../utils/state_management/slices/legacy';
-import { setSavedSearchName } from '../../../../../utils/state_management/slices/ui';
->>>>>>> 4a45cc4a64 (add table to dashboard)
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -64,12 +59,6 @@ export const getTopNavLinks = (
     }),
     run() {
       store.dispatch(resetExploreStateActionCreator(services));
-      // core.application.navigateToApp('explore', {
-      //   path: `${ExploreFlavor.Logs}#/`,
-      // });
-      // // TODO this behavior is different from Discover. Clicking New in Explore
-      // // only closes the saved search and does not change the query.
-      store!.dispatch(setSavedSearch(undefined));
     },
     testId: 'discoverNewButton',
     ariaLabel: i18n.translate('explore.discover.topNav.discoverNewButtonLabel', {
@@ -181,8 +170,6 @@ export const getTopNavLinks = (
               // dispatch SavedSearchId and SavedSearchName,
               // this ensures that state consistency for top nav and add to dashboard button
               store.dispatch(setSavedSearch(id));
-              store.dispatch(setSavedSearchName(savedExplore.title));
-
               // starts syncing `_g` portion of url with query services
               startSyncingQueryStateWithUrl();
 

@@ -3,19 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../types/saved_explore_types';
 import {
   setSavedSearch,
   setQuery,
-  setStyleOptions,
   setChartType,
+  setStyleOptions,
 } from '../state_management/slices';
 import { Query } from '../../../../../data/common';
-import { selectActiveTabId, selectSavedSearchName } from '../state_management/selectors';
 /**
  * Hook for loading saved explore objects (following vis_builder pattern)
  * This handles saved object loading AFTER store creation, not during getPreloadedState
@@ -26,8 +25,6 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dispatch = useDispatch();
-  const savedSearchName = useSelector(selectSavedSearchName);
-  const currentTab = useSelector(selectActiveTabId);
 
   const { chrome, data, toastNotifications, getSavedExploreById } = services;
 
@@ -101,15 +98,8 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
   }, [exploreIdFromUrl, getSavedExploreById, dispatch, chrome, data, toastNotifications]);
 
   useEffect(() => {
-    /**
-     * Load the savedExplore object when:
-     * - The component mounts,and the saved explore ID is already retrieved from the URL.
-     * - savedExploreId changes
-     * - savedExploreName changes externally (e.g., renamed via top nav)
-     * - switchTab
-     */
     loadSavedExplore();
-  }, [loadSavedExplore, savedSearchName, currentTab]);
+  }, [loadSavedExplore]);
 
   return {
     savedExplore: savedExploreState,
