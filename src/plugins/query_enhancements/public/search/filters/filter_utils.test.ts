@@ -177,7 +177,7 @@ describe('convertFiltersToClause', () => {
     );
   });
 
-  it('should not escape non-string values in phrase queries', () => {
+  it('should not quote non-string values in phrase queries', () => {
     const filter = getPhraseFilter();
     filter.meta.params.query = 123;
     filter.query.match_phrase.field1 = 123;
