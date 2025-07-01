@@ -19,6 +19,7 @@ export interface SavedExplore
     | 'save'
     | 'getFullPath'
     | 'getOpenSearchType'
+    | 'searchSourceFields'
   > {
   searchSource: ISearchSource; // This is optional in SavedObject, but required for SavedSearch
   description?: string;
