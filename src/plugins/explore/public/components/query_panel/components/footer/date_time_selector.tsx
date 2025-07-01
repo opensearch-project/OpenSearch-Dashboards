@@ -7,14 +7,14 @@
 // This component will be fully functional once integrated with query services.
 
 import React from 'react';
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker, OnTimeChangeProps } from '@elastic/eui';
 import { UI_SETTINGS } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 
 export interface DatePickerProps {
   services: ExploreServices;
   timefilter: any;
-  onTimeChange: (time: { start: string; end: string }) => void;
+  onTimeChange: (props: OnTimeChangeProps) => void;
   onRunQuery: () => void;
   onRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
 }

@@ -7,7 +7,7 @@ import './index.scss';
 import React, { useState, useMemo, useCallback } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, OnTimeChangeProps } from '@elastic/eui';
 import { QueryPanelLayout } from './layout';
 import { ExploreServices } from '../../types';
 import { IndexPattern } from '../../../../data/common/index_patterns';
@@ -71,7 +71,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
 
   // Handle time range changes
   const handleTimeChange = useCallback(
-    ({ start, end }: { start: string; end: string }) => {
+    ({ start, end, isInvalid, isQuickSelection }: OnTimeChangeProps) => {
       const newTimeRange = { from: start, to: end };
 
       // Update timefilter - this will trigger re-render automatically
@@ -79,11 +79,13 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
         timefilter.setTime(newTimeRange);
       }
 
-      // EXPLICIT cache clear - same pattern as other triggers
-      dispatch(clearResults());
+      if (isQuickSelection) {
+        // EXPLICIT cache clear - same pattern as other triggers
+        dispatch(clearResults());
 
-      // Execute queries - interval will be picked up from Redux state
-      dispatch(executeQueries({ services }));
+        // Execute queries - interval will be picked up from Redux state
+        dispatch(executeQueries({ services }));
+      }
     },
     [timefilter, dispatch, services]
   );
