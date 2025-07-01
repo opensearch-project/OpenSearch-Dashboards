@@ -34,6 +34,8 @@ export interface ChartStyleControlMap {
   // logs: {};
 }
 
+export type StyleOptions = ChartStyleControlMap[ChartType];
+
 export type AllChartStyleControls =
   | LineChartStyleControls
   | PieChartStyleControls
