@@ -4,10 +4,17 @@
  */
 
 import { configureStore, combineReducers, PreloadedState } from '@reduxjs/toolkit';
-import { isEqual } from 'lodash';
-import { queryReducer, uiReducer, resultsReducer, tabReducer, legacyReducer } from './slices';
-import { persistReduxState, loadReduxState } from './utils/redux_persistence';
+import {
+  queryReducer,
+  uiReducer,
+  resultsReducer,
+  tabReducer,
+  legacyReducer,
+  systemReducer,
+} from './slices';
+import { loadReduxState } from './utils/redux_persistence';
 import { createQuerySyncMiddleware } from './middleware/query_sync_middleware';
+import { createPersistenceMiddleware } from './middleware/persistence_middleware';
 import { ExploreServices } from '../../../types';
 
 const rootReducer = combineReducers({
@@ -16,6 +23,7 @@ const rootReducer = combineReducers({
   results: resultsReducer,
   tab: tabReducer,
   legacy: legacyReducer,
+  system: systemReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
@@ -31,7 +39,9 @@ export const configurePreloadedStore = (
     preloadedState,
     middleware: (getDefaultMiddleware) =>
       services
-        ? getDefaultMiddleware().concat(createQuerySyncMiddleware(services))
+        ? getDefaultMiddleware()
+            .concat(createPersistenceMiddleware(services))
+            .concat(createQuerySyncMiddleware(services))
         : getDefaultMiddleware(),
   });
 };
@@ -39,19 +49,5 @@ export const configurePreloadedStore = (
 export const getPreloadedStore = async (services: ExploreServices) => {
   const preloadedState = await loadReduxState(services);
   const store = configurePreloadedStore(preloadedState, services);
-
-  let previousState = store.getState();
-
-  const handleChange = () => {
-    const state = store.getState();
-    persistReduxState(state, services);
-
-    if (isEqual(state, previousState)) return;
-
-    previousState = state;
-  };
-
-  const unsubscribe = store.subscribe(handleChange);
-
-  return { store, unsubscribe };
+  return { store, unsubscribe: () => {} };
 };
