@@ -25,8 +25,8 @@ import {
   SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './filters/parser';
 import { IUiSettingsClient } from '../../../../core/public';
+import { PPLFilterUtils } from './filters';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
@@ -113,10 +113,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
     );
 
-    const filterClause = convertFiltersToWhereClause(filters, index, ignoreFilterIfFieldNotInIndex);
-    const commands = query.query.split('|');
-    if (filterClause) {
-      commands.splice(1, 0, filterClause);
+    const whereCommand = PPLFilterUtils.convertFiltersToWhereClause(
+      filters,
+      index,
+      ignoreFilterIfFieldNotInIndex
+    );
+    const whereCommands: string[] = [];
+    if (whereCommand) {
+      whereCommands.push(whereCommand);
     }
 
     const datasetService = this.queryService.queryString.getDatasetService();
@@ -127,13 +131,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
-      const timeFilter = getTimeFilterWhereClause(
+      const timeFilter = PPLFilterUtils.getTimeFilterWhereClause(
         dataset.timeFieldName,
         this.queryService.timefilter.timefilter.getTime()
       );
-      commands.splice(1, 0, timeFilter);
+      whereCommands.push(timeFilter);
     }
-    return { ...query, query: commands.map((cmd) => cmd.trim()).join(' | ') };
+    return {
+      ...query,
+      query: whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query),
+    };
   }
 
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {

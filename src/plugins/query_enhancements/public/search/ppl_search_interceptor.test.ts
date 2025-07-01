@@ -15,7 +15,7 @@ import {
 import { dataPluginMock } from '../../../data/public/mocks';
 import { DATASET, SEARCH_STRATEGY } from '../../common';
 import * as fetchModule from '../../common/utils';
-import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './filters/parser';
+import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './filters/filter_utils';
 import { PPLSearchInterceptor } from './ppl_search_interceptor';
 
 jest.mock('../../common/utils', () => ({

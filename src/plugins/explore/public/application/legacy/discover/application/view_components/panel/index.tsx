@@ -16,6 +16,8 @@ import {
   removeColumn,
   moveColumn,
   setColumns,
+  clearResults,
+  setQueryWithHistory,
 } from '../../../../../utils/state_management/slices';
 import { selectColumns, selectQuery } from '../../../../../utils/state_management/selectors';
 import { DiscoverSidebar } from '../../components/sidebar';
@@ -26,13 +28,14 @@ import { useIndexPatternContext } from '../../../../../components/index_pattern_
 import {
   defaultResultsProcessor,
   defaultPrepareQuery,
+  executeQueries,
 } from '../../../../../utils/state_management/actions/query_actions';
 
 export function DiscoverPanel() {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const {
     data: {
-      query: { filterManager },
+      query: { filterManager, queryString },
     },
     capabilities,
     application,
@@ -42,10 +45,10 @@ export function DiscoverPanel() {
   const columns = useSelector(selectColumns);
   const query = useSelector(selectQuery);
   const results = useSelector((state: any) => state.results);
-  const cacheKey = useMemo(() => {
-    const queryString = typeof query.query === 'string' ? query.query : '';
-    return defaultPrepareQuery(queryString);
-  }, [query]);
+  const cacheKey = useMemo(
+    () => defaultPrepareQuery(typeof query.query === 'string' ? query.query : ''),
+    [query]
+  );
   const rawResults = cacheKey ? results[cacheKey] : null;
   const { indexPattern } = useIndexPatternContext();
 
@@ -97,9 +100,15 @@ export function DiscoverPanel() {
         operation,
         indexPattern.id ?? ''
       );
-      return filterManager.addFilters(newFilters);
+      const languageConfig = queryString.getLanguageService().getLanguage(query.language);
+      const newQuery = languageConfig?.insertFiltersToQuery?.(query, newFilters);
+      if (newQuery) {
+        dispatch(setQueryWithHistory(newQuery));
+        dispatch(clearResults());
+        dispatch(executeQueries({ services }));
+      }
     },
-    [filterManager, indexPattern]
+    [filterManager, indexPattern, query, queryString, dispatch, services]
   );
 
   const onCreateIndexPattern = useCallback(async () => {

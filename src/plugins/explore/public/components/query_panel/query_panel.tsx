@@ -4,7 +4,7 @@
  */
 
 import './index.scss';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiPanel } from '@elastic/eui';
@@ -68,6 +68,10 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   const [localQuery, setLocalQuery] = useState(query.query);
   const [localPrompt, setLocalPrompt] = useState(prompt);
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
+
+  useEffect(() => {
+    setLocalQuery(query.query);
+  }, [query]);
 
   // Handle time range changes
   const handleTimeChange = useCallback(

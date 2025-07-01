@@ -12,7 +12,7 @@ import {
   RangeFilterParams,
   TimeRange,
 } from '../../../../data/common';
-import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './parser';
+import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './filter_utils';
 
 const getPhraseFilter = (): Filter => ({
   meta: {
