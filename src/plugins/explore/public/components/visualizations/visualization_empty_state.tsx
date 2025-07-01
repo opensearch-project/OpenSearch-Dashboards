@@ -5,16 +5,14 @@
 
 import { i18n } from '@osd/i18n';
 import {
-  EuiText,
   EuiFlexGroup,
-  EuiPanel,
-  EuiSelect,
+  EuiSuperSelect,
   EuiSpacer,
   EuiButtonIcon,
-  EuiAccordion,
-  EuiHorizontalRule,
   EuiFormRow,
   EuiFlexItem,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -38,14 +36,16 @@ interface VisualizationEmptyStateProps {
 
 interface AvailableRuleOption {
   value: string;
-  text: string;
+  inputDisplay: React.ReactNode;
+  iconType?: string;
+  disabled?: boolean;
   rules: Array<Partial<VisualizationRule>>;
 }
 
 interface VisColumnOption {
   value: string;
-  text: string;
   column: VisColumn;
+  inputDisplay: string;
 }
 
 // Exclude unknown fields since we cannot generate visualization with them
@@ -120,7 +120,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
   const convertToSelectOption = (col: VisColumn): VisColumnOption => ({
     column: col,
     value: col.name,
-    text: col.name,
+    inputDisplay: col.name,
   });
   const allColumnOptions = useMemo(
     () =>
@@ -131,12 +131,42 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
   );
   const [numericalColumnOptions, categoricalColumnOptions, dateColumnOptions] = allColumnOptions;
 
+  // Get icon type based on chart type
+  const getChartIconType = (type: string): string => {
+    switch (type) {
+      case 'line':
+        return 'visLine';
+      case 'area':
+        return 'visArea';
+      case 'bar':
+        return 'visBarVertical';
+      case 'pie':
+        return 'visPie';
+      case 'metric':
+        return 'visMetric';
+      case 'heatmap':
+        return 'heatmap';
+      case 'scatterpoint':
+        return 'visScatter';
+      case 'table':
+        return 'tableOfContents';
+      default:
+        return 'visualizeApp';
+    }
+  };
+
   // Create base mapping once with all visualization rules
   const baseChartTypeMapping = useMemo(() => {
     return ALL_VISUALIZATION_RULES.reduce((acc, rule) => {
       rule.chartTypes.forEach(({ type, name }) => {
         if (!acc[type]) {
-          acc[type] = { value: type, text: name, rules: [] };
+          const iconType = getChartIconType(type);
+          acc[type] = {
+            value: type,
+            inputDisplay: name,
+            iconType,
+            rules: [],
+          };
         }
         acc[type].rules.push({
           id: rule.id,
@@ -149,35 +179,60 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     }, {} as Record<string, AvailableRuleOption>);
   }, []); // Only calculate once
 
-  // Filter rules based on current selected columns
+  // Process chart types to mark unavailable ones as disabled
   const chartTypeMappedOptions = useMemo(() => {
-    const filtered = Object.fromEntries(
-      Object.entries(baseChartTypeMapping).map(([type, chartType]) => [
-        type,
-        {
-          ...chartType,
-          rules: chartType.rules.filter((rule) => {
-            const [numCount, cateCount, dateCount] = rule.matchIndex || [0, 0, 0];
+    // First, filter rules for each chart type based on current selected columns
+    const processed = Object.fromEntries(
+      Object.entries(baseChartTypeMapping).map(([type, chartType]) => {
+        const filteredRules = chartType.rules.filter((rule) => {
+          const [numCount, cateCount, dateCount] = rule.matchIndex || [0, 0, 0];
 
-            // Special condition for metric type
-            if (type === CHART_METADATA.metric.type && numericalColumnOptions.length > 0) {
-              return numericalColumnOptions[0].column.validValuesCount === 1;
-            }
+          // Special condition for metric type
+          if (type === CHART_METADATA.metric.type && numericalColumnOptions.length > 0) {
+            return numericalColumnOptions[0].column.validValuesCount === 1;
+          }
 
-            return (
-              numericalColumnOptions.length >= numCount &&
-              categoricalColumnOptions.length >= cateCount &&
-              dateColumnOptions.length >= dateCount
-            );
-          }),
-        },
-      ])
+          return (
+            numericalColumnOptions.length >= numCount &&
+            categoricalColumnOptions.length >= cateCount &&
+            dateColumnOptions.length >= dateCount
+          );
+        });
+
+        // Mark chart type as disabled if it has no valid rules
+        const isDisabled = filteredRules.length === 0;
+
+        // Create custom option content with greyed out text for disabled options
+        const optionContent = (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type={chartType.iconType || 'visualizeApp'}
+                size="m"
+                color={isDisabled ? 'subdued' : 'default'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" color={isDisabled ? 'subdued' : 'default'}>
+                {chartType.inputDisplay}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+
+        return [
+          type,
+          {
+            ...chartType,
+            disabled: isDisabled,
+            optionContent,
+            rules: filteredRules,
+          },
+        ];
+      })
     );
 
-    // Filter out chart types with empty rules
-    return Object.fromEntries(
-      Object.entries(filtered).filter(([_, chartType]) => chartType.rules.length > 0)
-    );
+    return processed;
   }, [
     baseChartTypeMapping,
     numericalColumnOptions,
@@ -364,13 +419,31 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
               defaultMessage: 'Visualization Type',
             })}
           >
-            <EuiSelect
+            <EuiSuperSelect
               id="chartType"
-              hasNoInitialSelection
-              value={currChartTypeId}
-              options={Object.values(chartTypeMappedOptions)}
-              onChange={(e) => {
-                updateChartTypeSelection(e.target.value);
+              valueOfSelected={currChartTypeId}
+              placeholder="Select a visualization type"
+              options={Object.values(chartTypeMappedOptions).map((option) => ({
+                ...option,
+                inputDisplay: (
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type={option.iconType || 'visualizeApp'}
+                        size="m"
+                        color={option.disabled ? 'subdued' : 'default'}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s" color={option.disabled ? 'subdued' : 'default'}>
+                        {option.inputDisplay}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              }))}
+              onChange={(value) => {
+                updateChartTypeSelection(value);
               }}
             />
           </EuiFormRow>
@@ -400,14 +473,15 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                           {selectedColumns.map((selectedColumn) => {
                             return (
                               <React.Fragment key={selectedColumn.id}>
-                                <EuiPanel grow={false} paddingSize="s">
-                                  <EuiFlexGroup
-                                    gutterSize="none"
-                                    alignItems="center"
-                                    style={{ gap: 4 }}
-                                  >
-                                    <EuiSelect
-                                      value={selectedColumn.name}
+                                <EuiFlexGroup
+                                  gutterSize="none"
+                                  alignItems="center"
+                                  style={{ gap: 4 }}
+                                >
+                                  <EuiFlexItem>
+                                    <EuiSuperSelect
+                                      fullWidth
+                                      valueOfSelected={selectedColumn.name}
                                       options={allColumnOptions[index].filter(
                                         // Filter out the fields already selected but keep the current one
                                         (col) => {
@@ -429,15 +503,17 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                                           );
                                         }
                                       )}
-                                      onChange={(e) => {
+                                      onChange={(value) => {
                                         replaceFieldSelection(
                                           fieldTypeString as VisFieldTypeString,
                                           index,
                                           selectedColumn.name,
-                                          e.target.value
+                                          value
                                         );
                                       }}
                                     />
+                                  </EuiFlexItem>
+                                  <EuiFlexItem grow={false}>
                                     <EuiButtonIcon
                                       onClick={() =>
                                         removeFieldSelection(
@@ -448,8 +524,9 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                                       iconType="trash"
                                       aria-label={`delete selected field ${selectedColumn.name}`}
                                     />
-                                  </EuiFlexGroup>
-                                </EuiPanel>
+                                  </EuiFlexItem>
+                                </EuiFlexGroup>
+
                                 <EuiSpacer size="xs" />
                               </React.Fragment>
                             );
@@ -459,18 +536,18 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                     )}
                     {canSelectMoreFields && (
                       <>
-                        <EuiSelect
+                        <EuiSuperSelect
                           id={`${fieldTypeString}_field`}
-                          hasNoInitialSelection
+                          placeholder="Select a field"
                           options={allColumnOptions[index].filter(
                             (col) =>
                               !selectedColumns.some((selected) => selected.name === col.column.name)
                           )}
-                          onChange={(e) =>
+                          onChange={(value) =>
                             updateFieldSelection(
                               fieldTypeString as VisFieldTypeString,
                               index,
-                              e.target.value
+                              value
                             )
                           }
                         />
