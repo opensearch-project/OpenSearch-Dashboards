@@ -15,6 +15,9 @@ interface GridOptionsProps {
 }
 
 export const GridOptionsPanel: React.FC<GridOptionsProps> = ({ grid, onGridChange }) => {
+  if (!grid || !onGridChange) {
+    return null;
+  }
   const updateGridOption = <K extends keyof GridOptions>(key: K, value: GridOptions[K]) => {
     // Create a new grid object to ensure the change is detected
     const newGrid = {

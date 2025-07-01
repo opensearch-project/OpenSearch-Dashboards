@@ -33,9 +33,11 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  // if it is 1 metric and 1 category, then it should not show legend
   const notShowLegend =
-    numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0;
+    (numericalColumns.length === 1 &&
+      categoricalColumns.length === 0 &&
+      dateColumns.length === 1) ||
+    (numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">

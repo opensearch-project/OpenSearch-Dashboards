@@ -25,7 +25,7 @@ export const LegendOptionsPanel = ({
   onLegendOptionsChange,
   shouldShowLegend = true,
 }: LegendOptionsProps) => {
-  if (!shouldShowLegend) {
+  if (!shouldShowLegend || !legendOptions || !onLegendOptionsChange) {
     return null;
   }
 
