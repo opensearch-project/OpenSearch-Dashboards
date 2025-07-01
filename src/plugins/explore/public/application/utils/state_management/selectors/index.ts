@@ -64,8 +64,6 @@ export const selectIsLoading = createSelector(
   (systemState) => systemState.status === ResultStatus.LOADING
 );
 
-export const selectFlavor = createSelector([selectUIState], (uiState) => uiState.flavor);
-
 export const selectActiveTab = createSelector(
   [selectActiveTabId],
   (activeTabId) => activeTabId // Return just the ID, components will resolve the tab via context
