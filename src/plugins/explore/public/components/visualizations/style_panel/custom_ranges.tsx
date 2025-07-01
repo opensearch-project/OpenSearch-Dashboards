@@ -9,7 +9,6 @@ import {
   EuiFlexItem,
   EuiFieldNumber,
   EuiFormRow,
-  EuiSpacer,
   EuiButtonIcon,
   EuiButton,
 } from '@elastic/eui';
@@ -102,7 +101,6 @@ export const CustomRange: React.FC<CustomRangeProps> = ({ customRanges, onCustom
   };
   return (
     <>
-      <EuiSpacer size="m" />
       {ranges.map((range, index) => {
         const prevMax = index > 0 ? ranges[index - 1].max : 0;
         return (
@@ -116,8 +114,7 @@ export const CustomRange: React.FC<CustomRangeProps> = ({ customRanges, onCustom
           />
         );
       })}
-      <EuiSpacer size="m" />
-      <EuiButton onClick={handleAddRange} fill>
+      <EuiButton onClick={handleAddRange} fullWidth size="s">
         + Add Range
       </EuiButton>
     </>

@@ -186,6 +186,10 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     }
   }, [isRule2, valueAxes, onValueAxesChange]);
 
+  if (!categoryAxes || !valueAxes || !onCategoryAxesChange || !onValueAxesChange) {
+    return null;
+  }
+
   return (
     <StyleAccordion
       id="axesSection"
