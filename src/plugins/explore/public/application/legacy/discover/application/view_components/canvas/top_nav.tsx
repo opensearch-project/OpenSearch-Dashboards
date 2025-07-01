@@ -19,7 +19,7 @@ import { useIndexPatternContext } from '../../../../../components/index_pattern_
 
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
-import { ResultStatus } from '../utils';
+import { ResultStatus } from '../../../../../utils/state_management/types';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
 import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
 import {

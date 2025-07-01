@@ -12,19 +12,16 @@ import { clearResults } from '../state_management/slices';
 
 /**
  * Hook to handle initial query execution on page load
- * Follows discover pattern for initial search behavior
  */
 export const useInitialQueryExecution = (services: ExploreServices) => {
   const dispatch = useDispatch();
   const queryState = useSelector((state: RootState) => state.query);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Check if should search on page load (like discover)
   const shouldSearchOnPageLoad = useMemo(() => {
-    return services.uiSettings.get('discover:searchOnPageLoad', true);
-  }, [services.uiSettings]);
+    return services?.uiSettings?.get('discover:searchOnPageLoad', true) ?? true;
+  }, [services?.uiSettings]);
 
-  // Initial query execution - simplified logic
   useEffect(() => {
     if (
       !isInitialized &&
@@ -33,22 +30,18 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
       shouldSearchOnPageLoad &&
       services
     ) {
-      // EXPLICIT cache clear for consistency
+      // Add initial default query to history
+      const timefilter = services?.data?.query?.timefilter?.timefilter;
+      if (timefilter && queryState.query.trim()) {
+        services.data.query.queryString.addToQueryHistory(queryState, timefilter.getTime());
+      }
+
+      // Execute the initial query
       dispatch(clearResults());
-
-      // Execute queries - cache already cleared
       dispatch(executeQueries({ services }) as unknown);
-
       setIsInitialized(true);
     }
-  }, [
-    isInitialized,
-    queryState.query,
-    queryState.dataset,
-    shouldSearchOnPageLoad,
-    dispatch,
-    services,
-  ]);
+  }, [isInitialized, queryState, shouldSearchOnPageLoad, dispatch, services]);
 
   return { isInitialized };
 };
