@@ -78,8 +78,11 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 }) => {
   const visualizationRegistry = useVisualizationRegistry();
 
+  // Original vis data from the query result
+  const originalVisualizationData = useRef(visualizationData);
+
   // Indicates no rule is matched and the user should manually generate the visualization
-  const shouldManuallyGenerate = useRef(!Boolean(visualizationData.visualizationType));
+  const shouldManuallyGenerate = useRef(true);
 
   // Local state for chart type, initialized from Redux
   const storedChartTypeId = useSelector(selectChartType);
@@ -104,7 +107,11 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
   );
 
   // Map columns to add value and text fields for select component
-  const { numericalColumns = [], categoricalColumns = [], dateColumns = [] } = visualizationData;
+  const {
+    numericalColumns = [],
+    categoricalColumns = [],
+    dateColumns = [],
+  } = originalVisualizationData.current;
   const convertToSelectOption = (col: VisColumn): VisColumnOption => ({
     column: col,
     value: col.name,
@@ -238,7 +245,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
    * [1, 1, 1], [1, 2, 0] should remains available.
    */
   const availableRules = useMemo(() => {
-    if (!currChartTypeId) return [];
+    if (!currChartTypeId || !chartTypeMappedOptions[currChartTypeId]) return [];
 
     return chartTypeMappedOptions[currChartTypeId].rules.filter((rule) => {
       const [ruleNum, ruleCat, ruleDate] = rule.matchIndex || [0, 0, 0];
@@ -250,7 +257,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
   const handleGeneration = useCallback(() => {
     // Update the visualizationData in the parent component
-    if (visualizationData) {
+    if (originalVisualizationData.current) {
       const ruleToUse = availableRules.find((rule) =>
         isEqual(rule.matchIndex, currFieldsCountByType)
       );
@@ -260,10 +267,29 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
         );
         if (visualizationType) {
           updateVisualization({
-            styleDefaults: visualizationType.ui.style.defaults,
-            rule: ruleToUse.id!,
-            fields: fieldsSelection,
+            visualizationType,
+            rule: ruleToUse,
+            fieldNames: fieldsSelection,
+            columns: {
+              numerical: originalVisualizationData.current.numericalColumns
+                ? originalVisualizationData.current.numericalColumns.filter((col) =>
+                    fieldsSelection.numerical.includes(col.name)
+                  )
+                : [],
+              categorical: originalVisualizationData.current.categoricalColumns
+                ? originalVisualizationData.current.categoricalColumns.filter((col) =>
+                    fieldsSelection.categorical.includes(col.name)
+                  )
+                : [],
+              date: originalVisualizationData.current.dateColumns
+                ? originalVisualizationData.current.dateColumns.filter((col) =>
+                    fieldsSelection.date.includes(col.name)
+                  )
+                : [],
+            },
           });
+          // Reset the flag after successful generation
+          shouldManuallyGenerate.current = false;
         }
       }
     }
@@ -274,18 +300,17 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     visualizationRegistry,
     currChartTypeOption,
     updateVisualization,
-    visualizationData,
   ]);
 
   useEffect(() => {
     if (
       currChartTypeOption &&
       shouldManuallyGenerate.current &&
-      !isEqual(fieldsSelection, [0, 0, 0])
+      !isEqual(currFieldsCountByType, [0, 0, 0])
     ) {
       handleGeneration();
     }
-  }, [currChartTypeOption, fieldsSelection, handleGeneration]);
+  }, [currChartTypeOption, currFieldsCountByType, handleGeneration]);
 
   // Max possible number of selections for each field types base on current available rules
   const maxMatchIndex = useMemo(() => {
@@ -383,10 +408,11 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     [allColumnOptions]
   );
 
-  if (!visualizationData || !Boolean(Object.keys(chartTypeMappedOptions).length)) return null;
+  if (!originalVisualizationData.current || !Boolean(Object.keys(chartTypeMappedOptions).length))
+    return null;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" key="visualizationEmptyState">
       <EuiFlexItem grow={false}>
         <StyleAccordion
           id="generalSection"
@@ -440,7 +466,10 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
             initialIsOpen={true}
           >
             <>
-              {Object.entries(fieldsSelection).map(([fieldTypeString, selectedColumns], index) => {
+              {FIELD_TYPE_ORDER.map((fieldTypeString, index) => {
+                const selectedColumns = fieldsSelection
+                  ? fieldsSelection[fieldTypeString as keyof typeof fieldsSelection]
+                  : [];
                 const canSelectMoreFields = matchIndexDifference[index] > 0;
 
                 // Label only displays when select component and/or selected fields are shown

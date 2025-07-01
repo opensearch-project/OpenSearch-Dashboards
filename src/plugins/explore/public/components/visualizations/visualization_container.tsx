@@ -15,11 +15,10 @@ import {
   ChartStyleControlMap,
   VisualizationTypeResult,
   VisualizationType,
-  AllChartStyleControls,
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
-import { VisColumn } from './types';
+import { VisColumn, VisualizationRule } from './types';
 import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
@@ -37,16 +36,19 @@ import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 
-interface SelectedFieldNames {
-  categorical: string[];
-  date: string[];
-  numerical: string[];
-}
-
 export interface UpdateVisualizationProps {
-  styleDefaults: AllChartStyleControls;
-  rule: string;
-  fields: SelectedFieldNames;
+  visualizationType: VisualizationType<any>;
+  rule: Partial<VisualizationRule>;
+  fieldNames: {
+    categorical: string[];
+    date: string[];
+    numerical: string[];
+  };
+  columns: {
+    categorical: VisColumn[];
+    date: VisColumn[];
+    numerical: VisColumn[];
+  };
 }
 
 export const VisualizationContainer = () => {
@@ -66,116 +68,122 @@ export const VisualizationContainer = () => {
   const rows = useMemo(() => results?.hits?.hits || [], [results]);
   const styleOptions = useSelector(selectStyleOptions);
   const selectedChartType = useSelector(selectChartType);
-  const selectedFields = useSelector(selectFieldNames);
+  const selectedFieldNames = useSelector(selectFieldNames);
   const fieldSchema = useMemo(() => results?.fieldSchema || [], [results]);
 
   const visualizationRegistry = useVisualizationRegistry();
 
   const [currentRuleId, setCurrentRuleId] = useState<string | undefined>(undefined);
 
-  const updateVisualization = useCallback(
-    ({ styleDefaults, rule, fields }: UpdateVisualizationProps) => {
-      dispatch(setStyleOptions(styleDefaults));
-      dispatch(setFieldNames(fields));
-      setCurrentRuleId(rule);
+  const [visualizationData, setVisualizationData] = useState<
+    VisualizationTypeResult<ChartType> | undefined
+  >(undefined);
+
+  const updateVisualizationState = useCallback(
+    (
+      visualizationType: VisualizationType<ChartType>,
+      fieldNames: { numerical: string[]; categorical: string[]; date: string[] }
+    ) => {
+      dispatch(setSelectedChartType(visualizationType.type));
+      dispatch(setStyleOptions(visualizationType.ui.style.defaults));
+      dispatch(setFieldNames(fieldNames));
     },
     [dispatch]
   );
 
-  const [visualizationData, setVisualizationData] = useState<
-    VisualizationTypeResult<ChartType> | undefined
-  >(undefined);
+  const updateVisualization = useCallback(
+    ({ visualizationType, rule, fieldNames, columns }: UpdateVisualizationProps) => {
+      updateVisualizationState(visualizationType, fieldNames);
+      setCurrentRuleId(rule.id);
+      setVisualizationData((prev) => ({
+        ...prev,
+        numericalColumns: columns.numerical,
+        categoricalColumns: columns.categorical,
+        dateColumns: columns.date,
+        ruleId: rule.id,
+        visualizationType: visualizationType as VisualizationType<ChartType>,
+        toExpression: rule.toExpression,
+      }));
+    },
+    [updateVisualizationState]
+  );
 
   useEffect(() => {
     if (fieldSchema.length === 0 || rows.length === 0) {
       return;
     }
-    const currentVisData = getVisualizationType(rows, fieldSchema, visualizationRegistry);
+    const visualizationTypeResult = getVisualizationType(rows, fieldSchema);
 
-    if (currentVisData) {
-      setVisualizationData(currentVisData);
+    if (visualizationTypeResult?.ruleId && visualizationTypeResult.visualizationType) {
+      setCurrentRuleId(visualizationTypeResult.ruleId);
+      updateVisualizationState(visualizationTypeResult.visualizationType, {
+        numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
+        categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
+        date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
+      });
+    } else {
+      dispatch(setSelectedChartType('' as any)); // FIXME
+      dispatch(setStyleOptions({} as any)); // FIXME
+      dispatch(setFieldNames({ numerical: [], categorical: [], date: [] }));
+    }
 
-      const fields = {
-        numerical: currentVisData.numericalColumns?.map((col) => col.name) || [],
-        categorical: currentVisData.categoricalColumns?.map((col) => col.name) || [],
-        date: currentVisData.dateColumns?.map((col) => col.name) || [],
-      };
+    setVisualizationData(visualizationTypeResult);
+  }, [fieldSchema, rows, updateVisualizationState, dispatch]);
 
-      if (currentVisData.visualizationType) {
-        // Has rule matched by runing the query - highest priority
-        dispatch(setSelectedChartType(currentVisData.visualizationType.type));
-        updateVisualization({
-          styleDefaults: currentVisData.visualizationType.ui.style.defaults,
-          rule: currentVisData.ruleId!,
-          fields,
-        });
-      } else if (selectedChartType) {
-        // trigger render visualization with user-selected chart type and current fields
-        const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
-        if (chartConfig) {
-          const columns = {
-            numerical: currentVisData.numericalColumns
-              ? currentVisData.numericalColumns.filter((col) =>
-                  selectedFields?.numerical?.includes(col.name)
-                )
-              : [],
-            categorical: currentVisData.categoricalColumns
-              ? currentVisData.categoricalColumns.filter((col) =>
-                  selectedFields?.categorical?.includes(col.name)
-                )
-              : [],
-            date: currentVisData.dateColumns
-              ? currentVisData.dateColumns.filter((col) => selectedFields?.date?.includes(col.name))
-              : [],
-          };
-          const matchedRule = visualizationRegistry.findBestMatch(
-            columns.numerical,
-            columns.categorical,
-            columns.date
-          );
-          if (matchedRule && selectedFields) {
-            updateVisualization({
-              styleDefaults: chartConfig.ui.style.defaults,
-              rule: matchedRule.rule.id,
-              fields: selectedFields,
-            });
-          } else {
-            dispatch(
-              setFieldNames({
-                numerical: [],
-                categorical: [],
-                date: [],
-              })
-            );
-          }
-        }
-      } else {
-        dispatch(
-          setFieldNames({
-            numerical: [],
-            categorical: [],
-            date: [],
-          })
+  useEffect(() => {
+    if (!currentRuleId && selectedFieldNames && styleOptions && selectedChartType) {
+      // Handle the case that loading from saved search, since we don't save current rule id
+      const currentVisData = getVisualizationType(rows, fieldSchema, visualizationRegistry);
+
+      if (currentVisData) {
+        const columns = {
+          numerical: currentVisData.numericalColumns
+            ? currentVisData.numericalColumns.filter((col) =>
+                selectedFieldNames?.numerical?.includes(col.name)
+              )
+            : [],
+          categorical: currentVisData.categoricalColumns
+            ? currentVisData.categoricalColumns.filter((col) =>
+                selectedFieldNames?.categorical?.includes(col.name)
+              )
+            : [],
+          date: currentVisData.dateColumns
+            ? currentVisData.dateColumns.filter((col) =>
+                selectedFieldNames?.date?.includes(col.name)
+              )
+            : [],
+        };
+        const matchedRule = visualizationRegistry.findBestMatch(
+          columns.numerical,
+          columns.categorical,
+          columns.date
         );
+        if (matchedRule && currentVisData.visualizationType) {
+          updateVisualization({
+            visualizationType: currentVisData.visualizationType,
+            rule: matchedRule.rule,
+            fieldNames: selectedFieldNames,
+            columns,
+          });
+        }
       }
     }
-    // TODO figure out why putting updateVisualization in the deps array cause infinite rerender
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fieldSchema, rows, selectedChartType, visualizationRegistry, dispatch]);
+  }, [
+    currentRuleId,
+    selectedFieldNames,
+    styleOptions,
+    selectedChartType,
+    rows,
+    fieldSchema,
+    visualizationRegistry,
+    updateVisualization,
+  ]);
 
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: data.query.queryString.getQuery(),
     filters: data.query.filterManager.getFilters(),
     timeRange: data.query.timefilter.timefilter.getTime(),
   });
-
-  // Initialize selectedChartType and its default styles when visualizationData changes
-  useEffect(() => {
-    if (visualizationData && visualizationData.visualizationType) {
-      dispatch(setSelectedChartType(visualizationData.visualizationType.type));
-      dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
-    }
-  }, [visualizationData, dispatch]);
 
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
@@ -185,7 +193,6 @@ export const VisualizationContainer = () => {
       !visualizationData ||
       !currentRuleId ||
       !styleOptions ||
-      !selectedFields ||
       !visualizationData.transformedData
     ) {
       return null;
@@ -194,25 +201,6 @@ export const VisualizationContainer = () => {
     const rule = visualizationRegistry.getRules().find((r) => r.id === currentRuleId);
 
     if (!rule || !rule.toExpression) {
-      return null;
-    }
-
-    const filteredNumerical = (visualizationData.numericalColumns || []).filter((col) =>
-      selectedFields?.numerical?.includes(col.name)
-    );
-    const filteredCategorical = (visualizationData.categoricalColumns || []).filter((col) =>
-      selectedFields?.categorical?.includes(col.name)
-    );
-    const filteredDate = (visualizationData.dateColumns || []).filter((col) =>
-      selectedFields?.date?.includes(col.name)
-    );
-
-    // Don't generate expression if no fields are selected
-    if (
-      filteredNumerical.length === 0 &&
-      filteredCategorical.length === 0 &&
-      filteredDate.length === 0
-    ) {
       return null;
     }
 
@@ -240,13 +228,12 @@ export const VisualizationContainer = () => {
       indexPattern,
       ruleBasedToExpressionFn,
       visualizationData.transformedData,
-      filteredNumerical,
-      filteredCategorical,
-      filteredDate,
+      visualizationData.numericalColumns,
+      visualizationData.categoricalColumns,
+      visualizationData.dateColumns,
       styleOptions ?? {}
     );
   }, [
-    selectedFields,
     searchContext,
     rows,
     indexPattern,
@@ -352,7 +339,7 @@ export const VisualizationContainer = () => {
             selectedChartType={selectedChartType}
             onChartTypeChange={handleChartTypeChange}
             ReactExpressionRenderer={ReactExpressionRenderer}
-            setVisualizationData={setVisualizationData}
+            updateVisualization={updateVisualization}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

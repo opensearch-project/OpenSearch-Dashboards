@@ -12,7 +12,6 @@ import {
   ChartStyleControlMap,
 } from './utils/use_visualization_types';
 import { VisualizationEmptyState } from './visualization_empty_state';
-import { VisColumn } from './types';
 import { UpdateVisualizationProps } from './visualization_container';
 
 export interface VisualizationProps<T extends ChartType> {
@@ -23,11 +22,6 @@ export interface VisualizationProps<T extends ChartType> {
   onStyleChange: (newOptions: Partial<ChartStyleControlMap[T]>) => void;
   selectedChartType?: string;
   onChartTypeChange?: (chartType: ChartType) => void;
-  selectedFields: {
-    numerical: VisColumn[];
-    categorical: VisColumn[];
-    date: VisColumn[];
-  };
   ReactExpressionRenderer: React.ComponentType<{
     expression: string;
     searchContext: IExpressionLoaderParams['searchContext'];
@@ -43,7 +37,6 @@ export const Visualization = <T extends ChartType>({
   onStyleChange,
   selectedChartType,
   onChartTypeChange,
-  selectedFields,
   ReactExpressionRenderer,
   updateVisualization,
 }: VisualizationProps<T>) => {
