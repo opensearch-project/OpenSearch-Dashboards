@@ -61,13 +61,29 @@ export enum ThresholdLineStyle {
   DotDashed = 'dot-dashed',
 }
 
-// Styling: Threshold line configuration
 export interface ThresholdLine {
   color: string;
   show: boolean;
   style: ThresholdLineStyle;
   value: number;
   width: number;
+}
+
+export interface ThresholdLine {
+  color: string;
+  show: boolean;
+  style: ThresholdLineStyle;
+  value: number;
+  width: number;
+  name?: string;
+  id?: string; // Unique identifier for each threshold
+}
+
+// Array of threshold lines
+export type ThresholdLines = ThresholdLine[];
+
+export interface TooltipOptions {
+  mode: 'all' | 'hidden';
 }
 
 // Styling: Grid configuration
