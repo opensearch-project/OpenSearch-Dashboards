@@ -23,7 +23,8 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
 import {
-  setQuery,
+  setQueryState,
+  setQueryWithHistory,
   setShowDatasetFields,
   setSavedQuery,
   clearResults,
@@ -99,14 +100,11 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
       const queryToRun = paramQuery ?? localQuery;
       const nextQuery = { ...query, query: queryToRun };
 
-      dispatch(setQuery(nextQuery));
+      dispatch(setQueryWithHistory(nextQuery));
       dispatch(clearResults());
       dispatch(executeQueries({ services }));
-
-      // Use nextQuery here, not query!
-      services.data.query.queryString.addToQueryHistory(nextQuery, timefilter.getTime());
     },
-    [dispatch, localQuery, query, services, timefilter]
+    [dispatch, localQuery, query, services]
   );
 
   // Real autocomplete implementation using the data plugin's autocomplete service
@@ -291,7 +289,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
 
   const handleClearQuery = () => {
     dispatch(setSavedQuery(undefined));
-    dispatch(setQuery({ ...query, query: '' }));
+    dispatch(setQueryState({ ...query, query: '' }));
     setLocalQuery('');
   };
 
@@ -300,7 +298,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
       return;
     }
     const savedQueryAttributes = savedQuery.attributes.query;
-    dispatch(setQuery({ ...savedQueryAttributes, dataset: query.dataset }));
+    dispatch(setQueryState({ ...savedQueryAttributes, dataset: query.dataset }));
     setLocalQuery(savedQueryAttributes.query);
     updateSavedQueryId(savedQuery.id);
   };

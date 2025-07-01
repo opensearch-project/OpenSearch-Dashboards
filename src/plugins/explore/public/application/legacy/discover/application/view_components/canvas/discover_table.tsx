@@ -27,7 +27,7 @@ import { ExploreServices } from '../../../../../../types';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { popularizeField } from '../../helpers/popularize_field';
 import { filterColumns } from '../utils/filter_columns';
-import { ResultStatus } from '../utils';
+import { ResultStatus } from '../../../../../utils/state_management/types';
 
 interface Props {
   scrollToTop?: () => void;
