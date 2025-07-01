@@ -7,7 +7,7 @@ import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 
 import { PieVisStyleControls } from './pie_vis_options';
-import { Positions } from '../types';
+import { Positions, TooltipOptions } from '../types';
 
 export interface PieExclusiveStyleControl {
   donut: boolean;
@@ -22,6 +22,7 @@ export interface PieChartStyleControls {
   addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Positions;
+  tooltipOptions: TooltipOptions;
 
   // Exclusive controls
   exclusive: PieExclusiveStyleControl;
@@ -32,6 +33,9 @@ export const defaultPieChartStyles: PieChartStyleControls = {
   addTooltip: true,
   addLegend: true,
   legendPosition: Positions.RIGHT,
+  tooltipOptions: {
+    mode: 'all',
+  },
   exclusive: {
     donut: true,
     showValues: true,

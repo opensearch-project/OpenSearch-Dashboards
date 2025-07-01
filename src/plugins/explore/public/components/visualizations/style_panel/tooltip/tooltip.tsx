@@ -33,6 +33,10 @@ export const TooltipOptionsPanel = ({
     },
   ];
 
+  if (!tooltipOptions || !onTooltipOptionsChange) {
+    return null;
+  }
+
   return (
     <StyleAccordion
       id="tooltipSection"
