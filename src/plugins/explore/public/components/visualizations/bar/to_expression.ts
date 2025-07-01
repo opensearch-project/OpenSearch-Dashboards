@@ -92,12 +92,12 @@ export const createBarSpec = (
     title: `${metricName} by ${categoryName}`,
     data: { values: transformedData },
     layer: layers,
-    // Add legend configuration if needed
-    ...(styles.addLegend && {
-      legend: {
-        orient: styles.legendPosition?.toLowerCase() || 'right',
-      },
-    }),
+    // Add legend configuration if needed, or explicitly set to null if disabled
+    legend: styles.addLegend
+      ? {
+          orient: styles.legendPosition?.toLowerCase() || 'right',
+        }
+      : null,
   };
 };
 
@@ -186,6 +186,12 @@ export const createTimeBarChart = (
     title: `${metricName} Over Time`,
     data: { values: transformedData },
     layer: layers,
+    // Add legend configuration if needed, or explicitly set to null if disabled
+    legend: styles.addLegend
+      ? {
+          orient: styles.legendPosition?.toLowerCase() || 'right',
+        }
+      : null,
   };
 };
 
@@ -517,17 +523,21 @@ export const createStackedBarSpec = (
       color: {
         field: categoryField2,
         type: 'nominal',
-        legend: {
-          title: categoryName2,
-          orient: styles.legendPosition?.toLowerCase() || 'bottom',
-        },
+        legend: styles.addLegend
+          ? {
+              title: categoryName2,
+              orient: styles.legendPosition?.toLowerCase() || 'bottom',
+            }
+          : null,
       },
-      // Optional: Add tooltip with all information
-      tooltip: [
-        { field: categoryField1, type: 'nominal', title: categoryName1 },
-        { field: categoryField2, type: 'nominal', title: categoryName2 },
-        { field: metricField, type: 'quantitative', title: metricName },
-      ],
+      // Optional: Add tooltip with all information if tooltip mode is not hidden
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: categoryField1, type: 'nominal', title: categoryName1 },
+          { field: categoryField2, type: 'nominal', title: categoryName2 },
+          { field: metricField, type: 'quantitative', title: metricName },
+        ],
+      }),
     },
   };
 
