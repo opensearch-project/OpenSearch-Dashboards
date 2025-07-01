@@ -5,7 +5,8 @@
 
 import { VEGASCHEMA, VisColumn } from '../types';
 import { BarChartStyleControls } from './bar_vis_config';
-import { getStrokeDash, applyAxisStyling } from '../line/line_chart_utils';
+import { applyAxisStyling } from '../line/line_chart_utils';
+import { getStrokeDash, createThresholdLayer } from '../style_panel/threshold/utils';
 
 export const createBarSpec = (
   transformedData: Array<Record<string, any>>,
@@ -32,7 +33,7 @@ export const createBarSpec = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
@@ -80,20 +81,9 @@ export const createBarSpec = (
 
   layers.push(mainLayer);
 
-  // Add threshold line if enabled
-  if (styles.thresholdLine?.show) {
-    const thresholdLayer = {
-      mark: {
-        type: 'rule',
-        color: styles.thresholdLine.color || '#E7664C',
-        strokeWidth: styles.thresholdLine.width || 1,
-        strokeDash: getStrokeDash(styles.thresholdLine.style),
-        tooltip: false,
-      },
-      encoding: {
-        [valueAxis]: { value: styles.thresholdLine.value || 0 },
-      },
-    };
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
 
@@ -139,7 +129,7 @@ export const createTimeBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
@@ -185,20 +175,9 @@ export const createTimeBarChart = (
 
   layers.push(mainLayer);
 
-  // Add threshold line if enabled
-  if (styles.thresholdLine?.show) {
-    const thresholdLayer = {
-      mark: {
-        type: 'rule',
-        color: styles.thresholdLine.color || '#E7664C',
-        strokeWidth: styles.thresholdLine.width || 1,
-        strokeDash: getStrokeDash(styles.thresholdLine.style),
-        tooltip: false,
-      },
-      encoding: {
-        y: { value: styles.thresholdLine.value || 0 },
-      },
-    };
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
 
@@ -247,7 +226,7 @@ export const createGroupedTimeBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
@@ -310,23 +289,10 @@ export const createGroupedTimeBarChart = (
     },
   };
 
-  // Add threshold line if enabled
-  if (styles.thresholdLine?.show) {
-    spec.layer = [
-      { mark: barMark, encoding: spec.encoding },
-      {
-        mark: {
-          type: 'rule',
-          color: styles.thresholdLine.color || '#E7664C',
-          strokeWidth: styles.thresholdLine.width || 1,
-          strokeDash: getStrokeDash(styles.thresholdLine.style),
-          tooltip: false,
-        },
-        encoding: {
-          y: { value: styles.thresholdLine.value || 0 },
-        },
-      },
-    ];
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  if (thresholdLayer) {
+    spec.layer = [{ mark: barMark, encoding: spec.encoding }, ...thresholdLayer.layer];
     delete spec.mark;
     delete spec.encoding;
   }
@@ -369,7 +335,7 @@ export const createFacetedTimeBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
@@ -442,22 +408,29 @@ export const createFacetedTimeBarChart = (
             },
           },
         },
-        // Add threshold line to each facet if enabled
-        ...(styles.thresholdLine?.show
-          ? [
-              {
+        // Add threshold layer to each facet if enabled
+        ...(styles.thresholdLines && styles.thresholdLines.length > 0
+          ? styles.thresholdLines
+              .filter((threshold) => threshold.show)
+              .map((threshold) => ({
                 mark: {
                   type: 'rule',
-                  color: styles.thresholdLine.color || '#E7664C',
-                  strokeWidth: styles.thresholdLine.width || 1,
-                  strokeDash: getStrokeDash(styles.thresholdLine.style),
-                  tooltip: false,
+                  color: threshold.color || '#E7664C',
+                  strokeWidth: threshold.width || 1,
+                  strokeDash: getStrokeDash(threshold.style),
+                  tooltip: styles.tooltipOptions?.mode !== 'hidden',
                 },
                 encoding: {
-                  y: { value: styles.thresholdLine.value || 0 },
+                  y: { value: threshold.value || 0 },
+                  ...(styles.tooltipOptions?.mode !== 'hidden' && {
+                    tooltip: {
+                      value: `${threshold.name ? threshold.name + ': ' : ''}Threshold: ${
+                        threshold.value
+                      }`,
+                    },
+                  }),
                 },
-              },
-            ]
+              }))
           : []),
       ],
     },
@@ -493,7 +466,7 @@ export const createStackedBarSpec = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    tooltip: styles.addTooltip !== false,
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
     size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
     binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
@@ -558,23 +531,10 @@ export const createStackedBarSpec = (
     },
   };
 
-  // Add threshold line if enabled
-  if (styles.thresholdLine?.show) {
-    spec.layer = [
-      { mark: barMark, encoding: spec.encoding },
-      {
-        mark: {
-          type: 'rule',
-          color: styles.thresholdLine.color || '#E7664C',
-          strokeWidth: styles.thresholdLine.width || 1,
-          strokeDash: getStrokeDash(styles.thresholdLine.style),
-          tooltip: false,
-        },
-        encoding: {
-          [valueAxis]: { value: styles.thresholdLine.value || 0 },
-        },
-      },
-    ];
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  if (thresholdLayer) {
+    spec.layer = [{ mark: barMark, encoding: spec.encoding }, ...thresholdLayer.layer];
     delete spec.mark;
     delete spec.encoding;
   }
