@@ -23,12 +23,12 @@ import { ResultStatus } from '../utils';
 import { selectSavedQuery } from '../../../../../utils/state_management/selectors';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
 import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
-import { selectUIState } from '../../../../../utils/state_management/selectors';
+import { selectTabState, selectUIState } from '../../../../../utils/state_management/selectors';
 import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
 import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
-import { RootState } from '../../../../../utils/state_management/store';
 import { getTopNavLinks } from '../../../../../../components/top_nav/top_nav_links';
 import { useCurrentExploreId } from '../../../../../utils/hooks/use_current_explore_id';
+import { selectStatus } from '../../../../../utils/state_management/selectors';
 
 export interface TopNavProps {
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
@@ -52,10 +52,12 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
   const savedExploreId = useCurrentExploreId();
 
   const uiState = useNewStateSelector(selectUIState);
+  const tabState = useNewStateSelector(selectTabState);
+
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
   const savedQueryId = useSelector(selectSavedQuery);
-  const isLoading = useSelector((state: RootState) => state.ui.status === ResultStatus.LOADING);
+  const isLoading = useSelector(selectStatus) === ResultStatus.LOADING;
   const { savedExplore } = useSavedExplore(savedExploreId);
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
@@ -107,7 +109,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
             savedExplore,
             flavorId ?? 'logs',
             tabDefinition!,
-            uiState,
+            tabState,
             indexPattern
           )
         : undefined
@@ -116,7 +118,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
     savedExplore,
     indexPattern,
     searchContext,
-    uiState,
+    tabState,
     services,
     startSyncingQueryStateWithUrl,
     flavorId,

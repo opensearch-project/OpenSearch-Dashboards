@@ -63,7 +63,8 @@ export interface SearchProps {
     filters: Filter[] | undefined;
     timeRange: TimeRange | undefined;
   };
-  chartType?: ChartType | 'logs';
+  chartType?: ChartType;
+  activeTab?: string;
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -318,10 +319,11 @@ export class ExploreEmbeddable
     const visualizationData = getVisualizationType(rows, fieldSchema);
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
-    const selectedChartType =
-      JSON.parse(this.savedExplore.visualization || '{}').chartType ?? 'line';
+    const visualization = JSON.parse(this.savedExplore.visualization || '{}');
+    const selectedChartType = visualization.chartType ?? 'line';
     this.searchProps.chartType = selectedChartType;
-    if (selectedChartType !== 'logs' && visualizationData) {
+    this.searchProps.activeTab = visualization.activeTab;
+    if (visualization.activeTab !== 'logs' && visualizationData) {
       const rule = this.services.visualizationRegistry
         .start()
         .getRules()

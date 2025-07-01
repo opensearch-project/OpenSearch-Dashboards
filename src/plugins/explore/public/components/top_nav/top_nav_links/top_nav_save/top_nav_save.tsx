@@ -56,7 +56,6 @@ export const getSaveButtonRun = (
   }: OnSaveProps): Promise<SaveResult | undefined> => {
     const {
       chrome,
-      core,
       data: { search },
       history,
       store,
@@ -135,22 +134,21 @@ export const getSaveButtonRun = (
 
       return { error };
     }
-
-    const saveModal = (
-      <SavedObjectSaveModal
-        onSave={onSave}
-        onClose={() => {}}
-        title={savedExplore.title ?? ''}
-        showCopyOnSave={!!savedExplore.id}
-        // TODO: Does this need to be type "explore"?
-        objectType="discover"
-        description={i18n.translate('explore.localMenu.saveSaveSearchDescription', {
-          defaultMessage:
-            'Save your Discover search so you can use it in visualizations and dashboards',
-        })}
-        showDescription={false}
-      />
-    );
-    showSaveModal(saveModal, core.i18n.Context);
   };
+  const saveModal = (
+    <SavedObjectSaveModal
+      onSave={onSave}
+      onClose={() => {}}
+      title={savedExplore.title ?? ''}
+      showCopyOnSave={!!savedExplore.id}
+      // TODO: Does this need to be type "explore"?
+      objectType="discover"
+      description={i18n.translate('explore.localMenu.saveSaveSearchDescription', {
+        defaultMessage:
+          'Save your Discover search so you can use it in visualizations and dashboards',
+      })}
+      showDescription={false}
+    />
+  );
+  showSaveModal(saveModal, services.core.i18n.Context);
 };
