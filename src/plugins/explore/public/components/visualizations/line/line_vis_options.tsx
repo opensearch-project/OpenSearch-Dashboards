@@ -9,7 +9,9 @@ import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
+import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { LineExclusiveVisOptions } from './exclusive_style';
+import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
@@ -68,6 +70,25 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               updateStyleOption('legendPosition', legendOptions.position);
             }
           }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ThresholdOptions
+          thresholdLines={styleOptions.thresholdLines}
+          onThresholdLinesChange={(thresholdLines) =>
+            updateStyleOption('thresholdLines', thresholdLines)
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TooltipOptionsPanel
+          tooltipOptions={styleOptions.tooltipOptions}
+          onTooltipOptionsChange={(tooltipOptions) =>
+            updateStyleOption('tooltipOptions', {
+              ...styleOptions.tooltipOptions,
+              ...tooltipOptions,
+            })
+          }
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

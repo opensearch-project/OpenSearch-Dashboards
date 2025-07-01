@@ -8,23 +8,6 @@ import { LineChartStyleControls } from './line_vis_config';
 import { ThresholdLineStyle, VisColumn, Positions } from '../types';
 
 /**
- * Get stroke dash array for different line styles
- * @param style The line style ('dashed', 'dot-dashed', or 'full')
- * @returns The stroke dash array or undefined for solid lines
- */
-export const getStrokeDash = (style: string): number[] | undefined => {
-  switch (style) {
-    case ThresholdLineStyle.Dashed:
-      return [5, 5];
-    case ThresholdLineStyle.DotDashed:
-      return [5, 5, 1, 5];
-    case ThresholdLineStyle.Full:
-    default:
-      return undefined;
-  }
-};
-
-/**
  * Get Vega interpolation from UI lineMode
  * @param lineMode The line mode ('straight', 'smooth', or 'stepped')
  * @returns The corresponding Vega interpolation value
@@ -75,13 +58,13 @@ export const buildMarkConfig = (
   const lineStyle = styles?.lineStyle ?? 'both';
   const lineWidth = styles?.lineWidth ?? 2;
   const lineMode = styles?.lineMode ?? 'smooth';
-  const addTooltip = styles?.addTooltip !== false;
+  const showTooltip = styles?.tooltipOptions?.mode !== 'hidden';
 
   if (markType === 'bar') {
     return {
       type: 'bar',
       opacity: 0.7,
-      tooltip: addTooltip,
+      tooltip: showTooltip,
     };
   }
 
@@ -91,14 +74,14 @@ export const buildMarkConfig = (
       // Only show points
       return {
         type: 'point',
-        tooltip: addTooltip,
+        tooltip: showTooltip,
         size: 100,
       };
     case 'line':
       // Only show line
       return {
         type: 'line',
-        tooltip: addTooltip,
+        tooltip: showTooltip,
         strokeWidth: lineWidth,
         interpolate: getVegaInterpolation(lineMode),
       };
@@ -107,7 +90,7 @@ export const buildMarkConfig = (
       return {
         type: 'line',
         point: true,
-        tooltip: addTooltip,
+        tooltip: showTooltip,
         strokeWidth: lineWidth,
         interpolate: getVegaInterpolation(lineMode),
       };
@@ -116,50 +99,11 @@ export const buildMarkConfig = (
       return {
         type: 'line',
         point: true,
-        tooltip: addTooltip,
+        tooltip: showTooltip,
         strokeWidth: lineWidth,
         interpolate: getVegaInterpolation(lineMode),
       };
   }
-};
-
-/**
- * Create threshold line layer
- * @param styles The style options
- * @returns The threshold layer configuration or null if disabled
- */
-export const createThresholdLayer = (styles: Partial<LineChartStyleControls> | undefined): any => {
-  if (!styles?.thresholdLine?.show) {
-    return null;
-  }
-
-  const thresholdLayer: any = {
-    mark: {
-      type: 'rule',
-      color: styles.thresholdLine.color,
-      strokeWidth: styles.thresholdLine.width,
-      strokeDash: getStrokeDash(styles.thresholdLine.style),
-      tooltip: styles.addTooltip !== false,
-    },
-    encoding: {
-      y: {
-        datum: styles.thresholdLine.value,
-        type: 'quantitative',
-      },
-    },
-  };
-
-  // Add tooltip content if enabled
-  if (styles.addTooltip !== false) {
-    thresholdLayer.encoding.tooltip = {
-      value:
-        i18n.translate('explore.vis.thresholdValue', {
-          defaultMessage: 'Threshold: ',
-        }) + styles.thresholdLine.value,
-    };
-  }
-
-  return thresholdLayer;
 };
 
 /**
@@ -172,20 +116,22 @@ export const createTimeMarkerLayer = (styles: Partial<LineChartStyleControls> | 
     return null;
   }
 
+  const showTooltip = styles?.tooltipOptions?.mode !== 'hidden';
+
   return {
     mark: {
       type: 'rule',
       color: '#FF6B6B',
       strokeWidth: 2,
       strokeDash: [3, 3],
-      tooltip: styles.addTooltip !== false,
+      tooltip: showTooltip,
     },
     encoding: {
       x: {
         datum: { expr: 'now()' },
         type: 'temporal',
       },
-      ...(styles.addTooltip !== false && {
+      ...(showTooltip && {
         tooltip: {
           value: 'Current Time',
         },
