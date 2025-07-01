@@ -15,7 +15,7 @@ import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
  * Persists Redux state to URL
  */
 export const persistReduxState = (state: RootState, services: ExploreServices) => {
-  if (state.ui.transaction?.inProgress || !services.osdUrlStateStorage) return;
+  if (!services.osdUrlStateStorage) return;
   try {
     // Sync up _q (Query state) to URL state
     services.osdUrlStateStorage.set('_q', state.query, { replace: true });
@@ -63,6 +63,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<any> =>
     const finalResultsState = appState?.results || (await getPreloadedResultsState(services));
     const finalTabState = appState?.tab || (await getPreloadedTabState(services));
     const finalLegacyState = appState?.legacy || (await getPreloadedLegacyState(services));
+    const finalSystemState = await getPreloadedSystemState(services);
 
     const finalState = {
       query: finalQueryState,
@@ -70,6 +71,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<any> =>
       results: finalResultsState,
       tab: finalTabState,
       legacy: finalLegacyState,
+      system: finalSystemState,
     };
 
     return finalState;
@@ -87,6 +89,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<any>
   const resultsState = await getPreloadedResultsState(services);
   const tabState = await getPreloadedTabState(services);
   const legacyState = await getPreloadedLegacyState(services);
+  const systemState = await getPreloadedSystemState(services);
 
   return {
     query: queryState, // Contains dataset, query, and language
@@ -94,6 +97,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<any>
     results: resultsState,
     tab: tabState,
     legacy: legacyState,
+    system: systemState,
   };
 };
 
@@ -179,14 +183,18 @@ const getPreloadedQueryState = async (services: ExploreServices) => {
 const getPreloadedUIState = async (services: ExploreServices) => {
   return {
     activeTabId: 'logs',
+    flavor: 'log',
+    showDatasetFields: true,
+    prompt: '',
+  };
+};
+
+/**
+ * Get preloaded system state
+ */
+const getPreloadedSystemState = async (services: ExploreServices) => {
+  return {
     status: ResultStatus.UNINITIALIZED,
-    error: null,
-    abortController: null,
-    styleOptions: {},
-    transaction: {
-      inProgress: false,
-      pendingActions: [],
-    },
   };
 };
 
@@ -201,7 +209,12 @@ const getPreloadedResultsState = async (services: ExploreServices) => {
  * Get preloaded tab state
  */
 const getPreloadedTabState = async (services: ExploreServices) => {
-  return {};
+  return {
+    logs: {},
+    visualizations: {
+      styleOptions: {},
+    },
+  };
 };
 
 /**

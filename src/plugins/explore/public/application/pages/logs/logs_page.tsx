@@ -60,7 +60,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
 
   // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
-    return state.ui?.status || ResultStatus.UNINITIALIZED;
+    return state.system?.status || ResultStatus.UNINITIALIZED;
   });
   const rows = useSelector((state: RootState) => {
     const query = state.query;

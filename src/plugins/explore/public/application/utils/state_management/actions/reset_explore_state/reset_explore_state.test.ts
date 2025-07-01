@@ -4,21 +4,19 @@
  */
 
 import { resetExploreStateActionCreator } from './reset_explore_state';
-import { setLegacyState } from '../../slices/legacy_slice';
-import { setQueryState } from '../../slices/query_slice';
-import { setResultsState } from '../../slices/results_slice';
-import { setTabState } from '../../slices/tab_slice';
-import { setUiState } from '../../slices/ui_slice';
+import {
+  setLegacyState,
+  setQueryState,
+  setResultsState,
+  setTabState,
+  setUiState,
+} from '../../slices';
 import { getPreloadedState } from '../../utils/redux_persistence';
 import { beginTransaction, finishTransaction } from '../transaction_actions';
 import { executeQueries } from '../query_actions';
 
 jest.mock('../../utils/redux_persistence');
-jest.mock('../../slices/legacy_slice');
-jest.mock('../../slices/query_slice');
-jest.mock('../../slices/results_slice');
-jest.mock('../../slices/tab_slice');
-jest.mock('../../slices/ui_slice');
+jest.mock('../../slices');
 jest.mock('../transaction_actions');
 jest.mock('../query_actions');
 
