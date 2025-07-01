@@ -37,7 +37,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   const notShowLegend =
     numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0;
 
-  console.log('BarVisStyleControls styleOptions', styleOptions);
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
