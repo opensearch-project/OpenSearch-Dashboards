@@ -1,2 +1,2 @@
 feat:
-- Working static banner plugin with no overlapping [#9989](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9989))
+- Add static banner plugin and feature flag ([#9989](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9989))
