@@ -5,7 +5,7 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { ResultStatus } from '../../../legacy/discover/application/view_components/utils/use_search';
+import { ResultStatus } from '../types';
 
 /**
  * Basic selectors

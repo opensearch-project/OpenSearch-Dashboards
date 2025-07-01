@@ -4,7 +4,7 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ResultStatus } from '../../../../legacy/discover/application/view_components/utils/use_search';
+import { ResultStatus } from '../../types';
 
 export interface SystemState {
   status: ResultStatus;
