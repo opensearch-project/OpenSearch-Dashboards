@@ -79,7 +79,7 @@ export const VisualizationContainer = () => {
       dispatch(setSelectedChartType(visualizationData.visualizationType.type));
       dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
     }
-  }, [visualizationData, dispatch, styleOptions]);
+  }, [visualizationData, dispatch]);
 
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
