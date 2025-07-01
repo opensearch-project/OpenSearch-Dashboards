@@ -72,8 +72,7 @@ export const buildMarkConfig = (
   markType: 'line' | 'bar' = 'line'
 ): VegaLiteMarkConfig => {
   // Default values - handle undefined styles object
-  const showLine = styles?.showLine !== false;
-  const showDots = styles?.showDots !== false;
+  const lineStyle = styles?.lineStyle ?? 'both';
   const lineWidth = styles?.lineWidth ?? 2;
   const lineMode = styles?.lineMode ?? 'smooth';
   const addTooltip = styles?.addTooltip !== false;
@@ -86,38 +85,41 @@ export const buildMarkConfig = (
     };
   }
 
-  // For line charts
-  if (!showLine && showDots) {
-    // Only show points
-    return {
-      type: 'point',
-      tooltip: addTooltip,
-      size: 100,
-    };
-  } else if (showLine && !showDots) {
-    // Only show line
-    return {
-      type: 'line',
-      tooltip: addTooltip,
-      strokeWidth: lineWidth,
-      interpolate: getVegaInterpolation(lineMode),
-    };
-  } else if (showLine && showDots) {
-    // Show both line and points
-    return {
-      type: 'line',
-      point: true,
-      tooltip: addTooltip,
-      strokeWidth: lineWidth,
-      interpolate: getVegaInterpolation(lineMode),
-    };
-  } else {
-    // Toggle off both line and dots - show empty
-    return {
-      type: 'point',
-      tooltip: addTooltip,
-      size: 0, // Make points invisible
-    };
+  // For line charts - use lineStyle to determine the visualization
+  switch (lineStyle) {
+    case 'dots':
+      // Only show points
+      return {
+        type: 'point',
+        tooltip: addTooltip,
+        size: 100,
+      };
+    case 'line':
+      // Only show line
+      return {
+        type: 'line',
+        tooltip: addTooltip,
+        strokeWidth: lineWidth,
+        interpolate: getVegaInterpolation(lineMode),
+      };
+    case 'both':
+      // Show both line and points
+      return {
+        type: 'line',
+        point: true,
+        tooltip: addTooltip,
+        strokeWidth: lineWidth,
+        interpolate: getVegaInterpolation(lineMode),
+      };
+    default:
+      // Fallback to both if lineStyle is not recognized
+      return {
+        type: 'line',
+        point: true,
+        tooltip: addTooltip,
+        strokeWidth: lineWidth,
+        interpolate: getVegaInterpolation(lineMode),
+      };
   }
 };
 

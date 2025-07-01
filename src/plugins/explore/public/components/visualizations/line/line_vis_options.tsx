@@ -7,15 +7,9 @@ import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
-import { BasicVisOptions } from '../style_panel/basic_vis_options';
-import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { ThresholdOptions } from '../style_panel/threshold_options';
-import { GridOptionsPanel } from '../style_panel/grid_options';
-import { AxesOptions } from '../style_panel/axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
-import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
-import { StyleAccordion } from '../style_panel/style_accordion';
+import { LineExclusiveVisOptions } from './exclusive_style';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
@@ -74,6 +68,20 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               updateStyleOption('legendPosition', legendOptions.position);
             }
           }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <LineExclusiveVisOptions
+          addTimeMarker={styleOptions.addTimeMarker}
+          lineStyle={styleOptions.lineStyle}
+          lineMode={styleOptions.lineMode}
+          lineWidth={styleOptions.lineWidth}
+          onAddTimeMarkerChange={(addTimeMarker) =>
+            updateStyleOption('addTimeMarker', addTimeMarker)
+          }
+          onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
+          onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
+          onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

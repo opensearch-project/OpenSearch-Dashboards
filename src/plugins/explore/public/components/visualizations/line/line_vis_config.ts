@@ -14,6 +14,7 @@ import {
   ValueAxis,
   Positions,
 } from '../types';
+import { LineStyle } from './exclusive_style';
 
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
@@ -23,10 +24,9 @@ export interface LineChartStyleControls {
   legendPosition: Positions;
   addTimeMarker: boolean;
 
-  showLine: boolean;
+  lineStyle: LineStyle;
   lineMode: string;
   lineWidth: number;
-  showDots: boolean;
 
   // Threshold and grid
   thresholdLine: ThresholdLine;
@@ -44,10 +44,9 @@ const defaultLineChartStyles: LineChartStyleControls = {
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
 
-  showLine: true,
+  lineStyle: 'both',
   lineMode: 'smooth',
   lineWidth: 2,
-  showDots: true,
 
   // Threshold and grid
   thresholdLine: {
