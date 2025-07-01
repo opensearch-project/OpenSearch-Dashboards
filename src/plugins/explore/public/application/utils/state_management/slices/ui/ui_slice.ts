@@ -14,8 +14,6 @@ export interface UIState {
   flavor: string;
   showDatasetFields: boolean;
   prompt?: string; // Optional prompt for query panel
-  styleOptions: ChartStyleControlMap[ChartType] | undefined;
-  chartType: ChartType;
 }
 
 const initialState: UIState = {
@@ -23,8 +21,6 @@ const initialState: UIState = {
   flavor: 'log',
   showDatasetFields: true,
   prompt: '', // Initialize prompt as empty string
-  styleOptions: undefined,
-  chartType: 'line',
 };
 
 const uiSlice = createSlice({
@@ -45,12 +41,6 @@ const uiSlice = createSlice({
     },
     setQueryPrompt: (state, action: PayloadAction<string>) => {
       state.prompt = action.payload;
-    },
-    setStyleOptions: (state, action: PayloadAction<ChartStyleControlMap[ChartType]>) => {
-      state.styleOptions = action.payload;
-    },
-    setChartType: (state, action: PayloadAction<ChartType>) => {
-      state.chartType = action.payload;
     },
   },
 });

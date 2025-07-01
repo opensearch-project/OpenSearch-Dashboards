@@ -255,7 +255,9 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           disabled={!enableButton}
           isLoading={isLoading}
         >
-          Add
+          {i18n.translate('explore.addtoDashboardModal.addButton', {
+            defaultMessage: 'Add',
+          })}
         </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
