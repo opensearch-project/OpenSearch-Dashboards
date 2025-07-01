@@ -103,7 +103,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
       services,
       startSyncingQueryStateWithUrl,
       searchContext,
-      indexPattern,
       savedExplore
         ? saveStateToSavedObject(
             savedExplore,

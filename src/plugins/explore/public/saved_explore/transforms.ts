@@ -33,6 +33,8 @@ export const saveStateToSavedObject = (
     chartType: tabState?.visualizations?.chartType ?? 'line',
     params: tabState?.visualizations?.styleOptions ?? {},
   });
+  obj.searchSourceFields = { index: indexPattern };
+
   obj.version = 1;
 
   return obj;
