@@ -43,6 +43,7 @@ import {
 import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
 import { selectShowDataSetFields } from '../../utils/state_management/selectors';
 import { ResultsSummaryPanel } from '../../../components/results_summary/results_summary_panel';
+import { useInitPage } from '../../utils/hooks/use_page_initialization';
 
 /**
  * Main application component for the Explore plugin
@@ -51,6 +52,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const { savedExplore } = useInitPage();
   const dispatch = useDispatch();
   const {
     indexPattern,
@@ -193,7 +195,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
             paddingSize="none"
           >
             <EuiPageBody className="explore-layout__canvas">
-              <TopNav setHeaderActionMenu={setHeaderActionMenu} />
+              <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
               {renderBottomRightPanel()}
             </EuiPageBody>
           </EuiResizablePanel>

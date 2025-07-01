@@ -29,15 +29,15 @@ import {
   selectSavedQuery,
 } from '../../../../../utils/state_management/selectors';
 import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
-import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
 import { getTopNavLinks } from '../../../../../../components/top_nav/top_nav_links';
-import { useCurrentExploreId } from '../../../../../utils/hooks/use_current_explore_id';
+import { SavedExplore } from '../../../../../../saved_explore';
 
 export interface TopNavProps {
+  savedExplore?: SavedExplore;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }
 
-export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
+export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const flavorId = useFlavorId();
   const {
@@ -52,7 +52,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
     history,
   } = services;
   const dispatch = useDispatch();
-  const savedExploreId = useCurrentExploreId();
 
   const uiState = useNewStateSelector(selectUIState);
   const tabState = useNewStateSelector(selectTabState);
@@ -61,7 +60,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
 
   const savedQueryId = useSelector(selectSavedQuery);
   const isLoading = useSelector(selectStatus) === ResultStatus.LOADING;
-  const { savedExplore } = useSavedExplore(savedExploreId);
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
