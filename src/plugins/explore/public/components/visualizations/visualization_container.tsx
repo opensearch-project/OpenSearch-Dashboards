@@ -151,12 +151,31 @@ export const VisualizationContainer = () => {
 
   const handleStyleChange = (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {
     if (styleOptions) {
-      dispatch(
-        setStyleOptions({
-          ...styleOptions,
-          ...newOptions,
-        } as ChartStyleControlMap[ChartType])
-      );
+      // TODO: needs proper refactor
+      // 1. The below `setStyleOptions` call
+      // 2. Another `setStyleOptions` triggered above via:
+      //    dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
+      //
+      // Root cause:
+      // HeatmapVisStyleControls currently performs default style initialization inside a `useEffect`,
+      // which internally calls `updateStyleOption`. This introduces a race condition when initializing styles.
+      //
+      // Proper solution:
+      // Refactor HeatmapVisStyleControls (and any other style controls components) to **not** handle default style initialization.
+      // Instead, this logic should be centralized and performed earlier, during the visualization type resolution phase.
+      //
+      // Replace static access to `visualizationData.visualizationType.ui.style.defaults` with a method like:
+      //   `visualizationData.visualizationType.ui.style.getDefaults(rows, fieldSchema)`
+      // This allows default styles to be computed dynamically based on actual data (`rows`, `fieldSchema`),
+      // avoiding conflicts during rendering.
+      setTimeout(() => {
+        dispatch(
+          setStyleOptions({
+            ...styleOptions,
+            ...newOptions,
+          } as ChartStyleControlMap[ChartType])
+        );
+      }, 50);
     }
   };
 
