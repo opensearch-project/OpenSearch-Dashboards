@@ -12,6 +12,7 @@ import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { LineExclusiveVisOptions } from './exclusive_style';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
+import { AxesOptions } from '../style_panel/axes/axes';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
@@ -89,6 +90,17 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               ...tooltipOptions,
             })
           }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AxesOptions
+          categoryAxes={styleOptions.categoryAxes}
+          valueAxes={styleOptions.valueAxes}
+          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
+          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
