@@ -29,6 +29,7 @@ export const StyleAccordion: React.FC<StyleAccordionProps> = ({
         }
         initialIsOpen={initialIsOpen}
       >
+        <EuiSpacer size="s" />
         <EuiPanel paddingSize="s" hasBorder={false} color="subdued">
           {children}
         </EuiPanel>
