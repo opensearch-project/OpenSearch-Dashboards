@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LineChartStyleControls } from './line_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
@@ -13,6 +12,7 @@ import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { LineExclusiveVisOptions } from './exclusive_style';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
+import { GridOptionsPanel } from '../style_panel/grid/grid';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
@@ -22,27 +22,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
-  onChartTypeChange,
 }) => {
-  // // State to track expanded/collapsed state of each panel
-  // const [expandedPanels, setExpandedPanels] = useState({
-  //   general: false,
-  //   basic: false,
-  //   exclusive: false,
-  //   threshold: false,
-  //   grid: false,
-  //   axes: false,
-  // });
-
-  // const togglePanel = (panelId: string) => {
-  //   setExpandedPanels({
-  //     ...expandedPanels,
-  //     [panelId]: !expandedPanels[panelId as keyof typeof expandedPanels],
-  //   });
-  // };
-
   const updateStyleOption = <K extends keyof LineChartStyleControls>(
     key: K,
     value: LineChartStyleControls[K]
@@ -101,6 +81,12 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
           numericalColumns={numericalColumns}
           categoricalColumns={categoricalColumns}
           dateColumns={dateColumns}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <GridOptionsPanel
+          grid={styleOptions.grid}
+          onGridChange={(grid) => updateStyleOption('grid', grid)}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
