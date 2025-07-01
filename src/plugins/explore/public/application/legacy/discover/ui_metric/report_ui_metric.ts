@@ -5,8 +5,8 @@
 
 import { UiStatsMetricType } from '@osd/analytics';
 import { METRIC_TYPE } from 'src/plugins/usage_collection/public';
-import { Query } from 'src/plugins/data/public';
 import { getUsageCollector } from 'src/plugins/explore/public/services/usage_collector';
+import { QueryState } from '../../../utils/state_management/slices';
 import { DATASET_METRIC_SUFFIX, LANGUAGE_METRIC_SUFFIX, NEW_DISCOVER_APP_NAME } from './constants';
 
 export const getDatasetTypeMetricEventName = (datasource: string) => {
@@ -31,7 +31,7 @@ export const trackUiMetric = (
   }
 };
 
-export const trackQueryMetric = (query: Query) => {
+export const trackQueryMetric = (query: QueryState) => {
   trackUiMetric(getDatasetTypeMetricEventName(query.dataset?.type!));
   trackUiMetric(getLanguageMetricEventName(query.language));
 };
