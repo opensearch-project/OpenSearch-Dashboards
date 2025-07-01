@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiText,
   EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -53,25 +54,27 @@ export const QueryAssistBanner: React.FC<QueryAssistBannerProps> = (props) => {
             </EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTextColor color="default">
-              <FormattedMessage
-                id="queryEnhancements.banner.title.prefix"
-                defaultMessage="Use natural language to explore your data with "
-              />
-              <EuiLink
-                data-test-subj="queryAssist-banner-changeLanguage"
-                onClick={() => {
-                  props.dependencies.onSelectLanguage(props.languages[0]);
-                  if (props.dependencies.isCollapsed) props.dependencies.setIsCollapsed(false);
-                }}
-              >
+            <EuiText size="xs">
+              <EuiTextColor color="default">
                 <FormattedMessage
-                  id="queryEnhancements.banner.title.suffix"
-                  defaultMessage="Natural Language Query Generation for {languages}"
-                  values={{ languages: props.languages.join(', ') }}
+                  id="queryEnhancements.banner.title.prefix"
+                  defaultMessage="Use natural language to explore your data with "
                 />
-              </EuiLink>
-            </EuiTextColor>
+                <EuiLink
+                  data-test-subj="queryAssist-banner-changeLanguage"
+                  onClick={() => {
+                    props.dependencies.onSelectLanguage(props.languages[0]);
+                    if (props.dependencies.isCollapsed) props.dependencies.setIsCollapsed(false);
+                  }}
+                >
+                  <FormattedMessage
+                    id="queryEnhancements.banner.title.suffix"
+                    defaultMessage="Natural Language Query Generation for {languages}"
+                    values={{ languages: props.languages.join(', ') }}
+                  />
+                </EuiLink>
+              </EuiTextColor>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
