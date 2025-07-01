@@ -73,15 +73,11 @@ export const VisualizationContainer = () => {
 
   const visualizationRegistry = useVisualizationRegistry();
 
-  // Initialize selectedChartType and styleOptions when visualizationData changes
+  // Initialize selectedChartType and its default styles when visualizationData changes
   useEffect(() => {
     if (visualizationData && visualizationData.visualizationType) {
       dispatch(setSelectedChartType(visualizationData.visualizationType.type));
-
-      // Initialize style options with defaults if not already set
-      if (!styleOptions && visualizationData.visualizationType.ui?.style?.defaults) {
-        dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
-      }
+      dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
     }
   }, [visualizationData, dispatch, styleOptions]);
 
@@ -188,7 +184,7 @@ export const VisualizationContainer = () => {
   };
 
   // Don't render if visualization is not enabled or data is not ready
-  if (!visualizationData || !styleOptions) {
+  if (!visualizationData) {
     return null;
   }
 
