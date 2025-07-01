@@ -58,6 +58,10 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       finalQueryState = await getPreloadedQueryState(services);
     }
     services.data.query.queryString.setQuery(finalQueryState);
+    const timefilter = services?.data?.query?.timefilter?.timefilter;
+    if (timefilter) {
+      services.data.query.queryString.addToQueryHistory(finalQueryState, timefilter.getTime());
+    }
 
     // Only run preload functions for missing sections
     const finalUIState = appState?.ui || getPreloadedUIState(services);

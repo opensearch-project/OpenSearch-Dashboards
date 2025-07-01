@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Query } from '../../../../data/common';
-import { ResultStatus } from '../../application/legacy/discover/application/view_components/utils/use_search';
+import { QueryState } from '../../application/utils/state_management/slices';
+import { ResultStatus } from '../../application/utils/state_management/types';
 
 /**
  * Props passed to tab components
  */
 export interface TabComponentProps {
-  query: Query;
+  query: QueryState;
   results: Record<string, unknown>;
   status: ResultStatus;
   error: Error | null;

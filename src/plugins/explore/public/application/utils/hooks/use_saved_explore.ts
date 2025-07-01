@@ -7,9 +7,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../types/saved_explore_types';
+
 /**
- * Hook for loading saved explore objects (following vis_builder pattern)
- * This handles saved object loading AFTER store creation, not during getPreloadedState
+ * Hook for loading saved explore objects
  */
 export const useSavedExplore = (exploreIdFromUrl?: string) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
