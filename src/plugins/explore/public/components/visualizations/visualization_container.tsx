@@ -4,7 +4,7 @@
  */
 import './visualization_container.scss';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { Visualization } from './visualization';
@@ -79,6 +79,8 @@ export const VisualizationContainer = () => {
     VisualizationTypeResult<ChartType> | undefined
   >(undefined);
 
+  const isUserUpdatedVisualization = useRef(false);
+
   const updateVisualizationState = useCallback(
     (
       visualizationType: VisualizationType<ChartType>,
@@ -93,6 +95,8 @@ export const VisualizationContainer = () => {
 
   const updateVisualization = useCallback(
     ({ visualizationType, rule, fieldNames, columns }: UpdateVisualizationProps) => {
+      isUserUpdatedVisualization.current = true;
+
       updateVisualizationState(visualizationType, fieldNames);
       setCurrentRuleId(rule.id);
       setVisualizationData((prev) => ({
@@ -108,75 +112,126 @@ export const VisualizationContainer = () => {
     [updateVisualizationState]
   );
 
-  useEffect(() => {
-    if (fieldSchema.length === 0 || rows.length === 0) {
-      return;
-    }
-    const visualizationTypeResult = getVisualizationType(rows, fieldSchema);
-
-    if (visualizationTypeResult?.ruleId && visualizationTypeResult.visualizationType) {
-      setCurrentRuleId(visualizationTypeResult.ruleId);
-      updateVisualizationState(visualizationTypeResult.visualizationType, {
-        numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
-        categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
-        date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
-      });
-    } else {
-      dispatch(setSelectedChartType('' as any)); // FIXME
-      dispatch(setStyleOptions({} as any)); // FIXME
-      dispatch(setFieldNames({ numerical: [], categorical: [], date: [] }));
-    }
-
-    setVisualizationData(visualizationTypeResult);
-  }, [fieldSchema, rows, updateVisualizationState, dispatch]);
-
-  useEffect(() => {
-    if (!currentRuleId && selectedFieldNames && styleOptions && selectedChartType) {
-      // Handle the case that loading from saved search, since we don't save current rule id
-      const currentVisData = getVisualizationType(rows, fieldSchema, visualizationRegistry);
-
-      if (currentVisData) {
-        const columns = {
-          numerical: currentVisData.numericalColumns
-            ? currentVisData.numericalColumns.filter((col) =>
-                selectedFieldNames?.numerical?.includes(col.name)
-              )
-            : [],
-          categorical: currentVisData.categoricalColumns
-            ? currentVisData.categoricalColumns.filter((col) =>
-                selectedFieldNames?.categorical?.includes(col.name)
-              )
-            : [],
-          date: currentVisData.dateColumns
-            ? currentVisData.dateColumns.filter((col) =>
-                selectedFieldNames?.date?.includes(col.name)
-              )
-            : [],
-        };
-        const matchedRule = visualizationRegistry.findBestMatch(
+  const findMatchedRuleWithCache = useCallback(
+    ({
+      visData,
+      fieldNames,
+    }: {
+      visData: VisualizationTypeResult<ChartType>;
+      fieldNames: UpdateVisualizationProps['fieldNames'];
+    }) => {
+      const columns = {
+        numerical: visData.numericalColumns
+          ? visData.numericalColumns.filter((col) => fieldNames?.numerical?.includes(col.name))
+          : [],
+        categorical: visData.categoricalColumns
+          ? visData.categoricalColumns.filter((col) => fieldNames?.categorical?.includes(col.name))
+          : [],
+        date: visData.dateColumns
+          ? visData.dateColumns.filter((col) => fieldNames?.date?.includes(col.name))
+          : [],
+      };
+      // Will return null if not found
+      return {
+        matchedRule: visualizationRegistry.findBestMatch(
           columns.numerical,
           columns.categorical,
           columns.date
-        );
-        if (matchedRule && currentVisData.visualizationType) {
-          updateVisualization({
-            visualizationType: currentVisData.visualizationType,
-            rule: matchedRule.rule,
-            fieldNames: selectedFieldNames,
-            columns,
+        ),
+        columns,
+      };
+    },
+    [visualizationRegistry]
+  );
+
+  const clearCache = useCallback(() => {
+    dispatch(setSelectedChartType('' as any)); // FIXME
+    dispatch(setStyleOptions({} as any)); // FIXME
+    dispatch(setFieldNames({ numerical: [], categorical: [], date: [] }));
+  }, [dispatch]);
+
+  useEffect(() => {
+    // FIXME simplify the logic here
+    if (fieldSchema.length === 0 || rows.length === 0) {
+      return;
+    }
+
+    const visualizationTypeResult = getVisualizationType(rows, fieldSchema);
+
+    if (!visualizationTypeResult?.ruleId) {
+      isUserUpdatedVisualization.current = false;
+    }
+
+    if (isUserUpdatedVisualization.current) {
+      // Avoid being triggered by empty state component updates
+      return;
+    }
+
+    if (visualizationTypeResult) {
+      if (visualizationTypeResult?.ruleId && visualizationTypeResult.visualizationType) {
+        // trigger render visualization with user-selected chart type and current fields
+        setCurrentRuleId(visualizationTypeResult.ruleId);
+        updateVisualizationState(visualizationTypeResult.visualizationType, {
+          numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
+          categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
+          date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
+        });
+        setVisualizationData(visualizationTypeResult);
+      } else if (selectedChartType) {
+        // Populate user-selected chart type and current fields
+        const availableFields = {
+          numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
+          categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
+          date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
+        };
+
+        const hasInvalidFields =
+          selectedFieldNames &&
+          (selectedFieldNames.numerical?.some(
+            (field) => !availableFields.numerical.includes(field)
+          ) ||
+            selectedFieldNames.categorical?.some(
+              (field) => !availableFields.categorical.includes(field)
+            ) ||
+            selectedFieldNames.date?.some((field) => !availableFields.date.includes(field)));
+
+        if (hasInvalidFields) {
+          // Last query contains field that no longer exists
+          clearCache();
+          setVisualizationData(visualizationTypeResult);
+        } else {
+          if (selectedFieldNames) {
+            const { matchedRule } = findMatchedRuleWithCache({
+              visData: visualizationTypeResult,
+              fieldNames: selectedFieldNames,
+            });
+            if (matchedRule) {
+              setCurrentRuleId(matchedRule.rule.id);
+            }
+          }
+
+          setVisualizationData({
+            ...visualizationTypeResult,
+            visualizationType: visualizationRegistry.getVisualizationConfig(
+              selectedChartType
+            ) as VisualizationType<ChartType>,
           });
         }
+      } else {
+        clearCache();
+        setVisualizationData(visualizationTypeResult);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    currentRuleId,
-    selectedFieldNames,
-    styleOptions,
-    selectedChartType,
-    rows,
     fieldSchema,
+    rows,
+    updateVisualizationState,
+    dispatch,
+    selectedChartType,
+    clearCache,
+    findMatchedRuleWithCache,
     visualizationRegistry,
-    updateVisualization,
   ]);
 
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
@@ -293,22 +348,20 @@ export const VisualizationContainer = () => {
 
   const handleChartTypeChange = (chartType: ChartType) => {
     dispatch(setSelectedChartType(chartType));
-
-    // Get the visualization configuration for the selected chart type
-    const chartConfig = visualizationRegistry.getVisualizationConfig(chartType);
-
-    // Update the style options with the defaults for the selected chart type
-    if (chartConfig && chartConfig.ui && chartConfig.ui.style) {
-      dispatch(setStyleOptions(chartConfig.ui.style.defaults));
-
-      // Update the visualizationData with the new visualization type
-      if (visualizationData) {
-        setVisualizationData({
-          ...visualizationData,
-          visualizationType: chartConfig as VisualizationType<ChartType>,
-        });
-      }
-    }
+    // dispatch(setSelectedChartType(chartType));
+    // // Get the visualization configuration for the selected chart type
+    // const chartConfig = visualizationRegistry.getVisualizationConfig(chartType);
+    // // Update the style options with the defaults for the selected chart type
+    // if (chartConfig && chartConfig.ui && chartConfig.ui.style) {
+    //   dispatch(setStyleOptions(chartConfig.ui.style.defaults));
+    //   // Update the visualizationData with the new visualization type
+    //   if (visualizationData) {
+    //     setVisualizationData({
+    //       ...visualizationData,
+    //       visualizationType: chartConfig as VisualizationType<ChartType>,
+    //     });
+    //   }
+    // }
   };
 
   // Don't render if visualization is not enabled or data is not ready

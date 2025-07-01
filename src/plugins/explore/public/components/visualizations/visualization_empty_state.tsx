@@ -82,7 +82,9 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
   const originalVisualizationData = useRef(visualizationData);
 
   // Indicates no rule is matched and the user should manually generate the visualization
-  const shouldManuallyGenerate = useRef(true);
+  const shouldManuallyGenerate = useRef(
+    !Boolean(originalVisualizationData.current.visualizationType)
+  );
 
   // Local state for chart type, initialized from Redux
   const storedChartTypeId = useSelector(selectChartType);
@@ -304,13 +306,14 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
   useEffect(() => {
     if (
+      currChartTypeId &&
       currChartTypeOption &&
       shouldManuallyGenerate.current &&
       !isEqual(currFieldsCountByType, [0, 0, 0])
     ) {
       handleGeneration();
     }
-  }, [currChartTypeOption, currFieldsCountByType, handleGeneration]);
+  }, [currChartTypeId, currChartTypeOption, currFieldsCountByType, handleGeneration]);
 
   // Max possible number of selections for each field types base on current available rules
   const maxMatchIndex = useMemo(() => {
@@ -394,6 +397,8 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
       oldColumnName: string,
       newColumnName: string
     ) => {
+      shouldManuallyGenerate.current = true;
+
       const newColumnOption = allColumnOptions[fieldTypeIndex].find(
         (col) => col.value === newColumnName
       )!;
