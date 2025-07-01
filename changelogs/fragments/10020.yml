@@ -1,0 +1,2 @@
+fix:
+- Increase timeout waiting for the exiting of an optimizer worker ([#10020](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10020))
