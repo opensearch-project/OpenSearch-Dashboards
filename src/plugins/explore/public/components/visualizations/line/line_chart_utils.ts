@@ -8,23 +8,6 @@ import { LineChartStyleControls } from './line_vis_config';
 import { ThresholdLineStyle, VisColumn, Positions } from '../types';
 
 /**
- * Get stroke dash array for different line styles
- * @param style The line style ('dashed', 'dot-dashed', or 'full')
- * @returns The stroke dash array or undefined for solid lines
- */
-export const getStrokeDash = (style: string): number[] | undefined => {
-  switch (style) {
-    case ThresholdLineStyle.Dashed:
-      return [5, 5];
-    case ThresholdLineStyle.DotDashed:
-      return [5, 5, 1, 5];
-    case ThresholdLineStyle.Full:
-    default:
-      return undefined;
-  }
-};
-
-/**
  * Get Vega interpolation from UI lineMode
  * @param lineMode The line mode ('straight', 'smooth', or 'stepped')
  * @returns The corresponding Vega interpolation value
@@ -72,92 +55,55 @@ export const buildMarkConfig = (
   markType: 'line' | 'bar' = 'line'
 ): VegaLiteMarkConfig => {
   // Default values - handle undefined styles object
-  const showLine = styles?.showLine !== false;
-  const showDots = styles?.showDots !== false;
+  const lineStyle = styles?.lineStyle ?? 'both';
   const lineWidth = styles?.lineWidth ?? 2;
   const lineMode = styles?.lineMode ?? 'smooth';
-  const addTooltip = styles?.addTooltip !== false;
+  const showTooltip = styles?.tooltipOptions?.mode !== 'hidden';
 
   if (markType === 'bar') {
     return {
       type: 'bar',
       opacity: 0.7,
-      tooltip: addTooltip,
+      tooltip: showTooltip,
     };
   }
 
-  // For line charts
-  if (!showLine && showDots) {
-    // Only show points
-    return {
-      type: 'point',
-      tooltip: addTooltip,
-      size: 100,
-    };
-  } else if (showLine && !showDots) {
-    // Only show line
-    return {
-      type: 'line',
-      tooltip: addTooltip,
-      strokeWidth: lineWidth,
-      interpolate: getVegaInterpolation(lineMode),
-    };
-  } else if (showLine && showDots) {
-    // Show both line and points
-    return {
-      type: 'line',
-      point: true,
-      tooltip: addTooltip,
-      strokeWidth: lineWidth,
-      interpolate: getVegaInterpolation(lineMode),
-    };
-  } else {
-    // Toggle off both line and dots - show empty
-    return {
-      type: 'point',
-      tooltip: addTooltip,
-      size: 0, // Make points invisible
-    };
+  // For line charts - use lineStyle to determine the visualization
+  switch (lineStyle) {
+    case 'dots':
+      // Only show points
+      return {
+        type: 'point',
+        tooltip: showTooltip,
+        size: 100,
+      };
+    case 'line':
+      // Only show line
+      return {
+        type: 'line',
+        tooltip: showTooltip,
+        strokeWidth: lineWidth,
+        interpolate: getVegaInterpolation(lineMode),
+      };
+    case 'both':
+      // Show both line and points
+      return {
+        type: 'line',
+        point: true,
+        tooltip: showTooltip,
+        strokeWidth: lineWidth,
+        interpolate: getVegaInterpolation(lineMode),
+      };
+    default:
+      // Fallback to both if lineStyle is not recognized
+      return {
+        type: 'line',
+        point: true,
+        tooltip: showTooltip,
+        strokeWidth: lineWidth,
+        interpolate: getVegaInterpolation(lineMode),
+      };
   }
-};
-
-/**
- * Create threshold line layer
- * @param styles The style options
- * @returns The threshold layer configuration or null if disabled
- */
-export const createThresholdLayer = (styles: Partial<LineChartStyleControls> | undefined): any => {
-  if (!styles?.thresholdLine?.show) {
-    return null;
-  }
-
-  const thresholdLayer: any = {
-    mark: {
-      type: 'rule',
-      color: styles.thresholdLine.color,
-      strokeWidth: styles.thresholdLine.width,
-      strokeDash: getStrokeDash(styles.thresholdLine.style),
-      tooltip: styles.addTooltip !== false,
-    },
-    encoding: {
-      y: {
-        datum: styles.thresholdLine.value,
-        type: 'quantitative',
-      },
-    },
-  };
-
-  // Add tooltip content if enabled
-  if (styles.addTooltip !== false) {
-    thresholdLayer.encoding.tooltip = {
-      value:
-        i18n.translate('explore.vis.thresholdValue', {
-          defaultMessage: 'Threshold: ',
-        }) + styles.thresholdLine.value,
-    };
-  }
-
-  return thresholdLayer;
 };
 
 /**
@@ -170,20 +116,22 @@ export const createTimeMarkerLayer = (styles: Partial<LineChartStyleControls> | 
     return null;
   }
 
+  const showTooltip = styles?.tooltipOptions?.mode !== 'hidden';
+
   return {
     mark: {
       type: 'rule',
       color: '#FF6B6B',
       strokeWidth: 2,
       strokeDash: [3, 3],
-      tooltip: styles.addTooltip !== false,
+      tooltip: showTooltip,
     },
     encoding: {
       x: {
         datum: { expr: 'now()' },
         type: 'temporal',
       },
-      ...(styles.addTooltip !== false && {
+      ...(showTooltip && {
         tooltip: {
           value: 'Current Time',
         },
@@ -243,7 +191,7 @@ export const applyAxisStyling = (
       orient: categoryAxis.position || baseAxis.orient,
       labelAngle: categoryAxis.labels?.rotate || 0,
       labelLimit: categoryAxis.labels?.truncate || 100,
-      grid: styles.grid?.categoryLines !== false, // Show grid lines by default
+      grid: styles.grid ? styles.grid.categoryLines : true, // Explicitly check grid object
       labels: categoryAxis.labels?.show,
     };
   } else if (axisType === 'value') {
@@ -292,7 +240,7 @@ export const applyAxisStyling = (
         orient,
         labelAngle: valueAxis.labels?.rotate || 0,
         labelLimit: valueAxis.labels?.truncate || 100,
-        grid: styles.grid?.valueLines !== false, // Show grid lines by default
+        grid: styles.grid ? styles.grid.valueLines : true, // Explicitly check grid object
         labels: valueAxis.labels?.show !== false, // Show labels by default
       };
     }

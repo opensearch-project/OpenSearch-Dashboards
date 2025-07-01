@@ -15,7 +15,7 @@ export const selectUIState = (state: RootState) => state.ui;
 const selectResultsState = (state: RootState) => state.results;
 const selectLegacyState = (state: RootState) => state.legacy;
 const selectSystemState = (state: RootState) => state.system;
-const selectTabState = (state: RootState) => state.tab;
+export const selectTabState = (state: RootState) => state.tab;
 
 /**
  * Query selectors
