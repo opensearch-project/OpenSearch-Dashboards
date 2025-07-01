@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiLink, EuiSmallButton } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSmallButton, EuiText } from '@elastic/eui';
 import './classic_experience_banner.scss';
 import { NEW_DISCOVER_INFO_URL, SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY } from '../constants';
 
@@ -24,7 +24,7 @@ export const ClassicExperienceBanner = ({ navigateToExplore }: ClassicExperience
       data-test-subj="exploreClassicExperienceBanner"
       size="s"
     >
-      <div>
+      <EuiText size="s">
         <span
           className="exploreClassicExperienceBanner__img"
           role="img"
@@ -40,7 +40,7 @@ export const ClassicExperienceBanner = ({ navigateToExplore }: ClassicExperience
         >
           Learn more
         </EuiLink>
-      </div>
+      </EuiText>
       <EuiSmallButton
         className="exploreClassicExperienceBanner__newExperienceButton"
         data-test-subj="exploreClassicExperienceBanner__newExperienceButton"
