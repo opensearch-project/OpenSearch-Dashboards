@@ -6,7 +6,6 @@
 import {
   uiReducer,
   setActiveTab,
-  setFlavor,
   setShowDatasetFields,
   setQueryPrompt,
   setUiState,
@@ -17,7 +16,6 @@ describe('UI Slice', () => {
   // Define the initial state for testing
   const initialState: UIState = {
     activeTabId: 'logs',
-    flavor: 'log',
     showDatasetFields: true,
     prompt: '',
   };
@@ -39,25 +37,6 @@ describe('UI Slice', () => {
       expect(newState.activeTabId).toBe(newTabId);
 
       // Other state properties should remain unchanged
-      expect(newState.flavor).toBe(initialState.flavor);
-      expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
-      expect(newState.prompt).toBe(initialState.prompt);
-    });
-  });
-
-  describe('setFlavor', () => {
-    it('should handle setFlavor action', () => {
-      const newFlavor = 'metric';
-      const action = setFlavor(newFlavor);
-
-      expect(action.type).toBe('ui/setFlavor');
-      expect(action.payload).toBe(newFlavor);
-
-      const newState = uiReducer(initialState, action);
-      expect(newState.flavor).toBe(newFlavor);
-
-      // Other state properties should remain unchanged
-      expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
       expect(newState.prompt).toBe(initialState.prompt);
     });
@@ -76,7 +55,6 @@ describe('UI Slice', () => {
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.prompt).toBe(initialState.prompt);
     });
   });
@@ -94,7 +72,6 @@ describe('UI Slice', () => {
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.flavor).toBe(initialState.flavor);
       expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
     });
   });
@@ -125,15 +102,11 @@ describe('UI Slice', () => {
       state = uiReducer(state, setActiveTab('visualizations'));
       expect(state.activeTabId).toBe('visualizations');
 
-      // Second action: set flavor
-      state = uiReducer(state, setFlavor('metric'));
-      expect(state.flavor).toBe('metric');
-
-      // Third action: set show dataset fields
+      // Second action: set show dataset fields
       state = uiReducer(state, setShowDatasetFields(false));
       expect(state.showDatasetFields).toBe(false);
 
-      // Fourth action: set query prompt
+      // Third action: set query prompt
       state = uiReducer(state, setQueryPrompt('test query'));
       expect(state.prompt).toBe('test query');
 
@@ -141,7 +114,6 @@ describe('UI Slice', () => {
       expect(state).toEqual({
         ...initialState,
         activeTabId: 'visualizations',
-        flavor: 'metric',
         showDatasetFields: false,
         prompt: 'test query',
       });
