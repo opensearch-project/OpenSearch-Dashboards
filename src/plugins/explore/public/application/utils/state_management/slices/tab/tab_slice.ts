@@ -21,7 +21,7 @@ export interface TabState {
 const initialState: TabState = {
   logs: {},
   visualizations: {
-    styleOptions: defaultMetricChartStyles as ChartStyleControlMap[ChartType],
+    styleOptions: defaultMetricChartStyles,
     chartType: 'metric',
   },
 };
