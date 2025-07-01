@@ -32,9 +32,8 @@ import { IndexPatternField } from '../../../../../../../../../data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 interface GroupedFields {
-  selected: IndexPatternField[];
-  popular: IndexPatternField[];
-  unpopular: IndexPatternField[];
+  resultFields: IndexPatternField[];
+  schemaFields: IndexPatternField[];
 }
 
 /**
@@ -42,53 +41,45 @@ interface GroupedFields {
  */
 export function groupFields(
   fields: IndexPatternField[] | null,
-  columns: string[],
-  popularLimit: number,
   fieldCounts: Record<string, number>,
   fieldFilterState: FieldFilterState
 ): GroupedFields {
   const result: GroupedFields = {
-    selected: [],
-    popular: [],
-    unpopular: [],
+    resultFields: [],
+    schemaFields: [],
   };
-  if (!Array.isArray(fields) || !Array.isArray(columns) || typeof fieldCounts !== 'object') {
+  if (!Array.isArray(fields) || typeof fieldCounts !== 'object') {
     return result;
   }
 
-  const popular = fields
-    .filter((field) => !columns.includes(field.name) && field.count)
-    .sort((a: IndexPatternField, b: IndexPatternField) => (b.count || 0) - (a.count || 0))
-    .map((field) => field.name)
-    .slice(0, popularLimit);
+  // fields are not regular JS array but a custom class extending native array and it breaks native array method (e.g. filter())
+  // Convert FldList to proper Array for filtering to work correctly
+  // https://github.com/opensearch-project/OpenSearch-Dashboards/blob/d7004dc5b0392477fdd54ac66b29d231975a173b/src/plugins/data/common/index_patterns/fields/field_list.ts
+  const fieldsArray = Array.from(fields);
 
+  const filteredFields = fieldsArray.filter((field) => {
+    return field.name in fieldCounts;
+  });
+
+  const resultFields = filteredFields.map((field) => field.name);
   const compareFn = (a: IndexPatternField, b: IndexPatternField) => {
     if (!a.displayName) {
       return 0;
     }
     return a.displayName.localeCompare(b.displayName || '');
   };
-  const fieldsSorted = fields.sort(compareFn);
+  const fieldsSorted = fieldsArray.sort(compareFn);
 
   for (const field of fieldsSorted) {
-    if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
+    if (!isFieldFiltered(field, fieldFilterState, fieldCounts) || field.type === '_source') {
       continue;
     }
-    if (columns.includes(field.name)) {
-      result.selected.push(field);
-    } else if (popular.includes(field.name) && field.type !== '_source') {
-      result.popular.push(field);
-    } else if (field.type !== '_source') {
-      result.unpopular.push(field);
+    if (resultFields.includes(field.name)) {
+      result.resultFields.push(field);
+    } else {
+      result.schemaFields.push(field);
     }
   }
-
-  // sort the selected fields by the column order
-  result.selected.sort((a, b) => {
-    const aIndex = columns.indexOf(a.name);
-    const bIndex = columns.indexOf(b.name);
-    return aIndex - bIndex;
-  });
 
   return result;
 }

@@ -39,6 +39,7 @@ import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
 import { getStubIndexPattern } from '../../../../../../../../data/public/test_utils';
 import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
+import * as fieldFilter from './lib/field_filter';
 
 jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: () => ({
@@ -99,7 +100,6 @@ function getCompProps(): DiscoverSidebarProps {
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    onNormalize: jest.fn(),
     onCreateIndexPattern: jest.fn(),
     selectedIndexPattern: indexPattern,
     onReorderFields: jest.fn(),
@@ -108,17 +108,43 @@ function getCompProps(): DiscoverSidebarProps {
 }
 
 describe('discover sidebar', function () {
-  it('should have Selected Fields and Available Fields with Popular Fields sections', async function () {
-    render(<DiscoverSidebar {...getCompProps()} />);
+  let spy: jest.SpyInstance;
 
-    const popular = screen.getByTestId('fieldList-popular');
-    const selected = screen.getByTestId('fieldList-selected');
-    const unpopular = screen.getByTestId('fieldList-unpopular');
-
-    expect(within(popular).getAllByTestId('fieldList-field').length).toBe(1);
-    expect(within(unpopular).getAllByTestId('fieldList-field').length).toBe(7);
-    expect(within(selected).getAllByTestId('fieldList-field').length).toBe(1);
+  afterEach(() => {
+    if (spy) {
+      spy.mockRestore(); // This works with spyOn
+    }
   });
+
+  it('should have Result and Schema field sections', async function () {
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    const result = screen.getByTestId('fieldList-result');
+    const schema = screen.getByTestId('fieldList-schema');
+
+    expect(within(result).getAllByTestId('fieldList-field').length).toBe(5);
+    expect(within(schema).getAllByTestId('fieldList-field').length).toBe(4);
+  });
+
+  it('should show all missing index pattern which are not in query results', async function () {
+    spy = jest.spyOn(fieldFilter, 'getDefaultFieldFilter').mockReturnValue({
+      missing: false,
+      type: 'any',
+      name: '',
+      aggregatable: null,
+      searchable: null,
+    });
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    const result = screen.getByTestId('fieldList-result');
+    const schema = screen.getByTestId('fieldList-schema');
+
+    expect(within(result).getAllByTestId('fieldList-field').length).toBe(5);
+    expect(within(schema).getAllByTestId('fieldList-field').length).toBe(22);
+  });
+
   it('should allow selecting fields', async function () {
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
@@ -127,14 +153,7 @@ describe('discover sidebar', function () {
 
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
-  it('should allow deselecting fields', async function () {
-    const props = getCompProps();
-    render(<DiscoverSidebar {...props} />);
 
-    await fireEvent.click(screen.getByTestId('fieldToggle-extension'));
-
-    expect(props.onRemoveField).toHaveBeenCalledWith('extension');
-  });
   it('should allow adding filters', async function () {
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
