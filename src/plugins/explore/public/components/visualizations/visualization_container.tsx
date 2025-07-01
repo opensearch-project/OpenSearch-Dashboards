@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import './visualization_container.scss';
-
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { Visualization } from './visualization';
 import {
   getVisualizationType,
@@ -32,14 +31,14 @@ import {
   selectChartType,
 } from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
+import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
+import { ExecutionContextSearch } from '../../../../expressions/common/';
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const {
-    data: {
-      query: { filterManager, queryString, timefilter },
-    },
+    data,
     expressions: { ReactExpressionRenderer },
   } = services;
   const { indexPattern } = useIndexPatternContext();
@@ -65,10 +64,10 @@ export const VisualizationContainer = () => {
     setVisualizationData(getVisualizationType(rows, fieldSchema));
   }, [fieldSchema, rows]);
 
-  const [searchContext, setSearchContext] = useState<IExpressionLoaderParams['searchContext']>({
-    query: queryString.getQuery(),
-    filters: filterManager.getFilters(),
-    timeRange: timefilter.timefilter.getTime(),
+  const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
+    query: data.query.queryString.getQuery(),
+    filters: data.query.filterManager.getFilters(),
+    timeRange: data.query.timefilter.timefilter.getTime(),
   });
 
   const visualizationRegistry = useVisualizationRegistry();
@@ -147,7 +146,7 @@ export const VisualizationContainer = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [queryString, services.data.query.state$]);
+  }, [data.query.queryString, services.data.query.state$]);
 
   const handleStyleChange = (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {
     if (styleOptions) {
@@ -187,17 +186,28 @@ export const VisualizationContainer = () => {
 
   return (
     <div className="exploreVisContainer">
-      <Visualization<ChartType>
-        expression={expression!}
-        searchContext={searchContext}
-        styleOptions={styleOptions}
-        visualizationData={visualizationData}
-        onStyleChange={handleStyleChange}
-        selectedChartType={selectedChartType}
-        onChartTypeChange={handleChartTypeChange}
-        ReactExpressionRenderer={ReactExpressionRenderer}
-        setVisualizationData={setVisualizationData}
-      />
+      <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
+        <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
+          <SaveAndAddButtonWithModal
+            searchContext={searchContext}
+            indexPattern={indexPattern}
+            services={services}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <Visualization<ChartType>
+            expression={expression}
+            searchContext={searchContext}
+            styleOptions={styleOptions}
+            visualizationData={visualizationData as VisualizationTypeResult<ChartType>}
+            onStyleChange={handleStyleChange}
+            selectedChartType={selectedChartType}
+            onChartTypeChange={handleChartTypeChange}
+            ReactExpressionRenderer={ReactExpressionRenderer}
+            setVisualizationData={setVisualizationData}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
