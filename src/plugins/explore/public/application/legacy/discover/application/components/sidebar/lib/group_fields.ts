@@ -57,11 +57,6 @@ export function groupFields(
   // https://github.com/opensearch-project/OpenSearch-Dashboards/blob/d7004dc5b0392477fdd54ac66b29d231975a173b/src/plugins/data/common/index_patterns/fields/field_list.ts
   const fieldsArray = Array.from(fields);
 
-  const filteredFields = fieldsArray.filter((field) => {
-    return field.name in fieldCounts;
-  });
-
-  const resultFields = filteredFields.map((field) => field.name);
   const compareFn = (a: IndexPatternField, b: IndexPatternField) => {
     if (!a.displayName) {
       return 0;
@@ -74,7 +69,7 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts) || field.type === '_source') {
       continue;
     }
-    if (resultFields.includes(field.name)) {
+    if (field.name in fieldCounts) {
       result.resultFields.push(field);
     } else {
       result.schemaFields.push(field);
