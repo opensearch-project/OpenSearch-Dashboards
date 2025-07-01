@@ -119,7 +119,6 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-  // return (
   //   <EuiSplitPanel.Outer>
   //     <EuiSplitPanel.Inner paddingSize="s">
   //       <EuiButtonEmpty

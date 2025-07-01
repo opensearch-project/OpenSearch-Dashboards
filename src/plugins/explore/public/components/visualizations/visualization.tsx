@@ -39,6 +39,9 @@ export const Visualization = <T extends ChartType>({
   ReactExpressionRenderer,
   setVisualizationData,
 }: VisualizationProps<T>) => {
+  if (!visualizationData || !styleOptions || Object.keys(styleOptions).length === 0) {
+    return null;
+  }
   const availableChartTypes = visualizationData.availableChartTypes;
   return (
     <EuiFlexGroup gutterSize="none">

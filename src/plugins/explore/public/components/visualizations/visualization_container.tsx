@@ -184,7 +184,7 @@ export const VisualizationContainer = () => {
   };
 
   // Don't render if visualization is not enabled or data is not ready
-  if (!visualizationData || !styleOptions) {
+  if (!visualizationData) {
     return null;
   }
 
