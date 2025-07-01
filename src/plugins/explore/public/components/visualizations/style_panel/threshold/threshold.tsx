@@ -55,6 +55,10 @@ export const ThresholdOptions = ({
 }: ThresholdOptionsProps) => {
   const [thresholdStyle, setThresholdStyle] = useState<ThresholdLineStyle>(ThresholdLineStyle.Full);
 
+  if (!thresholdLines || !onThresholdLinesChange) {
+    return null;
+  }
+
   const handleAddThreshold = () => {
     const activeThresholds = thresholdLines.filter((t) => t.show);
     const thresholdNumber = activeThresholds.length + 1;
