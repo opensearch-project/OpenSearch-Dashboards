@@ -13,6 +13,15 @@
 .exploreVisPanel__inner {
   flex: 1 1 auto;
   overflow: auto;
+
+  .visChart__container {
+    overflow: unset;
+  }
+}
+
+.exploreVisStyleContainer {
+  height: 600px;
+  overflow: auto;
 }
 
 .exploreVisStylePanel {
