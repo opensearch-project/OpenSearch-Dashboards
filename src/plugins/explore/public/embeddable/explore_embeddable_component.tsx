@@ -58,7 +58,7 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
           <EuiFlexItem>
             <VisualizationNoResults />
           </EuiFlexItem>
-        ) : searchProps.chartType === 'logs' ? (
+        ) : searchProps.activeTab === 'logs' ? (
           // Render table
           <DataGridTableMemoized {...tableProps} />
         ) : (

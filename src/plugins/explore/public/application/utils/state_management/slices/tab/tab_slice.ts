@@ -4,19 +4,25 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  ChartStyleControlMap,
+  ChartType,
+} from '../../../../../components/visualizations/utils/use_visualization_types';
+import { defaultMetricChartStyles } from '../../../../../components/visualizations/metric/metric_vis_config';
 
 export interface TabState {
-  [tabId: string]: {
-    skipInitialFetch?: boolean;
+  logs: {};
+  visualizations: {
+    styleOptions: ChartStyleControlMap[ChartType] | undefined;
+    chartType: ChartType;
   };
 }
 
 const initialState: TabState = {
-  logs: {
-    skipInitialFetch: false,
-  },
+  logs: {},
   visualizations: {
-    skipInitialFetch: false,
+    styleOptions: defaultMetricChartStyles as ChartStyleControlMap[ChartType],
+    chartType: 'metric',
   },
 };
 
@@ -27,14 +33,14 @@ const tabSlice = createSlice({
     setTabState: (_, action: PayloadAction<TabState>) => {
       return { ...action.payload };
     },
-    setSkipInitialFetch: (state, action: PayloadAction<{ tabId: string; skip: boolean }>) => {
-      const { tabId, skip } = action.payload;
-      if (state[tabId]) {
-        state[tabId].skipInitialFetch = skip;
-      }
+    setStyleOptions: (state, action: PayloadAction<ChartStyleControlMap[ChartType]>) => {
+      state.visualizations.styleOptions = action.payload;
+    },
+    setChartType: (state, action: PayloadAction<ChartType>) => {
+      state.visualizations.chartType = action.payload;
     },
   },
 });
 
-export const { setTabState, setSkipInitialFetch } = tabSlice.actions;
+export const { setTabState, setStyleOptions, setChartType } = tabSlice.actions;
 export const tabReducer = tabSlice.reducer;

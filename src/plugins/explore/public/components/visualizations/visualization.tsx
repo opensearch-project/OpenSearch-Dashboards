@@ -39,6 +39,9 @@ export const Visualization = <T extends ChartType>({
   ReactExpressionRenderer,
   setVisualizationData,
 }: VisualizationProps<T>) => {
+  if (!visualizationData || !styleOptions || Object.keys(styleOptions).length === 0) {
+    return null;
+  }
   const availableChartTypes = visualizationData.availableChartTypes;
   return (
     <EuiFlexGroup gutterSize="none">
@@ -61,12 +64,30 @@ export const Visualization = <T extends ChartType>({
           </div>
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <VisualizationEmptyState
-          visualizationData={visualizationData as any}
-          setVisualizationData={setVisualizationData}
-        />
-        <div data-test-subj="exploreStylePanel" className="exploreVisStylePanel">
+      <EuiFlexItem grow={false} className="exploreVisStylePanel">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <VisualizationEmptyState
+              visualizationData={visualizationData as any}
+              setVisualizationData={setVisualizationData}
+            />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {styleOptions &&
+            visualizationData.visualizationType?.ui.style.render({
+              styleOptions,
+              onStyleChange,
+              numericalColumns: visualizationData.numericalColumns,
+              categoricalColumns: visualizationData.categoricalColumns,
+              dateColumns: visualizationData.dateColumns,
+              availableChartTypes,
+              selectedChartType,
+              onChartTypeChange,
+            })}
+        </EuiFlexItem>
+      </EuiFlexItem>
+      {/* <div data-test-subj="exploreStylePanel" className="exploreVisStylePanel">
           {visualizationData.visualizationType?.ui.style.render({
             styleOptions,
             onStyleChange,
@@ -77,8 +98,7 @@ export const Visualization = <T extends ChartType>({
             selectedChartType,
             onChartTypeChange,
           })}
-        </div>
-      </EuiFlexItem>
+        </div> */}
     </EuiFlexGroup>
   );
 };

@@ -87,5 +87,6 @@ export function buildServices(
 
     // For result summary
     isSummaryAgentAvailable$,
+    dashboard: plugins.dashboard,
   };
 }
