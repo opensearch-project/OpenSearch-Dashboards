@@ -1,7 +1,8 @@
 .exploreVisContainer {
   display: flex;
   min-height: 500px;
-  overflow: hidden;
+  overflow-y: hidden; 
+  overflow-x: auto; 
 }
 
 .exploreVisPanel {
