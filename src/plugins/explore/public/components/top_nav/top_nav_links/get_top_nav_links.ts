@@ -7,7 +7,6 @@ import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../saved_explore';
 import { TopNavMenuIconData } from '../../../../../navigation/public';
 import { ExecutionContextSearch } from '../../../../../expressions';
-import { IndexPattern } from '../../../../../data/public';
 import { getNewButtonRun, newTopNavData } from './top_nav_new';
 import { getOpenButtonRun, openTopNavData } from './top_nav_open';
 import { getSaveButtonRun, saveTopNavData } from './top_nav_save';
@@ -17,7 +16,6 @@ export const getTopNavLinks = (
   services: ExploreServices,
   startSyncingQueryStateWithUrl: () => void,
   searchContext: ExecutionContextSearch,
-  indexPattern: IndexPattern | undefined,
   savedExplore?: SavedExplore
 ) => {
   const { capabilities, share } = services;
@@ -27,13 +25,7 @@ export const getTopNavLinks = (
   if (capabilities.discover?.save) {
     topNavLinks.push({
       ...saveTopNavData,
-      run: getSaveButtonRun(
-        services,
-        startSyncingQueryStateWithUrl,
-        searchContext,
-        indexPattern,
-        savedExplore
-      ),
+      run: getSaveButtonRun(services, startSyncingQueryStateWithUrl, searchContext, savedExplore),
     });
   }
 
