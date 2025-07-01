@@ -45,7 +45,6 @@ interface QueryState {
 ```typescript
 interface UIState {
   activeTabId: string;        // Currently active tab
-  flavor: string;             // Current flavor setting
   showDatasetFields: boolean; // Dataset fields visibility
   prompt?: string;            // Query prompt text
 }
