@@ -24,13 +24,13 @@ import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
 import {
-  selectStyleOptions,
-  selectChartType,
-} from '../../application/utils/state_management/selectors';
-import {
   setStyleOptions,
   setChartType as setSelectedChartType,
 } from '../../application/utils/state_management/slices';
+import {
+  selectStyleOptions,
+  selectChartType,
+} from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 
 export const VisualizationContainer = () => {
@@ -73,12 +73,17 @@ export const VisualizationContainer = () => {
 
   const visualizationRegistry = useVisualizationRegistry();
 
-  // Initialize selectedChartType when visualizationData changes
+  // Initialize selectedChartType and styleOptions when visualizationData changes
   useEffect(() => {
     if (visualizationData && visualizationData.visualizationType) {
       dispatch(setSelectedChartType(visualizationData.visualizationType.type));
+
+      // Initialize style options with defaults if not already set
+      if (!styleOptions && visualizationData.visualizationType.ui?.style?.defaults) {
+        dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
+      }
     }
-  }, [visualizationData, dispatch]);
+  }, [visualizationData, dispatch, styleOptions]);
 
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
@@ -157,7 +162,10 @@ export const VisualizationContainer = () => {
   const handleStyleChange = (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {
     if (styleOptions) {
       dispatch(
-        setStyleOptions({ ...styleOptions, ...newOptions } as ChartStyleControlMap[ChartType])
+        setStyleOptions({
+          ...styleOptions,
+          ...newOptions,
+        } as ChartStyleControlMap[ChartType])
       );
     }
   };
@@ -170,7 +178,7 @@ export const VisualizationContainer = () => {
 
     // Update the style options with the defaults for the selected chart type
     if (chartConfig && chartConfig.ui && chartConfig.ui.style) {
-      setStyleOptions(chartConfig.ui.style.defaults);
+      dispatch(setStyleOptions(chartConfig.ui.style.defaults));
 
       // Update the visualizationData with the new visualization type
       if (visualizationData) {
@@ -180,7 +188,7 @@ export const VisualizationContainer = () => {
   };
 
   // Don't render if visualization is not enabled or data is not ready
-  if (!visualizationData) {
+  if (!visualizationData || !styleOptions) {
     return null;
   }
 

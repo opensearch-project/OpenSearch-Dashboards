@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './index.scss';
 import React, { useState, useMemo, useCallback } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,25 +17,19 @@ import { RecentQueriesTable, SavedQuery } from '../../../../data/public';
 import { useEditorMode } from './hooks/useEditorMode';
 import { QueryTypeDetector } from './utils/type_detection';
 import { LanguageType, Query, TimeRange } from './types';
-
 import {
   selectIsLoading,
   selectShowDataSetFields,
 } from '../../application/utils/state_management/selectors';
-import './index.scss';
 import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
 import {
   setQuery,
   setShowDatasetFields,
+  setSavedQuery,
   clearResults,
 } from '../../application/utils/state_management/slices';
-import {
-  beginTransaction,
-  finishTransaction,
-} from '../../application/utils/state_management/actions/transaction_actions';
 import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
-import { setSavedQuery } from '../../application/utils/state_management/slices';
 
 export interface QueryPanelProps {
   services: ExploreServices;
@@ -104,17 +99,12 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
       const queryToRun = paramQuery ?? localQuery;
       const nextQuery = { ...query, query: queryToRun };
 
-      dispatch(beginTransaction());
-      try {
-        dispatch(setQuery(nextQuery));
-        dispatch(clearResults());
-        dispatch(executeQueries({ services }));
+      dispatch(setQuery(nextQuery));
+      dispatch(clearResults());
+      dispatch(executeQueries({ services }));
 
-        // Use nextQuery here, not query!
-        services.data.query.queryString.addToQueryHistory(nextQuery, timefilter.getTime());
-      } finally {
-        dispatch(finishTransaction());
-      }
+      // Use nextQuery here, not query!
+      services.data.query.queryString.addToQueryHistory(nextQuery, timefilter.getTime());
     },
     [dispatch, localQuery, query, services, timefilter]
   );

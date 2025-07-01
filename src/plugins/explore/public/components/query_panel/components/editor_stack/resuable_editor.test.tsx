@@ -11,10 +11,11 @@ import { EditorType } from './types';
 // TODO: Look for more test cases related to monaco editor, once api integrated.
 // Mock CodeEditor from opensearch_dashboards_react
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
-  CodeEditor: ({ value, onChange, height }: any) => (
+  CodeEditor: ({ value, onChange, height, placeholder }: any) => (
     <textarea
       data-test-subj="mockCodeEditor"
       value={value}
+      placeholder={placeholder}
       style={{ height }}
       onChange={(e) => onChange(e.target.value)}
     />
@@ -39,7 +40,9 @@ const defaultProps: ReusableEditorProps = {
 
 describe('ReusableEditor', () => {
   it('renders editor and placeholder', () => {
-    render(<ReusableEditor {...defaultProps} placeholder="Type here..." />);
+    render(
+      <ReusableEditor {...defaultProps} placeholder="Type here..." editorType={EditorType.Prompt} />
+    );
     expect(screen.getByTestId('mockCodeEditor')).toBeInTheDocument();
     expect(screen.getByText('Type here...')).toBeInTheDocument();
   });
