@@ -191,7 +191,7 @@ export const applyAxisStyling = (
       orient: categoryAxis.position || baseAxis.orient,
       labelAngle: categoryAxis.labels?.rotate || 0,
       labelLimit: categoryAxis.labels?.truncate || 100,
-      grid: styles.grid?.categoryLines !== false, // Show grid lines by default
+      grid: styles.grid ? styles.grid.categoryLines : true, // Explicitly check grid object
       labels: categoryAxis.labels?.show,
     };
   } else if (axisType === 'value') {
@@ -240,7 +240,7 @@ export const applyAxisStyling = (
         orient,
         labelAngle: valueAxis.labels?.rotate || 0,
         labelLimit: valueAxis.labels?.truncate || 100,
-        grid: styles.grid?.valueLines !== false, // Show grid lines by default
+        grid: styles.grid ? styles.grid.valueLines : true, // Explicitly check grid object
         labels: valueAxis.labels?.show !== false, // Show labels by default
       };
     }
