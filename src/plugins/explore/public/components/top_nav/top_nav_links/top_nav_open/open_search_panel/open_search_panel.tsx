@@ -108,7 +108,7 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
               //   // TODO:finalize this until flavor and view route are finalized
               //   path: `${ExploreFlavor.Logs}#/${id}`,
               // });
-              application.navigateToUrl(`app/explore/logs/#/${id}`);
+              application.navigateToUrl(`app/explore/${ExploreFlavor.Logs}/#/view/${id}`);
             }
             onClose();
           }}
