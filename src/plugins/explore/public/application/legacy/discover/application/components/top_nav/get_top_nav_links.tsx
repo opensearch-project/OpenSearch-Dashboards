@@ -167,9 +167,8 @@ export const getTopNavLinks = (
               }
 
               // set App state to clean
-              // dispatch SavedSearchId and SavedSearchName,
-              // this ensures that state consistency for top nav and add to dashboard button
               store.dispatch(setSavedSearch(id));
+
               // starts syncing `_g` portion of url with query services
               startSyncingQueryStateWithUrl();
 
@@ -230,7 +229,6 @@ export const getTopNavLinks = (
       }),
       run: async (anchorElement) => {
         if (!savedExplore) return;
-        // @ts-expect-error TODO: Fix me
         const state: LegacyState = store.getState().legacy; // store is defined before the view is loaded
         const sharingData = await getSharingData({
           searchSource: savedExplore.searchSource,

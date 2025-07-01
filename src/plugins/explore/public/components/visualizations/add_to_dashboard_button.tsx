@@ -13,7 +13,7 @@ import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_util
 import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
 import { ExploreServices } from '../../types';
-import { selectUIState } from '../../application/utils/state_management/selectors';
+import { selectUIState, selectTabState } from '../../application/utils/state_management/selectors';
 import { ExecutionContextSearch } from '../../../../expressions/common';
 import { IndexPattern, useSyncQueryStateWithUrl } from '../../../../data/public';
 import { saveStateToSavedObject } from '../../saved_explore/transforms';
@@ -43,7 +43,7 @@ export const SaveAndAddButtonWithModal = ({
   indexPattern,
 }: {
   services: Partial<CoreStart> & ExploreServices;
-  searchContext?: ExecutionContextSearch;
+  searchContext: ExecutionContextSearch;
   indexPattern?: IndexPattern;
 }) => {
   const { core, dashboard, savedObjects, toastNotifications, uiSettings, history, data } = services;
@@ -64,11 +64,11 @@ export const SaveAndAddButtonWithModal = ({
   const [showAddToDashboardModal, setShowAddToDashboardModal] = useState(false);
 
   const uiState = useSelector(selectUIState);
-
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
+  const tabState = useSelector(selectTabState);
+
   const savedExploreIdFromUrl = useCurrentExploreId();
-  // const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
   const flavorId = useFlavorId();
 
   const saveObjectsClient = savedObjects.client;
@@ -86,7 +86,7 @@ export const SaveAndAddButtonWithModal = ({
       savedExplore,
       flavorId ?? 'logs',
       tabDefinition!,
-      uiState,
+      tabState,
       indexPattern
     );
 
@@ -100,7 +100,6 @@ export const SaveAndAddButtonWithModal = ({
         newTitle,
         saveOptions,
         searchContext,
-        indexPattern,
         services,
         startSyncingQueryStateWithUrl,
       });

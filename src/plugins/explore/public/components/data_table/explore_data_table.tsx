@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useRef, memo } from 'react';
+import React, { useCallback, useMemo, useRef, memo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -38,14 +38,7 @@ import { ExecutionContextSearch } from '../../../../expressions/common/';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const {
-    uiSettings,
-    data: {
-      query: { filterManager },
-    },
-    capabilities,
-    indexPatterns,
-  } = services;
+  const { uiSettings, data, capabilities, indexPatterns } = services;
 
   const savedSearch = useSelector(selectSavedSearch);
   const columns = useSelector(selectColumns);
@@ -62,6 +55,26 @@ const ExploreDataTableComponent = () => {
 
   const rawResults = cacheKey ? results[cacheKey] : null;
   const rows = rawResults?.hits?.hits || [];
+
+  const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
+    query: data.query.queryString.getQuery(),
+    filters: data.query.filterManager.getFilters(),
+    timeRange: data.query.timefilter.timefilter.getTime(),
+  });
+
+  useEffect(() => {
+    const subscription = services.data.query.state$.subscribe(({ state }) => {
+      setSearchContext({
+        query: state.query,
+        timeRange: state.time,
+        filters: state.filters,
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [services.data.query.state$]);
 
   const tableColumns = useMemo(() => {
     if (indexPattern == null) {
@@ -129,15 +142,15 @@ const ExploreDataTableComponent = () => {
       if (!indexPattern) return;
 
       const newFilters = opensearchFilters.generateFilters(
-        filterManager,
+        data.query.filterManager,
         field,
         values,
         operation,
         indexPattern.id ?? ''
       );
-      return filterManager.addFilters(newFilters);
+      return data.query.filterManager.addFilters(newFilters);
     },
-    [filterManager, indexPattern]
+    [data.query.filterManager, indexPattern]
   );
 
   return (
@@ -153,7 +166,11 @@ const ExploreDataTableComponent = () => {
     >
       <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
         <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
-          <SaveAndAddButtonWithModal indexPattern={indexPattern} services={services} />
+          <SaveAndAddButtonWithModal
+            searchContext={searchContext}
+            indexPattern={indexPattern}
+            services={services}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <DataTable

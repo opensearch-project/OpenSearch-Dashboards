@@ -51,7 +51,6 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
     false
   );
 
-  // const savedExploreIdFromUrl = useCurrentExploreId();
   const { savedExplore } = useSavedExplore(savedExploreId);
 
   const [title, setTitle] = useState<string>('');
@@ -256,9 +255,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           disabled={!enableButton}
           isLoading={isLoading}
         >
-          {i18n.translate('explore.addtoDashboardModal.addButton', {
-            defaultMessage: 'Add',
-          })}
+          Add
         </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>

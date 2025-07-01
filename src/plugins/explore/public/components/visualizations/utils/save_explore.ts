@@ -8,10 +8,11 @@ import { CoreStart } from 'src/core/public';
 import { SavedExplore } from '../../../saved_explore';
 import { ExploreServices } from '../../../types';
 import { ExecutionContextSearch } from '../../../../../expressions/common';
-import { IndexPattern } from '../../../../../data/public';
+
 import { Query } from '../../../../../data/common';
 import { SaveResult } from '../../../../../saved_objects/public';
 import { LegacyState, setSavedSearch } from '../../../application/utils/state_management/slices';
+import { updateLegacyPropertiesInSavedObject } from '../../../saved_explore/transforms';
 
 export async function saveSavedExplore({
   savedExplore,
@@ -21,24 +22,16 @@ export async function saveSavedExplore({
   services,
   startSyncingQueryStateWithUrl,
   newCopyOnSave,
-  indexPattern,
 }: {
   savedExplore: SavedExplore;
   newTitle: string;
   saveOptions: { isTitleDuplicateConfirmed: boolean; onTitleDuplicate: () => void };
-  searchContext?: ExecutionContextSearch;
+  searchContext: ExecutionContextSearch;
   services: Partial<CoreStart> & ExploreServices;
   startSyncingQueryStateWithUrl: () => void;
   newCopyOnSave?: boolean;
-  indexPattern?: IndexPattern;
 }): Promise<SaveResult | undefined> {
-  const {
-    toastNotifications,
-    chrome,
-    history,
-    store,
-    data: { search },
-  } = services;
+  const { toastNotifications, chrome, history, store } = services;
 
   const currentTitle = savedExplore.title;
   savedExplore.title = newTitle;
@@ -50,22 +43,25 @@ export async function saveSavedExplore({
   savedExplore.columns = state.columns;
   savedExplore.sort = state.sort;
 
-  if (searchContext) {
-    const searchSource = search.searchSource.createEmpty();
-    searchSource.setField('query', searchContext.query as Query);
-    searchSource.setField('filter', searchContext.filters);
-    searchSource.setField('index', indexPattern);
-    savedExplore.searchSource = searchSource;
-  }
+  // Use transform approach similar to vis_builder - serialize state into saved object
+  updateLegacyPropertiesInSavedObject(savedExplore, {
+    columns: state.columns,
+    sort: state.sort,
+  });
 
+  const searchSourceInstance = savedExplore.searchSourceFields;
+
+  if (searchSourceInstance) {
+    searchSourceInstance.query = searchContext.query as Query;
+    searchSourceInstance.filter = searchContext.filters;
+  }
   try {
     // update or creating existing save explore
     const originalId = savedExplore.id;
 
     const id = await savedExplore.save(saveOptions);
 
-    // toast only display when creating new savedExplore objects, not updating existing ones.
-    if (id && id !== originalId) {
+    if (id) {
       toastNotifications.addSuccess({
         title: i18n.translate('explore.notifications.SavedExploreTitle', {
           defaultMessage: `Search '{savedQueryTitle}' was saved`,
@@ -75,7 +71,11 @@ export async function saveSavedExplore({
         }),
         'data-test-subj': 'savedExploreSuccess',
       });
+    }
+    // toast only display when creating new savedExplore objects, not updating existing ones.
+    if (id !== originalId) {
       history().push(`/view/${encodeURIComponent(id)}`);
+    } else {
       // Update browser title and breadcrumbs
       chrome.docTitle.change(newTitle);
       chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: newTitle }]);
@@ -100,6 +100,6 @@ export async function saveSavedExplore({
     // Reset the original title
     savedExplore.title = currentTitle;
 
-    throw error;
+    return { error };
   }
 }

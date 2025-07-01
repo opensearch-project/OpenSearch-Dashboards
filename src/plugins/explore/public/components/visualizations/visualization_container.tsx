@@ -6,9 +6,7 @@ import './visualization_container.scss';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { IExpressionLoaderParams } from '../../../../expressions/public';
 import { Visualization } from './visualization';
 import {
   getVisualizationType,

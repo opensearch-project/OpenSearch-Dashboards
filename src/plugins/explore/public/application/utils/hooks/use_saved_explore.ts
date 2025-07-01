@@ -36,6 +36,8 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
       // Load saved explore object
       const savedExploreObject = await getSavedExploreById(exploreIdFromUrl);
 
+      // Update savedSearch to store just the ID (like discover)
+      // TODO: remove this once legacy state is not consumed any more
       dispatch(setSavedSearch(exploreIdFromUrl));
 
       if (savedExploreObject?.id) {
@@ -58,14 +60,10 @@ export const useSavedExplore = (exploreIdFromUrl?: string) => {
           }
         }
 
-        // Update savedSearch to store just the ID (like discover)
-        // TODO: remove this once legacy state is not consumed any more
-        // dispatch(setSavedSearch(exploreIdFromUrl));
-
         // Set style options
         const visualization = savedExploreObject.visualization;
         if (visualization) {
-          const { chartType, params: styleOptions } = JSON.parse(visualization);
+          const { chartType, styleOptions } = JSON.parse(visualization);
           dispatch(setChartType(chartType));
           dispatch(setStyleOptions(styleOptions));
         }
