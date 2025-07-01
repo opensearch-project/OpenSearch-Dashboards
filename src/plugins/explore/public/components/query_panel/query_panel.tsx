@@ -284,7 +284,13 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     setIsRecentQueryVisible(false);
     handlePromptChange(updatedQuery);
     handleRun(updatedQuery);
-    if (timeRange) handleTimeChange({ start: timeRange.from, end: timeRange.to });
+    if (timeRange)
+      handleTimeChange({
+        start: timeRange.from,
+        end: timeRange.to,
+        isInvalid: false,
+        isQuickSelection: true,
+      });
   };
 
   const handleShowFieldsToggle = (showField: boolean) => {
