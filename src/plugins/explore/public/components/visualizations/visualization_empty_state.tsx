@@ -14,6 +14,7 @@ import {
   EuiAccordion,
   EuiHorizontalRule,
   EuiFormRow,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -28,6 +29,7 @@ import {
 } from './utils/use_visualization_types';
 import { setChartType, setStyleOptions } from '../../application/utils/state_management/slices';
 import { CHART_METADATA } from './constants';
+import { StyleAccordion } from './style_panel/style_accordion';
 
 interface VisualizationEmptyStateProps {
   visualizationData: VisualizationTypeResult<ChartType>;
@@ -349,168 +351,138 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <StyleAccordion
-        id="generalSection"
-        accordionLabel={i18n.translate('explore.stylePanel.tabs.general', {
-          defaultMessage: 'General',
-        })}
-        initialIsOpen={true}
-      >
-        <EuiFormRow
-          label={i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
-            defaultMessage: 'Visualization Type',
-          })}
-        >
-          <EuiSelect
-            id="chartType"
-            hasNoInitialSelection
-            value={currChartTypeId}
-            options={Object.values(chartTypeMappedOptions)}
-            onChange={(e) => {
-              updateChartTypeSelection(e.target.value);
-            }}
-          />
-        </EuiFormRow>
-      </StyleAccordion>
-      {currChartTypeId && (
+      <EuiFlexItem grow={false}>
         <StyleAccordion
-          id="axisAndScalesSection"
-          accordionLabel={i18n.translate('explore.stylePanel.tabs.axisAndScales', {
-            defaultMessage: 'Axis & scales',
+          id="generalSection"
+          accordionLabel={i18n.translate('explore.stylePanel.tabs.general', {
+            defaultMessage: 'General',
           })}
           initialIsOpen={true}
         >
-          <>
-            {Object.entries(fieldsSelection).map(([fieldTypeString, selectedColumns], index) => {
-              const canSelectMoreFields = matchIndexDifference[index] > 0;
-
-              // Label only displays when select component and/or selected fields are shown
-              const shouldDisplayLabel = Boolean(selectedColumns.length) || canSelectMoreFields;
-
-              return (
-                <React.Fragment key={`${fieldTypeString}_${index}`}>
-                  {shouldDisplayLabel && (
-                    <EuiFormRow label={FIELD_TYPE_LABELS[index]}>
-                      <>
-                        {selectedColumns.map((selectedColumn) => {
-                          return (
-                            <React.Fragment key={selectedColumn.id}>
-                              <EuiPanel grow={false} paddingSize="s">
-                                <EuiFlexGroup
-                                  gutterSize="none"
-                                  alignItems="center"
-                                  style={{ gap: 4 }}
-                                >
-                                  <EuiSelect
-                                    value={selectedColumn.name}
-                                    options={allColumnOptions[index].filter(
-                                      // Filter out the fields already selected but keep the current one
-                                      (col) => {
-                                        const isCurrentColumn =
-                                          col.column.name === selectedColumn.name;
-                                        const isAlreadySelected = selectedColumns.some(
-                                          (selected) => selected.name === col.column.name
-                                        );
-                                        // Only display as an available option when there is only one value
-                                        // Avoiding render multiple overlapped values as metric
-                                        const isValidForMetric =
-                                          currChartTypeId === 'metric'
-                                            ? col.column.validValuesCount === 1
-                                            : true;
-
-                                        return (
-                                          (isCurrentColumn || !isAlreadySelected) &&
-                                          isValidForMetric
-                                        );
-                                      }
-                                    )}
-                                    onChange={(e) => {
-                                      replaceFieldSelection(
-                                        fieldTypeString as VisFieldTypeString,
-                                        index,
-                                        selectedColumn.name,
-                                        e.target.value
-                                      );
-                                    }}
-                                  />
-                                  <EuiButtonIcon
-                                    onClick={() =>
-                                      removeFieldSelection(
-                                        fieldTypeString as VisFieldTypeString,
-                                        selectedColumn.name
-                                      )
-                                    }
-                                    iconType="trash"
-                                    aria-label={`delete selected field ${selectedColumn.name}`}
-                                  />
-                                </EuiFlexGroup>
-                              </EuiPanel>
-                              <EuiSpacer size="xs" />
-                            </React.Fragment>
-                          );
-                        })}
-                      </>
-                    </EuiFormRow>
-                  )}
-                  {canSelectMoreFields && (
-                    <>
-                      <EuiSelect
-                        id={`${fieldTypeString}_field`}
-                        hasNoInitialSelection
-                        options={allColumnOptions[index].filter(
-                          (col) =>
-                            !selectedColumns.some((selected) => selected.name === col.column.name)
-                        )}
-                        onChange={(e) =>
-                          updateFieldSelection(
-                            fieldTypeString as VisFieldTypeString,
-                            index,
-                            e.target.value
-                          )
-                        }
-                      />
-                    </>
-                  )}
-                </React.Fragment>
-              );
+          <EuiFormRow
+            label={i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
+              defaultMessage: 'Visualization Type',
             })}
-          </>
+          >
+            <EuiSelect
+              id="chartType"
+              hasNoInitialSelection
+              value={currChartTypeId}
+              options={Object.values(chartTypeMappedOptions)}
+              onChange={(e) => {
+                updateChartTypeSelection(e.target.value);
+              }}
+            />
+          </EuiFormRow>
         </StyleAccordion>
+      </EuiFlexItem>
+      {currChartTypeId && (
+        <EuiFlexItem grow={false}>
+          <StyleAccordion
+            id="axisAndScalesSection"
+            accordionLabel={i18n.translate('explore.stylePanel.tabs.axisAndScales', {
+              defaultMessage: 'Axis & scales',
+            })}
+            initialIsOpen={true}
+          >
+            <>
+              {Object.entries(fieldsSelection).map(([fieldTypeString, selectedColumns], index) => {
+                const canSelectMoreFields = matchIndexDifference[index] > 0;
+
+                // Label only displays when select component and/or selected fields are shown
+                const shouldDisplayLabel = Boolean(selectedColumns.length) || canSelectMoreFields;
+
+                return (
+                  <React.Fragment key={`${fieldTypeString}_${index}`}>
+                    {shouldDisplayLabel && (
+                      <EuiFormRow label={FIELD_TYPE_LABELS[index]}>
+                        <>
+                          {selectedColumns.map((selectedColumn) => {
+                            return (
+                              <React.Fragment key={selectedColumn.id}>
+                                <EuiPanel grow={false} paddingSize="s">
+                                  <EuiFlexGroup
+                                    gutterSize="none"
+                                    alignItems="center"
+                                    style={{ gap: 4 }}
+                                  >
+                                    <EuiSelect
+                                      value={selectedColumn.name}
+                                      options={allColumnOptions[index].filter(
+                                        // Filter out the fields already selected but keep the current one
+                                        (col) => {
+                                          const isCurrentColumn =
+                                            col.column.name === selectedColumn.name;
+                                          const isAlreadySelected = selectedColumns.some(
+                                            (selected) => selected.name === col.column.name
+                                          );
+                                          // Only display as an available option when there is only one value
+                                          // Avoiding render multiple overlapped values as metric
+                                          const isValidForMetric =
+                                            currChartTypeId === 'metric'
+                                              ? col.column.validValuesCount === 1
+                                              : true;
+
+                                          return (
+                                            (isCurrentColumn || !isAlreadySelected) &&
+                                            isValidForMetric
+                                          );
+                                        }
+                                      )}
+                                      onChange={(e) => {
+                                        replaceFieldSelection(
+                                          fieldTypeString as VisFieldTypeString,
+                                          index,
+                                          selectedColumn.name,
+                                          e.target.value
+                                        );
+                                      }}
+                                    />
+                                    <EuiButtonIcon
+                                      onClick={() =>
+                                        removeFieldSelection(
+                                          fieldTypeString as VisFieldTypeString,
+                                          selectedColumn.name
+                                        )
+                                      }
+                                      iconType="trash"
+                                      aria-label={`delete selected field ${selectedColumn.name}`}
+                                    />
+                                  </EuiFlexGroup>
+                                </EuiPanel>
+                                <EuiSpacer size="xs" />
+                              </React.Fragment>
+                            );
+                          })}
+                        </>
+                      </EuiFormRow>
+                    )}
+                    {canSelectMoreFields && (
+                      <>
+                        <EuiSelect
+                          id={`${fieldTypeString}_field`}
+                          hasNoInitialSelection
+                          options={allColumnOptions[index].filter(
+                            (col) =>
+                              !selectedColumns.some((selected) => selected.name === col.column.name)
+                          )}
+                          onChange={(e) =>
+                            updateFieldSelection(
+                              fieldTypeString as VisFieldTypeString,
+                              index,
+                              e.target.value
+                            )
+                          }
+                        />
+                      </>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </>
+          </StyleAccordion>
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  );
-};
-
-// TODO make this a shared component
-interface StyleAccordionProps {
-  id: string;
-  accordionLabel: React.ReactNode;
-  initialIsOpen: boolean;
-}
-
-const StyleAccordion: React.FC<StyleAccordionProps> = ({
-  id,
-  accordionLabel,
-  initialIsOpen,
-  children,
-}) => {
-  return (
-    <EuiPanel paddingSize="s" borderRadius="none" hasBorder={false} hasShadow={false}>
-      <EuiAccordion
-        id={id}
-        buttonContent={
-          <EuiText size="s" style={{ fontWeight: 600 }}>
-            {accordionLabel}
-          </EuiText>
-        }
-        initialIsOpen={initialIsOpen}
-      >
-        <EuiSpacer size="xs" />
-        <EuiPanel paddingSize="s" hasBorder={false} color="subdued">
-          {children}
-        </EuiPanel>
-      </EuiAccordion>
-      <EuiHorizontalRule margin="xs" />{' '}
-    </EuiPanel>
   );
 };
