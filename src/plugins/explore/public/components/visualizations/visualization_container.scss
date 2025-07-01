@@ -20,15 +20,11 @@
   }
 }
 
-.exploreVisStyleContainer {
-  height: 600px;
-  overflow: auto;
-}
-
 .exploreVisStylePanel {
   margin-top: 10px;
-  min-height: 500px;
   display: flex;
   flex-direction: column;
   width: 300px;
+  height: 600px;
+  overflow: auto;
 }
