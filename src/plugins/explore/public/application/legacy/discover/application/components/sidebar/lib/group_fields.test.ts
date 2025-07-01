@@ -77,7 +77,7 @@ describe('group_fields', function () {
 
     const fieldFilterState = getDefaultFieldFilter();
 
-    const actual = groupFields(fields as any, ['currency'], fieldCounts, fieldFilterState);
+    const actual = groupFields(fields as any, fieldCounts, fieldFilterState);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "resultFields": Array [
@@ -94,8 +94,6 @@ describe('group_fields', function () {
             "searchable": true,
             "type": "string",
           },
-        ],
-        "schemaFields": Array [
           Object {
             "aggregatable": true,
             "count": 0,
@@ -123,6 +121,7 @@ describe('group_fields', function () {
             "type": "date",
           },
         ],
+        "schemaFields": Array [],
       }
     `);
   });
