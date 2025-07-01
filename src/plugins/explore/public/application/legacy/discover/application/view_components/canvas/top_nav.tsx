@@ -20,15 +20,18 @@ import { useIndexPatternContext } from '../../../../../components/index_pattern_
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
 import { ResultStatus } from '../utils';
-import { selectSavedQuery } from '../../../../../utils/state_management/selectors';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
 import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
-import { selectTabState, selectUIState } from '../../../../../utils/state_management/selectors';
+import {
+  selectTabState,
+  selectUIState,
+  selectStatus,
+  selectSavedQuery,
+} from '../../../../../utils/state_management/selectors';
 import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
 import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
 import { getTopNavLinks } from '../../../../../../components/top_nav/top_nav_links';
 import { useCurrentExploreId } from '../../../../../utils/hooks/use_current_explore_id';
-import { selectStatus } from '../../../../../utils/state_management/selectors';
 
 export interface TopNavProps {
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
