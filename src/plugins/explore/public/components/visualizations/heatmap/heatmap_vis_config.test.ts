@@ -40,7 +40,7 @@ describe('createHeatmapeConfig', () => {
     const config = createHeatmapConfig();
     const defaults = config.ui.style.defaults as HeatmapChartStyleControls;
     // Verify basic controls
-    expect(defaults.addTooltip).toBe(true);
+    expect(defaults.tooltipOptions.mode).toBe('all');
     expect(defaults.addLegend).toBe(true);
     expect(defaults.legendPosition).toBe(Positions.RIGHT);
     // Verify exclusive style

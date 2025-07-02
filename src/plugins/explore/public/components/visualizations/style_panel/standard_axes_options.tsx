@@ -3,20 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  EuiPanel,
-  EuiTitle,
   EuiFormRow,
+  EuiButtonGroup,
   EuiSelect,
   EuiSwitch,
+  EuiSplitPanel,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { StandardAxes, Positions, AxisRole } from '../types';
 import { DebouncedTruncateField, DebouncedText } from './utils';
+import { StyleAccordion } from '../style_panel/style_accordion';
 
 interface AllAxesOptionsProps {
   standardAxes: StandardAxes[];
@@ -43,6 +46,15 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
   onStandardAxesChange,
   disableGrid,
 }) => {
+  const [expandedAxes, setExpandedAxes] = useState<Record<string, boolean>>({});
+
+  const toggleAxisExpansion = (axisId: string) => {
+    setExpandedAxes({
+      ...expandedAxes,
+      [axisId]: !expandedAxes[axisId],
+    });
+  };
+
   const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
     const updatedAxes = [...standardAxes];
     updatedAxes[index] = {
@@ -59,20 +71,26 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
         const isYAxis = axis.axisRole === AxisRole.Y;
 
         return (
-          <div key={axis.id}>
-            <EuiFlexGroup gutterSize="s" direction="column" alignItems="flexStart">
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h4>
-                    {i18n.translate('explore.vis.standardAxes.axisRoleLabel', {
-                      defaultMessage: isYAxis ? 'Y-Axis' : 'X-Axis',
-                    })}
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              {axis.field?.options && (
-                <EuiFlexItem>
+          <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
+            <EuiButtonEmpty
+              iconSide="left"
+              color="text"
+              iconType={expandedAxes[axis.id] ? 'arrowDown' : 'arrowRight'}
+              onClick={() => toggleAxisExpansion(axis.id)}
+              size="xs"
+              data-test-subj={`standardAxis-${index}-button`}
+            >
+              {i18n.translate('explore.vis.gridOptions.categoryAxis', {
+                defaultMessage: isYAxis ? 'Y-Axis' : 'X-Axis',
+              })}
+            </EuiButtonEmpty>
+
+            <EuiSpacer size="s" />
+            {expandedAxes[axis.id] && (
+              <div>
+                {axis.field?.options && (
                   <EuiFormRow
+                    fullWidth
                     label={i18n.translate('explore.vis.standardAxes.axisField', {
                       defaultMessage: 'Field',
                     })}
@@ -98,11 +116,51 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                       }))}
                     />
                   </EuiFormRow>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" justifyContent="center">
-                  <EuiFlexItem>
+                )}
+                <EuiFormRow
+                  label={i18n.translate('explore.vis.standardAxes.axisPosition', {
+                    defaultMessage: 'Position',
+                  })}
+                >
+                  <EuiButtonGroup
+                    name={`AxisPosition-${index}`}
+                    legend="Select axis position"
+                    options={
+                      isYAxis
+                        ? [
+                            { id: Positions.LEFT, label: 'Left' },
+                            { id: Positions.RIGHT, label: 'Right' },
+                          ]
+                        : [
+                            { id: Positions.BOTTOM, label: 'Bottom' },
+                            { id: Positions.TOP, label: 'Top' },
+                          ]
+                    }
+                    idSelected={axis.position}
+                    onChange={(id) =>
+                      updateAxis(index, {
+                        position: id as Positions,
+                      })
+                    }
+                    buttonSize="compressed"
+                    isFullWidth
+                  />
+                </EuiFormRow>
+
+                <EuiFormRow
+                  label={i18n.translate('explore.vis.standardAxes.showAxisLinesAndLabels', {
+                    defaultMessage: 'Show axis lines and labels',
+                  })}
+                >
+                  <EuiSwitch
+                    label=""
+                    checked={axis.show}
+                    onChange={(e) => updateAxis(index, { show: e.target.checked })}
+                  />
+                </EuiFormRow>
+
+                {axis.show && (
+                  <>
                     <DebouncedText
                       value={getAxisDisplayTitle(axis)}
                       placeholder="Axis name"
@@ -112,59 +170,16 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                         })
                       }
                       label={i18n.translate('explore.vis.standardAxes.axisTitle', {
-                        defaultMessage: 'Axis title',
+                        defaultMessage: 'Display name',
                       })}
                     />
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
                     <EuiFormRow
-                      label={i18n.translate('explore.vis.standardAxes.axisPosition', {
-                        defaultMessage: 'Position',
+                      label={i18n.translate('explore.vis.standardAxes.showLabels', {
+                        defaultMessage: 'Show labels',
                       })}
                     >
-                      <EuiSelect
-                        value={axis.position}
-                        onChange={(e) =>
-                          updateAxis(index, {
-                            position: e.target.value as Positions,
-                          })
-                        }
-                        options={
-                          isYAxis
-                            ? [
-                                { value: 'left', text: 'Left' },
-                                { value: 'right', text: 'Right' },
-                              ]
-                            : [
-                                { value: 'bottom', text: 'Bottom' },
-                                { value: 'top', text: 'Top' },
-                              ]
-                        }
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFormRow>
-                  <EuiSwitch
-                    label={i18n.translate('explore.vis.standardAxes.showAxisLinesAndLabels', {
-                      defaultMessage: 'Show axis lines and labels',
-                    })}
-                    checked={axis.show}
-                    onChange={(e) => updateAxis(index, { show: e.target.checked })}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              {axis.show && (
-                <>
-                  <EuiFlexItem>
-                    <EuiFormRow>
                       <EuiSwitch
-                        label={i18n.translate('explore.vis.standardAxes.showLabels', {
-                          defaultMessage: 'Show labels',
-                        })}
+                        label=""
                         checked={axis.labels.show}
                         onChange={(e) =>
                           updateAxis(index, {
@@ -173,11 +188,10 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                         }
                       />
                     </EuiFormRow>
-                  </EuiFlexItem>
 
-                  {axis.labels.show && (
-                    <>
-                      <EuiFlexItem>
+                    {axis.labels.show && (
+                      <>
+                        <EuiSpacer size="s" />
                         <EuiFlexGroup>
                           <EuiFlexItem>
                             <EuiFormRow
@@ -231,28 +245,35 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </>
-                  )}
-                </>
-              )}
-              {!disableGrid && (
-                <EuiFlexItem>
-                  <EuiSwitch
-                    checked={axis.grid?.showLines ?? false}
-                    onChange={(e) =>
-                      updateAxis(index, {
-                        grid: { ...axis.grid, showLines: e.target.checked },
-                      })
-                    }
-                    label={i18n.translate('explore.vis.standardAxes.showAxisGrid.switchLabel', {
-                      defaultMessage: 'Show grid lines',
-                    })}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </div>
+                        <EuiSpacer size="s" />
+
+                        {!disableGrid && (
+                          <EuiFormRow
+                            label={i18n.translate(
+                              'explore.vis.standardAxes.showAxisGrid.switchLabel',
+                              {
+                                defaultMessage: 'Show grid lines',
+                              }
+                            )}
+                          >
+                            <EuiSwitch
+                              checked={axis.grid?.showLines ?? false}
+                              onChange={(e) =>
+                                updateAxis(index, {
+                                  grid: { ...axis.grid, showLines: e.target.checked },
+                                })
+                              }
+                              label=""
+                            />
+                          </EuiFormRow>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </EuiSplitPanel.Inner>
         );
       })}
     </>
@@ -266,8 +287,22 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   onChangeSwitchAxes,
 }) => {
   return (
-    <EuiPanel paddingSize="s" data-test-subj="standardAxesPanel">
-      <EuiFlexGroup direction="column" gutterSize="xs">
+    <StyleAccordion
+      id="allAxesSection"
+      accordionLabel={i18n.translate('explore.stylePanel.tabs.allAxes', {
+        defaultMessage: 'Axes Settings',
+      })}
+      initialIsOpen={true}
+      data-test-subj="standardAxesPanel"
+    >
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem>
+          <StandardAxesOptions
+            disableGrid={disableGrid}
+            standardAxes={standardAxes}
+            onStandardAxesChange={onStandardAxesChange}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={() => onChangeSwitchAxes(standardAxes)}
@@ -278,14 +313,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
             })}
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <StandardAxesOptions
-            disableGrid={disableGrid}
-            standardAxes={standardAxes}
-            onStandardAxesChange={onStandardAxesChange}
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </StyleAccordion>
   );
 };
