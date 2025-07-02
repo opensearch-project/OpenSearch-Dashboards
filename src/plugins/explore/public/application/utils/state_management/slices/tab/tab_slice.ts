@@ -15,6 +15,11 @@ export interface TabState {
   visualizations: {
     styleOptions: ChartStyleControlMap[ChartType] | undefined;
     chartType: ChartType;
+    fieldNames?: {
+      numerical: string[];
+      categorical: string[];
+      date: string[];
+    };
   };
 }
 
@@ -39,8 +44,14 @@ const tabSlice = createSlice({
     setChartType: (state, action: PayloadAction<ChartType>) => {
       state.visualizations.chartType = action.payload;
     },
+    setFieldNames: (
+      state,
+      action: PayloadAction<{ numerical: string[]; categorical: string[]; date: string[] }>
+    ) => {
+      state.visualizations.fieldNames = action.payload;
+    },
   },
 });
 
-export const { setTabState, setStyleOptions, setChartType } = tabSlice.actions;
+export const { setTabState, setStyleOptions, setChartType, setFieldNames } = tabSlice.actions;
 export const tabReducer = tabSlice.reducer;

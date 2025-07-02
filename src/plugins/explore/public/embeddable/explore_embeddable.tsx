@@ -324,10 +324,34 @@ export class ExploreEmbeddable
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = visualization.activeTab;
     if (visualization.activeTab !== 'logs' && visualizationData) {
+      const fields = visualization.fields;
+      const filteredColumns = {
+        numerical: visualizationData.numericalColumns
+          ? visualizationData.numericalColumns.filter((col) => fields.numerical.includes(col.name))
+          : [],
+        categorical: visualizationData.categoricalColumns
+          ? visualizationData.categoricalColumns.filter((col) =>
+              fields.categorical.includes(col.name)
+            )
+          : [],
+        date: visualizationData.dateColumns
+          ? visualizationData.dateColumns.filter((col) => fields.date.includes(col.name))
+          : [],
+      };
+
+      const matchedRuleId = visualizationData.ruleId
+        ? visualizationData.ruleId
+        : this.services.visualizationRegistry
+            .getRegistry()
+            .findBestMatch(
+              filteredColumns.numerical,
+              filteredColumns.categorical,
+              filteredColumns.date
+            )?.rule.id; // FIXME improve error tolerance
       const rule = this.services.visualizationRegistry
         .start()
         .getRules()
-        .find((r) => r.id === visualizationData.ruleId);
+        .find((r) => r.id === matchedRuleId);
       const ruleBasedToExpressionFn = (
         transformedData: Array<Record<string, any>>,
         numericalColumns: VisColumn[],
@@ -351,15 +375,15 @@ export class ExploreEmbeddable
       };
       this.searchProps.searchContext = searchContext;
       const indexPattern = this.savedExplore.searchSource.getField('index');
-      const styleOptions = JSON.parse(this.savedExplore.visualization || '{}').params;
+      const styleOptions = visualization.params;
       const exp = toExpression(
         searchContext,
         indexPattern!,
         ruleBasedToExpressionFn,
         visualizationData.transformedData,
-        visualizationData.numericalColumns,
-        visualizationData.categoricalColumns,
-        visualizationData.dateColumns,
+        filteredColumns.numerical,
+        filteredColumns.categorical,
+        filteredColumns.date,
         styleOptions
       );
       this.searchProps.expression = exp;

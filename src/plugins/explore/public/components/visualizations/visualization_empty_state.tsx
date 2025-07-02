@@ -16,22 +16,25 @@ import {
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { VisColumn, VisFieldType, VisualizationRule } from './types';
 import {
   ChartType,
   useVisualizationRegistry,
-  VisualizationType,
   VisualizationTypeResult,
 } from './utils/use_visualization_types';
-import { setChartType, setStyleOptions } from '../../application/utils/state_management/slices';
 import { CHART_METADATA } from './constants';
 import { StyleAccordion } from './style_panel/style_accordion';
+import {
+  selectFieldNames,
+  selectChartType,
+} from '../../application/utils/state_management/selectors';
+import { UpdateVisualizationProps } from './visualization_container';
 
 interface VisualizationEmptyStateProps {
   visualizationData: VisualizationTypeResult<ChartType>;
-  setVisualizationData?: (data: VisualizationTypeResult<ChartType> | undefined) => void;
+  updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
 interface AvailableRuleOption {
@@ -51,6 +54,12 @@ interface VisColumnOption {
 // Exclude unknown fields since we cannot generate visualization with them
 type VisFieldTypeString = VisFieldType.Numerical | VisFieldType.Categorical | VisFieldType.Date;
 
+const FIELD_TYPE_ORDER: VisFieldTypeString[] = [
+  VisFieldType.Numerical,
+  VisFieldType.Categorical,
+  VisFieldType.Date,
+];
+
 const FIELD_TYPE_LABELS = [
   i18n.translate('explore.stylePanel.fieldSwitcher.numericalFieldLabel', {
     defaultMessage: 'Numerical Field',
@@ -65,41 +74,29 @@ const FIELD_TYPE_LABELS = [
 
 export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = ({
   visualizationData,
-  setVisualizationData,
+  updateVisualization,
 }) => {
-  const dispatch = useDispatch();
-
   const visualizationRegistry = useVisualizationRegistry();
 
-  // Keep the original columns that get form the search because generated new visualization will
-  // modify the columns in visualization data
+  // Original vis data from the query result
   const originalVisualizationData = useRef(visualizationData);
 
   // Indicates no rule is matched and the user should manually generate the visualization
-  const shouldManuallyGenerate = useRef(!Boolean(visualizationData.visualizationType));
-
-  // Selected chart type id, such as "area" and "line"
-  const [currChartTypeId, setCurrChartTypeId] = useState<string | undefined>(
-    visualizationData.visualizationType ? visualizationData.visualizationType.name : undefined
+  const shouldManuallyGenerate = useRef(
+    !Boolean(originalVisualizationData.current.visualizationType)
   );
 
-  // Selected fields by user, categorized by field types
-  const [fieldsSelection, setFieldsSelection] = useState<{
-    numerical: VisColumn[];
-    categorical: VisColumn[];
-    date: VisColumn[];
-  }>(
-    visualizationData.visualizationType
-      ? {
-          numerical: visualizationData.numericalColumns ?? [],
-          categorical: visualizationData.categoricalColumns ?? [],
-          date: visualizationData.dateColumns ?? [],
-        }
-      : {
-          numerical: [],
-          categorical: [],
-          date: [],
-        }
+  // Local state for chart type, initialized from Redux
+  const storedChartTypeId = useSelector(selectChartType);
+  const [currChartTypeId, setCurrChartTypeId] = useState(storedChartTypeId);
+
+  // Local state for field selection, avoid trigger update on express in visualization container
+  const [fieldsSelection, setFieldsSelection] = useState(
+    useSelector(selectFieldNames) ?? {
+      categorical: [],
+      date: [],
+      numerical: [],
+    }
   );
 
   const currFieldsCountByType: [number, number, number] = useMemo(
@@ -250,7 +247,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
    * [1, 1, 1], [1, 2, 0] should remains available.
    */
   const availableRules = useMemo(() => {
-    if (!currChartTypeId) return [];
+    if (!currChartTypeId || !chartTypeMappedOptions[currChartTypeId]) return [];
 
     return chartTypeMappedOptions[currChartTypeId].rules.filter((rule) => {
       const [ruleNum, ruleCat, ruleDate] = rule.matchIndex || [0, 0, 0];
@@ -262,7 +259,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
   const handleGeneration = useCallback(() => {
     // Update the visualizationData in the parent component
-    if (setVisualizationData && originalVisualizationData.current) {
+    if (originalVisualizationData.current) {
       const ruleToUse = availableRules.find((rule) =>
         isEqual(rule.matchIndex, currFieldsCountByType)
       );
@@ -271,40 +268,52 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
           currChartTypeOption?.value!
         );
         if (visualizationType) {
-          dispatch(setStyleOptions(visualizationType.ui.style.defaults));
-          dispatch(setChartType(visualizationType.type));
-
-          setVisualizationData({
-            ...originalVisualizationData.current,
-            numericalColumns: fieldsSelection.numerical,
-            categoricalColumns: fieldsSelection.categorical,
-            dateColumns: fieldsSelection.date,
-            ruleId: ruleToUse.id,
-            visualizationType: visualizationType as VisualizationType<ChartType>,
-            toExpression: ruleToUse.toExpression,
+          updateVisualization({
+            visualizationType,
+            rule: ruleToUse,
+            fieldNames: fieldsSelection,
+            columns: {
+              numerical: originalVisualizationData.current.numericalColumns
+                ? originalVisualizationData.current.numericalColumns.filter((col) =>
+                    fieldsSelection.numerical.includes(col.name)
+                  )
+                : [],
+              categorical: originalVisualizationData.current.categoricalColumns
+                ? originalVisualizationData.current.categoricalColumns.filter((col) =>
+                    fieldsSelection.categorical.includes(col.name)
+                  )
+                : [],
+              date: originalVisualizationData.current.dateColumns
+                ? originalVisualizationData.current.dateColumns.filter((col) =>
+                    fieldsSelection.date.includes(col.name)
+                  )
+                : [],
+            },
           });
+          // Reset the flag after successful generation
+          shouldManuallyGenerate.current = false;
         }
       }
     }
   }, [
-    setVisualizationData,
     availableRules,
     currFieldsCountByType,
     fieldsSelection,
     visualizationRegistry,
     currChartTypeOption,
-    dispatch,
+    updateVisualization,
   ]);
 
   useEffect(() => {
     if (
+      currChartTypeId &&
       currChartTypeOption &&
       shouldManuallyGenerate.current &&
-      !isEqual(fieldsSelection, [0, 0, 0])
+      !isEqual(currFieldsCountByType, [0, 0, 0])
     ) {
       handleGeneration();
     }
-  }, [currChartTypeOption, fieldsSelection, shouldManuallyGenerate, handleGeneration]);
+  }, [currChartTypeId, currChartTypeOption, currFieldsCountByType, handleGeneration]);
 
   // Max possible number of selections for each field types base on current available rules
   const maxMatchIndex = useMemo(() => {
@@ -331,7 +340,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     ];
   }, [maxMatchIndex, currFieldsCountByType]);
 
-  const updateChartTypeSelection = (chartTypeId: string) => {
+  const updateChartTypeSelection = (chartTypeId: ChartType) => {
     shouldManuallyGenerate.current = true;
 
     setCurrChartTypeId(chartTypeId);
@@ -363,7 +372,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
       setFieldsSelection((prev) => ({
         ...prev,
-        [fieldTypeString]: [...prev[fieldTypeString], columnOption.column],
+        [fieldTypeString]: [...prev[fieldTypeString], columnOption.column.name],
       }));
     },
     [allColumnOptions]
@@ -371,9 +380,11 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
   const removeFieldSelection = useCallback(
     (fieldTypeString: VisFieldTypeString, columnName: string) => {
+      shouldManuallyGenerate.current = true;
+
       setFieldsSelection((prev) => ({
         ...prev,
-        [fieldTypeString]: prev[fieldTypeString].filter((col) => col.name !== columnName),
+        [fieldTypeString]: prev[fieldTypeString].filter((name) => name !== columnName),
       }));
     },
     []
@@ -394,18 +405,19 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
       setFieldsSelection((prev) => ({
         ...prev,
-        [fieldTypeString]: prev[fieldTypeString].map((col) =>
-          col.name === oldColumnName ? newColumnOption.column : col
+        [fieldTypeString]: prev[fieldTypeString].map((name) =>
+          name === oldColumnName ? newColumnOption.column.name : name
         ),
       }));
     },
     [allColumnOptions]
   );
 
-  if (!visualizationData || !Boolean(Object.keys(chartTypeMappedOptions).length)) return null;
+  if (!originalVisualizationData.current || !Boolean(Object.keys(chartTypeMappedOptions).length))
+    return null;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" key="visualizationEmptyState">
       <EuiFlexItem grow={false}>
         <StyleAccordion
           id="generalSection"
@@ -421,7 +433,13 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
           >
             <EuiSuperSelect
               id="chartType"
-              valueOfSelected={currChartTypeId}
+              valueOfSelected={
+                chartTypeMappedOptions[currChartTypeId]
+                  ? chartTypeMappedOptions[currChartTypeId].disabled
+                    ? undefined
+                    : currChartTypeId
+                  : undefined
+              }
               placeholder="Select a visualization type"
               options={Object.values(chartTypeMappedOptions).map((option) => ({
                 ...option,
@@ -443,13 +461,13 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                 ),
               }))}
               onChange={(value) => {
-                updateChartTypeSelection(value);
+                updateChartTypeSelection(value as ChartType);
               }}
             />
           </EuiFormRow>
         </StyleAccordion>
       </EuiFlexItem>
-      {currChartTypeId && (
+      {currChartTypeId && !chartTypeMappedOptions[currChartTypeId].disabled && (
         <EuiFlexItem grow={false}>
           <StyleAccordion
             id="axisAndScalesSection"
@@ -459,7 +477,10 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
             initialIsOpen={true}
           >
             <>
-              {Object.entries(fieldsSelection).map(([fieldTypeString, selectedColumns], index) => {
+              {FIELD_TYPE_ORDER.map((fieldTypeString, index) => {
+                const selectedColumns = fieldsSelection
+                  ? fieldsSelection[fieldTypeString as keyof typeof fieldsSelection]
+                  : [];
                 const canSelectMoreFields = matchIndexDifference[index] > 0;
 
                 // Label only displays when select component and/or selected fields are shown
@@ -472,7 +493,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                         <>
                           {selectedColumns.map((selectedColumn) => {
                             return (
-                              <React.Fragment key={selectedColumn.id}>
+                              <React.Fragment key={selectedColumn}>
                                 <EuiFlexGroup
                                   gutterSize="none"
                                   alignItems="center"
@@ -481,14 +502,14 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                                   <EuiFlexItem>
                                     <EuiSuperSelect
                                       fullWidth
-                                      valueOfSelected={selectedColumn.name}
+                                      valueOfSelected={selectedColumn}
                                       options={allColumnOptions[index].filter(
                                         // Filter out the fields already selected but keep the current one
                                         (col) => {
                                           const isCurrentColumn =
-                                            col.column.name === selectedColumn.name;
+                                            col.column.name === selectedColumn;
                                           const isAlreadySelected = selectedColumns.some(
-                                            (selected) => selected.name === col.column.name
+                                            (selected) => selected === col.column.name
                                           );
                                           // Only display as an available option when there is only one value
                                           // Avoiding render multiple overlapped values as metric
@@ -507,7 +528,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                                         replaceFieldSelection(
                                           fieldTypeString as VisFieldTypeString,
                                           index,
-                                          selectedColumn.name,
+                                          selectedColumn,
                                           value
                                         );
                                       }}
@@ -518,11 +539,11 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                                       onClick={() =>
                                         removeFieldSelection(
                                           fieldTypeString as VisFieldTypeString,
-                                          selectedColumn.name
+                                          selectedColumn
                                         )
                                       }
                                       iconType="trash"
-                                      aria-label={`delete selected field ${selectedColumn.name}`}
+                                      aria-label={`delete selected field ${selectedColumn}`}
                                     />
                                   </EuiFlexItem>
                                 </EuiFlexGroup>
@@ -541,7 +562,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
                           placeholder="Select a field"
                           options={allColumnOptions[index].filter(
                             (col) =>
-                              !selectedColumns.some((selected) => selected.name === col.column.name)
+                              !selectedColumns.some((selected) => selected === col.column.name)
                           )}
                           onChange={(value) =>
                             updateFieldSelection(
