@@ -72,13 +72,25 @@ export const VisualizationContainer = () => {
 
   const visualizationRegistry = useVisualizationRegistry();
 
-  // Initialize selectedChartType and its default styles when visualizationData changes
   useEffect(() => {
     if (visualizationData && visualizationData.visualizationType) {
-      dispatch(setSelectedChartType(visualizationData.visualizationType.type));
-      dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
+      if (!selectedChartType) {
+        // default initialization on load
+        dispatch(setSelectedChartType(visualizationData.visualizationType.type));
+        dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
+        return;
+      }
+      // if URL stores a different chart type than the visualizationData; we should persist the chart type from URL
+      if (selectedChartType !== visualizationData.visualizationType.type) {
+        const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
+        setVisualizationData({
+          ...visualizationData,
+          visualizationType: chartConfig as VisualizationType<ChartType>,
+        });
+        return;
+      }
     }
-  }, [visualizationData, dispatch]);
+  }, [visualizationData, dispatch, selectedChartType, visualizationRegistry]);
 
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
@@ -199,7 +211,7 @@ export const VisualizationContainer = () => {
   };
 
   // Don't render if visualization is not enabled or data is not ready
-  if (!visualizationData) {
+  if (!visualizationData || !expression) {
     return null;
   }
 

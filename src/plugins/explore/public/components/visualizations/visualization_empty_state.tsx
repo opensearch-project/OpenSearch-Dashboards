@@ -83,6 +83,12 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     visualizationData.visualizationType ? visualizationData.visualizationType.name : undefined
   );
 
+  useEffect(() => {
+    if (visualizationData.visualizationType) {
+      setCurrChartTypeId(visualizationData.visualizationType.name);
+    }
+  }, [visualizationData.visualizationType]);
+
   // Selected fields by user, categorized by field types
   const [fieldsSelection, setFieldsSelection] = useState<{
     numerical: VisColumn[];

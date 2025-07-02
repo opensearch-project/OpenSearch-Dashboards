@@ -87,18 +87,6 @@ export const Visualization = <T extends ChartType>({
             })}
         </EuiFlexItem>
       </EuiFlexItem>
-      {/* <div data-test-subj="exploreStylePanel" className="exploreVisStylePanel">
-          {visualizationData.visualizationType?.ui.style.render({
-            styleOptions,
-            onStyleChange,
-            numericalColumns: visualizationData.numericalColumns,
-            categoricalColumns: visualizationData.categoricalColumns,
-            dateColumns: visualizationData.dateColumns,
-            availableChartTypes,
-            selectedChartType,
-            onChartTypeChange,
-          })}
-        </div> */}
     </EuiFlexGroup>
   );
 };
