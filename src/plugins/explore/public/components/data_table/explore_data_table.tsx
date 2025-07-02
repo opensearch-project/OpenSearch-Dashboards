@@ -31,8 +31,16 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
-import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
-import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
+import {
+  addColumn,
+  clearResults,
+  removeColumn,
+  setQueryWithHistory,
+} from '../../application/utils/state_management/slices';
+import {
+  defaultPrepareQuery,
+  executeQueries,
+} from '../../application/utils/state_management/actions/query_actions';
 import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 
@@ -48,10 +56,10 @@ const ExploreDataTableComponent = () => {
 
   // Use default cache key computation for this component
   const query = useSelector((state: RootState) => state.query);
-  const cacheKey = useMemo(() => {
-    const queryString = typeof query.query === 'string' ? query.query : '';
-    return defaultPrepareQuery(queryString);
-  }, [query]);
+  const cacheKey = useMemo(
+    () => defaultPrepareQuery(typeof query.query === 'string' ? query.query : ''),
+    [query]
+  );
 
   const rawResults = cacheKey ? results[cacheKey] : null;
   const rows = rawResults?.hits?.hits || [];
@@ -148,9 +156,17 @@ const ExploreDataTableComponent = () => {
         operation,
         indexPattern.id ?? ''
       );
-      return data.query.filterManager.addFilters(newFilters);
+      const languageConfig = services.data.query.queryString
+        .getLanguageService()
+        .getLanguage(query.language);
+      const newQuery = languageConfig?.insertFiltersToQuery?.(query, newFilters);
+      if (newQuery) {
+        dispatch(setQueryWithHistory(newQuery));
+        dispatch(clearResults());
+        dispatch(executeQueries({ services }));
+      }
     },
-    [data.query.filterManager, indexPattern]
+    [data.query.filterManager, indexPattern, dispatch, query, services]
   );
 
   return (
