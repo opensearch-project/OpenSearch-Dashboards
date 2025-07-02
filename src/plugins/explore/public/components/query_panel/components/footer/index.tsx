@@ -5,8 +5,7 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, OnTimeChangeProps } from '@elastic/eui';
 import { SavedQuery } from 'src/plugins/data/public';
 import { ShowFieldToggle } from './show_field';
 import { SaveQueryButton } from './save_query';
@@ -37,7 +36,7 @@ interface QueryPanelFooterProps {
   showDatePicker: boolean;
   services: ExploreServices;
   timefilter: any;
-  onTimeChange: (time: { start: string; end: string }) => void;
+  onTimeChange: (props: OnTimeChangeProps) => void;
   onRunQuery: () => void;
   onClearQuery: () => void;
   onLoadSavedQuery: (savedQuery: SavedQuery) => void;
@@ -56,7 +55,6 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   showDatePicker,
   noInput,
   query,
-  datePickerRef,
   services,
   timefilter,
   onClearQuery,
