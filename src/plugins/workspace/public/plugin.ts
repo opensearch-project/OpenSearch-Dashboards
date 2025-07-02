@@ -539,11 +539,12 @@ export class WorkspacePlugin
     });
 
     if (workspaceId) {
-      core.chrome.registerCollapsibleNavHeader(() => {
+      core.chrome.registerCollapsibleNavHeader((props) => {
         if (!this.coreStart) {
           return null;
         }
         return React.createElement(WorkspaceSelector, {
+          ...props,
           key: 'workspaceSelector',
           coreStart: this.coreStart,
           registeredUseCases$: this.registeredUseCases$,

@@ -36,6 +36,7 @@ describe('<CollapsibleNavTop />', () => {
       navLinks: [],
       currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
       setCurrentNavGroup: jest.fn(),
+      isNavOpen: true,
     };
   };
 
@@ -48,9 +49,7 @@ describe('<CollapsibleNavTop />', () => {
   });
 
   it('should render expand icon when collapsed', async () => {
-    const { findByTestId } = render(
-      <CollapsibleNavTop {...getMockedProps()} shouldShrinkNavigation />
-    );
+    const { findByTestId } = render(<CollapsibleNavTop {...getMockedProps()} isNavOpen={false} />);
     await findByTestId('collapsibleNavShrinkButton');
   });
 });

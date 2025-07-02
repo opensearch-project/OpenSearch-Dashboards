@@ -8,6 +8,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { NavGroups } from './collapsible_nav_groups';
 import { ChromeRegistrationNavLink } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
+import { coreMock } from 'opensearch-dashboards/public/mocks';
 
 describe('<NavGroups />', () => {
   const getMockedNavLink = (
@@ -21,7 +22,7 @@ describe('<NavGroups />', () => {
   });
   it('should render correctly', () => {
     const navigateToApp = jest.fn();
-    const onNavItemClick = jest.fn();
+    const basePath = coreMock.createStart().http.basePath;
     const { container, getByTestId, queryByTestId } = render(
       <NavGroups
         navLinks={[
@@ -61,7 +62,8 @@ describe('<NavGroups />', () => {
           }),
         ]}
         navigateToApp={navigateToApp}
-        onNavItemClick={onNavItemClick}
+        isNavOpen
+        basePath={basePath}
       />
     );
     expect(container).toMatchSnapshot();
