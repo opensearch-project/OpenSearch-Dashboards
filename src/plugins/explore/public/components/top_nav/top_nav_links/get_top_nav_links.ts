@@ -11,11 +11,20 @@ import { getNewButtonRun, newTopNavData } from './top_nav_new';
 import { getOpenButtonRun, openTopNavData } from './top_nav_open';
 import { getSaveButtonRun, saveTopNavData } from './top_nav_save';
 import { getShareButtonRun, shareTopNavData } from './top_nav_share';
+import { IndexPattern } from '../../../../../data/public';
+import { TabState } from '../../../application/utils/state_management/slices';
+import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
 
 export const getTopNavLinks = (
   services: ExploreServices,
   startSyncingQueryStateWithUrl: () => void,
   searchContext: ExecutionContextSearch,
+  stateProps: {
+    indexPattern: IndexPattern | undefined;
+    tabState: TabState;
+    flavorId: string | null;
+    tabDefinition: TabDefinition | undefined;
+  },
   savedExplore?: SavedExplore
 ) => {
   const { capabilities, share } = services;
@@ -25,7 +34,13 @@ export const getTopNavLinks = (
   if (capabilities.discover?.save) {
     topNavLinks.push({
       ...saveTopNavData,
-      run: getSaveButtonRun(services, startSyncingQueryStateWithUrl, searchContext, savedExplore),
+      run: getSaveButtonRun(
+        services,
+        startSyncingQueryStateWithUrl,
+        searchContext,
+        stateProps,
+        savedExplore
+      ),
     });
   }
 

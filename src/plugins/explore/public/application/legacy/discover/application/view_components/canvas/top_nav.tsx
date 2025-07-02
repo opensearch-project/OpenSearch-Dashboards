@@ -21,7 +21,6 @@ import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
 import { ResultStatus } from '../../../../../utils/state_management/types';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
-import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
 import {
   selectTabState,
   selectUIState,
@@ -104,15 +103,13 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       services,
       startSyncingQueryStateWithUrl,
       searchContext,
+      {
+        indexPattern,
+        tabState,
+        flavorId,
+        tabDefinition,
+      },
       savedExplore
-        ? saveStateToSavedObject(
-            savedExplore,
-            flavorId ?? 'logs',
-            tabDefinition!,
-            tabState,
-            indexPattern
-          )
-        : undefined
     );
   }, [
     savedExplore,
