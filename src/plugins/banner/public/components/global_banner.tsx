@@ -14,30 +14,49 @@ import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { BannerConfig, DEFAULT_BANNER_HEIGHT, HIDDEN_BANNER_HEIGHT } from '../../common';
 import { BannerService } from '../services/banner_service';
 import { LinkRenderer } from './link_renderer';
+import { BannerApiService } from '../services/banner_api_service';
+import { HttpStart } from '../../../../core/public';
 
 const ReactMarkdownLazy = React.lazy(() => import('react-markdown'));
 
 interface GlobalBannerProps {
   bannerService?: BannerService;
+  http?: HttpStart;
 }
 
-export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService }) => {
+export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService, http }) => {
   const [bannerConfig, setBannerConfig] = useState<BannerConfig | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const bannerRef = useRef<HTMLDivElement>(null);
 
   if (!bannerService) {
     throw new Error('BannerService is required');
   }
 
+  // Subscribe to banner config changes
   useEffect(() => {
     const subscription = bannerService.getBannerConfig$().subscribe((config) => {
       setBannerConfig(config);
+      setIsLoading(false);
     });
 
     return () => {
       subscription.unsubscribe();
     };
   }, [bannerService]);
+
+  // Fetch banner config from API when component mounts
+  useEffect(() => {
+    const fetchBannerConfig = async () => {
+      if (http) {
+        setIsLoading(true);
+        const apiService = new BannerApiService(http, bannerService);
+        await apiService.fetchBannerConfig();
+      }
+    };
+
+    fetchBannerConfig();
+  }, [bannerService, http]);
 
   // Update the CSS variable with the banner's height
   useEffect(() => {
@@ -110,6 +129,16 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService }) => 
     });
   };
 
+  if (isLoading) {
+    return (
+      <div ref={bannerRef}>
+        <EuiCallOut iconType="loading">
+          <EuiLoadingSpinner size="m" /> Loading banner...
+        </EuiCallOut>
+      </div>
+    );
+  }
+
   if (!bannerConfig || !bannerConfig.isVisible) {
     return null;
   }
@@ -129,13 +158,13 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService }) => 
               root: Fragment,
               link: LinkRenderer,
             }}
-            source={bannerConfig.text.trim()}
+            source={bannerConfig.content.trim()}
           />
         </Suspense>
       );
     }
 
-    return bannerConfig.text;
+    return bannerConfig.content;
   };
 
   return (

@@ -12,7 +12,7 @@
 export interface BannerPluginSetup {
   bannerEnabled: () => boolean;
   getConfig: () => {
-    text: string;
+    content: string;
     color: 'primary' | 'success' | 'warning';
     iconType: string;
     isVisible: boolean;
