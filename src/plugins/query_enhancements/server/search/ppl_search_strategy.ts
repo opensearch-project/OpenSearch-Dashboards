@@ -35,6 +35,9 @@ export const pplSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
+        // TODO: PPL does not support fetch_size yet due to https://github.com/opensearch-project/sql/issues/3314
+        // We can add the below back for https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9385
+        // request.body.fetch_size = await context.core.uiSettings.client.get('discover:sampleSize');
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
         const rawResponse: any = await pplFacet.describeQuery(context, request);
