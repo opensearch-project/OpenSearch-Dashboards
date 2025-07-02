@@ -379,3 +379,6 @@
 
 # Set the value to true to enable the new UI for savedQueries in Discover
 # data.savedQueriesNewUI.enabled: true
+
+# Set the value to true to enable the banner plugin
+# banner.enabled: true
