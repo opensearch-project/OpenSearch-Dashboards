@@ -79,7 +79,7 @@ export const VisualizationContainer = () => {
     VisualizationTypeResult<ChartType> | undefined
   >(undefined);
 
-  const isUserUpdatedVisualization = useRef(false);
+  const isVisualizationUpdated = useRef(false);
 
   const updateVisualizationState = useCallback(
     (
@@ -95,7 +95,8 @@ export const VisualizationContainer = () => {
 
   const updateVisualization = useCallback(
     ({ visualizationType, rule, fieldNames, columns }: UpdateVisualizationProps) => {
-      isUserUpdatedVisualization.current = true;
+      // Handle user modifiy the visualization through style panel manually
+      isVisualizationUpdated.current = true;
 
       updateVisualizationState(visualizationType, fieldNames);
       setCurrentRuleId(rule.id);
@@ -148,83 +149,94 @@ export const VisualizationContainer = () => {
     dispatch(setSelectedChartType('' as any)); // FIXME
     dispatch(setStyleOptions({} as any)); // FIXME
     dispatch(setFieldNames({ numerical: [], categorical: [], date: [] }));
+
+    isVisualizationUpdated.current = true;
   }, [dispatch]);
 
   useEffect(() => {
-    // FIXME simplify the logic here
+    // TODO simplify the logic here
     if (fieldSchema.length === 0 || rows.length === 0) {
+      return;
+    }
+
+    if (isVisualizationUpdated.current) {
+      // Avoid being triggered by empty state component updates
       return;
     }
 
     const visualizationTypeResult = getVisualizationType(rows, fieldSchema);
 
-    if (!visualizationTypeResult?.ruleId) {
-      isUserUpdatedVisualization.current = false;
-    }
-
-    if (isUserUpdatedVisualization.current) {
-      // Avoid being triggered by empty state component updates
-      return;
-    }
-
     if (visualizationTypeResult) {
+      // Always set the data from the query as it should be the single source of truth
+      setVisualizationData(visualizationTypeResult);
+
+      // Map from visualization columns to the field names
+      const availableFieldNames = {
+        numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
+        categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
+        date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
+      };
+
       if (visualizationTypeResult?.ruleId && visualizationTypeResult.visualizationType) {
-        // trigger render visualization with user-selected chart type and current fields
+        // Highest priority when rule matched so the visualization should automatically generate
         setCurrentRuleId(visualizationTypeResult.ruleId);
-        updateVisualizationState(visualizationTypeResult.visualizationType, {
-          numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
-          categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
-          date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
-        });
-        setVisualizationData(visualizationTypeResult);
+        updateVisualizationState(visualizationTypeResult.visualizationType, availableFieldNames);
+
+        isVisualizationUpdated.current = true;
       } else if (selectedChartType) {
-        // Populate user-selected chart type and current fields
-        const availableFields = {
-          numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
-          categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
-          date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
-        };
+        // Populate and trigger render visualization with user-selected chart/fields
 
         const hasInvalidFields =
           selectedFieldNames &&
           (selectedFieldNames.numerical?.some(
-            (field) => !availableFields.numerical.includes(field)
+            (field) => !availableFieldNames.numerical.includes(field)
           ) ||
             selectedFieldNames.categorical?.some(
-              (field) => !availableFields.categorical.includes(field)
+              (field) => !availableFieldNames.categorical.includes(field)
             ) ||
-            selectedFieldNames.date?.some((field) => !availableFields.date.includes(field)));
+            selectedFieldNames.date?.some((field) => !availableFieldNames.date.includes(field)));
 
         if (hasInvalidFields) {
-          // Last query contains field that no longer exists
+          // Previous selected fields contains a field that no longer exist in the current query
           clearCache();
-          setVisualizationData(visualizationTypeResult);
         } else {
           if (selectedFieldNames) {
-            const { matchedRule } = findMatchedRuleWithCache({
+            const { matchedRule, columns } = findMatchedRuleWithCache({
               visData: visualizationTypeResult,
               fieldNames: selectedFieldNames,
             });
             if (matchedRule) {
-              setCurrentRuleId(matchedRule.rule.id);
+              // The previous query is empty-stated but visualization is generated by user selection
+              const visType = visualizationRegistry.getVisualizationConfig(
+                selectedChartType
+              ) as VisualizationType<ChartType>;
+
+              // Trigger the generation of visualization that the user previously created
+              requestAnimationFrame(() => {
+                setCurrentRuleId(matchedRule.rule.id);
+                setVisualizationData({
+                  ...visualizationTypeResult,
+                  visualizationType: visType,
+                  numericalColumns: columns.numerical,
+                  categoricalColumns: columns.categorical,
+                  dateColumns: columns.date,
+                  ruleId: matchedRule.rule.id,
+                  toExpression: matchedRule.rule.toExpression,
+                });
+              });
             }
           }
 
-          setVisualizationData({
-            ...visualizationTypeResult,
-            visualizationType: visualizationRegistry.getVisualizationConfig(
-              selectedChartType
-            ) as VisualizationType<ChartType>,
-          });
+          isVisualizationUpdated.current = true;
         }
       } else {
+        // No visualization automatically created and the user also previously didn't build a visualization
         clearCache();
-        setVisualizationData(visualizationTypeResult);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     fieldSchema,
+    selectedFieldNames,
     rows,
     updateVisualizationState,
     dispatch,
