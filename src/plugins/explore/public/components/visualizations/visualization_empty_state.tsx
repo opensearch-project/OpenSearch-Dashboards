@@ -434,7 +434,11 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
             <EuiSuperSelect
               id="chartType"
               valueOfSelected={
-                chartTypeMappedOptions[currChartTypeId].disabled ? undefined : currChartTypeId
+                chartTypeMappedOptions[currChartTypeId]
+                  ? chartTypeMappedOptions[currChartTypeId].disabled
+                    ? undefined
+                    : currChartTypeId
+                  : undefined
               }
               placeholder="Select a visualization type"
               options={Object.values(chartTypeMappedOptions).map((option) => ({
@@ -463,7 +467,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
           </EuiFormRow>
         </StyleAccordion>
       </EuiFlexItem>
-      {!chartTypeMappedOptions[currChartTypeId].disabled && (
+      {currChartTypeId && !chartTypeMappedOptions[currChartTypeId].disabled && (
         <EuiFlexItem grow={false}>
           <StyleAccordion
             id="axisAndScalesSection"
