@@ -224,7 +224,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
                   setIsTitleOrDashboardTitleDupilcate(false);
                   setTitle(text);
                 }}
-                label={i18n.translate('explore.addtoDashboardModal.saveExploreName', {
+                label={i18n.translate('explore.addtoDashboardModal.saveDiscoverTitle', {
                   defaultMessage: 'Save discover title',
                 })}
               />
