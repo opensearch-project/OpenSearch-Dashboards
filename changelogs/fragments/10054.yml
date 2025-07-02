@@ -1,0 +1,2 @@
+fix:
+- Move column inferring to initialization stage ([#10054](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10054))
