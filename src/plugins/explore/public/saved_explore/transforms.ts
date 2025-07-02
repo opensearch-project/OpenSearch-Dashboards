@@ -32,6 +32,7 @@ export const saveStateToSavedObject = (
     activeTab: tabDefinition.id,
     chartType: tabState?.visualizations?.chartType ?? 'line',
     params: tabState?.visualizations?.styleOptions ?? {},
+    fields: tabState?.visualizations?.fieldNames,
   });
   obj.searchSourceFields = { index: indexPattern };
 

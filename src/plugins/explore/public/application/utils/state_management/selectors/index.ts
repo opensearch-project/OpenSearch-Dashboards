@@ -59,6 +59,11 @@ export const selectChartType = createSelector(
   (tabState) => tabState.visualizations.chartType
 );
 
+export const selectFieldNames = createSelector(
+  [selectTabState],
+  (tabState) => tabState.visualizations.fieldNames
+);
+
 export const selectIsLoading = createSelector(
   [selectSystemState],
   (systemState) => systemState.status === ResultStatus.LOADING
