@@ -11,9 +11,10 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import {
   setSavedSearch,
-  setQuery,
   setChartType,
   setStyleOptions,
+  setFieldNames,
+  setQueryState,
 } from '../state_management/slices';
 import { Query } from '../../../../../data/common';
 
@@ -43,7 +44,7 @@ export const useInitPage = () => {
           // Set query in query string manager
           if (query) {
             data.query.queryString.setQuery(query);
-            dispatch(setQuery(query as Query));
+            dispatch(setQueryState(query as Query));
           }
         }
 
@@ -54,9 +55,10 @@ export const useInitPage = () => {
         // Set style options
         const visualization = savedExplore.visualization;
         if (visualization) {
-          const { chartType, params } = JSON.parse(visualization);
+          const { chartType, params, fields } = JSON.parse(visualization);
           dispatch(setChartType(chartType));
           dispatch(setStyleOptions(params));
+          dispatch(setFieldNames(fields));
         }
 
         // Add to recently accessed
