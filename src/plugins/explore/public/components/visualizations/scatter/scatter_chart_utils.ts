@@ -4,7 +4,7 @@
  */
 import { VisColumn, FieldSetting } from '../types';
 
-export function inferAxesFromColumns(
+export function inferAxesFromColumnsScatter(
   numerical?: VisColumn[],
   categorical?: VisColumn[]
 ): { x: FieldSetting | undefined; y: FieldSetting | undefined } {

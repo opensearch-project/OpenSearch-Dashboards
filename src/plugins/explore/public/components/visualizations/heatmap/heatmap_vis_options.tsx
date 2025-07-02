@@ -3,17 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { StandardAxes, AxisRole } from '../types';
+import { StandardAxes } from '../types';
 import {
   HeatmapLabelVisOptions,
   HeatmapExclusiveVisOptions,
 } from './heatmap_exclusive_vis_options';
-import { inferAxesFromColumns } from './heatmap_chart_utils';
 import { AllAxesOptions } from '../style_panel/standard_axes_options';
 import { swapAxes } from '../utils/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -54,22 +53,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   ) => {
     onStyleChange({ [key]: value });
   };
-
-  useEffect(() => {
-    const { x, y } = inferAxesFromColumns(numericalColumns, categoricalColumns);
-    const axesWithFields = styleOptions.StandardAxes.map((axis) => {
-      if (axis.axisRole === AxisRole.X) {
-        return { ...axis, field: x };
-      }
-      if (axis.axisRole === AxisRole.Y) {
-        return { ...axis, field: y };
-      }
-      return axis;
-    });
-
-    updateStyleOption('StandardAxes', axesWithFields);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numericalColumns, categoricalColumns, dateColumns]);
 
   const handleSwitchAxes = (axes: StandardAxes[]) => {
     const updateAxes = swapAxes(axes);

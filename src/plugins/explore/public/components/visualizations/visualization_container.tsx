@@ -20,6 +20,7 @@ import {
 import './visualization_container.scss';
 import { VisColumn } from './types';
 import { toExpression } from './utils/to_expression';
+import { inferColumns } from './utils/infer_columns';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
 import {
@@ -75,8 +76,11 @@ export const VisualizationContainer = () => {
   // Initialize selectedChartType and its default styles when visualizationData changes
   useEffect(() => {
     if (visualizationData && visualizationData.visualizationType) {
+      const { type, ui } = visualizationData.visualizationType;
+      const initialStyleOptions = { ...ui.style.defaults };
+      const updatedStyleOptions = inferColumns(type, visualizationData, initialStyleOptions);
       dispatch(setSelectedChartType(visualizationData.visualizationType.type));
-      dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
+      dispatch(setStyleOptions(updatedStyleOptions));
     }
   }, [visualizationData, dispatch]);
 
@@ -186,7 +190,9 @@ export const VisualizationContainer = () => {
 
     // Update the style options with the defaults for the selected chart type
     if (chartConfig && chartConfig.ui && chartConfig.ui.style) {
-      dispatch(setStyleOptions(chartConfig.ui.style.defaults));
+      const initialStyleOptions = chartConfig.ui.style.defaults;
+      const updatedStyleOptions = inferColumns(chartType, visualizationData, initialStyleOptions);
+      dispatch(setStyleOptions(updatedStyleOptions));
 
       // Update the visualizationData with the new visualization type
       if (visualizationData) {

@@ -11,7 +11,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import {
   setSavedSearch,
-  setQuery,
+  setQueryState,
   setChartType,
   setStyleOptions,
 } from '../state_management/slices';
@@ -43,7 +43,7 @@ export const useInitPage = () => {
           // Set query in query string manager
           if (query) {
             data.query.queryString.setQuery(query);
-            dispatch(setQuery(query as Query));
+            dispatch(setQueryState(query as Query));
           }
         }
 

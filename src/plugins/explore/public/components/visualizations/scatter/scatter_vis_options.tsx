@@ -3,16 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiSplitPanel, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ScatterChartStyleControls } from './scatter_vis_config';
 import { GeneralVisOptions } from '../style_panel/general_vis_options';
-import { AxisRole, StandardAxes } from '../types';
+import { StandardAxes } from '../types';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/standard_axes_options';
 import { swapAxes } from '../utils/utils';
-import { inferAxesFromColumns } from './scatter_chart_utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { ChartTypeSwitcher } from '../style_panel/chart_type_switcher';
 
@@ -52,22 +51,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
 
   // if it is 2 metrics, then it should not show legend
   const notShowLegend = numericalColumns.length === 2 && categoricalColumns.length === 0;
-
-  useEffect(() => {
-    const { x, y } = inferAxesFromColumns(numericalColumns, categoricalColumns);
-    const axesWithFields = styleOptions.StandardAxes.map((axis) => {
-      if (axis.axisRole === AxisRole.X) {
-        return { ...axis, field: x };
-      }
-      if (axis.axisRole === AxisRole.Y) {
-        return { ...axis, field: y };
-      }
-      return axis;
-    });
-
-    updateStyleOption('StandardAxes', axesWithFields);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numericalColumns, categoricalColumns, dateColumns]);
 
   const handleSwitchAxes = (axes: StandardAxes[]) => {
     const updateAxes = swapAxes(axes);
