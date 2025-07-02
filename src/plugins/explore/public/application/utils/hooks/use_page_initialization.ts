@@ -11,10 +11,10 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import {
   setSavedSearch,
-  setQueryState,
   setChartType,
   setStyleOptions,
   setFieldNames,
+  setQueryState,
 } from '../state_management/slices';
 import { Query } from '../../../../../data/common';
 
