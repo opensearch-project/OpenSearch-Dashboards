@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import './visualization_container.scss';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -206,7 +206,10 @@ export const VisualizationContainer = () => {
   return (
     <div className="exploreVisContainer">
       <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
-        <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
+        <EuiFlexItem>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem style={{ alignItems: 'flex-end' }}>
           <SaveAndAddButtonWithModal
             searchContext={searchContext}
             indexPattern={indexPattern}
