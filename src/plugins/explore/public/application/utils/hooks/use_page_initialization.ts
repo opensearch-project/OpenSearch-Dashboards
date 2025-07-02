@@ -15,6 +15,7 @@ import {
   setStyleOptions,
   setFieldNames,
   setQueryState,
+  setActiveTab,
 } from '../state_management/slices';
 import { Query } from '../../../../../data/common';
 import { executeQueries } from '../state_management/actions/query_actions';
@@ -24,7 +25,6 @@ export const useInitPage = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const exploreId = useCurrentExploreId();
   const { savedExplore, error } = useSavedExplore(exploreId);
-
   const { chrome, data } = services;
 
   useEffect(() => {
@@ -44,8 +44,7 @@ export const useInitPage = () => {
           const query = searchSource.query;
           // Set query in query string manager
           if (query) {
-            data.query.queryString.setQuery(query);
-            dispatch(setQueryState(query as Query));
+            dispatch(setQueryState(query));
           }
         }
 
@@ -56,10 +55,11 @@ export const useInitPage = () => {
         // Set style options
         const visualization = savedExplore.visualization;
         if (visualization) {
-          const { chartType, params, fields } = JSON.parse(visualization);
+          const { chartType, params, fields, activeTab } = JSON.parse(visualization);
           dispatch(setChartType(chartType));
           dispatch(setStyleOptions(params));
           dispatch(setFieldNames(fields));
+          dispatch(setActiveTab(activeTab));
         }
 
         // Add to recently accessed
