@@ -23,7 +23,7 @@ export const createHeatmapWithBin = (
   const markLayer: any = {
     mark: {
       type: 'rect',
-      tooltip: styles.addTooltip,
+      tooltip: styles?.tooltipOptions?.mode !== 'hidden',
       stroke: 'white',
       strokeWidth: 1,
     },
@@ -94,7 +94,7 @@ export const createRegularHeatmap = (
   const markLayer: any = {
     mark: {
       type: 'rect',
-      tooltip: styles.addTooltip,
+      tooltip: styles?.tooltipOptions?.mode !== 'hidden',
       stroke: 'white',
       strokeWidth: 1,
     },
