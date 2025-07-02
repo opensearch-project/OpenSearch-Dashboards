@@ -51,11 +51,12 @@ run(
     `,
     flags: {
       default: {},
-      string: [],
+      string: ['port'],
       boolean: ['clean', 'site'],
       help: `
       --clean            Clean Storybook build folder.
       --site             Build static version of Storybook.
+      --port             Specify the port to run Storybook (default: 9001).
     `,
     },
   }

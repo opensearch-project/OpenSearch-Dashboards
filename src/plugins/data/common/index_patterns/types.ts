@@ -40,6 +40,8 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 export interface IIndexPattern {
   fields: IFieldType[];
   title: string;
+  displayName?: string;
+  description?: string;
   id?: string;
   type?: string;
   timeFieldName?: string;
@@ -55,6 +57,8 @@ export interface IndexPatternAttributes {
   type: string;
   fields: string;
   title: string;
+  displayName?: string;
+  description?: string;
   typeMeta: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -194,6 +198,8 @@ export interface IndexPatternSpec {
   id?: string;
   version?: string;
   title?: string;
+  displayName?: string;
+  description?: string;
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
