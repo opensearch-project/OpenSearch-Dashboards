@@ -46,7 +46,12 @@ export const Visualization = <T extends ChartType>({
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
-        <EuiPanel data-test-subj="exploreVisualizationLoader" className="exploreVisPanel">
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          data-test-subj="exploreVisualizationLoader"
+          className="exploreVisPanel"
+        >
           <div className="exploreVisPanel__inner">
             {visualizationData.visualizationType ? (
               <ReactExpressionRenderer
@@ -65,27 +70,29 @@ export const Visualization = <T extends ChartType>({
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="exploreVisStylePanel">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <VisualizationEmptyState
-              visualizationData={visualizationData as any}
-              setVisualizationData={setVisualizationData}
-            />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {styleOptions &&
-            visualizationData.visualizationType?.ui.style.render({
-              styleOptions,
-              onStyleChange,
-              numericalColumns: visualizationData.numericalColumns,
-              categoricalColumns: visualizationData.categoricalColumns,
-              dateColumns: visualizationData.dateColumns,
-              availableChartTypes,
-              selectedChartType,
-              onChartTypeChange,
-            })}
-        </EuiFlexItem>
+        <EuiPanel hasShadow={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <VisualizationEmptyState
+                visualizationData={visualizationData as any}
+                setVisualizationData={setVisualizationData}
+              />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {styleOptions &&
+              visualizationData.visualizationType?.ui.style.render({
+                styleOptions,
+                onStyleChange,
+                numericalColumns: visualizationData.numericalColumns,
+                categoricalColumns: visualizationData.categoricalColumns,
+                dateColumns: visualizationData.dateColumns,
+                availableChartTypes,
+                selectedChartType,
+                onChartTypeChange,
+              })}
+          </EuiFlexItem>
+        </EuiPanel>
       </EuiFlexItem>
       {/* <div data-test-subj="exploreStylePanel" className="exploreVisStylePanel">
           {visualizationData.visualizationType?.ui.style.render({
