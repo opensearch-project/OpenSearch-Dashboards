@@ -4,10 +4,17 @@
  */
 
 import { Dispatch } from 'redux';
-// Transaction actions now handled in UI slice
-// We'll create simple action creators for transaction management
-import { startTransaction, commitTransaction, rollbackTransaction } from '../slices/ui_slice';
-import { COMMIT_STATE_TRANSACTION, RESTORE_STATE } from '../handlers/transaction_handler';
+import { startTransaction, commitTransaction, rollbackTransaction } from '../slices';
+
+/**
+ * Action type for committing a transaction
+ */
+export const COMMIT_STATE_TRANSACTION = 'transaction/commitState';
+
+/**
+ * Action type for restoring state after rollback
+ */
+export const RESTORE_STATE = 'transaction/restoreState';
 
 /**
  * Begins a transaction to batch state updates

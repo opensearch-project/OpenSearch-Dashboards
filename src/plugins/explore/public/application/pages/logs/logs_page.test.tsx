@@ -4,12 +4,20 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { discoverPluginMock } from '../../legacy/discover/mocks';
+import {
+  ISearchResult,
+  resultsInitialState,
+  resultsReducer,
+  setShowDatasetFields,
+  uiInitialState,
+  uiReducer,
+} from '../../utils/state_management/slices';
 import { ResultStatus } from '../../utils/state_management/types';
 import { LogsPage } from './logs_page';
 
@@ -101,27 +109,38 @@ jest.mock('../../components/index_pattern_context', () => ({
   }),
 }));
 
+jest.mock('../../../components/query_panel', () => ({
+  QueryPanel: () => <div data-test-subj="query-panel">Mock Query Panel</div>,
+}));
+
 describe('LogsPage', () => {
   const createTestStore = (
     status = ResultStatus.UNINITIALIZED,
     rows: OpenSearchSearchHit[] = [],
     fieldSchema: any[] = []
   ) => {
+    const preloadedState = {
+      ui: {
+        ...uiInitialState,
+        status,
+        executionCacheKeys: ['test-cache-key'],
+        showDatasetFields: true,
+      },
+      results: {
+        ...resultsInitialState,
+        'test-cache-key': {
+          hits: { hits: rows },
+          fieldSchema,
+        } as ISearchResult,
+      },
+    };
+
     return configureStore({
       reducer: {
-        ui: () => ({
-          status,
-          executionCacheKeys: ['test-cache-key'],
-        }),
-        results: () => ({
-          'test-cache-key': {
-            hits: {
-              hits: rows,
-            },
-            fieldSchema,
-          },
-        }),
+        ui: uiReducer,
+        results: resultsReducer,
       },
+      preloadedState,
     });
   };
 
@@ -262,5 +281,21 @@ describe('LogsPage', () => {
     );
 
     expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
+  });
+
+  it('hide/show fields selector panel correctly', async () => {
+    const store = createTestStore();
+    render(
+      <Provider store={store}>
+        <LogsPage />
+      </Provider>
+    );
+
+    expect(screen.getByTestId('dscBottomLeftCanvas')).toBeVisible();
+
+    store.dispatch(setShowDatasetFields(false));
+    await waitFor(() => {
+      expect(screen.getByTestId('dscBottomLeftCanvas')).not.toBeVisible();
+    });
   });
 });

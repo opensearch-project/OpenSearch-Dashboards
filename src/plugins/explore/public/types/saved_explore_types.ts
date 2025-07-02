@@ -19,6 +19,7 @@ export interface SavedExplore
     | 'save'
     | 'getFullPath'
     | 'getOpenSearchType'
+    | 'searchSourceFields'
   > {
   searchSource: ISearchSource; // This is optional in SavedObject, but required for SavedSearch
   description?: string;
@@ -26,6 +27,13 @@ export interface SavedExplore
   uiState?: string; // Serialized UI state
   queryState?: string; // Serialized query state
   version?: number;
+  visualization?: string; // Serialized visualization state
+  type?: string;
+  kibanaSavedObjectMeta?: {
+    searchSourceJSON: string;
+  };
+  sort?: SortOrder[];
+  columns?: string[];
 }
 
 export interface SavedExploreAttributes {

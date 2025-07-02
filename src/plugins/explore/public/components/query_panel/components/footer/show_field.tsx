@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -13,15 +13,7 @@ interface ShowFieldToggleProps {
 }
 
 export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onToggle }) => {
-  const [showField, setShowField] = useState(isEnabled);
-
-  const handleToggle = () => {
-    const newState = !showField;
-    setShowField(newState);
-    onToggle(newState);
-  };
-
-  const buttonLabel = showField
+  const buttonLabel = isEnabled
     ? i18n.translate('explore.queryPanel.showFieldToggle.hideFieldsLabel', {
         defaultMessage: 'Hide Fields',
       })
@@ -31,8 +23,8 @@ export const ShowFieldToggle: React.FC<ShowFieldToggleProps> = ({ isEnabled, onT
 
   return (
     <EuiButtonEmpty
-      onClick={handleToggle}
-      iconType={showField ? 'menuLeft' : 'menuRight'}
+      onClick={() => onToggle(!isEnabled)}
+      iconType={isEnabled ? 'menuLeft' : 'menuRight'}
       data-test-subj="queryPanelFooterShowFields"
       className="queryPanel__footer__showFieldsToggle"
     >

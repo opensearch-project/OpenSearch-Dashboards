@@ -6,16 +6,13 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldNumber,
-  EuiPanel,
+  EuiRange,
   EuiSelect,
   EuiSwitch,
   EuiFormRow,
-  EuiTitle,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { MetricChartStyleControls } from './metric_vis_config';
 import { RangeValue, ColorSchemas } from '../types';
@@ -24,6 +21,7 @@ import { DebouncedText } from '../style_panel/utils';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { getColorSchemas } from '../utils/collections';
 import { StyleControlsProps } from '../utils/use_visualization_types';
+import { StyleAccordion } from '../style_panel/style_accordion';
 
 export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
 
@@ -31,6 +29,10 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   styleOptions,
   onStyleChange,
   numericalColumns = [],
+  categoricalColumns = [],
+  dateColumns = [],
+  availableChartTypes = [],
+  selectedChartType,
 }) => {
   const updateStyleOption = <K extends keyof MetricChartStyleControls>(
     key: K,
@@ -51,102 +53,110 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
 
   const colorSchemas = getColorSchemas();
 
-  const tabs: EuiTabbedContentTab[] = [
-    {
-      id: 'exclusive',
-      name: i18n.translate('explore.vis.metric.tabs.exclusive', {
-        defaultMessage: 'Exclusive',
-      }),
-      content: (
-        <EuiPanel paddingSize="s" data-test-subj="metricExclusivePanel">
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h4>
-                  {i18n.translate('explore.vis.metric.settings', {
-                    defaultMessage: 'Exclusive Settings',
-                  })}
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSwitch
-                label="Show title"
-                checked={styleOptions.showTitle}
-                onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
-                data-test-subj="showTitleButton"
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <StyleAccordion
+          id="metricSection"
+          accordionLabel={i18n.translate('explore.stylePanel.tabs.metric', {
+            defaultMessage: 'Metric Settings',
+          })}
+          initialIsOpen={true}
+        >
+          <EuiFormRow
+            label={i18n.translate('explore.stylePanel.metric.title', {
+              defaultMessage: 'Title Setting',
+            })}
+          >
+            <EuiButtonGroup
+              legend="Show or hide title"
+              options={[
+                {
+                  id: 'show',
+                  label: 'Shown',
+                  'data-test-subj': 'showTitleShown',
+                },
+                {
+                  id: 'hide',
+                  label: 'Hidden',
+                  'data-test-subj': 'showTitleHidden',
+                },
+              ]}
+              idSelected={styleOptions.showTitle ? 'show' : 'hide'}
+              onChange={(id) => updateStyleOption('showTitle', id === 'show')}
+              buttonSize="compressed"
+              isFullWidth={true}
+              type="single"
+              data-test-subj="showTitleButtonGroup"
+            />
+          </EuiFormRow>
+
+          {styleOptions.showTitle && (
+            <EuiFormRow>
+              <DebouncedText
+                value={styleOptions.title || numericalColumns[0]?.name || ''}
+                placeholder="Metric title"
+                onChange={(text) => updateStyleOption('title', text)}
+                label={i18n.translate('explore.vis.metric.title', {
+                  defaultMessage: 'Metric Title',
+                })}
               />
-            </EuiFlexItem>
-            {styleOptions.showTitle && (
-              <EuiFlexItem>
-                <DebouncedText
-                  value={styleOptions.title || numericalColumns[0].name}
-                  placeholder="Metric title"
-                  onChange={(text) => updateStyleOption('title', text)}
-                  label={i18n.translate('explore.vis.metric.title', {
-                    defaultMessage: 'Axis title',
-                  })}
-                />
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem>
+            </EuiFormRow>
+          )}
+
+          <EuiFormRow
+            label={i18n.translate('explore.vis.metric.fontSize', {
+              defaultMessage: 'Font Size',
+            })}
+          >
+            <EuiRange
+              value={fontSize}
+              onChange={(e) => handleFontSize((e.target as HTMLInputElement).value)}
+              min={10}
+              max={100}
+              step={1}
+              showLabels
+              showValue
+              aria-label={i18n.translate('explore.vis.metric.fontSize', {
+                defaultMessage: 'Font Size',
+              })}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate('explore.vis.metric.useColor', {
+                defaultMessage: 'Use color for font color',
+              })}
+              checked={styleOptions.useColor}
+              onChange={(e) => updateStyleOption('useColor', e.target.checked)}
+            />
+          </EuiFormRow>
+          {styleOptions.useColor && (
+            <>
               <EuiFormRow
-                label={i18n.translate('explore.vis.metric.fontSize', {
-                  defaultMessage: 'Font Size',
+                label={i18n.translate('explore.vis.metric.colorSchema', {
+                  defaultMessage: 'Color Schema',
                 })}
               >
-                <EuiFieldNumber value={fontSize} onChange={(e) => handleFontSize(e.target.value)} />
+                <EuiSelect
+                  options={colorSchemas}
+                  value={styleOptions.colorSchema}
+                  onChange={(e) => updateStyleOption('colorSchema', e.target.value as ColorSchemas)}
+                />
               </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSwitch
-                label={i18n.translate('explore.vis.metric.useColor', {
-                  defaultMessage: 'Use color for font color',
-                })}
-                checked={styleOptions.useColor}
-                onChange={(e) => updateStyleOption('useColor', e.target.checked)}
-              />
-            </EuiFlexItem>
-            {styleOptions.useColor && (
-              <>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    label={i18n.translate('explore.vis.metric.colorSchema', {
-                      defaultMessage: 'Color Schema',
-                    })}
-                  >
-                    <EuiSelect
-                      options={colorSchemas}
-                      value={styleOptions.colorSchema}
-                      onChange={(e) =>
-                        updateStyleOption('colorSchema', e.target.value as ColorSchemas)
-                      }
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <CustomRange
-                    customRanges={styleOptions.customRanges}
-                    onCustomRangesChange={(ranges: RangeValue[]) => {
-                      updateStyleOption('customRanges', ranges);
-                    }}
-                  />
-                </EuiFlexItem>
-              </>
-            )}
-          </EuiFlexGroup>
-        </EuiPanel>
-      ),
-    },
-  ];
-
-  return (
-    <EuiTabbedContent
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      autoFocus="selected"
-      size="s"
-      expand={false}
-    />
+              <EuiFormRow>
+                <CustomRange
+                  customRanges={styleOptions.customRanges}
+                  onCustomRangesChange={(ranges: RangeValue[]) => {
+                    updateStyleOption('customRanges', ranges);
+                  }}
+                />
+              </EuiFormRow>
+            </>
+          )}
+        </StyleAccordion>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

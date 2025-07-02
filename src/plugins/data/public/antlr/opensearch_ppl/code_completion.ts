@@ -13,12 +13,14 @@ import { monaco } from '@osd/monaco';
 import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
 import {
   fetchColumnValues,
+  formatAvailableFieldsToSuggestions,
   formatFieldsToSuggestions,
   formatValuesToSuggestions,
   parseQuery,
 } from '../shared/utils';
 import { openSearchPplAutocompleteData as simplifiedPplAutocompleteData } from './simplified_ppl_grammar/opensearch_ppl_autocomplete';
 import { openSearchPplAutocompleteData as defaultPplAutocompleteData } from './default_ppl_grammar/opensearch_ppl_autocomplete';
+import { getAvailableFieldsForAutocomplete } from './simplified_ppl_grammar/symbol_table_parser';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 import { PPL_AGGREGATE_FUNCTIONS, PPL_SUGGESTION_IMPORTANCE } from './constants';
@@ -132,7 +134,26 @@ export const getSimplifiedPPLSuggestions = async ({
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
-      finalSuggestions.push(...formatFieldsToSuggestions(indexPattern, (f: any) => `${f} `, '3'));
+      const initialFields = indexPattern.fields;
+
+      // Get available fields from symbol table based on current query context
+      const cursorPosition = position?.column || selectionEnd;
+      const availableFields = getAvailableFieldsForAutocomplete(
+        query,
+        cursorPosition,
+        initialFields,
+        (field) => !field?.subType
+      );
+
+      finalSuggestions.push(
+        ...formatAvailableFieldsToSuggestions(
+          availableFields,
+          (f: string) => `${f} `,
+          (f: string) => {
+            return f.startsWith('_') ? `9` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
+          }
+        )
+      );
     }
 
     if (suggestions.suggestValuesForColumn) {

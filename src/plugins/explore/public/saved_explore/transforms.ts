@@ -6,8 +6,9 @@
 import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../data/public';
 import { InvalidJSONProperty } from '../../../opensearch_dashboards_utils/public';
-import { LegacyState } from '../application/utils/state_management/slices/legacy_slice';
+import { LegacyState, TabState } from '../application/utils/state_management/slices';
 import { SavedExplore, SavedExploreAttributes } from '../types/saved_explore_types';
+import { TabDefinition } from '../services/tab_registry/tab_registry_service';
 
 export interface ExploreState {
   legacy: LegacyState;
@@ -17,13 +18,24 @@ export interface ExploreState {
 
 export const saveStateToSavedObject = (
   obj: SavedExplore,
-  state: ExploreState,
-  indexPattern: IndexPattern
+  flavorId: string,
+  tabDefinition: TabDefinition,
+  tabState?: TabState,
+  indexPattern?: IndexPattern
 ): SavedExplore => {
   // Serialize the state into the saved object
-  obj.legacyState = JSON.stringify(state.legacy);
-  obj.uiState = JSON.stringify(state.ui || {});
-  obj.queryState = JSON.stringify(state.query || {});
+  obj.type = flavorId;
+  obj.visualization = JSON.stringify({
+    // TODO: Add title to saved object
+    // Visualization has an independent title?
+    title: '',
+    activeTab: tabDefinition.id,
+    chartType: tabState?.visualizations?.chartType ?? 'line',
+    params: tabState?.visualizations?.styleOptions ?? {},
+    fields: tabState?.visualizations?.fieldNames,
+  });
+  obj.searchSourceFields = { index: indexPattern };
+
   obj.version = 1;
 
   return obj;

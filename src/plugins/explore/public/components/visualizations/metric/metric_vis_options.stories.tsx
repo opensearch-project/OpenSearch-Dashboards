@@ -16,7 +16,14 @@ export default {
 
 // Mock data for the component props
 const mockNumericalColumns: VisColumn[] = [
-  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
+  {
+    id: 1,
+    name: 'count',
+    schema: VisFieldType.Numerical,
+    column: 'count',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
 ];
 
 const Template: ComponentStory<typeof MetricVisStyleControls> = (args) => {

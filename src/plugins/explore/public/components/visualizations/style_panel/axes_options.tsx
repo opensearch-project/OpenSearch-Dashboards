@@ -173,16 +173,6 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
 
   return (
     <EuiPanel paddingSize="s">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('explore.vis.gridOptions.title', {
-            defaultMessage: 'Axes',
-          })}
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
       {/* Category Axis Configuration */}
       <EuiTitle size="xs">
         <h4>

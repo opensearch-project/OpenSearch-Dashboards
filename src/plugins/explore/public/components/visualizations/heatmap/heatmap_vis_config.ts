@@ -13,6 +13,7 @@ import {
   ScaleType,
   Positions,
   AxisRole,
+  TooltipOptions,
   LabelAggregationType,
 } from '../types';
 
@@ -36,7 +37,7 @@ export interface ExclusiveHeatmapConfig {
 // Complete heatmap chart style controls interface
 export interface HeatmapChartStyleControls {
   // Basic controls
-  addTooltip: boolean;
+  tooltipOptions: TooltipOptions;
   addLegend: boolean;
   legendPosition: Positions;
 
@@ -49,7 +50,9 @@ export interface HeatmapChartStyleControls {
 
 export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
   // Basic controls
-  addTooltip: true,
+  tooltipOptions: {
+    mode: 'all',
+  },
   addLegend: true,
   legendPosition: Positions.RIGHT,
 

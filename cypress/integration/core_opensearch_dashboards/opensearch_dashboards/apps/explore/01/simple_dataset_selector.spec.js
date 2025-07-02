@@ -14,11 +14,13 @@ import {
   getRandomizedWorkspaceName,
   getDefaultQuery,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
-import { verifyDiscoverPageState } from '../../../../../../utils/apps/query_enhancements/saved';
-import { validateItemsInSimpleDatasetSelectorDropDown } from '../../../../../../utils/apps/query_enhancements/simple_dataset_selector';
+} from '../../../../../../utils/apps/explore/shared';
+import { verifyDiscoverPageState } from '../../../../../../utils/apps/explore/saved';
+import {
+  generateSimpleDatasetSelectorTestConfigurations,
+  validateItemsInSimpleDatasetSelectorDropDown,
+} from '../../../../../../utils/apps/explore/simple_dataset_selector';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateSimpleDatasetSelectorTestConfigurations } from '../../../../../../utils/apps/explore/simple_dataset_selector';
 
 const workspaceName = getRandomizedWorkspaceName();
 const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
@@ -74,9 +76,6 @@ export const runSimpleDatasetSelectorTests = () => {
           page: 'explore',
           isEnhancement: true,
         });
-
-        // Select the original language
-        cy.setQueryLanguage(config.language);
 
         // Select the index pattern
         cy.setIndexPatternAsDataset(config.indexPattern, DATASOURCE_NAME);

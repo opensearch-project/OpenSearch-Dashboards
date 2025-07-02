@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Moment } from 'moment';
+import { Dataset } from 'src/plugins/data/common';
 
 export interface RefreshInterval {
   pause: boolean;
@@ -21,19 +22,17 @@ export interface TimeRangeBounds {
 }
 
 export enum LanguageType {
-  Natural = 'natural',
-  KeyValue = 'keyvalue',
-  PPL = 'ppl',
+  Natural = 'plaintext',
+  KeyValue = 'PPL',
+  PPL = 'PPL',
 }
 
 // eslint-disable-next-line
 export type Query = {
   query: string | { [key: string]: any };
-  language: LanguageType;
-  prompt?: string;
-  dataset?: string;
+  language: string;
+  dataset?: Dataset;
 };
-
 export interface RecentQueryItem {
   id: number;
   query: Query;
@@ -50,7 +49,7 @@ export interface RecentQueryTableItem {
 export interface RecentQueriesTableProps {
   onClickRecentQuery: (query: Query, timeRange?: TimeRange) => void;
   isVisible: boolean;
-  languageType: LanguageType;
+  languageType: string;
 }
 
 export enum ResultStatus {

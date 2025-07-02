@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import { executeQueries } from '../state_management/actions/query_actions';
-import { clearResults } from '../state_management/slices/results_slice';
+import { clearResults } from '../state_management/slices';
 
 /**
  * Hook to handle auto-refresh subscription only

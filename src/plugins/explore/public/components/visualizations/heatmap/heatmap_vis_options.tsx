@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
+import React, { useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { GeneralVisOptions } from '../style_panel/general_vis_options';
 import { StandardAxes, AxisRole } from '../types';
+import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
+import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import {
   HeatmapLabelVisOptions,
   HeatmapExclusiveVisOptions,
@@ -26,6 +26,9 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
+  availableChartTypes = [],
+  selectedChartType,
+  onChartTypeChange,
 }) => {
   const shouldShowType = numericalColumns.length === 3;
   const updateStyleOption = <K extends keyof HeatmapChartStyleControls>(
@@ -56,73 +59,59 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
     updateStyleOption('StandardAxes', updateAxes);
   };
 
-  const tabs: EuiTabbedContentTab[] = [
-    {
-      id: 'basic',
-      name: i18n.translate('explore.vis.heatmapChart.tabs.basic', {
-        defaultMessage: 'Basic',
-      }),
-      content: (
-        <GeneralVisOptions
-          addTooltip={styleOptions.addTooltip}
-          addLegend={styleOptions.addLegend}
-          legendPosition={styleOptions.legendPosition}
-          onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
-          onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
-          onLegendPositionChange={(legendPosition) =>
-            updateStyleOption('legendPosition', legendPosition)
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <LegendOptionsPanel
+          shouldShowLegend={true}
+          legendOptions={{
+            show: styleOptions.addLegend,
+            position: styleOptions.legendPosition,
+          }}
+          onLegendOptionsChange={(legendOptions) => {
+            if (legendOptions.show !== undefined) {
+              updateStyleOption('addLegend', legendOptions.show);
+            }
+            if (legendOptions.position !== undefined) {
+              updateStyleOption('legendPosition', legendOptions.position);
+            }
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TooltipOptionsPanel
+          tooltipOptions={styleOptions.tooltipOptions}
+          onTooltipOptionsChange={(tooltipOptions) =>
+            updateStyleOption('tooltipOptions', {
+              ...styleOptions.tooltipOptions,
+              ...tooltipOptions,
+            })
           }
         />
-      ),
-    },
-    {
-      id: 'exclusive',
-      name: i18n.translate('explore.vis.heatmapChart.tabs.exclusive', {
-        defaultMessage: 'Exclusive',
-      }),
-      content: (
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <HeatmapExclusiveVisOptions
           styles={styleOptions.exclusive}
           onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
         />
-      ),
-    },
-    {
-      id: 'label',
-      name: i18n.translate('explore.vis.heatmapChart.tabs.label', {
-        defaultMessage: 'Label',
-      }),
-      content: (
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
         <HeatmapLabelVisOptions
           shouldShowType={shouldShowType}
           styles={styleOptions.label}
           onChange={(label) => updateStyleOption('label', label)}
         />
-      ),
-    },
-    {
-      id: 'axes',
-      name: i18n.translate('explore.vis.heatmapChart.tabs.axes', {
-        defaultMessage: 'Axes',
-      }),
-      content: (
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
         <AllAxesOptions
           disableGrid={true}
           standardAxes={styleOptions.StandardAxes}
           onChangeSwitchAxes={handleSwitchAxes}
           onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
         />
-      ),
-    },
-  ];
-
-  return (
-    <EuiTabbedContent
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      autoFocus="selected"
-      size="s"
-      expand={false}
-    />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

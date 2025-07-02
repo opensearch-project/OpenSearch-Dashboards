@@ -17,17 +17,34 @@ $customSize10: 10px;
     position: relative;
 
     .promptEditor {
-      border: 1px solid $euiBorderColor;
       border-radius: $euiBorderRadiusSmall;
+
+      .monaco-editor .overflow-guard {
+        border: $euiBorderThin;
+      }
 
       .monaco-editor .view-overlays .current-line {
         border: none;
       }
 
       .monaco-editor {
+
         .margin {
-          background-color: $euiFormBackgroundColor;
+          .glyph-margin {
+            background: white;
+            width: $customSize10 !important;
+          }
         }
+      }
+
+      .monaco-scrollable-element {
+        border-radius: 0 $euiSizeXS 0 0;
+        left: $customSize10 !important; // Adjust left position to account for glyph margin
+      }
+
+      .monaco-editor .margin .glyph-margin {
+        background: white;
+        width: $customSize10;
       }
 
       .monaco-editor,
@@ -38,6 +55,7 @@ $customSize10: 10px;
       }
 
       &.promptEditor--readonly {
+
         .monaco-editor,
         .react-monaco-editor-container {
           background-color: $euiColorLightShade !important;
@@ -154,11 +172,6 @@ $customSize10: 10px;
         .view-lines {
           font-size: $euiFontSizeXS;
         }
-
-        .comment-line span {
-          /* stylelint-disable-next-line @osd/stylelint/no_restricted_properties */
-          color: $euiColorSuccess;
-        }
       }
 
       .monaco-editor,
@@ -170,6 +183,7 @@ $customSize10: 10px;
       }
 
       &.queryEditor--readonly {
+
         .monaco-editor,
         .react-monaco-editor-container {
           background-color: $euiColorLightShade !important;

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { i18n } from '@osd/i18n';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
@@ -39,6 +40,8 @@ import {
   setServices as setLegacyServices,
   setUiActions,
   setExpressionLoader,
+  setDashboard,
+  setDashboardVersion,
 } from './application/legacy/discover/opensearch_dashboards_services';
 import { getPreloadedStore } from './application/utils/state_management/store';
 import { buildServices } from './build_services';
@@ -60,6 +63,11 @@ import {
 } from './types';
 import { DocViewsRegistry } from './types/doc_views_types';
 import { ExploreEmbeddableFactory } from './embeddable';
+import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
+import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
+import { reactToUiComponent } from '../../opensearch_dashboards_react/public';
+import { VisualizationActionMenuItem } from './helpers/visualization_action_menu';
+import { ActionExecutionContext } from '../../ui_actions/public';
 
 export class ExplorePlugin
   implements
@@ -72,8 +80,12 @@ export class ExplorePlugin
   // @ts-ignore
   private config: ConfigSchema;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  // FIXME set to false when integrate with dashboard assistant plugin
+  private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(true);
+
   private stopUrlTracking?: () => void;
   private currentHistory?: ScopedHistory;
+  private readonly DISCOVER_VISUALIZATION_NAME = 'DiscoverVisualization';
 
   /** discover */
   private docViewsRegistry: DocViewsRegistry | null = null;
@@ -98,6 +110,7 @@ export class ExplorePlugin
   ): ExplorePluginSetup {
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
+    this.registerExploreVisualization(core, setupDeps);
     const visualizationRegistryService = this.visualizationRegistryService.setup();
 
     this.docViewsRegistry = new DocViewsRegistry();
@@ -230,14 +243,7 @@ export class ExplorePlugin
 
         // Get start services
         const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
-
-        const features = await core.workspaces.currentWorkspace$
-          .pipe(take(1))
-          .toPromise()
-          .then((workspace) => workspace?.features);
-        const isExploreEnabledWorkspace =
-          (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
-          false;
+        const isExploreEnabledWorkspace = this.getIsExploreEnabledWorkspace(coreStart);
         // We want to limit explore UI to only show up under the explore-enabled
         // workspaces. If user lands in the explore plugin URL in a different
         // workspace, we will redirect them to classic discover. We will also redirect if
@@ -285,7 +291,8 @@ export class ExplorePlugin
           pluginsStart,
           this.initializerContext,
           this.tabRegistry,
-          this.visualizationRegistryService
+          this.visualizationRegistryService,
+          this.isSummaryAgentAvailable$
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -402,11 +409,15 @@ export class ExplorePlugin
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
       visualizationRegistry: visualizationRegistryService,
+      isSummaryAgentAvailable$: this.isSummaryAgentAvailable$,
     };
   }
 
   public start(core: CoreStart, plugins: ExploreStartDependencies): ExplorePluginStart {
     setUiActions(plugins.uiActions);
+    setDashboard(plugins.dashboard);
+    const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
+    setDashboardVersion({ version: opensearchDashboardsVersion });
 
     if (plugins.expressions) {
       setExpressionLoader(plugins.expressions.ExpressionLoader);
@@ -421,7 +432,8 @@ export class ExplorePlugin
         plugins,
         this.initializerContext,
         this.tabRegistry,
-        this.visualizationRegistryService
+        this.visualizationRegistryService,
+        this.isSummaryAgentAvailable$
       );
       setLegacyServices({
         ...services,
@@ -468,7 +480,114 @@ export class ExplorePlugin
       };
     };
 
-    const factory = new ExploreEmbeddableFactory(getStartServices);
+    const factory = new ExploreEmbeddableFactory(
+      getStartServices,
+      this.visualizationRegistryService
+    );
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+  }
+
+  private async registerExploreVisualization(
+    core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
+    setupDeps: ExploreSetupDependencies
+  ) {
+    const exploreVisDisplayName = i18n.translate('explore.visualization.title', {
+      defaultMessage: 'Visualize with Discover',
+    });
+    // Register explore visualization as visualization alias
+    setupDeps.visualizations.registerAlias({
+      name: this.DISCOVER_VISUALIZATION_NAME,
+      aliasPath: '#/',
+      aliasApp: PLUGIN_ID,
+      title: exploreVisDisplayName,
+      description: i18n.translate('explore.visualization.description', {
+        defaultMessage: 'Create visualization with Discover',
+      }),
+      icon: 'visualizeApp',
+      stage: 'production',
+      // We only want explore visualization type avaialble for observability
+      // type of workspace, so make it as hidden initially
+      hidden: true,
+      appExtensions: {
+        visualizations: {
+          docTypes: [SAVED_OBJECT_TYPE],
+          toListItem: ({ id, attributes, updated_at: updatedAt }) => {
+            let iconType = '';
+            let chartName = '';
+            try {
+              const vis = JSON.parse(attributes.visualization as string);
+              const chart = this.visualizationRegistryService
+                .getRegistry()
+                .getAvailableChartTypes()
+                .find((t) => t.type === vis.chartType);
+              if (chart) {
+                iconType = chart.icon;
+                chartName = chart.name;
+              }
+            } catch (e) {
+              iconType = '';
+            }
+            return {
+              description: `${attributes?.description || ''}`,
+              // TODO: it should navigate to different explore flavor based on the `attributes.type`
+              editApp: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
+              editUrl: `#/view/${encodeURIComponent(id)}`,
+              icon: iconType,
+              id,
+              savedObjectType: SAVED_OBJECT_TYPE,
+              title: `${attributes?.title || ''}`,
+              typeTitle: chartName,
+              updated_at: updatedAt,
+              stage: 'production',
+            };
+          },
+        },
+      },
+    });
+
+    const [coreStart, pluginsStart] = await core.getStartServices();
+    const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
+    if (isExploreEnabledWorkspace) {
+      const registeredVisAlias = pluginsStart.visualizations
+        .getAliases()
+        .find((v) => v.name === this.DISCOVER_VISUALIZATION_NAME);
+
+      // if current workspace has explore enabled, the explore visualization ingress should be not hidden
+      if (registeredVisAlias) {
+        registeredVisAlias.hidden = false;
+      }
+
+      // Register explore visualization to dashboard add vis panel list
+      pluginsStart.uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
+        id: `add_vis_action_explore`,
+        getIconType: () => 'visualizeApp',
+        order: 1,
+        MenuItem: reactToUiComponent<{ onClick: () => void; context: ActionExecutionContext }>(
+          (props) =>
+            React.createElement(VisualizationActionMenuItem, {
+              exploreVisDisplayName,
+              onClick: () => {
+                props.onClick();
+              },
+            })
+        ),
+        execute: async () => {
+          coreStart.application.navigateToApp(`${PLUGIN_ID}/${ExploreFlavor.Logs}`, {
+            replace: true,
+          });
+        },
+      });
+    }
+  }
+
+  private async getIsExploreEnabledWorkspace(core: CoreStart) {
+    const features = await core.workspaces.currentWorkspace$
+      .pipe(take(1))
+      .toPromise()
+      .then((workspace) => workspace?.features);
+    return (
+      (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+      false
+    );
   }
 }

@@ -4,7 +4,7 @@
  */
 
 import { IndexPattern } from '../../../../data/public';
-import { Query } from '../../../../data/common';
+import { QueryState } from './state_management/slices';
 import { ExploreServices } from '../../types';
 
 /**
@@ -95,7 +95,7 @@ export type DataProcessor = (
  * Interface for prepared query
  */
 export interface PreparedQuery {
-  query: Query;
+  query: QueryState;
   cacheKey: string;
   tabId: string;
 }

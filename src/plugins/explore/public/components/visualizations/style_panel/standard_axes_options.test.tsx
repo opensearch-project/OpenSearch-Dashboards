@@ -79,6 +79,9 @@ describe('AxesOptions', () => {
   it('shows/hides label options based on show labels toggle', () => {
     render(<AllAxesOptions {...defaultProps} />);
 
+    const axis = screen.getByTestId('standardAxis-0-button');
+    fireEvent.click(axis);
+
     // Initially label options should be visible
     expect(screen.getAllByText('Aligned')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Truncate')[0]).toBeInTheDocument();

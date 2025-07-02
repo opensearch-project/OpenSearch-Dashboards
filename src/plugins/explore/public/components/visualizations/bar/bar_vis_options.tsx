@@ -4,23 +4,17 @@
  */
 
 import React from 'react';
-import { i18n } from '@osd/i18n';
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import { GeneralVisOptions } from '../style_panel/general_vis_options';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BarChartStyleControls } from './bar_vis_config';
-import { VisColumn } from '../types';
+import { StyleControlsProps } from '../utils/use_visualization_types';
+import { LegendOptionsPanel } from '../style_panel/legend/legend';
+import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
-import { ThresholdOptions } from '../style_panel/threshold_options';
-import { GridOptionsPanel } from '../style_panel/grid_options';
-import { AxesOptions } from '../style_panel/axes_options';
+import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
+import { AxesOptions } from '../style_panel/axes/axes';
+import { GridOptionsPanel } from '../style_panel/grid/grid';
 
-export interface BarVisStyleControlsProps {
-  styleOptions: BarChartStyleControls;
-  onStyleChange: (newOptions: Partial<BarChartStyleControls>) => void;
-  numericalColumns?: VisColumn[];
-  categoricalColumns?: VisColumn[];
-  dateColumns?: VisColumn[];
-}
+export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
 
 export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   styleOptions,
@@ -28,6 +22,9 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
+  availableChartTypes = [],
+  selectedChartType,
+  onChartTypeChange,
 }) => {
   const updateStyleOption = <K extends keyof BarChartStyleControls>(
     key: K,
@@ -36,36 +33,68 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  // if it is 1 metric and 1 category, then it should not show legend
   const notShowLegend =
-    numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0;
+    (numericalColumns.length === 1 &&
+      categoricalColumns.length === 0 &&
+      dateColumns.length === 1) ||
+    (numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0);
 
-  const tabs: EuiTabbedContentTab[] = [
-    {
-      id: 'basic',
-      name: i18n.translate('explore.vis.barChart.tabs.general', {
-        defaultMessage: 'Basic',
-      }),
-      content: (
-        <GeneralVisOptions
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <LegendOptionsPanel
           shouldShowLegend={!notShowLegend}
-          addTooltip={styleOptions.addTooltip}
-          addLegend={styleOptions.addLegend}
-          legendPosition={styleOptions.legendPosition}
-          onAddTooltipChange={(addTooltip) => updateStyleOption('addTooltip', addTooltip)}
-          onAddLegendChange={(addLegend) => updateStyleOption('addLegend', addLegend)}
-          onLegendPositionChange={(legendPosition) =>
-            updateStyleOption('legendPosition', legendPosition)
+          legendOptions={{
+            show: styleOptions.addLegend,
+            position: styleOptions.legendPosition,
+          }}
+          onLegendOptionsChange={(legendOptions) => {
+            if (legendOptions.show !== undefined) {
+              updateStyleOption('addLegend', legendOptions.show);
+            }
+            if (legendOptions.position !== undefined) {
+              updateStyleOption('legendPosition', legendOptions.position);
+            }
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ThresholdOptions
+          thresholdLines={styleOptions.thresholdLines}
+          onThresholdLinesChange={(thresholdLines) =>
+            updateStyleOption('thresholdLines', thresholdLines)
           }
         />
-      ),
-    },
-    {
-      id: 'exclusive',
-      name: i18n.translate('explore.vis.barChart.tabs.exclusive', {
-        defaultMessage: 'Bar',
-      }),
-      content: (
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TooltipOptionsPanel
+          tooltipOptions={styleOptions.tooltipOptions}
+          onTooltipOptionsChange={(tooltipOptions) =>
+            updateStyleOption('tooltipOptions', {
+              ...styleOptions.tooltipOptions,
+              ...tooltipOptions,
+            })
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AxesOptions
+          categoryAxes={styleOptions.categoryAxes}
+          valueAxes={styleOptions.valueAxes}
+          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
+          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <GridOptionsPanel
+          grid={styleOptions.grid}
+          onGridChange={(grid) => updateStyleOption('grid', grid)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <BarExclusiveVisOptions
           barWidth={styleOptions.barWidth}
           barPadding={styleOptions.barPadding}
@@ -84,58 +113,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
             updateStyleOption('barBorderColor', barBorderColor)
           }
         />
-      ),
-    },
-    {
-      id: 'threshold',
-      name: i18n.translate('explore.vis.barChart.tabs.threshold', {
-        defaultMessage: 'Threshold',
-      }),
-      content: (
-        <ThresholdOptions
-          thresholdLine={styleOptions.thresholdLine}
-          onThresholdChange={(thresholdLine) => updateStyleOption('thresholdLine', thresholdLine)}
-        />
-      ),
-    },
-    {
-      id: 'grid',
-      name: i18n.translate('explore.vis.barChart.tabs.grid', {
-        defaultMessage: 'Grid',
-      }),
-      content: (
-        <GridOptionsPanel
-          grid={styleOptions.grid}
-          onGridChange={(grid) => updateStyleOption('grid', grid)}
-        />
-      ),
-    },
-    {
-      id: 'axes',
-      name: i18n.translate('explore.vis.barChart.tabs.axes', {
-        defaultMessage: 'Axes',
-      }),
-      content: (
-        <AxesOptions
-          categoryAxes={styleOptions.categoryAxes}
-          valueAxes={styleOptions.valueAxes}
-          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
-          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-        />
-      ),
-    },
-  ];
-
-  return (
-    <EuiTabbedContent
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      autoFocus="selected"
-      size="s"
-      expand={false}
-    />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

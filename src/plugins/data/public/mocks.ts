@@ -83,6 +83,15 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
           fetchForWildcard: jest.fn(),
         },
       }),
+      getByTitle: jest.fn().mockReturnValue({
+        id: 'id',
+        name: 'name',
+        dataSourceRef: {
+          id: 'id',
+          type: 'datasource',
+          name: 'datasource',
+        },
+      }),
       get: jest.fn().mockReturnValue(
         Promise.resolve({
           id: 'id',

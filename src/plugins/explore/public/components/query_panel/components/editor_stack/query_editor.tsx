@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { monaco } from '@osd/monaco';
 import { getEditorConfig } from './shared';
@@ -18,10 +18,8 @@ export interface QueryEditorProps {
   onQueryRun: (queryString?: string) => void;
   onQueryEdit: () => void;
   onClearEditor: () => void;
+  provideCompletionItems?: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
-
-// TODO: Move this dynamic comment once the actual query is loaded
-const FIXED_COMMENT = '// AI Generated PPL at 00.03.33pm';
 
 export const QueryEditor: React.FC<QueryEditorProps> = ({
   queryString,
@@ -31,32 +29,13 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   onQueryRun,
   onQueryEdit,
   onClearEditor,
+  provideCompletionItems,
 }) => {
-  const editorConfig = getEditorConfig(languageType);
-  const [decorated, setDecorated] = useState(false);
-
-  // Inject comment only once when content is loaded
-  // TODO: UPDATE THIS WTH DYNAMIC DECODED STRING ONCE API INTEGRATED
-  useEffect(() => {
-    if (queryString?.startsWith && !queryString.startsWith(FIXED_COMMENT)) {
-      onChange(`${FIXED_COMMENT}\n${queryString}`);
-    }
-  }, [queryString, onChange]);
+  const editorConfig = useMemo(() => getEditorConfig(languageType), [languageType]);
 
   const onEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    // Decorate the first line with a comment style if not already decorated
-    if (!decorated) {
-      editor.createDecorationsCollection([
-        {
-          range: new monaco.Range(1, 1, 1, 1),
-          options: {
-            isWholeLine: true,
-            className: 'comment-line',
-          },
-        },
-      ]);
-      setDecorated(true);
-    }
+    // Optionally, you can add more editor setup logic here
+    editor.focus();
   };
 
   return (
@@ -77,6 +56,7 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
       onEdit={onQueryEdit}
       onClear={onClearEditor}
       onEditorDidMount={onEditorDidMount}
+      provideCompletionItems={provideCompletionItems}
     />
   );
 };

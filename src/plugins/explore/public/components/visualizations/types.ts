@@ -9,10 +9,14 @@ export enum Positions {
   TOP = 'top',
   BOTTOM = 'bottom',
 }
-export interface ChartTypeMapping {
+export interface ChartMetadata {
   type: string;
-  priority: number; // Higher number means higher priority for rule matching
   name: string;
+  icon: string;
+}
+
+export interface ChartTypeMapping extends ChartMetadata {
+  priority: number; // Higher number means higher priority for rule matching
 }
 
 export interface VisualizationRule {
@@ -24,6 +28,7 @@ export interface VisualizationRule {
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
   ) => boolean;
+  matchIndex: number[];
   chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
   toExpression?: (
     transformedData: Array<Record<string, any>>,
@@ -56,13 +61,29 @@ export enum ThresholdLineStyle {
   DotDashed = 'dot-dashed',
 }
 
-// Styling: Threshold line configuration
 export interface ThresholdLine {
   color: string;
   show: boolean;
   style: ThresholdLineStyle;
   value: number;
   width: number;
+}
+
+export interface ThresholdLine {
+  color: string;
+  show: boolean;
+  style: ThresholdLineStyle;
+  value: number;
+  width: number;
+  name?: string;
+  id?: string; // Unique identifier for each threshold
+}
+
+// Array of threshold lines
+export type ThresholdLines = ThresholdLine[];
+
+export interface TooltipOptions {
+  mode: 'all' | 'hidden';
 }
 
 // Styling: Grid configuration

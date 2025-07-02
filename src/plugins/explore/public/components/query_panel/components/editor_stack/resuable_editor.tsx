@@ -24,6 +24,7 @@ export interface ReusableEditorProps {
   placeholder?: React.ReactNode;
   editorType?: EditorType;
   height?: number;
+  provideCompletionItems?: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
 // Map EditorType enum to actual CSS class prefixes
@@ -52,6 +53,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
   clearText,
   height = 32, // default height
   editorType = EditorType.Query,
+  provideCompletionItems,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
@@ -103,10 +105,13 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         label: i18n.translate('explore.queryPanel.reusableEditor.run', {
           defaultMessage: 'Run',
         }),
-        keybindings: [monaco.KeyCode.Enter],
+        // eslint-disable-next-line no-bitwise
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1.5,
         run: () => {
+          // Close autocomplete if open
+          editor.trigger('keyboard', 'hideSuggestWidget', {});
           const val = editor.getValue();
           onRun(val);
           onEdit();
@@ -146,10 +151,55 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         },
       });
 
+      // Add Tab key handling to trigger next autosuggestions after selection
+      editor.addCommand(monaco.KeyCode.Tab, () => {
+        // First accept the selected suggestion
+        editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
+
+        // Then retrigger suggestions after a short delay
+        setTimeout(() => {
+          editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        }, 100);
+      });
+
+      // Add Enter key handling for suggestions
+      editor.addCommand(monaco.KeyCode.Enter, () => {
+        // Check if suggestion widget is visible by checking for any suggestion context
+        const contextKeyService = (editor as any)._contextKeyService;
+        const suggestWidgetVisible = contextKeyService?.getContextKeyValue('suggestWidgetVisible');
+
+        if (suggestWidgetVisible) {
+          // Accept the selected suggestion and trigger next suggestions
+          editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
+          setTimeout(() => {
+            editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+          }, 100);
+        } else {
+          // Run the query if no suggestions are visible
+          const val = editor.getValue();
+          onRun(val);
+          onEdit();
+        }
+      });
+
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
-        setEditorHeight(contentHeight);
-        editor.layout({ width: editor.getLayoutInfo().width, height: contentHeight });
+        const maxHeight = 100;
+        const finalHeight = Math.min(contentHeight, maxHeight);
+
+        setEditorHeight(finalHeight);
+
+        editor.layout({
+          width: editor.getLayoutInfo().width,
+          height: finalHeight,
+        });
+
+        editor.updateOptions({
+          scrollBeyondLastLine: false,
+          scrollbar: {
+            vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
+          },
+        });
       });
 
       onEditorDidMount?.(editor);
@@ -170,7 +220,7 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
         className={`${editorClassPrefix} ${isReadOnly ? `${editorClassPrefix}--readonly` : ''} ${
           editorIsFocused && !isReadOnly ? `${editorClassPrefix}--focused` : ''
         }`}
-        data-test-subj={`explore${editorClassPrefix}__multiLine`}
+        data-test-subj="exploreReusableEditor"
       >
         <CodeEditor
           height={editorHeight}
@@ -181,11 +231,26 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
           options={editorConfig.options}
           languageConfiguration={editorConfig.languageConfiguration}
           triggerSuggestOnFocus={editorConfig.triggerSuggestOnFocus}
+          useLatestTheme={true}
+          suggestionProvider={{
+            triggerCharacters: [' '],
+            provideCompletionItems: async (model, position, context, token) => {
+              // If a custom completion provider is provided
+              if (provideCompletionItems) {
+                return provideCompletionItems(model, position, context, token);
+              }
+              return { suggestions: [] };
+            },
+          }}
         />
 
-        {!value && !editorIsFocused && !isReadOnly && (
-          <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
-        )}
+        {!value &&
+          !editorIsFocused &&
+          !isReadOnly &&
+          placeholder &&
+          editorType !== EditorType.Query && (
+            <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
+          )}
 
         {isReadOnly && (
           <EditToolbar

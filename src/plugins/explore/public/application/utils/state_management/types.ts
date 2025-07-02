@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { RootState } from './store';
+
 /**
  * Enum for query result status
  */
@@ -37,3 +39,9 @@ export interface QueryStatus {
   elapsedMs: number;
   startTime: number;
 }
+
+/**
+ * Application state without query state (used for URL persistence)
+ * Query state is handled separately in URL persistence
+ */
+export type AppState = Omit<RootState, 'query'>;

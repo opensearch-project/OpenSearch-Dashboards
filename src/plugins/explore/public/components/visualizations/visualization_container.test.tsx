@@ -6,20 +6,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { VisualizationContainer } from './visualization_container';
-import { VisFieldType } from './types';
-import { ResultStatus } from '../../application/legacy/discover/application/view_components/utils/use_search';
-
-// Define a minimal OpenSearchSearchHit type for testing
-interface OpenSearchSearchHit {
-  _index: string;
-  _type: string;
-  _id: string;
-  _score: number;
-  _source: Record<string, any>;
-  _version?: number;
-  fields?: Record<string, any>;
-  highlight?: Record<string, any>;
-}
 
 // Mock the visualization module
 jest.mock('./visualization');
@@ -97,23 +83,6 @@ const mockVisualizationType = {
 };
 
 describe('VisualizationContainer', () => {
-  const defaultProps = {
-    rows: [
-      {
-        _index: 'test-index',
-        _type: 'test-type',
-        _id: 'test-id',
-        _score: 1,
-        _source: { x: 1, y: 2 },
-      },
-    ] as OpenSearchSearchHit[],
-    fieldSchema: [
-      { name: 'y', type: VisFieldType.Numerical },
-      { name: 'x', type: VisFieldType.Date },
-    ],
-    status: ResultStatus.READY,
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -157,7 +126,7 @@ describe('VisualizationContainer', () => {
       useVisualizationRegistry: jest.fn(),
     }));
 
-    const { container } = render(<VisualizationContainer {...defaultProps} />);
+    const { container } = render(<VisualizationContainer />);
     expect(container.firstChild).toBeNull();
   });
 });

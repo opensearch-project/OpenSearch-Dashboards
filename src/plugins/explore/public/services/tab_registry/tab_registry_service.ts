@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Query } from '../../../../data/common';
-import { ResultStatus } from '../../application/legacy/discover/application/view_components/utils/use_search';
+import { QueryState } from '../../application/utils/state_management/slices';
+import { ResultStatus } from '../../application/utils/state_management/types';
 
 /**
  * Props passed to tab components
  */
 export interface TabComponentProps {
-  query: Query;
+  query: QueryState;
   results: Record<string, unknown>;
   status: ResultStatus;
   error: Error | null;
@@ -29,8 +29,8 @@ export interface TabDefinition {
   // Language-aware query handling
   supportedLanguages: string[];
 
-  // Transform complete query object instead of just string (now optional)
-  prepareQuery?: (query: Query) => Query;
+  // Transform query string for cache key generation
+  prepareQuery?: (queryString: string) => string;
 
   // Optional results processor for raw results
   resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;

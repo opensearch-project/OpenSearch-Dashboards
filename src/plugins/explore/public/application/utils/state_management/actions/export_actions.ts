@@ -5,13 +5,15 @@
 
 import { Dispatch } from 'redux';
 import { saveAs } from 'file-saver';
+// TODO: What is this import?
 import { createTabCacheKey } from './query_actions';
+import { ExploreServices } from '../../../../types';
 
 /**
  * Redux Thunk for exporting data to CSV
  * Uses existing results from the Redux store
  */
-export const exportToCsv = (options: { fileName?: string; services?: any } = {}) => {
+export const exportToCsv = (options: { fileName?: string; services?: ExploreServices } = {}) => {
   return (dispatch: Dispatch, getState: () => any) => {
     const state = getState();
     const { activeTabId } = state.ui;
@@ -94,7 +96,7 @@ function generateCsv(rows: any[], indexPattern: any, columns: string[]) {
  * Creates a new SearchSource to fetch more data than is in the cache
  */
 export const exportMaxSizeCsv = (
-  options: { maxSize?: number; fileName?: string; services?: any } = {}
+  options: { maxSize?: number; fileName?: string; services?: ExploreServices } = {}
 ) => {
   return async (dispatch: Dispatch, getState: () => any) => {
     const state = getState();

@@ -4,14 +4,19 @@
  */
 
 import { RootState } from '../store';
-import { ResultStatus } from '../types';
+import { ResultStatus, AppState } from '../types';
+import { ExploreServices } from '../../../../types';
+import { LegacyState, QueryState, ResultsState, SystemState, TabState, UIState } from '../slices';
+import { Dataset, DataStructure } from '../../../../../../data/common';
+import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
+import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
+import { defaultMetricChartStyles } from '../../../../components/visualizations/metric/metric_vis_config';
 
 /**
  * Persists Redux state to URL
- * This function is called after each state change
  */
-export const persistReduxState = (state: RootState, services: any) => {
-  if (state.ui.transaction?.inProgress) return;
+export const persistReduxState = (state: RootState, services: ExploreServices) => {
+  if (!services.osdUrlStateStorage) return;
   try {
     // Sync up _q (Query state) to URL state
     services.osdUrlStateStorage.set('_q', state.query, { replace: true });
@@ -34,7 +39,7 @@ export const persistReduxState = (state: RootState, services: any) => {
 /**
  * Loads Redux state from URL or returns default state
  */
-export const loadReduxState = async (services: any): Promise<any> => {
+export const loadReduxState = async (services: ExploreServices): Promise<RootState> => {
   try {
     // Use the osdUrlStateStorage from services
     if (!services.osdUrlStateStorage) {
@@ -42,48 +47,52 @@ export const loadReduxState = async (services: any): Promise<any> => {
     }
 
     // Get URL state
-    const queryState = services.osdUrlStateStorage.get('_q');
-    const appState = services.osdUrlStateStorage.get('_a');
+    const queryState = services.osdUrlStateStorage.get('_q') as QueryState | null;
+    const appState = services.osdUrlStateStorage.get('_a') as AppState | null;
 
     // Query state handling
-    let finalQueryState;
-    if (queryState && queryState.dataset) {
+    let finalQueryState: QueryState;
+    if (queryState?.dataset) {
       finalQueryState = queryState;
     } else {
       finalQueryState = await getPreloadedQueryState(services);
     }
     services.data.query.queryString.setQuery(finalQueryState);
+    const timefilter = services?.data?.query?.timefilter?.timefilter;
+    if (timefilter) {
+      services.data.query.queryString.addToQueryHistory(finalQueryState, timefilter.getTime());
+    }
 
     // Only run preload functions for missing sections
-    const finalUIState = appState?.ui || (await getPreloadedUIState(services));
-    const finalResultsState = appState?.results || (await getPreloadedResultsState(services));
-    const finalTabState = appState?.tab || (await getPreloadedTabState(services));
-    const finalLegacyState = appState?.legacy || (await getPreloadedLegacyState(services));
+    const finalUIState = appState?.ui || getPreloadedUIState(services);
+    const finalResultsState = appState?.results || getPreloadedResultsState(services);
+    const finalTabState = appState?.tab || getPreloadedTabState(services);
+    const finalLegacyState = appState?.legacy || getPreloadedLegacyState(services);
+    const finalSystemState = getPreloadedSystemState(services);
 
-    const finalState = {
+    return {
       query: finalQueryState,
       ui: finalUIState,
       results: finalResultsState,
       tab: finalTabState,
       legacy: finalLegacyState,
+      system: finalSystemState,
     };
-
-    return finalState;
   } catch (err) {
     return await getPreloadedState(services); // Fallback to full preload
   }
 };
 
 /**
- * Get preloaded state for each slice (following vis_builder pattern)
- * NOW INCLUDES DATASET INITIALIZATION via getPreloadedQueryState
+ * Get preloaded state for each slice
  */
-export const getPreloadedState = async (services: any): Promise<any> => {
-  const queryState = await getPreloadedQueryState(services); // NOW includes dataset initialization
-  const uiState = await getPreloadedUIState(services);
-  const resultsState = await getPreloadedResultsState(services);
-  const tabState = await getPreloadedTabState(services);
-  const legacyState = await getPreloadedLegacyState(services);
+export const getPreloadedState = async (services: ExploreServices): Promise<RootState> => {
+  const queryState = await getPreloadedQueryState(services);
+  const uiState = getPreloadedUIState(services);
+  const resultsState = getPreloadedResultsState(services);
+  const tabState = getPreloadedTabState(services);
+  const legacyState = getPreloadedLegacyState(services);
+  const systemState = getPreloadedSystemState(services);
 
   return {
     query: queryState, // Contains dataset, query, and language
@@ -91,14 +100,51 @@ export const getPreloadedState = async (services: any): Promise<any> => {
     results: resultsState,
     tab: tabState,
     legacy: legacyState,
+    system: systemState,
   };
 };
 
 /**
- * Get preloaded query state with dataset initialization
- * Uses the same approach as DatasetSelector to get default dataset
+ * Fetches the first available dataset using the data plugin's dataset service
  */
-const getPreloadedQueryState = async (services: any) => {
+const fetchFirstAvailableDataset = async (
+  services: ExploreServices
+): Promise<Dataset | undefined> => {
+  try {
+    const datasetService = services.data?.query?.queryString?.getDatasetService();
+    if (!datasetService) {
+      return undefined;
+    }
+
+    const typeConfig: DatasetTypeConfig | undefined = datasetService.getType('INDEX_PATTERN');
+    if (!typeConfig) {
+      return undefined;
+    }
+
+    const dataPluginServices: IDataPluginServices = {
+      ...services,
+      storage: services.storage as any,
+    };
+
+    const fetchedIndexPatternDataStructures: DataStructure = await typeConfig.fetch(
+      dataPluginServices,
+      []
+    );
+    const fetchedDatasets: Dataset[] =
+      fetchedIndexPatternDataStructures.children?.map((pattern: DataStructure) =>
+        typeConfig.toDataset([pattern])
+      ) ?? [];
+
+    return fetchedDatasets.length > 0 ? fetchedDatasets[0] : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+/**
+ * Resolves the dataset to use for the initial query state
+ */
+const resolveDataset = async (services: ExploreServices): Promise<Dataset | undefined> => {
   // First, try to get dataset from QueryStringManager (same as ConnectedDatasetSelector)
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
   const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
@@ -107,41 +153,29 @@ const getPreloadedQueryState = async (services: any) => {
 
   // If no dataset found, fetch available datasets and select first one (same as DatasetSelector)
   if (!selectedDataset) {
-    try {
-      const datasetService = services.data?.query?.queryString?.getDatasetService();
-      if (datasetService) {
-        const typeConfig = datasetService.getType('INDEX_PATTERN'); // DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-        if (typeConfig) {
-          const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
-          const fetchedDatasets =
-            fetchedIndexPatternDataStructures.children?.map((pattern: any) =>
-              typeConfig.toDataset([pattern])
-            ) ?? [];
-
-          if (fetchedDatasets.length > 0) {
-            selectedDataset = fetchedDatasets[0];
-          }
-        }
-      }
-    } catch (error) {
-      // Ignore errors when parsing URL state
-    }
+    selectedDataset = await fetchFirstAvailableDataset(services);
   }
 
-  // If we have a dataset, generate query with PPL language
-  if (selectedDataset) {
-    // Currently set default language to PPL for explore
-    const datasetWithPPL = { ...selectedDataset, language: 'PPL' };
-    const queryWithDefaults = services.data.query.queryString.getInitialQueryByDataset(
-      datasetWithPPL
-    );
+  return selectedDataset;
+};
 
-    return queryWithDefaults;
+/**
+ * Get preloaded query state with dataset initialization
+ */
+const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryState> => {
+  // Resolve the dataset to use for the initial query state
+  const selectedDataset = await resolveDataset(services);
+
+  if (selectedDataset) {
+    return services.data.query.queryString.getInitialQueryByDataset({
+      ...selectedDataset,
+      language: EXPLORE_DEFAULT_LANGUAGE,
+    });
   } else {
     return {
       query: '',
-      language: 'PPL',
-      dataset: undefined,
+      language: EXPLORE_DEFAULT_LANGUAGE,
+      dataset: selectedDataset,
     };
   }
 };
@@ -149,37 +183,47 @@ const getPreloadedQueryState = async (services: any) => {
 /**
  * Get preloaded UI state
  */
-const getPreloadedUIState = async (services: any) => {
+const getPreloadedUIState = (services: ExploreServices): UIState => {
   return {
     activeTabId: 'logs',
+    showDatasetFields: true,
+    prompt: '',
+  };
+};
+
+/**
+ * Get preloaded system state
+ */
+const getPreloadedSystemState = (services: ExploreServices): SystemState => {
+  return {
     status: ResultStatus.UNINITIALIZED,
-    error: null,
-    abortController: null,
-    transaction: {
-      inProgress: false,
-      pendingActions: [],
-    },
   };
 };
 
 /**
  * Get preloaded results state (empty - not persisted)
  */
-const getPreloadedResultsState = async (services: any) => {
+const getPreloadedResultsState = (services: ExploreServices): ResultsState => {
   return {};
 };
 
 /**
  * Get preloaded tab state
  */
-const getPreloadedTabState = async (services: any) => {
-  return {};
+const getPreloadedTabState = (services: ExploreServices): TabState => {
+  return {
+    logs: {},
+    visualizations: {
+      styleOptions: defaultMetricChartStyles,
+      chartType: 'metric',
+    },
+  };
 };
 
 /**
  * Get preloaded legacy state (vis_builder approach - defaults only, no saved object loading)
  */
-const getPreloadedLegacyState = async (services: any) => {
+const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
   // Only return defaults - NO saved object loading (like vis_builder)
   const defaultColumns = services.uiSettings?.get('defaultColumns') || ['_source'];
 

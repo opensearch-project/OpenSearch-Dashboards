@@ -37,7 +37,7 @@ export const createPieSpec = (
       type: 'arc',
       innerRadius: styleOptions.exclusive?.donut ? 30 : 0,
       radius: 130,
-      tooltip: styleOptions?.addTooltip,
+      tooltip: styleOptions?.tooltipOptions?.mode === 'all',
     },
   };
 

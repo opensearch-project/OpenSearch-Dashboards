@@ -4,6 +4,8 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { SavedObjectAttributes, SimpleSavedObject } from 'opensearch-dashboards/public';
+
 import { UiActionsStart } from '../../../ui_actions/public';
 import { getServices } from '../application/legacy/discover/opensearch_dashboards_services';
 import {
@@ -15,6 +17,7 @@ import { TimeRange } from '../../../data/public';
 import { ExploreInput, ExploreOutput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { ExploreEmbeddable } from './explore_embeddable';
+import { VisualizationRegistryService } from '../services/visualization_registry_service';
 
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -29,11 +32,29 @@ export class ExploreEmbeddableFactory
       defaultMessage: 'Saved explore',
     }),
     type: 'explore',
-    getIconForSavedObject: () => 'search',
-    includeFields: ['kibanaSavedObjectMeta'],
+    getIconForSavedObject: ({ attributes }: SimpleSavedObject<SavedObjectAttributes>) => {
+      let iconType = '';
+      try {
+        const vis = JSON.parse(attributes.visualization as string);
+        const chart = this.visualizationRegistryService
+          .getRegistry()
+          .getAvailableChartTypes()
+          .find((t) => t.type === vis.chartType);
+        if (chart) {
+          iconType = chart.icon;
+        }
+      } catch (e) {
+        iconType = '';
+      }
+      return iconType;
+    },
+    includeFields: ['kibanaSavedObjectMeta', 'visualization'],
   };
 
-  constructor(private getStartServices: () => Promise<StartServices>) {}
+  constructor(
+    private getStartServices: () => Promise<StartServices>,
+    private readonly visualizationRegistryService: VisualizationRegistryService
+  ) {}
 
   public canCreateNew() {
     return false;
@@ -57,6 +78,7 @@ export class ExploreEmbeddableFactory
     const services = getServices();
     const filterManager = services.filterManager;
     const url = await services.getSavedExploreUrlById(savedObjectId);
+    // TODO: Finalize this once flavor and view route are implemented
     const editUrl = services.addBasePath(`/app/explorer/discover${url}`);
 
     try {
@@ -65,6 +87,7 @@ export class ExploreEmbeddableFactory
         throw new Error('Saved object not found');
       }
       const indexPattern = savedObject.searchSource.getField('index');
+      const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
       return new ExploreEmbeddableClass(
         {
@@ -77,6 +100,7 @@ export class ExploreEmbeddableFactory
           services,
         },
         input,
+        executeTriggerActions,
         parent
       );
     } catch (e) {

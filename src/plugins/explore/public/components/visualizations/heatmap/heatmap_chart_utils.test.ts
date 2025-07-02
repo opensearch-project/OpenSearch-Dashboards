@@ -3,13 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { createlabelLayer, getDataBound, addTransform } from './heatmap_chart_utils';
-import { LabelAggregationType, VisFieldType, ColorSchemas, ScaleType } from '../types';
+import { LabelAggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
 
 import { defaultHeatmapChartStyles } from './heatmap_vis_config';
 
 describe('createlabelLayer', () => {
-  const xAxis = { id: 2, name: 'category', schema: VisFieldType.Categorical, column: 'category' };
-  const yAxis = { id: 3, name: 'product', schema: VisFieldType.Categorical, column: 'product' };
+  const xAxis: VisColumn = {
+    id: 2,
+    name: 'category',
+    schema: VisFieldType.Categorical,
+    column: 'category',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  };
+  const yAxis: VisColumn = {
+    id: 3,
+    name: 'product',
+    schema: VisFieldType.Categorical,
+    column: 'product',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  };
 
   const colorField = 'value';
 

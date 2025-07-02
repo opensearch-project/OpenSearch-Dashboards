@@ -12,7 +12,7 @@ import {
   removeColumn,
   moveColumn,
   setSort,
-} from '../../../../../utils/state_management/slices/legacy_slice';
+} from '../../../../../utils/state_management/slices';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { SortOrder } from '../../../../../../types/saved_explore_types';
 import {
@@ -27,7 +27,7 @@ import { ExploreServices } from '../../../../../../types';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { popularizeField } from '../../helpers/popularize_field';
 import { filterColumns } from '../utils/filter_columns';
-import { ResultStatus } from '../utils';
+import { ResultStatus } from '../../../../../utils/state_management/types';
 
 interface Props {
   scrollToTop?: () => void;

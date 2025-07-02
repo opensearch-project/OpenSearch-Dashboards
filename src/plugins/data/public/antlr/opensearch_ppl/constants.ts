@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OpenSearchPPLParser } from './default_ppl_grammar/.generated/OpenSearchPPLParser';
+import { OpenSearchPPLParser } from '@osd/antlr-grammar';
 
 export const PPL_AGGREGATE_FUNCTIONS = [
   'avg',
@@ -24,4 +24,5 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<number, string>([
   [OpenSearchPPLParser.PLUS, '2'],
   [OpenSearchPPLParser.MINUS, '2'],
   [OpenSearchPPLParser.SOURCE, '2'],
+  [OpenSearchPPLParser.RT_PRTHS, '2'],
 ]);

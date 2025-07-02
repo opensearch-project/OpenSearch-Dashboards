@@ -1,7 +1,8 @@
 .exploreVisContainer {
   display: flex;
   min-height: 500px;
-  overflow: hidden;
+  overflow-y: hidden; 
+  overflow-x: auto; 
 }
 
 .exploreVisPanel {
@@ -13,17 +14,17 @@
 .exploreVisPanel__inner {
   flex: 1 1 auto;
   overflow: auto;
+
+  .visChart__container {
+    overflow: unset;
+  }
 }
 
 .exploreVisStylePanel {
-  min-height: 500px;
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   width: 300px;
-}
-
-.exploreVisStylePanel__inner {
-  flex: 1 1 auto;
+  height: 600px;
   overflow: auto;
-  padding-right: 8px;
 }

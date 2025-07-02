@@ -127,6 +127,7 @@ import {
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
 import { DashboardProvider, DashboardServices } from './types';
+import { bootstrap } from './ui_triggers';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -219,6 +220,9 @@ export class DashboardPlugin
     core: CoreSetup<StartDependencies, DashboardStart>,
     { share, uiActions, embeddable, home, urlForwarding, data, usageCollection }: SetupDependencies
   ): DashboardSetup {
+    // bootstrap UI Actions
+    bootstrap(uiActions);
+
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
       DashboardFeatureFlagConfig
     >();
@@ -403,6 +407,7 @@ export class DashboardPlugin
         const history = createHashHistory(); // need more research
         const services: DashboardServices = {
           ...coreStart,
+          uiActions: pluginsStart.uiActions,
           pluginInitializerContext: this.initializerContext,
           opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
           history,

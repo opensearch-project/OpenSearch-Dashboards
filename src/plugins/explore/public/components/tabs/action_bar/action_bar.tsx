@@ -3,17 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { memo } from 'react';
-import { DiscoverResultsActionBar } from '../../../application/legacy/discover/application/components/results_action_bar/results_action_bar';
+import { DiscoverResultsActionBar } from './results_action_bar/results_action_bar';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useSelector } from '../../../application/legacy/discover/application/utils/state_management';
-import {
-  selectRows,
-  selectSavedSearch,
-  selectTotalHits,
-} from '../../../application/utils/state_management/selectors';
+import { selectSavedSearch } from '../../../application/utils/state_management/selectors';
 import { useIndexPatternContext } from '../../../application/components/index_pattern_context';
-import { LOGS_VIEW_ID } from '../../../../common';
+import { ExploreFlavor } from '../../../../common';
+import { useTabResults } from '../../../application/utils/hooks/use_tab_results';
 
 /**
  * Logs tab component for displaying log entries
@@ -22,11 +19,23 @@ import { LOGS_VIEW_ID } from '../../../../common';
 const ActionBarComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { indexPattern } = useIndexPatternContext();
+  const { results } = useTabResults();
   const { core } = services;
 
   const savedSearch = useSelector(selectSavedSearch);
-  const rows = useSelector(selectRows);
-  const totalHits = useSelector(selectTotalHits);
+  const { inspector, inspectorAdapters } = services;
+
+  const openInspector = () => {
+    if (inspector) {
+      inspector.open(inspectorAdapters, {
+        title: savedSearch,
+      });
+    }
+  };
+
+  const rows = results?.hits?.hits || [];
+  const totalHits = (results?.hits?.total as any)?.value || results?.hits?.total || 0;
+  const elapsedMs = results?.elapsedMs;
 
   return (
     <DiscoverResultsActionBar
@@ -34,11 +43,13 @@ const ActionBarComponent = () => {
       showResetButton={!!savedSearch}
       resetQuery={() => {
         core.application.navigateToApp('explore', {
-          path: `${LOGS_VIEW_ID}#/view/${savedSearch}`,
+          path: `${ExploreFlavor.Logs}#/view/${savedSearch}`,
         });
       }}
       rows={rows}
+      elapsedMs={elapsedMs}
       indexPattern={indexPattern}
+      inspectionHanlder={openInspector}
     />
   );
 };

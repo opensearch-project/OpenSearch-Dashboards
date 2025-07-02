@@ -14,7 +14,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
-  EuiTitle,
 } from '@elastic/eui';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 
@@ -61,16 +60,6 @@ export const BasicVisOptions = ({
 
   return (
     <EuiPanel paddingSize="s">
-      <EuiTitle size="xs">
-        <h4>
-          {i18n.translate('explore.vis.gridOptions.exclusiveSettings', {
-            defaultMessage: 'Exclusive Settings',
-          })}
-        </h4>
-      </EuiTitle>
-
-      <EuiSpacer size="s" />
-
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.showLine', {
           defaultMessage: 'Show line',
