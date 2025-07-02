@@ -219,13 +219,13 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
             <EuiFlexItem grow={true} style={{ width: '100%' }}>
               <DebouncedText
                 value={title}
-                placeholder="Save Explore name"
+                placeholder="Save discover title"
                 onChange={(text) => {
                   setIsTitleOrDashboardTitleDupilcate(false);
                   setTitle(text);
                 }}
                 label={i18n.translate('explore.addtoDashboardModal.saveExploreName', {
-                  defaultMessage: 'Save Explore name',
+                  defaultMessage: 'Save discover title',
                 })}
               />
             </EuiFlexItem>
