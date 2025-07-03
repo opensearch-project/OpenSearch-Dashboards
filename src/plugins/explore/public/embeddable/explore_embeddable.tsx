@@ -180,16 +180,16 @@ export class ExploreEmbeddable
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);
     searchSource.setParent(this.filtersSearchSource);
-    const actualQuery = this.savedExplore.searchSource.getField('query');
+    const query = this.savedExplore.searchSource.getField('query');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const activeTab = uiState.activeTab;
     // If the active tab is logs, we need to prepare the query for the logs tab
-    if (activeTab === 'logs' && actualQuery) {
-      actualQuery.query = defaultPrepareQuery(actualQuery?.query as string);
+    if (activeTab === 'logs' && query) {
+      query.query = defaultPrepareQuery(query?.query as string);
     }
     searchSource.setFields({
       index: indexPattern,
-      query: actualQuery,
+      query,
       highlightAll: true,
       version: true,
     });

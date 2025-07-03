@@ -110,8 +110,7 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
               //   // TODO:finalize this until flavor and view route are finalized
               //   path: `${flavor}#/view/${id}`,
               // });
-              // application.navigateToUrl(`/app/explore/${flavor}/#/view/${id}`);
-              // window.location.href = `/app/explore/${flavor}/#/view/${id}`;
+              // NOTE: Use this for now instead of navigateToApp to avoid the top nav disappearing
               const url = application.getUrlForApp(`explore/${flavor}`, { path: `#/view/${id}` });
               application.navigateToUrl(url);
             }
