@@ -5,13 +5,18 @@
 
 import {
   EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingChart,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -21,6 +26,100 @@ import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { SpanDetailFlyout } from './span_detail_flyout';
 import { PanelTitle } from '../utils/helper_functions';
 import { GanttChart } from '../gantt_chart_vega/gantt_chart_vega';
+
+// Service Legend component to display in the header
+interface ServiceLegendProps {
+  colorMap: Record<string, string>;
+  data: Span[];
+}
+
+const ServiceLegend: React.FC<ServiceLegendProps> = ({ colorMap, data }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  // Extract services in the order they appear in the data
+  const servicesInOrder = useMemo(() => {
+    const serviceSet = new Set<string>();
+    // Add services in the order they appear in the data
+    data.forEach((span: Span) => {
+      const serviceName = span.serviceName;
+      if (serviceName && colorMap[serviceName]) {
+        serviceSet.add(serviceName);
+      }
+    });
+    return Array.from(serviceSet);
+  }, [data, colorMap]);
+
+  if (servicesInOrder.length === 0) {
+    return null;
+  }
+
+  const togglePopover = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
+  const legendButton = (
+    <EuiButtonEmpty
+      size="s"
+      onClick={togglePopover}
+      iconType="inspect"
+      data-test-subj="service-legend-toggle"
+      isSelected={isPopoverOpen}
+    >
+      Service legend
+    </EuiButtonEmpty>
+  );
+
+  const legendContent = (
+    <div style={{ width: '200px' }}>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <strong>Service legend</strong>
+          </EuiText>
+        </EuiFlexItem>
+
+        {servicesInOrder.map((service) => (
+          <EuiFlexItem grow={false} key={`service-legend-${service}`}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: colorMap[service],
+                    borderRadius: '2px',
+                    border: '1px solid #fff',
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  <span>{service}</span>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </div>
+  );
+
+  return (
+    <EuiPopover
+      button={legendButton}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="s"
+      anchorPosition="downRight"
+    >
+      {legendContent}
+    </EuiPopover>
+  );
+};
 
 export interface Span {
   traceId: string;
@@ -94,19 +193,21 @@ export function SpanDetailPanel(props: {
     };
   }, []);
 
-  const addSpanFilter = (field: string, value: any) => {
-    const newFilters = [...props.spanFilters];
-    const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
-    if (index === -1) {
-      newFilters.push({ field, value });
-    } else {
-      newFilters.splice(index, 1, { field, value });
-    }
-    props.setSpanFiltersWithStorage(newFilters);
-  };
-
-  // Destructure props to avoid the entire props object as a dependency
   const { spanFilters, setSpanFiltersWithStorage } = props;
+
+  const addSpanFilter = useCallback(
+    (field: string, value: any) => {
+      const newFilters = [...spanFilters];
+      const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
+      if (index === -1) {
+        newFilters.push({ field, value });
+      } else {
+        newFilters.splice(index, 1, { field, value });
+      }
+      setSpanFiltersWithStorage(newFilters);
+    },
+    [spanFilters, setSpanFiltersWithStorage]
+  );
 
   const removeSpanFilter = useCallback(
     (field: string) => {
@@ -211,6 +312,14 @@ export function SpanDetailPanel(props: {
     }
   }, [props.payloadData]);
 
+  const errorCount = useMemo(() => {
+    return parsedData.filter((span: Span) => span.status?.code === 2).length;
+  }, [parsedData]);
+
+  const handleErrorFilterClick = useCallback(() => {
+    addSpanFilter('status.code', 2);
+  }, [addSpanFilter]);
+
   // Calculate dynamic height based on number of spans
   const calculateGanttHeight = (spanCount: number): number => {
     const rowHeight = 35;
@@ -228,7 +337,6 @@ export function SpanDetailPanel(props: {
       return Math.max(150, spanCount * rowHeight + baseHeight);
     }
 
-    // For larger datasets, use progressive scaling
     const calculatedHeight = spanCount * rowHeight + baseHeight;
     const minHeight = 200;
     const maxHeight = 600;
@@ -255,12 +363,34 @@ export function SpanDetailPanel(props: {
       <EuiPanel data-test-subj="span-gantt-chart-panel">
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <PanelTitle title="Spans" totalItems={parsedData.length} />
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <PanelTitle title="Spans" totalItems={parsedData.length} />
+                  </EuiFlexItem>
+                  {errorCount > 0 && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content="Click to apply filter">
+                        <EuiButton
+                          onClick={handleErrorFilterClick}
+                          data-test-subj="error-count-button"
+                          size="s"
+                          color="secondary"
+                        >
+                          View Errors ({errorCount})
+                        </EuiButton>
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
+              <EuiFlexItem />
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <ServiceLegend colorMap={props.colorMap || {}} data={parsedData} />
+                  </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonGroup
                       isDisabled={props.isGanttChartLoading}

@@ -111,7 +111,7 @@ export function createGanttSpec(
             strokeWidth: { value: 1 },
             tooltip: {
               signal:
-                "{'Service': datum.serviceName, 'Name': datum.name, 'Duration': datum.duration + ' ms', 'Start': datum.startTime + ' ms'}",
+                "datum.hasError ? {'⚠️ Error': 'click for details', 'Service': datum.serviceName, 'Name': datum.name, 'Duration': datum.duration + ' ms', 'Start': datum.startTime + ' ms'} : {'Service': datum.serviceName, 'Name': datum.name, 'Duration': datum.duration + ' ms', 'Start': datum.startTime + ' ms'}",
             },
             cursor: { value: 'pointer' },
           },
@@ -206,11 +206,11 @@ export function createGanttSpec(
             fontSize: { value: 10 },
             fontWeight: { value: 'bold' },
             baseline: { value: 'middle' },
-            fill: { value: '#000' },
           },
           update: {
             x: { scale: 'xscale', field: 'endTime', offset: 8 },
-            text: { signal: 'datum.duration + " ms"' },
+            text: { signal: 'datum.hasError ? "Error" : datum.duration + " ms"' },
+            fill: { signal: 'datum.hasError ? "#c14125" : "#000"' },
           },
         },
       },
