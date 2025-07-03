@@ -74,7 +74,9 @@ export const histogramResultsProcessor = (
   interval: string
 ) => {
   const result = defaultResultsProcessor(rawResults, indexPattern);
-  const histogramConfigs = createHistogramConfigs(indexPattern, interval, data);
+  const histogramConfigs = indexPattern.timeFieldName
+    ? createHistogramConfigs(indexPattern, interval, data)
+    : undefined;
 
   if (histogramConfigs) {
     const bucketAggConfig = histogramConfigs.aggs[1] as IBucketDateHistogramAggConfig;
