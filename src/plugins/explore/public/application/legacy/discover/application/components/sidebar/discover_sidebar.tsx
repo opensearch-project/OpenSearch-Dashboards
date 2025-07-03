@@ -42,7 +42,6 @@ import { I18nProvider } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
 import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../../../../data/public';
-import { FIELDS_LIMIT_SETTING } from '../../../../../../../common/legacy/discover';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldDataFrame } from './discover_field_data_frame';
@@ -90,10 +89,6 @@ export interface DiscoverSidebarProps {
    */
   onCreateIndexPattern: () => void;
   /**
-   * Callback function to normalize the index pattern
-   */
-  onNormalize: () => void;
-  /**
    * Currently selected index pattern
    */
   selectedIndexPattern?: IndexPattern;
@@ -102,12 +97,10 @@ export interface DiscoverSidebarProps {
 
 export function DiscoverSidebar(props: DiscoverSidebarProps) {
   const {
-    columns,
     fieldCounts,
     hits,
     onAddField,
     onReorderFields,
-    onNormalize,
     onCreateIndexPattern,
     selectedIndexPattern,
     isEnhancementsEnabledOverride,
@@ -121,11 +114,10 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits, services]);
 
-  const onNormalizeIndexPattern = useCallback(async () => {
-    await onNormalize();
+  const onNormalizeIndexPattern = useCallback(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
-  }, [fieldCounts, onNormalize, selectedIndexPattern]);
+  }, [fieldCounts, selectedIndexPattern]);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -140,20 +132,12 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     [hits, selectedIndexPattern]
   );
 
-  const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
   const shortDotsEnabled = services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
 
-  const {
-    selected: selectedFields,
-    popular: popularFields,
-    unpopular: unpopularFields,
-  } = useMemo(() => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilterState), [
-    fields,
-    columns,
-    popularLimit,
-    fieldCounts,
-    fieldFilterState,
-  ]);
+  const { resultFields, schemaFields } = useMemo(
+    () => groupFields(fields, fieldCounts, fieldFilterState),
+    [fields, fieldCounts, fieldFilterState]
+  );
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];
@@ -185,8 +169,8 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
         destination.droppableId === 'SELECTED_FIELDS'
       ) {
         const fieldListMap = {
-          POPULAR_FIELDS: popularFields,
-          UNPOPULAR_FIELDS: unpopularFields,
+          RESULT_FIELDS: resultFields,
+          SCHEMA_FIELDS: schemaFields,
         };
         const fieldList = fieldListMap[source.droppableId as keyof typeof fieldListMap];
         const field = fieldList[source.index];
@@ -194,7 +178,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
         return;
       }
     },
-    [fields, onAddField, onReorderFields, popularFields, unpopularFields]
+    [fields, onAddField, onReorderFields, resultFields, schemaFields]
   );
 
   if (!selectedIndexPattern || !fields) {
@@ -239,42 +223,29 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
           >
             {(fields.length > 0 || selectedIndexPattern.fieldsLoading) && (
               <>
-                <FieldList
-                  category="selected"
-                  fields={selectedFields}
-                  getDetailsByField={getDetailsByField}
-                  shortDotsEnabled={shortDotsEnabled}
-                  title={i18n.translate(
-                    'explore.discover.fieldChooser.filter.selectedFieldsTitle',
-                    {
-                      defaultMessage: 'Selected fields',
-                    }
-                  )}
-                  {...props}
-                />
-                {popularFields.length > 0 && (
+                {resultFields.length > 0 && (
                   <FieldList
-                    category="popular"
-                    fields={popularFields}
+                    category="result"
+                    fields={resultFields}
                     getDetailsByField={getDetailsByField}
                     shortDotsEnabled={shortDotsEnabled}
-                    title={i18n.translate('explore.discover.fieldChooser.filter.popularTitle', {
-                      defaultMessage: 'Popular fields',
-                    })}
+                    title={i18n.translate(
+                      'explore.discover.fieldChooser.filter.resultFieldsTitle',
+                      {
+                        defaultMessage: 'Result',
+                      }
+                    )}
                     {...props}
                   />
                 )}
                 <FieldList
-                  category="unpopular"
-                  fields={unpopularFields}
+                  category="schema"
+                  fields={schemaFields}
                   getDetailsByField={getDetailsByField}
                   shortDotsEnabled={shortDotsEnabled}
-                  title={i18n.translate(
-                    'explore.discover.fieldChooser.filter.availableFieldsTitle',
-                    {
-                      defaultMessage: 'Available fields',
-                    }
-                  )}
+                  title={i18n.translate('explore.discover.fieldChooser.filter.schemaFieldsTitle', {
+                    defaultMessage: 'Schema',
+                  })}
                   {...props}
                 />
               </>
@@ -287,7 +258,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
 }
 
 interface FieldGroupProps extends DiscoverSidebarProps {
-  category: 'selected' | 'popular' | 'unpopular';
+  category: 'result' | 'schema' | 'selected';
   title: string;
   fields: IndexPatternField[];
   getDetailsByField: (field: IndexPatternField) => FieldDetails;
