@@ -17,6 +17,7 @@ import {
   setQueryState,
 } from '../state_management/slices';
 import { Query } from '../../../../../data/common';
+import { executeQueries } from '../state_management/actions/query_actions';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -68,6 +69,8 @@ export const useInitPage = () => {
           savedExplore.id,
           { type: 'explore' }
         );
+
+        dispatch(executeQueries({ services }));
       }
     }
     if (error) {
@@ -77,7 +80,7 @@ export const useInitPage = () => {
         chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: 'Error' }]);
       }
     }
-  }, [chrome, data.query.queryString, dispatch, error, savedExplore]);
+  }, [chrome, data.query.queryString, dispatch, error, savedExplore, services]);
 
   const pageContext = { savedExplore };
 
