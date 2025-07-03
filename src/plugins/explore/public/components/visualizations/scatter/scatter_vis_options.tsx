@@ -27,21 +27,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   selectedChartType,
   onChartTypeChange,
 }) => {
-  // State to track expanded/collapsed state of each panel
-  const [expandedPanels, setExpandedPanels] = useState({
-    general: false,
-    basic: false,
-    exclusive: false,
-    axes: false,
-  });
-
-  const togglePanel = (panelId: string) => {
-    setExpandedPanels({
-      ...expandedPanels,
-      [panelId]: !expandedPanels[panelId as keyof typeof expandedPanels],
-    });
-  };
-
   const updateStyleOption = <K extends keyof ScatterChartStyleControls>(
     key: K,
     value: ScatterChartStyleControls[K]
