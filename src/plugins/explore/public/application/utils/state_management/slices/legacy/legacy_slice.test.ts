@@ -13,7 +13,6 @@ import {
   moveColumn,
   setSort,
   setInterval,
-  setSavedQuery,
   setIsDirty,
   setLineCount,
   LegacyState,
@@ -25,7 +24,6 @@ describe('legacySlice reducers', () => {
     columns: ['a', 'b', 'c'],
     sort: [['a', 'asc']],
     interval: 'auto',
-    savedQuery: undefined,
     isDirty: false,
     lineCount: undefined,
   };
@@ -36,7 +34,6 @@ describe('legacySlice reducers', () => {
       columns: ['x'],
       sort: [],
       interval: '1h',
-      savedQuery: 'q',
       isDirty: true,
       lineCount: 10,
     };
@@ -98,11 +95,6 @@ describe('legacySlice reducers', () => {
   it('setInterval sets interval', () => {
     const state = legacyReducer(initialState, setInterval('5m'));
     expect(state.interval).toBe('5m');
-  });
-
-  it('setSavedQuery sets savedQuery', () => {
-    const state = legacyReducer(initialState, setSavedQuery('query-id'));
-    expect(state.savedQuery).toBe('query-id');
   });
 
   it('setIsDirty sets isDirty', () => {

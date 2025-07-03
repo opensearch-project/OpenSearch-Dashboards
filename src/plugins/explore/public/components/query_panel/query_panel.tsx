@@ -28,7 +28,6 @@ import {
   setQueryState,
   setQueryWithHistory,
   setShowDatasetFields,
-  setSavedQuery,
   clearResults,
 } from '../../application/utils/state_management/slices';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
@@ -371,25 +370,11 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     return !localQuery?.trim() && !localPrompt?.trim();
   }, [localQuery, localPrompt]);
 
-  const handleClearQuery = () => {
-    dispatch(setSavedQuery(undefined));
-    dispatch(setQueryState({ ...query, query: '' }));
-    setLocalQuery('');
-  };
-
-  const handleLoadSavedQuery = (savedQuery: SavedQuery) => {
-    if (!savedQuery || typeof savedQuery === 'string') {
-      return;
-    }
-    const savedQueryAttributes = savedQuery.attributes.query;
-    dispatch(setQueryState({ ...savedQueryAttributes, dataset: query.dataset }));
-    setLocalQuery(savedQueryAttributes.query);
-    updateSavedQueryId(savedQuery.id);
-  };
-
-  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    dispatch(setSavedQuery(newSavedQueryId));
-  };
+  const handleQueryEditorUpdate = useCallback((newQuery: Query) => {
+    setLocalQuery(
+      typeof newQuery.query === 'string' ? newQuery.query : JSON.stringify(newQuery.query)
+    );
+  }, []);
 
   return (
     <EuiPanel paddingSize="s" className="queryPanel__container">
@@ -411,9 +396,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
             onRunQuery={handleRun}
             onRefreshChange={handleRefreshChange}
             onShowFieldsToggle={handleShowFieldsToggle}
-            onClearQuery={handleClearQuery}
-            onLoadSavedQuery={handleLoadSavedQuery}
-            onSavedQuery={updateSavedQueryId}
+            onQueryEditorUpdate={handleQueryEditorUpdate}
           />
         }
       >
