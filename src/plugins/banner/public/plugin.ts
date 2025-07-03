@@ -17,7 +17,7 @@ import { renderBanner, unmountBanner, setInitialBannerHeight } from './services/
 
 export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart> {
   private readonly bannerService = new BannerService();
-  private bannerApiService: BannerApiService | undefined;
+  private bannerApiService?: BannerApiService;
 
   constructor() {}
 
