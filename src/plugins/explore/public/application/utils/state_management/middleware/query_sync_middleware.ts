@@ -27,14 +27,14 @@ export const createQuerySyncMiddleware = (services: ExploreServices): Middleware
 
         if (!isEqual(queryStringQuery, query)) {
           services.data.query.queryString.setQuery(query);
+        }
 
-          // Add to query history only for user-initiated query executions
-          // This prevents programmatic updates (loading saved queries, clearing, etc.) from polluting history
-          if (action.meta?.addToHistory && query.query?.trim()) {
-            const timefilter = services?.data?.query?.timefilter?.timefilter;
-            if (timefilter) {
-              services.data.query.queryString.addToQueryHistory(query, timefilter.getTime());
-            }
+        // Add to query history only for user-initiated query executions
+        // This prevents programmatic updates (loading saved queries, clearing, etc.) from polluting history
+        if (action.meta?.addToHistory && query.query?.trim()) {
+          const timefilter = services?.data?.query?.timefilter?.timefilter;
+          if (timefilter) {
+            services.data.query.queryString.addToQueryHistory(query, timefilter.getTime());
           }
         }
       }
