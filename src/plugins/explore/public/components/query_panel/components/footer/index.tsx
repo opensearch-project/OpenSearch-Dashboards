@@ -6,7 +6,6 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, OnTimeChangeProps } from '@elastic/eui';
-import { SavedQuery } from 'src/plugins/data/public';
 import { ShowFieldToggle } from './show_field';
 import { SaveQueryButton } from './save_query';
 import { Actions } from './actions';
@@ -38,11 +37,9 @@ interface QueryPanelFooterProps {
   timefilter: any;
   onTimeChange: (props: OnTimeChangeProps) => void;
   onRunQuery: () => void;
-  onClearQuery: () => void;
-  onLoadSavedQuery: (savedQuery: SavedQuery) => void;
   onRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
   onShowFieldsToggle: (enabled: boolean) => void;
-  onSavedQuery: (newSavedQueryId: string | undefined) => void;
+  onQueryEditorUpdate: (query: Query) => void;
 }
 
 export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
@@ -57,13 +54,11 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   query,
   services,
   timefilter,
-  onClearQuery,
-  onLoadSavedQuery,
-  onSavedQuery,
   onTimeChange,
   onRunQuery,
   onRefreshChange,
   onShowFieldsToggle,
+  onQueryEditorUpdate,
 }) => {
   return (
     <div className="queryPanel__footer">
@@ -102,9 +97,8 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                 showDatePicker={showDatePicker}
                 timeFilter={timefilter}
                 query={query}
-                onClearQuery={onClearQuery}
-                onLoadSavedQuery={onLoadSavedQuery}
-                onSavedQuery={onSavedQuery}
+                onQueryExecute={onRunQuery}
+                onQueryEditorUpdate={onQueryEditorUpdate}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

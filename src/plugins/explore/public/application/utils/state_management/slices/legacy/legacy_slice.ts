@@ -14,6 +14,9 @@ export interface LegacyState {
   // Saved search ID (matches discover format - just string, not object)
   savedSearch?: string;
 
+  // Saved query ID (matches discover/vis_builder format)
+  savedQuery?: string;
+
   // Column configuration
   columns: string[];
 
@@ -22,9 +25,6 @@ export interface LegacyState {
 
   // Interval configuration
   interval: string;
-
-  // Saved query ID (legacy discover format)
-  savedQuery?: string;
 
   // Additional state from legacy discover slice
   isDirty?: boolean;
@@ -35,10 +35,10 @@ export interface LegacyState {
 
 const initialState: LegacyState = {
   savedSearch: undefined,
+  savedQuery: undefined,
   columns: [],
   sort: [],
   interval: 'auto',
-  savedQuery: undefined,
   isDirty: false,
   lineCount: undefined,
 };
@@ -52,6 +52,18 @@ const legacySlice = createSlice({
     },
     setSavedSearch: (state, action: PayloadAction<string | undefined>) => {
       state.savedSearch = action.payload;
+    },
+    setSavedQuery: (state, action: PayloadAction<string | undefined>) => {
+      if (action.payload === undefined) {
+        // if the payload is undefined, remove the savedQuery property
+        const { savedQuery, ...restState } = state;
+        return restState;
+      } else {
+        return {
+          ...state,
+          savedQuery: action.payload,
+        };
+      }
     },
     setColumns: (state, action: PayloadAction<string[]>) => {
       state.columns = action.payload;
@@ -78,9 +90,6 @@ const legacySlice = createSlice({
     setInterval: (state, action: PayloadAction<string>) => {
       state.interval = action.payload;
     },
-    setSavedQuery: (state, action: PayloadAction<string | undefined>) => {
-      state.savedQuery = action.payload;
-    },
     setIsDirty: (state, action: PayloadAction<boolean>) => {
       state.isDirty = action.payload;
     },
@@ -93,13 +102,13 @@ const legacySlice = createSlice({
 export const {
   setLegacyState,
   setSavedSearch,
+  setSavedQuery,
   setColumns,
   addColumn,
   removeColumn,
   moveColumn,
   setSort,
   setInterval,
-  setSavedQuery,
   setIsDirty,
   setLineCount,
 } = legacySlice.actions;
