@@ -32,7 +32,7 @@ import { groupFields } from './group_fields';
 import { getDefaultFieldFilter } from './field_filter';
 
 describe('group_fields', function () {
-  it('should group fields in selected, popular, unpopular group', function () {
+  it('should group fields into resultFields and schemaFields', function () {
     const fields = [
       {
         name: 'category',
@@ -43,6 +43,7 @@ describe('group_fields', function () {
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
+        displayName: 'Category',
       },
       {
         name: 'currency',
@@ -53,6 +54,7 @@ describe('group_fields', function () {
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
+        displayName: 'Currency',
       },
       {
         name: 'customer_birth_date',
@@ -63,6 +65,7 @@ describe('group_fields', function () {
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
+        displayName: 'Customer Birth Date',
       },
     ];
 
@@ -74,13 +77,14 @@ describe('group_fields', function () {
 
     const fieldFilterState = getDefaultFieldFilter();
 
-    const actual = groupFields(fields as any, ['currency'], 5, fieldCounts, fieldFilterState);
+    const actual = groupFields(fields as any, fieldCounts, fieldFilterState);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "popular": Array [
+        "resultFields": Array [
           Object {
             "aggregatable": true,
             "count": 1,
+            "displayName": "Category",
             "esTypes": Array [
               "text",
             ],
@@ -90,11 +94,10 @@ describe('group_fields', function () {
             "searchable": true,
             "type": "string",
           },
-        ],
-        "selected": Array [
           Object {
             "aggregatable": true,
             "count": 0,
+            "displayName": "Currency",
             "esTypes": Array [
               "keyword",
             ],
@@ -104,11 +107,10 @@ describe('group_fields', function () {
             "searchable": true,
             "type": "string",
           },
-        ],
-        "unpopular": Array [
           Object {
             "aggregatable": true,
             "count": 0,
+            "displayName": "Customer Birth Date",
             "esTypes": Array [
               "date",
             ],
@@ -119,6 +121,7 @@ describe('group_fields', function () {
             "type": "date",
           },
         ],
+        "schemaFields": Array [],
       }
     `);
   });
