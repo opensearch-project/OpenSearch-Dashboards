@@ -56,6 +56,7 @@ export const getSaveButtonRun = (
       searchContext,
       services,
       startSyncingQueryStateWithUrl,
+      shouldUpdateTitle: true,
       newCopyOnSave,
     });
 

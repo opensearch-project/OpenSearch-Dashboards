@@ -95,6 +95,7 @@ export const SaveAndAddButtonWithModal = ({
       onTitleDuplicate,
     };
     try {
+      // by passing newCopyOnSave as true, to ensure every time add to dashboard will create a new explore
       const result = await saveSavedExplore({
         savedExplore: savedExploreWithState,
         newTitle,
@@ -102,6 +103,8 @@ export const SaveAndAddButtonWithModal = ({
         searchContext,
         services,
         startSyncingQueryStateWithUrl,
+        shouldUpdateTitle: false,
+        newCopyOnSave: true,
       });
 
       let dashboardId;
@@ -133,10 +136,8 @@ export const SaveAndAddButtonWithModal = ({
               <EuiText size="s">
                 <p>
                   {i18n.translate('explore.addToDashboard.notification.success.message', {
-                    defaultMessage:
-                      mode === 'new'
-                        ? 'Dashboard created successfully'
-                        : 'Dashboard added successfully',
+                    defaultMessage: `Explore '{newTitle}' is successfully added to the dashboard.`,
+                    values: { newTitle },
                   })}
                   &nbsp;
                   <EuiLink href={url} target="_blank">
