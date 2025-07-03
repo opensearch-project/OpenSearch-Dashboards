@@ -17,7 +17,6 @@ import {
   setQueryState,
   setActiveTab,
 } from '../state_management/slices';
-import { Query } from '../../../../../data/common';
 import { executeQueries } from '../state_management/actions/query_actions';
 
 export const useInitPage = () => {
@@ -52,10 +51,12 @@ export const useInitPage = () => {
         // TODO: remove this once legacy state is not consumed any more
         dispatch(setSavedSearch(savedExplore.id));
 
-        // Set style options
+        // Init vis state and ui state
         const visualization = savedExplore.visualization;
-        if (visualization) {
-          const { chartType, params, fields, activeTab } = JSON.parse(visualization);
+        const uiState = savedExplore.uiState;
+        if (visualization && uiState) {
+          const { chartType, params, fields } = JSON.parse(visualization);
+          const { activeTab } = JSON.parse(uiState);
           dispatch(setChartType(chartType));
           dispatch(setStyleOptions(params));
           dispatch(setFieldNames(fields));

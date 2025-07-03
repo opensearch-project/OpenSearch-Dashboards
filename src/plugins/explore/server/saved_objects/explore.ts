@@ -67,6 +67,7 @@ export const exploreSavedObjectType: SavedObjectsType = {
       version: { type: 'integer' },
       type: { type: 'text' },
       visualization: { type: 'text', index: false },
+      uiState: { type: 'text', index: false },
     },
   },
 };
