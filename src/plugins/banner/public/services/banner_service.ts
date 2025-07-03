@@ -14,7 +14,7 @@ import { BannerConfig } from '../../common';
 
 export class BannerService {
   private bannerConfig$ = new BehaviorSubject<BannerConfig>({
-    text: '',
+    content: '',
     color: 'primary',
     iconType: '',
     isVisible: false,
