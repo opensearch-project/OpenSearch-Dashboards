@@ -12,7 +12,7 @@ import {
   mockGetDimensions,
   mockBuildPointSeriesData,
   mockTabifyAggResponse,
-} from './test_utils';
+} from '../__mocks__';
 
 import {
   defaultPrepareQuery,
@@ -87,7 +87,7 @@ describe('Query Actions', () => {
   });
 
   describe('histogramResultsProcessor', () => {
-    const mockData = {} as any; // Simple mock object for DataPublicPluginStart
+    const mockData = {} as any;
     const mockHistogramConfigs = createMockHistogramConfigs();
 
     beforeEach(() => {
