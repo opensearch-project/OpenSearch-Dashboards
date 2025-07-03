@@ -5,6 +5,13 @@
 import { Moment } from 'moment';
 import { Dataset } from 'src/plugins/data/common';
 
+export enum EditorMode {
+  SinglePrompt = 'single-prompt', // Single Editor mode with prompt language
+  SingleQuery = 'single-query', // Single Editor mode with prompt language
+  DualPrompt = 'dual-prompt', // Dual Editor mode with prompt enabled and query disabled
+  DualQuery = 'dual-query', // Dual Editor mode with query enabled and prompt disabled
+}
+
 export interface RefreshInterval {
   pause: boolean;
   value: number;
@@ -21,9 +28,9 @@ export interface TimeRangeBounds {
   max: Moment | undefined;
 }
 
-export enum LanguageType {
+export enum EditorLanguage {
   Natural = 'plaintext',
-  KeyValue = 'PPL',
+  // TODO: Add support for key-value?
   PPL = 'PPL',
 }
 

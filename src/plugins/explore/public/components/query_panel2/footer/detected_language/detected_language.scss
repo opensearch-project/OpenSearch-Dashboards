@@ -1,0 +1,11 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreDetectedLanguage{
+  color: $euiColorDarkShade; // Use closest match from OUI
+  font-size: $euiFontSizeXS;
+
+  // TODO: Look at https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10015/files
+}

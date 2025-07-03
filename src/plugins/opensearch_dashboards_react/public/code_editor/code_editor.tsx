@@ -48,8 +48,11 @@ export interface Props {
   /** ID of the editor language */
   languageId: string;
 
-  /** Value of the editor */
-  value: string;
+  /** default value of the editor if you want the editor to have uncontrolled state */
+  defaultValue?: string;
+
+  /** Value of the editor if you want the editor to have controlled state */
+  value?: string;
 
   /** Function invoked when text in editor is changed */
   onChange: (value: string) => void;
@@ -169,7 +172,7 @@ export class CodeEditor extends React.Component<Props, {}> {
   };
 
   render() {
-    const { languageId, value, onChange, width, height, options } = this.props;
+    const { languageId, defaultValue, value, onChange, width, height, options } = this.props;
 
     monaco.languages.onLanguage(languageId, () => {
       if (this.props.suggestionProvider) {
@@ -194,6 +197,7 @@ export class CodeEditor extends React.Component<Props, {}> {
         <MonacoEditor
           theme="euiColors"
           language={languageId}
+          defaultValue={defaultValue}
           value={value}
           onChange={onChange}
           editorWillMount={this._editorWillMount}

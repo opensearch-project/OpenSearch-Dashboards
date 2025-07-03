@@ -207,7 +207,6 @@ export const ReusableEditor: React.FC<ReusableEditorProps> = ({
       return () => {
         focusDisposable.dispose();
         blurDisposable.dispose();
-        clearTimeout(blurTimeoutRef.current);
         return editor;
       };
     },

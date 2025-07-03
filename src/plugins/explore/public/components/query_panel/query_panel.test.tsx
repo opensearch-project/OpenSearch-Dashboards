@@ -16,9 +16,9 @@ import {
   resultsInitialState,
   tabReducer,
   legacyReducer,
-  systemReducer,
+  queryEditorReducer,
 } from '../../application/utils/state_management/slices';
-import { ResultStatus } from '../../application/utils/state_management/types';
+import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../common';
 
 // TODO: Add more test cases once api and services integrated.
@@ -100,7 +100,7 @@ const createTestStore = () => {
       lineCount: undefined,
     },
     system: {
-      status: ResultStatus.UNINITIALIZED,
+      status: QueryExecutionStatus.UNINITIALIZED,
     },
   };
 
@@ -111,7 +111,7 @@ const createTestStore = () => {
       results: resultsReducer,
       tab: tabReducer,
       legacy: legacyReducer,
-      system: systemReducer,
+      system: queryEditorReducer,
     },
     preloadedState,
   });

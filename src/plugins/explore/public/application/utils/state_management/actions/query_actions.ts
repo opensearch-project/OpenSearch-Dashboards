@@ -6,8 +6,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { ResultStatus } from '../types';
-import { setResults, ISearchResult, setStatus } from '../slices';
+import { QueryExecutionStatus } from '../types';
+import { setResults, ISearchResult, setExecutionStatus } from '../slices';
 import { ExploreServices } from '../../../../types';
 import { IndexPattern } from '../../../legacy/discover/opensearch_dashboards_services';
 import {
@@ -177,7 +177,7 @@ const executeQueryBase = async (
   const query = getState().query;
 
   try {
-    dispatch(setStatus(ResultStatus.LOADING));
+    dispatch(setExecutionStatus(QueryExecutionStatus.LOADING));
 
     // Create abort controller
     const abortController = new AbortController();
@@ -272,22 +272,22 @@ const executeQueryBase = async (
 
     // Set status based on results
     if (rawResults.hits && rawResults.hits.hits && rawResults.hits.hits.length > 0) {
-      dispatch(setStatus(ResultStatus.READY));
+      dispatch(setExecutionStatus(QueryExecutionStatus.READY));
     } else {
-      dispatch(setStatus(ResultStatus.NO_RESULTS));
+      dispatch(setExecutionStatus(QueryExecutionStatus.NO_RESULTS));
     }
 
     return rawResultsWithMeta;
   } catch (error: any) {
     // Handle abort errors
     if (error instanceof Error && error.name === 'AbortError') {
-      dispatch(setStatus(ResultStatus.READY)); // Keep current status on abort
+      dispatch(setExecutionStatus(QueryExecutionStatus.READY)); // Keep current status on abort
       return;
     }
 
     // Use search service to show error (like Discover does)
     services.data.search.showError(error as Error);
-    dispatch(setStatus(ResultStatus.ERROR));
+    dispatch(setExecutionStatus(QueryExecutionStatus.ERROR));
     throw error;
   }
 };

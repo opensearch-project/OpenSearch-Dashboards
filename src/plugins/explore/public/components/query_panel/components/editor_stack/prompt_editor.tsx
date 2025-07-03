@@ -41,7 +41,10 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
   const value = editorType === EditorType.Prompt ? prompt : queryString;
 
   const placeholderText = i18n.translate('explore.queryPanel.promptEditor.placeholder', {
-    defaultMessage: 'Ask a question or search using PPL',
+    defaultMessage: 'Ask a question or search using {symbol} PPL',
+    values: {
+      symbol: '</>',
+    },
   });
 
   return (
@@ -53,11 +56,7 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
       onEdit={onPromptEdit}
       onClear={onClearEditor}
       editorConfig={editorConfig}
-      placeholder={
-        <>
-          {placeholderText} <EuiIcon type="editorCodeBlock" />
-        </>
-      }
+      placeholder={placeholderText}
       editText={i18n.translate('explore.queryPanel.promptEditor.editPrompt', {
         defaultMessage: 'Edit Prompt',
       })}

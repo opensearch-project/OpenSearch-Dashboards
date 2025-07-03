@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RecentQueriesTable } from './table';
-import { LanguageType } from '../../../types';
+import { EditorLanguage } from '../../../types';
 
 // Todo: Mock recent queries data when redux implemententation is ready
 // const mockQueries = [
@@ -25,7 +25,7 @@ describe('RecentQueriesTable', () => {
       <RecentQueriesTable
         onClickRecentQuery={jest.fn()}
         isVisible={true}
-        languageType={LanguageType.PPL}
+        languageType={EditorLanguage.PPL}
       />
     );
     expect(screen.getAllByText('Recent query').length).toBeGreaterThan(0);

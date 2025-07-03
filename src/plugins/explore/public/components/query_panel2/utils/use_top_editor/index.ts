@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './system_slice';
+export * from './use_top_editor';

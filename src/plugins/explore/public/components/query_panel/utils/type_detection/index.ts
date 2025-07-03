@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LanguageType } from '../../types';
+import { EditorLanguage } from '../../types';
 import { PatternUtils, MAX_QUERY_LENGTH } from './constants';
 
 export interface DetectionResult {
-  type: LanguageType;
+  type: EditorLanguage;
   confidence: number;
   reason: string;
   warnings: string[];
@@ -26,7 +26,7 @@ export class QueryTypeDetector {
     // Security: Validate and normalize input
     if (!query || typeof query !== 'string') {
       return {
-        type: LanguageType.Natural,
+        type: EditorLanguage.Natural,
         confidence: 0,
         reason: 'Invalid query input',
         warnings: ['No valid input provided'],
@@ -35,7 +35,7 @@ export class QueryTypeDetector {
 
     if (query.length > MAX_QUERY_LENGTH) {
       return {
-        type: LanguageType.Natural,
+        type: EditorLanguage.Natural,
         confidence: 0,
         reason: 'Query too long',
         warnings: [`Query exceeds maximum length of ${MAX_QUERY_LENGTH} characters`],
@@ -45,7 +45,7 @@ export class QueryTypeDetector {
     const normalizedQuery = PatternUtils.normalizeQuery(query);
     if (!normalizedQuery) {
       return {
-        type: LanguageType.Natural,
+        type: EditorLanguage.Natural,
         confidence: 0,
         reason: 'Empty query after normalization',
         warnings: ['No meaningful content after processing'],
@@ -58,17 +58,17 @@ export class QueryTypeDetector {
       plaintext: this._checkNaturalLanguage(normalizedQuery),
     };
 
-    const keyToLanguageType: Record<string, LanguageType> = {
-      ppl: LanguageType.PPL,
-      keyvalue: LanguageType.KeyValue,
-      plaintext: LanguageType.Natural,
+    const keyToLanguageType: Record<string, EditorLanguage> = {
+      ppl: EditorLanguage.PPL,
+      keyvalue: EditorLanguage.KeyValue,
+      plaintext: EditorLanguage.Natural,
     };
 
     const sorted = (Object.keys(scores) as Array<keyof typeof scores>).sort(
       (a, b) => scores[b].score - scores[a].score
     );
     const best = sorted[0];
-    const fallback = scores[best].score < 0.4 ? LanguageType.Natural : keyToLanguageType[best];
+    const fallback = scores[best].score < 0.4 ? EditorLanguage.Natural : keyToLanguageType[best];
 
     return {
       type: fallback,

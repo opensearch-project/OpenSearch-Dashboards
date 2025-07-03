@@ -15,7 +15,6 @@ import {
 export const useQueryAssist = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
 
-  // Check if query assist is available through data plugin extension system
   const isAvailable = useMemo(() => {
     try {
       const extensions = services.data.query.queryString
@@ -30,8 +29,8 @@ export const useQueryAssist = () => {
   }, [services]);
 
   // Generate query using existing query assist API
-  const generateQuery = useCallback(
-    async (question: string, dataset: Dataset): Promise<QueryAssistResponse> => {
+  const generateQueryFromPrompt = useCallback(
+    async (prompt: string, dataset: Dataset): Promise<QueryAssistResponse> => {
       if (!isAvailable) {
         throw new Error(
           'Query assist is not available. Please ensure query enhancements plugin is enabled.'
@@ -39,7 +38,7 @@ export const useQueryAssist = () => {
       }
 
       const params: QueryAssistParameters = {
-        question,
+        question: prompt,
         index: dataset.title,
         language: 'PPL',
         dataSourceId: dataset.dataSource?.id,
@@ -59,6 +58,6 @@ export const useQueryAssist = () => {
 
   return {
     isAvailable,
-    generateQuery,
+    generateQueryFromPrompt,
   };
 };

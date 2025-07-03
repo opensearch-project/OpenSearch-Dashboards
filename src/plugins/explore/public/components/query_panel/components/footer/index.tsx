@@ -13,7 +13,7 @@ import { Actions } from './actions';
 import { DateTimeRangePicker } from './date_time_selector';
 import { RunQueryButton } from './run_query';
 import { ShowInputType } from './show_input_type';
-import { LanguageType, Query } from '../../types';
+import { EditorLanguage, Query } from '../../types';
 import { QueryError } from './query_error';
 import { ResultStatus } from '../../types';
 import { ExploreServices } from '../../../../types';
@@ -25,7 +25,7 @@ const RECENT_QUERIES_LABEL = i18n.translate('explore.queryPanel.recentQueryLabel
 });
 
 interface QueryPanelFooterProps {
-  languageType: LanguageType;
+  languageType: EditorLanguage;
   onRunClick: () => void;
   onRecentClick: () => void;
   isDualEditor: boolean;

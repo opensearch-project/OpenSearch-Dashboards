@@ -5,10 +5,10 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
-import { LanguageType } from '../../types';
+import { EditorLanguage } from '../../types';
 
 interface ShowInputTypeProps {
-  languageType: LanguageType;
+  languageType: EditorLanguage;
   isDualEditor: boolean;
   noInput: boolean;
 }
@@ -21,7 +21,7 @@ export const ShowInputType: React.FC<ShowInputTypeProps> = ({
   const getDisplayText = useMemo(() => {
     if (noInput) return '';
 
-    if (languageType === LanguageType.Natural) {
+    if (languageType === EditorLanguage.Natural) {
       return isDualEditor
         ? i18n.translate('explore.queryPanel.showInputType.naturalAndPPLLabel', {
             defaultMessage: 'Natural Language | PPL',

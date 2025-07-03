@@ -19,13 +19,13 @@ import { useIndexPatternContext } from '../../../../../components/index_pattern_
 
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
-import { ResultStatus } from '../../../../../utils/state_management/types';
+import { QueryExecutionStatus } from '../../../../../utils/state_management/types';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
 import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
 import {
   selectTabState,
   selectUIState,
-  selectStatus,
+  selectExecutionStatus,
   selectSavedQuery,
 } from '../../../../../utils/state_management/selectors';
 import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
@@ -59,7 +59,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
   const savedQueryId = useSelector(selectSavedQuery);
-  const isLoading = useSelector(selectStatus) === ResultStatus.LOADING;
+  const isLoading = useSelector(selectExecutionStatus) === QueryExecutionStatus.LOADING;
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -70,7 +70,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const { indexPattern } = useIndexPatternContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
-  const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
+  const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: QueryExecutionStatus.READY });
 
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
@@ -127,7 +127,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   // Replace data$ subscription with Redux state-based queryStatus
   useEffect(() => {
-    const status = isLoading ? ResultStatus.LOADING : ResultStatus.READY;
+    const status = isLoading ? QueryExecutionStatus.LOADING : QueryExecutionStatus.READY;
     setQueryStatus({ status });
   }, [isLoading]);
 

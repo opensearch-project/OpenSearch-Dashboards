@@ -16,9 +16,9 @@ import { IndexPattern } from '../../../../data/common/index_patterns';
 import { EditorStack } from './components/editor_stack';
 import { QueryPanelFooter } from './components/footer';
 import { RecentQueriesTable, SavedQuery } from '../../../../data/public';
-import { useEditorMode } from './hooks/useEditorMode';
+import { useEditorMode } from './hooks/use-editor-mode';
 import { QueryTypeDetector } from './utils/type_detection';
-import { LanguageType, Query, TimeRange } from './types';
+import { EditorLanguage, Query, TimeRange } from './types';
 import {
   selectIsLoading,
   selectShowDataSetFields,
@@ -74,7 +74,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   const [localPrompt, setLocalPrompt] = useState(prompt);
   const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
 
-  const { isAvailable: isQueryAssistAvailable, generateQuery } = useQueryAssist();
+  const { isAvailable: isQueryAssistAvailable, generateQueryFromPrompt } = useQueryAssist();
 
   // Handle time range changes
   const handleTimeChange = useCallback(
@@ -218,7 +218,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
 
   const handlePromptChange = useCallback(
     (value: string) => {
-      const isPPLQuery = detectLanguageType(value) === LanguageType.PPL;
+      const isPPLQuery = detectLanguageType(value) === EditorLanguage.PPL;
 
       if (isPPLQuery) {
         setLocalQuery(value);
@@ -261,7 +261,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
 
     try {
       // Use new hook with standard Dataset interface
-      const response: QueryAssistResponse = await generateQuery(promptParam, dataset);
+      const response: QueryAssistResponse = await generateQueryFromPrompt(promptParam, dataset);
       // Run the generated query
       await handleRun(response.query);
 
@@ -299,7 +299,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   };
 
   const handlePromptRun = async () => {
-    if (editorLanguageType === LanguageType.Natural) {
+    if (editorLanguageType === EditorLanguage.Natural) {
       if (!isQueryAssistAvailable) {
         services.notifications.toasts.addWarning({
           title: i18n.translate('explore.queryPanel.queryAssist-not-available-title', {
@@ -324,7 +324,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     resetEditorState();
     setLocalPrompt('');
     setLocalQuery('');
-    setEditorLanguageType(LanguageType.Natural);
+    setEditorLanguageType(EditorLanguage.Natural);
   };
 
   const handlePromptEdit = () => {

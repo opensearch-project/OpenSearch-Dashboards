@@ -18,7 +18,7 @@ import {
   uiInitialState,
   uiReducer,
 } from '../../utils/state_management/slices';
-import { ResultStatus } from '../../utils/state_management/types';
+import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { TracesPage } from './traces_page';
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
@@ -115,7 +115,7 @@ jest.mock('../../../components/query_panel', () => ({
 
 describe('TracesPage', () => {
   const createTestStore = (
-    status = ResultStatus.UNINITIALIZED,
+    status = QueryExecutionStatus.UNINITIALIZED,
     rows: OpenSearchSearchHit[] = [],
     fieldSchema: any[] = []
   ) => {
@@ -172,7 +172,7 @@ describe('TracesPage', () => {
   });
 
   it('does not render chart when status is UNINITIALIZED', () => {
-    const store = createTestStore(ResultStatus.UNINITIALIZED);
+    const store = createTestStore(QueryExecutionStatus.UNINITIALIZED);
     render(
       <Provider store={store}>
         <TracesPage />
@@ -183,7 +183,7 @@ describe('TracesPage', () => {
   });
 
   it('renders chart when status is READY', () => {
-    const store = createTestStore(ResultStatus.READY, [
+    const store = createTestStore(QueryExecutionStatus.READY, [
       { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
     ]);
     render(
@@ -196,7 +196,7 @@ describe('TracesPage', () => {
   });
 
   it('renders chart when status is LOADING with rows', () => {
-    const store = createTestStore(ResultStatus.LOADING, [
+    const store = createTestStore(QueryExecutionStatus.LOADING, [
       { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
     ]);
     render(
@@ -209,7 +209,7 @@ describe('TracesPage', () => {
   });
 
   it('renders chart when status is ERROR with rows', () => {
-    const store = createTestStore(ResultStatus.ERROR, [
+    const store = createTestStore(QueryExecutionStatus.ERROR, [
       { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
     ]);
     render(
@@ -222,7 +222,7 @@ describe('TracesPage', () => {
   });
 
   it('does not render chart when status is LOADING without rows', () => {
-    const store = createTestStore(ResultStatus.LOADING);
+    const store = createTestStore(QueryExecutionStatus.LOADING);
     render(
       <Provider store={store}>
         <TracesPage />
@@ -233,7 +233,7 @@ describe('TracesPage', () => {
   });
 
   it('does not render chart when status is ERROR without rows', () => {
-    const store = createTestStore(ResultStatus.ERROR);
+    const store = createTestStore(QueryExecutionStatus.ERROR);
     render(
       <Provider store={store}>
         <TracesPage />
@@ -244,7 +244,7 @@ describe('TracesPage', () => {
   });
 
   it('renders both tabs with correct content', () => {
-    const store = createTestStore(ResultStatus.READY, [
+    const store = createTestStore(QueryExecutionStatus.READY, [
       { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
     ]);
     render(
