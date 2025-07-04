@@ -46,6 +46,7 @@ import {
   ChartType,
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
+import { defaultPrepareQuery } from '../application/utils/state_management/actions/query_actions';
 
 export interface SearchProps {
   description?: string;
@@ -179,9 +180,16 @@ export class ExploreEmbeddable
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);
     searchSource.setParent(this.filtersSearchSource);
+    const query = this.savedExplore.searchSource.getField('query');
+    const uiState = JSON.parse(this.savedExplore.uiState || '{}');
+    const activeTab = uiState.activeTab;
+    // If the active tab is logs, we need to prepare the query for the logs tab
+    if (activeTab === 'logs' && query) {
+      query.query = defaultPrepareQuery(query?.query as string);
+    }
     searchSource.setFields({
       index: indexPattern,
-      query: this.savedExplore.searchSource.getField('query'),
+      query,
       highlightAll: true,
       version: true,
     });
@@ -320,10 +328,11 @@ export class ExploreEmbeddable
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
+    const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const selectedChartType = visualization.chartType ?? 'line';
     this.searchProps.chartType = selectedChartType;
-    this.searchProps.activeTab = visualization.activeTab;
-    if (visualization.activeTab !== 'logs' && visualizationData) {
+    this.searchProps.activeTab = uiState.activeTab;
+    if (uiState.activeTab !== 'logs' && visualizationData) {
       const fields = visualization.fields;
       const filteredColumns = {
         numerical: visualizationData.numericalColumns
