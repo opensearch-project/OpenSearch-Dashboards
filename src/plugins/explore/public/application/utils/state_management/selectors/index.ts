@@ -5,7 +5,6 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { ResultStatus } from '../types';
 
 /**
  * Basic selectors
@@ -14,7 +13,6 @@ const selectQueryState = (state: RootState) => state.query;
 export const selectUIState = (state: RootState) => state.ui;
 const selectResultsState = (state: RootState) => state.results;
 const selectLegacyState = (state: RootState) => state.legacy;
-const selectSystemState = (state: RootState) => state.system;
 export const selectTabState = (state: RootState) => state.tab;
 
 /**
@@ -40,10 +38,6 @@ export const selectActiveTabId = createSelector([selectUIState], (uiState) => ui
 
 export const selectQueryPrompt = createSelector([selectUIState], (uiState) => uiState.prompt);
 
-export const selectStatus = createSelector(
-  [selectSystemState],
-  (systemState) => systemState.status
-);
 export const selectShowDataSetFields = createSelector(
   [selectUIState],
   (uiState) => uiState.showDatasetFields
@@ -62,11 +56,6 @@ export const selectChartType = createSelector(
 export const selectFieldNames = createSelector(
   [selectTabState],
   (tabState) => tabState.visualizations.fieldNames
-);
-
-export const selectIsLoading = createSelector(
-  [selectSystemState],
-  (systemState) => systemState.status === ResultStatus.LOADING
 );
 
 export const selectActiveTab = createSelector(
@@ -93,3 +82,5 @@ export const selectSavedSearch = createSelector(
   [selectLegacyState],
   (legacyState) => legacyState.savedSearch
 );
+
+export * from './query_editor';

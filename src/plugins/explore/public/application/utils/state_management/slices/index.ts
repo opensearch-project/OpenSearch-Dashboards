@@ -8,4 +8,4 @@ export * from './query';
 export * from './results';
 export * from './tab';
 export * from './ui';
-export * from './system';
+export * from './query_editor';

@@ -16,6 +16,7 @@ import { IndexPatternProvider } from './components/index_pattern_context';
 import { ExploreFlavor } from '../../common';
 import { TracesPage } from './pages/traces';
 import { MetricsPage } from './pages/metrics';
+import { EditorContextProvider } from './context';
 
 // Route component props interface
 interface ExploreRouteProps {
@@ -63,21 +64,23 @@ export const renderApp = (
     <Router history={history}>
       <OpenSearchDashboardsContextProvider services={services}>
         <ReduxProvider store={store}>
-          <IndexPatternProvider>
-            <services.core.i18n.Context>
-              <Switch>
-                {/* View route for saved searches */}
-                {/* TODO: Do we need this? We might not need to, please revisit */}
-                <Route path="/view/:id" exact>
-                  <ViewRoute {...mainRouteProps} />
-                </Route>
+          <EditorContextProvider>
+            <IndexPatternProvider>
+              <services.core.i18n.Context>
+                <Switch>
+                  {/* View route for saved searches */}
+                  {/* TODO: Do we need this? We might not need to, please revisit */}
+                  <Route path="/view/:id" exact>
+                    <ViewRoute {...mainRouteProps} />
+                  </Route>
 
-                <Route path={[`/`]} exact={false}>
-                  {renderExploreFlavor(flavor, mainRouteProps)}
-                </Route>
-              </Switch>
-            </services.core.i18n.Context>
-          </IndexPatternProvider>
+                  <Route path={[`/`]} exact={false}>
+                    {renderExploreFlavor(flavor, mainRouteProps)}
+                  </Route>
+                </Switch>
+              </services.core.i18n.Context>
+            </IndexPatternProvider>
+          </EditorContextProvider>
         </ReduxProvider>
       </OpenSearchDashboardsContextProvider>
     </Router>,

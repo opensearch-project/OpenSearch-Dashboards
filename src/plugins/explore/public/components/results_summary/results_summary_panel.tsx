@@ -14,7 +14,7 @@ import { of } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { ResultStatus } from '../../application/utils/state_management/types';
+import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { ExploreServices } from '../../types';
 import { ResultsSummary, FeedbackStatus } from './results_summary';
 import { RootState } from '../../application/utils/state_management/store';
@@ -81,7 +81,7 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
     Boolean(results.length) &&
     Boolean(queryState.query) &&
     !isQueryDirty &&
-    status === ResultStatus.READY;
+    status === QueryExecutionStatus.READY;
 
   // The visibility of panel action buttons: thumbs up/down and copy to clipboard buttons
   const actionButtonVisible = Boolean(summary) && !loading && !isQueryDirty;

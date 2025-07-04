@@ -36,9 +36,19 @@ const querySlice = createSlice({
         meta: { addToHistory: true },
       }),
     },
+    setQueryStringWithHistory: {
+      reducer: (state, action: PayloadAction<string>) => {
+        // Same logic as setQueryState but with meta flag for history
+        state.query = action.payload;
+      },
+      prepare: (query: string) => ({
+        payload: query,
+        meta: { addToHistory: true },
+      }),
+    },
   },
 });
 
-export const { setQueryState, setQueryWithHistory } = querySlice.actions;
+export const { setQueryState, setQueryWithHistory, setQueryStringWithHistory } = querySlice.actions;
 export const queryReducer = querySlice.reducer;
 export const queryInitialState = querySlice.getInitialState();

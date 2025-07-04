@@ -8,7 +8,7 @@ import { RootState } from './store';
 /**
  * Enum for query result status
  */
-export enum ResultStatus {
+export enum QueryExecutionStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
   READY = 'ready', // results came back
@@ -20,7 +20,7 @@ export enum ResultStatus {
  * Interface for search data
  */
 export interface SearchData {
-  status: ResultStatus;
+  status: QueryExecutionStatus;
   fetchCounter?: number;
   fieldCounts?: Record<string, number>;
   hits?: number;
@@ -35,7 +35,7 @@ export interface SearchData {
  * Interface for query status
  */
 export interface QueryStatus {
-  status: ResultStatus;
+  status: QueryExecutionStatus;
   elapsedMs: number;
   startTime: number;
 }
@@ -45,3 +45,10 @@ export interface QueryStatus {
  * Query state is handled separately in URL persistence
  */
 export type AppState = Omit<RootState, 'query'>;
+
+export enum EditorMode {
+  SinglePrompt = 'single-prompt', // Single Editor mode with prompt language
+  SingleQuery = 'single-query', // Single Editor mode with prompt language
+  DualPrompt = 'dual-prompt', // Dual Editor mode with prompt enabled and query disabled
+  DualQuery = 'dual-query', // Dual Editor mode with query enabled and prompt disabled
+}

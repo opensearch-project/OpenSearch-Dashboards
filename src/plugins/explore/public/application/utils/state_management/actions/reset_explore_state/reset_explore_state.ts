@@ -5,6 +5,7 @@
 
 import {
   setLegacyState,
+  setQueryEditorState,
   setQueryState,
   setResultsState,
   setTabState,
@@ -31,6 +32,7 @@ export const resetExploreStateActionCreator = (services: ExploreServices) => asy
   dispatch(setTabState(state.tab));
   dispatch(setLegacyState(state.legacy));
   dispatch(setQueryState(state.query));
+  dispatch(setQueryEditorState(state.queryEditor));
   dispatch(executeQueries({ services }));
   dispatch(finishTransaction());
 };

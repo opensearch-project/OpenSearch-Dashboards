@@ -10,20 +10,20 @@ import {
   resultsReducer,
   tabReducer,
   legacyReducer,
-  systemReducer,
+  queryEditorReducer,
 } from './slices';
 import { loadReduxState } from './utils/redux_persistence';
 import { createQuerySyncMiddleware } from './middleware/query_sync_middleware';
 import { createPersistenceMiddleware } from './middleware/persistence_middleware';
 import { ExploreServices } from '../../../types';
 
-const rootReducer = combineReducers({
+export const rootReducer = combineReducers({
   query: queryReducer,
   ui: uiReducer,
   results: resultsReducer,
   tab: tabReducer,
   legacy: legacyReducer,
-  system: systemReducer,
+  queryEditor: queryEditorReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
