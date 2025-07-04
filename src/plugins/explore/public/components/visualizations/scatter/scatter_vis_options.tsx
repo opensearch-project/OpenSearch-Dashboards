@@ -35,7 +35,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   };
 
   // if it is 2 metrics, then it should not show legend
-  const notShowLegend = numericalColumns.length === 2 && categoricalColumns.length === 0;
+  const shouldShowLegend = !(numericalColumns.length === 2 && categoricalColumns.length === 0);
 
   useEffect(() => {
     const { x, y } = inferAxesFromColumns(numericalColumns, categoricalColumns);
@@ -60,7 +60,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      {!notShowLegend && (
+      {shouldShowLegend && (
         <EuiFlexItem grow={false}>
           <LegendOptionsPanel
             shouldShowLegend={true}
