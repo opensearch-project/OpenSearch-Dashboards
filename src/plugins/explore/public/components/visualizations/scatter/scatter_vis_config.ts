@@ -6,7 +6,7 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { ScatterVisStyleControls } from './scatter_vis_options';
-import { StandardAxes, PointShape, AxisRole, Positions } from '../types';
+import { StandardAxes, PointShape, AxisRole, Positions, TooltipOptions } from '../types';
 
 export interface ExclusiveScatterConfig {
   pointShape: PointShape;
@@ -16,7 +16,7 @@ export interface ExclusiveScatterConfig {
 // Complete line chart style controls interface
 export interface ScatterChartStyleControls {
   // Basic controls
-  addTooltip: boolean;
+  tooltipOptions: TooltipOptions;
   addLegend: boolean;
   legendPosition: Positions;
 
@@ -28,7 +28,9 @@ export interface ScatterChartStyleControls {
 
 export const defaultScatterChartStyles: ScatterChartStyleControls = {
   // Basic controls
-  addTooltip: true,
+  tooltipOptions: {
+    mode: 'all',
+  },
   addLegend: true,
   legendPosition: Positions.RIGHT,
 
