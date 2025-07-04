@@ -41,7 +41,6 @@ export const useInitPage = () => {
         if (searchSourceFields?.searchSourceJSON) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
           const query = searchSource.query;
-          // Set query in query string manager
           if (query) {
             dispatch(setQueryState(query));
           }
@@ -54,12 +53,14 @@ export const useInitPage = () => {
         // Init vis state and ui state
         const visualization = savedExplore.visualization;
         const uiState = savedExplore.uiState;
-        if (visualization && uiState) {
+        if (visualization) {
           const { chartType, params, fields } = JSON.parse(visualization);
-          const { activeTab } = JSON.parse(uiState);
           dispatch(setChartType(chartType));
           dispatch(setStyleOptions(params));
           dispatch(setFieldNames(fields));
+        }
+        if (uiState) {
+          const { activeTab } = JSON.parse(uiState);
           dispatch(setActiveTab(activeTab));
         }
 
