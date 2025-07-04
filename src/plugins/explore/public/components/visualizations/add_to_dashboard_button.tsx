@@ -103,7 +103,7 @@ export const SaveAndAddButtonWithModal = ({
         searchContext,
         services,
         startSyncingQueryStateWithUrl,
-        saveFromTopNav: false,
+        openAfterSave: false,
         newCopyOnSave: true,
       });
 
