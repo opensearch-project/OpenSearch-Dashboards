@@ -15,8 +15,8 @@ import {
   setStyleOptions,
   setFieldNames,
   setQueryState,
+  setActiveTab,
 } from '../state_management/slices';
-import { Query } from '../../../../../data/common';
 import { executeQueries } from '../state_management/actions/query_actions';
 
 export const useInitPage = () => {
@@ -24,7 +24,6 @@ export const useInitPage = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const exploreId = useCurrentExploreId();
   const { savedExplore, error } = useSavedExplore(exploreId);
-
   const { chrome, data } = services;
 
   useEffect(() => {
@@ -42,10 +41,8 @@ export const useInitPage = () => {
         if (searchSourceFields?.searchSourceJSON) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
           const query = searchSource.query;
-          // Set query in query string manager
           if (query) {
-            data.query.queryString.setQuery(query);
-            dispatch(setQueryState(query as Query));
+            dispatch(setQueryState(query));
           }
         }
 
@@ -53,13 +50,18 @@ export const useInitPage = () => {
         // TODO: remove this once legacy state is not consumed any more
         dispatch(setSavedSearch(savedExplore.id));
 
-        // Set style options
+        // Init vis state and ui state
         const visualization = savedExplore.visualization;
+        const uiState = savedExplore.uiState;
         if (visualization) {
           const { chartType, params, fields } = JSON.parse(visualization);
           dispatch(setChartType(chartType));
           dispatch(setStyleOptions(params));
           dispatch(setFieldNames(fields));
+        }
+        if (uiState) {
+          const { activeTab } = JSON.parse(uiState);
+          dispatch(setActiveTab(activeTab));
         }
 
         // Add to recently accessed
