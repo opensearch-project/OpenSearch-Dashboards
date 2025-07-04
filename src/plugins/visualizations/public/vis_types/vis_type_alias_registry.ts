@@ -30,6 +30,7 @@
 
 import { SavedObjectAttributes } from 'opensearch-dashboards/public';
 import { TriggerContextMapping } from '../../../ui_actions/public';
+import { VisTypeGroup } from './types';
 
 export interface VisualizationListItem {
   editUrl: string;
@@ -72,6 +73,7 @@ export interface VisTypeAlias {
   description: string;
   getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   stage: 'experimental' | 'beta' | 'production';
+  grouping?: VisTypeGroup[];
   hidden?: boolean;
 
   appExtensions?: {

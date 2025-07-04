@@ -548,6 +548,25 @@ export class ExplorePlugin
     const [coreStart, pluginsStart] = await core.getStartServices();
     const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
     if (isExploreEnabledWorkspace) {
+      const dashboardVisActions = pluginsStart.uiActions.getTriggerActions(
+        DASHBOARD_ADD_PANEL_TRIGGER
+      );
+      const allVis = pluginsStart.visualizations.all();
+      dashboardVisActions.forEach((action) => {
+        const visOfAction = allVis.find((vis) => action.id === `add_vis_action_${vis.name}`);
+        if (
+          visOfAction &&
+          visOfAction.name !== 'markdown' &&
+          visOfAction.name !== 'input_control_vis'
+        ) {
+          action.grouping?.push({
+            id: 'others',
+            getDisplayName: () => 'Other visualizations',
+            getIconType: () => 'boxesHorizontal',
+          });
+        }
+      });
+
       const registeredVisAlias = pluginsStart.visualizations
         .getAliases()
         .find((v) => v.name === this.DISCOVER_VISUALIZATION_NAME);
@@ -561,7 +580,7 @@ export class ExplorePlugin
       pluginsStart.uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
         id: `add_vis_action_explore`,
         getIconType: () => 'visualizeApp',
-        order: 1,
+        order: 1000,
         MenuItem: reactToUiComponent<{ onClick: () => void; context: ActionExecutionContext }>(
           (props) =>
             React.createElement(VisualizationActionMenuItem, {

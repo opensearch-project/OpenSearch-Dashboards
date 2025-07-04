@@ -49,9 +49,16 @@ export const createNewVisActions = (services: {
   visTypes.forEach((visType, i) => {
     uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
       id: `add_vis_action_${visType.name}`,
-      order: 10 * (i + 1),
+      order: 10 * (visTypes.length - i),
       getDisplayName: () => visType.title,
       getIconType: () => visType.icon as EuiIconType,
+      grouping: visType.grouping
+        ? visType.grouping.map((g) => ({
+            id: g.id,
+            getDisplayName: () => g.title,
+            getIconType: () => g.icon,
+          }))
+        : [],
       execute: async () => {
         const dialog = overlays.openModal(
           toMountPoint(

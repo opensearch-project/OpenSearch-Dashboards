@@ -29,12 +29,19 @@
  */
 
 import { IconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import React from 'react';
 import { Adapters } from 'src/plugins/inspector';
 import { IndexPattern } from 'src/plugins/data/public';
 import { ISchemas } from 'src/plugins/vis_default_editor/public';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Vis, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
+
+export interface VisTypeGroup {
+  id: string;
+  title: string;
+  icon?: EuiIconType;
+}
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
@@ -59,6 +66,7 @@ export interface VisType<TVisParams = unknown> {
   readonly icon?: IconType;
   readonly image?: string;
   readonly stage: 'experimental' | 'beta' | 'production';
+  readonly grouping: VisTypeGroup[];
   readonly requiresSearch: boolean;
   readonly useCustomNoDataScreen: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);

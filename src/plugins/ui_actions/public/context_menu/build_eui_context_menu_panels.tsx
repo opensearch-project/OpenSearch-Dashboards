@@ -137,6 +137,7 @@ export interface BuildContextMenuParams {
   actions: ActionWithContext[];
   title?: string;
   closeMenu?: () => void;
+  autoWrapItems?: boolean;
 }
 
 /**
@@ -146,6 +147,7 @@ export async function buildContextMenuForActions({
   actions,
   title = defaultTitle,
   closeMenu = () => {},
+  autoWrapItems = true,
 }: BuildContextMenuParams): Promise<EuiContextMenuPanelDescriptor[]> {
   const panels: Record<string, PanelDescriptor> = {
     // This is the first panel which links out to all others via items property
@@ -239,7 +241,9 @@ export async function buildContextMenuForActions({
 
   // On the mainMenu, before adding in items for other groups, the first 4 items are shown.
   // Any additional items are hidden behind a "more" item
-  wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
+  if (autoWrapItems) {
+    wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
+  }
 
   // This will be used to store items that eventually are placed into the
   // mainMenu panel. Specifying a category allows for placing groups into the

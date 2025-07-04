@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiListGroupItem, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroupItem,
+  EuiText,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 import React from 'react';
 
 export const VisualizationActionMenuItem = ({
@@ -14,24 +21,18 @@ export const VisualizationActionMenuItem = ({
   onClick: () => void;
 }) => {
   return (
-    <EuiListGroupItem
-      iconType="visualizeApp"
-      onClick={onClick}
-      label={
-        <>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>{exploreVisDisplayName}</EuiFlexItem>
-            <EuiFlexItem>
-              <EuiBadge color="hollow" iconType="sparkleFilled">
-                New!
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiText size="xs" color="subdued">
-            Build query-powered visualizations
-          </EuiText>
-        </>
-      }
-    />
+    <>
+      <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>{exploreVisDisplayName}</EuiFlexItem>
+        <EuiFlexItem>
+          <EuiBadge color="hollow" iconType="sparkleFilled">
+            New!
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiText size="xs" color="subdued">
+        Build query-powered visualizations
+      </EuiText>
+    </>
   );
 };
