@@ -21,7 +21,7 @@ export async function saveSavedExplore({
   searchContext,
   services,
   startSyncingQueryStateWithUrl,
-  shouldUpdateTitle,
+  saveFromTopNav,
   newCopyOnSave,
 }: {
   savedExplore: SavedExplore;
@@ -30,7 +30,7 @@ export async function saveSavedExplore({
   searchContext: ExecutionContextSearch;
   services: Partial<CoreStart> & ExploreServices;
   startSyncingQueryStateWithUrl: () => void;
-  shouldUpdateTitle: boolean;
+  saveFromTopNav: boolean;
   newCopyOnSave?: boolean;
 }): Promise<SaveResult | undefined> {
   const { toastNotifications, chrome, history, store } = services;
@@ -63,10 +63,10 @@ export async function saveSavedExplore({
 
     const id = await savedExplore.save(saveOptions);
 
-    // When shouldUpdateTitle is true,it indicates top nav save
+    // When saveFromTopNav is true,it indicates top nav save
     // should update toast, title, breadcrumbs, URL
 
-    if (id && shouldUpdateTitle) {
+    if (id && saveFromTopNav) {
       toastNotifications.addSuccess({
         title: i18n.translate('explore.notifications.SavedExploreTitle', {
           defaultMessage: `Search '{savedQueryTitle}' was saved`,
