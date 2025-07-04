@@ -4,13 +4,22 @@
  */
 
 import { RootState } from '../store';
-import { ResultStatus, AppState } from '../types';
+import { AppState, EditorMode, QueryExecutionStatus } from '../types';
 import { ExploreServices } from '../../../../types';
-import { LegacyState, QueryState, ResultsState, SystemState, TabState, UIState } from '../slices';
+import {
+  LegacyState,
+  QueryEditorSliceState,
+  QueryState,
+  ResultsState,
+  TabState,
+  UIState,
+} from '../slices';
 import { Dataset, DataStructure } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
 import { defaultMetricChartStyles } from '../../../../components/visualizations/metric/metric_vis_config';
+import { getPromptModeIsAvailable } from './get_prompt_mode_is_available';
+import { DEFAULT_EDITOR_MODE } from '../constants';
 
 /**
  * Persists Redux state to URL
@@ -68,7 +77,10 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
     const finalTabState = appState?.tab || getPreloadedTabState(services);
     const finalLegacyState = appState?.legacy || getPreloadedLegacyState(services);
-    const finalSystemState = getPreloadedSystemState(services);
+    const finalQueryEditorState = await getPreloadedQueryEditorState(
+      services,
+      queryState ?? undefined
+    );
 
     return {
       query: finalQueryState,
@@ -76,7 +88,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       results: finalResultsState,
       tab: finalTabState,
       legacy: finalLegacyState,
-      system: finalSystemState,
+      queryEditor: finalQueryEditorState,
     };
   } catch (err) {
     return await getPreloadedState(services); // Fallback to full preload
@@ -92,7 +104,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
   const resultsState = getPreloadedResultsState(services);
   const tabState = getPreloadedTabState(services);
   const legacyState = getPreloadedLegacyState(services);
-  const systemState = getPreloadedSystemState(services);
+  const queryEditorState = await getPreloadedQueryEditorState(services, queryState);
 
   return {
     query: queryState, // Contains dataset, query, and language
@@ -100,7 +112,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
     results: resultsState,
     tab: tabState,
     legacy: legacyState,
-    system: systemState,
+    queryEditor: queryEditorState,
   };
 };
 
@@ -192,11 +204,21 @@ const getPreloadedUIState = (services: ExploreServices): UIState => {
 };
 
 /**
- * Get preloaded system state
+ * Get preloaded queryEditor state
  */
-const getPreloadedSystemState = (services: ExploreServices): SystemState => {
+const getPreloadedQueryEditorState = async (
+  services: ExploreServices,
+  queryState?: QueryState
+): Promise<QueryEditorSliceState> => {
+  let promptModeIsAvailable = false;
+  if (queryState?.dataset) {
+    promptModeIsAvailable = await getPromptModeIsAvailable(services, queryState.dataset);
+  }
+
   return {
-    status: ResultStatus.UNINITIALIZED,
+    executionStatus: QueryExecutionStatus.UNINITIALIZED,
+    promptModeIsAvailable,
+    editorMode: queryState?.query.length ? EditorMode.SingleQuery : DEFAULT_EDITOR_MODE,
   };
 };
 

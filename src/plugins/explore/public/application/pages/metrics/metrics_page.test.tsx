@@ -5,20 +5,25 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import React, { FC } from 'react';
 import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { discoverPluginMock } from '../../legacy/discover/mocks';
 import {
-  resultsInitialState,
   ISearchResult,
+  resultsInitialState,
   resultsReducer,
+  setShowDatasetFields,
   uiInitialState,
   uiReducer,
-  setShowDatasetFields,
+  queryInitialState,
+  queryReducer,
+  queryEditorInitialState,
+  queryEditorReducer,
 } from '../../utils/state_management/slices';
-import { ResultStatus } from '../../utils/state_management/types';
+import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { MetricsPage } from './metrics_page';
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
@@ -28,7 +33,7 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   withOpenSearchDashboards: jest.fn((component: React.Component) => component),
 }));
 
-jest.mock('../../components/query_panel', () => ({
+jest.mock('../../../components/query_panel', () => ({
   QueryPanel: () => <div data-test-subj="query-panel">Query Panel</div>,
 }));
 
@@ -115,23 +120,33 @@ jest.mock('../../../components/query_panel', () => ({
 
 describe('MetricsPage', () => {
   const createTestStore = (
-    status = ResultStatus.UNINITIALIZED,
+    status = QueryExecutionStatus.UNINITIALIZED,
     rows: OpenSearchSearchHit[] = [],
     fieldSchema: any[] = []
   ) => {
+    // Use 'test-query' as cache key since empty string is falsy
+    const cacheKey = 'test-query';
     const preloadedState = {
       ui: {
         ...uiInitialState,
         status,
-        executionCacheKeys: ['test-cache-key'],
+        executionCacheKeys: [cacheKey],
         showDatasetFields: true,
       },
       results: {
         ...resultsInitialState,
-        'test-cache-key': {
+        [cacheKey]: {
           hits: { hits: rows },
           fieldSchema,
         } as ISearchResult,
+      },
+      query: {
+        ...queryInitialState,
+        query: 'test-query', // Set query to match cache key
+      },
+      queryEditor: {
+        ...queryEditorInitialState,
+        executionStatus: status,
       },
     };
 
@@ -139,9 +154,19 @@ describe('MetricsPage', () => {
       reducer: {
         ui: uiReducer,
         results: resultsReducer,
+        query: queryReducer,
+        queryEditor: queryEditorReducer,
       },
       preloadedState,
     });
+  };
+
+  const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
+    return (
+      <MemoryRouter>
+        <Provider store={store}>{children}</Provider>
+      </MemoryRouter>
+    );
   };
 
   beforeEach(() => {
@@ -160,9 +185,9 @@ describe('MetricsPage', () => {
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.getByTestId('header-dataset-selector')).toBeInTheDocument();
@@ -172,85 +197,85 @@ describe('MetricsPage', () => {
   });
 
   it('does not render chart when status is UNINITIALIZED', () => {
-    const store = createTestStore(ResultStatus.UNINITIALIZED);
+    const store = createTestStore(QueryExecutionStatus.UNINITIALIZED);
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.queryByTestId('discover-chart-container')).not.toBeInTheDocument();
   });
 
   it('renders chart when status is READY', () => {
-    const store = createTestStore(ResultStatus.READY, [
+    const store = createTestStore(QueryExecutionStatus.READY, [
       { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
     ]);
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.getByTestId('discover-chart-container')).toBeInTheDocument();
   });
 
   it('renders chart when status is LOADING with rows', () => {
-    const store = createTestStore(ResultStatus.LOADING, [
+    const store = createTestStore(QueryExecutionStatus.LOADING, [
       { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
     ]);
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.getByTestId('discover-chart-container')).toBeInTheDocument();
   });
 
   it('renders chart when status is ERROR with rows', () => {
-    const store = createTestStore(ResultStatus.ERROR, [
+    const store = createTestStore(QueryExecutionStatus.ERROR, [
       { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
     ]);
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.getByTestId('discover-chart-container')).toBeInTheDocument();
   });
 
   it('does not render chart when status is LOADING without rows', () => {
-    const store = createTestStore(ResultStatus.LOADING);
+    const store = createTestStore(QueryExecutionStatus.LOADING);
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.queryByTestId('discover-chart-container')).not.toBeInTheDocument();
   });
 
   it('does not render chart when status is ERROR without rows', () => {
-    const store = createTestStore(ResultStatus.ERROR);
+    const store = createTestStore(QueryExecutionStatus.ERROR);
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.queryByTestId('discover-chart-container')).not.toBeInTheDocument();
   });
 
   it('renders both tabs with correct content', () => {
-    const store = createTestStore(ResultStatus.READY, [
+    const store = createTestStore(QueryExecutionStatus.READY, [
       { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
     ]);
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.getByTestId('tab-explore_logs_tab')).toBeInTheDocument();
@@ -264,9 +289,9 @@ describe('MetricsPage', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage setHeaderActionMenu={mockSetHeaderActionMenu} />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
@@ -275,9 +300,9 @@ describe('MetricsPage', () => {
   it('renders the new experience banner', () => {
     const store = createTestStore();
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
@@ -286,9 +311,9 @@ describe('MetricsPage', () => {
   it('hide/show fields selector panel correctly', async () => {
     const store = createTestStore();
     render(
-      <Provider store={store}>
+      <TestHarness store={store}>
         <MetricsPage />
-      </Provider>
+      </TestHarness>
     );
 
     expect(screen.getByTestId('dscBottomLeftCanvas')).toBeVisible();

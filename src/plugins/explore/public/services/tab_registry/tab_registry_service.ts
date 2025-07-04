@@ -4,7 +4,7 @@
  */
 
 import { QueryState } from '../../application/utils/state_management/slices';
-import { ResultStatus } from '../../application/utils/state_management/types';
+import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 
 /**
  * Props passed to tab components
@@ -12,7 +12,7 @@ import { ResultStatus } from '../../application/utils/state_management/types';
 export interface TabComponentProps {
   query: QueryState;
   results: Record<string, unknown>;
-  status: ResultStatus;
+  status: QueryExecutionStatus;
   error: Error | null;
   cacheKey: string;
 }
