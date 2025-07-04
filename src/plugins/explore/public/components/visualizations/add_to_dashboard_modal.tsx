@@ -12,7 +12,6 @@ import {
   EuiModalBody,
   EuiFlexGroup,
   EuiFormRow,
-  EuiText,
   EuiModalFooter,
   EuiSmallButton,
   EuiSmallButtonEmpty,
@@ -40,7 +39,6 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const [isSaveExploreExisting] = useState<boolean>(savedExploreId !== undefined ? true : false);
   const [selectedOption, setSelectedOption] = useState<'existing' | 'new'>('existing');
   const [existingDashboard, setExistingDashboard] = useState<DashboardInterface[]>([]);
   const [selectDashboard, setSelectDashboard] = useState<DashboardInterface | null>(null);
@@ -54,12 +52,6 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const { savedExplore } = useSavedExplore(savedExploreId);
 
   const [title, setTitle] = useState<string>('');
-
-  useEffect(() => {
-    if (savedExplore) {
-      setTitle(savedExplore.title);
-    }
-  }, [savedExplore]);
 
   const enableButton =
     title &&
@@ -215,29 +207,19 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           )}
           {renderDuplicateTitleCallout()}
 
-          {!isSaveExploreExisting && (
-            <EuiFlexItem grow={true} style={{ width: '100%' }}>
-              <DebouncedText
-                value={title}
-                placeholder="Save discover title"
-                onChange={(text) => {
-                  setIsTitleOrDashboardTitleDupilcate(false);
-                  setTitle(text);
-                }}
-                label={i18n.translate('explore.addtoDashboardModal.saveDiscoverTitle', {
-                  defaultMessage: 'Save discover title',
-                })}
-              />
-            </EuiFlexItem>
-          )}
-          {isSaveExploreExisting && (
-            <EuiFlexItem grow={true} style={{ width: '100%' }}>
-              <EuiText
-                size="xs"
-                color="subdued"
-              >{`it will update the existing save explore ${savedExplore?.title}`}</EuiText>{' '}
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={true} style={{ width: '100%' }}>
+            <DebouncedText
+              value={title}
+              placeholder="Save Explore name"
+              onChange={(text) => {
+                setIsTitleOrDashboardTitleDupilcate(false);
+                setTitle(text);
+              }}
+              label={i18n.translate('explore.addtoDashboardModal.saveExploreName', {
+                defaultMessage: 'Save Explore name',
+              })}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>
 
