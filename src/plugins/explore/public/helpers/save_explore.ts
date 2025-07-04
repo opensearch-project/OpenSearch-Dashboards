@@ -63,8 +63,7 @@ export async function saveSavedExplore({
 
     const id = await savedExplore.save(saveOptions);
 
-    // When openAfterSave is true,it indicates top nav save
-    // should update toast, title, breadcrumbs, URL
+    // When openAfterSave is true,it indicates save should update toast, title, breadcrumbs, URL
 
     if (id && openAfterSave) {
       toastNotifications.addSuccess({
