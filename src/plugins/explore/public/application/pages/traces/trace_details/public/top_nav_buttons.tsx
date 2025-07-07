@@ -38,20 +38,6 @@ export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
   const { services } = useOpenSearchDashboards<DataExplorerServices>();
 
   const menuActions: TopNavMenuData[] = [
-    // TODO Remove/Register title in different way
-    {
-      id: 'traceId',
-      label: `Trace: ${traceId}`,
-      tooltip: 'Click to copy trace ID to clipboard',
-      run: () => {
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(traceId);
-        }
-      },
-      testId: 'traceIdBtn',
-      disableButton: false,
-      className: 'euiButtonEmpty--text',
-    },
     {
       id: 'viewRawData',
       label: 'View raw data',

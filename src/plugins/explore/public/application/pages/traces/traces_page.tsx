@@ -7,7 +7,6 @@ import '../explore_page.scss';
 
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 import {
   EuiErrorBoundary,
   EuiResizableContainer,
@@ -45,7 +44,6 @@ import { CanvasPanel } from '../../legacy/discover/application/components/panel/
 import { selectShowDataSetFields } from '../../utils/state_management/selectors';
 import { ResultsSummaryPanel } from '../../../components/results_summary/results_summary_panel';
 import { useInitPage } from '../../utils/hooks/use_page_initialization';
-import { TraceDetails } from './trace_details/trace_view';
 
 /**
  * Main application component for the Explore plugin
@@ -56,8 +54,6 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { savedExplore } = useInitPage();
   const dispatch = useDispatch();
-  const location = useLocation();
-  const isTraceDetailsPage = location.hash.startsWith('#/traceDetails');
   const {
     indexPattern,
     isLoading: indexPatternLoading,
@@ -210,37 +206,33 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
 
   return (
     <EuiErrorBoundary>
-      {isTraceDetailsPage ? (
-        <TraceDetails setMenuMountPoint={setHeaderActionMenu} />
-      ) : (
-        <div className="mainPage">
-          <EuiPage className="explore-layout" paddingSize="none" grow={false}>
-            <EuiPageBody className="explore-layout__page-body">
-              {/* TopNav component - configured like discover */}
+      <div className="mainPage">
+        <EuiPage className="explore-layout" paddingSize="none" grow={false}>
+          <EuiPageBody className="explore-layout__page-body">
+            {/* TopNav component - configured like discover */}
 
-              <HeaderDatasetSelector />
+            <HeaderDatasetSelector />
 
-              <NewExperienceBanner />
+            <NewExperienceBanner />
 
-              {/* QueryPanel component - only render when IndexPattern is loaded */}
-              <div className="dscCanvas__queryPanel">
-                {indexPatternLoading ? (
-                  <div>Loading IndexPattern...</div>
-                ) : indexPatternError ? (
-                  <div>Error loading IndexPattern: {indexPatternError}</div>
-                ) : indexPattern ? (
-                  <QueryPanel services={services} indexPattern={indexPattern} />
-                ) : (
-                  <div>No IndexPattern available</div>
-                )}
-              </div>
+            {/* QueryPanel component - only render when IndexPattern is loaded */}
+            <div className="dscCanvas__queryPanel">
+              {indexPatternLoading ? (
+                <div>Loading IndexPattern...</div>
+              ) : indexPatternError ? (
+                <div>Error loading IndexPattern: {indexPatternError}</div>
+              ) : indexPattern ? (
+                <QueryPanel services={services} indexPattern={indexPattern} />
+              ) : (
+                <div>No IndexPattern available</div>
+              )}
+            </div>
 
-              {/* Main content area with resizable panels under QueryPanel */}
-              {BottomPanel}
-            </EuiPageBody>
-          </EuiPage>
-        </div>
-      )}
+            {/* Main content area with resizable panels under QueryPanel */}
+            {BottomPanel}
+          </EuiPageBody>
+        </EuiPage>
+      </div>
     </EuiErrorBoundary>
   );
 };
