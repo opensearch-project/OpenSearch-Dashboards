@@ -45,11 +45,16 @@ describe('<WorkspaceSelector />', () => {
     });
   });
 
-  const WorkspaceSelectorCreatorComponent = () => {
+  const WorkspaceSelectorCreatorComponent = (props?: { isNavOpen?: boolean }) => {
+    const { isNavOpen = true } = props || {};
     return (
       <I18nProvider>
         {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
-        <WorkspaceSelector coreStart={coreStartMock} registeredUseCases$={registeredUseCases$} />
+        <WorkspaceSelector
+          coreStart={coreStartMock}
+          registeredUseCases$={registeredUseCases$}
+          isNavOpen={isNavOpen}
+        />
       </I18nProvider>
     );
   };
@@ -223,5 +228,10 @@ describe('<WorkspaceSelector />', () => {
     fireEvent.click(screen.getByTestId('workspace-selector-button'));
     expect(screen.queryByText(/manage/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/create workspaces/i)).toBeNull();
+  });
+
+  it('should show workspace icon when isNavOpen is false', async () => {
+    const { findByTestId } = render(<WorkspaceSelectorCreatorComponent isNavOpen={false} />);
+    await findByTestId('workspaceSelectorIcon');
   });
 });

@@ -124,6 +124,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$, isNavOpen }:
           <EuiButtonEmpty onClick={onButtonClick} flush="both">
             <EuiIcon
               size="l"
+              data-test-subj="workspaceSelectorIcon"
               type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
               color={getValidWorkspaceColor(currentWorkspace.color)}
             />
