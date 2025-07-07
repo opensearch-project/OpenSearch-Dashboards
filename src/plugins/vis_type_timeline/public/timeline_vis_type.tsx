@@ -52,6 +52,7 @@ export function getTimelineVisDefinition(dependencies: TimelineVisDependencies) 
     name: TIMELINE_VIS_NAME,
     title: 'Timeline',
     icon: 'timeline',
+    isClassic: true,
     description: i18n.translate('timeline.timelineDescription', {
       defaultMessage: 'Build time-series using functional expressions',
     }),
