@@ -111,6 +111,8 @@ const mountComponent = () => {
   );
 };
 
+const asyncSleep = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));
+
 describe('ConfigurePrometheusDatasourcePanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -128,9 +130,8 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
       textArea.simulate('change', { target: { value: 'New details' } });
       textArea.simulate('blur', { target: { value: 'New details' } });
     });
-    setTimeout(() => {
-      expect(mockSetDetailsForRequest).toHaveBeenCalledWith('New details');
-    }, 1000);
+    await asyncSleep(1000);
+    expect(mockSetDetailsForRequest).toHaveBeenCalledWith('New details');
   });
 
   it('updates store URI state on change', async () => {
@@ -140,9 +141,8 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
       storeField.simulate('change', { target: { value: 'New Store URI' } });
       storeField.simulate('blur', { target: { value: 'New Store URI' } });
     });
-    setTimeout(() => {
-      expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
-    }, 1000);
+    await asyncSleep(1000);
+    expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
   });
 
   it('updates auth method on select change', async () => {
@@ -151,9 +151,8 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     await act(async () => {
       select.simulate('change', { target: { value: 'awssigv4' } });
     });
-    setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
-    }, 1000);
+    await asyncSleep(1000);
+    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
   });
 
   it('displays authentication fields based on auth method', async () => {
@@ -162,15 +161,13 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     await act(async () => {
       select.simulate('change', { target: { value: 'awssigv4' } });
     });
-    setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
-    }, 100);
+    await asyncSleep(100);
+    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
 
     await act(async () => {
       select.simulate('change', { target: { value: 'basicauth' } });
     });
-    setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
-    }, 1000);
+    await asyncSleep(1000);
+    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
   });
 });
