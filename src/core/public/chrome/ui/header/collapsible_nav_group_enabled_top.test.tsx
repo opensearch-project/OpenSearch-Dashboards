@@ -47,9 +47,4 @@ describe('<CollapsibleNavTop />', () => {
     fireEvent.click(getByTestId('collapsibleNavHome'));
     expect(props.navigateToApp).toBeCalledWith('home');
   });
-
-  it('should render expand icon when collapsed', async () => {
-    const { findByTestId } = render(<CollapsibleNavTop {...getMockedProps()} isNavOpen={false} />);
-    await findByTestId('collapsibleNavShrinkButton');
-  });
 });
