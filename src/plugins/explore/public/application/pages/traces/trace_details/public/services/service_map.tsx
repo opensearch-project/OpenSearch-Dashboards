@@ -118,103 +118,100 @@ const ServiceNode = ({
           position: 'relative',
         }}
       >
-        {/* Service name with metric bars */}
-        <div style={{ display: 'flex', marginBottom: showDetails ? '8px' : '0' }}>
-          <div
-            style={{
-              fontSize: '16px',
-              fontWeight: '600',
-              color: '#232F3E',
-              lineHeight: '1.2',
-              flexGrow: 1,
-            }}
-          >
-            {data.label}
-          </div>
-          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+        {/* Service name */}
+        <div
+          style={{
+            fontSize: '16px',
+            fontWeight: '600',
+            color: '#232F3E',
+            lineHeight: '1.2',
+            marginBottom: '8px',
+          }}
+        >
+          {data.label}
+        </div>
+
+        {/* Metric bars */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+            marginBottom: showDetails ? '8px' : '0',
+          }}
+        >
+          {selectedMetrics.includes('requestRate') && (
             <div
+              title={`Request Rate: ${data.spanCount}`}
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2px',
-                width: '20px',
-                alignItems: 'center',
+                width: '100%',
+                height: '6px',
+                position: 'relative',
+                backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                borderRadius: '1px',
               }}
             >
-              {selectedMetrics.includes('requestRate') && (
-                <div
-                  title={`Request Rate: ${data.spanCount}`}
-                  style={{
-                    width: '100%',
-                    height: '6px',
-                    position: 'relative',
-                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                    borderRadius: '1px',
-                  }}
-                >
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      height: '100%',
-                      width: `${requestRateIntensity * 100}%`,
-                      backgroundColor: `rgba(0, 0, 255, ${0.3 + requestRateIntensity * 0.7})`,
-                      borderRadius: '1px',
-                    }}
-                  />
-                </div>
-              )}
-              {selectedMetrics.includes('errorRate') && (
-                <div
-                  title={`Error Rate: ${(data.errorRate * 100).toFixed(1)}%`}
-                  style={{
-                    width: '100%',
-                    height: '6px',
-                    position: 'relative',
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                    borderRadius: '1px',
-                  }}
-                >
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      height: '100%',
-                      width: `${errorRateIntensity * 100}%`,
-                      backgroundColor: `rgba(255, 0, 0, ${0.3 + errorRateIntensity * 0.7})`,
-                      borderRadius: '1px',
-                    }}
-                  />
-                </div>
-              )}
-              {selectedMetrics.includes('duration') && (
-                <div
-                  title={`Avg Duration: ${formatLatency(data.avgLatency)}`}
-                  style={{
-                    width: '100%',
-                    height: '6px',
-                    position: 'relative',
-                    backgroundColor: 'rgba(128, 0, 128, 0.1)',
-                    borderRadius: '1px',
-                  }}
-                >
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      height: '100%',
-                      width: `${durationIntensity * 100}%`,
-                      backgroundColor: `rgba(128, 0, 128, ${0.3 + durationIntensity * 0.7})`,
-                      borderRadius: '1px',
-                    }}
-                  />
-                </div>
-              )}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  height: '100%',
+                  width: `${requestRateIntensity * 100}%`,
+                  backgroundColor: `rgba(0, 0, 255, ${0.3 + requestRateIntensity * 0.7})`,
+                  borderRadius: '1px',
+                }}
+              />
             </div>
-          </div>
+          )}
+          {selectedMetrics.includes('errorRate') && (
+            <div
+              title={`Error Rate: ${(data.errorRate * 100).toFixed(1)}%`}
+              style={{
+                width: '100%',
+                height: '6px',
+                position: 'relative',
+                backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                borderRadius: '1px',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  height: '100%',
+                  width: `${errorRateIntensity * 100}%`,
+                  backgroundColor: `rgba(255, 0, 0, ${0.3 + errorRateIntensity * 0.7})`,
+                  borderRadius: '1px',
+                }}
+              />
+            </div>
+          )}
+          {selectedMetrics.includes('duration') && (
+            <div
+              title={`Avg Duration: ${formatLatency(data.avgLatency)}`}
+              style={{
+                width: '100%',
+                height: '6px',
+                position: 'relative',
+                backgroundColor: 'rgba(128, 0, 128, 0.1)',
+                borderRadius: '1px',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  height: '100%',
+                  width: `${durationIntensity * 100}%`,
+                  backgroundColor: `rgba(128, 0, 128, ${0.3 + durationIntensity * 0.7})`,
+                  borderRadius: '1px',
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Metrics section - only shown when showDetails is true */}
