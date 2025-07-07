@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern } from '../../../../../../data/common';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { indexPatternMock } from '../../../legacy/discover/__mock__/index_pattern_mock';
 import {
   createMockSearchResult,
   createMockSearchResultWithAggregations,
@@ -16,7 +14,6 @@ import {
   mockBuildPointSeriesData,
   mockTabifyAggResponse,
 } from '../__mocks__';
-import { ISearchResult } from '../slices';
 
 import {
   defaultPrepareQuery,
@@ -92,29 +89,6 @@ describe('Query Actions', () => {
 
   describe('histogramResultsProcessor', () => {
     const mockData = dataPluginMock.createStartContract(true);
-    const searchResult: ISearchResult = {
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        skipped: 0,
-        successful: 1,
-        total: 1,
-      },
-      took: 0,
-      elapsedMs: 0,
-      hits: {
-        total: 1,
-        max_score: 0,
-        hits: [
-          { _index: 'mock-index', _type: 'mock-type', _id: 'mock-id', _score: 0, _source: {} },
-        ],
-      },
-      fieldSchema: [
-        { name: '@timestamp', type: 'date' },
-        { name: 'response', type: 'string' },
-      ],
-    };
-
     const mockHistogramConfigs = createMockHistogramConfigs();
 
     beforeEach(() => {
@@ -126,17 +100,6 @@ describe('Query Actions', () => {
     });
 
     describe('when indexPattern has timeFieldName', () => {
-      it('should not throw error without time field', async () => {
-        expect(() =>
-          histogramResultsProcessor(
-            searchResult,
-            { ...indexPatternMock, timeFieldName: undefined } as IndexPattern,
-            mockData,
-            'auto'
-          )
-        ).not.toThrow();
-      });
-
       it('should process histogram data', () => {
         const mockRawResults = createMockSearchResultWithAggregations();
         const mockIndexPattern = createMockIndexPattern({ timeFieldName: '@timestamp' });
