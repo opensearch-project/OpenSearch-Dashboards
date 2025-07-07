@@ -147,9 +147,19 @@ export const VisualizationContainer = () => {
 
     if (visualizationTypeResult) {
       // Always set the data from the query as it should be the single source of truth
-      setVisualizationData(visualizationTypeResult);
+
+      if (selectedChartType && !visualizationTypeResult.visualizationType) {
+        const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
+        setVisualizationData({
+          ...visualizationTypeResult,
+          visualizationType: chartConfig as VisualizationType<ChartType>,
+        });
+      } else {
+        setVisualizationData(visualizationTypeResult);
+        updateVisualizationState(visualizationTypeResult.visualizationType!);
+      }
+
       setCurrentRuleId(visualizationTypeResult.ruleId);
-      updateVisualizationState(visualizationTypeResult.visualizationType!);
 
       // // Map from visualization columns to the field names
       // const availableFieldNames = {
@@ -215,6 +225,7 @@ export const VisualizationContainer = () => {
       //   clearCache();
       // }
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [
     fieldSchema,
     // selectedFieldNames,
@@ -224,7 +235,7 @@ export const VisualizationContainer = () => {
     // selectedChartType,
     // clearCache,
     // findMatchedRuleWithCache,
-    // visualizationRegistry,
+    visualizationRegistry,
   ]);
 
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
@@ -353,6 +364,7 @@ export const VisualizationContainer = () => {
         setVisualizationData({
           ...visualizationData,
           visualizationType: chartConfig as VisualizationType<ChartType>,
+          axisColumnMappings: {},
         });
       }
     }

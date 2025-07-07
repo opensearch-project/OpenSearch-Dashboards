@@ -20,7 +20,7 @@ import {
   VisualizationRule,
 } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
-import { BAR_POSSIBLE_SELECTIONS } from './utils/chart_type_axes_mapping';
+import { BAR_POSSIBLE_SELECTIONS, PIE_POSSIBLE_SELECTIONS } from './utils/chart_type_axes_mapping';
 
 /**
  * Registry for visualization rules and configurations.
@@ -47,34 +47,13 @@ export class VisualizationRegistry {
     const bestMatch = this.findBestMatch(numericalColumns, categoricalColumns, dateColumns);
 
     if (bestMatch) {
-      const findColumns = (type: VisFieldType) => {
-        switch (type) {
-          case VisFieldType.Numerical:
-            return numericalColumns;
-          case VisFieldType.Categorical:
-            return categoricalColumns;
-          case VisFieldType.Date:
-            return dateColumns;
-          default:
-            return [];
-        }
-      };
-
-      const possibleMapping = visualizationRegistry.getPossibleMappingFromChartType(
-        bestMatch.chartType.name
+      const mappingObj = this.getDefaultAxesMapping(
+        bestMatch.rule,
+        bestMatch.chartType.type,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
       );
-      const currentlyDisplayedMapping = possibleMapping.find(({ columnMatch }) =>
-        isEqual(columnMatch, bestMatch.rule.matchIndex)
-      );
-      const mappingObj = currentlyDisplayedMapping
-        ? (Object.fromEntries(
-            Object.entries(currentlyDisplayedMapping!.mapping[0]).map(([role, config]) => [
-              role,
-              config && findColumns(config.type)[config.index],
-            ])
-          ) as AxisColumnMappings)
-        : {};
-
       return {
         visualizationType: this.getVisualizationConfig(bestMatch.chartType.type),
         numericalColumns,
@@ -98,6 +77,40 @@ export class VisualizationRegistry {
       toExpression: undefined,
       axisColumnMappings: {},
     };
+  }
+
+  getDefaultAxesMapping(
+    rule: VisualizationRule,
+    chartTypeName: string,
+    numericalColumns: VisColumn[],
+    categoricalColumns: VisColumn[],
+    dateColumns: VisColumn[]
+  ) {
+    const findColumns = (type: VisFieldType) => {
+      switch (type) {
+        case VisFieldType.Numerical:
+          return numericalColumns;
+        case VisFieldType.Categorical:
+          return categoricalColumns;
+        case VisFieldType.Date:
+          return dateColumns;
+        default:
+          return [];
+      }
+    };
+
+    const possibleMapping = visualizationRegistry.getPossibleMappingFromChartType(chartTypeName);
+    const currentlyDisplayedMapping = possibleMapping.find(({ columnMatch }) =>
+      isEqual(columnMatch, rule.matchIndex)
+    );
+    return currentlyDisplayedMapping
+      ? (Object.fromEntries(
+          Object.entries(currentlyDisplayedMapping!.mapping[0]).map(([role, config]) => [
+            role,
+            config && findColumns(config.type)[config.index],
+          ])
+        ) as AxisColumnMappings)
+      : {};
   }
 
   /**
@@ -212,7 +225,7 @@ export class VisualizationRegistry {
       case 'heatmap':
         return [];
       case 'pie':
-        return [];
+        return PIE_POSSIBLE_SELECTIONS;
       case 'scatter':
         return [];
       case 'metric':

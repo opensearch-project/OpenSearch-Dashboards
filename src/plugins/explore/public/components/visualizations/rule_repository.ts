@@ -396,7 +396,8 @@ const oneMetricOneCateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'line':
         return createCategoryLineChart(

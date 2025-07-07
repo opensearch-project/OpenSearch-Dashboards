@@ -44,6 +44,7 @@ export const Visualization = <T extends ChartType>({
     return null;
   }
   const availableChartTypes = visualizationData.availableChartTypes;
+  const hasSelectionMapping = Object.keys(visualizationData.axisColumnMappings!).length !== 0;
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
@@ -54,7 +55,9 @@ export const Visualization = <T extends ChartType>({
           className="exploreVisPanel"
         >
           <div className="exploreVisPanel__inner">
-            {expression ? (
+            {expression &&
+            hasSelectionMapping &&
+            Object.keys(visualizationData.axisColumnMappings!).length !== 0 ? (
               <ReactExpressionRenderer
                 key={JSON.stringify(searchContext) + expression}
                 expression={expression}

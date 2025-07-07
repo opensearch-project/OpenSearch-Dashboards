@@ -62,3 +62,15 @@ export const BAR_POSSIBLE_SELECTIONS: ChartTypePossibleMapping[] = [
     ],
   },
 ];
+
+export const PIE_POSSIBLE_SELECTIONS: ChartTypePossibleMapping[] = [
+  {
+    columnMatch: [1, 1, 0],
+    mapping: [
+      {
+        [AxisRole.THETA]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+      },
+    ],
+  },
+];
