@@ -19,7 +19,7 @@ import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public'
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';
-import { ResultStatus } from '../../utils/state_management/types';
+import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { TopNav } from '../../legacy/discover/application/view_components/canvas/top_nav';
 import { DiscoverChartContainer } from '../../legacy/discover/application/view_components/canvas/discover_chart_container';
 import { QueryPanel } from '../../../components/query_panel';
@@ -62,7 +62,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
 
   // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
-    return state.system?.status || ResultStatus.UNINITIALIZED;
+    return state.queryEditor.executionStatus || QueryExecutionStatus.UNINITIALIZED;
   });
   const rows = useSelector((state: RootState) => {
     const query = state.query;
@@ -71,7 +71,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     // Use default cache key computation - pass query string only
     const queryString = typeof query.query === 'string' ? query.query : '';
     const cacheKey = defaultPrepareQuery(queryString);
-    const rawResults = cacheKey ? results[cacheKey] : null;
+    const rawResults = results.hasOwnProperty(cacheKey) ? results[cacheKey] : null;
 
     if (rawResults) {
       const hits = rawResults.hits?.hits || [];
@@ -109,7 +109,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       );
     }
 
-    if (status === ResultStatus.NO_RESULTS) {
+    if (status === QueryExecutionStatus.NO_RESULTS) {
       return (
         <CanvasPanel>
           <DiscoverNoResults
@@ -122,7 +122,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       );
     }
 
-    if (status === ResultStatus.UNINITIALIZED) {
+    if (status === QueryExecutionStatus.UNINITIALIZED) {
       return (
         <CanvasPanel>
           <DiscoverUninitialized onRefresh={onRefresh} />
@@ -130,7 +130,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       );
     }
 
-    if (status === ResultStatus.LOADING && !rows?.length) {
+    if (status === QueryExecutionStatus.LOADING && !rows?.length) {
       return (
         <CanvasPanel>
           <LoadingSpinner />
@@ -138,7 +138,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       );
     }
 
-    if (status === ResultStatus.ERROR && !rows?.length) {
+    if (status === QueryExecutionStatus.ERROR && !rows?.length) {
       return (
         <CanvasPanel>
           <DiscoverUninitialized onRefresh={onRefresh} />
@@ -147,9 +147,9 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     }
 
     if (
-      status === ResultStatus.READY ||
-      (status === ResultStatus.LOADING && !!rows?.length) ||
-      (status === ResultStatus.ERROR && !!rows?.length)
+      status === QueryExecutionStatus.READY ||
+      (status === QueryExecutionStatus.LOADING && !!rows?.length) ||
+      (status === QueryExecutionStatus.ERROR && !!rows?.length)
     ) {
       return (
         <>
@@ -220,7 +220,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
               ) : indexPatternError ? (
                 <div>Error loading IndexPattern: {indexPatternError}</div>
               ) : indexPattern ? (
-                <QueryPanel services={services} indexPattern={indexPattern} />
+                <QueryPanel />
               ) : (
                 <div>No IndexPattern available</div>
               )}
