@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
@@ -121,14 +122,16 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$, isNavOpen }:
     button = (
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem>
-          <EuiButtonEmpty onClick={onButtonClick} flush="both">
-            <EuiIcon
-              size="l"
-              data-test-subj="workspaceSelectorIcon"
-              type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
-              color={getValidWorkspaceColor(currentWorkspace.color)}
-            />
-          </EuiButtonEmpty>
+          <EuiToolTip content={currentWorkspace.name}>
+            <EuiButtonEmpty onClick={onButtonClick} flush="both">
+              <EuiIcon
+                size="l"
+                data-test-subj="workspaceSelectorIcon"
+                type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
+                color={getValidWorkspaceColor(currentWorkspace.color)}
+              />
+            </EuiButtonEmpty>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

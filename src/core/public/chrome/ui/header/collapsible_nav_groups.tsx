@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import classNames from 'classnames';
@@ -94,10 +95,17 @@ export function NavGroups({
         link: navLink.link,
         className,
       });
+      const isHidden = !navOpen && !result.icon;
       return {
         ...result,
         name: navOpen ? result.name : '',
-        hidden: !navOpen && !result.icon,
+        hidden: isHidden,
+        icon:
+          !isNavOpen && !isHidden ? (
+            <EuiToolTip content={navLink.link.title}>{result.icon}</EuiToolTip>
+          ) : (
+            result.icon
+          ),
       };
     }
 
