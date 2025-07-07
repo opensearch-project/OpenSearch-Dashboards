@@ -24,21 +24,21 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
         class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
       />
       <div
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        class="euiPanel euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"
       >
         <div
           class="euiFlexItem"
         >
           <nav
-            class="euiSideNav euiSideNav-isOpenMobile"
+            class="euiSideNav leftNavSideNavWrapper euiSideNav-isOpenMobile"
           >
             <div
               class="euiSideNav__content"
               id="euiSideNavContent_generated-id"
             >
               <div
-                class="euiSideNavItem euiSideNavItem--root nav-link-item "
+                class="euiSideNavItem euiSideNavItem--root nav-link-item nav-link-item-active-false "
               >
                 <button
                   aria-label="link-in-all"
@@ -85,11 +85,35 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
       class="eui-fullHeight left-navigation-wrapper"
     >
       <div
-        class="searchBarIcon euiHeaderSectionItemButton"
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder"
+        style="flex-grow: 0;"
+      >
+        <button
+          data-test-subj="back"
+        >
+          go back
+        </button>
+      </div>
+      <div
+        class="searchBarIcon"
       />
       <div
-        class="flex-1-container"
-      />
+        class="euiPanel euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        style="padding-top: 0px;"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <nav
+            class="euiSideNav leftNavSideNavWrapper euiSideNav-isOpenMobile"
+          >
+            <div
+              class="euiSideNav__content"
+              id="euiSideNavContent_generated-id"
+            />
+          </nav>
+        </div>
+      </div>
       <div
         class="bottom-container bottom-container-collapsed"
       />
@@ -122,21 +146,21 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
         class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
       />
       <div
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        class="euiPanel euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"
       >
         <div
           class="euiFlexItem"
         >
           <nav
-            class="euiSideNav euiSideNav-isOpenMobile"
+            class="euiSideNav leftNavSideNavWrapper euiSideNav-isOpenMobile"
           >
             <div
               class="euiSideNav__content"
               id="euiSideNavContent_generated-id"
             >
               <div
-                class="euiSideNavItem euiSideNavItem--root nav-link-item "
+                class="euiSideNavItem euiSideNavItem--root nav-link-item nav-link-item-active-false "
               >
                 <button
                   aria-label="link-in-all"
