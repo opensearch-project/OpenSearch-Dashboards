@@ -101,7 +101,7 @@ export class FilterUtils {
     }
   }
 
-  private static quote(value: unknown) {
+  protected static quote(value: unknown) {
     if (typeof value === 'string') return `'${value.replaceAll("'", "''")}'`;
     return value;
   }

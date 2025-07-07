@@ -31,22 +31,17 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
-import {
-  addColumn,
-  clearResults,
-  removeColumn,
-  setQueryWithHistory,
-} from '../../application/utils/state_management/slices';
-import {
-  defaultPrepareQuery,
-  executeQueries,
-} from '../../application/utils/state_management/actions/query_actions';
+import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
+import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
 import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
+import { useEditorContext } from '../../application/context';
+import { EditorMode } from '../../application/utils/state_management/types';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { uiSettings, data, capabilities, indexPatterns } = services;
+  const editorContext = useEditorContext();
 
   const savedSearch = useSelector(selectSavedSearch);
   const columns = useSelector(selectColumns);
@@ -156,17 +151,17 @@ const ExploreDataTableComponent = () => {
         operation,
         indexPattern.id ?? ''
       );
-      const languageConfig = services.data.query.queryString
+      const languageConfig = data.query.queryString
         .getLanguageService()
         .getLanguage(query.language);
-      const newQuery = languageConfig?.insertFiltersToQuery?.(query, newFilters);
-      if (newQuery) {
-        dispatch(setQueryWithHistory(newQuery));
-        dispatch(clearResults());
-        dispatch(executeQueries({ services }));
-      }
+      const newText =
+        editorContext.editorMode === EditorMode.SingleQuery ||
+        editorContext.editorMode === EditorMode.DualQuery
+          ? languageConfig?.addFiltersToQuery?.(editorContext.query, newFilters)
+          : languageConfig?.addFiltersToPrompt?.(editorContext.prompt, newFilters);
+      if (newText) editorContext.setEditorText(newText);
     },
-    [data.query.filterManager, indexPattern, dispatch, query, services]
+    [data.query.filterManager, data.query.queryString, editorContext, indexPattern, query.language]
   );
 
   return (

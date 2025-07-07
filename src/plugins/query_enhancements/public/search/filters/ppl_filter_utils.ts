@@ -58,14 +58,14 @@ export class PPLFilterUtils extends FilterUtils {
   }
 
   /**
-   * Inserts filters into a Query object by converting them to PPL predicates
+   * Inserts filters into a query string by converting them to PPL predicates
    * and adding WHERE clauses after the first command. If a matching filter
    * already exists, it won't be added again. If a negated version exists, it
    * will be replaced.
    *
    * @param query - The query string
    * @param filter - The Filter objects to insert into the query
-   * @returns A new Query object with the filters applied as WHERE clauses
+   * @returns A new query string with the filters applied as WHERE clauses
    */
   public static addFiltersToQuery(query: string, filters: Filter[]): string {
     return filters.reduce(PPLFilterUtils.addFilterToQuery, query);

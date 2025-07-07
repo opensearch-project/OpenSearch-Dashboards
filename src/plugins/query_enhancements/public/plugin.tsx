@@ -27,6 +27,7 @@ import {
   QueryEnhancementsPluginStartDependencies,
 } from './types';
 import { PPLFilterUtils } from './search/filters';
+import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
 
 export class QueryEnhancementsPlugin
   implements
@@ -70,6 +71,7 @@ export class QueryEnhancementsPlugin
       }),
       getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
       addFiltersToQuery: PPLFilterUtils.addFiltersToQuery,
+      addFiltersToPrompt: NaturalLanguageFilterUtils.addFiltersToPrompt,
       fields: {
         sortable: false,
         visualizable: false,

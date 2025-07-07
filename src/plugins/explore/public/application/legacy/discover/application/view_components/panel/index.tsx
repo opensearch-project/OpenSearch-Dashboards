@@ -30,6 +30,8 @@ import {
   defaultPrepareQuery,
   executeQueries,
 } from '../../../../../utils/state_management/actions/query_actions';
+import { useEditorContext } from '../../../../../context';
+import { EditorMode } from '../../../../../utils/state_management/types';
 
 export function DiscoverPanel() {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -42,6 +44,7 @@ export function DiscoverPanel() {
     uiSettings,
   } = services;
 
+  const editorContext = useEditorContext();
   const columns = useSelector(selectColumns);
   const query = useSelector(selectQuery);
   const results = useSelector((state: any) => state.results);
@@ -101,14 +104,14 @@ export function DiscoverPanel() {
         indexPattern.id ?? ''
       );
       const languageConfig = queryString.getLanguageService().getLanguage(query.language);
-      const newQuery = languageConfig?.insertFiltersToQuery?.(query, newFilters);
-      if (newQuery) {
-        dispatch(setQueryWithHistory(newQuery));
-        dispatch(clearResults());
-        dispatch(executeQueries({ services }));
-      }
+      const newText =
+        editorContext.editorMode === EditorMode.SingleQuery ||
+        editorContext.editorMode === EditorMode.DualQuery
+          ? languageConfig?.addFiltersToQuery?.(editorContext.query, newFilters)
+          : languageConfig?.addFiltersToPrompt?.(editorContext.prompt, newFilters);
+      if (newText) editorContext.setEditorText(newText);
     },
-    [filterManager, indexPattern, query, queryString, dispatch, services]
+    [indexPattern, filterManager, queryString, query.language, editorContext]
   );
 
   const onCreateIndexPattern = useCallback(async () => {

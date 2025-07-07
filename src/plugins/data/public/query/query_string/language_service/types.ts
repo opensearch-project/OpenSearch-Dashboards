@@ -68,4 +68,6 @@ export interface LanguageConfig {
   hideDatePicker?: boolean;
   sampleQueries?: SampleQuery[];
   addFiltersToQuery?: (query: string, filters: Filter[]) => string;
+  /** Add filters to the natural language prompt. */
+  addFiltersToPrompt?: (prompt: string, filters: Filter[]) => string;
 }
