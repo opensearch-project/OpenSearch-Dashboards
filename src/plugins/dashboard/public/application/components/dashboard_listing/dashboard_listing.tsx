@@ -45,6 +45,7 @@ export const DashboardListing = () => {
   const showUpdatedUx = uiSettings?.get('home:useNewHomePage');
   const { HeaderControl } = navigation.ui;
   const { setAppRightControls } = application;
+  const text2dashEnabled = application.capabilities?.assistant?.enabled === true;
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
@@ -205,7 +206,13 @@ export const DashboardListing = () => {
     );
   });
 
-  const createButton = <CreateButton dashboardProviders={dashboardProviders()} />;
+  const createButton = (
+    <CreateButton
+      dashboardProviders={dashboardProviders()}
+      core={application}
+      text2dashEnabled={text2dashEnabled}
+    />
+  );
 
   return (
     <>
