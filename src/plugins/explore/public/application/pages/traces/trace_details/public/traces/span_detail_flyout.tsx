@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { TracePPLService as PPLService } from '../../server/ppl_request_trace';
 import { nanoToMilliSec, get, isEmpty, round } from '../utils/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';
@@ -163,7 +164,12 @@ export function SpanDetailFlyout(props: {
     if (error) {
       return (
         <EuiText color="danger">
-          <p>Error loading span data: {error}</p>
+          <p>
+            {i18n.translate('explore.spanDetailFlyout.error.loadingSpanData', {
+              defaultMessage: 'Error loading span data: {errorMessage}',
+              values: { errorMessage: error },
+            })}
+          </p>
         </EuiText>
       );
     }
@@ -171,7 +177,11 @@ export function SpanDetailFlyout(props: {
     if (!span || isEmpty(span)) {
       return (
         <EuiText>
-          <p>No span data available</p>
+          <p>
+            {i18n.translate('explore.spanDetailFlyout.error.noSpanDataAvailable', {
+              defaultMessage: 'No span data available',
+            })}
+          </p>
         </EuiText>
       );
     }
@@ -179,14 +189,18 @@ export function SpanDetailFlyout(props: {
     const overviewList = [
       getListItem(
         getSpanFieldKey('SPAN_ID'),
-        'Span ID',
+        i18n.translate('explore.spanDetailFlyout.title.spanId', {
+          defaultMessage: 'Span ID',
+        }),
         getSpanValue(span, 'SPAN_ID') ? (
           <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={getSpanValue(span, 'SPAN_ID')}>
                 {(copy) => (
                   <EuiSmallButtonIcon
-                    aria-label="copy-button"
+                    aria-label={i18n.translate('explore.spanDetailFlyout.ariaLabel.copyButton', {
+                      defaultMessage: 'copy-button',
+                    })}
                     onClick={copy}
                     iconType="copyClipboard"
                   />
@@ -201,14 +215,18 @@ export function SpanDetailFlyout(props: {
       ),
       getListItem(
         getSpanFieldKey('PARENT_SPAN_ID'),
-        'Parent span ID',
+        i18n.translate('explore.spanDetailFlyout.title.parentSpanId', {
+          defaultMessage: 'Parent span ID',
+        }),
         getSpanValue(span, 'PARENT_SPAN_ID') ? (
           <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={span.parentSpanId}>
                 {(copy) => (
                   <EuiSmallButtonIcon
-                    aria-label="copy-button"
+                    aria-label={i18n.translate('explore.spanDetailFlyout.ariaLabel.copyButton', {
+                      defaultMessage: 'copy-button',
+                    })}
                     onClick={copy}
                     iconType="copyClipboard"
                   />
@@ -221,36 +239,56 @@ export function SpanDetailFlyout(props: {
           '-'
         )
       ),
-      getListItem(getSpanFieldKey('SERVICE'), 'Service', getSpanValue(span, 'SERVICE') || '-'),
+      getListItem(
+        getSpanFieldKey('SERVICE'),
+        i18n.translate('explore.spanDetailFlyout.title.service', {
+          defaultMessage: 'Service',
+        }),
+        getSpanValue(span, 'SERVICE') || '-'
+      ),
       getListItem(
         getSpanFieldKey('OPERATION'),
-        'Operation',
+        i18n.translate('explore.spanDetailFlyout.title.operation', {
+          defaultMessage: 'Operation',
+        }),
         getSpanValue(span, 'OPERATION') || '-'
       ),
       getListItem(
         getSpanFieldKey('DURATION'),
-        'Duration',
+        i18n.translate('explore.spanDetailFlyout.title.duration', {
+          defaultMessage: 'Duration',
+        }),
         `${round(nanoToMilliSec(Math.max(0, span.durationInNanos || 0)), 2)} ms`
       ),
       getListItem(
         getSpanFieldKey('START_TIME'),
-        'Start time',
+        i18n.translate('explore.spanDetailFlyout.title.startTime', {
+          defaultMessage: 'Start time',
+        }),
         span.startTime ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT) : '-'
       ),
       getListItem(
         getSpanFieldKey('END_TIME'),
-        'End time',
+        i18n.translate('explore.spanDetailFlyout.title.endTime', {
+          defaultMessage: 'End time',
+        }),
         span.endTime ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT) : '-'
       ),
       getListItem(
         getSpanFieldKey('ERRORS'),
-        'Errors',
+        i18n.translate('explore.spanDetailFlyout.title.errors', {
+          defaultMessage: 'Errors',
+        }),
         span['status.code'] === 2 ? (
           <EuiText color="danger" size="s" style={{ fontWeight: 700 }}>
-            Yes
+            {i18n.translate('explore.spanDetailFlyout.errors.yes', {
+              defaultMessage: 'Yes',
+            })}
           </EuiText>
         ) : (
-          'No'
+          i18n.translate('explore.spanDetailFlyout.errors.no', {
+            defaultMessage: 'No',
+          })
         )
       ),
     ];
@@ -293,7 +331,11 @@ export function SpanDetailFlyout(props: {
     const eventsComponent = isEmpty(span.events) ? null : (
       <>
         <EuiText size="m">
-          <span className="panel-title">Event</span>
+          <span className="panel-title">
+            {i18n.translate('explore.spanDetailFlyout.section.event', {
+              defaultMessage: 'Event',
+            })}
+          </span>
         </EuiText>
         <EuiCodeBlock language="json" paddingSize="s" isCopyable overflowHeight={400}>
           {JSON.stringify(span.events, null, 2)}
@@ -306,7 +348,11 @@ export function SpanDetailFlyout(props: {
     return (
       <>
         <EuiText size="m">
-          <span className="panel-title">Overview</span>
+          <span className="panel-title">
+            {i18n.translate('explore.spanDetailFlyout.section.overview', {
+              defaultMessage: 'Overview',
+            })}
+          </span>
         </EuiText>
         <>
           <EuiSpacer size="s" />
@@ -315,7 +361,11 @@ export function SpanDetailFlyout(props: {
           <EuiHorizontalRule margin="s" />
           {eventsComponent}
           <EuiText size="m">
-            <span className="panel-title">Span attributes</span>
+            <span className="panel-title">
+              {i18n.translate('explore.spanDetailFlyout.section.spanAttributes', {
+                defaultMessage: 'Span attributes',
+              })}
+            </span>
             {attributesList.length === 0 || attributesList.length ? (
               <span className="panel-title-count">{` (${attributesList.length})`}</span>
             ) : null}
@@ -341,12 +391,20 @@ export function SpanDetailFlyout(props: {
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
               <EuiText size="s">
-                <h2>Span detail</h2>
+                <h2>
+                  {i18n.translate('explore.spanDetailFlyout.header.spanDetail', {
+                    defaultMessage: 'Span detail',
+                  })}
+                </h2>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {!isSpanDataLoading && !isEmpty(span) && (
-                <EuiToolTip content="View associated logs using Span Id">
+                <EuiToolTip
+                  content={i18n.translate('explore.spanDetailFlyout.tooltip.viewAssociatedLogs', {
+                    defaultMessage: 'View associated logs using Span Id',
+                  })}
+                >
                   <EuiSmallButton
                     onClick={() => {
                       // const spanId = getSpanValue(span, 'SPAN_ID');
@@ -361,7 +419,9 @@ export function SpanDetailFlyout(props: {
                     }}
                     iconType="discoverApp"
                   >
-                    View associated logs
+                    {i18n.translate('explore.spanDetailFlyout.button.viewAssociatedLogs', {
+                      defaultMessage: 'View associated logs',
+                    })}
                   </EuiSmallButton>
                 </EuiToolTip>
               )}
@@ -376,7 +436,9 @@ export function SpanDetailFlyout(props: {
                   iconSide="left"
                   size="xs"
                 >
-                  Back
+                  {i18n.translate('explore.spanDetailFlyout.button.back', {
+                    defaultMessage: 'Back',
+                  })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             )}

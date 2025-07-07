@@ -35,7 +35,9 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
       <div className="full-screen-wrapper">
         <EuiButtonIcon
           iconType="cross"
-          aria-label="Close full screen"
+          aria-label={i18n.translate('explore.customDataGrid.ariaLabel.closeFullScreen', {
+            defaultMessage: 'Close full screen',
+          })}
           onClick={onClose}
           display="empty"
           className="full-screen-close-icon"

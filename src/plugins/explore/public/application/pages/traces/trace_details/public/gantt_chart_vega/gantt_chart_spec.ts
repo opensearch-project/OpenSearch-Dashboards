@@ -4,6 +4,7 @@
  */
 
 import { Spec } from 'vega';
+import { i18n } from '@osd/i18n';
 
 export function createGanttSpec(
   height: number,
@@ -74,7 +75,9 @@ export function createGanttSpec(
         orient: 'top',
         grid: true,
         tickCount: 8,
-        title: 'Time (ms)',
+        title: i18n.translate('explore.ganttChart.axis.timeTitle', {
+          defaultMessage: 'Time (ms)',
+        }),
         titleFontSize: 12,
         labelFontSize: 10,
         encode: {
@@ -111,7 +114,35 @@ export function createGanttSpec(
             strokeWidth: { value: 1 },
             tooltip: {
               signal:
-                "datum.hasError ? {'⚠️ Error': 'click for details', 'Service': datum.serviceName, 'Name': datum.name, 'Duration': datum.duration + ' ms', 'Start': datum.startTime + ' ms'} : {'Service': datum.serviceName, 'Name': datum.name, 'Duration': datum.duration + ' ms', 'Start': datum.startTime + ' ms'}",
+                "datum.hasError ? {'⚠️ Error': '" +
+                i18n.translate('explore.ganttChart.tooltip.clickForDetails', {
+                  defaultMessage: 'click for details',
+                }) +
+                "', '" +
+                i18n.translate('explore.ganttChart.tooltip.service', {
+                  defaultMessage: 'Service',
+                }) +
+                "': datum.serviceName, '" +
+                i18n.translate('explore.ganttChart.tooltip.name', { defaultMessage: 'Name' }) +
+                "': datum.name, '" +
+                i18n.translate('explore.ganttChart.tooltip.duration', {
+                  defaultMessage: 'Duration',
+                }) +
+                "': datum.duration + ' ms', '" +
+                i18n.translate('explore.ganttChart.tooltip.start', { defaultMessage: 'Start' }) +
+                "': datum.startTime + ' ms'} : {'" +
+                i18n.translate('explore.ganttChart.tooltip.service', {
+                  defaultMessage: 'Service',
+                }) +
+                "': datum.serviceName, '" +
+                i18n.translate('explore.ganttChart.tooltip.name', { defaultMessage: 'Name' }) +
+                "': datum.name, '" +
+                i18n.translate('explore.ganttChart.tooltip.duration', {
+                  defaultMessage: 'Duration',
+                }) +
+                "': datum.duration + ' ms', '" +
+                i18n.translate('explore.ganttChart.tooltip.start', { defaultMessage: 'Start' }) +
+                "': datum.startTime + ' ms'}",
             },
             cursor: { value: 'pointer' },
           },
@@ -136,7 +167,14 @@ export function createGanttSpec(
             fill: { value: '#c14125' },
             stroke: { value: 'white' },
             strokeWidth: { value: 1 },
-            tooltip: { signal: "'Error in span'" },
+            tooltip: {
+              signal:
+                "'" +
+                i18n.translate('explore.ganttChart.tooltip.errorInSpan', {
+                  defaultMessage: 'Error in span',
+                }) +
+                "'",
+            },
           },
           update: {
             x: { scale: 'xscale', field: 'endTime' },
@@ -209,7 +247,14 @@ export function createGanttSpec(
           },
           update: {
             x: { scale: 'xscale', field: 'endTime', offset: 8 },
-            text: { signal: 'datum.hasError ? "Error" : datum.duration + " ms"' },
+            text: {
+              signal:
+                'datum.hasError ? "' +
+                i18n.translate('explore.ganttChart.label.error', {
+                  defaultMessage: 'Error',
+                }) +
+                '" : datum.duration + " ms"',
+            },
             fill: { signal: 'datum.hasError ? "#c14125" : "#000"' },
           },
         },

@@ -4,6 +4,7 @@
  */
 
 import { EuiButton, EuiDataGridColumn, EuiPanel } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RenderCustomDataGrid } from '../utils/custom_datagrid';
@@ -46,27 +47,37 @@ const getLogColumns = (availableWidth?: number): EuiDataGridColumn[] => {
   return [
     {
       id: '@timestamp',
-      display: 'Time',
+      display: i18n.translate('explore.logs.column.time', {
+        defaultMessage: 'Time',
+      }),
       initialWidth: getWidth(columnProportions.time),
     },
     {
       id: 'spanId',
-      display: 'Span ID',
+      display: i18n.translate('explore.logs.column.spanId', {
+        defaultMessage: 'Span ID',
+      }),
       initialWidth: getWidth(columnProportions.spanId),
     },
     {
       id: 'severityText',
-      display: 'Severity Text',
+      display: i18n.translate('explore.logs.column.severityText', {
+        defaultMessage: 'Severity Text',
+      }),
       initialWidth: getWidth(columnProportions.severity),
     },
     {
       id: 'severityNumber',
-      display: 'Severity Number',
+      display: i18n.translate('explore.logs.column.severityNumber', {
+        defaultMessage: 'Severity Number',
+      }),
       initialWidth: getWidth(columnProportions.number),
     },
     {
       id: 'body',
-      display: 'Body',
+      display: i18n.translate('explore.logs.column.body', {
+        defaultMessage: 'Body',
+      }),
       initialWidth: getWidth(columnProportions.body),
     },
   ];
@@ -140,7 +151,11 @@ export function LogsDetails({
 
   const handleFetchLogData = useCallback(async () => {
     if (!pplService || !traceId || !dataSourceId) {
-      setError('Missing required parameters for log fetch');
+      setError(
+        i18n.translate('explore.logs.error.missingParameters', {
+          defaultMessage: 'Missing required parameters for log fetch',
+        })
+      );
       return;
     }
 
@@ -232,11 +247,17 @@ export function LogsDetails({
             redirectToLogs(traceData, dataSourceMDSId, traceId, services);
           } else {
             // Cannot redirect due to missing parameters
-            setError('Missing required parameters for log redirection');
+            setError(
+              i18n.translate('explore.logs.error.missingRedirectionParameters', {
+                defaultMessage: 'Missing required parameters for log redirection',
+              })
+            );
           }
         }}
       >
-        View associated Logs
+        {i18n.translate('explore.logs.button.viewAssociatedLogs', {
+          defaultMessage: 'View associated Logs',
+        })}
       </EuiButton>
     ),
     [traceData, dataSourceId, traceId, services]
@@ -245,15 +266,30 @@ export function LogsDetails({
   if (error) {
     return (
       <EuiPanel>
-        <PanelTitle title="Logs" />
-        <div>Error loading logs: {error}</div>
+        <PanelTitle
+          title={i18n.translate('explore.logs.panel.title', {
+            defaultMessage: 'Logs',
+          })}
+        />
+        <div>
+          {i18n.translate('explore.logs.error.loading', {
+            defaultMessage: 'Error loading logs: {errorMessage}',
+            values: { errorMessage: error },
+          })}
+        </div>
       </EuiPanel>
     );
   }
 
   return (
     <EuiPanel data-test-subj="logs-panel">
-      <PanelTitle title="Logs" totalItems={total} action={viewLogsButton} />
+      <PanelTitle
+        title={i18n.translate('explore.logs.panel.title', {
+          defaultMessage: 'Logs',
+        })}
+        totalItems={total}
+        action={viewLogsButton}
+      />
       <div style={{ marginTop: '16px', overflowY: 'auto', maxHeight: 500 }}>
         {RenderCustomDataGrid({
           columns,

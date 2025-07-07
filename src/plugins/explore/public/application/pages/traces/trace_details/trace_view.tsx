@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { i18n } from '@osd/i18n';
 import { EuiPage, EuiPageBody, EuiSpacer, EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { TraceTopNavMenu } from './public/top_nav_buttons';
@@ -86,7 +87,15 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
   }, []);
 
   useEffect(() => {
-    chrome?.setBreadcrumbs([{ text: traceId || 'Unknown Trace' }]);
+    chrome?.setBreadcrumbs([
+      {
+        text:
+          traceId ||
+          i18n.translate('explore.traceDetails.breadcrumb.unknownTrace', {
+            defaultMessage: 'Unknown Trace',
+          }),
+      },
+    ]);
   }, [chrome, traceId]);
 
   useEffect(() => {

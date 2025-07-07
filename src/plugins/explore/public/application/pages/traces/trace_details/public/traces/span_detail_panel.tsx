@@ -19,6 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { i18n } from '@osd/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { ChromeStart } from 'opensearch-dashboards/public';
 import { TracePPLService } from '../../server/ppl_request_trace';
@@ -69,7 +70,9 @@ const ServiceLegend: React.FC<ServiceLegendProps> = ({ colorMap, data }) => {
       data-test-subj="service-legend-toggle"
       isSelected={isPopoverOpen}
     >
-      Service legend
+      {i18n.translate('explore.spanDetailPanel.button.serviceLegend', {
+        defaultMessage: 'Service legend',
+      })}
     </EuiButtonEmpty>
   );
 
@@ -78,7 +81,11 @@ const ServiceLegend: React.FC<ServiceLegendProps> = ({ colorMap, data }) => {
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <strong>Service legend</strong>
+            <strong>
+              {i18n.translate('explore.spanDetailPanel.title.serviceLegend', {
+                defaultMessage: 'Service legend',
+              })}
+            </strong>
           </EuiText>
         </EuiFlexItem>
 
@@ -228,7 +235,12 @@ export function SpanDetailPanel(props: {
           iconType="cross"
           iconSide="right"
           iconOnClick={() => removeSpanFilter(field)}
-          iconOnClickAriaLabel="remove current filter"
+          iconOnClickAriaLabel={i18n.translate(
+            'explore.spanDetailPanel.ariaLabel.removeCurrentFilter',
+            {
+              defaultMessage: 'remove current filter',
+            }
+          )}
         >
           {`${field}: ${value}`}
         </EuiBadge>
@@ -239,15 +251,21 @@ export function SpanDetailPanel(props: {
   const toggleOptions = [
     {
       id: 'timeline',
-      label: 'Timeline',
+      label: i18n.translate('explore.spanDetailPanel.toggle.timeline', {
+        defaultMessage: 'Timeline',
+      }),
     },
     {
       id: 'span_list',
-      label: 'Span list',
+      label: i18n.translate('explore.spanDetailPanel.toggle.spanList', {
+        defaultMessage: 'Span list',
+      }),
     },
     {
       id: 'hierarchy_span_list',
-      label: 'Tree view',
+      label: i18n.translate('explore.spanDetailPanel.toggle.treeView', {
+        defaultMessage: 'Tree view',
+      }),
     },
   ];
   const [toggleIdSelected, setToggleIdSelected] = useState(toggleOptions[0].id);
@@ -367,22 +385,40 @@ export function SpanDetailPanel(props: {
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="xs" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <PanelTitle title="Spans" totalItems={parsedData.length} />
+                    <PanelTitle
+                      title={i18n.translate('explore.spanDetailPanel.title.spans', {
+                        defaultMessage: 'Spans',
+                      })}
+                      totalItems={parsedData.length}
+                    />
                   </EuiFlexItem>
-                  {errorCount > 0 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip content="Click to apply filter">
-                        <EuiButton
-                          onClick={handleErrorFilterClick}
-                          data-test-subj="error-count-button"
-                          size="s"
-                          color="secondary"
+                  {errorCount > 0 &&
+                    !spanFilters.some(
+                      (filter) => filter.field === 'status.code' && filter.value === 2
+                    ) && (
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'explore.spanDetailPanel.tooltip.clickToApplyFilter',
+                            {
+                              defaultMessage: 'Click to apply filter',
+                            }
+                          )}
                         >
-                          View Errors ({errorCount})
-                        </EuiButton>
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  )}
+                          <EuiButton
+                            onClick={handleErrorFilterClick}
+                            data-test-subj="error-count-button"
+                            size="s"
+                            color="secondary"
+                          >
+                            {i18n.translate('explore.spanDetailPanel.button.filterErrors', {
+                              defaultMessage: 'Filter errors ({errorCount})',
+                              values: { errorCount },
+                            })}
+                          </EuiButton>
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    )}
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem />
@@ -394,7 +430,9 @@ export function SpanDetailPanel(props: {
                   <EuiFlexItem grow={false}>
                     <EuiButtonGroup
                       isDisabled={props.isGanttChartLoading}
-                      legend="Select view of spans"
+                      legend={i18n.translate('explore.spanDetailPanel.legend.selectViewOfSpans', {
+                        defaultMessage: 'Select view of spans',
+                      })}
                       options={toggleOptions}
                       idSelected={toggleIdSelected}
                       onChange={(id) => setToggleIdSelected(id)}

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiOverlayMask,
   EuiModal,
@@ -40,13 +41,17 @@ export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
   const menuActions: TopNavMenuData[] = [
     {
       id: 'viewRawData',
-      label: 'View raw data',
+      label: i18n.translate('explore.traceDetails.topNav.viewRawData', {
+        defaultMessage: 'View raw data',
+      }),
       run: () => setRawModalOpen(true),
       testId: 'viewRawDataBtn',
     },
     {
       id: 'viewLogs',
-      label: 'View associated Logs',
+      label: i18n.translate('explore.traceDetails.topNav.viewAssociatedLogs', {
+        defaultMessage: 'View associated Logs',
+      }),
       run: () => redirectToLogs(payloadData, dataSourceMDSId, traceId, services),
       testId: 'viewLogsBtn',
       emphasize: true,
@@ -72,7 +77,11 @@ export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
         <EuiOverlayMask>
           <EuiModal onClose={() => setRawModalOpen(false)}>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>Raw data</EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>
+                {i18n.translate('explore.traceDetails.modal.rawDataTitle', {
+                  defaultMessage: 'Raw data',
+                })}
+              </EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>
               {payloadData && payloadData.length > 0 && (
@@ -83,7 +92,9 @@ export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
             </EuiModalBody>
             <EuiModalFooter>
               <EuiButton onClick={() => setRawModalOpen(false)} fill>
-                Close
+                {i18n.translate('explore.traceDetails.modal.closeButton', {
+                  defaultMessage: 'Close',
+                })}
               </EuiButton>
             </EuiModalFooter>
           </EuiModal>

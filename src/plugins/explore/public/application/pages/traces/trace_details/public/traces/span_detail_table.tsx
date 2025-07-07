@@ -5,6 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { EuiButtonEmpty, EuiDataGridColumn, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RenderCustomDataGrid } from '../utils/custom_datagrid';
@@ -65,45 +66,65 @@ export interface SpanSearchParams {
 const getColumns = (): EuiDataGridColumn[] => [
   {
     id: 'serviceName',
-    display: 'Service',
+    display: i18n.translate('explore.spanDetailTable.column.service', {
+      defaultMessage: 'Service',
+    }),
   },
   {
     id: 'name',
-    display: 'Operation',
+    display: i18n.translate('explore.spanDetailTable.column.operation', {
+      defaultMessage: 'Operation',
+    }),
   },
   {
     id: 'spanId',
-    display: 'Span Id',
+    display: i18n.translate('explore.spanDetailTable.column.spanId', {
+      defaultMessage: 'Span Id',
+    }),
   },
   {
     id: 'parentSpanId',
-    display: 'Parent span Id',
+    display: i18n.translate('explore.spanDetailTable.column.parentSpanId', {
+      defaultMessage: 'Parent span Id',
+    }),
   },
   {
     id: 'traceId',
-    display: 'Trace Id',
+    display: i18n.translate('explore.spanDetailTable.column.traceId', {
+      defaultMessage: 'Trace Id',
+    }),
   },
   {
     id: 'traceGroup',
-    display: 'Trace group',
+    display: i18n.translate('explore.spanDetailTable.column.traceGroup', {
+      defaultMessage: 'Trace group',
+    }),
   },
   {
     id: 'durationInNanos',
-    display: 'Duration',
+    display: i18n.translate('explore.spanDetailTable.column.duration', {
+      defaultMessage: 'Duration',
+    }),
     initialWidth: 100,
   },
   {
     id: 'status.code',
-    display: 'Errors',
+    display: i18n.translate('explore.spanDetailTable.column.errors', {
+      defaultMessage: 'Errors',
+    }),
     initialWidth: 100,
   },
   {
     id: 'startTime',
-    display: 'Start time',
+    display: i18n.translate('explore.spanDetailTable.column.startTime', {
+      defaultMessage: 'Start time',
+    }),
   },
   {
     id: 'endTime',
-    display: 'End time',
+    display: i18n.translate('explore.spanDetailTable.column.endTime', {
+      defaultMessage: 'End time',
+    }),
   },
 ];
 
@@ -131,10 +152,14 @@ const renderSpanCellValue = ({
     case 'status.code':
       return value === 2 ? (
         <EuiText color="danger" size="s">
-          Yes
+          {i18n.translate('explore.spanDetailTable.errors.yes', {
+            defaultMessage: 'Yes',
+          })}
         </EuiText>
       ) : (
-        'No'
+        i18n.translate('explore.spanDetailTable.errors.no', {
+          defaultMessage: 'No',
+        })
       );
     case 'spanId':
       return disableInteractions ? (
@@ -446,7 +471,9 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       iconType="expand"
       data-test-subj="treeExpandAll"
     >
-      Expand all
+      {i18n.translate('explore.spanDetailTable.button.expandAll', {
+        defaultMessage: 'Expand all',
+      })}
     </EuiButtonEmpty>,
     <EuiButtonEmpty
       size="xs"
@@ -456,7 +483,9 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       iconType="minimize"
       data-test-subj="treeCollapseAll"
     >
-      Collapse all
+      {i18n.translate('explore.spanDetailTable.button.collapseAll', {
+        defaultMessage: 'Collapse all',
+      })}
     </EuiButtonEmpty>,
   ];
 

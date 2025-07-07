@@ -4,6 +4,7 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiPanel,
   EuiPanelProps,
@@ -461,7 +462,9 @@ const FlowComponent: React.FC<{
         >
           <div style={{ flex: 1 }}>
             <EuiComboBox
-              placeholder="Focus on service"
+              placeholder={i18n.translate('explore.serviceMap.placeholder.focusOnService', {
+                defaultMessage: 'Focus on service',
+              })}
               singleSelection={{ asPlainText: true }}
               options={serviceOptions}
               selectedOptions={selectedServiceOption}
@@ -489,13 +492,24 @@ const FlowComponent: React.FC<{
           }}
         >
           <EuiTitle size="xxs">
-            <h4>Metrics</h4>
+            <h4>
+              {i18n.translate('explore.serviceMap.title.metrics', {
+                defaultMessage: 'Metrics',
+              })}
+            </h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <div role="group" aria-label="Select metrics to display">
+          <div
+            role="group"
+            aria-label={i18n.translate('explore.serviceMap.ariaLabel.selectMetrics', {
+              defaultMessage: 'Select metrics to display',
+            })}
+          >
             <EuiCheckbox
               id="requestRate"
-              label="Request Rate"
+              label={i18n.translate('explore.serviceMap.checkbox.requestRate', {
+                defaultMessage: 'Request Rate',
+              })}
               checked={selectedMetrics.includes('requestRate')}
               onChange={() => {
                 const newSelectedMetrics = [...selectedMetrics];
@@ -521,7 +535,9 @@ const FlowComponent: React.FC<{
 
             <EuiCheckbox
               id="errorRate"
-              label="Error Rate"
+              label={i18n.translate('explore.serviceMap.checkbox.errorRate', {
+                defaultMessage: 'Error Rate',
+              })}
               checked={selectedMetrics.includes('errorRate')}
               onChange={() => {
                 const newSelectedMetrics = [...selectedMetrics];
@@ -547,7 +563,9 @@ const FlowComponent: React.FC<{
 
             <EuiCheckbox
               id="duration"
-              label="Duration"
+              label={i18n.translate('explore.serviceMap.checkbox.duration', {
+                defaultMessage: 'Duration',
+              })}
               checked={selectedMetrics.includes('duration')}
               onChange={() => {
                 const newSelectedMetrics = [...selectedMetrics];
@@ -575,7 +593,9 @@ const FlowComponent: React.FC<{
             {selectedMetrics.includes('requestRate') && (
               <div style={{ marginBottom: '8px' }}>
                 <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '2px' }}>
-                  Request Rate
+                  {i18n.translate('explore.serviceMap.legend.requestRate', {
+                    defaultMessage: 'Request Rate',
+                  })}
                 </div>
                 <div
                   style={{
@@ -608,7 +628,9 @@ const FlowComponent: React.FC<{
             {selectedMetrics.includes('errorRate') && (
               <div style={{ marginBottom: '8px' }}>
                 <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '2px' }}>
-                  Error Rate
+                  {i18n.translate('explore.serviceMap.legend.errorRate', {
+                    defaultMessage: 'Error Rate',
+                  })}
                 </div>
                 <div
                   style={{
@@ -641,7 +663,9 @@ const FlowComponent: React.FC<{
             {selectedMetrics.includes('duration') && (
               <div style={{ marginBottom: '8px' }}>
                 <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '2px' }}>
-                  Duration
+                  {i18n.translate('explore.serviceMap.legend.duration', {
+                    defaultMessage: 'Duration',
+                  })}
                 </div>
                 <div
                   style={{
@@ -681,7 +705,13 @@ const FlowComponent: React.FC<{
             color="primary"
             data-test-subj="serviceMapToggleDetails"
           >
-            {showDetails ? 'Collapse cards' : 'Expand cards'}
+            {showDetails
+              ? i18n.translate('explore.serviceMap.button.collapseCards', {
+                  defaultMessage: 'Collapse cards',
+                })
+              : i18n.translate('explore.serviceMap.button.expandCards', {
+                  defaultMessage: 'Expand cards',
+                })}
           </EuiButton>
         </div>
 
@@ -943,7 +973,9 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
             backgroundColor: '#fafafa',
           }}
         >
-          No trace data available
+          {i18n.translate('explore.serviceMap.emptyState.noTraceData', {
+            defaultMessage: 'No trace data available',
+          })}
         </div>
       </EuiPanel>
     );
@@ -962,7 +994,9 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
             backgroundColor: '#fafafa',
           }}
         >
-          No services found in trace data
+          {i18n.translate('explore.serviceMap.emptyState.noServicesFound', {
+            defaultMessage: 'No services found in trace data',
+          })}
         </div>
       </EuiPanel>
     );
