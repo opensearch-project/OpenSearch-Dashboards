@@ -38,6 +38,7 @@ import { search } from '../../../../../data/public';
 import { DocViewsRegistry } from '../../../types/doc_views_types';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
 import { ExpressionsStart } from '../../../../../expressions/public';
+import { DashboardStart } from '../../../../../dashboard/public';
 
 let services: ExploreServices | null = null;
 let uiActions: UiActionsStart;
@@ -109,3 +110,9 @@ export {
 export const [getExpressionLoader, setExpressionLoader] = createGetterSetter<
   ExpressionsStart['ExpressionLoader']
 >('expressions.ExpressionLoader');
+
+export const [getDashboard, setDashboard] = createGetterSetter<DashboardStart>('Dashboard');
+
+export const [getDashboardVersion, setDashboardVersion] = createGetterSetter<{ version: string }>(
+  'DashboardVersion'
+);

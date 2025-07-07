@@ -29,7 +29,12 @@ export interface ChartStyleControlMap {
   scatter: ScatterChartStyleControls;
   bar: BarChartStyleControls;
   area: AreaChartStyleControls;
+  // NOTE: Log table does not have style controls.
+  // log is one of chart types?
+  // logs: {};
 }
+
+export type StyleOptions = ChartStyleControlMap[ChartType];
 
 export type AllChartStyleControls =
   | LineChartStyleControls
@@ -117,7 +122,7 @@ export const getVisualizationType = <T = unknown>(
   rows?: Array<OpenSearchSearchHit<T>>,
   fieldSchema?: Array<Partial<IFieldType>>,
   registry = visualizationRegistry
-) => {
+): VisualizationTypeResult<ChartType> | undefined => {
   if (!fieldSchema || !rows) {
     return;
   }
@@ -157,7 +162,7 @@ export const getVisualizationType = <T = unknown>(
   return {
     ...registry.getVisualizationType(fieldStats),
     transformedData,
-  };
+  } as VisualizationTypeResult<ChartType>;
 };
 
 /**

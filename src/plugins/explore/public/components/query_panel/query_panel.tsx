@@ -3,38 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './index.scss';
 import React, { useState, useMemo, useCallback } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, OnTimeChangeProps } from '@elastic/eui';
+import { QueryAssistResponse } from 'src/plugins/query_enhancements/common/query_assist';
+import { i18n } from '@osd/i18n';
 import { QueryPanelLayout } from './layout';
 import { ExploreServices } from '../../types';
 import { IndexPattern } from '../../../../data/common/index_patterns';
 import { EditorStack } from './components/editor_stack';
 import { QueryPanelFooter } from './components/footer';
-import { RecentQueriesTable } from './components/footer/recent_query/table';
+import { RecentQueriesTable, SavedQuery } from '../../../../data/public';
 import { useEditorMode } from './hooks/useEditorMode';
 import { QueryTypeDetector } from './utils/type_detection';
-import { Query, TimeRange, LanguageType } from './types';
-
+import { LanguageType, Query, TimeRange } from './types';
 import {
   selectIsLoading,
   selectShowDataSetFields,
 } from '../../application/utils/state_management/selectors';
-import './index.scss';
-
 import { getEffectiveLanguageForAutoComplete } from '../../../../data/public';
 import {
-  setQuery,
+  setQueryState,
+  setQueryWithHistory,
   setShowDatasetFields,
   clearResults,
 } from '../../application/utils/state_management/slices';
-import {
-  beginTransaction,
-  finishTransaction,
-} from '../../application/utils/state_management/actions/transaction_actions';
-import { ResultStatus, QueryStatus } from '../../application/utils/state_management/types';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
+import { AgentError, ProhibitedQueryError } from './utils/error';
+import { useQueryAssist } from './hooks';
 
 export interface QueryPanelProps {
   services: ExploreServices;
@@ -43,7 +41,6 @@ export interface QueryPanelProps {
 
 const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   const dispatch = useDispatch();
-  const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
 
   const {
     isDualEditor,
@@ -68,22 +65,35 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
 
   // Get timefilter directly from services
   const timefilter = services?.data?.query?.timefilter?.timefilter;
+  // Retrieve the current dataset from Query Service
+  const dataset = services?.data?.query?.queryString?.getQuery()?.dataset;
 
   // Local state for editor
   const [localQuery, setLocalQuery] = useState(query.query);
   const [localPrompt, setLocalPrompt] = useState(prompt);
+  const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
+
+  const { isAvailable: isQueryAssistAvailable, generateQuery } = useQueryAssist();
 
   // Handle time range changes
   const handleTimeChange = useCallback(
-    ({ start, end }: { start: string; end: string }) => {
+    ({ start, end, isInvalid, isQuickSelection }: OnTimeChangeProps) => {
       const newTimeRange = { from: start, to: end };
 
       // Update timefilter - this will trigger re-render automatically
       if (timefilter) {
         timefilter.setTime(newTimeRange);
       }
+
+      if (isQuickSelection) {
+        // EXPLICIT cache clear - same pattern as other triggers
+        dispatch(clearResults());
+
+        // Execute queries - interval will be picked up from Redux state
+        dispatch(executeQueries({ services }));
+      }
     },
-    [timefilter]
+    [timefilter, dispatch, services]
   );
 
   const handleRefreshChange = useCallback(
@@ -99,21 +109,17 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   );
 
   // Execute query when run button is clicked
-  const handleRun = useCallback(async () => {
-    dispatch(beginTransaction());
-    try {
-      // Update query string in Redux
-      dispatch(setQuery({ ...query, query: localQuery }));
+  const handleRun = useCallback(
+    async (paramQuery?: string) => {
+      const queryToRun = paramQuery ?? localQuery;
+      const nextQuery = { ...query, query: queryToRun };
 
-      // EXPLICIT cache clear - separate cache logic
+      dispatch(setQueryWithHistory(nextQuery));
       dispatch(clearResults());
-
-      // Execute queries - cache already cleared
-      await dispatch(executeQueries({ services }));
-    } finally {
-      dispatch(finishTransaction());
-    }
-  }, [dispatch, localQuery, query, services]);
+      dispatch(executeQueries({ services }));
+    },
+    [dispatch, localQuery, query, services]
+  );
 
   // Real autocomplete implementation using the data plugin's autocomplete service
   const provideCompletionItems = useCallback(
@@ -194,13 +200,6 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     [query, services, indexPattern]
   );
 
-  // TODO: Create query status overlay for progress indicator
-  const queryStatus: QueryStatus = {
-    status: isLoading ? ResultStatus.LOADING : ResultStatus.READY,
-    elapsedMs: 0,
-    startTime: Date.now(),
-  };
-
   const detectLanguageType = useCallback(
     (inputQuery: string) => {
       const detector = new QueryTypeDetector();
@@ -222,11 +221,12 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
 
       if (isPPLQuery) {
         setLocalQuery(value);
+        setIsDualEditor(false);
       } else {
         setLocalPrompt(value);
       }
     },
-    [detectLanguageType]
+    [detectLanguageType, setIsDualEditor]
   );
 
   const handleQueryRun = () => {
@@ -234,18 +234,87 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     setIsPromptReadOnly(true);
   };
 
-  const handlePromptRun = async (_?: string | { [key: string]: any }) => {
-    // TODO: Implement the NL API call to generate PPL query
+  const handleAgentCall = async () => {
+    const promptParam = localPrompt?.trim();
 
-    if (editorLanguageType === LanguageType.Natural) {
-      setLocalQuery('source = opensearch_dashboards_sample_data_ecommerce'); // TODO: Example query, Remove this once actual NL API intg
-      handleRun(); // TODO: Call NL API to generate PPL query and uopdate
+    if (!promptParam) {
+      services.notifications.toasts.addWarning({
+        title: i18n.translate('explore.queryPanel.missing-prompt-warning', {
+          defaultMessage:
+            'Enter a natural language question to automatically generate a query to view results',
+        }),
+        id: 'missing-prompt-warning',
+      });
+      return;
+    }
+
+    if (!dataset) {
+      services.notifications.toasts.addWarning({
+        title: i18n.translate('explore.queryPanel.missing-dataset-warning', {
+          defaultMessage: 'Select a dataset to ask a question',
+        }),
+        id: 'missing-dataset-warning',
+      });
+      return;
+    }
+
+    try {
+      // Use new hook with standard Dataset interface
+      const response: QueryAssistResponse = await generateQuery(promptParam, dataset);
+      // Run the generated query
+      await handleRun(response.query);
 
       setIsDualEditor(true);
       setIsEditorReadOnly(true);
-      // setLocalQuery((prev) => prev ?? queryString); // TODO: update this once NL updates redux state for querystring
+
+      if (response.timeRange) {
+        timefilter.setTime(response.timeRange);
+      }
+    } catch (error) {
+      if (error instanceof ProhibitedQueryError) {
+        services.notifications.toasts.addError(error, {
+          id: 'prohibited-query-error',
+          title: i18n.translate('explore.queryPanel.prohibited-query-error', {
+            defaultMessage: 'I am unable to respond to this query. Try another question',
+          }),
+        });
+      } else if (error instanceof AgentError) {
+        services.notifications.toasts.addError(error, {
+          id: 'agent-error',
+          title: i18n.translate('explore.queryPanel.agent-error', {
+            defaultMessage: 'I am unable to respond to this query. Try another question',
+          }),
+        });
+      } else {
+        services.notifications.toasts.addError(error, {
+          id: 'miscellaneous-prompt-error',
+          title: i18n.translate('explore.queryPanel.miscellaneous-prompt-error', {
+            defaultMessage: 'Failed to generate results',
+          }),
+        });
+      }
+      setLocalQuery('');
+    }
+  };
+
+  const handlePromptRun = async () => {
+    if (editorLanguageType === LanguageType.Natural) {
+      if (!isQueryAssistAvailable) {
+        services.notifications.toasts.addWarning({
+          title: i18n.translate('explore.queryPanel.queryAssist-not-available-title', {
+            defaultMessage: 'Natural language queries not available',
+          }),
+          text: i18n.translate('explore.queryPanel.queryAssist-not-available-text', {
+            defaultMessage: 'Query assist feature is not enabled or configured.',
+          }),
+          id: 'queryAssist-not-available',
+        });
+        return;
+      }
+
+      handleAgentCall();
     } else {
-      handleRun();
+      await handleRun();
       setIsDualEditor(false);
     }
   };
@@ -268,7 +337,7 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   };
 
   const handleRunClick = () => {
-    if (isDualEditor) {
+    if (isDualEditor && isPromptReadOnly) {
       handleRun();
     } else {
       handlePromptRun();
@@ -279,12 +348,18 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
     setIsRecentQueryVisible(!isRecentQueryVisible);
   };
 
-  const onClickRecentQuery = (recentQuery: Query, timeRange?: TimeRange) => {
+  const onClickRecentQuery = (currentQuery: Query, timeRange?: TimeRange) => {
+    const updatedQuery = typeof currentQuery.query === 'string' ? currentQuery.query : '';
     setIsRecentQueryVisible(false);
-    setLocalQuery(typeof recentQuery.query === 'string' ? recentQuery.query : '');
-    setLocalPrompt(recentQuery.prompt ?? '');
-    setIsDualEditor(true);
-    handleQueryRun();
+    handlePromptChange(updatedQuery);
+    handleRun(updatedQuery);
+    if (timeRange)
+      handleTimeChange({
+        start: timeRange.from,
+        end: timeRange.to,
+        isInvalid: false,
+        isQuickSelection: true,
+      });
   };
 
   const handleShowFieldsToggle = (showField: boolean) => {
@@ -294,6 +369,12 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
   const noInput = useMemo(() => {
     return !localQuery?.trim() && !localPrompt?.trim();
   }, [localQuery, localPrompt]);
+
+  const handleQueryEditorUpdate = useCallback((newQuery: Query) => {
+    setLocalQuery(
+      typeof newQuery.query === 'string' ? newQuery.query : JSON.stringify(newQuery.query)
+    );
+  }, []);
 
   return (
     <EuiPanel paddingSize="s" className="queryPanel__container">
@@ -307,18 +388,21 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
             noInput={noInput}
             showDatasetFields={showDatasetFields}
             services={services}
+            query={query}
             timefilter={timefilter}
             onRunClick={handleRunClick}
             onRecentClick={handleRecentClick}
             onTimeChange={handleTimeChange}
             onRunQuery={handleRun}
-            oneRefreshChange={handleRefreshChange}
+            onRefreshChange={handleRefreshChange}
             onShowFieldsToggle={handleShowFieldsToggle}
+            onQueryEditorUpdate={handleQueryEditorUpdate}
           />
         }
       >
         <EditorStack
           isDualEditor={isDualEditor}
+          isQueryLoading={isLoading}
           isPromptReadOnly={isPromptReadOnly}
           isEditorReadOnly={isEditorReadOnly}
           queryString={typeof localQuery === 'string' ? localQuery : ''}
@@ -338,8 +422,8 @@ const QueryPanel: React.FC<QueryPanelProps> = ({ services, indexPattern }) => {
         <div className="queryPanel__recentQueries">
           <RecentQueriesTable
             isVisible={isRecentQueryVisible}
+            queryString={services.data.query.queryString}
             onClickRecentQuery={onClickRecentQuery}
-            languageType={query.language}
           />
         </div>
       )}

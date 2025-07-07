@@ -9,11 +9,7 @@ import { DatasetSelector, DatasetSelectorAppearance, Query } from '../../../../d
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
 import { executeQueries } from '../utils/state_management/actions/query_actions';
-import { clearResults, setQuery } from '../utils/state_management/slices';
-import {
-  beginTransaction,
-  finishTransaction,
-} from '../utils/state_management/actions/transaction_actions';
+import { clearResults, setQueryWithHistory } from '../utils/state_management/slices';
 
 /**
  * Header dataset selector component for Explore
@@ -37,14 +33,9 @@ export const HeaderDatasetSelector: React.FC = () => {
       if (!isMounted.current || !query.dataset) return;
       const queryStringState = services.data.query.queryString.getQuery();
 
-      dispatch(beginTransaction());
-      try {
-        dispatch(clearResults());
-        dispatch(setQuery(queryStringState));
-        dispatch(executeQueries({ services }));
-      } finally {
-        dispatch(finishTransaction());
-      }
+      dispatch(clearResults());
+      dispatch(setQueryWithHistory(queryStringState));
+      dispatch(executeQueries({ services }));
     },
     [dispatch, services]
   );

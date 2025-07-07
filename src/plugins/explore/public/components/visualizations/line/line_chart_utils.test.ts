@@ -282,12 +282,33 @@ describe('Line Chart Utils', () => {
     };
 
     const numericalColumns: VisColumn[] = [
-      { id: 1, name: 'metric1', schema: VisFieldType.Numerical, column: 'field-1' },
-      { id: 2, name: 'metric2', schema: VisFieldType.Numerical, column: 'field-2' },
+      {
+        id: 1,
+        name: 'metric1',
+        schema: VisFieldType.Numerical,
+        column: 'field-1',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+      {
+        id: 2,
+        name: 'metric2',
+        schema: VisFieldType.Numerical,
+        column: 'field-2',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
     ];
 
     const dateColumns: VisColumn[] = [
-      { id: 3, name: 'date', schema: VisFieldType.Date, column: 'field-3' },
+      {
+        id: 3,
+        name: 'date',
+        schema: VisFieldType.Date,
+        column: 'field-3',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
     ];
 
     it('should return the base axis when styles is undefined', () => {

@@ -31,12 +31,15 @@ export const DebouncedText: React.FC<{
   placeholder: string;
   onChange: (value: string) => void;
   label: string;
-}> = ({ value, placeholder, onChange, label }) => {
+  disable?: boolean;
+}> = ({ value, placeholder, onChange, label, disable = false }) => {
   const [localValue, handleChange] = useDebouncedValue(value, onChange, 500);
 
   return (
     <EuiFormRow label={label}>
       <EuiFieldText
+        compressed={true}
+        disabled={disable}
         value={localValue}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}

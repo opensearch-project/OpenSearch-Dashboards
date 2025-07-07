@@ -24,6 +24,8 @@ describe('MetricVisStyleControls', () => {
         name: 'value',
         schema: VisFieldType.Numerical,
         column: 'field-1',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
       },
     ],
     categoricalColumns: [],

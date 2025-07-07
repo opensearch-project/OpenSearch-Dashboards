@@ -5,14 +5,14 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, OnTimeChangeProps } from '@elastic/eui';
 import { ShowFieldToggle } from './show_field';
 import { SaveQueryButton } from './save_query';
 import { Actions } from './actions';
 import { DateTimeRangePicker } from './date_time_selector';
 import { RunQueryButton } from './run_query';
 import { ShowInputType } from './show_input_type';
-import { LanguageType } from '../../types';
+import { LanguageType, Query } from '../../types';
 import { QueryError } from './query_error';
 import { ResultStatus } from '../../types';
 import { ExploreServices } from '../../../../types';
@@ -30,14 +30,16 @@ interface QueryPanelFooterProps {
   isDualEditor: boolean;
   isLoading: boolean;
   noInput: boolean;
+  query: Query;
   showDatasetFields: boolean;
   showDatePicker: boolean;
   services: ExploreServices;
   timefilter: any;
-  onTimeChange: (time: { start: string; end: string }) => void;
+  onTimeChange: (props: OnTimeChangeProps) => void;
   onRunQuery: () => void;
-  oneRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
+  onRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
   onShowFieldsToggle: (enabled: boolean) => void;
+  onQueryEditorUpdate: (query: Query) => void;
 }
 
 export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
@@ -49,12 +51,14 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
   showDatasetFields,
   showDatePicker,
   noInput,
+  query,
   services,
   timefilter,
   onTimeChange,
   onRunQuery,
-  oneRefreshChange,
+  onRefreshChange,
   onShowFieldsToggle,
+  onQueryEditorUpdate,
 }) => {
   return (
     <div className="queryPanel__footer">
@@ -88,7 +92,14 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
               <div className="queryPanel__footer__verticalSeparator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SaveQueryButton />
+              <SaveQueryButton
+                services={services}
+                showDatePicker={showDatePicker}
+                timeFilter={timefilter}
+                query={query}
+                onQueryExecute={onRunQuery}
+                onQueryEditorUpdate={onQueryEditorUpdate}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div className="queryPanel__footer__verticalSeparator" />
@@ -113,7 +124,6 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                 noInput={noInput}
               />
             </EuiFlexItem>
-            {/* Removed line count feature */}
           </EuiFlexGroup>
         </EuiFlexItem>
 
@@ -130,7 +140,7 @@ export const QueryPanelFooter: React.FC<QueryPanelFooterProps> = ({
                   timefilter={timefilter}
                   onTimeChange={onTimeChange}
                   onRunQuery={onRunQuery}
-                  oneRefreshChange={oneRefreshChange}
+                  onRefreshChange={onRefreshChange}
                 />
               </EuiFlexItem>
             )}

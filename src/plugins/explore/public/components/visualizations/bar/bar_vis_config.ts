@@ -10,17 +10,18 @@ import {
   CategoryAxis,
   GridOptions,
   Positions,
-  ThresholdLine,
+  ThresholdLines,
   ThresholdLineStyle,
   ValueAxis,
+  TooltipOptions,
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 
 export interface BarChartStyleControls {
   // Basic controls
-  addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Positions;
+  tooltipOptions: TooltipOptions;
 
   // Bar specific controls
   barWidth: number;
@@ -30,7 +31,7 @@ export interface BarChartStyleControls {
   barBorderColor: string;
 
   // Threshold and grid
-  thresholdLine: ThresholdLine;
+  thresholdLines: ThresholdLines;
   grid: GridOptions;
 
   // Axes configuration
@@ -40,9 +41,11 @@ export interface BarChartStyleControls {
 
 export const defaultBarChartStyles: BarChartStyleControls = {
   // Basic controls
-  addTooltip: true,
   addLegend: true,
   legendPosition: Positions.RIGHT,
+  tooltipOptions: {
+    mode: 'all',
+  },
 
   // Bar specific controls
   barWidth: 0.7,
@@ -52,13 +55,17 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   barBorderColor: '#000000',
 
   // Threshold and grid
-  thresholdLine: {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-  },
+  thresholdLines: [
+    {
+      id: '1',
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+      name: '',
+    },
+  ],
   grid: {
     categoryLines: true,
     valueLines: true,
@@ -104,7 +111,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   ],
 };
 
-export const createBarConfig = (): VisualizationType => ({
+export const createBarConfig = (): VisualizationType<'bar'> => ({
   name: 'bar',
   type: 'bar',
   ui: {

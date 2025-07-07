@@ -13,28 +13,28 @@ import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dash
 import { PLUGIN_ID } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDispatch, useSelector } from '../../utils/state_management';
-import { setSavedQuery } from '../../../../../utils/state_management/slices';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
 
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
-import { ResultStatus } from '../utils';
-import { selectSavedQuery } from '../../../../../utils/state_management/selectors';
+import { ResultStatus } from '../../../../../utils/state_management/types';
 import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
-import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
-import { selectUIState } from '../../../../../utils/state_management/selectors';
+import {
+  selectTabState,
+  selectUIState,
+  selectStatus,
+} from '../../../../../utils/state_management/selectors';
 import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
-import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
-import { getSavedExploreIdFromUrl } from '../../../../../utils/state_management/utils/url';
-import { RootState } from '../../../../../utils/state_management/store';
+import { getTopNavLinks } from '../../../../../../components/top_nav/top_nav_links';
+import { SavedExplore } from '../../../../../../saved_explore';
 
 export interface TopNavProps {
+  savedExplore?: SavedExplore;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }
 
-export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
+export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const flavorId = useFlavorId();
   const {
@@ -48,24 +48,18 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
     uiSettings,
     history,
   } = services;
-  const dispatch = useDispatch();
-  const savedExploreIdFromUrl = getSavedExploreIdFromUrl();
 
   const uiState = useNewStateSelector(selectUIState);
+  const tabState = useNewStateSelector(selectTabState);
 
-  const savedQueryId = useSelector(selectSavedQuery);
-  const isLoading = useSelector((state: RootState) => state.ui.status === ResultStatus.LOADING);
-  const { savedExplore } = useSavedExplore(savedExploreIdFromUrl);
+  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
+
+  const isLoading = useSelector(selectStatus) === ResultStatus.LOADING;
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
     timeRange: timefilter.timefilter.getTime(),
   });
-
-  // Replace savedSearch - use legacy state
-  // const savedSearch = useMemo(() => {
-  //   return legacyState?.savedSearch;
-  // }, [legacyState?.savedSearch]);
 
   // Get IndexPattern from centralized context
   const { indexPattern } = useIndexPatternContext();
@@ -105,10 +99,24 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
       services,
       startSyncingQueryStateWithUrl,
       searchContext,
-      indexPattern,
-      savedExplore ? saveStateToSavedObject(savedExplore, uiState, indexPattern) : undefined
+      {
+        indexPattern,
+        tabState,
+        flavorId,
+        tabDefinition,
+      },
+      savedExplore
     );
-  }, [savedExplore, indexPattern, searchContext, uiState, services, startSyncingQueryStateWithUrl]);
+  }, [
+    savedExplore,
+    indexPattern,
+    searchContext,
+    tabState,
+    services,
+    startSyncingQueryStateWithUrl,
+    flavorId,
+    tabDefinition,
+  ]);
 
   // Replace data$ subscription with Redux state-based queryStatus
   useEffect(() => {
@@ -147,10 +155,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
 
   const showDatePicker = useMemo(() => indexPattern?.isTimeBased() ?? false, [indexPattern]);
 
-  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    dispatch(setSavedQuery(newSavedQueryId));
-  };
-
   return (
     <TopNavMenu
       appName={PLUGIN_ID}
@@ -158,12 +162,12 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
       data={data}
       showSearchBar={false}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
-      showSaveQuery={true}
+      showSaveQuery={false}
       useDefaultBehaviors
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
-      savedQueryId={savedQueryId}
-      onSavedQueryIdChange={updateSavedQueryId}
+      savedQueryId={undefined}
+      onSavedQueryIdChange={() => {}}
       groupActions={true}
       screenTitle={screenTitle}
       queryStatus={queryStatus}

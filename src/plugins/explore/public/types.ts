@@ -22,6 +22,7 @@ import {
   TimefilterContract,
 } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import { DashboardSetup, DashboardStart } from 'src/plugins/dashboard/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { RequestAdapter, Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import {
@@ -39,13 +40,13 @@ import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/
 import { ScopedHistory } from '../../../core/public';
 import { SavedExploreLoader, SavedExplore } from './saved_explore';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
-import { ReduxStore } from './application/utils/interfaces';
 
 import {
   VisualizationRegistryService,
   VisualizationRegistryServiceSetup,
   VisualizationRegistryServiceStart,
 } from './services/visualization_registry_service';
+import { AppStore } from './application/utils/state_management/store';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -88,6 +89,7 @@ export interface ExploreSetupDependencies {
   data: DataPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
+  dashboard: DashboardSetup;
 }
 
 /**
@@ -105,6 +107,7 @@ export interface ExploreStartDependencies {
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
   expressions: ExpressionsStart;
+  dashboard: DashboardStart;
 }
 
 // ============================================================================
@@ -139,7 +142,7 @@ export interface ExploreServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedExploreById: (id?: string) => Promise<SavedExplore | undefined>;
+  getSavedExploreById: (id?: string) => Promise<SavedExplore>;
   getSavedExploreUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
   visualizations: VisualizationsStart;
@@ -154,7 +157,7 @@ export interface ExploreServices {
   overlays: CoreStart['overlays'];
 
   // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
-  store: ReduxStore; // Redux store
+  store: AppStore; // Redux store
   viewRegistry?: Record<string, unknown>; // ViewServiceStart - will be replaced with tabRegistry
   embeddable: EmbeddableStart; // EmbeddableStart
   scopedHistory?: ScopedHistory; // ScopedHistory
@@ -167,4 +170,5 @@ export interface ExploreServices {
 
   // For results summary
   isSummaryAgentAvailable$: BehaviorSubject<boolean>;
+  dashboard: DashboardStart;
 }

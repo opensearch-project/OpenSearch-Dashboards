@@ -5,19 +5,18 @@
 
 import { i18n } from '@osd/i18n';
 import {
-  EuiText,
   EuiFlexGroup,
-  EuiPanel,
-  EuiSelect,
+  EuiSuperSelect,
   EuiSpacer,
   EuiButtonIcon,
-  EuiAccordion,
-  EuiHorizontalRule,
   EuiFormRow,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { VisColumn, VisFieldType, VisualizationRule } from './types';
 import {
@@ -25,27 +24,41 @@ import {
   useVisualizationRegistry,
   VisualizationTypeResult,
 } from './utils/use_visualization_types';
-import { setStyleOptions } from '../../application/utils/state_management/slices/ui_slice';
+import { CHART_METADATA } from './constants';
+import { StyleAccordion } from './style_panel/style_accordion';
+import {
+  selectFieldNames,
+  selectChartType,
+} from '../../application/utils/state_management/selectors';
+import { UpdateVisualizationProps } from './visualization_container';
 
 interface VisualizationEmptyStateProps {
   visualizationData: VisualizationTypeResult<ChartType>;
-  setVisualizationData?: (data: VisualizationTypeResult<ChartType> | undefined) => void;
+  updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
 interface AvailableRuleOption {
   value: string;
-  text: string;
+  inputDisplay: React.ReactNode;
+  iconType?: string;
+  disabled?: boolean;
   rules: Array<Partial<VisualizationRule>>;
 }
 
 interface VisColumnOption {
   value: string;
-  text: string;
   column: VisColumn;
+  inputDisplay: string;
 }
 
 // Exclude unknown fields since we cannot generate visualization with them
 type VisFieldTypeString = VisFieldType.Numerical | VisFieldType.Categorical | VisFieldType.Date;
+
+const FIELD_TYPE_ORDER: VisFieldTypeString[] = [
+  VisFieldType.Numerical,
+  VisFieldType.Categorical,
+  VisFieldType.Date,
+];
 
 const FIELD_TYPE_LABELS = [
   i18n.translate('explore.stylePanel.fieldSwitcher.numericalFieldLabel', {
@@ -61,41 +74,29 @@ const FIELD_TYPE_LABELS = [
 
 export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = ({
   visualizationData,
-  setVisualizationData,
+  updateVisualization,
 }) => {
-  const dispatch = useDispatch();
-
   const visualizationRegistry = useVisualizationRegistry();
 
-  // Keep the original columns that get form the search because generated new visualization will
-  // modifiy the columns in visualization data
+  // Original vis data from the query result
   const originalVisualizationData = useRef(visualizationData);
 
   // Indicates no rule is matched and the user should manually generate the visualization
-  const shouldManuallyGenerate = useRef(!Boolean(visualizationData.visualizationType));
-
-  // Selected chart type id, such as "area" and "line"
-  const [currChartTypeId, setCurrChartTypeId] = useState<string | undefined>(
-    visualizationData.visualizationType ? visualizationData.visualizationType.name : undefined
+  const shouldManuallyGenerate = useRef(
+    !Boolean(originalVisualizationData.current.visualizationType)
   );
 
-  // Selected fields by user, categorized by field types
-  const [fieldsSelection, setFieldsSelection] = useState<{
-    numerical: VisColumn[];
-    categorical: VisColumn[];
-    date: VisColumn[];
-  }>(
-    visualizationData.visualizationType
-      ? {
-          numerical: visualizationData.numericalColumns ?? [],
-          categorical: visualizationData.categoricalColumns ?? [],
-          date: visualizationData.dateColumns ?? [],
-        }
-      : {
-          numerical: [],
-          categorical: [],
-          date: [],
-        }
+  // Local state for chart type, initialized from Redux
+  const storedChartTypeId = useSelector(selectChartType);
+  const [currChartTypeId, setCurrChartTypeId] = useState(storedChartTypeId);
+
+  // Local state for field selection, avoid trigger update on express in visualization container
+  const [fieldsSelection, setFieldsSelection] = useState(
+    useSelector(selectFieldNames) ?? {
+      categorical: [],
+      date: [],
+      numerical: [],
+    }
   );
 
   const currFieldsCountByType: [number, number, number] = useMemo(
@@ -116,19 +117,53 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
   const convertToSelectOption = (col: VisColumn): VisColumnOption => ({
     column: col,
     value: col.name,
-    text: col.name,
+    inputDisplay: col.name,
   });
-  const allColumnOptions = [numericalColumns, categoricalColumns, dateColumns].map((columns) =>
-    columns.map(convertToSelectOption)
+  const allColumnOptions = useMemo(
+    () =>
+      [numericalColumns, categoricalColumns, dateColumns].map((columns) =>
+        columns.map(convertToSelectOption)
+      ),
+    [numericalColumns, categoricalColumns, dateColumns]
   );
   const [numericalColumnOptions, categoricalColumnOptions, dateColumnOptions] = allColumnOptions;
+
+  // Get icon type based on chart type
+  const getChartIconType = (type: string): string => {
+    switch (type) {
+      case 'line':
+        return 'visLine';
+      case 'area':
+        return 'visArea';
+      case 'bar':
+        return 'visBarVertical';
+      case 'pie':
+        return 'visPie';
+      case 'metric':
+        return 'visMetric';
+      case 'heatmap':
+        return 'heatmap';
+      case 'scatterpoint':
+        return 'visScatter';
+      case 'table':
+        return 'tableOfContents';
+      default:
+        return 'visualizeApp';
+    }
+  };
 
   // Create base mapping once with all visualization rules
   const baseChartTypeMapping = useMemo(() => {
     return ALL_VISUALIZATION_RULES.reduce((acc, rule) => {
       rule.chartTypes.forEach(({ type, name }) => {
         if (!acc[type]) {
-          acc[type] = { value: type, text: name, rules: [] };
+          const iconType = getChartIconType(type);
+          acc[type] = {
+            value: type,
+            inputDisplay: name,
+            iconType,
+            rules: [],
+          };
         }
         acc[type].rules.push({
           id: rule.id,
@@ -141,33 +176,63 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     }, {} as Record<string, AvailableRuleOption>);
   }, []); // Only calculate once
 
-  // Filter rules based on current selected columns
+  // Process chart types to mark unavailable ones as disabled
   const chartTypeMappedOptions = useMemo(() => {
-    const filtered = Object.fromEntries(
-      Object.entries(baseChartTypeMapping).map(([type, chartType]) => [
-        type,
-        {
-          ...chartType,
-          rules: chartType.rules.filter((rule) => {
-            const [numCount, cateCount, dateCount] = rule.matchIndex || [0, 0, 0];
+    // First, filter rules for each chart type based on current selected columns
+    const processed = Object.fromEntries(
+      Object.entries(baseChartTypeMapping).map(([type, chartType]) => {
+        const filteredRules = chartType.rules.filter((rule) => {
+          const [numCount, cateCount, dateCount] = rule.matchIndex || [0, 0, 0];
 
-            return (
-              numericalColumnOptions.length >= numCount &&
-              categoricalColumnOptions.length >= cateCount &&
-              dateColumnOptions.length >= dateCount
-            );
-          }),
-        },
-      ])
+          // Special condition for metric type
+          if (type === CHART_METADATA.metric.type && numericalColumnOptions.length > 0) {
+            return numericalColumnOptions[0].column.validValuesCount === 1;
+          }
+
+          return (
+            numericalColumnOptions.length >= numCount &&
+            categoricalColumnOptions.length >= cateCount &&
+            dateColumnOptions.length >= dateCount
+          );
+        });
+
+        // Mark chart type as disabled if it has no valid rules
+        const isDisabled = filteredRules.length === 0;
+
+        // Create custom option content with greyed out text for disabled options
+        const optionContent = (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type={chartType.iconType || 'visualizeApp'}
+                size="m"
+                color={isDisabled ? 'subdued' : 'default'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" color={isDisabled ? 'subdued' : 'default'}>
+                {chartType.inputDisplay}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+
+        return [
+          type,
+          {
+            ...chartType,
+            disabled: isDisabled,
+            optionContent,
+            rules: filteredRules,
+          },
+        ];
+      })
     );
 
-    // Filter out chart types with empty rules
-    return Object.fromEntries(
-      Object.entries(filtered).filter(([_, chartType]) => chartType.rules.length > 0)
-    );
+    return processed;
   }, [
     baseChartTypeMapping,
-    numericalColumnOptions.length,
+    numericalColumnOptions,
     categoricalColumnOptions.length,
     dateColumnOptions.length,
   ]);
@@ -182,7 +247,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
    * [1, 1, 1], [1, 2, 0] should remains available.
    */
   const availableRules = useMemo(() => {
-    if (!currChartTypeId) return [];
+    if (!currChartTypeId || !chartTypeMappedOptions[currChartTypeId]) return [];
 
     return chartTypeMappedOptions[currChartTypeId].rules.filter((rule) => {
       const [ruleNum, ruleCat, ruleDate] = rule.matchIndex || [0, 0, 0];
@@ -194,7 +259,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
   const handleGeneration = useCallback(() => {
     // Update the visualizationData in the parent component
-    if (setVisualizationData && originalVisualizationData.current) {
+    if (originalVisualizationData.current) {
       const ruleToUse = availableRules.find((rule) =>
         isEqual(rule.matchIndex, currFieldsCountByType)
       );
@@ -202,38 +267,53 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
         const visualizationType = visualizationRegistry.getVisualizationConfig(
           currChartTypeOption?.value!
         );
-        dispatch(setStyleOptions(visualizationType.ui.style.defaults));
-
-        setVisualizationData({
-          ...originalVisualizationData.current,
-          numericalColumns: fieldsSelection.numerical,
-          categoricalColumns: fieldsSelection.categorical,
-          dateColumns: fieldsSelection.date,
-          ruleId: ruleToUse.id,
-          visualizationType,
-          toExpression: ruleToUse.toExpression,
-        });
+        if (visualizationType) {
+          updateVisualization({
+            visualizationType,
+            rule: ruleToUse,
+            fieldNames: fieldsSelection,
+            columns: {
+              numerical: originalVisualizationData.current.numericalColumns
+                ? originalVisualizationData.current.numericalColumns.filter((col) =>
+                    fieldsSelection.numerical.includes(col.name)
+                  )
+                : [],
+              categorical: originalVisualizationData.current.categoricalColumns
+                ? originalVisualizationData.current.categoricalColumns.filter((col) =>
+                    fieldsSelection.categorical.includes(col.name)
+                  )
+                : [],
+              date: originalVisualizationData.current.dateColumns
+                ? originalVisualizationData.current.dateColumns.filter((col) =>
+                    fieldsSelection.date.includes(col.name)
+                  )
+                : [],
+            },
+          });
+          // Reset the flag after successful generation
+          shouldManuallyGenerate.current = false;
+        }
       }
     }
   }, [
-    setVisualizationData,
     availableRules,
     currFieldsCountByType,
     fieldsSelection,
     visualizationRegistry,
     currChartTypeOption,
-    dispatch,
+    updateVisualization,
   ]);
 
   useEffect(() => {
     if (
+      currChartTypeId &&
       currChartTypeOption &&
       shouldManuallyGenerate.current &&
-      !isEqual(fieldsSelection, [0, 0, 0])
+      !isEqual(currFieldsCountByType, [0, 0, 0])
     ) {
       handleGeneration();
     }
-  }, [currChartTypeOption, fieldsSelection, shouldManuallyGenerate, handleGeneration]);
+  }, [currChartTypeId, currChartTypeOption, currFieldsCountByType, handleGeneration]);
 
   // Max possible number of selections for each field types base on current available rules
   const maxMatchIndex = useMemo(() => {
@@ -248,7 +328,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     );
   }, [availableRules]);
 
-  // Max number of the remainig possible selection for each field types base on current fields selection
+  // Max number of the remaining possible selection for each field types base on current fields selection
   const matchIndexDifference = useMemo(() => {
     const [maxNum, maxCat, maxDate] = maxMatchIndex;
     const [currNum, currCat, currDate] = currFieldsCountByType;
@@ -260,17 +340,17 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     ];
   }, [maxMatchIndex, currFieldsCountByType]);
 
-  const updateChartTypeSelection = (chartTypeId: string) => {
+  const updateChartTypeSelection = (chartTypeId: ChartType) => {
     shouldManuallyGenerate.current = true;
 
     setCurrChartTypeId(chartTypeId);
   };
 
   useEffect(() => {
-    // Listern to the change of chart type, which will triggers maxMatchIndex chagnes
+    // Listen to the change of chart type, which will triggers maxMatchIndex changes
     maxMatchIndex.forEach((max, index) => {
       if (max < currFieldsCountByType[index]) {
-        // Reset the fields selection when current selected fields are not suport with the
+        // Reset the fields selection when current selected fields are not support with the
         // chart type that the user just changed
         setFieldsSelection({
           numerical: [],
@@ -292,7 +372,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
       setFieldsSelection((prev) => ({
         ...prev,
-        [fieldTypeString]: [...prev[fieldTypeString], columnOption.column],
+        [fieldTypeString]: [...prev[fieldTypeString], columnOption.column.name],
       }));
     },
     [allColumnOptions]
@@ -300,9 +380,11 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
   const removeFieldSelection = useCallback(
     (fieldTypeString: VisFieldTypeString, columnName: string) => {
+      shouldManuallyGenerate.current = true;
+
       setFieldsSelection((prev) => ({
         ...prev,
-        [fieldTypeString]: prev[fieldTypeString].filter((col) => col.name !== columnName),
+        [fieldTypeString]: prev[fieldTypeString].filter((name) => name !== columnName),
       }));
     },
     []
@@ -323,167 +405,182 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
 
       setFieldsSelection((prev) => ({
         ...prev,
-        [fieldTypeString]: prev[fieldTypeString].map((col) =>
-          col.name === oldColumnName ? newColumnOption.column : col
+        [fieldTypeString]: prev[fieldTypeString].map((name) =>
+          name === oldColumnName ? newColumnOption.column.name : name
         ),
       }));
     },
     [allColumnOptions]
   );
 
-  if (!visualizationData || !Boolean(Object.keys(chartTypeMappedOptions).length)) return null;
+  if (!originalVisualizationData.current || !Boolean(Object.keys(chartTypeMappedOptions).length))
+    return null;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <StyleAccordion
-        id="generalSection"
-        accordionLabel={i18n.translate('explore.stylePanel.tabs.general', {
-          defaultMessage: 'General',
-        })}
-        initialIsOpen={true}
-      >
-        <EuiFormRow
-          label={i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
-            defaultMessage: 'Visualization Type',
-          })}
-        >
-          <EuiSelect
-            id="chartType"
-            hasNoInitialSelection
-            value={currChartTypeId}
-            options={Object.values(chartTypeMappedOptions)}
-            onChange={(e) => {
-              updateChartTypeSelection(e.target.value);
-            }}
-          />
-        </EuiFormRow>
-      </StyleAccordion>
-      {currChartTypeId && (
+    <EuiFlexGroup direction="column" gutterSize="none" key="visualizationEmptyState">
+      <EuiFlexItem grow={false}>
         <StyleAccordion
-          id="axisAndScalesSection"
-          accordionLabel={i18n.translate('explore.stylePanel.tabs.axisAndScales', {
-            defaultMessage: 'Axis & scales',
+          id="generalSection"
+          accordionLabel={i18n.translate('explore.stylePanel.tabs.general', {
+            defaultMessage: 'General',
           })}
           initialIsOpen={true}
         >
-          <>
-            {Object.entries(fieldsSelection).map(([fieldTypeString, selectedColumns], index) => {
-              const canSelectMoreFields = matchIndexDifference[index] > 0;
+          <EuiFormRow
+            label={i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
+              defaultMessage: 'Visualization Type',
+            })}
+          >
+            <EuiSuperSelect
+              id="chartType"
+              valueOfSelected={
+                chartTypeMappedOptions[currChartTypeId]
+                  ? chartTypeMappedOptions[currChartTypeId].disabled
+                    ? undefined
+                    : currChartTypeId
+                  : undefined
+              }
+              placeholder="Select a visualization type"
+              options={Object.values(chartTypeMappedOptions).map((option) => ({
+                ...option,
+                inputDisplay: (
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type={option.iconType || 'visualizeApp'}
+                        size="m"
+                        color={option.disabled ? 'subdued' : 'default'}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s" color={option.disabled ? 'subdued' : 'default'}>
+                        {option.inputDisplay}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              }))}
+              onChange={(value) => {
+                updateChartTypeSelection(value as ChartType);
+              }}
+            />
+          </EuiFormRow>
+        </StyleAccordion>
+      </EuiFlexItem>
+      {currChartTypeId && !chartTypeMappedOptions[currChartTypeId].disabled && (
+        <EuiFlexItem grow={false}>
+          <StyleAccordion
+            id="axisAndScalesSection"
+            accordionLabel={i18n.translate('explore.stylePanel.tabs.axisAndScales', {
+              defaultMessage: 'Axis & scales',
+            })}
+            initialIsOpen={true}
+          >
+            <>
+              {FIELD_TYPE_ORDER.map((fieldTypeString, index) => {
+                const selectedColumns = fieldsSelection
+                  ? fieldsSelection[fieldTypeString as keyof typeof fieldsSelection]
+                  : [];
+                const canSelectMoreFields = matchIndexDifference[index] > 0;
 
-              // Label only displays when select component and/or selected fields are shown
-              const shouldDisplayLabel = Boolean(selectedColumns.length) || canSelectMoreFields;
+                // Label only displays when select component and/or selected fields are shown
+                const shouldDisplayLabel = Boolean(selectedColumns.length) || canSelectMoreFields;
 
-              return (
-                <React.Fragment key={`${fieldTypeString}_${index}`}>
-                  {shouldDisplayLabel && (
-                    <EuiFormRow label={FIELD_TYPE_LABELS[index]}>
-                      <>
-                        {selectedColumns.map((selectedColumn) => {
-                          return (
-                            <React.Fragment key={selectedColumn.id}>
-                              <EuiPanel grow={false} paddingSize="s">
+                return (
+                  <React.Fragment key={`${fieldTypeString}_${index}`}>
+                    {shouldDisplayLabel && (
+                      <EuiFormRow label={FIELD_TYPE_LABELS[index]}>
+                        <>
+                          {selectedColumns.map((selectedColumn) => {
+                            return (
+                              <React.Fragment key={selectedColumn}>
                                 <EuiFlexGroup
                                   gutterSize="none"
                                   alignItems="center"
                                   style={{ gap: 4 }}
                                 >
-                                  <EuiSelect
-                                    value={selectedColumn.name}
-                                    options={allColumnOptions[index].filter(
-                                      // Filter out the fields already selected but keet the current one
-                                      (col) =>
-                                        col.column.name === selectedColumn.name ||
-                                        !selectedColumns.some(
-                                          (selected) => selected.name === col.column.name
+                                  <EuiFlexItem>
+                                    <EuiSuperSelect
+                                      fullWidth
+                                      valueOfSelected={selectedColumn}
+                                      options={allColumnOptions[index].filter(
+                                        // Filter out the fields already selected but keep the current one
+                                        (col) => {
+                                          const isCurrentColumn =
+                                            col.column.name === selectedColumn;
+                                          const isAlreadySelected = selectedColumns.some(
+                                            (selected) => selected === col.column.name
+                                          );
+                                          // Only display as an available option when there is only one value
+                                          // Avoiding render multiple overlapped values as metric
+                                          const isValidForMetric =
+                                            currChartTypeId === 'metric'
+                                              ? col.column.validValuesCount === 1
+                                              : true;
+
+                                          return (
+                                            (isCurrentColumn || !isAlreadySelected) &&
+                                            isValidForMetric
+                                          );
+                                        }
+                                      )}
+                                      onChange={(value) => {
+                                        replaceFieldSelection(
+                                          fieldTypeString as VisFieldTypeString,
+                                          index,
+                                          selectedColumn,
+                                          value
+                                        );
+                                      }}
+                                    />
+                                  </EuiFlexItem>
+                                  <EuiFlexItem grow={false}>
+                                    <EuiButtonIcon
+                                      onClick={() =>
+                                        removeFieldSelection(
+                                          fieldTypeString as VisFieldTypeString,
+                                          selectedColumn
                                         )
-                                    )}
-                                    onChange={(e) => {
-                                      replaceFieldSelection(
-                                        fieldTypeString as VisFieldTypeString,
-                                        index,
-                                        selectedColumn.name,
-                                        e.target.value
-                                      );
-                                    }}
-                                  />
-                                  <EuiButtonIcon
-                                    onClick={() =>
-                                      removeFieldSelection(
-                                        fieldTypeString as VisFieldTypeString,
-                                        selectedColumn.name
-                                      )
-                                    }
-                                    iconType="trash"
-                                    aria-label={`delete selected field ${selectedColumn.name}`}
-                                  />
+                                      }
+                                      iconType="trash"
+                                      aria-label={`delete selected field ${selectedColumn}`}
+                                    />
+                                  </EuiFlexItem>
                                 </EuiFlexGroup>
-                              </EuiPanel>
-                              <EuiSpacer size="xs" />
-                            </React.Fragment>
-                          );
-                        })}
+
+                                <EuiSpacer size="xs" />
+                              </React.Fragment>
+                            );
+                          })}
+                        </>
+                      </EuiFormRow>
+                    )}
+                    {canSelectMoreFields && (
+                      <>
+                        <EuiSuperSelect
+                          id={`${fieldTypeString}_field`}
+                          placeholder="Select a field"
+                          options={allColumnOptions[index].filter(
+                            (col) =>
+                              !selectedColumns.some((selected) => selected === col.column.name)
+                          )}
+                          onChange={(value) =>
+                            updateFieldSelection(
+                              fieldTypeString as VisFieldTypeString,
+                              index,
+                              value
+                            )
+                          }
+                        />
                       </>
-                    </EuiFormRow>
-                  )}
-                  {canSelectMoreFields && (
-                    <>
-                      <EuiSelect
-                        id={`${fieldTypeString}_field`}
-                        hasNoInitialSelection
-                        options={allColumnOptions[index].filter(
-                          (col) =>
-                            !selectedColumns.some((selected) => selected.name === col.column.name)
-                        )}
-                        onChange={(e) =>
-                          updateFieldSelection(
-                            fieldTypeString as VisFieldTypeString,
-                            index,
-                            e.target.value
-                          )
-                        }
-                      />
-                    </>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </>
-        </StyleAccordion>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </>
+          </StyleAccordion>
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  );
-};
-
-// TODO make this a shared component
-interface StyleAccordionProps {
-  id: string;
-  accordionLabel: React.ReactNode;
-  initialIsOpen: boolean;
-}
-
-const StyleAccordion: React.FC<StyleAccordionProps> = ({
-  id,
-  accordionLabel,
-  initialIsOpen,
-  children,
-}) => {
-  return (
-    <EuiPanel paddingSize="s" borderRadius="none" hasBorder={false} hasShadow={false}>
-      <EuiAccordion
-        id={id}
-        buttonContent={
-          <EuiText size="s" style={{ fontWeight: 600 }}>
-            {accordionLabel}
-          </EuiText>
-        }
-        initialIsOpen={initialIsOpen}
-      >
-        <EuiSpacer size="xs" />
-        <EuiPanel paddingSize="s" hasBorder={false} color="subdued">
-          {children}
-        </EuiPanel>
-      </EuiAccordion>
-      <EuiHorizontalRule margin="xs" />{' '}
-    </EuiPanel>
   );
 };

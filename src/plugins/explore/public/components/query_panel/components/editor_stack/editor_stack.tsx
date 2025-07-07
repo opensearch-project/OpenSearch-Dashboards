@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { monaco } from '@osd/monaco';
+import { EuiProgress } from '@elastic/eui';
 import { PromptEditor } from './prompt_editor';
 import { QueryEditor } from './query_editor';
 import { LanguageType } from './types';
@@ -15,6 +16,7 @@ interface EditorStackProps {
   onQueryChange: (value: string) => void;
   languageType: LanguageType;
   isDualEditor: boolean;
+  isQueryLoading: boolean;
   isPromptReadOnly: boolean;
   isEditorReadOnly: boolean;
   onQueryEdit: () => void;
@@ -29,6 +31,7 @@ interface EditorStackProps {
 
 const EditorStack: React.FC<EditorStackProps> = ({
   isDualEditor,
+  isQueryLoading,
   isPromptReadOnly,
   isEditorReadOnly,
   languageType,
@@ -68,6 +71,9 @@ const EditorStack: React.FC<EditorStackProps> = ({
           provideCompletionItems={provideCompletionItems}
         />
       )}
+      <div className="queryPanel__editorStack__progress" data-test-subj="queryPanelEditorProgress">
+        {isQueryLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      </div>
     </div>
   );
 };

@@ -44,8 +44,6 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
     defaultMessage: 'Ask a question or search using PPL',
   });
 
-  // console.log('prompt queryString editortyep', prompt, queryString, editorType);
-
   return (
     <ReusableEditor
       value={value || ''}

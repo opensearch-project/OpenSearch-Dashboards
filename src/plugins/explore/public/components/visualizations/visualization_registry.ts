@@ -55,8 +55,7 @@ export class VisualizationRegistry {
       };
     }
 
-    // TODO: Handle the case where no rule matches, render empty state or default table visualization
-    // No matching visualization type found
+    // Render empty state for the user to manually select the columns
     return {
       visualizationType: undefined,
       numericalColumns,
@@ -88,9 +87,9 @@ export class VisualizationRegistry {
   }
 
   /**
-   * Find the best matching rule and visualization type based on prorities.
+   * Find the best matching rule and visualization type based on priorities.
    */
-  private findBestMatch(
+  public findBestMatch(
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]

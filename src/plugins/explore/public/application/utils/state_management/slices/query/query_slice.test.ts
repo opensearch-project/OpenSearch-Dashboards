@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { setQuery, setQueryState, queryReducer, QueryState } from './query_slice';
+import { setQueryState, queryReducer, QueryState } from './query_slice';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
 
 describe('querySlice reducers', () => {
@@ -13,7 +13,7 @@ describe('querySlice reducers', () => {
     dataset: undefined,
   };
 
-  it('setQuery replaces the entire state', () => {
+  it('setQueryState replaces the entire state', () => {
     const newQuery: QueryState = {
       query: 'foo',
       language: 'sql',
@@ -23,11 +23,11 @@ describe('querySlice reducers', () => {
         type: 'log',
       },
     };
-    const state = queryReducer(initialState, setQuery(newQuery));
+    const state = queryReducer(initialState, setQueryState(newQuery));
     expect(state).toEqual(newQuery);
   });
 
-  it('setQueryState replaces the entire state', () => {
+  it('setQueryState replaces the entire state (second test)', () => {
     const newState: QueryState = {
       query: 'bar',
       language: 'ppl',
@@ -41,9 +41,9 @@ describe('querySlice reducers', () => {
     expect(state).toEqual(newState);
   });
 
-  it('setQuery works with partial fields (should overwrite missing fields with undefined)', () => {
+  it('setQueryState works with partial fields (should overwrite missing fields with undefined)', () => {
     const partialQuery = { query: 'baz', language: 'sql' } as QueryState;
-    const state = queryReducer(initialState, setQuery(partialQuery));
+    const state = queryReducer(initialState, setQueryState(partialQuery));
     expect(state).toEqual({ ...partialQuery });
   });
 });

@@ -142,7 +142,9 @@ export const buildQueryStatusConfig = (response: any) => {
  * Test if a PPL query is using search command
  * https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.rst
  */
-export const isPPLSearchQuery = (query: Query) => {
+export const isPPLSearchQuery = (
+  query: Query
+): query is Omit<Query, 'query'> & { query: string } => {
   if (query.language !== 'PPL') {
     return false;
   }

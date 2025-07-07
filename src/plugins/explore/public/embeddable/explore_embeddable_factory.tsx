@@ -18,6 +18,7 @@ import { ExploreInput, ExploreOutput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { VisualizationRegistryService } from '../services/visualization_registry_service';
+import { ExploreFlavor } from '../../common';
 
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -78,7 +79,6 @@ export class ExploreEmbeddableFactory
     const services = getServices();
     const filterManager = services.filterManager;
     const url = await services.getSavedExploreUrlById(savedObjectId);
-    const editUrl = services.addBasePath(`/app/explorer/discover${url}`);
 
     try {
       const savedObject = await services.getSavedExploreById(savedObjectId);
@@ -86,7 +86,11 @@ export class ExploreEmbeddableFactory
         throw new Error('Saved object not found');
       }
       const indexPattern = savedObject.searchSource.getField('index');
+      const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
+      const flavor = savedObject.type ?? ExploreFlavor.Logs;
+      const editUrl = services.addBasePath(`/app/explore/${flavor}#/view/${url}`);
+
       return new ExploreEmbeddableClass(
         {
           savedExplore: savedObject,
@@ -98,6 +102,7 @@ export class ExploreEmbeddableFactory
           services,
         },
         input,
+        executeTriggerActions,
         parent
       );
     } catch (e) {

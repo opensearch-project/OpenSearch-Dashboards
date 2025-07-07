@@ -19,7 +19,7 @@ export const createTwoMetricScatter = (
   const markLayer = {
     mark: {
       type: 'point',
-      tooltip: styles.addTooltip,
+      tooltip: styles?.tooltipOptions?.mode !== 'hidden',
       shape: styles?.exclusive?.pointShape,
       angle: styles?.exclusive?.angle,
       filled: styles?.exclusive?.filled,
@@ -60,10 +60,10 @@ export const createTwoMetricOneCateScatter = (
   const markLayer = {
     mark: {
       type: 'point',
-      tooltip: styles.addTooltip,
-      shape: styles?.exclusive?.pointShape,
-      angle: styles?.exclusive?.angle,
-      filled: styles?.exclusive?.filled,
+      tooltip: styles.tooltipOptions?.mode !== 'hidden',
+      shape: styles.exclusive?.pointShape,
+      angle: styles.exclusive?.angle,
+      filled: styles.exclusive?.filled,
     },
     encoding: {
       x: {
@@ -116,10 +116,10 @@ export const createThreeMetricOneCateScatter = (
   const markLayer = {
     mark: {
       type: 'point',
-      tooltip: styles.addTooltip,
-      shape: styles?.exclusive?.pointShape,
-      angle: styles?.exclusive?.angle,
-      filled: styles?.exclusive?.filled,
+      tooltip: styles.tooltipOptions?.mode !== 'hidden',
+      shape: styles.exclusive?.pointShape,
+      angle: styles.exclusive?.angle,
+      filled: styles.exclusive?.filled,
     },
     encoding: {
       x: {

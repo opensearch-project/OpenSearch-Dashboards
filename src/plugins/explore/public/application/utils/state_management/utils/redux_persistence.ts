@@ -6,16 +6,17 @@
 import { RootState } from '../store';
 import { ResultStatus, AppState } from '../types';
 import { ExploreServices } from '../../../../types';
-import { QueryState } from '../slices';
+import { LegacyState, QueryState, ResultsState, SystemState, TabState, UIState } from '../slices';
 import { Dataset, DataStructure } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
+import { defaultMetricChartStyles } from '../../../../components/visualizations/metric/metric_vis_config';
 
 /**
  * Persists Redux state to URL
  */
 export const persistReduxState = (state: RootState, services: ExploreServices) => {
-  if (state.ui.transaction?.inProgress || !services.osdUrlStateStorage) return;
+  if (!services.osdUrlStateStorage) return;
   try {
     // Sync up _q (Query state) to URL state
     services.osdUrlStateStorage.set('_q', state.query, { replace: true });
@@ -38,7 +39,7 @@ export const persistReduxState = (state: RootState, services: ExploreServices) =
 /**
  * Loads Redux state from URL or returns default state
  */
-export const loadReduxState = async (services: ExploreServices): Promise<any> => {
+export const loadReduxState = async (services: ExploreServices): Promise<RootState> => {
   try {
     // Use the osdUrlStateStorage from services
     if (!services.osdUrlStateStorage) {
@@ -57,22 +58,26 @@ export const loadReduxState = async (services: ExploreServices): Promise<any> =>
       finalQueryState = await getPreloadedQueryState(services);
     }
     services.data.query.queryString.setQuery(finalQueryState);
+    const timefilter = services?.data?.query?.timefilter?.timefilter;
+    if (timefilter) {
+      services.data.query.queryString.addToQueryHistory(finalQueryState, timefilter.getTime());
+    }
 
     // Only run preload functions for missing sections
-    const finalUIState = appState?.ui || (await getPreloadedUIState(services));
-    const finalResultsState = appState?.results || (await getPreloadedResultsState(services));
-    const finalTabState = appState?.tab || (await getPreloadedTabState(services));
-    const finalLegacyState = appState?.legacy || (await getPreloadedLegacyState(services));
+    const finalUIState = appState?.ui || getPreloadedUIState(services);
+    const finalResultsState = appState?.results || getPreloadedResultsState(services);
+    const finalTabState = appState?.tab || getPreloadedTabState(services);
+    const finalLegacyState = appState?.legacy || getPreloadedLegacyState(services);
+    const finalSystemState = getPreloadedSystemState(services);
 
-    const finalState = {
+    return {
       query: finalQueryState,
       ui: finalUIState,
       results: finalResultsState,
       tab: finalTabState,
       legacy: finalLegacyState,
+      system: finalSystemState,
     };
-
-    return finalState;
   } catch (err) {
     return await getPreloadedState(services); // Fallback to full preload
   }
@@ -81,12 +86,13 @@ export const loadReduxState = async (services: ExploreServices): Promise<any> =>
 /**
  * Get preloaded state for each slice
  */
-export const getPreloadedState = async (services: ExploreServices): Promise<any> => {
+export const getPreloadedState = async (services: ExploreServices): Promise<RootState> => {
   const queryState = await getPreloadedQueryState(services);
-  const uiState = await getPreloadedUIState(services);
-  const resultsState = await getPreloadedResultsState(services);
-  const tabState = await getPreloadedTabState(services);
-  const legacyState = await getPreloadedLegacyState(services);
+  const uiState = getPreloadedUIState(services);
+  const resultsState = getPreloadedResultsState(services);
+  const tabState = getPreloadedTabState(services);
+  const legacyState = getPreloadedLegacyState(services);
+  const systemState = getPreloadedSystemState(services);
 
   return {
     query: queryState, // Contains dataset, query, and language
@@ -94,6 +100,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<any>
     results: resultsState,
     tab: tabState,
     legacy: legacyState,
+    system: systemState,
   };
 };
 
@@ -155,7 +162,7 @@ const resolveDataset = async (services: ExploreServices): Promise<Dataset | unde
 /**
  * Get preloaded query state with dataset initialization
  */
-const getPreloadedQueryState = async (services: ExploreServices) => {
+const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryState> => {
   // Resolve the dataset to use for the initial query state
   const selectedDataset = await resolveDataset(services);
 
@@ -176,38 +183,47 @@ const getPreloadedQueryState = async (services: ExploreServices) => {
 /**
  * Get preloaded UI state
  */
-const getPreloadedUIState = async (services: ExploreServices) => {
+const getPreloadedUIState = (services: ExploreServices): UIState => {
   return {
     activeTabId: 'logs',
+    showDatasetFields: true,
+    prompt: '',
+  };
+};
+
+/**
+ * Get preloaded system state
+ */
+const getPreloadedSystemState = (services: ExploreServices): SystemState => {
+  return {
     status: ResultStatus.UNINITIALIZED,
-    error: null,
-    abortController: null,
-    styleOptions: {},
-    transaction: {
-      inProgress: false,
-      pendingActions: [],
-    },
   };
 };
 
 /**
  * Get preloaded results state (empty - not persisted)
  */
-const getPreloadedResultsState = async (services: ExploreServices) => {
+const getPreloadedResultsState = (services: ExploreServices): ResultsState => {
   return {};
 };
 
 /**
  * Get preloaded tab state
  */
-const getPreloadedTabState = async (services: ExploreServices) => {
-  return {};
+const getPreloadedTabState = (services: ExploreServices): TabState => {
+  return {
+    logs: {},
+    visualizations: {
+      styleOptions: defaultMetricChartStyles,
+      chartType: 'metric',
+    },
+  };
 };
 
 /**
  * Get preloaded legacy state (vis_builder approach - defaults only, no saved object loading)
  */
-const getPreloadedLegacyState = async (services: ExploreServices) => {
+const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
   // Only return defaults - NO saved object loading (like vis_builder)
   const defaultColumns = services.uiSettings?.get('defaultColumns') || ['_source'];
 

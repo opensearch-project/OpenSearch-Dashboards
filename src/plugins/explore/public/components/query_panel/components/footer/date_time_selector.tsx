@@ -7,16 +7,16 @@
 // This component will be fully functional once integrated with query services.
 
 import React from 'react';
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker, OnTimeChangeProps } from '@elastic/eui';
 import { UI_SETTINGS } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 
 export interface DatePickerProps {
   services: ExploreServices;
   timefilter: any;
-  onTimeChange: (time: { start: string; end: string }) => void;
+  onTimeChange: (props: OnTimeChangeProps) => void;
   onRunQuery: () => void;
-  oneRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
+  onRefreshChange: (refresh: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
@@ -24,7 +24,7 @@ export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
   timefilter,
   onTimeChange,
   onRunQuery,
-  oneRefreshChange,
+  onRefreshChange,
 }) => {
   return (
     <div key="datePicker">
@@ -36,7 +36,7 @@ export const DateTimeRangePicker: React.FC<DatePickerProps> = ({
         refreshInterval={timefilter?.getRefreshInterval().value}
         onTimeChange={onTimeChange}
         onRefresh={onRunQuery}
-        onRefreshChange={oneRefreshChange}
+        onRefreshChange={onRefreshChange}
         showUpdateButton={false}
         commonlyUsedRanges={services?.uiSettings
           ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)

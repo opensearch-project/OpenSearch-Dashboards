@@ -37,6 +37,8 @@ describe('to_expression', () => {
     name: 'date',
     schema: VisFieldType.Date,
     column: 'field-0',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const numericColumn1: VisColumn = {
@@ -44,6 +46,8 @@ describe('to_expression', () => {
     name: 'value1',
     schema: VisFieldType.Numerical,
     column: 'field-1',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const numericColumn2: VisColumn = {
@@ -51,6 +55,8 @@ describe('to_expression', () => {
     name: 'value2',
     schema: VisFieldType.Numerical,
     column: 'field-2',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const categoricalColumn1: VisColumn = {
@@ -58,6 +64,8 @@ describe('to_expression', () => {
     name: 'category1',
     schema: VisFieldType.Categorical,
     column: 'field-2',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const categoricalColumn2: VisColumn = {
@@ -65,6 +73,8 @@ describe('to_expression', () => {
     name: 'category2',
     schema: VisFieldType.Categorical,
     column: 'field-3',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const styleOptions = {

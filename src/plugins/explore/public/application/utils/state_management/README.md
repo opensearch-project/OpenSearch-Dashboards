@@ -2,62 +2,71 @@
 
 ## Overview
 
-The Explore plugin uses Redux Toolkit with a 5-slice architecture for state management, featuring direct cache key computation for optimal performance and maintainability.
+The Explore plugin uses Redux Toolkit with a slice architecture for state management, featuring middleware-based persistence and logical separation of UI and infrastructure state.
 
-## Architecture
+## State Architecture
 
 ### State Slices
 
 ```typescript
 const store = configureStore({
   reducer: {
-    legacy: legacyReducer,    // Legacy Discover state
-    tab: tabReducer,          // Tab management state  
-    query: queryReducer,      // Current query state
-    ui: uiReducer,           // UI state and status
-    results: resultsReducer, // Query results cache
+    query: queryReducer,     // Query state
+    ui: uiReducer,           // UI state (persisted to URL)
+    results: resultsReducer, // Query results cache (not persisted)
+    tab: tabReducer,         // Tab-specific state (persisted to URL)
+    legacy: legacyReducer,   // Legacy Discover state (persisted to URL)
+    system: systemReducer,   // Infrastructure state (not persisted)
   },
 });
 ```
 
-#### Query Slice
+### State Persistence
+
+Middleware-based persistence triggers only on specific action types:
+
+```typescript
+// Persisted to URL: ['query/', 'ui/', 'tab/', 'legacy/']
+// Not persisted: ['system/', 'results/']
+```
+
+## State Slices
+
+### Query Slice
 ```typescript
 interface QueryState {
   query: string;
   dataset?: DatasetConfig;
   language?: string;
-  // ... other query properties
 }
 ```
 
-#### UI Slice
+### UI Slice
 ```typescript
 interface UIState {
-  activeTabId: string;           // Currently active tab
-  flavor: string;                // Current flavor setting
-  status: ResultStatus;          // Loading/ready/error status
-  transaction: {                 // Transaction management
-    inProgress: boolean;
-    pendingActions: string[];
+  activeTabId: string;        // Currently active tab
+  showDatasetFields: boolean; // Dataset fields visibility
+  prompt?: string;            // Query prompt text
+}
+```
+
+### System Slice
+```typescript
+interface SystemState {
+  status: ResultStatus;       // Loading/ready/error status
+}
+```
+
+### Tab Slice
+```typescript
+interface TabState {
+  logs: {};
+  visualizations: {
+    styleOptions?: ChartStyleControlMap[ChartType];
+    chartType: ChartType;
   };
 }
 ```
-
-#### Results Slice
-```typescript
-interface ResultsState {
-  [cacheKey: string]: ISearchResult;
-}
-```
-
-### Cache Key Strategy
-
-Components compute cache keys directly using prepared query strings:
-
-- **Default Components**: Use `defaultPrepareQuery(queryString)` for histogram/sidebar components
-- **Tab Components**: Use tab-specific `prepareQuery(queryString)` or fall back to `defaultPrepareQuery`
-- **Direct Computation**: Components compute their own cache keys when needed
-- **No Shared State**: Cache keys computed on-demand, not stored in UI state
 
 ## Query Execution Flow
 
@@ -128,30 +137,6 @@ const MyTabComponent = () => {
 };
 ```
 
-### Utility Hooks
-
-For common patterns, use the provided utility hooks:
-
-```typescript
-import { useDefaultCacheKey, useTabCacheKey } from '../hooks/use_cache_keys';
-
-// For default components
-const MyHistogramComponent = () => {
-  const cacheKey = useDefaultCacheKey();
-  const results = useSelector((state: RootState) => state.results);
-  const rawResults = results[cacheKey];
-  // ...
-};
-
-// For tab components  
-const MyTabComponent = () => {
-  const cacheKey = useTabCacheKey();
-  const results = useSelector((state: RootState) => state.results);
-  const rawResults = results[cacheKey];
-  // ...
-};
-```
-
 ## Tab Development
 
 ### Basic Tab Registration
@@ -211,14 +196,9 @@ export const MyTabComponent = () => {
   const rows = rawResults?.hits?.hits || [];
   const totalHits = (rawResults?.hits?.total as any)?.value || rawResults?.hits?.total || 0;
 
-  if (!rawResults) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
       <h3>My Custom Tab</h3>
-      <p>Total hits: {totalHits}</p>
       {/* Render your tab content */}
     </div>
   );
@@ -283,14 +263,6 @@ const cacheKey = prepareQuery(queryString);
 const needsQuery = !results[cacheKey];
 ```
 
-### Performance Benefits
-
-- **Direct Access**: Cache keys computed on-demand when needed
-- **Memoization**: Cache keys computed only when query changes
-- **Reduced State**: Smaller UI state without cache key storage
-- **Component Independence**: Each component computes its own cache key
-- **Type Safety**: TypeScript can better validate cache key usage
-
 ## Best Practices
 
 ### For Component Developers
@@ -327,44 +299,15 @@ const needsQuery = !results[cacheKey];
 - **Processor**: Tab's custom `resultsProcessor` or direct access
 - **Purpose**: Tab-specific data visualization
 
-## Troubleshooting
+## State Management Features
 
-### Common Issues
+### Middleware-Based Persistence
+- Only triggers on relevant actions for performance
+- Replaces store subscription approach
+- Selective persistence based on action types
 
-1. **Empty Results**: Check if correct cache key is being computed (`defaultPrepareQuery` or tab-specific `prepareQuery`)
-2. **Stale Data**: Verify cache keys are recomputing on query changes
-3. **Performance**: Ensure cache key computation is memoized properly
-4. **Tab Switching**: Confirm cache preservation logic is working
-
-### Debug Commands
-
-```typescript
-// Debug cache state
-const queryString = typeof query.query === 'string' ? query.query : '';
-const defaultCacheKey = defaultPrepareQuery(queryString);
-const activeTab = services.tabRegistry?.getTab(activeTabId);
-const tabCacheKey = (activeTab?.prepareQuery || defaultPrepareQuery)(queryString);
-
-console.log('Query String:', queryString);
-console.log('Default Cache Key:', defaultCacheKey);
-console.log('Tab Cache Key:', tabCacheKey);
-console.log('Available Results:', Object.keys(results));
-
-// Debug query comparison
-console.log('Queries Equal:', defaultCacheKey === tabCacheKey);
-console.log('Query Object:', query);
-```
-
-## Implementation Status
-
-### ✅ Current Features
-- Direct cache key computation eliminates complex state management
-- Simplified query execution with shared `executeQueryBase` helper
-- Eliminated code duplication between query execution functions
-- Multi-tab query optimization with direct cache key comparison
-- Cache-based result storage by prepared query strings
-- Tab switching without unnecessary re-queries
-- Modular result processors
-- Utility hooks for common cache key patterns
-
-This architecture provides a clean, performant, and maintainable approach to query execution and result caching in the Explore plugin.
+### State Separation
+- **UI State**: User interface preferences that should be bookmarkable
+- **System State**: Infrastructure state that shouldn't persist (status, loading states)
+- **Tab State**: Tab-specific configuration
+- **Results State**: Cached data that shouldn't persist
