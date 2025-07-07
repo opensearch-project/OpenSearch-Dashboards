@@ -439,6 +439,7 @@ export class WorkspacePlugin
       // workspace essential use case overview
       core.application.register({
         id: ESSENTIAL_OVERVIEW_PAGE_ID,
+        euiIconType: 'tableOfContents',
         title: '',
         async mount(params: AppMountParameters) {
           const { renderUseCaseOverviewApp } = await import('./application');
@@ -476,6 +477,7 @@ export class WorkspacePlugin
       // register workspace Analytics(all) use case overview app
       core.application.register({
         id: ANALYTICS_ALL_OVERVIEW_PAGE_ID,
+        euiIconType: 'tableOfContents',
         title: '',
         async mount(params: AppMountParameters) {
           const { renderUseCaseOverviewApp } = await import('./application');
