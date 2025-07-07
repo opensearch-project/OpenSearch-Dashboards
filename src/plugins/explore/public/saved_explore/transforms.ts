@@ -29,9 +29,12 @@ export const saveStateToSavedObject = (
     // TODO: Add title to saved object
     // Visualization has an independent title?
     title: '',
-    activeTab: tabDefinition.id,
     chartType: tabState?.visualizations?.chartType ?? 'line',
     params: tabState?.visualizations?.styleOptions ?? {},
+    fields: tabState?.visualizations?.fieldNames,
+  });
+  obj.uiState = JSON.stringify({
+    activeTab: tabDefinition.id,
   });
   obj.searchSourceFields = { index: indexPattern };
 

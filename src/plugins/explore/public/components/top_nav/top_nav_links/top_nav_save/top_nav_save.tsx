@@ -22,6 +22,10 @@ import {
   showSaveModal,
 } from '../../../../../../saved_objects/public';
 import { saveSavedExplore } from '../../../../helpers/save_explore';
+import { IndexPattern } from '../../../../../../data/public';
+import { TabState } from '../../../../application/utils/state_management/slices';
+import { TabDefinition } from '../../../../services/tab_registry/tab_registry_service';
+import { saveStateToSavedObject } from '../../../../saved_explore/transforms';
 
 export const saveTopNavData: TopNavMenuIconUIData = {
   tooltip: i18n.translate('explore.topNav.saveTitle', {
@@ -35,10 +39,18 @@ export const saveTopNavData: TopNavMenuIconUIData = {
   controlType: 'icon',
 };
 
+export interface SaveStateProps {
+  indexPattern: IndexPattern | undefined;
+  tabState: TabState;
+  flavorId: string | null;
+  tabDefinition: TabDefinition | undefined;
+}
+
 export const getSaveButtonRun = (
   services: ExploreServices,
   startSyncingQueryStateWithUrl: () => void,
   searchContext: ExecutionContextSearch,
+  saveStateProps: SaveStateProps,
   savedExplore?: SavedExplore
 ): TopNavMenuIconRun => () => {
   if (!savedExplore) return;
@@ -49,8 +61,15 @@ export const getSaveButtonRun = (
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: OnSaveProps): Promise<SaveResult | undefined> => {
-    const result = await saveSavedExplore({
+    const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
+      saveStateProps.flavorId ?? 'logs',
+      saveStateProps.tabDefinition!,
+      saveStateProps.tabState,
+      saveStateProps.indexPattern
+    );
+    const result = await saveSavedExplore({
+      savedExplore: savedExploreWithState,
       newTitle,
       saveOptions: { isTitleDuplicateConfirmed, onTitleDuplicate },
       searchContext,

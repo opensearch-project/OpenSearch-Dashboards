@@ -148,7 +148,6 @@ export function DiscoverPanel() {
       }}
       selectedIndexPattern={indexPattern}
       onCreateIndexPattern={onCreateIndexPattern}
-      onNormalize={() => {}}
       onAddFilter={onAddFilter}
       isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}
     />
