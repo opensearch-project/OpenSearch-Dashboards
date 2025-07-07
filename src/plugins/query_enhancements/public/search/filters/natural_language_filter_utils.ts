@@ -14,10 +14,10 @@ export class NaturalLanguageFilterUtils extends FilterUtils {
     if (!meta.negate) {
       switch (meta.type) {
         case 'phrase':
-          return `${field} is ${FilterUtils.quote(meta.params.query)}`;
+          return `${field} is ${NaturalLanguageFilterUtils.quote(meta.params.query)}`;
         case 'phrases':
           return meta.params
-            .map((query: string) => `${field} is ${FilterUtils.quote(query)}`)
+            .map((query: string) => `${field} is ${NaturalLanguageFilterUtils.quote(query)}`)
             .join(' or ');
         case 'range':
           const ranges = [];
@@ -29,16 +29,18 @@ export class NaturalLanguageFilterUtils extends FilterUtils {
       }
       if (filter.query) {
         if (filter.query.match_phrase && field in filter.query.match_phrase) {
-          return `${field} is ${FilterUtils.quote(filter.query.match_phrase[field])}`;
+          return `${field} is ${NaturalLanguageFilterUtils.quote(
+            filter.query.match_phrase[field]
+          )}`;
         }
       }
     } else {
       switch (meta.type) {
         case 'phrase':
-          return `${field} is not ${FilterUtils.quote(meta.params.query)}`;
+          return `${field} is not ${NaturalLanguageFilterUtils.quote(meta.params.query)}`;
         case 'phrases':
           return meta.params
-            .map((query: string) => `${field} is not ${FilterUtils.quote(query)}`)
+            .map((query: string) => `${field} is not ${NaturalLanguageFilterUtils.quote(query)}`)
             .join(' and ');
         case 'range':
           const ranges = [];
@@ -50,7 +52,9 @@ export class NaturalLanguageFilterUtils extends FilterUtils {
       }
       if (filter.query) {
         if (filter.query.match_phrase && field in filter.query.match_phrase) {
-          return `${field} is not ${FilterUtils.quote(filter.query.match_phrase[field])}`;
+          return `${field} is not ${NaturalLanguageFilterUtils.quote(
+            filter.query.match_phrase[field]
+          )}`;
         }
       }
     }
@@ -85,5 +89,14 @@ export class NaturalLanguageFilterUtils extends FilterUtils {
    */
   public static addFiltersToPrompt(prompt: string, filters: Filter[]): string {
     return filters.reduce(NaturalLanguageFilterUtils.addFilterToPrompt, prompt);
+  }
+
+  protected static quote(value: unknown) {
+    if (typeof value !== 'string') return value;
+    if (value.includes("'")) {
+      if (value.includes('"')) return `\`${value}\``;
+      return `"${value}"`;
+    }
+    return `'${value}'`;
   }
 }

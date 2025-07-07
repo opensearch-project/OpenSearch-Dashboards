@@ -137,7 +137,12 @@ describe('NaturalLanguageFilterUtils', () => {
 
     it('should handle single quotes in values', () => {
       const filter = getPhraseFilter('field1', "test's");
-      expect(NaturalLanguageFilterUtils.toPredicate(filter)).toBe("field1 is 'test''s'");
+      expect(NaturalLanguageFilterUtils.toPredicate(filter)).toBe(`field1 is "test's"`);
+    });
+
+    it('should handle single and double quotes in values', () => {
+      const filter = getPhraseFilter('field1', `"test's"`);
+      expect(NaturalLanguageFilterUtils.toPredicate(filter)).toBe(`field1 is \`"test's"\``);
     });
   });
 
