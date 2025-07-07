@@ -67,5 +67,5 @@ export interface LanguageConfig {
   supportedAppNames?: string[];
   hideDatePicker?: boolean;
   sampleQueries?: SampleQuery[];
-  insertFiltersToQuery?: (query: Query, filters: Filter[]) => Query;
+  addFiltersToQuery?: (query: string, filters: Filter[]) => string;
 }

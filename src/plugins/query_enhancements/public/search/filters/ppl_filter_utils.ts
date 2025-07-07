@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Filter, Query } from '../../../../data/common';
+import { Filter } from '../../../../data/common';
 import { FilterUtils } from './filter_utils';
 
 export class PPLFilterUtils extends FilterUtils {
@@ -22,9 +22,7 @@ export class PPLFilterUtils extends FilterUtils {
     return commands.map((cmd) => cmd.trim()).join(' | ');
   }
 
-  private static insertFilterToQuery(query: Query, filter: Filter): Query {
-    if (typeof query.query !== 'string') return query;
-
+  private static addFilterToQuery(query: string, filter: Filter): string {
     const predicate = PPLFilterUtils.toPredicate(filter);
     if (!predicate) return query;
 
@@ -35,7 +33,7 @@ export class PPLFilterUtils extends FilterUtils {
         ...filter,
         meta: { ...filter.meta, negate: !filter.meta.negate },
       });
-    const commands = query.query.split('|').map((cmd) => cmd.trim());
+    const commands = query.split('|').map((cmd) => cmd.trim());
     let filterExists = false;
 
     for (let i = 0; i < commands.length; i++) {
@@ -56,7 +54,7 @@ export class PPLFilterUtils extends FilterUtils {
       commands.splice(1, 0, whereCommand);
     }
 
-    return { ...query, query: commands.join(' | ') };
+    return commands.join(' | ');
   }
 
   /**
@@ -65,11 +63,11 @@ export class PPLFilterUtils extends FilterUtils {
    * already exists, it won't be added again. If a negated version exists, it
    * will be replaced.
    *
-   * @param query - The original Query object containing a PPL query string
+   * @param query - The query string
    * @param filter - The Filter objects to insert into the query
    * @returns A new Query object with the filters applied as WHERE clauses
    */
-  public static insertFiltersToQuery(query: Query, filters: Filter[]): Query {
-    return filters.reduce(PPLFilterUtils.insertFilterToQuery, query);
+  public static addFiltersToQuery(query: string, filters: Filter[]): string {
+    return filters.reduce(PPLFilterUtils.addFilterToQuery, query);
   }
 }

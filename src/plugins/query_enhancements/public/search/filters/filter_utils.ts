@@ -51,7 +51,7 @@ export class FilterUtils {
     return predicate ? 'WHERE ' + predicate : '';
   }
 
-  protected static toPredicate(filter: Filter): string | undefined {
+  public static toPredicate(filter: Filter): string | undefined {
     const meta = filter.meta;
     // SQL/PPL does not accept .keyword and will automatically append it if needed
     const field = getFilterField(filter)?.replace(/.keyword$/, '');

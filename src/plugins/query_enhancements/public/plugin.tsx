@@ -69,7 +69,7 @@ export class QueryEnhancementsPlugin
         usageCollector: data.search.usageCollector,
       }),
       getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
-      insertFiltersToQuery: PPLFilterUtils.insertFiltersToQuery,
+      addFiltersToQuery: PPLFilterUtils.addFiltersToQuery,
       fields: {
         sortable: false,
         visualizable: false,

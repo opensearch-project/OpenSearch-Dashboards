@@ -101,28 +101,28 @@ describe('PPLFilterUtils', () => {
   describe('insertFiltersToQuery', () => {
     it('should return original query when filters array is empty', () => {
       const query = createQuery('source=test_index | fields *');
-      const result = PPLFilterUtils.insertFiltersToQuery(query, []);
+      const result = PPLFilterUtils.addFiltersToQuery(query, []);
       expect(result).toEqual(query);
     });
 
     it('should return original query when query is not a string', () => {
       const query = ({ language: 'PPL', query: { something: 'other' } } as unknown) as Query;
       const filters = [createFilter('field1', 'value1')];
-      const result = PPLFilterUtils.insertFiltersToQuery(query, filters);
+      const result = PPLFilterUtils.addFiltersToQuery(query, filters);
       expect(result).toEqual(query);
     });
 
     it('should insert a single filter', () => {
       const query = createQuery('source=test_index | fields *');
       const filters = [createFilter('field1', 'value1')];
-      const result = PPLFilterUtils.insertFiltersToQuery(query, filters);
+      const result = PPLFilterUtils.addFiltersToQuery(query, filters);
       expect(result.query).toBe("source=test_index | WHERE `field1` = 'value1' | fields *");
     });
 
     it('should insert multiple filters', () => {
       const query = createQuery('source=test_index | fields *');
       const filters = [createFilter('field1', 'value1'), createFilter('field2', 'value2')];
-      const result = PPLFilterUtils.insertFiltersToQuery(query, filters);
+      const result = PPLFilterUtils.addFiltersToQuery(query, filters);
 
       expect(result.query).toContain('source=test_index');
       expect(result.query).toContain("WHERE `field1` = 'value1'");
@@ -133,14 +133,14 @@ describe('PPLFilterUtils', () => {
     it('should not add duplicate filters', () => {
       const query = createQuery("source=test_index | WHERE `field1` = 'value1' | fields *");
       const filters = [createFilter('field1', 'value1')];
-      const result = PPLFilterUtils.insertFiltersToQuery(query, filters);
+      const result = PPLFilterUtils.addFiltersToQuery(query, filters);
       expect(result.query).toBe("source=test_index | WHERE `field1` = 'value1' | fields *");
     });
 
     it('should replace negated version of a filter', () => {
       const query = createQuery("source=test_index | WHERE `field1` != 'value1' | fields *");
       const filters = [createFilter('field1', 'value1', false)]; // Non-negated version
-      const result = PPLFilterUtils.insertFiltersToQuery(query, filters);
+      const result = PPLFilterUtils.addFiltersToQuery(query, filters);
       expect(result.query).toBe("source=test_index | WHERE `field1` = 'value1' | fields *");
     });
   });
