@@ -5,27 +5,11 @@
 
 import React from 'react';
 import { QueryPanel } from './query_panel';
-import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
-
-const mockUiSettings = {
-  get: (key: string, defaultValue: any) => defaultValue,
-  get$: (key: string, defaultValue: any) => ({
-    subscribe: (cb: any) => {
-      cb(defaultValue);
-      return { unsubscribe: () => {} };
-    },
-  }),
-};
-
-export const StorybookProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <OpenSearchDashboardsContextProvider services={{ uiSettings: mockUiSettings }}>
-    {children}
-  </OpenSearchDashboardsContextProvider>
-);
+import { StorybookProviders } from './mock_provider.mocks';
 
 export default {
   component: QueryPanel,
-  title: 'src/plugins/explore/public/components/query_panel/index.tsx',
+  title: 'src/plugins/explore/public/components/query_panel',
 };
 
 export function QueryEditor() {

@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+// TODO: Move this over to context folder
+
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { IndexPattern } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -102,11 +104,14 @@ export const IndexPatternProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
   }, [dataset, services]);
 
-  const contextValue: IndexPatternContextValue = {
-    indexPattern,
-    isLoading,
-    error,
-  };
+  const contextValue = useMemo<IndexPatternContextValue>(
+    () => ({
+      indexPattern,
+      isLoading,
+      error,
+    }),
+    [indexPattern, isLoading, error]
+  );
 
   return (
     <IndexPatternContext.Provider value={contextValue}>{children}</IndexPatternContext.Provider>
