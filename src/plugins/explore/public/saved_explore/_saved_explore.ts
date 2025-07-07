@@ -25,6 +25,7 @@ export function createSavedExploreClass(services: SavedObjectOpenSearchDashboard
       version: 'integer',
       type: 'text',
       visualization: 'text',
+      uiState: 'text',
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
@@ -46,6 +47,7 @@ export function createSavedExploreClass(services: SavedObjectOpenSearchDashboard
           version: 'integer',
           type: 'text',
           visualization: 'text',
+          uiState: 'text',
         },
         searchSource: true,
         defaults: {
@@ -57,6 +59,7 @@ export function createSavedExploreClass(services: SavedObjectOpenSearchDashboard
           version: 1,
           type: '',
           visualization: '',
+          uiState: '',
         },
       });
       this.showInRecentlyAccessed = true;

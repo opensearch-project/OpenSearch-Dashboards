@@ -104,7 +104,7 @@ interface BaseSavedObjectFinder {
     id: SimpleSavedObject['id'],
     type: SimpleSavedObject['type'],
     name: string,
-    savedObject: SimpleSavedObject
+    savedObject: SimpleSavedObject<FinderAttributes>
   ) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
