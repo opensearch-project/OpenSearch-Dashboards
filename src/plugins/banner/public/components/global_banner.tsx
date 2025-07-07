@@ -12,51 +12,59 @@
 import React, { Fragment, useEffect, useState, Suspense, useRef } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { BannerConfig, DEFAULT_BANNER_HEIGHT, HIDDEN_BANNER_HEIGHT } from '../../common';
-import { BannerService } from '../services/banner_service';
 import { LinkRenderer } from './link_renderer';
-import { BannerApiService } from '../services/banner_api_service';
 import { HttpStart } from '../../../../core/public';
 
 const ReactMarkdownLazy = React.lazy(() => import('react-markdown'));
 
-interface GlobalBannerProps {
-  bannerService?: BannerService;
-  http?: HttpStart;
+interface BannerApiResponse {
+  enabled: boolean;
+  content?: string;
+  color?: 'primary' | 'success' | 'warning';
+  iconType?: string;
+  isVisible?: boolean;
+  useMarkdown?: boolean;
 }
 
-export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService, http }) => {
+interface GlobalBannerProps {
+  http: HttpStart;
+}
+
+export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
   const [bannerConfig, setBannerConfig] = useState<BannerConfig | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const bannerRef = useRef<HTMLDivElement>(null);
 
-  if (!bannerService) {
-    throw new Error('BannerService is required');
-  }
-
-  // Subscribe to banner config changes
-  useEffect(() => {
-    const subscription = bannerService.getBannerConfig$().subscribe((config) => {
-      setBannerConfig(config);
-      setIsLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [bannerService]);
-
   // Fetch banner config from API when component mounts
   useEffect(() => {
     const fetchBannerConfig = async () => {
-      if (http) {
+      try {
         setIsLoading(true);
-        const apiService = new BannerApiService(http, bannerService);
-        await apiService.fetchBannerConfig();
+        const response = await http.get<BannerApiResponse>('/api/_plugins/_banner/content');
+
+        setBannerConfig({
+          content: response.content || '',
+          color: response.color || 'primary',
+          iconType: response.iconType || '',
+          isVisible: response.isVisible !== undefined ? response.isVisible : false,
+          useMarkdown: response.useMarkdown || false,
+        });
+      } catch (error) {
+        // Hide banner on error
+        setBannerConfig({
+          content: '',
+          color: 'primary',
+          iconType: '',
+          isVisible: false,
+          useMarkdown: false,
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchBannerConfig();
-  }, [bannerService, http]);
+  }, [http]);
 
   // Update the CSS variable with the banner's height
   useEffect(() => {
@@ -124,9 +132,7 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService, http 
 
   // Hide banner when close button is clicked
   const hideBanner = () => {
-    bannerService.updateBannerConfig({
-      isVisible: false,
-    });
+    setBannerConfig((prevConfig) => (prevConfig ? { ...prevConfig, isVisible: false } : null));
   };
 
   if (isLoading) {

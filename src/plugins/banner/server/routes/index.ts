@@ -19,16 +19,6 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
       validate: false,
     },
     async (context, request, response) => {
-      const bannerEnabled = bannerSetup.bannerEnabled();
-
-      if (!bannerEnabled) {
-        return response.ok({
-          body: {
-            enabled: false,
-          },
-        });
-      }
-
       const config = bannerSetup.getConfig();
 
       return response.ok({
