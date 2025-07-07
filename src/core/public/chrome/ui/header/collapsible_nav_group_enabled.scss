@@ -232,5 +232,9 @@ $sizeForSelectedSubMenu: 5px;
     .nav-link-item-btn::after {
       display: none;
     }
+
+    .leftNavMenuIcon {
+      color: $euiColorPrimary;
+    }
   }
 }
