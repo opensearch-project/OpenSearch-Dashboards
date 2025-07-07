@@ -12,10 +12,11 @@ import { CoreStart, DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../../c
 import { BehaviorSubject } from 'rxjs';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { I18nProvider } from '@osd/i18n/react';
+import { WorkspaceUseCase } from '../../types';
 describe('<WorkspaceSelector />', () => {
   let coreStartMock: CoreStart;
   const navigateToApp = jest.fn();
-  const registeredUseCases$ = new BehaviorSubject([
+  const registeredUseCases$ = new BehaviorSubject<WorkspaceUseCase[]>([
     { ...DEFAULT_NAV_GROUPS.observability, features: [{ id: 'discover', title: 'Discover' }] },
   ]);
 
@@ -49,7 +50,6 @@ describe('<WorkspaceSelector />', () => {
     const { isNavOpen = true } = props || {};
     return (
       <I18nProvider>
-        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceSelector
           coreStart={coreStartMock}
           registeredUseCases$={registeredUseCases$}
