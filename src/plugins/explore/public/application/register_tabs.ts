@@ -47,15 +47,10 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     prepareQuery: (queryString) => {
       const patternsField = 'message'; // TODO: pull from patterns field configured in dataset
 
-      return queryString;
-      // return {
-      //   ...query,
-      //   query:
-      //     typeof query.query === 'string'
-      //       ? query.query +
-      //         ` | patterns ${patternsField} | stats count() as count by patterns_field | sort - count | fields patterns_field, count`
-      //       : query.queryString,
-      // };
+      return (
+        queryString +
+        ` | patterns ${patternsField} | stats count() as count by patterns_field | sort - count | fields patterns_field, count`
+      );
     },
 
     component: PatternsTab,
