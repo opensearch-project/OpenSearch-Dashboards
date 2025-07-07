@@ -16,8 +16,6 @@ import {
   removeColumn,
   moveColumn,
   setColumns,
-  clearResults,
-  setQueryWithHistory,
 } from '../../../../../utils/state_management/slices';
 import { selectColumns, selectQuery } from '../../../../../utils/state_management/selectors';
 import { DiscoverSidebar } from '../../components/sidebar';
@@ -28,7 +26,6 @@ import { useIndexPatternContext } from '../../../../../components/index_pattern_
 import {
   defaultResultsProcessor,
   defaultPrepareQuery,
-  executeQueries,
 } from '../../../../../utils/state_management/actions/query_actions';
 import { useEditorContext } from '../../../../../context';
 import { EditorMode } from '../../../../../utils/state_management/types';
