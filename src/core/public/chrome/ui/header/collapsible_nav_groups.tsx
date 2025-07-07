@@ -23,7 +23,7 @@ import { InternalApplicationStart } from '../../../application/types';
 import { createEuiListItem } from './nav_link';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
 import { CollapsibleNavGroupsLabel, getIsCategoryOpen } from './collapsible_nav_groups_label';
-import { SimplePopover } from './hover_popover';
+import { SimplePopover } from './simple_popover';
 import { HttpStart } from '../../../http';
 
 export interface NavGroupsProps {
