@@ -6,7 +6,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
     class="euiFlexItem"
   >
     <nav
-      class="euiSideNav euiSideNav-isOpenMobile"
+      class="euiSideNav leftNavSideNavWrapper euiSideNav-isOpenMobile"
     >
       <div
         class="euiSideNav__content"
@@ -30,7 +30,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             class="euiSideNavItem__items"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item  nav-link-parent-item"
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item nav-link-item-active-false  nav-link-parent-item"
             >
               <button
                 aria-label="pure link"
@@ -76,7 +76,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                 class="euiSideNavItem__items"
               >
                 <div
-                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
+                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-link-item-active-false nav-nested-item"
                 >
                   <button
                     aria-label="subLink"
@@ -142,7 +142,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             class="euiSideNavItem__items"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item  nav-link-parent-item"
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item nav-link-item-active-false  nav-link-parent-item"
             >
               <button
                 aria-label="link-in-category"
@@ -188,7 +188,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                 class="euiSideNavItem__items"
               >
                 <div
-                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
+                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-link-item-active-false nav-nested-item"
                 >
                   <button
                     aria-label="sub-link-in-category"
@@ -215,7 +215,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
               </div>
             </div>
             <div
-              class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
+              class="euiSideNavItem euiSideNavItem--trunk nav-link-item nav-link-item-active-false "
             >
               <button
                 aria-label="link-2-in-category"
