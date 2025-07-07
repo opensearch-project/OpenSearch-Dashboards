@@ -59,7 +59,7 @@ export const callAgentActionCreator = createAsyncThunk<
     const params: QueryAssistParameters = {
       question: prompt,
       index: dataset.title,
-      // TODO: Make this not
+      // TODO: when we introduce more query languages, this should be no longer be hardcoded to PPL
       language: 'PPL',
       dataSourceId: dataset.dataSource?.id,
     };

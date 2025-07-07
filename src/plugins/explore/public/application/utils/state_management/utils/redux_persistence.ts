@@ -215,10 +215,16 @@ const getPreloadedQueryEditorState = async (
     promptModeIsAvailable = await getPromptModeIsAvailable(services, queryState.dataset);
   }
 
+  // If !promptMode or there is query, default to SingleQuery
+  const editorMode =
+    !promptModeIsAvailable || queryState?.query.length
+      ? EditorMode.SingleQuery
+      : DEFAULT_EDITOR_MODE;
+
   return {
     executionStatus: QueryExecutionStatus.UNINITIALIZED,
     promptModeIsAvailable,
-    editorMode: queryState?.query.length ? EditorMode.SingleQuery : DEFAULT_EDITOR_MODE,
+    editorMode,
   };
 };
 

@@ -24,6 +24,11 @@ export const onEditorChangeActionCreator = (text: string, editorContext: EditorC
   editorContext.setEditorText(text);
 
   if (!promptModeIsAvailable) {
+    // change to Query mode if in singlePrompt mode
+    if (editorMode !== EditorMode.SingleQuery) {
+      dispatch(setEditorMode(EditorMode.SingleQuery));
+    }
+
     return;
   }
 

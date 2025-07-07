@@ -103,7 +103,7 @@ describe('onEditorChangeActionCreator', () => {
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
     });
 
-    it('should return early when promptModeIsAvailable is false', () => {
+    it('should return early when promptModeIsAvailable is false and editor is already in SingleQuery mode', () => {
       const mockState = {
         queryEditor: {
           editorMode: EditorMode.SingleQuery,
@@ -121,6 +121,30 @@ describe('onEditorChangeActionCreator', () => {
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
       expect(mockQueryTypeDetector).not.toHaveBeenCalled();
       expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    it('should change to SingleQuery mode and return early when promptModeIsAvailable is false and editor is not in SingleQuery mode', () => {
+      const mockState = {
+        queryEditor: {
+          editorMode: EditorMode.SinglePrompt,
+          promptModeIsAvailable: false,
+        },
+      } as RootState;
+
+      mockGetState.mockReturnValue(mockState);
+      mockSelectPromptModeIsAvailable.mockReturnValue(false);
+
+      const actionCreator = onEditorChangeActionCreator('test query', mockEditorContext);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('test query');
+      expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
+      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'queryEditor/setEditorMode',
+        payload: EditorMode.SingleQuery,
+      });
+      expect(mockQueryTypeDetector).not.toHaveBeenCalled();
     });
   });
 
@@ -253,12 +277,15 @@ describe('onEditorChangeActionCreator', () => {
       expect(mockQueryTypeDetector).not.toHaveBeenCalled();
     });
 
-    it('should not dispatch any mode changes', () => {
+    it('should change to SingleQuery mode when promptModeIsAvailable is false', () => {
       const actionCreator = onEditorChangeActionCreator('any text', mockEditorContext);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockSetEditorMode).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'queryEditor/setEditorMode',
+        payload: EditorMode.SingleQuery,
+      });
     });
 
     it('should still set editor text', () => {
@@ -288,12 +315,15 @@ describe('onEditorChangeActionCreator', () => {
       expect(mockQueryTypeDetector).not.toHaveBeenCalled();
     });
 
-    it('should not dispatch any mode changes', () => {
+    it('should change to SingleQuery mode when promptModeIsAvailable is false', () => {
       const actionCreator = onEditorChangeActionCreator('any text', mockEditorContext);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockSetEditorMode).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'queryEditor/setEditorMode',
+        payload: EditorMode.SingleQuery,
+      });
     });
 
     it('should still set editor text', () => {

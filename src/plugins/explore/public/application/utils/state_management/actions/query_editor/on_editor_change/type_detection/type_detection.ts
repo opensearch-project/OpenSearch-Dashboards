@@ -52,9 +52,9 @@ export class QueryTypeDetector {
     }
 
     const scores = {
-      ppl: this._checkPpl(normalizedQuery),
-      keyvalue: this._checkKeyValue(normalizedQuery),
-      plaintext: this._checkNaturalLanguage(normalizedQuery),
+      ppl: QueryTypeDetector._checkPpl(normalizedQuery),
+      keyvalue: QueryTypeDetector._checkKeyValue(normalizedQuery),
+      plaintext: QueryTypeDetector._checkNaturalLanguage(normalizedQuery),
     };
 
     const keyToLanguageType: Record<string, EditorLanguage> = {

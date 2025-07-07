@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { firstValueFrom } from '@osd/std';
 import { Dataset } from '../../../../../../../data/common';
 import { ExploreServices } from '../../../../../types';
+import { QueryEditorExtensionDependencies } from '../../../../../../../data/public';
 
 export const getPromptModeIsAvailable = async (
   services: ExploreServices,
@@ -16,19 +18,14 @@ export const getPromptModeIsAvailable = async (
       .getQueryEditorExtensionMap();
 
     // Check if query assist is available through data plugin extension system
-    if (!extensions['query-assist']) {
+    const queryAssistExtension = extensions['query-assist'];
+    if (!queryAssistExtension) {
       return false;
     }
 
-    // check if agent is available
-    const response: { configuredLanguages: string[] } = await services.http.get(
-      '/api/enhancements/assist/languages',
-      {
-        query: { dataSourceId: dataset.dataSource?.id },
-      }
+    return await firstValueFrom(
+      queryAssistExtension.isEnabled$({} as QueryEditorExtensionDependencies)
     );
-
-    return !!response.configuredLanguages.length;
   } catch (error) {
     // Fallback to false
     return false;
