@@ -13,7 +13,7 @@ import { IFieldType } from '../../../application/legacy/discover/opensearch_dash
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
-import { ChartTypeMapping, VisColumn, VisFieldType } from '../types';
+import { AxisColumnMappings, ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -54,6 +54,8 @@ export interface StyleControlsProps<T extends AllChartStyleControls> {
   availableChartTypes?: ChartTypeMapping[];
   selectedChartType?: string;
   onChartTypeChange?: (chartType: ChartType) => void;
+  axisColumnMappings: AxisColumnMappings;
+  updateVisualization: (data: any) => void;
 }
 
 export interface VisualizationType<T extends ChartType> {
@@ -112,6 +114,7 @@ export interface VisualizationTypeResult<T extends ChartType> {
     styleOptions: any,
     chartType?: string
   ) => any;
+  axisColumnMappings?: AxisColumnMappings;
 }
 
 const getFieldTypeFromSchema = (schema?: string): VisFieldType =>

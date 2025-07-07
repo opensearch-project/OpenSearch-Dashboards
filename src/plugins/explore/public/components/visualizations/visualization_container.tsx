@@ -18,37 +18,25 @@ import {
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
-import { VisColumn, VisualizationRule } from './types';
+import { AxisColumnMappings, VisColumn, VisualizationRule } from './types';
 import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
 import {
   setStyleOptions,
   setChartType as setSelectedChartType,
-  setFieldNames,
 } from '../../application/utils/state_management/slices';
 import {
   selectStyleOptions,
   selectChartType,
-  selectFieldNames,
 } from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 
 export interface UpdateVisualizationProps {
-  visualizationType: VisualizationType<any>;
   rule: Partial<VisualizationRule>;
-  fieldNames: {
-    categorical: string[];
-    date: string[];
-    numerical: string[];
-  };
-  columns: {
-    categorical: VisColumn[];
-    date: VisColumn[];
-    numerical: VisColumn[];
-  };
+  mappings?: AxisColumnMappings;
 }
 
 export const VisualizationContainer = () => {
@@ -68,13 +56,11 @@ export const VisualizationContainer = () => {
   const rows = useMemo(() => results?.hits?.hits || [], [results]);
   const styleOptions = useSelector(selectStyleOptions);
   const selectedChartType = useSelector(selectChartType);
-  const selectedFieldNames = useSelector(selectFieldNames);
   const fieldSchema = useMemo(() => results?.fieldSchema || [], [results]);
 
   const visualizationRegistry = useVisualizationRegistry();
 
   const [currentRuleId, setCurrentRuleId] = useState<string | undefined>(undefined);
-
   const [visualizationData, setVisualizationData] = useState<
     VisualizationTypeResult<ChartType> | undefined
   >(undefined);
@@ -83,167 +69,162 @@ export const VisualizationContainer = () => {
 
   const updateVisualizationState = useCallback(
     (
-      visualizationType: VisualizationType<ChartType>,
-      fieldNames: { numerical: string[]; categorical: string[]; date: string[] }
+      visualizationType: VisualizationType<ChartType>
+      // fieldNames: { numerical: string[]; categorical: string[]; date: string[] }
     ) => {
       dispatch(setSelectedChartType(visualizationType.type));
       dispatch(setStyleOptions(visualizationType.ui.style.defaults));
-      dispatch(setFieldNames(fieldNames));
+      // dispatch(setFieldNames(fieldNames));
     },
     [dispatch]
   );
 
-  const updateVisualization = useCallback(
-    ({ visualizationType, rule, fieldNames, columns }: UpdateVisualizationProps) => {
-      // Handle user modifiy the visualization through style panel manually
-      isVisualizationUpdated.current = true;
-
-      updateVisualizationState(visualizationType, fieldNames);
-      setCurrentRuleId(rule.id);
-      setVisualizationData((prev) => ({
-        ...prev,
-        numericalColumns: columns.numerical,
-        categoricalColumns: columns.categorical,
-        dateColumns: columns.date,
-        ruleId: rule.id,
-        visualizationType: visualizationType as VisualizationType<ChartType>,
-        toExpression: rule.toExpression,
-      }));
-    },
-    [updateVisualizationState]
-  );
-
-  const findMatchedRuleWithCache = useCallback(
-    ({
-      visData,
-      fieldNames,
-    }: {
-      visData: VisualizationTypeResult<ChartType>;
-      fieldNames: UpdateVisualizationProps['fieldNames'];
-    }) => {
-      const columns = {
-        numerical: visData.numericalColumns
-          ? visData.numericalColumns.filter((col) => fieldNames?.numerical?.includes(col.name))
-          : [],
-        categorical: visData.categoricalColumns
-          ? visData.categoricalColumns.filter((col) => fieldNames?.categorical?.includes(col.name))
-          : [],
-        date: visData.dateColumns
-          ? visData.dateColumns.filter((col) => fieldNames?.date?.includes(col.name))
-          : [],
-      };
-      // Will return null if not found
-      return {
-        matchedRule: visualizationRegistry.findBestMatch(
-          columns.numerical,
-          columns.categorical,
-          columns.date
-        ),
-        columns,
-      };
-    },
-    [visualizationRegistry]
-  );
-
-  const clearCache = useCallback(() => {
-    dispatch(setSelectedChartType('' as any)); // FIXME
-    dispatch(setStyleOptions({} as any)); // FIXME
-    dispatch(setFieldNames({ numerical: [], categorical: [], date: [] }));
-
+  const updateVisualization = useCallback(({ rule, mappings }: UpdateVisualizationProps) => {
+    // Handle user modifiy the visualization through style panel manually
     isVisualizationUpdated.current = true;
-  }, [dispatch]);
+
+    setVisualizationData((prev) => ({
+      ...prev,
+      axisColumnMappings: mappings,
+      ruleId: rule ? rule.id : undefined,
+      toExpression: rule ? rule.toExpression : undefined,
+    }));
+
+    setCurrentRuleId(rule ? rule.id : '');
+  }, []);
+
+  // const findMatchedRuleWithCache = useCallback(
+  //   ({
+  //     visData,
+  //     fieldNames,
+  //   }: {
+  //     visData: VisualizationTypeResult<ChartType>;
+  //     fieldNames: UpdateVisualizationProps['fieldNames'];
+  //   }) => {
+  //     const columns = {
+  //       numerical: visData.numericalColumns
+  //         ? visData.numericalColumns.filter((col) => fieldNames?.numerical?.includes(col.name))
+  //         : [],
+  //       categorical: visData.categoricalColumns
+  //         ? visData.categoricalColumns.filter((col) => fieldNames?.categorical?.includes(col.name))
+  //         : [],
+  //       date: visData.dateColumns
+  //         ? visData.dateColumns.filter((col) => fieldNames?.date?.includes(col.name))
+  //         : [],
+  //     };
+  //     // Will return null if not found
+  //     return {
+  //       matchedRule: visualizationRegistry.findBestMatch(
+  //         columns.numerical,
+  //         columns.categorical,
+  //         columns.date
+  //       ),
+  //       columns,
+  //     };
+  //   },
+  //   [visualizationRegistry]
+  // );
+
+  // const clearCache = useCallback(() => {
+  //   dispatch(setSelectedChartType('' as any)); // FIXME
+  //   dispatch(setStyleOptions({} as any)); // FIXME
+  //   dispatch(setFieldNames({ numerical: [], categorical: [], date: [] }));
+
+  //   isVisualizationUpdated.current = true;
+  // }, [dispatch]);
 
   useEffect(() => {
-    // TODO simplify the logic here
     if (fieldSchema.length === 0 || rows.length === 0) {
       return;
     }
 
-    if (isVisualizationUpdated.current) {
-      // Avoid being triggered by empty state component updates
-      return;
-    }
+    // if (isVisualizationUpdated.current) {
+    //   // Avoid being triggered by empty state component updates
+    //   return;
+    // }
 
     const visualizationTypeResult = getVisualizationType(rows, fieldSchema);
 
     if (visualizationTypeResult) {
       // Always set the data from the query as it should be the single source of truth
       setVisualizationData(visualizationTypeResult);
+      setCurrentRuleId(visualizationTypeResult.ruleId);
+      updateVisualizationState(visualizationTypeResult.visualizationType!);
 
-      // Map from visualization columns to the field names
-      const availableFieldNames = {
-        numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
-        categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
-        date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
-      };
+      // // Map from visualization columns to the field names
+      // const availableFieldNames = {
+      //   numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
+      //   categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
+      //   date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
+      // };
 
-      if (visualizationTypeResult?.ruleId && visualizationTypeResult.visualizationType) {
-        // Highest priority when rule matched so the visualization should automatically generate
-        setCurrentRuleId(visualizationTypeResult.ruleId);
-        updateVisualizationState(visualizationTypeResult.visualizationType, availableFieldNames);
+      // if (visualizationTypeResult?.ruleId && visualizationTypeResult.visualizationType) {
+      //   // Highest priority when rule matched so the visualization should automatically generate
+      //   setCurrentRuleId(visualizationTypeResult.ruleId);
+      //   updateVisualizationState(visualizationTypeResult.visualizationType, availableFieldNames);
 
-        isVisualizationUpdated.current = true;
-      } else if (selectedChartType) {
-        // Populate and trigger render visualization with user-selected chart/fields
+      //   isVisualizationUpdated.current = true;
+      // } else if (selectedChartType) {
+      //   // Populate and trigger render visualization with user-selected chart/fields
 
-        const hasInvalidFields =
-          selectedFieldNames &&
-          (selectedFieldNames.numerical?.some(
-            (field) => !availableFieldNames.numerical.includes(field)
-          ) ||
-            selectedFieldNames.categorical?.some(
-              (field) => !availableFieldNames.categorical.includes(field)
-            ) ||
-            selectedFieldNames.date?.some((field) => !availableFieldNames.date.includes(field)));
+      //   const hasInvalidFields =
+      //     selectedFieldNames &&
+      //     (selectedFieldNames.numerical?.some(
+      //       (field) => !availableFieldNames.numerical.includes(field)
+      //     ) ||
+      //       selectedFieldNames.categorical?.some(
+      //         (field) => !availableFieldNames.categorical.includes(field)
+      //       ) ||
+      //       selectedFieldNames.date?.some((field) => !availableFieldNames.date.includes(field)));
 
-        if (hasInvalidFields) {
-          // Previous selected fields contains a field that no longer exist in the current query
-          clearCache();
-        } else {
-          if (selectedFieldNames) {
-            const { matchedRule, columns } = findMatchedRuleWithCache({
-              visData: visualizationTypeResult,
-              fieldNames: selectedFieldNames,
-            });
-            if (matchedRule) {
-              // The previous query is empty-stated but visualization is generated by user selection
-              const visType = visualizationRegistry.getVisualizationConfig(
-                selectedChartType
-              ) as VisualizationType<ChartType>;
+      //   if (hasInvalidFields) {
+      //     // Previous selected fields contains a field that no longer exist in the current query
+      //     clearCache();
+      //   } else {
+      //     if (selectedFieldNames) {
+      //       const { matchedRule, columns } = findMatchedRuleWithCache({
+      //         visData: visualizationTypeResult,
+      //         fieldNames: selectedFieldNames,
+      //       });
+      //       if (matchedRule) {
+      //         // The previous query is empty-stated but visualization is generated by user selection
+      //         const visType = visualizationRegistry.getVisualizationConfig(
+      //           selectedChartType
+      //         ) as VisualizationType<ChartType>;
 
-              // Trigger the generation of visualization that the user previously created
-              requestAnimationFrame(() => {
-                setCurrentRuleId(matchedRule.rule.id);
-                setVisualizationData({
-                  ...visualizationTypeResult,
-                  visualizationType: visType,
-                  numericalColumns: columns.numerical,
-                  categoricalColumns: columns.categorical,
-                  dateColumns: columns.date,
-                  ruleId: matchedRule.rule.id,
-                  toExpression: matchedRule.rule.toExpression,
-                });
-              });
-            }
-          }
+      //         // Trigger the generation of visualization that the user previously created
+      //         requestAnimationFrame(() => {
+      //           setCurrentRuleId(matchedRule.rule.id);
+      //           setVisualizationData({
+      //             ...visualizationTypeResult,
+      //             visualizationType: visType,
+      //             numericalColumns: columns.numerical,
+      //             categoricalColumns: columns.categorical,
+      //             dateColumns: columns.date,
+      //             ruleId: matchedRule.rule.id,
+      //             toExpression: matchedRule.rule.toExpression,
+      //           });
+      //         });
+      //       }
+      //     }
 
-          isVisualizationUpdated.current = true;
-        }
-      } else {
-        // No visualization automatically created and the user also previously didn't build a visualization
-        clearCache();
-      }
+      //     isVisualizationUpdated.current = true;
+      //   }
+      // } else {
+      //   // No visualization automatically created and the user also previously didn't build a visualization
+      //   clearCache();
+      // }
     }
   }, [
     fieldSchema,
-    selectedFieldNames,
+    // selectedFieldNames,
     rows,
     updateVisualizationState,
-    dispatch,
-    selectedChartType,
-    clearCache,
-    findMatchedRuleWithCache,
-    visualizationRegistry,
+    // dispatch,
+    // selectedChartType,
+    // clearCache,
+    // findMatchedRuleWithCache,
+    // visualizationRegistry,
   ]);
 
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
@@ -285,7 +266,8 @@ export const VisualizationContainer = () => {
         categoricalColumns,
         dateColumns,
         styleOpts,
-        selectedChartType
+        selectedChartType,
+        visualizationData.axisColumnMappings
       );
     };
 
@@ -298,7 +280,8 @@ export const VisualizationContainer = () => {
       visualizationData.numericalColumns,
       visualizationData.categoricalColumns,
       visualizationData.dateColumns,
-      styleOptions ?? {}
+      styleOptions ?? {},
+      visualizationData.axisColumnMappings
     );
   }, [
     searchContext,
@@ -360,20 +343,19 @@ export const VisualizationContainer = () => {
 
   const handleChartTypeChange = (chartType: ChartType) => {
     dispatch(setSelectedChartType(chartType));
-    // dispatch(setSelectedChartType(chartType));
-    // // Get the visualization configuration for the selected chart type
-    // const chartConfig = visualizationRegistry.getVisualizationConfig(chartType);
-    // // Update the style options with the defaults for the selected chart type
-    // if (chartConfig && chartConfig.ui && chartConfig.ui.style) {
-    //   dispatch(setStyleOptions(chartConfig.ui.style.defaults));
-    //   // Update the visualizationData with the new visualization type
-    //   if (visualizationData) {
-    //     setVisualizationData({
-    //       ...visualizationData,
-    //       visualizationType: chartConfig as VisualizationType<ChartType>,
-    //     });
-    //   }
-    // }
+    // Get the visualization configuration for the selected chart type
+    const chartConfig = visualizationRegistry.getVisualizationConfig(chartType);
+    // Update the style options with the defaults for the selected chart type
+    if (chartConfig && chartConfig.ui && chartConfig.ui.style) {
+      dispatch(setStyleOptions(chartConfig.ui.style.defaults));
+      // Update the visualizationData with the new visualization type
+      if (visualizationData) {
+        setVisualizationData({
+          ...visualizationData,
+          visualizationType: chartConfig as VisualizationType<ChartType>,
+        });
+      }
+    }
   };
 
   // Don't render if visualization is not enabled or data is not ready

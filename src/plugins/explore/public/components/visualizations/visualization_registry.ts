@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { isEqual } from 'lodash';
 import { createLineConfig } from './line/line_vis_config';
 import { createHeatmapConfig } from './heatmap/heatmap_vis_config';
 import { createScatterConfig } from './scatter/scatter_vis_config';
@@ -11,6 +12,7 @@ import { createPieConfig } from './pie/pie_vis_config';
 import { createAreaConfig } from './area/area_vis_config';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import {
+  AxisColumnMappings,
   ChartMetadata,
   ChartTypeMapping,
   VisColumn,
@@ -18,6 +20,7 @@ import {
   VisualizationRule,
 } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
+import { BAR_POSSIBLE_SELECTIONS } from './utils/chart_type_axes_mapping';
 
 /**
  * Registry for visualization rules and configurations.
@@ -44,6 +47,34 @@ export class VisualizationRegistry {
     const bestMatch = this.findBestMatch(numericalColumns, categoricalColumns, dateColumns);
 
     if (bestMatch) {
+      const findColumns = (type: VisFieldType) => {
+        switch (type) {
+          case VisFieldType.Numerical:
+            return numericalColumns;
+          case VisFieldType.Categorical:
+            return categoricalColumns;
+          case VisFieldType.Date:
+            return dateColumns;
+          default:
+            return [];
+        }
+      };
+
+      const possibleMapping = visualizationRegistry.getPossibleMappingFromChartType(
+        bestMatch.chartType.name
+      );
+      const currentlyDisplayedMapping = possibleMapping.find(({ columnMatch }) =>
+        isEqual(columnMatch, bestMatch.rule.matchIndex)
+      );
+      const mappingObj = currentlyDisplayedMapping
+        ? (Object.fromEntries(
+            Object.entries(currentlyDisplayedMapping!.mapping[0]).map(([role, config]) => [
+              role,
+              config && findColumns(config.type)[config.index],
+            ])
+          ) as AxisColumnMappings)
+        : {};
+
       return {
         visualizationType: this.getVisualizationConfig(bestMatch.chartType.type),
         numericalColumns,
@@ -52,6 +83,7 @@ export class VisualizationRegistry {
         ruleId: bestMatch.rule.id,
         availableChartTypes: bestMatch.rule.chartTypes,
         toExpression: bestMatch.rule.toExpression,
+        axisColumnMappings: mappingObj,
       };
     }
 
@@ -64,6 +96,7 @@ export class VisualizationRegistry {
       ruleId: undefined,
       availableChartTypes: [],
       toExpression: undefined,
+      axisColumnMappings: {},
     };
   }
 
@@ -169,6 +202,28 @@ export class VisualizationRegistry {
    */
   public getRules(): VisualizationRule[] {
     return [...this.rules];
+  }
+
+  public getPossibleMappingFromChartType(type: string) {
+    // TODO: finish
+    switch (type) {
+      case 'line':
+        return [];
+      case 'heatmap':
+        return [];
+      case 'pie':
+        return [];
+      case 'scatter':
+        return [];
+      case 'metric':
+        return [];
+      case 'bar':
+        return BAR_POSSIBLE_SELECTIONS;
+      case 'area':
+        return [];
+      default:
+        return [];
+    }
   }
 }
 

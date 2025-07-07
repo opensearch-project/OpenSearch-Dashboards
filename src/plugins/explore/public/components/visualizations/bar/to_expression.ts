@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VEGASCHEMA, VisColumn } from '../types';
+import { AxisColumnMappings, AxisRole, VEGASCHEMA, VisColumn } from '../types';
 import { BarChartStyleControls } from './bar_vis_config';
 import { applyAxisStyling } from '../line/line_chart_utils';
 import { getStrokeDash, createThresholdLayer } from '../style_panel/threshold/utils';
@@ -13,17 +13,22 @@ export const createBarSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>
+  styles: Partial<BarChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
     throw new Error('Bar chart requires at least one numerical column and one categorical column');
   }
 
-  const metricField = numericalColumns[0].column;
-  const categoryField = categoricalColumns[0].column;
-  const metricName = numericalColumns[0].name;
-  const categoryName = categoricalColumns[0].name;
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+
+  const metricField = yAxisColumn?.column;
+  const categoryField = xAxisColumn?.column;
+  const metricName = yAxisColumn?.name;
+  const categoryName = xAxisColumn?.name;
+
   const layers: any[] = [];
 
   // Set up encoding
@@ -113,17 +118,21 @@ export const createTimeBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>
+  styles: Partial<BarChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || dateColumns.length === 0) {
     throw new Error('Time bar chart requires at least one numerical column and one date column');
   }
 
-  const metricField = numericalColumns[0].column;
-  const dateField = dateColumns[0].column;
-  const metricName = numericalColumns[0].name;
-  const dateName = dateColumns[0].name;
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+
+  const metricField = yAxisColumn?.column;
+  const dateField = xAxisColumn?.column;
+  const metricName = yAxisColumn?.name;
+  const dateName = xAxisColumn?.name;
   const layers: any[] = [];
 
   // Configure bar mark
@@ -209,7 +218,8 @@ export const createGroupedTimeBarChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>
+  styles: Partial<BarChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (
@@ -222,12 +232,16 @@ export const createGroupedTimeBarChart = (
     );
   }
 
-  const metricField = numericalColumns[0].column;
-  const categoryField = categoricalColumns[0].column;
-  const dateField = dateColumns[0].column;
-  const metricName = numericalColumns[0].name;
-  const categoryName = categoricalColumns[0].name;
-  const dateName = dateColumns[0].name;
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+
+  const metricField = yAxisColumn?.column;
+  const dateField = xAxisColumn?.column;
+  const metricName = yAxisColumn?.name;
+  const dateName = xAxisColumn?.name;
+  const categoryField = colorColumn?.column;
+  const categoryName = colorColumn?.name;
 
   // Configure bar mark
   const barMark: any = {
@@ -320,7 +334,8 @@ export const createFacetedTimeBarChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>
+  styles: Partial<BarChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length < 2 || dateColumns.length === 0) {
@@ -329,14 +344,19 @@ export const createFacetedTimeBarChart = (
     );
   }
 
-  const metricField = numericalColumns[0].column;
-  const category1Field = categoricalColumns[0].column;
-  const category2Field = categoricalColumns[1].column;
-  const dateField = dateColumns[0].column;
-  const metricName = numericalColumns[0].name;
-  const category1Name = categoricalColumns[0].name;
-  const category2Name = categoricalColumns[1].name;
-  const dateName = dateColumns[0].name;
+  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
+  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
+  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
+  const facetMapping = axisColumnMappings?.[AxisRole.FACET];
+
+  const metricField = yAxisMapping?.column;
+  const dateField = xAxisMapping?.column;
+  const category1Field = colorMapping?.column;
+  const category2Field = facetMapping?.column;
+  const metricName = yAxisMapping?.name;
+  const dateName = xAxisMapping?.name;
+  const category1Name = colorMapping?.name;
+  const category2Name = facetMapping?.name;
 
   // Configure bar mark
   const barMark: any = {
@@ -448,7 +468,8 @@ export const createStackedBarSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>
+  styles: Partial<BarChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length < 2) {
@@ -457,13 +478,16 @@ export const createStackedBarSpec = (
     );
   }
 
-  const metricField = numericalColumns[0].column;
-  const categoryField1 = categoricalColumns[0].column; // Y-axis (categories)
-  const categoryField2 = categoricalColumns[1].column; // Color (stacking)
+  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
+  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
+  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
 
-  const metricName = numericalColumns[0].name;
-  const categoryName1 = categoricalColumns[0].name;
-  const categoryName2 = categoricalColumns[1].name;
+  const metricField = yAxisMapping?.column;
+  const categoryField1 = xAxisMapping?.column;
+  const categoryField2 = colorMapping?.column;
+  const metricName = yAxisMapping?.name;
+  const categoryName1 = xAxisMapping?.name;
+  const categoryName2 = colorMapping?.name;
 
   // Set up encoding
   const categoryAxis = 'x';

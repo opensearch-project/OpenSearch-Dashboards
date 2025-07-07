@@ -10,7 +10,7 @@ import {
   IExpressionLoaderParams,
 } from '../../../../../expressions/public';
 import { IndexPattern } from '../../../../../data/public';
-import { VisColumn } from '../types';
+import { AxisColumnMappings, VisColumn } from '../types';
 
 /**
  * Convert the visualization configuration to an expression
@@ -33,13 +33,15 @@ export const toExpression = (
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[],
     styleOptions: any,
-    selectedChartType: string
+    selectedChartType: string,
+    axisColumnMappings?: AxisColumnMappings
   ) => any,
   transformedData?: Array<Record<string, any>>,
   numericalColumns?: VisColumn[],
   categoricalColumns?: VisColumn[],
   dateColumns?: VisColumn[],
-  styleOptions?: any
+  styleOptions?: any,
+  axisColumnMappings?: AxisColumnMappings
 ) => {
   if (!indexPattern || !searchContext) {
     return '';
@@ -61,7 +63,8 @@ export const toExpression = (
     categoricalColumns!,
     dateColumns!,
     styleOptions,
-    'line'
+    'line',
+    axisColumnMappings
   );
 
   const vega = buildExpressionFunction<any>('vega', {

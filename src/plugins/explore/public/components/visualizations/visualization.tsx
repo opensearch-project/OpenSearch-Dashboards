@@ -40,7 +40,7 @@ export const Visualization = <T extends ChartType>({
   ReactExpressionRenderer,
   updateVisualization,
 }: VisualizationProps<T>) => {
-  if (!visualizationData || !styleOptions || Object.keys(styleOptions).length === 0) {
+  if (!visualizationData) {
     return null;
   }
   const availableChartTypes = visualizationData.availableChartTypes;
@@ -76,22 +76,23 @@ export const Visualization = <T extends ChartType>({
             <EuiFlexGroup direction="column" gutterSize="none">
               <VisualizationEmptyState
                 visualizationData={visualizationData as any}
-                updateVisualization={updateVisualization}
+                onChartTypeChange={onChartTypeChange}
               />
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {styleOptions &&
-              visualizationData.visualizationType?.ui.style.render({
-                styleOptions,
-                onStyleChange,
-                numericalColumns: visualizationData.numericalColumns,
-                categoricalColumns: visualizationData.categoricalColumns,
-                dateColumns: visualizationData.dateColumns,
-                availableChartTypes,
-                selectedChartType,
-                onChartTypeChange,
-              })}
+            {visualizationData.visualizationType?.ui.style.render({
+              styleOptions: styleOptions ?? ({} as any),
+              onStyleChange,
+              numericalColumns: visualizationData.numericalColumns,
+              categoricalColumns: visualizationData.categoricalColumns,
+              dateColumns: visualizationData.dateColumns,
+              availableChartTypes,
+              selectedChartType,
+              onChartTypeChange, // TODO remove
+              axisColumnMappings: visualizationData.axisColumnMappings!,
+              updateVisualization,
+            })}
           </EuiFlexItem>
         </EuiPanel>
       </EuiFlexItem>

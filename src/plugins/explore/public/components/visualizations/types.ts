@@ -19,6 +19,8 @@ export interface ChartTypeMapping extends ChartMetadata {
   priority: number; // Higher number means higher priority for rule matching
 }
 
+export type AxisColumnMappings = Partial<Record<AxisRole, VisColumn>>;
+
 export interface VisualizationRule {
   id: string; // Unique rule identifier
   name: string;
@@ -36,7 +38,8 @@ export interface VisualizationRule {
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[],
     styleOptions: any,
-    chartType?: string
+    chartType?: string,
+    axisColumnMappings?: AxisColumnMappings
   ) => any;
 }
 export interface VisColumn {
@@ -134,6 +137,8 @@ export interface FieldSetting {
 export enum AxisRole {
   X = 'x',
   Y = 'y',
+  COLOR = 'color',
+  FACET = 'facet',
 }
 
 // for heatmap the axies can serve as value axis or category axis in 2 scienrios

@@ -7,34 +7,25 @@ import { i18n } from '@osd/i18n';
 import {
   EuiFlexGroup,
   EuiSuperSelect,
-  EuiSpacer,
-  EuiButtonIcon,
   EuiFormRow,
   EuiFlexItem,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
-import { VisColumn, VisFieldType, VisualizationRule } from './types';
-import {
-  ChartType,
-  useVisualizationRegistry,
-  VisualizationTypeResult,
-} from './utils/use_visualization_types';
+import { VisColumn, VisualizationRule } from './types';
+import { ChartType, VisualizationTypeResult } from './utils/use_visualization_types';
 import { CHART_METADATA } from './constants';
 import { StyleAccordion } from './style_panel/style_accordion';
-import {
-  selectFieldNames,
-  selectChartType,
-} from '../../application/utils/state_management/selectors';
-import { UpdateVisualizationProps } from './visualization_container';
+import { selectChartType } from '../../application/utils/state_management/selectors';
+// import { UpdateVisualizationProps } from './visualization_container';
 
 interface VisualizationEmptyStateProps {
   visualizationData: VisualizationTypeResult<ChartType>;
-  updateVisualization: (data: UpdateVisualizationProps) => void;
+  // updateVisualization: (data: UpdateVisualizationProps) => void;
+  onChartTypeChange?: (chartType: ChartType) => void;
 }
 
 interface AvailableRuleOption {
@@ -52,31 +43,32 @@ interface VisColumnOption {
 }
 
 // Exclude unknown fields since we cannot generate visualization with them
-type VisFieldTypeString = VisFieldType.Numerical | VisFieldType.Categorical | VisFieldType.Date;
+// type VisFieldTypeString = VisFieldType.Numerical | VisFieldType.Categorical | VisFieldType.Date;
 
-const FIELD_TYPE_ORDER: VisFieldTypeString[] = [
-  VisFieldType.Numerical,
-  VisFieldType.Categorical,
-  VisFieldType.Date,
-];
+// const FIELD_TYPE_ORDER: VisFieldTypeString[] = [
+//   VisFieldType.Numerical,
+//   VisFieldType.Categorical,
+//   VisFieldType.Date,
+// ];
 
-const FIELD_TYPE_LABELS = [
-  i18n.translate('explore.stylePanel.fieldSwitcher.numericalFieldLabel', {
-    defaultMessage: 'Numerical Field',
-  }),
-  i18n.translate('explore.stylePanel.fieldSwitcher.categoricalFieldLabel', {
-    defaultMessage: 'Categorical Field',
-  }),
-  i18n.translate('explore.stylePanel.fieldSwitcher.dateFieldLabel', {
-    defaultMessage: 'Date Field',
-  }),
-];
+// const FIELD_TYPE_LABELS = [
+//   i18n.translate('explore.stylePanel.fieldSwitcher.numericalFieldLabel', {
+//     defaultMessage: 'Numerical Field',
+//   }),
+//   i18n.translate('explore.stylePanel.fieldSwitcher.categoricalFieldLabel', {
+//     defaultMessage: 'Categorical Field',
+//   }),
+//   i18n.translate('explore.stylePanel.fieldSwitcher.dateFieldLabel', {
+//     defaultMessage: 'Date Field',
+//   }),
+// ];
 
 export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = ({
   visualizationData,
-  updateVisualization,
+  // updateVisualization,
+  onChartTypeChange,
 }) => {
-  const visualizationRegistry = useVisualizationRegistry();
+  // const visualizationRegistry = useVisualizationRegistry();
 
   // Original vis data from the query result
   const originalVisualizationData = useRef(visualizationData);
@@ -91,22 +83,22 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
   const [currChartTypeId, setCurrChartTypeId] = useState(storedChartTypeId);
 
   // Local state for field selection, avoid trigger update on express in visualization container
-  const [fieldsSelection, setFieldsSelection] = useState(
-    useSelector(selectFieldNames) ?? {
-      categorical: [],
-      date: [],
-      numerical: [],
-    }
-  );
+  // const [fieldsSelection, setFieldsSelection] = useState(
+  //   useSelector(selectFieldNames) ?? {
+  //     categorical: [],
+  //     date: [],
+  //     numerical: [],
+  //   }
+  // );
 
-  const currFieldsCountByType: [number, number, number] = useMemo(
-    () => [
-      fieldsSelection.numerical.length,
-      fieldsSelection.categorical.length,
-      fieldsSelection.date.length,
-    ],
-    [fieldsSelection]
-  );
+  // const currFieldsCountByType: [number, number, number] = useMemo(
+  //   () => [
+  //     fieldsSelection.numerical.length,
+  //     fieldsSelection.categorical.length,
+  //     fieldsSelection.date.length,
+  //   ],
+  //   [fieldsSelection]
+  // );
 
   // Map columns to add value and text fields for select component
   const {
@@ -237,181 +229,182 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     dateColumnOptions.length,
   ]);
 
-  const currChartTypeOption = currChartTypeId ? chartTypeMappedOptions[currChartTypeId] : undefined;
+  // const currChartTypeOption = currChartTypeId ? chartTypeMappedOptions[currChartTypeId] : undefined;
 
-  /**
-   * Available rules remained base on count of the current selections.
-   *
-   * For example, there's a chart supports all of [2, 0, 1], [1, 1, 1], [1, 2, 0] rules. After selects
-   * a categorical field, the [2, 0, 1] should no longer be available so should be filtered out, whereas
-   * [1, 1, 1], [1, 2, 0] should remains available.
-   */
-  const availableRules = useMemo(() => {
-    if (!currChartTypeId || !chartTypeMappedOptions[currChartTypeId]) return [];
+  // /**
+  //  * Available rules remained base on count of the current selections.
+  //  *
+  //  * For example, there's a chart supports all of [2, 0, 1], [1, 1, 1], [1, 2, 0] rules. After selects
+  //  * a categorical field, the [2, 0, 1] should no longer be available so should be filtered out, whereas
+  //  * [1, 1, 1], [1, 2, 0] should remains available.
+  //  */
+  // const availableRules = useMemo(() => {
+  //   if (!currChartTypeId || !chartTypeMappedOptions[currChartTypeId]) return [];
 
-    return chartTypeMappedOptions[currChartTypeId].rules.filter((rule) => {
-      const [ruleNum, ruleCat, ruleDate] = rule.matchIndex || [0, 0, 0];
-      const [currNum, currCat, currDate] = currFieldsCountByType;
+  //   return chartTypeMappedOptions[currChartTypeId].rules.filter((rule) => {
+  //     const [ruleNum, ruleCat, ruleDate] = rule.matchIndex || [0, 0, 0];
+  //     const [currNum, currCat, currDate] = currFieldsCountByType;
 
-      return ruleNum >= currNum && ruleCat >= currCat && ruleDate >= currDate;
-    });
-  }, [currChartTypeId, currFieldsCountByType, chartTypeMappedOptions]);
+  //     return ruleNum >= currNum && ruleCat >= currCat && ruleDate >= currDate;
+  //   });
+  // }, [currChartTypeId, currFieldsCountByType, chartTypeMappedOptions]);
 
-  const handleGeneration = useCallback(() => {
-    // Update the visualizationData in the parent component
-    if (originalVisualizationData.current) {
-      const ruleToUse = availableRules.find((rule) =>
-        isEqual(rule.matchIndex, currFieldsCountByType)
-      );
-      if (ruleToUse) {
-        const visualizationType = visualizationRegistry.getVisualizationConfig(
-          currChartTypeOption?.value!
-        );
-        if (visualizationType) {
-          updateVisualization({
-            visualizationType,
-            rule: ruleToUse,
-            fieldNames: fieldsSelection,
-            columns: {
-              numerical: originalVisualizationData.current.numericalColumns
-                ? originalVisualizationData.current.numericalColumns.filter((col) =>
-                    fieldsSelection.numerical.includes(col.name)
-                  )
-                : [],
-              categorical: originalVisualizationData.current.categoricalColumns
-                ? originalVisualizationData.current.categoricalColumns.filter((col) =>
-                    fieldsSelection.categorical.includes(col.name)
-                  )
-                : [],
-              date: originalVisualizationData.current.dateColumns
-                ? originalVisualizationData.current.dateColumns.filter((col) =>
-                    fieldsSelection.date.includes(col.name)
-                  )
-                : [],
-            },
-          });
-          // Reset the flag after successful generation
-          shouldManuallyGenerate.current = false;
-        }
-      }
-    }
-  }, [
-    availableRules,
-    currFieldsCountByType,
-    fieldsSelection,
-    visualizationRegistry,
-    currChartTypeOption,
-    updateVisualization,
-  ]);
+  // const handleGeneration = useCallback(() => {
+  //   // Update the visualizationData in the parent component
+  //   if (originalVisualizationData.current) {
+  //     const ruleToUse = availableRules.find((rule) =>
+  //       isEqual(rule.matchIndex, currFieldsCountByType)
+  //     );
+  //     if (ruleToUse) {
+  //       const visualizationType = visualizationRegistry.getVisualizationConfig(
+  //         currChartTypeOption?.value!
+  //       );
+  //       if (visualizationType) {
+  //         updateVisualization({
+  //           visualizationType,
+  //           rule: ruleToUse,
+  //           fieldNames: fieldsSelection,
+  //           columns: {
+  //             numerical: originalVisualizationData.current.numericalColumns
+  //               ? originalVisualizationData.current.numericalColumns.filter((col) =>
+  //                   fieldsSelection.numerical.includes(col.name)
+  //                 )
+  //               : [],
+  //             categorical: originalVisualizationData.current.categoricalColumns
+  //               ? originalVisualizationData.current.categoricalColumns.filter((col) =>
+  //                   fieldsSelection.categorical.includes(col.name)
+  //                 )
+  //               : [],
+  //             date: originalVisualizationData.current.dateColumns
+  //               ? originalVisualizationData.current.dateColumns.filter((col) =>
+  //                   fieldsSelection.date.includes(col.name)
+  //                 )
+  //               : [],
+  //           },
+  //         });
+  //         // Reset the flag after successful generation
+  //         shouldManuallyGenerate.current = false;
+  //       }
+  //     }
+  //   }
+  // }, [
+  //   availableRules,
+  //   currFieldsCountByType,
+  //   fieldsSelection,
+  //   visualizationRegistry,
+  //   currChartTypeOption,
+  //   updateVisualization,
+  // ]);
 
-  useEffect(() => {
-    if (
-      currChartTypeId &&
-      currChartTypeOption &&
-      shouldManuallyGenerate.current &&
-      !isEqual(currFieldsCountByType, [0, 0, 0])
-    ) {
-      handleGeneration();
-    }
-  }, [currChartTypeId, currChartTypeOption, currFieldsCountByType, handleGeneration]);
+  // useEffect(() => {
+  //   if (
+  //     currChartTypeId &&
+  //     currChartTypeOption &&
+  //     shouldManuallyGenerate.current &&
+  //     !isEqual(currFieldsCountByType, [0, 0, 0])
+  //   ) {
+  //     handleGeneration();
+  //   }
+  // }, [currChartTypeId, currChartTypeOption, currFieldsCountByType, handleGeneration]);
 
-  // Max possible number of selections for each field types base on current available rules
-  const maxMatchIndex = useMemo(() => {
-    if (!availableRules.length) return [0, 0, 0];
+  // // Max possible number of selections for each field types base on current available rules
+  // const maxMatchIndex = useMemo(() => {
+  //   if (!availableRules.length) return [0, 0, 0];
 
-    return availableRules.reduce(
-      (max, rule) => {
-        const [ruleNum, ruleCat, ruleDate] = rule.matchIndex || [0, 0, 0];
-        return [Math.max(max[0], ruleNum), Math.max(max[1], ruleCat), Math.max(max[2], ruleDate)];
-      },
-      [0, 0, 0]
-    );
-  }, [availableRules]);
+  //   return availableRules.reduce(
+  //     (max, rule) => {
+  //       const [ruleNum, ruleCat, ruleDate] = rule.matchIndex || [0, 0, 0];
+  //       return [Math.max(max[0], ruleNum), Math.max(max[1], ruleCat), Math.max(max[2], ruleDate)];
+  //     },
+  //     [0, 0, 0]
+  //   );
+  // }, [availableRules]);
 
-  // Max number of the remaining possible selection for each field types base on current fields selection
-  const matchIndexDifference = useMemo(() => {
-    const [maxNum, maxCat, maxDate] = maxMatchIndex;
-    const [currNum, currCat, currDate] = currFieldsCountByType;
+  // // Max number of the remaining possible selection for each field types base on current fields selection
+  // const matchIndexDifference = useMemo(() => {
+  //   const [maxNum, maxCat, maxDate] = maxMatchIndex;
+  //   const [currNum, currCat, currDate] = currFieldsCountByType;
 
-    return [
-      Math.max(0, maxNum - currNum),
-      Math.max(0, maxCat - currCat),
-      Math.max(0, maxDate - currDate),
-    ];
-  }, [maxMatchIndex, currFieldsCountByType]);
+  //   return [
+  //     Math.max(0, maxNum - currNum),
+  //     Math.max(0, maxCat - currCat),
+  //     Math.max(0, maxDate - currDate),
+  //   ];
+  // }, [maxMatchIndex, currFieldsCountByType]);
 
   const updateChartTypeSelection = (chartTypeId: ChartType) => {
     shouldManuallyGenerate.current = true;
 
+    onChartTypeChange?.(chartTypeId);
     setCurrChartTypeId(chartTypeId);
   };
 
-  useEffect(() => {
-    // Listen to the change of chart type, which will triggers maxMatchIndex changes
-    maxMatchIndex.forEach((max, index) => {
-      if (max < currFieldsCountByType[index]) {
-        // Reset the fields selection when current selected fields are not support with the
-        // chart type that the user just changed
-        setFieldsSelection({
-          numerical: [],
-          categorical: [],
-          date: [],
-        });
-        return;
-      }
-    });
-  }, [maxMatchIndex, currFieldsCountByType]);
+  // useEffect(() => {
+  //   // Listen to the change of chart type, which will triggers maxMatchIndex changes
+  //   maxMatchIndex.forEach((max, index) => {
+  //     if (max < currFieldsCountByType[index]) {
+  //       // Reset the fields selection when current selected fields are not support with the
+  //       // chart type that the user just changed
+  //       setFieldsSelection({
+  //         numerical: [],
+  //         categorical: [],
+  //         date: [],
+  //       });
+  //       return;
+  //     }
+  //   });
+  // }, [maxMatchIndex, currFieldsCountByType]);
 
-  const updateFieldSelection = useCallback(
-    (fieldTypeString: VisFieldTypeString, fieldTypeIndex: number, columnName: string) => {
-      shouldManuallyGenerate.current = true;
+  // const updateFieldSelection = useCallback(
+  //   (fieldTypeString: VisFieldTypeString, fieldTypeIndex: number, columnName: string) => {
+  //     shouldManuallyGenerate.current = true;
 
-      const columnOption = allColumnOptions[fieldTypeIndex].find(
-        (col) => col.value === columnName
-      )!;
+  //     const columnOption = allColumnOptions[fieldTypeIndex].find(
+  //       (col) => col.value === columnName
+  //     )!;
 
-      setFieldsSelection((prev) => ({
-        ...prev,
-        [fieldTypeString]: [...prev[fieldTypeString], columnOption.column.name],
-      }));
-    },
-    [allColumnOptions]
-  );
+  //     setFieldsSelection((prev) => ({
+  //       ...prev,
+  //       [fieldTypeString]: [...prev[fieldTypeString], columnOption.column.name],
+  //     }));
+  //   },
+  //   [allColumnOptions]
+  // );
 
-  const removeFieldSelection = useCallback(
-    (fieldTypeString: VisFieldTypeString, columnName: string) => {
-      shouldManuallyGenerate.current = true;
+  // const removeFieldSelection = useCallback(
+  //   (fieldTypeString: VisFieldTypeString, columnName: string) => {
+  //     shouldManuallyGenerate.current = true;
 
-      setFieldsSelection((prev) => ({
-        ...prev,
-        [fieldTypeString]: prev[fieldTypeString].filter((name) => name !== columnName),
-      }));
-    },
-    []
-  );
+  //     setFieldsSelection((prev) => ({
+  //       ...prev,
+  //       [fieldTypeString]: prev[fieldTypeString].filter((name) => name !== columnName),
+  //     }));
+  //   },
+  //   []
+  // );
 
-  const replaceFieldSelection = useCallback(
-    (
-      fieldTypeString: VisFieldTypeString,
-      fieldTypeIndex: number,
-      oldColumnName: string,
-      newColumnName: string
-    ) => {
-      shouldManuallyGenerate.current = true;
+  // const replaceFieldSelection = useCallback(
+  //   (
+  //     fieldTypeString: VisFieldTypeString,
+  //     fieldTypeIndex: number,
+  //     oldColumnName: string,
+  //     newColumnName: string
+  //   ) => {
+  //     shouldManuallyGenerate.current = true;
 
-      const newColumnOption = allColumnOptions[fieldTypeIndex].find(
-        (col) => col.value === newColumnName
-      )!;
+  //     const newColumnOption = allColumnOptions[fieldTypeIndex].find(
+  //       (col) => col.value === newColumnName
+  //     )!;
 
-      setFieldsSelection((prev) => ({
-        ...prev,
-        [fieldTypeString]: prev[fieldTypeString].map((name) =>
-          name === oldColumnName ? newColumnOption.column.name : name
-        ),
-      }));
-    },
-    [allColumnOptions]
-  );
+  //     setFieldsSelection((prev) => ({
+  //       ...prev,
+  //       [fieldTypeString]: prev[fieldTypeString].map((name) =>
+  //         name === oldColumnName ? newColumnOption.column.name : name
+  //       ),
+  //     }));
+  //   },
+  //   [allColumnOptions]
+  // );
 
   if (!originalVisualizationData.current || !Boolean(Object.keys(chartTypeMappedOptions).length))
     return null;
@@ -467,7 +460,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
           </EuiFormRow>
         </StyleAccordion>
       </EuiFlexItem>
-      {currChartTypeId && !chartTypeMappedOptions[currChartTypeId].disabled && (
+      {/* {currChartTypeId && !chartTypeMappedOptions[currChartTypeId].disabled && (
         <EuiFlexItem grow={false}>
           <StyleAccordion
             id="axisAndScalesSection"
@@ -580,7 +573,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
             </>
           </StyleAccordion>
         </EuiFlexItem>
-      )}
+      )} */}
     </EuiFlexGroup>
   );
 };
