@@ -12,7 +12,7 @@ import {
   SAMPLE_SIZE_SETTING,
 } from '../../../common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { IndexPatternField, opensearchFilters, UI_SETTINGS } from '../../../../data/public';
+import { UI_SETTINGS } from '../../../../data/public';
 import { DocViewFilterFn } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
 import {
@@ -35,11 +35,13 @@ import { addColumn, removeColumn } from '../../application/utils/state_managemen
 import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
 import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
+import { useChangeQueryEditor } from '../../application/hooks';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { uiSettings, data, capabilities, indexPatterns } = services;
 
+  const { onAddFilter } = useChangeQueryEditor();
   const savedSearch = useSelector(selectSavedSearch);
   const columns = useSelector(selectColumns);
   const { indexPattern } = useIndexPatternContext();
@@ -48,10 +50,10 @@ const ExploreDataTableComponent = () => {
 
   // Use default cache key computation for this component
   const query = useSelector((state: RootState) => state.query);
-  const cacheKey = useMemo(() => {
-    const queryString = typeof query.query === 'string' ? query.query : '';
-    return defaultPrepareQuery(queryString);
-  }, [query]);
+  const cacheKey = useMemo(
+    () => defaultPrepareQuery(typeof query.query === 'string' ? query.query : ''),
+    [query]
+  );
 
   const rawResults = cacheKey ? results[cacheKey] : null;
   const rows = rawResults?.hits?.hits || [];
@@ -135,22 +137,6 @@ const ExploreDataTableComponent = () => {
       dispatch(removeColumn(col));
     },
     [indexPattern, capabilities.discover?.save, indexPatterns, dispatch]
-  );
-
-  const onAddFilter = useCallback(
-    (field: string | IndexPatternField, values: string, operation: '+' | '-') => {
-      if (!indexPattern) return;
-
-      const newFilters = opensearchFilters.generateFilters(
-        data.query.filterManager,
-        field,
-        values,
-        operation,
-        indexPattern.id ?? ''
-      );
-      return data.query.filterManager.addFilters(newFilters);
-    },
-    [data.query.filterManager, indexPattern]
   );
 
   return (

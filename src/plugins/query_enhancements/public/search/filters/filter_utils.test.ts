@@ -12,7 +12,7 @@ import {
   RangeFilterParams,
   TimeRange,
 } from '../../../../data/common';
-import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './parser';
+import { FilterUtils } from './filter_utils';
 
 const getPhraseFilter = (): Filter => ({
   meta: {
@@ -104,27 +104,31 @@ describe('convertFiltersToClause', () => {
   beforeEach(() => {});
 
   it('should return empty string for empty filters array', () => {
-    expect(convertFiltersToWhereClause([], undefined)).toBe('');
+    expect(FilterUtils.convertFiltersToWhereClause([], undefined)).toBe('');
   });
 
   it('should skip disabled filters', () => {
     const filters: Filter[] = [disable(getPhraseFilter())];
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe('');
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe('');
   });
 
   it('should handle phrase filter', () => {
     const filters: Filter[] = [getPhraseFilter()];
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe("WHERE `field1` = 'test'");
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
+      "WHERE `field1` = 'test'"
+    );
   });
 
   it('should handle negated phrase filter', () => {
     const filters: Filter[] = [negate(getPhraseFilter())];
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe("WHERE `field1` != 'test'");
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
+      "WHERE `field1` != 'test'"
+    );
   });
 
   it('should handle phrases filter', () => {
     const filters: Filter[] = [negate(getPhrasesFilter()), getPhrasesFilter()];
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe(
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
       "WHERE (`field1` != 'a' AND `field1` != 'b' AND `field1` != 'c') AND (`field1` = 'a' OR `field1` = 'b' OR `field1` = 'c')"
     );
   });
@@ -136,24 +140,28 @@ describe('convertFiltersToClause', () => {
       getRangeFilter({ gte: 4 }),
       getRangeFilter({ lt: 11 }),
     ];
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe(
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
       'WHERE (`range_field` < 5 OR `range_field` >= 10) AND (`range_field` >= 5 AND `range_field` < 10) AND (`range_field` >= 4) AND (`range_field` < 11)'
     );
   });
 
   it('should handle exists filter', () => {
     const filters: Filter[] = [getExistsFilter()];
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe('WHERE ISNOTNULL(`category`)');
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
+      'WHERE ISNOTNULL(`category`)'
+    );
   });
 
   it('should handle negated exists filter', () => {
     const filters: Filter[] = [negate(getExistsFilter())];
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe('WHERE ISNULL(`category`)');
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
+      'WHERE ISNULL(`category`)'
+    );
   });
 
   it('should handle multiple filters', () => {
     const filters: Filter[] = [getPhraseFilter(), getRangeFilter({ gte: 1, lt: 10 })];
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe(
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
       "WHERE (`field1` = 'test') AND (`range_field` >= 1 AND `range_field` < 10)"
     );
   });
@@ -164,7 +172,20 @@ describe('convertFiltersToClause', () => {
     filter.query.match_phrase.field1 = "test's";
     const filters: Filter[] = [filter];
 
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe("WHERE `field1` = 'test''s'");
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
+      "WHERE `field1` = 'test''s'"
+    );
+  });
+
+  it('should not quote non-string values in phrase queries', () => {
+    const filter = getPhraseFilter();
+    filter.meta.params.query = 123;
+    filter.query.match_phrase.field1 = 123;
+    const filters: Filter[] = [filter];
+
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
+      'WHERE `field1` = 123'
+    );
   });
 
   it('should remove .keyword suffix from field names', () => {
@@ -173,7 +194,9 @@ describe('convertFiltersToClause', () => {
     filter.query.match_phrase['field1.keyword'] = filter.query.match_phrase.field1;
     const filters: Filter[] = [filter];
 
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe("WHERE `field1` = 'test'");
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe(
+      "WHERE `field1` = 'test'"
+    );
   });
 
   it('ignores custom DSL filters', () => {
@@ -192,7 +215,7 @@ describe('convertFiltersToClause', () => {
       },
     ];
 
-    expect(convertFiltersToWhereClause(filters, undefined)).toBe('');
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined)).toBe('');
   });
 
   it('should filter out fields not in index pattern when ignoreFilterIfFieldNotInIndex is true', () => {
@@ -212,7 +235,7 @@ describe('convertFiltersToClause', () => {
       },
     ];
 
-    expect(convertFiltersToWhereClause(filters, mockIndexPattern, true)).toBe(
+    expect(FilterUtils.convertFiltersToWhereClause(filters, mockIndexPattern, true)).toBe(
       "WHERE `field1` = 'test'"
     );
   });
@@ -234,7 +257,7 @@ describe('convertFiltersToClause', () => {
       },
     ];
 
-    expect(convertFiltersToWhereClause(filters, mockIndexPattern, false)).toBe(
+    expect(FilterUtils.convertFiltersToWhereClause(filters, mockIndexPattern, false)).toBe(
       "WHERE (`field1` = 'test') AND (`non_existent_field` = 'test')"
     );
   });
@@ -256,7 +279,7 @@ describe('convertFiltersToClause', () => {
       },
     ];
 
-    expect(convertFiltersToWhereClause(filters, undefined, true)).toBe(
+    expect(FilterUtils.convertFiltersToWhereClause(filters, undefined, true)).toBe(
       "WHERE (`field1` = 'test') AND (`non_existent_field` = 'test')"
     );
   });
@@ -269,7 +292,7 @@ describe('getTimeFilterCommand', () => {
       to: '2023-01-02T00:00:00Z',
     };
 
-    const result = getTimeFilterWhereClause('timestamp', timeRange);
+    const result = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange);
     expect(result).toBe(
       "WHERE `timestamp` >= '2023-01-01 00:00:00' AND `timestamp` <= '2023-01-02 00:00:00'"
     );
