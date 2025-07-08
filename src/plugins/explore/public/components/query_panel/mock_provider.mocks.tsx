@@ -162,6 +162,7 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
       ui: {
         activeTabId: 'logs',
         showDatasetFields: true,
+        showHistogram: true,
         prompt: '',
       },
       results: {},
