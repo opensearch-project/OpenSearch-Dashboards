@@ -556,7 +556,7 @@ export class ExplorePlugin
         if (visOfAction && visOfAction.isClassic) {
           action.grouping?.push({
             id: 'others',
-            getDisplayName: () => 'Other visualizations',
+            getDisplayName: () => 'More',
             getIconType: () => 'boxesHorizontal',
           });
         }

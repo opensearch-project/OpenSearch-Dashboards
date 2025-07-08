@@ -31,10 +31,8 @@ const VisualizationActionMenuItem = ({
     <>
       <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>{title}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiBadge color="hollow" iconType="sparkleFilled">
-            New!
-          </EuiBadge>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">New!</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiText size="xs" color="subdued">
