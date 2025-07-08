@@ -152,6 +152,12 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showSearchBar={false}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
       showSaveQuery={false}
+      showDatasetSelect={true}
+      datasetSelectProps={{
+        onSelect: (dataset: any) => {
+          if (!dataset) return;
+        },
+      }}
       useDefaultBehaviors
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}

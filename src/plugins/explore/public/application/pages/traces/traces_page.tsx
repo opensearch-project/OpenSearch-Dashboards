@@ -24,7 +24,6 @@ import { TopNav } from '../../../components/top_nav/top_nav';
 import { DiscoverChartContainer } from '../../../components/chart/discover_chart_container';
 import { QueryPanel } from '../../../components/query_panel';
 import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
-import { HeaderDatasetSelector } from '../../components/header_dataset_selector';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
 import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
@@ -208,8 +207,6 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
             {/* TopNav component - configured like discover */}
-
-            <HeaderDatasetSelector />
 
             <NewExperienceBanner />
 

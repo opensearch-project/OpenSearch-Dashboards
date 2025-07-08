@@ -38,6 +38,7 @@ import {
   QueryStatus,
   SearchBarProps,
   StatefulSearchBarProps,
+  DatasetSelectProps,
 } from '../../../data/public';
 import { DataSourceMenuProps, createDataSourceMenu } from '../../../data_source_management/public';
 import { MountPointPortal } from '../../../opensearch_dashboards_react/public';
@@ -60,6 +61,11 @@ export type TopNavMenuProps = Omit<StatefulSearchBarProps, 'showDatePicker'> &
     showDatePicker?: boolean | TopNavMenuItemRenderType;
     showFilterBar?: boolean;
     showDataSourceMenu?: boolean;
+    showDatasetSelect?: boolean | TopNavMenuItemRenderType;
+    datasetSelectProps?: {
+      onSelect?: (dataset: any) => void;
+      appName?: string;
+    };
     data?: DataPublicPluginStart;
     groupActions?: boolean;
     className?: string;
@@ -101,6 +107,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     showSearchBar,
     showDatePicker,
     showDataSourceMenu,
+    showDatasetSelect,
     dataSourceMenuConfig,
     groupActions,
     screenTitle,
@@ -113,7 +120,8 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   const shouldReturnNull =
     (!config || config.length === 0) &&
     (!showSearchBar || !props.data) &&
-    (!showDataSourceMenu || !dataSourceMenuConfig);
+    (!showDataSourceMenu || !dataSourceMenuConfig) &&
+    (!showDatasetSelect || !props.data);
 
   if (shouldReturnNull) {
     return null;
@@ -152,6 +160,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
       >
         {renderItems()}
         {renderDataSourceMenu()}
+        {renderDatasetSelect()}
       </EuiHeaderLinks>
     );
   }
@@ -160,6 +169,18 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     if (!showDataSourceMenu) return null;
     const DataSourceMenu = createDataSourceMenu();
     return <DataSourceMenu {...dataSourceMenuConfig!} />;
+  }
+
+  function renderDatasetSelect(): ReactElement | null {
+    if (!showDatasetSelect || !props.data) return null;
+    const { DatasetSelect } = props.data.ui;
+
+    return (
+      <DatasetSelect
+        onSelect={props.datasetSelectProps?.onSelect || (() => {})}
+        appName={props.datasetSelectProps?.appName || props.appName || ''}
+      />
+    );
   }
 
   function renderSearchBar(overrides: Partial<SearchBarProps> = {}): ReactElement | null {
@@ -282,6 +303,7 @@ TopNavMenu.defaultProps = {
   showDatePicker: true,
   showFilterBar: true,
   showDataSourceMenu: false,
+  showDatasetSelect: false,
   screenTitle: '',
   groupActions: false,
 };
