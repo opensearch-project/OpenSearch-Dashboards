@@ -9,12 +9,14 @@ export interface UIState {
   activeTabId: string;
   showDatasetFields: boolean;
   prompt?: string; // Optional prompt for query panel
+  showHistogram: boolean;
 }
 
 const initialState: UIState = {
   activeTabId: 'logs',
   showDatasetFields: true,
   prompt: '', // Initialize prompt as empty string
+  showHistogram: true,
 };
 
 const uiSlice = createSlice({
@@ -33,9 +35,18 @@ const uiSlice = createSlice({
     setQueryPrompt: (state, action: PayloadAction<string>) => {
       state.prompt = action.payload;
     },
+    setShowHistogram: (state, action: PayloadAction<boolean>) => {
+      state.showHistogram = action.payload;
+    },
   },
 });
 
-export const { setActiveTab, setShowDatasetFields, setQueryPrompt, setUiState } = uiSlice.actions;
+export const {
+  setActiveTab,
+  setShowDatasetFields,
+  setQueryPrompt,
+  setUiState,
+  setShowHistogram,
+} = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
 export const uiInitialState = uiSlice.getInitialState();
