@@ -11,20 +11,11 @@
 
 import React, { Fragment, useEffect, useState, Suspense, useRef } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import { BannerConfig, DEFAULT_BANNER_HEIGHT, HIDDEN_BANNER_HEIGHT } from '../../common';
+import { BannerConfig, HIDDEN_BANNER_HEIGHT, DEFAULT_BANNER_CONFIG } from '../../common';
 import { LinkRenderer } from './link_renderer';
 import { HttpStart } from '../../../../core/public';
 
 const ReactMarkdownLazy = React.lazy(() => import('react-markdown'));
-
-interface BannerApiResponse {
-  enabled: boolean;
-  content?: string;
-  color?: 'primary' | 'success' | 'warning';
-  iconType?: string;
-  isVisible?: boolean;
-  useMarkdown?: boolean;
-}
 
 interface GlobalBannerProps {
   http: HttpStart;
@@ -40,23 +31,13 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
     const fetchBannerConfig = async () => {
       try {
         setIsLoading(true);
-        const response = await http.get<BannerApiResponse>('/api/_plugins/_banner/content');
+        const response = await http.get<BannerConfig>('/api/_plugins/_banner/content');
 
-        setBannerConfig({
-          content: response.content || '',
-          color: response.color || 'primary',
-          iconType: response.iconType || '',
-          isVisible: response.isVisible !== undefined ? response.isVisible : false,
-          useMarkdown: response.useMarkdown || false,
-        });
+        setBannerConfig(response);
       } catch (error) {
         // Hide banner on error
         setBannerConfig({
-          content: '',
-          color: 'primary',
-          iconType: '',
-          isVisible: false,
-          useMarkdown: false,
+          ...DEFAULT_BANNER_CONFIG,
         });
       } finally {
         setIsLoading(false);
@@ -68,28 +49,14 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
 
   // Update the CSS variable with the banner's height
   useEffect(() => {
-    // Add a smooth transition when changing banner visibility
-    document.documentElement.style.transition = 'padding-top 0.3s ease';
+    // No transition needed
 
     // If banner is not visible, set height to 0
     if (!bannerConfig?.isVisible) {
       document.documentElement.style.setProperty('--global-banner-height', HIDDEN_BANNER_HEIGHT);
 
-      // Reset the transition after a delay
-      setTimeout(() => {
-        document.documentElement.style.transition = '';
-      }, 300);
-
       return;
     }
-
-    // Set an initial non-zero value to ensure CSS takes effect
-    document.documentElement.style.setProperty('--global-banner-height', DEFAULT_BANNER_HEIGHT);
-
-    // Reset the transition after a delay
-    setTimeout(() => {
-      document.documentElement.style.transition = '';
-    }, 300);
 
     // Use ResizeObserver to detect height changes
     const resizeObserver = new ResizeObserver((entries) => {
@@ -113,19 +80,9 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
     return () => {
       resizeObserver.disconnect();
 
-      // Don't reset the height on page navigation - only when the banner is actually being hidden
-      // We can detect this by checking if the banner config is still visible
       if (!bannerConfig || !bannerConfig.isVisible) {
-        // Use a transition when removing the banner to prevent sudden layout shifts
-        document.documentElement.style.transition = 'padding-top 0.3s ease';
-
         // Reset the height when banner is removed
         document.documentElement.style.setProperty('--global-banner-height', HIDDEN_BANNER_HEIGHT);
-
-        // Reset the transition after a delay
-        setTimeout(() => {
-          document.documentElement.style.transition = '';
-        }, 300);
       }
     };
   }, [bannerConfig]);
@@ -181,6 +138,7 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
         iconType={bannerConfig.iconType}
         dismissible={true}
         onDismiss={hideBanner}
+        size={bannerConfig.size}
       />
     </div>
   );

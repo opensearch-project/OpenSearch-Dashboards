@@ -25,4 +25,7 @@ export const configSchema = schema.object({
   iconType: schema.string({ defaultValue: 'iInCircle' }),
   isVisible: schema.boolean({ defaultValue: true }),
   useMarkdown: schema.boolean({ defaultValue: true }),
+  size: schema.oneOf([schema.literal('s'), schema.literal('m')], {
+    defaultValue: 'm',
+  }),
 });

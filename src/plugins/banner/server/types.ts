@@ -9,15 +9,11 @@
  * GitHub history for details.
  */
 
+import { BannerConfig } from '../common';
+
 export interface BannerPluginSetup {
   bannerEnabled: () => boolean;
-  getConfig: () => {
-    content: string;
-    color: 'primary' | 'success' | 'warning';
-    iconType: string;
-    isVisible: boolean;
-    useMarkdown: boolean;
-  };
+  getConfig: () => BannerConfig;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

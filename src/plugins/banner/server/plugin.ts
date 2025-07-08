@@ -15,6 +15,7 @@ import { BannerPluginSetup, BannerPluginStart } from './types';
 import { BannerPluginConfigType } from './config';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 import { defineRoutes } from './routes';
+import { BannerConfig } from '../common';
 
 export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart> {
   private readonly config$: Observable<BannerPluginConfigType>;
@@ -28,12 +29,13 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
 
     const bannerSetup = {
       bannerEnabled: () => pluginConfig.enabled,
-      getConfig: () => ({
+      getConfig: (): BannerConfig => ({
         content: pluginConfig.content,
         color: pluginConfig.color,
         iconType: pluginConfig.iconType,
         isVisible: pluginConfig.isVisible,
         useMarkdown: pluginConfig.useMarkdown,
+        size: pluginConfig.size,
       }),
     };
 

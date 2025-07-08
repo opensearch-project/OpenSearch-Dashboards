@@ -11,7 +11,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { BannerPluginSetup, BannerPluginStart } from './types';
-import { renderBanner, unmountBanner, setInitialBannerHeight } from './render_banner';
+import { renderBanner, unmountBanner } from './render_banner';
 
 export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart> {
   constructor() {}
@@ -21,9 +21,6 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
   }
 
   public async start(core: CoreStart): Promise<BannerPluginStart> {
-    // Set initial height to prevent layout shifts
-    setInitialBannerHeight(false);
-
     // Render the banner component and pass the HTTP client
     renderBanner(core.http);
 

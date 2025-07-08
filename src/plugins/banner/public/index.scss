@@ -30,13 +30,7 @@ $expandedHeaderWidth: $headerWidth * 2;
   min-height: var(--global-banner-height);
 }
 
-/**
- * 3. Smooth transitions - Prevents jarring layout shifts when banner height changes
- */
 /* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
-.euiHeader {
-  transition: top 0.3s ease;
-}
 
 /**
  * 4. Header positioning - Places headers below the banner
@@ -52,7 +46,7 @@ $expandedHeaderWidth: $headerWidth * 2;
 }
 
 /**
- * 5. Fix for body padding when header is expanded and fixed
+ * 4. Fix for body padding when header is expanded and fixed
  *    Ensures content doesn't overlap with headers
  */
 .headerIsExpanded.euiBody--headerIsFixed {
@@ -60,7 +54,7 @@ $expandedHeaderWidth: $headerWidth * 2;
 }
 
 /**
- * 6. Fix for flayout position when header is expanded and fixed
+ * 5. Fix for flayout position when header is expanded and fixed
  *    Ensures content doesn't overlap with headers
  */
 .euiOverlayMask {
@@ -72,7 +66,7 @@ $expandedHeaderWidth: $headerWidth * 2;
 }
 
 /**
- * 7. Override content area min-height to account for global banner
+ * 6. Override content area min-height to account for global banner
  *    Ensures content area is properly sized when banner is present
  */
 .app-wrapper {

@@ -23,12 +23,12 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
 
       return response.ok({
         body: {
-          enabled: true,
           content: config.content,
           color: config.color,
           iconType: config.iconType,
           isVisible: config.isVisible,
           useMarkdown: config.useMarkdown,
+          size: config.size,
         },
       });
     }

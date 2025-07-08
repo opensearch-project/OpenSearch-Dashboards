@@ -20,4 +20,5 @@ export interface BannerConfig {
   iconType?: string;
   isVisible: boolean;
   useMarkdown?: boolean;
+  size?: 's' | 'm';
 }

@@ -12,17 +12,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { GlobalBanner } from './components/global_banner';
-import { BANNER_CONTAINER_ID, DEFAULT_BANNER_HEIGHT, HIDDEN_BANNER_HEIGHT } from '../common';
+import { BANNER_CONTAINER_ID } from '../common';
 import { HttpStart } from '../../../core/public';
-
-/**
- * Sets the initial banner height based on visibility
- * @param isVisible Whether the banner is initially visible
- */
-export const setInitialBannerHeight = (isVisible: boolean): void => {
-  const initialHeight = isVisible ? DEFAULT_BANNER_HEIGHT : HIDDEN_BANNER_HEIGHT;
-  document.documentElement.style.setProperty('--global-banner-height', initialHeight);
-};
 
 /**
  * Renders the banner component into the DOM
