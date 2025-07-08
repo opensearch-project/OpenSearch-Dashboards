@@ -7,31 +7,25 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector } from 'react-redux';
-import {
-  QueryStatus,
-  ResultStatus,
-  useSyncQueryStateWithUrl,
-} from '../../../../../../../../data/public';
-import { createOsdUrlStateStorage } from '../../../../../../../../opensearch_dashboards_utils/public';
-import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { PLUGIN_ID } from '../../../../../../../common';
-import { ExploreServices } from '../../../../../../types';
-import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { useSelector } from '../../utils/state_management';
-import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
-
-import './discover_canvas.scss';
-import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
-import { QueryExecutionStatus } from '../../../../../utils/state_management/types';
-import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
+import { QueryStatus, ResultStatus, useSyncQueryStateWithUrl } from '../../../../data/public';
+import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { PLUGIN_ID } from '../../../common';
+import { ExploreServices } from '../../types';
+import { IndexPattern } from '../../application/legacy/discover/opensearch_dashboards_services';
+import { useSelector } from '../../application/legacy/discover/application/utils/state_management';
+import { useIndexPatternContext } from '../../application/components/index_pattern_context';
+import { TopNavMenuItemRenderType } from '../../../../navigation/public';
+import { QueryExecutionStatus } from '../../application/utils/state_management/types';
+import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
   selectTabState,
   selectUIState,
   selectExecutionStatus,
-} from '../../../../../utils/state_management/selectors';
-import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
-import { getTopNavLinks } from '../../../../../../components/top_nav/top_nav_links';
-import { SavedExplore } from '../../../../../../saved_explore';
+} from '../../application/utils/state_management/selectors';
+import { useFlavorId } from '../../helpers/use_flavor_id';
+import { getTopNavLinks } from './top_nav_links';
+import { SavedExplore } from '../../saved_explore';
 
 export interface TopNavProps {
   savedExplore?: SavedExplore;

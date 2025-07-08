@@ -43,6 +43,11 @@ export const selectShowDataSetFields = createSelector(
   (uiState) => uiState.showDatasetFields
 );
 
+export const selectShowHistogram = createSelector(
+  [selectUIState],
+  (uiState) => uiState.showHistogram
+);
+
 export const selectStyleOptions = createSelector(
   [selectTabState],
   (tabState) => tabState.visualizations.styleOptions
