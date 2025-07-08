@@ -26,13 +26,15 @@ const placeholder = i18n.translate('explore.queryPanel.queryEditor.placeholder',
 export const BottomEditor = () => {
   const editorMode = useSelector(selectEditorMode);
   const { bottomEditorRef, bottomEditorText } = useEditorContextByEditorComponent();
-  const { isFocused, ...editorProps } = useBottomEditor();
+  const { isFocused, onWrapperClick, ...editorProps } = useBottomEditor();
   // TODO: change me
   const editorClassPrefix = 'queryEditor';
   const isReadOnly = editorMode !== EditorMode.DualQuery;
   const isVisible = useSelector(selectIsDualEditorMode);
   const showPlaceholder = !bottomEditorText.length && !isReadOnly;
 
+  // This is here to autofocus when toggling between the dual editors
+  // TODO: Ideally we don't need an useEffect here and do this explicitly.
   useEffect(() => {
     if (editorMode === EditorMode.DualQuery) {
       bottomEditorRef.current?.focus();
@@ -45,12 +47,15 @@ export const BottomEditor = () => {
         [`${editorClassPrefix}Wrapper--hidden`]: !isVisible,
       })}
     >
+      {/* Suppressing below as this should only happen for click events.  */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
       <div
         className={classNames(editorClassPrefix, {
           [`${editorClassPrefix}--readonly`]: isReadOnly,
           [`${editorClassPrefix}--focused`]: isFocused,
         })}
         data-test-subj="exploreReusableEditor"
+        onClick={onWrapperClick}
       >
         <CodeEditor {...editorProps} />
         {showPlaceholder ? (

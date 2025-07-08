@@ -4,14 +4,10 @@
  */
 
 import { firstValueFrom } from '@osd/std';
-import { Dataset } from '../../../../../../../data/common';
-import { ExploreServices } from '../../../../../types';
-import { QueryEditorExtensionDependencies } from '../../../../../../../data/public';
+import { ExploreServices } from '../../../types';
+import { QueryEditorExtensionDependencies } from '../../../../../data/public';
 
-export const getPromptModeIsAvailable = async (
-  services: ExploreServices,
-  dataset: Dataset
-): Promise<boolean> => {
+export const getPromptModeIsAvailable = async (services: ExploreServices): Promise<boolean> => {
   try {
     const extensions = services.data.query.queryString
       .getLanguageService()

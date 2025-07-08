@@ -10,21 +10,20 @@
   background-color: inherit !important;
 }
 
-.dscChart__wrapper {
+.exploreChart__wrapper {
   border-bottom: 1px solid $euiColorLightShade;
 
   &--enhancement {
-    padding: 8px;
-    gap: 8px;
+    gap: $euiSizeS;
     flex-grow: 0;
     flex-wrap: nowrap;
   }
 
-  .dscChart__chartheader {
+  .exploreChart__chartheader {
     align-items: center;
   }
 }
 
-.dscChart__TimechartHeader {
+.exploreChart__TimechartHeader {
   padding-top: $euiSizeXS;
 }
