@@ -5,11 +5,7 @@
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  IndexPatternField,
-  UI_SETTINGS,
-  opensearchFilters,
-} from '../../../../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import {
   addColumn,
@@ -27,25 +23,20 @@ import {
   defaultResultsProcessor,
   defaultPrepareQuery,
 } from '../../../../../utils/state_management/actions/query_actions';
+import { useChangeQueryEditor } from '../../../../../hooks';
 
 export function DiscoverPanel() {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const {
-    data: {
-      query: { filterManager },
-    },
-    capabilities,
-    application,
-    uiSettings,
-  } = services;
+  const { capabilities, application, uiSettings } = services;
 
+  const { onAddFilter } = useChangeQueryEditor();
   const columns = useSelector(selectColumns);
   const query = useSelector(selectQuery);
   const results = useSelector((state: any) => state.results);
-  const cacheKey = useMemo(() => {
-    const queryString = typeof query.query === 'string' ? query.query : '';
-    return defaultPrepareQuery(queryString);
-  }, [query]);
+  const cacheKey = useMemo(
+    () => defaultPrepareQuery(typeof query.query === 'string' ? query.query : ''),
+    [query]
+  );
   const rawResults = cacheKey ? results[cacheKey] : null;
   const { indexPattern } = useIndexPatternContext();
 
@@ -85,22 +76,6 @@ export function DiscoverPanel() {
       prevColumns.current = columns;
     }
   }, [columns, dispatch, indexPattern?.timeFieldName]);
-
-  const onAddFilter = useCallback(
-    (field: string | IndexPatternField, values: string, operation: '+' | '-') => {
-      if (!indexPattern) return;
-
-      const newFilters = opensearchFilters.generateFilters(
-        filterManager,
-        field,
-        values,
-        operation,
-        indexPattern.id ?? ''
-      );
-      return filterManager.addFilters(newFilters);
-    },
-    [filterManager, indexPattern]
-  );
 
   const onCreateIndexPattern = useCallback(async () => {
     if (!indexPattern?.title) return;
