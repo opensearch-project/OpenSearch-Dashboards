@@ -8,12 +8,8 @@ import { useDispatch } from 'react-redux';
 import { DatasetSelector, DatasetSelectorAppearance, Query } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
-import { executeQueries } from '../utils/state_management/actions/query_actions';
-import { clearResults, setQuery } from '../utils/state_management/slices';
-import {
-  beginTransaction,
-  finishTransaction,
-} from '../utils/state_management/actions/transaction_actions';
+import { useEditorContext } from '../context';
+import { setDatasetActionCreator } from '../utils/state_management/actions/set_dataset';
 
 /**
  * Header dataset selector component for Explore
@@ -21,6 +17,7 @@ import {
  */
 export const HeaderDatasetSelector: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const editorContext = useEditorContext();
   const dispatch = useDispatch();
   const isMounted = useRef(false);
 
@@ -33,20 +30,11 @@ export const HeaderDatasetSelector: React.FC = () => {
 
   // Handle dataset selection - sync with Explore's Redux store
   const handleDatasetSelect = useCallback(
-    (query: Query, dateRange?: any) => {
+    (query: Query) => {
       if (!isMounted.current || !query.dataset) return;
-      const queryStringState = services.data.query.queryString.getQuery();
-
-      dispatch(beginTransaction());
-      try {
-        dispatch(clearResults());
-        dispatch(setQuery(queryStringState));
-        dispatch(executeQueries({ services }));
-      } finally {
-        dispatch(finishTransaction());
-      }
+      dispatch(setDatasetActionCreator(services, editorContext));
     },
-    [dispatch, services]
+    [dispatch, editorContext, services]
   );
 
   // Render dataset selector directly (no portal needed since we're already in the right location)

@@ -35,6 +35,7 @@ export interface OpenSearchPanelProps {
 }
 
 const savedObjectMetadata = [
+  // NOTE: Should saved search be included?
   {
     type: 'search',
     getIconForSavedObject: () => 'search',
@@ -49,7 +50,7 @@ const savedObjectMetadata = [
     name: i18n.translate('explore.savedExplore.savedObjectName', {
       defaultMessage: 'Saved explore',
     }),
-    includeFields: ['kibanaSavedObjectMeta'],
+    includeFields: ['kibanaSavedObjectMeta', 'type'],
   },
 ];
 
@@ -85,7 +86,7 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
             />
           }
           savedObjectMetaData={savedObjectMetadata}
-          onChoose={(id, type) => {
+          onChoose={(id, type, _, savedObject) => {
             // Reset query app filters before loading saved search
             filterManager.setAppFilters([]);
             data.query.queryString.clearQuery();
@@ -102,10 +103,16 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
               // appId change and no new store created, so we need to dispatch
               // the state change.
               store.dispatch({ type: 'logs/incrementSaveExploreLoadCount' });
-              application.navigateToApp('explore', {
-                // TODO:finalize this until flavor and view route are finalized
-                path: `${ExploreFlavor.Logs}#/${id}`,
-              });
+              // TODO: Nav link is generated in runtime. Different from discover, if using navigateToApp, top nav would disappear.
+              // Address once flavor and view route are finalized.
+              const flavor = savedObject.attributes.type ?? ExploreFlavor.Logs;
+              // application.navigateToApp('explore', {
+              //   // TODO:finalize this until flavor and view route are finalized
+              //   path: `${flavor}#/view/${id}`,
+              // });
+              // NOTE: Use this for now instead of navigateToApp to avoid the top nav disappearing
+              const url = application.getUrlForApp(`explore/${flavor}`, { path: `#/view/${id}` });
+              application.navigateToUrl(url);
             }
             onClose();
           }}

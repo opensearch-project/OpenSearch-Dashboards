@@ -19,10 +19,10 @@ import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public'
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';
-import { ResultStatus } from '../../utils/state_management/types';
+import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { TopNav } from '../../legacy/discover/application/view_components/canvas/top_nav';
 import { DiscoverChartContainer } from '../../legacy/discover/application/view_components/canvas/discover_chart_container';
-import { QueryPanel } from '../../../components/query_panel/query_panel';
+import { QueryPanel } from '../../../components/query_panel';
 import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
 import { HeaderDatasetSelector } from '../../components/header_dataset_selector';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
@@ -43,6 +43,7 @@ import {
 import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
 import { selectShowDataSetFields } from '../../utils/state_management/selectors';
 import { ResultsSummaryPanel } from '../../../components/results_summary/results_summary_panel';
+import { useInitPage } from '../../utils/hooks/use_page_initialization';
 
 /**
  * Main application component for the Explore plugin
@@ -51,6 +52,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const { savedExplore } = useInitPage();
   const dispatch = useDispatch();
   const {
     indexPattern,
@@ -60,7 +62,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
 
   // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
-    return state.ui?.status || ResultStatus.UNINITIALIZED;
+    return state.queryEditor.executionStatus || QueryExecutionStatus.UNINITIALIZED;
   });
   const rows = useSelector((state: RootState) => {
     const query = state.query;
@@ -107,7 +109,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
       );
     }
 
-    if (status === ResultStatus.NO_RESULTS) {
+    if (status === QueryExecutionStatus.NO_RESULTS) {
       return (
         <CanvasPanel>
           <DiscoverNoResults
@@ -120,7 +122,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
       );
     }
 
-    if (status === ResultStatus.UNINITIALIZED) {
+    if (status === QueryExecutionStatus.UNINITIALIZED) {
       return (
         <CanvasPanel>
           <DiscoverUninitialized onRefresh={onRefresh} />
@@ -128,7 +130,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
       );
     }
 
-    if (status === ResultStatus.LOADING && !rows?.length) {
+    if (status === QueryExecutionStatus.LOADING && !rows?.length) {
       return (
         <CanvasPanel>
           <LoadingSpinner />
@@ -136,7 +138,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
       );
     }
 
-    if (status === ResultStatus.ERROR && !rows?.length) {
+    if (status === QueryExecutionStatus.ERROR && !rows?.length) {
       return (
         <CanvasPanel>
           <DiscoverUninitialized onRefresh={onRefresh} />
@@ -145,9 +147,9 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
     }
 
     if (
-      status === ResultStatus.READY ||
-      (status === ResultStatus.LOADING && !!rows?.length) ||
-      (status === ResultStatus.ERROR && !!rows?.length)
+      status === QueryExecutionStatus.READY ||
+      (status === QueryExecutionStatus.LOADING && !!rows?.length) ||
+      (status === QueryExecutionStatus.ERROR && !!rows?.length)
     ) {
       return (
         <>
@@ -193,7 +195,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
             paddingSize="none"
           >
             <EuiPageBody className="explore-layout__canvas">
-              <TopNav setHeaderActionMenu={setHeaderActionMenu} />
+              <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
               {renderBottomRightPanel()}
             </EuiPageBody>
           </EuiResizablePanel>
@@ -220,7 +222,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
               ) : indexPatternError ? (
                 <div>Error loading IndexPattern: {indexPatternError}</div>
               ) : indexPattern ? (
-                <QueryPanel services={services} indexPattern={indexPattern} />
+                <QueryPanel />
               ) : (
                 <div>No IndexPattern available</div>
               )}

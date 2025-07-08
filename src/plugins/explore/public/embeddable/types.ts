@@ -4,12 +4,13 @@
  */
 
 import { Embeddable, EmbeddableInput, EmbeddableOutput } from '../../../embeddable/public';
-import { Filter, IIndexPattern, TimeRange, Query } from '../../../data/public';
+import { Filter, IIndexPattern, TimeRange } from '../../../data/public';
+import { QueryState } from '../application/utils/state_management/slices';
 import { SortOrder } from '../types/saved_explore_types';
 
 export interface ExploreInput extends EmbeddableInput {
   timeRange: TimeRange;
-  query?: Query;
+  query?: QueryState;
   filters?: Filter[];
   hidePanelTitles?: boolean;
   columns?: string[];

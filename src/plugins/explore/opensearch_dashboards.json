@@ -17,7 +17,8 @@
     "urlForwarding",
     "usageCollection",
     "visualizations",
-    "expressions"
+    "expressions",
+    "dashboard"
   ],
   "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "dashboard"],
   "optionalPlugins": ["home", "share"],

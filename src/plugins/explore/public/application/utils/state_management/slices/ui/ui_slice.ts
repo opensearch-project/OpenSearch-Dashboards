@@ -4,38 +4,17 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ResultStatus } from '../../../../legacy/discover/application/view_components/utils/use_search';
-import {
-  ChartStyleControlMap,
-  ChartType,
-} from '../../../../../components/visualizations/utils/use_visualization_types';
 
 export interface UIState {
   activeTabId: string;
-  flavor: string;
-  status: ResultStatus;
   showDatasetFields: boolean;
-  transaction: {
-    inProgress: boolean;
-    pendingActions: string[];
-  };
   prompt?: string; // Optional prompt for query panel
-  styleOptions: ChartStyleControlMap[ChartType] | undefined;
-  chartType: ChartType;
 }
 
 const initialState: UIState = {
   activeTabId: 'logs',
-  flavor: 'log',
-  status: ResultStatus.UNINITIALIZED,
   showDatasetFields: true,
-  transaction: {
-    inProgress: false,
-    pendingActions: [],
-  },
   prompt: '', // Initialize prompt as empty string
-  styleOptions: undefined,
-  chartType: 'line',
 };
 
 const uiSlice = createSlice({
@@ -48,55 +27,15 @@ const uiSlice = createSlice({
     setActiveTab: (state, action: PayloadAction<string>) => {
       state.activeTabId = action.payload;
     },
-    setFlavor: (state, action: PayloadAction<string>) => {
-      state.flavor = action.payload;
-    },
-    setStatus: (state, action: PayloadAction<ResultStatus>) => {
-      state.status = action.payload;
-    },
     setShowDatasetFields: (state, action: PayloadAction<boolean>) => {
       state.showDatasetFields = action.payload;
     },
     setQueryPrompt: (state, action: PayloadAction<string>) => {
       state.prompt = action.payload;
     },
-    setStyleOptions: (state, action: PayloadAction<ChartStyleControlMap[ChartType]>) => {
-      state.styleOptions = action.payload;
-    },
-    setChartType: (state, action: PayloadAction<ChartType>) => {
-      state.chartType = action.payload;
-    },
-    // Transaction actions
-    startTransaction: (
-      state,
-      action: PayloadAction<{ previousState: Record<string, unknown> }>
-    ) => {
-      state.transaction.inProgress = true;
-      state.transaction.pendingActions = [];
-    },
-    commitTransaction: (state) => {
-      state.transaction.inProgress = false;
-      state.transaction.pendingActions = [];
-    },
-    rollbackTransaction: (state, action: PayloadAction<string>) => {
-      state.transaction.inProgress = false;
-      state.transaction.pendingActions = [];
-    },
   },
 });
 
-export const {
-  setActiveTab,
-  setFlavor,
-  setStatus,
-  setShowDatasetFields,
-  setQueryPrompt,
-  startTransaction,
-  commitTransaction,
-  rollbackTransaction,
-  setStyleOptions,
-  setChartType,
-  setUiState,
-} = uiSlice.actions;
+export const { setActiveTab, setShowDatasetFields, setQueryPrompt, setUiState } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
 export const uiInitialState = uiSlice.getInitialState();

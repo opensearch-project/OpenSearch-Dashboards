@@ -42,7 +42,11 @@ import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
-import { ChartType } from '../components/visualizations/utils/use_visualization_types';
+import {
+  ChartType,
+  StyleOptions,
+} from '../components/visualizations/utils/use_visualization_types';
+import { defaultPrepareQuery } from '../application/utils/state_management/actions/query_actions';
 
 export interface SearchProps {
   description?: string;
@@ -60,7 +64,8 @@ export interface SearchProps {
     filters: Filter[] | undefined;
     timeRange: TimeRange | undefined;
   };
-  chartType?: ChartType | 'logs';
+  chartType?: ChartType;
+  activeTab?: string;
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -175,9 +180,16 @@ export class ExploreEmbeddable
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);
     searchSource.setParent(this.filtersSearchSource);
+    const query = this.savedExplore.searchSource.getField('query');
+    const uiState = JSON.parse(this.savedExplore.uiState || '{}');
+    const activeTab = uiState.activeTab;
+    // If the active tab is logs, we need to prepare the query for the logs tab
+    if (activeTab === 'logs' && query) {
+      query.query = defaultPrepareQuery(query?.query as string);
+    }
     searchSource.setFields({
       index: indexPattern,
-      query: this.savedExplore.searchSource.getField('query'),
+      query,
       highlightAll: true,
       version: true,
     });
@@ -311,27 +323,50 @@ export class ExploreEmbeddable
         }),
     });
     const rows = resp.hits.hits;
-    this.searchProps.rows = rows;
-    // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
-    this.searchProps.hits = resp.hits.hits.length;
     const fieldSchema = searchSource.getDataFrame()?.schema;
     const visualizationData = getVisualizationType(rows, fieldSchema);
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
-    const selectedChartType =
-      JSON.parse(this.savedExplore.visualization || '{}').chartType ?? 'line';
+    const visualization = JSON.parse(this.savedExplore.visualization || '{}');
+    const uiState = JSON.parse(this.savedExplore.uiState || '{}');
+    const selectedChartType = visualization.chartType ?? 'line';
     this.searchProps.chartType = selectedChartType;
-    if (selectedChartType !== 'logs' && visualizationData) {
+    this.searchProps.activeTab = uiState.activeTab;
+    if (uiState.activeTab !== 'logs' && visualizationData) {
+      const fields = visualization.fields;
+      const filteredColumns = {
+        numerical: visualizationData.numericalColumns
+          ? visualizationData.numericalColumns.filter((col) => fields.numerical.includes(col.name))
+          : [],
+        categorical: visualizationData.categoricalColumns
+          ? visualizationData.categoricalColumns.filter((col) =>
+              fields.categorical.includes(col.name)
+            )
+          : [],
+        date: visualizationData.dateColumns
+          ? visualizationData.dateColumns.filter((col) => fields.date.includes(col.name))
+          : [],
+      };
+
+      const matchedRuleId = visualizationData.ruleId
+        ? visualizationData.ruleId
+        : this.services.visualizationRegistry
+            .getRegistry()
+            .findBestMatch(
+              filteredColumns.numerical,
+              filteredColumns.categorical,
+              filteredColumns.date
+            )?.rule.id; // FIXME improve error tolerance
       const rule = this.services.visualizationRegistry
         .start()
         .getRules()
-        .find((r) => r.id === visualizationData.ruleId);
+        .find((r) => r.id === matchedRuleId);
       const ruleBasedToExpressionFn = (
         transformedData: Array<Record<string, any>>,
         numericalColumns: VisColumn[],
         categoricalColumns: VisColumn[],
         dateColumns: VisColumn[],
-        styleOpts: any
+        styleOpts: StyleOptions
       ) => {
         return rule?.toExpression?.(
           transformedData,
@@ -349,15 +384,15 @@ export class ExploreEmbeddable
       };
       this.searchProps.searchContext = searchContext;
       const indexPattern = this.savedExplore.searchSource.getField('index');
-      const styleOptions = JSON.parse(this.savedExplore.visualization || '{}').params;
+      const styleOptions = visualization.params;
       const exp = toExpression(
         searchContext,
         indexPattern!,
         ruleBasedToExpressionFn,
         visualizationData.transformedData,
-        visualizationData.numericalColumns,
-        visualizationData.categoricalColumns,
-        visualizationData.dateColumns,
+        filteredColumns.numerical,
+        filteredColumns.categorical,
+        filteredColumns.date,
         styleOptions
       );
       this.searchProps.expression = exp;
@@ -365,6 +400,7 @@ export class ExploreEmbeddable
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
     this.searchProps.rows = rows;
+    // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = resp.hits.hits.length;
     this.searchProps.isLoading = false;
   };

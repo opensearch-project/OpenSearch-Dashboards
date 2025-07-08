@@ -28,7 +28,7 @@ describe('ScatterExclusiveVisOptions', () => {
 
   it('renders exclusive settings title', () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
-    expect(screen.getByText('Exclusive Settings')).toBeInTheDocument();
+    expect(screen.getByText('Scatter Settings')).toBeInTheDocument();
   });
   it('calls onChange when change is made(filled)', () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);

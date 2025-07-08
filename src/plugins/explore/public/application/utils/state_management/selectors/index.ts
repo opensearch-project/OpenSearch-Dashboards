@@ -5,7 +5,6 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { ResultStatus } from '../../../legacy/discover/application/view_components/utils/use_search';
 
 /**
  * Basic selectors
@@ -14,7 +13,7 @@ const selectQueryState = (state: RootState) => state.query;
 export const selectUIState = (state: RootState) => state.ui;
 const selectResultsState = (state: RootState) => state.results;
 const selectLegacyState = (state: RootState) => state.legacy;
-const selectTransactionState = (state: RootState) => state.ui.transaction;
+export const selectTabState = (state: RootState) => state.tab;
 
 /**
  * Query selectors
@@ -39,40 +38,26 @@ export const selectActiveTabId = createSelector([selectUIState], (uiState) => ui
 
 export const selectQueryPrompt = createSelector([selectUIState], (uiState) => uiState.prompt);
 
-export const selectStatus = createSelector([selectUIState], (uiState) => uiState.status);
 export const selectShowDataSetFields = createSelector(
   [selectUIState],
   (uiState) => uiState.showDatasetFields
 );
 
 export const selectStyleOptions = createSelector(
-  [selectUIState],
-  (uiState) => uiState.styleOptions
+  [selectTabState],
+  (tabState) => tabState.visualizations.styleOptions
 );
 
-export const selectChartType = createSelector([selectUIState], (uiState) => uiState.chartType);
-
-// Backward compatibility selector for components that still check isLoading
-export const selectIsLoading = createSelector(
-  [selectUIState],
-  (uiState) => uiState.status === ResultStatus.LOADING
+export const selectChartType = createSelector(
+  [selectTabState],
+  (tabState) => tabState.visualizations.chartType
 );
 
-// Error handling moved to toast notifications and search service
+export const selectFieldNames = createSelector(
+  [selectTabState],
+  (tabState) => tabState.visualizations.fieldNames
+);
 
-export const selectFlavor = createSelector([selectUIState], (uiState) => uiState.flavor);
-
-// TODO: Fix this selector - queryPanel doesn't exist in UIState
-// export const selectPromptQuery = createSelector(
-//   [selectUIState],
-//   (uiState) => uiState.queryPanel.promptQuery
-// );
-
-/**
- * Tab selectors
- * Note: These selectors now need to be used with services from context
- * Components should use useOpenSearchDashboards<ExploreServices>() to get tabRegistry
- */
 export const selectActiveTab = createSelector(
   [selectActiveTabId],
   (activeTabId) => activeTabId // Return just the ID, components will resolve the tab via context
@@ -98,15 +83,4 @@ export const selectSavedSearch = createSelector(
   (legacyState) => legacyState.savedSearch
 );
 
-export const selectSavedQuery = createSelector(
-  [selectLegacyState],
-  (legacyState) => legacyState.savedQuery
-);
-
-/**
- * Transaction selectors
- */
-export const selectIsTransactionInProgress = createSelector(
-  [selectTransactionState],
-  (transactionState) => transactionState.inProgress
-);
+export * from './query_editor';

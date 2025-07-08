@@ -7,17 +7,24 @@ import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../saved_explore';
 import { TopNavMenuIconData } from '../../../../../navigation/public';
 import { ExecutionContextSearch } from '../../../../../expressions';
-import { IndexPattern } from '../../../../../data/public';
 import { getNewButtonRun, newTopNavData } from './top_nav_new';
 import { getOpenButtonRun, openTopNavData } from './top_nav_open';
 import { getSaveButtonRun, saveTopNavData } from './top_nav_save';
 import { getShareButtonRun, shareTopNavData } from './top_nav_share';
+import { IndexPattern } from '../../../../../data/public';
+import { TabState } from '../../../application/utils/state_management/slices';
+import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
 
 export const getTopNavLinks = (
   services: ExploreServices,
   startSyncingQueryStateWithUrl: () => void,
   searchContext: ExecutionContextSearch,
-  indexPattern: IndexPattern | undefined,
+  stateProps: {
+    indexPattern: IndexPattern | undefined;
+    tabState: TabState;
+    flavorId: string | null;
+    tabDefinition: TabDefinition | undefined;
+  },
   savedExplore?: SavedExplore
 ) => {
   const { capabilities, share } = services;
@@ -31,7 +38,7 @@ export const getTopNavLinks = (
         services,
         startSyncingQueryStateWithUrl,
         searchContext,
-        indexPattern,
+        stateProps,
         savedExplore
       ),
     });

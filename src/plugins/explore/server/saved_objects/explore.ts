@@ -47,7 +47,7 @@ export const exploreSavedObjectType: SavedObjectsType = {
     getInAppUrl(obj) {
       return {
         // TODO:finalize this until flavor and view route are finalized
-        path: `/app/explore/logs/#/${encodeURIComponent(obj.id)}`,
+        path: `/app/explore/${obj.attributes.type}/#/view/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'discover.show',
       };
     },
@@ -67,6 +67,7 @@ export const exploreSavedObjectType: SavedObjectsType = {
       version: { type: 'integer' },
       type: { type: 'text' },
       visualization: { type: 'text', index: false },
+      uiState: { type: 'text', index: false },
     },
   },
 };

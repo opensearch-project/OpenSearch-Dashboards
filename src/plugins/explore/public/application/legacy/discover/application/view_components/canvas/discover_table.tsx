@@ -27,7 +27,7 @@ import { ExploreServices } from '../../../../../../types';
 import { DataGridTable } from '../../components/data_grid/data_grid_table';
 import { popularizeField } from '../../helpers/popularize_field';
 import { filterColumns } from '../utils/filter_columns';
-import { ResultStatus } from '../utils';
+import { QueryExecutionStatus } from '../../../../../utils/state_management/types';
 
 interface Props {
   scrollToTop?: () => void;
@@ -64,7 +64,7 @@ export const DiscoverTable = ({ scrollToTop, cacheKey, results: passedResults }:
     return [];
   });
 
-  const isLoading = useSelector((state: any) => state.ui.status === ResultStatus.LOADING);
+  const isLoading = useSelector((state: any) => state.ui.status === QueryExecutionStatus.LOADING);
   const reduxIndexPattern = useSelector((state: any) => {
     return state.query.dataset;
   });
