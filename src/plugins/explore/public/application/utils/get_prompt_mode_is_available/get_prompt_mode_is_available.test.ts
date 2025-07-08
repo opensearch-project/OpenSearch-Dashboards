@@ -5,12 +5,10 @@
 
 import { of } from 'rxjs';
 import { getPromptModeIsAvailable } from './get_prompt_mode_is_available';
-import { Dataset } from '../../../../../../../data/common';
-import { ExploreServices } from '../../../../../types';
+import { ExploreServices } from '../../../types';
 
 describe('getPromptModeIsAvailable', () => {
   let services: jest.Mocked<ExploreServices>;
-  let dataset: Dataset;
 
   beforeEach(() => {
     services = {
@@ -25,10 +23,6 @@ describe('getPromptModeIsAvailable', () => {
       },
     } as any;
 
-    dataset = {
-      dataSource: { id: 'test-id' },
-    } as any;
-
     jest.clearAllMocks();
   });
 
@@ -37,7 +31,7 @@ describe('getPromptModeIsAvailable', () => {
       any
     >).mockReturnValue({});
 
-    const result = await getPromptModeIsAvailable(services, dataset);
+    const result = await getPromptModeIsAvailable(services);
     expect(result).toBe(false);
   });
 
@@ -52,7 +46,7 @@ describe('getPromptModeIsAvailable', () => {
       },
     });
 
-    const result = await getPromptModeIsAvailable(services, dataset);
+    const result = await getPromptModeIsAvailable(services);
     expect(result).toBe(false);
     expect(mockIsEnabled$).toHaveBeenCalledWith({});
   });
@@ -68,7 +62,7 @@ describe('getPromptModeIsAvailable', () => {
       },
     });
 
-    const result = await getPromptModeIsAvailable(services, dataset);
+    const result = await getPromptModeIsAvailable(services);
     expect(result).toBe(true);
     expect(mockIsEnabled$).toHaveBeenCalledWith({});
   });
@@ -80,7 +74,7 @@ describe('getPromptModeIsAvailable', () => {
       throw new Error('Extension map error');
     });
 
-    const result = await getPromptModeIsAvailable(services, dataset);
+    const result = await getPromptModeIsAvailable(services);
     expect(result).toBe(false);
   });
 });
