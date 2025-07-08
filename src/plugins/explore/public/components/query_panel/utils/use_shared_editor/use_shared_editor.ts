@@ -25,6 +25,7 @@ import {
   selectEditorMode,
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
+import { toggleDualEditorMode } from '../../../../application/utils/state_management/slices';
 
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
 type CompletionItemProvider = monaco.languages.CompletionItemProvider;
@@ -219,6 +220,15 @@ export const useSharedEditor = ({
     [dispatch, editorContext]
   );
 
+  const onWrapperClick = useCallback(() => {
+    if (
+      (editorPosition === 'top' && editorMode === EditorMode.DualQuery) ||
+      (editorPosition === 'bottom' && editorMode === EditorMode.DualPrompt)
+    ) {
+      dispatch(toggleDualEditorMode());
+    }
+  }, [dispatch, editorMode, editorPosition]);
+
   return {
     isFocused,
     height: editorHeight,
@@ -226,6 +236,7 @@ export const useSharedEditor = ({
     useLatestTheme: true,
     editorDidMount,
     onChange,
+    onWrapperClick,
     languageConfiguration,
   };
 };

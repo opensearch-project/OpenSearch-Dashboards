@@ -44,7 +44,7 @@ export const TopEditor = () => {
   const editorMode = useSelector(selectEditorMode);
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const { topEditorRef, topEditorText } = useEditorContextByEditorComponent();
-  const { isFocused, ...editorProps } = useTopEditor();
+  const { isFocused, onWrapperClick, ...editorProps } = useTopEditor();
   // TODO: change me
   const editorClassPrefix = [EditorMode.DualPrompt, EditorMode.SinglePrompt].includes(editorMode)
     ? 'promptEditor'
@@ -60,20 +60,25 @@ export const TopEditor = () => {
     return editorMode === EditorMode.DualPrompt ? dualEditorPlaceholder : singleEditorPlaceholder;
   }, [editorMode, promptModeIsAvailable]);
 
+  // This is here to autofocus when toggling between the dual editors
+  // TODO: Ideally we don't need an useEffect here and do this explicitly.
   useEffect(() => {
-    if (editorMode !== EditorMode.DualQuery) {
+    if (editorMode === EditorMode.DualPrompt) {
       topEditorRef.current?.focus();
     }
   }, [editorMode, topEditorRef]);
 
   return (
     <div className={`${editorClassPrefix}Wrapper`}>
+      {/* Suppressing below as this should only happen for click events.  */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
       <div
         className={classNames(editorClassPrefix, {
           [`${editorClassPrefix}--readonly`]: isReadOnly,
           [`${editorClassPrefix}--focused`]: isFocused,
         })}
         data-test-subj="exploreReusableEditor"
+        onClick={onWrapperClick}
       >
         <CodeEditor {...editorProps} />
         {showPlaceholder ? (
