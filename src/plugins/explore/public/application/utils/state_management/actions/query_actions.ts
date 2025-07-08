@@ -19,7 +19,7 @@ import {
   createHistogramConfigs,
   getDimensions,
   buildPointSeriesData,
-} from '../../../legacy/discover/application/components/chart/utils';
+} from '../../../../components/chart/utils';
 import { IBucketDateHistogramAggConfig } from '../../../../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
