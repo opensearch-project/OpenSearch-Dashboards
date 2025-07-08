@@ -18,7 +18,7 @@ import { Dataset, DataStructure } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
 import { defaultMetricChartStyles } from '../../../../components/visualizations/metric/metric_vis_config';
-import { getPromptModeIsAvailable } from './get_prompt_mode_is_available';
+import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
 
 /**
