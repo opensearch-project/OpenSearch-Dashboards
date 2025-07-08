@@ -191,15 +191,15 @@ describe('TopEditor', () => {
     expect(screen.queryByText('Ask a question or search using </> PPL')).not.toBeInTheDocument();
   });
 
-  it('focuses editor when not in DualQuery mode', () => {
-    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+  it('focuses editor when in DualPrompt mode', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.DualPrompt);
 
     renderWithProvider(<TopEditor />);
 
     expect(mockTopEditorRef.current.focus).toHaveBeenCalled();
   });
 
-  it('does not focus editor when in DualQuery mode', () => {
+  it('does not focus editor when not in DualPrompt mode', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
 
     renderWithProvider(<TopEditor />);

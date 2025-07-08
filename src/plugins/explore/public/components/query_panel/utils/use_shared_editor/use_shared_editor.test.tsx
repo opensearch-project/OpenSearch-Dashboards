@@ -39,6 +39,10 @@ jest.mock('../../../../application/utils/state_management/actions/query_editor',
   onEditorRunActionCreator: jest.fn(),
 }));
 
+jest.mock('../../../../application/utils/state_management/slices', () => ({
+  toggleDualEditorMode: jest.fn(),
+}));
+
 jest.mock('../../../../../../data/public', () => ({
   getEffectiveLanguageForAutoComplete: jest.fn(),
 }));
@@ -77,6 +81,7 @@ import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { EditorMode } from '../../../../application/utils/state_management/types';
+import { toggleDualEditorMode } from '../../../../application/utils/state_management/slices';
 import IActionDescriptor = monaco.editor.IActionDescriptor;
 
 const mockUseDispatch = useDispatch as jest.MockedFunction<typeof useDispatch>;
@@ -153,7 +158,7 @@ describe('useSharedEditor', () => {
     jest.clearAllMocks();
   });
 
-  const renderUseSharedEditor = (props = {}) => {
+  const renderUseSharedEditor = (props = {}, selectorMock?: (selector: any) => any) => {
     const defaultProps = {
       setEditorRef: mockSetEditorRef,
       editorPosition: 'top' as const,
@@ -171,11 +176,14 @@ describe('useSharedEditor', () => {
       typeof getEffectiveLanguageForAutoComplete
     >;
 
-    mockUseSelector.mockImplementation((selector) => {
-      if (selector === selectEditorMode) return EditorMode.SingleQuery;
-      if (selector === selectQueryLanguage) return 'SQL';
-      return undefined;
-    });
+    mockUseSelector.mockImplementation(
+      selectorMock ||
+        ((selector) => {
+          if (selector === selectEditorMode) return EditorMode.SingleQuery;
+          if (selector === selectQueryLanguage) return 'SQL';
+          return undefined;
+        })
+    );
 
     mockUseIndexPatternContext.mockReturnValue({ indexPattern: { id: 'test' } } as any);
     mockGetEffectiveLanguageForAutoComplete.mockReturnValue('SQL');
@@ -198,6 +206,7 @@ describe('useSharedEditor', () => {
       useLatestTheme: true,
       editorDidMount: expect.any(Function),
       onChange: expect.any(Function),
+      onWrapperClick: expect.any(Function),
       languageConfiguration: {
         autoClosingPairs: [
           { open: '(', close: ')' },
@@ -425,6 +434,104 @@ describe('useSharedEditor', () => {
       });
 
       expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, newEditorContext);
+    });
+  });
+
+  describe('onWrapperClick', () => {
+    beforeEach(() => {
+      (toggleDualEditorMode as jest.MockedFunction<any>).mockReturnValue({
+        type: 'TOGGLE_DUAL_EDITOR_MODE',
+      });
+    });
+
+    it('should dispatch toggleDualEditorMode when top editor is clicked in DualQuery mode', () => {
+      const { result } = renderUseSharedEditor({ editorPosition: 'top' }, (selector) => {
+        if (selector === selectEditorMode) return EditorMode.DualQuery;
+        if (selector === selectQueryLanguage) return 'SQL';
+        return undefined;
+      });
+
+      act(() => {
+        result.current.onWrapperClick();
+      });
+
+      expect(toggleDualEditorMode).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'TOGGLE_DUAL_EDITOR_MODE' });
+    });
+
+    it('should dispatch toggleDualEditorMode when bottom editor is clicked in DualPrompt mode', () => {
+      const { result } = renderUseSharedEditor({ editorPosition: 'bottom' }, (selector) => {
+        if (selector === selectEditorMode) return EditorMode.DualPrompt;
+        if (selector === selectQueryLanguage) return 'SQL';
+        return undefined;
+      });
+
+      act(() => {
+        result.current.onWrapperClick();
+      });
+
+      expect(toggleDualEditorMode).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'TOGGLE_DUAL_EDITOR_MODE' });
+    });
+
+    it('should not dispatch toggleDualEditorMode when top editor is clicked in SingleQuery mode', () => {
+      const { result } = renderUseSharedEditor({ editorPosition: 'top' }, (selector) => {
+        if (selector === selectEditorMode) return EditorMode.SingleQuery;
+        if (selector === selectQueryLanguage) return 'SQL';
+        return undefined;
+      });
+
+      act(() => {
+        result.current.onWrapperClick();
+      });
+
+      expect(toggleDualEditorMode).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    it('should not dispatch toggleDualEditorMode when bottom editor is clicked in SingleQuery mode', () => {
+      const { result } = renderUseSharedEditor({ editorPosition: 'bottom' }, (selector) => {
+        if (selector === selectEditorMode) return EditorMode.SingleQuery;
+        if (selector === selectQueryLanguage) return 'SQL';
+        return undefined;
+      });
+
+      act(() => {
+        result.current.onWrapperClick();
+      });
+
+      expect(toggleDualEditorMode).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    it('should not dispatch toggleDualEditorMode when top editor is clicked in DualPrompt mode', () => {
+      const { result } = renderUseSharedEditor({ editorPosition: 'top' }, (selector) => {
+        if (selector === selectEditorMode) return EditorMode.DualPrompt;
+        if (selector === selectQueryLanguage) return 'SQL';
+        return undefined;
+      });
+
+      act(() => {
+        result.current.onWrapperClick();
+      });
+
+      expect(toggleDualEditorMode).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    it('should not dispatch toggleDualEditorMode when bottom editor is clicked in DualQuery mode', () => {
+      const { result } = renderUseSharedEditor({ editorPosition: 'bottom' }, (selector) => {
+        if (selector === selectEditorMode) return EditorMode.DualQuery;
+        if (selector === selectQueryLanguage) return 'SQL';
+        return undefined;
+      });
+
+      act(() => {
+        result.current.onWrapperClick();
+      });
+
+      expect(toggleDualEditorMode).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
     });
   });
 });

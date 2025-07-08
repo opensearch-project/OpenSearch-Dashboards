@@ -22,6 +22,7 @@ export interface UseSharedEditorReturnType {
   useLatestTheme: true;
   editorDidMount: (editor: IStandaloneCodeEditor) => () => IStandaloneCodeEditor;
   onChange: (text: string) => void;
+  onWrapperClick(): void;
   languageConfiguration: LanguageConfiguration;
 }
 
