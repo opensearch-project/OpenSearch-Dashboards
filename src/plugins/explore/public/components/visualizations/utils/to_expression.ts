@@ -32,16 +32,13 @@ export const toExpression = (
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[],
-    styleOptions: any,
-    selectedChartType: string,
-    axisColumnMappings?: AxisColumnMappings
+    styleOptions: any
   ) => any,
   transformedData?: Array<Record<string, any>>,
   numericalColumns?: VisColumn[],
   categoricalColumns?: VisColumn[],
   dateColumns?: VisColumn[],
-  styleOptions?: any,
-  axisColumnMappings?: AxisColumnMappings
+  styleOptions?: any
 ) => {
   if (!indexPattern || !searchContext) {
     return '';
@@ -62,9 +59,7 @@ export const toExpression = (
     numericalColumns!,
     categoricalColumns!,
     dateColumns!,
-    styleOptions,
-    'line',
-    axisColumnMappings
+    styleOptions
   );
 
   const vega = buildExpressionFunction<any>('vega', {

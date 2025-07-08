@@ -11,13 +11,14 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
 import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 import { useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
+import { getColumnMatchFromMapping } from '../../visualization_container_utils';
 
 interface VisColumnOption {
   column: VisColumn;
@@ -45,7 +46,10 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 }) => {
   const visualizationRegistry = useVisualizationRegistry();
 
-  const possibleMapping = visualizationRegistry.getPossibleMappingFromChartType(chartType);
+  const possibleMapping = useMemo(
+    () => visualizationRegistry.getVisualizationConfig(chartType)?.ui.availableMappings!,
+    [chartType, visualizationRegistry]
+  );
 
   const columnsCount = useMemo(
     () => [numericalColumns.length, categoricalColumns.length, dateColumns.length],
@@ -57,8 +61,8 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   const availableMappingsFromQuery = useMemo(
     () =>
       possibleMapping
-        .filter((mapping) => {
-          const [ruleNum, ruleCat, ruleDate] = mapping.columnMatch;
+        .filter((obj) => {
+          const [ruleNum, ruleCat, ruleDate] = getColumnMatchFromMapping(obj.mapping[0]);
           const [currNum, currCat, currDate] = columnsCount;
           return ruleNum <= currNum && ruleCat <= currCat && ruleDate <= currDate;
         })
@@ -72,7 +76,9 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     Object.keys(mapping).forEach((role) => allAxisRolesFromQuery.add(role as AxisRole));
   });
 
-  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>(currentMapping);
+  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>(
+    isEmpty(currentMapping) ? {} : currentMapping
+  );
 
   // Filter out those mapping (combination of axes selection) that no longer be satisify
   // by the current combination of axes selection
@@ -105,7 +111,9 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     const possibleSelection = possibleMapping.find((selection) =>
       selection.mapping.includes(mapping as any)
     );
-    return possibleSelection ? { mapping, columnMatch: possibleSelection.columnMatch } : undefined;
+    return possibleSelection
+      ? { mapping, columnMatch: getColumnMatchFromMapping(possibleSelection.mapping[0]) }
+      : undefined;
   }, [availableMappingsFromSelection, currentSelections, possibleMapping]);
 
   useEffect(() => {

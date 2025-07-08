@@ -113,5 +113,6 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
       defaults: defaultLineChartStyles,
       render: (props) => React.createElement(LineVisStyleControls, props),
     },
+    availableMappings: [], // TODO
   },
 });

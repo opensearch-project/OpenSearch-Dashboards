@@ -20,7 +20,7 @@ import {
   VisualizationRule,
 } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
-import { BAR_POSSIBLE_SELECTIONS, PIE_POSSIBLE_SELECTIONS } from './utils/chart_type_axes_mapping';
+import { getColumnMatchFromMapping } from './visualization_container_utils';
 
 /**
  * Registry for visualization rules and configurations.
@@ -99,9 +99,9 @@ export class VisualizationRegistry {
       }
     };
 
-    const possibleMapping = visualizationRegistry.getPossibleMappingFromChartType(chartTypeName);
-    const currentlyDisplayedMapping = possibleMapping.find(({ columnMatch }) =>
-      isEqual(columnMatch, rule.matchIndex)
+    const possibleMapping = this.getVisualizationConfig(chartTypeName)?.ui.availableMappings;
+    const currentlyDisplayedMapping = possibleMapping?.find(({ mapping }) =>
+      isEqual(getColumnMatchFromMapping(mapping[0]), rule.matchIndex)
     );
     return currentlyDisplayedMapping
       ? (Object.fromEntries(
@@ -215,28 +215,6 @@ export class VisualizationRegistry {
    */
   public getRules(): VisualizationRule[] {
     return [...this.rules];
-  }
-
-  public getPossibleMappingFromChartType(type: string) {
-    // TODO: finish
-    switch (type) {
-      case 'line':
-        return [];
-      case 'heatmap':
-        return [];
-      case 'pie':
-        return PIE_POSSIBLE_SELECTIONS;
-      case 'scatter':
-        return [];
-      case 'metric':
-        return [];
-      case 'bar':
-        return BAR_POSSIBLE_SELECTIONS;
-      case 'area':
-        return [];
-      default:
-        return [];
-    }
   }
 }
 

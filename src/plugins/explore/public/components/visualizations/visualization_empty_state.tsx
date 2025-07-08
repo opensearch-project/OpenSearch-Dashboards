@@ -12,7 +12,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { VisColumn, VisualizationRule } from './types';
@@ -81,6 +81,10 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
   // Local state for chart type, initialized from Redux
   const storedChartTypeId = useSelector(selectChartType);
   const [currChartTypeId, setCurrChartTypeId] = useState(storedChartTypeId);
+
+  useEffect(() => {
+    setCurrChartTypeId(storedChartTypeId);
+  }, [storedChartTypeId]);
 
   // Local state for field selection, avoid trigger update on express in visualization container
   // const [fieldsSelection, setFieldsSelection] = useState(
@@ -336,7 +340,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
     shouldManuallyGenerate.current = true;
 
     onChartTypeChange?.(chartTypeId);
-    setCurrChartTypeId(chartTypeId);
+    // setCurrChartTypeId(chartTypeId);
   };
 
   // useEffect(() => {
@@ -427,7 +431,7 @@ export const VisualizationEmptyState: React.FC<VisualizationEmptyStateProps> = (
             <EuiSuperSelect
               id="chartType"
               valueOfSelected={
-                chartTypeMappedOptions[currChartTypeId]
+                currChartTypeId && chartTypeMappedOptions[currChartTypeId]
                   ? chartTypeMappedOptions[currChartTypeId].disabled
                     ? undefined
                     : currChartTypeId
