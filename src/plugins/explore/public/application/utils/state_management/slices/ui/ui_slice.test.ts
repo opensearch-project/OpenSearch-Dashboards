@@ -9,6 +9,7 @@ import {
   setShowDatasetFields,
   setQueryPrompt,
   setUiState,
+  setShowHistogram,
   UIState,
 } from './ui_slice';
 
@@ -18,6 +19,7 @@ describe('UI Slice', () => {
     activeTabId: 'logs',
     showDatasetFields: true,
     prompt: '',
+    showHistogram: true,
   };
 
   it('should return the initial state', () => {
@@ -39,6 +41,7 @@ describe('UI Slice', () => {
       // Other state properties should remain unchanged
       expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
       expect(newState.prompt).toBe(initialState.prompt);
+      expect(newState.showHistogram).toBe(initialState.showHistogram);
     });
   });
 
@@ -56,6 +59,7 @@ describe('UI Slice', () => {
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.prompt).toBe(initialState.prompt);
+      expect(newState.showHistogram).toBe(initialState.showHistogram);
     });
   });
 
@@ -73,6 +77,25 @@ describe('UI Slice', () => {
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
+      expect(newState.showHistogram).toBe(initialState.showHistogram);
+    });
+  });
+
+  describe('setShowHistogram', () => {
+    it('should handle setShowHistogram action', () => {
+      const newValue = false;
+      const action = setShowHistogram(newValue);
+
+      expect(action.type).toBe('ui/setShowHistogram');
+      expect(action.payload).toBe(newValue);
+
+      const newState = uiReducer(initialState, action);
+      expect(newState.showHistogram).toBe(newValue);
+
+      // Other state properties should remain unchanged
+      expect(newState.activeTabId).toBe(initialState.activeTabId);
+      expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
+      expect(newState.prompt).toBe(initialState.prompt);
     });
   });
 

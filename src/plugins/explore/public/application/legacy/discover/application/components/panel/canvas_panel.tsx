@@ -19,7 +19,7 @@ export const CanvasPanel: React.FC<ICanvasPanelProps> = ({ children, testId, cla
       paddingSize="s"
       className={className ?? 'dscCanvas'}
       data-test-subj={testId}
-      borderRadius="l"
+      borderRadius="m"
     >
       {children}
     </EuiPanel>

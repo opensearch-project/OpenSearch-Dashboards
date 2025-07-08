@@ -58,7 +58,7 @@ import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription, combineLatest } from 'rxjs';
 import { Chart as IChart } from '../utils/point_series';
-import { ExploreServices } from '../../../../../../../types';
+import { ExploreServices } from '../../../types';
 
 export interface DiscoverHistogramProps {
   chartData: IChart;

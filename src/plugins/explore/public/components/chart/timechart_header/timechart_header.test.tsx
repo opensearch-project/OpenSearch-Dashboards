@@ -66,7 +66,6 @@ describe('timechart header', function () {
         description: 'second',
         scale: undefined,
       },
-      isEnhancementsEnabled: true,
     };
   });
 

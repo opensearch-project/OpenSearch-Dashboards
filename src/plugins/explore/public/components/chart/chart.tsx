@@ -5,21 +5,27 @@
 
 import './_histogram.scss';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import classNames from 'classnames';
-import { DataPublicPluginStart, search } from '../../../../../../../../data/public';
+import { DataPublicPluginStart, search } from '../../../../data/public';
 import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_header';
 import { DiscoverHistogram } from './histogram/histogram';
-import { ExploreServices } from '../../../../../../types';
+import { ExploreServices } from '../../types';
 import { Chart } from './utils';
-import { useDispatch, useSelector } from '../../utils/state_management';
-import { setInterval, clearResults } from '../../../../../utils/state_management/slices';
-import { executeQueries } from '../../../../../utils/state_management/actions/query_actions';
+import {
+  useDispatch,
+  useSelector,
+} from '../../application/legacy/discover/application/utils/state_management';
+import {
+  setInterval,
+  clearResults,
+  setShowHistogram,
+} from '../../application/utils/state_management/slices';
+import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
@@ -27,7 +33,7 @@ interface DiscoverChartProps {
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
   services: ExploreServices;
-  isEnhancementsEnabled: boolean;
+  showHistogram: boolean;
 }
 
 export const DiscoverChart = ({
@@ -36,7 +42,7 @@ export const DiscoverChart = ({
   config,
   data,
   services,
-  isEnhancementsEnabled,
+  showHistogram,
 }: DiscoverChartProps) => {
   const { from, to } = data.query.timefilter.timefilter.getTime();
   const timeRange = {
@@ -70,10 +76,9 @@ export const DiscoverChart = ({
     },
     [data, dispatch, services]
   );
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const timeChartHeader = (
-    <div className="dscChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
+    <div className="exploreChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
       <TimechartHeader
         bucketInterval={bucketInterval}
         dateFormat={config.get('dateFormat')}
@@ -81,7 +86,6 @@ export const DiscoverChart = ({
         options={search.aggs.intervalOptions}
         onChangeInterval={onChangeInterval}
         stateInterval={interval || ''}
-        isEnhancementsEnabled={isEnhancementsEnabled}
       />
     </div>
   );
@@ -93,12 +97,12 @@ export const DiscoverChart = ({
   const toggle = (
     <EuiToolTip content={toggleLabel}>
       <EuiButtonIcon
-        aria-expanded={isCollapsed}
+        aria-expanded={showHistogram}
         aria-label={toggleLabel}
         data-test-subj="histogramCollapseBtn"
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-        iconSize={'s'}
+        onClick={() => dispatch(setShowHistogram(!showHistogram))}
+        iconType={showHistogram ? 'arrowDown' : 'arrowRight'}
+        iconSize={'m'}
       />
     </EuiToolTip>
   );
@@ -107,7 +111,7 @@ export const DiscoverChart = ({
     <EuiFlexGroup
       direction="row"
       gutterSize="m"
-      className="dscChart__chartheader"
+      className="exploreChart__chartheader"
       data-test-subj="dscChartChartheader"
     >
       <EuiFlexItem grow={false}>{toggle}</EuiFlexItem>
@@ -117,25 +121,14 @@ export const DiscoverChart = ({
     </EuiFlexGroup>
   );
 
-  const histogramHeader = (
-    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="xs">
-      <EuiFlexItem grow={false}>{timeChartHeader}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  const showHistogram = !isEnhancementsEnabled || !isCollapsed;
-
   return (
     <EuiFlexGroup
       direction="column"
       gutterSize="none"
-      className={classNames('dscChart__wrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'dscChart__wrapper--enhancement': isEnhancementsEnabled,
-      })}
+      className="exploreChart__wrapper exploreChart__wrapper--enhancement"
       data-test-subj="dscChartWrapper"
     >
-      {isEnhancementsEnabled ? queryEnhancedHistogramHeader : histogramHeader}
+      {queryEnhancedHistogramHeader}
       {chartData && showHistogram && (
         <EuiFlexItem grow={false}>
           <section

@@ -6,15 +6,16 @@
 import './discover_chart_container.scss';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { ExploreServices } from '../../../../../../types';
-import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { DiscoverChart } from '../../components/chart/chart';
-import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
+import { ExploreServices } from '../../types';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { DiscoverChart } from './chart';
+import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import {
   histogramResultsProcessor,
   defaultPrepareQuery,
-} from '../../../../../utils/state_management/actions/query_actions';
-import { RootState } from '../../../../../utils/state_management/store';
+} from '../../application/utils/state_management/actions/query_actions';
+import { RootState } from '../../application/utils/state_management/store';
+import { selectShowHistogram } from '../../application/utils/state_management/selectors';
 
 export const DiscoverChartContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -23,6 +24,7 @@ export const DiscoverChartContainer = () => {
   const { interval } = useSelector((state: RootState) => state.legacy);
   const query = useSelector((state: RootState) => state.query);
   const results = useSelector((state: RootState) => state.results);
+  const showHistogram = useSelector(selectShowHistogram);
 
   // Use default cache key computation for histogram data
   const cacheKey = useMemo(() => {
@@ -66,7 +68,7 @@ export const DiscoverChartContainer = () => {
       config={uiSettings}
       data={data}
       services={services}
-      isEnhancementsEnabled={true}
+      showHistogram={showHistogram}
     />
   );
 };
