@@ -14,7 +14,11 @@ import { PLUGIN_ID } from '../../../../../../../common';
 import { ExploreServices } from '../../../../../../types';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { useDispatch, useSelector } from '../../utils/state_management';
-import { setSavedQuery } from '../../../../../utils/state_management/slices';
+import {
+  setSavedQuery,
+  clearResults,
+  setQuery,
+} from '../../../../../utils/state_management/slices';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
 
 import './discover_canvas.scss';
@@ -176,6 +180,16 @@ export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
       showSearchBar={false}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
       showSaveQuery={true}
+      showDatasetSelect={true}
+      datasetSelectProps={{
+        onSelect: (dataset: any) => {
+          if (!dataset) return;
+
+          dispatch(clearResults());
+          dispatch(setQuery(queryString.getQuery()));
+          // Execute queries will be handled by the query state changes
+        },
+      }}
       useDefaultBehaviors
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
