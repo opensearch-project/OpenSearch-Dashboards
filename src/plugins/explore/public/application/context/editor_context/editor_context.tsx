@@ -37,11 +37,11 @@ export interface InternalEditorContextValue {
  */
 export interface EditorContextValue {
   /**
-   * Context-sensitive editor text
+   * Context-sensitive currently focused editor text
    */
   editorText: string;
   /**
-   * Context-sensitive setEditor text
+   * Context-sensitive set currently focused editor text
    */
   setEditorText: Dispatch<SetStateAction<string>>;
   /**
@@ -104,7 +104,6 @@ export const EditorContextProvider: FC = ({ children }) => {
 
 export const useEditorContext = (): EditorContextValue => {
   const context = useContext(EditorContext);
-  const editorState = useSelector(selectEditorMode);
   const editorMode = useSelector(selectEditorMode);
 
   if (!context) {
@@ -113,18 +112,18 @@ export const useEditorContext = (): EditorContextValue => {
   const { bottomEditorText, topEditorText, setBottomEditorText, setTopEditorText } = context;
 
   const editorText = useMemo(() => {
-    if (editorState === EditorMode.DualQuery) {
+    if (editorMode === EditorMode.DualQuery) {
       return bottomEditorText;
     }
     return topEditorText;
-  }, [editorState, bottomEditorText, topEditorText]);
+  }, [editorMode, bottomEditorText, topEditorText]);
 
   const setEditorText = useMemo(() => {
-    if (editorState === EditorMode.DualQuery) {
+    if (editorMode === EditorMode.DualQuery) {
       return setBottomEditorText;
     }
     return setTopEditorText;
-  }, [editorState, setBottomEditorText, setTopEditorText]);
+  }, [editorMode, setBottomEditorText, setTopEditorText]);
 
   const clearEditors = useCallback(() => {
     setBottomEditorText('');

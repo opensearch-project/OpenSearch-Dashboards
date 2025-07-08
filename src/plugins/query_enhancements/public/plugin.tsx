@@ -6,7 +6,7 @@ import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import { DataStorage, OSD_FIELD_TYPES } from '../../data/common';
+import { DataStorage, Filter, OSD_FIELD_TYPES } from '../../data/common';
 import {
   createEditor,
   DefaultInput,
@@ -26,6 +26,8 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
+import { PPLFilterUtils } from './search/filters';
+import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
 
 export class QueryEnhancementsPlugin
   implements
@@ -68,6 +70,8 @@ export class QueryEnhancementsPlugin
         usageCollector: data.search.usageCollector,
       }),
       getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      addFiltersToQuery: PPLFilterUtils.addFiltersToQuery,
+      addFiltersToPrompt: NaturalLanguageFilterUtils.addFiltersToPrompt,
       fields: {
         sortable: false,
         visualizable: false,
