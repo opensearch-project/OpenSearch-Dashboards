@@ -21,6 +21,7 @@ export async function saveSavedExplore({
   searchContext,
   services,
   startSyncingQueryStateWithUrl,
+  openAfterSave,
   newCopyOnSave,
 }: {
   savedExplore: SavedExplore;
@@ -29,6 +30,7 @@ export async function saveSavedExplore({
   searchContext: ExecutionContextSearch;
   services: Partial<CoreStart> & ExploreServices;
   startSyncingQueryStateWithUrl: () => void;
+  openAfterSave: boolean;
   newCopyOnSave?: boolean;
 }): Promise<SaveResult | undefined> {
   const { toastNotifications, chrome, history, store } = services;
@@ -61,7 +63,9 @@ export async function saveSavedExplore({
 
     const id = await savedExplore.save(saveOptions);
 
-    if (id) {
+    // When openAfterSave is true,it indicates save should update toast, title, breadcrumbs, URL
+
+    if (id && openAfterSave) {
       toastNotifications.addSuccess({
         title: i18n.translate('explore.notifications.SavedExploreTitle', {
           defaultMessage: `Search '{savedQueryTitle}' was saved`,
@@ -71,19 +75,21 @@ export async function saveSavedExplore({
         }),
         'data-test-subj': 'savedExploreSuccess',
       });
-    }
-    if (id !== originalId) {
-      history().push(`/view/${encodeURIComponent(id)}`);
-    } else {
-      // Update browser title and breadcrumbs
-      chrome.docTitle.change(newTitle);
-      chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedExplore.title }]);
+
+      if (id !== originalId) {
+        history().push(`/view/${encodeURIComponent(id)}`);
+      } else {
+        // Update browser title and breadcrumbs
+        chrome.docTitle.change(newTitle);
+        chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedExplore.title }]);
+      }
+
+      store.dispatch(setSavedSearch(id));
+
+      // starts syncing `_g` portion of url with query services
+      startSyncingQueryStateWithUrl();
     }
 
-    store.dispatch(setSavedSearch(id));
-
-    // starts syncing `_g` portion of url with query services
-    startSyncingQueryStateWithUrl();
     return { id };
   } catch (error) {
     toastNotifications.addDanger({
