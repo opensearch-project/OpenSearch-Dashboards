@@ -246,3 +246,95 @@ exports[`<NavGroups /> should render correctly 1`] = `
   </div>
 </div>
 `;
+
+exports[`<NavGroups /> should render correctly when nav collapse 1`] = `
+<div>
+  <div
+    class="euiFlexItem"
+  >
+    <nav
+      class="euiSideNav leftNavSideNavWrapper euiSideNav-isOpenMobile"
+    >
+      <div
+        class="euiSideNav__content"
+        id="euiSideNavContent_generated-id"
+      >
+        <div
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-fake-item"
+        >
+          <div
+            class="euiSideNavItemButton nav-link-fake-item-button"
+          >
+            <span
+              class="euiSideNavItemButton__content"
+            >
+              <span
+                class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+              />
+            </span>
+          </div>
+          <div
+            class="euiSideNavItem__items"
+          >
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item nav-link-item-active-false  nav-link-parent-item"
+            >
+              <button
+                aria-label="pure link"
+                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn"
+                hidden=""
+                type="button"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <div
+                    class="euiPopover euiPopover--anchorUpLeft euiSideNavItemButton__icon"
+                  >
+                    <div
+                      class="euiPopover__anchor"
+                    />
+                  </div>
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                    title="pure link"
+                  >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiAccordion__button"
+                      data-test-subj="collapsibleNavAppLink-pure"
+                    >
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                        >
+                          pure link
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          class="leftNavCustomizedAccordionIcon"
+                          data-euiicon-type="minus"
+                        />
+                      </div>
+                    </div>
+                  </span>
+                  <span
+                    data-euiicon-type="arrowDown"
+                  />
+                </span>
+              </button>
+              <div
+                class="euiSideNavItem__items"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+`;
