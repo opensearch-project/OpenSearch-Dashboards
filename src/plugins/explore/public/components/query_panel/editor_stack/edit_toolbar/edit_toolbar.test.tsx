@@ -84,8 +84,17 @@ describe('EditToolbar', () => {
     expect(clearButton).toBeInTheDocument();
   });
 
-  it('displays "Edit Query" text in dual query mode', () => {
+  it('displays "Edit Prompt" text in dual query mode', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
+
+    renderWithProvider(<EditToolbar />);
+
+    const editButton = screen.getByRole('button', { name: /edit prompt/i });
+    expect(editButton).toHaveTextContent('Edit Prompt');
+  });
+
+  it('displays "Edit Query" text in dual prompt mode', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.DualPrompt);
 
     renderWithProvider(<EditToolbar />);
 
