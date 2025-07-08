@@ -11,7 +11,6 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiButton,
-  EuiButtonGroup,
   EuiCheckbox,
   EuiTitle,
   EuiSpacer,
