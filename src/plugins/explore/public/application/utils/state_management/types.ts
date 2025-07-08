@@ -4,17 +4,14 @@
  */
 
 import { RootState } from './store';
+import {
+  QueryStatus as DataPluginQueryStatus,
+  ResultStatus as DataPluginResultStatus,
+} from '../../../../../data/public';
 
-/**
- * Enum for query result status
- */
-export enum QueryExecutionStatus {
-  UNINITIALIZED = 'uninitialized',
-  LOADING = 'loading', // initial data load
-  READY = 'ready', // results came back
-  NO_RESULTS = 'none', // no results came back
-  ERROR = 'error', // error occurred
-}
+export type QueryResultStatus = DataPluginQueryStatus;
+export const QueryExecutionStatus = DataPluginResultStatus;
+export type QueryExecutionStatus = DataPluginResultStatus;
 
 /**
  * Interface for search data
@@ -29,15 +26,6 @@ export interface SearchData {
   chartData?: import('../interfaces').ChartData;
   title?: string;
   error?: Error;
-}
-
-/**
- * Interface for query status
- */
-export interface QueryStatus {
-  status: QueryExecutionStatus;
-  elapsedMs: number;
-  startTime: number;
 }
 
 /**

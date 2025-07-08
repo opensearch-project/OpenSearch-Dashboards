@@ -4,17 +4,22 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EditorMode, QueryExecutionStatus } from '../../types';
+import { EditorMode, QueryResultStatus, QueryExecutionStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
 
 export interface QueryEditorSliceState {
-  executionStatus: QueryExecutionStatus;
+  queryStatus: QueryResultStatus;
   editorMode: EditorMode;
   promptModeIsAvailable: boolean;
 }
 
 const initialState: QueryEditorSliceState = {
-  executionStatus: QueryExecutionStatus.UNINITIALIZED,
+  queryStatus: {
+    status: QueryExecutionStatus.UNINITIALIZED,
+    elapsedMs: undefined,
+    startTime: undefined,
+    body: undefined,
+  },
   editorMode: DEFAULT_EDITOR_MODE,
   promptModeIsAvailable: false,
 };
@@ -26,8 +31,11 @@ const queryEditorSlice = createSlice({
     setQueryEditorState: (_, action: PayloadAction<QueryEditorSliceState>) => {
       return action.payload;
     },
-    setExecutionStatus: (state, action: PayloadAction<QueryExecutionStatus>) => {
-      state.executionStatus = action.payload;
+    setQueryStatus: (state, action: PayloadAction<QueryResultStatus>) => {
+      state.queryStatus = action.payload;
+    },
+    updateQueryStatus: (state, action: PayloadAction<Partial<QueryResultStatus>>) => {
+      state.queryStatus = { ...state.queryStatus, ...action.payload };
     },
     setEditorMode: (state, action: PayloadAction<EditorMode>) => {
       state.editorMode = action.payload;
@@ -50,7 +58,8 @@ const queryEditorSlice = createSlice({
 
 export const {
   setQueryEditorState,
-  setExecutionStatus,
+  setQueryStatus,
+  updateQueryStatus,
   setEditorMode,
   // TODO: Need to use this when we change data set
   setPromptModeIsAvailable,
