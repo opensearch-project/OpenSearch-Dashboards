@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { BottomEditor } from './bottom_editor';
@@ -233,5 +233,36 @@ describe('BottomEditor', () => {
     renderWithProvider(<BottomEditor />);
 
     expect(screen.queryByText('Search using </> PPL')).not.toBeInTheDocument();
+  });
+
+  describe('onWrapperClick', () => {
+    it('calls onWrapperClick when editor wrapper is clicked', () => {
+      const mockOnWrapperClick = jest.fn();
+      mockUseBottomEditor.mockReturnValue({
+        isFocused: false,
+        onWrapperClick: mockOnWrapperClick,
+        ...mockEditorProps,
+      } as any);
+
+      const { container } = renderWithProvider(<BottomEditor />);
+      const editorWrapper = container.querySelector('[data-test-subj="exploreReusableEditor"]');
+
+      fireEvent.click(editorWrapper!);
+
+      expect(mockOnWrapperClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call onWrapperClick when editor wrapper is not clicked', () => {
+      const mockOnWrapperClick = jest.fn();
+      mockUseBottomEditor.mockReturnValue({
+        isFocused: false,
+        onWrapperClick: mockOnWrapperClick,
+        ...mockEditorProps,
+      } as any);
+
+      renderWithProvider(<BottomEditor />);
+
+      expect(mockOnWrapperClick).not.toHaveBeenCalled();
+    });
   });
 });

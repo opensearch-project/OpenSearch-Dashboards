@@ -17,8 +17,8 @@ import './edit_toolbar.scss';
 const editQueryText = i18n.translate('explore.queryPanel.queryEditor.editQuery', {
   defaultMessage: 'Edit Query',
 });
-const editPromptText = i18n.translate('explore.queryPanel.queryEditor.editQuery', {
-  defaultMessage: 'Edit Query',
+const editPromptText = i18n.translate('explore.queryPanel.queryEditor.editPrompt', {
+  defaultMessage: 'Edit Prompt',
 });
 const clearText = i18n.translate('explore.queryPanel.queryEditor.clearEditor', {
   defaultMessage: 'Clear Editor',
