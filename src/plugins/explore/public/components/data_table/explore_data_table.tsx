@@ -12,7 +12,7 @@ import {
   SAMPLE_SIZE_SETTING,
 } from '../../../common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { IndexPatternField, opensearchFilters, UI_SETTINGS } from '../../../../data/public';
+import { UI_SETTINGS } from '../../../../data/public';
 import { DocViewFilterFn } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
 import {
@@ -35,14 +35,13 @@ import { addColumn, removeColumn } from '../../application/utils/state_managemen
 import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
 import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
-import { useEditorContext } from '../../application/context';
-import { EditorMode } from '../../application/utils/state_management/types';
+import { useChangeQueryEditor } from '../../application/hooks';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { uiSettings, data, capabilities, indexPatterns } = services;
-  const editorContext = useEditorContext();
 
+  const { onAddFilter } = useChangeQueryEditor();
   const savedSearch = useSelector(selectSavedSearch);
   const columns = useSelector(selectColumns);
   const { indexPattern } = useIndexPatternContext();
@@ -138,30 +137,6 @@ const ExploreDataTableComponent = () => {
       dispatch(removeColumn(col));
     },
     [indexPattern, capabilities.discover?.save, indexPatterns, dispatch]
-  );
-
-  const onAddFilter = useCallback(
-    (field: string | IndexPatternField, values: string, operation: '+' | '-') => {
-      if (!indexPattern) return;
-
-      const newFilters = opensearchFilters.generateFilters(
-        data.query.filterManager,
-        field,
-        values,
-        operation,
-        indexPattern.id ?? ''
-      );
-      const languageConfig = data.query.queryString
-        .getLanguageService()
-        .getLanguage(query.language);
-      const newText =
-        editorContext.editorMode === EditorMode.SingleQuery ||
-        editorContext.editorMode === EditorMode.DualQuery
-          ? languageConfig?.addFiltersToQuery?.(editorContext.query, newFilters)
-          : languageConfig?.addFiltersToPrompt?.(editorContext.prompt, newFilters);
-      if (newText) editorContext.setEditorText(newText);
-    },
-    [data.query.filterManager, data.query.queryString, editorContext, indexPattern, query.language]
   );
 
   return (

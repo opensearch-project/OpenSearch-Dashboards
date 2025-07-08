@@ -64,10 +64,6 @@ export interface EditorContextValue {
    * Gives the prompt string
    */
   prompt: string;
-  /**
-   * Current {@link EditorMode}
-   */
-  editorMode: EditorMode;
 }
 
 const EditorContext = createContext<InternalEditorContextValue>({
@@ -167,7 +163,6 @@ export const useEditorContext = (): EditorContextValue => {
       setBottomEditorText,
       query,
       prompt,
-      editorMode,
     }),
     [
       editorText,
@@ -177,7 +172,6 @@ export const useEditorContext = (): EditorContextValue => {
       setBottomEditorText,
       query,
       prompt,
-      editorMode,
     ]
   );
 };

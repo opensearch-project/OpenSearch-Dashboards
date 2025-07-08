@@ -5,11 +5,7 @@
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  IndexPatternField,
-  UI_SETTINGS,
-  opensearchFilters,
-} from '../../../../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import {
   addColumn,
@@ -27,21 +23,13 @@ import {
   defaultResultsProcessor,
   defaultPrepareQuery,
 } from '../../../../../utils/state_management/actions/query_actions';
-import { useEditorContext } from '../../../../../context';
-import { EditorMode } from '../../../../../utils/state_management/types';
+import { useChangeQueryEditor } from '../../../../../hooks';
 
 export function DiscoverPanel() {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const {
-    data: {
-      query: { filterManager, queryString },
-    },
-    capabilities,
-    application,
-    uiSettings,
-  } = services;
+  const { capabilities, application, uiSettings } = services;
 
-  const editorContext = useEditorContext();
+  const { onAddFilter } = useChangeQueryEditor();
   const columns = useSelector(selectColumns);
   const query = useSelector(selectQuery);
   const results = useSelector((state: any) => state.results);
@@ -88,28 +76,6 @@ export function DiscoverPanel() {
       prevColumns.current = columns;
     }
   }, [columns, dispatch, indexPattern?.timeFieldName]);
-
-  const onAddFilter = useCallback(
-    (field: string | IndexPatternField, values: string, operation: '+' | '-') => {
-      if (!indexPattern) return;
-
-      const newFilters = opensearchFilters.generateFilters(
-        filterManager,
-        field,
-        values,
-        operation,
-        indexPattern.id ?? ''
-      );
-      const languageConfig = queryString.getLanguageService().getLanguage(query.language);
-      const newText =
-        editorContext.editorMode === EditorMode.SingleQuery ||
-        editorContext.editorMode === EditorMode.DualQuery
-          ? languageConfig?.addFiltersToQuery?.(editorContext.query, newFilters)
-          : languageConfig?.addFiltersToPrompt?.(editorContext.prompt, newFilters);
-      if (newText) editorContext.setEditorText(newText);
-    },
-    [indexPattern, filterManager, queryString, query.language, editorContext]
-  );
 
   const onCreateIndexPattern = useCallback(async () => {
     if (!indexPattern?.title) return;
