@@ -73,7 +73,6 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import {
   selectEditorMode,
   selectQueryLanguage,
-  selectPromptModeIsAvailable,
 } from '../../../../application/utils/state_management/selectors';
 import { useIndexPatternContext } from '../../../../application/components/index_pattern_context';
 import { useSharedEditor } from '../use_shared_editor';
