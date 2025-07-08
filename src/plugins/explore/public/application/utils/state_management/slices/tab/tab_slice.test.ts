@@ -3,15 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { setTabState, setStyleOptions, setChartType, tabReducer, TabState } from './tab_slice';
+import { setChartType, setStyleOptions, setTabState, tabReducer, TabState } from './tab_slice';
+import { ColorSchemas } from '../../../../../components/visualizations/types';
 
 describe('tabSlice reducers', () => {
   // Define the initial state for testing
   const initialState: TabState = {
     logs: {},
     visualizations: {
-      styleOptions: undefined,
-      chartType: 'line',
+      chartType: 'metric',
+      styleOptions: {
+        colorSchema: ColorSchemas.BLUES,
+        fontSize: 60,
+        showTitle: true,
+        title: '',
+        useColor: false,
+      },
     },
   };
 
