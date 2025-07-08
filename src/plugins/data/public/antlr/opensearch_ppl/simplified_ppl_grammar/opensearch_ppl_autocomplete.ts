@@ -117,6 +117,7 @@ export function processVisitedRules(
   let suggestSourcesOrTables: OpenSearchPplAutocompleteResult['suggestSourcesOrTables'];
   let suggestAggregateFunctions = false;
   let shouldSuggestColumns = false;
+  let suggestFieldsInAggregateFunction = false;
   let suggestValuesForColumn: string | undefined;
   let suggestRenameAs: boolean = false;
   const rerunWithoutRules: number[] = [];
@@ -135,6 +136,15 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchPPLParser.RULE_qualifiedName: {
+        // Check if we're in a stats function context
+        const isInStatsFunction = (parentRuleList ?? []).includes(
+          OpenSearchPPLParser.RULE_statsFunction
+        );
+
+        if (isInStatsFunction) {
+          suggestFieldsInAggregateFunction = true;
+        }
+
         // Avoids suggestion fieldNames when last token is source. eg: source = , should suggest only tableName and not fieldname
         const lastTokenResult = findLastNonSpaceOperatorToken(tokenStream, cursorTokenIndex);
         if (lastTokenResult?.token.type === tokenDictionary.SOURCE) {
@@ -257,6 +267,7 @@ export function processVisitedRules(
     suggestSourcesOrTables,
     suggestAggregateFunctions,
     shouldSuggestColumns,
+    suggestFieldsInAggregateFunction,
     suggestValuesForColumn,
     suggestRenameAs,
     rerunWithoutRules,

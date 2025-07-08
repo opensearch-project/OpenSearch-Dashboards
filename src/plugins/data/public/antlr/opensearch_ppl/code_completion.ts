@@ -66,7 +66,7 @@ export const getDefaultSuggestions = async ({
 
     if (suggestions.suggestAggregateFunctions) {
       finalSuggestions.push(
-        ...PPL_AGGREGATE_FUNCTIONS.map((af) => ({
+        ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
           insertText: af + ' ',
@@ -130,7 +130,6 @@ export const getSimplifiedPPLSuggestions = async ({
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
     });
-
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
@@ -148,7 +147,7 @@ export const getSimplifiedPPLSuggestions = async ({
       finalSuggestions.push(
         ...formatAvailableFieldsToSuggestions(
           availableFields,
-          (f: string) => `${f} `,
+          (f: string) => (suggestions.suggestFieldsInAggregateFunction ? `${f}` : `${f} `),
           (f: string) => {
             return f.startsWith('_') ? `9` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
           }
@@ -173,10 +172,11 @@ export const getSimplifiedPPLSuggestions = async ({
 
     if (suggestions.suggestAggregateFunctions) {
       finalSuggestions.push(
-        ...PPL_AGGREGATE_FUNCTIONS.map((af) => ({
+        ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
-          insertText: af + ' ',
+          insertText: prop?.optionalParam ? `${af}() $0` : `${af}($0)`,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
           detail: SuggestionItemDetailsTags.AggregateFunction,
         }))
       );
@@ -213,7 +213,6 @@ export const getSimplifiedPPLSuggestions = async ({
         }))
       );
     }
-
     return finalSuggestions;
   } catch (e) {
     return [];

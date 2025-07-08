@@ -106,8 +106,7 @@ describe('ppl code_completion', () => {
 
     it('should suggest aggregate functions for stats', async () => {
       const result = await getSimpleSuggestions('source = test-index | stats ');
-
-      [...PPL_AGGREGATE_FUNCTIONS, 'count'].forEach((af) => {
+      Object.keys(PPL_AGGREGATE_FUNCTIONS).forEach((af) => {
         checkSuggestionsContain(result, {
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
