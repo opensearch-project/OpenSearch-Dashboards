@@ -5,6 +5,7 @@
 
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import React from 'react';
 import { PatternItem } from '../patterns_table';
 import { isValidFiniteNumber } from './utils';
 
@@ -31,7 +32,9 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
     name: i18n.translate('explore.patterns.table.column.pattern', {
       defaultMessage: 'Pattern',
     }),
-    render: (pattern: string) => pattern || '—',
+    render: (pattern: string) => {
+      return <mark>{pattern || '-'}</mark>;
+    },
   },
   {
     field: 'sample',
