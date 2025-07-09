@@ -222,7 +222,12 @@ const getPreloadedQueryEditorState = async (
       : DEFAULT_EDITOR_MODE;
 
   return {
-    executionStatus: QueryExecutionStatus.UNINITIALIZED,
+    queryStatus: {
+      status: QueryExecutionStatus.UNINITIALIZED,
+      elapsedMs: undefined,
+      startTime: undefined,
+      body: undefined,
+    },
     promptModeIsAvailable,
     editorMode,
   };
