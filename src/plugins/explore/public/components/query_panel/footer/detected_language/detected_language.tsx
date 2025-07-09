@@ -6,7 +6,10 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
-import { selectEditorMode } from '../../../../application/utils/state_management/selectors';
+import {
+  selectEditorMode,
+  selectPromptModeIsAvailable,
+} from '../../../../application/utils/state_management/selectors';
 import './detected_language.scss';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { LanguageReference } from './language_reference';
@@ -17,9 +20,15 @@ const naturalLanguageText = i18n.translate('explore.queryPanel.detectedLanguage.
 
 export const DetectedLanguage = () => {
   const editorMode = useSelector(selectEditorMode);
+  const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
 
   const content = useMemo(() => {
+    if (!promptModeIsAvailable) {
+      return <LanguageReference />;
+    }
+
     switch (editorMode) {
+      case EditorMode.SingleEmpty:
       case EditorMode.DualQuery:
       case EditorMode.DualPrompt: {
         return (
@@ -36,7 +45,7 @@ export const DetectedLanguage = () => {
       default:
         throw new Error(`DetectedLanguage encountered unsupported editorMode: ${editorMode}`);
     }
-  }, [editorMode]);
+  }, [editorMode, promptModeIsAvailable]);
 
   return (
     <span className="exploreDetectedLanguage" data-test-subj="exploreDetectedLanguage">

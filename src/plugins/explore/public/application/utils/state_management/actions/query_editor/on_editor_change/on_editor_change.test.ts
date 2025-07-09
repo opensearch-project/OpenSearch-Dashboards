@@ -56,11 +56,11 @@ describe('onEditorChangeActionCreator', () => {
       prompt: 'current prompt',
     };
 
-    // Mock the return value of setEditorMode
-    mockSetEditorMode.mockReturnValue({
+    // Mock the return value of setEditorMode to return the mode that was passed to it
+    mockSetEditorMode.mockImplementation((mode: EditorMode) => ({
       type: 'queryEditor/setEditorMode',
-      payload: EditorMode.SingleQuery,
-    });
+      payload: mode,
+    }));
   });
 
   describe('basic functionality', () => {
@@ -148,6 +148,203 @@ describe('onEditorChangeActionCreator', () => {
     });
   });
 
+  describe('empty text handling', () => {
+    it('should change to SingleEmpty mode when text is empty and editor is not already in SingleEmpty mode', () => {
+      const mockState = {
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: true,
+        },
+      } as RootState;
+
+      mockGetState.mockReturnValue(mockState);
+      mockSelectPromptModeIsAvailable.mockReturnValue(true);
+
+      const actionCreator = onEditorChangeActionCreator('', mockEditorContext);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('');
+      expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
+      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'queryEditor/setEditorMode',
+        payload: EditorMode.SingleEmpty,
+      });
+      expect(mockQueryTypeDetector).not.toHaveBeenCalled();
+    });
+
+    it('should not change mode when text is empty and editor is already in SingleEmpty mode', () => {
+      const mockState = {
+        queryEditor: {
+          editorMode: EditorMode.SingleEmpty,
+          promptModeIsAvailable: true,
+        },
+      } as RootState;
+
+      mockGetState.mockReturnValue(mockState);
+      mockSelectPromptModeIsAvailable.mockReturnValue(true);
+
+      // Mock what the type detector returns for empty text
+      mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.PPL } as DetectionResult);
+
+      const actionCreator = onEditorChangeActionCreator('', mockEditorContext);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('');
+      expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
+      // Empty text from SingleEmpty mode gets detected as PPL and switches to SingleQuery
+      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'queryEditor/setEditorMode',
+        payload: EditorMode.SingleQuery,
+      });
+      expect(mockQueryTypeDetector).toHaveBeenCalledWith('');
+    });
+
+    it('should not change to SingleEmpty mode when text is empty and promptModeIsAvailable is false', () => {
+      const mockState = {
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: false,
+        },
+      } as RootState;
+
+      mockGetState.mockReturnValue(mockState);
+      mockSelectPromptModeIsAvailable.mockReturnValue(false);
+
+      const actionCreator = onEditorChangeActionCreator('', mockEditorContext);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('');
+      expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
+      // When promptModeIsAvailable is false and editor is already SingleQuery, no mode change occurs
+      expect(mockSetEditorMode).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockQueryTypeDetector).not.toHaveBeenCalled();
+    });
+
+    it('should change to SingleEmpty mode when text contains only whitespace and editor is not already in SingleEmpty mode', () => {
+      const mockState = {
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: true,
+        },
+      } as RootState;
+
+      mockGetState.mockReturnValue(mockState);
+      mockSelectPromptModeIsAvailable.mockReturnValue(true);
+
+      const actionCreator = onEditorChangeActionCreator('   \n\t  ', mockEditorContext);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('   \n\t  ');
+      expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
+      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'queryEditor/setEditorMode',
+        payload: EditorMode.SingleEmpty,
+      });
+      expect(mockQueryTypeDetector).not.toHaveBeenCalled();
+    });
+
+    it('should change to SingleEmpty mode when text contains only spaces and editor is not already in SingleEmpty mode', () => {
+      const mockState = {
+        queryEditor: {
+          editorMode: EditorMode.SinglePrompt,
+          promptModeIsAvailable: true,
+        },
+      } as RootState;
+
+      mockGetState.mockReturnValue(mockState);
+      mockSelectPromptModeIsAvailable.mockReturnValue(true);
+
+      const actionCreator = onEditorChangeActionCreator('     ', mockEditorContext);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('     ');
+      expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
+      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'queryEditor/setEditorMode',
+        payload: EditorMode.SingleEmpty,
+      });
+      expect(mockQueryTypeDetector).not.toHaveBeenCalled();
+    });
+
+    it('should not change to SingleEmpty mode when text contains only whitespace and promptModeIsAvailable is false', () => {
+      const mockState = {
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: false,
+        },
+      } as RootState;
+
+      mockGetState.mockReturnValue(mockState);
+      mockSelectPromptModeIsAvailable.mockReturnValue(false);
+
+      const actionCreator = onEditorChangeActionCreator('  \t\n  ', mockEditorContext);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('  \t\n  ');
+      expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
+      // When promptModeIsAvailable is false and editor is already SingleQuery, no mode change occurs
+      expect(mockSetEditorMode).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockQueryTypeDetector).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('SingleEmpty mode', () => {
+    beforeEach(() => {
+      mockGetState.mockReturnValue({
+        queryEditor: {
+          editorMode: EditorMode.SingleEmpty,
+          promptModeIsAvailable: true,
+        },
+      } as RootState);
+      mockSelectPromptModeIsAvailable.mockReturnValue(true);
+    });
+
+    it('should call QueryTypeDetector.detect with the text', () => {
+      const testText = '| where something=somethingElse';
+      mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.PPL } as DetectionResult);
+
+      const actionCreator = onEditorChangeActionCreator(testText, mockEditorContext);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockQueryTypeDetector).toHaveBeenCalledWith(testText);
+    });
+
+    it('should change mode when inferred language is PPL', () => {
+      mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.PPL } as DetectionResult);
+
+      const actionCreator = onEditorChangeActionCreator('| where field="value"', mockEditorContext);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'queryEditor/setEditorMode',
+        payload: EditorMode.SingleQuery,
+      });
+    });
+
+    it('should change to SinglePrompt mode when inferred language is Natural', () => {
+      mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.Natural } as DetectionResult);
+
+      const actionCreator = onEditorChangeActionCreator(
+        'Show me all users from last week',
+        mockEditorContext
+      );
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SinglePrompt);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'queryEditor/setEditorMode',
+        payload: EditorMode.SinglePrompt,
+      });
+    });
+  });
+
   describe('SingleQuery mode', () => {
     beforeEach(() => {
       mockGetState.mockReturnValue({
@@ -191,20 +388,8 @@ describe('onEditorChangeActionCreator', () => {
       expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SinglePrompt);
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'queryEditor/setEditorMode',
-        payload: EditorMode.SingleQuery,
+        payload: EditorMode.SinglePrompt,
       });
-    });
-
-    it('should handle unknown language types gracefully', () => {
-      mockQueryTypeDetector.mockReturnValue({
-        type: 'UNKNOWN' as EditorLanguage,
-      } as DetectionResult);
-
-      const actionCreator = onEditorChangeActionCreator('unknown text', mockEditorContext);
-      actionCreator(mockDispatch, mockGetState);
-
-      expect(mockSetEditorMode).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toHaveBeenCalled();
     });
   });
 

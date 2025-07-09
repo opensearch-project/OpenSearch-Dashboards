@@ -4,7 +4,7 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EditorMode, QueryResultStatus, QueryExecutionStatus } from '../../types';
+import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
 
 export interface QueryEditorSliceState {

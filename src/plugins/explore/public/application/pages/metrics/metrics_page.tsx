@@ -68,9 +68,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
     const query = state.query;
     const results = state.results;
 
-    // Use default cache key computation - pass query string only
-    const queryString = typeof query.query === 'string' ? query.query : '';
-    const cacheKey = defaultPrepareQuery(queryString);
+    const cacheKey = defaultPrepareQuery(query);
     const rawResults = cacheKey ? results[cacheKey] : null;
 
     if (rawResults) {

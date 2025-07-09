@@ -14,6 +14,7 @@ import {
   DataPublicPluginStart,
   search,
   indexPatterns as indexPatternUtils,
+  Query,
 } from '../../../../../../data/public';
 import {
   createHistogramConfigs,
@@ -26,14 +27,47 @@ import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 
 /**
- * Default query preparation for tabs (removes stats pipe for histogram compatibility)
+ * Adds a source if query string does not have it
+ */
+export const prependSourceIfNecessary = (query: Query): string => {
+  const queryString = typeof query.query === 'string' ? query.query : '';
+  const lowerCaseQuery = queryString.toLowerCase();
+  const hasSource = /^(search\s+)?source\s*=/.test(lowerCaseQuery);
+
+  if (hasSource) {
+    return queryString;
+  }
+
+  const datasetTitle = query.dataset?.title || '';
+
+  if (queryString.trim() === '') {
+    return `source=${datasetTitle}`;
+  } else {
+    if (queryString.trim().startsWith('|')) {
+      return `source=${datasetTitle} ${queryString}`;
+    } else {
+      return `source=${datasetTitle} | ${queryString}`;
+    }
+  }
+};
+
+/**
+ * Removes stats pipe for histogram compatibility
  * Returns only the prepared query string for cache key usage
  */
-export const defaultPrepareQuery = (queryString: string): string => {
+export const stripStatsFromQuery = (queryString: string): string => {
   // Remove stats pipe for histogram compatibility
   return typeof queryString === 'string'
     ? queryString.replace(/\s*\|\s*stats.*$/i, '')
     : queryString;
+};
+
+/**
+ * Default query preparation for tabs (removes stats pipe for histogram compatibility)
+ * TODO: This only works for PPL. When other languages are introduced we must revisit this
+ */
+export const defaultPrepareQuery = (query: Query): string => {
+  return stripStatsFromQuery(prependSourceIfNecessary(query));
 };
 
 /**
@@ -109,12 +143,11 @@ export const executeQueries = createAsyncThunk<
   }
 
   // Direct cache key computation (no computeQueryContext)
-  const queryString = typeof query.query === 'string' ? query.query : '';
-  const defaultCacheKey = defaultPrepareQuery(queryString);
+  const defaultCacheKey = defaultPrepareQuery(query);
 
   const activeTab = services.tabRegistry?.getTab(activeTabId);
   const activeTabPrepareQuery = activeTab?.prepareQuery || defaultPrepareQuery;
-  const activeTabCacheKey = activeTabPrepareQuery(queryString);
+  const activeTabCacheKey = activeTabPrepareQuery(query);
   const queriesEqual = defaultCacheKey === activeTabCacheKey;
 
   // Check what needs execution (for tab switching case)
