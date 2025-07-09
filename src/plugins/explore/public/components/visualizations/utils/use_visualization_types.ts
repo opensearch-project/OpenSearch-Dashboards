@@ -18,6 +18,7 @@ import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
+import { UpdateVisualizationProps } from '../visualization_container';
 
 export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar' | 'area';
 
@@ -55,7 +56,7 @@ export interface StyleControlsProps<T extends AllChartStyleControls> {
   selectedChartType?: string;
   onChartTypeChange?: (chartType: ChartType) => void;
   axisColumnMappings: AxisColumnMappings;
-  updateVisualization: (data: any) => void;
+  updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
 export interface ChartTypePossibleMapping {

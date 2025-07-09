@@ -250,7 +250,12 @@ const threeMetricsRule: VisualizationRule = {
     chartType = 'heatmap',
     axisColumnMappings
   ) => {
-    return createHeatmapWithBin(transformedData, numericalColumns, styleOptions);
+    return createHeatmapWithBin(
+      transformedData,
+      numericalColumns,
+      styleOptions,
+      axisColumnMappings
+    );
   },
 };
 
@@ -282,7 +287,12 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
   ) => {
     switch (chartType) {
       case 'heatmap':
-        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+        return createRegularHeatmap(
+          transformedData,
+          numericalColumns,
+          styleOptions,
+          axisColumnMappings
+        );
       case 'bar':
         return createStackedBarSpec(
           transformedData,
@@ -301,7 +311,12 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
           styleOptions
         );
       default:
-        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+        return createRegularHeatmap(
+          transformedData,
+          numericalColumns,
+          styleOptions,
+          axisColumnMappings
+        );
     }
   },
 };
@@ -334,7 +349,12 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
   ) => {
     switch (chartType) {
       case 'heatmap':
-        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+        return createRegularHeatmap(
+          transformedData,
+          numericalColumns,
+          styleOptions,
+          axisColumnMappings
+        );
       case 'bar':
         return createStackedBarSpec(
           transformedData,
@@ -353,7 +373,12 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
           styleOptions
         );
       default:
-        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+        return createRegularHeatmap(
+          transformedData,
+          numericalColumns,
+          styleOptions,
+          axisColumnMappings
+        );
     }
   },
 };

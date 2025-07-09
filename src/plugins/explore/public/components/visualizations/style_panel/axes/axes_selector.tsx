@@ -12,6 +12,7 @@ import {
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { isEmpty, isEqual } from 'lodash';
+import { i18n } from '@osd/i18n';
 
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
@@ -33,6 +34,24 @@ interface AxesSelectPanelProps {
   currentMapping: AxisColumnMappings;
   updateVisualization: (data: UpdateVisualizationProps) => void;
 }
+
+const AXIS_SELECT_LABEL = {
+  [AxisRole.X]: i18n.translate('explore.visualize.axisSelectLabelX', {
+    defaultMessage: 'X-Axis',
+  }),
+  [AxisRole.Y]: i18n.translate('explore.visualize.axisSelectLabelY', {
+    defaultMessage: 'Y-Axis',
+  }),
+  [AxisRole.COLOR]: i18n.translate('explore.visualize.axisSelectLabelColor', {
+    defaultMessage: 'Color',
+  }),
+  [AxisRole.FACET]: i18n.translate('explore.visualize.axisSelectLabelFacet', {
+    defaultMessage: 'Split Chart By',
+  }),
+  [AxisRole.THETA]: i18n.translate('explore.visualize.axisSelectLabelTheta', {
+    defaultMessage: 'Theta',
+  }),
+};
 
 export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   chartType,
@@ -195,7 +214,13 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   };
 
   return (
-    <StyleAccordion id="axesSelector" accordionLabel="Axis Select" initialIsOpen={true}>
+    <StyleAccordion
+      id="axesSelector"
+      accordionLabel={i18n.translate('explore.stylePanel.tabs.field', {
+        defaultMessage: 'Field',
+      })}
+      initialIsOpen={true}
+    >
       <>
         {Array.from(allAxisRolesFromSelection).map((axisRole) => {
           const currentSelection = currentSelections[axisRole];
@@ -243,8 +268,8 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
   onChange,
 }) => {
   return (
-    <React.Fragment key={`${axisRole}`}>
-      <EuiFormRow label={`${axisRole}-axis`}>
+    <React.Fragment key={`${axisRole}Selector`}>
+      <EuiFormRow label={AXIS_SELECT_LABEL[axisRole]}>
         <EuiFlexItem>
           <EuiComboBox
             compressed

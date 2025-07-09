@@ -49,7 +49,7 @@ import {
 } from './visualization_container_utils';
 
 export interface UpdateVisualizationProps {
-  rule: Partial<VisualizationRule>;
+  rule?: Partial<VisualizationRule>;
   mappings: AxisColumnMappings;
 }
 
@@ -90,12 +90,11 @@ export const VisualizationContainer = () => {
       setVisualizationData((prev) => ({
         ...prev,
         axisColumnMappings: mappings,
-        ruleId: rule.id,
-        toExpression: rule.toExpression,
+        ...(rule && { ruleId: rule.id, toExpression: rule.toExpression }),
       }));
 
       dispatch(setAxesMapping(convertMappingsToStrings(mappings)));
-      setCurrentRuleId(rule.id);
+      if (rule) setCurrentRuleId(rule.id);
     },
     [dispatch]
   );
