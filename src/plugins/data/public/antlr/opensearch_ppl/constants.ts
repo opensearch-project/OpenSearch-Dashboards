@@ -5,17 +5,17 @@
 
 import { OpenSearchPPLParser } from '@osd/antlr-grammar';
 
-export const PPL_AGGREGATE_FUNCTIONS = [
-  'avg',
-  'count',
-  'sum',
-  'min',
-  'max',
-  'var_samp',
-  'var_pop',
-  'stddev_samp',
-  'stddev_pop',
-];
+export const PPL_AGGREGATE_FUNCTIONS = {
+  avg: { optionalParam: false },
+  count: { optionalParam: true },
+  sum: { optionalParam: false },
+  min: { optionalParam: false },
+  max: { optionalParam: false },
+  var_samp: { optionalParam: false },
+  var_pop: { optionalParam: false },
+  stddev_samp: { optionalParam: false },
+  stddev_pop: { optionalParam: false },
+};
 
 export const PPL_SUGGESTION_IMPORTANCE = new Map<number, string>([
   [OpenSearchPPLParser.PIPE, '0'],
