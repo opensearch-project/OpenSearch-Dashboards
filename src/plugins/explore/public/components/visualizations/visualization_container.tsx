@@ -2,7 +2,9 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import './visualization_container.scss';
+import { isEmpty, isEqual } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -18,37 +20,37 @@ import {
 } from './utils/use_visualization_types';
 
 import './visualization_container.scss';
-import { VisColumn, VisualizationRule } from './types';
+import { AxisColumnMappings, VisColumn, VisualizationRule } from './types';
 import { toExpression } from './utils/to_expression';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { ExploreServices } from '../../types';
 import {
   setStyleOptions,
   setChartType as setSelectedChartType,
-  setFieldNames,
+  setAxesMapping,
 } from '../../application/utils/state_management/slices';
 import {
   selectStyleOptions,
   selectChartType,
-  selectFieldNames,
+  selectAxesMapping,
 } from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
+import { ALL_VISUALIZATION_RULES } from './rule_repository';
+import {
+  applyDefaultVisualization,
+  convertMappingsToStrings,
+  convertStringsToMappings,
+  findRuleByIndex,
+  getAllColumns,
+  getColumnMatchFromMapping,
+  isValidMapping,
+} from './visualization_container_utils';
 
 export interface UpdateVisualizationProps {
-  visualizationType: VisualizationType<any>;
   rule: Partial<VisualizationRule>;
-  fieldNames: {
-    categorical: string[];
-    date: string[];
-    numerical: string[];
-  };
-  columns: {
-    categorical: VisColumn[];
-    date: VisColumn[];
-    numerical: VisColumn[];
-  };
+  mappings: AxisColumnMappings;
 }
 
 export const VisualizationContainer = () => {
@@ -68,182 +70,135 @@ export const VisualizationContainer = () => {
   const rows = useMemo(() => results?.hits?.hits || [], [results]);
   const styleOptions = useSelector(selectStyleOptions);
   const selectedChartType = useSelector(selectChartType);
-  const selectedFieldNames = useSelector(selectFieldNames);
+  const selectedAxesMapping = useSelector(selectAxesMapping);
   const fieldSchema = useMemo(() => results?.fieldSchema || [], [results]);
 
   const visualizationRegistry = useVisualizationRegistry();
 
   const [currentRuleId, setCurrentRuleId] = useState<string | undefined>(undefined);
-
   const [visualizationData, setVisualizationData] = useState<
     VisualizationTypeResult<ChartType> | undefined
   >(undefined);
 
   const isVisualizationUpdated = useRef(false);
 
-  const updateVisualizationState = useCallback(
-    (
-      visualizationType: VisualizationType<ChartType>,
-      fieldNames: { numerical: string[]; categorical: string[]; date: string[] }
-    ) => {
-      dispatch(setSelectedChartType(visualizationType.type));
-      dispatch(setStyleOptions(visualizationType.ui.style.defaults));
-      dispatch(setFieldNames(fieldNames));
+  const updateVisualization = useCallback(
+    ({ rule, mappings }: UpdateVisualizationProps) => {
+      // Handle user modifiy the visualization through style panel manually
+      isVisualizationUpdated.current = true;
+
+      setVisualizationData((prev) => ({
+        ...prev,
+        axisColumnMappings: mappings,
+        ruleId: rule.id,
+        toExpression: rule.toExpression,
+      }));
+
+      dispatch(setAxesMapping(convertMappingsToStrings(mappings)));
+      setCurrentRuleId(rule.id);
     },
     [dispatch]
   );
 
-  const updateVisualization = useCallback(
-    ({ visualizationType, rule, fieldNames, columns }: UpdateVisualizationProps) => {
-      // Handle user modifiy the visualization through style panel manually
-      isVisualizationUpdated.current = true;
-
-      updateVisualizationState(visualizationType, fieldNames);
-      setCurrentRuleId(rule.id);
-      setVisualizationData((prev) => ({
-        ...prev,
-        numericalColumns: columns.numerical,
-        categoricalColumns: columns.categorical,
-        dateColumns: columns.date,
-        ruleId: rule.id,
-        visualizationType: visualizationType as VisualizationType<ChartType>,
-        toExpression: rule.toExpression,
-      }));
-    },
-    [updateVisualizationState]
+  const originalVisualizationData = useRef<VisualizationTypeResult<ChartType> | undefined>(
+    undefined
   );
-
-  const findMatchedRuleWithCache = useCallback(
-    ({
-      visData,
-      fieldNames,
-    }: {
-      visData: VisualizationTypeResult<ChartType>;
-      fieldNames: UpdateVisualizationProps['fieldNames'];
-    }) => {
-      const columns = {
-        numerical: visData.numericalColumns
-          ? visData.numericalColumns.filter((col) => fieldNames?.numerical?.includes(col.name))
-          : [],
-        categorical: visData.categoricalColumns
-          ? visData.categoricalColumns.filter((col) => fieldNames?.categorical?.includes(col.name))
-          : [],
-        date: visData.dateColumns
-          ? visData.dateColumns.filter((col) => fieldNames?.date?.includes(col.name))
-          : [],
-      };
-      // Will return null if not found
-      return {
-        matchedRule: visualizationRegistry.findBestMatch(
-          columns.numerical,
-          columns.categorical,
-          columns.date
-        ),
-        columns,
-      };
-    },
-    [visualizationRegistry]
-  );
-
-  const clearCache = useCallback(() => {
-    dispatch(setSelectedChartType('' as any)); // FIXME
-    dispatch(setStyleOptions({} as any)); // FIXME
-    dispatch(setFieldNames({ numerical: [], categorical: [], date: [] }));
-
-    isVisualizationUpdated.current = true;
-  }, [dispatch]);
 
   useEffect(() => {
-    // TODO simplify the logic here
-    if (fieldSchema.length === 0 || rows.length === 0) {
-      return;
-    }
-
-    if (isVisualizationUpdated.current) {
-      // Avoid being triggered by empty state component updates
+    if (isVisualizationUpdated.current || fieldSchema.length === 0 || rows.length === 0) {
       return;
     }
 
     const visualizationTypeResult = getVisualizationType(rows, fieldSchema);
 
-    if (visualizationTypeResult) {
-      // Always set the data from the query as it should be the single source of truth
-      setVisualizationData(visualizationTypeResult);
+    if (!visualizationTypeResult) {
+      return;
+    }
 
-      // Map from visualization columns to the field names
-      const availableFieldNames = {
-        numerical: visualizationTypeResult.numericalColumns?.map((col) => col.name) || [],
-        categorical: visualizationTypeResult.categoricalColumns?.map((col) => col.name) || [],
-        date: visualizationTypeResult.dateColumns?.map((col) => col.name) || [],
-      };
+    originalVisualizationData.current = visualizationTypeResult;
+    const allColumns = getAllColumns(visualizationTypeResult);
 
-      if (visualizationTypeResult?.ruleId && visualizationTypeResult.visualizationType) {
-        // Highest priority when rule matched so the visualization should automatically generate
-        setCurrentRuleId(visualizationTypeResult.ruleId);
-        updateVisualizationState(visualizationTypeResult.visualizationType, availableFieldNames);
+    if (visualizationTypeResult?.ruleId && visualizationTypeResult.visualizationType) {
+      // Rule matched and visualization can be automatically generated
+      if (selectedChartType && !isEmpty(selectedAxesMapping) && !isEmpty(styleOptions)) {
+        // Has a visualization generated previously
+        const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
 
-        isVisualizationUpdated.current = true;
-      } else if (selectedChartType) {
-        // Populate and trigger render visualization with user-selected chart/fields
+        // Check if the chart type and axes selection previously can continue be used on
+        // the new query. The checkingis base on compare current availble columns and previous
+        // selected axes-column mappings.
+        if (!isValidMapping(selectedAxesMapping, allColumns)) {
+          // Cannot apply, use the auto rule-matched visualization
+          services.notifications.toasts.addInfo(
+            'Cannot apply previous configured visualization, use rule matched'
+          ); // FIXME message
 
-        const hasInvalidFields =
-          selectedFieldNames &&
-          (selectedFieldNames.numerical?.some(
-            (field) => !availableFieldNames.numerical.includes(field)
-          ) ||
-            selectedFieldNames.categorical?.some(
-              (field) => !availableFieldNames.categorical.includes(field)
-            ) ||
-            selectedFieldNames.date?.some((field) => !availableFieldNames.date.includes(field)));
-
-        if (hasInvalidFields) {
-          // Previous selected fields contains a field that no longer exist in the current query
-          clearCache();
+          applyDefaultVisualization(
+            visualizationTypeResult,
+            setCurrentRuleId,
+            setVisualizationData,
+            dispatch
+          );
         } else {
-          if (selectedFieldNames) {
-            const { matchedRule, columns } = findMatchedRuleWithCache({
-              visData: visualizationTypeResult,
-              fieldNames: selectedFieldNames,
-            });
-            if (matchedRule) {
-              // The previous query is empty-stated but visualization is generated by user selection
-              const visType = visualizationRegistry.getVisualizationConfig(
-                selectedChartType
-              ) as VisualizationType<ChartType>;
-
-              // Trigger the generation of visualization that the user previously created
-              requestAnimationFrame(() => {
-                setCurrentRuleId(matchedRule.rule.id);
-                setVisualizationData({
-                  ...visualizationTypeResult,
-                  visualizationType: visType,
-                  numericalColumns: columns.numerical,
-                  categoricalColumns: columns.categorical,
-                  dateColumns: columns.date,
-                  ruleId: matchedRule.rule.id,
-                  toExpression: matchedRule.rule.toExpression,
-                });
-              });
-            }
-          }
-
-          isVisualizationUpdated.current = true;
+          // Use saved visualization selections
+          setVisualizationData({
+            ...visualizationTypeResult,
+            visualizationType: chartConfig as VisualizationType<ChartType>,
+            axisColumnMappings: convertStringsToMappings(selectedAxesMapping, allColumns),
+          });
         }
       } else {
-        // No visualization automatically created and the user also previously didn't build a visualization
-        clearCache();
+        // No visualization previously generated, directly use the rule-matched visualization
+        applyDefaultVisualization(
+          visualizationTypeResult,
+          setCurrentRuleId,
+          setVisualizationData,
+          dispatch
+        );
       }
+    } else if (selectedChartType) {
+      // No rule matched and previously selected a chart type
+      const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
+
+      // Similar check with the above if branch
+      if (!isValidMapping(selectedAxesMapping, allColumns)) {
+        // Cannot apply, use empty state
+        services.notifications.toasts.addInfo(
+          'Cannot apply previous configured visualization, reset'
+        ); // FIXME message
+        dispatch(setAxesMapping({}));
+
+        setVisualizationData({
+          ...visualizationTypeResult,
+          visualizationType: chartConfig as VisualizationType<ChartType>,
+          axisColumnMappings: {},
+        });
+      } else {
+        // Use saved visualization selections
+        const ruleToUse = findRuleByIndex(selectedAxesMapping, allColumns);
+        setCurrentRuleId(ruleToUse?.id);
+        dispatch(setAxesMapping(selectedAxesMapping));
+        setVisualizationData({
+          ...visualizationTypeResult,
+          visualizationType: chartConfig as VisualizationType<ChartType>,
+          axisColumnMappings: convertStringsToMappings(selectedAxesMapping, allColumns),
+          ruleId: ruleToUse?.id,
+          toExpression: ruleToUse?.toExpression,
+        });
+      }
+    } else {
+      // First loading, use the auto-matched state (can be matched visualization or empty state)
+      setVisualizationData(visualizationTypeResult);
     }
   }, [
     fieldSchema,
-    selectedFieldNames,
     rows,
-    updateVisualizationState,
-    dispatch,
     selectedChartType,
-    clearCache,
-    findMatchedRuleWithCache,
     visualizationRegistry,
+    dispatch,
+    selectedAxesMapping,
+    services.notifications.toasts,
+    styleOptions,
   ]);
 
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
@@ -285,7 +240,8 @@ export const VisualizationContainer = () => {
         categoricalColumns,
         dateColumns,
         styleOpts,
-        selectedChartType
+        selectedChartType,
+        visualizationData.axisColumnMappings
       );
     };
 
@@ -359,21 +315,69 @@ export const VisualizationContainer = () => {
   };
 
   const handleChartTypeChange = (chartType: ChartType) => {
+    isVisualizationUpdated.current = true;
+
     dispatch(setSelectedChartType(chartType));
-    // dispatch(setSelectedChartType(chartType));
-    // // Get the visualization configuration for the selected chart type
-    // const chartConfig = visualizationRegistry.getVisualizationConfig(chartType);
-    // // Update the style options with the defaults for the selected chart type
-    // if (chartConfig && chartConfig.ui && chartConfig.ui.style) {
-    //   dispatch(setStyleOptions(chartConfig.ui.style.defaults));
-    //   // Update the visualizationData with the new visualization type
-    //   if (visualizationData) {
-    //     setVisualizationData({
-    //       ...visualizationData,
-    //       visualizationType: chartConfig as VisualizationType<ChartType>,
-    //     });
-    //   }
-    // }
+    // Get the visualization configuration for the selected chart type
+    const chartConfig = visualizationRegistry.getVisualizationConfig(chartType);
+    // Update the style options with the defaults for the selected chart type
+    if (chartConfig && chartConfig.ui && chartConfig.ui.style) {
+      dispatch(setStyleOptions(chartConfig.ui.style.defaults));
+      // Update the visualizationData with the new visualization type
+      if (visualizationData) {
+        if (!isEmpty(selectedAxesMapping)) {
+          // Attempt to reuse the mapping for new chart type, find the rule used firstly
+          const currentRule = ALL_VISUALIZATION_RULES.find((rule) => rule.id === currentRuleId);
+
+          if (currentRule) {
+            const currentRuleInNewChartType = currentRule?.chartTypes.find(
+              (chart) => chart.type === chartType
+            );
+            if (currentRuleInNewChartType) {
+              // Find mapping for the new chart type under the same rule (combination of columns)
+              const reusedMapping = chartConfig.ui.availableMappings.find((obj) =>
+                isEqual(getColumnMatchFromMapping(obj.mapping), currentRule.matchIndex)
+              )?.mapping[0];
+
+              if (reusedMapping) {
+                const allColumns = getAllColumns(visualizationData);
+
+                const updatedMapping = Object.fromEntries(
+                  Object.entries(reusedMapping).map(([key, config]) => {
+                    const matchingColumn = Object.values(selectedAxesMapping).find((columnName) => {
+                      const column = allColumns.find((col) => col.name === columnName);
+                      return column?.schema === config.type;
+                    });
+                    return [key, matchingColumn];
+                  })
+                );
+
+                setVisualizationData({
+                  ...visualizationData,
+                  visualizationType: chartConfig as VisualizationType<ChartType>,
+                  axisColumnMappings: convertStringsToMappings(updatedMapping, allColumns),
+                  ruleId: currentRule.id,
+                  toExpression: currentRule.toExpression,
+                });
+
+                dispatch(setAxesMapping(updatedMapping));
+                return;
+              }
+            }
+            services.notifications.toasts.addInfo(
+              'Cannot apply configured visualization to the current chart type, reset'
+            ); // FIXME message
+          }
+        }
+      }
+      // Fallback logic, the mapping cannot be reused for the new chart type
+      setVisualizationData({
+        ...visualizationData,
+        visualizationType: chartConfig as VisualizationType<ChartType>,
+        axisColumnMappings: {},
+      });
+      dispatch(setAxesMapping({}));
+    }
   };
 
   // Don't render if visualization is not enabled or data is not ready

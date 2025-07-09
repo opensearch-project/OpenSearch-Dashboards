@@ -4,18 +4,22 @@
  */
 
 import { PieChartStyleControls } from './pie_vis_config';
-import { VisColumn, VEGASCHEMA } from '../types';
+import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 
 export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<PieChartStyleControls>
+  styleOptions: Partial<PieChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ) => {
-  const numericField = numericalColumns[0].column;
-  const numericName = numericalColumns[0].name;
-  const categoryField = categoricalColumns[0].column;
+  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+  const thetaColumn = axisColumnMappings?.[AxisRole.THETA];
+
+  const numericField = thetaColumn?.column;
+  const numericName = thetaColumn?.name;
+  const categoryField = colorColumn?.column;
 
   const encodingBase = {
     theta: {

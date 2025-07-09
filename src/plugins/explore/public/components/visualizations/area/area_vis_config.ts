@@ -108,5 +108,6 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
       defaults: defaultAreaChartStyles,
       render: (props) => React.createElement(AreaVisStyleControls, props),
     },
+    availableMappings: [], // TODO
   },
 });
