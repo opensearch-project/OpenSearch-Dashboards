@@ -4,7 +4,7 @@
  */
 
 import { createQuerySyncMiddleware } from './query_sync_middleware';
-import { setQueryState, setQueryWithHistory } from '../slices';
+import { setQueryState, setQueryWithHistory, setQueryStringWithHistory } from '../slices';
 import { createMockExploreServices, createMockStore, MockStore } from '../__mocks__';
 
 describe('createQuerySyncMiddleware', () => {
@@ -157,6 +157,71 @@ describe('createQuerySyncMiddleware', () => {
       },
       { from: 'now-15m', to: 'now' }
     );
+  });
+
+  it('should sync query and add to history when setQueryStringWithHistory is dispatched', () => {
+    const action = setQueryStringWithHistory('SELECT * FROM logs');
+
+    middleware(action);
+
+    expect(mockNext).toHaveBeenCalledWith(action);
+    expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith({
+      query: 'SELECT * FROM logs',
+      language: 'sql',
+      dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
+    });
+    expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledWith(
+      {
+        query: 'SELECT * FROM logs',
+        language: 'sql',
+        dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
+      },
+      { from: 'now-15m', to: 'now' }
+    );
+  });
+
+  it('should not sync when queries are equal but still add to history for setQueryStringWithHistory', () => {
+    // Mock getQuery to return the same query as in state
+    mockServices.data.query.queryString.getQuery = jest.fn().mockReturnValue({
+      query: 'SELECT * FROM logs',
+      language: 'sql',
+      dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
+    });
+
+    const action = setQueryStringWithHistory('SELECT * FROM logs');
+
+    middleware(action);
+
+    expect(mockNext).toHaveBeenCalledWith(action);
+    // setQuery should not be called when queries are equal
+    expect(mockServices.data.query.queryString.setQuery).not.toHaveBeenCalled();
+    // But addToQueryHistory should still be called because it has addToHistory meta
+    expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledWith(
+      {
+        query: 'SELECT * FROM logs',
+        language: 'sql',
+        dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
+      },
+      { from: 'now-15m', to: 'now' }
+    );
+  });
+
+  it('should not add to history for empty queries with setQueryStringWithHistory', () => {
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: {
+        query: '   ', // Empty/whitespace query
+        language: 'sql',
+        dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
+      },
+    });
+
+    const action = setQueryStringWithHistory('   ');
+
+    middleware(action);
+
+    expect(mockNext).toHaveBeenCalledWith(action);
+    expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalled();
+    expect(mockServices.data.query.queryString.addToQueryHistory).not.toHaveBeenCalled();
   });
 
   it('should not process non-query actions', () => {
