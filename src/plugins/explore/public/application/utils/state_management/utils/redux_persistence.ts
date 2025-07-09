@@ -248,7 +248,8 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
     logs: {},
     visualizations: {
       styleOptions: defaultMetricChartStyles,
-      chartType: 'metric',
+      chartType: undefined,
+      axesMapping: {},
     },
   };
 };

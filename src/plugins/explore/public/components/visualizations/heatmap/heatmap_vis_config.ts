@@ -125,5 +125,6 @@ export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
       defaults: defaultHeatmapChartStyles,
       render: (props) => React.createElement(HeatmapVisStyleControls, props),
     },
+    availableMappings: [], // TODO
   },
 });

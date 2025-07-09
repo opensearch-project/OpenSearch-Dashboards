@@ -31,7 +31,7 @@ export const saveStateToSavedObject = (
     title: '',
     chartType: tabState?.visualizations?.chartType ?? 'line',
     params: tabState?.visualizations?.styleOptions ?? {},
-    fields: tabState?.visualizations?.fieldNames,
+    axesMapping: tabState?.visualizations?.axesMapping,
   });
   obj.uiState = JSON.stringify({
     activeTab: tabDefinition.id,
