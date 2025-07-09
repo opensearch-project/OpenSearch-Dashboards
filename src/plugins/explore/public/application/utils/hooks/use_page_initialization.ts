@@ -13,7 +13,7 @@ import {
   setSavedSearch,
   setChartType,
   setStyleOptions,
-  setFieldNames,
+  setAxesMapping,
   setQueryState,
   setActiveTab,
 } from '../state_management/slices';
@@ -54,10 +54,10 @@ export const useInitPage = () => {
         const visualization = savedExplore.visualization;
         const uiState = savedExplore.uiState;
         if (visualization) {
-          const { chartType, params, fields } = JSON.parse(visualization);
+          const { chartType, params, axesMapping } = JSON.parse(visualization);
           dispatch(setChartType(chartType));
           dispatch(setStyleOptions(params));
-          dispatch(setFieldNames(fields));
+          dispatch(setAxesMapping(axesMapping));
         }
         if (uiState) {
           const { activeTab } = JSON.parse(uiState);

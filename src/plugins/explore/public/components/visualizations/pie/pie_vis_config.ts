@@ -7,7 +7,7 @@ import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 
 import { PieVisStyleControls } from './pie_vis_options';
-import { Positions, TooltipOptions } from '../types';
+import { AxisRole, Positions, TooltipOptions, VisFieldType } from '../types';
 
 export interface PieExclusiveStyleControl {
   donut: boolean;
@@ -52,5 +52,15 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
       defaults: defaultPieChartStyles,
       render: (props) => React.createElement(PieVisStyleControls, props),
     },
+    availableMappings: [
+      {
+        mapping: [
+          {
+            [AxisRole.THETA]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+          },
+        ],
+      },
+    ],
   },
 });

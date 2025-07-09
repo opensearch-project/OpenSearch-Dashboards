@@ -11,7 +11,7 @@ import {
   ChartType,
   ChartStyleControlMap,
 } from './utils/use_visualization_types';
-import { VisualizationEmptyState } from './visualization_empty_state';
+import { ChartTypeSelector } from './chart_type_selector';
 import { UpdateVisualizationProps } from './visualization_container';
 
 export interface VisualizationProps<T extends ChartType> {
@@ -40,10 +40,11 @@ export const Visualization = <T extends ChartType>({
   ReactExpressionRenderer,
   updateVisualization,
 }: VisualizationProps<T>) => {
-  if (!visualizationData || !styleOptions || Object.keys(styleOptions).length === 0) {
+  if (!visualizationData) {
     return null;
   }
   const availableChartTypes = visualizationData.availableChartTypes;
+  const hasSelectionMapping = Object.keys(visualizationData.axisColumnMappings!).length !== 0;
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
@@ -54,7 +55,9 @@ export const Visualization = <T extends ChartType>({
           className="exploreVisPanel"
         >
           <div className="exploreVisPanel__inner">
-            {expression ? (
+            {expression &&
+            hasSelectionMapping &&
+            Object.keys(visualizationData.axisColumnMappings!).length !== 0 ? (
               <ReactExpressionRenderer
                 key={JSON.stringify(searchContext) + expression}
                 expression={expression}
@@ -74,24 +77,25 @@ export const Visualization = <T extends ChartType>({
         <EuiPanel hasShadow={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="none">
-              <VisualizationEmptyState
-                visualizationData={visualizationData as any}
-                updateVisualization={updateVisualization}
+              <ChartTypeSelector
+                visualizationData={visualizationData}
+                onChartTypeChange={onChartTypeChange}
               />
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {styleOptions &&
-              visualizationData.visualizationType?.ui.style.render({
-                styleOptions,
-                onStyleChange,
-                numericalColumns: visualizationData.numericalColumns,
-                categoricalColumns: visualizationData.categoricalColumns,
-                dateColumns: visualizationData.dateColumns,
-                availableChartTypes,
-                selectedChartType,
-                onChartTypeChange,
-              })}
+            {visualizationData.visualizationType?.ui.style.render({
+              styleOptions: styleOptions ?? ({} as any),
+              onStyleChange,
+              numericalColumns: visualizationData.numericalColumns,
+              categoricalColumns: visualizationData.categoricalColumns,
+              dateColumns: visualizationData.dateColumns,
+              availableChartTypes,
+              selectedChartType,
+              onChartTypeChange, // TODO remove
+              axisColumnMappings: visualizationData.axisColumnMappings!,
+              updateVisualization,
+            })}
           </EuiFlexItem>
         </EuiPanel>
       </EuiFlexItem>
