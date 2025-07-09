@@ -18,7 +18,11 @@ export const createQuerySyncMiddleware = (services: ExploreServices): Middleware
   return (store) => (next) => (action) => {
     const result = next(action);
 
-    if (action.type === 'query/setQueryState' || action.type === 'query/setQueryWithHistory') {
+    if (
+      action.type === 'query/setQueryState' ||
+      action.type === 'query/setQueryWithHistory' ||
+      action.type === 'query/setQueryStringWithHistory'
+    ) {
       const state = store.getState();
       const query = state.query;
 
