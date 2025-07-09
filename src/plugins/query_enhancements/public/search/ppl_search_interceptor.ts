@@ -127,6 +127,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const datasetService = this.queryService.queryString.getDatasetService();
     const dataset = query.dataset;
+    // TODO LOOK HERE
     if (
       dataset &&
       dataset.timeFieldName &&
