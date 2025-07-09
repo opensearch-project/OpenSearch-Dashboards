@@ -74,7 +74,7 @@ export const Visualization = <T extends ChartType>({
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="exploreVisStylePanel">
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} paddingSize="s">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="none">
               <ChartTypeSelector

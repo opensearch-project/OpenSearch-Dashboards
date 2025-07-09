@@ -75,6 +75,7 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
             })}
           >
             <EuiFieldNumber
+              compressed
               value={thresholdLine.value}
               onChange={(e) => updateThresholdOption('value', parseFloat(e.target.value) || 0)}
               data-test-subj="exploreVisThresholdValue"
@@ -99,6 +100,7 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
             })}
           >
             <EuiSelect
+              compressed
               options={lineStyleOptions}
               value={thresholdLine.style}
               onChange={(e) => updateThresholdOption('style', e.target.value)}
@@ -114,6 +116,7 @@ export const ThresholdOptions = ({ thresholdLine, onThresholdChange }: Threshold
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
                 <EuiRange
+                  compressed
                   min={1}
                   max={10}
                   step={1}

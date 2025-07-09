@@ -247,6 +247,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
       <EuiFormRow label={`${axisRole}-axis`}>
         <EuiFlexItem>
           <EuiComboBox
+            compressed
             selectedOptions={[{ label: selectedColumn }]}
             singleSelection={{ asPlainText: true }}
             options={allColumnOptions}

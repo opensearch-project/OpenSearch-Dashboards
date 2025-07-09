@@ -123,6 +123,7 @@ export const LineExclusiveVisOptions = ({
         })}
       >
         <EuiRange
+          compressed
           value={localLineWidth}
           onChange={(e) => handleLineWidthChange((e.target as HTMLInputElement).value)}
           min={1}
@@ -144,6 +145,7 @@ export const LineExclusiveVisOptions = ({
         })}
       >
         <EuiSwitch
+          compressed
           label=""
           checked={addTimeMarker}
           onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
