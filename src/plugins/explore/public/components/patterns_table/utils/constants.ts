@@ -9,7 +9,8 @@ import { PatternItem } from '../patterns_table';
 import { isValidFiniteNumber } from './utils';
 
 export const PATTERNS_FIELD = 'patterns_field';
-export const COUNT_FIELD = 'count';
+export const COUNT_FIELD = 'pattern_count';
+export const SAMPLE_FIELD = 'sample_logs';
 
 export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
   {
@@ -31,6 +32,13 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
       defaultMessage: 'Pattern',
     }),
     render: (pattern: string) => pattern || '—',
+  },
+  {
+    field: 'sample',
+    name: i18n.translate('explore.patterns.table.column.sampleLog', {
+      defaultMessage: 'Sample Log',
+    }),
+    render: (sample: string[]) => sample[0] || '—',
   },
   {
     field: 'count',
