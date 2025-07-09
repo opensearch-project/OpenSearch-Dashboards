@@ -80,43 +80,17 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
               size="xs"
               data-test-subj={`standardAxis-${index}-button`}
             >
-              {i18n.translate('explore.vis.gridOptions.categoryAxis', {
-                defaultMessage: isYAxis ? 'Y-Axis' : 'X-Axis',
-              })}
+              {isYAxis
+                ? i18n.translate('explore.vis.gridOptions.categoryXAxis', {
+                    defaultMessage: 'Y-Axis',
+                  })
+                : i18n.translate('explore.vis.gridOptions.categoryYAxis', {
+                    defaultMessage: 'X-Axis',
+                  })}
             </EuiButtonEmpty>
             <EuiSpacer size="s" />
             {expandedAxes[axis.id] && (
               <div>
-                {axis.field?.options && (
-                  <EuiFormRow
-                    fullWidth
-                    label={i18n.translate('explore.vis.standardAxes.axisField', {
-                      defaultMessage: 'Field',
-                    })}
-                  >
-                    <EuiSelect
-                      compressed
-                      value={axis.field.default.column}
-                      onChange={(e) => {
-                        const selectedColumn = axis.field?.options?.find(
-                          (opt) => opt.column === e.target.value
-                        );
-                        if (selectedColumn) {
-                          updateAxis(index, {
-                            field: {
-                              ...axis.field,
-                              default: selectedColumn,
-                            },
-                          });
-                        }
-                      }}
-                      options={axis.field.options.map((option) => ({
-                        value: option.column,
-                        text: option.name,
-                      }))}
-                    />
-                  </EuiFormRow>
-                )}
                 <EuiFormRow
                   label={i18n.translate('explore.vis.standardAxes.axisPosition', {
                     defaultMessage: 'Position',
