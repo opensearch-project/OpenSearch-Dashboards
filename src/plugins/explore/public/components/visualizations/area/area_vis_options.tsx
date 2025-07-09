@@ -50,7 +50,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
           dateColumns={dateColumns}
           currentMapping={axisColumnMappings}
           updateVisualization={updateVisualization}
-          chartType="bar"
+          chartType="area"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

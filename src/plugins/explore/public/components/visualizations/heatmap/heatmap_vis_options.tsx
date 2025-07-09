@@ -68,15 +68,17 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   }, [numericalColumns, categoricalColumns, dateColumns, axisColumnMappings]);
 
   const handleSwitchAxes = (axes: StandardAxes[]) => {
-    const updateAxes = swapAxes(axes);
-    updateStyleOption('StandardAxes', updateAxes);
-    updateVisualization({
-      mappings: {
-        ...axisColumnMappings,
-        [AxisRole.Y]: axisColumnMappings[AxisRole.X],
-        [AxisRole.X]: axisColumnMappings[AxisRole.Y],
-      },
-    });
+    if (axisColumnMappings[AxisRole.X] && axisColumnMappings[AxisRole.Y]) {
+      const updateAxes = swapAxes(axes);
+      updateStyleOption('StandardAxes', updateAxes);
+      updateVisualization({
+        mappings: {
+          ...axisColumnMappings,
+          [AxisRole.Y]: axisColumnMappings[AxisRole.X],
+          [AxisRole.X]: axisColumnMappings[AxisRole.Y],
+        },
+      });
+    }
   };
 
   return (

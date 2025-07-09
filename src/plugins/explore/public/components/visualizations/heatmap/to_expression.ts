@@ -28,19 +28,19 @@ export const createHeatmapWithBin = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default.column,
+        field: xAxis?.field?.default?.column,
         type: 'quantitative',
         bin: true,
         axis: applyAxisStyling(xAxis),
       },
       y: {
-        field: yAxis?.field?.default.column,
+        field: yAxis?.field?.default?.column,
         type: 'quantitative',
         bin: true,
         axis: applyAxisStyling(yAxis),
       },
       color: {
-        field: colorFieldColumn.column,
+        field: colorFieldColumn?.column,
         type: 'quantitative',
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
         bin: !styles.exclusive?.useCustomRanges
@@ -53,7 +53,7 @@ export const createHeatmapWithBin = (
         },
         legend: styles.addLegend
           ? {
-              title: colorFieldColumn.name || 'Metrics',
+              title: colorFieldColumn?.name || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
@@ -61,18 +61,18 @@ export const createHeatmapWithBin = (
     },
   };
 
-  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn.column);
+  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn?.column);
 
   const baseSpec = {
     $schema: VEGASCHEMA,
     data: { values: transformedData },
-    transform: addTransform(styles, colorFieldColumn.column),
+    transform: addTransform(styles, colorFieldColumn?.column),
     layer: [
       markLayer,
       createlabelLayer(
         styles,
         false,
-        colorFieldColumn.column,
+        colorFieldColumn?.column,
         xAxis?.field?.default,
         yAxis?.field?.default
       ),
@@ -100,17 +100,17 @@ export const createRegularHeatmap = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default.column,
+        field: xAxis?.field?.default?.column,
         type: 'nominal',
         axis: applyAxisStyling(xAxis),
       },
       y: {
-        field: yAxis?.field?.default.column,
+        field: yAxis?.field?.default?.column,
         type: 'nominal',
         axis: applyAxisStyling(yAxis),
       },
       color: {
-        field: colorFieldColumn.column,
+        field: colorFieldColumn?.column,
         type: 'quantitative',
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
         bin: !styles.exclusive?.useCustomRanges
@@ -123,7 +123,7 @@ export const createRegularHeatmap = (
         },
         legend: styles.addLegend
           ? {
-              title: colorFieldColumn.name || 'Metrics',
+              title: colorFieldColumn?.name || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
@@ -131,18 +131,18 @@ export const createRegularHeatmap = (
     },
   };
 
-  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn.column);
+  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn?.column);
 
   const baseSpec = {
     $schema: VEGASCHEMA,
     data: { values: transformedData },
-    transform: addTransform(styles, colorFieldColumn.column),
+    transform: addTransform(styles, colorFieldColumn?.column),
     layer: [
       markLayer,
       createlabelLayer(
         styles,
         true,
-        colorFieldColumn.column,
+        colorFieldColumn?.column,
         xAxis?.field?.default,
         yAxis?.field?.default
       ),

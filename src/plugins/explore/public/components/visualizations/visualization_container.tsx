@@ -341,12 +341,15 @@ export const VisualizationContainer = () => {
               if (reusedMapping) {
                 const allColumns = getAllColumns(visualizationData);
 
+                const usedColumns = new Set<string>();
                 const updatedMapping = Object.fromEntries(
                   Object.entries(reusedMapping).map(([key, config]) => {
                     const matchingColumn = Object.values(selectedAxesMapping).find((columnName) => {
+                      if (usedColumns.has(columnName)) return false;
                       const column = allColumns.find((col) => col.name === columnName);
                       return column?.schema === config.type;
                     });
+                    if (matchingColumn) usedColumns.add(matchingColumn);
                     return [key, matchingColumn];
                   })
                 );
