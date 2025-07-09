@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import { LineChartStyleControls } from './line_vis_config';
-import { ThresholdLineStyle, VisColumn, Positions } from '../types';
+import { VisColumn, Positions } from '../types';
 
 /**
  * Get Vega interpolation from UI lineMode

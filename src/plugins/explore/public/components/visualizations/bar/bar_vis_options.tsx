@@ -44,6 +44,16 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>
+        <AxesSelectPanel
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          currentMapping={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          chartType="bar"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <LegendOptionsPanel
           shouldShowLegend={!notShowLegend}
@@ -78,16 +88,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               ...tooltipOptions,
             })
           }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <AxesSelectPanel
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-          currentMapping={axisColumnMappings}
-          updateVisualization={updateVisualization}
-          chartType="bar"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

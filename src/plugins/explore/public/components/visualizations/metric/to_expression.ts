@@ -4,7 +4,14 @@
  */
 
 import { MetricChartStyleControls } from './metric_vis_config';
-import { VisColumn, RangeValue, ColorSchemas, VEGASCHEMA } from '../types';
+import {
+  VisColumn,
+  RangeValue,
+  ColorSchemas,
+  VEGASCHEMA,
+  AxisRole,
+  AxisColumnMappings,
+} from '../types';
 import { generateColorBySchema } from '../utils/utils';
 
 export const createSingleMetric = (
@@ -12,10 +19,13 @@ export const createSingleMetric = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<MetricChartStyleControls>
+  styleOptions: Partial<MetricChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ) => {
-  const numericFields = numericalColumns[0].column;
-  const numericNames = numericalColumns[0].name;
+  // Only contains one and the only one value, use x-axis key for now
+  const valueMapping = axisColumnMappings?.[AxisRole.X];
+  const numericFields = valueMapping?.column;
+  const numericNames = valueMapping?.name;
 
   function generateColorConditions(ranges: RangeValue[], color: ColorSchemas) {
     const colors = generateColorBySchema(ranges.length + 1, color);

@@ -10,7 +10,7 @@ import {
   IExpressionLoaderParams,
 } from '../../../../../expressions/public';
 import { IndexPattern } from '../../../../../data/public';
-import { AxisColumnMappings, VisColumn } from '../types';
+import { VisColumn } from '../types';
 
 /**
  * Convert the visualization configuration to an expression

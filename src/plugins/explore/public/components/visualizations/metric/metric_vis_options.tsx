@@ -22,6 +22,7 @@ import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { getColorSchemas } from '../utils/collections';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 
 export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
 
@@ -33,6 +34,8 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   dateColumns = [],
   availableChartTypes = [],
   selectedChartType,
+  axisColumnMappings,
+  updateVisualization,
 }) => {
   const updateStyleOption = <K extends keyof MetricChartStyleControls>(
     key: K,
@@ -55,6 +58,16 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <AxesSelectPanel
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          currentMapping={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          chartType="metric"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <StyleAccordion
           id="metricSection"
@@ -110,6 +123,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             })}
           >
             <EuiRange
+              compressed
               value={fontSize}
               onChange={(e) => handleFontSize((e.target as HTMLInputElement).value)}
               min={10}
@@ -140,6 +154,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                 })}
               >
                 <EuiSelect
+                  compressed
                   options={colorSchemas}
                   value={styleOptions.colorSchema}
                   onChange={(e) => updateStyleOption('colorSchema', e.target.value as ColorSchemas)}

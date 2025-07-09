@@ -49,7 +49,7 @@ import {
 } from './visualization_container_utils';
 
 export interface UpdateVisualizationProps {
-  rule: Partial<VisualizationRule>;
+  rule?: Partial<VisualizationRule>;
   mappings: AxisColumnMappings;
 }
 
@@ -90,12 +90,11 @@ export const VisualizationContainer = () => {
       setVisualizationData((prev) => ({
         ...prev,
         axisColumnMappings: mappings,
-        ruleId: rule.id,
-        toExpression: rule.toExpression,
+        ...(rule && { ruleId: rule.id, toExpression: rule.toExpression }),
       }));
 
       dispatch(setAxesMapping(convertMappingsToStrings(mappings)));
-      setCurrentRuleId(rule.id);
+      if (rule) setCurrentRuleId(rule.id);
     },
     [dispatch]
   );
@@ -342,12 +341,15 @@ export const VisualizationContainer = () => {
               if (reusedMapping) {
                 const allColumns = getAllColumns(visualizationData);
 
+                const usedColumns = new Set<string>();
                 const updatedMapping = Object.fromEntries(
                   Object.entries(reusedMapping).map(([key, config]) => {
                     const matchingColumn = Object.values(selectedAxesMapping).find((columnName) => {
+                      if (usedColumns.has(columnName)) return false;
                       const column = allColumns.find((col) => col.name === columnName);
                       return column?.schema === config.type;
                     });
+                    if (matchingColumn) usedColumns.add(matchingColumn);
                     return [key, matchingColumn];
                   })
                 );

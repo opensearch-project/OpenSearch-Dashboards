@@ -90,6 +90,7 @@ interface ExploreEmbeddableConfig {
   editable: boolean;
   filterManager: FilterManager;
   services: ExploreServices;
+  editApp: string;
 }
 
 export class ExploreEmbeddable
@@ -122,6 +123,7 @@ export class ExploreEmbeddable
       editable,
       filterManager,
       services,
+      editApp,
     }: ExploreEmbeddableConfig,
     initialInput: ExploreInput,
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
@@ -133,7 +135,7 @@ export class ExploreEmbeddable
         defaultTitle: savedExplore.title,
         editUrl,
         editPath,
-        editApp: 'explore',
+        editApp,
         indexPatterns,
         editable,
       },
