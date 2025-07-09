@@ -6,7 +6,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { PatternItem, PatternsTable } from './patterns_table';
-import { COUNT_FIELD, PATTERNS_FIELD } from './utils/constants';
+import { COUNT_FIELD, PATTERNS_FIELD, SAMPLE_FIELD } from './utils/constants';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { RootState } from '../../application/utils/state_management/store';
 import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
@@ -30,6 +30,7 @@ export const PatternsContainer = () => {
     pattern: row._source[PATTERNS_FIELD],
     ratio: row._source[COUNT_FIELD] / logsTotal,
     count: row._source[COUNT_FIELD],
+    sample: row._source[SAMPLE_FIELD],
   }));
 
   return <PatternsTable items={items} />;
