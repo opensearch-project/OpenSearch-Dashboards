@@ -62,6 +62,7 @@ export const ChartTypeSwitcher = ({
         })}
       </div>
       <EuiSelect
+        compressed
         value={currentChartType}
         onChange={handleChartTypeChange}
         options={chartTypeOptions}

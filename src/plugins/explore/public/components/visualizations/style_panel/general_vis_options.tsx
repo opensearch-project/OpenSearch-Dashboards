@@ -61,6 +61,7 @@ export const GeneralVisOptions = ({
                 })}
               >
                 <EuiSelect
+                  compressed
                   value={legendPosition}
                   onChange={(e) => onLegendPositionChange(e.target.value as Positions)}
                   options={legendPositions}

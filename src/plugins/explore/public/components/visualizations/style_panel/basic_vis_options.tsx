@@ -81,6 +81,7 @@ export const BasicVisOptions = ({
             })}
           >
             <EuiSelect
+              compressed
               options={lineModeOptions}
               value={lineMode}
               onChange={(e) => onLineModeChange(e.target.value)}
@@ -95,6 +96,7 @@ export const BasicVisOptions = ({
             })}
           >
             <EuiFieldNumber
+              compressed
               value={localLineWidth}
               onChange={(e) => handleLineWidthChange(e.target.value)}
               min={1}
@@ -128,6 +130,7 @@ export const BasicVisOptions = ({
         })}
       >
         <EuiSwitch
+          compressed
           label=""
           checked={addTimeMarker}
           onChange={(e) => onAddTimeMarkerChange(e.target.checked)}

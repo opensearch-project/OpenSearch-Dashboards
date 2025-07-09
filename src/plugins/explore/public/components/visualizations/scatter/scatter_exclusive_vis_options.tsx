@@ -43,6 +43,7 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
         })}
       >
         <EuiSelect
+          compressed
           options={pointShapes}
           value={styles.pointShape}
           onChange={(e) => updateStyle('pointShape', e.target.value as PointShape)}
@@ -55,6 +56,7 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
         })}
       >
         <EuiSwitch
+          compressed
           label=""
           checked={styles.filled}
           onChange={(e) => updateStyle('filled', e.target.checked)}
@@ -67,6 +69,7 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
         })}
       >
         <EuiRange
+          compressed
           min={0}
           max={360}
           value={styles.angle}

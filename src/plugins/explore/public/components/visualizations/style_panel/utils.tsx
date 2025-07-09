@@ -20,7 +20,11 @@ export const DebouncedTruncateField: React.FC<{
 
   return (
     <EuiFormRow label={label}>
-      <EuiFieldNumber value={localValue} onChange={(e) => handleChange(e.target.value)} />
+      <EuiFieldNumber
+        compressed
+        value={localValue}
+        onChange={(e) => handleChange(e.target.value)}
+      />
     </EuiFormRow>
   );
 };
