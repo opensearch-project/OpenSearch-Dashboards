@@ -243,7 +243,7 @@ export class ExplorePlugin
 
         // Get start services
         const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
-        const isExploreEnabledWorkspace = this.getIsExploreEnabledWorkspace(coreStart);
+        const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
         // We want to limit explore UI to only show up under the explore-enabled
         // workspaces. If user lands in the explore plugin URL in a different
         // workspace, we will redirect them to classic discover. We will also redirect if
