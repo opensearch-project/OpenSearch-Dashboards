@@ -32,8 +32,7 @@ export const toExpression = (
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[],
-    styleOptions: any,
-    selectedChartType: string
+    styleOptions: any
   ) => any,
   transformedData?: Array<Record<string, any>>,
   numericalColumns?: VisColumn[],
@@ -60,8 +59,7 @@ export const toExpression = (
     numericalColumns!,
     categoricalColumns!,
     dateColumns!,
-    styleOptions,
-    'line'
+    styleOptions
   );
 
   const vega = buildExpressionFunction<any>('vega', {

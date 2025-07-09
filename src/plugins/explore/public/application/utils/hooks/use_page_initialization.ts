@@ -13,11 +13,12 @@ import {
   setSavedSearch,
   setChartType,
   setStyleOptions,
-  setFieldNames,
+  setAxesMapping,
   setQueryState,
   setActiveTab,
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
+import { ExploreFlavor } from '../../../../common';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -54,10 +55,10 @@ export const useInitPage = () => {
         const visualization = savedExplore.visualization;
         const uiState = savedExplore.uiState;
         if (visualization) {
-          const { chartType, params, fields } = JSON.parse(visualization);
+          const { chartType, params, axesMapping } = JSON.parse(visualization);
           dispatch(setChartType(chartType));
           dispatch(setStyleOptions(params));
-          dispatch(setFieldNames(fields));
+          dispatch(setAxesMapping(axesMapping));
         }
         if (uiState) {
           const { activeTab } = JSON.parse(uiState);
@@ -66,7 +67,7 @@ export const useInitPage = () => {
 
         // Add to recently accessed
         chrome.recentlyAccessed.add(
-          `/app/explore#/view/${savedExplore.id}`,
+          `/app/explore/${savedExplore.type ?? ExploreFlavor.Logs}#/view/${savedExplore.id}`,
           title,
           savedExplore.id,
           { type: 'explore' }

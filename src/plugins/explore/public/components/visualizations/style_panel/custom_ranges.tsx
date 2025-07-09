@@ -11,6 +11,7 @@ import {
   EuiFormRow,
   EuiButtonIcon,
   EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { RangeValue } from '../types';
 
@@ -40,6 +41,7 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, prevMax, o
       <EuiFlexItem>
         <EuiFormRow label="Min">
           <EuiFieldNumber
+            compressed
             min={prevMax ?? 0}
             value={value.min ?? ''}
             onChange={handleMinChange}
@@ -50,6 +52,7 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, prevMax, o
       <EuiFlexItem>
         <EuiFormRow label="Max">
           <EuiFieldNumber
+            compressed
             min={value.min ?? 0}
             value={value.max ?? ''}
             onChange={handleMaxChange}
@@ -57,8 +60,9 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, prevMax, o
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={{ marginTop: 30 }}>
         <EuiButtonIcon
+          size="xs"
           iconType="trash"
           aria-label="Delete"
           color="danger"
@@ -114,6 +118,7 @@ export const CustomRange: React.FC<CustomRangeProps> = ({ customRanges, onCustom
           />
         );
       })}
+      <EuiSpacer size="s" />
       <EuiButton onClick={handleAddRange} fullWidth size="s">
         + Add Range
       </EuiButton>

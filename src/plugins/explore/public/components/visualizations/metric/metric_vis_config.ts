@@ -6,7 +6,7 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { MetricVisStyleControls } from './metric_vis_options';
-import { RangeValue, ColorSchemas } from '../types';
+import { RangeValue, ColorSchemas, AxisRole, VisFieldType } from '../types';
 
 export interface MetricChartStyleControls {
   showTitle: boolean;
@@ -33,5 +33,14 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
       defaults: defaultMetricChartStyles,
       render: (props) => React.createElement(MetricVisStyleControls, props),
     },
+    availableMappings: [
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+    ],
   },
 });

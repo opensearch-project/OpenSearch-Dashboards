@@ -71,7 +71,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
         const isYAxis = axis.axisRole === AxisRole.Y;
 
         return (
-          <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
+          <EuiSplitPanel.Inner paddingSize="none" key={axis.id} color="subdued">
             <EuiButtonEmpty
               iconSide="left"
               color="text"
@@ -80,43 +80,17 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
               size="xs"
               data-test-subj={`standardAxis-${index}-button`}
             >
-              {i18n.translate('explore.vis.gridOptions.categoryAxis', {
-                defaultMessage: isYAxis ? 'Y-Axis' : 'X-Axis',
-              })}
+              {isYAxis
+                ? i18n.translate('explore.vis.gridOptions.categoryXAxis', {
+                    defaultMessage: 'Y-Axis',
+                  })
+                : i18n.translate('explore.vis.gridOptions.categoryYAxis', {
+                    defaultMessage: 'X-Axis',
+                  })}
             </EuiButtonEmpty>
-
             <EuiSpacer size="s" />
             {expandedAxes[axis.id] && (
               <div>
-                {axis.field?.options && (
-                  <EuiFormRow
-                    fullWidth
-                    label={i18n.translate('explore.vis.standardAxes.axisField', {
-                      defaultMessage: 'Field',
-                    })}
-                  >
-                    <EuiSelect
-                      value={axis.field.default.column}
-                      onChange={(e) => {
-                        const selectedColumn = axis.field?.options?.find(
-                          (opt) => opt.column === e.target.value
-                        );
-                        if (selectedColumn) {
-                          updateAxis(index, {
-                            field: {
-                              ...axis.field,
-                              default: selectedColumn,
-                            },
-                          });
-                        }
-                      }}
-                      options={axis.field.options.map((option) => ({
-                        value: option.column,
-                        text: option.name,
-                      }))}
-                    />
-                  </EuiFormRow>
-                )}
                 <EuiFormRow
                   label={i18n.translate('explore.vis.standardAxes.axisPosition', {
                     defaultMessage: 'Position',
@@ -146,19 +120,18 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                     isFullWidth
                   />
                 </EuiFormRow>
-
                 <EuiFormRow
                   label={i18n.translate('explore.vis.standardAxes.showAxisLinesAndLabels', {
                     defaultMessage: 'Show axis lines and labels',
                   })}
                 >
                   <EuiSwitch
+                    compressed
                     label=""
                     checked={axis.show}
                     onChange={(e) => updateAxis(index, { show: e.target.checked })}
                   />
                 </EuiFormRow>
-
                 {axis.show && (
                   <>
                     <DebouncedText
@@ -179,6 +152,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                       })}
                     >
                       <EuiSwitch
+                        compressed
                         label=""
                         checked={axis.labels.show}
                         onChange={(e) =>
@@ -200,6 +174,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                               })}
                             >
                               <EuiSelect
+                                compressed
                                 value={
                                   axis.labels.rotate === 0
                                     ? 'horizontal'
@@ -246,30 +221,26 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                           </EuiFlexItem>
                         </EuiFlexGroup>
                         <EuiSpacer size="s" />
-
-                        {!disableGrid && (
-                          <EuiFormRow
-                            label={i18n.translate(
-                              'explore.vis.standardAxes.showAxisGrid.switchLabel',
-                              {
-                                defaultMessage: 'Show grid lines',
-                              }
-                            )}
-                          >
-                            <EuiSwitch
-                              checked={axis.grid?.showLines ?? false}
-                              onChange={(e) =>
-                                updateAxis(index, {
-                                  grid: { ...axis.grid, showLines: e.target.checked },
-                                })
-                              }
-                              label=""
-                            />
-                          </EuiFormRow>
-                        )}
                       </>
                     )}
                   </>
+                )}
+                {!disableGrid && (
+                  <EuiFormRow
+                    label={i18n.translate('explore.vis.standardAxes.showAxisGrid.switchLabel', {
+                      defaultMessage: 'Show grid lines',
+                    })}
+                  >
+                    <EuiSwitch
+                      checked={axis.grid?.showLines ?? false}
+                      onChange={(e) =>
+                        updateAxis(index, {
+                          grid: { ...axis.grid, showLines: e.target.checked },
+                        })
+                      }
+                      label=""
+                    />
+                  </EuiFormRow>
                 )}
               </div>
             )}
@@ -305,6 +276,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            size="s"
             onClick={() => onChangeSwitchAxes(standardAxes)}
             data-test-subj="switchAxesButton"
           >

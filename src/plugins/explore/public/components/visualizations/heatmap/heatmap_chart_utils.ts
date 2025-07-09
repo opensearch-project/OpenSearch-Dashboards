@@ -126,30 +126,3 @@ export const enhanceStyle = (
     markLayer.encoding.color.scale.range = range;
   }
 };
-
-export function inferAxesFromColumns(
-  numerical?: VisColumn[],
-  categorical?: VisColumn[]
-): { x: FieldSetting | undefined; y: FieldSetting | undefined } {
-  if (numerical?.length === 3) {
-    return {
-      x: {
-        default: numerical[0],
-        options: numerical,
-      },
-      y: {
-        default: numerical[1],
-        options: numerical,
-      },
-    };
-  }
-  if (numerical?.length === 1 && categorical?.length === 2) {
-    return {
-      x: {
-        default: categorical[0],
-      },
-      y: { default: categorical[1] },
-    };
-  }
-  return { x: undefined, y: undefined };
-}

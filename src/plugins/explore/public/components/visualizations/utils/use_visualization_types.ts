@@ -13,11 +13,12 @@ import { IFieldType } from '../../../application/legacy/discover/opensearch_dash
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
-import { ChartTypeMapping, VisColumn, VisFieldType } from '../types';
+import { AxisColumnMappings, AxisRole, ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
+import { UpdateVisualizationProps } from '../visualization_container';
 
 export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar' | 'area';
 
@@ -54,6 +55,12 @@ export interface StyleControlsProps<T extends AllChartStyleControls> {
   availableChartTypes?: ChartTypeMapping[];
   selectedChartType?: string;
   onChartTypeChange?: (chartType: ChartType) => void;
+  axisColumnMappings: AxisColumnMappings;
+  updateVisualization: (data: UpdateVisualizationProps) => void;
+}
+
+export interface ChartTypePossibleMapping {
+  mapping: Array<Partial<Record<AxisRole, { type: VisFieldType; index: number }>>>;
 }
 
 export interface VisualizationType<T extends ChartType> {
@@ -64,6 +71,7 @@ export interface VisualizationType<T extends ChartType> {
       defaults: ChartStyleControlMap[T];
       render: (props: StyleControlsProps<ChartStyleControlMap[T]>) => JSX.Element;
     };
+    availableMappings: ChartTypePossibleMapping[];
   };
 }
 
@@ -112,6 +120,7 @@ export interface VisualizationTypeResult<T extends ChartType> {
     styleOptions: any,
     chartType?: string
   ) => any;
+  axisColumnMappings?: AxisColumnMappings;
 }
 
 const getFieldTypeFromSchema = (schema?: string): VisFieldType =>

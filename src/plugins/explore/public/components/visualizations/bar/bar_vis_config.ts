@@ -14,6 +14,8 @@ import {
   ThresholdLineStyle,
   ValueAxis,
   TooltipOptions,
+  VisFieldType,
+  AxisRole,
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 
@@ -120,5 +122,52 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
       render: (props) =>
         React.createElement(BarVisStyleControls, props as BarVisStyleControlsProps),
     },
+    availableMappings: [
+      {
+        mapping: [
+          // TODO the first one should be default?
+          {
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+          },
+        ],
+      },
+    ],
   },
 });

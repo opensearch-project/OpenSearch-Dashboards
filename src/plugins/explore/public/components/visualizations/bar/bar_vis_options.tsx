@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { BarChartStyleControls } from './bar_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
@@ -13,6 +13,7 @@ import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { GridOptionsPanel } from '../style_panel/grid/grid';
+import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
 
@@ -25,6 +26,8 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   availableChartTypes = [],
   selectedChartType,
   onChartTypeChange,
+  axisColumnMappings,
+  updateVisualization,
 }) => {
   const updateStyleOption = <K extends keyof BarChartStyleControls>(
     key: K,
@@ -41,6 +44,16 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>
+        <AxesSelectPanel
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          currentMapping={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          chartType="bar"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <LegendOptionsPanel
           shouldShowLegend={!notShowLegend}

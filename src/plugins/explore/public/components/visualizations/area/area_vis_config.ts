@@ -14,6 +14,8 @@ import {
   ValueAxis,
   Positions,
   TooltipOptions,
+  AxisRole,
+  VisFieldType,
 } from '../types';
 
 // Complete area chart style controls interface
@@ -108,5 +110,51 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
       defaults: defaultAreaChartStyles,
       render: (props) => React.createElement(AreaVisStyleControls, props),
     },
+    availableMappings: [
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+          },
+        ],
+      },
+    ],
   },
 });

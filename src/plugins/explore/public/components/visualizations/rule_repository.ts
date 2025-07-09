@@ -60,18 +60,43 @@ const oneMetricOneDateRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'line'
+    chartType = 'line',
+    axisColumnMappings
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
       case 'line':
-        return createSimpleLineChart(transformedData, numericalColumns, dateColumns, styleOptions);
+        return createSimpleLineChart(
+          transformedData,
+          numericalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
       case 'area':
-        return createSimpleAreaChart(transformedData, numericalColumns, dateColumns, styleOptions);
+        return createSimpleAreaChart(
+          transformedData,
+          numericalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
       case 'bar':
-        return createTimeBarChart(transformedData, numericalColumns, dateColumns, styleOptions);
+        return createTimeBarChart(
+          transformedData,
+          numericalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
       default:
-        return createSimpleLineChart(transformedData, numericalColumns, dateColumns, styleOptions);
+        return createSimpleLineChart(
+          transformedData,
+          numericalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
     }
   },
 };
@@ -91,14 +116,27 @@ const twoMetricOneDateRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'line'
+    chartType = 'line',
+    axisColumnMappings
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
       case 'line':
-        return createLineBarChart(transformedData, numericalColumns, dateColumns, styleOptions);
+        return createLineBarChart(
+          transformedData,
+          numericalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
       default:
-        return createLineBarChart(transformedData, numericalColumns, dateColumns, styleOptions);
+        return createLineBarChart(
+          transformedData,
+          numericalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
     }
   },
 };
@@ -122,7 +160,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'line'
+    chartType = 'line',
+    axisColumnMappings
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -132,7 +171,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'area':
         return createMultiAreaChart(
@@ -140,7 +180,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'bar':
         return createGroupedTimeBarChart(
@@ -148,7 +189,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       default:
         return createMultiLineChart(
@@ -156,7 +198,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
     }
   },
@@ -181,7 +224,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'line'
+    chartType = 'line',
+    axisColumnMappings
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -191,7 +235,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'area':
         return createFacetedMultiAreaChart(
@@ -199,7 +244,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'bar':
         return createFacetedTimeBarChart(
@@ -207,7 +253,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       default:
         return createFacetedMultiLineChart(
@@ -215,7 +262,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
     }
   },
@@ -235,9 +283,15 @@ const threeMetricsRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'heatmap'
+    chartType = 'heatmap',
+    axisColumnMappings
   ) => {
-    return createHeatmapWithBin(transformedData, numericalColumns, styleOptions);
+    return createHeatmapWithBin(
+      transformedData,
+      numericalColumns,
+      styleOptions,
+      axisColumnMappings
+    );
   },
 };
 
@@ -264,18 +318,25 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'heatmap'
+    chartType = 'heatmap',
+    axisColumnMappings
   ) => {
     switch (chartType) {
       case 'heatmap':
-        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+        return createRegularHeatmap(
+          transformedData,
+          numericalColumns,
+          styleOptions,
+          axisColumnMappings
+        );
       case 'bar':
         return createStackedBarSpec(
           transformedData,
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'area':
         return createStackedAreaChart(
@@ -283,10 +344,16 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       default:
-        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+        return createRegularHeatmap(
+          transformedData,
+          numericalColumns,
+          styleOptions,
+          axisColumnMappings
+        );
     }
   },
 };
@@ -314,18 +381,25 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'bar'
+    chartType = 'bar',
+    axisColumnMappings
   ) => {
     switch (chartType) {
       case 'heatmap':
-        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+        return createRegularHeatmap(
+          transformedData,
+          numericalColumns,
+          styleOptions,
+          axisColumnMappings
+        );
       case 'bar':
         return createStackedBarSpec(
           transformedData,
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'area':
         return createStackedAreaChart(
@@ -333,10 +407,16 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       default:
-        return createRegularHeatmap(transformedData, numericalColumns, styleOptions);
+        return createRegularHeatmap(
+          transformedData,
+          numericalColumns,
+          styleOptions,
+          axisColumnMappings
+        );
     }
   },
 };
@@ -360,7 +440,8 @@ const oneMetricOneCateRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'pie'
+    chartType = 'pie',
+    axisColumnMappings
   ) => {
     switch (chartType) {
       case 'bar':
@@ -369,7 +450,8 @@ const oneMetricOneCateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'pie':
         return createPieSpec(
@@ -377,7 +459,8 @@ const oneMetricOneCateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'line':
         return createCategoryLineChart(
@@ -385,7 +468,8 @@ const oneMetricOneCateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'area':
         return createCategoryAreaChart(
@@ -393,7 +477,8 @@ const oneMetricOneCateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       default:
         return createBarSpec(
@@ -401,7 +486,8 @@ const oneMetricOneCateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
     }
   },
@@ -424,14 +510,16 @@ const oneMetricRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'metric'
+    chartType = 'metric',
+    axisColumnMappings
   ) => {
     return createSingleMetric(
       transformedData,
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions
+      styleOptions,
+      axisColumnMappings
     );
   },
 };
@@ -450,14 +538,16 @@ const twoMetricRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'scatter'
+    chartType = 'scatter',
+    axisColumnMappings
   ) => {
     return createTwoMetricScatter(
       transformedData,
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions
+      styleOptions,
+      axisColumnMappings
     );
   },
 };
@@ -476,14 +566,16 @@ const twoMetricOneCateRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'scatter'
+    chartType = 'scatter',
+    axisColumnMappings
   ) => {
     return createTwoMetricOneCateScatter(
       transformedData,
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions
+      styleOptions,
+      axisColumnMappings
     );
   },
 };
@@ -502,14 +594,16 @@ const threeMetricOneCateRule: VisualizationRule = {
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'scatter'
+    chartType = 'scatter',
+    axisColumnMappings
   ) => {
     return createThreeMetricOneCateScatter(
       transformedData,
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions
+      styleOptions,
+      axisColumnMappings
     );
   },
 };

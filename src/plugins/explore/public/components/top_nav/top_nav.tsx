@@ -7,26 +7,25 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector } from 'react-redux';
-import { QueryStatus, ResultStatus, useSyncQueryStateWithUrl } from '../../../../data/public';
+import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { PLUGIN_ID } from '../../../common';
 import { ExploreServices } from '../../types';
 import { IndexPattern } from '../../application/legacy/discover/opensearch_dashboards_services';
-import { useSelector } from '../../application/legacy/discover/application/utils/state_management';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
-import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
   selectTabState,
   selectUIState,
-  selectExecutionStatus,
+  selectQueryStatus,
 } from '../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
 import { SavedExplore } from '../../saved_explore';
 
+// import './discover_canvas.scss';
 export interface TopNavProps {
   savedExplore?: SavedExplore;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
@@ -49,10 +48,10 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const uiState = useNewStateSelector(selectUIState);
   const tabState = useNewStateSelector(selectTabState);
+  const queryStatus = useNewStateSelector(selectQueryStatus);
 
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
-  const isLoading = useSelector(selectExecutionStatus) === QueryExecutionStatus.LOADING;
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
@@ -63,9 +62,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const { indexPattern } = useIndexPatternContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
-  const [queryStatus, setQueryStatus] = useState<QueryStatus>({
-    status: ResultStatus.READY,
-  });
 
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
@@ -117,12 +113,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     flavorId,
     tabDefinition,
   ]);
-
-  // Replace data$ subscription with Redux state-based queryStatus
-  useEffect(() => {
-    const status = isLoading ? ResultStatus.LOADING : ResultStatus.READY;
-    setQueryStatus({ status });
-  }, [isLoading]);
 
   useEffect(() => {
     let isMounted = true;

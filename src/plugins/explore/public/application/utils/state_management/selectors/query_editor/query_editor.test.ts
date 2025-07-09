@@ -4,6 +4,7 @@
  */
 
 import {
+  selectQueryStatus,
   selectExecutionStatus,
   selectIsLoading,
   selectEditorMode,
@@ -16,7 +17,12 @@ import { EditorMode, QueryExecutionStatus } from '../../types';
 describe('query_editor selectors', () => {
   const createMockState = (queryEditorState: Partial<RootState['queryEditor']>): RootState => ({
     queryEditor: {
-      executionStatus: QueryExecutionStatus.UNINITIALIZED,
+      queryStatus: {
+        status: QueryExecutionStatus.UNINITIALIZED,
+        elapsedMs: undefined,
+        startTime: undefined,
+        body: undefined,
+      },
       editorMode: EditorMode.SingleQuery,
       promptModeIsAvailable: false,
       ...queryEditorState,
@@ -29,10 +35,33 @@ describe('query_editor selectors', () => {
     query: {} as any,
   });
 
+  describe('selectQueryStatus', () => {
+    it('should return the full queryStatus from queryEditor state', () => {
+      const mockQueryStatus = {
+        status: QueryExecutionStatus.LOADING,
+        elapsedMs: 100,
+        startTime: Date.now(),
+        body: undefined,
+      };
+      const state = createMockState({
+        queryStatus: mockQueryStatus,
+      });
+
+      const result = selectQueryStatus(state);
+
+      expect(result).toEqual(mockQueryStatus);
+    });
+  });
+
   describe('selectExecutionStatus', () => {
     it('should return the execution status from queryEditor state', () => {
       const state = createMockState({
-        executionStatus: QueryExecutionStatus.LOADING,
+        queryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
       });
 
       const result = selectExecutionStatus(state);
@@ -44,7 +73,12 @@ describe('query_editor selectors', () => {
   describe('selectIsLoading', () => {
     it('should return true when execution status === LOADING', () => {
       const state = createMockState({
-        executionStatus: QueryExecutionStatus.LOADING,
+        queryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
       });
 
       const result = selectIsLoading(state);
@@ -52,9 +86,14 @@ describe('query_editor selectors', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false when execution status !== IDLE', () => {
+    it('should return false when execution status !== LOADING', () => {
       const state = createMockState({
-        executionStatus: QueryExecutionStatus.READY,
+        queryStatus: {
+          status: QueryExecutionStatus.READY,
+          elapsedMs: 100,
+          startTime: undefined,
+          body: undefined,
+        },
       });
 
       const result = selectIsLoading(state);

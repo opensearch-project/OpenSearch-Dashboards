@@ -15,6 +15,7 @@ import {
   AxisRole,
   TooltipOptions,
   LabelAggregationType,
+  VisFieldType,
 } from '../types';
 
 export interface HeatmapLabels {
@@ -125,5 +126,25 @@ export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
       defaults: defaultHeatmapChartStyles,
       render: (props) => React.createElement(HeatmapVisStyleControls, props),
     },
+    availableMappings: [
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
+            [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 2 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Categorical, index: 1 },
+            [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+    ],
   },
 });
