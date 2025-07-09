@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, memo, useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -151,6 +151,9 @@ const ExploreDataTableComponent = () => {
       ref={containerRef}
     >
       <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
+        <EuiFlexItem>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
         <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
           <SaveAndAddButtonWithModal
             searchContext={searchContext}

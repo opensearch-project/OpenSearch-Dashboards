@@ -71,7 +71,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
         const isYAxis = axis.axisRole === AxisRole.Y;
 
         return (
-          <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
+          <EuiSplitPanel.Inner paddingSize="none" key={axis.id} color="subdued">
             <EuiButtonEmpty
               iconSide="left"
               color="text"
@@ -95,6 +95,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                     })}
                   >
                     <EuiSelect
+                      compressed
                       value={axis.field.default.column}
                       onChange={(e) => {
                         const selectedColumn = axis.field?.options?.find(
@@ -151,6 +152,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                   })}
                 >
                   <EuiSwitch
+                    compressed
                     label=""
                     checked={axis.show}
                     onChange={(e) => updateAxis(index, { show: e.target.checked })}
@@ -176,6 +178,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                       })}
                     >
                       <EuiSwitch
+                        compressed
                         label=""
                         checked={axis.labels.show}
                         onChange={(e) =>
@@ -197,6 +200,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                               })}
                             >
                               <EuiSelect
+                                compressed
                                 value={
                                   axis.labels.rotate === 0
                                     ? 'horizontal'
@@ -298,6 +302,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            size="s"
             onClick={() => onChangeSwitchAxes(standardAxes)}
             data-test-subj="switchAxesButton"
           >

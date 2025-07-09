@@ -68,6 +68,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         })}
       >
         <EuiSelect
+          compressed
           options={colorSchemas}
           value={styles.colorSchema}
           onChange={(e) => updateExclusiveOption('colorSchema', e.target.value as ColorSchemas)}
@@ -80,6 +81,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         })}
       >
         <EuiSwitch
+          compressed
           label=""
           checked={styles.reverseSchema}
           onChange={(e) => updateExclusiveOption('reverseSchema', e.target.checked)}
@@ -131,6 +133,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         })}
       >
         <EuiSwitch
+          compressed
           label=""
           checked={styles.scaleToDataBounds}
           disabled={styles.percentageMode || styles.useCustomRanges}
@@ -144,6 +147,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         })}
       >
         <EuiSwitch
+          compressed
           label=""
           disabled={styles.useCustomRanges || styles.scaleToDataBounds}
           checked={styles.percentageMode}
@@ -172,6 +176,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         })}
       >
         <EuiSwitch
+          compressed
           label=""
           disabled={styles.percentageMode || styles.scaleToDataBounds}
           checked={styles.useCustomRanges}
@@ -224,6 +229,7 @@ export const HeatmapLabelVisOptions = ({
         })}
       >
         <EuiSwitch
+          compressed
           label=""
           checked={styles.show}
           onChange={(e) => updateLabelOption('show', e.target.checked)}
@@ -238,6 +244,7 @@ export const HeatmapLabelVisOptions = ({
             })}
           >
             <EuiSwitch
+              compressed
               label=""
               checked={styles.rotate}
               onChange={(e) => updateLabelOption('rotate', e.target.checked)}
@@ -250,6 +257,7 @@ export const HeatmapLabelVisOptions = ({
             })}
           >
             <EuiSwitch
+              compressed
               label=""
               checked={styles.overwriteColor}
               onChange={(e) => updateLabelOption('overwriteColor', e.target.checked)}
@@ -263,6 +271,7 @@ export const HeatmapLabelVisOptions = ({
               })}
             >
               <EuiColorPicker
+                compressed
                 onChange={(color) => updateLabelOption('color', color)}
                 color={styles.color}
               />
@@ -276,6 +285,7 @@ export const HeatmapLabelVisOptions = ({
               })}
             >
               <EuiSelect
+                compressed
                 value={styles.type}
                 onChange={(e) => updateLabelOption('type', e.target.value as LabelAggregationType)}
                 options={labelType}

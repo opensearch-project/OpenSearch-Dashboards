@@ -110,6 +110,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             })}
           >
             <EuiRange
+              compressed
               value={fontSize}
               onChange={(e) => handleFontSize((e.target as HTMLInputElement).value)}
               min={10}
@@ -140,6 +141,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                 })}
               >
                 <EuiSelect
+                  compressed
                   options={colorSchemas}
                   value={styleOptions.colorSchema}
                   onChange={(e) => updateStyleOption('colorSchema', e.target.value as ColorSchemas)}

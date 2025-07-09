@@ -182,6 +182,7 @@ export const ChartTypeSelector = <T extends ChartType>({
           >
             <EuiSuperSelect
               id="chartType"
+              compressed
               valueOfSelected={
                 currChartTypeId && chartTypeMappedOptions[currChartTypeId]
                   ? chartTypeMappedOptions[currChartTypeId].disabled

@@ -63,6 +63,7 @@ const DebouncedAxisTitle: React.FC<{
   return (
     <EuiFormRow label={label}>
       <EuiFieldText
+        compressed
         value={localValue}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
@@ -85,7 +86,11 @@ const DebouncedTruncateField: React.FC<{
 
   return (
     <EuiFormRow label={label}>
-      <EuiFieldNumber value={localValue} onChange={(e) => handleChange(e.target.value)} />
+      <EuiFieldNumber
+        compressed
+        value={localValue}
+        onChange={(e) => handleChange(e.target.value)}
+      />
     </EuiFormRow>
   );
 };
@@ -194,6 +199,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                 })}
               >
                 <EuiSelect
+                  compressed
                   value={axis.position}
                   onChange={(e) =>
                     updateCategoryAxis(index, {
@@ -215,6 +221,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
             <EuiFlexItem>
               <EuiFormRow>
                 <EuiSwitch
+                  compressed
                   label={i18n.translate('explore.vis.gridOptions.showAxisLinesAndLabels', {
                     defaultMessage: 'Show axis lines and labels',
                   })}
@@ -250,6 +257,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                 <EuiFlexItem>
                   <EuiFormRow>
                     <EuiSwitch
+                      compressed
                       label={i18n.translate('explore.vis.gridOptions.showLabels', {
                         defaultMessage: 'Show labels',
                       })}
@@ -275,6 +283,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                         })}
                       >
                         <EuiSelect
+                          compressed
                           value={
                             axis.labels.rotate === 0
                               ? 'horizontal'
@@ -370,6 +379,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                     })}
                   >
                     <EuiSelect
+                      compressed
                       value={axis.position}
                       onChange={(e) =>
                         updateValueAxis(index, {
@@ -392,6 +402,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                 <EuiFlexItem>
                   <EuiFormRow>
                     <EuiSwitch
+                      compressed
                       label={i18n.translate('explore.vis.gridOptions.showAxisLineAndLabels', {
                         defaultMessage: 'Show axis line and labels',
                       })}
@@ -427,6 +438,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                     <EuiFlexItem>
                       <EuiFormRow>
                         <EuiSwitch
+                          compressed
                           label={i18n.translate('explore.vis.gridOptions.showLabels', {
                             defaultMessage: 'Show labels',
                           })}
@@ -453,6 +465,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                             })}
                           >
                             <EuiSelect
+                              compressed
                               value={
                                 axis.labels.rotate === 0
                                   ? 'horizontal'
@@ -518,6 +531,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   })}
                 >
                   <EuiSelect
+                    compressed
                     value={axis.position}
                     onChange={(e) =>
                       updateValueAxis(index, {
@@ -539,6 +553,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
               <EuiFlexItem>
                 <EuiFormRow>
                   <EuiSwitch
+                    compressed
                     label={i18n.translate('explore.vis.gridOptions.showAxisLineAndLabels', {
                       defaultMessage: 'Show axis line and labels',
                     })}
@@ -574,6 +589,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   <EuiFlexItem>
                     <EuiFormRow>
                       <EuiSwitch
+                        compressed
                         label={i18n.translate('explore.vis.gridOptions.showLabels', {
                           defaultMessage: 'Show labels',
                         })}
@@ -600,6 +616,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                           })}
                         >
                           <EuiSelect
+                            compressed
                             value={
                               axis.labels.rotate === 0
                                 ? 'horizontal'
