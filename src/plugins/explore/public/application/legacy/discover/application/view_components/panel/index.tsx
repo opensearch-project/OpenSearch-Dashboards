@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { UI_SETTINGS } from '../../../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
@@ -27,7 +27,7 @@ import { useChangeQueryEditor } from '../../../../../hooks';
 
 export function DiscoverPanel() {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { capabilities, application, uiSettings } = services;
+  const { capabilities, uiSettings } = services;
 
   const { onAddFilter } = useChangeQueryEditor();
   const columns = useSelector(selectColumns);
@@ -74,13 +74,6 @@ export function DiscoverPanel() {
     }
   }, [columns, dispatch, indexPattern?.timeFieldName]);
 
-  const onCreateIndexPattern = useCallback(async () => {
-    if (!indexPattern?.title) return;
-    application?.navigateToApp('management', {
-      path: `opensearch-dashboards/indexPatterns/create?id=${indexPattern.title}`,
-    });
-  }, [application, indexPattern?.title]);
-
   const isEnhancementsEnabledOverride = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 
   return (
@@ -110,7 +103,6 @@ export function DiscoverPanel() {
         );
       }}
       selectedIndexPattern={indexPattern}
-      onCreateIndexPattern={onCreateIndexPattern}
       onAddFilter={onAddFilter}
       isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}
     />

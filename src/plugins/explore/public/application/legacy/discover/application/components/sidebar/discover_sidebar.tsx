@@ -39,15 +39,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
 import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../../../../data/public';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { DiscoverField } from './discover_field';
-import { DiscoverFieldDataFrame } from './discover_field_data_frame';
 import { DiscoverFieldSearch } from './discover_field_search';
 import './discover_sidebar.scss';
-import { displayIndexPatternCreation } from './lib/display_index_pattern_creation';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getDetails } from './lib/get_details';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
@@ -85,10 +83,6 @@ export interface DiscoverSidebarProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
-   * Callback function to create an index pattern
-   */
-  onCreateIndexPattern: () => void;
-  /**
    * Currently selected index pattern
    */
   selectedIndexPattern?: IndexPattern;
@@ -101,23 +95,18 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     hits,
     onAddField,
     onReorderFields,
-    onCreateIndexPattern,
     selectedIndexPattern,
     isEnhancementsEnabledOverride,
   } = props;
-  const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
-  const services = useMemo(() => getServices(), []);
+  const shortDotsEnabled = useMemo(() => {
+    const services = getServices();
+    return services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+  }, []);
 
-  useEffect(() => {
-    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
-    setFields(newFields);
-  }, [selectedIndexPattern, fieldCounts, hits, services]);
-
-  const onNormalizeIndexPattern = useCallback(() => {
-    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
-    setFields(newFields);
-  }, [fieldCounts, selectedIndexPattern]);
+  const fields = useMemo(() => {
+    return getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+  }, [selectedIndexPattern, fieldCounts]);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -131,8 +120,6 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     (ipField: IndexPatternField) => getDetails(ipField, hits, selectedIndexPattern),
     [hits, selectedIndexPattern]
   );
-
-  const shortDotsEnabled = services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
 
   const { resultFields, schemaFields } = useMemo(
     () => groupFields(fields, fieldCounts, fieldFilterState),
@@ -208,14 +195,6 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
               isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}
             />
           </EuiSplitPanel.Inner>
-          {displayIndexPatternCreation(selectedIndexPattern) ? (
-            <EuiSplitPanel.Inner grow={false} paddingSize="s">
-              <DiscoverFieldDataFrame
-                onCreateIndexPattern={onCreateIndexPattern}
-                onNormalizeIndexPattern={onNormalizeIndexPattern}
-              />
-            </EuiSplitPanel.Inner>
-          ) : null}
 
           <EuiSplitPanel.Inner
             className="eui-yScroll dscSideBar_fieldListContainer"
