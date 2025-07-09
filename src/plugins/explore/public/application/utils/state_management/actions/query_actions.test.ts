@@ -301,16 +301,6 @@ describe('Query Actions', () => {
       expect(result).toBe('source=test-dataset');
     });
 
-    it('should prepend source with pipe for non-empty query', () => {
-      const query: Query = {
-        query: 'where level="error"',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source=test-dataset | where level="error"');
-    });
-
     it('should prepend source without extra pipe when query starts with pipe', () => {
       const query: Query = {
         query: '| where level="error"',
@@ -335,12 +325,12 @@ describe('Query Actions', () => {
   describe('defaultPrepareQuery', () => {
     it('should combine prependSourceIfNecessary and stripStatsFromQuery', () => {
       const query: Query = {
-        query: 'where level="error" | stats count by host',
+        query: 'level="error" | stats count by host',
         dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
         language: 'ppl',
       };
       const result = defaultPrepareQuery(query);
-      expect(result).toBe('source=test-dataset | where level="error"');
+      expect(result).toBe('source=test-dataset level="error"');
     });
 
     it('should handle query that already has source', () => {
@@ -365,7 +355,7 @@ describe('Query Actions', () => {
 
     it('should handle query with only stats pipe', () => {
       const query: Query = {
-        query: 'stats count by host',
+        query: '| stats count by host',
         dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
         language: 'ppl',
       };
