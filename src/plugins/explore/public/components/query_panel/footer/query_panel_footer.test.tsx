@@ -6,6 +6,22 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryPanelFooter } from './query_panel_footer';
+import { useIndexPatternContext } from '../../../application/components/index_pattern_context';
+import { useSelector } from 'react-redux';
+
+jest.mock('react-redux', () => ({
+  useSelector: jest.fn(),
+  connect: jest.fn(() => (component: any) => component),
+  Provider: ({ children }: any) => children,
+}));
+
+jest.mock('../../../../../data/public', () => ({
+  QueryResult: ({ queryStatus }: any) => (
+    <div data-test-subj="query-result">
+      Query Result: {queryStatus.status} - {queryStatus.elapsedMs}ms
+    </div>
+  ),
+}));
 
 // Mock all child components
 jest.mock('./save_query', () => ({
@@ -18,12 +34,6 @@ jest.mock('./date_time_range_picker', () => ({
 
 jest.mock('./run_query_button', () => ({
   RunQueryButton: () => <div data-test-subj="run-query-button">Run Query</div>,
-}));
-
-jest.mock('./query_error', () => ({
-  QueryError: ({ queryStatus }: any) => (
-    <div data-test-subj="query-error">Query Error: {queryStatus.body.error.error}</div>
-  ),
 }));
 
 jest.mock('./filter_panel_toggle', () => ({
@@ -42,15 +52,23 @@ jest.mock('../../../application/components/index_pattern_context', () => ({
   useIndexPatternContext: jest.fn(),
 }));
 
-import { useIndexPatternContext } from '../../../application/components/index_pattern_context';
-
 const mockUseIndexPatternContext = useIndexPatternContext as jest.MockedFunction<
   typeof useIndexPatternContext
 >;
 
+const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
+
 describe('QueryPanelFooter', () => {
+  const mockQueryStatus = {
+    status: 'ready',
+    elapsedMs: 150,
+    startTime: Date.now(),
+    body: undefined,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseSelector.mockReturnValue(mockQueryStatus);
   });
 
   it('renders all footer components', () => {
@@ -63,7 +81,7 @@ describe('QueryPanelFooter', () => {
     expect(screen.getByTestId('filter-panel-toggle')).toBeInTheDocument();
     expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
     expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
-    expect(screen.getByTestId('query-error')).toBeInTheDocument();
+    expect(screen.getByTestId('query-result')).toBeInTheDocument();
     expect(screen.getByTestId('detected-language')).toBeInTheDocument();
     expect(screen.getByTestId('run-query-button')).toBeInTheDocument();
   });
@@ -108,16 +126,37 @@ describe('QueryPanelFooter', () => {
     expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
   });
 
-  it('renders query error with correct error message', () => {
+  it('renders QueryResult component with correct query status', () => {
     mockUseIndexPatternContext.mockReturnValue({
       indexPattern: { timeFieldName: '@timestamp' },
     } as any);
 
     render(<QueryPanelFooter />);
 
-    expect(screen.getByTestId('query-error')).toHaveTextContent(
-      'Query Error: An error occurred while processing the query.'
-    );
+    expect(screen.getByTestId('query-result')).toHaveTextContent('Query Result: ready - 150ms');
+  });
+
+  it('renders QueryResult component with error status', () => {
+    const errorQueryStatus = {
+      status: 'error',
+      elapsedMs: 500,
+      startTime: Date.now(),
+      body: {
+        error: {
+          error: 'Query execution failed',
+          message: { error: 'Syntax error in query' },
+        },
+      },
+    };
+
+    mockUseSelector.mockReturnValue(errorQueryStatus);
+    mockUseIndexPatternContext.mockReturnValue({
+      indexPattern: { timeFieldName: '@timestamp' },
+    } as any);
+
+    render(<QueryPanelFooter />);
+
+    expect(screen.getByTestId('query-result')).toHaveTextContent('Query Result: error - 500ms');
   });
 
   it('conditionally renders date time picker wrapper with correct class', () => {
@@ -132,5 +171,15 @@ describe('QueryPanelFooter', () => {
     );
     expect(datePickerWrapper).toBeInTheDocument();
     expect(datePickerWrapper).toContainElement(screen.getByTestId('date-time-range-picker'));
+  });
+
+  it('calls selectQueryStatus selector', () => {
+    mockUseIndexPatternContext.mockReturnValue({
+      indexPattern: { timeFieldName: '@timestamp' },
+    } as any);
+
+    render(<QueryPanelFooter />);
+
+    expect(mockUseSelector).toHaveBeenCalled();
   });
 });

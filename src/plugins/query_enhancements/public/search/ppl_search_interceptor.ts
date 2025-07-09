@@ -4,7 +4,8 @@
  */
 
 import { trimEnd } from 'lodash';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
+import { first, switchMap } from 'rxjs/operators';
 import { formatTimePickerDate, Query, UI_SETTINGS } from '../../../data/common';
 import {
   DataPublicPluginStart,
@@ -25,10 +26,12 @@ import {
   SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { convertFiltersToWhereClause, getTimeFilterWhereClause } from './filters/parser';
 import { IUiSettingsClient } from '../../../../core/public';
+import { PPLFilterUtils } from './filters';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
+  private static readonly filterManagerSupportedAppNames = ['dashboards'];
+
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
   private uiSettings!: IUiSettingsClient;
@@ -61,9 +64,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       },
     };
 
-    const query = this.buildQuery(request);
-
-    return fetch(context, query, this.getAggConfig(searchRequest, query));
+    return from(this.buildQuery(request)).pipe(
+      switchMap((query) => fetch(context, query, this.getAggConfig(searchRequest, query)))
+    );
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
@@ -100,23 +103,26 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
   }
 
-  private buildQuery(request: IOpenSearchDashboardsSearchRequest) {
+  private async buildQuery(request: IOpenSearchDashboardsSearchRequest) {
     const query = this.getQuery(request);
     // Only append filters if query is running search command (e.g. not describe command)
     if (!isPPLSearchQuery(query)) return query;
 
-    const filters = this.queryService.filterManager.getFilters();
-    const index = request.params?.index
-      ? this.indexPatterns.getByTitle(request.params.index, true)
-      : undefined;
-    const ignoreFilterIfFieldNotInIndex = this.uiSettings.get(
-      UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
-    );
+    const whereCommands: string[] = [];
 
-    const filterClause = convertFiltersToWhereClause(filters, index, ignoreFilterIfFieldNotInIndex);
-    const commands = query.query.split('|');
-    if (filterClause) {
-      commands.splice(1, 0, filterClause);
+    const appId = await this.application.currentAppId$.pipe(first()).toPromise();
+    if (appId && PPLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
+      const filters = this.queryService.filterManager.getFilters();
+      const index = request.params?.index
+        ? this.indexPatterns.getByTitle(request.params.index, true)
+        : undefined;
+
+      const whereCommand = PPLFilterUtils.convertFiltersToWhereClause(
+        filters,
+        index,
+        this.uiSettings.get(UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX)
+      );
+      whereCommands.push(whereCommand);
     }
 
     const datasetService = this.queryService.queryString.getDatasetService();
@@ -127,13 +133,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
-      const timeFilter = getTimeFilterWhereClause(
+      const timeFilter = PPLFilterUtils.getTimeFilterWhereClause(
         dataset.timeFieldName,
         this.queryService.timefilter.timefilter.getTime()
       );
-      commands.splice(1, 0, timeFilter);
+      whereCommands.push(timeFilter);
     }
-    return { ...query, query: commands.map((cmd) => cmd.trim()).join(' | ') };
+    return {
+      ...query,
+      query: whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query),
+    };
   }
 
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {

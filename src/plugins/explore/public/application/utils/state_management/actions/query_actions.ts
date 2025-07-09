@@ -7,7 +7,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { QueryExecutionStatus } from '../types';
-import { setResults, ISearchResult, setExecutionStatus } from '../slices';
+import { setResults, ISearchResult, setQueryStatus, updateQueryStatus } from '../slices';
 import { ExploreServices } from '../../../../types';
 import { IndexPattern } from '../../../legacy/discover/opensearch_dashboards_services';
 import {
@@ -19,7 +19,7 @@ import {
   createHistogramConfigs,
   getDimensions,
   buildPointSeriesData,
-} from '../../../legacy/discover/application/components/chart/utils';
+} from '../../../../components/chart/utils';
 import { IBucketDateHistogramAggConfig } from '../../../../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
@@ -173,11 +173,17 @@ const executeQueryBase = async (
     return;
   }
 
-  // Access query state directly
   const query = getState().query;
 
   try {
-    dispatch(setExecutionStatus(QueryExecutionStatus.LOADING));
+    dispatch(
+      setQueryStatus({
+        status: QueryExecutionStatus.LOADING,
+        startTime: Date.now(),
+        elapsedMs: undefined,
+        body: undefined,
+      })
+    );
 
     // Create abort controller
     const abortController = new AbortController();
@@ -270,24 +276,40 @@ const executeQueryBase = async (
 
     dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
 
-    // Set status based on results
-    if (rawResults.hits && rawResults.hits.hits && rawResults.hits.hits.length > 0) {
-      dispatch(setExecutionStatus(QueryExecutionStatus.READY));
-    } else {
-      dispatch(setExecutionStatus(QueryExecutionStatus.NO_RESULTS));
-    }
+    // Set completion status with timing
+    dispatch(
+      updateQueryStatus({
+        status:
+          rawResults.hits?.hits?.length > 0
+            ? QueryExecutionStatus.READY
+            : QueryExecutionStatus.NO_RESULTS,
+        elapsedMs: inspectorRequest.getTime()!,
+      })
+    );
 
     return rawResultsWithMeta;
   } catch (error: any) {
     // Handle abort errors
     if (error instanceof Error && error.name === 'AbortError') {
-      dispatch(setExecutionStatus(QueryExecutionStatus.READY)); // Keep current status on abort
       return;
     }
 
     // Use search service to show error (like Discover does)
     services.data.search.showError(error as Error);
-    dispatch(setExecutionStatus(QueryExecutionStatus.ERROR));
+
+    // Set error status with data plugin's error format
+    dispatch(
+      updateQueryStatus({
+        status: QueryExecutionStatus.ERROR,
+        body: {
+          error: {
+            error: error.message || 'Unknown error',
+            message: { error: error.message },
+            statusCode: error.statusCode,
+          },
+        },
+      })
+    );
     throw error;
   }
 };

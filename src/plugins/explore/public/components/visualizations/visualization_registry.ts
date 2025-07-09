@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { isEqual } from 'lodash';
 import { createLineConfig } from './line/line_vis_config';
 import { createHeatmapConfig } from './heatmap/heatmap_vis_config';
 import { createScatterConfig } from './scatter/scatter_vis_config';
@@ -11,6 +12,7 @@ import { createPieConfig } from './pie/pie_vis_config';
 import { createAreaConfig } from './area/area_vis_config';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import {
+  AxisColumnMappings,
   ChartMetadata,
   ChartTypeMapping,
   VisColumn,
@@ -18,6 +20,7 @@ import {
   VisualizationRule,
 } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
+import { getColumnMatchFromMapping } from './visualization_container_utils';
 
 /**
  * Registry for visualization rules and configurations.
@@ -44,6 +47,13 @@ export class VisualizationRegistry {
     const bestMatch = this.findBestMatch(numericalColumns, categoricalColumns, dateColumns);
 
     if (bestMatch) {
+      const mappingObj = this.getDefaultAxesMapping(
+        bestMatch.rule,
+        bestMatch.chartType.type,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
+      );
       return {
         visualizationType: this.getVisualizationConfig(bestMatch.chartType.type),
         numericalColumns,
@@ -52,6 +62,7 @@ export class VisualizationRegistry {
         ruleId: bestMatch.rule.id,
         availableChartTypes: bestMatch.rule.chartTypes,
         toExpression: bestMatch.rule.toExpression,
+        axisColumnMappings: mappingObj,
       };
     }
 
@@ -64,7 +75,42 @@ export class VisualizationRegistry {
       ruleId: undefined,
       availableChartTypes: [],
       toExpression: undefined,
+      axisColumnMappings: {},
     };
+  }
+
+  getDefaultAxesMapping(
+    rule: VisualizationRule,
+    chartTypeName: string,
+    numericalColumns: VisColumn[],
+    categoricalColumns: VisColumn[],
+    dateColumns: VisColumn[]
+  ) {
+    const findColumns = (type: VisFieldType) => {
+      switch (type) {
+        case VisFieldType.Numerical:
+          return numericalColumns;
+        case VisFieldType.Categorical:
+          return categoricalColumns;
+        case VisFieldType.Date:
+          return dateColumns;
+        default:
+          return [];
+      }
+    };
+
+    const possibleMapping = this.getVisualizationConfig(chartTypeName)?.ui.availableMappings;
+    const currentlyDisplayedMapping = possibleMapping?.find(({ mapping }) =>
+      isEqual(getColumnMatchFromMapping(mapping), rule.matchIndex)
+    );
+    return currentlyDisplayedMapping
+      ? (Object.fromEntries(
+          Object.entries(currentlyDisplayedMapping!.mapping[0]).map(([role, config]) => [
+            role,
+            config && findColumns(config.type)[config.index],
+          ])
+        ) as AxisColumnMappings)
+      : {};
   }
 
   /**

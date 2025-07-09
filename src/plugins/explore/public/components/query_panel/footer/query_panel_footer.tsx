@@ -4,23 +4,25 @@
  */
 
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SaveQueryButton } from './save_query';
 import { DateTimeRangePicker } from './date_time_range_picker';
 import { RunQueryButton } from './run_query_button';
-import { QueryError } from './query_error';
 import { FilterPanelToggle } from './filter_panel_toggle';
 import { RecentQueriesButton } from './recent_queries_button';
 import { useIndexPatternContext } from '../../../application/components/index_pattern_context';
 import { DetectedLanguage } from './detected_language';
-import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
+import { QueryResult } from '../../../../../data/public';
+import { selectQueryStatus } from '../../../application/utils/state_management/selectors';
 
 import './query_panel_footer.scss';
 
 export const QueryPanelFooter = () => {
   const { indexPattern } = useIndexPatternContext();
   const showDatePicker = Boolean(indexPattern?.timeFieldName);
+  const queryStatus = useSelector(selectQueryStatus);
 
   return (
     <div className="queryPanel__footer">
@@ -53,17 +55,7 @@ export const QueryPanelFooter = () => {
               <div className="queryPanel__footer__verticalSeparator" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <QueryError
-                // TODO: Update query error with query slice object and remove below mocked string
-                queryStatus={{
-                  status: QueryExecutionStatus.ERROR,
-                  body: {
-                    error: {
-                      error: 'An error occurred while processing the query.', // This is mocked error string
-                    },
-                  },
-                }}
-              />
+              <QueryResult queryStatus={queryStatus} />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="queryPanel__footer__showInputTypeWrapper">
               <DetectedLanguage />

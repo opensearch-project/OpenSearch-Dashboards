@@ -19,10 +19,18 @@ export const mockDataPluginMocks = {
   search: {
     tabifyAggResponse: jest.fn(),
   },
+  ResultStatus: {
+    UNINITIALIZED: 'uninitialized',
+    LOADING: 'loading',
+    READY: 'ready',
+    NO_RESULTS: 'none',
+    ERROR: 'error',
+  },
+  QueryStatus: {},
 };
 
 // Mock the modules using the mock objects
-jest.mock('../../../legacy/discover/application/components/chart/utils', () => mockChartUtilsMocks);
+jest.mock('../../../../components/chart/utils', () => mockChartUtilsMocks);
 jest.mock('../../../../../../data/public', () => mockDataPluginMocks);
 
 // Export individual mock functions for convenience

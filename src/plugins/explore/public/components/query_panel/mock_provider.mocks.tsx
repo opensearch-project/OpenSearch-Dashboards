@@ -162,6 +162,7 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
       ui: {
         activeTabId: 'logs',
         showDatasetFields: true,
+        showHistogram: true,
         prompt: '',
       },
       results: {},
@@ -170,11 +171,7 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
         visualizations: {
           styleOptions: undefined,
           chartType: 'line',
-          fieldNames: {
-            numerical: [],
-            categorical: [],
-            date: [],
-          },
+          axesMapping: {},
         },
       },
       legacy: {
@@ -183,7 +180,12 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
         interval: 'auto',
       },
       queryEditor: {
-        executionStatus: QueryExecutionStatus.UNINITIALIZED,
+        queryStatus: {
+          status: QueryExecutionStatus.UNINITIALIZED,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
         editorMode,
         promptModeIsAvailable: false,
       },

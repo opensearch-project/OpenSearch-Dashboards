@@ -47,6 +47,10 @@ import {
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
 import { defaultPrepareQuery } from '../application/utils/state_management/actions/query_actions';
+import {
+  convertStringsToMappings,
+  findRuleByIndex,
+} from '../components/visualizations/visualization_container_utils';
 
 export interface SearchProps {
   description?: string;
@@ -325,6 +329,7 @@ export class ExploreEmbeddable
     const rows = resp.hits.hits;
     const fieldSchema = searchSource.getDataFrame()?.schema;
     const visualizationData = getVisualizationType(rows, fieldSchema);
+
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
@@ -333,48 +338,29 @@ export class ExploreEmbeddable
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
     if (uiState.activeTab !== 'logs' && visualizationData) {
-      const fields = visualization.fields;
-      const filteredColumns = {
-        numerical: visualizationData.numericalColumns
-          ? visualizationData.numericalColumns.filter((col) => fields.numerical.includes(col.name))
-          : [],
-        categorical: visualizationData.categoricalColumns
-          ? visualizationData.categoricalColumns.filter((col) =>
-              fields.categorical.includes(col.name)
-            )
-          : [],
-        date: visualizationData.dateColumns
-          ? visualizationData.dateColumns.filter((col) => fields.date.includes(col.name))
-          : [],
-      };
-
-      const matchedRuleId = visualizationData.ruleId
-        ? visualizationData.ruleId
-        : this.services.visualizationRegistry
-            .getRegistry()
-            .findBestMatch(
-              filteredColumns.numerical,
-              filteredColumns.categorical,
-              filteredColumns.date
-            )?.rule.id; // FIXME improve error tolerance
-      const rule = this.services.visualizationRegistry
-        .start()
-        .getRules()
-        .find((r) => r.id === matchedRuleId);
+      const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
+      const allColumns = [
+        ...(numericalColumns ?? []),
+        ...(categoricalColumns ?? []),
+        ...(dateColumns ?? []),
+      ];
+      const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+      const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns); // FIXME when no rule matched
       const ruleBasedToExpressionFn = (
         transformedData: Array<Record<string, any>>,
-        numericalColumns: VisColumn[],
-        categoricalColumns: VisColumn[],
-        dateColumns: VisColumn[],
+        numericalCols: VisColumn[],
+        categoricalCols: VisColumn[],
+        dateCols: VisColumn[],
         styleOpts: StyleOptions
       ) => {
-        return rule?.toExpression?.(
+        return matchedRule?.toExpression?.(
           transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
+          numericalCols,
+          categoricalCols,
+          dateCols,
           styleOpts,
-          selectedChartType
+          selectedChartType,
+          axesMapping
         );
       };
       const searchContext = {
@@ -390,9 +376,9 @@ export class ExploreEmbeddable
         indexPattern!,
         ruleBasedToExpressionFn,
         visualizationData.transformedData,
-        filteredColumns.numerical,
-        filteredColumns.categorical,
-        filteredColumns.date,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
         styleOptions
       );
       this.searchProps.expression = exp;

@@ -146,7 +146,12 @@ describe('LogsPage', () => {
       },
       queryEditor: {
         ...queryEditorInitialState,
-        executionStatus: status,
+        queryStatus: {
+          status,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
       },
     };
 

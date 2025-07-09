@@ -20,8 +20,8 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
-import { TopNav } from '../../legacy/discover/application/view_components/canvas/top_nav';
-import { DiscoverChartContainer } from '../../legacy/discover/application/view_components/canvas/discover_chart_container';
+import { TopNav } from '../../../components/top_nav/top_nav';
+import { DiscoverChartContainer } from '../../../components/chart/discover_chart_container';
 import { QueryPanel } from '../../../components/query_panel';
 import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
 import { HeaderDatasetSelector } from '../../components/header_dataset_selector';
@@ -62,7 +62,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
 
   // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
-    return state.queryEditor.executionStatus || QueryExecutionStatus.UNINITIALIZED;
+    return state.queryEditor.queryStatus.status || QueryExecutionStatus.UNINITIALIZED;
   });
   const rows = useSelector((state: RootState) => {
     const query = state.query;

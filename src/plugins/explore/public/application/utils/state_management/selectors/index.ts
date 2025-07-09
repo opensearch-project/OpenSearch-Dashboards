@@ -43,6 +43,11 @@ export const selectShowDataSetFields = createSelector(
   (uiState) => uiState.showDatasetFields
 );
 
+export const selectShowHistogram = createSelector(
+  [selectUIState],
+  (uiState) => uiState.showHistogram
+);
+
 export const selectStyleOptions = createSelector(
   [selectTabState],
   (tabState) => tabState.visualizations.styleOptions
@@ -53,9 +58,9 @@ export const selectChartType = createSelector(
   (tabState) => tabState.visualizations.chartType
 );
 
-export const selectFieldNames = createSelector(
+export const selectAxesMapping = createSelector(
   [selectTabState],
-  (tabState) => tabState.visualizations.fieldNames
+  (tabState) => tabState.visualizations.axesMapping
 );
 
 export const selectActiveTab = createSelector(
