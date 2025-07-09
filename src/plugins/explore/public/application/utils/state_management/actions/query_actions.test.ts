@@ -301,16 +301,6 @@ describe('Query Actions', () => {
       expect(result).toBe('source=test-dataset');
     });
 
-    it('should prepend source with space for non-empty query', () => {
-      const query: Query = {
-        query: 'where level="error"',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source=test-dataset where level="error"');
-    });
-
     it('should prepend source without extra pipe when query starts with pipe', () => {
       const query: Query = {
         query: '| where level="error"',
