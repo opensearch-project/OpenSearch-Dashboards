@@ -9,17 +9,14 @@ import {
   ChartType,
 } from '../../../../../components/visualizations/utils/use_visualization_types';
 import { defaultMetricChartStyles } from '../../../../../components/visualizations/metric/metric_vis_config';
+import { AxisColumnMappings, AxisRole } from '../../../../../components/visualizations/types';
 
 export interface TabState {
   logs: {};
   visualizations: {
     styleOptions: ChartStyleControlMap[ChartType] | undefined;
-    chartType: ChartType;
-    fieldNames?: {
-      numerical: string[];
-      categorical: string[];
-      date: string[];
-    };
+    chartType: ChartType | undefined;
+    axesMapping: Partial<Record<AxisRole, string>>;
   };
 }
 
@@ -27,7 +24,8 @@ const initialState: TabState = {
   logs: {},
   visualizations: {
     styleOptions: defaultMetricChartStyles,
-    chartType: 'metric',
+    chartType: undefined,
+    axesMapping: {},
   },
 };
 
@@ -41,17 +39,14 @@ const tabSlice = createSlice({
     setStyleOptions: (state, action: PayloadAction<ChartStyleControlMap[ChartType]>) => {
       state.visualizations.styleOptions = action.payload;
     },
-    setChartType: (state, action: PayloadAction<ChartType>) => {
+    setChartType: (state, action: PayloadAction<ChartType | undefined>) => {
       state.visualizations.chartType = action.payload;
     },
-    setFieldNames: (
-      state,
-      action: PayloadAction<{ numerical: string[]; categorical: string[]; date: string[] }>
-    ) => {
-      state.visualizations.fieldNames = action.payload;
+    setAxesMapping: (state, action: PayloadAction<Partial<Record<AxisRole, string>>>) => {
+      state.visualizations.axesMapping = action.payload;
     },
   },
 });
 
-export const { setTabState, setStyleOptions, setChartType, setFieldNames } = tabSlice.actions;
+export const { setTabState, setStyleOptions, setChartType, setAxesMapping } = tabSlice.actions;
 export const tabReducer = tabSlice.reducer;

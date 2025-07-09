@@ -58,9 +58,9 @@ export const selectChartType = createSelector(
   (tabState) => tabState.visualizations.chartType
 );
 
-export const selectFieldNames = createSelector(
+export const selectAxesMapping = createSelector(
   [selectTabState],
-  (tabState) => tabState.visualizations.fieldNames
+  (tabState) => tabState.visualizations.axesMapping
 );
 
 export const selectActiveTab = createSelector(

@@ -88,5 +88,6 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
       defaults: defaultScatterChartStyles,
       render: (props) => React.createElement(ScatterVisStyleControls, props),
     },
+    availableMappings: [], // TODO
   },
 });

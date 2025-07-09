@@ -171,11 +171,7 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
         visualizations: {
           styleOptions: undefined,
           chartType: 'line',
-          fieldNames: {
-            numerical: [],
-            categorical: [],
-            date: [],
-          },
+          axesMapping: {},
         },
       },
       legacy: {
