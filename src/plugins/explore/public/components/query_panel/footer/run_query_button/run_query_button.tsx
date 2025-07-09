@@ -18,7 +18,6 @@ export const RunQueryButton = () => {
   const editorContext = useEditorContext();
   const isLoading = useSelector(selectIsLoading);
   const dispatch = useDispatch();
-  const isDisabled = editorContext.editorText.trim().length === 0;
 
   const handleClick = () => {
     dispatch(onEditorRunActionCreator(services, editorContext));
@@ -28,7 +27,6 @@ export const RunQueryButton = () => {
     <EuiButton
       fill
       onClick={handleClick}
-      isDisabled={isDisabled}
       data-test-subj="queryPanelFooterRunQueryButton"
       size="s"
       isLoading={isLoading}

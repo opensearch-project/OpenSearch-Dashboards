@@ -8,13 +8,14 @@ import { saveAs } from 'file-saver';
 // TODO: What is this import?
 import { createTabCacheKey } from './query_actions';
 import { ExploreServices } from '../../../../types';
+import { AppDispatch, RootState } from '../store';
 
 /**
  * Redux Thunk for exporting data to CSV
  * Uses existing results from the Redux store
  */
 export const exportToCsv = (options: { fileName?: string; services?: ExploreServices } = {}) => {
-  return (dispatch: Dispatch, getState: () => any) => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState();
     const { activeTabId } = state.ui;
     const query = state.query; // Now query state is flattened
@@ -47,7 +48,7 @@ export const exportToCsv = (options: { fileName?: string; services?: ExploreServ
     const rows = results.hits.hits;
 
     // Get index pattern
-    const indexPattern = preparedQuery.dataset || services.data.indexPattern;
+    const indexPattern = query.dataset || services.data.indexPatterns;
 
     // Get columns from legacy state
     const columns = state.legacy?.columns || [];
@@ -119,7 +120,7 @@ export const exportMaxSizeCsv = (
       const searchSource = await services.data.search.searchSource.create();
 
       // Configure SearchSource
-      const indexPattern = preparedQuery.dataset || services.data.indexPattern;
+      const indexPattern = preparedQuery.dataset || services.data.indexPatterns;
       const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(indexPattern);
 
       searchSource

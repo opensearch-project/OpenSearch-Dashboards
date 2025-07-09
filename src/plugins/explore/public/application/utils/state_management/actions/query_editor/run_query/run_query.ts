@@ -14,9 +14,10 @@ import { ExploreServices } from '../../../../../../types';
 export const runQueryActionCreator = (services: ExploreServices, query?: string) => (
   dispatch: AppDispatch
 ) => {
-  if (query) {
+  if (typeof query === 'string') {
     dispatch(setQueryStringWithHistory(query));
   }
+
   dispatch(clearResults());
   dispatch(executeQueries({ services }));
 };

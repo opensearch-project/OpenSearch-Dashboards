@@ -77,10 +77,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
     const finalTabState = appState?.tab || getPreloadedTabState(services);
     const finalLegacyState = appState?.legacy || getPreloadedLegacyState(services);
-    const finalQueryEditorState = await getPreloadedQueryEditorState(
-      services,
-      queryState ?? undefined
-    );
+    const finalQueryEditorState = await getPreloadedQueryEditorState(services, finalQueryState);
 
     return {
       query: finalQueryState,
@@ -179,10 +176,16 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
   const selectedDataset = await resolveDataset(services);
 
   if (selectedDataset) {
-    return services.data.query.queryString.getInitialQueryByDataset({
+    const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...selectedDataset,
       language: EXPLORE_DEFAULT_LANGUAGE,
     });
+
+    // override the initial query to be an empty string
+    return {
+      ...initialQueryByDataset,
+      query: '',
+    };
   } else {
     return {
       query: '',
@@ -199,6 +202,7 @@ const getPreloadedUIState = (services: ExploreServices): UIState => {
   return {
     activeTabId: 'logs',
     showDatasetFields: true,
+    showHistogram: true,
     prompt: '',
   };
 };
@@ -212,13 +216,13 @@ const getPreloadedQueryEditorState = async (
 ): Promise<QueryEditorSliceState> => {
   let promptModeIsAvailable = false;
   if (queryState?.dataset) {
-    promptModeIsAvailable = await getPromptModeIsAvailable(services, queryState.dataset);
+    promptModeIsAvailable = await getPromptModeIsAvailable(services);
   }
 
-  // If !promptMode or there is query, default to SingleQuery
+  // If !query.length, default to SingleEmpty
   const editorMode =
-    !promptModeIsAvailable || queryState?.query.length
-      ? EditorMode.SingleQuery
+    typeof queryState?.query === 'string' && !queryState.query.trim().length
+      ? EditorMode.SingleEmpty
       : DEFAULT_EDITOR_MODE;
 
   return {

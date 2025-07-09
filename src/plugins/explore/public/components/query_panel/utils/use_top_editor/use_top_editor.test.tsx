@@ -60,13 +60,6 @@ jest.mock('../../../../application/context', () => ({
   useEditorContextByEditorComponent: jest.fn(),
 }));
 
-jest.mock('../../../../application/utils/state_management/types', () => ({
-  EditorMode: {
-    SingleQuery: 'single_query',
-    Prompt: 'prompt',
-  },
-}));
-
 import { useSelector } from 'react-redux';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
@@ -219,6 +212,24 @@ describe('useTopEditor', () => {
     });
   });
 
+  it('should return correct editor configuration for empty mode', () => {
+    mockUseSelector.mockImplementation((selector) => {
+      if (selector === selectQueryLanguage) return 'SQL';
+      if (selector === selectEditorMode) return EditorMode.SingleEmpty;
+      return undefined;
+    });
+
+    const { result } = renderUseTopEditor();
+
+    expect(result.current).toEqual({
+      ...mockSharedEditorReturn,
+      languageId: 'SQL',
+      options: { placeholder: 'Enter prompt...' },
+      triggerSuggestOnFocus: false,
+      value: 'SELECT * FROM logs',
+    });
+  });
+
   it('should call useSharedEditor with setEditorRef and editorPosition', () => {
     renderUseTopEditor();
 
@@ -261,6 +272,16 @@ describe('useTopEditor', () => {
 
     const { result: promptResult } = renderUseTopEditor();
     expect(promptResult.current.triggerSuggestOnFocus).toBe(false);
+
+    // Test empty mode (should not trigger suggest on focus)
+    mockUseSelector.mockImplementation((selector) => {
+      if (selector === selectQueryLanguage) return 'SQL';
+      if (selector === selectEditorMode) return EditorMode.SingleEmpty;
+      return undefined;
+    });
+
+    const { result: emptyResult } = renderUseTopEditor();
+    expect(emptyResult.current.triggerSuggestOnFocus).toBe(false);
   });
 
   describe('editor mode changes', () => {

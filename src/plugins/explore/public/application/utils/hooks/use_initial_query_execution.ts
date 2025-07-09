@@ -23,13 +23,7 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   }, [services?.uiSettings]);
 
   useEffect(() => {
-    if (
-      !isInitialized &&
-      queryState.query &&
-      queryState.dataset &&
-      shouldSearchOnPageLoad &&
-      services
-    ) {
+    if (!isInitialized && queryState.dataset && shouldSearchOnPageLoad && services) {
       // Add initial default query to history
       const timefilter = services?.data?.query?.timefilter?.timefilter;
       if (timefilter && queryState.query.trim()) {

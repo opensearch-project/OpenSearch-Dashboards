@@ -43,8 +43,8 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     order: 15,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
-    prepareQuery: (queryString) => {
-      return queryString;
+    prepareQuery: (query) => {
+      return typeof query.query === 'string' ? query.query : '';
     },
 
     component: PatternsTab,
@@ -66,10 +66,10 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     order: 20,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
-    prepareQuery: (queryString) => {
-      // No query transformation for visualizations tab
-      // Visualization tab owner will implement their own prepareQuery
-      return queryString;
+    // No query transformation for visualizations tab
+    // Visualization tab owner will implement their own prepareQuery
+    prepareQuery: (query) => {
+      return typeof query.query === 'string' ? query.query : '';
     },
 
     component: VisualizationContainer,
