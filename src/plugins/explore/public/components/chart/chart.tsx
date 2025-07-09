@@ -102,7 +102,8 @@ export const DiscoverChart = ({
         data-test-subj="histogramCollapseBtn"
         onClick={() => dispatch(setShowHistogram(!showHistogram))}
         iconType={showHistogram ? 'arrowDown' : 'arrowRight'}
-        iconSize={'m'}
+        iconSize="m"
+        color="text"
       />
     </EuiToolTip>
   );
@@ -138,7 +139,7 @@ export const DiscoverChart = ({
             className="dscTimechart"
             data-test-subj="dscTimechart"
           >
-            <div className="dscHistogram" data-test-subj="discoverChart">
+            <div className="exploreHistogram" data-test-subj="discoverChart">
               <DiscoverHistogram
                 chartData={chartData}
                 timefilterUpdateHandler={timefilterUpdateHandler}
