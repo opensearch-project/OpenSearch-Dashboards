@@ -32,7 +32,10 @@ import {
 import { RootState } from '../../application/utils/state_management/store';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
-import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
+import {
+  defaultPrepareQuery,
+  defaultResultsProcessor,
+} from '../../application/utils/state_management/actions/query_actions';
 import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { useChangeQueryEditor } from '../../application/hooks';
@@ -75,6 +78,17 @@ const ExploreDataTableComponent = () => {
     };
   }, [services.data.query.state$]);
 
+  // Process raw results to get field counts and rows
+  const processedResults = useMemo(() => {
+    if (!rawResults || !indexPattern) {
+      return null;
+    }
+
+    // Use defaultResultsProcessor without histogram (DiscoverPanel doesn't need chart data)
+    const processed = defaultResultsProcessor(rawResults, indexPattern);
+    return processed;
+  }, [rawResults, indexPattern]);
+
   const tableColumns = useMemo(() => {
     if (indexPattern == null) {
       return [];
@@ -84,7 +98,8 @@ const ExploreDataTableComponent = () => {
       columns,
       indexPattern,
       uiSettings.get(DEFAULT_COLUMNS_SETTING),
-      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
+      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+      processedResults?.fieldCounts
     );
 
     let adjustedColumns = buildColumns(filteredColumns);
@@ -101,7 +116,7 @@ const ExploreDataTableComponent = () => {
     );
 
     return displayedColumns;
-  }, [columns, indexPattern, uiSettings]);
+  }, [columns, indexPattern, processedResults?.fieldCounts, uiSettings]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -161,7 +176,7 @@ const ExploreDataTableComponent = () => {
         <EuiFlexItem grow={true}>
           <DataTable
             columns={tableColumns}
-            indexPattern={indexPattern}
+            indexPattern={indexPattern!}
             rows={rows}
             docViewsRegistry={docViewsRegistry}
             sampleSize={uiSettings.get(SAMPLE_SIZE_SETTING)}
