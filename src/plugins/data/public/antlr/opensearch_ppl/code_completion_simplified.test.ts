@@ -352,5 +352,19 @@ describe('ppl code_completion', () => {
       const resultField1 = results1.find((result) => result.text === 'field1');
       expect(resultField1?.insertText).toBe('field1 ');
     });
+
+    it('should show the documentations for PPL commands', async () => {
+      const results = await getSimpleSuggestions('source = test-index | ');
+
+      const resultField = results.find((result) => result.text === 'where');
+      expect(resultField?.documentation).not.toBeFalsy();
+    });
+
+    it('should not show the documentations unsupported PPL commands', async () => {
+      const results = await getSimpleSuggestions('source = test-index ');
+
+      const resultField = results.find((result) => result.text === '|');
+      expect(resultField?.documentation).toBeFalsy();
+    });
   });
 });
