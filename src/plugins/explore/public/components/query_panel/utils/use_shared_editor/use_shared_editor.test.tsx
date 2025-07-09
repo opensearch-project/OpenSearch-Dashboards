@@ -240,6 +240,18 @@ describe('useSharedEditor', () => {
       expect(result.current.suggestionProvider.triggerCharacters).toEqual([' ']);
       expect(result.current.suggestionProvider.provideCompletionItems).toBeInstanceOf(Function);
     });
+
+    it('should register completion provider', () => {
+      // Mock monaco.languages.registerCompletionItemProvider
+      const registerCompletionItemProviderMock = jest.fn();
+      (monaco.languages as any).registerCompletionItemProvider = registerCompletionItemProviderMock;
+
+      // Render hook which should trigger useEffect
+      renderUseSharedEditor();
+
+      // Provider registration should be called
+      expect(registerCompletionItemProviderMock).toHaveBeenCalled();
+    });
   });
 
   describe('onChange', () => {
