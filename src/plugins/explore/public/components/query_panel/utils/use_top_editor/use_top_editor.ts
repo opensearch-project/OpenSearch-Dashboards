@@ -22,6 +22,7 @@ export const useTopEditor = (): UseEditorReturnType => {
   const queryLanguage = useSelector(selectQueryLanguage);
   const editorMode = useSelector(selectEditorMode);
   const { topEditorText, topEditorRef } = useEditorContextByEditorComponent();
+  const isQueryMode = editorMode === EditorMode.SingleQuery;
 
   const setEditorRef = useCallback(
     (editor: IStandaloneCodeEditor) => {
@@ -33,20 +34,18 @@ export const useTopEditor = (): UseEditorReturnType => {
   const sharedProps = useSharedEditor({ setEditorRef, editorPosition: 'top' });
 
   const options = useMemo(() => {
-    if (
-      [EditorMode.SingleEmpty, EditorMode.SinglePrompt, EditorMode.DualPrompt].includes(editorMode)
-    ) {
+    if (isQueryMode) {
+      return queryEditorOptions;
+    } else {
       return promptEditorOptions;
     }
-
-    return queryEditorOptions;
-  }, [editorMode]);
+  }, [isQueryMode]);
 
   return {
     ...sharedProps,
     languageId: queryLanguage,
     options,
-    triggerSuggestOnFocus: editorMode === EditorMode.SingleQuery,
+    triggerSuggestOnFocus: isQueryMode,
     value: topEditorText,
   };
 };
