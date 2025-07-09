@@ -122,7 +122,7 @@ export function TimechartHeader({
         <EuiFlexItem grow={false} className="exploreChart__TimechartHeader__logCount">
           <EuiText
             className="exploreChart__TimechartHeader__logCount__text"
-            data-test-subj="discoverIntervalDateRange"
+            data-test-subj="discoverTimechartHeaderLogCount"
             size="s"
           >
             {i18n.translate('explore.discover.timechartHeader.logCount', {
@@ -174,7 +174,7 @@ export function TimechartHeader({
             prepend={
               <EuiText
                 className="exploreChart__TimechartHeader__selection__prependText"
-                data-test-subj="discoverIntervalDateRange"
+                data-test-subj="discoverTimechartHeaderInterval"
                 size="s"
               >
                 {i18n.translate('explore.discover.timechartHeader.interval', {
