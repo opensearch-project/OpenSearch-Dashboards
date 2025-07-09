@@ -13,6 +13,8 @@ import {
   ThresholdLineStyle,
   ValueAxis,
   Positions,
+  AxisRole,
+  VisFieldType,
 } from '../types';
 import { LineStyle } from './exclusive_style';
 import { TooltipOptions } from '../types';
@@ -113,6 +115,51 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
       defaults: defaultLineChartStyles,
       render: (props) => React.createElement(LineVisStyleControls, props),
     },
-    availableMappings: [], // TODO
+    availableMappings: [
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+    ],
   },
 });
