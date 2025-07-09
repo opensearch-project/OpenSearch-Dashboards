@@ -11,7 +11,7 @@ import {
   ChartType,
   ChartStyleControlMap,
 } from './utils/use_visualization_types';
-import { VisualizationEmptyState } from './visualization_empty_state';
+import { ChartTypeSelector } from './chart_type_selector';
 import { UpdateVisualizationProps } from './visualization_container';
 
 export interface VisualizationProps<T extends ChartType> {
@@ -77,8 +77,8 @@ export const Visualization = <T extends ChartType>({
         <EuiPanel hasShadow={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="none">
-              <VisualizationEmptyState
-                visualizationData={visualizationData as any}
+              <ChartTypeSelector
+                visualizationData={visualizationData}
                 onChartTypeChange={onChartTypeChange}
               />
             </EuiFlexGroup>
