@@ -25,7 +25,7 @@ export class QueryTypeDetector {
     // Security: Validate and normalize input
     if (!query) {
       return {
-        type: EditorLanguage.Natural,
+        type: EditorLanguage.Undetermined,
         confidence: 0,
         reason: 'Invalid query input',
         warnings: ['No valid input provided'],
@@ -67,7 +67,8 @@ export class QueryTypeDetector {
       (a, b) => scores[b].score - scores[a].score
     );
     const best = sorted[0];
-    const fallback = scores[best].score < 0.4 ? EditorLanguage.Natural : keyToLanguageType[best];
+    const fallback =
+      scores[best].score < 0.4 ? EditorLanguage.Undetermined : keyToLanguageType[best];
 
     return {
       type: fallback,
@@ -93,6 +94,12 @@ export class QueryTypeDetector {
     if (PatternUtils.isPplStart(firstToken)) {
       score += 0.5;
       reasons.push(`Starts with PPL keyword: ${firstToken}`);
+    }
+
+    // Check if it starts with pipe
+    if (firstToken === '|' || firstToken.startsWith('|')) {
+      score += 0.4;
+      reasons.push("Starts with pipe character '|'");
     }
 
     // Check for pipe character (simple string search)

@@ -189,7 +189,7 @@ export class ExploreEmbeddable
     const activeTab = uiState.activeTab;
     // If the active tab is logs, we need to prepare the query for the logs tab
     if (activeTab === 'logs' && query) {
-      query.query = defaultPrepareQuery(query?.query as string);
+      query.query = defaultPrepareQuery(query);
     }
     searchSource.setFields({
       index: indexPattern,

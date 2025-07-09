@@ -191,10 +191,14 @@ describe('QueryStringManager', () => {
     expect(pplQuery).toHaveProperty('language', 'ppl');
   });
 
-  test('getInitialQueryByDataset returns correct query for dataset', () => {
+  test('getInitialQueryByDataset returns correct query for dataset with initial query string by default', () => {
     service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
       title: 'SQL',
       getQueryString: jest.fn().mockReturnValue('SELECT * FROM TABLE'),
+    });
+
+    service.getDatasetService().getType = jest.fn().mockReturnValue({
+      getInitialQueryString: jest.fn().mockReturnValue('source=test-dataset'),
     });
 
     const dataset = {
@@ -204,6 +208,47 @@ describe('QueryStringManager', () => {
     };
     const query = service.getInitialQueryByDataset(dataset);
     expect(query).toHaveProperty('dataset', dataset);
+    expect(query).toHaveProperty('query', 'source=test-dataset');
+  });
+
+  test('getInitialQueryByDataset returns correct query for dataset with useInitialDatasetQueryString=true', () => {
+    service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+      title: 'SQL',
+      getQueryString: jest.fn().mockReturnValue('SELECT * FROM TABLE'),
+    });
+
+    service.getDatasetService().getType = jest.fn().mockReturnValue({
+      getInitialQueryString: jest.fn().mockReturnValue('source=test-dataset'),
+    });
+
+    const dataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    };
+    const query = service.getInitialQueryByDataset(dataset, true);
+    expect(query).toHaveProperty('dataset', dataset);
+    expect(query).toHaveProperty('query', 'source=test-dataset');
+  });
+
+  test('getInitialQueryByDataset returns empty query string when useInitialDatasetQueryString=false', () => {
+    service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+      title: 'SQL',
+      getQueryString: jest.fn().mockReturnValue('SELECT * FROM TABLE'),
+    });
+
+    service.getDatasetService().getType = jest.fn().mockReturnValue({
+      getInitialQueryString: jest.fn().mockReturnValue('source=test-dataset'),
+    });
+
+    const dataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    };
+    const query = service.getInitialQueryByDataset(dataset, false);
+    expect(query).toHaveProperty('dataset', dataset);
+    expect(query).toHaveProperty('query', '');
   });
 
   describe('setQuery', () => {

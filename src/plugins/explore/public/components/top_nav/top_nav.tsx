@@ -25,7 +25,6 @@ import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
 import { SavedExplore } from '../../saved_explore';
 
-import './discover_canvas.scss';
 export interface TopNavProps {
   savedExplore?: SavedExplore;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];

@@ -46,7 +46,11 @@ export const TopEditor = () => {
   const { topEditorRef, topEditorText } = useEditorContextByEditorComponent();
   const { isFocused, onWrapperClick, ...editorProps } = useTopEditor();
   // TODO: change me
-  const editorClassPrefix = [EditorMode.DualPrompt, EditorMode.SinglePrompt].includes(editorMode)
+  const editorClassPrefix = [
+    EditorMode.SingleEmpty,
+    EditorMode.SinglePrompt,
+    EditorMode.DualPrompt,
+  ].includes(editorMode)
     ? 'promptEditor'
     : 'queryEditor';
   const isReadOnly = editorMode === EditorMode.DualQuery;

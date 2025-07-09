@@ -324,7 +324,7 @@ export class QueryStringManager {
    * Gets initial query for a dataset, using dataset's preferred language or current language
    * Called by getInitialQuery when only dataset changes
    */
-  public getInitialQueryByDataset = (newDataset: Dataset) => {
+  public getInitialQueryByDataset = (newDataset: Dataset, useInitialDatasetQueryString = true) => {
     const curQuery = this.query$.getValue();
     // Use dataset's preferred language or fallback to current language
     const languageId = newDataset.language || curQuery.language;
@@ -336,7 +336,7 @@ export class QueryStringManager {
 
     return {
       ...newQuery,
-      query: this.getInitialDatasetQueryString(newQuery),
+      query: useInitialDatasetQueryString ? this.getInitialDatasetQueryString(newQuery) : '',
     };
   };
 

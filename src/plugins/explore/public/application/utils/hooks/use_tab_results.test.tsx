@@ -33,6 +33,7 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
       },
     },
   }),
+  withOpenSearchDashboards: jest.fn((component: any) => component),
 }));
 jest.mock('../state_management/actions/query_actions', () => ({
   defaultPrepareQuery: jest.fn().mockReturnValue('default-cache-key'),
@@ -49,6 +50,8 @@ const mockDefaultPrepareQuery = defaultPrepareQuery as jest.MockedFunction<
 interface MockRootState {
   query: {
     query: string | object;
+    dataset?: any;
+    language?: string;
   };
   ui: {
     activeTabId: string;
@@ -131,7 +134,9 @@ describe('useTabResults', () => {
     const { result } = renderHookWithStore(store);
 
     expect(result.current.results).toEqual({ data: 'test data' });
-    expect(mockTab.prepareQuery).toHaveBeenCalledWith('test query');
+    expect(mockTab.prepareQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'test query' })
+    );
   });
 
   it('should return null when cache key does not exist', () => {
@@ -148,6 +153,9 @@ describe('useTabResults', () => {
     const { result } = renderHookWithStore(store);
 
     expect(result.current.results).toBeUndefined();
+    expect(mockTab.prepareQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'test query' })
+    );
   });
 
   it('should use defaultPrepareQuery when tab has no custom prepareQuery', () => {
@@ -163,7 +171,9 @@ describe('useTabResults', () => {
     const { result } = renderHookWithStore(store);
 
     expect(result.current.results).toEqual({ data: 'default data' });
-    expect(mockDefaultPrepareQuery).toHaveBeenCalledWith('test query');
+    expect(mockDefaultPrepareQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'test query' })
+    );
   });
 
   it('should handle non-string query input', () => {
@@ -179,6 +189,8 @@ describe('useTabResults', () => {
     const store = createMockStore(initialState);
     renderHookWithStore(store);
 
-    expect(mockTab.prepareQuery).toHaveBeenCalledWith('');
+    expect(mockTab.prepareQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ query: { complex: 'query object' } })
+    );
   });
 });

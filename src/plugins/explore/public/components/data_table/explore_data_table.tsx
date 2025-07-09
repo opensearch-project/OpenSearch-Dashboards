@@ -50,10 +50,7 @@ const ExploreDataTableComponent = () => {
 
   // Use default cache key computation for this component
   const query = useSelector((state: RootState) => state.query);
-  const cacheKey = useMemo(
-    () => defaultPrepareQuery(typeof query.query === 'string' ? query.query : ''),
-    [query]
-  );
+  const cacheKey = useMemo(() => defaultPrepareQuery(query), [query]);
 
   const rawResults = cacheKey ? results[cacheKey] : null;
   const rows = rawResults?.hits?.hits || [];
