@@ -28,8 +28,7 @@ export const DiscoverChartContainer = () => {
 
   // Use default cache key computation for histogram data
   const cacheKey = useMemo(() => {
-    const queryString = typeof query.query === 'string' ? query.query : '';
-    return defaultPrepareQuery(queryString);
+    return defaultPrepareQuery(query);
   }, [query]);
 
   const rawResults = cacheKey ? results[cacheKey] : null;

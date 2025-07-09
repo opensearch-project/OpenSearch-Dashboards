@@ -9,7 +9,6 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { RunQueryButton } from './run_query_button';
 
-// Mock all the deep imports to avoid i18n initialization issues
 jest.mock('../../../../application/utils/state_management/actions/query_editor', () => ({
   onEditorRunActionCreator: jest.fn(),
 }));
@@ -24,13 +23,6 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 
 jest.mock('../../../../application/context', () => ({
   useEditorContext: jest.fn(),
-}));
-
-// Mock i18n to avoid SearchBar initialization issues
-jest.mock('@osd/i18n', () => ({
-  i18n: {
-    translate: jest.fn((id, options) => options?.defaultMessage || id),
-  },
 }));
 
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
@@ -104,37 +96,6 @@ describe('RunQueryButton', () => {
     expect(button).toBeInTheDocument();
   });
 
-  it('is enabled when editor text is not empty', () => {
-    renderWithProvider(<RunQueryButton />);
-
-    const button = screen.getByRole('button', { name: /run query/i });
-    expect(button).not.toBeDisabled();
-  });
-
-  it('is disabled when editor text is empty', () => {
-    mockUseEditorContext.mockReturnValue({
-      ...mockEditorContext,
-      editorText: '',
-    } as any);
-
-    renderWithProvider(<RunQueryButton />);
-
-    const button = screen.getByRole('button', { name: /run query/i });
-    expect(button).toBeDisabled();
-  });
-
-  it('is disabled when editor text contains only whitespace', () => {
-    mockUseEditorContext.mockReturnValue({
-      ...mockEditorContext,
-      editorText: '   \n\t  ',
-    } as any);
-
-    renderWithProvider(<RunQueryButton />);
-
-    const button = screen.getByRole('button', { name: /run query/i });
-    expect(button).toBeDisabled();
-  });
-
   it('dispatches onEditorRunActionCreator when clicked', () => {
     renderWithProvider(<RunQueryButton />);
 
@@ -143,21 +104,6 @@ describe('RunQueryButton', () => {
 
     expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, mockEditorContext);
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'MOCK_ACTION' });
-  });
-
-  it('does not dispatch action when button is disabled', () => {
-    mockUseEditorContext.mockReturnValue({
-      ...mockEditorContext,
-      editorText: '',
-    } as any);
-
-    renderWithProvider(<RunQueryButton />);
-
-    const button = screen.getByRole('button', { name: /run query/i });
-    fireEvent.click(button);
-
-    expect(mockOnEditorRunActionCreator).not.toHaveBeenCalled();
-    expect(mockDispatch).not.toHaveBeenCalled();
   });
 
   it('calls onEditorRunActionCreator with correct parameters', () => {

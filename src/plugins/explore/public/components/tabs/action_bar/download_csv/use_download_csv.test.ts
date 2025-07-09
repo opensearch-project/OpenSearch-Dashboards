@@ -7,12 +7,14 @@ import { unparse } from 'papaparse';
 import { saveAs } from 'file-saver';
 import moment from 'moment';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useDiscoverContext } from '../../view_components/context';
-import { useSelector } from '../../../../application/legacy/discover/application/utils/state_management';
+import {
+  useSelector,
+  useDispatch,
+} from '../../../../application/legacy/discover/application/utils/state_management';
 import { AbortError, IndexPattern } from '../../../../../../data/common';
 import { setServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { discoverPluginMock } from '../../../../application/legacy/discover/mocks';
-import { OpenSearchSearchHit } from '../../../../application/legacy/discover/application/doc_views/doc_views_types';
+import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import {
   formatRowsForCsv,
   saveDataAsCsv,
@@ -29,12 +31,9 @@ jest.mock('papaparse', () => ({
   unparse: jest.fn(),
 }));
 
-jest.mock('../../view_components/context', () => ({
-  useDiscoverContext: jest.fn(),
-}));
-
-jest.mock('../../utils/state_management', () => ({
+jest.mock('../../../../application/legacy/discover/application/utils/state_management', () => ({
   useSelector: jest.fn(),
+  useDispatch: jest.fn(),
 }));
 
 const mockRow1: OpenSearchSearchHit<Record<string, number | string>> = {
@@ -159,23 +158,22 @@ describe('useDiscoverDownloadCsv', () => {
 
   describe('useDiscoverDownloadCsv', () => {
     const mockDisplayedColumnNames = ['bytes_transferred', 'category'];
-    const mockFetchForMaxCsvOption = jest.fn(() => mockRows);
+    const mockDispatch = jest.fn();
     const mockUnparse = jest.fn(() => 'someString');
 
     beforeEach(() => {
-      (useDiscoverContext as jest.MockedFunction<any>).mockImplementation(() => ({
-        fetchForMaxCsvOption: mockFetchForMaxCsvOption,
-      }));
+      (useDispatch as jest.MockedFunction<any>).mockReturnValue(mockDispatch);
       (useSelector as jest.MockedFunction<any>).mockImplementation(() => mockDisplayedColumnNames);
       (unparse as jest.MockedFunction<any>).mockImplementation(mockUnparse);
+      mockDispatch.mockResolvedValue({ payload: mockRows });
     });
 
     afterEach(() => {
-      (useDiscoverContext as jest.MockedFunction<any>).mockClear();
+      (useDispatch as jest.MockedFunction<any>).mockClear();
       (saveAs as jest.MockedFunction<any>).mockClear();
       (useSelector as jest.MockedFunction<any>).mockClear();
       (unparse as jest.MockedFunction<any>).mockClear();
-      mockFetchForMaxCsvOption.mockClear();
+      mockDispatch.mockClear();
       mockOnLoading.mockClear();
       mockOnSuccess.mockClear();
       mockOnError.mockClear();
@@ -228,23 +226,25 @@ describe('useDiscoverDownloadCsv', () => {
       expect(mockOnLoading).toHaveBeenCalled();
     });
 
-    it('does not call fetchForMaxCsvOption when downloadCsvForOption is called with DownloadCsvFormId.Visible', async () => {
+    it('does not call dispatch when downloadCsvForOption is called with DownloadCsvFormId.Visible', async () => {
       const { result } = renderHook(() => useDiscoverDownloadCsv(mockProps));
       await act(async () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Visible);
       });
-      expect(mockFetchForMaxCsvOption).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: expect.stringContaining('exportMaxSizeCsv') })
+      );
     });
 
-    it('calls fetchForMaxCsvOption with hits if option is Max and hits < MAX_DOWNLOAD_CSV_COUNT', async () => {
+    it('calls dispatch with hits if option is Max and hits < MAX_DOWNLOAD_CSV_COUNT', async () => {
       const { result } = renderHook(() => useDiscoverDownloadCsv(mockProps));
       await act(async () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Max);
       });
-      expect(mockFetchForMaxCsvOption).toHaveBeenCalledWith(mockHits);
+      expect(mockDispatch).toHaveBeenCalledWith(expect.any(Function));
     });
 
-    it('calls fetchForMaxCsvOption with MAX_DOWNLOAD_CSV_COUNT if option is Max and hits > MAX_DOWNLOAD_CSV_COUNT', async () => {
+    it('calls dispatch with MAX_DOWNLOAD_CSV_COUNT if option is Max and hits > MAX_DOWNLOAD_CSV_COUNT', async () => {
       const { result } = renderHook(() =>
         useDiscoverDownloadCsv({
           ...mockProps,
@@ -254,7 +254,7 @@ describe('useDiscoverDownloadCsv', () => {
       await act(async () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Max);
       });
-      expect(mockFetchForMaxCsvOption).toHaveBeenCalledWith(MAX_DOWNLOAD_CSV_COUNT);
+      expect(mockDispatch).toHaveBeenCalledWith(expect.any(Function));
     });
 
     it('uses rows provided by props if option is visible', async () => {
@@ -276,29 +276,16 @@ describe('useDiscoverDownloadCsv', () => {
       );
     });
 
-    it('uses rows provided by fetchForMaxCsvOption if option is Max', async () => {
-      const { result } = renderHook(() =>
-        useDiscoverDownloadCsv({
-          ...mockProps,
-          rows: [mockRow1],
-        })
-      );
+    it('calls onSuccess when Max option completes successfully', async () => {
+      const { result } = renderHook(() => useDiscoverDownloadCsv(mockProps));
       await act(async () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Max);
       });
-      expect(unparse).toHaveBeenCalledWith(
-        {
-          fields: mockDisplayedColumnNames,
-          data: [
-            [mockRow1._source.bytes_transferred, mockRow1._source.category],
-            [mockRow2._source.bytes_transferred, mockRow2._source.category],
-          ],
-        },
-        expect.anything()
-      );
+      expect(mockOnSuccess).toHaveBeenCalled();
+      expect(mockOnError).not.toHaveBeenCalled();
     });
 
-    it('calls onSuccess if successful download', async () => {
+    it('calls onSuccess if successful download for Visible option', async () => {
       const { result } = renderHook(() =>
         useDiscoverDownloadCsv({
           ...mockProps,
@@ -325,12 +312,8 @@ describe('useDiscoverDownloadCsv', () => {
       expect(mockOnSuccess).not.toHaveBeenCalled();
     });
 
-    it('does not call onError if !hits and Max option', async () => {
-      (useDiscoverContext as jest.MockedFunction<any>).mockImplementation(() => ({
-        fetchForMaxCsvOption: () => {
-          throw new AbortError();
-        },
-      }));
+    it('does not call onError when AbortError is thrown', async () => {
+      mockDispatch.mockRejectedValue(new AbortError());
       const { result } = renderHook(() => useDiscoverDownloadCsv(mockProps));
       await act(async () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Max);

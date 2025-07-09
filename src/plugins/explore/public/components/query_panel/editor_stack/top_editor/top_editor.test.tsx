@@ -25,6 +25,7 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
       Code Editor Mock
     </div>
   ),
+  withOpenSearchDashboards: jest.fn((component: any) => component),
 }));
 
 jest.mock('../../../../application/context', () => ({

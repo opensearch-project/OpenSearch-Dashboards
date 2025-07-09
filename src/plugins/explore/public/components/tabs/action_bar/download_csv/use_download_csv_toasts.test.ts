@@ -5,17 +5,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { getServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
-import { useDiscoverContext } from '../../view_components/context';
 import {
   useDiscoverDownloadCsvToasts,
   DiscoverDownloadCsvToastId,
 } from './use_download_csv_toasts';
 
-jest.mock('../../view_components/context', () => ({
-  useDiscoverContext: jest.fn(),
-}));
-
-jest.mock('../../../opensearch_dashboards_services', () => ({
+jest.mock('../../../../application/legacy/discover/opensearch_dashboards_services', () => ({
   getServices: jest.fn(),
 }));
 
@@ -37,20 +32,10 @@ describe('useDiscoverDownloadCsvToasts', () => {
         addWarning: mockWarning,
       },
     }));
-    (useDiscoverContext as jest.MockedFunction<any>).mockImplementation(() => ({
-      fetchForMaxCsvStateRef: {
-        current: {
-          abortController: {
-            abort: mockAbort,
-          },
-        },
-      },
-    }));
   });
 
   afterEach(() => {
     (getServices as jest.MockedFunction<any>).mockClear();
-    (useDiscoverContext as jest.MockedFunction<any>).mockClear();
     mockAddInfo.mockClear();
     mockRemove.mockClear();
     mockAddSuccess.mockClear();
@@ -68,11 +53,15 @@ describe('useDiscoverDownloadCsvToasts', () => {
     );
   });
 
-  it('calling onAbort cancel calls abort', () => {
+  it('calling onAbort shows cancel toast when there is an abort controller', () => {
     const { result } = renderHook(useDiscoverDownloadCsvToasts);
+    const mockAbortController = {
+      abort: mockAbort,
+    } as any;
+    result.current.setAbortController(mockAbortController);
     result.current.onAbort();
     expect(mockAbort).toHaveBeenCalled();
-    expect(mockRemove).toHaveBeenCalled();
+    expect(mockRemove).toHaveBeenCalledWith(DiscoverDownloadCsvToastId.Loading);
     expect(mockWarning).toHaveBeenCalledWith(
       expect.objectContaining({
         id: DiscoverDownloadCsvToastId.Cancelled,
