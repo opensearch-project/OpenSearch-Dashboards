@@ -15,6 +15,7 @@ jest.mock('./language_reference', () => ({
 }));
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectEditorMode: jest.fn(),
+  selectPromptModeIsAvailable: jest.fn(),
 }));
 
 const createMockStore = (editorMode: EditorMode) => {
@@ -28,12 +29,16 @@ const createMockStore = (editorMode: EditorMode) => {
   });
 };
 
-const renderWithStore = (editorMode: EditorMode) => {
+const renderWithStore = (editorMode: EditorMode, promptModeIsAvailable: boolean = true) => {
   const mockStore = createMockStore(editorMode);
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { selectEditorMode } = require('../../../../application/utils/state_management/selectors');
+  const {
+    selectEditorMode,
+    selectPromptModeIsAvailable,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  } = require('../../../../application/utils/state_management/selectors');
   selectEditorMode.mockReturnValue(editorMode);
+  selectPromptModeIsAvailable.mockReturnValue(promptModeIsAvailable);
 
   return render(
     <Provider store={mockStore}>
@@ -45,6 +50,14 @@ const renderWithStore = (editorMode: EditorMode) => {
 describe('DetectedLanguage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('renders Natural Language and LanguageReference for SingleEmpty mode', () => {
+    renderWithStore(EditorMode.SingleEmpty);
+
+    const container = screen.getByTestId('exploreDetectedLanguage');
+    expect(container).toHaveTextContent('Natural Language |');
+    expect(screen.getByTestId('language-reference')).toBeInTheDocument();
   });
 
   it('renders Natural Language text for SinglePrompt mode', () => {
@@ -89,5 +102,52 @@ describe('DetectedLanguage', () => {
 
     // eslint-disable-next-line no-console
     console.error = originalError;
+  });
+
+  describe('when promptModeIsAvailable is false', () => {
+    it('renders only LanguageReference for SingleEmpty mode when prompt mode not available', () => {
+      renderWithStore(EditorMode.SingleEmpty, false);
+
+      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
+      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
+        'Natural Language'
+      );
+    });
+
+    it('renders only LanguageReference for SinglePrompt mode when prompt mode not available', () => {
+      renderWithStore(EditorMode.SinglePrompt, false);
+
+      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
+      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
+        'Natural Language'
+      );
+    });
+
+    it('renders only LanguageReference for SingleQuery mode when prompt mode not available', () => {
+      renderWithStore(EditorMode.SingleQuery, false);
+
+      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
+      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
+        'Natural Language'
+      );
+    });
+
+    it('renders only LanguageReference for DualPrompt mode when prompt mode not available', () => {
+      renderWithStore(EditorMode.DualPrompt, false);
+
+      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
+      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
+        'Natural Language'
+      );
+    });
+
+    it('renders only LanguageReference for DualQuery mode when prompt mode not available', () => {
+      renderWithStore(EditorMode.DualQuery, false);
+
+      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
+      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
+        'Natural Language'
+      );
+    });
   });
 });

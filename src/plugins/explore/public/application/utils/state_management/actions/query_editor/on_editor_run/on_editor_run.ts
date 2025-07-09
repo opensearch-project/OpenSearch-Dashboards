@@ -37,7 +37,9 @@ export const onEditorRunActionCreator = (
     }
 
     dispatch(callAgentActionCreator({ services, editorContext }));
-  } else if ([EditorMode.SingleQuery, EditorMode.DualQuery].includes(editorMode)) {
+  } else if (
+    [EditorMode.SingleEmpty, EditorMode.SingleQuery, EditorMode.DualQuery].includes(editorMode)
+  ) {
     const query = editorContext.editorText;
 
     if (editorMode === EditorMode.DualQuery) {

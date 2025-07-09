@@ -33,10 +33,7 @@ export function DiscoverPanel() {
   const columns = useSelector(selectColumns);
   const query = useSelector(selectQuery);
   const results = useSelector((state: any) => state.results);
-  const cacheKey = useMemo(
-    () => defaultPrepareQuery(typeof query.query === 'string' ? query.query : ''),
-    [query]
-  );
+  const cacheKey = useMemo(() => defaultPrepareQuery(query), [query]);
   const rawResults = cacheKey ? results[cacheKey] : null;
   const { indexPattern } = useIndexPatternContext();
 

@@ -32,22 +32,32 @@ export const onEditorChangeActionCreator = (text: string, editorContext: EditorC
     return;
   }
 
+  if (text.trim().length === 0 && editorMode !== EditorMode.SingleEmpty) {
+    dispatch(setEditorMode(EditorMode.SingleEmpty));
+    return;
+  }
+
   switch (editorMode) {
+    case EditorMode.SingleEmpty:
     case EditorMode.SingleQuery:
     case EditorMode.SinglePrompt: {
       const inferredLanguage = QueryTypeDetector.detect(text);
 
-      // if you're on prompt mode but inferred is query, change to query
-      if (editorMode === EditorMode.SinglePrompt && inferredLanguage.type === EditorLanguage.PPL) {
+      // if you're on prompt mode (or empty) but inferred is query, change to query
+      if (
+        [EditorMode.SingleEmpty, EditorMode.SinglePrompt].includes(editorMode) &&
+        inferredLanguage.type === EditorLanguage.PPL
+      ) {
         dispatch(setEditorMode(EditorMode.SingleQuery));
 
-        // if you're on query mode but inferred is prompt, change to prompt
+        // if you're on query mode (or empty) but inferred is prompt, change to prompt
       } else if (
-        editorMode === EditorMode.SingleQuery &&
+        [EditorMode.SingleEmpty, EditorMode.SingleQuery].includes(editorMode) &&
         inferredLanguage.type === EditorLanguage.Natural
       ) {
         dispatch(setEditorMode(EditorMode.SinglePrompt));
       }
+      break;
     }
   }
 };
