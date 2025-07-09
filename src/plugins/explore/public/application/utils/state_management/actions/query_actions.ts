@@ -25,6 +25,12 @@ import { IBucketDateHistogramAggConfig } from '../../../../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
+import {
+  ChartData,
+  DefaultDataProcessor,
+  HistogramDataProcessor,
+  ProcessedSearchResults,
+} from '../../interfaces';
 
 /**
  * Adds a source if query string does not have it
@@ -74,7 +80,10 @@ export const defaultPrepareQuery = (query: Query): string => {
  * Default results processor for tabs
  * Processes raw hits to calculate field counts and optionally includes histogram data
  */
-export const defaultResultsProcessor = (rawResults: ISearchResult, indexPattern: IndexPattern) => {
+export const defaultResultsProcessor: DefaultDataProcessor = (
+  rawResults: ISearchResult,
+  indexPattern: IndexPattern
+): ProcessedSearchResults => {
   const fieldCounts: Record<string, number> = {};
   if (rawResults.hits && rawResults.hits.hits && indexPattern) {
     for (const hit of rawResults.hits.hits) {
@@ -85,7 +94,7 @@ export const defaultResultsProcessor = (rawResults: ISearchResult, indexPattern:
     }
   }
 
-  const result: any = {
+  const result: ProcessedSearchResults = {
     hits: rawResults.hits,
     fieldCounts,
     indexPattern, // Include IndexPattern for LogsTab (passed from TabContent)
@@ -101,12 +110,12 @@ export const defaultResultsProcessor = (rawResults: ISearchResult, indexPattern:
   return result;
 };
 
-export const histogramResultsProcessor = (
+export const histogramResultsProcessor: HistogramDataProcessor = (
   rawResults: ISearchResult,
   indexPattern: IndexPattern,
   data: DataPublicPluginStart,
   interval: string
-) => {
+): ProcessedSearchResults => {
   const result = defaultResultsProcessor(rawResults, indexPattern);
   const histogramConfigs = indexPattern.timeFieldName
     ? createHistogramConfigs(indexPattern, interval, data)
@@ -448,9 +457,9 @@ export const executeTabQuery = createAsyncThunk<
 /**
  * Helper function to transform aggregation results into chart data
  */
-function transformAggregationToChartData(results: any, indexPattern: any) {
+function transformAggregationToChartData(results: any, indexPattern: any): ChartData | undefined {
   if (!results.aggregations || !results.aggregations.histogram) {
-    return null;
+    return undefined;
   }
 
   const buckets = results.aggregations.histogram.buckets;
