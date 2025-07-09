@@ -176,13 +176,16 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
   const selectedDataset = await resolveDataset(services);
 
   if (selectedDataset) {
-    return services.data.query.queryString.getInitialQueryByDataset(
-      {
-        ...selectedDataset,
-        language: EXPLORE_DEFAULT_LANGUAGE,
-      },
-      false
-    );
+    const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
+      ...selectedDataset,
+      language: EXPLORE_DEFAULT_LANGUAGE,
+    });
+
+    // override the initial query to be an empty string
+    return {
+      ...initialQueryByDataset,
+      query: '',
+    };
   } else {
     return {
       query: '',
