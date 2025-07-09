@@ -6,7 +6,15 @@
 import React from 'react';
 import { createLineConfig, LineChartStyleControls } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
-import { CategoryAxis, GridOptions, ThresholdLineStyle, ValueAxis, Positions } from '../types';
+import {
+  CategoryAxis,
+  GridOptions,
+  ThresholdLineStyle,
+  ValueAxis,
+  Positions,
+  TooltipOptions,
+} from '../types';
+import { LineStyle } from './exclusive_style';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({
@@ -35,25 +43,32 @@ describe('line_vis_config', () => {
       const defaults = config.ui.style.defaults as LineChartStyleControls;
 
       // Verify basic controls
-      expect(defaults.addTooltip).toBe(true);
       expect(defaults.addLegend).toBe(true);
       expect(defaults.legendPosition).toBe(Positions.RIGHT);
       expect(defaults.addTimeMarker).toBe(false);
 
       // Verify line style
-      expect(defaults.showLine).toBe(true);
+      expect(defaults.lineStyle).toBe('both');
       expect(defaults.lineMode).toBe('smooth');
       expect(defaults.lineWidth).toBe(2);
-      expect(defaults.showDots).toBe(true);
+
+      // Verify tooltip options
+      expect(defaults.tooltipOptions).toEqual({
+        mode: 'all',
+      });
 
       // Verify threshold settings
-      expect(defaults.thresholdLine).toEqual({
-        color: '#E7664C',
-        show: false,
-        style: ThresholdLineStyle.Full,
-        value: 10,
-        width: 1,
-      });
+      expect(defaults.thresholdLines).toEqual([
+        {
+          id: '1',
+          color: '#E7664C',
+          show: false,
+          style: ThresholdLineStyle.Full,
+          value: 10,
+          width: 1,
+          name: '',
+        },
+      ]);
 
       // Verify grid settings
       expect(defaults.grid).toEqual({
@@ -75,21 +90,24 @@ describe('line_vis_config', () => {
       // Mock props
       const mockProps = {
         styleOptions: {
-          addTooltip: true,
           addLegend: true,
           legendPosition: Positions.RIGHT,
-          thresholdLine: {
-            show: false,
-            value: 100,
-            color: 'red',
-            width: 1,
-            style: ThresholdLineStyle.Dashed,
-          },
+          thresholdLines: [
+            {
+              id: '1',
+              show: false,
+              value: 100,
+              color: 'red',
+              width: 1,
+              style: ThresholdLineStyle.Dashed,
+              name: '',
+            },
+          ],
           addTimeMarker: false,
-          showLine: true,
-          lineMode: '',
+          lineStyle: 'both' as LineStyle,
+          lineMode: 'smooth',
           lineWidth: 1,
-          showDots: true,
+          tooltipOptions: { mode: 'all' } as TooltipOptions,
           grid: {} as GridOptions,
           categoryAxes: [] as CategoryAxis[],
           valueAxes: [] as ValueAxis[],
@@ -98,6 +116,8 @@ describe('line_vis_config', () => {
         numericalColumns: [],
         categoricalColumns: [],
         dateColumns: [],
+        axisColumnMappings: {},
+        updateVisualization: jest.fn(),
       };
 
       // Call the render function

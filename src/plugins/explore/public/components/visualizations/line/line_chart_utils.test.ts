@@ -4,35 +4,31 @@
  */
 
 import {
-  getStrokeDash,
   getVegaInterpolation,
   buildMarkConfig,
-  createThresholdLayer,
   createTimeMarkerLayer,
   applyAxisStyling,
   ValueAxisPosition,
 } from './line_chart_utils';
-import { ThresholdLineStyle, VisColumn, VisFieldType, Positions } from '../types';
+import { VisColumn, VisFieldType, Positions } from '../types';
+import { LineStyle } from './exclusive_style';
+
+// Mock the threshold utils
+jest.mock('../style_panel/threshold/utils', () => ({
+  getStrokeDash: jest.fn((style) => {
+    switch (style) {
+      case 'dashed':
+        return [5, 5];
+      case 'dot-dashed':
+        return [5, 5, 1, 5];
+      default:
+        return undefined;
+    }
+  }),
+  createThresholdLayer: jest.fn(),
+}));
 
 describe('Line Chart Utils', () => {
-  describe('getStrokeDash', () => {
-    it('should return the correct dash array for dashed style', () => {
-      expect(getStrokeDash(ThresholdLineStyle.Dashed)).toEqual([5, 5]);
-    });
-
-    it('should return the correct dash array for dot-dashed style', () => {
-      expect(getStrokeDash(ThresholdLineStyle.DotDashed)).toEqual([5, 5, 1, 5]);
-    });
-
-    it('should return undefined for full style', () => {
-      expect(getStrokeDash(ThresholdLineStyle.Full)).toBeUndefined();
-    });
-
-    it('should return undefined for unknown styles', () => {
-      expect(getStrokeDash('unknown')).toBeUndefined();
-    });
-  });
-
   describe('getVegaInterpolation', () => {
     it('should return "linear" for straight line mode', () => {
       expect(getVegaInterpolation('straight')).toBe('linear');
@@ -54,7 +50,7 @@ describe('Line Chart Utils', () => {
   describe('buildMarkConfig', () => {
     it('should build a bar mark config', () => {
       const styles = {
-        addTooltip: true,
+        tooltipOptions: { mode: 'all' as const },
       };
       const result = buildMarkConfig(styles, 'bar');
       expect(result).toEqual({
@@ -64,11 +60,10 @@ describe('Line Chart Utils', () => {
       });
     });
 
-    it('should build a point-only mark config when showLine is false and showDots is true', () => {
+    it('should build a point-only mark config when lineStyle is dots', () => {
       const styles = {
-        showLine: false,
-        showDots: true,
-        addTooltip: true,
+        lineStyle: 'dots' as LineStyle,
+        tooltipOptions: { mode: 'all' as const },
       };
       const result = buildMarkConfig(styles);
       expect(result).toEqual({
@@ -78,13 +73,12 @@ describe('Line Chart Utils', () => {
       });
     });
 
-    it('should build a line-only mark config when showLine is true and showDots is false', () => {
+    it('should build a line-only mark config when lineStyle is line', () => {
       const styles = {
-        showLine: true,
-        showDots: false,
+        lineStyle: 'line' as LineStyle,
         lineWidth: 3,
         lineMode: 'straight',
-        addTooltip: true,
+        tooltipOptions: { mode: 'all' as const },
       };
       const result = buildMarkConfig(styles);
       expect(result).toEqual({
@@ -95,13 +89,12 @@ describe('Line Chart Utils', () => {
       });
     });
 
-    it('should build a line with points mark config when both showLine and showDots are true', () => {
+    it('should build a line with points mark config when lineStyle is both', () => {
       const styles = {
-        showLine: true,
-        showDots: true,
+        lineStyle: 'both' as LineStyle,
         lineWidth: 2,
         lineMode: 'smooth',
-        addTooltip: true,
+        tooltipOptions: { mode: 'all' as const },
       };
       const result = buildMarkConfig(styles);
       expect(result).toEqual({
@@ -110,20 +103,6 @@ describe('Line Chart Utils', () => {
         tooltip: true,
         strokeWidth: 2,
         interpolate: 'monotone',
-      });
-    });
-
-    it('should build an invisible point mark config when both showLine and showDots are false', () => {
-      const styles = {
-        showLine: false,
-        showDots: false,
-        addTooltip: true,
-      };
-      const result = buildMarkConfig(styles);
-      expect(result).toEqual({
-        type: 'point',
-        tooltip: true,
-        size: 0,
       });
     });
 
@@ -139,83 +118,6 @@ describe('Line Chart Utils', () => {
     });
   });
 
-  describe('createThresholdLayer', () => {
-    it('should return null when threshold is not enabled', () => {
-      const styles = {
-        thresholdLine: {
-          show: false,
-          value: 10,
-          color: '#FF0000',
-          width: 2,
-          style: ThresholdLineStyle.Full,
-        },
-      };
-      expect(createThresholdLayer(styles)).toBeNull();
-    });
-
-    it('should create a threshold layer with tooltip when enabled', () => {
-      const styles = {
-        addTooltip: true,
-        thresholdLine: {
-          show: true,
-          value: 10,
-          color: '#FF0000',
-          width: 2,
-          style: ThresholdLineStyle.Dashed,
-        },
-      };
-      const result = createThresholdLayer(styles);
-      expect(result).toMatchObject({
-        mark: {
-          type: 'rule',
-          color: '#FF0000',
-          strokeWidth: 2,
-          strokeDash: [5, 5],
-          tooltip: true,
-        },
-        encoding: {
-          y: {
-            datum: 10,
-            type: 'quantitative',
-          },
-          tooltip: {
-            value: expect.stringContaining('Threshold: 10'),
-          },
-        },
-      });
-    });
-
-    it('should create a threshold layer without tooltip when tooltips are disabled', () => {
-      const styles = {
-        addTooltip: false,
-        thresholdLine: {
-          show: true,
-          value: 10,
-          color: '#FF0000',
-          width: 2,
-          style: ThresholdLineStyle.Full,
-        },
-      };
-      const result = createThresholdLayer(styles);
-      expect(result).toMatchObject({
-        mark: {
-          type: 'rule',
-          color: '#FF0000',
-          strokeWidth: 2,
-          strokeDash: undefined,
-          tooltip: false,
-        },
-        encoding: {
-          y: {
-            datum: 10,
-            type: 'quantitative',
-          },
-        },
-      });
-      expect(result.encoding.tooltip).toBeUndefined();
-    });
-  });
-
   describe('createTimeMarkerLayer', () => {
     it('should return null when time marker is not enabled', () => {
       const styles = {
@@ -227,7 +129,7 @@ describe('Line Chart Utils', () => {
     it('should create a time marker layer with tooltip when enabled', () => {
       const styles = {
         addTimeMarker: true,
-        addTooltip: true,
+        tooltipOptions: { mode: 'all' as const },
       };
       const result = createTimeMarkerLayer(styles);
       expect(result).toMatchObject({
@@ -253,7 +155,7 @@ describe('Line Chart Utils', () => {
     it('should create a time marker layer without tooltip when tooltips are disabled', () => {
       const styles = {
         addTimeMarker: true,
-        addTooltip: false,
+        tooltipOptions: { mode: 'hidden' as const },
       };
       const result = createTimeMarkerLayer(styles);
       expect(result).toMatchObject({
