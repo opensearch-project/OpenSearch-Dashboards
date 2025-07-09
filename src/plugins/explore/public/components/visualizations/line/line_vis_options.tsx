@@ -13,6 +13,7 @@ import { LineExclusiveVisOptions } from './exclusive_style';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { GridOptionsPanel } from '../style_panel/grid/grid';
+import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
@@ -22,6 +23,8 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
+  axisColumnMappings,
+  updateVisualization,
 }) => {
   const updateStyleOption = <K extends keyof LineChartStyleControls>(
     key: K,
@@ -38,6 +41,16 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <AxesSelectPanel
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          currentMapping={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          chartType="line"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <LegendOptionsPanel
           shouldShowLegend={!notShowLegend}
