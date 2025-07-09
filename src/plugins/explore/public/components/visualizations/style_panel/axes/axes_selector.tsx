@@ -26,7 +26,6 @@ interface VisColumnOption {
 }
 
 interface AxesSelectPanelProps {
-  isInitial: boolean;
   chartType: string;
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
@@ -36,7 +35,6 @@ interface AxesSelectPanelProps {
 }
 
 export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
-  isInitial,
   chartType,
   numericalColumns,
   categoricalColumns,
@@ -62,7 +60,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     () =>
       possibleMapping
         .filter((obj) => {
-          const [ruleNum, ruleCat, ruleDate] = getColumnMatchFromMapping(obj.mapping[0]);
+          const [ruleNum, ruleCat, ruleDate] = getColumnMatchFromMapping(obj.mapping);
           const [currNum, currCat, currDate] = columnsCount;
           return ruleNum <= currNum && ruleCat <= currCat && ruleDate <= currDate;
         })
@@ -112,7 +110,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       selection.mapping.includes(mapping as any)
     );
     return possibleSelection
-      ? { mapping, columnMatch: getColumnMatchFromMapping(possibleSelection.mapping[0]) }
+      ? { mapping, columnMatch: getColumnMatchFromMapping(possibleSelection.mapping) }
       : undefined;
   }, [availableMappingsFromSelection, currentSelections, possibleMapping]);
 

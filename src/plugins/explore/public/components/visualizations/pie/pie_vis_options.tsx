@@ -38,7 +38,6 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         <AxesSelectPanel
-          isInitial={false}
           numericalColumns={numericalColumns}
           categoricalColumns={categoricalColumns}
           dateColumns={dateColumns}

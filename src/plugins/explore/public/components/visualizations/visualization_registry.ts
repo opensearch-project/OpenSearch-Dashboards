@@ -101,7 +101,7 @@ export class VisualizationRegistry {
 
     const possibleMapping = this.getVisualizationConfig(chartTypeName)?.ui.availableMappings;
     const currentlyDisplayedMapping = possibleMapping?.find(({ mapping }) =>
-      isEqual(getColumnMatchFromMapping(mapping[0]), rule.matchIndex)
+      isEqual(getColumnMatchFromMapping(mapping), rule.matchIndex)
     );
     return currentlyDisplayedMapping
       ? (Object.fromEntries(

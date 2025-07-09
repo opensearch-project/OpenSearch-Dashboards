@@ -68,7 +68,6 @@ const Template: ComponentStory<typeof AxesSelectPanel> = (args) => {
 
 export const Primary = Template.bind({});
 Primary.args = {
-  isInitial: true,
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
   dateColumns: mockDateColumns,

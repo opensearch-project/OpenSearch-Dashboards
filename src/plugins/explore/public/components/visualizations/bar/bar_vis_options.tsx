@@ -82,7 +82,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <AxesSelectPanel
-          isInitial={false}
           numericalColumns={numericalColumns}
           categoricalColumns={categoricalColumns}
           dateColumns={dateColumns}

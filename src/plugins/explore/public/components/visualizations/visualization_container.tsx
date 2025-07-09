@@ -336,7 +336,7 @@ export const VisualizationContainer = () => {
             if (currentRuleInNewChartType) {
               // Find mapping for the new chart type under the same rule (combination of columns)
               const reusedMapping = chartConfig.ui.availableMappings.find((obj) =>
-                isEqual(getColumnMatchFromMapping(obj.mapping[0]), currentRule.matchIndex)
+                isEqual(getColumnMatchFromMapping(obj.mapping), currentRule.matchIndex)
               )?.mapping[0];
 
               if (reusedMapping) {
