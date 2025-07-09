@@ -49,11 +49,7 @@ export const prependSourceIfNecessary = (query: Query): string => {
   if (queryString.trim() === '') {
     return `source=${datasetTitle}`;
   } else {
-    if (queryString.trim().startsWith('|')) {
-      return `source=${datasetTitle} ${queryString}`;
-    } else {
-      return `source=${datasetTitle} | ${queryString}`;
-    }
+    return `source=${datasetTitle} ${queryString}`;
   }
 };
 
