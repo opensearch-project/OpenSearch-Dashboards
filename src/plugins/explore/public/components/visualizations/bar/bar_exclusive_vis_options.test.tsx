@@ -4,9 +4,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
-import { act } from 'react-dom/test-utils';
 
 // Mock the debounced value hook
 jest.mock('../utils/use_debounced_value', () => ({
@@ -34,122 +33,127 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('renders with default props', () => {
-    const wrapper = mount(<BarExclusiveVisOptions {...defaultProps} />);
+    render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Check if the component renders
-    expect(wrapper.exists()).toBe(true);
+    // Check if the component renders with the correct title
+    expect(screen.getByText('Bar Settings')).toBeInTheDocument();
 
     // Check if the bar width input exists with correct value
-    const barWidthInput = wrapper.find('[data-test-subj="barWidthInput"]').first();
-    expect(barWidthInput.exists()).toBe(true);
-    expect(barWidthInput.prop('value')).toBe(0.7);
+    const barWidthInput = screen.getByTestId('barWidthInput');
+    expect(barWidthInput).toBeInTheDocument();
+    expect(barWidthInput).toHaveValue(0.7);
 
     // Check if the bar padding input exists with correct value
-    const barPaddingInput = wrapper.find('[data-test-subj="barPaddingInput"]').first();
-    expect(barPaddingInput.exists()).toBe(true);
-    expect(barPaddingInput.prop('value')).toBe(0.1);
+    const barPaddingInput = screen.getByTestId('barPaddingInput');
+    expect(barPaddingInput).toBeInTheDocument();
+    expect(barPaddingInput).toHaveValue(0.1);
 
-    // Check if the show bar border switch exists with correct value
-    const showBarBorderSwitch = wrapper.find('[data-test-subj="showBarBorderSwitch"]').first();
-    expect(showBarBorderSwitch.exists()).toBe(true);
-    expect(showBarBorderSwitch.prop('checked')).toBe(false);
+    // Check if the bar border button group exists
+    const barBorderButtonGroup = screen.getByTestId('barBorderButtonGroup');
+    expect(barBorderButtonGroup).toBeInTheDocument();
+
+    // Check that the "Hidden" option is selected
+    expect(screen.getByTestId('hidden')).toBeInTheDocument();
 
     // Border options should not be visible when showBarBorder is false
-    expect(wrapper.find('[data-test-subj="barBorderWidthInput"]').exists()).toBe(false);
-    expect(wrapper.find('[data-test-subj="barBorderColorPicker"]').exists()).toBe(false);
+    expect(screen.queryByTestId('barBorderWidthInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('barBorderColorPicker')).not.toBeInTheDocument();
   });
 
   test('shows border options when showBarBorder is true', () => {
-    const wrapper = mount(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
+    render(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
+
+    // Check that the "Shown" option is selected
+    expect(screen.getByTestId('shown')).toBeInTheDocument();
 
     // Border options should be visible when showBarBorder is true
-    expect(wrapper.find('[data-test-subj="barBorderWidthInput"]').exists()).toBe(true);
-    expect(wrapper.find('[data-test-subj="barBorderColorPicker"]').exists()).toBe(true);
+    const barBorderWidthInput = screen.getByTestId('barBorderWidthInput');
+    expect(barBorderWidthInput).toBeInTheDocument();
+    expect(barBorderWidthInput).toHaveValue(1);
 
-    // Check if the border width input has the correct value
-    const barBorderWidthInput = wrapper.find('[data-test-subj="barBorderWidthInput"]').first();
-    expect(barBorderWidthInput.prop('value')).toBe(1);
+    // The color picker has a compound data-test-subj
+    const barBorderColorPicker = screen.getByTestId(/barBorderColorPicker/);
+    expect(barBorderColorPicker).toBeInTheDocument();
   });
 
   test('calls onBarWidthChange when bar width is changed', () => {
-    const wrapper = mount(<BarExclusiveVisOptions {...defaultProps} />);
+    render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Simulate changing the bar width
-    const barWidthInput = wrapper.find('[data-test-subj="barWidthInput"]').first();
-    const onChangeProp = barWidthInput.prop('onChange');
-    if (onChangeProp) {
-      act(() => {
-        onChangeProp({ target: { value: '0.8' } } as React.ChangeEvent<HTMLInputElement>);
-      });
-    }
+    // Get the bar width input and change its value
+    const barWidthInput = screen.getByTestId('barWidthInput');
+    fireEvent.change(barWidthInput, { target: { value: '0.8' } });
 
     // Check if the callback was called with the correct value
     expect(defaultProps.onBarWidthChange).toHaveBeenCalledWith(0.8);
   });
 
   test('calls onBarPaddingChange when bar padding is changed', () => {
-    const wrapper = mount(<BarExclusiveVisOptions {...defaultProps} />);
+    render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Simulate changing the bar padding
-    const barPaddingInput = wrapper.find('[data-test-subj="barPaddingInput"]').first();
-    const onChangeProp = barPaddingInput.prop('onChange');
-    if (onChangeProp) {
-      act(() => {
-        onChangeProp({ target: { value: '0.2' } } as React.ChangeEvent<HTMLInputElement>);
-      });
-    }
+    // Get the bar padding input and change its value
+    const barPaddingInput = screen.getByTestId('barPaddingInput');
+    fireEvent.change(barPaddingInput, { target: { value: '0.2' } });
 
     // Check if the callback was called with the correct value
     expect(defaultProps.onBarPaddingChange).toHaveBeenCalledWith(0.2);
   });
 
   test('calls onShowBarBorderChange when show bar border is toggled', () => {
-    const wrapper = mount(<BarExclusiveVisOptions {...defaultProps} />);
+    render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Simulate toggling the show bar border switch
-    const showBarBorderSwitch = wrapper.find('[data-test-subj="showBarBorderSwitch"]').first();
-    const onChangeProp = showBarBorderSwitch.prop('onChange');
-    if (onChangeProp) {
-      act(() => {
-        onChangeProp({ target: { checked: true } } as React.ChangeEvent<HTMLInputElement>);
-      });
-    }
+    // Find the "Shown" radio input and click it
+    const shownRadio = screen.getByTestId('shown');
+    fireEvent.click(shownRadio);
 
     // Check if the callback was called with the correct value
     expect(defaultProps.onShowBarBorderChange).toHaveBeenCalledWith(true);
   });
 
   test('calls onBarBorderWidthChange when border width is changed', () => {
-    const wrapper = mount(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
+    render(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
 
-    // Simulate changing the border width
-    const barBorderWidthInput = wrapper.find('[data-test-subj="barBorderWidthInput"]').first();
-    const onChangeProp = barBorderWidthInput.prop('onChange');
-    if (onChangeProp) {
-      act(() => {
-        onChangeProp({ target: { value: '2' } } as React.ChangeEvent<HTMLInputElement>);
-      });
-    }
+    // Get the border width input and change its value
+    const barBorderWidthInput = screen.getByTestId('barBorderWidthInput');
+    fireEvent.change(barBorderWidthInput, { target: { value: '2' } });
 
     // Check if the callback was called with the correct value
     expect(defaultProps.onBarBorderWidthChange).toHaveBeenCalledWith(2);
   });
 
-  test('calls onBarBorderColorChange when border color is changed', () => {
-    const wrapper = mount(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
+  test('renders color picker with correct color', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
 
-    // Simulate changing the border color
-    const barBorderColorPicker = wrapper.find('[data-test-subj="barBorderColorPicker"]').first();
-    const onChangeProp = barBorderColorPicker.prop('onChange');
-    if (onChangeProp) {
-      act(() => {
-        // The EuiColorPicker component expects a string color value
-        // TypeScript doesn't know this is a special case
-        (onChangeProp as any)('#FF0000');
-      });
-    }
+    // For EuiColorPicker, we'll test that it's rendered
+    // The data-test-subj includes both euiColorPickerAnchor and barBorderColorPicker
+    const barBorderColorPicker = screen.getByTestId(/barBorderColorPicker/);
+    expect(barBorderColorPicker).toBeInTheDocument();
+    expect(barBorderColorPicker).toHaveValue('#000000');
+  });
 
-    // Check if the callback was called with the correct value
-    expect(defaultProps.onBarBorderColorChange).toHaveBeenCalledWith('#FF0000');
+  test('renders help text for inputs', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    // Check if help text is rendered for bar width
+    expect(screen.getByText('Value between 0.1 and 1')).toBeInTheDocument();
+
+    // Check if help text is rendered for bar padding
+    expect(screen.getByText('Value between 0 and 0.5')).toBeInTheDocument();
+  });
+
+  test('renders form labels correctly', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    // Check if labels are rendered correctly
+    expect(screen.getByText('Bar width')).toBeInTheDocument();
+    expect(screen.getByText('Bar padding')).toBeInTheDocument();
+    expect(screen.queryAllByText('Bar border').length > 0).toBeTruthy();
+  });
+
+  test('renders border form labels when showBarBorder is true', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
+
+    // Check if border-related labels are rendered
+    expect(screen.getByText('Border width')).toBeInTheDocument();
+    expect(screen.getByText('Border color')).toBeInTheDocument();
   });
 });

@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createBarSpec, createStackedBarSpec } from './to_expression';
+import { createBarSpec, createStackedBarSpec, createTimeBarChart } from './to_expression';
 import { defaultBarChartStyles } from './bar_vis_config';
-import { VisColumn, VisFieldType, VEGASCHEMA } from '../types';
+import { VisColumn, VisFieldType, VEGASCHEMA, AxisRole, ThresholdLineStyle } from '../types';
 
 describe('bar to_expression', () => {
   // Create mock VisColumn objects
@@ -36,6 +36,15 @@ describe('bar to_expression', () => {
     uniqueValuesCount: 10,
   };
 
+  const mockDateColumn: VisColumn = {
+    id: 4,
+    name: 'Date',
+    column: 'date',
+    schema: VisFieldType.Date,
+    validValuesCount: 100,
+    uniqueValuesCount: 50,
+  };
+
   // Sample data for testing
   const mockData = [
     { count: 10, category: 'A', category2: 'X', date: '2023-01-01' },
@@ -50,7 +59,11 @@ describe('bar to_expression', () => {
         [mockNumericalColumn],
         [mockCategoricalColumn],
         [],
-        defaultBarChartStyles
+        defaultBarChartStyles,
+        {
+          [AxisRole.X]: mockCategoricalColumn,
+          [AxisRole.Y]: mockNumericalColumn,
+        }
       );
 
       // Check basic structure
@@ -96,13 +109,17 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLine: {
-          ...defaultBarChartStyles.thresholdLine,
-          show: true,
-          value: 15,
-          color: '#00FF00',
-          width: 2,
-        },
+        thresholdLines: [
+          {
+            id: '1',
+            color: '#00FF00',
+            show: true,
+            style: ThresholdLineStyle.Full,
+            value: 15,
+            width: 2,
+            name: '',
+          },
+        ],
       };
 
       const spec = createBarSpec(
@@ -119,7 +136,7 @@ describe('bar to_expression', () => {
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
       expect(thresholdLayer.mark.strokeWidth).toBe(2);
-      expect(thresholdLayer.encoding.y.value).toBe(15);
+      expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
     test('throws error when required columns are missing', () => {
@@ -142,7 +159,12 @@ describe('bar to_expression', () => {
         [mockNumericalColumn],
         [mockCategoricalColumn, mockCategoricalColumn2],
         [],
-        defaultBarChartStyles
+        defaultBarChartStyles,
+        {
+          [AxisRole.X]: mockCategoricalColumn,
+          [AxisRole.Y]: mockNumericalColumn,
+          [AxisRole.COLOR]: mockCategoricalColumn2,
+        }
       );
 
       // Check basic structure
@@ -188,13 +210,17 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLine: {
-          ...defaultBarChartStyles.thresholdLine,
-          show: true,
-          value: 15,
-          color: '#00FF00',
-          width: 2,
-        },
+        thresholdLines: [
+          {
+            id: '1',
+            color: '#00FF00',
+            show: true,
+            style: ThresholdLineStyle.Full,
+            value: 15,
+            width: 2,
+            name: '',
+          },
+        ],
       };
 
       const spec = createStackedBarSpec(
@@ -202,7 +228,12 @@ describe('bar to_expression', () => {
         [mockNumericalColumn],
         [mockCategoricalColumn, mockCategoricalColumn2],
         [],
-        customStyles
+        customStyles,
+        {
+          [AxisRole.X]: mockCategoricalColumn,
+          [AxisRole.Y]: mockNumericalColumn,
+          [AxisRole.COLOR]: mockCategoricalColumn2,
+        }
       );
 
       // Check threshold line
@@ -212,7 +243,106 @@ describe('bar to_expression', () => {
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
       expect(thresholdLayer.mark.strokeWidth).toBe(2);
-      expect(thresholdLayer.encoding.y.value).toBe(15);
+      expect(thresholdLayer.encoding.y.datum).toBe(15);
+    });
+  });
+
+  describe('createTimeBarChart', () => {
+    test('creates a basic time bar chart spec', () => {
+      const spec = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        defaultBarChartStyles,
+        {
+          [AxisRole.X]: mockDateColumn,
+          [AxisRole.Y]: mockNumericalColumn,
+        }
+      );
+
+      // Check basic structure
+      expect(spec.$schema).toBe(VEGASCHEMA);
+      expect(spec.title).toBe('Count Over Time');
+      expect(spec.data.values).toBe(mockData);
+      expect(spec.layer).toHaveLength(1);
+
+      // Check encoding
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.type).toBe('bar');
+      expect(mainLayer.mark.tooltip).toBe(true);
+      expect(mainLayer.encoding.x.field).toBe('date');
+      expect(mainLayer.encoding.x.type).toBe('temporal');
+      expect(mainLayer.encoding.y.field).toBe('count');
+      expect(mainLayer.encoding.y.type).toBe('quantitative');
+    });
+
+    test('applies bar styling options', () => {
+      const customStyles = {
+        ...defaultBarChartStyles,
+        barWidth: 0.5,
+        barPadding: 0.2,
+        showBarBorder: true,
+        barBorderColor: '#FF0000',
+        barBorderWidth: 2,
+      };
+
+      const spec = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        customStyles
+      );
+
+      // Check bar styling
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.size).toBe(10); // 0.5 * 20
+      expect(mainLayer.mark.binSpacing).toBe(2); // 0.2 * 10
+      expect(mainLayer.mark.stroke).toBe('#FF0000');
+      expect(mainLayer.mark.strokeWidth).toBe(2);
+    });
+
+    test('adds threshold line when enabled', () => {
+      const customStyles = {
+        ...defaultBarChartStyles,
+        thresholdLines: [
+          {
+            id: '1',
+            color: '#00FF00',
+            show: true,
+            style: ThresholdLineStyle.Full,
+            value: 15,
+            width: 2,
+            name: '',
+          },
+        ],
+      };
+
+      const spec = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        customStyles
+      );
+
+      // Check threshold line
+      expect(spec.layer).toHaveLength(2);
+      const thresholdLayer = spec.layer[1];
+      expect(thresholdLayer.mark.type).toBe('rule');
+      expect(thresholdLayer.mark.color).toBe('#00FF00');
+      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.encoding.y.datum).toBe(15);
+    });
+
+    test('throws error when required columns are missing', () => {
+      // No numerical columns
+      expect(() => {
+        createTimeBarChart(mockData, [], [mockDateColumn], defaultBarChartStyles);
+      }).toThrow('Time bar chart requires at least one numerical column and one date column');
+
+      // No date columns
+      expect(() => {
+        createTimeBarChart(mockData, [mockNumericalColumn], [], defaultBarChartStyles);
+      }).toThrow('Time bar chart requires at least one numerical column and one date column');
     });
   });
 });

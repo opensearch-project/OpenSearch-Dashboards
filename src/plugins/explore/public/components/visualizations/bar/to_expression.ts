@@ -89,7 +89,7 @@ export const createBarSpec = (
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
-    layers.push(thresholdLayer);
+    layers.push(...thresholdLayer.layer);
   }
 
   return {
@@ -187,7 +187,7 @@ export const createTimeBarChart = (
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
-    layers.push(thresholdLayer);
+    layers.push(...thresholdLayer.layer);
   }
 
   return {

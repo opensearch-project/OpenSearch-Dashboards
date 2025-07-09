@@ -8,21 +8,27 @@ import {
   createLineBarChart,
   createMultiLineChart,
   createFacetedMultiLineChart,
+  createCategoryLineChart,
 } from './to_expression';
-import { ThresholdLineStyle, VisColumn, VisFieldType, Positions } from '../types';
+import { ThresholdLineStyle, VisColumn, VisFieldType, Positions, TooltipOptions } from '../types';
 import * as lineChartUtils from './line_chart_utils';
+import * as thresholdUtils from '../style_panel/threshold/utils';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({
   buildMarkConfig: jest.fn().mockReturnValue({ type: 'line', tooltip: true }),
-  createThresholdLayer: jest.fn().mockReturnValue(null),
   createTimeMarkerLayer: jest.fn().mockReturnValue(null),
   applyAxisStyling: jest.fn().mockReturnValue({ title: 'Mocked Axis' }),
-  getStrokeDash: jest.fn().mockReturnValue([5, 5]),
   ValueAxisPosition: {
     Left: 'left',
     Right: 'right',
   },
+}));
+
+// Mock the threshold utils
+jest.mock('../style_panel/threshold/utils', () => ({
+  getStrokeDash: jest.fn().mockReturnValue([5, 5]),
+  createThresholdLayer: jest.fn().mockReturnValue(null),
 }));
 
 describe('to_expression', () => {
@@ -78,15 +84,21 @@ describe('to_expression', () => {
   };
 
   const styleOptions = {
-    addTooltip: true,
     addLegend: true,
     legendPosition: Positions.RIGHT,
-    thresholdLine: {
-      show: false,
-      value: 100,
-      color: 'red',
-      width: 1,
-      style: ThresholdLineStyle.Dashed,
+    thresholdLines: [
+      {
+        id: '1',
+        show: false,
+        value: 100,
+        color: 'red',
+        width: 1,
+        style: ThresholdLineStyle.Dashed,
+        name: '',
+      },
+    ],
+    tooltipOptions: {
+      mode: 'all' as TooltipOptions['mode'],
     },
     addTimeMarker: false,
   };
@@ -100,7 +112,7 @@ describe('to_expression', () => {
       // Enable threshold and time marker for this test
       const mockThresholdLayer = { mark: { type: 'rule' } };
       const mockTimeMarkerLayer = { mark: { type: 'rule' } };
-      (lineChartUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
+      (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
       (lineChartUtils.createTimeMarkerLayer as jest.Mock).mockReturnValueOnce(mockTimeMarkerLayer);
 
       const result = createSimpleLineChart(
@@ -125,7 +137,10 @@ describe('to_expression', () => {
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
-      expect(lineChartUtils.createThresholdLayer).toHaveBeenCalledWith(styleOptions);
+      expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
+        styleOptions.thresholdLines,
+        styleOptions.tooltipOptions?.mode
+      );
       expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(styleOptions);
     });
   });
@@ -197,7 +212,7 @@ describe('to_expression', () => {
   describe('createFacetedMultiLineChart', () => {
     it('should create a faceted multi-line chart with one metric, one date, and two categorical columns', () => {
       // Enable threshold and time marker for this test
-      styleOptions.thresholdLine.show = true;
+      styleOptions.thresholdLines[0].show = true;
       styleOptions.addTimeMarker = true;
 
       const result = createFacetedMultiLineChart(
@@ -235,7 +250,61 @@ describe('to_expression', () => {
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
-      expect(lineChartUtils.getStrokeDash).toHaveBeenCalled();
+      expect(thresholdUtils.getStrokeDash).toHaveBeenCalled();
+    });
+  });
+
+  describe('createCategoryLineChart', () => {
+    it('should create a category-based line chart with one metric and one categorical column', () => {
+      // Enable threshold for this test
+      const mockThresholdLayer = { mark: { type: 'rule' } };
+      (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
+
+      const result = createCategoryLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [],
+        styleOptions
+      );
+
+      // Verify the result structure
+      expect(result).toHaveProperty('$schema');
+      expect(result).toHaveProperty('title', 'value1 by category1');
+      expect(result).toHaveProperty('data.values', transformedData);
+      expect(result).toHaveProperty('layer');
+      expect(result.layer).toHaveLength(2); // Main layer + threshold
+
+      // Verify the main layer
+      expect(result.layer[0]).toHaveProperty('mark');
+      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-2');
+      expect(result.layer[0]).toHaveProperty('encoding.x.type', 'nominal');
+      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
+      expect(result.layer[0]).toHaveProperty('encoding.y.type', 'quantitative');
+
+      // Verify utility functions were called
+      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
+      expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
+      expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
+        styleOptions.thresholdLines,
+        styleOptions.tooltipOptions?.mode
+      );
+    });
+
+    it('should throw an error when required columns are missing', () => {
+      // Test with missing numerical column
+      expect(() => {
+        createCategoryLineChart(transformedData, [], [categoricalColumn1], [], styleOptions);
+      }).toThrow(
+        'Category line chart requires at least one numerical column and one categorical column'
+      );
+
+      // Test with missing categorical column
+      expect(() => {
+        createCategoryLineChart(transformedData, [numericColumn1], [], [], styleOptions);
+      }).toThrow(
+        'Category line chart requires at least one numerical column and one categorical column'
+      );
     });
   });
 });
