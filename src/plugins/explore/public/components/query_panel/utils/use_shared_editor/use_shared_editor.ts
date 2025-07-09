@@ -162,6 +162,17 @@ export const useSharedEditor = ({
     };
   }, [provideCompletionItems]);
 
+  // We need to manually register suggestionProvider if it gets re-created,
+  // because monaco.languages.onLanguage will not trigger registration
+  // callbacks if language is the same.
+  useEffect(() => {
+    const disposable = monaco.languages.registerCompletionItemProvider(
+      queryLanguage,
+      suggestionProvider
+    );
+    return () => disposable.dispose();
+  }, [suggestionProvider, queryLanguage]);
+
   const handleRun = useCallback(() => {
     dispatch(onEditorRunActionCreator(services, editorContextRef.current));
   }, [dispatch, services]);
