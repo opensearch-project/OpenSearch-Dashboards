@@ -68,7 +68,13 @@ const oneMetricOneDateRule: VisualizationRule = {
       case 'line':
         return createSimpleLineChart(transformedData, numericalColumns, dateColumns, styleOptions);
       case 'area':
-        return createSimpleAreaChart(transformedData, numericalColumns, dateColumns, styleOptions);
+        return createSimpleAreaChart(
+          transformedData,
+          numericalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
       case 'bar':
         return createTimeBarChart(
           transformedData,
@@ -149,7 +155,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'bar':
         return createGroupedTimeBarChart(
@@ -210,7 +217,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       case 'bar':
         return createFacetedTimeBarChart(
@@ -308,7 +316,8 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       default:
         return createRegularHeatmap(
@@ -370,7 +379,8 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       default:
         return createRegularHeatmap(
@@ -438,7 +448,8 @@ const oneMetricOneCateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          axisColumnMappings
         );
       default:
         return createBarSpec(

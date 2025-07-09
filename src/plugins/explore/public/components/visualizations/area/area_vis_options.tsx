@@ -12,6 +12,7 @@ import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { GridOptionsPanel } from '../style_panel/grid/grid';
+import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 
 export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyleControls>;
 
@@ -24,6 +25,8 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   availableChartTypes = [],
   selectedChartType,
   onChartTypeChange,
+  axisColumnMappings,
+  updateVisualization,
 }) => {
   const updateStyleOption = <K extends keyof AreaChartStyleControls>(
     key: K,
@@ -40,6 +43,16 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <AxesSelectPanel
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          currentMapping={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          chartType="bar"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <LegendOptionsPanel
           shouldShowLegend={!notShowLegend}
