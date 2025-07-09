@@ -6,17 +6,20 @@
 import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
-import { GridOptionsPanel } from './grid_options';
-import { GridOptions } from '../types';
+import { GridOptionsPanel } from './grid';
+import { GridOptions } from '../../types';
 
 export default {
   component: GridOptionsPanel,
-  title: 'src/plugins/explore/public/components/visualizations/style_panel/grid_options',
+  title: 'src/plugins/explore/public/components/visualizations/style_panel/grid/grid.tsx',
 } as ComponentMeta<typeof GridOptionsPanel>;
 
-// Template for the story
+const mockGrid = {
+  categoryLines: true,
+  valueLines: false,
+};
+
 const Template: ComponentStory<typeof GridOptionsPanel> = (args) => {
-  // Use state to track changes
   const [grid, setGrid] = useState<GridOptions>(args.grid);
 
   return (
@@ -35,35 +38,5 @@ const Template: ComponentStory<typeof GridOptionsPanel> = (args) => {
 // Primary story
 export const Primary = Template.bind({});
 Primary.args = {
-  grid: {
-    categoryLines: true,
-    valueLines: true,
-  },
-};
-
-// Story with no category lines
-export const NoCategoryLines = Template.bind({});
-NoCategoryLines.args = {
-  grid: {
-    categoryLines: false,
-    valueLines: true,
-  },
-};
-
-// Story with no value lines
-export const NoValueLines = Template.bind({});
-NoValueLines.args = {
-  grid: {
-    categoryLines: true,
-    valueLines: false,
-  },
-};
-
-// Story with no grid lines
-export const NoGridLines = Template.bind({});
-NoGridLines.args = {
-  grid: {
-    categoryLines: false,
-    valueLines: false,
-  },
+  grid: mockGrid,
 };
