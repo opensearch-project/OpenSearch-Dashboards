@@ -4,49 +4,44 @@
  */
 
 import React from 'react';
-import { createBarConfig, defaultBarChartStyles } from './bar_vis_config';
+import { createAreaConfig } from './area_vis_config';
 import { Positions, ThresholdLineStyle } from '../types';
-import { BarVisStyleControls } from './bar_vis_options';
+import { AreaVisStyleControls } from './area_vis_options';
 
-describe('bar_vis_config', () => {
-  describe('defaultBarChartStyles', () => {
+describe('area_vis_config', () => {
+  // Get the default styles from the config
+  const defaultAreaChartStyles = createAreaConfig().ui.style.defaults;
+
+  describe('defaultAreaChartStyles', () => {
     test('should have the expected default values', () => {
-      expect(defaultBarChartStyles).toMatchObject({
-        // Basic controls
+      expect(defaultAreaChartStyles).toMatchObject({
         addLegend: true,
         legendPosition: Positions.RIGHT,
+        addTimeMarker: false,
         tooltipOptions: {
           mode: 'all',
         },
-
-        // Bar specific controls
-        barWidth: 0.7,
-        barPadding: 0.1,
-        showBarBorder: false,
-        barBorderWidth: 1,
-        barBorderColor: '#000000',
-
-        // Threshold and grid
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#E7664C',
-            show: false,
-            style: ThresholdLineStyle.Full,
-            value: 10,
-            width: 1,
-            name: '',
-          },
-        ],
         grid: {
           categoryLines: true,
           valueLines: true,
         },
       });
 
+      // Check threshold lines
+      expect(defaultAreaChartStyles.thresholdLines).toHaveLength(1);
+      expect(defaultAreaChartStyles.thresholdLines[0]).toMatchObject({
+        id: '1',
+        color: '#E7664C',
+        show: false,
+        style: ThresholdLineStyle.Full,
+        value: 10,
+        width: 1,
+        name: '',
+      });
+
       // Check axes configuration
-      expect(defaultBarChartStyles.categoryAxes).toHaveLength(1);
-      expect(defaultBarChartStyles.categoryAxes[0]).toMatchObject({
+      expect(defaultAreaChartStyles.categoryAxes).toHaveLength(1);
+      expect(defaultAreaChartStyles.categoryAxes[0]).toMatchObject({
         id: 'CategoryAxis-1',
         type: 'category',
         position: Positions.BOTTOM,
@@ -62,8 +57,8 @@ describe('bar_vis_config', () => {
         },
       });
 
-      expect(defaultBarChartStyles.valueAxes).toHaveLength(1);
-      expect(defaultBarChartStyles.valueAxes[0]).toMatchObject({
+      expect(defaultAreaChartStyles.valueAxes).toHaveLength(1);
+      expect(defaultAreaChartStyles.valueAxes[0]).toMatchObject({
         id: 'ValueAxis-1',
         name: 'LeftAxis-1',
         type: 'value',
@@ -82,33 +77,30 @@ describe('bar_vis_config', () => {
     });
   });
 
-  describe('createBarConfig', () => {
+  describe('createAreaConfig', () => {
     test('should return the correct visualization type configuration', () => {
-      const config = createBarConfig();
+      const config = createAreaConfig();
 
-      expect(config).toMatchObject({
-        name: 'bar',
-        type: 'bar',
+      expect(config).toEqual({
+        name: 'area',
+        type: 'area',
         ui: {
           style: {
-            defaults: defaultBarChartStyles,
+            defaults: defaultAreaChartStyles,
             render: expect.any(Function),
           },
+          availableMappings: [],
         },
       });
-
-      // Verify availableMappings exists
-      expect(config.ui.availableMappings).toBeDefined();
-      expect(Array.isArray(config.ui.availableMappings)).toBe(true);
     });
 
-    test('render function should create a BarVisStyleControls component', () => {
-      const config = createBarConfig();
+    test('render function should create an AreaVisStyleControls component', () => {
+      const config = createAreaConfig();
       const mockCreateElement = jest.spyOn(React, 'createElement');
 
       // Call the render function with some props
       const props = {
-        styleOptions: defaultBarChartStyles,
+        styleOptions: defaultAreaChartStyles,
         onStyleChange: jest.fn(),
         axisColumnMappings: {},
         updateVisualization: jest.fn(),
@@ -116,10 +108,7 @@ describe('bar_vis_config', () => {
       config.ui.style.render(props);
 
       // Verify React.createElement was called with the right component
-      expect(mockCreateElement).toHaveBeenCalledWith(
-        BarVisStyleControls, // This is the BarVisStyleControls component
-        props
-      );
+      expect(mockCreateElement).toHaveBeenCalledWith(AreaVisStyleControls, props);
 
       mockCreateElement.mockRestore();
     });

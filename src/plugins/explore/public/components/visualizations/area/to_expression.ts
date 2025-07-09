@@ -76,7 +76,7 @@ export const createSimpleAreaChart = (
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
-    layers.push(thresholdLayer);
+    layers.push(...thresholdLayer.layer);
   }
 
   // Add time marker layer if enabled
@@ -189,7 +189,7 @@ export const createMultiAreaChart = (
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
-    layers.push(thresholdLayer);
+    layers.push(...thresholdLayer.layer);
   }
 
   // Add time marker layer if enabled
@@ -449,7 +449,7 @@ export const createCategoryAreaChart = (
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
-    layers.push(thresholdLayer);
+    layers.push(...thresholdLayer.layer);
   }
 
   return {
