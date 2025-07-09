@@ -5,6 +5,7 @@
 
 import { QueryState } from '../../application/utils/state_management/slices';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
+import { Query } from '../../../../data/common';
 
 /**
  * Props passed to tab components
@@ -30,7 +31,7 @@ export interface TabDefinition {
   supportedLanguages: string[];
 
   // Transform query string for cache key generation
-  prepareQuery?: (queryString: string) => string;
+  prepareQuery?: (query: Query) => string;
 
   // Optional results processor for raw results
   resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;

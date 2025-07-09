@@ -35,6 +35,7 @@ export interface SearchData {
 export type AppState = Omit<RootState, 'query'>;
 
 export enum EditorMode {
+  SingleEmpty = 'single-empty', // Single Editor mode with empty string
   SinglePrompt = 'single-prompt', // Single Editor mode with prompt language
   SingleQuery = 'single-query', // Single Editor mode with prompt language
   DualPrompt = 'dual-prompt', // Dual Editor mode with prompt enabled and query disabled

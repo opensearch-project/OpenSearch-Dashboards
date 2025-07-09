@@ -22,8 +22,7 @@ export const useTabResults = () => {
   const cacheKey = useMemo(() => {
     const activeTab = services.tabRegistry?.getTab(activeTabId);
     const prepareQuery = activeTab?.prepareQuery || defaultPrepareQuery;
-    const queryInput = typeof query.query === 'string' ? query.query : '';
-    return prepareQuery(queryInput);
+    return prepareQuery(query);
   }, [query, activeTabId, services]);
 
   return {

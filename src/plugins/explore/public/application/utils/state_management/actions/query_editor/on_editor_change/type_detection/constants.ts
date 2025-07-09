@@ -4,6 +4,7 @@
  */
 
 export enum EditorLanguage {
+  Undetermined = 'undetermined',
   Natural = 'plaintext',
   // TODO: Add support for key-value?
   PPL = 'PPL',
@@ -116,7 +117,7 @@ export const PatternUtils = {
   // Check if first token matches PPL start patterns
   isPplStart(firstToken: string): boolean {
     return PPL_START_KEYWORDS.some((keyword) =>
-      firstToken.toLowerCase().startsWith(keyword.toLowerCase())
+      firstToken.toLowerCase().startsWith(keyword.slice(0, 3).toLowerCase())
     );
   },
 

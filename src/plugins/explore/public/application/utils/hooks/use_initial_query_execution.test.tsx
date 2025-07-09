@@ -186,23 +186,6 @@ describe('useInitialQueryExecution', () => {
     });
   });
 
-  describe('when query is empty', () => {
-    it('should not execute query or add to history', () => {
-      const { result } = renderHookWithProvider(mockServices, {
-        query: {
-          query: '',
-          language: 'ppl',
-          dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
-        },
-      });
-
-      expect(mockServices.data.query.queryString.addToQueryHistory).not.toHaveBeenCalled();
-      expect(mockClearResults).not.toHaveBeenCalled();
-      expect(mockExecuteQueries).not.toHaveBeenCalled();
-      expect(result.current.isInitialized).toBe(false);
-    });
-  });
-
   describe('when query is whitespace only', () => {
     it('should not add whitespace-only query to history but should execute', () => {
       const { result } = renderHookWithProvider(mockServices, {

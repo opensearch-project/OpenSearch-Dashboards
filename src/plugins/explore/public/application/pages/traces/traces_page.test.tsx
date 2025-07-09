@@ -30,7 +30,7 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
     services: jest.fn(),
   }),
-  withOpenSearchDashboards: jest.fn((component: React.Component) => component),
+  withOpenSearchDashboards: jest.fn((component: any) => component),
 }));
 
 jest.mock('../../../components/query_panel', () => ({
@@ -43,16 +43,13 @@ jest.mock('../../components/header_dataset_selector', () => ({
   ),
 }));
 
-jest.mock(
-  '../../legacy/discover/application/view_components/canvas/discover_chart_container',
-  () => ({
-    DiscoverChartContainer: () => (
-      <div data-test-subj="discover-chart-container">Chart Container</div>
-    ),
-  })
-);
+jest.mock('../../../components/chart/discover_chart_container', () => ({
+  DiscoverChartContainer: () => (
+    <div data-test-subj="discover-chart-container">Chart Container</div>
+  ),
+}));
 
-jest.mock('../../legacy/discover/application/view_components/canvas/top_nav', () => ({
+jest.mock('../../../components/top_nav/top_nav', () => ({
   TopNav: () => <div data-test-subj="top-nav">Top Nav</div>,
 }));
 
@@ -106,6 +103,16 @@ jest.mock('../../utils/hooks/use_timefilter_subscription', () => ({
   useTimefilterSubscription: jest.fn(),
 }));
 
+jest.mock('../../utils/hooks/use_header_variants', () => ({
+  useHeaderVariants: jest.fn(),
+}));
+
+jest.mock('../../utils/hooks/use_page_initialization', () => ({
+  useInitPage: jest.fn().mockReturnValue({
+    savedExplore: null,
+  }),
+}));
+
 jest.mock('../../components/index_pattern_context', () => ({
   useIndexPatternContext: jest.fn().mockReturnValue({
     indexPattern: {},
@@ -114,8 +121,8 @@ jest.mock('../../components/index_pattern_context', () => ({
   }),
 }));
 
-jest.mock('../../../components/query_panel', () => ({
-  QueryPanel: () => <div data-test-subj="query-panel">Mock Query Panel</div>,
+jest.mock('../../../components/results_summary/results_summary_panel', () => ({
+  ResultsSummaryPanel: () => <div data-test-subj="results-summary-panel">Results Summary</div>,
 }));
 
 describe('TracesPage', () => {
@@ -124,8 +131,17 @@ describe('TracesPage', () => {
     rows: OpenSearchSearchHit[] = [],
     fieldSchema: any[] = []
   ) => {
-    // Use 'test-query' as cache key since empty string is falsy
-    const cacheKey = 'test-query';
+    // Create query object that matches the TracesPage component expectations
+    const queryObj = {
+      ...queryInitialState,
+      query: 'where level="error"',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+
+    // Generate cache key using the same logic as the component
+    const cacheKey = 'source=test-dataset | where level="error"';
+
     const preloadedState = {
       ui: {
         ...uiInitialState,
@@ -140,10 +156,7 @@ describe('TracesPage', () => {
           fieldSchema,
         } as ISearchResult,
       },
-      query: {
-        ...queryInitialState,
-        query: 'test-query', // Set query to match cache key
-      },
+      query: queryObj,
       queryEditor: {
         ...queryEditorInitialState,
         queryStatus: {

@@ -7,9 +7,9 @@ import { QueryTypeDetector } from './type_detection';
 import { EditorLanguage } from './constants';
 
 describe('QueryTypeDetector', () => {
-  it('returns natural language for empty query', () => {
+  it('returns undetermined for empty query', () => {
     const result = QueryTypeDetector.detect('');
-    expect(result.type).toBe(EditorLanguage.Natural);
+    expect(result.type).toBe(EditorLanguage.Undetermined);
     expect(result.confidence).toBe(0);
     expect(result.reason).toBe('Invalid query input');
     expect(result.warnings).toContain('No valid input provided');
@@ -47,9 +47,9 @@ describe('QueryTypeDetector', () => {
     expect(result.reason).toContain('question mark');
   });
 
-  it('returns natural language for ambiguous/low confidence', () => {
+  it('returns undetermined for ambiguous/low confidence', () => {
     const result = QueryTypeDetector.detect('hello world');
-    expect(result.type).toBe(EditorLanguage.Natural);
+    expect(result.type).toBe(EditorLanguage.Undetermined);
   });
 
   it('penalizes PPL score if NL starter present', () => {

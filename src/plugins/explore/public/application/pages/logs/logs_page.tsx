@@ -68,9 +68,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     const query = state.query;
     const results = state.results;
 
-    // Use default cache key computation - pass query string only
-    const queryString = typeof query.query === 'string' ? query.query : '';
-    const cacheKey = defaultPrepareQuery(queryString);
+    const cacheKey = defaultPrepareQuery(query);
     const rawResults = results.hasOwnProperty(cacheKey) ? results[cacheKey] : null;
 
     if (rawResults) {

@@ -5,16 +5,16 @@
 
 import {
   queryEditorReducer,
-  setQueryEditorState,
-  setQueryStatus,
-  updateQueryStatus,
+  QueryEditorSliceState,
+  resetEditorMode,
   setEditorMode,
   setPromptModeIsAvailable,
-  resetEditorMode,
+  setQueryEditorState,
+  setQueryStatus,
   toggleDualEditorMode,
-  QueryEditorSliceState,
+  updateQueryStatus,
 } from './query_editor_slice';
-import { QueryExecutionStatus, EditorMode, QueryResultStatus } from '../../types';
+import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
 
 describe('QueryEditor Slice', () => {
