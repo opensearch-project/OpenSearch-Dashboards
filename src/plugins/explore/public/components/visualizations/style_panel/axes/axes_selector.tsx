@@ -12,11 +12,12 @@ import {
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { isEmpty, isEqual } from 'lodash';
+import { i18n } from '@osd/i18n';
 
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
 import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
-import { useVisualizationRegistry } from '../../utils/use_visualization_types';
+import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
 import { getColumnMatchFromMapping } from '../../visualization_container_utils';
 
@@ -26,13 +27,34 @@ interface VisColumnOption {
 }
 
 interface AxesSelectPanelProps {
-  chartType: string;
+  chartType: ChartType;
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
   dateColumns: VisColumn[];
   currentMapping: AxisColumnMappings;
   updateVisualization: (data: UpdateVisualizationProps) => void;
 }
+
+const AXIS_SELECT_LABEL = {
+  [AxisRole.X]: i18n.translate('explore.visualize.axisSelectLabelX', {
+    defaultMessage: 'X-Axis',
+  }),
+  [AxisRole.Y]: i18n.translate('explore.visualize.axisSelectLabelY', {
+    defaultMessage: 'Y-Axis',
+  }),
+  [AxisRole.COLOR]: i18n.translate('explore.visualize.axisSelectLabelColor', {
+    defaultMessage: 'Color',
+  }),
+  [AxisRole.FACET]: i18n.translate('explore.visualize.axisSelectLabelFacet', {
+    defaultMessage: 'Split Chart By',
+  }),
+  [AxisRole.THETA]: i18n.translate('explore.visualize.axisSelectLabelTheta', {
+    defaultMessage: 'Theta',
+  }),
+  [AxisRole.SIZE]: i18n.translate('explore.visualize.axisSelectLabelSize', {
+    defaultMessage: 'Size',
+  }),
+};
 
 export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   chartType,
@@ -195,13 +217,20 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   };
 
   return (
-    <StyleAccordion id="axesSelector" accordionLabel="Axis Select" initialIsOpen={true}>
+    <StyleAccordion
+      id="axesSelector"
+      accordionLabel={i18n.translate('explore.stylePanel.tabs.field', {
+        defaultMessage: 'Field',
+      })}
+      initialIsOpen={true}
+    >
       <>
         {Array.from(allAxisRolesFromSelection).map((axisRole) => {
           const currentSelection = currentSelections[axisRole];
           return (
             <AxisSelector
               key={axisRole}
+              chartType={chartType}
               axisRole={axisRole}
               selectedColumn={currentSelection?.name || ''}
               allColumnOptions={getAvailableColumnsForAxis(axisRole)}
@@ -228,6 +257,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 };
 
 interface AxesSelectorOptions {
+  chartType: ChartType;
   axisRole: AxisRole;
   selectedColumn: string;
   allColumnOptions: Array<EuiComboBoxOptionOption<VisColumnOption>>;
@@ -236,6 +266,7 @@ interface AxesSelectorOptions {
 }
 
 export const AxisSelector: React.FC<AxesSelectorOptions> = ({
+  chartType,
   axisRole,
   selectedColumn,
   allColumnOptions,
@@ -243,8 +274,8 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
   onChange,
 }) => {
   return (
-    <React.Fragment key={`${axisRole}`}>
-      <EuiFormRow label={`${axisRole}-axis`}>
+    <React.Fragment key={`${axisRole}Selector`}>
+      <EuiFormRow label={chartType === 'metric' ? undefined : AXIS_SELECT_LABEL[axisRole]}>
         <EuiFlexItem>
           <EuiComboBox
             compressed

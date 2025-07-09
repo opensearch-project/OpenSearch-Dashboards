@@ -10,10 +10,10 @@ import { AxisRole, StandardAxes } from '../types';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/standard_axes_options';
 import { swapAxes } from '../utils/utils';
-import { inferAxesFromColumns } from './scatter_chart_utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
+import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 
 export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
 
@@ -26,6 +26,8 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   availableChartTypes = [],
   selectedChartType,
   onChartTypeChange,
+  axisColumnMappings,
+  updateVisualization,
 }) => {
   const updateStyleOption = <K extends keyof ScatterChartStyleControls>(
     key: K,
@@ -38,28 +40,58 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   const shouldShowLegend = !(numericalColumns.length === 2 && categoricalColumns.length === 0);
 
   useEffect(() => {
-    const { x, y } = inferAxesFromColumns(numericalColumns, categoricalColumns);
     const axesWithFields = styleOptions.StandardAxes.map((axis) => {
       if (axis.axisRole === AxisRole.X) {
-        return { ...axis, field: x };
+        return {
+          ...axis,
+          field: {
+            default: axisColumnMappings?.[AxisRole.X]!,
+            options: [axisColumnMappings?.[AxisRole.X]!],
+          },
+        };
       }
       if (axis.axisRole === AxisRole.Y) {
-        return { ...axis, field: y };
+        return {
+          ...axis,
+          field: {
+            default: axisColumnMappings?.[AxisRole.Y]!,
+            options: [axisColumnMappings?.[AxisRole.Y]!],
+          },
+        };
       }
       return axis;
     });
 
     updateStyleOption('StandardAxes', axesWithFields);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numericalColumns, categoricalColumns, dateColumns]);
+  }, [numericalColumns, categoricalColumns, dateColumns, axisColumnMappings]);
 
   const handleSwitchAxes = (axes: StandardAxes[]) => {
-    const updateAxes = swapAxes(axes);
-    updateStyleOption('StandardAxes', updateAxes);
+    if (axisColumnMappings[AxisRole.X] && axisColumnMappings[AxisRole.Y]) {
+      const updateAxes = swapAxes(axes);
+      updateStyleOption('StandardAxes', updateAxes);
+      updateVisualization({
+        mappings: {
+          ...axisColumnMappings,
+          [AxisRole.Y]: axisColumnMappings[AxisRole.X],
+          [AxisRole.X]: axisColumnMappings[AxisRole.Y],
+        },
+      });
+    }
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>
+        <AxesSelectPanel
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          currentMapping={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          chartType="scatter"
+        />
+      </EuiFlexItem>
       {shouldShowLegend && (
         <EuiFlexItem grow={false}>
           <LegendOptionsPanel
