@@ -200,7 +200,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
         <React.Fragment>
           <EuiFlexGroup
             alignItems="center"
-            className="dscHistogram__header--partial"
+            className="exploreHistogram__header--partial"
             data-test-subj="dscHistogramHeader"
             responsive={false}
             gutterSize="xs"
@@ -332,16 +332,10 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           theme={chartsTheme}
           baseTheme={chartsBaseTheme}
         />
-        <Axis
-          id="discover-histogram-left-axis"
-          position={Position.Left}
-          ticks={5}
-          title={chartData.yAxisLabel}
-        />
+        <Axis id="discover-histogram-left-axis" position={Position.Left} ticks={5} />
         <Axis
           id="discover-histogram-bottom-axis"
           position={Position.Bottom}
-          title={chartData.xAxisLabel}
           tickFormat={this.formatXValue}
           ticks={10}
         />

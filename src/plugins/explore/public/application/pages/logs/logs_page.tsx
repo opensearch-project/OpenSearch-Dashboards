@@ -152,11 +152,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       return (
         <>
           <ResultsSummaryPanel />
-          <CanvasPanel className="explore-chart-panel">
-            <div className="dscCanvas__chart">
-              <DiscoverChartContainer />
-            </div>
-          </CanvasPanel>
+          <DiscoverChartContainer />
           <CanvasPanel>
             <ExploreTabs />
           </CanvasPanel>
