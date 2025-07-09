@@ -100,7 +100,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
 
       <EuiFlexItem grow={false}>
         <AllAxesOptions
-          disableGrid={true}
+          disableGrid={false}
           standardAxes={styleOptions.StandardAxes}
           onChangeSwitchAxes={handleSwitchAxes}
           onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
