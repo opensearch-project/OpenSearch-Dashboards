@@ -118,7 +118,18 @@ export function TimechartHeader({
 
   return (
     <I18nProvider>
-      <EuiFlexGroup gutterSize="s" responsive alignItems="center">
+      <EuiFlexGroup gutterSize="s" responsive alignItems="center" justifyContent="flexEnd">
+        <EuiFlexItem grow={false} className="exploreChart__TimechartHeader__logCount">
+          <EuiText
+            className="exploreChart__TimechartHeader__logCount__text"
+            data-test-subj="discoverTimechartHeaderLogCount"
+            size="s"
+          >
+            {i18n.translate('explore.discover.timechartHeader.logCount', {
+              defaultMessage: 'Log count',
+            })}
+          </EuiText>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('explore.discover.howToChangeTheTimeTooltip', {
@@ -139,6 +150,7 @@ export function TimechartHeader({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
+            className="exploreChart__TimechartHeader__selection"
             aria-label={i18n.translate(
               'explore.discover.timechartHeader.timeIntervalSelect.ariaLabel',
               {
@@ -159,6 +171,17 @@ export function TimechartHeader({
               })}
             value={interval}
             onChange={handleIntervalChange}
+            prepend={
+              <EuiText
+                className="exploreChart__TimechartHeader__selection__prependText"
+                data-test-subj="discoverTimechartHeaderInterval"
+                size="s"
+              >
+                {i18n.translate('explore.discover.timechartHeader.interval', {
+                  defaultMessage: 'Interval',
+                })}
+              </EuiText>
+            }
             append={
               bucketInterval.scaled ? (
                 <EuiIconTip
