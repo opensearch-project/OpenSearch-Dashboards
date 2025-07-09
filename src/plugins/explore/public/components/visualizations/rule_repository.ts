@@ -518,7 +518,8 @@ const oneMetricRule: VisualizationRule = {
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions
+      styleOptions,
+      axisColumnMappings
     );
   },
 };

@@ -227,6 +227,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
           return (
             <AxisSelector
               key={axisRole}
+              chartType={chartType}
               axisRole={axisRole}
               selectedColumn={currentSelection?.name || ''}
               allColumnOptions={getAvailableColumnsForAxis(axisRole)}
@@ -253,6 +254,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 };
 
 interface AxesSelectorOptions {
+  chartType: string;
   axisRole: AxisRole;
   selectedColumn: string;
   allColumnOptions: Array<EuiComboBoxOptionOption<VisColumnOption>>;
@@ -261,6 +263,7 @@ interface AxesSelectorOptions {
 }
 
 export const AxisSelector: React.FC<AxesSelectorOptions> = ({
+  chartType,
   axisRole,
   selectedColumn,
   allColumnOptions,
@@ -269,7 +272,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
 }) => {
   return (
     <React.Fragment key={`${axisRole}Selector`}>
-      <EuiFormRow label={AXIS_SELECT_LABEL[axisRole]}>
+      <EuiFormRow label={chartType === 'metric' ? undefined : AXIS_SELECT_LABEL[axisRole]}>
         <EuiFlexItem>
           <EuiComboBox
             compressed
