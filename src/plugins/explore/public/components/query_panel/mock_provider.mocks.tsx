@@ -184,7 +184,12 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
         interval: 'auto',
       },
       queryEditor: {
-        executionStatus: QueryExecutionStatus.UNINITIALIZED,
+        queryStatus: {
+          status: QueryExecutionStatus.UNINITIALIZED,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
         editorMode,
         promptModeIsAvailable: false,
       },

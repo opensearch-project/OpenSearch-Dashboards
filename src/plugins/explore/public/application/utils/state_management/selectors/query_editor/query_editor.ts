@@ -9,14 +9,16 @@ import { EditorMode, QueryExecutionStatus } from '../../types';
 
 const selectState = (state: RootState) => state.queryEditor;
 
+export const selectQueryStatus = createSelector([selectState], (state) => state.queryStatus);
+
 export const selectExecutionStatus = createSelector(
   [selectState],
-  (state) => state.executionStatus
+  (state) => state.queryStatus.status
 );
 
 export const selectIsLoading = createSelector(
   [selectState],
-  (state) => state.executionStatus === QueryExecutionStatus.LOADING
+  (state) => state.queryStatus.status === QueryExecutionStatus.LOADING
 );
 
 export const selectPromptModeIsAvailable = createSelector(
