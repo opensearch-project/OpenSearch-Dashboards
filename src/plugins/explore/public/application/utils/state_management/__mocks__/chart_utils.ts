@@ -19,6 +19,14 @@ export const mockDataPluginMocks = {
   search: {
     tabifyAggResponse: jest.fn(),
   },
+  ResultStatus: {
+    UNINITIALIZED: 'uninitialized',
+    LOADING: 'loading',
+    READY: 'ready',
+    NO_RESULTS: 'none',
+    ERROR: 'error',
+  },
+  QueryStatus: {},
 };
 
 // Mock the modules using the mock objects
