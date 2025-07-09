@@ -13,10 +13,10 @@ import {
   HeatmapLabelVisOptions,
   HeatmapExclusiveVisOptions,
 } from './heatmap_exclusive_vis_options';
-import { inferAxesFromColumns } from './heatmap_chart_utils';
 import { AllAxesOptions } from '../style_panel/standard_axes_options';
 import { swapAxes } from '../utils/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
+import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 
 export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyleControls>;
 
@@ -29,6 +29,8 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   availableChartTypes = [],
   selectedChartType,
   onChartTypeChange,
+  axisColumnMappings,
+  updateVisualization,
 }) => {
   const shouldShowType = numericalColumns.length === 3;
   const updateStyleOption = <K extends keyof HeatmapChartStyleControls>(
@@ -39,28 +41,58 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   };
 
   useEffect(() => {
-    const { x, y } = inferAxesFromColumns(numericalColumns, categoricalColumns);
     const axesWithFields = styleOptions.StandardAxes.map((axis) => {
       if (axis.axisRole === AxisRole.X) {
-        return { ...axis, field: x };
+        return {
+          ...axis,
+          field: {
+            default: axisColumnMappings?.[AxisRole.X]!,
+            options: [axisColumnMappings?.[AxisRole.X]!],
+          },
+        };
       }
       if (axis.axisRole === AxisRole.Y) {
-        return { ...axis, field: y };
+        return {
+          ...axis,
+          field: {
+            default: axisColumnMappings?.[AxisRole.Y]!,
+            options: [axisColumnMappings?.[AxisRole.Y]!],
+          },
+        };
       }
       return axis;
     });
 
     updateStyleOption('StandardAxes', axesWithFields);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numericalColumns, categoricalColumns, dateColumns]);
+  }, [numericalColumns, categoricalColumns, dateColumns, axisColumnMappings]);
 
   const handleSwitchAxes = (axes: StandardAxes[]) => {
-    const updateAxes = swapAxes(axes);
-    updateStyleOption('StandardAxes', updateAxes);
+    if (axisColumnMappings[AxisRole.X] && axisColumnMappings[AxisRole.Y]) {
+      const updateAxes = swapAxes(axes);
+      updateStyleOption('StandardAxes', updateAxes);
+      updateVisualization({
+        mappings: {
+          ...axisColumnMappings,
+          [AxisRole.Y]: axisColumnMappings[AxisRole.X],
+          [AxisRole.X]: axisColumnMappings[AxisRole.Y],
+        },
+      });
+    }
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>
+        <AxesSelectPanel
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          currentMapping={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          chartType="heatmap"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <LegendOptionsPanel
           shouldShowLegend={true}

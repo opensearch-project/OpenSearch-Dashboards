@@ -4,13 +4,8 @@
  */
 
 import { AreaChartStyleControls } from './area_vis_config';
-import { VisColumn, Positions, VEGASCHEMA } from '../types';
-import {
-  buildMarkConfig,
-  createTimeMarkerLayer,
-  applyAxisStyling,
-  ValueAxisPosition,
-} from '../line/line_chart_utils';
+import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
+import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
 
 /**
@@ -25,12 +20,17 @@ export const createSimpleAreaChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>
+  styles: Partial<AreaChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const metricField = numericalColumns[0].column;
-  const dateField = dateColumns[0].column;
-  const metricName = numericalColumns[0].name;
-  const dateName = dateColumns[0].name;
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+
+  const metricField = yAxisColumn?.column;
+  const dateField = xAxisColumn?.column;
+  const metricName = yAxisColumn?.name;
+  const dateName = xAxisColumn?.name;
+
   const layers: any[] = [];
 
   const mainLayer = {
@@ -113,14 +113,19 @@ export const createMultiAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>
+  styles: Partial<AreaChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const metricField = numericalColumns[0].column;
-  const dateField = dateColumns[0].column;
-  const categoryField = categoricalColumns[0].column;
-  const metricName = numericalColumns[0].name;
-  const dateName = dateColumns[0].name;
-  const categoryName = categoricalColumns[0].name;
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+
+  const metricField = yAxisColumn?.column;
+  const dateField = xAxisColumn?.column;
+  const categoryField = colorColumn?.column;
+  const metricName = yAxisColumn?.name;
+  const dateName = xAxisColumn?.name;
+  const categoryName = colorColumn?.name;
   const layers: any[] = [];
 
   const mainLayer = {
@@ -215,16 +220,22 @@ export const createFacetedMultiAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>
+  styles: Partial<AreaChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const metricField = numericalColumns[0].column;
-  const dateField = dateColumns[0].column;
-  const category1Field = categoricalColumns[0].column;
-  const category2Field = categoricalColumns[1].column;
-  const metricName = numericalColumns[0].name;
-  const dateName = dateColumns[0].name;
-  const category1Name = categoricalColumns[0].name;
-  const category2Name = categoricalColumns[1].name;
+  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
+  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
+  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
+  const facetMapping = axisColumnMappings?.[AxisRole.FACET];
+
+  const metricField = yAxisMapping?.column;
+  const dateField = xAxisMapping?.column;
+  const category1Field = colorMapping?.column;
+  const category2Field = facetMapping?.column;
+  const metricName = yAxisMapping?.name;
+  const dateName = xAxisMapping?.name;
+  const category1Name = colorMapping?.name;
+  const category2Name = facetMapping?.name;
 
   return {
     $schema: VEGASCHEMA,
@@ -369,7 +380,8 @@ export const createCategoryAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>
+  styles: Partial<AreaChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
@@ -378,10 +390,13 @@ export const createCategoryAreaChart = (
     );
   }
 
-  const metricField = numericalColumns[0].column;
-  const categoryField = categoricalColumns[0].column;
-  const metricName = numericalColumns[0].name;
-  const categoryName = categoricalColumns[0].name;
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+
+  const metricField = yAxisColumn?.column;
+  const categoryField = xAxisColumn?.column;
+  const metricName = yAxisColumn?.name;
+  const categoryName = xAxisColumn?.name;
   const layers: any[] = [];
 
   const mainLayer = {
@@ -456,7 +471,8 @@ export const createStackedAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>
+  styles: Partial<AreaChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length < 2) {
@@ -465,13 +481,17 @@ export const createStackedAreaChart = (
     );
   }
 
-  const metricField = numericalColumns[0].column;
-  const categoryField1 = categoricalColumns[0].column; // X-axis (categories)
-  const categoryField2 = categoricalColumns[1].column; // Color (stacking)
+  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
+  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
+  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
 
-  const metricName = numericalColumns[0].name;
-  const categoryName1 = categoricalColumns[0].name;
-  const categoryName2 = categoricalColumns[1].name;
+  const metricField = yAxisMapping?.column;
+  const categoryField1 = xAxisMapping?.column; // X-axis (categories)
+  const categoryField2 = colorMapping?.column; // Color (stacking)
+
+  const metricName = yAxisMapping?.name;
+  const categoryName1 = xAxisMapping?.name;
+  const categoryName2 = colorMapping?.name;
 
   const spec: any = {
     $schema: VEGASCHEMA,

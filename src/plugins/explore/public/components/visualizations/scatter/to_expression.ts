@@ -4,7 +4,7 @@
  */
 
 import { ScatterChartStyleControls } from './scatter_vis_config';
-import { VisColumn, AxisRole, VEGASCHEMA } from '../types';
+import { VisColumn, AxisRole, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getAxisByRole } from '../utils/utils';
 
 export const createTwoMetricScatter = (
@@ -12,7 +12,8 @@ export const createTwoMetricScatter = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<ScatterChartStyleControls>
+  styles: Partial<ScatterChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
   const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
@@ -26,12 +27,12 @@ export const createTwoMetricScatter = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default.column,
+        field: xAxis?.field?.default?.column,
         type: 'quantitative',
         axis: applyAxisStyling(xAxis),
       },
       y: {
-        field: yAxis?.field?.default.column,
+        field: yAxis?.field?.default?.column,
         type: 'quantitative',
         axis: applyAxisStyling(yAxis),
       },
@@ -51,10 +52,11 @@ export const createTwoMetricOneCateScatter = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<ScatterChartStyleControls>
+  styles: Partial<ScatterChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const categoryFields = categoricalColumns?.map((item) => item.column);
-  const categoryNames = categoricalColumns?.map((item) => item.name);
+  const categoryFields = axisColumnMappings?.color?.column!;
+  const categoryNames = axisColumnMappings?.color?.name!;
   const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
   const markLayer = {
@@ -67,21 +69,21 @@ export const createTwoMetricOneCateScatter = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default.column,
+        field: xAxis?.field?.default?.column,
         type: 'quantitative',
         axis: applyAxisStyling(xAxis),
       },
       y: {
-        field: yAxis?.field?.default.column,
+        field: yAxis?.field?.default?.column,
         type: 'quantitative',
         axis: applyAxisStyling(yAxis),
       },
       color: {
-        field: categoryFields[0],
+        field: categoryFields,
         type: 'nominal',
         legend: styles?.addLegend
           ? {
-              title: categoryNames[0] || 'Metrics',
+              title: categoryNames || 'Metrics',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
@@ -104,15 +106,14 @@ export const createThreeMetricOneCateScatter = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<ScatterChartStyleControls>
+  styles: Partial<ScatterChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const categoryFields = categoricalColumns.map((item) => item.column);
-  const categoryNames = categoricalColumns.map((item) => item.name);
+  const categoryFields = axisColumnMappings?.color?.column!;
+  const categoryNames = axisColumnMappings?.color?.name!;
   const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
-  const numericalSize = numericalColumns.filter(
-    (f) => f.column !== xAxis?.field?.default.column && f.column !== yAxis?.field?.default.column
-  )[0];
+  const numericalSize = axisColumnMappings?.size;
   const markLayer = {
     mark: {
       type: 'point',
@@ -123,28 +124,28 @@ export const createThreeMetricOneCateScatter = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default.column,
+        field: xAxis?.field?.default?.column,
         type: 'quantitative',
         axis: applyAxisStyling(xAxis),
       },
       y: {
-        field: yAxis?.field?.default.column,
+        field: yAxis?.field?.default?.column,
         type: 'quantitative',
         axis: applyAxisStyling(yAxis),
       },
       color: {
-        field: categoryFields[0],
+        field: categoryFields,
         type: 'nominal',
         legend: styles?.addLegend
           ? {
-              title: categoryNames[0] || 'Metrics',
+              title: categoryNames || 'Metrics',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
           : null,
       },
       size: {
-        field: numericalSize.column,
+        field: numericalSize?.column,
         type: 'quantitative',
         legend: styles?.addLegend
           ? {
