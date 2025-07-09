@@ -46,7 +46,7 @@ export const Visualization = <T extends ChartType>({
   const availableChartTypes = visualizationData.availableChartTypes;
   const hasSelectionMapping = Object.keys(visualizationData.axisColumnMappings!).length !== 0;
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup gutterSize="none" style={{ minHeight: 0 }}>
       <EuiFlexItem>
         <EuiPanel
           hasBorder={false}
@@ -73,8 +73,8 @@ export const Visualization = <T extends ChartType>({
           </div>
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} className="exploreVisStylePanel">
-        <EuiPanel hasShadow={false} paddingSize="s">
+      <EuiFlexItem grow={false} className="exploreVisStyleFlexItem">
+        <EuiPanel hasShadow={false} paddingSize="s" className="exploreVisStylePanel">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="none">
               <ChartTypeSelector
@@ -99,7 +99,7 @@ export const Visualization = <T extends ChartType>({
           </EuiFlexItem>
         </EuiPanel>
       </EuiFlexItem>
-      {/* <div data-test-subj="exploreStylePanel" className="exploreVisStylePanel">
+      {/* <div data-test-subj="exploreStylePanel" className="exploreVisStyleFlexItem">
           {visualizationData.visualizationType?.ui.style.render({
             styleOptions,
             onStyleChange,
