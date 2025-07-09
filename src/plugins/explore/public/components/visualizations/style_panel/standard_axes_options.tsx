@@ -84,7 +84,6 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                 defaultMessage: isYAxis ? 'Y-Axis' : 'X-Axis',
               })}
             </EuiButtonEmpty>
-
             <EuiSpacer size="s" />
             {expandedAxes[axis.id] && (
               <div>
@@ -146,7 +145,6 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                     isFullWidth
                   />
                 </EuiFormRow>
-
                 <EuiFormRow
                   label={i18n.translate('explore.vis.standardAxes.showAxisLinesAndLabels', {
                     defaultMessage: 'Show axis lines and labels',
@@ -158,7 +156,6 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                     onChange={(e) => updateAxis(index, { show: e.target.checked })}
                   />
                 </EuiFormRow>
-
                 {axis.show && (
                   <>
                     <DebouncedText
@@ -246,30 +243,26 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                           </EuiFlexItem>
                         </EuiFlexGroup>
                         <EuiSpacer size="s" />
-
-                        {!disableGrid && (
-                          <EuiFormRow
-                            label={i18n.translate(
-                              'explore.vis.standardAxes.showAxisGrid.switchLabel',
-                              {
-                                defaultMessage: 'Show grid lines',
-                              }
-                            )}
-                          >
-                            <EuiSwitch
-                              checked={axis.grid?.showLines ?? false}
-                              onChange={(e) =>
-                                updateAxis(index, {
-                                  grid: { ...axis.grid, showLines: e.target.checked },
-                                })
-                              }
-                              label=""
-                            />
-                          </EuiFormRow>
-                        )}
                       </>
                     )}
                   </>
+                )}
+                {!disableGrid && (
+                  <EuiFormRow
+                    label={i18n.translate('explore.vis.standardAxes.showAxisGrid.switchLabel', {
+                      defaultMessage: 'Show grid lines',
+                    })}
+                  >
+                    <EuiSwitch
+                      checked={axis.grid?.showLines ?? false}
+                      onChange={(e) =>
+                        updateAxis(index, {
+                          grid: { ...axis.grid, showLines: e.target.checked },
+                        })
+                      }
+                      label=""
+                    />
+                  </EuiFormRow>
                 )}
               </div>
             )}
