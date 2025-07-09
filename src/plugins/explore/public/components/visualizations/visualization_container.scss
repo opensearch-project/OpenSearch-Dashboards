@@ -1,30 +1,41 @@
 .exploreVisContainer {
   display: flex;
-  min-height: 500px;
-  overflow-y: hidden; 
-  overflow-x: auto; 
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  flex-grow: 1;
 }
 
 .exploreVisPanel {
-  min-height: 500px;
   display: flex;
   flex-direction: column;
 }
 
 .exploreVisPanel__inner {
   flex: 1 1 auto;
-  overflow: auto;
+  overflow: visible;
+
+  .expExpressionRenderer__expression {
+    overflow: visible;
+
+    .visualization {
+      overflow: visible;
+    }
+  }
 
   .visChart__container {
     overflow: unset;
   }
 }
 
-.exploreVisStylePanel {
+.exploreVisStyleFlexItem {
   margin-top: 10px;
   display: flex;
   flex-direction: column;
   width: 300px;
-  height: 600px;
   overflow: auto;
+
+  .exploreVisStylePanel {
+    overflow-y: auto;
+  }
 }
