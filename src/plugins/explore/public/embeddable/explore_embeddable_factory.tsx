@@ -89,7 +89,7 @@ export class ExploreEmbeddableFactory
       const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
       const flavor = savedObject.type ?? ExploreFlavor.Logs;
-      const editUrl = services.addBasePath(`/app/explore/${flavor}#/view/${url}`);
+      const editUrl = services.addBasePath(`/app/explore/${flavor}/${url}`);
 
       return new ExploreEmbeddableClass(
         {
@@ -100,6 +100,7 @@ export class ExploreEmbeddableFactory
           editable: services.capabilities.discover?.save as boolean,
           indexPatterns: indexPattern ? [indexPattern] : [],
           services,
+          editApp: `explore/${flavor}`,
         },
         input,
         executeTriggerActions,
