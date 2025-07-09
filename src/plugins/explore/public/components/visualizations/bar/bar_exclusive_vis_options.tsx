@@ -95,6 +95,7 @@ export const BarExclusiveVisOptions = ({
             })}
           >
             <EuiFieldNumber
+              compressed
               value={localBarWidth}
               onChange={(e) => handleBarWidthChange(e.target.value)}
               min={0.1}
@@ -114,6 +115,7 @@ export const BarExclusiveVisOptions = ({
             })}
           >
             <EuiFieldNumber
+              compressed
               value={localBarPadding}
               onChange={(e) => handleBarPaddingChange(e.target.value)}
               min={0}
@@ -156,6 +158,7 @@ export const BarExclusiveVisOptions = ({
                 })}
               >
                 <EuiFieldNumber
+                  compressed
                   value={localBarBorderWidth}
                   onChange={(e) => handleBarBorderWidthChange(e.target.value)}
                   min={1}

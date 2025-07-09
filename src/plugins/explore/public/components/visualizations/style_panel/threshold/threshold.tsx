@@ -150,7 +150,7 @@ export const ThresholdOptions = ({
       <EuiSpacer size="m" />
 
       {activeThresholds.length > 0 && (
-        <EuiPanel paddingSize="s" color="subdued">
+        <EuiPanel paddingSize="none" color="subdued">
           <EuiFormLabel>
             {i18n.translate('explore.stylePanel.threshold.thresholds', {
               defaultMessage: 'Threshold(s)',
