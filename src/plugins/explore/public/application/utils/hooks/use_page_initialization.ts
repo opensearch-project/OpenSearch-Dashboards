@@ -18,6 +18,7 @@ import {
   setActiveTab,
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
+import { ExploreFlavor } from '../../../../common';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -66,7 +67,7 @@ export const useInitPage = () => {
 
         // Add to recently accessed
         chrome.recentlyAccessed.add(
-          `/app/explore#/view/${savedExplore.id}`,
+          `/app/explore/${savedExplore.type ?? ExploreFlavor.Logs}#/view/${savedExplore.id}`,
           title,
           savedExplore.id,
           { type: 'explore' }
