@@ -389,18 +389,18 @@ export const VisualizationContainer = () => {
 
   return (
     <div className="exploreVisContainer">
-      <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
-        <EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
         </EuiFlexItem>
-        <EuiFlexItem style={{ alignItems: 'flex-end' }}>
+        <EuiFlexItem grow={false} style={{ alignItems: 'flex-end' }}>
           <SaveAndAddButtonWithModal
             searchContext={searchContext}
             indexPattern={indexPattern}
             services={services}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} style={{ minHeight: 0 }}>
           <Visualization<ChartType>
             expression={expression!}
             searchContext={searchContext}
