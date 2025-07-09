@@ -52,10 +52,6 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
     setIsOpen(false);
   }, []);
 
-  const openPopover = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-
   const onAssociateDataSource = useCallback(
     async (ds: DataSourceConnection[]) => {
       const dataSourceObjects = ds
@@ -152,7 +148,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
       fill
       iconType="arrowDown"
       iconSide="right"
-      onClick={openPopover}
+      onClick={() => setIsOpen((prevState) => !prevState)}
     >
       <EuiIcon type="plusInCircle" />{' '}
       {i18n.translate('workspace.dataSources.associationButton.label', {
