@@ -6,7 +6,14 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { ScatterVisStyleControls } from './scatter_vis_options';
-import { StandardAxes, PointShape, AxisRole, Positions, TooltipOptions } from '../types';
+import {
+  StandardAxes,
+  PointShape,
+  AxisRole,
+  Positions,
+  TooltipOptions,
+  VisFieldType,
+} from '../types';
 
 export interface ExclusiveScatterConfig {
   pointShape: PointShape;
@@ -88,6 +95,34 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
       defaults: defaultScatterChartStyles,
       render: (props) => React.createElement(ScatterVisStyleControls, props),
     },
-    availableMappings: [], // TODO
+    availableMappings: [
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 2 },
+          },
+        ],
+      },
+    ],
   },
 });

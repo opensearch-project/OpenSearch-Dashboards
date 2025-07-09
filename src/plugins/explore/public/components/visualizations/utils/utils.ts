@@ -20,7 +20,7 @@ export const applyAxisStyling = (axesStyle?: StandardAxes): any => {
   fullAxisConfig.orient = axesStyle?.position;
 
   // Apply title settings
-  fullAxisConfig.title = axesStyle?.title.text || axesStyle?.field?.default.name;
+  fullAxisConfig.title = axesStyle?.title.text || axesStyle?.field?.default?.name;
 
   // Apply axis visibility
   if (!axesStyle?.show) {

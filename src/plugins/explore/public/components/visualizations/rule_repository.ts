@@ -546,7 +546,8 @@ const twoMetricRule: VisualizationRule = {
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions
+      styleOptions,
+      axisColumnMappings
     );
   },
 };
@@ -573,7 +574,8 @@ const twoMetricOneCateRule: VisualizationRule = {
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions
+      styleOptions,
+      axisColumnMappings
     );
   },
 };
@@ -600,7 +602,8 @@ const threeMetricOneCateRule: VisualizationRule = {
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions
+      styleOptions,
+      axisColumnMappings
     );
   },
 };

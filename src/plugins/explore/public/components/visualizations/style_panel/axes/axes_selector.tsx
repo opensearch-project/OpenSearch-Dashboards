@@ -17,7 +17,7 @@ import { i18n } from '@osd/i18n';
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
 import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
-import { useVisualizationRegistry } from '../../utils/use_visualization_types';
+import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
 import { getColumnMatchFromMapping } from '../../visualization_container_utils';
 
@@ -27,7 +27,7 @@ interface VisColumnOption {
 }
 
 interface AxesSelectPanelProps {
-  chartType: string;
+  chartType: ChartType;
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
   dateColumns: VisColumn[];
@@ -50,6 +50,9 @@ const AXIS_SELECT_LABEL = {
   }),
   [AxisRole.THETA]: i18n.translate('explore.visualize.axisSelectLabelTheta', {
     defaultMessage: 'Theta',
+  }),
+  [AxisRole.SIZE]: i18n.translate('explore.visualize.axisSelectLabelSize', {
+    defaultMessage: 'Size',
   }),
 };
 
@@ -254,7 +257,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 };
 
 interface AxesSelectorOptions {
-  chartType: string;
+  chartType: ChartType;
   axisRole: AxisRole;
   selectedColumn: string;
   allColumnOptions: Array<EuiComboBoxOptionOption<VisColumnOption>>;
