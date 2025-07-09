@@ -38,7 +38,7 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   withOpenSearchDashboards: jest.fn((component: any) => component),
 }));
 jest.mock('../state_management/actions/query_actions', () => ({
-  defaultPrepareQuery: jest.fn().mockReturnValue('default-cache-key'),
+  defaultPrepareQueryString: jest.fn().mockReturnValue('default-cache-key'),
 }));
 
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
@@ -152,7 +152,7 @@ describe('useTabResults', () => {
     );
   });
 
-  it('should use defaultPrepareQuery when tab has no custom prepareQuery', () => {
+  it('should use defaultPrepareQueryString when tab has no custom prepareQuery', () => {
     const initialState: MockRootState = {
       query: { query: 'test query' },
       ui: { activeTabId: 'tab-1' },

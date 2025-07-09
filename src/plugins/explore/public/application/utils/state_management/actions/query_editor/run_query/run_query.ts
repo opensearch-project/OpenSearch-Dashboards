@@ -4,7 +4,7 @@
  */
 
 import { AppDispatch } from '../../../store';
-import { clearResults, setQueryStringWithHistory } from '../../../slices';
+import { clearResults, setQueryStringWithHistory, setActiveTab } from '../../../slices';
 import { executeQueries } from '../../query_actions';
 import { ExploreServices } from '../../../../../../types';
 
@@ -18,6 +18,7 @@ export const runQueryActionCreator = (services: ExploreServices, query?: string)
     dispatch(setQueryStringWithHistory(query));
   }
 
+  dispatch(setActiveTab(''));
   dispatch(clearResults());
   dispatch(executeQueries({ services }));
 };

@@ -13,7 +13,6 @@ import {
 } from '../../slices';
 import { getPreloadedState } from '../../utils/redux_persistence';
 import { ExploreServices } from '../../../../../types';
-import { beginTransaction, finishTransaction } from '../transaction_actions';
 import { executeQueries } from '../query_actions';
 import { AppDispatch } from '../../store';
 
@@ -26,7 +25,6 @@ export const resetExploreStateActionCreator = (services: ExploreServices) => asy
 ) => {
   const state = await getPreloadedState(services);
 
-  dispatch(beginTransaction());
   dispatch(setUiState(state.ui));
   dispatch(setResultsState(state.results));
   dispatch(setTabState(state.tab));
@@ -34,5 +32,4 @@ export const resetExploreStateActionCreator = (services: ExploreServices) => asy
   dispatch(setQueryState(state.query));
   dispatch(setQueryEditorState(state.queryEditor));
   dispatch(executeQueries({ services }));
-  dispatch(finishTransaction());
 };

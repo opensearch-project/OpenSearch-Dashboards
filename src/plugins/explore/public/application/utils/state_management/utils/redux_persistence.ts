@@ -232,7 +232,7 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
  */
 const getPreloadedUIState = (services: ExploreServices): UIState => {
   return {
-    activeTabId: 'logs',
+    activeTabId: '',
     showFilterPanel: true,
     showHistogram: true,
   };
