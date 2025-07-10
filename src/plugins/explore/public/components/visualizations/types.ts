@@ -91,8 +91,8 @@ export interface TooltipOptions {
 
 // Styling: Grid configuration
 export interface GridOptions {
-  categoryLines: boolean;
-  valueLines: boolean;
+  xLines: boolean;
+  yLines: boolean;
 }
 
 // Styling: Axis label configuration
@@ -159,7 +159,6 @@ export interface StandardAxes {
   style: Record<string, any>;
   labels: AxisLabels;
   title: AxisTitle;
-  grid: Grid;
   axisRole: AxisRole;
 }
 

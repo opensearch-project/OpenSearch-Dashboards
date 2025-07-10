@@ -24,14 +24,12 @@ import { StyleAccordion } from '../../style_panel/style_accordion';
 interface AllAxesOptionsProps {
   standardAxes: StandardAxes[];
   onStandardAxesChange: (categoryAxes: StandardAxes[]) => void;
-  disableGrid: boolean;
   onChangeSwitchAxes: (categoryAxes: StandardAxes[]) => void;
 }
 
 interface AxesOptionsProps {
   standardAxes: StandardAxes[];
   onStandardAxesChange: (categoryAxes: StandardAxes[]) => void;
-  disableGrid: boolean;
 }
 
 const getAxisDisplayTitle = (axis: StandardAxes) => {
@@ -44,7 +42,6 @@ const getAxisDisplayTitle = (axis: StandardAxes) => {
 export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
   standardAxes,
   onStandardAxesChange,
-  disableGrid,
 }) => {
   const [expandedAxes, setExpandedAxes] = useState<Record<string, boolean>>({});
 
@@ -71,7 +68,7 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
         const isYAxis = axis.axisRole === AxisRole.Y;
 
         return (
-          <EuiSplitPanel.Inner paddingSize="none" key={axis.id} color="subdued">
+          <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
             <EuiButtonEmpty
               iconSide="left"
               color="text"
@@ -120,14 +117,12 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                     isFullWidth
                   />
                 </EuiFormRow>
-                <EuiFormRow
-                  label={i18n.translate('explore.vis.standardAxes.showAxisLinesAndLabels', {
-                    defaultMessage: 'Show axis lines and labels',
-                  })}
-                >
+                <EuiFormRow>
                   <EuiSwitch
                     compressed
-                    label=""
+                    label={i18n.translate('explore.vis.standardAxes.showAxisLinesAndLabels', {
+                      defaultMessage: 'Show axis lines and labels',
+                    })}
                     checked={axis.show}
                     onChange={(e) => updateAxis(index, { show: e.target.checked })}
                   />
@@ -146,14 +141,12 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                         defaultMessage: 'Display name',
                       })}
                     />
-                    <EuiFormRow
-                      label={i18n.translate('explore.vis.standardAxes.showLabels', {
-                        defaultMessage: 'Show labels',
-                      })}
-                    >
+                    <EuiFormRow>
                       <EuiSwitch
                         compressed
-                        label=""
+                        label={i18n.translate('explore.vis.standardAxes.showLabels', {
+                          defaultMessage: 'Show labels',
+                        })}
                         checked={axis.labels.show}
                         onChange={(e) =>
                           updateAxis(index, {
@@ -220,27 +213,9 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                        <EuiSpacer size="s" />
                       </>
                     )}
                   </>
-                )}
-                {!disableGrid && (
-                  <EuiFormRow
-                    label={i18n.translate('explore.vis.standardAxes.showAxisGrid.switchLabel', {
-                      defaultMessage: 'Show grid lines',
-                    })}
-                  >
-                    <EuiSwitch
-                      checked={axis.grid?.showLines ?? false}
-                      onChange={(e) =>
-                        updateAxis(index, {
-                          grid: { ...axis.grid, showLines: e.target.checked },
-                        })
-                      }
-                      label=""
-                    />
-                  </EuiFormRow>
                 )}
               </div>
             )}
@@ -254,7 +229,6 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
 export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   standardAxes,
   onStandardAxesChange,
-  disableGrid,
   onChangeSwitchAxes,
 }) => {
   return (
@@ -266,10 +240,9 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
       initialIsOpen={true}
       data-test-subj="standardAxesPanel"
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <StandardAxesOptions
-            disableGrid={disableGrid}
             standardAxes={standardAxes}
             onStandardAxesChange={onStandardAxesChange}
           />
