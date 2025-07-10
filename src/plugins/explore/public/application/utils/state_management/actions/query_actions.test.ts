@@ -15,47 +15,98 @@ import {
 } from '../__mocks__';
 
 import {
-  stripStatsFromQuery,
   histogramResultsProcessor,
   defaultResultsProcessor,
-  prependSourceIfNecessary,
-  defaultPrepareQuery,
+  defaultPrepareQueryString,
 } from './query_actions';
 import { Query } from '../../../../../../data/public';
+import { defaultPreparePplQuery } from '../../languages';
+
+jest.mock('../../languages', () => ({
+  defaultPreparePplQuery: jest.fn(),
+}));
 
 describe('Query Actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('stripStatsFromQuery', () => {
-    it('should remove stats pipe from query string', () => {
-      const queryWithStats = 'source=logs | where level="error" | stats count by host';
-      const result = stripStatsFromQuery(queryWithStats);
-      expect(result).toBe('source=logs | where level="error"');
+  describe('defaultPrepareQueryString', () => {
+    const mockDefaultPreparePplQuery = defaultPreparePplQuery as jest.MockedFunction<
+      typeof defaultPreparePplQuery
+    >;
+
+    beforeEach(() => {
+      mockDefaultPreparePplQuery.mockClear();
     });
 
-    it('should handle query without stats pipe', () => {
-      const queryWithoutStats = 'source=logs | where level="error"';
-      const result = stripStatsFromQuery(queryWithoutStats);
-      expect(result).toBe('source=logs | where level="error"');
+    it('should call defaultPreparePplQuery for PPL language', () => {
+      const pplQuery: Query = {
+        query: 'source=logs | stats count() by status',
+        language: 'PPL',
+        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      };
+
+      mockDefaultPreparePplQuery.mockReturnValue({
+        ...pplQuery,
+        query: 'source=logs | stats count() by status',
+      });
+
+      const result = defaultPrepareQueryString(pplQuery);
+
+      expect(mockDefaultPreparePplQuery).toHaveBeenCalledWith(pplQuery);
+      expect(result).toBe('source=logs | stats count() by status');
     });
 
-    it('should handle empty query string', () => {
-      const result = stripStatsFromQuery('');
-      expect(result).toBe('');
+    it('should return processed query string from defaultPreparePplQuery', () => {
+      const pplQuery: Query = {
+        query: 'source=index | where field="value" | stats count()',
+        language: 'PPL',
+        dataset: { title: 'test-index', id: '456', type: 'INDEX_PATTERN' },
+      };
+
+      const processedQuery = 'source=index | where field="value"';
+      mockDefaultPreparePplQuery.mockReturnValue({
+        ...pplQuery,
+        query: processedQuery,
+      });
+
+      const result = defaultPrepareQueryString(pplQuery);
+
+      expect(mockDefaultPreparePplQuery).toHaveBeenCalledWith(pplQuery);
+      expect(result).toBe(processedQuery);
     });
 
-    it('should handle case insensitive stats removal', () => {
-      const queryWithStats = 'source=logs | STATS count by host';
-      const result = stripStatsFromQuery(queryWithStats);
-      expect(result).toBe('source=logs');
+    it('should throw error for unsupported language', () => {
+      const unsupportedQuery: Query = {
+        query: 'SELECT * FROM table',
+        language: 'SQL',
+      };
+
+      expect(() => defaultPrepareQueryString(unsupportedQuery)).toThrow(
+        'defaultPrepareQuery encountered unhandled language: SQL'
+      );
+      expect(mockDefaultPreparePplQuery).not.toHaveBeenCalled();
     });
 
-    it('should handle stats with extra whitespace', () => {
-      const queryWithStats = 'source=logs   |   stats count by host';
-      const result = stripStatsFromQuery(queryWithStats);
-      expect(result).toBe('source=logs');
+    it('should extract query string from QueryWithQueryAsString object', () => {
+      const pplQuery: Query = {
+        query: 'level="debug" | stats count() by service',
+        language: 'PPL',
+        dataset: { title: 'debug-logs', id: '789', type: 'INDEX_PATTERN' },
+      };
+
+      const queryWithQueryAsString = {
+        ...pplQuery,
+        query: 'source=debug-logs level="debug"',
+      };
+
+      mockDefaultPreparePplQuery.mockReturnValue(queryWithQueryAsString);
+
+      const result = defaultPrepareQueryString(pplQuery);
+
+      expect(mockDefaultPreparePplQuery).toHaveBeenCalledWith(pplQuery);
+      expect(result).toBe('source=debug-logs level="debug"');
     });
   });
 
@@ -187,210 +238,6 @@ describe('Query Actions', () => {
         expect(result.bucketInterval).toEqual({ interval: 'auto', scale: 1 });
         expect(result.chartData).toBeDefined();
       });
-    });
-  });
-
-  describe('prependSourceIfNecessary', () => {
-    it('should handle undefined query by using empty string', () => {
-      const query: Query = {
-        query: undefined as any,
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source=test-dataset');
-    });
-
-    it('should return original query when it starts with "source" (case sensitive)', () => {
-      const query: Query = {
-        query: 'source=existing-index | where field=value',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source=existing-index | where field=value');
-    });
-
-    it('should return original query when it starts with "SOURCE" (case insensitive)', () => {
-      const query: Query = {
-        query: 'SOURCE=existing-index | where field=value',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('SOURCE=existing-index | where field=value');
-    });
-
-    it('should return original query when it starts with "search source" (case sensitive)', () => {
-      const query: Query = {
-        query: 'search source=existing-index | where field=value',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('search source=existing-index | where field=value');
-    });
-
-    it('should return original query when it starts with "SEARCH SOURCE" (case insensitive)', () => {
-      const query: Query = {
-        query: 'SEARCH SOURCE=existing-index | where field=value',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('SEARCH SOURCE=existing-index | where field=value');
-    });
-
-    it('should handle flexible whitespace between source and =', () => {
-      const query: Query = {
-        query: 'source   =existing-index | where field=value',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source   =existing-index | where field=value');
-    });
-
-    it('should handle no whitespace between source and =', () => {
-      const query: Query = {
-        query: 'source=existing-index | where field=value',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source=existing-index | where field=value');
-    });
-
-    it('should handle flexible whitespace between search, source and =', () => {
-      const query: Query = {
-        query: 'search    source   =existing-index | where field=value',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('search    source   =existing-index | where field=value');
-    });
-
-    it('should handle single space between search and source with no space before =', () => {
-      const query: Query = {
-        query: 'search source=existing-index | where field=value',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('search source=existing-index | where field=value');
-    });
-
-    it('should prepend source for empty query string', () => {
-      const query: Query = {
-        query: '',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source=test-dataset');
-    });
-
-    it('should prepend source for whitespace-only query string', () => {
-      const query: Query = {
-        query: '   \t\n  ',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source=test-dataset');
-    });
-
-    it('should prepend source without extra pipe when query starts with pipe', () => {
-      const query: Query = {
-        query: '| where level="error"',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source=test-dataset | where level="error"');
-    });
-
-    it('should handle query starting with pipe and whitespace', () => {
-      const query: Query = {
-        query: '  | where level="error"',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = prependSourceIfNecessary(query);
-      expect(result).toBe('source=test-dataset   | where level="error"');
-    });
-  });
-
-  describe('defaultPrepareQuery', () => {
-    it('should combine prependSourceIfNecessary and stripStatsFromQuery', () => {
-      const query: Query = {
-        query: 'level="error" | stats count by host',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = defaultPrepareQuery(query);
-      expect(result).toBe('source=test-dataset level="error"');
-    });
-
-    it('should handle query that already has source', () => {
-      const query: Query = {
-        query: 'source=existing-index | where level="error" | stats count by host',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = defaultPrepareQuery(query);
-      expect(result).toBe('source=existing-index | where level="error"');
-    });
-
-    it('should handle empty query', () => {
-      const query: Query = {
-        query: '',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = defaultPrepareQuery(query);
-      expect(result).toBe('source=test-dataset');
-    });
-
-    it('should handle query with only stats pipe', () => {
-      const query: Query = {
-        query: '| stats count by host',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = defaultPrepareQuery(query);
-      expect(result).toBe('source=test-dataset');
-    });
-
-    it('should handle query starting with pipe and stats', () => {
-      const query: Query = {
-        query: '| where level="error" | stats count by host',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = defaultPrepareQuery(query);
-      expect(result).toBe('source=test-dataset | where level="error"');
-    });
-
-    it('should handle search source queries with stats', () => {
-      const query: Query = {
-        query: 'search source=logs-* | where @timestamp > now()-1d | stats count by level',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = defaultPrepareQuery(query);
-      expect(result).toBe('search source=logs-* | where @timestamp > now()-1d');
-    });
-
-    it('should preserve case in source queries when stripping stats', () => {
-      const query: Query = {
-        query: 'SOURCE=LOGS-* | WHERE level="ERROR" | STATS count by host',
-        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
-        language: 'ppl',
-      };
-      const result = defaultPrepareQuery(query);
-      expect(result).toBe('SOURCE=LOGS-* | WHERE level="ERROR"');
     });
   });
 });

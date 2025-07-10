@@ -24,7 +24,7 @@ import { selectSavedSearch } from '../../application/utils/state_management/sele
 import { RootState } from '../../application/utils/state_management/store';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import {
-  defaultPrepareQuery,
+  defaultPrepareQueryString,
   defaultResultsProcessor,
 } from '../../application/utils/state_management/actions/query_actions';
 import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
@@ -43,7 +43,7 @@ const ExploreDataTableComponent = () => {
 
   // Use default cache key computation for this component
   const query = useSelector((state: RootState) => state.query);
-  const cacheKey = useMemo(() => defaultPrepareQuery(query), [query]);
+  const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
 
   const rawResults = cacheKey ? results[cacheKey] : null;
   const rows = rawResults?.hits?.hits || [];

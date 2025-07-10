@@ -12,7 +12,7 @@ import {
   OpenSearchDashboardsReactContextValue,
   useOpenSearchDashboards,
 } from '../../../../../opensearch_dashboards_react/public';
-import { defaultPrepareQuery } from '../state_management/actions/query_actions';
+import { defaultPrepareQueryString } from '../state_management/actions/query_actions';
 import {
   uiInitialState,
   uiReducer,
@@ -20,6 +20,8 @@ import {
   resultsReducer,
   queryInitialState,
   queryReducer,
+  QueryState,
+  UIState,
 } from '../state_management/slices';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { ExploreServices } from '../../../types';
@@ -42,23 +44,15 @@ jest.mock('../state_management/actions/query_actions', () => ({
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
   typeof useOpenSearchDashboards
 >;
-const mockDefaultPrepareQuery = defaultPrepareQuery as jest.MockedFunction<
-  typeof defaultPrepareQuery
+const mockDefaultPrepareQuery = defaultPrepareQueryString as jest.MockedFunction<
+  typeof defaultPrepareQueryString
 >;
 
 // Mock store state type
 interface MockRootState {
-  query: {
-    query: string | object;
-    dataset?: any;
-    language?: string;
-  };
-  ui: {
-    activeTabId: string;
-  };
-  results: {
-    [key: string]: any;
-  };
+  query: Pick<QueryState, 'query'>;
+  ui: Pick<UIState, 'activeTabId'>;
+  results: { [key: string]: any };
 }
 
 // Helper function to create a mock store
@@ -173,24 +167,6 @@ describe('useTabResults', () => {
     expect(result.current.results).toEqual({ data: 'default data' });
     expect(mockDefaultPrepareQuery).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'test query' })
-    );
-  });
-
-  it('should handle non-string query input', () => {
-    const initialState: MockRootState = {
-      query: { query: { complex: 'query object' } },
-      ui: { activeTabId: 'tab-1' },
-      results: { 'custom-cache-key': { data: 'test data' } },
-    };
-
-    mockServices.tabRegistry.getTab.mockReturnValue(mockTab);
-    mockTab.prepareQuery.mockReturnValue('custom-cache-key');
-
-    const store = createMockStore(initialState);
-    renderHookWithStore(store);
-
-    expect(mockTab.prepareQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ query: { complex: 'query object' } })
     );
   });
 });

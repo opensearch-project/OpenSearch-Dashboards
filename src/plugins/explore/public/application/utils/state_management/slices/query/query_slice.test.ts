@@ -11,6 +11,7 @@ import {
   QueryState,
 } from './query_slice';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
+import { Query } from '../../../../../../../data/common';
 
 describe('querySlice reducers', () => {
   const initialState: QueryState = {
@@ -21,43 +22,49 @@ describe('querySlice reducers', () => {
 
   describe('setQueryState', () => {
     it('setQueryState replaces the entire state', () => {
-      const newQuery: QueryState = {
+      const newQuery: Query = {
         query: 'foo',
         language: 'sql',
         dataset: {
           id: 'my-dataset',
           title: 'my dataset',
-          type: 'log',
+          type: 'INDEX_PATTERN',
         },
       };
       const state = queryReducer(initialState, setQueryState(newQuery));
-      expect(state).toEqual(newQuery);
+      expect(state).toEqual({
+        ...newQuery,
+        query: 'foo', // Ensuring query is a string
+      });
     });
   });
 
   describe('setQueryWithHistory', () => {
     it('should replace the entire state like setQueryState', () => {
-      const newQuery: QueryState = {
+      const newQuery: Query = {
         query: 'SELECT * FROM users',
         language: 'sql',
         dataset: {
           id: 'users-dataset',
           title: 'Users Dataset',
-          type: 'table',
+          type: 'INDEX_PATTERN',
         },
       };
       const state = queryReducer(initialState, setQueryWithHistory(newQuery));
-      expect(state).toEqual(newQuery);
+      expect(state).toEqual({
+        ...newQuery,
+        query: 'SELECT * FROM users', // Ensuring query is a string
+      });
     });
 
     it('should include meta flag for history tracking', () => {
       const newQuery: QueryState = {
         query: '| where status="active"',
-        language: 'ppl',
+        language: 'PPL',
         dataset: {
           id: 'logs-dataset',
           title: 'Application Logs',
-          type: 'log',
+          type: 'INDEX_PATTERN',
         },
       };
       const action = setQueryWithHistory(newQuery);
@@ -72,11 +79,11 @@ describe('querySlice reducers', () => {
     it('should update only the query string field', () => {
       const existingState: QueryState = {
         query: 'old query',
-        language: 'sql',
+        language: 'SQL',
         dataset: {
           id: 'existing-dataset',
           title: 'Existing Dataset',
-          type: 'table',
+          type: 'INDEX_PATTERN',
         },
       };
 

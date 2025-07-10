@@ -4,10 +4,11 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Query } from '../../../../../../../data/common';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
+import { QueryWithQueryAsString } from '../../../languages';
+import { Query } from '../../../../../../../data/common';
 
-export type QueryState = Query;
+export type QueryState = QueryWithQueryAsString;
 
 const initialState: QueryState = {
   query: '',
@@ -19,9 +20,10 @@ const querySlice = createSlice({
   name: 'query',
   initialState,
   reducers: {
-    setQueryState: (_, action: PayloadAction<QueryState>) => {
+    setQueryState: (_, action: PayloadAction<Query>) => {
       return {
         ...action.payload,
+        query: typeof action.payload.query === 'string' ? action.payload.query : '',
       };
     },
     setQueryWithHistory: {
@@ -31,8 +33,11 @@ const querySlice = createSlice({
           ...action.payload,
         };
       },
-      prepare: (query: QueryState) => ({
-        payload: query,
+      prepare: (query: Query) => ({
+        payload: {
+          ...query,
+          query: typeof query.query === 'string' ? query.query : '',
+        },
         meta: { addToHistory: true },
       }),
     },
