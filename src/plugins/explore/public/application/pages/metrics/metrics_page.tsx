@@ -30,7 +30,7 @@ import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subs
 import { ExploreTabs } from '../../../components/tabs/tabs';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
-import { useIndexPatternContext } from '../../context/dataset_context/dataset_context';
+import { useDatasetContext } from '../../context/dataset_context/dataset_context';
 import { DiscoverNoIndexPatterns } from '../../legacy/discover/application/components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../legacy/discover/application/components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';
@@ -40,7 +40,7 @@ import {
   defaultPrepareQueryString,
 } from '../../utils/state_management/actions/query_actions';
 import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
-import { selectShowDataSetFields } from '../../utils/state_management/selectors';
+import { selectShowDatasetFields } from '../../utils/state_management/selectors';
 import { ResultsSummaryPanel } from '../../../components/results_summary/results_summary_panel';
 import { useInitPage } from '../../utils/hooks/use_page_initialization';
 
@@ -57,7 +57,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
     indexPattern,
     isLoading: indexPatternLoading,
     error: indexPatternError,
-  } = useIndexPatternContext();
+  } = useDatasetContext();
 
   // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
@@ -78,7 +78,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
     return [];
   });
 
-  const showDataSetFields = useSelector(selectShowDataSetFields);
+  const showDataSetFields = useSelector(selectShowDatasetFields);
 
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 

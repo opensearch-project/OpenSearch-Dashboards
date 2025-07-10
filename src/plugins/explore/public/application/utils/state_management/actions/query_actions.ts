@@ -211,18 +211,18 @@ const executeQueryBase = async (
 
     const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
-    // Get IndexPattern
-    let indexPattern;
+    // Get Dataset
+    let dataset;
     if (query.dataset) {
-      indexPattern = await services.data.indexPatterns.get(
+      dataset = await services.data.dataViews.get(
         query.dataset.id,
         query.dataset.type !== 'INDEX_PATTERN'
       );
     } else {
-      indexPattern = (services.data as any).indexPattern;
+      dataset = (services.data as any).dataset;
     }
 
-    if (!indexPattern) {
+    if (!dataset) {
       throw new Error('IndexPattern not found for query execution');
     }
 
@@ -239,7 +239,7 @@ const executeQueryBase = async (
       const effectiveInterval = interval || state.legacy?.interval || 'auto';
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
-        indexPattern,
+        dataset,
         services,
         true, // Include histogram
         effectiveInterval
@@ -248,7 +248,7 @@ const executeQueryBase = async (
       // Tab-specific: Create without aggregations
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
-        indexPattern,
+        dataset,
         services,
         false // No histogram
       );

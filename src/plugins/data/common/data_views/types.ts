@@ -26,6 +26,11 @@ export interface IDataView {
   getFormatterForField?: (
     field: DataViewField | DataViewField['spec'] | IDataViewFieldType
   ) => FieldFormat;
+  /**
+   * Converts a DataView to a serializable Dataset object suitable for storage in Redux
+   * Maps dataSource to dataSourceRef and includes only essential properties
+   */
+  toDataset?(): any;
 }
 
 export interface DataViewAttributes {

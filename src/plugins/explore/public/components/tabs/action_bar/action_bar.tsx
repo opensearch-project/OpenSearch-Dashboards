@@ -8,7 +8,7 @@ import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useSelector } from '../../../application/legacy/discover/application/utils/state_management';
 import { selectSavedSearch } from '../../../application/utils/state_management/selectors';
-import { useDatasetContext } from '../../../application/context/dataset_context/dataset_context';
+import { useDatasetContext } from '../../../application/context';
 import { ExploreFlavor } from '../../../../common';
 import { useTabResults } from '../../../application/utils/hooks/use_tab_results';
 

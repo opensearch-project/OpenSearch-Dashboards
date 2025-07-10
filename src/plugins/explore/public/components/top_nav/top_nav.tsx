@@ -14,6 +14,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { PLUGIN_ID } from '../../../common';
 import { ExploreServices } from '../../types';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
+import { useEditorContext } from '../../application/context';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
@@ -29,6 +30,8 @@ import {
   clearResults,
   setQueryState,
 } from '../../application/utils/state_management/slices';
+import { setDatasetActionCreator } from '../../application/utils/state_management/actions/set_dataset';
+import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 
 export interface TopNavProps {
   savedExplore?: SavedExplore;
@@ -149,20 +152,36 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const showDatePicker = useMemo(() => dataset?.isTimeBased() ?? false, [dataset]);
 
   const dispatch = useDispatch();
+  const editorContext = useEditorContext();
 
   const handleDatasetSelect = (newDataset: any) => {
     if (!newDataset) return;
 
-    dispatch(setDataset(newDataset));
+    // Update the query state with the new dataset
+    // Make sure we're using a serializable version of the dataset
     const currentQuery = queryString.getQuery();
-    dispatch(clearResults());
+    // Check if dataset is a DataView instance (which has toDataset method)
+    const serializableDataset =
+      'toDataset' in newDataset && typeof (newDataset as any).toDataset === 'function'
+        ? (newDataset as any).toDataset()
+        : {
+            id: newDataset.id,
+            title: newDataset.title,
+            type: newDataset.type || '',
+            timeFieldName: newDataset.timeFieldName,
+            dataSource: newDataset.dataSource,
+          };
+
     dispatch(
       setQueryState({
         ...currentQuery,
         query: queryString.getInitialQueryByDataset(newDataset).query,
-        dataset: newDataset,
+        dataset: serializableDataset,
       })
     );
+
+    // Call the action creator to handle the rest of the logic
+    dispatch(setDatasetActionCreator(services, editorContext));
   };
 
   return (

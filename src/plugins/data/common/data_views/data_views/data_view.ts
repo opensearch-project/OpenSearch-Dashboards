@@ -4,7 +4,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { FieldFormatsContentType, SavedObjectsClientCommon } from '../..';
+import { Dataset, FieldFormatsContentType, SavedObjectsClientCommon } from '../..';
 import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
 
 import { SerializedFieldFormat } from '../../../../expressions/common';
@@ -389,5 +389,27 @@ export class DataView implements IDataView {
         field.esTypes as OPENSEARCH_FIELD_TYPES[]
       )
     );
+  }
+
+  /**
+   * Converts a DataView to a serializable Dataset object suitable for storage in Redux
+   * Maps dataSource to dataSourceRef and includes only essential properties
+   */
+  toDataset(): Dataset {
+    // Create a minimal Dataset object with only the essential properties
+    return {
+      id: this.id || '',
+      title: this.title,
+      type: this.type || '',
+      timeFieldName: this.timeFieldName,
+      // Map dataSourceRef to dataSource if it exists
+      dataSource: this.dataSourceRef
+        ? {
+            id: this.dataSourceRef.id,
+            title: this.title, // Use the title from the DataView as a fallback
+            type: this.dataSourceRef.type,
+          }
+        : undefined,
+    };
   }
 }

@@ -132,11 +132,13 @@ const ExploreDataTableComponent = () => {
           <EuiSpacer size="s" />
         </EuiFlexItem>
         <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
-          <SaveAndAddButtonWithModal
-            searchContext={searchContext}
-            dataset={dataset}
-            services={services}
-          />
+          {dataset && (
+            <SaveAndAddButtonWithModal
+              searchContext={searchContext}
+              dataset={dataset}
+              services={services}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <DataTable
