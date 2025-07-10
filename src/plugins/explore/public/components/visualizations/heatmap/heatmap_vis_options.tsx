@@ -13,7 +13,7 @@ import {
   HeatmapLabelVisOptions,
   HeatmapExclusiveVisOptions,
 } from './heatmap_exclusive_vis_options';
-import { AllAxesOptions } from '../style_panel/standard_axes_options';
+import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { swapAxes } from '../utils/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
