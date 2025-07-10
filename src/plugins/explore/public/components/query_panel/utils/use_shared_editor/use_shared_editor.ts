@@ -4,7 +4,7 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   onEditorChangeActionCreator,
@@ -31,7 +31,6 @@ import {
 } from '../../../../application/hooks';
 
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
-type CompletionItemProvider = monaco.languages.CompletionItemProvider;
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
 const TRIGGER_CHARACTERS = [' '];
@@ -166,23 +165,16 @@ export const useSharedEditor = ({
     [editorPosition, queryLanguage, services, indexPattern]
   );
 
-  const suggestionProvider = useMemo<CompletionItemProvider>(() => {
-    return {
+  // We need to manually register completion provider if it gets re-created,
+  // because monaco.languages.onLanguage will not trigger registration
+  // callbacks if the language is the same.
+  useEffect(() => {
+    const disposable = monaco.languages.registerCompletionItemProvider(queryLanguage, {
       triggerCharacters: TRIGGER_CHARACTERS,
       provideCompletionItems,
-    };
-  }, [provideCompletionItems]);
-
-  // We need to manually register suggestionProvider if it gets re-created,
-  // because monaco.languages.onLanguage will not trigger registration
-  // callbacks if language is the same.
-  useEffect(() => {
-    const disposable = monaco.languages.registerCompletionItemProvider(
-      queryLanguage,
-      suggestionProvider
-    );
+    });
     return () => disposable.dispose();
-  }, [suggestionProvider, queryLanguage]);
+  }, [provideCompletionItems, queryLanguage]);
 
   const handleRun = useCallback(() => {
     dispatch(onEditorRunActionCreator(services, onEditorRunContextRef.current));
@@ -256,7 +248,6 @@ export const useSharedEditor = ({
   return {
     isFocused,
     height: editorHeight,
-    suggestionProvider,
     useLatestTheme: true,
     editorDidMount,
     onChange,

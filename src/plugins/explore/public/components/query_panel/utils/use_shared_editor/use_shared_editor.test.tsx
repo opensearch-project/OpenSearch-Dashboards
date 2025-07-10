@@ -206,10 +206,6 @@ describe('useSharedEditor', () => {
     expect(result.current).toEqual({
       isFocused: false,
       height: 32,
-      suggestionProvider: {
-        triggerCharacters: [' '],
-        provideCompletionItems: expect.any(Function),
-      },
       useLatestTheme: true,
       editorDidMount: expect.any(Function),
       onChange: expect.any(Function),
@@ -238,6 +234,33 @@ describe('useSharedEditor', () => {
     });
 
     expect(customSetEditorRef).toHaveBeenCalledWith(mockEditor);
+  });
+
+  describe('completion provider', () => {
+    let disposeMock: jest.Mock;
+    let registerCompletionItemProviderMock: jest.Mock;
+    let originalRegisterCompletionItemProvider: typeof monaco.languages.registerCompletionItemProvider;
+
+    beforeEach(() => {
+      disposeMock = jest.fn();
+      registerCompletionItemProviderMock = jest.fn().mockReturnValue({
+        dispose: disposeMock,
+      });
+      originalRegisterCompletionItemProvider = monaco.languages.registerCompletionItemProvider;
+      monaco.languages.registerCompletionItemProvider = registerCompletionItemProviderMock;
+    });
+
+    afterEach(() => {
+      monaco.languages.registerCompletionItemProvider = originalRegisterCompletionItemProvider;
+    });
+
+    it('should register completion provider', () => {
+      const { unmount } = renderUseSharedEditor();
+      expect(registerCompletionItemProviderMock).toHaveBeenCalled();
+
+      unmount();
+      expect(disposeMock).toHaveBeenCalled();
+    });
   });
 
   describe('onChange', () => {
