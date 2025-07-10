@@ -201,9 +201,8 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
 const getPreloadedUIState = (services: ExploreServices): UIState => {
   return {
     activeTabId: 'logs',
-    showDatasetFields: true,
+    showFilterPanel: true,
     showHistogram: true,
-    prompt: '',
   };
 };
 
@@ -234,6 +233,7 @@ const getPreloadedQueryEditorState = async (
     },
     promptModeIsAvailable,
     editorMode,
+    lastExecutedPrompt: '',
   };
 };
 

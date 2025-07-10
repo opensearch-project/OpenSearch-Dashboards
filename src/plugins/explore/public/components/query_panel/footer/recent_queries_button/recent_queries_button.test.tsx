@@ -13,6 +13,7 @@ import { RECENT_QUERIES_TABLE_WRAPPER_EL } from '../../utils/constants';
 const mockDispatch = jest.fn();
 const mockHandleTimeChange = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
+const mockClearEditorsAndSetText = jest.fn();
 
 jest.doMock('react-dom', () => ({
   createPortal: jest.fn((children) => children),
@@ -60,6 +61,10 @@ jest.doMock('../../utils', () => ({
 
 jest.doMock('../../../../application/utils/state_management/actions/query_editor', () => ({
   loadQueryActionCreator: mockLoadQueryActionCreator,
+}));
+
+jest.doMock('../../../../application/hooks', () => ({
+  useClearEditorsAndSetText: () => mockClearEditorsAndSetText,
 }));
 
 jest.doMock('../../../../../../data/public', () => ({
@@ -194,5 +199,62 @@ describe('RecentQueriesButton', () => {
     // After clicking button, should be visible
     fireEvent.click(button);
     expect(table).toHaveStyle({ display: 'block' });
+  });
+
+  it('calls loadQueryActionCreator with correct parameters when query is clicked', () => {
+    renderWithStore();
+
+    const button = screen.getByTestId('exploreRecentQueriesButton');
+    fireEvent.click(button); // Show the table
+
+    const queryItem = screen.getByTestId('mock-query-item');
+    fireEvent.click(queryItem);
+
+    expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          query: expect.objectContaining({
+            queryString: expect.any(Object),
+          }),
+        }),
+      }),
+      mockClearEditorsAndSetText,
+      'SELECT * FROM test'
+    );
+    expect(mockDispatch).toHaveBeenCalled();
+  });
+
+  it('handles time range when query is clicked with time data', () => {
+    renderWithStore();
+
+    const button = screen.getByTestId('exploreRecentQueriesButton');
+    fireEvent.click(button); // Show the table
+
+    const queryItem = screen.getByTestId('mock-query-item');
+    fireEvent.click(queryItem);
+
+    expect(mockHandleTimeChange).toHaveBeenCalledWith({
+      start: 'now-1d',
+      end: 'now',
+      isInvalid: false,
+      isQuickSelection: true,
+    });
+  });
+
+  it('does not call handleTimeChange when no time range is provided', () => {
+    renderWithStore();
+
+    const button = screen.getByTestId('exploreRecentQueriesButton');
+    fireEvent.click(button); // Show the table
+
+    const queryItem = screen.getByTestId('mock-query-item-no-time');
+    fireEvent.click(queryItem);
+
+    expect(mockHandleTimeChange).not.toHaveBeenCalled();
+    expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
+      expect.any(Object),
+      mockClearEditorsAndSetText,
+      'SELECT * FROM test2'
+    );
   });
 });

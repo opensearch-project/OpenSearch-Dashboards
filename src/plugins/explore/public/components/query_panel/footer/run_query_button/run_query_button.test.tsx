@@ -21,14 +21,14 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
 }));
 
-jest.mock('../../../../application/context', () => ({
-  useEditorContext: jest.fn(),
+jest.mock('../../../../application/hooks', () => ({
+  useOnEditorRunContext: jest.fn(),
 }));
 
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { selectIsLoading } from '../../../../application/utils/state_management/selectors';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { useEditorContext } from '../../../../application/context';
+import { useOnEditorRunContext } from '../../../../application/hooks';
 
 const mockDispatch = jest.fn();
 const mockOnEditorRunActionCreator = onEditorRunActionCreator as jest.MockedFunction<
@@ -38,7 +38,9 @@ const mockSelectIsLoading = selectIsLoading as jest.MockedFunction<typeof select
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
   typeof useOpenSearchDashboards
 >;
-const mockUseEditorContext = useEditorContext as jest.MockedFunction<typeof useEditorContext>;
+const mockUseOnEditorRunContext = useOnEditorRunContext as jest.MockedFunction<
+  typeof useOnEditorRunContext
+>;
 
 // Mock redux hooks
 jest.mock('react-redux', () => ({
@@ -63,9 +65,11 @@ describe('RunQueryButton', () => {
     },
   };
 
-  const mockEditorContext = {
-    editorText: 'SELECT * FROM logs',
-    dataset: undefined,
+  const mockOnEditorRunContext = {
+    setBottomEditorText: jest.fn(),
+    clearEditorsAndSetText: jest.fn(),
+    query: 'SELECT * FROM logs',
+    prompt: 'Show me all logs',
   };
 
   const createMockStore = () => {
@@ -79,7 +83,7 @@ describe('RunQueryButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices } as any);
-    mockUseEditorContext.mockReturnValue(mockEditorContext as any);
+    mockUseOnEditorRunContext.mockReturnValue(mockOnEditorRunContext as any);
     mockSelectIsLoading.mockReturnValue(false);
     mockOnEditorRunActionCreator.mockReturnValue({ type: 'MOCK_ACTION' } as any);
   });
@@ -102,23 +106,46 @@ describe('RunQueryButton', () => {
     const button = screen.getByRole('button', { name: /run query/i });
     fireEvent.click(button);
 
-    expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, mockEditorContext);
+    expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, mockOnEditorRunContext);
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'MOCK_ACTION' });
   });
 
   it('calls onEditorRunActionCreator with correct parameters', () => {
-    const customEditorContext = {
-      editorText: 'SELECT COUNT(*) FROM users',
-      dataset: { id: 'test-dataset' },
+    const customOnEditorRunContext = {
+      setBottomEditorText: jest.fn(),
+      clearEditorsAndSetText: jest.fn(),
+      query: 'SELECT COUNT(*) FROM users',
+      prompt: 'Count all users',
     };
 
-    mockUseEditorContext.mockReturnValue(customEditorContext as any);
+    mockUseOnEditorRunContext.mockReturnValue(customOnEditorRunContext as any);
 
     renderWithProvider(<RunQueryButton />);
 
     const button = screen.getByRole('button', { name: /run query/i });
     fireEvent.click(button);
 
-    expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, customEditorContext);
+    expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(
+      mockServices,
+      customOnEditorRunContext
+    );
+  });
+
+  it('shows loading state when isLoading is true', () => {
+    mockSelectIsLoading.mockReturnValue(true);
+
+    renderWithProvider(<RunQueryButton />);
+
+    const loadingSpinner = document.querySelector('.euiLoadingSpinner');
+    expect(loadingSpinner).toBeInTheDocument();
+  });
+
+  it('does not show loading state when isLoading is false', () => {
+    mockSelectIsLoading.mockReturnValue(false);
+
+    renderWithProvider(<RunQueryButton />);
+
+    const loadingSpinner = document.querySelector('.euiLoadingSpinner');
+    expect(loadingSpinner).not.toBeInTheDocument();
   });
 });
