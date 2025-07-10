@@ -128,10 +128,17 @@ describe('useChangeQueryEditor', () => {
       '+',
       'test-index-pattern-id'
     );
+
+    expect(mockSetEditorText).toHaveBeenCalled();
+
+    const setTextCallback = mockSetEditorText.mock.calls[0][0];
+    const callbackResult = setTextCallback(mockEditorQuery);
+
     expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith(mockEditorQuery, [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    expect(mockSetEditorText).toHaveBeenCalledWith("source=logs | where `field` = 'value'");
+
+    expect(callbackResult).toBe("source=logs | where `field` = 'value'");
   });
 
   it('should add filters to query in DualQuery mode', () => {
@@ -145,10 +152,16 @@ describe('useChangeQueryEditor', () => {
 
     result.current.onAddFilter('field', 'value', '+');
 
+    expect(mockSetEditorText).toHaveBeenCalled();
+
+    const setTextCallback = mockSetEditorText.mock.calls[0][0];
+    const callbackResult = setTextCallback(mockEditorQuery);
+
     expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith(mockEditorQuery, [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    expect(mockSetEditorText).toHaveBeenCalledWith("source=logs | where `field` = 'value'");
+
+    expect(callbackResult).toBe("source=logs | where `field` = 'value'");
   });
 
   it('should add filters to prompt in SinglePrompt mode', () => {
@@ -162,10 +175,16 @@ describe('useChangeQueryEditor', () => {
 
     result.current.onAddFilter('field', 'value', '+');
 
+    expect(mockSetEditorText).toHaveBeenCalled();
+
+    const setTextCallback = mockSetEditorText.mock.calls[0][0];
+    const callbackResult = setTextCallback(mockEditorPrompt);
+
     expect(mockLanguageConfig.addFiltersToPrompt).toHaveBeenCalledWith(mockEditorPrompt, [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    expect(mockSetEditorText).toHaveBeenCalledWith("Show me logs, field is 'value'");
+
+    expect(callbackResult).toBe("Show me logs, field is 'value'");
   });
 
   it('should add filters to prompt in DualPrompt mode', () => {
@@ -179,10 +198,16 @@ describe('useChangeQueryEditor', () => {
 
     result.current.onAddFilter('field', 'value', '+');
 
+    expect(mockSetEditorText).toHaveBeenCalled();
+
+    const setTextCallback = mockSetEditorText.mock.calls[0][0];
+    const callbackResult = setTextCallback(mockEditorPrompt);
+
     expect(mockLanguageConfig.addFiltersToPrompt).toHaveBeenCalledWith(mockEditorPrompt, [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    expect(mockSetEditorText).toHaveBeenCalledWith("Show me logs, field is 'value'");
+
+    expect(callbackResult).toBe("Show me logs, field is 'value'");
   });
 
   it('should add filters to query in SingleEmpty mode', () => {
@@ -196,10 +221,16 @@ describe('useChangeQueryEditor', () => {
 
     result.current.onAddFilter('field', 'value', '+');
 
+    expect(mockSetEditorText).toHaveBeenCalled();
+
+    const setTextCallback = mockSetEditorText.mock.calls[0][0];
+    const callbackResult = setTextCallback(mockEditorQuery);
+
     expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith(mockEditorQuery, [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    expect(mockSetEditorText).toHaveBeenCalledWith("source=logs | where `field` = 'value'");
+
+    expect(callbackResult).toBe("source=logs | where `field` = 'value'");
   });
 
   it('should not update editor text if language config does not provide filter methods', () => {
@@ -212,7 +243,12 @@ describe('useChangeQueryEditor', () => {
 
     result.current.onAddFilter('field', 'value', '+');
 
-    expect(mockSetEditorText).not.toHaveBeenCalled();
+    expect(mockSetEditorText).toHaveBeenCalled();
+
+    const setTextCallback = mockSetEditorText.mock.calls[0][0];
+    const callbackResult = setTextCallback(mockEditorQuery);
+
+    expect(callbackResult).toBe(mockEditorQuery);
   });
 
   it('should accept IndexPatternField object as field parameter', () => {
