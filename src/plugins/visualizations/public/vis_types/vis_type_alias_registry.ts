@@ -30,7 +30,6 @@
 
 import { SavedObjectAttributes } from 'opensearch-dashboards/public';
 import { TriggerContextMapping } from '../../../ui_actions/public';
-import { VisTypeGroup } from './types';
 
 export interface VisualizationListItem {
   editUrl: string;
