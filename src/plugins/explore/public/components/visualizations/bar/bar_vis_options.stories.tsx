@@ -107,7 +107,13 @@ WithCustomStyles.args = {
     showBarBorder: true,
     barBorderWidth: 2,
     barBorderColor: '#FF0000',
-    thresholdLines: [...defaultBarChartStyles.thresholdLines],
+    thresholdLines: defaultBarChartStyles.thresholdLines.map((t) => ({
+      ...t,
+      show: true,
+      value: 15,
+      color: '#00FF00',
+      width: 2,
+    })),
     grid: {
       categoryLines: false,
       valueLines: true,
