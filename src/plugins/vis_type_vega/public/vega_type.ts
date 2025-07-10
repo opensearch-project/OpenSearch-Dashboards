@@ -59,6 +59,7 @@ export const createVegaTypeDefinition = (
       description: 'Vega and Vega-Lite are product names and should not be translated',
     }),
     icon: 'visVega',
+    isClassic: true,
     visConfig: { defaults: { spec: getDefaultSpec() } },
     editorConfig: {
       optionsTemplate: VegaVisEditor,

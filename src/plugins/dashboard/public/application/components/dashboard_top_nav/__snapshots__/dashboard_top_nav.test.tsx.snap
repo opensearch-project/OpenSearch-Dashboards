@@ -327,6 +327,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -967,8 +968,15 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -1455,6 +1463,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -2095,8 +2104,15 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -2583,6 +2599,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -3223,8 +3240,15 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -3711,6 +3735,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -4351,8 +4376,15 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -4839,6 +4871,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -5479,8 +5512,15 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -5967,6 +6007,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -6607,8 +6648,15 @@ exports[`Dashboard top nav render with all components 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
