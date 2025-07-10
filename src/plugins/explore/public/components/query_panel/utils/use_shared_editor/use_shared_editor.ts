@@ -33,6 +33,9 @@ type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
 const TRIGGER_CHARACTERS = [' '];
 
+// Registry to prevent duplicate completion provider registrations
+const completionProviderRegistry = new Map<string, monaco.IDisposable>();
+
 const languageConfiguration: LanguageConfiguration = {
   autoClosingPairs: [
     { open: '(', close: ')' },
@@ -171,12 +174,25 @@ export const useSharedEditor = ({
   // We need to manually register suggestionProvider if it gets re-created,
   // because monaco.languages.onLanguage will not trigger registration
   // callbacks if language is the same.
+  // Use a registry to prevent duplicate registrations per language
   useEffect(() => {
+    // Dispose existing provider for this language if it exists
+    const existingProvider = completionProviderRegistry.get(queryLanguage);
+    if (existingProvider) {
+      existingProvider.dispose();
+    }
+
     const disposable = monaco.languages.registerCompletionItemProvider(
       queryLanguage,
       suggestionProvider
     );
-    return () => disposable.dispose();
+
+    completionProviderRegistry.set(queryLanguage, disposable);
+
+    return () => {
+      disposable.dispose();
+      completionProviderRegistry.delete(queryLanguage);
+    };
   }, [suggestionProvider, queryLanguage]);
 
   const handleRun = useCallback(() => {
