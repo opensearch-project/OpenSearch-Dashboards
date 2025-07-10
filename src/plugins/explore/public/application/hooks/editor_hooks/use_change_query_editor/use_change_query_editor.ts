@@ -44,9 +44,9 @@ export const useChangeQueryEditor = () => {
       );
       const languageConfig = queryString.getLanguageService().getLanguage(query.language);
       const newText =
-        editorMode === EditorMode.SingleQuery || editorMode === EditorMode.DualQuery
-          ? languageConfig?.addFiltersToQuery?.(editorQuery, newFilters)
-          : languageConfig?.addFiltersToPrompt?.(editorPrompt, newFilters);
+        editorMode === EditorMode.SinglePrompt || editorMode === EditorMode.DualPrompt
+          ? languageConfig?.addFiltersToPrompt?.(editorPrompt, newFilters)
+          : languageConfig?.addFiltersToQuery?.(editorQuery, newFilters);
       if (newText) setEditorText(newText);
     },
     [

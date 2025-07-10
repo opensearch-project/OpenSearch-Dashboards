@@ -185,6 +185,23 @@ describe('useChangeQueryEditor', () => {
     expect(mockSetEditorText).toHaveBeenCalledWith("Show me logs, field is 'value'");
   });
 
+  it('should add filters to query in SingleEmpty mode', () => {
+    (useSelector as jest.Mock).mockImplementation((selector) => {
+      if (selector === selectEditorMode) return EditorMode.SingleEmpty;
+      if (selector === selectQuery) return { language: 'ppl' };
+      return undefined;
+    });
+
+    const { result } = renderHook(() => useChangeQueryEditor());
+
+    result.current.onAddFilter('field', 'value', '+');
+
+    expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith(mockEditorQuery, [
+      { meta: { key: 'field', value: 'value' } },
+    ]);
+    expect(mockSetEditorText).toHaveBeenCalledWith("source=logs | where `field` = 'value'");
+  });
+
   it('should not update editor text if language config does not provide filter methods', () => {
     // @ts-expect-error
     mockLanguageConfig.addFiltersToQuery = undefined;
