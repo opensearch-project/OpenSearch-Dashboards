@@ -5,7 +5,6 @@
 
 import './collapsible_nav_group_enabled.scss';
 import {
-  EuiFlexItem,
   EuiSideNavItemType,
   EuiSideNav,
   EuiText,
