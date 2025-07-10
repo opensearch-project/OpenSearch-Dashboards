@@ -83,7 +83,7 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   const fieldCounts: Record<string, number> = {};
   if (rawResults.hits && rawResults.hits.hits && indexPattern) {
     for (const hit of rawResults.hits.hits) {
-      const fields = Object.keys(indexPattern.flattenHit(hit));
+      const fields = Object.keys(hit._source);
       for (const fieldName of fields) {
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
       }
