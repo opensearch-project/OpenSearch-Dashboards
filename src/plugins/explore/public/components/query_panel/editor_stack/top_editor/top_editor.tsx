@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
 import classNames from 'classnames';
@@ -14,7 +14,7 @@ import {
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
-import { useEditorContextByEditorComponent } from '../../../../application/context';
+import { useTopEditorText } from '../../../../application/hooks';
 
 const singleEditorPlaceholder = i18n.translate(
   'explore.queryPanel.promptEditor.singlePlaceholder',
@@ -43,7 +43,7 @@ const dualEditorPlaceholder = i18n.translate('explore.queryPanel.promptEditor.du
 export const TopEditor = () => {
   const editorMode = useSelector(selectEditorMode);
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
-  const { topEditorRef, topEditorText } = useEditorContextByEditorComponent();
+  const text = useTopEditorText();
   const { isFocused, onWrapperClick, ...editorProps } = useTopEditor();
   // TODO: change me
   const editorClassPrefix = [
@@ -54,7 +54,7 @@ export const TopEditor = () => {
     ? 'promptEditor'
     : 'queryEditor';
   const isReadOnly = editorMode === EditorMode.DualQuery;
-  const showPlaceholder = !topEditorText.length && !isReadOnly;
+  const showPlaceholder = !text.length && !isReadOnly;
 
   const placeholderText = useMemo(() => {
     if (!promptModeIsAvailable) {
@@ -63,14 +63,6 @@ export const TopEditor = () => {
 
     return editorMode === EditorMode.DualPrompt ? dualEditorPlaceholder : singleEditorPlaceholder;
   }, [editorMode, promptModeIsAvailable]);
-
-  // This is here to autofocus when toggling between the dual editors
-  // TODO: Ideally we don't need an useEffect here and do this explicitly.
-  useEffect(() => {
-    if (editorMode === EditorMode.DualPrompt) {
-      topEditorRef.current?.focus();
-    }
-  }, [editorMode, topEditorRef]);
 
   return (
     <div className={`${editorClassPrefix}Wrapper`}>

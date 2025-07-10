@@ -6,8 +6,8 @@
 import {
   queryEditorReducer,
   QueryEditorSliceState,
-  resetEditorMode,
   setEditorMode,
+  setLastExecutedPrompt,
   setPromptModeIsAvailable,
   setQueryEditorState,
   setQueryStatus,
@@ -27,6 +27,7 @@ describe('QueryEditor Slice', () => {
     },
     editorMode: DEFAULT_EDITOR_MODE,
     promptModeIsAvailable: false,
+    lastExecutedPrompt: '',
   };
 
   it('should return the initial state', () => {
@@ -45,6 +46,7 @@ describe('QueryEditor Slice', () => {
         },
         editorMode: EditorMode.DualQuery,
         promptModeIsAvailable: true,
+        lastExecutedPrompt: 'test prompt',
       };
 
       const action = setQueryEditorState(newState);
@@ -85,6 +87,7 @@ describe('QueryEditor Slice', () => {
         },
         editorMode: EditorMode.DualPrompt,
         promptModeIsAvailable: true,
+        lastExecutedPrompt: 'existing prompt',
       };
 
       const newQueryStatus: QueryResultStatus = {
@@ -113,6 +116,7 @@ describe('QueryEditor Slice', () => {
         },
         editorMode: EditorMode.SingleQuery,
         promptModeIsAvailable: false,
+        lastExecutedPrompt: '',
       };
 
       const statusUpdate = {
@@ -158,6 +162,7 @@ describe('QueryEditor Slice', () => {
         },
         editorMode: EditorMode.SingleQuery,
         promptModeIsAvailable: true,
+        lastExecutedPrompt: 'original prompt',
       };
 
       const result = queryEditorReducer(existingState, setEditorMode(EditorMode.DualPrompt));
@@ -191,6 +196,7 @@ describe('QueryEditor Slice', () => {
         },
         editorMode: EditorMode.DualQuery,
         promptModeIsAvailable: false,
+        lastExecutedPrompt: 'some prompt',
       };
 
       const result = queryEditorReducer(existingState, setPromptModeIsAvailable(true));
@@ -201,108 +207,41 @@ describe('QueryEditor Slice', () => {
     });
   });
 
-  describe('resetEditorMode', () => {
-    it('should reset editor mode to default', () => {
-      const existingState: QueryEditorSliceState = {
-        queryStatus: {
-          status: QueryExecutionStatus.LOADING,
-          elapsedMs: 100,
-          startTime: Date.now(),
-          body: undefined,
-        },
-        editorMode: EditorMode.DualPrompt,
-        promptModeIsAvailable: true,
-      };
+  describe('setLastExecutedPrompt', () => {
+    it('should handle setLastExecutedPrompt action', () => {
+      const newPrompt = 'SELECT * FROM logs WHERE level = "error"';
+      const action = setLastExecutedPrompt(newPrompt);
 
-      const action = resetEditorMode();
-      const result = queryEditorReducer(existingState, action);
+      expect(action.type).toBe('queryEditor/setLastExecutedPrompt');
+      expect(action.payload).toBe(newPrompt);
 
-      expect(action.type).toBe('queryEditor/resetEditorMode');
-      expect(action.payload).toBeUndefined();
-      expect(result.editorMode).toBe(DEFAULT_EDITOR_MODE);
-      expect(result.queryStatus).toEqual(existingState.queryStatus);
-      expect(result.promptModeIsAvailable).toBe(existingState.promptModeIsAvailable);
+      const newState = queryEditorReducer(initialState, action);
+      expect(newState.lastExecutedPrompt).toBe(newPrompt);
+      expect(newState.queryStatus).toEqual(initialState.queryStatus);
+      expect(newState.editorMode).toBe(initialState.editorMode);
+      expect(newState.promptModeIsAvailable).toBe(initialState.promptModeIsAvailable);
     });
-  });
 
-  describe('toggleDualEditorMode', () => {
-    it('should toggle from DualQuery to DualPrompt', () => {
+    it('should preserve other state properties', () => {
       const existingState: QueryEditorSliceState = {
         queryStatus: {
           status: QueryExecutionStatus.READY,
-          elapsedMs: 200,
-          startTime: Date.now(),
-          body: undefined,
-        },
-        editorMode: EditorMode.DualQuery,
-        promptModeIsAvailable: true,
-      };
-
-      const action = toggleDualEditorMode();
-      const result = queryEditorReducer(existingState, action);
-
-      expect(action.type).toBe('queryEditor/toggleDualEditorMode');
-      expect(action.payload).toBeUndefined();
-      expect(result.editorMode).toBe(EditorMode.DualPrompt);
-      expect(result.queryStatus).toEqual(existingState.queryStatus);
-      expect(result.promptModeIsAvailable).toBe(existingState.promptModeIsAvailable);
-    });
-
-    it('should toggle from DualPrompt to DualQuery', () => {
-      const existingState: QueryEditorSliceState = {
-        queryStatus: {
-          status: QueryExecutionStatus.LOADING,
-          elapsedMs: undefined,
+          elapsedMs: 300,
           startTime: Date.now(),
           body: undefined,
         },
         editorMode: EditorMode.DualPrompt,
-        promptModeIsAvailable: false,
-      };
-
-      const result = queryEditorReducer(existingState, toggleDualEditorMode());
-
-      expect(result.editorMode).toBe(EditorMode.DualQuery);
-      expect(result.queryStatus).toEqual(existingState.queryStatus);
-      expect(result.promptModeIsAvailable).toBe(existingState.promptModeIsAvailable);
-    });
-
-    it('should not change mode when in SingleQuery', () => {
-      const existingState: QueryEditorSliceState = {
-        queryStatus: {
-          status: QueryExecutionStatus.ERROR,
-          elapsedMs: 500,
-          startTime: Date.now(),
-          body: { error: { error: 'Test error' } },
-        },
-        editorMode: EditorMode.SingleQuery,
         promptModeIsAvailable: true,
+        lastExecutedPrompt: 'old prompt',
       };
 
-      const result = queryEditorReducer(existingState, toggleDualEditorMode());
+      const newPrompt = 'DESCRIBE TABLE users';
+      const result = queryEditorReducer(existingState, setLastExecutedPrompt(newPrompt));
 
-      expect(result.editorMode).toBe(EditorMode.SingleQuery);
+      expect(result.lastExecutedPrompt).toBe(newPrompt);
       expect(result.queryStatus).toEqual(existingState.queryStatus);
-      expect(result.promptModeIsAvailable).toBe(existingState.promptModeIsAvailable);
-    });
-
-    it('should not change mode when in SinglePrompt', () => {
-      const existingState: QueryEditorSliceState = {
-        queryStatus: {
-          status: QueryExecutionStatus.NO_RESULTS,
-          elapsedMs: 150,
-          startTime: Date.now(),
-          body: undefined,
-        },
-        editorMode: EditorMode.SinglePrompt,
-        promptModeIsAvailable: false,
-      };
-
-      const result = queryEditorReducer(existingState, toggleDualEditorMode());
-
-      expect(result.editorMode).toBe(EditorMode.SinglePrompt);
-      expect(result.queryStatus).toEqual(existingState.queryStatus);
-      expect(result.promptModeIsAvailable).toBe(existingState.promptModeIsAvailable);
+      expect(result.editorMode).toBe(EditorMode.DualPrompt);
+      expect(result.promptModeIsAvailable).toBe(true);
     });
   });
 });

@@ -13,8 +13,9 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectQueryLanguage: jest.fn(),
 }));
 
-jest.mock('../../../../application/context', () => ({
-  useEditorContextByEditorComponent: jest.fn(),
+jest.mock('../../../../application/hooks', () => ({
+  useBottomEditorText: jest.fn(),
+  useEditorRefs: jest.fn(),
 }));
 
 jest.mock('../use_shared_editor', () => ({
@@ -30,18 +31,17 @@ jest.mock('../editor_options', () => ({
 }));
 
 import { selectQueryLanguage } from '../../../../application/utils/state_management/selectors';
-import {
-  InternalEditorContextValue,
-  useEditorContextByEditorComponent,
-} from '../../../../application/context';
+
 import { useSharedEditor } from '../use_shared_editor';
+import { useBottomEditorText, useEditorRefs } from '../../../../application/hooks';
 
 const mockSelectQueryLanguage = selectQueryLanguage as jest.MockedFunction<
   typeof selectQueryLanguage
 >;
-const mockUseEditorContextByEditorComponent = useEditorContextByEditorComponent as jest.MockedFunction<
-  typeof useEditorContextByEditorComponent
+const mockUseBottomEditorText = useBottomEditorText as jest.MockedFunction<
+  typeof useBottomEditorText
 >;
+const mockUseEditorRefs = useEditorRefs as jest.MockedFunction<typeof useEditorRefs>;
 const mockUseSharedEditor = useSharedEditor as jest.MockedFunction<typeof useSharedEditor>;
 
 describe('useBottomEditor', () => {
@@ -54,10 +54,11 @@ describe('useBottomEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseEditorContextByEditorComponent.mockReturnValue({
+    mockUseBottomEditorText.mockReturnValue(mockBottomEditorText);
+    mockUseEditorRefs.mockReturnValue({
       bottomEditorRef: mockBottomEditorRef,
-      bottomEditorText: mockBottomEditorText,
-    } as InternalEditorContextValue);
+      topEditorRef: { current: null },
+    });
 
     mockUseSharedEditor.mockReturnValue(mockSharedProps as any);
   });
@@ -87,7 +88,7 @@ describe('useBottomEditor', () => {
         fontSize: 14,
         wordWrap: 'on',
       },
-      triggerSuggestOnFocus: false,
+      triggerSuggestOnFocus: true,
       value: mockBottomEditorText,
     });
   });
@@ -97,9 +98,10 @@ describe('useBottomEditor', () => {
     expect(mockSelectQueryLanguage).toHaveBeenCalled();
   });
 
-  it('should call useEditorContextByEditorComponent', () => {
+  it('should call useBottomEditorText and useEditorRefs', () => {
     renderUseBottomEditor();
-    expect(mockUseEditorContextByEditorComponent).toHaveBeenCalled();
+    expect(mockUseBottomEditorText).toHaveBeenCalled();
+    expect(mockUseEditorRefs).toHaveBeenCalled();
   });
 
   it('should call useSharedEditor with setEditorRef callback and editorPosition', () => {
@@ -118,9 +120,9 @@ describe('useBottomEditor', () => {
     expect(mockBottomEditorRef.current).toBe(mockEditor);
   });
 
-  it('should set triggerSuggestOnFocus to false', () => {
+  it('should set triggerSuggestOnFocus to true', () => {
     const { result } = renderUseBottomEditor();
-    expect(result.current.triggerSuggestOnFocus).toBe(false);
+    expect(result.current.triggerSuggestOnFocus).toBe(true);
   });
 
   it('should use queryEditorOptions', () => {
@@ -130,5 +132,13 @@ describe('useBottomEditor', () => {
       fontSize: 14,
       wordWrap: 'on',
     });
+  });
+
+  it('should return text value from useBottomEditorText', () => {
+    const customText = 'custom query text';
+    mockUseBottomEditorText.mockReturnValue(customText);
+
+    const { result } = renderUseBottomEditor();
+    expect(result.current.value).toBe(customText);
   });
 });

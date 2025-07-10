@@ -15,22 +15,25 @@ import {
   AgentError,
   ProhibitedQueryError,
 } from '../../../../../../../components/query_panel/utils/error';
-import { setEditorMode } from '../../../../slices';
+import { setEditorMode, setLastExecutedPrompt } from '../../../../slices';
 import { EditorMode } from '../../../../types';
 import { runQueryActionCreator } from '../../run_query';
-import { EditorContextValue } from '../../../../../../context';
+import { useOnEditorRunContext } from '../../../../../../hooks';
 
 export const callAgentActionCreator = createAsyncThunk<
   void,
-  { services: ExploreServices; editorContext: EditorContextValue },
+  {
+    services: ExploreServices;
+    onEditorRunContext: ReturnType<typeof useOnEditorRunContext>;
+  },
   { state: RootState; dispatch: AppDispatch }
->('queryEditor/callAgent', async ({ services, editorContext }, { getState, dispatch }) => {
+>('queryEditor/callAgent', async ({ services, onEditorRunContext }, { getState, dispatch }) => {
   const {
     queryEditor: { editorMode },
   } = getState();
   const dataset = services.data.query.queryString.getQuery().dataset;
 
-  const prompt = editorContext.prompt;
+  const prompt = onEditorRunContext.prompt;
 
   if (!prompt.length) {
     services.notifications.toasts.addWarning({
@@ -71,7 +74,7 @@ export const callAgentActionCreator = createAsyncThunk<
       }
     );
 
-    editorContext.setBottomEditorText(response.query);
+    onEditorRunContext.setBottomEditorText(response.query);
 
     if (editorMode !== EditorMode.DualPrompt) {
       dispatch(setEditorMode(EditorMode.DualPrompt));
@@ -82,6 +85,9 @@ export const callAgentActionCreator = createAsyncThunk<
     }
 
     dispatch(runQueryActionCreator(services, response.query));
+
+    // update the lastExecutedPrompt
+    dispatch(setLastExecutedPrompt(prompt));
   } catch (error) {
     if (error instanceof ProhibitedQueryError) {
       services.notifications.toasts.addError(error, {

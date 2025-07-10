@@ -8,7 +8,7 @@ import { setEditorMode } from '../../../slices';
 import { EditorMode } from '../../../types';
 import { DetectionResult, QueryTypeDetector } from './type_detection';
 import { EditorLanguage } from './type_detection/constants';
-import { EditorContextValue } from '../../../../../context';
+import { useSetEditorText } from '../../../../../hooks';
 import { AppDispatch, RootState } from '../../../store';
 import { selectPromptModeIsAvailable } from '../../../selectors';
 
@@ -38,7 +38,7 @@ const mockSelectPromptModeIsAvailable = selectPromptModeIsAvailable as jest.Mock
 describe('onEditorChangeActionCreator', () => {
   let mockDispatch: jest.MockedFunction<AppDispatch>;
   let mockGetState: jest.MockedFunction<() => RootState>;
-  let mockEditorContext: EditorContextValue;
+  let mockSetEditorText: jest.MockedFunction<ReturnType<typeof useSetEditorText>>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,15 +46,7 @@ describe('onEditorChangeActionCreator', () => {
     mockDispatch = jest.fn();
     mockGetState = jest.fn();
 
-    mockEditorContext = {
-      editorText: 'current text',
-      setEditorText: jest.fn(),
-      clearEditors: jest.fn(),
-      clearEditorsAndSetText: jest.fn(),
-      setBottomEditorText: jest.fn(),
-      query: 'current query',
-      prompt: 'current prompt',
-    };
+    mockSetEditorText = jest.fn();
 
     // Mock the return value of setEditorMode to return the mode that was passed to it
     mockSetEditorMode.mockImplementation((mode: EditorMode) => ({
@@ -76,10 +68,10 @@ describe('onEditorChangeActionCreator', () => {
       mockGetState.mockReturnValue(mockState);
       mockSelectPromptModeIsAvailable.mockReturnValue(false);
 
-      const actionCreator = onEditorChangeActionCreator(testText, mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator(testText, mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith(testText);
+      expect(mockSetEditorText).toHaveBeenCalledWith(testText);
     });
 
     it('should call getState to access current editor mode and promptModeIsAvailable', () => {
@@ -96,7 +88,7 @@ describe('onEditorChangeActionCreator', () => {
       // Mock the type detector for SingleQuery mode
       mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.PPL } as DetectionResult);
 
-      const actionCreator = onEditorChangeActionCreator('test', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('test', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockGetState).toHaveBeenCalledTimes(1);
@@ -114,10 +106,10 @@ describe('onEditorChangeActionCreator', () => {
       mockGetState.mockReturnValue(mockState);
       mockSelectPromptModeIsAvailable.mockReturnValue(false);
 
-      const actionCreator = onEditorChangeActionCreator('test query', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('test query', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('test query');
+      expect(mockSetEditorText).toHaveBeenCalledWith('test query');
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
       expect(mockQueryTypeDetector).not.toHaveBeenCalled();
       expect(mockDispatch).not.toHaveBeenCalled();
@@ -134,10 +126,10 @@ describe('onEditorChangeActionCreator', () => {
       mockGetState.mockReturnValue(mockState);
       mockSelectPromptModeIsAvailable.mockReturnValue(false);
 
-      const actionCreator = onEditorChangeActionCreator('test query', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('test query', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('test query');
+      expect(mockSetEditorText).toHaveBeenCalledWith('test query');
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
       expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -160,10 +152,10 @@ describe('onEditorChangeActionCreator', () => {
       mockGetState.mockReturnValue(mockState);
       mockSelectPromptModeIsAvailable.mockReturnValue(true);
 
-      const actionCreator = onEditorChangeActionCreator('', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('');
+      expect(mockSetEditorText).toHaveBeenCalledWith('');
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
       expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -187,10 +179,10 @@ describe('onEditorChangeActionCreator', () => {
       // Mock what the type detector returns for empty text
       mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.PPL } as DetectionResult);
 
-      const actionCreator = onEditorChangeActionCreator('', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('');
+      expect(mockSetEditorText).toHaveBeenCalledWith('');
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
       // Empty text from SingleEmpty mode gets detected as PPL and switches to SingleQuery
       expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
@@ -212,10 +204,10 @@ describe('onEditorChangeActionCreator', () => {
       mockGetState.mockReturnValue(mockState);
       mockSelectPromptModeIsAvailable.mockReturnValue(false);
 
-      const actionCreator = onEditorChangeActionCreator('', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('');
+      expect(mockSetEditorText).toHaveBeenCalledWith('');
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
       // When promptModeIsAvailable is false and editor is already SingleQuery, no mode change occurs
       expect(mockSetEditorMode).not.toHaveBeenCalled();
@@ -234,10 +226,10 @@ describe('onEditorChangeActionCreator', () => {
       mockGetState.mockReturnValue(mockState);
       mockSelectPromptModeIsAvailable.mockReturnValue(true);
 
-      const actionCreator = onEditorChangeActionCreator('   \n\t  ', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('   \n\t  ', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('   \n\t  ');
+      expect(mockSetEditorText).toHaveBeenCalledWith('   \n\t  ');
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
       expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -258,10 +250,10 @@ describe('onEditorChangeActionCreator', () => {
       mockGetState.mockReturnValue(mockState);
       mockSelectPromptModeIsAvailable.mockReturnValue(true);
 
-      const actionCreator = onEditorChangeActionCreator('     ', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('     ', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('     ');
+      expect(mockSetEditorText).toHaveBeenCalledWith('     ');
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
       expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -282,10 +274,10 @@ describe('onEditorChangeActionCreator', () => {
       mockGetState.mockReturnValue(mockState);
       mockSelectPromptModeIsAvailable.mockReturnValue(false);
 
-      const actionCreator = onEditorChangeActionCreator('  \t\n  ', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('  \t\n  ', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith('  \t\n  ');
+      expect(mockSetEditorText).toHaveBeenCalledWith('  \t\n  ');
       expect(mockSelectPromptModeIsAvailable).toHaveBeenCalledWith(mockState);
       // When promptModeIsAvailable is false and editor is already SingleQuery, no mode change occurs
       expect(mockSetEditorMode).not.toHaveBeenCalled();
@@ -309,7 +301,7 @@ describe('onEditorChangeActionCreator', () => {
       const testText = '| where something=somethingElse';
       mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.PPL } as DetectionResult);
 
-      const actionCreator = onEditorChangeActionCreator(testText, mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator(testText, mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockQueryTypeDetector).toHaveBeenCalledWith(testText);
@@ -318,7 +310,7 @@ describe('onEditorChangeActionCreator', () => {
     it('should change mode when inferred language is PPL', () => {
       mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.PPL } as DetectionResult);
 
-      const actionCreator = onEditorChangeActionCreator('| where field="value"', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('| where field="value"', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
@@ -333,7 +325,7 @@ describe('onEditorChangeActionCreator', () => {
 
       const actionCreator = onEditorChangeActionCreator(
         'Show me all users from last week',
-        mockEditorContext
+        mockSetEditorText
       );
       actionCreator(mockDispatch, mockGetState);
 
@@ -360,7 +352,7 @@ describe('onEditorChangeActionCreator', () => {
       const testText = '| where something=somethingElse';
       mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.PPL } as DetectionResult);
 
-      const actionCreator = onEditorChangeActionCreator(testText, mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator(testText, mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockQueryTypeDetector).toHaveBeenCalledWith(testText);
@@ -369,7 +361,7 @@ describe('onEditorChangeActionCreator', () => {
     it('should not change mode when inferred language is PPL', () => {
       mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.PPL } as DetectionResult);
 
-      const actionCreator = onEditorChangeActionCreator('| where field="value"', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('| where field="value"', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockSetEditorMode).not.toHaveBeenCalled();
@@ -381,7 +373,7 @@ describe('onEditorChangeActionCreator', () => {
 
       const actionCreator = onEditorChangeActionCreator(
         'Show me all users from last week',
-        mockEditorContext
+        mockSetEditorText
       );
       actionCreator(mockDispatch, mockGetState);
 
@@ -408,7 +400,7 @@ describe('onEditorChangeActionCreator', () => {
       const testText = 'What are the top 10 users?';
       mockQueryTypeDetector.mockReturnValue({ type: EditorLanguage.Natural } as DetectionResult);
 
-      const actionCreator = onEditorChangeActionCreator(testText, mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator(testText, mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockQueryTypeDetector).toHaveBeenCalledWith(testText);
@@ -419,7 +411,7 @@ describe('onEditorChangeActionCreator', () => {
 
       const actionCreator = onEditorChangeActionCreator(
         '| where timestamp > now() - 1d',
-        mockEditorContext
+        mockSetEditorText
       );
       actionCreator(mockDispatch, mockGetState);
 
@@ -435,7 +427,7 @@ describe('onEditorChangeActionCreator', () => {
 
       const actionCreator = onEditorChangeActionCreator(
         'Show me recent activity',
-        mockEditorContext
+        mockSetEditorText
       );
       actionCreator(mockDispatch, mockGetState);
 
@@ -456,14 +448,14 @@ describe('onEditorChangeActionCreator', () => {
     });
 
     it('should not perform type detection', () => {
-      const actionCreator = onEditorChangeActionCreator('any text', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('any text', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockQueryTypeDetector).not.toHaveBeenCalled();
     });
 
     it('should change to SingleQuery mode when promptModeIsAvailable is false', () => {
-      const actionCreator = onEditorChangeActionCreator('any text', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('any text', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
@@ -475,10 +467,10 @@ describe('onEditorChangeActionCreator', () => {
 
     it('should still set editor text', () => {
       const testText = 'dual query text';
-      const actionCreator = onEditorChangeActionCreator(testText, mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator(testText, mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith(testText);
+      expect(mockSetEditorText).toHaveBeenCalledWith(testText);
     });
   });
 
@@ -494,14 +486,14 @@ describe('onEditorChangeActionCreator', () => {
     });
 
     it('should not perform type detection', () => {
-      const actionCreator = onEditorChangeActionCreator('any text', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('any text', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockQueryTypeDetector).not.toHaveBeenCalled();
     });
 
     it('should change to SingleQuery mode when promptModeIsAvailable is false', () => {
-      const actionCreator = onEditorChangeActionCreator('any text', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('any text', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
@@ -513,10 +505,10 @@ describe('onEditorChangeActionCreator', () => {
 
     it('should still set editor text', () => {
       const testText = 'dual prompt text';
-      const actionCreator = onEditorChangeActionCreator(testText, mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator(testText, mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.setEditorText).toHaveBeenCalledWith(testText);
+      expect(mockSetEditorText).toHaveBeenCalledWith(testText);
     });
   });
 
@@ -532,7 +524,7 @@ describe('onEditorChangeActionCreator', () => {
       } as RootState);
       mockSelectPromptModeIsAvailable.mockReturnValue(true);
 
-      mockEditorContext.setEditorText = jest.fn(() => {
+      mockSetEditorText.mockImplementation(() => {
         calls.push('setEditorText');
       });
 
@@ -545,7 +537,7 @@ describe('onEditorChangeActionCreator', () => {
         calls.push('dispatch');
       });
 
-      const actionCreator = onEditorChangeActionCreator('test text', mockEditorContext);
+      const actionCreator = onEditorChangeActionCreator('test text', mockSetEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(calls).toEqual(['setEditorText', 'typeDetection', 'dispatch']);
