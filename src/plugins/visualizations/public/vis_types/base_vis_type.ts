@@ -53,7 +53,7 @@ interface CommonBaseVisTypeOptions<TVisParams>
     >,
     Pick<
       Partial<VisType<TVisParams>>,
-      'editorConfig' | 'hidden' | 'stage' | 'useCustomNoDataScreen' | 'visConfig'
+      'editorConfig' | 'hidden' | 'stage' | 'useCustomNoDataScreen' | 'visConfig' | 'isClassic'
     > {
   options?: Partial<VisType<TVisParams>['options']>;
 }
@@ -103,6 +103,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
+  public readonly isClassic?: boolean;
 
   constructor(opts: BaseVisTypeOptions<TVisParams>) {
     if (!opts.icon && !opts.image) {
@@ -131,6 +132,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;
+    this.isClassic = opts.isClassic;
   }
 
   public get schemas(): ISchemas {

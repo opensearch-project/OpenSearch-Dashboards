@@ -3,20 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import {
-  EuiButton,
-  EuiWrappingPopover,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiSpacer,
-} from '@elastic/eui';
-import { ActionExecutionContext, UiActionsStart } from '../../../../../../ui_actions/public';
+import { useAsync } from 'react-use';
+import { EuiButton, EuiWrappingPopover, EuiSpacer, EuiContextMenu } from '@elastic/eui';
+import { buildContextMenuForActions, UiActionsStart } from '../../../../../../ui_actions/public';
 import { dashboardAddPanelTrigger, DASHBOARD_ADD_PANEL_TRIGGER } from '../../../../ui_triggers';
-import { uiToReactComponent } from '../../../../../../opensearch_dashboards_react/public';
 
 let isMount = false;
 
@@ -41,11 +35,20 @@ const PanelPopover = ({
   onAddExistingPanelFlyout: () => void;
   uiActions: UiActionsStart;
 }) => {
-  const actions = uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER).sort((a, b) => {
-    const aOrder = a.order ?? Infinity; // Missing values appear last
-    const bOrder = b.order ?? Infinity;
-    return aOrder - bOrder;
-  });
+  const actionsRef = useRef(uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER));
+
+  const panels = useAsync(() => {
+    return buildContextMenuForActions({
+      actions: actionsRef.current.map((action) => ({
+        action,
+        context: triggerContext,
+        trigger: DASHBOARD_ADD_PANEL_TRIGGER as any,
+      })),
+      closeMenu: onClose,
+      title: '',
+      autoWrapItems: false,
+    });
+  }, []);
 
   return (
     <I18nProvider>
@@ -56,42 +59,7 @@ const PanelPopover = ({
         closePopover={onClose}
         panelPaddingSize="s"
       >
-        <EuiListGroup
-          flush
-          size="xs"
-          gutterSize="none"
-          style={{ minWidth: 250, maxHeight: 350, overflow: 'auto' }}
-        >
-          {actions.map((action) => {
-            if (action.MenuItem) {
-              const ReactMenuItem = uiToReactComponent<{
-                context: ActionExecutionContext;
-                onClick: () => void;
-              }>(action.MenuItem);
-              return (
-                <ReactMenuItem
-                  context={triggerContext}
-                  onClick={() => {
-                    action.execute(triggerContext);
-                    onClose();
-                  }}
-                />
-              );
-            } else {
-              return (
-                <EuiListGroupItem
-                  key={action.id}
-                  iconType={action.getIconType(triggerContext)}
-                  label={action.getDisplayName(triggerContext)}
-                  onClick={() => {
-                    action.execute(triggerContext);
-                    onClose();
-                  }}
-                />
-              );
-            }
-          })}
-        </EuiListGroup>
+        <EuiContextMenu size="s" initialPanelId="mainMenu" panels={panels.value} />
         <EuiSpacer size="s" />
         <EuiButton
           fullWidth
