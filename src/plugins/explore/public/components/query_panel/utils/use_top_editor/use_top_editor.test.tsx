@@ -68,7 +68,7 @@ import {
   selectEditorMode,
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
-import { useIndexPatternContext } from '../../../../application/components/index_pattern_context';
+import { useIndexPatternContext } from '../../../../application/context/dataset_context/dataset_context';
 import { useSharedEditor } from '../use_shared_editor';
 import { useTopEditorText, useEditorRefs } from '../../../../application/hooks';
 import { EditorMode } from '../../../../application/utils/state_management/types';

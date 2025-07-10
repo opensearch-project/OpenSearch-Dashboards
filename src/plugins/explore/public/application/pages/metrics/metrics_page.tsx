@@ -30,7 +30,7 @@ import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subs
 import { ExploreTabs } from '../../../components/tabs/tabs';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
-import { useIndexPatternContext } from '../../components/index_pattern_context';
+import { useIndexPatternContext } from '../../context/dataset_context/dataset_context';
 import { DiscoverNoIndexPatterns } from '../../legacy/discover/application/components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../legacy/discover/application/components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';

@@ -6,14 +6,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import { IBucketDateHistogramAggConfig, Query, DataView as Dataset } from 'src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { ISearchResult, setQueryStatus, setResults, updateQueryStatus } from '../slices';
 import { ExploreServices } from '../../../../types';
-import { IndexPattern } from '../../../legacy/discover/opensearch_dashboards_services';
 import {
   DataPublicPluginStart,
   indexPatterns as indexPatternUtils,
-  Query,
   search,
 } from '../../../../../../data/public';
 import {
@@ -21,7 +20,6 @@ import {
   createHistogramConfigs,
   getDimensions,
 } from '../../../../components/chart/utils';
-import { IBucketDateHistogramAggConfig } from '../../../../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
@@ -51,11 +49,12 @@ export const defaultPrepareQueryString = (query: Query): string => {
  */
 export const defaultResultsProcessor: DefaultDataProcessor = (
   rawResults: ISearchResult,
-  indexPattern: IndexPattern
+  dataset: Dataset
 ): ProcessedSearchResults => {
   const fieldCounts: Record<string, number> = {};
-  if (rawResults.hits && rawResults.hits.hits && indexPattern) {
+  if (rawResults.hits && rawResults.hits.hits && dataset) {
     for (const hit of rawResults.hits.hits) {
+      // TODO: rocky shoudl this be flattened?
       const fields = Object.keys(hit._source);
       for (const fieldName of fields) {
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
@@ -66,13 +65,13 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   const result: ProcessedSearchResults = {
     hits: rawResults.hits,
     fieldCounts,
-    indexPattern, // Include IndexPattern for LogsTab (passed from TabContent)
-    elapsedMs: rawResults.elapsedMs, // Include timing info from raw results
+    dataset,
+    elapsedMs: rawResults.elapsedMs,
   };
 
   // Add histogram data if requested and available
-  if (rawResults.aggregations && indexPattern) {
-    result.chartData = transformAggregationToChartData(rawResults, indexPattern);
+  if (rawResults.aggregations && dataset) {
+    result.chartData = transformAggregationToChartData(rawResults, dataset);
     result.bucketInterval = { interval: 'auto', scale: 1 };
   }
 
@@ -81,13 +80,13 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
 
 export const histogramResultsProcessor: HistogramDataProcessor = (
   rawResults: ISearchResult,
-  indexPattern: IndexPattern,
+  dataset: Dataset,
   data: DataPublicPluginStart,
   interval: string
 ): ProcessedSearchResults => {
-  const result = defaultResultsProcessor(rawResults, indexPattern);
-  const histogramConfigs = indexPattern.timeFieldName
-    ? createHistogramConfigs(indexPattern, interval, data)
+  const result = defaultResultsProcessor(rawResults, dataset);
+  const histogramConfigs = dataset.timeFieldName
+    ? createHistogramConfigs(dataset, interval, data)
     : undefined;
 
   if (histogramConfigs) {

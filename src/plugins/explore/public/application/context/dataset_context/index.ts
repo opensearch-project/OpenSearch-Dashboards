@@ -4,4 +4,3 @@
  */
 
 export * from './dataset_context';
-export * from './editor_context';

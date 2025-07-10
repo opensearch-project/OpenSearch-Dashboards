@@ -6,36 +6,42 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
-import { DataView as Dataset } from 'src/plugins/data/common';
-import { useSyncQueryStateWithUrl } from '../../../../data/public';
-import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { PLUGIN_ID } from '../../../common';
-import { ExploreServices } from '../../types';
-import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
-import { TopNavMenuItemRenderType } from '../../../../navigation/public';
-import { ExecutionContextSearch } from '../../../../expressions/common';
+import { useSelector as useNewStateSelector } from 'react-redux';
+import { QueryStatus, useSyncQueryStateWithUrl } from '../../../../../../../../data/public';
+import { createOsdUrlStateStorage } from '../../../../../../../../opensearch_dashboards_utils/public';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
+import { PLUGIN_ID } from '../../../../../../../common';
+import { ExploreServices } from '../../../../../../types';
+import { IndexPattern as Dataset } from '../../../opensearch_dashboards_services';
+import { useDispatch, useSelector } from '../../utils/state_management';
+import {
+  setSavedQuery,
+  clearResults,
+  setQuery,
+} from '../../../../../utils/state_management/slices';
+import { useDatasetContext } from '../../../../../context/dataset_context/dataset_context';
+
+import './discover_canvas.scss';
+import { TopNavMenuItemRenderType } from '../../../../../../../../navigation/public';
+import { ResultStatus } from '../utils';
+import { ExecutionContextSearch } from '../../../../../../../../expressions/common/';
+import { saveStateToSavedObject } from '../../../../../../saved_explore/transforms';
 import {
   selectTabState,
   selectUIState,
-  selectQueryStatus,
-} from '../../application/utils/state_management/selectors';
-import { useFlavorId } from '../../helpers/use_flavor_id';
-import { getTopNavLinks } from './top_nav_links';
-import { SavedExplore } from '../../saved_explore';
-import {
-  setDataset,
-  clearResults,
-  setQueryState,
-} from '../../application/utils/state_management/slices';
+  selectStatus,
+  selectSavedQuery,
+} from '../../../../../utils/state_management/selectors';
+import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
+import { useSavedExplore } from '../../../../../utils/hooks/use_saved_explore';
+import { getTopNavLinks } from '../../../../../../components/top_nav/top_nav_links';
+import { useCurrentExploreId } from '../../../../../utils/hooks/use_current_explore_id';
 
 export interface TopNavProps {
-  savedExplore?: SavedExplore;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }
 
-export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavProps) => {
+export const TopNav = ({ setHeaderActionMenu = () => {} }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const flavorId = useFlavorId();
   const {
@@ -49,22 +55,28 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     uiSettings,
     history,
   } = services;
+  const dispatch = useDispatch();
+  const savedExploreId = useCurrentExploreId();
 
   const uiState = useNewStateSelector(selectUIState);
   const tabState = useNewStateSelector(selectTabState);
-  const queryStatus = useNewStateSelector(selectQueryStatus);
 
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
+  const savedQueryId = useSelector(selectSavedQuery);
+  const isLoading = useSelector(selectStatus) === ResultStatus.LOADING;
+  const { savedExplore } = useSavedExplore(savedExploreId);
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
     filters: filterManager.getFilters(),
     timeRange: timefilter.timefilter.getTime(),
   });
 
+  // Get Dataset from centralized context
   const { dataset } = useDatasetContext();
   const [datasets, setDatasets] = useState<Dataset[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
+  const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
 
   useEffect(() => {
     const subscription = services.data.query.state$.subscribe(({ state }) => {
@@ -98,13 +110,15 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       services,
       startSyncingQueryStateWithUrl,
       searchContext,
-      {
-        dataset,
-        tabState,
-        flavorId,
-        tabDefinition,
-      },
       savedExplore
+        ? saveStateToSavedObject(
+            savedExplore,
+            flavorId ?? 'logs',
+            tabDefinition!,
+            tabState,
+            dataset
+          )
+        : undefined
     );
   }, [
     savedExplore,
@@ -117,14 +131,20 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     tabDefinition,
   ]);
 
+  // Replace data$ subscription with Redux state-based queryStatus
+  useEffect(() => {
+    const status = isLoading ? ResultStatus.LOADING : ResultStatus.READY;
+    setQueryStatus({ status });
+  }, [isLoading]);
+
   useEffect(() => {
     let isMounted = true;
     const initializeDataset = async () => {
-      await data.dataViews.ensureDefaultDataView();
-      const defaultDataset = await data.dataViews.getDefault();
+      await data.indexPatterns.ensureDefaultIndexPattern();
+      const defaultDataset = await data.indexPatterns.getDefault();
       if (!isMounted) return;
 
-      setDatasets(defaultDataset ? [(defaultDataset as unknown) as Dataset] : undefined);
+      setDatasets(defaultDataset ? [defaultDataset] : undefined);
     };
 
     initializeDataset();
@@ -132,7 +152,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     return () => {
       isMounted = false;
     };
-  }, [data.dataViews, data.query]);
+  }, [data.indexPatterns, data.query]);
 
   useEffect(() => {
     // capitalize first letter
@@ -148,21 +168,8 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const showDatePicker = useMemo(() => dataset?.isTimeBased() ?? false, [dataset]);
 
-  const dispatch = useDispatch();
-
-  const handleDatasetSelect = (newDataset: any) => {
-    if (!newDataset) return;
-
-    dispatch(setDataset(newDataset));
-    const currentQuery = queryString.getQuery();
-    dispatch(clearResults());
-    dispatch(
-      setQueryState({
-        ...currentQuery,
-        query: queryString.getInitialQueryByDataset(newDataset).query,
-        dataset: newDataset,
-      })
-    );
+  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
+    dispatch(setSavedQuery(newSavedQueryId));
   };
 
   return (
@@ -172,16 +179,22 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       data={data}
       showSearchBar={false}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
-      showSaveQuery={false}
+      showSaveQuery={true}
       showDatasetSelect={true}
       datasetSelectProps={{
-        onSelect: handleDatasetSelect,
+        onSelect: (newDataset: any) => {
+          if (!newDataset) return;
+
+          dispatch(clearResults());
+          dispatch(setQuery(queryString.getQuery()));
+          // Execute queries will be handled by the query state changes
+        },
       }}
       useDefaultBehaviors
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={dataset ? [dataset] : datasets}
-      savedQueryId={undefined}
-      onSavedQueryIdChange={() => {}}
+      savedQueryId={savedQueryId}
+      onSavedQueryIdChange={updateSavedQueryId}
       groupActions={true}
       screenTitle={screenTitle}
       queryStatus={queryStatus}

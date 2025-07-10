@@ -4,22 +4,25 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Query, Dataset } from '../../../../../../../data/common';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
 import { QueryWithQueryAsString } from '../../../languages';
-import { Query } from '../../../../../../../data/common';
 
 export type QueryState = QueryWithQueryAsString;
 
 const initialState: QueryState = {
   query: '',
   language: EXPLORE_DEFAULT_LANGUAGE,
-  dataset: undefined, // Store dataset here
+  dataset: undefined,
 };
 
 const querySlice = createSlice({
   name: 'query',
   initialState,
   reducers: {
+    setDataset: (state, action: PayloadAction<Dataset | undefined>) => {
+      state.dataset = action.payload;
+    },
     setQueryState: (_, action: PayloadAction<Query>) => {
       return {
         ...action.payload,
@@ -54,6 +57,11 @@ const querySlice = createSlice({
   },
 });
 
-export const { setQueryState, setQueryWithHistory, setQueryStringWithHistory } = querySlice.actions;
+export const {
+  setDataset,
+  setQueryState,
+  setQueryWithHistory,
+  setQueryStringWithHistory,
+} = querySlice.actions;
 export const queryReducer = querySlice.reducer;
 export const queryInitialState = querySlice.getInitialState();

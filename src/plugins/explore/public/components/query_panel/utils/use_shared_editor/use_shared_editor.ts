@@ -19,7 +19,7 @@ import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
-import { useIndexPatternContext } from '../../../../application/components/index_pattern_context';
+import { useIndexPatternContext } from '../../../../application/context/dataset_context/dataset_context';
 import {
   selectEditorMode,
   selectQueryLanguage,

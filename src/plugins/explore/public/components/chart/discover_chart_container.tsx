@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { ExploreServices } from '../../types';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DiscoverChart } from './chart';
-import { useIndexPatternContext } from '../../application/components/index_pattern_context';
+import { useIndexPatternContext } from '../../application/context/dataset_context/dataset_context';
 import {
   histogramResultsProcessor,
   defaultPrepareQueryString,

@@ -22,7 +22,6 @@ import { getDocViewsRegistry } from '../../application/legacy/discover/opensearc
 import { ExploreServices } from '../../types';
 import { selectSavedSearch } from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
-import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import {
   defaultPrepareQueryString,
   defaultResultsProcessor,
@@ -30,6 +29,7 @@ import {
 import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { useChangeQueryEditor } from '../../application/hooks';
+import { useDatasetContext } from '../../application/context';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -37,7 +37,7 @@ const ExploreDataTableComponent = () => {
 
   const { onAddFilter } = useChangeQueryEditor();
   const savedSearch = useSelector(selectSavedSearch);
-  const { indexPattern } = useIndexPatternContext();
+  const { dataset } = useDatasetContext();
 
   const results = useSelector((state: RootState) => state.results);
 
@@ -70,41 +70,41 @@ const ExploreDataTableComponent = () => {
 
   // Process raw results to get field counts and rows
   const processedResults = useMemo(() => {
-    if (!rawResults || !indexPattern) {
+    if (!rawResults || !dataset) {
       return null;
     }
 
     // Use defaultResultsProcessor without histogram (DiscoverPanel doesn't need chart data)
-    const processed = defaultResultsProcessor(rawResults, indexPattern);
+    const processed = defaultResultsProcessor(rawResults, dataset);
     return processed;
-  }, [rawResults, indexPattern]);
+  }, [rawResults, dataset]);
 
   const tableColumns = useMemo(() => {
-    if (indexPattern == null) {
+    if (dataset == null) {
       return [];
     }
 
     let filteredColumns = filterColumns(
-      indexPattern,
+      dataset,
       uiSettings.get(DEFAULT_COLUMNS_SETTING),
       uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
       processedResults?.fieldCounts
     );
 
     // Handle the case where all fields/columns are removed except the time-field one
-    if (filteredColumns.length === 1 && filteredColumns[0] === indexPattern.timeFieldName) {
+    if (filteredColumns.length === 1 && filteredColumns[0] === dataset.timeFieldName) {
       filteredColumns = [...filteredColumns, '_source'];
     }
 
     const displayedColumns = getLegacyDisplayedColumns(
       filteredColumns,
-      indexPattern,
+      dataset,
       uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
       uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING)
     );
 
     return displayedColumns;
-  }, [indexPattern, processedResults?.fieldCounts, uiSettings]);
+  }, [dataset, processedResults?.fieldCounts, uiSettings]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -134,14 +134,14 @@ const ExploreDataTableComponent = () => {
         <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
           <SaveAndAddButtonWithModal
             searchContext={searchContext}
-            indexPattern={indexPattern}
+            dataset={dataset}
             services={services}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <DataTable
             columns={tableColumns}
-            indexPattern={indexPattern!}
+            dataset={dataset!}
             rows={rows}
             docViewsRegistry={docViewsRegistry}
             sampleSize={uiSettings.get(SAMPLE_SIZE_SETTING)}
