@@ -15,7 +15,7 @@ import {
   ISearchResult,
   resultsInitialState,
   resultsReducer,
-  setShowDatasetFields,
+  setShowFilterPanel,
   uiInitialState,
   uiReducer,
   queryInitialState,
@@ -25,6 +25,7 @@ import {
 } from '../../utils/state_management/slices';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { MetricsPage } from './metrics_page';
+import { defaultPrepareQuery } from '../../utils/state_management/actions/query_actions';
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -134,13 +135,13 @@ describe('MetricsPage', () => {
     // Create query object that matches the MetricsPage component expectations
     const queryObj = {
       ...queryInitialState,
-      query: 'where level="error"',
+      query: '| where level="error"',
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'PPL',
     };
 
     // Generate cache key using the same logic as the component
-    const cacheKey = 'source=test-dataset | where level="error"';
+    const cacheKey = defaultPrepareQuery(queryObj);
 
     const preloadedState = {
       ui: {
@@ -336,7 +337,7 @@ describe('MetricsPage', () => {
 
     expect(screen.getByTestId('dscBottomLeftCanvas')).toBeVisible();
 
-    store.dispatch(setShowDatasetFields(false));
+    store.dispatch(setShowFilterPanel(false));
     await waitFor(() => {
       expect(screen.getByTestId('dscBottomLeftCanvas')).not.toBeVisible();
     });

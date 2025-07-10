@@ -40,7 +40,7 @@ export const selectQueryPrompt = createSelector([selectUIState], (uiState) => ui
 
 export const selectShowDataSetFields = createSelector(
   [selectUIState],
-  (uiState) => uiState.showDatasetFields
+  (uiState) => uiState.showFilterPanel
 );
 
 export const selectShowHistogram = createSelector(

@@ -6,8 +6,7 @@
 import {
   uiReducer,
   setActiveTab,
-  setShowDatasetFields,
-  setQueryPrompt,
+  setShowFilterPanel,
   setUiState,
   setShowHistogram,
   UIState,
@@ -17,8 +16,7 @@ describe('UI Slice', () => {
   // Define the initial state for testing
   const initialState: UIState = {
     activeTabId: 'logs',
-    showDatasetFields: true,
-    prompt: '',
+    showFilterPanel: true,
     showHistogram: true,
   };
 
@@ -39,44 +37,24 @@ describe('UI Slice', () => {
       expect(newState.activeTabId).toBe(newTabId);
 
       // Other state properties should remain unchanged
-      expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
-      expect(newState.prompt).toBe(initialState.prompt);
+      expect(newState.showFilterPanel).toBe(initialState.showFilterPanel);
       expect(newState.showHistogram).toBe(initialState.showHistogram);
     });
   });
 
-  describe('setShowDatasetFields', () => {
-    it('should handle setShowDatasetFields action', () => {
+  describe('setShowFilterPanel', () => {
+    it('should handle setShowFilterPanel action', () => {
       const newValue = false;
-      const action = setShowDatasetFields(newValue);
+      const action = setShowFilterPanel(newValue);
 
-      expect(action.type).toBe('ui/setShowDatasetFields');
+      expect(action.type).toBe('ui/setShowFilterPanel');
       expect(action.payload).toBe(newValue);
 
       const newState = uiReducer(initialState, action);
-      expect(newState.showDatasetFields).toBe(newValue);
+      expect(newState.showFilterPanel).toBe(newValue);
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.prompt).toBe(initialState.prompt);
-      expect(newState.showHistogram).toBe(initialState.showHistogram);
-    });
-  });
-
-  describe('setQueryPrompt', () => {
-    it('should handle setQueryPrompt action', () => {
-      const newPrompt = 'SELECT * FROM logs';
-      const action = setQueryPrompt(newPrompt);
-
-      expect(action.type).toBe('ui/setQueryPrompt');
-      expect(action.payload).toBe(newPrompt);
-
-      const newState = uiReducer(initialState, action);
-      expect(newState.prompt).toBe(newPrompt);
-
-      // Other state properties should remain unchanged
-      expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
       expect(newState.showHistogram).toBe(initialState.showHistogram);
     });
   });
@@ -94,18 +72,16 @@ describe('UI Slice', () => {
 
       // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.showDatasetFields).toBe(initialState.showDatasetFields);
-      expect(newState.prompt).toBe(initialState.prompt);
+      expect(newState.showFilterPanel).toBe(initialState.showFilterPanel);
     });
   });
 
   describe('setUiState', () => {
     it('should handle setUiState action', () => {
-      const newState = {
+      const newState: UIState = {
         activeTabId: 'visualizations',
-        flavor: 'metric',
-        showDatasetFields: false,
-        prompt: 'test query',
+        showFilterPanel: false,
+        showHistogram: false,
       };
       const action = setUiState(newState);
 
@@ -126,19 +102,19 @@ describe('UI Slice', () => {
       expect(state.activeTabId).toBe('visualizations');
 
       // Second action: set show dataset fields
-      state = uiReducer(state, setShowDatasetFields(false));
-      expect(state.showDatasetFields).toBe(false);
+      state = uiReducer(state, setShowFilterPanel(false));
+      expect(state.showFilterPanel).toBe(false);
 
-      // Third action: set query prompt
-      state = uiReducer(state, setQueryPrompt('test query'));
-      expect(state.prompt).toBe('test query');
+      // Third action: set histogram
+      state = uiReducer(state, setShowHistogram(true));
+      expect(state.showHistogram).toBe(true);
 
       // Final state should have all changes
       expect(state).toEqual({
         ...initialState,
         activeTabId: 'visualizations',
-        showDatasetFields: false,
-        prompt: 'test query',
+        showFilterPanel: false,
+        showHistogram: true,
       });
     });
   });

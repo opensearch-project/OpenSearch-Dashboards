@@ -13,7 +13,6 @@ import {
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { UseSharedEditorProps, UseSharedEditorReturnType } from '../types';
-import { useEditorContext } from '../../../../application/context';
 import { getCommandEnterAction } from './command_enter_action';
 import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
@@ -25,7 +24,11 @@ import {
   selectEditorMode,
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
-import { toggleDualEditorMode } from '../../../../application/utils/state_management/slices';
+import {
+  useOnEditorRunContext,
+  useSetEditorText,
+  useToggleDualEditorMode,
+} from '../../../../application/hooks';
 
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
 type CompletionItemProvider = monaco.languages.CompletionItemProvider;
@@ -53,12 +56,14 @@ export const useSharedEditor = ({
   const { indexPattern } = useIndexPatternContext();
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const editorMode = useSelector(selectEditorMode);
+  const toggleDualEditorMode = useToggleDualEditorMode();
   // using a ref as provideCompletionItems uses a stale version of editorMode
   const editorModeRef = useRef<EditorMode>(editorMode);
-  const editorContext = useEditorContext();
+  const setEditorText = useSetEditorText();
+  const onEditorRunContext = useOnEditorRunContext();
   // The 'onRun' functions in editorDidMount uses the context values when the editor is mounted.
   // Using a ref will ensure it always uses the latest value
-  const editorContextRef = useRef(editorContext);
+  const onEditorRunContextRef = useRef(onEditorRunContext);
   const dispatch = useDispatch();
   const [isFocused, setIsFocused] = useState(false);
   const queryLanguage = useSelector(selectQueryLanguage);
@@ -69,8 +74,8 @@ export const useSharedEditor = ({
     editorModeRef.current = editorMode;
   }, [editorMode]);
   useEffect(() => {
-    editorContextRef.current = editorContext;
-  }, [editorContext]);
+    onEditorRunContextRef.current = onEditorRunContext;
+  }, [onEditorRunContext]);
 
   // Real autocomplete implementation using the data plugin's autocomplete service
   const provideCompletionItems = useCallback(
@@ -180,7 +185,7 @@ export const useSharedEditor = ({
   }, [suggestionProvider, queryLanguage]);
 
   const handleRun = useCallback(() => {
-    dispatch(onEditorRunActionCreator(services, editorContextRef.current));
+    dispatch(onEditorRunActionCreator(services, onEditorRunContextRef.current));
   }, [dispatch, services]);
 
   const editorDidMount = useCallback(
@@ -234,9 +239,9 @@ export const useSharedEditor = ({
 
   const onChange = useCallback(
     (text: string) => {
-      dispatch(onEditorChangeActionCreator(text, editorContext));
+      dispatch(onEditorChangeActionCreator(text, setEditorText));
     },
-    [dispatch, editorContext]
+    [dispatch, setEditorText]
   );
 
   const onWrapperClick = useCallback(() => {
@@ -244,9 +249,9 @@ export const useSharedEditor = ({
       (editorPosition === 'top' && editorMode === EditorMode.DualQuery) ||
       (editorPosition === 'bottom' && editorMode === EditorMode.DualPrompt)
     ) {
-      dispatch(toggleDualEditorMode());
+      toggleDualEditorMode();
     }
-  }, [dispatch, editorMode, editorPosition]);
+  }, [editorMode, editorPosition, toggleDualEditorMode]);
 
   return {
     isFocused,

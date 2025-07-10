@@ -13,12 +13,12 @@ import {
 } from '../../slices';
 import { executeQueries } from '../query_actions';
 import { getPromptModeIsAvailable } from '../../../get_prompt_mode_is_available';
-import { EditorContextValue } from '../../../../context';
 import { EditorMode } from '../../types';
+import { useClearEditors } from '../../../../hooks';
 
 export const setDatasetActionCreator = (
   services: ExploreServices,
-  editorContext: EditorContextValue
+  clearEditors: ReturnType<typeof useClearEditors>
 ) => async (dispatch: AppDispatch, getState: () => RootState) => {
   const queryStringState = services.data.query.queryString.getQuery();
   const {
@@ -33,11 +33,13 @@ export const setDatasetActionCreator = (
   if (newPromptModeIsAvailable !== promptModeIsAvailable) {
     dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable));
   }
-  if (editorMode !== EditorMode.SingleQuery) {
+
+  clearEditors();
+  if (newPromptModeIsAvailable && editorMode !== EditorMode.SingleEmpty) {
+    dispatch(setEditorMode(EditorMode.SingleEmpty));
+  } else if (editorMode !== EditorMode.SingleQuery) {
     dispatch(setEditorMode(EditorMode.SingleQuery));
   }
-  // TODO: Is this safe?
-  editorContext.clearEditorsAndSetText(queryStringState.query as string);
 
   dispatch(executeQueries({ services }));
 };

@@ -36,7 +36,7 @@ const mockServices = {
           return defaultValue;
       }
     },
-    get$: (key: string, defaultValue: any) => ({
+    get$: (_key: string, defaultValue: any) => ({
       subscribe: (cb: any) => {
         cb(defaultValue);
         return { unsubscribe: () => {} };
@@ -161,9 +161,8 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
       },
       ui: {
         activeTabId: 'logs',
-        showDatasetFields: true,
+        showFilterPanel: true,
         showHistogram: true,
-        prompt: '',
       },
       results: {},
       tab: {
@@ -188,6 +187,7 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
         },
         editorMode,
         promptModeIsAvailable: false,
+        lastExecutedPrompt: '',
       },
     },
   });
