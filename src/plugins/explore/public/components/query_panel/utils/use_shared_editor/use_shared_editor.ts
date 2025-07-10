@@ -142,6 +142,12 @@ export const useSharedEditor = ({
           range: defaultRange,
           detail: s.detail,
           sortText: s.sortText,
+          documentation: s.documentation
+            ? {
+                value: s.documentation,
+                isTrusted: true,
+              }
+            : '',
         }));
 
         return {

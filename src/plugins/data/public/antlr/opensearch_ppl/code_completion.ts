@@ -24,6 +24,7 @@ import { getAvailableFieldsForAutocomplete } from './simplified_ppl_grammar/symb
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 import { PPL_AGGREGATE_FUNCTIONS, PPL_SUGGESTION_IMPORTANCE } from './constants';
+import { Documentation } from './ppl_documentation';
 
 export const getDefaultSuggestions = async ({
   selectionStart,
@@ -210,6 +211,7 @@ export const getSimplifiedPPLSuggestions = async ({
           detail: SuggestionItemDetailsTags.Keyword,
           // sortText is the only option to sort suggestions, compares strings
           sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
+          documentation: Documentation[sk.value.toUpperCase()],
         }))
       );
     }
