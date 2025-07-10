@@ -10,12 +10,12 @@ import { EditorMode } from '../../../types';
 import { callAgentActionCreator } from './call_agent';
 import { setEditorMode } from '../../../slices';
 import { runQueryActionCreator } from '../run_query';
-import { EditorContextValue } from '../../../../../context';
+import { useOnEditorRunContext } from '../../../../../hooks';
 
 // This is used when user submits a query or a prompt. This called runQueryActionCreator under the hood
 export const onEditorRunActionCreator = (
   services: ExploreServices,
-  editorContext: EditorContextValue
+  onEditorRunContext: ReturnType<typeof useOnEditorRunContext>
 ) => (dispatch: AppDispatch, getState: () => RootState) => {
   const {
     queryEditor: { editorMode, promptModeIsAvailable },
@@ -36,19 +36,17 @@ export const onEditorRunActionCreator = (
       return;
     }
 
-    dispatch(callAgentActionCreator({ services, editorContext }));
+    dispatch(callAgentActionCreator({ services, onEditorRunContext }));
   } else if (
     [EditorMode.SingleEmpty, EditorMode.SingleQuery, EditorMode.DualQuery].includes(editorMode)
   ) {
-    const query = editorContext.editorText;
-
     if (editorMode === EditorMode.DualQuery) {
       // clear bottom editor and convert back to single editor
-      editorContext.clearEditorsAndSetText(query);
+      onEditorRunContext.clearEditorsAndSetText(onEditorRunContext.query);
       dispatch(setEditorMode(EditorMode.SingleQuery));
     }
 
-    dispatch(runQueryActionCreator(services, query));
+    dispatch(runQueryActionCreator(services, onEditorRunContext.query));
   } else {
     throw new Error(`onEditorRunActionCreator encountered unknown editorMode: ${editorMode}`);
   }

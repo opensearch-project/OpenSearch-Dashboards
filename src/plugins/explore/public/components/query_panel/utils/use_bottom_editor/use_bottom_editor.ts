@@ -10,13 +10,14 @@ import { selectQueryLanguage } from '../../../../application/utils/state_managem
 import { useSharedEditor } from '../use_shared_editor';
 import { queryEditorOptions } from '../editor_options';
 import { UseEditorReturnType } from '../types';
-import { useEditorContextByEditorComponent } from '../../../../application/context';
+import { useBottomEditorText, useEditorRefs } from '../../../../application/hooks';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
 export const useBottomEditor = (): UseEditorReturnType => {
   const queryLanguage = useSelector(selectQueryLanguage);
-  const { bottomEditorRef, bottomEditorText } = useEditorContextByEditorComponent();
+  const text = useBottomEditorText();
+  const { bottomEditorRef } = useEditorRefs();
 
   const setEditorRef = useCallback(
     (editor: IStandaloneCodeEditor) => {
@@ -31,7 +32,7 @@ export const useBottomEditor = (): UseEditorReturnType => {
     ...sharedProps,
     languageId: queryLanguage,
     options: queryEditorOptions,
-    triggerSuggestOnFocus: false,
-    value: bottomEditorText,
+    triggerSuggestOnFocus: true,
+    value: text,
   };
 };

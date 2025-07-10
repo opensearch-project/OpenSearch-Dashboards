@@ -9,7 +9,7 @@ import { setEditorMode } from '../../../slices';
 import { runQueryActionCreator } from '../run_query';
 import { EditorMode } from '../../../types';
 import { ExploreServices } from '../../../../../../types';
-import { EditorContextValue } from '../../../../../context';
+import { useOnEditorRunContext } from '../../../../../hooks';
 import { AppDispatch, RootState } from '../../../store';
 
 // Mock the dependencies
@@ -35,7 +35,7 @@ const mockRunQueryActionCreator = runQueryActionCreator as jest.MockedFunction<
 
 describe('onEditorRunActionCreator', () => {
   let mockServices: ExploreServices;
-  let mockEditorContext: EditorContextValue;
+  let mockOnEditorRunContext: ReturnType<typeof useOnEditorRunContext>;
   let mockDispatch: jest.MockedFunction<AppDispatch>;
   let mockGetState: jest.MockedFunction<() => RootState>;
 
@@ -53,12 +53,9 @@ describe('onEditorRunActionCreator', () => {
       },
     } as unknown) as ExploreServices;
 
-    mockEditorContext = {
-      editorText: 'some query',
-      setEditorText: jest.fn(),
-      clearEditors: jest.fn(),
-      clearEditorsAndSetText: jest.fn(),
+    mockOnEditorRunContext = {
       setBottomEditorText: jest.fn(),
+      clearEditorsAndSetText: jest.fn(),
       query: 'some query',
       prompt: 'Show me all users',
     };
@@ -83,7 +80,7 @@ describe('onEditorRunActionCreator', () => {
     });
 
     it('should dispatch callAgentActionCreator when prompt mode is available', () => {
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
       const mockCallAgentThunk = jest.fn();
       mockCallAgentActionCreator.mockReturnValue(mockCallAgentThunk);
 
@@ -91,7 +88,7 @@ describe('onEditorRunActionCreator', () => {
 
       expect(mockCallAgentActionCreator).toHaveBeenCalledWith({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
       expect(mockDispatch).toHaveBeenCalledWith(mockCallAgentThunk);
     });
@@ -104,7 +101,7 @@ describe('onEditorRunActionCreator', () => {
         },
       } as RootState);
 
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockServices.notifications.toasts.addWarning).toHaveBeenCalledWith({
@@ -128,7 +125,7 @@ describe('onEditorRunActionCreator', () => {
     });
 
     it('should dispatch callAgentActionCreator when prompt mode is available', () => {
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
       const mockCallAgentThunk = jest.fn();
       mockCallAgentActionCreator.mockReturnValue(mockCallAgentThunk);
 
@@ -136,7 +133,7 @@ describe('onEditorRunActionCreator', () => {
 
       expect(mockCallAgentActionCreator).toHaveBeenCalledWith({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
       expect(mockDispatch).toHaveBeenCalledWith(mockCallAgentThunk);
     });
@@ -149,7 +146,7 @@ describe('onEditorRunActionCreator', () => {
         },
       } as RootState);
 
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockServices.notifications.toasts.addWarning).toHaveBeenCalledWith({
@@ -172,8 +169,8 @@ describe('onEditorRunActionCreator', () => {
       } as RootState);
     });
 
-    it('should dispatch runQueryActionCreator with editor text', () => {
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+    it('should dispatch runQueryActionCreator with query text', () => {
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
       const mockRunQueryThunk = jest.fn();
       mockRunQueryActionCreator.mockReturnValue(mockRunQueryThunk);
 
@@ -181,23 +178,23 @@ describe('onEditorRunActionCreator', () => {
 
       expect(mockRunQueryActionCreator).toHaveBeenCalledWith(
         mockServices,
-        mockEditorContext.editorText
+        mockOnEditorRunContext.query
       );
       expect(mockDispatch).toHaveBeenCalledWith(mockRunQueryThunk);
     });
 
     it('should not clear editors or change mode', () => {
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
 
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.clearEditorsAndSetText).not.toHaveBeenCalled();
+      expect(mockOnEditorRunContext.clearEditorsAndSetText).not.toHaveBeenCalled();
       expect(mockSetEditorMode).not.toHaveBeenCalled();
     });
 
     it('should work with different query text', () => {
-      mockEditorContext.editorText = '| where user_type="admin"';
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      mockOnEditorRunContext.query = '| where user_type="admin"';
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
 
       actionCreator(mockDispatch, mockGetState);
 
@@ -208,8 +205,8 @@ describe('onEditorRunActionCreator', () => {
     });
 
     it('should work with empty query text', () => {
-      mockEditorContext.editorText = '';
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      mockOnEditorRunContext.query = '';
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
 
       actionCreator(mockDispatch, mockGetState);
 
@@ -227,18 +224,18 @@ describe('onEditorRunActionCreator', () => {
       } as RootState);
     });
 
-    it('should clear editors and set text with current editor text', () => {
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+    it('should clear editors and set text with current query text', () => {
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
 
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.clearEditorsAndSetText).toHaveBeenCalledWith(
-        mockEditorContext.editorText
+      expect(mockOnEditorRunContext.clearEditorsAndSetText).toHaveBeenCalledWith(
+        mockOnEditorRunContext.query
       );
     });
 
     it('should dispatch setEditorMode to change to SingleQuery', () => {
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
 
       actionCreator(mockDispatch, mockGetState);
 
@@ -249,8 +246,8 @@ describe('onEditorRunActionCreator', () => {
       });
     });
 
-    it('should dispatch runQueryActionCreator with editor text', () => {
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+    it('should dispatch runQueryActionCreator with query text', () => {
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
       const mockRunQueryThunk = jest.fn();
       mockRunQueryActionCreator.mockReturnValue(mockRunQueryThunk);
 
@@ -258,7 +255,7 @@ describe('onEditorRunActionCreator', () => {
 
       expect(mockRunQueryActionCreator).toHaveBeenCalledWith(
         mockServices,
-        mockEditorContext.editorText
+        mockOnEditorRunContext.query
       );
       expect(mockDispatch).toHaveBeenCalledWith(mockRunQueryThunk);
     });
@@ -266,7 +263,7 @@ describe('onEditorRunActionCreator', () => {
     it('should execute actions in correct order', () => {
       const calls: string[] = [];
 
-      mockEditorContext.clearEditorsAndSetText = jest.fn(() => {
+      mockOnEditorRunContext.clearEditorsAndSetText = jest.fn(() => {
         calls.push('clearEditorsAndSetText');
       });
 
@@ -278,7 +275,7 @@ describe('onEditorRunActionCreator', () => {
         }
       });
 
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
       actionCreator(mockDispatch, mockGetState);
 
       expect(calls).toEqual(['clearEditorsAndSetText', 'setEditorMode', 'runQuery']);
@@ -294,7 +291,7 @@ describe('onEditorRunActionCreator', () => {
         },
       } as RootState);
 
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
 
       expect(() => {
         actionCreator(mockDispatch, mockGetState);
@@ -309,7 +306,7 @@ describe('onEditorRunActionCreator', () => {
         },
       } as RootState);
 
-      const actionCreator = onEditorRunActionCreator(mockServices, mockEditorContext);
+      const actionCreator = onEditorRunActionCreator(mockServices, mockOnEditorRunContext);
 
       expect(() => {
         actionCreator(mockDispatch, mockGetState);

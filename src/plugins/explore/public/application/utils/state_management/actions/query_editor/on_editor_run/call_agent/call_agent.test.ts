@@ -7,7 +7,7 @@ import { callAgentActionCreator } from './call_agent';
 import { setEditorMode } from '../../../../slices';
 import { EditorMode } from '../../../../types';
 import { runQueryActionCreator } from '../../run_query';
-import { EditorContextValue } from '../../../../../../context';
+import { useOnEditorRunContext } from '../../../../../../hooks';
 import { ExploreServices } from '../../../../../../../types';
 import { RootState } from '../../../../store';
 import {
@@ -31,7 +31,7 @@ const mockRunQueryActionCreator = runQueryActionCreator as jest.MockedFunction<
 
 describe('callAgentActionCreator', () => {
   let mockServices: ExploreServices;
-  let mockEditorContext: EditorContextValue;
+  let mockOnEditorRunContext: ReturnType<typeof useOnEditorRunContext>;
   let mockGetState: jest.MockedFunction<() => RootState>;
   let mockDispatch: jest.MockedFunction<any>;
 
@@ -70,12 +70,9 @@ describe('callAgentActionCreator', () => {
       },
     } as unknown) as ExploreServices;
 
-    mockEditorContext = {
-      editorText: 'current text',
-      setEditorText: jest.fn(),
-      clearEditors: jest.fn(),
-      clearEditorsAndSetText: jest.fn(),
+    mockOnEditorRunContext = {
       setBottomEditorText: jest.fn(),
+      clearEditorsAndSetText: jest.fn(),
       query: 'current query',
       prompt: 'What are the top 10 users?',
     };
@@ -108,7 +105,7 @@ describe('callAgentActionCreator', () => {
     it('should call the agent API with correct parameters', async () => {
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -126,18 +123,18 @@ describe('callAgentActionCreator', () => {
     it('should set the bottom editor text with the response query', async () => {
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
 
-      expect(mockEditorContext.setBottomEditorText).toHaveBeenCalledWith(mockResponse.query);
+      expect(mockOnEditorRunContext.setBottomEditorText).toHaveBeenCalledWith(mockResponse.query);
     });
 
     it('should change to DualPrompt mode when not already in that mode', async () => {
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -156,7 +153,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -167,7 +164,7 @@ describe('callAgentActionCreator', () => {
     it('should set time range when provided in response', async () => {
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -184,7 +181,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -198,7 +195,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -216,11 +213,11 @@ describe('callAgentActionCreator', () => {
     });
 
     it('should show warning when prompt is empty', async () => {
-      mockEditorContext.prompt = '';
+      mockOnEditorRunContext.prompt = '';
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -234,12 +231,12 @@ describe('callAgentActionCreator', () => {
     });
 
     it('should show warning when prompt is only whitespace', async () => {
-      mockEditorContext.prompt = '   \n\t  ';
+      mockOnEditorRunContext.prompt = '   \n\t  ';
       (mockServices.http.post as jest.Mock).mockResolvedValue({ query: 'test query' });
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -263,7 +260,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -280,7 +277,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -305,7 +302,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -329,7 +326,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -346,7 +343,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -363,12 +360,12 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
 
-      expect(mockEditorContext.setBottomEditorText).not.toHaveBeenCalled();
+      expect(mockOnEditorRunContext.setBottomEditorText).not.toHaveBeenCalled();
       expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
     });
   });
@@ -390,7 +387,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -415,7 +412,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
@@ -439,7 +436,7 @@ describe('callAgentActionCreator', () => {
         queryEditor: { editorMode: EditorMode.SinglePrompt },
       } as RootState);
 
-      mockEditorContext.setBottomEditorText = jest.fn(() => {
+      mockOnEditorRunContext.setBottomEditorText = jest.fn(() => {
         calls.push('setBottomEditorText');
       });
 
@@ -467,7 +464,7 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        editorContext: mockEditorContext,
+        onEditorRunContext: mockOnEditorRunContext,
       });
 
       await thunk(mockDispatch, mockGetState, undefined);

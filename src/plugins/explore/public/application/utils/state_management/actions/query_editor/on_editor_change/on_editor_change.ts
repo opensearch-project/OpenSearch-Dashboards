@@ -8,20 +8,20 @@ import { setEditorMode } from '../../../slices';
 import { EditorMode } from '../../../types';
 import { QueryTypeDetector } from './type_detection';
 import { EditorLanguage } from './type_detection/constants';
-import { EditorContextValue } from '../../../../../context';
 import { selectPromptModeIsAvailable } from '../../../selectors';
+import { useSetEditorText } from '../../../../../hooks';
 
-export const onEditorChangeActionCreator = (text: string, editorContext: EditorContextValue) => (
-  dispatch: AppDispatch,
-  getState: () => RootState
-) => {
+export const onEditorChangeActionCreator = (
+  text: string,
+  setEditorText: ReturnType<typeof useSetEditorText>
+) => (dispatch: AppDispatch, getState: () => RootState) => {
   const state = getState();
   const {
     queryEditor: { editorMode },
   } = state;
   const promptModeIsAvailable = selectPromptModeIsAvailable(state);
 
-  editorContext.setEditorText(text);
+  setEditorText(text);
 
   if (!promptModeIsAvailable) {
     // change to Query mode if in singlePrompt mode

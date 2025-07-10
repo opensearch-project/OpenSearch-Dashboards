@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
@@ -21,7 +22,7 @@ import { useTimeFilter } from '../utils';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { RootState } from '../../../application/utils/state_management/store';
 import { executeQueries } from '../../../application/utils/state_management/actions/query_actions';
-import { useEditorContext } from '../../../application/context';
+import { useClearEditorsAndSetText } from '../../../application/hooks';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -30,7 +31,7 @@ export const SaveQueryButton = () => {
   const savedQueryService = services.data.query.savedQueries;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const dispatch = useDispatch();
-  const editorContext = useEditorContext();
+  const clearEditorsAndSetText = useClearEditorsAndSetText();
 
   // Get current saved query ID from Redux state
   const currentSavedQueryId = useSelector((state: RootState) => state.legacy.savedQuery);
@@ -117,7 +118,11 @@ export const SaveQueryButton = () => {
       dispatch(setSavedQuery(savedQuery.id));
       dispatch(setQueryState(savedQuery.attributes.query));
       dispatch(
-        loadQueryActionCreator(services, editorContext, savedQuery.attributes.query.query as string)
+        loadQueryActionCreator(
+          services,
+          clearEditorsAndSetText,
+          savedQuery.attributes.query.query as string
+        )
       );
 
       // 3. Update timefilter if present
@@ -136,7 +141,7 @@ export const SaveQueryButton = () => {
       dispatch(clearResults());
       dispatch(executeQueries({ services }));
     },
-    [dispatch, services, editorContext, timeFilter]
+    [dispatch, services, clearEditorsAndSetText, timeFilter]
   );
 
   const handleClearSavedQuery = useCallback(() => {

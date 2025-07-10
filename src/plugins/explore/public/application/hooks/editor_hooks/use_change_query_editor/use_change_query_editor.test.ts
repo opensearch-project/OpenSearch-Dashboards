@@ -4,40 +4,50 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { useIndexPatternContext } from '../../components/index_pattern_context';
-import { useEditorContext } from '../../context';
-import { useSelector } from '../../legacy/discover/application/utils/state_management';
-import { selectEditorMode, selectQuery } from '../../utils/state_management/selectors';
-import { EditorMode } from '../../utils/state_management/types';
+import { IndexPatternField, opensearchFilters } from '../../../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { useIndexPatternContext } from '../../../components/index_pattern_context';
+import { useEditorQueryText } from '../use_editor_query_text';
+import { useEditorPromptText } from '../use_editor_prompt_text';
+import { useSetEditorText } from '../use_set_editor_text';
+import { useSelector } from '../../../legacy/discover/application/utils/state_management';
+import { selectEditorMode, selectQuery } from '../../../utils/state_management/selectors';
+import { EditorMode } from '../../../utils/state_management/types';
 import { useChangeQueryEditor } from './use_change_query_editor';
 
-jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
+jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
 }));
 
-jest.mock('../../legacy/discover/application/utils/state_management', () => ({
+jest.mock('../../../legacy/discover/application/utils/state_management', () => ({
   useSelector: jest.fn(),
 }));
 
-jest.mock('../../utils/state_management/selectors', () => ({
+jest.mock('../../../utils/state_management/selectors', () => ({
   selectEditorMode: jest.fn(),
   selectQuery: jest.fn(),
 }));
 
-jest.mock('../../../../../data/public', () => ({
+jest.mock('../../../../../../data/public', () => ({
   opensearchFilters: {
     generateFilters: jest.fn(),
   },
 }));
 
-jest.mock('../../components/index_pattern_context', () => ({
+jest.mock('../../../components/index_pattern_context', () => ({
   useIndexPatternContext: jest.fn(),
 }));
 
-jest.mock('../../context', () => ({
-  useEditorContext: jest.fn(),
+jest.mock('../use_editor_query_text', () => ({
+  useEditorQueryText: jest.fn(),
+}));
+
+jest.mock('../use_editor_prompt_text', () => ({
+  useEditorPromptText: jest.fn(),
+}));
+
+jest.mock('../use_set_editor_text', () => ({
+  useSetEditorText: jest.fn(),
 }));
 
 describe('useChangeQueryEditor', () => {
@@ -45,11 +55,9 @@ describe('useChangeQueryEditor', () => {
   const mockLanguageService = { getLanguage: jest.fn() };
   const mockQueryString = { getLanguageService: jest.fn(() => mockLanguageService) };
   const mockIndexPattern = { id: 'test-index-pattern-id' };
-  const mockEditorContext = {
-    query: 'source=logs',
-    prompt: 'Show me logs',
-    setEditorText: jest.fn(),
-  };
+  const mockEditorQuery = 'source=logs';
+  const mockEditorPrompt = 'Show me logs';
+  const mockSetEditorText = jest.fn();
   const mockLanguageConfig = {
     addFiltersToQuery: jest.fn(),
     addFiltersToPrompt: jest.fn(),
@@ -70,7 +78,9 @@ describe('useChangeQueryEditor', () => {
     });
 
     (useIndexPatternContext as jest.Mock).mockReturnValue({ indexPattern: mockIndexPattern });
-    (useEditorContext as jest.Mock).mockReturnValue(mockEditorContext);
+    (useEditorQueryText as jest.Mock).mockReturnValue(mockEditorQuery);
+    (useEditorPromptText as jest.Mock).mockReturnValue(mockEditorPrompt);
+    (useSetEditorText as jest.Mock).mockReturnValue(mockSetEditorText);
     (useSelector as jest.Mock).mockImplementation((selector) => {
       if (selector === selectEditorMode) return EditorMode.SingleQuery;
       if (selector === selectQuery) return { language: 'PPL' };
@@ -103,7 +113,7 @@ describe('useChangeQueryEditor', () => {
     result.current.onAddFilter('field', 'value', '+');
 
     expect(opensearchFilters.generateFilters).not.toHaveBeenCalled();
-    expect(mockEditorContext.setEditorText).not.toHaveBeenCalled();
+    expect(mockSetEditorText).not.toHaveBeenCalled();
   });
 
   it('should add filters to query in SingleQuery mode', () => {
@@ -118,12 +128,10 @@ describe('useChangeQueryEditor', () => {
       '+',
       'test-index-pattern-id'
     );
-    expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith('source=logs', [
+    expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith(mockEditorQuery, [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    expect(mockEditorContext.setEditorText).toHaveBeenCalledWith(
-      "source=logs | where `field` = 'value'"
-    );
+    expect(mockSetEditorText).toHaveBeenCalledWith("source=logs | where `field` = 'value'");
   });
 
   it('should add filters to query in DualQuery mode', () => {
@@ -137,12 +145,10 @@ describe('useChangeQueryEditor', () => {
 
     result.current.onAddFilter('field', 'value', '+');
 
-    expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith('source=logs', [
+    expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith(mockEditorQuery, [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    expect(mockEditorContext.setEditorText).toHaveBeenCalledWith(
-      "source=logs | where `field` = 'value'"
-    );
+    expect(mockSetEditorText).toHaveBeenCalledWith("source=logs | where `field` = 'value'");
   });
 
   it('should add filters to prompt in SinglePrompt mode', () => {
@@ -156,10 +162,10 @@ describe('useChangeQueryEditor', () => {
 
     result.current.onAddFilter('field', 'value', '+');
 
-    expect(mockLanguageConfig.addFiltersToPrompt).toHaveBeenCalledWith('Show me logs', [
+    expect(mockLanguageConfig.addFiltersToPrompt).toHaveBeenCalledWith(mockEditorPrompt, [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    expect(mockEditorContext.setEditorText).toHaveBeenCalledWith("Show me logs, field is 'value'");
+    expect(mockSetEditorText).toHaveBeenCalledWith("Show me logs, field is 'value'");
   });
 
   it('should add filters to prompt in DualPrompt mode', () => {
@@ -173,10 +179,10 @@ describe('useChangeQueryEditor', () => {
 
     result.current.onAddFilter('field', 'value', '+');
 
-    expect(mockLanguageConfig.addFiltersToPrompt).toHaveBeenCalledWith('Show me logs', [
+    expect(mockLanguageConfig.addFiltersToPrompt).toHaveBeenCalledWith(mockEditorPrompt, [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    expect(mockEditorContext.setEditorText).toHaveBeenCalledWith("Show me logs, field is 'value'");
+    expect(mockSetEditorText).toHaveBeenCalledWith("Show me logs, field is 'value'");
   });
 
   it('should not update editor text if language config does not provide filter methods', () => {
@@ -189,7 +195,7 @@ describe('useChangeQueryEditor', () => {
 
     result.current.onAddFilter('field', 'value', '+');
 
-    expect(mockEditorContext.setEditorText).not.toHaveBeenCalled();
+    expect(mockSetEditorText).not.toHaveBeenCalled();
   });
 
   it('should accept IndexPatternField object as field parameter', () => {

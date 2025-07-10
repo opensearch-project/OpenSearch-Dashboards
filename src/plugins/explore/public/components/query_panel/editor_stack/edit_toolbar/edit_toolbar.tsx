@@ -7,9 +7,8 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
-import { toggleDualEditorMode } from '../../../../application/utils/state_management/slices';
 import { clearEditorActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
-import { useEditorContext } from '../../../../application/context';
+import { useClearEditors, useToggleDualEditorMode } from '../../../../application/hooks';
 import { selectEditorMode } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import './edit_toolbar.scss';
@@ -27,16 +26,17 @@ const clearText = i18n.translate('explore.queryPanel.queryEditor.clearEditor', {
 export const EditToolbar = () => {
   const dispatch = useDispatch();
   const editorMode = useSelector(selectEditorMode);
-  const editorContext = useEditorContext();
+  const clearEditors = useClearEditors();
+  const toggleEditorMode = useToggleDualEditorMode();
   // TODO: FIX ME
   const className = 'queryEditor__editOverlay';
 
   const onEditClick = () => {
-    dispatch(toggleDualEditorMode());
+    toggleEditorMode();
   };
 
   const onClearEditor = () => {
-    dispatch(clearEditorActionCreator(editorContext));
+    dispatch(clearEditorActionCreator(clearEditors));
   };
 
   const editText = editorMode === EditorMode.DualQuery ? editPromptText : editQueryText;
