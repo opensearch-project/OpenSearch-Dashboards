@@ -181,6 +181,7 @@ export function NavGroups({
             panelPaddingSize="none"
             button={props.icon || <></>}
             triggerType="hover"
+            key={navOpen ? undefined : `popover-${appId}`}
           >
             <EuiPopoverTitle>
               <EuiTitle size="s">

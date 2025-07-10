@@ -20,7 +20,7 @@ $iconWidth: 16px;
 
     .nav-link-item-category-item {
       border-top: $euiBorderThin;
-      border-color: $euiColorMediumShade;
+      border-color: $euiBorderColor;
       margin-top: $euiSizeS;
       margin-bottom: $euiSizeS;
     }
@@ -28,7 +28,7 @@ $iconWidth: 16px;
     .leftNavSideNavWrapper {
       border-top: $euiBorderThin;
       border-bottom: $euiBorderThin;
-      border-color: $euiColorMediumShade;
+      border-color: $euiBorderColor;
       padding-top: $euiSizeS;
     }
 
