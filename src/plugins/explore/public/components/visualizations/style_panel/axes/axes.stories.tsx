@@ -6,12 +6,12 @@
 import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
-import { AxesOptions } from './axes_options';
-import { CategoryAxis, VisColumn, ValueAxis, VisFieldType, Positions } from '../types';
+import { AxesOptions } from './axes';
+import { CategoryAxis, VisColumn, ValueAxis, VisFieldType, Positions } from '../../types';
 
 export default {
   component: AxesOptions,
-  title: 'src/plugins/explore/public/components/visualizations/style_panel/axes_options',
+  title: 'src/plugins/explore/public/components/visualizations/style_panel/axes/axes.tsx',
 } as ComponentMeta<typeof AxesOptions>;
 
 // Mock data for the component props

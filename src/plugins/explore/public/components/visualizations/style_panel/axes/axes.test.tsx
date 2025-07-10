@@ -4,12 +4,12 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AxesOptions } from './axes_options';
-import { CategoryAxis, ValueAxis, VisColumn, VisFieldType, Positions } from '../types';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { AxesOptions } from './axes';
+import { CategoryAxis, ValueAxis, VisColumn, VisFieldType, Positions } from '../../types';
 
 // Mock the debounced value hooks
-jest.mock('../utils/use_debounced_value', () => {
+jest.mock('../../utils/use_debounced_value', () => {
   return {
     useDebouncedValue: jest.fn((initialValue, onChange) => {
       // Use Jest's mock function instead of React.useState
@@ -128,21 +128,25 @@ describe('AxesOptions', () => {
     expect(container).toBeInTheDocument();
   });
 
-  it('renders category axis section', () => {
+  it('renders X axis section', () => {
     render(<AxesOptions {...defaultProps} />);
-    expect(screen.getByText('Category Axis (X-Axis)')).toBeInTheDocument();
+    expect(screen.getByText('X-Axis')).toBeInTheDocument();
   });
 
-  it('renders value axis section', () => {
+  it('renders Y axis section', () => {
     render(<AxesOptions {...defaultProps} />);
-    expect(screen.getByText('Value Axes (Y-Axes)')).toBeInTheDocument();
+    expect(screen.getByText('Y-Axis')).toBeInTheDocument();
   });
 
   it('calls onCategoryAxesChange when position is changed', () => {
     render(<AxesOptions {...defaultProps} />);
-    const positionSelect = screen.getAllByRole('combobox')[0];
-    fireEvent.change(positionSelect, { target: { value: Positions.TOP } });
+    const splitButton = screen.getByTestId('categoryAxis-0-button');
+    fireEvent.click(splitButton);
 
+    const buttonGroup = screen.getByRole('group', { name: 'Select axis position' });
+    const topButton = within(buttonGroup).getByTestId('top');
+
+    fireEvent.click(topButton);
     expect(defaultProps.onCategoryAxesChange).toHaveBeenCalledWith([
       {
         ...mockCategoryAxes[0],
@@ -151,8 +155,29 @@ describe('AxesOptions', () => {
     ]);
   });
 
+  it('calls onValueAxesChange when position is changed', () => {
+    render(<AxesOptions {...defaultProps} />);
+    const splitButton = screen.getByTestId('valueAxis-0-button');
+    fireEvent.click(splitButton);
+
+    const buttonGroup = screen.getByRole('group', { name: 'Select axis position' });
+    const topButton = within(buttonGroup).getByTestId('left');
+
+    fireEvent.click(topButton);
+    expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith([
+      {
+        ...mockValueAxes[0],
+        position: Positions.LEFT,
+      },
+    ]);
+  });
+
   it('calls onCategoryAxesChange when show is toggled', () => {
     render(<AxesOptions {...defaultProps} />);
+
+    const splitButton = screen.getByTestId('categoryAxis-0-button');
+    fireEvent.click(splitButton);
+
     const showSwitch = screen.getAllByRole('switch')[0];
     fireEvent.click(showSwitch);
 
@@ -166,7 +191,11 @@ describe('AxesOptions', () => {
 
   it('calls onValueAxesChange when show is toggled', () => {
     render(<AxesOptions {...defaultProps} />);
-    const showSwitch = screen.getAllByRole('switch')[2];
+
+    const splitButton = screen.getByTestId('valueAxis-0-button');
+    fireEvent.click(splitButton);
+
+    const showSwitch = screen.getAllByRole('switch')[0];
     fireEvent.click(showSwitch);
 
     expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith([
@@ -179,6 +208,10 @@ describe('AxesOptions', () => {
 
   it('updates axis title with debounced value', async () => {
     render(<AxesOptions {...defaultProps} />);
+
+    const splitButton = screen.getByTestId('categoryAxis-0-button');
+    fireEvent.click(splitButton);
+
     const titleInput = screen.getAllByRole('textbox')[0];
     fireEvent.change(titleInput, { target: { value: 'New Title' } });
 
@@ -194,9 +227,12 @@ describe('AxesOptions', () => {
 
   it('updates label rotation when alignment is changed', () => {
     render(<AxesOptions {...defaultProps} />);
-    // Find all comboboxes and get the alignment select (usually the third one)
+
+    const splitButton = screen.getByTestId('categoryAxis-0-button');
+    fireEvent.click(splitButton);
+
     const comboboxes = screen.getAllByRole('combobox');
-    // Find the one that has options for alignment
+
     const alignmentSelect = comboboxes.find(
       (select) =>
         select.innerHTML.includes('horizontal') ||
@@ -221,6 +257,9 @@ describe('AxesOptions', () => {
 
   it('updates truncate value with debounced value', async () => {
     render(<AxesOptions {...defaultProps} />);
+    const splitButton = screen.getByTestId('categoryAxis-0-button');
+    fireEvent.click(splitButton);
+
     const truncateInput = screen.getAllByRole('spinbutton')[0];
     fireEvent.change(truncateInput, { target: { value: '50' } });
 
@@ -300,6 +339,9 @@ describe('AxesOptions', () => {
 
   it('shows/hides label options based on show labels toggle', () => {
     render(<AxesOptions {...defaultProps} />);
+
+    const splitButton = screen.getByTestId('categoryAxis-0-button');
+    fireEvent.click(splitButton);
 
     // Initially label options should be visible
     expect(screen.getAllByText('Aligned')[0]).toBeInTheDocument();

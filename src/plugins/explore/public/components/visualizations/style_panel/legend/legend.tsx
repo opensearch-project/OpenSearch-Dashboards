@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { EuiPanel, EuiFormRow, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { Positions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
 

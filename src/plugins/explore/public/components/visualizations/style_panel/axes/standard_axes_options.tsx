@@ -17,9 +17,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { StandardAxes, Positions, AxisRole } from '../types';
-import { DebouncedTruncateField, DebouncedText } from './utils';
-import { StyleAccordion } from '../style_panel/style_accordion';
+import { StandardAxes, Positions, AxisRole } from '../../types';
+import { DebouncedTruncateField, DebouncedText } from '.././utils';
+import { StyleAccordion } from '../../style_panel/style_accordion';
 
 interface AllAxesOptionsProps {
   standardAxes: StandardAxes[];
