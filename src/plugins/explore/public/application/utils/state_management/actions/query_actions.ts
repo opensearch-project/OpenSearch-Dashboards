@@ -54,7 +54,6 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   const fieldCounts: Record<string, number> = {};
   if (rawResults.hits && rawResults.hits.hits && dataset) {
     for (const hit of rawResults.hits.hits) {
-      // TODO: rocky shoudl this be flattened?
       const fields = Object.keys(hit._source);
       for (const fieldName of fields) {
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
@@ -211,17 +210,35 @@ const executeQueryBase = async (
 
     const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
+    // Ensure data views are properly initialized
+    await services.data.dataViews.ensureDefaultDataView();
+
     // Get Dataset
     let dataset;
-    if (query.dataset) {
-      dataset = await services.data.dataViews.get(
-        query.dataset.id,
-        query.dataset.type !== 'INDEX_PATTERN'
-      );
-    } else {
-      dataset = (services.data as any).dataset;
+    try {
+      if (query.dataset) {
+        // Try to get the dataset by ID
+        dataset = await services.data.dataViews.get(
+          query.dataset.id,
+          query.dataset.type !== 'INDEX_PATTERN'
+        );
+      } else {
+        // If no dataset in query, use the default one
+        dataset = await services.data.dataViews.getDefault();
+      }
+    } catch (error) {
+      // If we can't get the specific dataset, try to get the default one
+      if (!dataset) {
+        try {
+          dataset = await services.data.dataViews.getDefault();
+        } catch (defaultError) {
+          // If we can't get any dataset, throw an error
+          throw new Error('Unable to find any index pattern for query execution');
+        }
+      }
     }
 
+    // If we still don't have a dataset, throw an error
     if (!dataset) {
       throw new Error('IndexPattern not found for query execution');
     }

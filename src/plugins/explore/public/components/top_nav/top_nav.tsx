@@ -24,13 +24,8 @@ import {
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
 import { SavedExplore } from '../../saved_explore';
-import {
-  setDataset,
-  clearResults,
-  setQueryState,
-} from '../../application/utils/state_management/slices';
+import { setQueryState } from '../../application/utils/state_management/slices';
 import { setDatasetActionCreator } from '../../application/utils/state_management/actions/set_dataset';
-import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 import { useClearEditors } from '../../application/hooks';
 
 export interface TopNavProps {
@@ -157,11 +152,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const handleDatasetSelect = (newDataset: any) => {
     if (!newDataset) return;
-
-    // Update the query state with the new dataset
-    // Make sure we're using a serializable version of the dataset
     const currentQuery = queryString.getQuery();
-    // Check if dataset is a DataView instance (which has toDataset method)
     const serializableDataset =
       'toDataset' in newDataset && typeof (newDataset as any).toDataset === 'function'
         ? (newDataset as any).toDataset()

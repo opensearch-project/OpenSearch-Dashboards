@@ -33,10 +33,14 @@ export const setDatasetActionCreator = (
   let dataView;
   if (dataset && dataset.id) {
     try {
+      // Ensure the dataView is loaded before proceeding
+      await services.data.dataViews.ensureDefaultDataView();
+
       // Fetch the full DataView object
       dataView = await services.data.dataViews.get(dataset.id, dataset.type !== 'INDEX_PATTERN');
     } catch (error) {
       // Handle error if dataset cannot be found
+      // We'll continue without the dataView and let the query execution handle it
     }
   }
 
@@ -45,7 +49,8 @@ export const setDatasetActionCreator = (
 
   // If we have a valid DataView, update the dataset in the query state
   if (dataView && typeof dataView.toDataset === 'function') {
-    dispatch(setDataset(dataView.toDataset()));
+    const serializedDataset = dataView.toDataset();
+    dispatch(setDataset(serializedDataset));
   }
 
   if (newPromptModeIsAvailable !== promptModeIsAvailable) {
