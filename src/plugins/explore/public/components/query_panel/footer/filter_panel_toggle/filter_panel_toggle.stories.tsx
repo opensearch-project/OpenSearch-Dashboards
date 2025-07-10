@@ -21,7 +21,7 @@ const Template: ComponentStory<typeof FilterPanelToggle> = () => (
       reducer: rootReducer,
       preloadedState: {
         ui: {
-          showDatasetFields: true,
+          showFilterPanel: true,
         },
       } as RootState,
     })}

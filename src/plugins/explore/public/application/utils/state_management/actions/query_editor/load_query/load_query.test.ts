@@ -8,7 +8,7 @@ import { setEditorMode } from '../../../slices';
 import { EditorMode } from '../../../types';
 import { runQueryActionCreator } from '../run_query';
 import { ExploreServices } from '../../../../../../types';
-import { EditorContextValue } from '../../../../../context';
+import { useClearEditorsAndSetText } from '../../../../../hooks';
 import { AppDispatch, RootState } from '../../../store';
 
 // Mock the dependencies
@@ -29,7 +29,7 @@ describe('loadQueryActionCreator', () => {
   let mockDispatch: jest.MockedFunction<AppDispatch>;
   let mockGetState: jest.MockedFunction<() => RootState>;
   let mockServices: ExploreServices;
-  let mockEditorContext: EditorContextValue;
+  let mockClearEditorsAndSetText: jest.MockedFunction<ReturnType<typeof useClearEditorsAndSetText>>;
   const testQuery = '| where field="b"';
 
   beforeEach(() => {
@@ -46,15 +46,7 @@ describe('loadQueryActionCreator', () => {
       indexPatterns: {},
     } as ExploreServices;
 
-    mockEditorContext = {
-      editorText: 'current text',
-      setEditorText: jest.fn(),
-      clearEditors: jest.fn(),
-      clearEditorsAndSetText: jest.fn(),
-      setBottomEditorText: jest.fn(),
-      query: 'current query',
-      prompt: 'current prompt',
-    };
+    mockClearEditorsAndSetText = jest.fn();
 
     // Mock return values
     mockSetEditorMode.mockReturnValue({ type: 'SET_EDITOR_MODE', payload: EditorMode.SingleQuery });
@@ -71,15 +63,23 @@ describe('loadQueryActionCreator', () => {
     });
 
     it('should clear editors and set the query text', () => {
-      const actionCreator = loadQueryActionCreator(mockServices, mockEditorContext, testQuery);
+      const actionCreator = loadQueryActionCreator(
+        mockServices,
+        mockClearEditorsAndSetText,
+        testQuery
+      );
 
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.clearEditorsAndSetText).toHaveBeenCalledWith(testQuery);
+      expect(mockClearEditorsAndSetText).toHaveBeenCalledWith(testQuery);
     });
 
     it('should not dispatch setEditorMode since already in SingleQuery mode', () => {
-      const actionCreator = loadQueryActionCreator(mockServices, mockEditorContext, testQuery);
+      const actionCreator = loadQueryActionCreator(
+        mockServices,
+        mockClearEditorsAndSetText,
+        testQuery
+      );
 
       actionCreator(mockDispatch, mockGetState);
 
@@ -94,7 +94,11 @@ describe('loadQueryActionCreator', () => {
       const mockRunAction = jest.fn();
       mockRunQueryActionCreator.mockReturnValue(mockRunAction);
 
-      const actionCreator = loadQueryActionCreator(mockServices, mockEditorContext, testQuery);
+      const actionCreator = loadQueryActionCreator(
+        mockServices,
+        mockClearEditorsAndSetText,
+        testQuery
+      );
 
       actionCreator(mockDispatch, mockGetState);
 
@@ -113,15 +117,23 @@ describe('loadQueryActionCreator', () => {
     });
 
     it('should clear editors and set the query text', () => {
-      const actionCreator = loadQueryActionCreator(mockServices, mockEditorContext, testQuery);
+      const actionCreator = loadQueryActionCreator(
+        mockServices,
+        mockClearEditorsAndSetText,
+        testQuery
+      );
 
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockEditorContext.clearEditorsAndSetText).toHaveBeenCalledWith(testQuery);
+      expect(mockClearEditorsAndSetText).toHaveBeenCalledWith(testQuery);
     });
 
     it('should dispatch setEditorMode to change to SingleQuery mode', () => {
-      const actionCreator = loadQueryActionCreator(mockServices, mockEditorContext, testQuery);
+      const actionCreator = loadQueryActionCreator(
+        mockServices,
+        mockClearEditorsAndSetText,
+        testQuery
+      );
 
       actionCreator(mockDispatch, mockGetState);
 
@@ -136,7 +148,11 @@ describe('loadQueryActionCreator', () => {
       const mockRunAction = jest.fn();
       mockRunQueryActionCreator.mockReturnValue(mockRunAction);
 
-      const actionCreator = loadQueryActionCreator(mockServices, mockEditorContext, testQuery);
+      const actionCreator = loadQueryActionCreator(
+        mockServices,
+        mockClearEditorsAndSetText,
+        testQuery
+      );
 
       actionCreator(mockDispatch, mockGetState);
 

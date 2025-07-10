@@ -13,8 +13,8 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { ExploreServices } from '../../../../types';
 import { loadQueryActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { useTimeFilter } from '../../utils';
-import { useEditorContext } from '../../../../application/context';
 import { RECENT_QUERIES_TABLE_WRAPPER_EL } from '../../utils/constants';
+import { useClearEditorsAndSetText } from '../../../../application/hooks';
 
 const label = i18n.translate('explore.queryPanel.recentQueryLabel', {
   defaultMessage: 'Recent Queries',
@@ -22,7 +22,7 @@ const label = i18n.translate('explore.queryPanel.recentQueryLabel', {
 
 export const RecentQueriesButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const editorContext = useEditorContext();
+  const clearEditorsAndSetText = useClearEditorsAndSetText();
   const { handleTimeChange } = useTimeFilter();
   const dispatch = useDispatch();
   const [queriesAreVisible, setQueriesAreVisible] = useState(false);
@@ -43,7 +43,7 @@ export const RecentQueriesButton = () => {
         isQuickSelection: true,
       });
     }
-    dispatch(loadQueryActionCreator(services, editorContext, updatedQuery));
+    dispatch(loadQueryActionCreator(services, clearEditorsAndSetText, updatedQuery));
   };
 
   return (

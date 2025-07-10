@@ -11,6 +11,7 @@ export interface QueryEditorSliceState {
   queryStatus: QueryResultStatus;
   editorMode: EditorMode;
   promptModeIsAvailable: boolean;
+  lastExecutedPrompt: string;
 }
 
 const initialState: QueryEditorSliceState = {
@@ -22,6 +23,7 @@ const initialState: QueryEditorSliceState = {
   },
   editorMode: DEFAULT_EDITOR_MODE,
   promptModeIsAvailable: false,
+  lastExecutedPrompt: '',
 };
 
 const queryEditorSlice = createSlice({
@@ -43,15 +45,8 @@ const queryEditorSlice = createSlice({
     setPromptModeIsAvailable: (state, action: PayloadAction<boolean>) => {
       state.promptModeIsAvailable = action.payload;
     },
-    resetEditorMode: (state) => {
-      state.editorMode = DEFAULT_EDITOR_MODE;
-    },
-    toggleDualEditorMode: (state) => {
-      if (state.editorMode === EditorMode.DualQuery) {
-        state.editorMode = EditorMode.DualPrompt;
-      } else if (state.editorMode === EditorMode.DualPrompt) {
-        state.editorMode = EditorMode.DualQuery;
-      }
+    setLastExecutedPrompt: (state, action: PayloadAction<string>) => {
+      state.lastExecutedPrompt = action.payload;
     },
   },
 });
@@ -61,10 +56,8 @@ export const {
   setQueryStatus,
   updateQueryStatus,
   setEditorMode,
-  // TODO: Need to use this when we change data set
+  setLastExecutedPrompt,
   setPromptModeIsAvailable,
-  resetEditorMode,
-  toggleDualEditorMode,
 } = queryEditorSlice.actions;
 export const queryEditorReducer = queryEditorSlice.reducer;
 export const queryEditorInitialState = initialState;
