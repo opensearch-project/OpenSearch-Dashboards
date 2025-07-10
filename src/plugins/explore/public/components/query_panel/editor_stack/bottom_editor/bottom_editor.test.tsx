@@ -25,8 +25,8 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   ),
   withOpenSearchDashboards: jest.fn((component: any) => component),
 }));
-jest.mock('../../../../application/context', () => ({
-  useEditorContextByEditorComponent: jest.fn(),
+jest.mock('../../../../application/hooks', () => ({
+  useBottomEditorText: jest.fn(),
 }));
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -38,24 +38,18 @@ import {
   selectEditorMode,
   selectIsDualEditorMode,
 } from '../../../../application/utils/state_management/selectors';
-import { useEditorContextByEditorComponent } from '../../../../application/context';
+import { useBottomEditorText } from '../../../../application/hooks';
 
 const mockUseBottomEditor = useBottomEditor as jest.MockedFunction<typeof useBottomEditor>;
 const mockSelectEditorMode = selectEditorMode as jest.MockedFunction<typeof selectEditorMode>;
 const mockSelectIsDualEditorMode = selectIsDualEditorMode as jest.MockedFunction<
   typeof selectIsDualEditorMode
 >;
-const mockUseEditorContextByEditorComponent = useEditorContextByEditorComponent as jest.MockedFunction<
-  typeof useEditorContextByEditorComponent
+const mockUseBottomEditorText = useBottomEditorText as jest.MockedFunction<
+  typeof useBottomEditorText
 >;
 
 describe('BottomEditor', () => {
-  const mockBottomEditorRef = {
-    current: {
-      focus: jest.fn(),
-    },
-  };
-
   const mockEditorProps = {
     value: 'SELECT * FROM logs',
     onChange: jest.fn(),
@@ -74,10 +68,7 @@ describe('BottomEditor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseEditorContextByEditorComponent.mockReturnValue({
-      bottomEditorRef: mockBottomEditorRef,
-      bottomEditorText: '',
-    } as any);
+    mockUseBottomEditorText.mockReturnValue('');
     mockUseBottomEditor.mockReturnValue({
       isFocused: false,
       ...mockEditorProps,
@@ -165,22 +156,6 @@ describe('BottomEditor', () => {
     expect(editor).not.toHaveClass('queryEditor--focused');
   });
 
-  it('focuses editor when switching to dual query mode', () => {
-    mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
-
-    renderWithProvider(<BottomEditor />);
-
-    expect(mockBottomEditorRef.current.focus).toHaveBeenCalled();
-  });
-
-  it('does not focus editor when not in dual query mode', () => {
-    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
-
-    renderWithProvider(<BottomEditor />);
-
-    expect(mockBottomEditorRef.current.focus).not.toHaveBeenCalled();
-  });
-
   it('passes correct props to CodeEditor', () => {
     const customProps = {
       isFocused: false,
@@ -202,10 +177,7 @@ describe('BottomEditor', () => {
 
   it('shows placeholder when text is empty and not readonly', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
-    mockUseEditorContextByEditorComponent.mockReturnValue({
-      bottomEditorRef: mockBottomEditorRef,
-      bottomEditorText: '',
-    } as any);
+    mockUseBottomEditorText.mockReturnValue('');
 
     renderWithProvider(<BottomEditor />);
 
@@ -214,10 +186,7 @@ describe('BottomEditor', () => {
 
   it('does not show placeholder when text is present', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
-    mockUseEditorContextByEditorComponent.mockReturnValue({
-      bottomEditorRef: mockBottomEditorRef,
-      bottomEditorText: 'SELECT * FROM logs',
-    } as any);
+    mockUseBottomEditorText.mockReturnValue('SELECT * FROM logs');
 
     renderWithProvider(<BottomEditor />);
 
@@ -226,10 +195,7 @@ describe('BottomEditor', () => {
 
   it('does not show placeholder when readonly', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
-    mockUseEditorContextByEditorComponent.mockReturnValue({
-      bottomEditorRef: mockBottomEditorRef,
-      bottomEditorText: '',
-    } as any);
+    mockUseBottomEditorText.mockReturnValue('');
 
     renderWithProvider(<BottomEditor />);
 

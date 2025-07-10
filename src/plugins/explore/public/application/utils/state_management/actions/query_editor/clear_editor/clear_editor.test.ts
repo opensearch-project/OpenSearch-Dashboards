@@ -4,63 +4,88 @@
  */
 
 import { clearEditorActionCreator } from './clear_editor';
-import { resetEditorMode } from '../../../slices';
-import { EditorContextValue } from '../../../../../context';
+import { setEditorMode } from '../../../slices';
+import { EditorMode } from '../../../types';
 
-// Mock the resetEditorMode action
+// Mock the setEditorMode action
 jest.mock('../../../slices', () => ({
-  resetEditorMode: jest.fn(),
+  setEditorMode: jest.fn(),
 }));
 
-const mockResetEditorMode = resetEditorMode as jest.MockedFunction<typeof resetEditorMode>;
+const mockSetEditorMode = setEditorMode as jest.MockedFunction<typeof setEditorMode>;
 
 describe('clearEditorActionCreator', () => {
+  let mockClearEditors = jest.fn();
   let mockDispatch: jest.MockedFunction<any>;
-  let mockEditorContext: EditorContextValue;
+  let mockGetState: jest.MockedFunction<any>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockDispatch = jest.fn();
+    mockGetState = jest.fn();
 
-    mockEditorContext = {
-      editorText: 'test text',
-      setEditorText: jest.fn(),
-      clearEditors: jest.fn(),
-      clearEditorsAndSetText: jest.fn(),
-      setBottomEditorText: jest.fn(),
-      query: 'test query',
-      prompt: 'test prompt',
-    };
-
-    // Mock the return value of resetEditorMode
-    mockResetEditorMode.mockReturnValue({
-      type: 'queryEditor/resetEditorMode',
-      payload: undefined,
+    // Mock the return value of setEditorMode
+    mockSetEditorMode.mockReturnValue({
+      type: 'queryEditor/setEditorMode',
+      payload: EditorMode.SingleEmpty,
     });
   });
 
   it('should call clearEditors on the editor context', () => {
-    const actionCreator = clearEditorActionCreator(mockEditorContext);
+    mockGetState.mockReturnValue({
+      queryEditor: { promptModeIsAvailable: true },
+    });
 
-    actionCreator(mockDispatch);
+    const actionCreator = clearEditorActionCreator(mockClearEditors);
+    actionCreator(mockDispatch, mockGetState);
 
-    expect(mockEditorContext.clearEditors).toHaveBeenCalledTimes(1);
+    expect(mockClearEditors).toHaveBeenCalledTimes(1);
   });
 
-  it('should dispatch resetEditorMode action', () => {
-    const actionCreator = clearEditorActionCreator(mockEditorContext);
+  it('should dispatch setEditorMode with SingleEmpty when promptModeIsAvailable is true', () => {
+    mockGetState.mockReturnValue({
+      queryEditor: { promptModeIsAvailable: true },
+    });
 
-    actionCreator(mockDispatch);
+    const actionCreator = clearEditorActionCreator(mockClearEditors);
+    actionCreator(mockDispatch, mockGetState);
 
-    expect(mockResetEditorMode).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'queryEditor/resetEditorMode' });
+    expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'queryEditor/setEditorMode',
+      payload: EditorMode.SingleEmpty,
+    });
   });
 
-  it('should call clearEditors before dispatching resetEditorMode', () => {
+  it('should dispatch setEditorMode with SingleQuery when promptModeIsAvailable is false', () => {
+    mockGetState.mockReturnValue({
+      queryEditor: { promptModeIsAvailable: false },
+    });
+
+    mockSetEditorMode.mockReturnValue({
+      type: 'queryEditor/setEditorMode',
+      payload: EditorMode.SingleQuery,
+    });
+
+    const actionCreator = clearEditorActionCreator(mockClearEditors);
+    actionCreator(mockDispatch, mockGetState);
+
+    expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'queryEditor/setEditorMode',
+      payload: EditorMode.SingleQuery,
+    });
+  });
+
+  it('should call clearEditors before dispatching setEditorMode', () => {
     const calls: string[] = [];
 
-    mockEditorContext.clearEditors = jest.fn(() => {
+    mockGetState.mockReturnValue({
+      queryEditor: { promptModeIsAvailable: true },
+    });
+
+    mockClearEditors = jest.fn(() => {
       calls.push('clearEditors');
     });
 
@@ -68,8 +93,8 @@ describe('clearEditorActionCreator', () => {
       calls.push('dispatch');
     });
 
-    const actionCreator = clearEditorActionCreator(mockEditorContext);
-    actionCreator(mockDispatch);
+    const actionCreator = clearEditorActionCreator(mockClearEditors);
+    actionCreator(mockDispatch, mockGetState);
 
     expect(calls).toEqual(['clearEditors', 'dispatch']);
   });

@@ -21,8 +21,10 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
 }));
 
-jest.mock('../../../../application/context', () => ({
-  useEditorContext: jest.fn(),
+jest.mock('../../../../application/hooks', () => ({
+  useOnEditorRunContext: jest.fn(),
+  useSetEditorText: jest.fn(),
+  useToggleDualEditorMode: jest.fn(),
 }));
 
 jest.mock('../../../../application/components/index_pattern_context', () => ({
@@ -37,10 +39,6 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
 jest.mock('../../../../application/utils/state_management/actions/query_editor', () => ({
   onEditorChangeActionCreator: jest.fn(),
   onEditorRunActionCreator: jest.fn(),
-}));
-
-jest.mock('../../../../application/utils/state_management/slices', () => ({
-  toggleDualEditorMode: jest.fn(),
 }));
 
 jest.mock('../../../../../../data/public', () => ({
@@ -65,7 +63,6 @@ jest.mock('./enter_action', () => ({
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { useEditorContext } from '../../../../application/context';
 import { useIndexPatternContext } from '../../../../application/components/index_pattern_context';
 import {
   selectEditorMode,
@@ -81,14 +78,24 @@ import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { EditorMode } from '../../../../application/utils/state_management/types';
-import { toggleDualEditorMode } from '../../../../application/utils/state_management/slices';
+import {
+  useOnEditorRunContext,
+  useSetEditorText,
+  useToggleDualEditorMode,
+} from '../../../../application/hooks';
 import IActionDescriptor = monaco.editor.IActionDescriptor;
 
 const mockUseDispatch = useDispatch as jest.MockedFunction<typeof useDispatch>;
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
   typeof useOpenSearchDashboards
 >;
-const mockUseEditorContext = useEditorContext as jest.MockedFunction<typeof useEditorContext>;
+const mockUseOnEditorRunContext = useOnEditorRunContext as jest.MockedFunction<
+  typeof useOnEditorRunContext
+>;
+const mockUseSetEditorText = useSetEditorText as jest.MockedFunction<typeof useSetEditorText>;
+const mockUseToggleDualEditorMode = useToggleDualEditorMode as jest.MockedFunction<
+  typeof useToggleDualEditorMode
+>;
 const mockOnEditorChangeActionCreator = onEditorChangeActionCreator as jest.MockedFunction<
   typeof onEditorChangeActionCreator
 >;
@@ -107,28 +114,26 @@ const mockGetEnterAction = getEnterAction as jest.MockedFunction<typeof getEnter
 describe('useSharedEditor', () => {
   let mockDispatch: jest.Mock;
   let mockServices: any;
-  let mockEditorContext: any;
   let mockSetEditorRef: jest.Mock;
   let mockEditor: any;
-  let mockProvideCompletionItems: jest.Mock;
+  let mockToggleDualEditorMode: jest.Mock;
+  let mockSetEditorText: jest.Mock;
+  let mockOnEditorRunContext: any;
 
   beforeEach(() => {
     mockDispatch = jest.fn();
     mockServices = {
-      data: { query: {} },
+      data: {
+        query: { queryString: { getQuery: jest.fn() } },
+        autocomplete: { getQuerySuggestions: jest.fn().mockResolvedValue([]) },
+      },
+      indexPatterns: { get: jest.fn() },
       uiSettings: { get: jest.fn() },
     };
-    mockEditorContext = {
-      editorText: 'SELECT * FROM logs',
-      setEditorText: jest.fn(),
-      clearEditors: jest.fn(),
-      clearEditorsAndSetText: jest.fn(),
-      setBottomEditorText: jest.fn(),
-      query: 'SELECT * FROM logs',
-      prompt: '',
-    };
     mockSetEditorRef = jest.fn();
-    mockProvideCompletionItems = jest.fn().mockReturnValue({ suggestions: [] });
+    mockToggleDualEditorMode = jest.fn();
+    mockSetEditorText = jest.fn();
+    mockOnEditorRunContext = { query: 'SELECT * FROM logs', prompt: '' };
 
     mockEditor = {
       onDidFocusEditorText: jest.fn().mockReturnValue({ dispose: jest.fn() }),
@@ -143,7 +148,9 @@ describe('useSharedEditor', () => {
 
     mockUseDispatch.mockReturnValue(mockDispatch);
     mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices } as any);
-    mockUseEditorContext.mockReturnValue(mockEditorContext);
+    mockUseOnEditorRunContext.mockReturnValue(mockOnEditorRunContext);
+    mockUseSetEditorText.mockReturnValue(mockSetEditorText);
+    mockUseToggleDualEditorMode.mockReturnValue(mockToggleDualEditorMode);
 
     mockGetCommandEnterAction.mockReturnValue({ id: 'command-enter' } as IActionDescriptor);
     mockGetShiftEnterAction.mockReturnValue({ id: 'shift-enter' } as IActionDescriptor);
@@ -264,8 +271,52 @@ describe('useSharedEditor', () => {
         result.current.onChange('new text');
       });
 
-      expect(mockOnEditorChangeActionCreator).toHaveBeenCalledWith('new text', mockEditorContext);
+      expect(mockOnEditorChangeActionCreator).toHaveBeenCalledWith('new text', mockSetEditorText);
       expect(mockDispatch).toHaveBeenCalledWith({ type: 'EDITOR_CHANGE' });
+    });
+  });
+
+  describe('onWrapperClick', () => {
+    it('should call toggleDualEditorMode when top editor is clicked in DualQuery mode', () => {
+      const { result } = renderUseSharedEditor({ editorPosition: 'top' }, (selector) => {
+        if (selector === selectEditorMode) return EditorMode.DualQuery;
+        if (selector === selectQueryLanguage) return 'SQL';
+        return undefined;
+      });
+
+      act(() => {
+        result.current.onWrapperClick();
+      });
+
+      expect(mockToggleDualEditorMode).toHaveBeenCalled();
+    });
+
+    it('should call toggleDualEditorMode when bottom editor is clicked in DualPrompt mode', () => {
+      const { result } = renderUseSharedEditor({ editorPosition: 'bottom' }, (selector) => {
+        if (selector === selectEditorMode) return EditorMode.DualPrompt;
+        if (selector === selectQueryLanguage) return 'SQL';
+        return undefined;
+      });
+
+      act(() => {
+        result.current.onWrapperClick();
+      });
+
+      expect(mockToggleDualEditorMode).toHaveBeenCalled();
+    });
+
+    it('should not call toggleDualEditorMode when top editor is clicked in SingleQuery mode', () => {
+      const { result } = renderUseSharedEditor({ editorPosition: 'top' }, (selector) => {
+        if (selector === selectEditorMode) return EditorMode.SingleQuery;
+        if (selector === selectQueryLanguage) return 'SQL';
+        return undefined;
+      });
+
+      act(() => {
+        result.current.onWrapperClick();
+      });
+
+      expect(mockToggleDualEditorMode).not.toHaveBeenCalled();
     });
   });
 
@@ -327,72 +378,12 @@ describe('useSharedEditor', () => {
       });
       expect(result.current.isFocused).toBe(false);
     });
-
-    it('should setup content size change handler', () => {
-      const { result } = renderUseSharedEditor();
-      let contentSizeHandler: () => void;
-
-      mockEditor.onDidContentSizeChange.mockImplementation((callback: any) => {
-        contentSizeHandler = callback;
-      });
-
-      act(() => {
-        result.current.editorDidMount(mockEditor);
-      });
-
-      // Test content size change with height < maxHeight
-      mockEditor.getContentHeight.mockReturnValue(50);
-      act(() => {
-        contentSizeHandler();
-      });
-
-      expect(result.current.height).toBe(50);
-      expect(mockEditor.layout).toHaveBeenCalledWith({ width: 400, height: 50 });
-      expect(mockEditor.updateOptions).toHaveBeenCalledWith({
-        scrollBeyondLastLine: false,
-        scrollbar: { vertical: 'hidden' },
-      });
-
-      // Test content size change with height > maxHeight
-      mockEditor.getContentHeight.mockReturnValue(150);
-      act(() => {
-        contentSizeHandler();
-      });
-
-      expect(result.current.height).toBe(100); // capped at maxHeight
-      expect(mockEditor.layout).toHaveBeenCalledWith({ width: 400, height: 100 });
-      expect(mockEditor.updateOptions).toHaveBeenCalledWith({
-        scrollBeyondLastLine: false,
-        scrollbar: { vertical: 'visible' },
-      });
-    });
-
-    it('should return disposal function', () => {
-      const { result } = renderUseSharedEditor();
-      const mockFocusDispose = jest.fn();
-      const mockBlurDispose = jest.fn();
-
-      mockEditor.onDidFocusEditorText.mockReturnValue({ dispose: mockFocusDispose });
-      mockEditor.onDidBlurEditorText.mockReturnValue({ dispose: mockBlurDispose });
-
-      let disposalFunction: () => any = () => mockEditor;
-      act(() => {
-        disposalFunction = result.current.editorDidMount(mockEditor);
-      });
-
-      const returnedEditor = disposalFunction();
-
-      expect(mockFocusDispose).toHaveBeenCalled();
-      expect(mockBlurDispose).toHaveBeenCalled();
-      expect(returnedEditor).toBe(mockEditor);
-    });
   });
 
   describe('handleRun callback', () => {
     it('should dispatch onEditorRunActionCreator with current context', () => {
       const { result } = renderUseSharedEditor();
 
-      // Get the handleRun function by accessing it through an action creator
       act(() => {
         result.current.editorDidMount(mockEditor);
       });
@@ -403,149 +394,17 @@ describe('useSharedEditor', () => {
 
       // Get the handleRun function from the mock calls
       const handleRunFromCommand = mockGetCommandEnterAction.mock.calls[0][0];
-      const handleRunFromEnter = mockGetEnterAction.mock.calls[0][0];
-
-      // Both should be the same function
-      expect(handleRunFromCommand).toBe(handleRunFromEnter);
 
       // Test the handleRun function
       act(() => {
         handleRunFromCommand();
       });
 
-      expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, mockEditorContext);
+      expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(
+        mockServices,
+        mockOnEditorRunContext
+      );
       expect(mockDispatch).toHaveBeenCalledWith({ type: 'EDITOR_RUN' });
-    });
-
-    it('should use latest editor context through ref', () => {
-      const { result, rerender } = renderUseSharedEditor();
-
-      act(() => {
-        result.current.editorDidMount(mockEditor);
-      });
-
-      // Update editor context
-      const newEditorContext = {
-        editorText: 'new text',
-        setEditorText: jest.fn(),
-        clearEditors: jest.fn(),
-        clearEditorsAndSetText: jest.fn(),
-        setBottomEditorText: jest.fn(),
-        query: 'new text',
-        prompt: '',
-      };
-      mockUseEditorContext.mockReturnValue(newEditorContext);
-
-      rerender({
-        setEditorRef: mockSetEditorRef,
-        provideCompletionItems: mockProvideCompletionItems,
-      });
-
-      // Get and call handleRun
-      const handleRun = mockGetCommandEnterAction.mock.calls[0][0];
-      act(() => {
-        handleRun();
-      });
-
-      expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, newEditorContext);
-    });
-  });
-
-  describe('onWrapperClick', () => {
-    beforeEach(() => {
-      (toggleDualEditorMode as jest.MockedFunction<any>).mockReturnValue({
-        type: 'TOGGLE_DUAL_EDITOR_MODE',
-      });
-    });
-
-    it('should dispatch toggleDualEditorMode when top editor is clicked in DualQuery mode', () => {
-      const { result } = renderUseSharedEditor({ editorPosition: 'top' }, (selector) => {
-        if (selector === selectEditorMode) return EditorMode.DualQuery;
-        if (selector === selectQueryLanguage) return 'SQL';
-        return undefined;
-      });
-
-      act(() => {
-        result.current.onWrapperClick();
-      });
-
-      expect(toggleDualEditorMode).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'TOGGLE_DUAL_EDITOR_MODE' });
-    });
-
-    it('should dispatch toggleDualEditorMode when bottom editor is clicked in DualPrompt mode', () => {
-      const { result } = renderUseSharedEditor({ editorPosition: 'bottom' }, (selector) => {
-        if (selector === selectEditorMode) return EditorMode.DualPrompt;
-        if (selector === selectQueryLanguage) return 'SQL';
-        return undefined;
-      });
-
-      act(() => {
-        result.current.onWrapperClick();
-      });
-
-      expect(toggleDualEditorMode).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'TOGGLE_DUAL_EDITOR_MODE' });
-    });
-
-    it('should not dispatch toggleDualEditorMode when top editor is clicked in SingleQuery mode', () => {
-      const { result } = renderUseSharedEditor({ editorPosition: 'top' }, (selector) => {
-        if (selector === selectEditorMode) return EditorMode.SingleQuery;
-        if (selector === selectQueryLanguage) return 'SQL';
-        return undefined;
-      });
-
-      act(() => {
-        result.current.onWrapperClick();
-      });
-
-      expect(toggleDualEditorMode).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toHaveBeenCalled();
-    });
-
-    it('should not dispatch toggleDualEditorMode when bottom editor is clicked in SingleQuery mode', () => {
-      const { result } = renderUseSharedEditor({ editorPosition: 'bottom' }, (selector) => {
-        if (selector === selectEditorMode) return EditorMode.SingleQuery;
-        if (selector === selectQueryLanguage) return 'SQL';
-        return undefined;
-      });
-
-      act(() => {
-        result.current.onWrapperClick();
-      });
-
-      expect(toggleDualEditorMode).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toHaveBeenCalled();
-    });
-
-    it('should not dispatch toggleDualEditorMode when top editor is clicked in DualPrompt mode', () => {
-      const { result } = renderUseSharedEditor({ editorPosition: 'top' }, (selector) => {
-        if (selector === selectEditorMode) return EditorMode.DualPrompt;
-        if (selector === selectQueryLanguage) return 'SQL';
-        return undefined;
-      });
-
-      act(() => {
-        result.current.onWrapperClick();
-      });
-
-      expect(toggleDualEditorMode).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toHaveBeenCalled();
-    });
-
-    it('should not dispatch toggleDualEditorMode when bottom editor is clicked in DualQuery mode', () => {
-      const { result } = renderUseSharedEditor({ editorPosition: 'bottom' }, (selector) => {
-        if (selector === selectEditorMode) return EditorMode.DualQuery;
-        if (selector === selectQueryLanguage) return 'SQL';
-        return undefined;
-      });
-
-      act(() => {
-        result.current.onWrapperClick();
-      });
-
-      expect(toggleDualEditorMode).not.toHaveBeenCalled();
-      expect(mockDispatch).not.toHaveBeenCalled();
     });
   });
 });

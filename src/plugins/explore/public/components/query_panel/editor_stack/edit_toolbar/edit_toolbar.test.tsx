@@ -10,8 +10,9 @@ import { configureStore } from '@reduxjs/toolkit';
 import { EditToolbar } from './edit_toolbar';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 
-jest.mock('../../../../application/utils/state_management/slices', () => ({
-  toggleDualEditorMode: jest.fn(),
+jest.mock('../../../../application/hooks', () => ({
+  useClearEditors: jest.fn(),
+  useToggleDualEditorMode: jest.fn(),
 }));
 
 jest.mock('../../../../application/utils/state_management/actions/query_editor', () => ({
@@ -22,33 +23,29 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectEditorMode: jest.fn(),
 }));
 
-jest.mock('../../../../application/context', () => ({
-  useEditorContext: jest.fn(),
-}));
-
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useDispatch: () => mockDispatch,
   useSelector: (selector: any) => selector(),
 }));
 
-import { toggleDualEditorMode } from '../../../../application/utils/state_management/slices';
 import { clearEditorActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { selectEditorMode } from '../../../../application/utils/state_management/selectors';
-import { useEditorContext } from '../../../../application/context';
+import { useClearEditors, useToggleDualEditorMode } from '../../../../application/hooks';
 
 const mockDispatch = jest.fn();
-const mockToggleDualEditorMode = toggleDualEditorMode as jest.MockedFunction<
-  typeof toggleDualEditorMode
->;
+const mockToggleDualEditorMode = jest.fn();
 const mockClearEditorActionCreator = clearEditorActionCreator as jest.MockedFunction<
   typeof clearEditorActionCreator
 >;
 const mockSelectEditorMode = selectEditorMode as jest.MockedFunction<typeof selectEditorMode>;
-const mockUseEditorContext = useEditorContext as jest.MockedFunction<typeof useEditorContext>;
+const mockUseClearEditors = useClearEditors as jest.MockedFunction<typeof useClearEditors>;
+const mockUseToggleDualEditorMode = useToggleDualEditorMode as jest.MockedFunction<
+  typeof useToggleDualEditorMode
+>;
 
 describe('EditToolbar', () => {
-  const mockEditorContext = {
+  const mockClearEditors = {
     editorText: 'SELECT * FROM logs',
     dataset: undefined,
   };
@@ -63,9 +60,9 @@ describe('EditToolbar', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseEditorContext.mockReturnValue(mockEditorContext as any);
+    mockUseClearEditors.mockReturnValue(mockClearEditors as any);
     mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
-    mockToggleDualEditorMode.mockReturnValue({ type: 'TOGGLE_DUAL_EDITOR_MODE' } as any);
+    mockUseToggleDualEditorMode.mockReturnValue(mockToggleDualEditorMode);
     mockClearEditorActionCreator.mockReturnValue({ type: 'CLEAR_EDITOR' } as any);
   });
 
@@ -113,14 +110,13 @@ describe('EditToolbar', () => {
     expect(clearButton).toBeInTheDocument();
   });
 
-  it('dispatches toggleDualEditorMode when edit button is clicked', () => {
+  it('calls toggleDualEditorMode function when edit button is clicked', () => {
     renderWithProvider(<EditToolbar />);
 
     const editButton = screen.getByRole('button', { name: /edit query/i });
     fireEvent.click(editButton);
 
     expect(mockToggleDualEditorMode).toHaveBeenCalled();
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'TOGGLE_DUAL_EDITOR_MODE' });
   });
 
   it('dispatches clearEditorActionCreator when clear button is clicked', () => {
@@ -129,23 +125,23 @@ describe('EditToolbar', () => {
     const clearButton = screen.getByRole('button', { name: /clear editor/i });
     fireEvent.click(clearButton);
 
-    expect(mockClearEditorActionCreator).toHaveBeenCalledWith(mockEditorContext);
+    expect(mockClearEditorActionCreator).toHaveBeenCalledWith(mockClearEditors);
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'CLEAR_EDITOR' });
   });
 
-  it('passes correct editor context to clear action', () => {
-    const customEditorContext = {
+  it('passes correct clear editors data to clear action', () => {
+    const customClearEditors = {
       editorText: 'SELECT COUNT(*) FROM users',
       dataset: { id: 'test-dataset' },
     };
 
-    mockUseEditorContext.mockReturnValue(customEditorContext as any);
+    mockUseClearEditors.mockReturnValue(customClearEditors as any);
 
     renderWithProvider(<EditToolbar />);
 
     const clearButton = screen.getByRole('button', { name: /clear editor/i });
     fireEvent.click(clearButton);
 
-    expect(mockClearEditorActionCreator).toHaveBeenCalledWith(customEditorContext);
+    expect(mockClearEditorActionCreator).toHaveBeenCalledWith(customClearEditors);
   });
 });
