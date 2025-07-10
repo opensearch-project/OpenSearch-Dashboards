@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
@@ -65,9 +64,6 @@ import { DocViewsRegistry } from './types/doc_views_types';
 import { ExploreEmbeddableFactory } from './embeddable';
 import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
 import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
-import { reactToUiComponent } from '../../opensearch_dashboards_react/public';
-import { VisualizationActionMenuItem } from './helpers/visualization_action_menu';
-import { ActionExecutionContext } from '../../ui_actions/public';
 
 export class ExplorePlugin
   implements
@@ -505,9 +501,10 @@ export class ExplorePlugin
       }),
       icon: 'visualizeApp',
       stage: 'production',
-      // We only want explore visualization type avaialble for observability
-      // type of workspace, so make it as hidden initially
-      hidden: true,
+      promotion: {
+        buttonText: exploreVisDisplayName,
+        description: 'Build query-powered visualizations',
+      },
       appExtensions: {
         visualizations: {
           docTypes: [SAVED_OBJECT_TYPE],
@@ -548,35 +545,32 @@ export class ExplorePlugin
     const [coreStart, pluginsStart] = await core.getStartServices();
     const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
     if (isExploreEnabledWorkspace) {
+      const dashboardVisActions = pluginsStart.uiActions.getTriggerActions(
+        DASHBOARD_ADD_PANEL_TRIGGER
+      );
+      const visTypes = pluginsStart.visualizations.all();
+      const aliasTypes = pluginsStart.visualizations.getAliases();
+      const allVisTypes = [...visTypes, ...aliasTypes];
+      dashboardVisActions.forEach((action) => {
+        const visOfAction = allVisTypes.find((vis) => action.id === `add_vis_action_${vis.name}`);
+        if (visOfAction && visOfAction.isClassic) {
+          action.grouping?.push({
+            id: 'others',
+            getDisplayName: () => 'More',
+            getIconType: () => 'boxesHorizontal',
+          });
+        }
+      });
+    } else {
       const registeredVisAlias = pluginsStart.visualizations
         .getAliases()
         .find((v) => v.name === this.DISCOVER_VISUALIZATION_NAME);
 
-      // if current workspace has explore enabled, the explore visualization ingress should be not hidden
+      // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
       if (registeredVisAlias) {
-        registeredVisAlias.hidden = false;
+        // Do not display it in the create vis modal
+        registeredVisAlias.hidden = true;
       }
-
-      // Register explore visualization to dashboard add vis panel list
-      pluginsStart.uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
-        id: `add_vis_action_explore`,
-        getIconType: () => 'visualizeApp',
-        order: 1,
-        MenuItem: reactToUiComponent<{ onClick: () => void; context: ActionExecutionContext }>(
-          (props) =>
-            React.createElement(VisualizationActionMenuItem, {
-              exploreVisDisplayName,
-              onClick: () => {
-                props.onClick();
-              },
-            })
-        ),
-        execute: async () => {
-          coreStart.application.navigateToApp(`${PLUGIN_ID}/${ExploreFlavor.Logs}`, {
-            replace: true,
-          });
-        },
-      });
     }
   }
 

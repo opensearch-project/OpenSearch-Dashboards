@@ -61,6 +61,7 @@ export interface VisType<TVisParams = unknown> {
   readonly stage: 'experimental' | 'beta' | 'production';
   readonly requiresSearch: boolean;
   readonly useCustomNoDataScreen: boolean;
+  readonly isClassic?: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly inspectorAdapters?: Adapters | (() => Adapters);
   /**
