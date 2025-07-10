@@ -7,6 +7,7 @@ import { i18n } from '@osd/i18n';
 import { SavedObjectAttributes, SimpleSavedObject } from 'opensearch-dashboards/public';
 
 import { UiActionsStart } from '../../../ui_actions/public';
+// TODO: should not use getServices from legacy any more
 import { getServices } from '../application/legacy/discover/opensearch_dashboards_services';
 import {
   EmbeddableFactoryDefinition,
