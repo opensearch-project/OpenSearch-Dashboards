@@ -1,0 +1,2 @@
+feat:
+- Make log table columns to be controlled by query result ([#10109](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10109))

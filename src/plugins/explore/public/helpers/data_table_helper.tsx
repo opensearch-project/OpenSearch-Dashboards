@@ -86,7 +86,7 @@ export function getLegacyDisplayedColumns(
   hideTimeField: boolean,
   isShortDots: boolean
 ): LegacyDisplayedColumn[] {
-  if (!Array.isArray(columns) || typeof indexPattern !== 'object' || !indexPattern.getFieldByName) {
+  if (!Array.isArray(columns) || !indexPattern || !indexPattern.getFieldByName) {
     return [];
   }
   // TODO: Remove overrides once we support PPL/SQL sorting
@@ -97,7 +97,8 @@ export function getLegacyDisplayedColumns(
       name: column,
       displayName: isShortDots ? shortenDottedString(column) : column,
       isSortable: osdFieldOverrides.sortable ?? !!field?.sortable,
-      isRemoveable: column !== '_source' || columns.length > 1,
+      // Explore will not support remove columns from UI
+      isRemoveable: false,
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
       colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
     };
