@@ -15,6 +15,9 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiPopover,
+  EuiContextMenu,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   ReactFlow,
@@ -45,7 +48,6 @@ interface SpanHit {
   };
 }
 
-// Define node data interface for better type safety
 interface ServiceNodeData {
   label: string;
   spanCount: number;
@@ -58,7 +60,7 @@ interface ServiceNodeData {
     maxErrorRate: number;
     maxDuration: number;
   };
-  [key: string]: unknown; // Add index signature to satisfy Record<string, unknown>
+  [key: string]: unknown;
 }
 
 // Custom node type definition
@@ -84,10 +86,18 @@ const ServiceNode = ({
   data,
   selectedMetrics,
   showDetails,
+  onFocusService,
+  onToggleDetails,
+  openPopoverNodeId,
+  setOpenPopoverNodeId,
 }: {
   data: ServiceNodeData;
   selectedMetrics: MetricOption[];
   showDetails: boolean;
+  onFocusService: (serviceName: string) => void;
+  onToggleDetails: () => void;
+  openPopoverNodeId: string | null;
+  setOpenPopoverNodeId: (id: string | null) => void;
 }) => {
   const serviceColor = data.color;
 
@@ -96,186 +106,280 @@ const ServiceNode = ({
   const errorRateIntensity = data.errorRate / (data.maxValues?.maxErrorRate || 0.1);
   const durationIntensity = data.avgLatency / (data.maxValues?.maxDuration || 1000000000); // 1s in nanos
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // If this card's popover is already open, close it
+    // Otherwise, close any open popover and open this one
+    if (openPopoverNodeId === data.label) {
+      setOpenPopoverNodeId(null);
+    } else {
+      setOpenPopoverNodeId(data.label);
+    }
+  };
+
+  const closePopover = () => {
+    setOpenPopoverNodeId(null);
+  };
+
+  const handleFocusClick = () => {
+    onFocusService(data.label);
+    closePopover();
+  };
+
+  const handleExpandCollapseClick = () => {
+    onToggleDetails();
+    closePopover();
+  };
+
+  const panels = [
+    {
+      id: 0,
+      title: 'Options',
+      items: [
+        {
+          name: i18n.translate('explore.serviceMap.popup.focusOnService', {
+            defaultMessage: 'Focus on this service',
+          }),
+          icon: <EuiIcon type="magnifyWithPlus" />,
+          onClick: handleFocusClick,
+        },
+        {
+          name: showDetails
+            ? i18n.translate('explore.serviceMap.popup.collapseAllCards', {
+                defaultMessage: 'Collapse all cards',
+              })
+            : i18n.translate('explore.serviceMap.popup.expandAllCards', {
+                defaultMessage: 'Expand all cards',
+              }),
+          icon: <EuiIcon type={showDetails ? 'fold' : 'unfold'} />,
+          onClick: handleExpandCollapseClick,
+        },
+      ],
+    },
+  ];
+
   return (
-    <div style={{ position: 'relative' }}>
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{ background: '#555', visibility: 'hidden' }}
-      />
-      <div
-        style={{
-          padding: '16px 20px',
-          borderRadius: '8px',
-          background: 'white',
-          color: '#333',
-          border: `2px solid ${serviceColor}`,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          minWidth: '180px',
-          textAlign: 'left',
-          fontSize: '14px',
-          fontWeight: '500',
-          position: 'relative',
-        }}
-      >
-        {/* Service name */}
-        <div
-          style={{
-            fontSize: '16px',
-            fontWeight: '600',
-            color: '#232F3E',
-            lineHeight: '1.2',
-            marginBottom: '8px',
-          }}
-        >
-          {data.label}
-        </div>
-
-        {/* Metric bars */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '4px',
-            marginBottom: showDetails ? '8px' : '0',
-          }}
-        >
-          {selectedMetrics.includes('requestRate') && (
-            <div
-              title={`Request Rate: ${data.spanCount}`}
-              style={{
-                width: '100%',
-                height: '6px',
-                position: 'relative',
-                backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                borderRadius: '1px',
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  height: '100%',
-                  width: `${requestRateIntensity * 100}%`,
-                  backgroundColor: `rgba(0, 0, 255, ${0.3 + requestRateIntensity * 0.7})`,
-                  borderRadius: '1px',
-                }}
-              />
-            </div>
-          )}
-          {selectedMetrics.includes('errorRate') && (
-            <div
-              title={`Error Rate: ${(data.errorRate * 100).toFixed(1)}%`}
-              style={{
-                width: '100%',
-                height: '6px',
-                position: 'relative',
-                backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                borderRadius: '1px',
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  height: '100%',
-                  width: `${errorRateIntensity * 100}%`,
-                  backgroundColor: `rgba(255, 0, 0, ${0.3 + errorRateIntensity * 0.7})`,
-                  borderRadius: '1px',
-                }}
-              />
-            </div>
-          )}
-          {selectedMetrics.includes('duration') && (
-            <div
-              title={`Avg Duration: ${formatLatency(data.avgLatency)}`}
-              style={{
-                width: '100%',
-                height: '6px',
-                position: 'relative',
-                backgroundColor: 'rgba(128, 0, 128, 0.1)',
-                borderRadius: '1px',
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  height: '100%',
-                  width: `${durationIntensity * 100}%`,
-                  backgroundColor: `rgba(128, 0, 128, ${0.3 + durationIntensity * 0.7})`,
-                  borderRadius: '1px',
-                }}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Metrics section - only shown when showDetails is true */}
-        {showDetails && (
+    <EuiPopover
+      button={
+        <div style={{ position: 'relative' }}>
+          <Handle
+            type="target"
+            position={Position.Left}
+            style={{ background: '#555', visibility: 'hidden' }}
+          />
           <div
             style={{
-              borderTop: '1px solid #eee',
-              paddingTop: '8px',
-              marginTop: '8px',
+              padding: '16px 20px',
+              borderRadius: '8px',
+              background: 'white',
+              color: '#333',
+              border: `2px solid ${serviceColor}`,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              minWidth: '180px',
+              textAlign: 'left',
+              fontSize: '14px',
+              fontWeight: '500',
+              position: 'relative',
+              cursor: 'pointer',
             }}
+            onClick={handleCardClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardClick({
+                  stopPropagation: () => e.stopPropagation(),
+                } as React.MouseEvent<HTMLDivElement>);
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={i18n.translate('explore.serviceMap.serviceCard.ariaLabel', {
+              defaultMessage: 'Service card for {serviceName}',
+              values: { serviceName: data.label },
+            })}
+            data-test-subj="serviceMapCard"
           >
-            {/* Request rate */}
-            {selectedMetrics.includes('requestRate') && (
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: '#666',
-                  marginBottom: '4px',
-                }}
-              >
-                Request rate: {data.spanCount}
-              </div>
-            )}
+            {/* Service name */}
+            <div
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#232F3E',
+                lineHeight: '1.2',
+                marginBottom: '8px',
+              }}
+            >
+              {data.label}
+            </div>
 
-            {/* Error rate */}
-            {selectedMetrics.includes('errorRate') && (
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: data.errorRate > 0 ? '#DE1B1B' : '#666',
-                  marginBottom: '4px',
-                }}
-              >
-                Error rate: {(data.errorRate * 100).toFixed(1)}%
-              </div>
-            )}
+            {/* Metric bars */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                marginBottom: showDetails ? '8px' : '0',
+              }}
+            >
+              {selectedMetrics.includes('requestRate') && (
+                <div
+                  title={`Request Rate: ${data.spanCount}`}
+                  style={{
+                    width: '100%',
+                    height: '6px',
+                    position: 'relative',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                    borderRadius: '1px',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      height: '100%',
+                      width: `${requestRateIntensity * 100}%`,
+                      backgroundColor: `rgba(0, 0, 255, ${0.3 + requestRateIntensity * 0.7})`,
+                      borderRadius: '1px',
+                    }}
+                  />
+                </div>
+              )}
+              {selectedMetrics.includes('errorRate') && (
+                <div
+                  title={`Error Rate: ${(data.errorRate * 100).toFixed(1)}%`}
+                  style={{
+                    width: '100%',
+                    height: '6px',
+                    position: 'relative',
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                    borderRadius: '1px',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      height: '100%',
+                      width: `${errorRateIntensity * 100}%`,
+                      backgroundColor: `rgba(255, 0, 0, ${0.3 + errorRateIntensity * 0.7})`,
+                      borderRadius: '1px',
+                    }}
+                  />
+                </div>
+              )}
+              {selectedMetrics.includes('duration') && (
+                <div
+                  title={`Avg Duration: ${formatLatency(data.avgLatency)}`}
+                  style={{
+                    width: '100%',
+                    height: '6px',
+                    position: 'relative',
+                    backgroundColor: 'rgba(128, 0, 128, 0.1)',
+                    borderRadius: '1px',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      height: '100%',
+                      width: `${durationIntensity * 100}%`,
+                      backgroundColor: `rgba(128, 0, 128, ${0.3 + durationIntensity * 0.7})`,
+                      borderRadius: '1px',
+                    }}
+                  />
+                </div>
+              )}
+            </div>
 
-            {/* Latency metrics */}
-            {selectedMetrics.includes('duration') && (
+            {/* Metrics section - only shown when showDetails is true */}
+            {showDetails && (
               <div
                 style={{
-                  fontSize: '12px',
-                  color: '#666',
-                  marginBottom: '4px',
+                  borderTop: '1px solid #eee',
+                  paddingTop: '8px',
+                  marginTop: '8px',
                 }}
               >
-                Avg duration: {formatLatency(data.avgLatency)}
+                {/* Request rate */}
+                {selectedMetrics.includes('requestRate') && (
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Request rate: {data.spanCount}
+                  </div>
+                )}
+
+                {/* Error rate */}
+                {selectedMetrics.includes('errorRate') && (
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: data.errorRate > 0 ? '#DE1B1B' : '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Error rate: {(data.errorRate * 100).toFixed(1)}%
+                  </div>
+                )}
+
+                {/* Latency metrics */}
+                {selectedMetrics.includes('duration') && (
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: '#666',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Avg duration: {formatLatency(data.avgLatency)}
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        style={{ background: '#555', visibility: 'hidden' }}
-      />
-    </div>
+          <Handle
+            type="source"
+            position={Position.Right}
+            style={{ background: '#555', visibility: 'hidden' }}
+          />
+        </div>
+      }
+      isOpen={openPopoverNodeId === data.label}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downCenter"
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
   );
 };
 
-const nodeTypes = (selectedMetrics: MetricOption[], showDetails: boolean) => ({
+const nodeTypes = (
+  selectedMetrics: MetricOption[],
+  showDetails: boolean,
+  onFocusService: (serviceName: string) => void,
+  onToggleDetails: () => void,
+  openPopoverNodeId: string | null,
+  setOpenPopoverNodeId: (id: string | null) => void
+) => ({
   serviceNode: (props: { data: ServiceNodeData }) => (
-    <ServiceNode data={props.data} selectedMetrics={selectedMetrics} showDetails={showDetails} />
+    <ServiceNode
+      data={props.data}
+      selectedMetrics={selectedMetrics}
+      showDetails={showDetails}
+      onFocusService={onFocusService}
+      onToggleDetails={onToggleDetails}
+      openPopoverNodeId={openPopoverNodeId}
+      setOpenPopoverNodeId={setOpenPopoverNodeId}
+    />
   ),
 });
 
@@ -290,14 +394,14 @@ const getLayoutedElements = async (nodes: ServiceNodeType[], edges: Edge[]) => {
     layoutOptions: {
       'elk.algorithm': 'layered',
       'elk.direction': 'RIGHT',
-      'elk.spacing.nodeNode': '120',
-      'elk.layered.spacing.nodeNodeBetweenLayers': '180',
-      'elk.margins': '60',
+      'elk.spacing.nodeNode': '75',
+      'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+      'elk.margins': '30',
     },
     children: nodes.map((node) => ({
       id: node.id,
       width: 180,
-      height: 100,
+      height: 140, // Height to account for expanded state
     })),
     edges: edges.map((edge) => ({
       id: edge.id,
@@ -369,6 +473,7 @@ const FlowComponent: React.FC<{
   onMetricsChange: (metrics: MetricOption[]) => void;
   showDetails: boolean;
   onToggleDetails: () => void;
+  isRefocusing: boolean;
 }> = ({
   initialNodes,
   initialEdges,
@@ -381,10 +486,12 @@ const FlowComponent: React.FC<{
   onMetricsChange,
   showDetails,
   onToggleDetails,
+  isRefocusing,
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceNodeType>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
   const [isLayoutLoading, setIsLayoutLoading] = useState<boolean>(true);
+  const [openPopoverNodeId, setOpenPopoverNodeId] = useState<string | null>(null);
   const { fitView } = useReactFlow();
 
   // Update nodes and edges when initial values change
@@ -400,6 +507,7 @@ const FlowComponent: React.FC<{
           fitView({
             padding: 0.5,
             nodes: [focusedNode],
+            duration: 800, // Animation duration for smoother zoom
           });
         }, 100);
       }
@@ -421,7 +529,10 @@ const FlowComponent: React.FC<{
 
         // Fit view after layout
         setTimeout(() => {
-          fitView({ padding: 0.2 });
+          fitView({
+            padding: 0.2,
+            duration: 800, // Add animation duration for smoother zoom
+          });
           setIsLayoutLoading(false);
         }, 100);
       })
@@ -446,7 +557,10 @@ const FlowComponent: React.FC<{
   useEffect(() => {
     if (nodes && nodes.length > 0) {
       setTimeout(() => {
-        fitView({ padding: 0.2 });
+        fitView({
+          padding: 0.2,
+          duration: 800, // Add animation duration for smoother zoom
+        });
       }, 100);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -477,7 +591,15 @@ const FlowComponent: React.FC<{
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes(selectedMetrics, showDetails)}
+        nodeTypes={nodeTypes(
+          selectedMetrics,
+          showDetails,
+          (serviceName) =>
+            onServiceSelection([{ label: serviceName, value: serviceName }], fitView),
+          onToggleDetails,
+          openPopoverNodeId,
+          setOpenPopoverNodeId
+        )}
         connectionMode={ConnectionMode.Loose}
         fitView={false}
         minZoom={0.1}
@@ -514,6 +636,7 @@ const FlowComponent: React.FC<{
               isClearable={true}
               data-test-subj="serviceMapFocusSelector"
               compressed
+              isDisabled={isRefocusing}
             />
           </div>
         </div>
@@ -780,12 +903,12 @@ export type ServiceMap = {
 } & Partial<EuiPanelProps>;
 
 export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panelProps }) => {
-  // State for service focus functionality
   const [focusedService, setFocusedService] = useState<string | null>(null);
   const [serviceOptions, setServiceOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedServiceOption, setSelectedServiceOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
+  const [isRefocusing, setIsRefocusing] = useState<boolean>(false);
 
   // State for metrics display
   const [selectedMetrics, setSelectedMetrics] = useState<MetricOption[]>([
@@ -981,6 +1104,15 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
     fitViewFn?: any
   ) => {
     setSelectedServiceOption(selectedOptions);
+
+    // Disable the dropdown during layout recalculation
+    setIsRefocusing(true);
+
+    // When clearing focus, immediately show the main loading spinner
+    if (selectedOptions.length === 0) {
+      setIsInitialLayoutLoading(true);
+    }
+
     if (selectedOptions.length > 0 && selectedOptions[0].value) {
       setFocusedService(selectedOptions[0].value);
 
@@ -992,15 +1124,25 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
           fitViewFn({
             padding: 0.5,
             nodes: [selectedNode],
+            duration: 800, // Add animation duration for smoother zoom
           });
+          // Re-enable the dropdown after layout is complete
+          setIsRefocusing(false);
         }, 200);
       }
     } else {
       setFocusedService(null);
       // Reset view to show all nodes
       if (fitViewFn) {
+        // Immediate feedback for clearing focus
         setTimeout(() => {
-          fitViewFn({ padding: 0.2 });
+          fitViewFn({
+            padding: 0.2,
+            duration: 800, // Add animation duration for smoother zoom
+          });
+          // Re-enable the dropdown after layout is complete
+          setIsRefocusing(false);
+          setIsInitialLayoutLoading(false);
         }, 200);
       }
     }
@@ -1068,7 +1210,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: '#fafafa',
+              backgroundColor: 'rgba(250, 250, 250, 0.7)',
               zIndex: 5,
             }}
           >
@@ -1088,6 +1230,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
             onMetricsChange={setSelectedMetrics}
             showDetails={showDetails}
             onToggleDetails={() => setShowDetails(!showDetails)}
+            isRefocusing={isRefocusing}
           />
         </ReactFlowProvider>
       </div>
