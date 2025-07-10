@@ -114,7 +114,7 @@ export const TableRowUI = ({
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
-        if (!fieldInfo?.filterable === false) {
+        if (fieldInfo?.filterable === false) {
           return (
             <td
               key={colName}
@@ -179,18 +179,24 @@ export const TableRowUI = ({
                 hit: row,
                 columns,
                 indexPattern,
-                filter: (mapping, value, mode) => {
-                  onFilter?.(mapping, value, mode);
-                  onClose?.();
-                },
-                onAddColumn: (columnName: string) => {
-                  onAddColumn?.(columnName);
-                  onClose?.();
-                },
-                onRemoveColumn: (columnName: string) => {
-                  onRemoveColumn?.(columnName);
-                  onClose?.();
-                },
+                filter: onFilter
+                  ? (mapping, value, mode) => {
+                      onFilter(mapping, value, mode);
+                      onClose?.();
+                    }
+                  : undefined,
+                onAddColumn: onAddColumn
+                  ? (columnName: string) => {
+                      onAddColumn(columnName);
+                      onClose?.();
+                    }
+                  : undefined,
+                onRemoveColumn: onRemoveColumn
+                  ? (columnName: string) => {
+                      onRemoveColumn(columnName);
+                      onClose?.();
+                    }
+                  : undefined,
               }}
               docViewsRegistry={docViewsRegistry}
             />
