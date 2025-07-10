@@ -7,6 +7,7 @@ import { ExploreServices } from '../../../../../types';
 import { AppDispatch, RootState } from '../../store';
 import {
   clearResults,
+  setDataset,
   setEditorMode,
   setPromptModeIsAvailable,
   setQueryWithHistory,
@@ -23,12 +24,29 @@ export const setDatasetActionCreator = (
   const queryStringState = services.data.query.queryString.getQuery();
   const {
     queryEditor: { editorMode, promptModeIsAvailable },
+    query: { dataset },
   } = getState();
 
   const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
 
+  // Get the current dataset from the state
+  let dataView;
+  if (dataset && dataset.id) {
+    try {
+      // Fetch the full DataView object
+      dataView = await services.data.dataViews.get(dataset.id, dataset.type !== 'INDEX_PATTERN');
+    } catch (error) {
+      // Handle error if dataset cannot be found
+    }
+  }
+
   dispatch(clearResults());
   dispatch(setQueryWithHistory(queryStringState));
+
+  // If we have a valid DataView, update the dataset in the query state
+  if (dataView && typeof dataView.toDataset === 'function') {
+    dispatch(setDataset(dataView.toDataset()));
+  }
 
   if (newPromptModeIsAvailable !== promptModeIsAvailable) {
     dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable));

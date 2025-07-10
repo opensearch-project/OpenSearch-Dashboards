@@ -13,8 +13,7 @@ import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_util
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { PLUGIN_ID } from '../../../common';
 import { ExploreServices } from '../../types';
-import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
-import { useEditorContext } from '../../application/context';
+import { useDatasetContext } from '../../application/context';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
@@ -32,6 +31,7 @@ import {
 } from '../../application/utils/state_management/slices';
 import { setDatasetActionCreator } from '../../application/utils/state_management/actions/set_dataset';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
+import { useClearEditors } from '../../application/hooks';
 
 export interface TopNavProps {
   savedExplore?: SavedExplore;
@@ -40,6 +40,8 @@ export interface TopNavProps {
 
 export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const clearEditors = useClearEditors();
+
   const flavorId = useFlavorId();
   const {
     data: {
@@ -152,7 +154,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const showDatePicker = useMemo(() => dataset?.isTimeBased() ?? false, [dataset]);
 
   const dispatch = useDispatch();
-  const editorContext = useEditorContext();
 
   const handleDatasetSelect = (newDataset: any) => {
     if (!newDataset) return;
@@ -180,8 +181,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       })
     );
 
-    // Call the action creator to handle the rest of the logic
-    dispatch(setDatasetActionCreator(services, editorContext));
+    dispatch(setDatasetActionCreator(services, clearEditors));
   };
 
   return (
