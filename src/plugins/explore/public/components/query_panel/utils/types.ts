@@ -5,7 +5,6 @@
 
 import type { monaco } from '@osd/monaco';
 
-type CompletionItemProvider = monaco.languages.CompletionItemProvider;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
@@ -18,7 +17,6 @@ export interface UseSharedEditorProps {
 export interface UseSharedEditorReturnType {
   isFocused: boolean;
   height: number;
-  suggestionProvider: CompletionItemProvider;
   useLatestTheme: true;
   editorDidMount: (editor: IStandaloneCodeEditor) => () => IStandaloneCodeEditor;
   onChange: (text: string) => void;
