@@ -199,10 +199,6 @@ describe('useSharedEditor', () => {
     expect(result.current).toEqual({
       isFocused: false,
       height: 32,
-      suggestionProvider: {
-        triggerCharacters: [' '],
-        provideCompletionItems: expect.any(Function),
-      },
       useLatestTheme: true,
       editorDidMount: expect.any(Function),
       onChange: expect.any(Function),
@@ -233,24 +229,30 @@ describe('useSharedEditor', () => {
     expect(customSetEditorRef).toHaveBeenCalledWith(mockEditor);
   });
 
-  describe('suggestionProvider', () => {
-    it('should create suggestion provider with trigger characters', () => {
-      const { result } = renderUseSharedEditor();
+  describe('completion provider', () => {
+    let disposeMock: jest.Mock;
+    let registerCompletionItemProviderMock: jest.Mock;
+    let originalRegisterCompletionItemProvider: typeof monaco.languages.registerCompletionItemProvider;
 
-      expect(result.current.suggestionProvider.triggerCharacters).toEqual([' ']);
-      expect(result.current.suggestionProvider.provideCompletionItems).toBeInstanceOf(Function);
+    beforeEach(() => {
+      disposeMock = jest.fn();
+      registerCompletionItemProviderMock = jest.fn().mockReturnValue({
+        dispose: disposeMock,
+      });
+      originalRegisterCompletionItemProvider = monaco.languages.registerCompletionItemProvider;
+      monaco.languages.registerCompletionItemProvider = registerCompletionItemProviderMock;
+    });
+
+    afterEach(() => {
+      monaco.languages.registerCompletionItemProvider = originalRegisterCompletionItemProvider;
     });
 
     it('should register completion provider', () => {
-      // Mock monaco.languages.registerCompletionItemProvider
-      const registerCompletionItemProviderMock = jest.fn();
-      (monaco.languages as any).registerCompletionItemProvider = registerCompletionItemProviderMock;
-
-      // Render hook which should trigger useEffect
-      renderUseSharedEditor();
-
-      // Provider registration should be called
+      const { unmount } = renderUseSharedEditor();
       expect(registerCompletionItemProviderMock).toHaveBeenCalled();
+
+      unmount();
+      expect(disposeMock).toHaveBeenCalled();
     });
   });
 
