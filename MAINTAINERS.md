@@ -36,6 +36,7 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Lin Wang                  | [wanglam](https://github.com/wanglam)               | Amazon      |
 | Daniel Rowe               | [d-buckner](https://github.com/d-buckner)           | Amazon      |
 | Tianyu Gao                | [raintygao](https://github.com/raintygao)           | Amazon      |
+| Shenoy Pratik             | [ps48](https://github.com/ps48)                     | Amazon      |
 
 ## Emeritus
 
@@ -53,4 +54,5 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 See [opensearch-project/.github/RESPONSIBILITIES.md](https://github.com/opensearch-project/.github/blob/main/RESPONSIBILITIES.md#maintainer-responsibilities) that explains what the role of maintainer means, what maintainers do in this and other repos, and how they should be doing it.
 
 In addition to the standard responsibilities above, this respository also requires:
+
 - PRs should not be merged unless all CI passes. If a CI failure must be overridden, please add a comment articulating why with the logins of two supporting maintainers (who are not the PR author).

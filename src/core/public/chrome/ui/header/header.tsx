@@ -47,6 +47,7 @@ import classnames from 'classnames';
 import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
+import { InjectedMetadataStart } from '../../../injected_metadata';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -129,6 +130,7 @@ export interface HeaderProps {
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
   globalSearchCommands?: GlobalSearchCommand[];
+  injectedMetadata?: InjectedMetadataStart;
 }
 
 const hasValue = (value: any) => {
@@ -155,6 +157,7 @@ export function Header({
   setCurrentNavGroup,
   useUpdatedHeader,
   globalSearchCommands,
+  injectedMetadata,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -655,8 +658,15 @@ export function Header({
     return useApplicationHeader ? renderApplicationHeader() : renderPageHeader();
   };
 
+  // Get the banner plugin configuration
+  const bannerPluginConfig = injectedMetadata
+    ?.getPlugins()
+    ?.find((plugin: { id: string }) => plugin.id === 'banner')?.config;
+  const isBannerEnabled = bannerPluginConfig?.enabled === true;
+
   return (
     <>
+      {isBannerEnabled && <div id="pluginGlobalBanner" />}
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}

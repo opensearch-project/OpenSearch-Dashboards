@@ -29,6 +29,7 @@
       - [I18n](../src/dev/i18n/README.md)
     - plugins
       - [Application_config](../src/plugins/application_config/README.md)
+      - [Banner](../src/plugins/banner/README.md)
       - [Bfetch](../src/plugins/bfetch/README.md)
       - [Charts](../src/plugins/charts/README.md)
       - console

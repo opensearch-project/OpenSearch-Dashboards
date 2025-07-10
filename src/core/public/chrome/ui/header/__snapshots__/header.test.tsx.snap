@@ -1834,6 +1834,26 @@ exports[`Header handles visibility and lock changes 1`] = `
       "put": [MockFunction],
     }
   }
+  injectedMetadata={
+    Object {
+      "getPlugins": [MockFunction] {
+        "calls": Array [
+          Array [],
+          Array [],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Array [],
+          },
+          Object {
+            "type": "return",
+            "value": Array [],
+          },
+        ],
+      },
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -9143,6 +9163,21 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
       "put": [MockFunction],
     }
   }
+  injectedMetadata={
+    Object {
+      "getPlugins": [MockFunction] {
+        "calls": Array [
+          Array [],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Array [],
+          },
+        ],
+      },
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -13033,6 +13068,21 @@ exports[`Header renders condensed header 1`] = `
       "patch": [MockFunction],
       "post": [MockFunction],
       "put": [MockFunction],
+    }
+  }
+  injectedMetadata={
+    Object {
+      "getPlugins": [MockFunction] {
+        "calls": Array [
+          Array [],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Array [],
+          },
+        ],
+      },
     }
   }
   intl={
@@ -18612,6 +18662,21 @@ exports[`Header renders page header with application title 1`] = `
       "put": [MockFunction],
     }
   }
+  injectedMetadata={
+    Object {
+      "getPlugins": [MockFunction] {
+        "calls": Array [
+          Array [],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Array [],
+          },
+        ],
+      },
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -23079,6 +23144,26 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
       "patch": [MockFunction],
       "post": [MockFunction],
       "put": [MockFunction],
+    }
+  }
+  injectedMetadata={
+    Object {
+      "getPlugins": [MockFunction] {
+        "calls": Array [
+          Array [],
+          Array [],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Array [],
+          },
+          Object {
+            "type": "return",
+            "value": Array [],
+          },
+        ],
+      },
     }
   }
   intl={
