@@ -61,7 +61,6 @@ export interface ExplorePluginSetup {
   docViewsLinks: {
     addDocViewLink: (docViewLinkSpec: unknown) => void;
   };
-  isSummaryAgentAvailable$: BehaviorSubject<boolean>;
 }
 
 export interface ExplorePluginStart {
@@ -170,7 +169,5 @@ export interface ExploreServices {
   visualizationRegistry: VisualizationRegistryService;
   expressions: ExpressionsStart;
 
-  // For results summary
-  isSummaryAgentAvailable$: BehaviorSubject<boolean>;
   dashboard: DashboardStart;
 }

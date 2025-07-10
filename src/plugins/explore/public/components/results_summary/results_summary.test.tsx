@@ -13,7 +13,6 @@ describe('ResultsSummary', () => {
     onClickAccordion: jest.fn(),
     actionButtonVisible: true,
     feedback: FeedbackStatus.NONE,
-    afterFeedbackTip: 'Thank you for your feedback',
     onFeedback: jest.fn(),
     summary: 'Test summary content',
     canGenerateSummary: true,

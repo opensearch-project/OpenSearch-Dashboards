@@ -31,7 +31,6 @@ interface ResultsSummaryProps {
   onClickAccordion: (isOpen: boolean) => void;
   actionButtonVisible: boolean;
   feedback: FeedbackStatus;
-  afterFeedbackTip: string;
   onFeedback: (satisfied: boolean) => void;
   summary: string;
   canGenerateSummary: boolean;
@@ -47,7 +46,6 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
   onClickAccordion,
   actionButtonVisible,
   feedback,
-  afterFeedbackTip,
   onFeedback,
   summary,
   canGenerateSummary,
@@ -60,6 +58,11 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
   const infoIconTooltip = i18n.translate('explore.resultsSummary.summary.sampletip', {
     defaultMessage: 'Summary based on first {sampleSize} records',
     values: { sampleSize },
+  });
+
+  const afterFeedbackTip = i18n.translate('explore.resultsSummary.summary.afterFeedback', {
+    defaultMessage:
+      'Thank you for the feedback. Try again by adjusting your question so that I have the opportunity to better assist you.',
   });
 
   return (
