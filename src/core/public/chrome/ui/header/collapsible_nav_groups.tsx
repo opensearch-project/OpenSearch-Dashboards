@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import classNames from 'classnames';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { ChromeNavLink } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { createEuiListItem } from './nav_link';
@@ -39,6 +40,49 @@ export interface NavGroupsProps {
 
 const LEVEL_FOR_ROOT_ITEMS = 1;
 
+type EnhancedNavItem = EuiSideNavItemType<{}> & { hidden?: boolean };
+
+const createNavItem = ({
+  link,
+  className,
+  appId,
+  navigateToApp,
+  basePath,
+}: {
+  link: ChromeNavLink;
+  className?: string;
+  appId?: string;
+  basePath: HttpStart['basePath'];
+  navigateToApp: CoreStart['application']['navigateToApp'];
+}): EuiSideNavItemType<{}> => {
+  const euiListItem = createEuiListItem({
+    link,
+    appId,
+    dataTestSubj: `collapsibleNavAppLink-${link.id}`,
+    navigateToApp,
+    basePath,
+  });
+
+  let icon = euiListItem.icon;
+
+  if (euiListItem.iconType) {
+    icon = <EuiIcon type={euiListItem.iconType} />;
+  }
+
+  return {
+    id: `${link.id}-${link.title}`,
+    name: <EuiText>{link.title}</EuiText>,
+    onClick: euiListItem.onClick,
+    href: euiListItem.href,
+    emphasize: euiListItem.isActive,
+    className: `nav-link-item nav-link-item-active-${!!euiListItem.isActive} ${className || ''}`,
+    buttonClassName: 'nav-link-item-btn',
+    'data-test-subj': euiListItem['data-test-subj'],
+    'aria-label': link.title,
+    icon: icon ? <span className="leftNavMenuIcon">{icon}</span> : undefined,
+  };
+};
+
 export function NavGroups({
   navLinks,
   style,
@@ -50,50 +94,19 @@ export function NavGroups({
   basePath,
 }: NavGroupsProps) {
   const [, setRenderKey] = useState(Date.now());
-  const createNavItem = ({
-    link,
-    className,
-  }: {
-    link: ChromeNavLink;
-    className?: string;
-  }): EuiSideNavItemType<{}> => {
-    const euiListItem = createEuiListItem({
-      link,
-      appId,
-      dataTestSubj: `collapsibleNavAppLink-${link.id}`,
-      navigateToApp,
-      basePath,
-    });
-
-    let icon = euiListItem.icon;
-
-    if (euiListItem.iconType) {
-      icon = <EuiIcon type={euiListItem.iconType} />;
-    }
-
-    return {
-      id: `${link.id}-${link.title}`,
-      name: <EuiText>{link.title}</EuiText>,
-      onClick: euiListItem.onClick,
-      href: euiListItem.href,
-      emphasize: euiListItem.isActive,
-      className: `nav-link-item nav-link-item-active-${!!euiListItem.isActive} ${className || ''}`,
-      buttonClassName: 'nav-link-item-btn',
-      'data-test-subj': euiListItem['data-test-subj'],
-      'aria-label': link.title,
-      icon: icon ? <span className="leftNavMenuIcon">{icon}</span> : undefined,
-    };
-  };
   const createSideNavItem = (
     navLink: LinkItem,
     level: number,
     className?: string,
     navOpen?: boolean
-  ): EuiSideNavItemType<{}> & { hidden?: boolean } => {
+  ): EnhancedNavItem => {
     if (navLink.itemType === LinkItemType.LINK) {
       const result = createNavItem({
         link: navLink.link,
         className,
+        appId,
+        navigateToApp,
+        basePath,
       });
       const isHidden = !navOpen && !result.icon;
       return {
@@ -110,10 +123,22 @@ export function NavGroups({
     }
 
     if (navLink.itemType === LinkItemType.PARENT_LINK && navLink.link) {
-      const props = createNavItem({ link: navLink.link });
       const parentOpenKey = `${currentWorkspaceId ? `${currentWorkspaceId}-` : ''}${
         navLink.link.id
       }`;
+      const subItems = navLink.links.map((subNavLink) =>
+        createSideNavItem(subNavLink, level + 1, 'nav-nested-item', navOpen)
+      );
+
+      const parentItemEmphasize = subItems.some((item) => item.emphasize);
+
+      const props = createNavItem({
+        link: navLink.link,
+        appId,
+        navigateToApp,
+        basePath,
+      });
+
       const content = (
         <CollapsibleNavGroupsLabel
           label={props.name}
@@ -123,14 +148,15 @@ export function NavGroups({
           data-test-subj={props['data-test-subj']}
         />
       );
-      const parentItem = {
+
+      const parentItem: EnhancedNavItem = {
         ...props,
         forceOpen: true,
         /**
          * The Tree component inside SideNav is not a controllable component,
          * so we need to change the id(will pass as key into the Tree component) to remount the component.
          */
-        id: `${props.id}-${!!getIsCategoryOpen(parentOpenKey)}`,
+        id: `${props.id}-${!!getIsCategoryOpen(parentOpenKey)}-${!!isNavOpen}`,
         /**
          * The href and onClick should both be undefined to make parent item rendered as accordion.
          */
@@ -140,12 +166,12 @@ export function NavGroups({
          * The data-test-subj has to be undefined because we render the element with the attribute in CollapsibleNavGroupsLabel
          */
         'data-test-subj': undefined,
-        className: classNames(props.className, 'nav-link-parent-item'),
+        className: classNames(
+          props.className,
+          `nav-link-parent-item nav-link-parent-item-active-${parentItemEmphasize}`
+        ),
         name: content,
-        items: (getIsCategoryOpen(parentOpenKey) && navOpen
-          ? navLink.links
-          : []
-        ).map((subNavLink) => createSideNavItem(subNavLink, level + 1, 'nav-nested-item', navOpen)),
+        items: getIsCategoryOpen(parentOpenKey) && navOpen ? subItems : [],
         hidden: !navOpen && !props.icon,
         icon: navOpen ? (
           props.icon
@@ -169,6 +195,7 @@ export function NavGroups({
                 return (
                   <EuiContextMenuItem
                     onClick={subNavLink.onClick as (event: React.MouseEvent) => void}
+                    icon={subNavLink.emphasize ? 'check' : 'empty'}
                   >
                     {subNavLink.name}
                   </EuiContextMenuItem>
@@ -231,7 +258,7 @@ export function NavGroups({
       };
     }
 
-    return {} as EuiSideNavItemType<{}>;
+    return {} as EnhancedNavItem;
   };
   const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
   const sideNavItems = orderedLinksOrCategories

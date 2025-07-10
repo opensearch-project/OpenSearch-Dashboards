@@ -124,6 +124,7 @@ describe('<NavGroups />', () => {
         navigateToApp={navigateToApp}
         isNavOpen={false}
         basePath={basePath}
+        appId="subLink"
       />
     );
     expect(container).toMatchSnapshot();
