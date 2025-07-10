@@ -149,18 +149,17 @@ export const formatValuesToSuggestions = <T extends { toString(): string }>(
   values: T[], // generic for any value type
   modifyInsertText?: (input: T) => string
 ) => {
-  let i = 0;
-
-  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values.map((val: T) => {
-    i++;
-    return {
-      text: val.toString(),
-      type: monaco.languages.CompletionItemKind.Value,
-      detail: SuggestionItemDetailsTags.Value,
-      sortText: i.toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
-      ...(modifyInsertText && { insertText: modifyInsertText(val) }),
-    };
-  });
+  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values
+    .filter((val) => val !== null) // Only using the notNull values
+    .map((val: T, i) => {
+      return {
+        text: val.toString(),
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: (i + 1).toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
+        ...(modifyInsertText && { insertText: modifyInsertText(val) }),
+      };
+    });
 
   return valueSuggestions;
 };
