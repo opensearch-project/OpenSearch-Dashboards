@@ -30,7 +30,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             class="euiSideNavItem__items"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item nav-link-item-active-false  nav-link-parent-item"
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item nav-link-item-active-false  nav-link-parent-item nav-link-parent-item-active-false"
             >
               <button
                 aria-label="pure link"
@@ -142,7 +142,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             class="euiSideNavItem__items"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item nav-link-item-active-false  nav-link-parent-item"
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item nav-link-item-active-false  nav-link-parent-item nav-link-parent-item-active-false"
             >
               <button
                 aria-label="link-in-category"
@@ -277,7 +277,7 @@ exports[`<NavGroups /> should render correctly when nav collapse 1`] = `
             class="euiSideNavItem__items"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item nav-link-item-active-false  nav-link-parent-item"
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems euiSideNavItem--emphasized nav-link-item nav-link-item-active-false  nav-link-parent-item nav-link-parent-item-active-true"
             >
               <button
                 aria-label="pure link"
