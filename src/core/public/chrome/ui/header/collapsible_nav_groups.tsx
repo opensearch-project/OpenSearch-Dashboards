@@ -29,7 +29,6 @@ import { HttpStart } from '../../../http';
 
 export interface NavGroupsProps {
   navLinks: ChromeNavLink[];
-  style?: React.CSSProperties;
   appId?: string;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   categoryCollapsible?: boolean;
@@ -85,7 +84,6 @@ const createNavItem = ({
 
 export function NavGroups({
   navLinks,
-  style,
   appId,
   navigateToApp,
   categoryCollapsible,
@@ -267,13 +265,11 @@ export function NavGroups({
     .filter((navItem) => !!navItem.id && !navItem.hidden);
 
   return (
-    <EuiFlexItem style={style}>
-      <EuiSideNav
-        items={sideNavItems}
-        isOpenOnMobile
-        mobileBreakpoints={[]}
-        className="leftNavSideNavWrapper"
-      />
-    </EuiFlexItem>
+    <EuiSideNav
+      items={sideNavItems}
+      isOpenOnMobile
+      mobileBreakpoints={[]}
+      className="leftNavSideNavWrapper"
+    />
   );
 }

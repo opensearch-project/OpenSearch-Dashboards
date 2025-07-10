@@ -12,6 +12,12 @@ $iconWidth: 16px;
   overflow: hidden;
   box-shadow: 1px 0 0 $euiBorderColor !important;
 
+  .leftNavSideNavWrapper {
+    border-top: $euiBorderThin;
+    border-color: $euiBorderColor;
+    padding-top: $euiSizeS;
+  }
+
   &.leftNavIsOpen-false {
     .nav-link-item-btn {
       margin-left: 0;
@@ -26,9 +32,6 @@ $iconWidth: 16px;
     }
 
     .leftNavSideNavWrapper {
-      border-top: $euiBorderThin;
-      border-bottom: $euiBorderThin;
-      border-color: $euiBorderColor;
       padding-top: $euiSizeS;
     }
 
@@ -167,6 +170,8 @@ $iconWidth: 16px;
     padding: 0 $euiSize;
     display: flex;
     -ms-overflow-style: -ms-autohiding-scrollbar;
+    border-top: $euiBorderThin;
+    border-color: $euiBorderColor;
 
     &.bottom-container-collapsed {
       flex-direction: column;
@@ -184,14 +189,11 @@ $iconWidth: 16px;
       gap: 16px;
       padding-top: $euiSizeM;
       padding-bottom: $euiSizeM;
-      border-top: $euiBorderThin;
-      border-color: $euiColorMediumShade;
     }
   }
 
   .navGroupEnabledNavTopWrapper {
     padding: 0 $euiSizeS;
-    padding-left: $euiSizeS;
   }
 
   .navGroupEnabledHomeIcon {
