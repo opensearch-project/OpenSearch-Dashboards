@@ -213,7 +213,16 @@ export function Header({
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
-  const className = classnames('hide-for-sharing', 'headerGlobalNav');
+
+  // Get the banner plugin configuration
+  const bannerPluginConfig = injectedMetadata
+    ?.getPlugins()
+    ?.find((plugin: { id: string }) => plugin.id === 'banner')?.config;
+  const isBannerEnabled = bannerPluginConfig?.enabled === true;
+
+  const className = classnames('hide-for-sharing', 'headerGlobalNav', {
+    'headerGlobalNav--withBanner': isBannerEnabled,
+  });
   const { useExpandedHeader = true } = branding;
   const useApplicationHeader = headerVariant === HeaderVariant.APPLICATION;
 
@@ -657,12 +666,6 @@ export function Header({
   const renderHeader = () => {
     return useApplicationHeader ? renderApplicationHeader() : renderPageHeader();
   };
-
-  // Get the banner plugin configuration
-  const bannerPluginConfig = injectedMetadata
-    ?.getPlugins()
-    ?.find((plugin: { id: string }) => plugin.id === 'banner')?.config;
-  const isBannerEnabled = bannerPluginConfig?.enabled === true;
 
   return (
     <>

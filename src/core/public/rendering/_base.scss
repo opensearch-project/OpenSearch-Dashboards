@@ -15,7 +15,7 @@
   min-height: calc(100vh - #{$osdHeaderOffset});
 
   .headerIsExpanded & {
-    min-height: calc(100vh - #{$osdHeaderOffset * 2});
+    min-height: calc(100vh - #{$osdHeaderOffsetExpanded});
   }
 
   &.hidden-chrome {
