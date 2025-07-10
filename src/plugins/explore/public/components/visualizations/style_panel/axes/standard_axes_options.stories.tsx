@@ -7,11 +7,12 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { AllAxesOptions } from './standard_axes_options';
-import { VisColumn, StandardAxes, Positions, AxisRole, VisFieldType } from '../types';
+import { VisColumn, StandardAxes, Positions, AxisRole, VisFieldType } from '../../types';
 
 export default {
   component: AllAxesOptions,
-  title: 'src/plugins/explore/public/components/visualizations/style_panel/standard_axes_options',
+  title:
+    'src/plugins/explore/public/components/visualizations/style_panel/axes/standard_axes_options.tsx',
 } as ComponentMeta<typeof AllAxesOptions>;
 
 // Mock data for the component props
@@ -58,7 +59,7 @@ const mockStandardAxes: StandardAxes[] = [
       text: '',
     },
     grid: {
-      showLines: false,
+      showLines: true,
     },
     axisRole: AxisRole.Y,
   },
@@ -77,7 +78,7 @@ const mockStandardAxes: StandardAxes[] = [
       text: '',
     },
     grid: {
-      showLines: false,
+      showLines: true,
     },
     axisRole: AxisRole.X,
   },
@@ -93,7 +94,7 @@ const Template: ComponentStory<typeof AllAxesOptions> = (args) => {
       <AllAxesOptions
         {...args}
         standardAxes={standardAxes}
-        disableGrid={true}
+        disableGrid={false}
         onStandardAxesChange={(axes) => {
           setStandardAxes(axes);
           action('onStandardAxesChange')(axes);

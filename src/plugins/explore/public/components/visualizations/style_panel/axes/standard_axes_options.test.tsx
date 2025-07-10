@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AllAxesOptions } from './standard_axes_options';
-import { StandardAxes, Positions, AxisRole } from '../types';
+import { StandardAxes, Positions, AxisRole } from '../../types';
 
 describe('AxesOptions', () => {
   const mockStandardAxes: StandardAxes[] = [
@@ -82,15 +82,12 @@ describe('AxesOptions', () => {
     const axis = screen.getByTestId('standardAxis-0-button');
     fireEvent.click(axis);
 
-    // Initially label options should be visible
     expect(screen.getAllByText('Aligned')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Truncate')[0]).toBeInTheDocument();
 
-    // Toggle off show labels
     const showLabelsSwitch = screen.getAllByRole('switch')[1];
     fireEvent.click(showLabelsSwitch);
 
-    // Check that the callback was called with the correct parameters
     expect(defaultProps.onStandardAxesChange).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
