@@ -28,8 +28,8 @@ export interface DataTableProps {
   isShortDots: boolean;
   showPagination?: boolean;
   docViewsRegistry: DocViewsRegistry;
-  onRemoveColumn: (column: string) => void;
-  onAddColumn: (column: string) => void;
+  onRemoveColumn?: (column: string) => void;
+  onAddColumn?: (column: string) => void;
   onFilter: DocViewFilterFn;
   onClose?: () => void;
   scrollToTop?: () => void;
@@ -197,7 +197,7 @@ const DataTableUI = ({
            * First cell is skipped because it has a fixed dimension set already.
            */
           tableElement.querySelectorAll('thead > tr > th:not(:first-child)').forEach((th) => {
-            (th as HTMLTableCellElement).style.width = th.getBoundingClientRect().width + 'px';
+            (th as HTMLTableCellElement).style.width = th.getBoundingClientRect().width + 20 + 'px';
           });
 
           tableElement.style.tableLayout = 'fixed';
