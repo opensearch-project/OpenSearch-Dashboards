@@ -26,3 +26,11 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<number, string>([
   [OpenSearchPPLParser.SOURCE, '2'],
   [OpenSearchPPLParser.RT_PRTHS, '2'],
 ]);
+
+export const PPL_FUNCTIONAL_KEYWORDS = new Map<number, { optionalParam: boolean }>([
+  [OpenSearchPPLParser.SPAN, { optionalParam: false }],
+  [OpenSearchPPLParser.MATCH, { optionalParam: false }],
+  [OpenSearchPPLParser.MATCH_PHRASE, { optionalParam: false }],
+  [OpenSearchPPLParser.MATCH_BOOL_PREFIX, { optionalParam: false }],
+  [OpenSearchPPLParser.MATCH_PHRASE_PREFIX, { optionalParam: false }],
+]);
