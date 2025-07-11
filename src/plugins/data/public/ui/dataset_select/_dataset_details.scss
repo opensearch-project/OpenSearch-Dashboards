@@ -39,4 +39,17 @@
       cursor: pointer;
     }
   }
+
+  &__footer {
+    padding: 0;
+  }
+
+  &__footerItem {
+    width: 100%;
+  }
+
+  &__viewButton {
+    width: 100%;
+    font-size: $euiFontSizeXS;
+  }
 }

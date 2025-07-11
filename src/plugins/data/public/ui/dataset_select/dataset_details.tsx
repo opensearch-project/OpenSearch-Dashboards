@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiSmallButtonEmpty,
   EuiPopover,
@@ -13,7 +13,7 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSmallButton,
+  EuiButton,
   EuiSelect,
   EuiDescriptionList,
   EuiBadge,
@@ -212,17 +212,29 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
         ]}
       />
 
-      <EuiPopoverFooter paddingSize="s">
-        <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiSmallButton onClick={closePopover} data-test-subj="datasetDetailsViewButton">
+      {/* TODO: Add footer back when dataset management is ready */}
+      {/* <EuiPopoverFooter paddingSize="s">
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+          className="datasetDetails__footer"
+        >
+          <EuiFlexItem grow={false} className="datasetDetails__footerItem">
+            <EuiButton
+              className="datasetDetails__viewButton"
+              data-test-subj="datasetDetailsViewButton"
+              size="s"
+              isSelected={false}
+              onClick={closePopover}
+            >
               {i18n.translate('data.datasetDetails.viewDatasetButton', {
                 defaultMessage: 'View dataset',
               })}
-            </EuiSmallButton>
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPopoverFooter>
+      </EuiPopoverFooter> */}
     </EuiPopover>
   );
 };
