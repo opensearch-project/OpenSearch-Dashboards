@@ -286,7 +286,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <DatasetDetails dataset={selectedDataset} />
+          <DatasetDetails
+            dataset={selectedDataset}
+            isDefault={selectedDataset?.id === defaultDatasetId}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>

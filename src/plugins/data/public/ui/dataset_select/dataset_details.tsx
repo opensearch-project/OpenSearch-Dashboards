@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiSmallButtonEmpty,
   EuiPopover,
@@ -16,8 +16,7 @@ import {
   EuiSmallButton,
   EuiSelect,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -26,18 +25,32 @@ import { IDataPluginServices } from '../../types';
 
 export interface DatasetDetailsProps {
   dataset?: Dataset;
+  isDefault: boolean | false;
 }
 
-export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset }) => {
+export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefault }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDefaultDataset, setIsDefaultDataset] = useState(isDefault);
   const {
     query: { queryString },
+    dataViews: datasetsService,
   } = services.data;
   const datasetService = queryString.getDatasetService();
 
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const closePopover = useCallback(() => setIsOpen(false), []);
+
+  const toggleDefault = useCallback(async () => {
+    if (!dataset) return;
+
+    if (isDefault) {
+      return;
+    } else {
+      await datasetsService.setDefault(dataset.id as string, true);
+      setIsDefaultDataset(true);
+    }
+  }, [dataset, isDefault, datasetsService]);
 
   const getTypeFromUri = useCallback((uri?: string): string | undefined => {
     if (!uri) return undefined;
@@ -107,7 +120,28 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset }) => {
       panelPaddingSize="s"
       panelClassName="datasetDetails__panel"
     >
-      <EuiPopoverTitle>{datasetTitle}</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+          <EuiFlexItem>{datasetTitle}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <div
+              onClick={toggleDefault}
+              data-test-subj="datasetDetailsDefaultButton"
+              tabIndex={0}
+              onKeyDown={() => {}}
+            >
+              <EuiBadge
+                color={isDefault ? 'default' : 'hollow'}
+                className="datasetDetails__defaultBadge"
+              >
+                {i18n.translate('data.datasetDetails.defaultLabel', {
+                  defaultMessage: 'Default',
+                })}
+              </EuiBadge>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
 
       <EuiDescriptionList
         compressed

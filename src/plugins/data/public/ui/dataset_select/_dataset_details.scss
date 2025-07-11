@@ -33,4 +33,10 @@
   &__minWidth {
     min-width: 0;
   }
+
+  &__defaultBadge {
+    span:is([class*="euiBadge__text"]) {
+      cursor: pointer;
+    }
+  }
 }
