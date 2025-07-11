@@ -15,7 +15,7 @@ export const createPieSpec = (
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
-  const thetaColumn = axisColumnMappings?.[AxisRole.THETA];
+  const thetaColumn = axisColumnMappings?.[AxisRole.SIZE];
 
   const numericField = thetaColumn?.column;
   const numericName = thetaColumn?.name;
