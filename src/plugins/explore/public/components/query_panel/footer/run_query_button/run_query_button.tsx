@@ -30,7 +30,6 @@ export const RunQueryButton = () => {
       data-test-subj="queryPanelFooterRunQueryButton"
       size="s"
       isLoading={isLoading}
-      style={{ marginLeft: '4px' }}
     >
       {i18n.translate('explore.queryPanel.runQueryButton.label', {
         defaultMessage: 'Run query',

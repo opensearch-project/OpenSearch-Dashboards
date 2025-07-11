@@ -6,11 +6,10 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { PplReference } from './ppl_reference';
-import { StorybookProviders } from '../../../../mock_provider.mocks';
+import { StorybookProviders } from '../../../mock_provider.mocks';
 
 const meta: Meta<typeof PplReference> = {
-  title:
-    'src/plugins/explore/public/components/query_panel/footer/detected_language/language_reference/ppl_reference',
+  title: 'src/plugins/explore/public/components/query_panel/footer/detected_language/ppl_reference',
   component: PplReference,
   decorators: [
     (Story) => (
