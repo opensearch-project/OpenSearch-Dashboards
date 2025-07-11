@@ -12,7 +12,7 @@ import { DiscoverChart } from './chart';
 import { useIndexPatternContext } from '../../application/components/index_pattern_context';
 import {
   histogramResultsProcessor,
-  defaultPrepareQuery,
+  defaultPrepareQueryString,
 } from '../../application/utils/state_management/actions/query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
@@ -29,7 +29,7 @@ export const DiscoverChartContainer = () => {
 
   // Use default cache key computation for histogram data
   const cacheKey = useMemo(() => {
-    return defaultPrepareQuery(query);
+    return defaultPrepareQueryString(query);
   }, [query]);
 
   const rawResults = cacheKey ? results[cacheKey] : null;
