@@ -43,7 +43,8 @@ export function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
-    indexPatterns: plugins.data.indexPatterns, // Direct access for convenience
+    datasets: plugins.data.dataViews,
+    indexPatterns: plugins.data.indexPatterns,
     getSavedExploreById: async (id?: string) => {
       return savedObjectService.get(id);
     },
@@ -54,7 +55,7 @@ export function buildServices(
       requests: new RequestAdapter(),
     },
     metadata: {
-      branch: context.env.packageInfo.branch, // From discover - used for version info
+      branch: context.env.packageInfo.branch,
     },
     navigation: plugins.navigation,
     share: plugins.share,

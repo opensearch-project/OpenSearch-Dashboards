@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { IndexPattern } from '../../../data/public';
+import { DataView as Dataset, IndexPattern } from 'src/plugins/data/common';
 import { InvalidJSONProperty } from '../../../opensearch_dashboards_utils/public';
 import { LegacyState, TabState } from '../application/utils/state_management/slices';
 import { SavedExplore, SavedExploreAttributes } from '../types/saved_explore_types';
@@ -21,7 +21,7 @@ export const saveStateToSavedObject = (
   flavorId: string,
   tabDefinition: TabDefinition,
   tabState?: TabState,
-  indexPattern?: IndexPattern
+  dataset?: IndexPattern | Dataset
 ): SavedExplore => {
   // Serialize the state into the saved object
   obj.type = flavorId;
@@ -36,7 +36,7 @@ export const saveStateToSavedObject = (
   obj.uiState = JSON.stringify({
     activeTab: tabDefinition.id,
   });
-  obj.searchSourceFields = { index: indexPattern };
+  obj.searchSourceFields = { index: dataset };
 
   obj.version = 1;
 

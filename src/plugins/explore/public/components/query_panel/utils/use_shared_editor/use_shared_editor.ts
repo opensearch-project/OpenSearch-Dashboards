@@ -19,7 +19,7 @@ import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
-import { useIndexPatternContext } from '../../../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../../../application/context';
 import {
   selectEditorMode,
   selectQueryLanguage,
@@ -52,8 +52,13 @@ export const useSharedEditor = ({
   setEditorRef,
   editorPosition,
 }: UseSharedEditorProps): UseSharedEditorReturnType => {
-  const { indexPattern } = useIndexPatternContext();
+  const { dataset } = useDatasetContext();
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const {
+    data: {
+      query: { queryString },
+    },
+  } = services;
   const editorMode = useSelector(selectEditorMode);
   const toggleDualEditorMode = useToggleDualEditorMode();
   // using a ref as provideCompletionItems uses a stale version of editorMode
@@ -98,29 +103,29 @@ export const useSharedEditor = ({
         const effectiveLanguage = getEffectiveLanguageForAutoComplete(queryLanguage, 'explore');
 
         // Get the current dataset from Query Service to avoid stale closure values
-        const currentDataset = services?.data?.query?.queryString?.getQuery().dataset;
+        const currentDataView = queryString?.getQuery().dataset;
 
-        // Get the current indexPattern from services to avoid stale closure values
-        let currentIndexPattern = indexPattern;
-        if (currentDataset) {
+        // Get the current dataset from services to avoid stale closure values
+        let currentDataset = dataset;
+        if (currentDataView) {
           try {
-            currentIndexPattern = await services?.indexPatterns?.get(
-              currentDataset.id,
-              currentDataset.type !== 'INDEX_PATTERN'
+            currentDataset = await services?.datasets?.get(
+              currentDataView.id,
+              currentDataView.type !== 'INDEX_PATTERN'
             );
           } catch (error) {
-            // Fallback to the prop indexPattern if fetching fails
-            currentIndexPattern = indexPattern;
+            // Fallback to the prop dataset if fetching fails
+            currentDataset = dataset;
           }
         }
 
-        // Use the current IndexPattern to avoid stale data
+        // Use the current Dataset to avoid stale data
         const suggestions = await services?.data?.autocomplete?.getQuerySuggestions({
           query: model.getValue(), // Use the current editor content, using the local query results in a race condition where we can get stale query data
           selectionStart: model.getOffsetAt(position),
           selectionEnd: model.getOffsetAt(position),
           language: effectiveLanguage,
-          indexPattern: currentIndexPattern as any,
+          indexPattern: currentDataset as any,
           datasetType: currentDataset?.type,
           position,
           services: services as any, // ExploreServices storage type incompatible with IDataPluginServices.DataStorage
@@ -166,7 +171,7 @@ export const useSharedEditor = ({
         return { suggestions: [], incomplete: false };
       }
     },
-    [editorPosition, queryLanguage, services, indexPattern]
+    [editorPosition, queryLanguage, services, queryString, dataset]
   );
 
   // We need to manually register completion provider if it gets re-created,

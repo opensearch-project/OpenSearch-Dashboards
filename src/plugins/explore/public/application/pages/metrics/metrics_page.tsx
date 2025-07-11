@@ -24,14 +24,13 @@ import { TopNav } from '../../../components/top_nav/top_nav';
 import { DiscoverChartContainer } from '../../../components/chart/discover_chart_container';
 import { QueryPanel } from '../../../components/query_panel';
 import { DiscoverPanel } from '../../legacy/discover/application/view_components/panel';
-import { HeaderDatasetSelector } from '../../components/header_dataset_selector';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
 import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
 import { ExploreTabs } from '../../../components/tabs/tabs';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
-import { useIndexPatternContext } from '../../components/index_pattern_context';
+import { useDatasetContext } from '../../context/dataset_context/dataset_context';
 import { DiscoverNoIndexPatterns } from '../../legacy/discover/application/components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../legacy/discover/application/components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';
@@ -41,7 +40,7 @@ import {
   defaultPrepareQueryString,
 } from '../../utils/state_management/actions/query_actions';
 import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
-import { selectShowDataSetFields } from '../../utils/state_management/selectors';
+import { selectShowDatasetFields } from '../../utils/state_management/selectors';
 import { ResultsSummaryPanel } from '../../../components/results_summary/results_summary_panel';
 import { useInitPage } from '../../utils/hooks/use_page_initialization';
 
@@ -54,11 +53,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { savedExplore } = useInitPage();
   const dispatch = useDispatch();
-  const {
-    indexPattern,
-    isLoading: indexPatternLoading,
-    error: indexPatternError,
-  } = useIndexPatternContext();
+  const { dataset, isLoading: isDatasetLoading, error: datasetError } = useDatasetContext();
 
   // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
@@ -79,7 +74,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
     return [];
   });
 
-  const showDataSetFields = useSelector(selectShowDataSetFields);
+  const showDataSetFields = useSelector(selectShowDatasetFields);
 
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
@@ -96,7 +91,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
   };
 
   const renderBottomRightPanel = () => {
-    if (indexPattern == null) {
+    if (dataset == null) {
       return (
         <CanvasPanel>
           <>
@@ -114,7 +109,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
             queryString={services?.data?.query?.queryString}
             query={services?.data?.query?.queryString?.getQuery()}
             savedQuery={services?.data?.query?.savedQueries}
-            timeFieldName={indexPattern.timeFieldName}
+            timeFieldName={dataset.timeFieldName}
           />
         </CanvasPanel>
       );
@@ -207,24 +202,9 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
       <div className="mainPage">
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
-            {/* TopNav component - configured like discover */}
-
-            <HeaderDatasetSelector />
-
             <NewExperienceBanner />
 
-            {/* QueryPanel component - only render when IndexPattern is loaded */}
-            <div className="dscCanvas__queryPanel">
-              {indexPatternLoading ? (
-                <div>Loading IndexPattern...</div>
-              ) : indexPatternError ? (
-                <div>Error loading IndexPattern: {indexPatternError}</div>
-              ) : indexPattern ? (
-                <QueryPanel />
-              ) : (
-                <div>No IndexPattern available</div>
-              )}
-            </div>
+            <div className="dscCanvas__queryPanel">{dataset ? <QueryPanel /> : null}</div>
 
             {/* Main content area with resizable panels under QueryPanel */}
             {BottomPanel}

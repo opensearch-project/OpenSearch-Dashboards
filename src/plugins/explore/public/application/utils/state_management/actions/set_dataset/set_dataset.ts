@@ -23,12 +23,29 @@ export const setDatasetActionCreator = (
   const queryStringState = services.data.query.queryString.getQuery();
   const {
     queryEditor: { editorMode, promptModeIsAvailable },
+    query: { dataset },
   } = getState();
 
   const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
 
+  let dataView;
+  if (dataset && dataset.id) {
+    await services.data.dataViews.ensureDefaultDataView();
+    dataView = await services.data.dataViews.get(
+      dataset.id,
+      dataset.type ? dataset.type !== 'INDEX_PATTERN' : false
+    );
+  }
+
   dispatch(clearResults());
   dispatch(setQueryWithHistory(queryStringState));
+
+  dispatch(
+    setQueryWithHistory({
+      ...queryStringState,
+      ...(dataView ? { dataset: dataView.toDataset() } : {}),
+    })
+  );
 
   if (newPromptModeIsAvailable !== promptModeIsAvailable) {
     dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable));

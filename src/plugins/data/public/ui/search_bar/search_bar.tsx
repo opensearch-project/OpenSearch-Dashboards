@@ -37,7 +37,14 @@ import {
   OpenSearchDashboardsReactContextValue,
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import { Filter, IIndexPattern, Query, TimeRange, UI_SETTINGS } from '../../../common';
+import {
+  Filter,
+  IDataView as IDataset,
+  IIndexPattern,
+  Query,
+  TimeRange,
+  UI_SETTINGS,
+} from '../../../common';
 import { SavedQuery, SavedQueryAttributes, TimeHistoryContract, QueryStatus } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { FilterBar } from '../filter_bar/filter_bar';
@@ -57,7 +64,7 @@ interface SearchBarInjectedDeps {
 }
 
 export interface SearchBarOwnProps {
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IIndexPattern[] | IDataset[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;

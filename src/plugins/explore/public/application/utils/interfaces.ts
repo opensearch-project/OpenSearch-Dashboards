@@ -4,7 +4,7 @@
  */
 
 import { Duration, Moment } from 'moment';
-import { IndexPattern, DataPublicPluginStart } from '../../../../data/public';
+import { DataView as Dataset, DataPublicPluginStart } from '../../../../data/public';
 import { QueryState, ISearchResult } from './state_management/slices';
 import { ExploreServices } from '../../types';
 
@@ -94,7 +94,7 @@ export interface RawSearchResults {
 export interface BaseProcessedSearchResults {
   hits: ISearchResult['hits'];
   fieldCounts: Record<string, number>;
-  indexPattern: IndexPattern;
+  dataset: Dataset;
   elapsedMs: number;
 }
 
@@ -111,7 +111,7 @@ export interface ProcessedSearchResults extends BaseProcessedSearchResults {
  */
 export type DefaultDataProcessor = (
   rawResults: ISearchResult,
-  indexPattern: IndexPattern
+  dataset: Dataset
 ) => ProcessedSearchResults;
 
 /**
@@ -119,7 +119,7 @@ export type DefaultDataProcessor = (
  */
 export type HistogramDataProcessor = (
   rawResults: ISearchResult,
-  indexPattern: IndexPattern,
+  dataset: Dataset,
   data: DataPublicPluginStart,
   interval: string
 ) => ProcessedSearchResults;

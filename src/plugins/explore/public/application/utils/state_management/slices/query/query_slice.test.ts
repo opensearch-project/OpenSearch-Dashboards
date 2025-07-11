@@ -4,6 +4,7 @@
  */
 
 import {
+  setDataset,
   setQueryState,
   setQueryWithHistory,
   setQueryStringWithHistory,
@@ -102,6 +103,38 @@ describe('querySlice reducers', () => {
       expect(action.type).toBe('query/setQueryStringWithHistory');
       expect(action.payload).toBe(queryString);
       expect(action.meta).toEqual({ addToHistory: true });
+    });
+  });
+
+  it('setDataset updates only the dataset field', () => {
+    const dataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: 'index-pattern',
+    };
+    const state = queryReducer(initialState, setDataset(dataset));
+    expect(state).toEqual({
+      ...initialState,
+      dataset,
+    });
+  });
+
+  it('setDataset preserves other state fields', () => {
+    const initialStateWithValues: QueryState = {
+      query: 'existing query',
+      language: 'ppl',
+      dataset: undefined,
+    };
+    const dataset = {
+      id: 'new-dataset',
+      title: 'New Dataset',
+      type: 'index-pattern',
+    };
+    const state = queryReducer(initialStateWithValues, setDataset(dataset));
+    expect(state).toEqual({
+      query: 'existing query',
+      language: 'ppl',
+      dataset,
     });
   });
 });

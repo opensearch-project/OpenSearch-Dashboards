@@ -11,6 +11,7 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import { DataView as Dataset } from 'src/plugins/data/common';
 import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
 import { ExploreServices } from '../../../../types';
 import { ExecutionContextSearch } from '../../../../../../expressions';
@@ -22,7 +23,6 @@ import {
   showSaveModal,
 } from '../../../../../../saved_objects/public';
 import { saveSavedExplore } from '../../../../helpers/save_explore';
-import { IndexPattern } from '../../../../../../data/public';
 import { TabState } from '../../../../application/utils/state_management/slices';
 import { TabDefinition } from '../../../../services/tab_registry/tab_registry_service';
 import { saveStateToSavedObject } from '../../../../saved_explore/transforms';
@@ -40,7 +40,7 @@ export const saveTopNavData: TopNavMenuIconUIData = {
 };
 
 export interface SaveStateProps {
-  indexPattern: IndexPattern | undefined;
+  dataset: Dataset | undefined;
   tabState: TabState;
   flavorId: string | null;
   tabDefinition: TabDefinition | undefined;
@@ -66,7 +66,7 @@ export const getSaveButtonRun = (
       saveStateProps.flavorId ?? 'logs',
       saveStateProps.tabDefinition!,
       saveStateProps.tabState,
-      saveStateProps.indexPattern
+      saveStateProps.dataset
     );
     const result = await saveSavedExplore({
       savedExplore: savedExploreWithState,
