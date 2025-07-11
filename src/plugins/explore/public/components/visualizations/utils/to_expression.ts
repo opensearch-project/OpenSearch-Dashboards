@@ -9,7 +9,7 @@ import {
   ExpressionFunctionOpenSearchDashboards,
   IExpressionLoaderParams,
 } from '../../../../../expressions/public';
-import { IndexPattern } from '../../../../../data/public';
+import { IndexPattern, DataView as Dataset } from '../../../../../data/public';
 import { VisColumn } from '../types';
 
 /**
@@ -26,7 +26,7 @@ import { VisColumn } from '../types';
  */
 export const toExpression = (
   searchContext: IExpressionLoaderParams['searchContext'],
-  indexPattern: IndexPattern,
+  indexPattern: IndexPattern | Dataset,
   toExpressionFn: (
     transformedData: Array<Record<string, any>>,
     numericalColumns: VisColumn[],

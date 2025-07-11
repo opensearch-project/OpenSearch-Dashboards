@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { IndexPattern, Dataset } from '../../../opensearch_dashboards_services';
 import { getIndexPatternFieldList } from '../../components/sidebar/lib/get_index_pattern_field_list';
 import { buildColumns } from '../../utils/columns';
 
@@ -18,7 +18,7 @@ import { buildColumns } from '../../utils/columns';
  * @param modifyColumn Booelan of 'discover:modifyColumnsOnSwitch'
  */
 export function filterColumns(
-  indexPattern: IndexPattern | undefined,
+  indexPattern: IndexPattern | Dataset | undefined,
   defaultColumns: string[],
   modifyColumn: boolean,
   fieldCounts?: Record<string, number>

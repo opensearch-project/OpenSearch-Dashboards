@@ -115,7 +115,7 @@ jest.mock('../../utils/hooks/use_page_initialization', () => ({
 }));
 
 jest.mock('../../components/index_pattern_context', () => ({
-  useIndexPatternContext: jest.fn().mockReturnValue({
+  useDatasetContext: jest.fn().mockReturnValue({
     indexPattern: {},
     isLoading: false,
     error: null,

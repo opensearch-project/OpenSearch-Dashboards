@@ -4,12 +4,12 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { IndexPatternField, opensearchFilters } from '../../../../../../data/public';
-import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { useIndexPatternContext } from '../../../components/index_pattern_context';
 import { useEditorQueryText } from '../use_editor_query_text';
 import { useEditorPromptText } from '../use_editor_prompt_text';
 import { useSetEditorText } from '../use_set_editor_text';
+import { DataViewField as DatasetField, opensearchFilters } from '../../../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { useDatasetContext } from '../../../context';
 import { useSelector } from '../../../legacy/discover/application/utils/state_management';
 import { selectEditorMode, selectQuery } from '../../../utils/state_management/selectors';
 import { EditorMode } from '../../../utils/state_management/types';
@@ -77,7 +77,7 @@ describe('useChangeQueryEditor', () => {
       },
     });
 
-    (useIndexPatternContext as jest.Mock).mockReturnValue({ indexPattern: mockIndexPattern });
+    (useDatasetContext as jest.Mock).mockReturnValue({ dataset: mockIndexPattern });
     (useEditorQueryText as jest.Mock).mockReturnValue(mockEditorQuery);
     (useEditorPromptText as jest.Mock).mockReturnValue(mockEditorPrompt);
     (useSetEditorText as jest.Mock).mockReturnValue(mockSetEditorText);
@@ -106,8 +106,8 @@ describe('useChangeQueryEditor', () => {
     expect(typeof result.current.onAddFilter).toBe('function');
   });
 
-  it('should not add filters when indexPattern is undefined', () => {
-    (useIndexPatternContext as jest.Mock).mockReturnValue({ indexPattern: undefined });
+  it('should not add filters when dataset is undefined', () => {
+    (useDatasetContext as jest.Mock).mockReturnValue({ dataset: undefined });
 
     const { result } = renderHook(() => useChangeQueryEditor());
     result.current.onAddFilter('field', 'value', '+');
@@ -251,13 +251,13 @@ describe('useChangeQueryEditor', () => {
     expect(callbackResult).toBe(mockEditorQuery);
   });
 
-  it('should accept IndexPatternField object as field parameter', () => {
+  it('should accept DatasetField object as field parameter', () => {
     const mockField = {
       name: 'fieldName',
       type: 'string',
       aggregatable: true,
       searchable: true,
-    } as IndexPatternField;
+    } as DatasetField;
 
     const { result } = renderHook(() => useChangeQueryEditor());
 

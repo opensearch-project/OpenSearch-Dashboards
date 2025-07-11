@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { UI_SETTINGS } from '../../../../../../../../data/public';
+import { IndexPattern, UI_SETTINGS } from '../../../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
 import {
   addColumn,
@@ -18,7 +18,7 @@ import { DiscoverSidebar } from '../../components/sidebar';
 import { ExploreServices } from '../../../../../../types';
 import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';
-import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
+import { useDatasetContext } from '../../../../../context';
 import {
   defaultResultsProcessor,
   defaultPrepareQueryString,
@@ -35,18 +35,18 @@ export function DiscoverPanel() {
   const results = useSelector((state: any) => state.results);
   const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
   const rawResults = cacheKey ? results[cacheKey] : null;
-  const { indexPattern } = useIndexPatternContext();
+  const { dataset } = useDatasetContext();
 
   // Process raw results to get field counts and rows
   const processedResults = useMemo(() => {
-    if (!rawResults || !indexPattern) {
+    if (!rawResults || !dataset) {
       return null;
     }
 
     // Use defaultResultsProcessor without histogram (DiscoverPanel doesn't need chart data)
-    const processed = defaultResultsProcessor(rawResults, indexPattern);
+    const processed = defaultResultsProcessor(rawResults, dataset);
     return processed;
-  }, [rawResults, indexPattern]);
+  }, [rawResults, dataset]);
 
   // Get fieldCounts and rows from processed results
   const fieldCounts = processedResults?.fieldCounts || {};
@@ -55,7 +55,7 @@ export function DiscoverPanel() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const timeFieldname = indexPattern?.timeFieldName;
+    const timeFieldname = dataset?.timeFieldName;
 
     if (columns !== prevColumns.current) {
       let updatedColumns = buildColumns(columns);
@@ -72,7 +72,7 @@ export function DiscoverPanel() {
       dispatch(setColumns(updatedColumns));
       prevColumns.current = columns;
     }
-  }, [columns, dispatch, indexPattern?.timeFieldName]);
+  }, [columns, dispatch, dataset?.timeFieldName]);
 
   const isEnhancementsEnabledOverride = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 
@@ -82,14 +82,14 @@ export function DiscoverPanel() {
       fieldCounts={(fieldCounts as any) || {}}
       hits={rows || []}
       onAddField={(fieldName, index) => {
-        if (indexPattern && capabilities.discover?.save) {
-          popularizeField(indexPattern, fieldName, services.data.indexPatterns);
+        if (dataset && capabilities.discover?.save) {
+          popularizeField(dataset, fieldName, services.data.dataViews);
         }
         dispatch(addColumn({ column: fieldName }));
       }}
       onRemoveField={(fieldName) => {
-        if (indexPattern && capabilities.discover?.save) {
-          popularizeField(indexPattern, fieldName, services.data.indexPatterns);
+        if (dataset && capabilities.discover?.save) {
+          popularizeField(dataset, fieldName, services.data.dataViews);
         }
         dispatch(removeColumn(fieldName));
       }}
@@ -102,7 +102,7 @@ export function DiscoverPanel() {
           })
         );
       }}
-      selectedIndexPattern={indexPattern}
+      selectedIndexPattern={(dataset as unknown) as IndexPattern}
       onAddFilter={onAddFilter}
       isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}
     />

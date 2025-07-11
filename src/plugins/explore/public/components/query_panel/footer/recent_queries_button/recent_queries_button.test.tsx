@@ -46,13 +46,6 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
   }),
 }));
 
-jest.doMock('../../../../application/context', () => ({
-  useEditorContext: () => ({
-    editorMode: 'single-query',
-    language: 'PPL',
-  }),
-}));
-
 jest.doMock('../../utils', () => ({
   useTimeFilter: () => ({
     handleTimeChange: mockHandleTimeChange,
