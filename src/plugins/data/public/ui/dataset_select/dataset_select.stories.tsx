@@ -1753,13 +1753,20 @@ const editorOptions: monaco.editor.IEditorConstructionOptions = {
 };
 
 const createMockDatasetsService = (datasets: Dataset[] = [], shouldError: boolean = false) => ({
-  getIds: async () => {
+  getIds: async (includeHidden?: boolean) => {
     if (shouldError) throw new Error('Failed to fetch dataset IDs');
     return datasets.map((d) => d.id || '');
   },
   get: async (id: string) => {
     if (shouldError) throw new Error(`Dataset ${id} not found`);
     return datasets.find((d) => d.id === id);
+  },
+  getDefault: async () => {
+    return datasets.length > 0 ? datasets[0] : undefined;
+  },
+  saveToCache: (id: string, dataset: Dataset) => {},
+  create: async (spec: any, temporary?: boolean) => {
+    return datasets.find((d) => d.id === spec.id);
   },
 });
 
