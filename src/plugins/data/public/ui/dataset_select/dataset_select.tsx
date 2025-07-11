@@ -165,7 +165,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
       display="columnCompressed"
       className="datasetSelect"
       label={i18n.translate('data.datasetSelect.formRowLabel', {
-        defaultMessage: 'Dataset',
+        defaultMessage: 'Data',
       })}
     >
       <EuiFlexGroup gutterSize="none" alignItems="center" wrap={false} responsive={false}>

@@ -14,8 +14,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSmallButton,
-  EuiPanel,
   EuiSelect,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -107,85 +109,57 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset }) => {
     >
       <EuiPopoverTitle>{datasetTitle}</EuiPopoverTitle>
 
-      <EuiFlexGroup gutterSize="xs" direction="column">
+      <EuiDescriptionList textStyle="reverse" compressed>
         {datasetDescription && (
-          <EuiFlexItem>
-            <EuiPanel paddingSize="s" hasShadow={false} hasBorder={true}>
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                <EuiFlexItem>
-                  <EuiText size="xs">
-                    <strong>
-                      {i18n.translate('data.datasetDetails.descriptionTitle', {
-                        defaultMessage: 'Description',
-                      })}
-                    </strong>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="xs">
-                    <p>{datasetDescription}</p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
+          <>
+            <EuiDescriptionListTitle>
+              {i18n.translate('data.datasetDetails.descriptionTitle', {
+                defaultMessage: 'Description',
+              })}
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <EuiText size="xs">
+                <p>{datasetDescription}</p>
+              </EuiText>
+            </EuiDescriptionListDescription>
+          </>
         )}
 
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s" hasShadow={false} hasBorder={true}>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <strong>
-                    {i18n.translate('data.datasetDetails.dataDefinitionTitle', {
-                      defaultMessage: 'Definition',
-                    })}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={datasetIcon} size="s" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" className="datasetDetails__textTruncate">
-                      {dataSourceName}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
+        <EuiDescriptionListTitle>
+          {i18n.translate('data.datasetDetails.dataDefinitionTitle', {
+            defaultMessage: 'Definition',
+          })}
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={datasetIcon} size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" className="datasetDetails__textTruncate">
+                {dataSourceName}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiDescriptionListDescription>
 
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s" hasShadow={false} hasBorder={true}>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <strong>
-                    {i18n.translate('data.datasetDetails.timeFieldTitle', {
-                      defaultMessage: 'Time field',
-                    })}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSelect
-                  options={buildTimeFieldOptions()}
-                  value={timeFieldName}
-                  onChange={() => {}}
-                  disabled={true}
-                  data-test-subj="datasetDetailsTimeFieldSelect"
-                  compressed
-                  className="datasetDetails__timeField"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiDescriptionListTitle>
+          {i18n.translate('data.datasetDetails.timeFieldTitle', {
+            defaultMessage: 'Time field',
+          })}
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <EuiSelect
+            options={buildTimeFieldOptions()}
+            value={timeFieldName}
+            onChange={() => {}}
+            disabled={true}
+            data-test-subj="datasetDetailsTimeFieldSelect"
+            compressed
+            className="datasetDetails__timeField"
+          />
+        </EuiDescriptionListDescription>
+      </EuiDescriptionList>
 
       <EuiPopoverFooter paddingSize="s">
         <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
