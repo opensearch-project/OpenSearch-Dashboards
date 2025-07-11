@@ -335,6 +335,32 @@ export const parseQuery = <
         continue;
       }
 
+      if (field === 'suggestKeywords') {
+        // combine suggestKeywords arrays with smarter deduplication
+        const currentKeywords = result.suggestKeywords ?? [];
+        const nextKeywords = nextResult.suggestKeywords ?? [];
+
+        // Create a Map to handle deduplication by id, preferring existing entries
+        const keywordMap = new Map<number, KeywordSuggestion>();
+
+        // Add current keywords first (they take precedence)
+        currentKeywords.forEach((keyword) => {
+          if (keyword?.id !== undefined) {
+            keywordMap.set(keyword.id, keyword);
+          }
+        });
+
+        // Add next keywords only if they don't already exist
+        nextKeywords.forEach((keyword) => {
+          if (keyword?.id !== undefined && !keywordMap.has(keyword.id)) {
+            keywordMap.set(keyword.id, keyword);
+          }
+        });
+
+        result.suggestKeywords = Array.from(keywordMap.values());
+        continue;
+      }
+
       switch (typeof value) {
         case 'boolean':
           // if a boolean is true, keep overall result true
