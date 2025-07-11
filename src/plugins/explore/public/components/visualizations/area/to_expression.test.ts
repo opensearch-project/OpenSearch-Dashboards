@@ -85,8 +85,8 @@ describe('Area Chart to_expression', () => {
       },
     ],
     grid: {
-      categoryLines: true,
-      valueLines: true,
+      xLines: true,
+      yLines: true,
     },
   };
 

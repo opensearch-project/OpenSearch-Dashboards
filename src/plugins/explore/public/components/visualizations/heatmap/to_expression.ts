@@ -31,13 +31,13 @@ export const createHeatmapWithBin = (
         field: xAxis?.field?.default?.column,
         type: 'quantitative',
         bin: true,
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
       },
       y: {
         field: yAxis?.field?.default?.column,
         type: 'quantitative',
         bin: true,
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
       },
       color: {
         field: colorFieldColumn?.column,
@@ -102,12 +102,13 @@ export const createRegularHeatmap = (
       x: {
         field: xAxis?.field?.default?.column,
         type: 'nominal',
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, false),
+        // for regular heatmap, both x and y refer to categorical fields, we shall disable grid line for this case
       },
       y: {
         field: yAxis?.field?.default?.column,
         type: 'nominal',
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, false),
       },
       color: {
         field: colorFieldColumn?.column,

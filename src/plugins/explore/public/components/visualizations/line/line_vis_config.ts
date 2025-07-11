@@ -63,8 +63,8 @@ const defaultLineChartStyles: LineChartStyleControls = {
     },
   ],
   grid: {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   },
 
   // Category axes
