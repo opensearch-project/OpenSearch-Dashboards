@@ -8,7 +8,6 @@ import { EuiPopover, EuiPopoverProps } from '@elastic/eui';
 import { useEffect } from 'react';
 
 interface SimplePopoverProps extends Partial<EuiPopoverProps> {
-  triggerType?: 'click' | 'hover';
   button: React.ReactElement;
 }
 
@@ -24,28 +23,14 @@ const loopToGetPath = (element: HTMLElement | ParentNode | null) => {
 };
 
 export const SimplePopover: React.FC<SimplePopoverProps> = (props) => {
-  const { triggerType = 'click', ...others } = props;
+  const { ...others } = props;
   const [popVisible, setPopVisible] = useState(false);
   const popoverRef = useRef(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const buttonProps: Partial<React.HTMLAttributes<HTMLButtonElement>> = {};
-  const destroyRef = useRef<boolean>(false);
-  if (triggerType === 'click') {
-    buttonProps.onClick = (e) => {
-      e.stopPropagation();
-      setPopVisible(!popVisible);
-    };
-  }
-
-  if (triggerType === 'hover') {
-    buttonProps.onMouseEnter = () => {
-      setPopVisible(true);
-    };
-  }
-
-  const outsideClick = useCallback(() => {
-    setPopVisible(false);
-  }, [setPopVisible]);
+  buttonProps.onMouseEnter = () => {
+    setPopVisible(true);
+  };
 
   const outsideHover = useCallback(
     (e) => {
@@ -60,28 +45,13 @@ export const SimplePopover: React.FC<SimplePopoverProps> = (props) => {
   );
 
   useEffect(() => {
-    if (popVisible && triggerType === 'click') {
-      window.addEventListener('click', outsideClick);
-    }
-    return () => {
-      window.removeEventListener('click', outsideClick);
-    };
-  }, [popVisible, outsideClick, triggerType]);
-
-  useEffect(() => {
-    if (popVisible && triggerType === 'hover') {
+    if (popVisible) {
       window.addEventListener('mousemove', outsideHover);
     }
     return () => {
       window.removeEventListener('mousemove', outsideHover);
     };
-  }, [popVisible, outsideHover, triggerType]);
-
-  useEffect(() => {
-    return () => {
-      destroyRef.current = true;
-    };
-  }, []);
+  }, [popVisible, outsideHover]);
 
   return (
     <EuiPopover
