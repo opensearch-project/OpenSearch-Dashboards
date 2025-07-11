@@ -139,7 +139,6 @@ export enum AxisRole {
   Y = 'y',
   COLOR = 'color',
   FACET = 'facet',
-  THETA = 'theta',
   SIZE = 'size',
   Y_SECOND = 'y2',
 }

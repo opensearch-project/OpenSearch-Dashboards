@@ -48,9 +48,6 @@ const AXIS_SELECT_LABEL = {
   [AxisRole.FACET]: i18n.translate('explore.visualize.axisSelectLabelFacet', {
     defaultMessage: 'Split Chart By',
   }),
-  [AxisRole.THETA]: i18n.translate('explore.visualize.axisSelectLabelTheta', {
-    defaultMessage: 'Theta',
-  }),
   [AxisRole.SIZE]: i18n.translate('explore.visualize.axisSelectLabelSize', {
     defaultMessage: 'Size',
   }),
@@ -222,8 +219,8 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   return (
     <StyleAccordion
       id="axesSelector"
-      accordionLabel={i18n.translate('explore.stylePanel.tabs.field', {
-        defaultMessage: 'Field',
+      accordionLabel={i18n.translate('explore.stylePanel.tabs.fields', {
+        defaultMessage: 'Fields',
       })}
       initialIsOpen={true}
     >
