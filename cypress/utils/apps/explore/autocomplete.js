@@ -311,7 +311,7 @@ export const hideWidgets = (maxAttempts = 3) => {
  * @param {boolean} useKeyboard - Whether to use keyboard instead of mouse
  */
 export const createQuery = (config, useKeyboard = false) => {
-  const editorType = 'exploreReusableEditor';
+  const editorType = 'exploreReusableEditor-top';
 
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')

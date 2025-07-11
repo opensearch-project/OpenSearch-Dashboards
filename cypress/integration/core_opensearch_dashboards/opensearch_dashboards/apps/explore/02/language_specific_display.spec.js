@@ -104,9 +104,9 @@ export const runDisplayTests = () => {
         cy.getElementByTestId('languageReferenceButton').click();
 
         // testing the saved queries management button
-        cy.getElementByTestId('saved-query-management-popover-button').click();
+        cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
         cy.getElementByTestId('saved-query-management-popover').should('be.visible');
-        cy.getElementByTestId('saved-query-management-popover-button').click();
+        cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
 
         // testing the filter
         if (config.filters) {

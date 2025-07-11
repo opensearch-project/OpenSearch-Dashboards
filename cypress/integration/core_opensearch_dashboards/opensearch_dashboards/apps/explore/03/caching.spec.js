@@ -31,7 +31,7 @@ const cachingTestSuite = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
       cy.getElementByTestId('discoverNewButton').click();
@@ -57,7 +57,7 @@ const cachingTestSuite = () => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
 

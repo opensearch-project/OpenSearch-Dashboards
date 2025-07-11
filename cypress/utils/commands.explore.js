@@ -16,17 +16,18 @@ const RETRY_DELAY = 1000;
 
 const forceFocusEditor = () => {
   return cy
-    .get('[data-test-subj="exploreReusableEditor"] .react-monaco-editor-container')
+    .get('[data-test-subj="exploreReusableEditor-top"] .react-monaco-editor-container')
     .click({ force: true })
     .wait(200) // Give editor time to register focus
     .get('.inputarea')
+    .first()
     .focus()
     .wait(200); // Wait for focus to take effect
 };
 
 const clearMonacoEditor = () => {
   return cy
-    .get('[data-test-subj="exploreReusableEditor"] .react-monaco-editor-container')
+    .get('[data-test-subj="exploreReusableEditor-top"] .react-monaco-editor-container')
     .should('exist')
     .should('be.visible')
     .then(() => {
@@ -35,6 +36,7 @@ const clearMonacoEditor = () => {
         // Try different key combinations for selection
         return cy
           .get('.inputarea')
+          .first()
           .type('{ctrl}a', { force: true })
           .wait(100)
           .type('{backspace}', { force: true })
@@ -48,7 +50,7 @@ const clearMonacoEditor = () => {
 
 const isEditorEmpty = () => {
   return cy
-    .get('[data-test-subj="exploreReusableEditor"] .react-monaco-editor-container')
+    .get('[data-test-subj="exploreReusableEditor-top"] .react-monaco-editor-container')
     .find('.view-line')
     .invoke('text')
     .then((text) => text.trim() === '');
@@ -106,6 +108,7 @@ cy.explore.add('setQueryEditor', (value, options = {}) => {
   cy.explore.clearQueryEditor().then(() => {
     return cy
       .get('.inputarea')
+      .first()
       .should('be.visible')
       .wait(200)
       .type(escape ? `${value}{esc}` : value, {
@@ -230,4 +233,98 @@ cy.explore.add('setRelativeTopNavDate', (time, timeUnit) => {
 
 cy.explore.add('updateTopNav', (options) => {
   cy.getElementByTestId('queryPanelFooterRunQueryButton', options).click({ force: true });
+});
+
+cy.explore.add(
+  'saveQuery',
+  (name, description = ' ', includeFilters = true, includeTimeFilter = false) => {
+    cy.whenTestIdNotFound('saved-query-management-popover', () => {
+      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+    });
+    cy.getElementByTestId('saved-query-management-save-button').click();
+
+    cy.getElementByTestId('saveQueryFormTitle').type(name);
+    cy.getElementByTestId('saveQueryFormDescription').type(description);
+
+    if (includeFilters !== true) {
+      cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+    }
+
+    if (includeTimeFilter !== false) {
+      cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+    }
+
+    // The force is necessary as there is occasionally a popover that covers the button
+    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+  }
+);
+
+cy.explore.add(
+  'updateSavedQuery',
+  (name = '', saveAsNewQuery = false, includeFilters = true, includeTimeFilter = false) => {
+    cy.whenTestIdNotFound('saved-query-management-popover', () => {
+      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+    });
+    cy.getElementByTestId('saved-query-management-save-button').click();
+
+    if (saveAsNewQuery) {
+      cy.getElementByTestId('saveAsNewQueryCheckbox')
+        .parent()
+        .find('[class="euiCheckbox__label"]')
+        .click();
+      cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
+
+      // Selecting the saveAsNewQuery element deselects the include time filter option.
+      if (includeTimeFilter === true) {
+        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+      }
+    } else if (saveAsNewQuery === false) {
+      // defaults to not selected.
+
+      if (includeTimeFilter !== true) {
+        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+      }
+    }
+
+    if (includeFilters !== true) {
+      // Always defaults to selected.
+      cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+    }
+
+    // The force is necessary as there is occasionally a popover that covers the button
+    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+  }
+);
+
+cy.explore.add('loadSavedQuery', (name) => {
+  cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+
+  cy.getElementByTestId('saved-query-management-open-button').click();
+
+  cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
+  // click button through popover
+  cy.getElementByTestId('open-query-action-button').click({ force: true });
+});
+
+cy.explore.add('clearSavedQuery', () => {
+  cy.whenTestIdNotFound('saved-query-management-popover', () => {
+    cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+  });
+  //clear save queries
+  cy.getElementByTestId('saved-query-management-clear-button').click();
+});
+
+cy.explore.add('deleteSavedQuery', (name) => {
+  cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+
+  cy.getElementByTestId('saved-query-management-open-button').click();
+  cy.getElementByTestId('euiFlyoutCloseButton')
+    .parent()
+    .contains(name)
+    .findElementByTestId('deleteSavedQueryButton')
+    .click();
+
+  cy.getElementByTestId('confirmModalConfirmButton').click();
 });

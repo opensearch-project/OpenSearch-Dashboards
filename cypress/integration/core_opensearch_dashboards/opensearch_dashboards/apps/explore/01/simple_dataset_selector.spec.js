@@ -73,7 +73,7 @@ export const runSimpleDatasetSelectorTests = () => {
       } from the simple dataset selector`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 
@@ -130,7 +130,7 @@ export const runSimpleDatasetSelectorTests = () => {
     it('validate filtering index pattern in simple dataset selector', () => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
 

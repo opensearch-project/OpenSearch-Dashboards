@@ -36,7 +36,7 @@ export const runAutocompleteTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -55,7 +55,7 @@ export const runAutocompleteTests = () => {
             cy.wait(2000);
             cy.explore.clearQueryEditor();
 
-            const editorType = 'exploreReusableEditor';
+            const editorType = 'exploreReusableEditor-top';
 
             cy.getElementByTestId(editorType)
               .find('.monaco-editor')

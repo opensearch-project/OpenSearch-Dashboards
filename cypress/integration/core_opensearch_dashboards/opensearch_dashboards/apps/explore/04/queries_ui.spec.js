@@ -37,7 +37,7 @@ export const runQueryTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -131,27 +131,12 @@ export const runQueryTests = () => {
                 // Verify popover appears with title
                 cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
 
-                // Get current language first
-                cy.getElementByTestId('queryEditorLanguageSelector')
-                  .invoke('text')
-                  .then((language) => {
-                    // Get the link with matching text content and verify href
-                    cy.get('.euiPopover__panel-isOpen')
-                      .find('a.euiLink.euiLink--primary')
-                      .should('have.attr', 'href')
-                      .then((href) => {
-                        let expectedHref;
-
-                        switch (language.trim()) {
-                          case 'PPL':
-                            expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/ppl/syntax/`;
-                            break;
-                          default:
-                            throw new Error(`Unexpected language: ${language}`);
-                        }
-
-                        expect(href).to.equal(expectedHref);
-                      });
+                cy.get('.euiPopover__panel-isOpen')
+                  .find('a.euiLink.euiLink--primary')
+                  .should('have.attr', 'href')
+                  .then((href) => {
+                    const expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/ppl/syntax/`;
+                    expect(href).to.equal(expectedHref);
                   });
               });
             });

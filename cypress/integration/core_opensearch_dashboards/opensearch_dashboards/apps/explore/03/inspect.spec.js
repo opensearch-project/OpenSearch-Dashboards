@@ -52,7 +52,7 @@ const inspectTestSuite = () => {
       it(`should inspect and validate the first row data for ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName: workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
         cy.getElementByTestId('discoverNewButton').click();

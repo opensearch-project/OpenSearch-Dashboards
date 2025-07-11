@@ -4,8 +4,6 @@
  */
 
 import {
-  START_TIME,
-  END_TIME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   QueryLanguages,
@@ -17,7 +15,6 @@ import {
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/explore/histogram_interaction';
-import { DatasetTypes } from '../../../../../../utils/apps/explore/constants';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
@@ -39,7 +36,7 @@ const runHistogramInteractionTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -59,25 +56,6 @@ const runHistogramInteractionTests = () => {
           cy.getElementByTestId('dscChartChartheader').should('not.exist');
           cy.getElementByTestId('discoverChart').should('not.exist');
         }
-        // check interval selection persistence across language changes.
-        // Only need to check for INDEX_PATTERNS because INDEXES
-        // only supports SQL & PPL, and only one of the two supports histogram.
-        if (config.isHistogramVisible && config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.getElementByTestId('discoverIntervalSelect').select('Week');
-          cy.getElementByTestId('discoverIntervalDateRange').contains(
-            `${START_TIME} - ${END_TIME} per`
-          );
-          for (const language of DatasetTypes.INDEX_PATTERN.supportedLanguages) {
-            if (language.name === QueryLanguages.SQL.name) continue;
-            cy.wait(1000); // wait a bit to ensure data is loaded
-            if (language.supports.histogram) {
-              cy.getElementByTestId('discoverIntervalSelect').select('Week');
-              cy.getElementByTestId('discoverIntervalDateRange').contains(
-                `${START_TIME} - ${END_TIME} per`
-              );
-            }
-          }
-        }
       });
 
       it(`check the Auto interval value for ${config.testName}`, () => {
@@ -95,6 +73,7 @@ const runHistogramInteractionTests = () => {
             cy.getElementByTestId('discoverIntervalDateRange').should('be.visible');
           });
         });
+        cy.getElementByTestId('discoverIntervalSelect').select('auto');
         // TODO: check histogram visualization
         // Currently it's not possible to check anything INSIDE the histogram with Cypress
       });

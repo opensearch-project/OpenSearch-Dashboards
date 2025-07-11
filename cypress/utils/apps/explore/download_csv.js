@@ -213,7 +213,7 @@ export const downloadCsvAndVerify = (downloadOption, readCsvCallback) => {
 export const prepareDiscoverPageForDownload = (config, workspaceName) => {
   cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
-    page: 'explore',
+    page: 'explore/logs',
     isEnhancement: true,
   });
 

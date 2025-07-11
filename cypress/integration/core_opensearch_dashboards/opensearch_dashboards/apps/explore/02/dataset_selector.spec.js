@@ -56,7 +56,7 @@ export const runDatasetSelectorTests = () => {
       it(`should be able to select and load ${config.testName} dataset-language combination using advanced dataset selector`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 
@@ -81,7 +81,7 @@ export const runDatasetSelectorTests = () => {
       it(`select the ${config.testName} dataset-language combination and cancelling the workflow restores the original state`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 

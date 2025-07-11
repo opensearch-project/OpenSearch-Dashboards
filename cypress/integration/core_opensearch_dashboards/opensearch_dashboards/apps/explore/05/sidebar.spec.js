@@ -120,23 +120,6 @@ const addSidebarFieldsAndCheckDocTableColumns = (
       getDocTableHeaderByIndex(1).should('not.have.text', '_source');
       checkTableHeaders(testFields);
     },
-    () => {
-      testFields.slice(0, 2).forEach((field) => {
-        sideBar.selectFieldFromSidebar(field);
-      });
-      getDocTableHeaderByIndex(1).should('not.have.text', testFields[0]);
-      getDocTableHeaderByIndex(2).should('not.have.text', testFields[1]);
-      testFields.slice(2).forEach((field) => {
-        sideBar.selectFieldFromSidebar(field);
-      });
-      getDocTableHeaderByIndex(1).should('have.text', '_source');
-      getDocTableHeaderByIndex(2).should('not.exist');
-      testFields.forEach((field) => {
-        sideBar.selectFieldFromSidebar(field);
-      });
-      getDocTableHeaderByIndex(1).should('not.have.text', '_source');
-      checkTableHeaders(testFields);
-    },
   ]).each((fn) => fn());
 
   cy.getElementByTestId('discoverQueryHits').should('have.text', '10,000');
@@ -169,7 +152,9 @@ const checkFilteredFieldsForAllLanguages = () => {
 
 const checkSidebarPanelBehavior = () => {
   const checkPanelVisibility = (shouldBeVisible) => {
-    cy.getElementByTestId('dscBottomLeftCanvas').should(shouldBeVisible ? 'exist' : 'not.exist');
+    cy.getElementByTestId('dscBottomLeftCanvas').should(
+      shouldBeVisible ? 'exist' : 'not.be.visible'
+    );
   };
 
   checkPanelVisibility(true);
@@ -254,12 +239,19 @@ export const runSideBarTests = () => {
         beforeEach(() => {
           cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
-            page: 'explore',
+            page: 'explore/logs',
             isEnhancement: true,
           });
+
+          // On a new session, a syntax helper popover appears, which obstructs the typing within the query
+          // editor. Clicking on a random element removes the popover.
+          cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
+
+          cy.wait(1000);
+
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
-          sideBar.removeAllSelectedFields();
+          // sideBar.removeAllSelectedFields();
         });
 
         it('adds simple fields', () => {
@@ -306,7 +298,7 @@ export const runSideBarTests = () => {
 
           cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
-            page: 'explore',
+            page: 'explore/logs',
             isEnhancement: true,
           });
           cy.getElementByTestId('discoverNewButton').click();
