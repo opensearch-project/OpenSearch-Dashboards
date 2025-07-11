@@ -54,6 +54,9 @@ const AXIS_SELECT_LABEL = {
   [AxisRole.Y_SECOND]: i18n.translate('explore.visualize.axisSelectLabelY2nd', {
     defaultMessage: 'Y-Axis (2nd)',
   }),
+  [AxisRole.Value]: i18n.translate('explore.visualize.axisSelectLabelValue', {
+    defaultMessage: 'Value',
+  }),
 };
 
 export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
@@ -275,7 +278,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
 }) => {
   return (
     <React.Fragment key={`${axisRole}Selector`}>
-      <EuiFormRow label={chartType === 'metric' ? undefined : AXIS_SELECT_LABEL[axisRole]}>
+      <EuiFormRow label={AXIS_SELECT_LABEL[axisRole]}>
         <EuiFlexItem>
           <EuiComboBox
             compressed

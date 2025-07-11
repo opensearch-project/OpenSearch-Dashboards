@@ -141,6 +141,7 @@ export enum AxisRole {
   FACET = 'facet',
   SIZE = 'size',
   Y_SECOND = 'y2',
+  Value = 'value',
 }
 
 // for heatmap the axies can serve as value axis or category axis in 2 scienrios
