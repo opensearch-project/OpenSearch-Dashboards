@@ -27,6 +27,7 @@ import {
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
 import { DataView as Dataset, Query } from '../../../common';
+import { DEFAULT_DATA } from '../../../common/constants';
 import { IDataPluginServices } from '../../types';
 import { DatasetDetails } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
@@ -64,6 +65,20 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     }
 
     return undefined;
+  }, []);
+
+  const getDataSourceUri = useCallback((datasetObj?: Dataset): string => {
+    if (!datasetObj) return `${DEFAULT_DATA.SET_TYPES.INDEX_PATTERN.toLowerCase()}://default`;
+
+    if (datasetObj.dataSourceRef?.name) {
+      return datasetObj.dataSourceRef.name;
+    }
+
+    if (datasetObj.type) {
+      return `${datasetObj.type.toLowerCase()}://default`;
+    }
+
+    return `${DEFAULT_DATA.SET_TYPES.INDEX_PATTERN.toLowerCase()}://default`;
   }, []);
 
   const fetchDatasets = useCallback(async () => {
@@ -144,7 +159,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
       const isSelected = id === selectedDataset?.id;
       const isDefault = id === defaultDatasetId;
 
-      const datasetType = getTypeFromUri(dataset.dataSourceRef?.name) || dataset.type || '';
+      const datasetType =
+        getTypeFromUri(dataset.dataSourceRef?.name) ||
+        dataset.type ||
+        DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
       const iconType = datasetService.getType(datasetType)?.meta.icon.type || 'database';
 
       return {
@@ -152,7 +170,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         searchableLabel: description || title,
         key: id,
         checked: isSelected ? 'on' : undefined,
-        prepend: <EuiIcon type={iconType} />,
+        prepend: <EuiIcon size="s" type={iconType} />,
         'data-test-subj': `datasetOption-${id}`,
         append: isDefault ? (
           <EuiBadge>
@@ -166,7 +184,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   }, [datasets, selectedDataset, defaultDatasetId, getTypeFromUri, datasetService]);
 
   const datasetType =
-    getTypeFromUri(selectedDataset?.dataSourceRef?.name) || selectedDataset?.type || '';
+    getTypeFromUri(selectedDataset?.dataSourceRef?.name) ||
+    selectedDataset?.type ||
+    DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
 
   const datasetIcon = datasetService.getType(datasetType)?.meta.icon.type || 'database';
   const datasetTitle = selectedDataset

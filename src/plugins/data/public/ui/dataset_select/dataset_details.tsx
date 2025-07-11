@@ -8,12 +8,11 @@ import {
   EuiSmallButtonEmpty,
   EuiPopover,
   EuiPopoverTitle,
-  EuiPopoverFooter,
+  EuiTitle,
   EuiText,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiSelect,
   EuiDescriptionList,
   EuiBadge,
@@ -21,6 +20,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataView as Dataset } from '../../../common/data_views';
+import { DEFAULT_DATA } from '../../../common/constants';
 import { IDataPluginServices } from '../../types';
 
 export interface DatasetDetailsProps {
@@ -41,16 +41,16 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const closePopover = useCallback(() => setIsOpen(false), []);
 
-  const toggleDefault = useCallback(async () => {
+  const handleDefaultDatasetClicked = useCallback(async () => {
     if (!dataset) return;
 
-    if (isDefault) {
+    if (isDefaultDataset) {
       return;
     } else {
       await datasetsService.setDefault(dataset.id as string, true);
       setIsDefaultDataset(true);
     }
-  }, [dataset, isDefault, datasetsService]);
+  }, [dataset, isDefaultDataset, datasetsService]);
 
   const getTypeFromUri = useCallback((uri?: string): string | undefined => {
     if (!uri) return undefined;
@@ -89,11 +89,15 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
     return null;
   }
 
-  const datasetType = getTypeFromUri(dataset.dataSourceRef?.name) || dataset.type || '';
+  const datasetType =
+    getTypeFromUri(dataset.dataSourceRef?.name) ||
+    dataset.type ||
+    DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
   const datasetIcon = datasetService.getType(datasetType)?.meta.icon.type || 'database';
+
+  const dataSourceName = dataset.dataSourceRef?.name || `default`;
   const datasetTitle = dataset.displayName || dataset.title;
   const datasetDescription = dataset.description || '';
-  const dataSourceName = dataset.dataSourceRef?.name || '';
   const timeFieldName =
     dataset.timeFieldName ||
     i18n.translate('data.datasetDetails.noTimeFilter', {
@@ -122,10 +126,16 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
     >
       <EuiPopoverTitle>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-          <EuiFlexItem>{datasetTitle}</EuiFlexItem>
+          <EuiFlexItem>
+            {
+              <EuiTitle size="xxxs">
+                <>{datasetTitle}</>
+              </EuiTitle>
+            }
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <div
-              onClick={toggleDefault}
+              onClick={handleDefaultDatasetClicked}
               data-test-subj="datasetDetailsDefaultButton"
               tabIndex={0}
               onKeyDown={() => {}}
@@ -161,7 +171,7 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
                     </EuiText>
                   ),
                   description: (
-                    <EuiText size="xs">
+                    <EuiText size="xs" color="subdued">
                       <p>{datasetDescription}</p>
                     </EuiText>
                   ),
@@ -182,7 +192,7 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
                   <EuiIcon type={datasetIcon} size="s" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" className="datasetDetails__textTruncate">
+                  <EuiText size="xs" color="subdued" className="datasetDetails__textTruncate">
                     {dataSourceName}
                   </EuiText>
                 </EuiFlexItem>
