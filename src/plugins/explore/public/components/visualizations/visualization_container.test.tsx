@@ -4,129 +4,58 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { shallow } from 'enzyme';
 import { VisualizationContainer } from './visualization_container';
 
-// Mock the visualization module
-jest.mock('./visualization');
-
-// Mock the OpenSearch Dashboards context
+// Mock all dependencies to avoid import chain issues
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
-  useOpenSearchDashboards: jest.fn().mockReturnValue({
+  useOpenSearchDashboards: () => ({
     services: {
       data: {
         query: {
-          filterManager: {
-            getFilters: jest.fn().mockReturnValue([]),
-          },
-          queryString: {
-            getQuery: jest.fn().mockReturnValue({ query: '', language: 'kuery' }),
-          },
-          timefilter: {
-            timefilter: {
-              getTime: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
-            },
-          },
-          state$: {
-            subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
-          },
+          queryString: { getQuery: () => ({}) },
+          filterManager: { getFilters: () => [] },
+          timefilter: { timefilter: { getTime: () => ({}) } },
+          state$: { subscribe: () => ({ unsubscribe: () => {} }) },
         },
       },
-      expressions: {
-        ReactExpressionRenderer: jest.fn(),
-      },
+      expressions: { ReactExpressionRenderer: () => null },
+      notifications: { toasts: { addInfo: jest.fn() } },
     },
   }),
-  // Add mock for withOpenSearchDashboards
-  withOpenSearchDashboards: jest.fn().mockImplementation((Component) => Component),
+  withOpenSearchDashboards: (component: any) => component,
 }));
 
-// Mock the discover context
-jest.mock('../../application/legacy/discover/application/view_components/context', () => ({
-  useDiscoverContext: jest.fn().mockReturnValue({
-    indexPattern: {},
+jest.mock('react-redux', () => ({
+  useSelector: () => ({}),
+  useDispatch: () => jest.fn(),
+  connect: () => (component: any) => component,
+}));
+
+jest.mock('../../application/components/index_pattern_context', () => ({
+  useIndexPatternContext: () => ({ indexPattern: {} }),
+}));
+
+jest.mock('../../application/utils/hooks/use_tab_results', () => ({
+  useTabResults: () => ({ results: { hits: { hits: [] } } }),
+}));
+
+jest.mock('./utils/use_visualization_types', () => ({
+  useVisualizationRegistry: () => ({
+    getVisualizationConfig: () => null,
+    getRules: () => [],
   }),
 }));
 
-// Mock the visualization type
-const mockVisualizationType = {
-  name: 'line',
-  type: 'line',
-  ui: {
-    style: {
-      defaults: {
-        addTooltip: true,
-        addLegend: true,
-        legendPosition: 'right',
-        addTimeMarker: false,
-        showLine: true,
-        lineMode: 'smooth',
-        lineWidth: 2,
-        showDots: true,
-        thresholdLine: {
-          color: '#E7664C',
-          show: false,
-          style: 'full',
-          value: 10,
-          width: 1,
-        },
-        grid: {
-          categoryLines: true,
-          valueLines: true,
-        },
-        categoryAxes: [],
-        valueAxes: [],
-      },
-      render: jest.fn(),
-    },
-  },
-};
+// Mock all other imports
+jest.mock('./visualization', () => ({ Visualization: () => null }));
+jest.mock('./add_to_dashboard_button', () => ({ SaveAndAddButtonWithModal: () => null }));
+jest.mock('./visualization_container_utils', () => ({}));
+jest.mock('./rule_repository', () => ({ ALL_VISUALIZATION_RULES: [] }));
 
 describe('VisualizationContainer', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    // Set up the Visualization mock
-    const mockVisualization = jest.fn().mockImplementation(({ styleOptions }) => (
-      <div data-testid="visualization">
-        <div data-testid="style-options">{JSON.stringify(styleOptions)}</div>
-      </div>
-    ));
-
-    jest.requireMock('./visualization').Visualization = mockVisualization;
-
-    // Mock getVisualizationType to return visualization data
-    jest.mock('./utils/use_visualization_types', () => ({
-      getVisualizationType: jest.fn().mockReturnValue({
-        ruleId: 'test-rule',
-        visualizationType: mockVisualizationType,
-        transformedData: [{ x: 1, y: 2 }],
-        numericalColumns: [{ id: 1, name: 'y', schema: 'numerical', column: 'y' }],
-        categoricalColumns: [],
-        dateColumns: [{ id: 2, name: 'x', schema: 'date', column: 'x' }],
-        chartType: 'line',
-        availableChartTypes: [{ type: 'line', priority: 100, name: 'Line Chart' }],
-        toExpression: jest.fn(),
-      }),
-      useVisualizationRegistry: jest.fn().mockReturnValue({
-        getRules: jest.fn().mockReturnValue([
-          {
-            id: 'test-rule',
-            toExpression: jest.fn().mockReturnValue('mock-expression'),
-          },
-        ]),
-      }),
-    }));
-  });
-
-  it('should render null when visualization data is not ready', () => {
-    // Mock the implementation to return undefined visualization data
-    jest.mock('./utils/use_visualization_types', () => ({
-      getVisualizationType: jest.fn().mockReturnValue(undefined),
-      useVisualizationRegistry: jest.fn(),
-    }));
-
-    const { container } = render(<VisualizationContainer />);
-    expect(container.firstChild).toBeNull();
+  it('renders null when no visualization data', () => {
+    const wrapper = shallow(<VisualizationContainer />);
+    expect(wrapper.type()).toBeNull();
   });
 });
