@@ -99,9 +99,16 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     Object.keys(mapping).forEach((role) => allAxisRolesFromQuery.add(role as AxisRole));
   });
 
-  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>(
-    isEmpty(currentMapping) ? {} : currentMapping
-  );
+  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
+
+  useEffect(() => {
+    // This is an intentional design since we want to modify the mapping object from outside
+    // to intermediately synchronize the internal state, but we don't want the internal state
+    // change to also trigger changes in the state, resulting in an infinite loop.
+    setCurrentSelections((prevCurrentSelections) =>
+      isEqual(prevCurrentSelections, currentMapping) ? prevCurrentSelections : currentMapping
+    );
+  }, [currentMapping]);
 
   // Filter out those mapping (combination of axes selection) that no longer be satisify
   // by the current combination of axes selection
