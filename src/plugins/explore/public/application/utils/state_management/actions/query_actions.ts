@@ -7,19 +7,19 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { QueryExecutionStatus } from '../types';
-import { setResults, ISearchResult, setQueryStatus, updateQueryStatus } from '../slices';
+import { ISearchResult, setQueryStatus, setResults, updateQueryStatus } from '../slices';
 import { ExploreServices } from '../../../../types';
 import { IndexPattern } from '../../../legacy/discover/opensearch_dashboards_services';
 import {
   DataPublicPluginStart,
-  search,
   indexPatterns as indexPatternUtils,
   Query,
+  search,
 } from '../../../../../../data/public';
 import {
+  buildPointSeriesData,
   createHistogramConfigs,
   getDimensions,
-  buildPointSeriesData,
 } from '../../../../components/chart/utils';
 import { IBucketDateHistogramAggConfig } from '../../../../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
@@ -31,45 +31,18 @@ import {
   HistogramDataProcessor,
   ProcessedSearchResults,
 } from '../../interfaces';
+import { defaultPreparePplQuery } from '../../languages';
 
 /**
- * Adds a source if query string does not have it
+ * Default query preparation for tabs
  */
-export const prependSourceIfNecessary = (query: Query): string => {
-  const queryString = typeof query.query === 'string' ? query.query : '';
-  const lowerCaseQuery = queryString.toLowerCase();
-  const hasSource = /^(search\s+)?source\s*=/.test(lowerCaseQuery);
-
-  if (hasSource) {
-    return queryString;
+export const defaultPrepareQueryString = (query: Query): string => {
+  switch (query.language) {
+    case 'PPL':
+      return defaultPreparePplQuery(query).query;
+    default:
+      throw new Error(`defaultPrepareQuery encountered unhandled language: ${query.language}`);
   }
-
-  const datasetTitle = query.dataset?.title || '';
-
-  if (queryString.trim() === '') {
-    return `source=${datasetTitle}`;
-  } else {
-    return `source=${datasetTitle} ${queryString}`;
-  }
-};
-
-/**
- * Removes stats pipe for histogram compatibility
- * Returns only the prepared query string for cache key usage
- */
-export const stripStatsFromQuery = (queryString: string): string => {
-  // Remove stats pipe for histogram compatibility
-  return typeof queryString === 'string'
-    ? queryString.replace(/\s*\|\s*stats.*$/i, '')
-    : queryString;
-};
-
-/**
- * Default query preparation for tabs (removes stats pipe for histogram compatibility)
- * TODO: This only works for PPL. When other languages are introduced we must revisit this
- */
-export const defaultPrepareQuery = (query: Query): string => {
-  return stripStatsFromQuery(prependSourceIfNecessary(query));
 };
 
 /**
@@ -148,10 +121,10 @@ export const executeQueries = createAsyncThunk<
   }
 
   // Direct cache key computation (no computeQueryContext)
-  const defaultCacheKey = defaultPrepareQuery(query);
+  const defaultCacheKey = defaultPrepareQueryString(query);
 
   const activeTab = services.tabRegistry?.getTab(activeTabId);
-  const activeTabPrepareQuery = activeTab?.prepareQuery || defaultPrepareQuery;
+  const activeTabPrepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
   const activeTabCacheKey = activeTabPrepareQuery(query);
   const queriesEqual = defaultCacheKey === activeTabCacheKey;
 

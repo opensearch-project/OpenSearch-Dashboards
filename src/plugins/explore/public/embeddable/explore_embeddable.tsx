@@ -46,7 +46,7 @@ import {
   ChartType,
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
-import { defaultPrepareQuery } from '../application/utils/state_management/actions/query_actions';
+import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
 import {
   convertStringsToMappings,
   findRuleByIndex,
@@ -191,7 +191,7 @@ export class ExploreEmbeddable
     const activeTab = uiState.activeTab;
     // If the active tab is logs, we need to prepare the query for the logs tab
     if (activeTab === 'logs' && query) {
-      query.query = defaultPrepareQuery(query);
+      query.query = defaultPrepareQueryString(query);
     }
     searchSource.setFields({
       index: indexPattern,

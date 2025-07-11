@@ -38,7 +38,7 @@ import { LoadingSpinner } from '../../legacy/discover/application/components/loa
 import { DiscoverNoResults } from '../../legacy/discover/application/components/no_results/no_results';
 import {
   executeQueries,
-  defaultPrepareQuery,
+  defaultPrepareQueryString,
 } from '../../utils/state_management/actions/query_actions';
 import { CanvasPanel } from '../../legacy/discover/application/components/panel/canvas_panel';
 import { selectShowDataSetFields } from '../../utils/state_management/selectors';
@@ -68,7 +68,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
     const query = state.query;
     const results = state.results;
 
-    const cacheKey = defaultPrepareQuery(query);
+    const cacheKey = defaultPrepareQueryString(query);
     const rawResults = cacheKey ? results[cacheKey] : null;
 
     if (rawResults) {
