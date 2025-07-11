@@ -76,4 +76,29 @@
   &__infoIcon {
     margin-left: $euiSizeXS;
   }
+
+  &__advancedButton {
+    width: 100%;
+    font-size: $euiFontSizeXS;
+  }
+
+  &__footer {
+    padding: 0;
+  }
+
+  &__footerItem {
+    width: 100%;
+  }
+
+  &__advancedModal {
+    width: 1200px;
+    height: 800px;
+
+    // euiOverlayMask pushes the modal up due to having padding-bottom: 10vh
+    max-height: calc(90vh - $euiSizeL);
+
+    .euiModal__flex {
+      max-height: none;
+    }
+  }
 }

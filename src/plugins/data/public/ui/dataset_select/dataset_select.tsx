@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  EuiSmallButton,
+  EuiButton,
   EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,10 +21,15 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataView as Dataset } from '../../../common/data_views';
+import { FormattedMessage } from '@osd/i18n/react';
+import {
+  useOpenSearchDashboards,
+  toMountPoint,
+} from '../../../../opensearch_dashboards_react/public';
+import { DataView as Dataset, Query } from '../../../common';
 import { IDataPluginServices } from '../../types';
 import { DatasetDetails } from './dataset_details';
+import { AdvancedSelector } from '../dataset_selector/advanced_selector';
 import './_index.scss';
 
 export interface DatasetSelectProps {
@@ -41,10 +46,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>();
   const [defaultDatasetId, setDefaultDatasetId] = useState<string | undefined>();
   const [, setIsLoading] = useState(true);
+  const { data, overlays } = services;
   const {
     dataViews: datasetsService,
     query: { queryString },
-  } = services.data;
+  } = data;
   const datasetService = queryString.getDatasetService();
 
   const getTypeFromUri = useCallback((uri?: string): string | undefined => {
@@ -256,7 +262,8 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                 responsive={false}
                 className="datasetSelect__footer"
               >
-                <EuiFlexItem grow={false} className="datasetSelect__footerItem">
+                {/* TODO: Re-add once we have a way to create datasets that aren't index patterns */}
+                {/* <EuiFlexItem grow={false} className="datasetSelect__footerItem">
                   <EuiSmallButtonEmpty
                     onClick={() => {}}
                     data-test-subj="datasetSelectManageButton"
@@ -270,7 +277,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                   <EuiSmallButton
                     iconType="plusInCircle"
                     onClick={() => {
-                      // Close the popover and refresh the datasets
                       closePopover();
                       fetchDatasets();
                     }}
@@ -280,6 +286,42 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                       defaultMessage: 'Create',
                     })}
                   </EuiSmallButton>
+                </EuiFlexItem> */}
+                <EuiFlexItem grow={false} className="datasetSelect__footerItem">
+                  <EuiButton
+                    className="datasetSelect__advancedButton"
+                    data-test-subj="datasetSelectAdvancedButton"
+                    iconType="gear"
+                    iconSide="right"
+                    size="s"
+                    isSelected={false}
+                    onClick={() => {
+                      closePopover();
+                      const overlay = overlays?.openModal(
+                        toMountPoint(
+                          <AdvancedSelector
+                            services={services}
+                            onSelect={(query: Partial<Query>) => {
+                              overlay?.close();
+                              if (query) {
+                                onSelect(query.dataset as Dataset);
+                              }
+                            }}
+                            onCancel={() => overlay?.close()}
+                          />
+                        ),
+                        {
+                          maxWidth: false,
+                          className: 'datasetSelect__advancedModal',
+                        }
+                      );
+                    }}
+                  >
+                    <FormattedMessage
+                      id="data.datasetSelect.advancedButton"
+                      defaultMessage="View all available data"
+                    />
+                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPopoverFooter>
