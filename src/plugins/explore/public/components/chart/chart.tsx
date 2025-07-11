@@ -5,27 +5,25 @@
 
 import './_histogram.scss';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { useDispatch, useSelector } from 'react-redux';
 import { DataPublicPluginStart, search } from '../../../../data/public';
 import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_header';
 import { DiscoverHistogram } from './histogram/histogram';
 import { ExploreServices } from '../../types';
 import { Chart } from './utils';
 import {
-  useDispatch,
-  useSelector,
-} from '../../application/legacy/discover/application/utils/state_management';
-import {
   setInterval,
   clearResults,
   setShowHistogram,
 } from '../../application/utils/state_management/slices';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
+import { RootState } from '../../application/utils/state_management/store';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
@@ -45,11 +43,13 @@ export const DiscoverChart = ({
   showHistogram,
 }: DiscoverChartProps) => {
   const { from, to } = data.query.timefilter.timefilter.getTime();
-  const timeRange = {
-    from: dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
-    to: dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
-  };
-  const { interval } = useSelector((state) => state.legacy);
+  const timeRange = useMemo(() => {
+    return {
+      from: dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
+      to: dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') || '',
+    };
+  }, [from, to]);
+  const { interval } = useSelector((state: RootState) => state.legacy);
   const dispatch = useDispatch();
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
