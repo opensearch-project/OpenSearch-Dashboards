@@ -7,7 +7,6 @@ import { ExploreServices } from '../../../../../types';
 import { AppDispatch, RootState } from '../../store';
 import {
   clearResults,
-  setDataset,
   setEditorMode,
   setPromptModeIsAvailable,
   setQueryWithHistory,
@@ -29,7 +28,6 @@ export const setDatasetActionCreator = (
 
   const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
 
-  // Get the current dataset from the state
   let dataView;
   if (dataset && dataset.id) {
     await services.data.dataViews.ensureDefaultDataView();
@@ -39,10 +37,12 @@ export const setDatasetActionCreator = (
   dispatch(clearResults());
   dispatch(setQueryWithHistory(queryStringState));
 
-  if (dataView && dataView.toDataset) {
-    const serializedDataset = dataView.toDataset();
-    dispatch(setDataset(serializedDataset));
-  }
+  dispatch(
+    setQueryWithHistory({
+      ...queryStringState,
+      ...(dataView ? { dataset: dataView.toDataset() } : {}),
+    })
+  );
 
   if (newPromptModeIsAvailable !== promptModeIsAvailable) {
     dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable));
