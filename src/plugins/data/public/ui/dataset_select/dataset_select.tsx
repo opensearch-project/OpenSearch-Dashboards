@@ -35,9 +35,11 @@ export interface DatasetSelectProps {
 const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
+  const initialDatasetSet = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>();
+  const [defaultDatasetId, setDefaultDatasetId] = useState<string | undefined>();
   const [, setIsLoading] = useState(true);
   const {
     dataViews: datasetsService,
@@ -58,53 +60,59 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     return undefined;
   }, []);
 
-  useEffect(() => {
-    isMounted.current = true;
+  const fetchDatasets = useCallback(async () => {
+    setIsLoading(true);
 
-    const fetchDatasets = async () => {
-      setIsLoading(true);
+    try {
+      const datasetIds = await datasetsService.getIds(true); // Force refresh from server
 
-      try {
-        const datasetIds = await datasetsService.getIds();
-
-        const fetchedDatasets: Dataset[] = [];
-        for (const id of datasetIds) {
-          try {
-            const dataset = await datasetsService.get(id);
-            fetchedDatasets.push(dataset);
-          } catch (e) {
-            throw new Error(
-              i18n.translate('data.datasetSelect.fetchError', {
-                defaultMessage: 'Failed to fetch dataset with ID {id}: {error}',
-                values: { id, error: (e as Error).message },
-              })
-            );
-          }
-        }
-
-        if (isMounted.current) {
-          setDatasets(fetchedDatasets);
-
-          if (!selectedDataset && fetchedDatasets.length > 0) {
-            setSelectedDataset(fetchedDatasets[0]);
-            onSelect(fetchedDatasets[0]);
-          }
-
-          setIsLoading(false);
-        }
-      } catch (e) {
-        if (isMounted.current) {
-          setIsLoading(false);
+      const fetchedDatasets: Dataset[] = [];
+      for (const id of datasetIds) {
+        try {
+          const dataset = await datasetsService.get(id);
+          fetchedDatasets.push(dataset);
+        } catch (e) {
+          throw new Error(
+            i18n.translate('data.datasetSelect.fetchError', {
+              defaultMessage: 'Failed to fetch dataset with ID {id}: {error}',
+              values: { id, error: (e as Error).message },
+            })
+          );
         }
       }
-    };
+
+      const defaultDataset = await datasetsService.getDefault();
+      if (defaultDataset && isMounted.current) {
+        setDefaultDatasetId(defaultDataset.id);
+      }
+
+      if (isMounted.current) {
+        setDatasets(fetchedDatasets);
+
+        if (!initialDatasetSet.current && fetchedDatasets.length > 0) {
+          setSelectedDataset(fetchedDatasets[0]);
+          onSelect(fetchedDatasets[0]);
+          initialDatasetSet.current = true;
+        }
+
+        setIsLoading(false);
+      }
+    } catch (e) {
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [datasetsService, onSelect]);
+
+  useEffect(() => {
+    isMounted.current = true;
 
     fetchDatasets();
 
     return () => {
       isMounted.current = false;
     };
-  }, [datasetsService, onSelect, selectedDataset]);
+  }, [fetchDatasets]);
 
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const closePopover = useCallback(() => setIsOpen(false), []);
@@ -128,6 +136,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     return datasets.map((dataset) => {
       const { id, title, displayName, description } = dataset;
       const isSelected = id === selectedDataset?.id;
+      const isDefault = id === defaultDatasetId;
 
       const datasetType = getTypeFromUri(dataset.dataSourceRef?.name) || dataset.type || '';
       const iconType = datasetService.getType(datasetType)?.meta.icon.type || 'database';
@@ -139,7 +148,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         checked: isSelected ? 'on' : undefined,
         prepend: <EuiIcon type={iconType} />,
         'data-test-subj': `datasetOption-${id}`,
-        append: isSelected ? (
+        append: isDefault ? (
           <EuiBadge>
             {i18n.translate('data.datasetSelect.defaultLabel', {
               defaultMessage: 'Default',
@@ -148,7 +157,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         ) : undefined,
       };
     });
-  }, [datasets, selectedDataset, getTypeFromUri, datasetService]);
+  }, [datasets, selectedDataset, defaultDatasetId, getTypeFromUri, datasetService]);
 
   const datasetType =
     getTypeFromUri(selectedDataset?.dataSourceRef?.name) || selectedDataset?.type || '';
@@ -260,7 +269,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                 <EuiFlexItem grow={false} className="datasetSelect__footerItem">
                   <EuiSmallButton
                     iconType="plusInCircle"
-                    onClick={() => {}}
+                    onClick={() => {
+                      // Close the popover and refresh the datasets
+                      closePopover();
+                      fetchDatasets();
+                    }}
                     data-test-subj="datasetSelectCreateButton"
                   >
                     {i18n.translate('data.dataSelector.createButton', {
