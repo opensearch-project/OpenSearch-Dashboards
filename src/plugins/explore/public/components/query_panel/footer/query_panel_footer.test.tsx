@@ -21,10 +21,16 @@ jest.mock('../../../../../data/public', () => ({
       Query Result: {queryStatus.status} - {queryStatus.elapsedMs}ms
     </div>
   ),
+  ResultStatus: {
+    ERROR: 'error',
+    LOADING: 'loading',
+    READY: 'ready',
+    UNINITIALIZED: 'uninitialized',
+  },
 }));
 
 // Mock all child components
-jest.mock('./save_query', () => ({
+jest.mock('./save_query/save_query', () => ({
   SaveQueryButton: () => <div data-test-subj="save-query-button">Save Query</div>,
 }));
 
@@ -69,18 +75,24 @@ describe('QueryPanelFooter', () => {
     mockUseSelector.mockReturnValue(mockQueryStatus);
   });
 
-  it('renders all footer components', () => {
+  it('renders all footer components with correct layout', () => {
     mockUseDatasetContext.mockReturnValue({
       indexPattern: { timeFieldName: '@timestamp' },
     } as any);
 
-    render(<QueryPanelFooter />);
+    const { container } = render(<QueryPanelFooter />);
 
+    // Check main container
+    expect(container.querySelector('.exploreQueryPanelFooter')).toBeInTheDocument();
+
+    // Check left section components
     expect(screen.getByTestId('filter-panel-toggle')).toBeInTheDocument();
     expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
     expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
-    expect(screen.getByTestId('query-result')).toBeInTheDocument();
     expect(screen.getByTestId('detected-language')).toBeInTheDocument();
+
+    // Check right section components
+    expect(screen.getByTestId('date-time-range-picker')).toBeInTheDocument();
     expect(screen.getByTestId('run-query-button')).toBeInTheDocument();
   });
 
@@ -124,17 +136,17 @@ describe('QueryPanelFooter', () => {
     expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
   });
 
-  it('renders QueryResult component with correct query status', () => {
+  it('does not render QueryResult component when status is not error', () => {
     mockUseDatasetContext.mockReturnValue({
       indexPattern: { timeFieldName: '@timestamp' },
     } as any);
 
     render(<QueryPanelFooter />);
 
-    expect(screen.getByTestId('query-result')).toHaveTextContent('Query Result: ready - 150ms');
+    expect(screen.queryByTestId('query-result')).not.toBeInTheDocument();
   });
 
-  it('renders QueryResult component with error status', () => {
+  it('renders QueryResult component only when status is error', () => {
     const errorQueryStatus = {
       status: 'error',
       elapsedMs: 500,
@@ -155,20 +167,6 @@ describe('QueryPanelFooter', () => {
     render(<QueryPanelFooter />);
 
     expect(screen.getByTestId('query-result')).toHaveTextContent('Query Result: error - 500ms');
-  });
-
-  it('conditionally renders date time picker wrapper with correct class', () => {
-    mockUseDatasetContext.mockReturnValue({
-      indexPattern: { timeFieldName: '@timestamp' },
-    } as any);
-
-    const { container } = render(<QueryPanelFooter />);
-
-    const datePickerWrapper = container.querySelector(
-      '.queryPanel__footer__dateTimeRangePickerWrapper'
-    );
-    expect(datePickerWrapper).toBeInTheDocument();
-    expect(datePickerWrapper).toContainElement(screen.getByTestId('date-time-range-picker'));
   });
 
   it('calls selectQueryStatus selector', () => {
