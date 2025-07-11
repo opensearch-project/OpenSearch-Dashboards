@@ -202,22 +202,9 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
       <div className="mainPage">
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
-            {/* TopNav component - configured like discover */}
-
             <NewExperienceBanner />
 
-            {/* QueryPanel component - only render when dataset is loaded */}
-            <div className="dscCanvas__queryPanel">
-              {isDatasetLoading ? (
-                <div>Loading...</div>
-              ) : datasetError ? (
-                <div>Error: {datasetError}</div>
-              ) : dataset ? (
-                <QueryPanel />
-              ) : (
-                <div>No dataset available</div>
-              )}
-            </div>
+            <div className="dscCanvas__queryPanel">{dataset ? <QueryPanel /> : null}</div>
 
             {/* Main content area with resizable panels under QueryPanel */}
             {BottomPanel}

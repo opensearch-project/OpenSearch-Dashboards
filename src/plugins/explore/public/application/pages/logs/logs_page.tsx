@@ -200,20 +200,9 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
           <EuiPageBody className="explore-layout__page-body">
             <NewExperienceBanner />
 
-            {/* QueryPanel component - only render when dataset is loaded */}
-            <div className="dscCanvas__queryPanel">
-              {isDatasetLoading ? (
-                <div>Loading...</div>
-              ) : datasetError ? (
-                <div>Error: {datasetError}</div>
-              ) : dataset ? (
-                <QueryPanel />
-              ) : (
-                <div>No dataset available</div>
-              )}
-            </div>
+            <div className="dscCanvas__queryPanel">{dataset ? <QueryPanel /> : null}</div>
 
-            {/* Main content area with resizable panels under QueryPanel */}
+            {/* Main content area with resizable panels */}
             {BottomPanel}
           </EuiPageBody>
         </EuiPage>

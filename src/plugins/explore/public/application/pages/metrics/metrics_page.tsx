@@ -53,11 +53,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { savedExplore } = useInitPage();
   const dispatch = useDispatch();
-  const {
-    indexPattern,
-    isLoading: indexPatternLoading,
-    error: indexPatternError,
-  } = useDatasetContext();
+  const { dataset, isLoading: isDatasetLoading, error: datasetError } = useDatasetContext();
 
   // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
@@ -95,7 +91,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
   };
 
   const renderBottomRightPanel = () => {
-    if (indexPattern == null) {
+    if (dataset == null) {
       return (
         <CanvasPanel>
           <>
@@ -113,7 +109,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
             queryString={services?.data?.query?.queryString}
             query={services?.data?.query?.queryString?.getQuery()}
             savedQuery={services?.data?.query?.savedQueries}
-            timeFieldName={indexPattern.timeFieldName}
+            timeFieldName={dataset.timeFieldName}
           />
         </CanvasPanel>
       );
@@ -206,22 +202,9 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
       <div className="mainPage">
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
-            {/* TopNav component - configured like discover */}
-
             <NewExperienceBanner />
 
-            {/* QueryPanel component - only render when IndexPattern is loaded */}
-            <div className="dscCanvas__queryPanel">
-              {indexPatternLoading ? (
-                <div>Loading IndexPattern...</div>
-              ) : indexPatternError ? (
-                <div>Error loading IndexPattern: {indexPatternError}</div>
-              ) : indexPattern ? (
-                <QueryPanel />
-              ) : (
-                <div>No IndexPattern available</div>
-              )}
-            </div>
+            <div className="dscCanvas__queryPanel">{dataset ? <QueryPanel /> : null}</div>
 
             {/* Main content area with resizable panels under QueryPanel */}
             {BottomPanel}
