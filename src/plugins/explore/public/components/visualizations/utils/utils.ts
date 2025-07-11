@@ -5,8 +5,8 @@
 
 import { StandardAxes, ColorSchemas, AxisRole, Positions } from '../types';
 
-export const applyAxisStyling = (axesStyle?: StandardAxes): any => {
-  const gridEnabled = axesStyle?.grid.showLines ?? true;
+export const applyAxisStyling = (axesStyle?: StandardAxes, showGrid?: boolean): any => {
+  const gridEnabled = showGrid ?? true;
 
   const fullAxisConfig: any = {
     // Grid settings
@@ -24,6 +24,7 @@ export const applyAxisStyling = (axesStyle?: StandardAxes): any => {
 
   // Apply axis visibility
   if (!axesStyle?.show) {
+    fullAxisConfig.title = null;
     fullAxisConfig.labels = false;
     fullAxisConfig.ticks = false;
     fullAxisConfig.domain = false;

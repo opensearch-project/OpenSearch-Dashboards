@@ -22,8 +22,8 @@ describe('area_vis_config', () => {
           mode: 'all',
         },
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       });
 
