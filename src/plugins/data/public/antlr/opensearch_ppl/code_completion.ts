@@ -23,7 +23,11 @@ import { openSearchPplAutocompleteData as defaultPplAutocompleteData } from './d
 import { getAvailableFieldsForAutocomplete } from './simplified_ppl_grammar/symbol_table_parser';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
-import { PPL_AGGREGATE_FUNCTIONS, PPL_SUGGESTION_IMPORTANCE } from './constants';
+import {
+  PPL_AGGREGATE_FUNCTIONS,
+  PPL_FUNCTIONAL_KEYWORDS,
+  PPL_SUGGESTION_IMPORTANCE,
+} from './constants';
 import { Documentation } from './ppl_documentation';
 
 export const getDefaultSuggestions = async ({
@@ -204,15 +208,32 @@ export const getSimplifiedPPLSuggestions = async ({
     // Fill in PPL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
-        ...suggestions.suggestKeywords.map((sk) => ({
-          text: sk.value.toLowerCase(),
-          insertText: `${sk.value.toLowerCase()} `,
-          type: monaco.languages.CompletionItemKind.Keyword,
-          detail: SuggestionItemDetailsTags.Keyword,
-          // sortText is the only option to sort suggestions, compares strings
-          sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
-          documentation: Documentation[sk.value.toUpperCase()],
-        }))
+        ...suggestions.suggestKeywords.map((sk) => {
+          if (PPL_FUNCTIONAL_KEYWORDS.has(sk.id)) {
+            const functionalKeywordDetails = PPL_FUNCTIONAL_KEYWORDS.get(sk.id);
+            const functionName = sk.value.toLowerCase();
+
+            return {
+              text: `${functionName}()`,
+              type: monaco.languages.CompletionItemKind.Function,
+              insertText: functionalKeywordDetails?.optionalParam
+                ? `${functionName}() $0`
+                : `${functionName}($0)`,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+              detail: SuggestionItemDetailsTags.Function,
+            };
+          } else {
+            return {
+              text: sk.value.toLowerCase(),
+              insertText: `${sk.value.toLowerCase()} `,
+              type: monaco.languages.CompletionItemKind.Keyword,
+              detail: SuggestionItemDetailsTags.Keyword,
+              // sortText is the only option to sort suggestions, compares strings
+              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
+              documentation: Documentation[sk.value.toUpperCase()],
+            };
+          }
+        })
       );
     }
     return finalSuggestions;
