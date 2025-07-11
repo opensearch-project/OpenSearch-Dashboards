@@ -67,26 +67,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     return undefined;
   }, []);
 
-  const getDataSourceUri = useCallback((datasetObj?: Dataset): string => {
-    if (!datasetObj) return `${DEFAULT_DATA.SET_TYPES.INDEX_PATTERN.toLowerCase()}://default`;
-
-    if (datasetObj.dataSourceRef?.name) {
-      return datasetObj.dataSourceRef.name;
-    }
-
-    if (datasetObj.type) {
-      return `${datasetObj.type.toLowerCase()}://default`;
-    }
-
-    return `${DEFAULT_DATA.SET_TYPES.INDEX_PATTERN.toLowerCase()}://default`;
-  }, []);
-
   const fetchDatasets = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      const datasetIds = await datasetsService.getIds(true); // Force refresh from server
-
+      const datasetIds = await datasetsService.getIds(true);
       const fetchedDatasets: Dataset[] = [];
       for (const id of datasetIds) {
         try {
@@ -321,10 +306,15 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                         toMountPoint(
                           <AdvancedSelector
                             services={services}
-                            onSelect={(query: Partial<Query>) => {
+                            onSelect={async (query: Partial<Query>) => {
                               overlay?.close();
-                              if (query) {
-                                onSelect(query.dataset as Dataset);
+                              if (query && query.dataset) {
+                                try {
+                                  await datasetService.cacheDataset(query.dataset, services, false);
+                                  onSelect(query.dataset as Dataset);
+                                } catch (error) {
+                                  // Error handling is silent to match coding style
+                                }
                               }
                             }}
                             onCancel={() => overlay?.close()}
