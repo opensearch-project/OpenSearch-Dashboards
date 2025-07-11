@@ -31,7 +31,10 @@ export const setDatasetActionCreator = (
   let dataView;
   if (dataset && dataset.id) {
     await services.data.dataViews.ensureDefaultDataView();
-    dataView = await services.data.dataViews.get(dataset.id, dataset.type !== 'INDEX_PATTERN');
+    dataView = await services.data.dataViews.get(
+      dataset.id,
+      dataset.type ? dataset.type !== 'INDEX_PATTERN' : false
+    );
   }
 
   dispatch(clearResults());

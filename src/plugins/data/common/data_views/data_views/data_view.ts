@@ -394,19 +394,18 @@ export class DataView implements IDataView {
   /**
    * Converts a DataView to a serializable Dataset object suitable for storage in Redux
    * Maps dataSource to dataSourceRef and includes only essential properties
+   * TODO: This should be more complete
    */
-  toDataset(): Dataset {
-    // Create a minimal Dataset object with only the essential properties
+  public toDataset(): Dataset {
     return {
       id: this.id || '',
       title: this.title,
       type: this.type || '',
       timeFieldName: this.timeFieldName,
-      // Map dataSourceRef to dataSource if it exists
       dataSource: this.dataSourceRef
         ? {
             id: this.dataSourceRef.id,
-            title: this.title, // Use the title from the DataView as a fallback
+            title: this.dataSourceRef.name!,
             type: this.dataSourceRef.type,
           }
         : undefined,

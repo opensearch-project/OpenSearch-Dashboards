@@ -30,9 +30,6 @@ const querySlice = createSlice({
   name: 'query',
   initialState,
   reducers: {
-    setDataset: (state, action: PayloadAction<Dataset | undefined>) => {
-      state.dataset = getSerializableDataset(action.payload);
-    },
     setQueryState: (_, action: PayloadAction<Query>) => {
       const payload = { ...action.payload };
       if (payload.dataset) {
@@ -74,11 +71,6 @@ const querySlice = createSlice({
   },
 });
 
-export const {
-  setDataset,
-  setQueryState,
-  setQueryWithHistory,
-  setQueryStringWithHistory,
-} = querySlice.actions;
+export const { setQueryState, setQueryWithHistory, setQueryStringWithHistory } = querySlice.actions;
 export const queryReducer = querySlice.reducer;
 export const queryInitialState = querySlice.getInitialState();
