@@ -109,57 +109,74 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset }) => {
     >
       <EuiPopoverTitle>{datasetTitle}</EuiPopoverTitle>
 
-      <EuiDescriptionList textStyle="reverse" compressed>
-        {datasetDescription && (
-          <>
-            <EuiDescriptionListTitle>
-              {i18n.translate('data.datasetDetails.descriptionTitle', {
-                defaultMessage: 'Description',
-              })}
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
+      <EuiDescriptionList
+        compressed
+        className="datasetDetails__list"
+        titleProps={{
+          className: 'datasetDetails__listTitle',
+        }}
+        listItems={[
+          ...(datasetDescription
+            ? [
+                {
+                  title: (
+                    <EuiText size="xs">
+                      {i18n.translate('data.datasetDetails.descriptionTitle', {
+                        defaultMessage: 'Description',
+                      })}
+                    </EuiText>
+                  ),
+                  description: (
+                    <EuiText size="xs">
+                      <p>{datasetDescription}</p>
+                    </EuiText>
+                  ),
+                },
+              ]
+            : []),
+          {
+            title: (
               <EuiText size="xs">
-                <p>{datasetDescription}</p>
+                {i18n.translate('data.datasetDetails.dataDefinitionTitle', {
+                  defaultMessage: 'Definition',
+                })}
               </EuiText>
-            </EuiDescriptionListDescription>
-          </>
-        )}
-
-        <EuiDescriptionListTitle>
-          {i18n.translate('data.datasetDetails.dataDefinitionTitle', {
-            defaultMessage: 'Definition',
-          })}
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={datasetIcon} size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" className="datasetDetails__textTruncate">
-                {dataSourceName}
+            ),
+            description: (
+              <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={datasetIcon} size="s" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" className="datasetDetails__textTruncate">
+                    {dataSourceName}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+          },
+          {
+            title: (
+              <EuiText size="xs">
+                {i18n.translate('data.datasetDetails.timeFieldTitle', {
+                  defaultMessage: 'Time field',
+                })}
               </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiDescriptionListDescription>
-
-        <EuiDescriptionListTitle>
-          {i18n.translate('data.datasetDetails.timeFieldTitle', {
-            defaultMessage: 'Time field',
-          })}
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <EuiSelect
-            options={buildTimeFieldOptions()}
-            value={timeFieldName}
-            onChange={() => {}}
-            disabled={true}
-            data-test-subj="datasetDetailsTimeFieldSelect"
-            compressed
-            className="datasetDetails__timeField"
-          />
-        </EuiDescriptionListDescription>
-      </EuiDescriptionList>
+            ),
+            description: (
+              <EuiSelect
+                options={buildTimeFieldOptions()}
+                value={timeFieldName}
+                onChange={() => {}}
+                disabled={true}
+                data-test-subj="datasetDetailsTimeFieldSelect"
+                compressed
+                className="datasetDetails__timeField"
+              />
+            ),
+          },
+        ]}
+      />
 
       <EuiPopoverFooter paddingSize="s">
         <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
