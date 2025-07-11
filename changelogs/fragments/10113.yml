@@ -1,0 +1,2 @@
+fix:
+- Fixed a issue that cause chart time range update unexpectedly ([#10113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10113))
