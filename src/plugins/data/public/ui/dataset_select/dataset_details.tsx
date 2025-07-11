@@ -208,15 +208,13 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
               </EuiText>
             ),
             description: (
-              <EuiSelect
-                options={buildTimeFieldOptions()}
-                value={timeFieldName}
-                onChange={() => {}}
-                disabled={true}
-                data-test-subj="datasetDetailsTimeFieldSelect"
-                compressed
-                className="datasetDetails__timeField"
-              />
+              <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" className="datasetDetails__textTruncate">
+                    {timeFieldName}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ),
           },
         ]}

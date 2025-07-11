@@ -308,13 +308,38 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                             services={services}
                             onSelect={async (query: Partial<Query>) => {
                               overlay?.close();
-                              if (query && query.dataset) {
+                              if (query?.dataset) {
                                 try {
-                                  await datasetService.cacheDataset(query.dataset, services, false);
-                                  setSelectedDataset(query.dataset as Dataset);
-                                  onSelect(query.dataset as Dataset);
+                                  const { dataSource, timeFieldName } = query.dataset;
+                                  const updatedDataset = {
+                                    ...query.dataset,
+                                    ...(dataSource && {
+                                      dataSourceRef: {
+                                        id: dataSource.id || '',
+                                        name: `${query.dataset.type.toLowerCase()}://${
+                                          dataSource.title
+                                        }`,
+                                        type: dataSource.type,
+                                      },
+                                    }),
+                                    type:
+                                      query.dataset.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+                                    timeFieldName,
+                                  };
+
+                                  await datasetService.cacheDataset(
+                                    updatedDataset,
+                                    services,
+                                    false
+                                  );
+                                  setSelectedDataset(updatedDataset as Dataset);
+                                  onSelect(updatedDataset as Dataset);
                                 } catch (error) {
-                                  // Error handling is silent to match coding style
+                                  services.notifications?.toasts.addError(error, {
+                                    title: i18n.translate('data.datasetSelect.errorTitle', {
+                                      defaultMessage: 'Error selecting dataset',
+                                    }),
+                                  });
                                 }
                               }
                             }}
