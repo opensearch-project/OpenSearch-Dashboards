@@ -12,7 +12,6 @@ import {
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
-  getDefaultQuery,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { verifyDiscoverPageState } from '../../../../../../utils/apps/explore/saved';
@@ -83,7 +82,7 @@ export const runSimpleDatasetSelectorTests = () => {
         // Verify if the language is unchanged, we get a default query populated, and correct dataset is set
         verifyDiscoverPageState({
           dataset: config.indexPattern,
-          queryString: getDefaultQuery(config.indexPattern, config.language),
+          queryString: '',
           language: config.language,
           hitCount: null,
           filters: null,

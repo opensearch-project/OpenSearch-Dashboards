@@ -20,7 +20,7 @@ export const validateItemsInSimpleDatasetSelectorDropDown = (searchString, noIte
   cy.getElementByTestId('datasetSelectorButton').click({ force: true });
   cy.get('[placeholder="Filter options"]').clear().type(searchString);
   cy.get('[data-test-subj*="datasetOption"]').should('have.length', noItems);
-  cy.getElementByTestId('dscCanvas').click({ force: true });
+  cy.getElementByTestId('headerGlobalNav').click({ force: true });
   cy.get('[placeholder="Filter options"]').should('not.exist');
   // TODO: Investigate the root cause for the failure wihtout the wait
   cy.wait(1000); // Intentional Wait
