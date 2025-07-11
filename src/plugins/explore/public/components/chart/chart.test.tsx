@@ -28,11 +28,6 @@ jest.mock('./histogram/histogram', () => ({
   DiscoverHistogram: () => <div data-test-subj="mockDiscoverHistogram">Mock Histogram</div>,
 }));
 
-// Mock the executeQueries action
-jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
-  executeQueries: jest.fn().mockReturnValue({ type: 'mock/executeQueries' }),
-}));
-
 describe('DiscoverChart', () => {
   const mockConfig = {
     get: jest.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS'),
@@ -57,11 +52,19 @@ describe('DiscoverChart', () => {
       timefilter: {
         timefilter: {
           getTime: jest.fn().mockReturnValue({
-            from: '2023-01-01T00:00:00.000Z',
-            to: '2023-01-02T00:00:00.000Z',
+            from: 'now-15m',
+            to: 'now',
           }),
           setTime: jest.fn(),
         },
+      },
+    },
+    search: {
+      aggs: {
+        intervalOptions: [
+          { text: 'Auto', value: 'auto' },
+          { text: '1 hour', value: '1h' },
+        ],
       },
     },
   } as unknown) as DataPublicPluginStart;
@@ -77,14 +80,17 @@ describe('DiscoverChart', () => {
     },
     preloadedState: {
       legacy: {
-        interval: '1h',
+        savedSearch: undefined,
+        savedQuery: undefined,
         columns: [],
         sort: [],
+        interval: '1h',
+        isDirty: false,
+        lineCount: undefined,
       },
       ui: {
         activeTabId: 'logs',
-        showDatasetFields: true,
-        prompt: '',
+        showFilterPanel: true,
         showHistogram: true,
       },
     },
@@ -114,6 +120,7 @@ describe('DiscoverChart', () => {
 
     expect(screen.getByTestId('dscChartWrapper')).toBeInTheDocument();
     expect(screen.getByTestId('dscChartChartheader')).toBeInTheDocument();
+    expect(screen.getByTestId('dscChartTimechartHeader')).toBeInTheDocument();
     expect(screen.getByTestId('mockTimechartHeader')).toBeInTheDocument();
   });
 
@@ -122,6 +129,7 @@ describe('DiscoverChart', () => {
     renderComponent({ chartData });
 
     expect(screen.getByTestId('dscTimechart')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverChart')).toBeInTheDocument();
     expect(screen.getByTestId('mockDiscoverHistogram')).toBeInTheDocument();
   });
 
@@ -130,6 +138,7 @@ describe('DiscoverChart', () => {
     renderComponent({ chartData, showHistogram: false });
 
     expect(screen.queryByTestId('dscTimechart')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discoverChart')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockDiscoverHistogram')).not.toBeInTheDocument();
   });
 
@@ -137,6 +146,7 @@ describe('DiscoverChart', () => {
     renderComponent({ showHistogram: true });
 
     expect(screen.queryByTestId('dscTimechart')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discoverChart')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockDiscoverHistogram')).not.toBeInTheDocument();
   });
 
@@ -164,5 +174,18 @@ describe('DiscoverChart', () => {
     fireEvent.click(toggleButton);
 
     expect(dispatchSpy).toHaveBeenCalled();
+  });
+
+  it('calls onChangeInterval when interval is changed', () => {
+    const dispatchSpy = jest.spyOn(mockStore, 'dispatch');
+    renderComponent();
+
+    const changeIntervalButton = screen.getByText('Change Interval');
+    fireEvent.click(changeIntervalButton);
+
+    expect(dispatchSpy).toHaveBeenCalled();
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'legacy/setInterval' })
+    );
   });
 });
