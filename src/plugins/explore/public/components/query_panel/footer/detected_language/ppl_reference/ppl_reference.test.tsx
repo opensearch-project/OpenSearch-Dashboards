@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/react';
 import { PplReference } from './ppl_reference';
 
 // Mock useOpenSearchDashboards to provide test doc links
-jest.mock('../../../../../../../../opensearch_dashboards_react/public', () => ({
+jest.mock('../../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: () => ({
     services: {
       docLinks: {

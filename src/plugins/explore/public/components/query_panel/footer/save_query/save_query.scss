@@ -3,21 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.exploreDetectedLanguage {
-  color: $euiColorMediumShade;
-  font-size: $euiFontSizeXS;
-
-  &:disabled {
-    cursor: default;
-  }
-
+.exploreSaveQuery {
   &__buttonTextWrapper {
     align-items: center;
     display: flex;
     gap: $ouiSizeXS;
-  }
-
-  &__popoverBody {
-    width: 350px;
   }
 }
