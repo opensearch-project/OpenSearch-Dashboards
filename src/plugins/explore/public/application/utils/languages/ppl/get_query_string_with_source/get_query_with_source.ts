@@ -12,9 +12,10 @@ import { QueryWithQueryAsString } from '../../types';
 export const getQueryWithSource = (query: Query): QueryWithQueryAsString => {
   const queryString = typeof query.query === 'string' ? query.query : '';
   const lowerCaseQuery = queryString.toLowerCase();
-  const hasSource = /^(search\s+)?source\s*=/.test(lowerCaseQuery);
+  const hasSource = /^\s*(search\s+)?source\s*=/.test(lowerCaseQuery);
+  const hasDescribe = /^\s*describe\s+/.test(lowerCaseQuery);
 
-  if (hasSource) {
+  if (hasSource || hasDescribe) {
     return { ...query, query: queryString };
   }
 

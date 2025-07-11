@@ -151,4 +151,54 @@ describe('getQueryWithSource', () => {
       query: 'source=test-dataset   | where level="error"',
     });
   });
+
+  it('should handle leading whitespace before source', () => {
+    const query: Query = {
+      query: ' source = data_logs_small_time_1* | where unique_category = "Configuration"',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'ppl',
+    };
+    const result = getQueryWithSource(query);
+    expect(result).toEqual(query);
+  });
+
+  it('should handle leading whitespace before search source', () => {
+    const query: Query = {
+      query: '  search source=existing-index | where field=value',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'ppl',
+    };
+    const result = getQueryWithSource(query);
+    expect(result).toEqual(query);
+  });
+
+  it('should return original query when it starts with "describe"', () => {
+    const query: Query = {
+      query: 'describe table_name',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'ppl',
+    };
+    const result = getQueryWithSource(query);
+    expect(result).toEqual(query);
+  });
+
+  it('should return original query when it starts with "DESCRIBE" (case insensitive)', () => {
+    const query: Query = {
+      query: 'DESCRIBE table_name',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'ppl',
+    };
+    const result = getQueryWithSource(query);
+    expect(result).toEqual(query);
+  });
+
+  it('should handle leading whitespace before describe', () => {
+    const query: Query = {
+      query: '  describe table_name',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'ppl',
+    };
+    const result = getQueryWithSource(query);
+    expect(result).toEqual(query);
+  });
 });
