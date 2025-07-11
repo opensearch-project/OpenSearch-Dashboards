@@ -54,6 +54,9 @@ const AXIS_SELECT_LABEL = {
   [AxisRole.SIZE]: i18n.translate('explore.visualize.axisSelectLabelSize', {
     defaultMessage: 'Size',
   }),
+  [AxisRole.Y_SECOND]: i18n.translate('explore.visualize.axisSelectLabelY2nd', {
+    defaultMessage: 'Y-Axis (2nd)',
+  }),
 };
 
 export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
