@@ -43,6 +43,7 @@ const languageConfiguration: LanguageConfiguration = {
     { open: '"', close: '"' },
     { open: "'", close: "'" },
   ],
+  wordPattern: /@?\w[\w@'.-]*[?!,;:"]*/, // Consider tokens containing . @ as words while applying suggestions. Refer https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10118#discussion_r2201428532 for details.
 };
 
 /**

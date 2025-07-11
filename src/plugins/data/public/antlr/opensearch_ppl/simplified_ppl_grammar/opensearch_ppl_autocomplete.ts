@@ -22,7 +22,7 @@ import {
 
 import { removePotentialBackticks } from '../../shared/utils';
 
-// These are keywords that we do not want to show in autocomplete
+// These are keywords that we want to show in autocomplete
 const operatorsToInclude = [
   OpenSearchPPLParser.PIPE,
   OpenSearchPPLParser.EQUAL,
@@ -42,6 +42,11 @@ const operatorsToInclude = [
   OpenSearchPPLParser.LT_PRTHS,
   OpenSearchPPLParser.RT_PRTHS,
   OpenSearchPPLParser.IN,
+  OpenSearchPPLParser.SPAN,
+  OpenSearchPPLParser.MATCH,
+  OpenSearchPPLParser.MATCH_PHRASE,
+  OpenSearchPPLParser.MATCH_BOOL_PREFIX,
+  OpenSearchPPLParser.MATCH_PHRASE_PREFIX,
 ];
 
 const fieldRuleList = [
@@ -57,7 +62,9 @@ export function getIgnoredTokens(): number[] {
   const firstOperatorIndex = OpenSearchPPLParser.MATCH;
   const lastOperatorIndex = OpenSearchPPLParser.ERROR_RECOGNITION;
   for (let i = firstOperatorIndex; i <= lastOperatorIndex; i++) {
-    tokens.push(i);
+    if (!operatorsToInclude.includes(i)) {
+      tokens.push(i);
+    }
   }
 
   const firstFunctionIndex = OpenSearchPPLParser.CASE;
@@ -93,11 +100,8 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_statsFunctionName,
   OpenSearchPPLParser.RULE_percentileAggFunction,
   OpenSearchPPLParser.RULE_takeAggFunction,
-  OpenSearchPPLParser.RULE_timestampFunctionName,
   OpenSearchPPLParser.RULE_getFormatFunction,
   OpenSearchPPLParser.RULE_tableIdent,
-  OpenSearchPPLParser.RULE_singleFieldRelevanceFunctionName,
-  OpenSearchPPLParser.RULE_multiFieldRelevanceFunctionName,
   OpenSearchPPLParser.RULE_positionFunctionName,
   OpenSearchPPLParser.RULE_evalFunctionName,
   OpenSearchPPLParser.RULE_literalValue,
