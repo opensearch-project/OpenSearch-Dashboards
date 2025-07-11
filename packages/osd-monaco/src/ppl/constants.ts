@@ -121,7 +121,6 @@ export const PPL_TOKEN_SETS = {
     'FLOAT',
     'STRING',
     'BOOLEAN',
-    'SPAN',
     'MS',
     'S',
     'M',
@@ -235,6 +234,11 @@ export const PPL_TOKEN_SETS = {
     'RADIANS',
     'SIN',
     'TAN',
+    'SPAN',
+    'MATCH',
+    'MATCH_PHRASE',
+    'MATCH_PHRASE_PREFIX',
+    'MATCH_BOOL_PREFIX',
   ]),
 
   predefined: new Set([
@@ -276,7 +280,6 @@ export const PPL_TOKEN_SETS = {
     'SYSDATE',
     'TIME',
     'TIMEDIFF',
-    'TIMESTAMP',
     'TIMESTAMPADD',
     'TIMESTAMPDIFF',
     'TIME_FORMAT',
@@ -315,10 +318,6 @@ export const PPL_TOKEN_SETS = {
     'NULLIF',
     'IF',
     'TYPEOF',
-    'MATCH',
-    'MATCH_PHRASE',
-    'MATCH_PHRASE_PREFIX',
-    'MATCH_BOOL_PREFIX',
     'SIMPLE_QUERY_STRING',
     'MULTI_MATCH',
     'QUERY_STRING',
@@ -356,7 +355,7 @@ export const PPL_TOKEN_SETS = {
     'BACKTICK',
   ]),
 
-  variable: new Set(['ID', 'CLUSTER']),
+  variable: new Set(['ID', 'CLUSTER', 'TIMESTAMP']),
 
   string: new Set(['DQUOTA_STRING', 'SQUOTA_STRING', 'BQUOTA_STRING']),
 
