@@ -21,7 +21,7 @@ import { buildColumns } from '../../utils/columns';
 import { useIndexPatternContext } from '../../../../../components/index_pattern_context';
 import {
   defaultResultsProcessor,
-  defaultPrepareQuery,
+  defaultPrepareQueryString,
 } from '../../../../../utils/state_management/actions/query_actions';
 import { useChangeQueryEditor } from '../../../../../hooks';
 
@@ -33,7 +33,7 @@ export function DiscoverPanel() {
   const columns = useSelector(selectColumns);
   const query = useSelector(selectQuery);
   const results = useSelector((state: any) => state.results);
-  const cacheKey = useMemo(() => defaultPrepareQuery(query), [query]);
+  const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
   const rawResults = cacheKey ? results[cacheKey] : null;
   const { indexPattern } = useIndexPatternContext();
 

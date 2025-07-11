@@ -20,8 +20,9 @@ export const selectTabState = (state: RootState) => state.tab;
  */
 export const selectQuery = createSelector([selectQueryState], (queryState) => queryState);
 
-export const selectQueryString = createSelector([selectQueryState], (queryState) =>
-  typeof queryState.query === 'string' ? queryState.query : ''
+export const selectQueryString = createSelector(
+  [selectQueryState],
+  (queryState) => queryState.query
 );
 
 export const selectQueryLanguage = createSelector(
