@@ -25,7 +25,7 @@ import {
 } from '../../utils/state_management/slices';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { MetricsPage } from './metrics_page';
-import { defaultPrepareQuery } from '../../utils/state_management/actions/query_actions';
+import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -141,7 +141,7 @@ describe('MetricsPage', () => {
     };
 
     // Generate cache key using the same logic as the component
-    const cacheKey = defaultPrepareQuery(queryObj);
+    const cacheKey = defaultPrepareQueryString(queryObj);
 
     const preloadedState = {
       ui: {
