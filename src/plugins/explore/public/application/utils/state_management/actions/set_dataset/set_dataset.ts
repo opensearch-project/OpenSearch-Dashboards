@@ -32,23 +32,14 @@ export const setDatasetActionCreator = (
   // Get the current dataset from the state
   let dataView;
   if (dataset && dataset.id) {
-    try {
-      // Ensure the dataView is loaded before proceeding
-      await services.data.dataViews.ensureDefaultDataView();
-
-      // Fetch the full DataView object
-      dataView = await services.data.dataViews.get(dataset.id, dataset.type !== 'INDEX_PATTERN');
-    } catch (error) {
-      // Handle error if dataset cannot be found
-      // We'll continue without the dataView and let the query execution handle it
-    }
+    await services.data.dataViews.ensureDefaultDataView();
+    dataView = await services.data.dataViews.get(dataset.id, dataset.type !== 'INDEX_PATTERN');
   }
 
   dispatch(clearResults());
   dispatch(setQueryWithHistory(queryStringState));
 
-  // If we have a valid DataView, update the dataset in the query state
-  if (dataView && typeof dataView.toDataset === 'function') {
+  if (dataView && dataView.toDataset) {
     const serializedDataset = dataView.toDataset();
     dispatch(setDataset(serializedDataset));
   }
