@@ -123,10 +123,14 @@ export const VisualizationContainer = () => {
         // Has a visualization generated previously
         const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
 
+        // Cannot display metric with new query result if we have more than one value
+        const cannotDisplayAsMetric =
+          selectedChartType === 'metric' && allColumns[0].uniqueValuesCount > 0;
+
         // Check if the chart type and axes selection previously can continue be used on
         // the new query. The checkingis base on compare current availble columns and previous
         // selected axes-column mappings.
-        if (!isValidMapping(selectedAxesMapping, allColumns)) {
+        if (!isValidMapping(selectedAxesMapping, allColumns) || cannotDisplayAsMetric) {
           // Cannot apply, use the auto rule-matched visualization
           services.notifications.toasts.addInfo(
             'Cannot apply previous configured visualization, use rule matched'

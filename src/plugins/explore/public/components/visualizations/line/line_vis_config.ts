@@ -129,7 +129,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           {
             [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
             [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+            [AxisRole.Y_SECOND]: { type: VisFieldType.Numerical, index: 1 },
           },
         ],
       },

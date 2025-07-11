@@ -56,7 +56,7 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
       {
         mapping: [
           {
-            [AxisRole.THETA]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 0 },
             [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
           },
         ],

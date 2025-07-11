@@ -109,13 +109,13 @@ export const createLineBarChart = (
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
   const xAxisMapping = axisColumnMappings?.[AxisRole.X];
-  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
+  const secondYAxisMapping = axisColumnMappings?.[AxisRole.Y_SECOND];
 
   const metric1Field = yAxisMapping?.column;
-  const metric2Field = colorMapping?.column;
+  const metric2Field = secondYAxisMapping?.column;
   const dateField = xAxisMapping?.column;
   const metric1Name = yAxisMapping?.name;
-  const metric2Name = colorMapping?.name;
+  const metric2Name = secondYAxisMapping?.name;
   const dateName = xAxisMapping?.name;
   const layers: any[] = [];
 
