@@ -311,6 +311,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                               if (query && query.dataset) {
                                 try {
                                   await datasetService.cacheDataset(query.dataset, services, false);
+                                  setSelectedDataset(query.dataset as Dataset);
                                   onSelect(query.dataset as Dataset);
                                 } catch (error) {
                                   // Error handling is silent to match coding style
