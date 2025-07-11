@@ -4,7 +4,7 @@
  */
 
 import { ISearchResult } from '../slices/results/results_slice';
-import { IndexPattern } from '../../../legacy/discover/opensearch_dashboards_services';
+import { DataView as Dataset } from '../../../../../../data/common';
 
 /**
  * Creates a mock search result for testing
@@ -58,9 +58,9 @@ export const createMockSearchResultWithAggregations = (): ISearchResult =>
   });
 
 /**
- * Creates a mock IndexPattern for testing
+ * Creates a mock DataView (IndexPattern) for testing
  */
-export const createMockIndexPattern = (overrides: any = {}): IndexPattern =>
+export const createMockIndexPattern = (overrides: any = {}): Dataset =>
   ({
     flattenHit: jest.fn((hit) => {
       const flattened: any = {};
@@ -71,8 +71,9 @@ export const createMockIndexPattern = (overrides: any = {}): IndexPattern =>
     }),
     timeFieldName: '@timestamp',
     isTimeBased: jest.fn().mockReturnValue(true),
+    toDataset: jest.fn().mockReturnValue({}),
     ...overrides,
-  } as IndexPattern);
+  } as any);
 
 /**
  * Creates a mock DataPublicPluginStart for testing

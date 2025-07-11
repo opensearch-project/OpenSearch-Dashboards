@@ -4,12 +4,15 @@
  */
 
 import './tabs.scss';
-import React, { useCallback, memo, useEffect } from 'react';
+import React, { useCallback, memo } from 'react';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveTab } from '../../application/utils/state_management/slices';
-import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
-import { detectAndSetOptimalTab } from '../../application/utils/state_management/actions/detect_optimal_tab';
+import { clearQueryStatusMapByKey } from '../../application/utils/state_management/slices';
+import {
+  defaultPrepareQueryString,
+  executeTabQuery,
+} from '../../application/utils/state_management/actions/query_actions';
 import { selectActiveTab } from '../../application/utils/state_management/selectors';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
@@ -26,20 +29,30 @@ export const ExploreTabsComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const registryTabs = services.tabRegistry.getAllTabs();
   const results = useSelector((state: RootState) => state.results);
+  const query = useSelector((state: RootState) => state.query);
   const activeTabId = useSelector(selectActiveTab);
-
-  useEffect(() => {
-    if (activeTabId === '' && results && Object.keys(results).length > 0) {
-      dispatch(detectAndSetOptimalTab({ services }));
-    }
-  }, [activeTabId, results, dispatch, services]);
 
   const onTabsClick = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
       dispatch(setActiveTab(selectedTab.id));
-      dispatch(executeQueries({ services }));
+
+      const activeTab = services.tabRegistry.getTab(selectedTab.id);
+      const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
+      const newTabCacheKey = prepareQuery(query);
+
+      const needsExecution = !results[newTabCacheKey];
+
+      if (needsExecution) {
+        dispatch(clearQueryStatusMapByKey(newTabCacheKey));
+        dispatch(
+          executeTabQuery({
+            services,
+            cacheKey: newTabCacheKey,
+          })
+        );
+      }
     },
-    [dispatch, services]
+    [query, results, dispatch, services]
   );
 
   const tabs: EuiTabbedContentTab[] = registryTabs.map((registryTab) => {
@@ -53,7 +66,7 @@ export const ExploreTabsComponent = () => {
   const activeTab =
     tabs.find((tab) => {
       return tab.id === activeTabId;
-    }) || tabs.find((tab) => tab.id === 'logs'); // Fallback to logs if activeTabId is empty
+    }) || tabs.find((tab) => tab.id === 'logs');
 
   return (
     <EuiTabbedContent

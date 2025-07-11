@@ -7,15 +7,16 @@ import { persistReduxState, loadReduxState, getPreloadedState } from './redux_pe
 import { ExploreServices } from '../../../../types';
 import { RootState } from '../store';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
-
-jest.mock('../../get_prompt_mode_is_available', () => ({
-  getPromptModeIsAvailable: jest.fn(() => Promise.resolve(false)),
-}));
+import { ColorSchemas } from '../../../../components/visualizations/types';
+import { QueryExecutionStatus } from '../types';
 
 jest.mock('../../../../components/visualizations/metric/metric_vis_config', () => ({
   defaultMetricChartStyles: {
-    fillOpacity: 0.3,
-    lineWidth: 2,
+    showTitle: true,
+    title: '',
+    fontSize: 60,
+    useColor: false,
+    colorSchema: 'blues' as any,
   },
 }));
 
@@ -70,26 +71,50 @@ describe('redux_persistence', () => {
     it('should persist query and app state to URL storage', () => {
       const mockState: RootState = {
         query: {
-          query: 'SELECT * FROM logs',
-          language: 'sql',
+          query: 'source=logs | head 10',
+          language: 'PPL',
           dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
         },
         ui: {
-          activeTabId: '', // Empty string signals auto-detection needed
-          showDatasetFields: true,
-          prompt: '',
+          activeTabId: '',
+          showFilterPanel: true,
           showHistogram: true,
         },
         results: {},
         tab: {
           logs: {},
-          visualizations: { styleOptions: undefined, chartType: undefined, axesMapping: {} },
+          visualizations: {
+            styleOptions: {
+              showTitle: true,
+              title: '',
+              fontSize: 60,
+              useColor: false,
+              colorSchema: ColorSchemas.BLUES,
+            },
+            chartType: undefined,
+            axesMapping: {},
+          },
         },
-        legacy: { columns: ['_source'], sort: [], isDirty: false, interval: 'auto' },
+        legacy: {
+          columns: ['_source'],
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+          savedSearch: undefined,
+          savedQuery: undefined,
+          lineCount: undefined,
+        },
         queryEditor: {
-          queryStatus: { status: 'UNINITIALIZED' as any },
+          queryStatusMap: {},
+          overallQueryStatus: {
+            status: QueryExecutionStatus.UNINITIALIZED,
+            elapsedMs: undefined,
+            startTime: undefined,
+            body: undefined,
+          },
           promptModeIsAvailable: false,
           editorMode: 'SingleQuery' as any,
+          lastExecutedPrompt: '',
         },
       };
 
@@ -138,17 +163,35 @@ describe('redux_persistence', () => {
   describe('loadReduxState', () => {
     it('should load state from URL storage when available', async () => {
       const mockQueryState = {
-        query: 'SELECT * FROM logs',
-        language: 'sql',
+        query: 'source=logs | head 10',
+        language: 'PPL',
         dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
       };
       const mockAppState = {
-        ui: { activeTabId: 'logs', showDatasetFields: true, prompt: '', showHistogram: true },
+        ui: { activeTabId: 'logs', showFilterPanel: true, showHistogram: true },
         tab: {
           logs: {},
-          visualizations: { styleOptions: undefined, chartType: undefined, axesMapping: {} },
+          visualizations: {
+            styleOptions: {
+              showTitle: true,
+              title: '',
+              fontSize: 60,
+              useColor: false,
+              colorSchema: ColorSchemas.BLUES,
+            },
+            chartType: undefined,
+            axesMapping: {},
+          },
         },
-        legacy: { columns: ['_source'], sort: [], isDirty: false, interval: 'auto' },
+        legacy: {
+          columns: ['_source'],
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+          savedSearch: undefined,
+          savedQuery: undefined,
+          lineCount: undefined,
+        },
       };
 
       (mockServices.osdUrlStateStorage!.get as jest.Mock)
@@ -168,14 +211,14 @@ describe('redux_persistence', () => {
       const result = await loadReduxState(servicesWithoutStorage);
 
       expect(result).toBeDefined();
-      expect(result.ui.activeTabId).toBe(''); // Empty string signals auto-detection needed
+      expect(result.ui.activeTabId).toBe('');
       expect(result.query.language).toBe(EXPLORE_DEFAULT_LANGUAGE);
     });
 
     it('should use preloaded state for missing sections', async () => {
       const mockQueryState = {
-        query: 'SELECT * FROM logs',
-        language: 'sql',
+        query: 'source=logs | head 10',
+        language: 'PPL',
         dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
       };
 
@@ -187,7 +230,7 @@ describe('redux_persistence', () => {
 
       expect(result.query).toEqual(mockQueryState);
       expect(result.ui.activeTabId).toBe(''); // Should use preloaded UI state
-      expect(result.ui.showDatasetFields).toBe(true);
+      expect(result.ui.showFilterPanel).toBe(true);
     });
 
     it('should handle errors and fallback to preloaded state', async () => {
@@ -217,10 +260,9 @@ describe('redux_persistence', () => {
 
       expect(result).toBeDefined();
       expect(result.ui).toEqual({
-        activeTabId: '', // Empty string signals auto-detection needed
-        showDatasetFields: true,
+        activeTabId: '',
+        showFilterPanel: true,
         showHistogram: true,
-        prompt: '',
       });
       expect(result.query.language).toBe(EXPLORE_DEFAULT_LANGUAGE);
       expect(result.query.query).toBe(''); // Should be empty string
@@ -228,6 +270,14 @@ describe('redux_persistence', () => {
       expect(result.tab.logs).toEqual({});
       expect(result.legacy.columns).toEqual(['_source']);
       expect(result.queryEditor.promptModeIsAvailable).toBe(false);
+      expect(result.queryEditor.queryStatusMap).toEqual({});
+      expect(result.queryEditor.overallQueryStatus).toEqual({
+        status: QueryExecutionStatus.UNINITIALIZED,
+        elapsedMs: undefined,
+        startTime: undefined,
+        body: undefined,
+      });
+      expect(result.queryEditor.lastExecutedPrompt).toBe('');
     });
 
     it('should handle dataset initialization', async () => {
@@ -247,10 +297,7 @@ describe('redux_persistence', () => {
 
       const result = await getPreloadedState(mockServices);
 
-      expect(result.query.dataset).toEqual({
-        ...mockDataset,
-        language: EXPLORE_DEFAULT_LANGUAGE,
-      });
+      expect(result.query.dataset).toEqual(mockDataset);
       expect(mockServices.data.query.queryString.getInitialQueryByDataset).toHaveBeenCalledWith({
         ...mockDataset,
         language: EXPLORE_DEFAULT_LANGUAGE,
@@ -292,6 +339,34 @@ describe('redux_persistence', () => {
       const result = await getPreloadedState(servicesWithoutUiSettings);
 
       expect(result.legacy.columns).toEqual(['_source']);
+    });
+
+    it('should set correct editor mode based on query content', async () => {
+      // Test with empty query - should default to SingleEmpty
+      const result1 = await getPreloadedState(mockServices);
+      expect(result1.queryEditor.editorMode).toBe('single-empty');
+
+      // Mock a non-empty query
+      (mockServices.data.query.queryString.getInitialQueryByDataset as jest.Mock).mockReturnValue({
+        query: 'source=logs | head 10',
+        language: EXPLORE_DEFAULT_LANGUAGE,
+        dataset: { id: 'test', title: 'test', type: 'INDEX_PATTERN' },
+      });
+
+      // Mock dataset service to return a dataset
+      (mockServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() =>
+            Promise.resolve({
+              children: [{ id: 'pattern1', title: 'Pattern 1' }],
+            })
+          ),
+          toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
+        })),
+      });
+
+      const result2 = await getPreloadedState(mockServices);
+      expect(result2.queryEditor.editorMode).toBe('single-empty');
     });
   });
 });

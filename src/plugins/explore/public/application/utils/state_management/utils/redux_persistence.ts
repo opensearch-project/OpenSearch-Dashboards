@@ -257,7 +257,8 @@ const getPreloadedQueryEditorState = async (
       : DEFAULT_EDITOR_MODE;
 
   return {
-    queryStatus: {
+    queryStatusMap: {},
+    overallQueryStatus: {
       status: QueryExecutionStatus.UNINITIALIZED,
       elapsedMs: undefined,
       startTime: undefined,

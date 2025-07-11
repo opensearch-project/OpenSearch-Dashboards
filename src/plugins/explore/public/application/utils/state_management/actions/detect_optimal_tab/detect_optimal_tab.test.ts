@@ -40,6 +40,10 @@ describe('detect_optimal_tab', () => {
     mockServices = {
       tabRegistry: {
         getTab: jest.fn(),
+        getAllTabs: jest.fn().mockReturnValue([
+          { id: 'logs', label: 'Logs' },
+          { id: 'explore_visualization_tab', label: 'Visualization' },
+        ]),
       },
     } as any;
 
@@ -137,7 +141,7 @@ describe('detect_optimal_tab', () => {
         fieldSchema: [{ name: 'test', type: 'string' }],
       };
 
-      expect(determineOptimalTab(results)).toBe('explore_visualization_tab');
+      expect(determineOptimalTab(results, mockServices)).toBe('explore_visualization_tab');
     });
 
     it('should return logs tab when results cannot be visualized', () => {
@@ -150,27 +154,12 @@ describe('detect_optimal_tab', () => {
         fieldSchema: [{ name: 'test', type: 'string' }],
       };
 
-      expect(determineOptimalTab(results)).toBe('logs');
+      expect(determineOptimalTab(results, mockServices)).toBe('logs');
     });
   });
 
   describe('detectAndSetOptimalTab', () => {
-    it('should set saved tab when savedTabId is provided', async () => {
-      const mockAction = { type: 'setActiveTab', payload: 'saved-tab' };
-      mockSetActiveTab.mockReturnValue(mockAction);
-
-      const thunk = detectAndSetOptimalTab({
-        services: mockServices,
-        savedTabId: 'saved-tab',
-      });
-
-      await thunk(mockDispatch, mockGetState, undefined);
-
-      expect(mockSetActiveTab).toHaveBeenCalledWith('saved-tab');
-      expect(mockDispatch).toHaveBeenCalledWith(mockAction);
-    });
-
-    it('should detect optimal tab when no savedTabId is provided and results are available', async () => {
+    it('should detect optimal tab when results are available', async () => {
       mockGetVisualizationType.mockReturnValue({
         visualizationType: {} as any,
       });

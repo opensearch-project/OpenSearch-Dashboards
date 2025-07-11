@@ -126,7 +126,7 @@ describe('Query Actions', () => {
           field2: 1,
           field3: 1,
         },
-        indexPattern: mockIndexPattern,
+        dataset: mockIndexPattern,
         elapsedMs: 100,
       });
     });
@@ -265,11 +265,21 @@ describe('Query Actions', () => {
         ...jest.requireActual('./query_actions'),
         executeTabQuery: mockExecuteTabQuery,
       }));
+
+      // Mock the defaultPreparePplQuery for all tests
+      const mockDefaultPreparePplQuery = defaultPreparePplQuery as jest.MockedFunction<
+        typeof defaultPreparePplQuery
+      >;
+      mockDefaultPreparePplQuery.mockReturnValue({
+        query: 'source=test-dataset',
+        language: 'PPL',
+        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+      });
     });
 
     it('should return early when no services provided', async () => {
       const mockState = {
-        query: { query: '', language: 'sql', dataset: null },
+        query: { query: '', language: 'PPL', dataset: null },
         ui: { activeTabId: '' },
         results: {},
         legacy: { interval: '1h' },
@@ -293,8 +303,8 @@ describe('Query Actions', () => {
     it('should handle missing state gracefully', async () => {
       const mockState = {
         query: {
-          query: 'SELECT * FROM logs',
-          language: 'sql',
+          query: 'source=logs',
+          language: 'PPL',
           dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
         },
         ui: { activeTabId: '' },
@@ -305,6 +315,15 @@ describe('Query Actions', () => {
       mockGetState.mockReturnValue(mockState);
       mockServices.tabRegistry.getTab.mockReturnValue({
         prepareQuery: jest.fn().mockReturnValue('viz-cache-key'),
+      });
+
+      // Mock the defaultPreparePplQuery for PPL language
+      const mockDefaultPreparePplQuery = defaultPreparePplQuery as jest.MockedFunction<
+        typeof defaultPreparePplQuery
+      >;
+      mockDefaultPreparePplQuery.mockReturnValue({
+        ...mockState.query,
+        query: 'source=test-dataset',
       });
 
       const thunk = executeQueries({ services: mockServices });
@@ -322,20 +341,20 @@ describe('Query Actions', () => {
     it('should handle cached results correctly', async () => {
       const mockState = {
         query: {
-          query: 'SELECT * FROM logs',
-          language: 'sql',
+          query: 'source=logs',
+          language: 'PPL',
           dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
         },
         ui: { activeTabId: 'logs' },
         results: {
-          'source=test-dataset SELECT * FROM logs': { hits: { hits: [] } }, // All queries cached
+          'source=test-dataset': { hits: { hits: [] } }, // All queries cached
         },
         legacy: { interval: '1h' },
       };
 
       mockGetState.mockReturnValue(mockState);
       mockServices.tabRegistry.getTab.mockReturnValue({
-        prepareQuery: jest.fn().mockReturnValue('source=test-dataset SELECT * FROM logs'),
+        prepareQuery: jest.fn().mockReturnValue('source=test-dataset'),
       });
 
       const thunk = executeQueries({ services: mockServices });
@@ -351,7 +370,7 @@ describe('Query Actions', () => {
       const mockState = {
         query: {
           query: '', // Empty query
-          language: 'sql',
+          language: 'PPL',
           dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
         },
         ui: { activeTabId: '' },
@@ -376,8 +395,8 @@ describe('Query Actions', () => {
     it('should handle missing tab registry gracefully', async () => {
       const mockState = {
         query: {
-          query: 'SELECT * FROM logs',
-          language: 'sql',
+          query: 'source=logs',
+          language: 'PPL',
           dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
         },
         ui: { activeTabId: '' },
@@ -412,43 +431,62 @@ describe('Query Actions', () => {
     beforeEach(() => {
       mockServices = {
         data: {
-          indexPatterns: {
+          dataViews: {
             get: jest.fn().mockResolvedValue({
               id: 'test-pattern',
               title: 'test-pattern',
               fields: [],
             }),
+            ensureDefaultDataView: jest.fn().mockResolvedValue({}),
+            getDefault: jest.fn().mockResolvedValue({
+              id: 'default-pattern',
+              title: 'default-pattern',
+              fields: [],
+            }),
           },
           search: {
-            search: jest.fn().mockReturnValue({
-              subscribe: jest.fn((callbacks) => {
-                // Simulate successful search
-                setTimeout(() => {
-                  callbacks.next({
-                    rawResponse: {
-                      hits: { hits: [], total: { value: 0 } },
-                      took: 100,
-                    },
-                  });
-                  callbacks.complete();
-                }, 0);
-                return { unsubscribe: jest.fn() };
+            searchSource: {
+              create: jest.fn().mockResolvedValue({
+                setParent: jest.fn(),
+                setFields: jest.fn(),
+                setField: jest.fn(),
+                getSearchRequestBody: jest.fn().mockResolvedValue({}),
+                getDataFrame: jest.fn().mockReturnValue({ schema: [] }),
+                fetch: jest.fn().mockResolvedValue({
+                  hits: { hits: [], total: { value: 0 } },
+                  took: 100,
+                }),
               }),
-            }),
-            showError: jest.fn(), // Add missing showError function
+            },
+            showError: jest.fn(),
+          },
+          query: {
+            queryString: {
+              getQuery: jest.fn().mockReturnValue({ query: '', language: 'PPL' }),
+            },
+            filterManager: {
+              getFilters: jest.fn().mockReturnValue([]),
+            },
+            timefilter: {
+              timefilter: {
+                createFilter: jest.fn().mockReturnValue({}),
+              },
+            },
           },
         },
         inspectorAdapters: {
           requests: {
             reset: jest.fn(),
             start: jest.fn().mockReturnValue({
-              stats: jest.fn().mockReturnValue({
-                addStat: jest.fn(),
-              }),
-              json: jest.fn(),
-              ok: jest.fn(),
+              stats: jest.fn().mockReturnThis(),
+              json: jest.fn().mockReturnThis(),
+              ok: jest.fn().mockReturnThis(),
+              getTime: jest.fn().mockReturnValue(100),
             }),
           },
+        },
+        uiSettings: {
+          get: jest.fn().mockReturnValue(500),
         },
       };
 
@@ -459,8 +497,8 @@ describe('Query Actions', () => {
     it('should execute tab query successfully', async () => {
       const mockState = {
         query: {
-          query: 'SELECT * FROM logs',
-          language: 'sql',
+          query: 'source=logs',
+          language: 'PPL',
           dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
         },
         results: {},
@@ -491,7 +529,7 @@ describe('Query Actions', () => {
 
     it('should handle missing services gracefully', async () => {
       const mockState = {
-        query: { query: '', language: 'sql', dataset: null },
+        query: { query: '', language: 'PPL', dataset: null },
         results: {},
       };
 
@@ -547,15 +585,16 @@ describe('Query Actions', () => {
 
       mockGetState.mockReturnValue(mockState);
 
-      // Mock search to throw error
-      mockServices.data.search.search.mockReturnValue({
-        subscribe: jest.fn((callbacks) => {
-          setTimeout(() => {
-            callbacks.error(new Error('Search failed'));
-          }, 0);
-          return { unsubscribe: jest.fn() };
-        }),
-      });
+      // Mock search to throw error by making fetch throw
+      const mockSearchSource = {
+        setParent: jest.fn(),
+        setFields: jest.fn(),
+        setField: jest.fn(),
+        getSearchRequestBody: jest.fn().mockResolvedValue({}),
+        getDataFrame: jest.fn().mockReturnValue({ schema: [] }),
+        fetch: jest.fn().mockRejectedValue(new Error('Search failed')),
+      };
+      mockServices.data.search.searchSource.create.mockResolvedValue(mockSearchSource);
 
       const thunk = executeTabQuery({
         services: mockServices,
@@ -591,7 +630,7 @@ describe('Query Actions', () => {
 
       // Verify that executeTabQuery calls executeQueryBase with correct parameters
       // (includeHistogram: false, interval: undefined)
-      expect(mockServices.data.indexPatterns.get).toHaveBeenCalledWith('test-dataset', false);
+      expect(mockServices.data.dataViews.get).toHaveBeenCalledWith('test-dataset', false);
     });
 
     it('should handle empty cache key', async () => {

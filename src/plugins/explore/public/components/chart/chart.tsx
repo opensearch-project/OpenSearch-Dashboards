@@ -20,10 +20,17 @@ import { Chart } from './utils';
 import {
   setInterval,
   clearResults,
+  clearResultsByKey,
+  clearQueryStatusMap,
+  clearQueryStatusMapByKey,
   setShowHistogram,
 } from '../../application/utils/state_management/slices';
-import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 import { RootState } from '../../application/utils/state_management/store';
+import {
+  executeQueries,
+  executeHistogramQuery,
+  defaultPrepareQueryString,
+} from '../../application/utils/state_management/actions/query_actions';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
@@ -50,15 +57,14 @@ export const DiscoverChart = ({
     };
   }, [from, to]);
   const { interval } = useSelector((state: RootState) => state.legacy);
+  const query = useSelector((state: RootState) => state.query);
   const dispatch = useDispatch();
+  const cacheKey = defaultPrepareQueryString(query);
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
-
-    // EXPLICIT cache clear - same pattern as other triggers
-    dispatch(clearResults());
-
-    // Execute queries - interval will be picked up from Redux state
-    dispatch(executeQueries({ services }));
+    dispatch(clearResultsByKey(cacheKey));
+    dispatch(clearQueryStatusMapByKey(cacheKey));
+    dispatch(executeHistogramQuery({ services, cacheKey, interval: newInterval }));
   };
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -67,11 +73,8 @@ export const DiscoverChart = ({
         to: moment(ranges.to).toISOString(),
         mode: 'absolute',
       });
-
-      // EXPLICIT cache clear - same pattern as other triggers
       dispatch(clearResults());
-
-      // Execute queries - interval will be picked up from Redux state
+      dispatch(clearQueryStatusMap());
       dispatch(executeQueries({ services }));
     },
     [data, dispatch, services]

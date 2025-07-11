@@ -15,6 +15,7 @@ import { getPreloadedState } from '../../utils/redux_persistence';
 import { ExploreServices } from '../../../../../types';
 import { executeQueries } from '../query_actions';
 import { AppDispatch } from '../../store';
+import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 
 /**
  * Redux Thunk for resetting the Explore state to its preloaded state.
@@ -31,5 +32,6 @@ export const resetExploreStateActionCreator = (services: ExploreServices) => asy
   dispatch(setLegacyState(state.legacy));
   dispatch(setQueryState(state.query));
   dispatch(setQueryEditorState(state.queryEditor));
-  dispatch(executeQueries({ services }));
+  await dispatch(executeQueries({ services }));
+  dispatch(detectAndSetOptimalTab({ services }));
 };
