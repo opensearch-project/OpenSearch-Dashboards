@@ -54,7 +54,7 @@ export class PPLFilterUtils extends FilterUtils {
       commands.splice(1, 0, whereCommand);
     }
 
-    return commands.join(' | ');
+    return commands.join(' | ').trim();
   }
 
   /**

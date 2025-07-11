@@ -12,8 +12,6 @@ import { IndexPatternField } from '../../../../../../data/common';
 import { opensearchFilters } from '../../../../../../data/public';
 import { useIndexPatternContext } from '../../../components/index_pattern_context';
 import { EditorMode } from '../../../utils/state_management/types';
-import { useEditorQueryText } from '../use_editor_query_text';
-import { useEditorPromptText } from '../use_editor_prompt_text';
 import { useSetEditorText } from '../use_set_editor_text';
 
 export const useChangeQueryEditor = () => {
@@ -25,8 +23,6 @@ export const useChangeQueryEditor = () => {
     },
   } = useOpenSearchDashboards<ExploreServices>();
   const { indexPattern } = useIndexPatternContext();
-  const editorQuery = useEditorQueryText();
-  const editorPrompt = useEditorPromptText();
   const setEditorText = useSetEditorText();
   const editorMode = useSelector(selectEditorMode);
   const query = useSelector(selectQuery);
@@ -34,6 +30,8 @@ export const useChangeQueryEditor = () => {
   const onAddFilter = useCallback(
     (field: string | IndexPatternField, values: string, operation: '+' | '-') => {
       if (!indexPattern) return;
+      const languageConfig = queryString.getLanguageService().getLanguage(query.language);
+      if (!languageConfig) return;
 
       const newFilters = opensearchFilters.generateFilters(
         filterManager,
@@ -42,23 +40,16 @@ export const useChangeQueryEditor = () => {
         operation,
         indexPattern.id ?? ''
       );
-      const languageConfig = queryString.getLanguageService().getLanguage(query.language);
-      const newText =
-        editorMode === EditorMode.SingleQuery || editorMode === EditorMode.DualQuery
-          ? languageConfig?.addFiltersToQuery?.(editorQuery, newFilters)
-          : languageConfig?.addFiltersToPrompt?.(editorPrompt, newFilters);
-      if (newText) setEditorText(newText);
+      setEditorText((text) => {
+        const newText =
+          editorMode === EditorMode.SinglePrompt || editorMode === EditorMode.DualPrompt
+            ? languageConfig.addFiltersToPrompt?.(text, newFilters)
+            : languageConfig.addFiltersToQuery?.(text, newFilters);
+        if (newText) return newText;
+        return text;
+      });
     },
-    [
-      editorQuery,
-      editorPrompt,
-      editorMode,
-      filterManager,
-      indexPattern,
-      query.language,
-      queryString,
-      setEditorText,
-    ]
+    [editorMode, filterManager, indexPattern, query.language, queryString, setEditorText]
   );
 
   return { onAddFilter };
