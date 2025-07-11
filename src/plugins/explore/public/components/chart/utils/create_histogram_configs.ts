@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataPublicPluginStart, IndexPattern } from '../../../../../data/public';
+import { DataPublicPluginStart, DataView as Dataset } from '../../../../../data/public';
 
 export function createHistogramConfigs(
-  indexPattern: IndexPattern,
+  dataset: Dataset,
   histogramInterval: string,
   data: DataPublicPluginStart
 ) {
@@ -19,7 +19,7 @@ export function createHistogramConfigs(
       type: 'date_histogram',
       schema: 'segment',
       params: {
-        field: indexPattern.timeFieldName!,
+        field: dataset.timeFieldName!,
         interval: histogramInterval,
         timeRange: data.query.timefilter.timefilter.getTime(),
       },
@@ -28,7 +28,7 @@ export function createHistogramConfigs(
 
   // If index pattern is created before the index, this function will fail since the required fields for the histogram agg will be missing.
   try {
-    return data.search.aggs.createAggConfigs(indexPattern, visStateAggs);
+    return data.search.aggs.createAggConfigs(dataset, visStateAggs);
   } catch (error) {
     // Just display the error to the user but continue to render the rest of the page
     data.search.showError(error as Error);

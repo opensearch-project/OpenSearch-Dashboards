@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryPanelFooter } from './query_panel_footer';
-import { useIndexPatternContext } from '../../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../../application/context';
 import { useSelector } from 'react-redux';
 
 jest.mock('react-redux', () => ({
@@ -48,13 +48,11 @@ jest.mock('./detected_language', () => ({
   DetectedLanguage: () => <div data-test-subj="detected-language">Detected Language</div>,
 }));
 
-jest.mock('../../../application/components/index_pattern_context', () => ({
-  useIndexPatternContext: jest.fn(),
+jest.mock('../../../application/components/dataset_context', () => ({
+  useDatasetContext: jest.fn(),
 }));
 
-const mockUseIndexPatternContext = useIndexPatternContext as jest.MockedFunction<
-  typeof useIndexPatternContext
->;
+const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 
@@ -72,7 +70,7 @@ describe('QueryPanelFooter', () => {
   });
 
   it('renders all footer components', () => {
-    mockUseIndexPatternContext.mockReturnValue({
+    mockUseDatasetContext.mockReturnValue({
       indexPattern: { timeFieldName: '@timestamp' },
     } as any);
 
@@ -87,7 +85,7 @@ describe('QueryPanelFooter', () => {
   });
 
   it('shows date time picker when index pattern has time field', () => {
-    mockUseIndexPatternContext.mockReturnValue({
+    mockUseDatasetContext.mockReturnValue({
       indexPattern: { timeFieldName: '@timestamp' },
     } as any);
 
@@ -97,7 +95,7 @@ describe('QueryPanelFooter', () => {
   });
 
   it('hides date time picker when index pattern has no time field', () => {
-    mockUseIndexPatternContext.mockReturnValue({
+    mockUseDatasetContext.mockReturnValue({
       indexPattern: { timeFieldName: null },
     } as any);
 
@@ -107,7 +105,7 @@ describe('QueryPanelFooter', () => {
   });
 
   it('hides date time picker when index pattern is undefined', () => {
-    mockUseIndexPatternContext.mockReturnValue({
+    mockUseDatasetContext.mockReturnValue({
       indexPattern: undefined,
     } as any);
 
@@ -117,7 +115,7 @@ describe('QueryPanelFooter', () => {
   });
 
   it('hides date time picker when index pattern is null', () => {
-    mockUseIndexPatternContext.mockReturnValue({
+    mockUseDatasetContext.mockReturnValue({
       indexPattern: null,
     } as any);
 
@@ -127,7 +125,7 @@ describe('QueryPanelFooter', () => {
   });
 
   it('renders QueryResult component with correct query status', () => {
-    mockUseIndexPatternContext.mockReturnValue({
+    mockUseDatasetContext.mockReturnValue({
       indexPattern: { timeFieldName: '@timestamp' },
     } as any);
 
@@ -150,7 +148,7 @@ describe('QueryPanelFooter', () => {
     };
 
     mockUseSelector.mockReturnValue(errorQueryStatus);
-    mockUseIndexPatternContext.mockReturnValue({
+    mockUseDatasetContext.mockReturnValue({
       indexPattern: { timeFieldName: '@timestamp' },
     } as any);
 
@@ -160,7 +158,7 @@ describe('QueryPanelFooter', () => {
   });
 
   it('conditionally renders date time picker wrapper with correct class', () => {
-    mockUseIndexPatternContext.mockReturnValue({
+    mockUseDatasetContext.mockReturnValue({
       indexPattern: { timeFieldName: '@timestamp' },
     } as any);
 
@@ -174,7 +172,7 @@ describe('QueryPanelFooter', () => {
   });
 
   it('calls selectQueryStatus selector', () => {
-    mockUseIndexPatternContext.mockReturnValue({
+    mockUseDatasetContext.mockReturnValue({
       indexPattern: { timeFieldName: '@timestamp' },
     } as any);
 

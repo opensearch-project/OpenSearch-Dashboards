@@ -105,6 +105,10 @@ export {
   ISearchSource,
   OpenSearchQuerySortValue,
   SortDirection,
+  DataViewsContract as DatasetsContract,
+  IDataView as IDataset,
+  DataView as Dataset,
+  dataViews as datasets,
 } from '../../../../../data/public';
 
 export const [getExpressionLoader, setExpressionLoader] = createGetterSetter<

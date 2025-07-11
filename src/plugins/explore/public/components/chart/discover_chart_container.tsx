@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { ExploreServices } from '../../types';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DiscoverChart } from './chart';
-import { useIndexPatternContext } from '../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import {
   histogramResultsProcessor,
   defaultPrepareQueryString,
@@ -34,23 +34,23 @@ export const DiscoverChartContainer = () => {
 
   const rawResults = cacheKey ? results[cacheKey] : null;
 
-  // Get IndexPattern from centralized context
-  const { indexPattern } = useIndexPatternContext();
+  // Get dataset from centralized context
+  const { dataset } = useDatasetContext();
 
   const isTimeBased = useMemo(() => {
-    return indexPattern ? indexPattern.isTimeBased() : false;
-  }, [indexPattern]);
+    return dataset ? dataset.isTimeBased() : false;
+  }, [dataset]);
 
   // Process raw results to get chart data
   const processedResults = useMemo(() => {
-    if (!rawResults || !indexPattern) {
+    if (!rawResults || !dataset) {
       return null;
     }
 
     // Use defaultResultsProcessor with histogram enabled
-    const processed = histogramResultsProcessor(rawResults, indexPattern, data, interval);
+    const processed = histogramResultsProcessor(rawResults, dataset, data, interval);
     return processed;
-  }, [rawResults, indexPattern, data, interval]);
+  }, [rawResults, dataset, data, interval]);
 
   if (!isTimeBased) {
     return null;

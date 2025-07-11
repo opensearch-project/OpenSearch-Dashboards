@@ -11,7 +11,7 @@ import { i18n } from '@osd/i18n';
 import { HitsCounter } from '../hits_counter';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
-import { IndexPattern } from '../../../../../../data/common';
+import { DataView as Dataset } from '../../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 
 export interface DiscoverResultsActionBarProps {
@@ -20,7 +20,7 @@ export interface DiscoverResultsActionBarProps {
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
   elapsedMs?: number;
-  indexPattern?: IndexPattern;
+  dataset?: Dataset;
   inspectionHanlder?: () => void;
 }
 
@@ -30,7 +30,7 @@ export const DiscoverResultsActionBar = ({
   resetQuery,
   rows,
   elapsedMs,
-  indexPattern,
+  dataset,
   inspectionHanlder,
 }: DiscoverResultsActionBarProps) => {
   return (
@@ -68,12 +68,12 @@ export const DiscoverResultsActionBar = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {indexPattern && rows?.length ? (
+          {dataset && rows?.length ? (
             <EuiFlexItem
               grow={false}
               className="explore-results-action-bar__explore-download-csv-flex-item"
             >
-              <DiscoverDownloadCsv indexPattern={indexPattern} rows={rows} hits={hits} />
+              <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

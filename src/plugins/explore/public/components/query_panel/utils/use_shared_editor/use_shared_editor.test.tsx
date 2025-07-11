@@ -28,7 +28,7 @@ jest.mock('../../../../application/hooks', () => ({
 }));
 
 jest.mock('../../../../application/components/index_pattern_context', () => ({
-  useIndexPatternContext: jest.fn(),
+  useDatasetContext: jest.fn(),
 }));
 
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
@@ -63,7 +63,7 @@ jest.mock('./enter_action', () => ({
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { useIndexPatternContext } from '../../../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../../../application/context';
 import {
   selectEditorMode,
   selectQueryLanguage,
@@ -176,8 +176,8 @@ describe('useSharedEditor', () => {
 
     // Mock additional required dependencies
     const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
-    const mockUseIndexPatternContext = useIndexPatternContext as jest.MockedFunction<
-      typeof useIndexPatternContext
+    const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<
+      typeof useDatasetContext
     >;
     const mockGetEffectiveLanguageForAutoComplete = getEffectiveLanguageForAutoComplete as jest.MockedFunction<
       typeof getEffectiveLanguageForAutoComplete
@@ -192,7 +192,7 @@ describe('useSharedEditor', () => {
         })
     );
 
-    mockUseIndexPatternContext.mockReturnValue({ indexPattern: { id: 'test' } } as any);
+    mockUseDatasetContext.mockReturnValue({ indexPattern: { id: 'test' } } as any);
     mockGetEffectiveLanguageForAutoComplete.mockReturnValue('SQL');
 
     return renderHook(() => useSharedEditor({ ...defaultProps, ...props }), {
