@@ -86,7 +86,7 @@ describe('PPLFilterUtils', () => {
     });
   });
 
-  describe('insertFiltersToQuery', () => {
+  describe('addFiltersToQuery', () => {
     it('should return original query when filters array is empty', () => {
       const query = 'source=test_index | fields *';
       const result = PPLFilterUtils.addFiltersToQuery(query, []);
@@ -123,6 +123,13 @@ describe('PPLFilterUtils', () => {
       const filters = [createFilter('field1', 'value1', false)]; // Non-negated version
       const result = PPLFilterUtils.addFiltersToQuery(query, filters);
       expect(result).toBe("source=test_index | WHERE `field1` = 'value1' | fields *");
+    });
+
+    it('should handle empty query', () => {
+      const query = '';
+      const filters = [createFilter('field1', 'value1')];
+      const result = PPLFilterUtils.addFiltersToQuery(query, filters);
+      expect(result).toBe("| WHERE `field1` = 'value1'");
     });
   });
 });
