@@ -130,7 +130,7 @@ export function createTheme(
   selectionBackgroundColor: string
 ): monaco.editor.IStandaloneThemeData {
   return {
-    base: 'vs',
+    base: euiTheme === lightTheme ? 'vs' : 'vs-dark', // Change the base theme based on theme selected
     inherit: true,
     rules: [
       {
