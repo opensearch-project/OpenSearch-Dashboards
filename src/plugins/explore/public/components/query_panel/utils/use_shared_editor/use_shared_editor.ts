@@ -90,8 +90,6 @@ export const useSharedEditor = ({
       _: monaco.languages.CompletionContext,
       token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> => {
-      // TODO: There is a bug where editorModeRef.current does not use the updated value when you go from one explore app to another
-      // ex: start from traces page, go to logs page, then type "source". autocomplete does not work because editorModeRef.current is stale
       if (
         (editorPosition === 'top' && editorModeRef.current !== EditorMode.SingleQuery) ||
         (editorPosition === 'bottom' && editorModeRef.current !== EditorMode.DualQuery) ||
@@ -183,7 +181,7 @@ export const useSharedEditor = ({
       triggerCharacters: TRIGGER_CHARACTERS,
       provideCompletionItems,
     });
-    return () => disposable.dispose();
+    return () => disposable?.dispose();
   }, [provideCompletionItems, queryLanguage]);
 
   const handleRun = useCallback(() => {

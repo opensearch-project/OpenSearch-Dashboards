@@ -27,7 +27,7 @@ jest.mock('../../../../application/hooks', () => ({
   useToggleDualEditorMode: jest.fn(),
 }));
 
-jest.mock('../../../../application/components/index_pattern_context', () => ({
+jest.mock('../../../../application/context', () => ({
   useDatasetContext: jest.fn(),
 }));
 

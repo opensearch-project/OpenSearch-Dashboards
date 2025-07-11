@@ -43,7 +43,7 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectPromptModeIsAvailable: jest.fn(),
 }));
 
-jest.mock('../../../../application/components/index_pattern_context', () => ({
+jest.mock('../../../../application/context', () => ({
   useDatasetContext: jest.fn(),
 }));
 

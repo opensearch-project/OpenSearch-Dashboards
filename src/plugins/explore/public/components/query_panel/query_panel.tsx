@@ -7,7 +7,6 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { EditorStack } from './editor_stack';
 import { QueryPanelFooter } from './footer';
-import { RECENT_QUERIES_TABLE_WRAPPER_EL } from './utils/constants';
 import './query_panel.scss';
 
 const QueryPanel = () => {
@@ -21,8 +20,6 @@ const QueryPanel = () => {
           <QueryPanelFooter />
         </div>
       </div>
-      {/* Used as a portal for RecentQueries */}
-      <div className="queryPanel__recentQueries" id={RECENT_QUERIES_TABLE_WRAPPER_EL} />
     </EuiPanel>
   );
 };

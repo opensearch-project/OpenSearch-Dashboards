@@ -4,45 +4,70 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import { DetectedLanguage } from './detected_language';
+import { IntlProvider } from 'react-intl';
+import { DetectedLanguage, getLanguageReference } from './detected_language';
 import { EditorMode } from '../../../../application/utils/state_management/types';
+import { configureStore } from '@reduxjs/toolkit';
+import { rootReducer } from '../../../../application/utils/state_management/store';
 
-jest.mock('./language_reference', () => ({
-  LanguageReference: () => <span data-test-subj="language-reference">PPL Reference</span>,
-}));
-jest.mock('../../../../application/utils/state_management/selectors', () => ({
-  selectEditorMode: jest.fn(),
-  selectPromptModeIsAvailable: jest.fn(),
+// Mock the PplReference component
+jest.mock('./ppl_reference', () => ({
+  PplReference: () => <div data-test-subj="ppl-reference">PPL Reference</div>,
 }));
 
-const createMockStore = (editorMode: EditorMode) => {
-  return configureStore({
-    reducer: {
-      queryEditor: (state = { editorMode }) => state,
-    },
-    preloadedState: {
-      queryEditor: { editorMode },
-    },
-  });
+// Mock localStorage
+const mockLocalStorage = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
 };
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+});
 
-const renderWithStore = (editorMode: EditorMode, promptModeIsAvailable: boolean = true) => {
-  const mockStore = createMockStore(editorMode);
-
-  const {
-    selectEditorMode,
-    selectPromptModeIsAvailable,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('../../../../application/utils/state_management/selectors');
-  selectEditorMode.mockReturnValue(editorMode);
-  selectPromptModeIsAvailable.mockReturnValue(promptModeIsAvailable);
-
+const renderWithProviders = (component: React.ReactElement, initialState = {}) => {
+  const defaultState = {
+    query: {
+      query: 'source=hello',
+      language: 'PPL',
+      dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
+    },
+    queryEditor: {
+      editorMode: EditorMode.SingleQuery,
+      promptModeIsAvailable: false,
+      queryStatus: {
+        status: 'UNINITIALIZED',
+        elapsedMs: undefined,
+        startTime: undefined,
+        body: undefined,
+      },
+      lastExecutedPrompt: '',
+    },
+    ui: {
+      showDatasetFields: false,
+      prompt: '',
+    },
+    results: {},
+    tab: {},
+    legacy: {
+      interval: 'auto',
+      columns: [],
+      sort: [],
+    },
+    ...initialState,
+  };
+  const store = configureStore({
+    reducer: rootReducer,
+    preloadedState: defaultState as any,
+  });
   return render(
-    <Provider store={mockStore}>
-      <DetectedLanguage />
+    <Provider store={store}>
+      <IntlProvider locale="en" messages={{}}>
+        {component}
+      </IntlProvider>
     </Provider>
   );
 };
@@ -50,104 +75,261 @@ const renderWithStore = (editorMode: EditorMode, promptModeIsAvailable: boolean 
 describe('DetectedLanguage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockLocalStorage.getItem.mockReturnValue(null);
   });
 
-  it('renders Natural Language and LanguageReference for SingleEmpty mode', () => {
-    renderWithStore(EditorMode.SingleEmpty);
+  describe('Component Rendering', () => {
+    it('should render with PPL language and query editor mode', () => {
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: false,
+        },
+      };
 
-    const container = screen.getByTestId('exploreDetectedLanguage');
-    expect(container).toHaveTextContent('Natural Language |');
-    expect(screen.getByTestId('language-reference')).toBeInTheDocument();
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      expect(screen.getByTestId('exploreDetectedLanguage')).toBeInTheDocument();
+      expect(screen.getByText('PPL')).toBeInTheDocument();
+    });
+
+    it('should render with natural language/PPL text when dual mode is available', () => {
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.DualQuery,
+          promptModeIsAvailable: true,
+        },
+      };
+
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      expect(screen.getByText('Natural Language/PPL')).toBeInTheDocument();
+    });
+
+    it('should render only natural language text in single prompt mode', () => {
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.SinglePrompt,
+          promptModeIsAvailable: true,
+        },
+      };
+
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      expect(screen.getByText('Natural Language')).toBeInTheDocument();
+    });
+
+    it('should render with info icon', () => {
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      const icon = screen
+        .getByTestId('exploreDetectedLanguage')
+        .querySelector('[data-euiicon-type="iInCircle"]');
+      expect(icon).toBeInTheDocument();
+    });
   });
 
-  it('renders Natural Language text for SinglePrompt mode', () => {
-    renderWithStore(EditorMode.SinglePrompt);
+  describe('Button State', () => {
+    it('should enable button when not in single prompt mode', () => {
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: false,
+        },
+      };
 
-    expect(screen.getByTestId('exploreDetectedLanguage')).toHaveTextContent('Natural Language');
-    expect(screen.queryByTestId('language-reference')).not.toBeInTheDocument();
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      const button = screen.getByTestId('exploreDetectedLanguage');
+      expect(button).not.toBeDisabled();
+    });
+
+    it('should disable button in single prompt mode', () => {
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.SinglePrompt,
+          promptModeIsAvailable: true,
+        },
+      };
+
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      const button = screen.getByTestId('exploreDetectedLanguage');
+      expect(button).toBeDisabled();
+    });
   });
 
-  it('renders only LanguageReference for SingleQuery mode', () => {
-    renderWithStore(EditorMode.SingleQuery);
+  describe('Popover Behavior', () => {
+    it('should open popover initially when localStorage key is not set', () => {
+      mockLocalStorage.getItem.mockReturnValue(null);
 
-    expect(screen.getByTestId('language-reference')).toBeInTheDocument();
-    expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent('Natural Language');
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      expect(screen.getByText('Syntax options')).toBeInTheDocument();
+      expect(screen.getByTestId('ppl-reference')).toBeInTheDocument();
+    });
+
+    it('should not open popover initially when localStorage key is set to true', () => {
+      mockLocalStorage.getItem.mockReturnValue('true');
+
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      expect(screen.queryByText('Syntax options')).not.toBeInTheDocument();
+    });
+
+    it('should open popover when button is clicked', () => {
+      mockLocalStorage.getItem.mockReturnValue('true');
+
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      const button = screen.getByTestId('exploreDetectedLanguage');
+
+      // Initially closed
+      expect(screen.queryByText('Syntax options')).not.toBeInTheDocument();
+
+      // Click to open
+      fireEvent.click(button);
+      expect(screen.getByText('Syntax options')).toBeInTheDocument();
+      expect(screen.getByTestId('ppl-reference')).toBeInTheDocument();
+    });
+
+    it('should set localStorage when popover is opened', () => {
+      mockLocalStorage.getItem.mockReturnValue(null);
+
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.SingleQuery,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<DetectedLanguage />, initialState);
+
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith('hasSeenInfoBox_PPL', 'true');
+    });
   });
 
-  it('renders Natural Language and LanguageReference for DualPrompt mode', () => {
-    renderWithStore(EditorMode.DualPrompt);
+  describe('Text Content Based on Editor Mode', () => {
+    const testCases = [
+      {
+        editorMode: EditorMode.SingleEmpty,
+        promptModeIsAvailable: true,
+        expected: 'Natural Language/PPL',
+      },
+      {
+        editorMode: EditorMode.DualQuery,
+        promptModeIsAvailable: true,
+        expected: 'Natural Language/PPL',
+      },
+      {
+        editorMode: EditorMode.DualPrompt,
+        promptModeIsAvailable: true,
+        expected: 'Natural Language/PPL',
+      },
+      {
+        editorMode: EditorMode.SinglePrompt,
+        promptModeIsAvailable: true,
+        expected: 'Natural Language',
+      },
+      {
+        editorMode: EditorMode.SingleQuery,
+        promptModeIsAvailable: true,
+        expected: 'PPL',
+      },
+      {
+        editorMode: EditorMode.SingleQuery,
+        promptModeIsAvailable: false,
+        expected: 'PPL',
+      },
+    ];
 
-    const container = screen.getByTestId('exploreDetectedLanguage');
-    expect(container).toHaveTextContent('Natural Language |');
-    expect(screen.getByTestId('language-reference')).toBeInTheDocument();
+    testCases.forEach(({ editorMode, promptModeIsAvailable, expected }) => {
+      it(`should display "${expected}" for ${editorMode} mode with promptModeIsAvailable=${promptModeIsAvailable}`, () => {
+        const initialState = {
+          query: {
+            language: 'PPL',
+          },
+          queryEditor: {
+            editorMode,
+            promptModeIsAvailable,
+          },
+        };
+
+        renderWithProviders(<DetectedLanguage />, initialState);
+
+        expect(screen.getByText(expected)).toBeInTheDocument();
+      });
+    });
+  });
+});
+
+describe('getLanguageReference', () => {
+  it('should return PplReference component for PPL language', () => {
+    const result = getLanguageReference('PPL');
+    expect(result.type.name).toBe('PplReference');
   });
 
-  it('renders Natural Language and LanguageReference for DualQuery mode', () => {
-    renderWithStore(EditorMode.DualQuery);
-
-    const container = screen.getByTestId('exploreDetectedLanguage');
-    expect(container).toHaveTextContent('Natural Language |');
-    expect(screen.getByTestId('language-reference')).toBeInTheDocument();
-  });
-
-  it('throws error for unsupported editor mode', () => {
-    // eslint-disable-next-line no-console
-    const originalError = console.error;
-    // eslint-disable-next-line no-console
-    console.error = jest.fn();
-
+  it('should throw error for unsupported language', () => {
     expect(() => {
-      renderWithStore('unsupported-mode' as EditorMode);
-    }).toThrow('DetectedLanguage encountered unsupported editorMode: unsupported-mode');
-
-    // eslint-disable-next-line no-console
-    console.error = originalError;
-  });
-
-  describe('when promptModeIsAvailable is false', () => {
-    it('renders only LanguageReference for SingleEmpty mode when prompt mode not available', () => {
-      renderWithStore(EditorMode.SingleEmpty, false);
-
-      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
-      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
-        'Natural Language'
-      );
-    });
-
-    it('renders only LanguageReference for SinglePrompt mode when prompt mode not available', () => {
-      renderWithStore(EditorMode.SinglePrompt, false);
-
-      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
-      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
-        'Natural Language'
-      );
-    });
-
-    it('renders only LanguageReference for SingleQuery mode when prompt mode not available', () => {
-      renderWithStore(EditorMode.SingleQuery, false);
-
-      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
-      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
-        'Natural Language'
-      );
-    });
-
-    it('renders only LanguageReference for DualPrompt mode when prompt mode not available', () => {
-      renderWithStore(EditorMode.DualPrompt, false);
-
-      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
-      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
-        'Natural Language'
-      );
-    });
-
-    it('renders only LanguageReference for DualQuery mode when prompt mode not available', () => {
-      renderWithStore(EditorMode.DualQuery, false);
-
-      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
-      expect(screen.getByTestId('exploreDetectedLanguage')).not.toHaveTextContent(
-        'Natural Language'
-      );
-    });
+      getLanguageReference('UNSUPPORTED_LANGUAGE');
+    }).toThrow('LanguageReference encountered an unhandled language: UNSUPPORTED_LANGUAGE');
   });
 });

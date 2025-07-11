@@ -7,22 +7,23 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
-import { EuiPopover, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
 import {
   SavedQueryManagementComponent,
   SavedQueryMeta,
   SavedQuery,
-} from '../../../../../data/public';
-import { selectQuery } from '../../../application/utils/state_management/selectors';
-import { clearResults, setSavedQuery } from '../../../application/utils/state_management/slices';
-import { ExploreServices } from '../../../types';
-import { setQueryState } from '../../../application/utils/state_management/slices';
-import { loadQueryActionCreator } from '../../../application/utils/state_management/actions/query_editor';
-import { useTimeFilter } from '../utils';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { RootState } from '../../../application/utils/state_management/store';
-import { executeQueries } from '../../../application/utils/state_management/actions/query_actions';
-import { useClearEditorsAndSetText } from '../../../application/hooks';
+} from '../../../../../../data/public';
+import { selectQuery } from '../../../../application/utils/state_management/selectors';
+import { clearResults, setSavedQuery } from '../../../../application/utils/state_management/slices';
+import { ExploreServices } from '../../../../types';
+import { setQueryState } from '../../../../application/utils/state_management/slices';
+import { loadQueryActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
+import { useTimeFilter } from '../../utils';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { RootState } from '../../../../application/utils/state_management/store';
+import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
+import { useClearEditorsAndSetText } from '../../../../application/hooks';
+import './save_query.scss';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -150,38 +151,41 @@ export const SaveQueryButton = () => {
   }, [dispatch]);
 
   return (
-    <>
-      <EuiPopover
-        button={
-          <EuiButtonEmpty
-            onClick={onButtonClick}
-            iconType="save"
-            className="queryPanel__footer__saveQueryButton"
-            data-test-subj="queryPanelFootersaveQueryButton"
-          >
-            {i18n.translate('explore.queryPanel.saveQueryButton.savedQueries', {
-              defaultMessage: 'Saved queries',
-            })}
-            <EuiIcon type="arrowDown" className="queryPanel__footer__saveQueryButtonIcon" />
-          </EuiButtonEmpty>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        anchorPosition="downCenter"
-      >
-        <SavedQueryManagementComponent
-          savedQueryService={savedQueryService}
-          loadedSavedQuery={currentSavedQuery}
-          onInitiateSave={() => {}}
-          onInitiateSaveAsNew={() => {}}
-          onLoad={handleLoadSavedQuery}
-          onClearSavedQuery={handleClearSavedQuery}
-          closeMenuPopover={() => setIsPopoverOpen(false)}
-          showSaveQuery={!!services.capabilities?.explore?.saveQuery}
-          saveQuery={handleSaveQuery}
-          useNewSavedQueryUI={true}
-        />
-      </EuiPopover>
-    </>
+    <EuiPopover
+      button={
+        <EuiButtonEmpty
+          onClick={onButtonClick}
+          data-test-subj="queryPanelFooterSaveQueryButton"
+          size="xs"
+        >
+          <div className="exploreSaveQuery__buttonTextWrapper">
+            <EuiIcon type="save" size="s" />
+            <EuiText size="xs">
+              {i18n.translate('explore.queryPanel.saveQueryButton.savedQueries', {
+                defaultMessage: 'Saved queries',
+              })}
+            </EuiText>
+            <EuiIcon type="arrowDown" size="s" />
+          </div>
+        </EuiButtonEmpty>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      anchorPosition="downCenter"
+      panelPaddingSize="none"
+    >
+      <SavedQueryManagementComponent
+        savedQueryService={savedQueryService}
+        loadedSavedQuery={currentSavedQuery}
+        onInitiateSave={() => {}}
+        onInitiateSaveAsNew={() => {}}
+        onLoad={handleLoadSavedQuery}
+        onClearSavedQuery={handleClearSavedQuery}
+        closeMenuPopover={() => setIsPopoverOpen(false)}
+        showSaveQuery={!!services.capabilities?.explore?.saveQuery}
+        saveQuery={handleSaveQuery}
+        useNewSavedQueryUI={true}
+      />
+    </EuiPopover>
   );
 };
