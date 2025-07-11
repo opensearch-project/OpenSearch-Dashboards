@@ -366,5 +366,38 @@ describe('ppl code_completion', () => {
       const resultField = results.find((result) => result.text === '|');
       expect(resultField?.documentation).toBeFalsy();
     });
+
+    it('should suggest span method in by clause', async () => {
+      const results = await getSimpleSuggestions('source = test-index | stats count() by ');
+
+      checkSuggestionsContain(results, {
+        text: 'span()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
+    });
+
+    it('should suggest match method in where clause', async () => {
+      const results = await getSimpleSuggestions('source = test-index | where ');
+
+      checkSuggestionsContain(results, {
+        text: 'match()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
+
+      checkSuggestionsContain(results, {
+        text: 'match_phrase()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
+
+      checkSuggestionsContain(results, {
+        text: 'match_phrase_prefix()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
+
+      checkSuggestionsContain(results, {
+        text: 'match_bool_prefix()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
+    });
   });
 });
