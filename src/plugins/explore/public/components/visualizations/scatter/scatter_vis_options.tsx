@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ScatterChartStyleControls } from './scatter_vis_config';
 import { AxisRole, StandardAxes } from '../types';
@@ -14,6 +14,7 @@ import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { GridOptionsPanel } from '../style_panel/grid/grid';
 
 export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
 
@@ -92,6 +93,19 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           chartType="scatter"
         />
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AllAxesOptions
+          standardAxes={styleOptions.StandardAxes}
+          onChangeSwitchAxes={handleSwitchAxes}
+          onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <GridOptionsPanel
+          grid={styleOptions.grid}
+          onGridChange={(gridOption) => updateStyleOption('grid', gridOption)}
+        />
+      </EuiFlexItem>
       {shouldShowLegend && (
         <EuiFlexItem grow={false}>
           <LegendOptionsPanel
@@ -127,15 +141,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
         <ScatterExclusiveVisOptions
           styles={styleOptions.exclusive}
           onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-        />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <AllAxesOptions
-          disableGrid={false}
-          standardAxes={styleOptions.StandardAxes}
-          onChangeSwitchAxes={handleSwitchAxes}
-          onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

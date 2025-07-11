@@ -53,6 +53,35 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
           chartType="area"
         />
       </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <AxesOptions
+          categoryAxes={styleOptions.categoryAxes}
+          valueAxes={styleOptions.valueAxes}
+          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
+          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <ThresholdOptions
+          thresholdLines={styleOptions.thresholdLines}
+          onThresholdLinesChange={(thresholdLines) =>
+            updateStyleOption('thresholdLines', thresholdLines)
+          }
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <GridOptionsPanel
+          grid={styleOptions.grid}
+          onGridChange={(grid) => updateStyleOption('grid', grid)}
+        />
+      </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         <LegendOptionsPanel
           shouldShowLegend={!notShowLegend}
@@ -70,14 +99,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
           }}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ThresholdOptions
-          thresholdLines={styleOptions.thresholdLines}
-          onThresholdLinesChange={(thresholdLines) =>
-            updateStyleOption('thresholdLines', thresholdLines)
-          }
-        />
-      </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         <TooltipOptionsPanel
           tooltipOptions={styleOptions.tooltipOptions}
@@ -87,23 +109,6 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               ...tooltipOptions,
             })
           }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AxesOptions
-          categoryAxes={styleOptions.categoryAxes}
-          valueAxes={styleOptions.valueAxes}
-          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
-          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <GridOptionsPanel
-          grid={styleOptions.grid}
-          onGridChange={(grid) => updateStyleOption('grid', grid)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

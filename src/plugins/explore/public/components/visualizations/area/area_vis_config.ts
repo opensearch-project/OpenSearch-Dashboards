@@ -58,8 +58,8 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
     },
   ],
   grid: {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   },
 
   // Category axes

@@ -69,8 +69,8 @@ export const defaultBarChartStyles: BarChartStyleControls = {
     },
   ],
   grid: {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   },
 
   // Category axes

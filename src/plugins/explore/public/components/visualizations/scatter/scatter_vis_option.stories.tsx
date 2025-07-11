@@ -142,7 +142,6 @@ ScatterWithField.args = {
         title: {
           text: 'Count as new title',
         },
-        grid: { showLines: true },
         axisRole: AxisRole.X,
       },
       {
@@ -163,7 +162,6 @@ ScatterWithField.args = {
         title: {
           text: 'Min as new title',
         },
-        grid: { showLines: true },
         axisRole: AxisRole.Y,
       },
     ],

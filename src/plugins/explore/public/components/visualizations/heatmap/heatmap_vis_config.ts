@@ -16,6 +16,7 @@ import {
   TooltipOptions,
   LabelAggregationType,
   VisFieldType,
+  GridOptions,
 } from '../types';
 
 export interface HeatmapLabels {
@@ -44,6 +45,8 @@ export interface HeatmapChartStyleControls {
 
   // Axes configuration
   StandardAxes: StandardAxes[];
+
+  grid: GridOptions;
 
   exclusive: ExclusiveHeatmapConfig;
   label: HeatmapLabels;
@@ -74,6 +77,10 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     overwriteColor: false,
     color: 'black',
   },
+  grid: {
+    xLines: true,
+    yLines: true,
+  },
 
   // Standard axes
   StandardAxes: [
@@ -91,9 +98,6 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
       title: {
         text: '',
       },
-      grid: {
-        showLines: false,
-      },
       axisRole: AxisRole.Y,
     },
     {
@@ -109,9 +113,6 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
       },
       title: {
         text: '',
-      },
-      grid: {
-        showLines: false,
       },
       axisRole: AxisRole.X,
     },
