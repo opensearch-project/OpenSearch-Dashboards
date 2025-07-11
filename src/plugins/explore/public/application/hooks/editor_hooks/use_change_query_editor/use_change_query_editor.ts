@@ -8,9 +8,9 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { ExploreServices } from '../../../../types';
 import { useSelector } from '../../../legacy/discover/application/utils/state_management';
 import { selectEditorMode, selectQuery } from '../../../utils/state_management/selectors';
-import { IndexPatternField } from '../../../../../../data/common';
+import { DataViewField, IndexPatternField } from '../../../../../../data/common';
 import { opensearchFilters } from '../../../../../../data/public';
-import { useIndexPatternContext } from '../../../components/index_pattern_context';
+import { useDatasetContext } from '../../../context';
 import { EditorMode } from '../../../utils/state_management/types';
 import { useSetEditorText } from '../use_set_editor_text';
 
@@ -22,14 +22,14 @@ export const useChangeQueryEditor = () => {
       },
     },
   } = useOpenSearchDashboards<ExploreServices>();
-  const { indexPattern } = useIndexPatternContext();
+  const { dataset } = useDatasetContext();
   const setEditorText = useSetEditorText();
   const editorMode = useSelector(selectEditorMode);
   const query = useSelector(selectQuery);
 
   const onAddFilter = useCallback(
-    (field: string | IndexPatternField, values: string, operation: '+' | '-') => {
-      if (!indexPattern) return;
+    (field: string | IndexPatternField | DataViewField, values: string, operation: '+' | '-') => {
+      if (!dataset) return;
       const languageConfig = queryString.getLanguageService().getLanguage(query.language);
       if (!languageConfig) return;
 
@@ -38,7 +38,7 @@ export const useChangeQueryEditor = () => {
         field,
         values,
         operation,
-        indexPattern.id ?? ''
+        dataset.id ?? ''
       );
       setEditorText((text) => {
         const newText =
@@ -49,7 +49,7 @@ export const useChangeQueryEditor = () => {
         return text;
       });
     },
-    [editorMode, filterManager, indexPattern, query.language, queryString, setEditorText]
+    [editorMode, filterManager, dataset, query.language, queryString, setEditorText]
   );
 
   return { onAddFilter };

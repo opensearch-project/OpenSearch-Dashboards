@@ -17,6 +17,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
+  DataViewsContract as DatasetsContract,
   IndexPatternsContract,
   FilterManager,
   TimefilterContract,
@@ -130,7 +131,8 @@ export interface ExploreServices {
   history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
-  indexPatterns: IndexPatternsContract; // Direct access for convenience (same as data.indexPatterns)
+  datasets: DatasetsContract;
+  indexPatterns: IndexPatternsContract;
   inspector: InspectorPublicPluginStart;
   inspectorAdapters: {
     requests: RequestAdapter;
@@ -148,7 +150,7 @@ export interface ExploreServices {
   visualizations: VisualizationsStart;
   storage: Storage;
   uiActions: UiActionsStart;
-  appName: string; // Required by autocomplete service
+  appName: string;
 
   // Additional CoreStart properties that are accessed directly
   savedObjects: CoreStart['savedObjects'];

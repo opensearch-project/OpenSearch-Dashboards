@@ -8,7 +8,7 @@ import './data_table.scss';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EuiSmallButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { TableHeader } from './table_header/table_header';
 import {
   DocViewFilterFn,
@@ -23,7 +23,7 @@ export interface DataTableProps {
   columns: LegacyDisplayedColumn[];
   hits?: number;
   rows: Array<OpenSearchSearchHit<Record<string, any>>>;
-  indexPattern: IndexPattern;
+  dataset: IndexPattern | Dataset;
   sampleSize: number;
   isShortDots: boolean;
   showPagination?: boolean;
@@ -45,7 +45,7 @@ const DataTableUI = ({
   columns,
   hits,
   rows,
-  indexPattern,
+  dataset,
   sampleSize,
   isShortDots,
   docViewsRegistry,
@@ -175,8 +175,7 @@ const DataTableUI = ({
    */
   const indexOfRenderedData = rows?.[0]?._index;
   const timeFromFirstRow =
-    typeof indexPattern?.timeFieldName === 'string' &&
-    rows?.[0]?._source?.[indexPattern.timeFieldName];
+    typeof dataset?.timeFieldName === 'string' && rows?.[0]?._source?.[dataset.timeFieldName];
 
   useEffect(() => {
     if (tableElement) {
@@ -233,7 +232,7 @@ const DataTableUI = ({
                   key={row._id}
                   row={row}
                   columns={columnNames}
-                  indexPattern={indexPattern}
+                  dataset={dataset}
                   onAddColumn={onAddColumn}
                   onRemoveColumn={onRemoveColumn}
                   onFilter={onFilter}

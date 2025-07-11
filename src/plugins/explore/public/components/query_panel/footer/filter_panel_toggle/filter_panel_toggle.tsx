@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { setShowFilterPanel } from '../../../../application/utils/state_management/slices';
-import { selectShowDataSetFields } from '../../../../application/utils/state_management/selectors';
+import { selectShowDatasetFields } from '../../../../application/utils/state_management/selectors';
 
 const hideFieldsText = i18n.translate('explore.queryPanel.showFieldToggle.hideFieldsLabel', {
   defaultMessage: 'Hide Fields',
@@ -18,7 +18,7 @@ const showFieldsText = i18n.translate('explore.queryPanel.showFieldToggle.showFi
 });
 
 export const FilterPanelToggle = () => {
-  const showDatasetFields = useSelector(selectShowDataSetFields);
+  const showDatasetFields = useSelector(selectShowDatasetFields);
   const dispatch = useDispatch();
 
   const handleToggle = () => {

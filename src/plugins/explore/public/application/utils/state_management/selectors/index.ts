@@ -39,7 +39,7 @@ export const selectActiveTabId = createSelector([selectUIState], (uiState) => ui
 
 export const selectQueryPrompt = createSelector([selectUIState], (uiState) => uiState.prompt);
 
-export const selectShowDataSetFields = createSelector(
+export const selectShowDatasetFields = createSelector(
   [selectUIState],
   (uiState) => uiState.showFilterPanel
 );

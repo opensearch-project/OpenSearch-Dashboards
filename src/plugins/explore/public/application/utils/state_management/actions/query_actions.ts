@@ -6,14 +6,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import { IBucketDateHistogramAggConfig, Query, DataView as Dataset } from 'src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { ISearchResult, setQueryStatus, setResults, updateQueryStatus } from '../slices';
 import { ExploreServices } from '../../../../types';
-import { IndexPattern } from '../../../legacy/discover/opensearch_dashboards_services';
 import {
   DataPublicPluginStart,
   indexPatterns as indexPatternUtils,
-  Query,
   search,
 } from '../../../../../../data/public';
 import {
@@ -21,7 +20,6 @@ import {
   createHistogramConfigs,
   getDimensions,
 } from '../../../../components/chart/utils';
-import { IBucketDateHistogramAggConfig } from '../../../../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
@@ -51,10 +49,10 @@ export const defaultPrepareQueryString = (query: Query): string => {
  */
 export const defaultResultsProcessor: DefaultDataProcessor = (
   rawResults: ISearchResult,
-  indexPattern: IndexPattern
+  dataset: Dataset
 ): ProcessedSearchResults => {
   const fieldCounts: Record<string, number> = {};
-  if (rawResults.hits && rawResults.hits.hits && indexPattern) {
+  if (rawResults.hits && rawResults.hits.hits && dataset) {
     for (const hit of rawResults.hits.hits) {
       const fields = Object.keys(hit._source);
       for (const fieldName of fields) {
@@ -66,13 +64,13 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   const result: ProcessedSearchResults = {
     hits: rawResults.hits,
     fieldCounts,
-    indexPattern, // Include IndexPattern for LogsTab (passed from TabContent)
-    elapsedMs: rawResults.elapsedMs, // Include timing info from raw results
+    dataset,
+    elapsedMs: rawResults.elapsedMs,
   };
 
   // Add histogram data if requested and available
-  if (rawResults.aggregations && indexPattern) {
-    result.chartData = transformAggregationToChartData(rawResults, indexPattern);
+  if (rawResults.aggregations && dataset) {
+    result.chartData = transformAggregationToChartData(rawResults, dataset);
     result.bucketInterval = { interval: 'auto', scale: 1 };
   }
 
@@ -81,13 +79,13 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
 
 export const histogramResultsProcessor: HistogramDataProcessor = (
   rawResults: ISearchResult,
-  indexPattern: IndexPattern,
+  dataset: Dataset,
   data: DataPublicPluginStart,
   interval: string
 ): ProcessedSearchResults => {
-  const result = defaultResultsProcessor(rawResults, indexPattern);
-  const histogramConfigs = indexPattern.timeFieldName
-    ? createHistogramConfigs(indexPattern, interval, data)
+  const result = defaultResultsProcessor(rawResults, dataset);
+  const histogramConfigs = dataset.timeFieldName
+    ? createHistogramConfigs(dataset, interval, data)
     : undefined;
 
   if (histogramConfigs) {
@@ -212,18 +210,36 @@ const executeQueryBase = async (
 
     const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
-    // Get IndexPattern
-    let indexPattern;
-    if (query.dataset) {
-      indexPattern = await services.data.indexPatterns.get(
-        query.dataset.id,
-        query.dataset.type !== 'INDEX_PATTERN'
-      );
-    } else {
-      indexPattern = (services.data as any).indexPattern;
+    // Ensure data views are properly initialized
+    await services.data.dataViews.ensureDefaultDataView();
+
+    // Get Dataset
+    let dataset;
+    try {
+      if (query.dataset) {
+        // Try to get the dataset by ID
+        dataset = await services.data.dataViews.get(
+          query.dataset.id,
+          query.dataset.type !== 'INDEX_PATTERN'
+        );
+      } else {
+        // If no dataset in query, use the default one
+        dataset = await services.data.dataViews.getDefault();
+      }
+    } catch (error) {
+      // If we can't get the specific dataset, try to get the default one
+      if (!dataset) {
+        try {
+          dataset = await services.data.dataViews.getDefault();
+        } catch (defaultError) {
+          // If we can't get any dataset, throw an error
+          throw new Error('Unable to find any index pattern for query execution');
+        }
+      }
     }
 
-    if (!indexPattern) {
+    // If we still don't have a dataset, throw an error
+    if (!dataset) {
       throw new Error('IndexPattern not found for query execution');
     }
 
@@ -240,7 +256,7 @@ const executeQueryBase = async (
       const effectiveInterval = interval || state.legacy?.interval || 'auto';
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
-        indexPattern,
+        dataset,
         services,
         true, // Include histogram
         effectiveInterval
@@ -249,7 +265,7 @@ const executeQueryBase = async (
       // Tab-specific: Create without aggregations
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
-        indexPattern,
+        dataset,
         services,
         false // No histogram
       );

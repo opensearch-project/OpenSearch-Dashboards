@@ -44,7 +44,7 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
 }));
 
 jest.mock('../../../../application/components/index_pattern_context', () => ({
-  useIndexPatternContext: jest.fn(),
+  useDatasetContext: jest.fn(),
 }));
 
 jest.mock('../use_shared_editor', () => ({
@@ -68,7 +68,7 @@ import {
   selectEditorMode,
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
-import { useIndexPatternContext } from '../../../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../../../application/context';
 import { useSharedEditor } from '../use_shared_editor';
 import { useTopEditorText, useEditorRefs } from '../../../../application/hooks';
 import { EditorMode } from '../../../../application/utils/state_management/types';
@@ -80,9 +80,7 @@ const mockGetEffectiveLanguageForAutoComplete = getEffectiveLanguageForAutoCompl
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
   typeof useOpenSearchDashboards
 >;
-const mockUseIndexPatternContext = useIndexPatternContext as jest.MockedFunction<
-  typeof useIndexPatternContext
->;
+const mockuseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseSharedEditor = useSharedEditor as jest.MockedFunction<typeof useSharedEditor>;
 const mockUseTopEditorText = useTopEditorText as jest.MockedFunction<typeof useTopEditorText>;
 const mockUseEditorRefs = useEditorRefs as jest.MockedFunction<typeof useEditorRefs>;
@@ -144,7 +142,7 @@ describe('useTopEditor', () => {
 
     // Setup mocks
     mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices } as any);
-    mockUseIndexPatternContext.mockReturnValue({ indexPattern: mockIndexPattern } as any);
+    mockuseDatasetContext.mockReturnValue({ indexPattern: mockIndexPattern } as any);
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectQueryLanguage) return 'SQL';
       if (selector === selectEditorMode) return EditorMode.SingleQuery;
