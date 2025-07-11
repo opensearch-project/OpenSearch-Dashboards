@@ -224,7 +224,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
               }}
               listProps={{
                 showIcons: false,
-                rowHeight: 50,
+                rowHeight: 40,
               }}
               searchProps={{
                 placeholder: i18n.translate('data.datasetSelect.searchPlaceholder', {

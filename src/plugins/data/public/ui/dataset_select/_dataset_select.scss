@@ -43,6 +43,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: $euiFontSizeXS;
   }
 
   &__checkbox {
@@ -54,6 +55,12 @@
     width: 365px;
     padding: $euiSizeXS;
     overflow-y: auto;
+    
+    span:is([class*="euiSelectableListItem__text"]) {
+      :first-child {
+        font-size: $euiFontSizeXS;
+      }
+    }
   }
 
   &__searchContainer {
