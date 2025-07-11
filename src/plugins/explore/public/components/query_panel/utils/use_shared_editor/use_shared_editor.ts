@@ -152,6 +152,10 @@ export const useSharedEditor = ({
                 isTrusted: true,
               }
             : '',
+          command: {
+            id: 'editor.action.triggerSuggest',
+            title: 'Trigger Next Suggestion',
+          },
         }));
 
         return {
