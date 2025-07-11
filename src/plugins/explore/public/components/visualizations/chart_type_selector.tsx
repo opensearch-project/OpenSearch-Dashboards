@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -18,7 +19,6 @@ import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { VisualizationRule } from './types';
 import { ChartType, VisualizationTypeResult } from './utils/use_visualization_types';
 import { CHART_METADATA } from './constants';
-import { StyleAccordion } from './style_panel/style_accordion';
 import { selectChartType } from '../../application/utils/state_management/selectors';
 
 interface ChartTypeSelectorProps<T extends ChartType> {
@@ -166,57 +166,49 @@ export const ChartTypeSelector = <T extends ChartType>({
   if (!visualizationData || !Boolean(Object.keys(chartTypeMappedOptions).length)) return null;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" key="ChartTypeSelector">
-      <EuiFlexItem grow={false}>
-        <StyleAccordion
-          id="generalSection"
-          accordionLabel={i18n.translate('explore.stylePanel.tabs.general', {
-            defaultMessage: 'General',
-          })}
-          initialIsOpen={true}
-        >
-          <EuiFormRow
-            label={i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
-              defaultMessage: 'Visualization Type',
-            })}
-          >
-            <EuiSuperSelect
-              id="chartType"
-              compressed
-              valueOfSelected={
-                currChartTypeId && chartTypeMappedOptions[currChartTypeId]
-                  ? chartTypeMappedOptions[currChartTypeId].disabled
-                    ? undefined
-                    : currChartTypeId
-                  : undefined
-              }
-              placeholder="Select a visualization type"
-              options={Object.values(chartTypeMappedOptions).map((option) => ({
-                ...option,
-                inputDisplay: (
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={option.iconType || 'visualizeApp'}
-                        size="m"
-                        color={option.disabled ? 'subdued' : 'default'}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s" color={option.disabled ? 'subdued' : 'default'}>
-                        {option.inputDisplay}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ),
-              }))}
-              onChange={(value) => {
-                updateChartTypeSelection(value as ChartType);
-              }}
-            />
-          </EuiFormRow>
-        </StyleAccordion>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFormRow
+        key="ChartTypeSelector"
+        label={i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
+          defaultMessage: 'Visualization type',
+        })}
+      >
+        <EuiSuperSelect
+          id="chartType"
+          compressed
+          valueOfSelected={
+            currChartTypeId && chartTypeMappedOptions[currChartTypeId]
+              ? chartTypeMappedOptions[currChartTypeId].disabled
+                ? undefined
+                : currChartTypeId
+              : undefined
+          }
+          placeholder="Select a visualization type"
+          options={Object.values(chartTypeMappedOptions).map((option) => ({
+            ...option,
+            inputDisplay: (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type={option.iconType || 'visualizeApp'}
+                    size="m"
+                    color={option.disabled ? 'subdued' : 'default'}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" color={option.disabled ? 'subdued' : 'default'}>
+                    {option.inputDisplay}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+          }))}
+          onChange={(value) => {
+            updateChartTypeSelection(value as ChartType);
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="s" />
+    </>
   );
 };

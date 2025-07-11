@@ -9,8 +9,8 @@ import { GridOptionsPanel } from './grid';
 
 describe('GridOptionsPanel', () => {
   const mockGrid = {
-    categoryLines: true,
-    valueLines: false,
+    xLines: true,
+    yLines: false,
   };
 
   const mockOnGridChange = jest.fn();
@@ -35,7 +35,7 @@ describe('GridOptionsPanel', () => {
 
     expect(mockOnGridChange).toHaveBeenCalledWith({
       ...mockGrid,
-      categoryLines: false,
+      xLines: false,
     });
   });
 
@@ -49,7 +49,7 @@ describe('GridOptionsPanel', () => {
 
     expect(mockOnGridChange).toHaveBeenCalledWith({
       ...mockGrid,
-      valueLines: true,
+      yLines: true,
     });
   });
 });

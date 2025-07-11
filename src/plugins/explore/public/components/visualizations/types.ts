@@ -91,8 +91,8 @@ export interface TooltipOptions {
 
 // Styling: Grid configuration
 export interface GridOptions {
-  categoryLines: boolean;
-  valueLines: boolean;
+  xLines: boolean;
+  yLines: boolean;
 }
 
 // Styling: Axis label configuration
@@ -139,8 +139,9 @@ export enum AxisRole {
   Y = 'y',
   COLOR = 'color',
   FACET = 'facet',
-  THETA = 'theta',
   SIZE = 'size',
+  Y_SECOND = 'y2',
+  Value = 'value',
 }
 
 // for heatmap the axies can serve as value axis or category axis in 2 scienrios
@@ -159,7 +160,6 @@ export interface StandardAxes {
   style: Record<string, any>;
   labels: AxisLabels;
   title: AxisTitle;
-  grid: Grid;
   axisRole: AxisRole;
 }
 

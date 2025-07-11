@@ -48,11 +48,14 @@ const AXIS_SELECT_LABEL = {
   [AxisRole.FACET]: i18n.translate('explore.visualize.axisSelectLabelFacet', {
     defaultMessage: 'Split Chart By',
   }),
-  [AxisRole.THETA]: i18n.translate('explore.visualize.axisSelectLabelTheta', {
-    defaultMessage: 'Theta',
-  }),
   [AxisRole.SIZE]: i18n.translate('explore.visualize.axisSelectLabelSize', {
     defaultMessage: 'Size',
+  }),
+  [AxisRole.Y_SECOND]: i18n.translate('explore.visualize.axisSelectLabelY2nd', {
+    defaultMessage: 'Y-Axis (2nd)',
+  }),
+  [AxisRole.Value]: i18n.translate('explore.visualize.axisSelectLabelValue', {
+    defaultMessage: 'Value',
   }),
 };
 
@@ -96,9 +99,16 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     Object.keys(mapping).forEach((role) => allAxisRolesFromQuery.add(role as AxisRole));
   });
 
-  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>(
-    isEmpty(currentMapping) ? {} : currentMapping
-  );
+  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
+
+  useEffect(() => {
+    // This is an intentional design since we want to modify the mapping object from outside
+    // to intermediately synchronize the internal state, but we don't want the internal state
+    // change to also trigger changes in the state, resulting in an infinite loop.
+    setCurrentSelections((prevCurrentSelections) =>
+      isEqual(prevCurrentSelections, currentMapping) ? prevCurrentSelections : currentMapping
+    );
+  }, [currentMapping]);
 
   // Filter out those mapping (combination of axes selection) that no longer be satisify
   // by the current combination of axes selection
@@ -219,8 +229,8 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   return (
     <StyleAccordion
       id="axesSelector"
-      accordionLabel={i18n.translate('explore.stylePanel.tabs.field', {
-        defaultMessage: 'Field',
+      accordionLabel={i18n.translate('explore.stylePanel.tabs.fields', {
+        defaultMessage: 'Fields',
       })}
       initialIsOpen={true}
     >
@@ -275,7 +285,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
 }) => {
   return (
     <React.Fragment key={`${axisRole}Selector`}>
-      <EuiFormRow label={chartType === 'metric' ? undefined : AXIS_SELECT_LABEL[axisRole]}>
+      <EuiFormRow label={AXIS_SELECT_LABEL[axisRole]}>
         <EuiFlexItem>
           <EuiComboBox
             compressed

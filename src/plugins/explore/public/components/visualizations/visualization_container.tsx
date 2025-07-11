@@ -159,8 +159,17 @@ export const VisualizationContainer = () => {
       // No rule matched and previously selected a chart type
       const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
 
+      // Cannot display metric with new query result if we have more than one value
+      const cannotDisplayAsMetric =
+        selectedChartType === 'metric' && allColumns[0].uniqueValuesCount > 1;
+
       // Similar check with the above if branch
-      if (!isValidMapping(selectedAxesMapping, allColumns)) {
+      if (cannotDisplayAsMetric) {
+        // Empty state
+        setVisualizationData(visualizationTypeResult);
+        dispatch(setSelectedChartType(undefined));
+        services.notifications.toasts.addInfo('Cannot apply metric type visualization, reset'); // FIXME message
+      } else if (!isValidMapping(selectedAxesMapping, allColumns)) {
         // Cannot apply, use empty state
         services.notifications.toasts.addInfo(
           'Cannot apply previous configured visualization, reset'

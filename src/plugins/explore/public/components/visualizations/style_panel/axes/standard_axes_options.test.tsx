@@ -24,7 +24,6 @@ describe('AxesOptions', () => {
       title: {
         text: '',
       },
-      grid: { showLines: true },
       axisRole: AxisRole.X,
     },
     {
@@ -41,7 +40,6 @@ describe('AxesOptions', () => {
       title: {
         text: '',
       },
-      grid: { showLines: true },
       axisRole: AxisRole.Y,
     },
   ];

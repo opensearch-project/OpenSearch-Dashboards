@@ -18,6 +18,7 @@ export const GridOptionsPanel: React.FC<GridOptionsProps> = ({ grid, onGridChang
   if (!grid || !onGridChange) {
     return null;
   }
+
   const updateGridOption = <K extends keyof GridOptions>(key: K, value: GridOptions[K]) => {
     // Create a new grid object to ensure the change is detected
     const newGrid = {
@@ -51,17 +52,17 @@ export const GridOptionsPanel: React.FC<GridOptionsProps> = ({ grid, onGridChang
       initialIsOpen={true}
     >
       <EuiFormRow
-        label={i18n.translate('explore.vis.gridOptions.categoryLines', {
-          defaultMessage: 'Category lines',
+        label={i18n.translate('explore.vis.gridOptions.xLines', {
+          defaultMessage: 'X axes',
         })}
       >
         <EuiButtonGroup
-          legend={i18n.translate('explore.vis.gridOptions.categoryLines', {
-            defaultMessage: 'Category lines',
+          legend={i18n.translate('explore.vis.gridOptions.xLines', {
+            defaultMessage: 'X axes',
           })}
           options={visibilityOptions}
-          idSelected={grid.categoryLines ? 'shown' : 'hidden'}
-          onChange={(id) => updateGridOption('categoryLines', id === 'shown')}
+          idSelected={grid.xLines ? 'shown' : 'hidden'}
+          onChange={(id) => updateGridOption('xLines', id === 'shown')}
           buttonSize="compressed"
           isFullWidth
           data-test-subj="categoryLinesButtonGroup"
@@ -69,17 +70,17 @@ export const GridOptionsPanel: React.FC<GridOptionsProps> = ({ grid, onGridChang
       </EuiFormRow>
 
       <EuiFormRow
-        label={i18n.translate('explore.vis.gridOptions.valueLines', {
-          defaultMessage: 'Value lines',
+        label={i18n.translate('explore.vis.gridOptions.yLines', {
+          defaultMessage: 'Y axes',
         })}
       >
         <EuiButtonGroup
-          legend={i18n.translate('explore.vis.gridOptions.valueLines', {
-            defaultMessage: 'Value lines',
+          legend={i18n.translate('explore.vis.gridOptions.yLines', {
+            defaultMessage: 'Y axes',
           })}
           options={visibilityOptions}
-          idSelected={grid.valueLines ? 'shown' : 'hidden'}
-          onChange={(id) => updateGridOption('valueLines', id === 'shown')}
+          idSelected={grid.yLines ? 'shown' : 'hidden'}
+          onChange={(id) => updateGridOption('yLines', id === 'shown')}
           buttonSize="compressed"
           isFullWidth
           data-test-subj="valueLinesButtonGroup"

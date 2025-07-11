@@ -130,7 +130,7 @@ jest.mock('../style_panel/grid/grid', () => ({
     <div data-test-subj="grid-panel">
       <button
         data-test-subj="update-grid"
-        onClick={() => onGridChange({ ...grid, categoryLines: !grid.categoryLines })}
+        onClick={() => onGridChange({ ...grid, xLines: !grid.xLines })}
       >
         Update Grid
       </button>
@@ -191,7 +191,7 @@ describe('AreaVisStyleControls', () => {
           },
         },
       ],
-      grid: { categoryLines: true, valueLines: true },
+      grid: { xLines: true, yLines: true },
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {},
@@ -430,7 +430,7 @@ describe('AreaVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('update-grid'));
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      grid: { ...defaultProps.styleOptions.grid, categoryLines: false },
+      grid: { ...defaultProps.styleOptions.grid, xLines: false },
     });
   });
 
