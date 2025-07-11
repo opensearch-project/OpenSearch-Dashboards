@@ -15,8 +15,8 @@ export default {
 } as ComponentMeta<typeof GridOptionsPanel>;
 
 const mockGrid = {
-  categoryLines: true,
-  valueLines: false,
+  xLines: true,
+  yLines: false,
 };
 
 const Template: ComponentStory<typeof GridOptionsPanel> = (args) => {

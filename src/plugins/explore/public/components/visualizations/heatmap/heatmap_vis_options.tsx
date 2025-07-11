@@ -17,6 +17,7 @@ import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { swapAxes } from '../utils/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { GridOptionsPanel } from '../style_panel/grid/grid';
 
 export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyleControls>;
 
@@ -32,7 +33,7 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const shouldShowType = numericalColumns.length === 3;
+  const shouldShowTypeAndGrid = numericalColumns.length === 3;
   const updateStyleOption = <K extends keyof HeatmapChartStyleControls>(
     key: K,
     value: HeatmapChartStyleControls[K]
@@ -93,6 +94,22 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
           chartType="heatmap"
         />
       </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <AllAxesOptions
+          standardAxes={styleOptions.StandardAxes}
+          onChangeSwitchAxes={handleSwitchAxes}
+          onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
+        />
+      </EuiFlexItem>
+      {shouldShowTypeAndGrid && (
+        <EuiFlexItem grow={false}>
+          <GridOptionsPanel
+            grid={styleOptions.grid}
+            onGridChange={(gridOption) => updateStyleOption('grid', gridOption)}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <LegendOptionsPanel
           shouldShowLegend={true}
@@ -130,18 +147,9 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
 
       <EuiFlexItem grow={false}>
         <HeatmapLabelVisOptions
-          shouldShowType={shouldShowType}
+          shouldShowType={shouldShowTypeAndGrid}
           styles={styleOptions.label}
           onChange={(label) => updateStyleOption('label', label)}
-        />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <AllAxesOptions
-          disableGrid={true}
-          standardAxes={styleOptions.StandardAxes}
-          onChangeSwitchAxes={handleSwitchAxes}
-          onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

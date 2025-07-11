@@ -58,9 +58,7 @@ const mockStandardAxes: StandardAxes[] = [
     title: {
       text: '',
     },
-    grid: {
-      showLines: true,
-    },
+
     axisRole: AxisRole.Y,
   },
   {
@@ -77,9 +75,6 @@ const mockStandardAxes: StandardAxes[] = [
     title: {
       text: '',
     },
-    grid: {
-      showLines: true,
-    },
     axisRole: AxisRole.X,
   },
 ];
@@ -94,7 +89,6 @@ const Template: ComponentStory<typeof AllAxesOptions> = (args) => {
       <AllAxesOptions
         {...args}
         standardAxes={standardAxes}
-        disableGrid={false}
         onStandardAxesChange={(axes) => {
           setStandardAxes(axes);
           action('onStandardAxesChange')(axes);
