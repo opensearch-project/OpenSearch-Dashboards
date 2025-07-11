@@ -7,17 +7,12 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { RECENT_QUERIES_TABLE_WRAPPER_EL } from '../../utils/constants';
 
 // Mock all modules before importing the component
 const mockDispatch = jest.fn();
 const mockHandleTimeChange = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
 const mockClearEditorsAndSetText = jest.fn();
-
-jest.doMock('react-dom', () => ({
-  createPortal: jest.fn((children) => children),
-}));
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -113,22 +108,8 @@ const renderWithStore = () => {
 };
 
 describe('RecentQueriesButton', () => {
-  let mockWrapperElement: HTMLElement;
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Create and add the wrapper element to the DOM
-    mockWrapperElement = document.createElement('div');
-    mockWrapperElement.id = RECENT_QUERIES_TABLE_WRAPPER_EL;
-    document.body.appendChild(mockWrapperElement);
-  });
-
-  afterEach(() => {
-    // Clean up the wrapper element
-    if (document.getElementById(RECENT_QUERIES_TABLE_WRAPPER_EL)) {
-      document.body.removeChild(mockWrapperElement);
-    }
   });
 
   it('renders the recent queries button with correct text and icon', () => {
@@ -139,58 +120,36 @@ describe('RecentQueriesButton', () => {
     expect(button).toHaveTextContent('Recent Queries');
   });
 
-  it('toggles queries visibility when button is clicked', () => {
+  it('toggles popover visibility when button is clicked', () => {
     renderWithStore();
 
     const button = screen.getByTestId('exploreRecentQueriesButton');
-    const table = screen.getByTestId('recent-queries-table');
 
-    // Initially hidden
-    expect(table).toHaveStyle({ display: 'none' });
+    // Initially no table in DOM
+    expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
 
     // Click to show
     fireEvent.click(button);
+    let table = screen.getByTestId('recent-queries-table');
     expect(table).toHaveStyle({ display: 'block' });
 
     // Click to hide
     fireEvent.click(button);
+    table = screen.getByTestId('recent-queries-table');
     expect(table).toHaveStyle({ display: 'none' });
-  });
-
-  it('does not render portal when wrapper element is not found', () => {
-    // Remove the wrapper element
-    document.body.removeChild(mockWrapperElement);
-
-    const reactDom = jest.requireMock('react-dom');
-    reactDom.createPortal.mockClear();
-
-    renderWithStore();
-
-    // Should not call createPortal when wrapper element doesn't exist
-    expect(reactDom.createPortal).not.toHaveBeenCalled();
-  });
-
-  it('renders portal when wrapper element exists', () => {
-    const reactDom = jest.requireMock('react-dom');
-    reactDom.createPortal.mockClear();
-
-    renderWithStore();
-
-    // Should call createPortal with RecentQueriesTable and wrapper element
-    expect(reactDom.createPortal).toHaveBeenCalledWith(expect.anything(), mockWrapperElement);
   });
 
   it('passes correct props to RecentQueriesTable', () => {
     renderWithStore();
 
     const button = screen.getByTestId('exploreRecentQueriesButton');
-    const table = screen.getByTestId('recent-queries-table');
 
-    // Initially not visible
-    expect(table).toHaveStyle({ display: 'none' });
+    // Initially not visible (not in DOM)
+    expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
 
     // After clicking button, should be visible
     fireEvent.click(button);
+    const table = screen.getByTestId('recent-queries-table');
     expect(table).toHaveStyle({ display: 'block' });
   });
 
@@ -249,5 +208,24 @@ describe('RecentQueriesButton', () => {
       mockClearEditorsAndSetText,
       'SELECT * FROM test2'
     );
+  });
+
+  it('closes popover after selecting a query', () => {
+    renderWithStore();
+
+    const button = screen.getByTestId('exploreRecentQueriesButton');
+
+    // Open popover
+    fireEvent.click(button);
+    let table = screen.getByTestId('recent-queries-table');
+    expect(table).toHaveStyle({ display: 'block' });
+
+    // Click a query item
+    const queryItem = screen.getByTestId('mock-query-item');
+    fireEvent.click(queryItem);
+
+    // Popover should be closed (table hidden)
+    table = screen.getByTestId('recent-queries-table');
+    expect(table).toHaveStyle({ display: 'none' });
   });
 });

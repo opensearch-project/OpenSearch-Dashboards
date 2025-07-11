@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { RootState } from './store';
 import {
   QueryStatus as DataPluginQueryStatus,
