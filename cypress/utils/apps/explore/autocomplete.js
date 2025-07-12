@@ -132,7 +132,7 @@ const getLanguageSpecificConfig = (language, config) => {
           { value: '|' },
           { value: 'where', input: 'w' },
         ],
-        editorType: 'exploreReusableEditor',
+        editorType: 'exploreReusableEditor-top',
         andOperator: 'and',
       };
     default:
