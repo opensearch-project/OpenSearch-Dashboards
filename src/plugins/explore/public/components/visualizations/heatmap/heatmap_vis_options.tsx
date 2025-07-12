@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { StandardAxes, AxisRole } from '../types';
@@ -82,6 +83,8 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
     }
   };
 
+  const hasMappingSelected = !isEmpty(axisColumnMappings);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -94,64 +97,69 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
           chartType="heatmap"
         />
       </EuiFlexItem>
+      {hasMappingSelected && (
+        <>
+          <EuiFlexItem grow={false}>
+            <AllAxesOptions
+              standardAxes={styleOptions.StandardAxes}
+              onChangeSwitchAxes={handleSwitchAxes}
+              onStandardAxesChange={(standardAxes) =>
+                updateStyleOption('StandardAxes', standardAxes)
+              }
+            />
+          </EuiFlexItem>
+          {shouldShowTypeAndGrid && (
+            <EuiFlexItem grow={false}>
+              <GridOptionsPanel
+                grid={styleOptions.grid}
+                onGridChange={(gridOption) => updateStyleOption('grid', gridOption)}
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <LegendOptionsPanel
+              shouldShowLegend={true}
+              legendOptions={{
+                show: styleOptions.addLegend,
+                position: styleOptions.legendPosition,
+              }}
+              onLegendOptionsChange={(legendOptions) => {
+                if (legendOptions.show !== undefined) {
+                  updateStyleOption('addLegend', legendOptions.show);
+                }
+                if (legendOptions.position !== undefined) {
+                  updateStyleOption('legendPosition', legendOptions.position);
+                }
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TooltipOptionsPanel
+              tooltipOptions={styleOptions.tooltipOptions}
+              onTooltipOptionsChange={(tooltipOptions) =>
+                updateStyleOption('tooltipOptions', {
+                  ...styleOptions.tooltipOptions,
+                  ...tooltipOptions,
+                })
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <HeatmapExclusiveVisOptions
+              styles={styleOptions.exclusive}
+              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <AllAxesOptions
-          standardAxes={styleOptions.StandardAxes}
-          onChangeSwitchAxes={handleSwitchAxes}
-          onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
-        />
-      </EuiFlexItem>
-      {shouldShowTypeAndGrid && (
-        <EuiFlexItem grow={false}>
-          <GridOptionsPanel
-            grid={styleOptions.grid}
-            onGridChange={(gridOption) => updateStyleOption('grid', gridOption)}
-          />
-        </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <HeatmapLabelVisOptions
+              shouldShowType={shouldShowTypeAndGrid}
+              styles={styleOptions.label}
+              onChange={(label) => updateStyleOption('label', label)}
+            />
+          </EuiFlexItem>
+        </>
       )}
-      <EuiFlexItem grow={false}>
-        <LegendOptionsPanel
-          shouldShowLegend={true}
-          legendOptions={{
-            show: styleOptions.addLegend,
-            position: styleOptions.legendPosition,
-          }}
-          onLegendOptionsChange={(legendOptions) => {
-            if (legendOptions.show !== undefined) {
-              updateStyleOption('addLegend', legendOptions.show);
-            }
-            if (legendOptions.position !== undefined) {
-              updateStyleOption('legendPosition', legendOptions.position);
-            }
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <TooltipOptionsPanel
-          tooltipOptions={styleOptions.tooltipOptions}
-          onTooltipOptionsChange={(tooltipOptions) =>
-            updateStyleOption('tooltipOptions', {
-              ...styleOptions.tooltipOptions,
-              ...tooltipOptions,
-            })
-          }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <HeatmapExclusiveVisOptions
-          styles={styleOptions.exclusive}
-          onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-        />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <HeatmapLabelVisOptions
-          shouldShowType={shouldShowTypeAndGrid}
-          styles={styleOptions.label}
-          onChange={(label) => updateStyleOption('label', label)}
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

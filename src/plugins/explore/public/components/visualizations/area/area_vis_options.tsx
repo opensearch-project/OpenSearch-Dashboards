@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AreaChartStyleControls } from './area_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -41,6 +42,8 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
       dateColumns.length === 1) ||
     (numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0);
 
+  const hasMappingSelected = !isEmpty(axisColumnMappings);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
@@ -54,63 +57,69 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <AxesOptions
-          categoryAxes={styleOptions.categoryAxes}
-          valueAxes={styleOptions.valueAxes}
-          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
-          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-        />
-      </EuiFlexItem>
+      {hasMappingSelected && (
+        <>
+          <EuiFlexItem grow={false}>
+            <AxesOptions
+              categoryAxes={styleOptions.categoryAxes}
+              valueAxes={styleOptions.valueAxes}
+              onCategoryAxesChange={(categoryAxes) =>
+                updateStyleOption('categoryAxes', categoryAxes)
+              }
+              onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
+              numericalColumns={numericalColumns}
+              categoricalColumns={categoricalColumns}
+              dateColumns={dateColumns}
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <ThresholdOptions
-          thresholdLines={styleOptions.thresholdLines}
-          onThresholdLinesChange={(thresholdLines) =>
-            updateStyleOption('thresholdLines', thresholdLines)
-          }
-        />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ThresholdOptions
+              thresholdLines={styleOptions.thresholdLines}
+              onThresholdLinesChange={(thresholdLines) =>
+                updateStyleOption('thresholdLines', thresholdLines)
+              }
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <GridOptionsPanel
-          grid={styleOptions.grid}
-          onGridChange={(grid) => updateStyleOption('grid', grid)}
-        />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <GridOptionsPanel
+              grid={styleOptions.grid}
+              onGridChange={(grid) => updateStyleOption('grid', grid)}
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <LegendOptionsPanel
-          shouldShowLegend={!notShowLegend}
-          legendOptions={{
-            show: styleOptions.addLegend,
-            position: styleOptions.legendPosition,
-          }}
-          onLegendOptionsChange={(legendOptions) => {
-            if (legendOptions.show !== undefined) {
-              updateStyleOption('addLegend', legendOptions.show);
-            }
-            if (legendOptions.position !== undefined) {
-              updateStyleOption('legendPosition', legendOptions.position);
-            }
-          }}
-        />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LegendOptionsPanel
+              shouldShowLegend={!notShowLegend}
+              legendOptions={{
+                show: styleOptions.addLegend,
+                position: styleOptions.legendPosition,
+              }}
+              onLegendOptionsChange={(legendOptions) => {
+                if (legendOptions.show !== undefined) {
+                  updateStyleOption('addLegend', legendOptions.show);
+                }
+                if (legendOptions.position !== undefined) {
+                  updateStyleOption('legendPosition', legendOptions.position);
+                }
+              }}
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <TooltipOptionsPanel
-          tooltipOptions={styleOptions.tooltipOptions}
-          onTooltipOptionsChange={(tooltipOptions) =>
-            updateStyleOption('tooltipOptions', {
-              ...styleOptions.tooltipOptions,
-              ...tooltipOptions,
-            })
-          }
-        />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TooltipOptionsPanel
+              tooltipOptions={styleOptions.tooltipOptions}
+              onTooltipOptionsChange={(tooltipOptions) =>
+                updateStyleOption('tooltipOptions', {
+                  ...styleOptions.tooltipOptions,
+                  ...tooltipOptions,
+                })
+              }
+            />
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 };
