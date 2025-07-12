@@ -9,14 +9,14 @@ import {
   ChartType,
 } from '../../../../../components/visualizations/utils/use_visualization_types';
 import { defaultMetricChartStyles } from '../../../../../components/visualizations/metric/metric_vis_config';
-import { AxisColumnMappings, AxisRole } from '../../../../../components/visualizations/types';
+import { AxisRole } from '../../../../../components/visualizations/types';
 
 export interface TabState {
   logs: {};
   visualizations: {
     styleOptions: ChartStyleControlMap[ChartType] | undefined;
     chartType: ChartType | undefined;
-    axesMapping: Partial<Record<AxisRole, string>>;
+    axesMapping?: Partial<Record<AxisRole, string>>;
   };
 }
 
@@ -42,7 +42,10 @@ const tabSlice = createSlice({
     setChartType: (state, action: PayloadAction<ChartType | undefined>) => {
       state.visualizations.chartType = action.payload;
     },
-    setAxesMapping: (state, action: PayloadAction<Partial<Record<AxisRole, string>>>) => {
+    setAxesMapping: (
+      state,
+      action: PayloadAction<Partial<Record<AxisRole, string>> | undefined>
+    ) => {
       state.visualizations.axesMapping = action.payload;
     },
   },
