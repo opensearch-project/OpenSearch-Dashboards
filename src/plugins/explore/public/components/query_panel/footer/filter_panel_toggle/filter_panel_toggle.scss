@@ -1,0 +1,14 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreFilterPanelToggle {
+  width: 102px; // prevent layout shifting when toggling
+
+  &__buttonTextWrapper {
+    align-items: center;
+    display: flex;
+    gap: $ouiSizeXS;
+  }
+}

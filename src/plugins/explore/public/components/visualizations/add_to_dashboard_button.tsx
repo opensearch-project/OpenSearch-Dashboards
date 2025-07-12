@@ -15,7 +15,11 @@ import { AddToDashboardModal } from './add_to_dashboard_modal';
 import { ExploreServices } from '../../types';
 import { selectUIState, selectTabState } from '../../application/utils/state_management/selectors';
 import { ExecutionContextSearch } from '../../../../expressions/common';
-import { IndexPattern, useSyncQueryStateWithUrl } from '../../../../data/public';
+import {
+  DataView as Dataset,
+  IndexPattern,
+  useSyncQueryStateWithUrl,
+} from '../../../../data/public';
 import { saveStateToSavedObject } from '../../saved_explore/transforms';
 import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from '../../helpers/save_explore';
@@ -40,11 +44,11 @@ export interface OnSaveProps {
 export const SaveAndAddButtonWithModal = ({
   services,
   searchContext,
-  indexPattern,
+  dataset,
 }: {
   services: Partial<CoreStart> & ExploreServices;
   searchContext: ExecutionContextSearch;
-  indexPattern?: IndexPattern;
+  dataset?: IndexPattern | Dataset;
 }) => {
   const { core, dashboard, savedObjects, toastNotifications, uiSettings, history, data } = services;
 
@@ -87,7 +91,7 @@ export const SaveAndAddButtonWithModal = ({
       flavorId ?? 'logs',
       tabDefinition!,
       tabState,
-      indexPattern
+      dataset
     );
 
     const saveOptions = {

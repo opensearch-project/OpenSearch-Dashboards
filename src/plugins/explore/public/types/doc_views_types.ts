@@ -5,7 +5,7 @@
 
 import { ComponentType } from 'react';
 import { Explanation } from 'elasticsearch';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 
 export interface OpenSearchSearchHit<T = unknown> {
   _index: string;
@@ -41,7 +41,7 @@ export interface DocViewRenderProps {
   columns?: string[];
   filter?: DocViewFilterFn;
   hit: OpenSearchSearchHit;
-  indexPattern: IndexPattern;
+  indexPattern: IndexPattern | Dataset;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }

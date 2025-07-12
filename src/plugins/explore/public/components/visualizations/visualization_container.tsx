@@ -22,7 +22,7 @@ import {
 import './visualization_container.scss';
 import { AxisColumnMappings, VisColumn, VisualizationRule } from './types';
 import { toExpression } from './utils/to_expression';
-import { useIndexPatternContext } from '../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import { ExploreServices } from '../../types';
 import {
   setStyleOptions,
@@ -60,7 +60,7 @@ export const VisualizationContainer = () => {
     data,
     expressions: { ReactExpressionRenderer },
   } = services;
-  const { indexPattern } = useIndexPatternContext();
+  const { dataset } = useDatasetContext();
   const { results } = useTabResults();
 
   // TODO: Register custom processor for visualization tab
@@ -230,7 +230,7 @@ export const VisualizationContainer = () => {
   const expression = useMemo(() => {
     if (
       !rows ||
-      !indexPattern ||
+      !dataset ||
       !visualizationData ||
       !styleOptions ||
       !visualizationData.transformedData
@@ -271,7 +271,7 @@ export const VisualizationContainer = () => {
     // Create a complete expression using the toExpression function including the OpenSearch Dashboards context and the Vega spec
     return toExpression(
       searchContext,
-      indexPattern,
+      dataset,
       ruleBasedToExpressionFn,
       visualizationData.transformedData,
       visualizationData.numericalColumns,
@@ -282,7 +282,7 @@ export const VisualizationContainer = () => {
   }, [
     searchContext,
     rows,
-    indexPattern,
+    dataset,
     styleOptions,
     visualizationData,
     visualizationRegistry,
@@ -425,7 +425,7 @@ export const VisualizationContainer = () => {
         <EuiFlexItem grow={false} style={{ alignItems: 'flex-end' }}>
           <SaveAndAddButtonWithModal
             searchContext={searchContext}
-            indexPattern={indexPattern}
+            indexPattern={dataset as any}
             services={services}
           />
         </EuiFlexItem>

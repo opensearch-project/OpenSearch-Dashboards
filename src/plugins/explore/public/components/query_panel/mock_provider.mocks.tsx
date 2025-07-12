@@ -11,7 +11,7 @@ import { EXPLORE_DEFAULT_LANGUAGE } from '../../../common';
 import { EditorMode, QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { EditorContextProvider } from '../../application/context';
-import { IndexPatternProvider } from '../../application/components/index_pattern_context';
+import { DatasetProvider } from '../../application/context';
 
 const mockServices = {
   uiSettings: {
@@ -203,7 +203,7 @@ export const StorybookProviders: React.FC<{
     <Provider store={store}>
       <OpenSearchDashboardsContextProvider services={mockServices}>
         <EditorContextProvider>
-          <IndexPatternProvider>{children}</IndexPatternProvider>
+          <DatasetProvider>{children}</DatasetProvider>
         </EditorContextProvider>
       </OpenSearchDashboardsContextProvider>
     </Provider>

@@ -1,0 +1,16 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreRecentQueriesButton {
+  &__buttonTextWrapper {
+    align-items: center;
+    display: flex;
+    gap: $ouiSizeXS;
+  }
+
+  &__popover {
+    max-width: 800px;
+  }
+}
