@@ -4,6 +4,7 @@
  */
 
 import './visualization_container.scss';
+import { i18n } from '@osd/i18n';
 import { isEmpty, isEqual } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -52,6 +53,21 @@ export interface UpdateVisualizationProps {
   rule?: Partial<VisualizationRule>;
   mappings: AxisColumnMappings;
 }
+
+const VISUALIZATION_TOAST_MSG = {
+  useRule: i18n.translate('explore.visualize.toast.useRule', {
+    defaultMessage: 'Cannot apply previous configured visualization, use rule matched',
+  }),
+  reset: i18n.translate('explore.visualize.toast.reset', {
+    defaultMessage: 'Cannot apply previous configured visualization, reset',
+  }),
+  metricReset: i18n.translate('explore.visualize.toast.metricReset', {
+    defaultMessage: 'Cannot apply metric type visualization, reset',
+  }),
+  switchReset: i18n.translate('explore.visualize.toast.switchReset', {
+    defaultMessage: 'Cannot apply configured visualization to the current chart type, reset',
+  }),
+};
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -117,6 +133,10 @@ export const VisualizationContainer = () => {
     originalVisualizationData.current = visualizationTypeResult;
     const allColumns = getAllColumns(visualizationTypeResult);
 
+    // Cannot display metric with new query result if we have more than one value
+    const cannotDisplayAsMetric =
+      selectedChartType === 'metric' && allColumns[0].uniqueValuesCount > 1;
+
     if (
       visualizationTypeResult?.ruleId &&
       visualizationTypeResult.visualizationType &&
@@ -130,11 +150,9 @@ export const VisualizationContainer = () => {
         // Check if the chart type and axes selection previously can continue be used on
         // the new query. The checking is based on compare current available columns and previous
         // selected axes-column mappings.
-        if (!isValidMapping(selectedAxesMapping ?? {}, allColumns)) {
+        if (!isValidMapping(selectedAxesMapping ?? {}, allColumns) || cannotDisplayAsMetric) {
           // Cannot apply, use the auto rule-matched visualization
-          services.notifications.toasts.addInfo(
-            'Cannot apply previous configured visualization, use rule matched'
-          ); // FIXME message
+          services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.useRule);
 
           applyDefaultVisualization(
             visualizationTypeResult,
@@ -162,10 +180,6 @@ export const VisualizationContainer = () => {
     } else if (selectedChartType) {
       // No rule matched and previously selected a chart type
       const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
-
-      // Cannot display metric with new query result if we have more than one value
-      const cannotDisplayAsMetric =
-        selectedChartType === 'metric' && allColumns[0].uniqueValuesCount > 1;
 
       // Similar check with the above if branch
       if (selectedChartType === 'table') {
@@ -395,9 +409,7 @@ export const VisualizationContainer = () => {
                 return;
               }
             }
-            services.notifications.toasts.addInfo(
-              'Cannot apply configured visualization to the current chart type, reset'
-            ); // FIXME message
+            services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.switchReset);
           }
         }
       }
