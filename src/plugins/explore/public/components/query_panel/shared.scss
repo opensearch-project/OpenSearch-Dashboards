@@ -1,0 +1,48 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+$exploreQueryPanelOverlayZIndex: 1;
+$exploreQueryPanelEditToolbarZIndex: 2;
+
+@mixin exploreEditor {
+  border: 1px solid $ouiBorderColor;
+  border-radius: $ouiBorderRadius;
+  cursor: text;
+  padding: $ouiSizeS $ouiSizeXS;
+  position: relative;
+
+  &--focused {
+    border-bottom-width: 2px;
+    border-bottom-color: $ouiColorPrimary;
+    margin-bottom: -1px; // prevent layout shifting due to increase in border width;
+  }
+
+  &__overlay {
+    border-radius: $ouiBorderRadius;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: $exploreQueryPanelOverlayZIndex;
+  }
+}
+
+@mixin exploreQueryPanelButton {
+  &__buttonTextWrapper {
+    align-items: center;
+    display: flex;
+    gap: $ouiSizeXS;
+  }
+}
+
+@mixin exploreQueryPanelVerticalSeparator {
+  &__verticalSeparator {
+    width: 1px;
+    height: $ouiSize;
+    background: $euiColorLightShade;
+    margin: $ouiSizeXS $ouiSizeXXS;
+  }
+}

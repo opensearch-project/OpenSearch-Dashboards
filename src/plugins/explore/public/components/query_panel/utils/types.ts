@@ -16,7 +16,6 @@ export interface UseSharedEditorProps {
 
 export interface UseSharedEditorReturnType {
   isFocused: boolean;
-  height: number;
   useLatestTheme: true;
   editorDidMount: (editor: IStandaloneCodeEditor) => () => IStandaloneCodeEditor;
   onChange: (text: string) => void;

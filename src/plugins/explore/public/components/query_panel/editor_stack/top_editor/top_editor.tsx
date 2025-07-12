@@ -10,11 +10,14 @@ import classNames from 'classnames';
 import { useTopEditor } from '../../utils';
 import {
   selectEditorMode,
+  selectIsDualEditorMode,
   selectPromptModeIsAvailable,
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { useTopEditorText } from '../../../../application/hooks';
+import { EditToolbar } from './edit_toolbar';
+import './top_editor.scss';
 
 const singleEditorPlaceholder = i18n.translate(
   'explore.queryPanel.promptEditor.singlePlaceholder',
@@ -45,16 +48,9 @@ export const TopEditor = () => {
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const text = useTopEditorText();
   const { isFocused, onWrapperClick, ...editorProps } = useTopEditor();
-  // TODO: change me
-  const editorClassPrefix = [
-    EditorMode.SingleEmpty,
-    EditorMode.SinglePrompt,
-    EditorMode.DualPrompt,
-  ].includes(editorMode)
-    ? 'promptEditor'
-    : 'queryEditor';
   const isReadOnly = editorMode === EditorMode.DualQuery;
-  const showPlaceholder = !text.length && !isReadOnly;
+  const showPlaceholder = !text.length && !isReadOnly && false;
+  const isDualMode = useSelector(selectIsDualEditorMode);
 
   const placeholderText = useMemo(() => {
     if (!promptModeIsAvailable) {
@@ -65,22 +61,27 @@ export const TopEditor = () => {
   }, [editorMode, promptModeIsAvailable]);
 
   return (
-    <div className={`${editorClassPrefix}Wrapper`}>
-      {/* Suppressing below as this should only happen for click events.  */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-      <div
-        className={classNames(editorClassPrefix, {
-          [`${editorClassPrefix}--readonly`]: isReadOnly,
-          [`${editorClassPrefix}--focused`]: isFocused,
-        })}
-        data-test-subj="exploreReusableEditor"
-        onClick={onWrapperClick}
-      >
-        <CodeEditor {...editorProps} />
-        {showPlaceholder ? (
-          <div className={`${editorClassPrefix}__placeholder`}>{placeholderText}</div>
-        ) : null}
-      </div>
+    // Suppressing below as this should only happen for click events.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+    <div
+      className={classNames('exploreTopEditor', {
+        ['exploreTopEditor--readonly']: isReadOnly,
+        ['exploreTopEditor--focused']: isFocused,
+        ['exploreTopEditor--dualMode']: isDualMode,
+        ['exploreTopEditor--promptMode']:
+          isDualMode ||
+          editorMode === EditorMode.SinglePrompt ||
+          editorMode === EditorMode.SingleEmpty,
+      })}
+      data-test-subj="exploreTopEditor"
+      onClick={onWrapperClick}
+    >
+      <div className="exploreTopEditor__overlay" />
+      {isDualMode ? <EditToolbar /> : null}
+      <CodeEditor {...editorProps} />
+      {showPlaceholder ? (
+        <div className={`exploreTopEditor__placeholder`}>{placeholderText}</div>
+      ) : null}
     </div>
   );
 };

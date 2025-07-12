@@ -1,0 +1,20 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+@import "../../../shared";
+
+.exploreEditToolbar {
+  background: $ouiColorEmptyShade;
+  border: 1px solid $ouiBorderColor;
+  border-radius: $ouiBorderRadius;
+  display: flex;
+  align-items: center;
+  position: absolute;
+  right: $ouiSizeS;
+  bottom: -12px;
+  z-index: $exploreQueryPanelEditToolbarZIndex;
+
+  @include exploreQueryPanelButton;
+  @include exploreQueryPanelVerticalSeparator;
+}

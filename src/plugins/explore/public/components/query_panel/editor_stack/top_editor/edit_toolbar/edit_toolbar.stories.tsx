@@ -6,8 +6,8 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EditToolbar } from './edit_toolbar';
-import { StorybookProviders } from '../../mock_provider.mocks';
-import { EditorMode } from '../../../../application/utils/state_management/types';
+import { StorybookProviders } from '../../../mock_provider.mocks';
+import { EditorMode } from '../../../../../application/utils/state_management/types';
 
 const meta: Meta<typeof EditToolbar> = {
   title: 'src/plugins/explore/public/components/query_panel/editor_stack/edit_toolbar',
