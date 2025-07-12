@@ -15,7 +15,6 @@ import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-  getDefaultQuery,
 } from '../../../../../../utils/apps/explore/shared';
 
 import { verifyDiscoverPageState } from '../../../../../../utils/apps/explore/saved';
@@ -69,7 +68,7 @@ export const runDatasetSelectorTests = () => {
 
         verifyDiscoverPageState({
           dataset: config.dataset,
-          queryString: getDefaultQuery(config.dataset, config.language),
+          queryString: '',
           language: config.language,
           hitCount: config.hitCount,
         });
