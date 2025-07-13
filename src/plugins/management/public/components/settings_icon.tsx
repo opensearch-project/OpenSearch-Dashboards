@@ -57,7 +57,7 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
           title={i18n.translate('management.settings.icon.nav.title', {
             defaultMessage: 'Administration',
           })}
-          chrome={core.chrome}
+          isNavDrawerLocked$={core.chrome.getIsNavDrawerLocked$()}
         />
       }
       isOpen={isPopoverOpen}

@@ -45,7 +45,6 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiHorizontalRule,
-  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { ExclusiveUnion } from '@elastic/eui';
@@ -53,6 +52,7 @@ import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { GITHUB_CREATE_ISSUE_LINK } from '../../constants';
+import { LeftBottomActionButton } from './left_bottom_action_button';
 
 /** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
@@ -126,6 +126,7 @@ interface Props {
   opensearchDashboardsDocLink: string;
   surveyLink?: string;
   useUpdatedAppearance?: boolean;
+  isNavDrawerLocked$?: Rx.Observable<boolean>;
 }
 
 interface State {
@@ -325,25 +326,15 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     }
 
     const button = useUpdatedAppearance ? (
-      <EuiToolTip
-        content={intl.formatMessage({
-          id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonTitle',
-          defaultMessage: 'Help',
+      <LeftBottomActionButton
+        iconType="iInCircle"
+        onClick={this.onMenuButtonClick}
+        title={intl.formatMessage({
+          id: 'core.ui.chrome.headerGlobalNav.aboutMenuButtonTitle',
+          defaultMessage: 'About',
         })}
-      >
-        <EuiButtonIcon
-          iconType="iInCircle"
-          color="text"
-          size="xs"
-          aria-expanded={this.state.isOpen}
-          aria-haspopup="true"
-          aria-label={intl.formatMessage({
-            id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
-            defaultMessage: 'Help menu',
-          })}
-          onClick={this.onMenuButtonClick}
-        />
-      </EuiToolTip>
+        isNavDrawerLocked$={this.props.isNavDrawerLocked$ || Rx.of(false)}
+      />
     ) : (
       <EuiToolTip
         content={intl.formatMessage({

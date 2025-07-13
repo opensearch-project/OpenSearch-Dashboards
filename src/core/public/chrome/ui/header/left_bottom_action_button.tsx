@@ -11,13 +11,13 @@ import {
   EuiIconProps,
   EuiToolTip,
 } from '@elastic/eui';
-import { CoreStart } from 'opensearch-dashboards/public';
 import React from 'react';
 import { useObservable } from 'react-use';
 import './left_bottom_action_button.scss';
+import { Observable } from 'rxjs';
 
 interface LeftBottomActionButtonProps {
-  chrome: CoreStart['chrome'];
+  isNavDrawerLocked$: Observable<boolean>;
   iconType?: EuiIconProps['type'];
   icon?: React.ReactNode;
   onClick?: () => void;
@@ -25,12 +25,12 @@ interface LeftBottomActionButtonProps {
 }
 
 export const LeftBottomActionButton = (props: LeftBottomActionButtonProps) => {
-  const isNavOpen = useObservable(props.chrome.getIsNavDrawerLocked$(), false);
+  const isNavOpen = useObservable(props.isNavDrawerLocked$, false);
 
   let finalIcon: React.ReactNode | undefined = props.icon;
 
   if (props.iconType) {
-    finalIcon = <EuiIcon type={props.iconType} aria-label={props.title} />;
+    finalIcon = <EuiIcon type={props.iconType} aria-label={props.title} color="text" />;
   }
 
   return isNavOpen ? (
