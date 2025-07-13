@@ -1,0 +1,11 @@
+@import "./collapsible_nav_group_enabled";
+
+$leftBottomActionButtonIconWidth: 24px;
+
+.leftBottomActionButtonIconItem {
+  width: $leftBottomActionButtonIconWidth;
+}
+
+.leftBottomActionButtonTitleItem {
+  width: $expandedLeftNavWidth - $paddingForNavWrapper - $leftBottomActionButtonIconWidth * 2;
+}
