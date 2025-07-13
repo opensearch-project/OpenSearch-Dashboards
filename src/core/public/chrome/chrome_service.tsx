@@ -315,6 +315,7 @@ export class ChromeService {
                 opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
                 surveyLink={injectedMetadata.getSurvey()}
                 useUpdatedAppearance
+                isNavDrawerLocked$={getIsNavDrawerLocked$}
               />
             </I18nProvider>,
             element
