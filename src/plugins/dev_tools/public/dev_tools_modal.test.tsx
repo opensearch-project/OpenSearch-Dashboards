@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { DevToolsIcon } from './dev_tools_icon';
+import { DevToolsModal } from './dev_tools_modal';
 import { coreMock } from '../../../core/public/mocks';
 import { urlForwardingPluginMock } from 'src/plugins/url_forwarding/public/mocks';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
@@ -25,7 +25,7 @@ describe('<DevToolsIcon />', () => {
   it('should call chrome.navGroup.setCurrentNavGroup and application.navigateToApp methods from core service when click', async () => {
     const coreStartMock = coreMock.createStart();
     const { container, getByTestId, findByText } = render(
-      <DevToolsIcon
+      <DevToolsModal
         core={coreStartMock}
         devTools={[]}
         deps={createDepsMock()}
@@ -61,7 +61,9 @@ describe('<DevToolsIcon />', () => {
   it('should register uiActions to show dev tools', async () => {
     const coreStartMock = coreMock.createStart();
     const deps = createDepsMock();
-    render(<DevToolsIcon core={coreStartMock} devTools={[]} deps={deps} title="Dev tools title" />);
+    render(
+      <DevToolsModal core={coreStartMock} devTools={[]} deps={deps} title="Dev tools title" />
+    );
 
     expect(deps.uiActions.addTriggerAction).toHaveBeenCalled();
   });
