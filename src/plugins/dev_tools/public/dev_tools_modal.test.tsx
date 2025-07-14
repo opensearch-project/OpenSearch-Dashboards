@@ -21,40 +21,24 @@ jest.mock('./application', () => ({
   MainApp: () => <div />,
 }));
 
-describe('<DevToolsIcon />', () => {
+describe('<DevToolsModal />', () => {
   it('should call chrome.navGroup.setCurrentNavGroup and application.navigateToApp methods from core service when click', async () => {
     const coreStartMock = coreMock.createStart();
-    const { container, getByTestId, findByText } = render(
-      <DevToolsModal
-        core={coreStartMock}
-        devTools={[]}
-        deps={createDepsMock()}
-        title="Dev tools title"
-      />
+    const deps = createDepsMock();
+    let actionDefinition: Parameters<typeof deps.uiActions.addTriggerAction>[1] | undefined;
+    jest.spyOn(deps.uiActions, 'addTriggerAction').mockImplementation((id, action) => {
+      actionDefinition = action;
+    });
+    const { container, findByText } = render(
+      <DevToolsModal core={coreStartMock} devTools={[]} deps={deps} title="Dev tools title" />
     );
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        <span
-          class="euiToolTipAnchor"
-        >
-          <button
-            aria-label="go-to-dev-tools"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-            data-test-subj="openDevToolsModal"
-            type="button"
-          >
-            <span
-              aria-hidden="true"
-              class="euiButtonIcon__icon"
-              color="inherit"
-              data-euiicon-type="consoleApp"
-            />
-          </button>
-        </span>
-      </div>
-    `);
+    expect(container).toMatchInlineSnapshot(`<div />`);
 
-    fireEvent.click(getByTestId('openDevToolsModal'));
+    actionDefinition?.execute({
+      trigger: {
+        id: '',
+      },
+    });
     await findByText('Dev tools title');
   });
 
