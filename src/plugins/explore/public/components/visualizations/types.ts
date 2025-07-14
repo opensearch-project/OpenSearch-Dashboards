@@ -32,6 +32,7 @@ export interface VisualizationRule {
   ) => boolean;
   matchIndex: number[];
   chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
+  // TODO: rename it, the name is inappropriate, it doesn't create expression
   toExpression?: (
     transformedData: Array<Record<string, any>>,
     numericalColumns: VisColumn[],

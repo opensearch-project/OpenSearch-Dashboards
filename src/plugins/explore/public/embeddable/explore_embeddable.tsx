@@ -80,6 +80,10 @@ export interface SearchProps {
   onMoveColumn?: (column: string, index: number) => void;
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
+  tableData?: {
+    rows: Array<Record<string, any>>;
+    columns: VisColumn[];
+  };
 }
 
 interface ExploreEmbeddableConfig {
@@ -346,44 +350,51 @@ export class ExploreEmbeddable
         ...(categoricalColumns ?? []),
         ...(dateColumns ?? []),
       ];
-      const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
-      const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns); // FIXME when no rule matched
-      const ruleBasedToExpressionFn = (
-        transformedData: Array<Record<string, any>>,
-        numericalCols: VisColumn[],
-        categoricalCols: VisColumn[],
-        dateCols: VisColumn[],
-        styleOpts: StyleOptions
-      ) => {
-        return matchedRule?.toExpression?.(
-          transformedData,
-          numericalCols,
-          categoricalCols,
-          dateCols,
-          styleOpts,
-          selectedChartType,
-          axesMapping
+      if (selectedChartType === 'table') {
+        this.searchProps.tableData = {
+          columns: allColumns,
+          rows: visualizationData.transformedData ?? [],
+        };
+      } else {
+        const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+        const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns); // FIXME when no rule matched
+        const ruleBasedToExpressionFn = (
+          transformedData: Array<Record<string, any>>,
+          numericalCols: VisColumn[],
+          categoricalCols: VisColumn[],
+          dateCols: VisColumn[],
+          styleOpts: StyleOptions
+        ) => {
+          return matchedRule?.toExpression?.(
+            transformedData,
+            numericalCols,
+            categoricalCols,
+            dateCols,
+            styleOpts,
+            selectedChartType,
+            axesMapping
+          );
+        };
+        const searchContext = {
+          query: this.input.query,
+          filters: this.input.filters,
+          timeRange: this.input.timeRange,
+        };
+        this.searchProps.searchContext = searchContext;
+        const indexPattern = this.savedExplore.searchSource.getField('index');
+        const styleOptions = visualization.params;
+        const exp = toExpression(
+          searchContext,
+          indexPattern!,
+          ruleBasedToExpressionFn,
+          visualizationData.transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions
         );
-      };
-      const searchContext = {
-        query: this.input.query,
-        filters: this.input.filters,
-        timeRange: this.input.timeRange,
-      };
-      this.searchProps.searchContext = searchContext;
-      const indexPattern = this.savedExplore.searchSource.getField('index');
-      const styleOptions = visualization.params;
-      const exp = toExpression(
-        searchContext,
-        indexPattern!,
-        ruleBasedToExpressionFn,
-        visualizationData.transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions
-      );
-      this.searchProps.expression = exp;
+        this.searchProps.expression = exp;
+      }
     }
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
