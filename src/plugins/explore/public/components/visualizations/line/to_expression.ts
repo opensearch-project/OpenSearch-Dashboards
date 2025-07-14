@@ -326,7 +326,7 @@ export const createFacetedMultiLineChart = (
     },
     facet: {
       field: category2Field,
-      type: 'nominal',
+      type: getSchemaFromAxisMapping(facetMapping),
       columns: 2,
       header: { title: category2Name },
     },
@@ -339,34 +339,17 @@ export const createFacetedMultiLineChart = (
           encoding: {
             x: {
               field: dateField,
-              type: 'temporal',
-              axis: applyAxisStyling(
-                {
-                  title: dateName,
-                  labelAngle: -45,
-                },
-                styles,
-                'category',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
+              type: getSchemaFromAxisMapping(xAxisMapping),
+              axis: applyAxisStyling(xAxisMapping, styles?.grid?.xLines),
             },
             y: {
               field: metricField,
-              type: 'quantitative',
-              axis: applyAxisStyling(
-                { title: metricName },
-                styles,
-                'value',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
+              type: getSchemaFromAxisMapping(yAxisMapping),
+              axis: applyAxisStyling(yAxisMapping, styles?.grid?.yLines),
             },
             color: {
               field: category1Field,
-              type: 'nominal',
+              type: getSchemaFromAxisMapping(colorMapping),
               legend:
                 styles?.addLegend !== false
                   ? {
