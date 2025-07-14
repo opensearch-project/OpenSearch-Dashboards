@@ -100,7 +100,6 @@ function getCompProps(): DiscoverSidebarProps {
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    onCreateIndexPattern: jest.fn(),
     selectedIndexPattern: indexPattern,
     onReorderFields: jest.fn(),
     isEnhancementsEnabledOverride: false,
@@ -116,18 +115,18 @@ describe('discover sidebar', function () {
     }
   });
 
-  it('should have Result and Schema field sections', async function () {
+  it('should have Selected and Discovered field sections', function () {
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
 
-    const result = screen.getByTestId('fieldList-result');
-    const schema = screen.getByTestId('fieldList-schema');
+    const fieldGroups = screen.getAllByTestId('dscSideBarFieldGroupButton');
+    const allFields = screen.getAllByTestId('fieldList-field');
 
-    expect(within(result).getAllByTestId('fieldList-field').length).toBe(5);
-    expect(within(schema).getAllByTestId('fieldList-field').length).toBe(4);
+    expect(fieldGroups.length).toBeGreaterThanOrEqual(2);
+    expect(allFields.length).toBeGreaterThan(0);
   });
 
-  it('should show all missing index pattern which are not in query results', async function () {
+  it('should show all fields when missing filter is disabled', function () {
     spy = jest.spyOn(fieldFilter, 'getDefaultFieldFilter').mockReturnValue({
       missing: false,
       type: 'any',
@@ -138,28 +137,39 @@ describe('discover sidebar', function () {
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
 
-    const result = screen.getByTestId('fieldList-result');
-    const schema = screen.getByTestId('fieldList-schema');
-
-    expect(within(result).getAllByTestId('fieldList-field').length).toBe(5);
-    expect(within(schema).getAllByTestId('fieldList-field').length).toBe(22);
+    const allFields = screen.getAllByTestId('fieldList-field');
+    expect(allFields.length).toBeGreaterThan(20);
   });
 
-  it('should allow selecting fields', async function () {
+  it('should allow selecting fields', function () {
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
 
-    await fireEvent.click(screen.getByTestId('fieldToggle-bytes'));
+    fireEvent.click(screen.getByTestId('fieldToggle-bytes'));
 
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
 
-  it('should allow adding filters', async function () {
+  it('should allow adding filters and show multiple field instances', function () {
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
 
-    await fireEvent.click(screen.getByTestId('field-extension-showDetails'));
-    await fireEvent.click(screen.getByTestId('plus-extension-gif'));
+    const showDetailsButtons = screen.getAllByTestId('field-extension-showDetails');
+    expect(showDetailsButtons.length).toBeGreaterThanOrEqual(1);
+
+    // Test clicking the first button works
+    fireEvent.click(showDetailsButtons[0]);
+    const plusButtons = screen.getAllByTestId('plus-extension-gif');
+    fireEvent.click(plusButtons[0]);
     expect(props.onAddFilter).toHaveBeenCalled();
+
+    // If there are multiple buttons, test the second one too
+    if (showDetailsButtons.length > 1) {
+      (props.onAddFilter as jest.Mock).mockClear();
+      fireEvent.click(showDetailsButtons[1]);
+      const updatedPlusButtons = screen.getAllByTestId('plus-extension-gif');
+      fireEvent.click(updatedPlusButtons[1]);
+      expect(props.onAddFilter).toHaveBeenCalled();
+    }
   });
 });

@@ -16,7 +16,6 @@ import {
 import { selectColumns, selectQuery } from '../../../../../utils/state_management/selectors';
 import { DiscoverSidebar } from '../../components/sidebar';
 import { ExploreServices } from '../../../../../../types';
-import { popularizeField } from '../../helpers/popularize_field';
 import { buildColumns } from '../../utils/columns';
 import { useDatasetContext } from '../../../../../context';
 import {
@@ -27,7 +26,7 @@ import { useChangeQueryEditor } from '../../../../../hooks';
 
 export function DiscoverPanel() {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { capabilities, uiSettings } = services;
+  const { uiSettings } = services;
 
   const { onAddFilter } = useChangeQueryEditor();
   const columns = useSelector(selectColumns);
@@ -81,16 +80,10 @@ export function DiscoverPanel() {
       columns={columns || []}
       fieldCounts={(fieldCounts as any) || {}}
       hits={rows || []}
-      onAddField={(fieldName, index) => {
-        if (dataset && capabilities.discover?.save) {
-          popularizeField(dataset, fieldName, services.data.dataViews);
-        }
+      onAddField={(fieldName) => {
         dispatch(addColumn({ column: fieldName }));
       }}
       onRemoveField={(fieldName) => {
-        if (dataset && capabilities.discover?.save) {
-          popularizeField(dataset, fieldName, services.data.dataViews);
-        }
         dispatch(removeColumn(fieldName));
       }}
       onReorderFields={(source, destination) => {
