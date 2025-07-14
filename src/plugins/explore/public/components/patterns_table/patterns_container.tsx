@@ -10,6 +10,7 @@ import { COUNT_FIELD, PATTERNS_FIELD, SAMPLE_FIELD } from './utils/constants';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { RootState } from '../../application/utils/state_management/store';
 import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
+import { highlightLogUsingPattern } from './utils/utils';
 
 export const PatternsContainer = () => {
   const { results: patternResults } = useTabResults();
@@ -27,10 +28,9 @@ export const PatternsContainer = () => {
   const hits = patternResults?.hits?.hits || [];
   // Convert rows to pattern items or use default if rows is undefined
   const items: PatternItem[] = hits?.map((row: any) => ({
-    pattern: row._source[PATTERNS_FIELD],
     ratio: row._source[COUNT_FIELD] / logsTotal,
     count: row._source[COUNT_FIELD],
-    sample: row._source[SAMPLE_FIELD],
+    sample: highlightLogUsingPattern(row._source[SAMPLE_FIELD][0], row._source[PATTERNS_FIELD]),
   }));
 
   return <PatternsTable items={items} />;
