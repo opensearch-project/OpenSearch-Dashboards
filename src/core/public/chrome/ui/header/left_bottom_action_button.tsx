@@ -19,6 +19,7 @@ import './left_bottom_action_button.scss';
 
 interface LeftBottomActionButtonProps {
   isNavDrawerLocked$: Observable<boolean>;
+  isChromeVisible$: Observable<boolean>;
   iconType?: EuiIconProps['type'];
   icon?: React.ReactNode;
   onClick?: () => void;
@@ -27,6 +28,7 @@ interface LeftBottomActionButtonProps {
 
 export const LeftBottomActionButton = (props: LeftBottomActionButtonProps) => {
   const isNavOpen = useObservable(props.isNavDrawerLocked$, false);
+  const isVisible = useObservable(props.isChromeVisible$, true);
 
   let finalIcon: React.ReactNode | undefined = props.icon;
 
@@ -34,7 +36,7 @@ export const LeftBottomActionButton = (props: LeftBottomActionButtonProps) => {
     finalIcon = <EuiIcon type={props.iconType} aria-label={props.title} color="text" />;
   }
 
-  return isNavOpen ? (
+  return isNavOpen && isVisible ? (
     <EuiFlexGroup
       style={{ cursor: 'pointer' }}
       gutterSize="s"

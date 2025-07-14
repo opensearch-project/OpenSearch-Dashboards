@@ -58,6 +58,7 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
             defaultMessage: 'Administration',
           })}
           isNavDrawerLocked$={core.chrome.getIsNavDrawerLocked$()}
+          isChromeVisible$={core.chrome.getIsVisible$()}
         />
       }
       isOpen={isPopoverOpen}
