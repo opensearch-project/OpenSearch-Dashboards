@@ -16,6 +16,7 @@ import { loadReduxState } from './utils/redux_persistence';
 import { createQuerySyncMiddleware } from './middleware/query_sync_middleware';
 import { createPersistenceMiddleware } from './middleware/persistence_middleware';
 import { createOverallStatusMiddleware } from './middleware/overall_status_middleware';
+import { resetExploreStateActionCreator } from './actions/reset_explore_state/reset_explore_state';
 import { ExploreServices } from '../../../types';
 
 export const rootReducer = combineReducers({
@@ -51,5 +52,8 @@ export const configurePreloadedStore = (
 export const getPreloadedStore = async (services: ExploreServices) => {
   const preloadedState = await loadReduxState(services);
   const store = configurePreloadedStore(preloadedState, services);
-  return { store, unsubscribe: () => {} };
+  const reset = () => {
+    store.dispatch(resetExploreStateActionCreator(services));
+  };
+  return { store, unsubscribe: () => {}, reset };
 };
