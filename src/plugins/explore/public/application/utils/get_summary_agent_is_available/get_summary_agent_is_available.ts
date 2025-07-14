@@ -12,6 +12,8 @@ export const getSummaryAgentIsAvailable = async (
   dataSourceId: string
 ) => {
   try {
+    // TODO: OSD core should not rely on plugin APIs, refactor this once this RFC is
+    // implemented #9859
     const res = await services.http.fetch<{ exists: boolean }>({
       method: 'GET',
       path: AGENT_EXISTS_API,
