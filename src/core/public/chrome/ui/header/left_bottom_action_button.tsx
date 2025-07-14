@@ -12,9 +12,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
-import { useObservable } from 'react-use';
-import './left_bottom_action_button.scss';
 import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+
+import './left_bottom_action_button.scss';
 
 interface LeftBottomActionButtonProps {
   isNavDrawerLocked$: Observable<boolean>;
