@@ -92,6 +92,8 @@ export type TopNavMenuProps = Omit<StatefulSearchBarProps, 'showDatePicker'> &
     queryStatus?: QueryStatus;
   };
 
+const defaultOnSelect = () => {};
+
 /*
  * Top Nav Menu is a convenience wrapper component for:
  * - Top navigation menu - configured by an array of `TopNavMenuData` objects
@@ -177,7 +179,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
 
     return (
       <DatasetSelect
-        onSelect={props.datasetSelectProps?.onSelect || (() => {})}
+        onSelect={props.datasetSelectProps?.onSelect || defaultOnSelect}
         appName={props.datasetSelectProps?.appName || props.appName || ''}
       />
     );

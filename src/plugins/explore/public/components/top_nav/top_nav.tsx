@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
@@ -150,30 +150,33 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const dispatch = useDispatch();
 
-  const handleDatasetSelect = (newDataset: any) => {
-    if (!newDataset) return;
-    const currentQuery = queryString.getQuery();
-    const serializableDataset =
-      'toDataset' in newDataset && typeof (newDataset as any).toDataset === 'function'
-        ? (newDataset as any).toDataset()
-        : {
-            id: newDataset.id,
-            title: newDataset.title,
-            type: newDataset.type || '',
-            timeFieldName: newDataset.timeFieldName,
-            dataSource: newDataset.dataSource,
-          };
+  const handleDatasetSelect = useCallback(
+    (newDataset: any) => {
+      if (!newDataset) return;
+      const currentQuery = queryString.getQuery();
+      const serializableDataset =
+        'toDataset' in newDataset && typeof (newDataset as any).toDataset === 'function'
+          ? (newDataset as any).toDataset()
+          : {
+              id: newDataset.id,
+              title: newDataset.title,
+              type: newDataset.type || '',
+              timeFieldName: newDataset.timeFieldName,
+              dataSource: newDataset.dataSource,
+            };
 
-    dispatch(
-      setQueryState({
-        ...currentQuery,
-        query: queryString.getInitialQueryByDataset(newDataset).query,
-        dataset: serializableDataset,
-      })
-    );
+      dispatch(
+        setQueryState({
+          ...currentQuery,
+          query: queryString.getInitialQueryByDataset(newDataset).query,
+          dataset: serializableDataset,
+        })
+      );
 
-    dispatch(setDatasetActionCreator(services, clearEditors));
-  };
+      dispatch(setDatasetActionCreator(services, clearEditors));
+    },
+    [clearEditors, dispatch, queryString, services]
+  );
 
   return (
     <TopNavMenu
