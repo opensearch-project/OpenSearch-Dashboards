@@ -85,6 +85,10 @@ export interface DiscoverFieldProps {
    * Determines whether the field name is shortened test.sub1.sub2 = t.s.sub2
    */
   useShortDots?: boolean;
+  /**
+   * Determines whether to show the field summary
+   */
+  showSummary?: boolean;
 }
 
 export const DiscoverField = ({
@@ -97,6 +101,7 @@ export const DiscoverField = ({
   onAddFilter,
   getDetails,
   useShortDots,
+  showSummary,
 }: DiscoverFieldProps) => {
   const addLabelAria = i18n.translate(
     'explore.discover.fieldChooser.discoverField.addButtonAriaLabel',
@@ -142,7 +147,7 @@ export const DiscoverField = ({
     <EuiToolTip delay="long" content={field.name}>
       <span
         data-test-subj={`field-${field.name}`}
-        className="dscSidebarField__name eui-textBreakWord"
+        className="exploreSidebarField__name eui-textBreakWord"
       >
         {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
       </span>
@@ -171,7 +176,7 @@ export const DiscoverField = ({
           size="xs"
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={addLabelAria}
-          className="dscSidebarField__actionButton"
+          className="exploreSidebarField__actionButton"
         />
       </EuiToolTip>
     );
@@ -197,7 +202,7 @@ export const DiscoverField = ({
           size="xs"
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={removeLabelAria}
-          className="dscSidebarField__actionButton"
+          className="exploreSidebarField__actionButton"
         />
       </EuiToolTip>
     );
@@ -208,7 +213,7 @@ export const DiscoverField = ({
       gutterSize="s"
       alignItems="center"
       responsive={false}
-      className="dscSidebarField"
+      className="exploreSidebarField"
       data-test-subj="dscSidebarField"
     >
       <EuiFlexItem grow={false}>
@@ -221,7 +226,7 @@ export const DiscoverField = ({
       <EuiFlexItem grow>
         <EuiText size="xs">{fieldName}</EuiText>
       </EuiFlexItem>
-      {!isSourceField && (
+      {!isSourceField && showSummary && (
         <EuiFlexItem grow={false}>
           <EuiPopover
             ownFocus
@@ -237,10 +242,10 @@ export const DiscoverField = ({
                 onClick={() => setOpen((state) => !state)}
                 aria-label={infoLabelAria}
                 data-test-subj={`field-${field.name}-showDetails`}
-                className="dscSidebarField__actionButton"
+                className="exploreSidebarField__actionButton"
               />
             }
-            panelClassName="dscSidebarItem__fieldPopoverPanel"
+            panelClassName="exploreSidebarItem__fieldPopoverPanel"
           >
             <EuiPopoverTitle tabIndex={0}>
               {' '}

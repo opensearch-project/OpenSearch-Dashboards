@@ -18,12 +18,12 @@ import { buildColumns } from '../../utils/columns';
  * @param modifyColumn Booelan of 'discover:modifyColumnsOnSwitch'
  */
 export function filterColumns(
+  columns: string[],
   indexPattern: IndexPattern | Dataset | undefined,
   defaultColumns: string[],
   modifyColumn: boolean,
   fieldCounts?: Record<string, number>
 ) {
-  const columns = fieldCounts ? Object.keys(fieldCounts) : [];
   // if false, we keep all the chosen columns
   if (!modifyColumn) {
     return columns.length > 0 ? buildColumns(columns) : ['_source'];
@@ -39,5 +39,5 @@ export function filterColumns(
   const filteredColumns = combinedColumns.filter((column) => fieldsName.includes(column));
   const adjustedColumns = buildColumns(filteredColumns);
   // show all columns if query fields are less than 8
-  return adjustedColumns.length < 8 ? adjustedColumns : ['_source'];
+  return adjustedColumns.length > 0 ? adjustedColumns : ['_source'];
 }
