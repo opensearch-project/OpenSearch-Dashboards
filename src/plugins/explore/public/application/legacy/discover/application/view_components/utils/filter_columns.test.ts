@@ -28,42 +28,45 @@ describe('filterColumns', () => {
     mockBuildColumns.mockImplementation((cols) => cols);
   });
 
-  it('should return built columns when modifyColumn is false and fieldCounts exist', () => {
-    const fieldCounts = { a: 5, b: 3 };
+  it('should return built columns when modifyColumn is false and columns exist', () => {
+    const columns = ['a', 'b'];
     const defaultColumns = ['a'];
     mockBuildColumns.mockReturnValue(['a', 'b']);
 
-    const result = filterColumns(indexPatternMock, defaultColumns, false, fieldCounts);
+    const result = filterColumns(columns, indexPatternMock, defaultColumns, false);
 
     expect(mockBuildColumns).toHaveBeenCalledWith(['a', 'b']);
     expect(result).toEqual(['a', 'b']);
   });
 
-  it('should return ["_source"] when modifyColumn is false and no fieldCounts', () => {
+  it('should return ["_source"] when modifyColumn is false and no columns', () => {
+    const columns: string[] = [];
     const defaultColumns = ['a'];
 
-    const result = filterColumns(indexPatternMock, defaultColumns, false);
+    const result = filterColumns(columns, indexPatternMock, defaultColumns, false);
 
     expect(result).toEqual(['_source']);
   });
 
   it('should filter columns based on index pattern fields when modifyColumn is true and no fieldCounts', () => {
+    const columns = ['a', 'e'];
     const defaultColumns = ['a', 'e'];
     mockBuildColumns.mockReturnValue(['a']);
 
-    const result = filterColumns(indexPatternMock, defaultColumns, true);
+    const result = filterColumns(columns, indexPatternMock, defaultColumns, true);
 
     expect(mockBuildColumns).toHaveBeenCalledWith(['a']);
     expect(result).toEqual(['a']);
   });
 
   it('should use getIndexPatternFieldList when fieldCounts is provided and modifyColumn is true', () => {
+    const columns = ['a', 'b'];
     const fieldCounts = { a: 5, b: 3 };
     const defaultColumns = ['a'];
     mockGetIndexPatternFieldList.mockReturnValue([{ name: 'a' } as any, { name: 'b' } as any]);
     mockBuildColumns.mockReturnValue(['a', 'b']);
 
-    const result = filterColumns(indexPatternMock, defaultColumns, true, fieldCounts);
+    const result = filterColumns(columns, indexPatternMock, defaultColumns, true, fieldCounts);
 
     expect(mockGetIndexPatternFieldList).toHaveBeenCalledWith(indexPatternMock, fieldCounts);
     expect(mockBuildColumns).toHaveBeenCalledWith(['a', 'b']);
@@ -71,18 +74,20 @@ describe('filterColumns', () => {
   });
 
   it('should combine columns and defaultColumns without duplicates', () => {
+    const columns = ['a', 'b'];
     const fieldCounts = { a: 5, b: 3 };
     const defaultColumns = ['a', 'c'];
     mockGetIndexPatternFieldList.mockReturnValue([{ name: 'a' } as any, { name: 'c' } as any]);
     mockBuildColumns.mockReturnValue(['a', 'c']);
 
-    const result = filterColumns(indexPatternMock, defaultColumns, true, fieldCounts);
+    const result = filterColumns(columns, indexPatternMock, defaultColumns, true, fieldCounts);
 
     expect(mockBuildColumns).toHaveBeenCalledWith(['a', 'c']);
     expect(result).toEqual(['a', 'c']);
   });
 
-  it('should return ["_source"] when adjustedColumns has 8 or more items', () => {
+  it('should return adjustedColumns when they exist', () => {
+    const columns = ['a', 'b'];
     const fieldCounts = { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8 };
     const defaultColumns = ['a'];
     mockGetIndexPatternFieldList.mockReturnValue([
@@ -95,22 +100,23 @@ describe('filterColumns', () => {
       { name: 'g' } as any,
       { name: 'h' } as any,
     ]);
-    mockBuildColumns.mockReturnValue(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']);
+    mockBuildColumns.mockReturnValue(['a', 'b']);
 
-    const result = filterColumns(indexPatternMock, defaultColumns, true, fieldCounts);
+    const result = filterColumns(columns, indexPatternMock, defaultColumns, true, fieldCounts);
 
-    expect(result).toEqual(['_source']);
+    expect(result).toEqual(['a', 'b']);
   });
 
   it('should handle undefined indexPattern when modifyColumn is true', () => {
+    const columns = ['a', 'b'];
     const fieldCounts = { a: 5, b: 3 };
     const defaultColumns = ['a'];
     mockGetIndexPatternFieldList.mockReturnValue([]);
     mockBuildColumns.mockReturnValue([]);
 
-    const result = filterColumns(undefined, defaultColumns, true, fieldCounts);
+    const result = filterColumns(columns, undefined, defaultColumns, true, fieldCounts);
 
     expect(mockGetIndexPatternFieldList).toHaveBeenCalledWith(undefined, fieldCounts);
-    expect(result).toEqual([]);
+    expect(result).toEqual(['_source']);
   });
 });

@@ -1,9 +1,9 @@
-.dscSidebarItem__fieldPopoverPanel {
+.exploreSidebarItem__fieldPopoverPanel {
   min-width: 260px;
   max-width: 300px;
 }
 
-.dscSidebarField {
+.exploreSidebarField {
   &__actionButton {
     opacity: 0;
     transition: opacity $euiAnimSpeedFast;
@@ -15,7 +15,7 @@
 
   &:hover &__actionButton,
   &:focus &__actionButton,
-  .dscSidebarField__actionButton:focus {
+  .exploreSidebarField__actionButton:focus {
     opacity: 1;
   }
 }
