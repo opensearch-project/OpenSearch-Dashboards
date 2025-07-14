@@ -63,12 +63,12 @@ jest.mock('../../../opensearch_dashboards_services', () => ({
 
 function getProps({
   selected = false,
-  showDetails = false,
+  showSummary = false,
   useShortDots = false,
   field,
 }: {
   selected?: boolean;
-  showDetails?: boolean;
+  showSummary?: boolean;
   useShortDots?: boolean;
   field?: IndexPatternField;
 }) {
@@ -104,7 +104,7 @@ function getProps({
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    showDetails,
+    showSummary,
     selected,
     useShortDots,
   };
@@ -129,13 +129,19 @@ describe('discover sidebar field', function () {
 
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
   });
-  it('should trigger getDetails', async function () {
-    const props = getProps({ selected: true });
+  it('should trigger getDetails when showSummary is true', async function () {
+    const props = getProps({ showSummary: true });
     render(<DiscoverField {...props} />);
 
     await fireEvent.click(screen.getByTestId('field-bytes-showDetails'));
 
     expect(props.getDetails).toHaveBeenCalledWith(props.field);
+  });
+  it('should not show details button when showSummary is false', function () {
+    const props = getProps({ showSummary: false });
+    render(<DiscoverField {...props} />);
+
+    expect(screen.queryByTestId('field-bytes-showDetails')).toBeNull();
   });
   it('should not allow clicking on _source', function () {
     const field = new IndexPatternField(

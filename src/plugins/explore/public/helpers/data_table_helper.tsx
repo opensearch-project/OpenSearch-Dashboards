@@ -101,8 +101,7 @@ export function getLegacyDisplayedColumns(
       name: column,
       displayName: isShortDots ? shortenDottedString(column) : column,
       isSortable: osdFieldOverrides.sortable ?? !!field?.sortable,
-      // Explore will not support remove columns from UI
-      isRemoveable: false,
+      isRemoveable: column !== '_source' || columns.length > 1,
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
       colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
     };

@@ -196,7 +196,7 @@ const DataTableUI = ({
            * First cell is skipped because it has a fixed dimension set already.
            */
           tableElement.querySelectorAll('thead > tr > th:not(:first-child)').forEach((th) => {
-            (th as HTMLTableCellElement).style.width = th.getBoundingClientRect().width + 20 + 'px';
+            (th as HTMLTableCellElement).style.width = th.getBoundingClientRect().width + 'px';
           });
 
           tableElement.style.tableLayout = 'fixed';

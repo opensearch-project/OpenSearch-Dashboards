@@ -4,7 +4,7 @@
  */
 
 .deSidebar_panel {
-  .dscSideBar_searchContainer {
+  .exploreSideBar_searchContainer {
     border-bottom: $euiBorderThin;
 
     .toggleFieldFilterButton {
@@ -12,14 +12,14 @@
       background-color: $euiFormInputGroupLabelBackground;
     }
 
-    .dscSideBar_searchInput {
+    .exploreSideBar_searchInput {
       box-shadow: none;
       border: $euiBorderThin;
       background-color: $euiFormBackgroundColor;
     }
   }
 
-  .dscSideBar_fieldListContainer {
+  .exploreSideBar_fieldListContainer {
     padding-top: $euiSizeS;
   }
 
@@ -44,7 +44,7 @@
   }
 }
 
-.dscSideBar_fieldGroup {
+.exploreSideBar_fieldGroup {
   width: 100%;
 
   /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
@@ -56,9 +56,14 @@
   }
 }
 
-.dscSidebar__item:hover,
-.dscSidebar__item:focus {
-  background-color: $euiColorLightestShade;
-  padding-left: $euiSizeXS;
-  margin-left: -$euiSizeXS;
+.exploreSideBar__item {
+  // match fieldGroup condense indent(icon size + text margin)
+  padding-left: $euiSizeM + 2px + $euiSizeM + $euiSizeS;
+  padding-right: $euiSizeS;
+  border-radius: $euiSizeXS;
+
+  &:focus,
+  &:hover {
+    background-color: $euiColorLightestShade;
+  }
 }
