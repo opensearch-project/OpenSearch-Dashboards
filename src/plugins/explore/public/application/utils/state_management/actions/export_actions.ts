@@ -16,7 +16,7 @@ export const exportToCsv = (options: { fileName?: string; services?: ExploreServ
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState();
     const { activeTabId } = state.ui;
-    const query = state.query; // Now query state is flattened
+    const query = state.query;
     const services = options.services; // Services now passed as parameter
 
     if (!services) {
@@ -24,10 +24,12 @@ export const exportToCsv = (options: { fileName?: string; services?: ExploreServ
     }
 
     // Get tab definition
-    const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
+    const tabDefinition = services.tabRegistry.getTab?.(activeTabId);
 
     // Prepare query for the tab
-    const preparedQuery = tabDefinition?.prepareQuery ? tabDefinition.prepareQuery(query) : query;
+    const preparedQuery = tabDefinition?.prepareQuery
+      ? tabDefinition.prepareQuery(query)
+      : query.query;
 
     // Get results from cache
     const results = state.results[preparedQuery];
