@@ -4,12 +4,7 @@
  */
 
 import { createQuerySyncMiddleware } from './query_sync_middleware';
-import {
-  setQueryState,
-  setQueryWithHistory,
-  setQueryStringWithHistory,
-  QueryState,
-} from '../slices';
+import { setQueryState, setQueryWithHistory, setQueryStringWithHistory } from '../slices';
 import { createMockExploreServices, createMockStore, MockStore } from '../__mocks__';
 
 describe('createQuerySyncMiddleware', () => {
