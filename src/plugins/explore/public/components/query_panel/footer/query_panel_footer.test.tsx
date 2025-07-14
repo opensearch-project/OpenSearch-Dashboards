@@ -54,7 +54,7 @@ jest.mock('./detected_language', () => ({
   DetectedLanguage: () => <div data-test-subj="detected-language">Detected Language</div>,
 }));
 
-jest.mock('../../../application/components/dataset_context', () => ({
+jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
 }));
 
@@ -77,7 +77,7 @@ describe('QueryPanelFooter', () => {
 
   it('renders all footer components with correct layout', () => {
     mockUseDatasetContext.mockReturnValue({
-      indexPattern: { timeFieldName: '@timestamp' },
+      dataset: { timeFieldName: '@timestamp' },
     } as any);
 
     const { container } = render(<QueryPanelFooter />);
@@ -96,9 +96,9 @@ describe('QueryPanelFooter', () => {
     expect(screen.getByTestId('run-query-button')).toBeInTheDocument();
   });
 
-  it('shows date time picker when index pattern has time field', () => {
+  it('shows date time picker when dataset has time field', () => {
     mockUseDatasetContext.mockReturnValue({
-      indexPattern: { timeFieldName: '@timestamp' },
+      dataset: { timeFieldName: '@timestamp' },
     } as any);
 
     render(<QueryPanelFooter />);
@@ -106,9 +106,9 @@ describe('QueryPanelFooter', () => {
     expect(screen.getByTestId('date-time-range-picker')).toBeInTheDocument();
   });
 
-  it('hides date time picker when index pattern has no time field', () => {
+  it('hides date time picker when dataset has no time field', () => {
     mockUseDatasetContext.mockReturnValue({
-      indexPattern: { timeFieldName: null },
+      dataset: { timeFieldName: null },
     } as any);
 
     render(<QueryPanelFooter />);
@@ -116,9 +116,9 @@ describe('QueryPanelFooter', () => {
     expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
   });
 
-  it('hides date time picker when index pattern is undefined', () => {
+  it('hides date time picker when dataset is undefined', () => {
     mockUseDatasetContext.mockReturnValue({
-      indexPattern: undefined,
+      dataset: undefined,
     } as any);
 
     render(<QueryPanelFooter />);
@@ -126,9 +126,9 @@ describe('QueryPanelFooter', () => {
     expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
   });
 
-  it('hides date time picker when index pattern is null', () => {
+  it('hides date time picker when dataset is null', () => {
     mockUseDatasetContext.mockReturnValue({
-      indexPattern: null,
+      dataset: null,
     } as any);
 
     render(<QueryPanelFooter />);
@@ -138,7 +138,7 @@ describe('QueryPanelFooter', () => {
 
   it('does not render QueryResult component when status is not error', () => {
     mockUseDatasetContext.mockReturnValue({
-      indexPattern: { timeFieldName: '@timestamp' },
+      dataset: { timeFieldName: '@timestamp' },
     } as any);
 
     render(<QueryPanelFooter />);
@@ -161,7 +161,7 @@ describe('QueryPanelFooter', () => {
 
     mockUseSelector.mockReturnValue(errorQueryStatus);
     mockUseDatasetContext.mockReturnValue({
-      indexPattern: { timeFieldName: '@timestamp' },
+      dataset: { timeFieldName: '@timestamp' },
     } as any);
 
     render(<QueryPanelFooter />);
@@ -171,7 +171,7 @@ describe('QueryPanelFooter', () => {
 
   it('calls selectQueryStatus selector', () => {
     mockUseDatasetContext.mockReturnValue({
-      indexPattern: { timeFieldName: '@timestamp' },
+      dataset: { timeFieldName: '@timestamp' },
     } as any);
 
     render(<QueryPanelFooter />);

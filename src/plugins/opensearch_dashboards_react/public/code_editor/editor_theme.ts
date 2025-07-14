@@ -173,7 +173,7 @@ export function createTheme(
       'editorCursor.foreground': standardizeColor(euiTheme.euiColorDarkestShade),
       'list.hoverBackground': standardizeColor(euiTheme.euiColorLightShade),
       'list.highlightForeground': standardizeColor(euiTheme.euiColorPrimary),
-      'editor.lineHighlightBorder': standardizeColor(euiTheme.euiColorLightestShade),
+      'editor.lineHighlightBorder': standardizeColor(euiTheme.euiColorEmptyShade),
     },
   };
 }
