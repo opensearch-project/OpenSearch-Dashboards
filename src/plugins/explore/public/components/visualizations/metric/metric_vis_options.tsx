@@ -77,51 +77,10 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             <StyleAccordion
               id="metricSection"
               accordionLabel={i18n.translate('explore.stylePanel.tabs.metric', {
-                defaultMessage: 'Metric Settings',
+                defaultMessage: 'Metric',
               })}
               initialIsOpen={true}
             >
-              <EuiFormRow
-                label={i18n.translate('explore.stylePanel.metric.title', {
-                  defaultMessage: 'Title Setting',
-                })}
-              >
-                <EuiButtonGroup
-                  legend="Show or hide title"
-                  options={[
-                    {
-                      id: 'show',
-                      label: 'Shown',
-                      'data-test-subj': 'showTitleShown',
-                    },
-                    {
-                      id: 'hide',
-                      label: 'Hidden',
-                      'data-test-subj': 'showTitleHidden',
-                    },
-                  ]}
-                  idSelected={styleOptions.showTitle ? 'show' : 'hide'}
-                  onChange={(id) => updateStyleOption('showTitle', id === 'show')}
-                  buttonSize="compressed"
-                  isFullWidth={true}
-                  type="single"
-                  data-test-subj="showTitleButtonGroup"
-                />
-              </EuiFormRow>
-
-              {styleOptions.showTitle && (
-                <EuiFormRow>
-                  <DebouncedText
-                    value={styleOptions.title || numericalColumns[0]?.name || ''}
-                    placeholder="Metric title"
-                    onChange={(text) => updateStyleOption('title', text)}
-                    label={i18n.translate('explore.vis.metric.title', {
-                      defaultMessage: 'Metric Title',
-                    })}
-                  />
-                </EuiFormRow>
-              )}
-
               <EuiFormRow
                 label={i18n.translate('explore.vis.metric.fontSize', {
                   defaultMessage: 'Font Size',
@@ -144,8 +103,9 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
 
               <EuiFormRow>
                 <EuiSwitch
+                  compressed
                   label={i18n.translate('explore.vis.metric.useColor', {
-                    defaultMessage: 'Use color for font color',
+                    defaultMessage: 'Value color',
                   })}
                   checked={styleOptions.useColor}
                   onChange={(e) => updateStyleOption('useColor', e.target.checked)}
@@ -176,6 +136,32 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                     />
                   </EuiFormRow>
                 </>
+              )}
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('explore.stylePanel.metric.title', {
+                    defaultMessage: 'Show title',
+                  })}
+                  checked={styleOptions.showTitle}
+                  onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
+                  data-test-subj="showTitleSwitch"
+                />
+              </EuiFormRow>
+
+              {styleOptions.showTitle && (
+                <EuiFormRow>
+                  <DebouncedText
+                    value={styleOptions.title || numericalColumns[0]?.name || ''}
+                    placeholder={i18n.translate('explore.vis.metric.title', {
+                      defaultMessage: 'Title',
+                    })}
+                    onChange={(text) => updateStyleOption('title', text)}
+                    label={i18n.translate('explore.vis.metric.title', {
+                      defaultMessage: 'Title',
+                    })}
+                  />
+                </EuiFormRow>
               )}
             </StyleAccordion>
           </EuiFlexItem>

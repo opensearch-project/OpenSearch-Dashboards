@@ -108,6 +108,19 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
               }
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <HeatmapExclusiveVisOptions
+              styles={styleOptions.exclusive}
+              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <HeatmapLabelVisOptions
+              shouldShowType={shouldShowTypeAndGrid}
+              styles={styleOptions.label}
+              onChange={(label) => updateStyleOption('label', label)}
+            />
+          </EuiFlexItem>
           {shouldShowTypeAndGrid && (
             <EuiFlexItem grow={false}>
               <GridOptionsPanel
@@ -142,20 +155,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
                   ...tooltipOptions,
                 })
               }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <HeatmapExclusiveVisOptions
-              styles={styleOptions.exclusive}
-              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <HeatmapLabelVisOptions
-              shouldShowType={shouldShowTypeAndGrid}
-              styles={styleOptions.label}
-              onChange={(label) => updateStyleOption('label', label)}
             />
           </EuiFlexItem>
         </>

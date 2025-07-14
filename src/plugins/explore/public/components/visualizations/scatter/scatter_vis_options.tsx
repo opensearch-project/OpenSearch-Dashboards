@@ -108,6 +108,12 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            <ScatterExclusiveVisOptions
+              styles={styleOptions.exclusive}
+              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <GridOptionsPanel
               grid={styleOptions.grid}
               onGridChange={(gridOption) => updateStyleOption('grid', gridOption)}
@@ -141,13 +147,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
                   ...tooltipOptions,
                 })
               }
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <ScatterExclusiveVisOptions
-              styles={styleOptions.exclusive}
-              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
             />
           </EuiFlexItem>
         </>

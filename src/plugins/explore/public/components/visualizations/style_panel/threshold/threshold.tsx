@@ -132,7 +132,6 @@ export const ThresholdOptions = ({
       })}
       initialIsOpen={true}
     >
-      <EuiSpacer size="s" />
       {activeThresholds.length > 0 && (
         <EuiPanel paddingSize="s" color="subdued" data-test-subj="thresholdPanel">
           <EuiFormLabel>

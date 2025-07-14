@@ -18,7 +18,7 @@ import {
   AxisRole,
   AxisColumnMappings,
 } from '../types';
-import { LineStyle } from './exclusive_style';
+import { LineStyle } from './line_exclusive_vis_options';
 
 // Mock the child components
 jest.mock('../style_panel/legend/legend', () => {
@@ -117,7 +117,7 @@ jest.mock('../style_panel/grid/grid', () => ({
   )),
 }));
 
-jest.mock('./exclusive_style', () => ({
+jest.mock('./line_exclusive_vis_options', () => ({
   LineExclusiveVisOptions: jest.fn(
     ({
       addTimeMarker,

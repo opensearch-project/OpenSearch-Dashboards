@@ -51,6 +51,12 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>
+            <PieExclusiveVisOptions
+              styles={styleOptions.exclusive}
+              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <LegendOptionsPanel
               shouldShowLegend={true}
               legendOptions={{
@@ -76,12 +82,6 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
                   ...tooltipOptions,
                 })
               }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <PieExclusiveVisOptions
-              styles={styleOptions.exclusive}
-              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
             />
           </EuiFlexItem>
         </>

@@ -36,7 +36,7 @@ describe('BarExclusiveVisOptions', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     // Check if the component renders with the correct title
-    expect(screen.getByText('Bar Settings')).toBeInTheDocument();
+    expect(screen.getByText('Bar')).toBeInTheDocument();
 
     // Check if the bar width input exists with correct value
     const barWidthInput = screen.getByTestId('barWidthInput');
@@ -48,12 +48,9 @@ describe('BarExclusiveVisOptions', () => {
     expect(barPaddingInput).toBeInTheDocument();
     expect(barPaddingInput).toHaveValue(0.1);
 
-    // Check if the bar border button group exists
-    const barBorderButtonGroup = screen.getByTestId('barBorderButtonGroup');
-    expect(barBorderButtonGroup).toBeInTheDocument();
-
-    // Check that the "Hidden" option is selected
-    expect(screen.getByTestId('hidden')).toBeInTheDocument();
+    // Check if the bar border switch exists
+    const barBorderSwitch = screen.getByTestId('barBorderSwitch');
+    expect(barBorderSwitch).toBeInTheDocument();
 
     // Border options should not be visible when showBarBorder is false
     expect(screen.queryByTestId('barBorderWidthInput')).not.toBeInTheDocument();
@@ -63,8 +60,9 @@ describe('BarExclusiveVisOptions', () => {
   test('shows border options when showBarBorder is true', () => {
     render(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
 
-    // Check that the "Shown" option is selected
-    expect(screen.getByTestId('shown')).toBeInTheDocument();
+    // Check that the switch is checked
+    const barBorderSwitch = screen.getByTestId('barBorderSwitch');
+    expect(barBorderSwitch).toBeChecked();
 
     // Border options should be visible when showBarBorder is true
     const barBorderWidthInput = screen.getByTestId('barBorderWidthInput');
@@ -101,9 +99,9 @@ describe('BarExclusiveVisOptions', () => {
   test('calls onShowBarBorderChange when show bar border is toggled', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Find the "Shown" radio input and click it
-    const shownRadio = screen.getByTestId('shown');
-    fireEvent.click(shownRadio);
+    // Find the switch and click it
+    const barBorderSwitch = screen.getByTestId('barBorderSwitch');
+    fireEvent.click(barBorderSwitch);
 
     // Check if the callback was called with the correct value
     expect(defaultProps.onShowBarBorderChange).toHaveBeenCalledWith(true);
@@ -144,9 +142,9 @@ describe('BarExclusiveVisOptions', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     // Check if labels are rendered correctly
-    expect(screen.getByText('Bar width')).toBeInTheDocument();
-    expect(screen.getByText('Bar padding')).toBeInTheDocument();
-    expect(screen.queryAllByText('Bar border').length > 0).toBeTruthy();
+    expect(screen.getByText('Width')).toBeInTheDocument();
+    expect(screen.getByText('Padding')).toBeInTheDocument();
+    expect(screen.getByText('Show border')).toBeInTheDocument();
   });
 
   test('renders border form labels when showBarBorder is true', () => {

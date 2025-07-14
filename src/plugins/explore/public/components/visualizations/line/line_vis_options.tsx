@@ -10,7 +10,7 @@ import { LineChartStyleControls } from './line_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { ThresholdOptions } from '../style_panel/threshold/threshold';
-import { LineExclusiveVisOptions } from './exclusive_style';
+import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { GridOptionsPanel } from '../style_panel/grid/grid';
@@ -72,6 +72,21 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
+            <LineExclusiveVisOptions
+              addTimeMarker={styleOptions.addTimeMarker}
+              lineStyle={styleOptions.lineStyle}
+              lineMode={styleOptions.lineMode}
+              lineWidth={styleOptions.lineWidth}
+              onAddTimeMarkerChange={(addTimeMarker) =>
+                updateStyleOption('addTimeMarker', addTimeMarker)
+              }
+              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
+              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
+              onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
             <ThresholdOptions
               thresholdLines={styleOptions.thresholdLines}
               onThresholdLinesChange={(thresholdLines) =>
@@ -114,21 +129,6 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
                   ...tooltipOptions,
                 })
               }
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <LineExclusiveVisOptions
-              addTimeMarker={styleOptions.addTimeMarker}
-              lineStyle={styleOptions.lineStyle}
-              lineMode={styleOptions.lineMode}
-              lineWidth={styleOptions.lineWidth}
-              onAddTimeMarkerChange={(addTimeMarker) =>
-                updateStyleOption('addTimeMarker', addTimeMarker)
-              }
-              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
-              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
-              onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
             />
           </EuiFlexItem>
         </>

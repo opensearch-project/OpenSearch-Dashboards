@@ -74,6 +74,27 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
+            <BarExclusiveVisOptions
+              barWidth={styleOptions.barWidth}
+              barPadding={styleOptions.barPadding}
+              showBarBorder={styleOptions.showBarBorder}
+              barBorderWidth={styleOptions.barBorderWidth}
+              barBorderColor={styleOptions.barBorderColor}
+              onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
+              onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}
+              onShowBarBorderChange={(showBarBorder) =>
+                updateStyleOption('showBarBorder', showBarBorder)
+              }
+              onBarBorderWidthChange={(barBorderWidth) =>
+                updateStyleOption('barBorderWidth', barBorderWidth)
+              }
+              onBarBorderColorChange={(barBorderColor) =>
+                updateStyleOption('barBorderColor', barBorderColor)
+              }
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
             <ThresholdOptions
               thresholdLines={styleOptions.thresholdLines}
               onThresholdLinesChange={(thresholdLines) =>
@@ -115,27 +136,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
                   ...styleOptions.tooltipOptions,
                   ...tooltipOptions,
                 })
-              }
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <BarExclusiveVisOptions
-              barWidth={styleOptions.barWidth}
-              barPadding={styleOptions.barPadding}
-              showBarBorder={styleOptions.showBarBorder}
-              barBorderWidth={styleOptions.barBorderWidth}
-              barBorderColor={styleOptions.barBorderColor}
-              onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
-              onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}
-              onShowBarBorderChange={(showBarBorder) =>
-                updateStyleOption('showBarBorder', showBarBorder)
-              }
-              onBarBorderWidthChange={(barBorderWidth) =>
-                updateStyleOption('barBorderWidth', barBorderWidth)
-              }
-              onBarBorderColorChange={(barBorderColor) =>
-                updateStyleOption('barBorderColor', barBorderColor)
               }
             />
           </EuiFlexItem>

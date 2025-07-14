@@ -4,9 +4,15 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { LegendOptionsPanel } from './legend';
 import { Positions } from '../../types';
+
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn().mockImplementation((id, { defaultMessage }) => defaultMessage),
+  },
+}));
 
 describe('LegendOptionsPanel', () => {
   const mockLegend = {
@@ -15,6 +21,10 @@ describe('LegendOptionsPanel', () => {
   };
 
   const mockOnLegendChange = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('renders correctly', () => {
     render(
@@ -26,10 +36,10 @@ describe('LegendOptionsPanel', () => {
     );
 
     const legendModeSwitch = screen.getByTestId('legendModeSwitch');
-    const legendPositionButtonGroup = screen.getByTestId('legendPositionButtonGroup');
+    const legendPositionSelect = screen.getByTestId('legendPositionSelect');
 
     expect(legendModeSwitch).toBeInTheDocument();
-    expect(legendPositionButtonGroup).toBeInTheDocument();
+    expect(legendPositionSelect).toBeInTheDocument();
   });
 
   it('update legend mode correctly', () => {
@@ -58,10 +68,9 @@ describe('LegendOptionsPanel', () => {
       />
     );
 
-    const legendPositionButtonGroup = screen.getByTestId('legendPositionButtonGroup');
-    const positionButton = within(legendPositionButtonGroup).getByTestId('right');
+    const legendPositionSelect = screen.getByTestId('legendPositionSelect');
 
-    fireEvent.click(positionButton);
+    fireEvent.change(legendPositionSelect, { target: { value: Positions.RIGHT } });
     expect(mockOnLegendChange).toHaveBeenLastCalledWith({
       position: Positions.RIGHT,
     });
