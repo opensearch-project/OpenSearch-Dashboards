@@ -15,7 +15,7 @@ import {
 } from '../../../../core/public';
 import { UseCaseService } from './use_case_service';
 import { waitFor } from '@testing-library/dom';
-import { WORKSPACE_DETAIL_APP_ID } from '../../common/constants';
+import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_PARENT_NAV_ID } from '../../common/constants';
 
 const mockNavGroupsMap = {
   system: {
@@ -96,37 +96,48 @@ describe('UseCaseService', () => {
       await waitFor(() => {
         expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(navGroupInfo, [
           {
+            id: WORKSPACE_PARENT_NAV_ID,
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 100,
+          },
+          {
             id: WORKSPACE_DETAIL_APP_ID,
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 100,
             title: 'Workspace details',
+            parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
           },
           {
             id: 'workspace_collaborators',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 200,
             title: 'Collaborators',
+            parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
           },
           {
             id: 'dataSources',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 300,
+            parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
           },
           {
             id: 'indexPatterns',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 400,
+            parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
           },
           {
             id: 'objects',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 500,
+            parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
           },
           {
             id: 'import_sample_data',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 600,
             title: 'Sample data',
+            parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
           },
         ]);
       });
