@@ -44,7 +44,7 @@ describe('ThresholdOptions', () => {
         onThresholdLinesChange={mockOnThresholdChange}
       />
     );
-    const addThresholdButton = screen.getByText('Add another threshold');
+    const addThresholdButton = screen.getByText('Add threshold');
     fireEvent.click(addThresholdButton);
     expect(mockOnThresholdChange).toHaveBeenCalledTimes(1);
 

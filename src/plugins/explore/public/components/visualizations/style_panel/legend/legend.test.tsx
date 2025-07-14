@@ -25,10 +25,10 @@ describe('LegendOptionsPanel', () => {
       />
     );
 
-    const legendModeButtonGroup = screen.getByTestId('legendModeButtonGroup');
+    const legendModeSwitch = screen.getByTestId('legendModeSwitch');
     const legendPositionButtonGroup = screen.getByTestId('legendPositionButtonGroup');
 
-    expect(legendModeButtonGroup).toBeInTheDocument();
+    expect(legendModeSwitch).toBeInTheDocument();
     expect(legendPositionButtonGroup).toBeInTheDocument();
   });
 
@@ -41,10 +41,9 @@ describe('LegendOptionsPanel', () => {
       />
     );
 
-    const legendModeButtonGroup = screen.getByTestId('legendModeButtonGroup');
-    const modeButton = within(legendModeButtonGroup).getByTestId('false');
+    const legendModeSwitch = screen.getByTestId('legendModeSwitch');
 
-    fireEvent.click(modeButton);
+    fireEvent.click(legendModeSwitch);
     expect(mockOnLegendChange).toHaveBeenLastCalledWith({
       show: false,
     });

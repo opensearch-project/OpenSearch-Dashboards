@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { EuiFormRow, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { Positions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
 
@@ -28,21 +28,6 @@ export const LegendOptionsPanel = ({
   if (!shouldShowLegend || !legendOptions || !onLegendOptionsChange) {
     return null;
   }
-
-  const legendModeOptions = [
-    {
-      id: 'true',
-      label: i18n.translate('explore.stylePanel.legend.mode.shown', {
-        defaultMessage: 'Shown',
-      }),
-    },
-    {
-      id: 'false',
-      label: i18n.translate('explore.stylePanel.legend.mode.hidden', {
-        defaultMessage: 'Hidden',
-      }),
-    },
-  ];
 
   const legendPositionOptions = [
     {
@@ -79,35 +64,27 @@ export const LegendOptionsPanel = ({
       })}
       initialIsOpen={true}
     >
-      <EuiFormRow
+      <EuiSwitch
+        compressed
         label={i18n.translate('explore.stylePanel.legend.mode', {
-          defaultMessage: 'Legend mode',
+          defaultMessage: 'Show legend',
         })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.legend.mode', {
-            defaultMessage: 'Legend mode',
-          })}
-          options={legendModeOptions}
-          idSelected={legendOptions.show.toString()}
-          onChange={(id) => onLegendOptionsChange({ show: id === 'true' })}
-          buttonSize="compressed"
-          isFullWidth
-          data-test-subj="legendModeButtonGroup"
-        />
-      </EuiFormRow>
+        checked={legendOptions.show}
+        onChange={(e) => onLegendOptionsChange({ show: e.target.checked })}
+        data-test-subj="legendModeSwitch"
+      />
 
       {legendOptions.show && (
         <>
           <EuiSpacer size="s" />
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.legend.position', {
-              defaultMessage: 'Legend position',
+              defaultMessage: 'Position',
             })}
           >
             <EuiButtonGroup
               legend={i18n.translate('explore.stylePanel.legend.position', {
-                defaultMessage: 'Legend position',
+                defaultMessage: 'Position',
               })}
               options={legendPositionOptions}
               idSelected={legendOptions.position}

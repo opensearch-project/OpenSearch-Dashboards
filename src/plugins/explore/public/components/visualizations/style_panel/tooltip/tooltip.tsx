@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 import { TooltipOptions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
 
@@ -18,21 +18,6 @@ export const TooltipOptionsPanel = ({
   tooltipOptions,
   onTooltipOptionsChange,
 }: TooltipOptionsProps) => {
-  const tooltipModeOptions = [
-    {
-      id: 'all',
-      label: i18n.translate('explore.stylePanel.tooltip.mode.shown', {
-        defaultMessage: 'Shown',
-      }),
-    },
-    {
-      id: 'hidden',
-      label: i18n.translate('explore.stylePanel.tooltip.mode.hidden', {
-        defaultMessage: 'Hidden',
-      }),
-    },
-  ];
-
   if (!tooltipOptions || !onTooltipOptionsChange) {
     return null;
   }
@@ -45,23 +30,19 @@ export const TooltipOptionsPanel = ({
       })}
       initialIsOpen={true}
     >
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.tooltip.mode', {
-          defaultMessage: 'Tooltip mode',
+      <EuiSwitch
+        compressed
+        label={i18n.translate('explore.stylePanel.heatmap.label.showLabels', {
+          defaultMessage: 'Show tooltip',
         })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.tooltip.mode', {
-            defaultMessage: 'Tooltip mode',
-          })}
-          options={tooltipModeOptions}
-          idSelected={tooltipOptions.mode}
-          onChange={(id) => onTooltipOptionsChange({ mode: id as TooltipOptions['mode'] })}
-          buttonSize="compressed"
-          isFullWidth
-          data-test-subj="tooltipModeButtonGroup"
-        />
-      </EuiFormRow>
+        checked={tooltipOptions.mode === 'all'}
+        onChange={(e) =>
+          onTooltipOptionsChange({
+            mode: e.target.checked ? 'all' : 'hidden',
+          })
+        }
+        data-test-subj="tooltipModeSwitch"
+      />
     </StyleAccordion>
   );
 };

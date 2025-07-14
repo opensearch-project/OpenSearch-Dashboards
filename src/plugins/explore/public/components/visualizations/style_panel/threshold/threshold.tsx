@@ -31,8 +31,8 @@ export interface ThresholdOptionsProps {
 const thresholdStyleOptions = [
   {
     id: ThresholdLineStyle.Full,
-    label: i18n.translate('explore.stylePanel.threshold.lineStyle.line', {
-      defaultMessage: 'Line',
+    label: i18n.translate('explore.stylePanel.threshold.lineStyle.solid', {
+      defaultMessage: 'Solid',
     }),
   },
   {
@@ -133,22 +133,6 @@ export const ThresholdOptions = ({
       initialIsOpen={true}
     >
       <EuiSpacer size="s" />
-      <EuiButton
-        fullWidth
-        onClick={handleAddThreshold}
-        size="s"
-        data-test-subj="exploreVisAddThreshold"
-      >
-        {activeThresholds.length > 0
-          ? i18n.translate('explore.stylePanel.threshold.addAnotherThreshold', {
-              defaultMessage: 'Add another threshold',
-            })
-          : i18n.translate('explore.stylePanel.threshold.addThreshold', {
-              defaultMessage: 'Add a threshold',
-            })}
-      </EuiButton>
-      <EuiSpacer size="m" />
-
       {activeThresholds.length > 0 && (
         <EuiPanel paddingSize="s" color="subdued" data-test-subj="thresholdPanel">
           <EuiFormLabel>
@@ -223,7 +207,7 @@ export const ThresholdOptions = ({
 
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.threshold.style', {
-              defaultMessage: 'Threshold style',
+              defaultMessage: 'Line style',
             })}
           >
             <EuiButtonGroup
@@ -240,6 +224,18 @@ export const ThresholdOptions = ({
           </EuiFormRow>
         </EuiPanel>
       )}
+      <EuiButton
+        fullWidth
+        onClick={handleAddThreshold}
+        size="s"
+        data-test-subj="exploreVisAddThreshold"
+        iconType="plusInCircle"
+      >
+        {i18n.translate('explore.stylePanel.threshold.addAnotherThreshold', {
+          defaultMessage: 'Add threshold',
+        })}
+      </EuiButton>
+      <EuiSpacer size="m" />
     </StyleAccordion>
   );
 };
