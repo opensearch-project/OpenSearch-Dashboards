@@ -21,10 +21,19 @@ jest.mock('../../slices', () => ({
   setEditorMode: jest.fn(),
   setPromptModeIsAvailable: jest.fn(),
   setQueryWithHistory: jest.fn(),
+  setActiveTab: jest.fn(),
+}));
+
+jest.mock('../../slices/query_editor/query_editor_slice', () => ({
+  clearQueryStatusMap: jest.fn(),
 }));
 
 jest.mock('../query_actions', () => ({
   executeQueries: jest.fn(),
+}));
+
+jest.mock('../detect_optimal_tab', () => ({
+  detectAndSetOptimalTab: jest.fn(),
 }));
 
 jest.mock('../../../get_prompt_mode_is_available', () => ({
@@ -46,6 +55,11 @@ describe('setDatasetActionCreator', () => {
     queryEditor: {
       editorMode: EditorMode.SingleQuery,
       promptModeIsAvailable: false,
+    },
+    query: {
+      query: 'SELECT * FROM test',
+      language: 'PPL',
+      dataset: undefined,
     },
   };
 
@@ -104,6 +118,11 @@ describe('setDatasetActionCreator', () => {
         editorMode: EditorMode.DualQuery,
         promptModeIsAvailable: false,
       },
+      query: {
+        query: 'SELECT * FROM test',
+        language: 'PPL',
+        dataset: undefined,
+      },
     });
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
@@ -117,6 +136,11 @@ describe('setDatasetActionCreator', () => {
     mockGetState.mockReturnValue({
       queryEditor: {
         editorMode: EditorMode.SingleQuery,
+      },
+      query: {
+        query: 'SELECT * FROM test',
+        language: 'PPL',
+        dataset: undefined,
       },
     });
 
@@ -149,6 +173,11 @@ describe('setDatasetActionCreator', () => {
       queryEditor: {
         promptModeIsAvailable: true,
       },
+      query: {
+        query: 'SELECT * FROM test',
+        language: 'PPL',
+        dataset: undefined,
+      },
     };
     mockGetState.mockReturnValue(stateWithPromptMode);
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
@@ -166,6 +195,11 @@ describe('setDatasetActionCreator', () => {
         editorMode: EditorMode.SingleQuery,
         promptModeIsAvailable: false,
       },
+      query: {
+        query: 'SELECT * FROM test',
+        language: 'PPL',
+        dataset: undefined,
+      },
     });
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
@@ -180,6 +214,11 @@ describe('setDatasetActionCreator', () => {
       queryEditor: {
         editorMode: EditorMode.SingleEmpty,
         promptModeIsAvailable: false,
+      },
+      query: {
+        query: 'SELECT * FROM test',
+        language: 'PPL',
+        dataset: undefined,
       },
     });
 
@@ -197,6 +236,11 @@ describe('setDatasetActionCreator', () => {
       queryEditor: {
         editorMode: EditorMode.SingleQuery,
         promptModeIsAvailable: false,
+      },
+      query: {
+        query: 'SELECT * FROM test',
+        language: 'PPL',
+        dataset: undefined,
       },
     });
 

@@ -20,7 +20,7 @@ export const useTabResults = () => {
   const results = useSelector((state: RootState) => state.results);
 
   const cacheKey = useMemo(() => {
-    const activeTab = services.tabRegistry?.getTab(activeTabId);
+    const activeTab = services.tabRegistry.getTab(activeTabId);
     const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
     return prepareQuery(query);
   }, [query, activeTabId, services]);

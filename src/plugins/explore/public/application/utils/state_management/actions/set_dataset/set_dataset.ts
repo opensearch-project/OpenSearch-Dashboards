@@ -10,11 +10,14 @@ import {
   setEditorMode,
   setPromptModeIsAvailable,
   setQueryWithHistory,
+  setActiveTab,
 } from '../../slices';
+import { clearQueryStatusMap } from '../../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../query_actions';
 import { getPromptModeIsAvailable } from '../../../get_prompt_mode_is_available';
 import { EditorMode } from '../../types';
 import { useClearEditors } from '../../../../hooks';
+import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 
 export const setDatasetActionCreator = (
   services: ExploreServices,
@@ -37,7 +40,9 @@ export const setDatasetActionCreator = (
     );
   }
 
+  dispatch(setActiveTab(''));
   dispatch(clearResults());
+  dispatch(clearQueryStatusMap());
   dispatch(setQueryWithHistory(queryStringState));
 
   dispatch(
@@ -58,5 +63,6 @@ export const setDatasetActionCreator = (
     dispatch(setEditorMode(EditorMode.SingleQuery));
   }
 
-  dispatch(executeQueries({ services }));
+  await dispatch(executeQueries({ services }));
+  dispatch(detectAndSetOptimalTab({ services }));
 };

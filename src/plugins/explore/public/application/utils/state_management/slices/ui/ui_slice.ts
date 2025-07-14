@@ -12,7 +12,7 @@ export interface UIState {
 }
 
 const initialState: UIState = {
-  activeTabId: 'logs',
+  activeTabId: '',
   showFilterPanel: true,
   showHistogram: true,
 };

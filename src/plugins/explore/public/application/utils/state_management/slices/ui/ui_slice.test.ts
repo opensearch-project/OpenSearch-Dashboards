@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { gasConstantDependencies } from 'mathjs';
 import {
   uiReducer,
   setActiveTab,
@@ -13,9 +14,8 @@ import {
 } from './ui_slice';
 
 describe('UI Slice', () => {
-  // Define the initial state for testing
   const initialState: UIState = {
-    activeTabId: 'logs',
+    activeTabId: '',
     showFilterPanel: true,
     showHistogram: true,
   };
@@ -53,7 +53,6 @@ describe('UI Slice', () => {
       const newState = uiReducer(initialState, action);
       expect(newState.showFilterPanel).toBe(newValue);
 
-      // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.showHistogram).toBe(initialState.showHistogram);
     });
@@ -70,7 +69,6 @@ describe('UI Slice', () => {
       const newState = uiReducer(initialState, action);
       expect(newState.showHistogram).toBe(newValue);
 
-      // Other state properties should remain unchanged
       expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.showFilterPanel).toBe(initialState.showFilterPanel);
     });
