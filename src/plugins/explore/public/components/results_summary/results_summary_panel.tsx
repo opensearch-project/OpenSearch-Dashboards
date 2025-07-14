@@ -106,6 +106,8 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
         const actualSampleSize = Math.min(SUMMARY_REQUEST_SAMPLE_SIZE, queryRes?.length);
         const dataString = JSON.stringify(queryRes?.slice(0, actualSampleSize));
         const payload = `'${dataString}'`;
+        // TODO: OSD core should not rely on plugin APIs, refactor this once this RFC is
+        // implemented #9859
         const response = await http.post('/api/assistant/data2summary', {
           body: JSON.stringify({
             sample_data: payload,
