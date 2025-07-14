@@ -125,6 +125,17 @@ export function SpanDetailFlyout(props: {
     }
   }, [props.spanId, props.traceId, props.pplService, props.dataSourceMDSId, props.allSpans]);
 
+  useEffect(() => {
+    if (props.isFlyoutVisible && props.spanId && props.allSpans.length > 0) {
+      // Update the span data when allSpans changes
+      const spanData = props.allSpans.find((s) => s.spanId === props.spanId);
+      if (spanData) {
+        setSpan(spanData);
+        setError(null);
+      }
+    }
+  }, [props.allSpans, props.isFlyoutVisible, props.spanId]);
+
   const getListItem = (
     fieldKey: string | undefined,
     title: React.ReactNode,

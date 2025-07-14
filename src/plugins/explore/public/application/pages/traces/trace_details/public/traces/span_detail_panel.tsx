@@ -182,6 +182,7 @@ export function SpanDetailPanel(props: {
   const [availableWidth, setAvailableWidth] = useState<number>(window.innerWidth);
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
   const [currentSpan, setCurrentSpan] = useState('');
+  const [filterOperationInProgress, setFilterOperationInProgress] = useState(false);
 
   const updateAvailableWidth = () => {
     if (containerRef.current) {
@@ -204,6 +205,10 @@ export function SpanDetailPanel(props: {
 
   const addSpanFilter = useCallback(
     (field: string, value: any) => {
+      if (currentSpan) {
+        setFilterOperationInProgress(true);
+      }
+
       const newFilters = [...spanFilters];
       const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
       if (index === -1) {
@@ -213,11 +218,16 @@ export function SpanDetailPanel(props: {
       }
       setSpanFiltersWithStorage(newFilters);
     },
-    [spanFilters, setSpanFiltersWithStorage]
+    [spanFilters, setSpanFiltersWithStorage, currentSpan]
   );
 
   const removeSpanFilter = useCallback(
     (field: string) => {
+      // Mark that a filter operation is in progress
+      if (currentSpan) {
+        setFilterOperationInProgress(true);
+      }
+
       const newFilters = [...spanFilters];
       const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
       if (index !== -1) {
@@ -225,7 +235,7 @@ export function SpanDetailPanel(props: {
         setSpanFiltersWithStorage(newFilters);
       }
     },
-    [spanFilters, setSpanFiltersWithStorage]
+    [spanFilters, setSpanFiltersWithStorage, currentSpan]
   );
 
   const renderFilters = useMemo(() => {
@@ -335,8 +345,19 @@ export function SpanDetailPanel(props: {
   }, [parsedData]);
 
   const handleErrorFilterClick = useCallback(() => {
+    if (currentSpan) {
+      setFilterOperationInProgress(true);
+    }
+
     addSpanFilter('status.code', 2);
-  }, [addSpanFilter]);
+  }, [addSpanFilter, currentSpan]);
+
+  useEffect(() => {
+    // When data changes and a filter operation is in progress, keep the flyout open
+    if (filterOperationInProgress && !currentSpan) {
+      setFilterOperationInProgress(false);
+    }
+  }, [filterOperationInProgress, currentSpan, props.payloadData]);
 
   // Calculate dynamic height based on number of spans
   const calculateGanttHeight = (spanCount: number): number => {
@@ -474,7 +495,10 @@ export function SpanDetailPanel(props: {
         <SpanDetailFlyout
           spanId={currentSpan}
           isFlyoutVisible={!!currentSpan}
-          closeFlyout={() => setCurrentSpan('')}
+          closeFlyout={() => {
+            setCurrentSpan('');
+            setFilterOperationInProgress(false);
+          }}
           addSpanFilter={addSpanFilter}
           dataSourceMDSId={props.dataSourceMDSId}
           dataSourceMDSLabel={props.dataSourceMDSLabel}

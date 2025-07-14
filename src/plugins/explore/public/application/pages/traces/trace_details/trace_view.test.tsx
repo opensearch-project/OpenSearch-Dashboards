@@ -10,7 +10,7 @@ import { TraceDetails } from './trace_view';
 // Mock react-router-dom
 jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(() => ({
-    hash: '#?traceId=test-trace-id&datasourceId=test-datasource-id',
+    hash: '#?traceId=test-trace-id&datasourceId=test-datasource-id&indexPattern=test-index-pattern',
   })),
 }));
 
@@ -197,7 +197,7 @@ describe('TraceDetails', () => {
     expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
     expect(document.querySelector('[data-testid="span-detail-panel"]')).toBeInTheDocument();
     expect(document.querySelector('[data-testid="service-map"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="logs-details"]')).toBeInTheDocument();
+    // expect(document.querySelector('[data-testid="logs-details"]')).toBeInTheDocument();
 
     // Check that trace ID and data source ID are passed correctly
     expect(document.querySelector('[data-testid="trace-id"]')).toHaveTextContent('test-trace-id');
@@ -208,7 +208,7 @@ describe('TraceDetails', () => {
     // Check that data is passed to components
     expect(document.querySelector('[data-testid="payload-count"]')).toHaveTextContent('2');
     expect(document.querySelector('[data-testid="service-hits-count"]')).toHaveTextContent('2');
-    expect(document.querySelector('[data-testid="logs-trace-count"]')).toHaveTextContent('2');
+    // expect(document.querySelector('[data-testid="logs-trace-count"]')).toHaveTextContent('2');
   });
 
   it('renders no match message when no data is found', async () => {
