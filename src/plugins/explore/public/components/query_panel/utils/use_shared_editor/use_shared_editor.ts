@@ -25,6 +25,7 @@ import {
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
 import {
+  useEditorRefs,
   useOnEditorRunContext,
   useSetEditorText,
   useToggleDualEditorMode,
@@ -72,7 +73,7 @@ export const useSharedEditor = ({
   const dispatch = useDispatch();
   const [isFocused, setIsFocused] = useState(false);
   const queryLanguage = useSelector(selectQueryLanguage);
-  const [editorHeight, setEditorHeight] = useState(32);
+  const { topEditorRef, bottomEditorRef } = useEditorRefs();
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -213,8 +214,6 @@ export const useSharedEditor = ({
         const maxHeight = 100;
         const finalHeight = Math.min(contentHeight, maxHeight);
 
-        setEditorHeight(finalHeight);
-
         editor.layout({
           width: editor.getLayoutInfo().width,
           height: finalHeight,
@@ -250,12 +249,15 @@ export const useSharedEditor = ({
       (editorPosition === 'bottom' && editorMode === EditorMode.DualPrompt)
     ) {
       toggleDualEditorMode();
+    } else if (editorPosition === 'top') {
+      topEditorRef.current?.focus();
+    } else if (editorPosition === 'bottom') {
+      bottomEditorRef.current?.focus();
     }
-  }, [editorMode, editorPosition, toggleDualEditorMode]);
+  }, [editorMode, editorPosition, toggleDualEditorMode, topEditorRef, bottomEditorRef]);
 
   return {
     isFocused,
-    height: editorHeight,
     useLatestTheme: true,
     editorDidMount,
     onChange,

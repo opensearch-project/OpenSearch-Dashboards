@@ -16,11 +16,6 @@ jest.mock('./footer', () => ({
 }));
 
 describe('QueryPanel', () => {
-  it('renders without crashing', () => {
-    render(<QueryPanel />);
-    expect(screen.getByTestId('exploreQueryPanelLayout')).toBeInTheDocument();
-  });
-
   it('renders EditorStack component', () => {
     render(<QueryPanel />);
     expect(screen.getByTestId('editor-stack')).toBeInTheDocument();

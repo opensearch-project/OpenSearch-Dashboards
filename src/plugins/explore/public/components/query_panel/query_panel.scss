@@ -3,22 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.queryPanel__container {
-  position: relative;
-  margin-bottom: $euiSizeXS;
-
-  .queryPanel__layout {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: 6px;
-    box-sizing: border-box;
-
-    .queryPanel__verticalSeparator {
-      width: 1px;
-      height: $euiSize;
-      background: $euiColorLightestShade;
-      margin: 0 4px;
-    }
+.exploreQueryPanel {
+  &__editorStackWrapper {
+    margin-bottom: $ouiSizeM;
   }
 }

@@ -15,6 +15,7 @@ import {
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { useBottomEditorText } from '../../../../application/hooks';
+import './bottom_editor.scss';
 
 const placeholder = i18n.translate('explore.queryPanel.queryEditor.placeholder', {
   defaultMessage: 'Search using {symbol} PPL',
@@ -27,33 +28,27 @@ export const BottomEditor = () => {
   const editorMode = useSelector(selectEditorMode);
   const text = useBottomEditorText();
   const { isFocused, onWrapperClick, ...editorProps } = useBottomEditor();
-  // TODO: change me
-  const editorClassPrefix = 'queryEditor';
   const isReadOnly = editorMode !== EditorMode.DualQuery;
   const isVisible = useSelector(selectIsDualEditorMode);
   const showPlaceholder = !text.length && !isReadOnly;
 
   return (
+    // Suppressing below as this should only happen for click events.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div
-      className={classNames(`${editorClassPrefix}Wrapper`, {
-        [`${editorClassPrefix}Wrapper--hidden`]: !isVisible,
+      className={classNames('exploreBottomEditor', {
+        ['exploreBottomEditor--readonly']: isReadOnly,
+        ['exploreBottomEditor--focused']: isFocused,
+        ['exploreBottomEditor--hidden']: !isVisible,
       })}
+      data-test-subj="exploreBottomEditor"
+      onClick={onWrapperClick}
     >
-      {/* Suppressing below as this should only happen for click events.  */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-      <div
-        className={classNames(editorClassPrefix, {
-          [`${editorClassPrefix}--readonly`]: isReadOnly,
-          [`${editorClassPrefix}--focused`]: isFocused,
-        })}
-        data-test-subj="exploreReusableEditor"
-        onClick={onWrapperClick}
-      >
-        <CodeEditor {...editorProps} />
-        {showPlaceholder ? (
-          <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
-        ) : null}
-      </div>
+      <div className="exploreBottomEditor__overlay" />
+      <CodeEditor {...editorProps} />
+      {showPlaceholder ? (
+        <div className="exploreBottomEditor__placeholder">{placeholder}</div>
+      ) : null}
     </div>
   );
 };

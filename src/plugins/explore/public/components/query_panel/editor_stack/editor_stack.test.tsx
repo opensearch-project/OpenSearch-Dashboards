@@ -17,12 +17,7 @@ jest.mock('./bottom_editor', () => ({
   BottomEditor: () => <div data-test-subj="bottom-editor">Bottom Editor Mock</div>,
 }));
 
-jest.mock('./edit_toolbar', () => ({
-  EditToolbar: () => <div data-test-subj="edit-toolbar">Edit Toolbar Mock</div>,
-}));
-
 jest.mock('../../../application/utils/state_management/selectors', () => ({
-  selectIsDualEditorMode: jest.fn(),
   selectIsLoading: jest.fn(),
 }));
 
@@ -31,14 +26,8 @@ jest.mock('react-redux', () => ({
   useSelector: (selector: any) => selector(),
 }));
 
-import {
-  selectIsDualEditorMode,
-  selectIsLoading,
-} from '../../../application/utils/state_management/selectors';
+import { selectIsLoading } from '../../../application/utils/state_management/selectors';
 
-const mockSelectIsDualEditorMode = selectIsDualEditorMode as jest.MockedFunction<
-  typeof selectIsDualEditorMode
->;
 const mockSelectIsLoading = selectIsLoading as jest.MockedFunction<typeof selectIsLoading>;
 
 describe('EditorStack', () => {
@@ -52,7 +41,6 @@ describe('EditorStack', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSelectIsDualEditorMode.mockReturnValue(false);
     mockSelectIsLoading.mockReturnValue(false);
   });
 
@@ -61,43 +49,11 @@ describe('EditorStack', () => {
     return render(<Provider store={store}>{component}</Provider>);
   };
 
-  it('renders the editor stack container', () => {
-    renderWithProvider(<EditorStack />);
-
-    const editorStack = screen.getByTestId('exploreEditorStack');
-    expect(editorStack).toBeInTheDocument();
-    expect(editorStack).toHaveClass('queryPanel__editorStack');
-  });
-
-  it('always renders TopEditor and BottomEditor', () => {
+  it('renders both TopEditor and BottomEditor', () => {
     renderWithProvider(<EditorStack />);
 
     expect(screen.getByTestId('top-editor')).toBeInTheDocument();
     expect(screen.getByTestId('bottom-editor')).toBeInTheDocument();
-  });
-
-  it('does not render EditToolbar when not in dual editor mode', () => {
-    mockSelectIsDualEditorMode.mockReturnValue(false);
-
-    renderWithProvider(<EditorStack />);
-
-    expect(screen.queryByTestId('edit-toolbar')).not.toBeInTheDocument();
-  });
-
-  it('renders EditToolbar when in dual editor mode', () => {
-    mockSelectIsDualEditorMode.mockReturnValue(true);
-
-    renderWithProvider(<EditorStack />);
-
-    expect(screen.getByTestId('edit-toolbar')).toBeInTheDocument();
-  });
-
-  it('renders progress container with correct test subject', () => {
-    renderWithProvider(<EditorStack />);
-
-    const progressContainer = screen.getByTestId('queryPanelEditorProgress');
-    expect(progressContainer).toBeInTheDocument();
-    expect(progressContainer).toHaveClass('queryPanel__editorStack__progress');
   });
 
   it('does not show progress bar when not loading', () => {
@@ -105,7 +61,7 @@ describe('EditorStack', () => {
 
     renderWithProvider(<EditorStack />);
 
-    expect(screen.queryByTestId('queryPanelIsLoading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
   });
 
   it('shows progress bar when loading', () => {
@@ -113,37 +69,28 @@ describe('EditorStack', () => {
 
     renderWithProvider(<EditorStack />);
 
-    expect(screen.getByTestId('queryPanelIsLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('exploreQueryPanelIsLoading')).toBeInTheDocument();
   });
 
-  it('handles dual editor mode toggle correctly', () => {
-    mockSelectIsDualEditorMode.mockReturnValue(false);
+  it('renders progress bar with correct properties when loading', () => {
+    mockSelectIsLoading.mockReturnValue(true);
 
-    const { rerender } = renderWithProvider(<EditorStack />);
+    renderWithProvider(<EditorStack />);
 
-    // Initially no toolbar
-    expect(screen.queryByTestId('edit-toolbar')).not.toBeInTheDocument();
-
-    // Switch to dual editor mode
-    mockSelectIsDualEditorMode.mockReturnValue(true);
-
-    rerender(
-      <Provider store={createMockStore()}>
-        <EditorStack />
-      </Provider>
-    );
-
-    // Now toolbar should be present
-    expect(screen.getByTestId('edit-toolbar')).toBeInTheDocument();
+    const progressBar = screen.getByTestId('exploreQueryPanelIsLoading');
+    expect(progressBar).toBeInTheDocument();
+    expect(progressBar).toHaveClass('euiProgress--xs');
+    expect(progressBar).toHaveClass('euiProgress--accent');
+    expect(progressBar).toHaveClass('euiProgress--absolute');
   });
 
-  it('handles loading state toggle correctly', () => {
+  it('handles loading state changes correctly', () => {
     mockSelectIsLoading.mockReturnValue(false);
 
     const { rerender } = renderWithProvider(<EditorStack />);
 
     // Initially no progress bar
-    expect(screen.queryByTestId('queryPanelIsLoading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
 
     // Switch to loading state
     mockSelectIsLoading.mockReturnValue(true);
@@ -155,6 +102,6 @@ describe('EditorStack', () => {
     );
 
     // Now progress bar should be present
-    expect(screen.getByTestId('queryPanelIsLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('exploreQueryPanelIsLoading')).toBeInTheDocument();
   });
 });
