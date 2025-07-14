@@ -7,7 +7,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
-import { DataView as Dataset } from 'src/plugins/data/common';
+import { DataView as Dataset, DEFAULT_DATA } from '../../../../data/common';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -152,24 +152,47 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const dispatch = useDispatch();
 
-  const handleDatasetSelect = (newDataset: any) => {
+  const handleDatasetSelect = async (newDataset: any) => {
     if (!newDataset) return;
+
     const currentQuery = queryString.getQuery();
-    const serializableDataset =
-      'toDataset' in newDataset && typeof (newDataset as any).toDataset === 'function'
-        ? (newDataset as any).toDataset()
-        : {
-            id: newDataset.id,
-            title: newDataset.title,
-            type: newDataset.type || '',
-            timeFieldName: newDataset.timeFieldName,
-            dataSource: newDataset.dataSource,
-          };
+
+    let serializableDataset;
+
+    // Check if dataset is a DataView instance (which has toDataset method)
+    if ('toDataset' in newDataset && typeof (newDataset as any).toDataset === 'function') {
+      try {
+        serializableDataset = await (newDataset as any).toDataset(data.dataViews);
+      } catch (error) {
+        serializableDataset = await (newDataset as any).toDataset();
+      }
+    } else {
+      const dataSourceRef = newDataset.dataSourceRef || newDataset.dataSource;
+
+      let dataSourceInfo;
+      if (dataSourceRef) {
+        dataSourceInfo = {
+          id: dataSourceRef.id,
+          title: dataSourceRef.title || dataSourceRef.name || dataSourceRef.id,
+          type: dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+        };
+      }
+
+      serializableDataset = {
+        id: newDataset.id,
+        title: newDataset.title,
+        type: newDataset.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        timeFieldName: newDataset.timeFieldName,
+        isRemoteDataset:
+          newDataset.isRemoteDataset !== undefined ? newDataset.isRemoteDataset : !!dataSourceRef,
+        dataSource: dataSourceInfo,
+      };
+    }
 
     dispatch(
       setQueryState({
         ...currentQuery,
-        query: queryString.getInitialQueryByDataset(newDataset).query,
+        query: queryString.getInitialQueryByDataset(serializableDataset).query,
         dataset: serializableDataset,
       })
     );

@@ -29,8 +29,6 @@ export const setDatasetActionCreator = (
     query: { dataset },
   } = getState();
 
-  const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
-
   let dataView;
   if (dataset && dataset.id) {
     await services.data.dataViews.ensureDefaultDataView();
@@ -45,12 +43,15 @@ export const setDatasetActionCreator = (
   dispatch(clearQueryStatusMap());
   dispatch(setQueryWithHistory(queryStringState));
 
-  dispatch(
-    setQueryWithHistory({
-      ...queryStringState,
-      ...(dataView ? { dataset: dataView.toDataset() } : {}),
-    })
-  );
+  const datasetFromDataView = dataView ? await dataView.toDataset() : undefined;
+  const updatedQuery = {
+    ...queryStringState,
+    ...(datasetFromDataView ? { dataset: datasetFromDataView } : {}),
+  };
+
+  dispatch(setQueryWithHistory(updatedQuery));
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
 
   if (newPromptModeIsAvailable !== promptModeIsAvailable) {
     dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable));
@@ -59,7 +60,7 @@ export const setDatasetActionCreator = (
   clearEditors();
   if (newPromptModeIsAvailable && editorMode !== EditorMode.SingleEmpty) {
     dispatch(setEditorMode(EditorMode.SingleEmpty));
-  } else if (editorMode !== EditorMode.SingleQuery) {
+  } else if (!newPromptModeIsAvailable && editorMode !== EditorMode.SingleQuery) {
     dispatch(setEditorMode(EditorMode.SingleQuery));
   }
 

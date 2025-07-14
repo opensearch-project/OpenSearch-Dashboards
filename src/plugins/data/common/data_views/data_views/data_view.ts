@@ -4,7 +4,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { Dataset, FieldFormatsContentType, SavedObjectsClientCommon } from '../..';
+import { Dataset, FieldFormatsContentType, SavedObjectsClientCommon, DEFAULT_DATA } from '../..';
 import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
 
 import { SerializedFieldFormat } from '../../../../expressions/common';
@@ -54,7 +54,6 @@ type FormatFieldFn = (
   type?: FieldFormatsContentType
 ) => any;
 
-const DATA_SOURCE_REFERNECE_NAME = 'dataSource';
 export class DataView implements IDataView {
   public id?: string;
   public title: string = '';
@@ -81,10 +80,18 @@ export class DataView implements IDataView {
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
+  private savedObjectsClient: SavedObjectsClientCommon;
 
-  constructor({ spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] }: DataViewDeps) {
+  constructor({
+    spec = {},
+    fieldFormats,
+    shortDotsEnable = false,
+    metaFields = [],
+    savedObjectsClient,
+  }: DataViewDeps) {
     // set dependencies
     this.fieldFormats = fieldFormats;
+    this.savedObjectsClient = savedObjectsClient;
     // set config
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
@@ -119,6 +126,33 @@ export class DataView implements IDataView {
     });
     this.dataSourceRef = spec.dataSourceRef;
     this.fieldsLoading = spec.fieldsLoading;
+
+    // Initialize data source reference if provided
+    if (this.dataSourceRef?.id) {
+      this.initializeDataSourceRef();
+    }
+  }
+
+  /**
+   * Initialize the data source reference by fetching the saved object
+   */
+  private async initializeDataSourceRef() {
+    if (!this.dataSourceRef?.id) return;
+
+    try {
+      const dataSourceSavedObject = await this.savedObjectsClient.get(
+        this.dataSourceRef.type,
+        this.dataSourceRef.id
+      );
+      const attributes = dataSourceSavedObject.attributes as any;
+      this.dataSourceRef = {
+        id: this.dataSourceRef.id,
+        type: this.dataSourceRef.type,
+        name: attributes.title || this.dataSourceRef.name || this.dataSourceRef.id,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -364,7 +398,7 @@ export class DataView implements IDataView {
           {
             id: this.dataSourceRef.id,
             type: this.dataSourceRef.type,
-            name: DATA_SOURCE_REFERNECE_NAME,
+            name: this.dataSourceRef.name,
           },
         ]
       : [];
@@ -391,24 +425,38 @@ export class DataView implements IDataView {
     );
   }
 
-  /**
-   * Converts a DataView to a serializable Dataset object suitable for storage in Redux
-   * Maps dataSource to dataSourceRef and includes only essential properties
-   * TODO: This should be more complete
-   */
-  public toDataset(): Dataset {
+  public async toDataset(): Promise<Dataset> {
+    const defaultType = DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+    const dataSourceReference = this.dataSourceRef || (this as any).dataSource;
+
+    let dataSource;
+    if (dataSourceReference?.id) {
+      try {
+        const dataSourceSavedObject = await this.savedObjectsClient.get(
+          dataSourceReference.type,
+          dataSourceReference.id
+        );
+        const attributes = dataSourceSavedObject.attributes as any;
+        dataSource = {
+          id: dataSourceReference.id,
+          title: attributes.title || dataSourceReference.id,
+          type: attributes.dataSourceEngineType || dataSourceReference.type || 'OpenSearch',
+        };
+      } catch (error) {
+        dataSource = {
+          id: dataSourceReference.id,
+          title: dataSourceReference.name || dataSourceReference.title || dataSourceReference.id,
+          type: dataSourceReference.type,
+        };
+      }
+    }
+
     return {
       id: this.id || '',
       title: this.title,
-      type: this.type || '',
+      type: this.type || defaultType,
       timeFieldName: this.timeFieldName,
-      dataSource: this.dataSourceRef
-        ? {
-            id: this.dataSourceRef.id,
-            title: this.dataSourceRef.name!,
-            type: this.dataSourceRef.type,
-          }
-        : undefined,
+      dataSource,
     };
   }
 }

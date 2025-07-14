@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   EuiButton,
   EuiSmallButtonEmpty,
@@ -54,18 +54,29 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   } = data;
   const datasetService = queryString.getDatasetService();
 
-  const getTypeFromUri = useCallback((uri?: string): string | undefined => {
-    if (!uri) return undefined;
+  // Helper function to extract data source information from URI format
+  const extractDataSourceInfo = useCallback((uri?: string): { type?: string; name?: string } => {
+    if (!uri) return {};
 
     if (uri.includes('://')) {
       const parts = uri.split('://');
       if (parts.length >= 2) {
-        return parts[0].toUpperCase();
+        const type = parts[0].toUpperCase();
+        const pathParts = parts[1].split('/');
+        const name = pathParts[0];
+        return { type, name };
       }
     }
 
-    return undefined;
+    return { name: uri };
   }, []);
+
+  const getTypeFromUri = useCallback(
+    (uri?: string): string | undefined => {
+      return extractDataSourceInfo(uri).type;
+    },
+    [extractDataSourceInfo]
+  );
 
   const fetchDatasets = useCallback(async () => {
     setIsLoading(true);
@@ -150,8 +161,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
       const iconType = datasetService.getType(datasetType)?.meta.icon.type || 'database';
 
+      const label = displayName || title;
+
       return {
-        label: displayName || title,
+        label,
         searchableLabel: description || title,
         key: id,
         checked: isSelected ? 'on' : undefined,
@@ -174,11 +187,23 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
 
   const datasetIcon = datasetService.getType(datasetType)?.meta.icon.type || 'database';
-  const datasetTitle = selectedDataset
-    ? selectedDataset.displayName || selectedDataset.title
-    : i18n.translate('data.datasetSelect.selectDataLabel', {
+
+  const datasetTitle = useMemo(() => {
+    if (!selectedDataset) {
+      return i18n.translate('data.datasetSelect.selectDataLabel', {
         defaultMessage: 'Select data',
       });
+    }
+
+    // Use displayName if available (this should be the resolved name from toDataset)
+    if (selectedDataset.displayName) {
+      return selectedDataset.displayName;
+    }
+
+    // Otherwise just use the title without data source prefix
+    return selectedDataset.title;
+  }, [selectedDataset]);
+
   return (
     <EuiFormRow
       fullWidth={true}
@@ -189,7 +214,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
       })}
     >
       <EuiFlexGroup gutterSize="none" alignItems="center" wrap={false} responsive={false}>
-        <EuiFlexItem>
+        <EuiFlexItem className="datasetSelect__mainContent">
           <EuiPopover
             button={
               <EuiToolTip display="block" content={datasetTitle}>

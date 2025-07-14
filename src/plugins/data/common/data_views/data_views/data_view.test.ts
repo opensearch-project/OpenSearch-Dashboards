@@ -289,6 +289,88 @@ describe('DataViewWithDataSource', () => {
     });
   });
 
+  describe('toDataset', () => {
+    test('should correctly fetch data source information from saved objects client', async () => {
+      const mockSavedObjectsClient = {
+        get: jest.fn().mockResolvedValue({
+          attributes: {
+            title: 'My OpenSearch Cluster',
+            dataSourceEngineType: 'OpenSearch',
+          },
+        }),
+      };
+
+      dataView = new DataView({
+        spec: {
+          id: 'test-pattern',
+          type: 'index-pattern',
+          dataSourceRef: {
+            id: 'test-data-source-id',
+            type: 'data-source',
+            name: 'opensearch://my-cluster/index-pattern',
+          },
+        },
+        savedObjectsClient: mockSavedObjectsClient as any,
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: false,
+        metaFields: [],
+      });
+
+      const dataset = await dataView.toDataset();
+
+      // Verify the dataset has the expected properties
+      expect(dataset.id).toEqual(dataView.id);
+      expect(dataset.title).toEqual(dataView.title);
+      expect(dataset.type).toEqual(dataView.type || 'index-pattern');
+      expect(dataset.timeFieldName).toEqual(dataView.timeFieldName);
+      expect(dataset.isRemoteDataset).toBe(true);
+      expect(dataset.language).toBe('kuery');
+
+      // Verify data source information is fetched from saved objects
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('data-source', 'test-data-source-id');
+      expect(dataset.dataSource).toBeDefined();
+      expect(dataset.dataSource?.id).toEqual('test-data-source-id');
+      expect(dataset.dataSource?.title).toEqual('My OpenSearch Cluster');
+      expect(dataset.dataSource?.type).toEqual('OpenSearch');
+    });
+
+    test('should handle saved objects client error and use fallback values', async () => {
+      const mockSavedObjectsClient = {
+        get: jest.fn().mockRejectedValue(new Error('Data source not found')),
+      };
+
+      dataView = new DataView({
+        spec: {
+          id: 'test-pattern',
+          type: 'index-pattern',
+          dataSourceRef: {
+            id: 'test-data-source-id',
+            type: 'data-source',
+            name: 'My Cluster',
+          },
+        },
+        savedObjectsClient: mockSavedObjectsClient as any,
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: false,
+        metaFields: [],
+      });
+
+      const dataset = await dataView.toDataset();
+
+      // Verify fallback data source information is used
+      expect(dataset.dataSource?.title).toEqual('My Cluster');
+      expect(dataset.dataSource?.type).toEqual('data-source');
+    });
+
+    test('should handle undefined data source reference', async () => {
+      const dataset = await dataView.toDataset();
+
+      // Verify dataset has no data source
+      expect(dataset.dataSource).toBeUndefined();
+      expect(dataset.isRemoteDataset).toBe(false);
+    });
+  });
+
   describe('flattenHit', () => {
     test('should not modify original hit', () => {
       const nestedArrayDataView = new DataView({
