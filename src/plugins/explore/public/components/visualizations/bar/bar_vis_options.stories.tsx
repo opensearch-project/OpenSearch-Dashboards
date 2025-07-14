@@ -100,20 +100,20 @@ export const WithCustomStyles = Template.bind({});
 WithCustomStyles.args = {
   styleOptions: {
     ...defaultBarChartStyles,
-    addTooltip: false,
+    tooltipOptions: { mode: 'hidden' },
     addLegend: false,
     barWidth: 0.5,
     barPadding: 0.2,
     showBarBorder: true,
     barBorderWidth: 2,
     barBorderColor: '#FF0000',
-    thresholdLine: {
-      ...defaultBarChartStyles.thresholdLine,
+    thresholdLines: defaultBarChartStyles.thresholdLines.map((t) => ({
+      ...t,
       show: true,
       value: 15,
       color: '#00FF00',
       width: 2,
-    },
+    })),
     grid: {
       categoryLines: false,
       valueLines: true,

@@ -16,6 +16,8 @@ jest.mock('@osd/i18n', () => ({
 
 describe('MetricVisStyleControls', () => {
   const mockProps: MetricVisStyleControlsProps = {
+    axisColumnMappings: {},
+    updateVisualization: jest.fn(),
     styleOptions: defaultMetricChartStyles,
     onStyleChange: jest.fn(),
     numericalColumns: [
