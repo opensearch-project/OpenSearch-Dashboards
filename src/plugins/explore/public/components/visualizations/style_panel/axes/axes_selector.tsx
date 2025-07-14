@@ -9,17 +9,28 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiComboBox,
+  EuiButtonEmpty,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { isEmpty, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 
-import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
+import {
+  AxisColumnMappings,
+  AxisRole,
+  VisColumn,
+  VisFieldType,
+  Positions,
+  CompleteAxisWithStyle,
+} from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
 import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
-import { getColumnMatchFromMapping } from '../../visualization_container_utils';
+import {
+  getColumnMatchFromMapping,
+  applyDefaultAxisStyle,
+} from '../../visualization_container_utils';
 
 interface VisColumnOption {
   column: VisColumn;
@@ -115,11 +126,24 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   const availableMappingsFromSelection = useMemo(
     () =>
       availableMappingsFromQuery.filter((mapping) => {
-        return Object.entries(currentSelections).every(([role, selectedCol]) => {
+        const directMatch = Object.entries(currentSelections).every(([role, selectedCol]) => {
           if (!selectedCol) return true;
           const mappingRole = (mapping as any)[role];
           return mappingRole && mappingRole.type === selectedCol.schema;
         });
+
+        if (directMatch) return true;
+
+        // Try switched role matching:
+        // This handles cases where the user switches the selected fields for x and y,
+        // but the available mapping only exists in one direction (e.g., x: numerical, y: categorical).
+        const switchMatch =
+          currentSelections.x &&
+          currentSelections.y &&
+          mapping.x?.type === currentSelections.y.schema &&
+          mapping.y?.type === currentSelections.x.schema;
+
+        return switchMatch;
       }),
     [availableMappingsFromQuery, currentSelections]
   );
@@ -153,12 +177,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       );
 
       if (ruleToUse) {
-        const updatedAxes: AxisColumnMappings = {};
-        Object.entries(currentSelections).forEach(([key, value]) => {
-          if (value) {
-            updatedAxes[key as AxisRole] = value;
-          }
-        });
+        const updatedAxes = applyDefaultAxisStyle(currentSelections);
 
         updateVisualization({ rule: ruleToUse, mappings: updatedAxes });
       }
@@ -226,6 +245,44 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     return allColumns;
   };
 
+  const swapAxes = () => {
+    // setIsSwappingAxes(true);
+
+    const positionSwapMap: Record<Positions, Positions> = {
+      [Positions.LEFT]: Positions.BOTTOM,
+      [Positions.RIGHT]: Positions.TOP,
+      [Positions.BOTTOM]: Positions.LEFT,
+      [Positions.TOP]: Positions.RIGHT,
+    };
+
+    const swapPosition = (pos: Positions): Positions => positionSwapMap[pos] ?? pos;
+
+    const swapAxis = (axis?: CompleteAxisWithStyle): CompleteAxisWithStyle | undefined => {
+      if (!axis) return undefined;
+
+      return {
+        ...axis,
+        styles: axis.styles
+          ? {
+              ...axis.styles,
+              position: swapPosition(axis.styles.position),
+            }
+          : undefined,
+      };
+    };
+
+    const newSelections: Partial<Record<AxisRole, CompleteAxisWithStyle>> = {
+      ...currentSelections,
+      [AxisRole.X]: swapAxis(currentSelections[AxisRole.Y]),
+      [AxisRole.Y]: swapAxis(currentSelections[AxisRole.X]),
+    };
+
+    setCurrentSelections(newSelections);
+  };
+
+  // if it is line bar chart, disable the swap button
+  const hasY2 = Boolean(currentSelections[AxisRole.Y_SECOND]);
+
   return (
     <StyleAccordion
       id="axesSelector"
@@ -235,6 +292,14 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       initialIsOpen={true}
     >
       <>
+        <EuiButtonEmpty
+          size="s"
+          onClick={swapAxes}
+          isDisabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y] || hasY2}
+        >
+          Switch X and Y
+        </EuiButtonEmpty>
+
         {Array.from(allAxisRolesFromSelection).map((axisRole) => {
           const currentSelection = currentSelections[axisRole];
           return (

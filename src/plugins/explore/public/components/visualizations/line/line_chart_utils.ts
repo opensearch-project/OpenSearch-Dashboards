@@ -110,11 +110,14 @@ export const buildMarkConfig = (
  * @param styles The style options
  * @returns The time marker layer configuration or null if disabled
  */
-export const createTimeMarkerLayer = (styles: Partial<LineChartStyleControls> | undefined): any => {
+export const createTimeMarkerLayer = (
+  styles: Partial<LineChartStyleControls> | undefined,
+  timeMarkerLayerEncoding?: 'x' | 'y'
+): any => {
   if (!styles?.addTimeMarker) {
     return null;
   }
-
+  const encodingChannel = timeMarkerLayerEncoding ?? 'x';
   const showTooltip = styles?.tooltipOptions?.mode !== 'hidden';
 
   return {
@@ -126,7 +129,7 @@ export const createTimeMarkerLayer = (styles: Partial<LineChartStyleControls> | 
       tooltip: showTooltip,
     },
     encoding: {
-      x: {
+      [encodingChannel]: {
         datum: { expr: 'now()' },
         type: 'temporal',
       },

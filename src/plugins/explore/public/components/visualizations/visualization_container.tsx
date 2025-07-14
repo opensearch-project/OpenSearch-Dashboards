@@ -40,12 +40,13 @@ import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import {
   applyDefaultVisualization,
-  convertMappingsToStrings,
+  convertMappingsToNameAndStyles,
   convertStringsToMappings,
   findRuleByIndex,
   getAllColumns,
   getColumnMatchFromMapping,
   isValidMapping,
+  buildUpdatedAxisMapping,
 } from './visualization_container_utils';
 
 export interface UpdateVisualizationProps {
@@ -93,7 +94,7 @@ export const VisualizationContainer = () => {
         ...(rule && { ruleId: rule.id, toExpression: rule.toExpression }),
       }));
 
-      dispatch(setAxesMapping(convertMappingsToStrings(mappings)));
+      dispatch(setAxesMapping(convertMappingsToNameAndStyles(mappings)));
       if (rule) setCurrentRuleId(rule.id);
     },
     [dispatch]
@@ -349,19 +350,30 @@ export const VisualizationContainer = () => {
 
               if (reusedMapping) {
                 const allColumns = getAllColumns(visualizationData);
-
-                const usedColumns = new Set<string>();
-                const updatedMapping = Object.fromEntries(
-                  Object.entries(reusedMapping).map(([key, config]) => {
-                    const matchingColumn = Object.values(selectedAxesMapping).find((columnName) => {
-                      if (usedColumns.has(columnName)) return false;
-                      const column = allColumns.find((col) => col.name === columnName);
-                      return column?.schema === config.type;
-                    });
-                    if (matchingColumn) usedColumns.add(matchingColumn);
-                    return [key, matchingColumn];
-                  })
+                const completeAxesMapping = convertStringsToMappings(
+                  selectedAxesMapping,
+                  allColumns
                 );
+
+                // const usedColumns = new Set<string>();
+
+                const updatedMapping = buildUpdatedAxisMapping(
+                  reusedMapping,
+                  completeAxesMapping,
+                  allColumns
+                );
+
+                // Object.fromEntries(
+                //   Object.entries(reusedMapping).map(([key, config]) => {
+                //     const matchingColumn = Object.values(selectedAxesMapping).find((axis) => {
+                //       if (usedColumns.has(axis.name)) return false;
+                //       const column = allColumns.find((col) => col.name === axis.name);
+                //       return column?.schema === config.type;
+                //     });
+                //     if (matchingColumn) usedColumns.add(matchingColumn.name);
+                //     return [key, matchingColumn];
+                //   })
+                // );
 
                 setVisualizationData({
                   ...visualizationData,

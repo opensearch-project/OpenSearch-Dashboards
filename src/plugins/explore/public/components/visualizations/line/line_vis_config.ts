@@ -122,11 +122,16 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
             [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
           },
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
+          },
         ],
       },
       {
         mapping: [
           {
+            // TODO :temporarily disable vertical line-bar chart
             [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
             [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
             [AxisRole.Y_SECOND]: { type: VisFieldType.Numerical, index: 1 },
@@ -140,6 +145,11 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
             [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
           },
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+          },
         ],
       },
       {
@@ -150,6 +160,12 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
             [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
           },
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+          },
         ],
       },
       {
@@ -157,6 +173,10 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           {
             [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
             [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
           },
         ],
       },

@@ -4,7 +4,7 @@
  */
 
 import type { Encoding } from 'vega-lite/build/src/encoding';
-import { LabelAggregationType, VisColumn, ColorSchemas, FieldSetting } from '../types';
+import { LabelAggregationType, ColorSchemas } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { generateColorBySchema } from '../utils/utils';
 
@@ -13,8 +13,8 @@ export const createlabelLayer = (
   styles: Partial<HeatmapChartStyleControls>,
   isRegular: boolean,
   colorField: string,
-  xAxis?: VisColumn,
-  yAxis?: VisColumn
+  xField?: string,
+  yField?: string
 ) => {
   if (!styles.label?.show) {
     return null;
@@ -37,12 +37,12 @@ export const createlabelLayer = (
     },
     encoding: {
       x: {
-        field: xAxis?.column,
+        field: xField,
         type: isRegular ? 'nominal' : 'quantitative',
         bin: !isRegular ? true : false,
       },
       y: {
-        field: yAxis?.column,
+        field: yField,
         type: isRegular ? 'nominal' : 'quantitative',
         bin: !isRegular ? true : false,
       },

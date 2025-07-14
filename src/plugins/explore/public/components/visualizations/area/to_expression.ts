@@ -4,9 +4,10 @@
  */
 
 import { AreaChartStyleControls } from './area_vis_config';
-import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
-import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
+import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole, VisFieldType } from '../types';
+import { buildMarkConfig, createTimeMarkerLayer } from '../line/line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
+import { applyAxisStyling, getSchemaFromAxisMapping } from '../utils/utils';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -43,44 +44,34 @@ export const createSimpleAreaChart = (
     encoding: {
       x: {
         field: dateField,
-        type: 'temporal',
-        axis: applyAxisStyling(
-          {
-            title: dateName,
-            labelAngle: -45,
-          },
-          styles,
-          'category',
-          numericalColumns,
-          [],
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(xAxisColumn),
+        axis: applyAxisStyling(xAxisColumn, styles?.grid?.xLines),
       },
       y: {
         field: metricField,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          [],
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(yAxisColumn),
+        axis: applyAxisStyling(yAxisColumn, styles?.grid?.yLines),
       },
     },
   };
 
   layers.push(mainLayer);
 
+  const encodingDefault = yAxisColumn?.schema === VisFieldType.Numerical ? 'y' : 'x';
+
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    encodingDefault
+  );
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
 
   // Add time marker layer if enabled
-  const timeMarkerLayer = createTimeMarkerLayer(styles);
+  const timeMarkerLayerEncoding = xAxisColumn?.schema === VisFieldType.Date ? 'x' : 'y';
+  const timeMarkerLayer = createTimeMarkerLayer(styles, timeMarkerLayerEncoding);
   if (timeMarkerLayer) {
     layers.push(timeMarkerLayer);
   }
@@ -138,34 +129,17 @@ export const createMultiAreaChart = (
     encoding: {
       x: {
         field: dateField,
-        type: 'temporal',
-        axis: applyAxisStyling(
-          {
-            title: dateName,
-            labelAngle: -45,
-          },
-          styles,
-          'category',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(xAxisColumn),
+        axis: applyAxisStyling(xAxisColumn, styles?.grid?.xLines),
       },
       y: {
         field: metricField,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(yAxisColumn),
+        axis: applyAxisStyling(yAxisColumn, styles?.grid?.yLines),
       },
       color: {
         field: categoryField,
-        type: 'nominal',
+        type: getSchemaFromAxisMapping(colorColumn),
         legend: styles.addLegend
           ? {
               title: categoryName,
@@ -186,14 +160,22 @@ export const createMultiAreaChart = (
 
   layers.push(mainLayer);
 
+  const encodingDefault = yAxisColumn?.schema === VisFieldType.Numerical ? 'y' : 'x';
+
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    encodingDefault
+  );
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
 
+  const timeMarkerLayerEncoding = xAxisColumn?.schema === VisFieldType.Date ? 'x' : 'y';
+
   // Add time marker layer if enabled
-  const timeMarkerLayer = createTimeMarkerLayer(styles);
+  const timeMarkerLayer = createTimeMarkerLayer(styles, timeMarkerLayerEncoding);
   if (timeMarkerLayer) {
     layers.push(timeMarkerLayer);
   }
@@ -236,6 +218,7 @@ export const createFacetedMultiAreaChart = (
   const dateName = xAxisMapping?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
+  const encodingDefault = yAxisMapping?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
   return {
     $schema: VEGASCHEMA,
@@ -267,34 +250,17 @@ export const createFacetedMultiAreaChart = (
           encoding: {
             x: {
               field: dateField,
-              type: 'temporal',
-              axis: applyAxisStyling(
-                {
-                  title: dateName,
-                  labelAngle: -45,
-                },
-                styles,
-                'category',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
+              type: getSchemaFromAxisMapping(xAxisMapping),
+              axis: applyAxisStyling(xAxisMapping, styles?.grid?.xLines),
             },
             y: {
               field: metricField,
-              type: 'quantitative',
-              axis: applyAxisStyling(
-                { title: metricName },
-                styles,
-                'value',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
+              type: getSchemaFromAxisMapping(yAxisMapping),
+              axis: applyAxisStyling(yAxisMapping, styles?.grid?.yLines),
             },
             color: {
               field: category1Field,
-              type: 'nominal',
+              type: getSchemaFromAxisMapping(colorMapping),
               legend: styles.addLegend
                 ? {
                     title: category1Name,
@@ -305,9 +271,17 @@ export const createFacetedMultiAreaChart = (
             // Optional: Add tooltip with all information if tooltip mode is not hidden
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [
-                { field: dateField, type: 'temporal', title: dateName },
-                { field: category1Field, type: 'nominal', title: category1Name },
-                { field: metricField, type: 'quantitative', title: metricName },
+                { field: dateField, type: getSchemaFromAxisMapping(xAxisMapping), title: dateName },
+                {
+                  field: category1Field,
+                  type: getSchemaFromAxisMapping(colorMapping),
+                  title: category1Name,
+                },
+                {
+                  field: metricField,
+                  type: getSchemaFromAxisMapping(yAxisMapping),
+                  title: metricName,
+                },
               ],
             }),
           },
@@ -325,7 +299,7 @@ export const createFacetedMultiAreaChart = (
                   tooltip: styles.tooltipOptions?.mode !== 'hidden',
                 },
                 encoding: {
-                  y: { value: threshold.value || 0 },
+                  [encodingDefault]: { value: threshold.value || 0 },
                   ...(styles.tooltipOptions?.mode !== 'hidden' && {
                     tooltip: {
                       value: `${threshold.name ? threshold.name + ': ' : ''}Threshold: ${
@@ -409,45 +383,37 @@ export const createCategoryAreaChart = (
     encoding: {
       x: {
         field: categoryField,
-        type: 'nominal',
-        axis: applyAxisStyling(
-          {
-            title: categoryName,
-            labelAngle: -45,
-          },
-          styles,
-          'category',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(xAxisColumn),
+        axis: applyAxisStyling(xAxisColumn, styles?.grid?.xLines),
       },
       y: {
         field: metricField,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(yAxisColumn),
+        axis: applyAxisStyling(yAxisColumn, styles?.grid?.yLines),
       },
       // Optional: Add tooltip with all information if tooltip mode is not hidden
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: categoryField, type: 'nominal', title: categoryName },
-          { field: metricField, type: 'quantitative', title: metricName },
+          {
+            field: categoryField,
+            type: getSchemaFromAxisMapping(xAxisColumn),
+            title: categoryName,
+          },
+          { field: metricField, type: getSchemaFromAxisMapping(yAxisColumn), title: metricName },
         ],
       }),
     },
   };
 
   layers.push(mainLayer);
+  const encodingDefault = yAxisColumn?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    encodingDefault
+  );
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -505,36 +471,19 @@ export const createStackedAreaChart = (
     encoding: {
       x: {
         field: categoryField1,
-        type: 'nominal',
-        axis: applyAxisStyling(
-          {
-            title: categoryName1,
-            labelAngle: -45,
-          },
-          styles,
-          'category',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(xAxisMapping),
+        axis: applyAxisStyling(xAxisMapping, styles?.grid?.xLines),
       },
       y: {
         field: metricField,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
-        stack: 'normalize', // Can be 'zero', 'normalize', or 'center'
+        type: getSchemaFromAxisMapping(yAxisMapping),
+        axis: applyAxisStyling(yAxisMapping, styles?.grid?.yLines),
+        stack: 'zero', // Can be 'zero', 'normalize', or 'center'
       },
       // Color: Second categorical field (stacking)
       color: {
         field: categoryField2,
-        type: 'nominal',
+        type: getSchemaFromAxisMapping(colorMapping),
         legend: styles.addLegend
           ? {
               title: categoryName2,
@@ -545,16 +494,30 @@ export const createStackedAreaChart = (
       // Optional: Add tooltip with all information if tooltip mode is not hidden
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: categoryField1, type: 'nominal', title: categoryName1 },
-          { field: categoryField2, type: 'nominal', title: categoryName2 },
-          { field: metricField, type: 'quantitative', title: metricName },
+          {
+            field: categoryField1,
+            type: getSchemaFromAxisMapping(xAxisMapping),
+            title: categoryName1,
+          },
+          {
+            field: categoryField2,
+            type: getSchemaFromAxisMapping(colorMapping),
+            title: categoryName2,
+          },
+          { field: metricField, type: getSchemaFromAxisMapping(yAxisMapping), title: metricName },
         ],
       }),
     },
   };
 
+  const encodingDefault = xAxisMapping?.schema === VisFieldType.Categorical ? 'y' : 'x';
+
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    encodingDefault
+  );
   if (thresholdLayer) {
     spec.layer = [{ mark: spec.mark, encoding: spec.encoding }, ...thresholdLayer.layer];
     delete spec.mark;

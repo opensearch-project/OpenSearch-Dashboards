@@ -19,7 +19,24 @@ export interface ChartTypeMapping extends ChartMetadata {
   priority: number; // Higher number means higher priority for rule matching
 }
 
-export type AxisColumnMappings = Partial<Record<AxisRole, VisColumn>>;
+export interface AxisStyleStoredInMapping {
+  position: Positions;
+  show: boolean;
+  style: Record<string, any>;
+  labels: AxisLabels;
+  title: AxisTitle;
+}
+
+export interface AxisWithStyle {
+  styles?: AxisStyleStoredInMapping;
+  name: string;
+}
+
+export interface CompleteAxisWithStyle extends VisColumn {
+  styles?: AxisStyleStoredInMapping;
+}
+
+export type AxisColumnMappings = Partial<Record<AxisRole, CompleteAxisWithStyle>>;
 
 export interface VisualizationRule {
   id: string; // Unique rule identifier

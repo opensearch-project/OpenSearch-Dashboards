@@ -130,13 +130,10 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
             [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
           },
-        ],
-      },
-      {
-        mapping: [
+          // TODO the first one should be default?
           {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
           },
         ],
       },
@@ -145,6 +142,23 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           {
             [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
             [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+          },
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
             [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
           },
         ],
@@ -157,6 +171,12 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
             [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
             [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
           },
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+          },
         ],
       },
       {
@@ -164,6 +184,11 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
           {
             [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
             [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+          },
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
             [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
           },
         ],

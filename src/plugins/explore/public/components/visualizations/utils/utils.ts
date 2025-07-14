@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StandardAxes, ColorSchemas, AxisRole, Positions } from '../types';
+import {
+  StandardAxes,
+  ColorSchemas,
+  AxisRole,
+  VisFieldType,
+  CompleteAxisWithStyle,
+} from '../types';
 
-export const applyAxisStyling = (axesStyle?: StandardAxes, showGrid?: boolean): any => {
+export const applyAxisStyling = (axesStyle?: CompleteAxisWithStyle, showGrid?: boolean): any => {
   const gridEnabled = showGrid ?? true;
 
   const fullAxisConfig: any = {
@@ -17,13 +23,13 @@ export const applyAxisStyling = (axesStyle?: StandardAxes, showGrid?: boolean): 
 
   // Apply position
 
-  fullAxisConfig.orient = axesStyle?.position;
+  fullAxisConfig.orient = axesStyle?.styles?.position;
 
   // Apply title settings
-  fullAxisConfig.title = axesStyle?.title.text || axesStyle?.field?.default?.name;
+  fullAxisConfig.title = axesStyle?.styles?.title.text || axesStyle?.name;
 
   // Apply axis visibility
-  if (!axesStyle?.show) {
+  if (!axesStyle?.styles?.show) {
     fullAxisConfig.title = null;
     fullAxisConfig.labels = false;
     fullAxisConfig.ticks = false;
@@ -32,25 +38,26 @@ export const applyAxisStyling = (axesStyle?: StandardAxes, showGrid?: boolean): 
   }
 
   // Apply label settings
-  if (axesStyle.labels) {
-    if (!axesStyle.labels.show) {
+  if (axesStyle?.styles?.labels) {
+    if (!axesStyle?.styles?.labels.show) {
       fullAxisConfig.labels = false;
     } else {
       fullAxisConfig.labels = true;
       // Apply label rotation/alignment
-      if (axesStyle.labels.rotate !== undefined) {
-        fullAxisConfig.labelAngle = axesStyle.labels.rotate;
+      if (axesStyle?.styles?.labels.rotate !== undefined) {
+        fullAxisConfig.labelAngle = axesStyle?.styles?.labels.rotate;
       }
 
       // Apply label truncation
-      if (axesStyle.labels.truncate !== undefined && axesStyle.labels.truncate > 0) {
-        fullAxisConfig.labelLimit = axesStyle.labels.truncate;
+      if (
+        axesStyle?.styles?.labels.truncate !== undefined &&
+        axesStyle?.styles?.labels.truncate > 0
+      ) {
+        fullAxisConfig.labelLimit = axesStyle?.styles?.labels.truncate;
       }
 
       // Apply label filtering (this controls overlapping labels)
-      if (axesStyle.labels.filter !== undefined) {
-        fullAxisConfig.labelOverlap = axesStyle.labels.filter ? 'greedy' : false;
-      }
+      fullAxisConfig.labelOverlap = 'greedy';
     }
   }
 
@@ -99,33 +106,17 @@ export function generateColorBySchema(count: number, schema: ColorSchemas): stri
   return colors;
 }
 
-export function swapAxes(axes: StandardAxes[]) {
-  return axes.map((axis) => {
-    if (axis.axisRole === AxisRole.Y) {
-      return {
-        ...axis,
-        axisRole: AxisRole.X,
-        position:
-          axis.position === Positions.LEFT
-            ? Positions.BOTTOM
-            : axis.position === Positions.RIGHT
-            ? Positions.TOP
-            : axis.position,
-      };
-    }
-
-    if (axis.axisRole === AxisRole.X) {
-      return {
-        ...axis,
-        axisRole: AxisRole.Y,
-        position:
-          axis.position === Positions.BOTTOM
-            ? Positions.LEFT
-            : axis.position === Positions.TOP
-            ? Positions.RIGHT
-            : axis.position,
-      };
-    }
-    return axis;
-  });
-}
+export const getSchemaFromAxisMapping = (
+  axis?: CompleteAxisWithStyle
+): 'quantitative' | 'nominal' | 'temporal' | 'unknown' => {
+  switch (axis?.schema) {
+    case VisFieldType.Numerical:
+      return 'quantitative';
+    case VisFieldType.Categorical:
+      return 'nominal';
+    case VisFieldType.Date:
+      return 'temporal';
+    default:
+      return 'unknown';
+  }
+};

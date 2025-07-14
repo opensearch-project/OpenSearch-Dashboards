@@ -4,14 +4,17 @@
  */
 
 import { LineChartStyleControls } from './line_vis_config';
-import { VisColumn, Positions, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import {
-  buildMarkConfig,
-  createTimeMarkerLayer,
-  applyAxisStyling,
-  ValueAxisPosition,
-} from './line_chart_utils';
+  VisColumn,
+  Positions,
+  VEGASCHEMA,
+  AxisColumnMappings,
+  AxisRole,
+  VisFieldType,
+} from '../types';
+import { buildMarkConfig, createTimeMarkerLayer, ValueAxisPosition } from './line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
+import { applyAxisStyling, getSchemaFromAxisMapping } from '../utils/utils';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -42,44 +45,34 @@ export const createSimpleLineChart = (
     encoding: {
       x: {
         field: dateField,
-        type: 'temporal',
-        axis: applyAxisStyling(
-          {
-            title: dateName,
-            labelAngle: -45,
-          },
-          styles,
-          'category',
-          numericalColumns,
-          [],
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(xAxisColumn),
+        axis: applyAxisStyling(xAxisColumn, styles?.grid?.xLines),
       },
       y: {
         field: metricField,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          [],
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(yAxisColumn),
+        axis: applyAxisStyling(yAxisColumn, styles?.grid?.yLines),
       },
     },
   };
 
   layers.push(mainLayer);
 
+  const encodingDefault = yAxisColumn?.schema === VisFieldType.Numerical ? 'y' : 'x';
+  const timeMarkerLayerEncoding = xAxisColumn?.schema === VisFieldType.Date ? 'x' : 'y';
+
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    encodingDefault
+  );
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
 
   // Add time marker layer if enabled
-  const timeMarkerLayer = createTimeMarkerLayer(styles);
+  const timeMarkerLayer = createTimeMarkerLayer(styles, timeMarkerLayerEncoding);
   if (timeMarkerLayer) {
     layers.push(timeMarkerLayer);
   }
@@ -124,31 +117,13 @@ export const createLineBarChart = (
     encoding: {
       x: {
         field: dateField,
-        type: 'temporal',
-        axis: applyAxisStyling(
-          {
-            title: dateName,
-            labelAngle: -45,
-          },
-          styles,
-          'category',
-          numericalColumns,
-          [],
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(xAxisMapping),
+        axis: applyAxisStyling(xAxisMapping, styles?.grid?.xLines),
       },
       y: {
         field: metric1Field,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metric1Name },
-          styles,
-          'value',
-          numericalColumns,
-          [],
-          dateColumns,
-          ValueAxisPosition.Left // First value axis which is on the left
-        ),
+        type: getSchemaFromAxisMapping(yAxisMapping),
+        axis: applyAxisStyling(yAxisMapping, styles?.grid?.yLines),
       },
       color: {
         datum: metric1Name,
@@ -167,23 +142,12 @@ export const createLineBarChart = (
     encoding: {
       x: {
         field: dateField,
-        type: 'temporal',
+        type: getSchemaFromAxisMapping(xAxisMapping),
       },
       y: {
         field: metric2Field,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          {
-            title: metric2Name,
-            orient: Positions.RIGHT,
-          },
-          styles,
-          'value',
-          numericalColumns,
-          [],
-          dateColumns,
-          ValueAxisPosition.Right // Second value axis which is on the right
-        ),
+        type: getSchemaFromAxisMapping(secondYAxisMapping),
+        axis: applyAxisStyling(secondYAxisMapping, styles?.grid?.yLines),
         scale: { zero: false },
       },
       color: {
@@ -201,13 +165,21 @@ export const createLineBarChart = (
   layers.push(barLayer, lineLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const encodingDefault = yAxisMapping?.schema === VisFieldType.Numerical ? 'y' : 'x';
+
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    encodingDefault
+  );
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
 
   // Add time marker layer if enabled
-  const timeMarkerLayer = createTimeMarkerLayer(styles);
+  const timeMarkerLayerEncoding = xAxisMapping?.schema === VisFieldType.Date ? 'x' : 'y';
+
+  const timeMarkerLayer = createTimeMarkerLayer(styles, timeMarkerLayerEncoding);
   if (timeMarkerLayer) {
     layers.push(timeMarkerLayer);
   }
@@ -257,30 +229,13 @@ export const createMultiLineChart = (
     encoding: {
       x: {
         field: dateField,
-        type: 'temporal',
-        axis: applyAxisStyling(
-          {
-            title: dateName,
-            labelAngle: -45,
-          },
-          styles,
-          'category',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(xAxisColumn),
+        axis: applyAxisStyling(xAxisColumn, styles?.grid?.xLines),
       },
       y: {
         field: metricField,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(yAxisColumn),
+        axis: applyAxisStyling(yAxisColumn, styles?.grid?.yLines),
       },
       color: {
         field: categoryField,
@@ -299,13 +254,20 @@ export const createMultiLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const encodingDefault = yAxisColumn?.schema === VisFieldType.Numerical ? 'y' : 'x';
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    encodingDefault
+  );
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
 
   // Add time marker layer if enabled
-  const timeMarkerLayer = createTimeMarkerLayer(styles);
+  const timeMarkerLayerEncoding = xAxisColumn?.schema === VisFieldType.Date ? 'x' : 'y';
+
+  const timeMarkerLayer = createTimeMarkerLayer(styles, timeMarkerLayerEncoding);
   if (timeMarkerLayer) {
     layers.push(timeMarkerLayer);
   }
@@ -510,38 +472,27 @@ export const createCategoryLineChart = (
     encoding: {
       x: {
         field: categoryField,
-        type: 'nominal',
-        axis: applyAxisStyling(
-          {
-            title: categoryName,
-            labelAngle: -45,
-          },
-          styles,
-          'category',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(xAxisColumn),
+        axis: applyAxisStyling(xAxisColumn, styles?.grid?.xLines),
       },
       y: {
         field: metricField,
-        type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        ),
+        type: getSchemaFromAxisMapping(yAxisColumn),
+        axis: applyAxisStyling(yAxisColumn, styles?.grid?.yLines),
       },
     },
   };
 
   layers.push(mainLayer);
 
+  const encodingDefault = yAxisColumn?.schema === VisFieldType.Numerical ? 'y' : 'x';
+
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    encodingDefault
+  );
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }

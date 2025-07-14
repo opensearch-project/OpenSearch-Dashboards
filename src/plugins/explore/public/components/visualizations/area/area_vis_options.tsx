@@ -10,9 +10,10 @@ import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
-import { AxesOptions } from '../style_panel/axes/axes';
 import { GridOptionsPanel } from '../style_panel/grid/grid';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
+import { AxisRole, AxisStyleStoredInMapping } from '../types';
 
 export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyleControls>;
 
@@ -35,6 +36,23 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
+  const handleAxisStyleChange = (
+    role: AxisRole,
+    updatedStyles: Partial<AxisStyleStoredInMapping>
+  ) => {
+    const updatedMapping = {
+      ...axisColumnMappings,
+      [role]: {
+        ...axisColumnMappings[role],
+        styles: {
+          ...axisColumnMappings[role]?.styles,
+          ...updatedStyles,
+        },
+      },
+    };
+    updateVisualization({ mappings: updatedMapping });
+  };
+
   const notShowLegend =
     (numericalColumns.length === 1 &&
       categoricalColumns.length === 0 &&
@@ -55,14 +73,9 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <AxesOptions
-          categoryAxes={styleOptions.categoryAxes}
-          valueAxes={styleOptions.valueAxes}
-          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
-          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
+        <AllAxesOptions
+          axisColumnMappings={axisColumnMappings}
+          onChangeAxisStyle={handleAxisStyleChange}
         />
       </EuiFlexItem>
 

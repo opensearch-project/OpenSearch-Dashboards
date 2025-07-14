@@ -13,35 +13,32 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { StandardAxes, Positions, AxisRole } from '../../types';
+import {
+  Positions,
+  AxisRole,
+  AxisStyleStoredInMapping,
+  CompleteAxisWithStyle,
+  AxisLabels,
+} from '../../types';
 import { DebouncedTruncateField, DebouncedText } from '.././utils';
 import { StyleAccordion } from '../../style_panel/style_accordion';
 
 interface AllAxesOptionsProps {
-  standardAxes: StandardAxes[];
-  onStandardAxesChange: (categoryAxes: StandardAxes[]) => void;
-  onChangeSwitchAxes: (categoryAxes: StandardAxes[]) => void;
+  axisColumnMappings: Partial<Record<AxisRole, CompleteAxisWithStyle>>;
+  onChangeAxisStyle: (role: AxisRole, updatedStyles: Partial<AxisStyleStoredInMapping>) => void;
 }
 
 interface AxesOptionsProps {
-  standardAxes: StandardAxes[];
-  onStandardAxesChange: (categoryAxes: StandardAxes[]) => void;
+  axisColumnMappings: Partial<Record<AxisRole, CompleteAxisWithStyle>>;
+  onChangeAxisStyle: (role: AxisRole, updatedStyles: Partial<AxisStyleStoredInMapping>) => void;
 }
 
-const getAxisDisplayTitle = (axis: StandardAxes) => {
-  if (axis.title?.text && axis.title.text.trim() !== '') {
-    return axis.title.text;
-  }
-  return axis.field?.default.name || '';
-};
-
 export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
-  standardAxes,
-  onStandardAxesChange,
+  axisColumnMappings,
+  onChangeAxisStyle,
 }) => {
   const [expandedAxes, setExpandedAxes] = useState<Record<string, boolean>>({});
 
@@ -52,41 +49,83 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
     });
   };
 
-  const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
-    const updatedAxes = [...standardAxes];
-    updatedAxes[index] = {
-      ...updatedAxes[index],
-      ...updates,
-    };
-
-    onStandardAxesChange(updatedAxes);
+  const getPositionOptions = (role: AxisRole) => {
+    if (role === AxisRole.Y) {
+      return [
+        {
+          id: Positions.LEFT,
+          label: i18n.translate(`explore.vis.standardAxes.${role}.left`, {
+            defaultMessage: 'Left',
+          }),
+        },
+        {
+          id: Positions.RIGHT,
+          label: i18n.translate(`explore.vis.standardAxes.${role}.right`, {
+            defaultMessage: 'Right',
+          }),
+        },
+      ];
+    } else if (role === AxisRole.Y_SECOND) {
+      return [
+        {
+          id: Positions.RIGHT,
+          label: i18n.translate(`explore.vis.standardAxes.${role}.right`, {
+            defaultMessage: 'Right',
+          }),
+        },
+        {
+          id: Positions.LEFT,
+          label: i18n.translate(`explore.vis.standardAxes.${role}.left`, {
+            defaultMessage: 'Left',
+          }),
+        },
+      ];
+    } else {
+      return [
+        {
+          id: Positions.BOTTOM,
+          label: i18n.translate(`explore.vis.standardAxes.${role}.bottom`, {
+            defaultMessage: 'Bottom',
+          }),
+        },
+        {
+          id: Positions.TOP,
+          label: i18n.translate(`explore.vis.standardAxes.${role}.top`, { defaultMessage: 'Top' }),
+        },
+      ];
+    }
   };
 
+  const getDefaultSelections = (role: AxisRole, axis: CompleteAxisWithStyle) => {
+    if (role === AxisRole.Y) {
+      return axis.styles?.position ?? Positions.LEFT;
+    }
+    if (role === AxisRole.Y_SECOND) {
+      return axis.styles?.position ?? Positions.RIGHT;
+    }
+    return axis.styles?.position ?? Positions.BOTTOM;
+  };
   return (
     <>
-      {standardAxes.map((axis, index) => {
-        const isYAxis = axis.axisRole === AxisRole.Y;
-
+      {Object.entries(axisColumnMappings).map(([role, axis]) => {
+        const axisRole = role as AxisRole;
+        if (role !== AxisRole.X && role !== AxisRole.Y && role !== AxisRole.Y_SECOND) return null;
         return (
-          <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
+          <EuiSplitPanel.Inner paddingSize="s" key={role} color="subdued">
             <EuiButtonEmpty
               iconSide="left"
               color="text"
-              iconType={expandedAxes[axis.id] ? 'arrowDown' : 'arrowRight'}
-              onClick={() => toggleAxisExpansion(axis.id)}
+              iconType={expandedAxes[role] ? 'arrowDown' : 'arrowRight'}
+              onClick={() => toggleAxisExpansion(role)}
               size="xs"
-              data-test-subj={`standardAxis-${index}-button`}
+              data-test-subj={`standardAxis-${role}-button`}
             >
-              {isYAxis
-                ? i18n.translate('explore.vis.gridOptions.categoryXAxis', {
-                    defaultMessage: 'Y-Axis',
-                  })
-                : i18n.translate('explore.vis.gridOptions.categoryYAxis', {
-                    defaultMessage: 'X-Axis',
-                  })}
+              {i18n.translate('explore.vis.gridOptions.categoryXAxis', {
+                defaultMessage: role,
+              })}
             </EuiButtonEmpty>
             <EuiSpacer size="s" />
-            {expandedAxes[axis.id] && (
+            {expandedAxes[role] && (
               <div>
                 <EuiFormRow
                   label={i18n.translate('explore.vis.standardAxes.axisPosition', {
@@ -94,22 +133,12 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                   })}
                 >
                   <EuiButtonGroup
-                    name={`AxisPosition-${index}`}
+                    name={`AxisPosition-${role}`}
                     legend="Select axis position"
-                    options={
-                      isYAxis
-                        ? [
-                            { id: Positions.LEFT, label: 'Left' },
-                            { id: Positions.RIGHT, label: 'Right' },
-                          ]
-                        : [
-                            { id: Positions.BOTTOM, label: 'Bottom' },
-                            { id: Positions.TOP, label: 'Top' },
-                          ]
-                    }
-                    idSelected={axis.position}
+                    options={getPositionOptions(axisRole)}
+                    idSelected={getDefaultSelections(axisRole, axis)}
                     onChange={(id) =>
-                      updateAxis(index, {
+                      onChangeAxisStyle(axisRole, {
                         position: id as Positions,
                       })
                     }
@@ -123,18 +152,18 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                     label={i18n.translate('explore.vis.standardAxes.showAxisLinesAndLabels', {
                       defaultMessage: 'Show axis lines and labels',
                     })}
-                    checked={axis.show}
-                    onChange={(e) => updateAxis(index, { show: e.target.checked })}
+                    checked={axis.styles?.show ?? true}
+                    onChange={(e) => onChangeAxisStyle(axisRole, { show: e.target.checked })}
                   />
                 </EuiFormRow>
-                {axis.show && (
+                {axis.styles?.show && (
                   <>
                     <DebouncedText
-                      value={getAxisDisplayTitle(axis)}
+                      value={axis.styles.title.text || axis.name}
                       placeholder="Axis name"
                       onChange={(text) =>
-                        updateAxis(index, {
-                          title: { ...axis.title, text },
+                        onChangeAxisStyle(axisRole, {
+                          title: { ...axis.styles?.title, text },
                         })
                       }
                       label={i18n.translate('explore.vis.standardAxes.axisTitle', {
@@ -147,16 +176,19 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                         label={i18n.translate('explore.vis.standardAxes.showLabels', {
                           defaultMessage: 'Show labels',
                         })}
-                        checked={axis.labels.show}
+                        checked={axis.styles?.labels.show}
                         onChange={(e) =>
-                          updateAxis(index, {
-                            labels: { ...axis.labels, show: e.target.checked },
+                          onChangeAxisStyle(axisRole, {
+                            labels: {
+                              ...axis.styles?.labels,
+                              show: e.target.checked,
+                            } as AxisLabels,
                           })
                         }
                       />
                     </EuiFormRow>
 
-                    {axis.labels.show && (
+                    {axis.styles?.labels.show && (
                       <>
                         <EuiSpacer size="s" />
                         <EuiFlexGroup>
@@ -169,9 +201,9 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                               <EuiSelect
                                 compressed
                                 value={
-                                  axis.labels.rotate === 0
+                                  axis.styles?.labels.rotate === 0
                                     ? 'horizontal'
-                                    : axis.labels.rotate === -90
+                                    : axis.styles?.labels.rotate === -90
                                     ? 'vertical'
                                     : 'angled'
                                 }
@@ -180,11 +212,11 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
                                   if (e.target.value === 'vertical') rotationValue = -90;
                                   else if (e.target.value === 'angled') rotationValue = -45;
 
-                                  updateAxis(index, {
+                                  onChangeAxisStyle(axisRole, {
                                     labels: {
-                                      ...axis.labels,
+                                      ...axis.styles?.labels,
                                       rotate: rotationValue,
-                                    },
+                                    } as AxisLabels,
                                   });
                                 }}
                                 options={[
@@ -198,13 +230,13 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
 
                           <EuiFlexItem>
                             <DebouncedTruncateField
-                              value={axis.labels.truncate ?? 100}
+                              value={axis.styles?.labels.truncate ?? 100}
                               onChange={(truncateValue) => {
-                                updateAxis(index, {
+                                onChangeAxisStyle(axisRole, {
                                   labels: {
-                                    ...axis.labels,
+                                    ...axis.styles?.labels,
                                     truncate: truncateValue,
-                                  },
+                                  } as AxisLabels,
                                 });
                               }}
                               label={i18n.translate('explore.vis.standardAxes.labelTruncate', {
@@ -227,9 +259,8 @@ export const StandardAxesOptions: React.FC<AxesOptionsProps> = ({
 };
 
 export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
-  standardAxes,
-  onStandardAxesChange,
-  onChangeSwitchAxes,
+  axisColumnMappings,
+  onChangeAxisStyle,
 }) => {
   return (
     <StyleAccordion
@@ -243,20 +274,9 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <StandardAxesOptions
-            standardAxes={standardAxes}
-            onStandardAxesChange={onStandardAxesChange}
+            axisColumnMappings={axisColumnMappings}
+            onChangeAxisStyle={onChangeAxisStyle}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            onClick={() => onChangeSwitchAxes(standardAxes)}
-            data-test-subj="switchAxesButton"
-          >
-            {i18n.translate('explore.vis.standardAxes.switchXY', {
-              defaultMessage: 'Switch X and Y',
-            })}
-          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </StyleAccordion>

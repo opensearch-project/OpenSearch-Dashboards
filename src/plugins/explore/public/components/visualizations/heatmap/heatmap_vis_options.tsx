@@ -6,7 +6,7 @@
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { StandardAxes, AxisRole } from '../types';
+import { AxisRole, AxisStyleStoredInMapping } from '../types';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import {
@@ -14,7 +14,6 @@ import {
   HeatmapExclusiveVisOptions,
 } from './heatmap_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
-import { swapAxes } from '../utils/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { GridOptionsPanel } from '../style_panel/grid/grid';
@@ -39,6 +38,23 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
     value: HeatmapChartStyleControls[K]
   ) => {
     onStyleChange({ [key]: value });
+  };
+
+  const handleAxisStyleChange = (
+    role: AxisRole,
+    updatedStyles: Partial<AxisStyleStoredInMapping>
+  ) => {
+    const updatedMapping = {
+      ...axisColumnMappings,
+      [role]: {
+        ...axisColumnMappings[role],
+        styles: {
+          ...axisColumnMappings[role]?.styles,
+          ...updatedStyles,
+        },
+      },
+    };
+    updateVisualization({ mappings: updatedMapping });
   };
 
   useEffect(() => {
@@ -68,20 +84,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numericalColumns, categoricalColumns, dateColumns, axisColumnMappings]);
 
-  const handleSwitchAxes = (axes: StandardAxes[]) => {
-    if (axisColumnMappings[AxisRole.X] && axisColumnMappings[AxisRole.Y]) {
-      const updateAxes = swapAxes(axes);
-      updateStyleOption('StandardAxes', updateAxes);
-      updateVisualization({
-        mappings: {
-          ...axisColumnMappings,
-          [AxisRole.Y]: axisColumnMappings[AxisRole.X],
-          [AxisRole.X]: axisColumnMappings[AxisRole.Y],
-        },
-      });
-    }
-  };
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -97,9 +99,8 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
 
       <EuiFlexItem grow={false}>
         <AllAxesOptions
-          standardAxes={styleOptions.StandardAxes}
-          onChangeSwitchAxes={handleSwitchAxes}
-          onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
+          axisColumnMappings={axisColumnMappings}
+          onChangeAxisStyle={handleAxisStyleChange}
         />
       </EuiFlexItem>
       {shouldShowTypeAndGrid && (

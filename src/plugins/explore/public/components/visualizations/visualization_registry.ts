@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, map } from 'lodash';
 import { createLineConfig } from './line/line_vis_config';
 import { createHeatmapConfig } from './heatmap/heatmap_vis_config';
 import { createScatterConfig } from './scatter/scatter_vis_config';
@@ -18,9 +18,13 @@ import {
   VisColumn,
   VisFieldType,
   VisualizationRule,
+  AxisRole,
+  AxisTitle,
+  Positions,
+  AxisLabels,
 } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
-import { getColumnMatchFromMapping } from './visualization_container_utils';
+import { getColumnMatchFromMapping, getDefaultAxisStyle } from './visualization_container_utils';
 
 /**
  * Registry for visualization rules and configurations.
@@ -85,7 +89,7 @@ export class VisualizationRegistry {
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
-  ) {
+  ): AxisColumnMappings {
     const findColumns = (type: VisFieldType) => {
       switch (type) {
         case VisFieldType.Numerical:
@@ -103,14 +107,22 @@ export class VisualizationRegistry {
     const currentlyDisplayedMapping = possibleMapping?.find(({ mapping }) =>
       isEqual(getColumnMatchFromMapping(mapping), rule.matchIndex)
     );
-    return currentlyDisplayedMapping
-      ? (Object.fromEntries(
-          Object.entries(currentlyDisplayedMapping!.mapping[0]).map(([role, config]) => [
-            role,
-            config && findColumns(config.type)[config.index],
-          ])
-        ) as AxisColumnMappings)
-      : {};
+
+    if (!currentlyDisplayedMapping) return {};
+
+    const axisStyles: AxisColumnMappings = {};
+
+    for (const [axisRole, config] of Object.entries(currentlyDisplayedMapping.mapping[0])) {
+      const role = axisRole as AxisRole;
+
+      const column = findColumns(config.type)[config.index];
+      if (!column) continue;
+
+      const styles = getDefaultAxisStyle(role);
+      axisStyles[role] = styles ? { ...column, styles } : column;
+    }
+
+    return axisStyles;
   }
 
   /**

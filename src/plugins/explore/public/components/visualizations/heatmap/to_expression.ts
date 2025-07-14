@@ -4,8 +4,8 @@
  */
 
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { VisColumn, AxisRole, VEGASCHEMA, AxisColumnMappings } from '../types';
-import { applyAxisStyling, getAxisByRole } from '../utils/utils';
+import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
+import { applyAxisStyling, getSchemaFromAxisMapping } from '../utils/utils';
 import { createlabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
 
 export const createHeatmapWithBin = (
@@ -14,8 +14,8 @@ export const createHeatmapWithBin = (
   styles: Partial<HeatmapChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ) => {
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
+  const xAxis = axisColumnMappings?.x;
+  const yAxis = axisColumnMappings?.y;
 
   const colorFieldColumn = axisColumnMappings?.color as any;
 
@@ -28,20 +28,20 @@ export const createHeatmapWithBin = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
-        type: 'quantitative',
+        field: xAxis?.column,
+        type: getSchemaFromAxisMapping(xAxis),
         bin: true,
         axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
       },
       y: {
-        field: yAxis?.field?.default?.column,
-        type: 'quantitative',
+        field: yAxis?.column,
+        type: getSchemaFromAxisMapping(yAxis),
         bin: true,
         axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
       },
       color: {
         field: colorFieldColumn?.column,
-        type: 'quantitative',
+        type: getSchemaFromAxisMapping(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
         bin: !styles.exclusive?.useCustomRanges
           ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
@@ -69,13 +69,7 @@ export const createHeatmapWithBin = (
     transform: addTransform(styles, colorFieldColumn?.column),
     layer: [
       markLayer,
-      createlabelLayer(
-        styles,
-        false,
-        colorFieldColumn?.column,
-        xAxis?.field?.default,
-        yAxis?.field?.default
-      ),
+      createlabelLayer(styles, false, colorFieldColumn?.column, xAxis?.column, yAxis?.column),
     ].filter(Boolean),
   };
   return baseSpec;
@@ -87,8 +81,8 @@ export const createRegularHeatmap = (
   styles: Partial<HeatmapChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ) => {
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
+  const xAxis = axisColumnMappings?.x;
+  const yAxis = axisColumnMappings?.y;
 
   const colorFieldColumn = axisColumnMappings?.color!;
   const markLayer: any = {
@@ -100,19 +94,19 @@ export const createRegularHeatmap = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
-        type: 'nominal',
+        field: xAxis?.column,
+        type: getSchemaFromAxisMapping(xAxis),
         axis: applyAxisStyling(xAxis, false),
         // for regular heatmap, both x and y refer to categorical fields, we shall disable grid line for this case
       },
       y: {
-        field: yAxis?.field?.default?.column,
-        type: 'nominal',
+        field: yAxis?.column,
+        type: getSchemaFromAxisMapping(yAxis),
         axis: applyAxisStyling(yAxis, false),
       },
       color: {
         field: colorFieldColumn?.column,
-        type: 'quantitative',
+        type: getSchemaFromAxisMapping(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
         bin: !styles.exclusive?.useCustomRanges
           ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
@@ -140,13 +134,7 @@ export const createRegularHeatmap = (
     transform: addTransform(styles, colorFieldColumn?.column),
     layer: [
       markLayer,
-      createlabelLayer(
-        styles,
-        true,
-        colorFieldColumn?.column,
-        xAxis?.field?.default,
-        yAxis?.field?.default
-      ),
+      createlabelLayer(styles, true, colorFieldColumn?.column, xAxis?.column, yAxis?.column),
     ].filter(Boolean),
   };
 

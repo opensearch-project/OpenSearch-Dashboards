@@ -3,13 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ScatterChartStyleControls } from './scatter_vis_config';
-import { AxisRole, StandardAxes } from '../types';
+import { AxisRole, AxisStyleStoredInMapping } from '../types';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
-import { swapAxes } from '../utils/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
@@ -40,45 +39,21 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   // if it is 2 metrics, then it should not show legend
   const shouldShowLegend = !(numericalColumns.length === 2 && categoricalColumns.length === 0);
 
-  useEffect(() => {
-    const axesWithFields = styleOptions.StandardAxes.map((axis) => {
-      if (axis.axisRole === AxisRole.X) {
-        return {
-          ...axis,
-          field: {
-            default: axisColumnMappings?.[AxisRole.X]!,
-            options: [axisColumnMappings?.[AxisRole.X]!],
-          },
-        };
-      }
-      if (axis.axisRole === AxisRole.Y) {
-        return {
-          ...axis,
-          field: {
-            default: axisColumnMappings?.[AxisRole.Y]!,
-            options: [axisColumnMappings?.[AxisRole.Y]!],
-          },
-        };
-      }
-      return axis;
-    });
-
-    updateStyleOption('StandardAxes', axesWithFields);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numericalColumns, categoricalColumns, dateColumns, axisColumnMappings]);
-
-  const handleSwitchAxes = (axes: StandardAxes[]) => {
-    if (axisColumnMappings[AxisRole.X] && axisColumnMappings[AxisRole.Y]) {
-      const updateAxes = swapAxes(axes);
-      updateStyleOption('StandardAxes', updateAxes);
-      updateVisualization({
-        mappings: {
-          ...axisColumnMappings,
-          [AxisRole.Y]: axisColumnMappings[AxisRole.X],
-          [AxisRole.X]: axisColumnMappings[AxisRole.Y],
+  const handleAxisStyleChange = (
+    role: AxisRole,
+    updatedStyles: Partial<AxisStyleStoredInMapping>
+  ) => {
+    const updatedMapping = {
+      ...axisColumnMappings,
+      [role]: {
+        ...axisColumnMappings[role],
+        styles: {
+          ...axisColumnMappings[role]?.styles,
+          ...updatedStyles,
         },
-      });
-    }
+      },
+    };
+    updateVisualization({ mappings: updatedMapping });
   };
 
   return (
@@ -95,9 +70,8 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <AllAxesOptions
-          standardAxes={styleOptions.StandardAxes}
-          onChangeSwitchAxes={handleSwitchAxes}
-          onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
+          axisColumnMappings={axisColumnMappings}
+          onChangeAxisStyle={handleAxisStyleChange}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
