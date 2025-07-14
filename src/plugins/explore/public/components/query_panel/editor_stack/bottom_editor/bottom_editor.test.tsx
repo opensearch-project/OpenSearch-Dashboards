@@ -86,7 +86,7 @@ describe('BottomEditor', () => {
   it('renders the bottom editor component with correct test subject', () => {
     renderWithProvider(<BottomEditor />);
 
-    expect(screen.getByTestId('exploreReusableEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('exploreBottomEditor')).toBeInTheDocument();
     expect(screen.getByTestId('code-editor')).toBeInTheDocument();
     expect(screen.getByText('Code Editor Mock')).toBeInTheDocument();
   });
@@ -96,7 +96,7 @@ describe('BottomEditor', () => {
 
     renderWithProvider(<BottomEditor />);
 
-    const bottomEditor = screen.getByTestId('exploreReusableEditor');
+    const bottomEditor = screen.getByTestId('exploreBottomEditor');
     expect(bottomEditor).toHaveClass('exploreBottomEditor--hidden');
   });
 
@@ -105,7 +105,7 @@ describe('BottomEditor', () => {
 
     renderWithProvider(<BottomEditor />);
 
-    const bottomEditor = screen.getByTestId('exploreReusableEditor');
+    const bottomEditor = screen.getByTestId('exploreBottomEditor');
     expect(bottomEditor).not.toHaveClass('exploreBottomEditor--hidden');
   });
 
@@ -114,7 +114,7 @@ describe('BottomEditor', () => {
 
     renderWithProvider(<BottomEditor />);
 
-    const bottomEditor = screen.getByTestId('exploreReusableEditor');
+    const bottomEditor = screen.getByTestId('exploreBottomEditor');
     expect(bottomEditor).toHaveClass('exploreBottomEditor--readonly');
   });
 
@@ -123,7 +123,7 @@ describe('BottomEditor', () => {
 
     renderWithProvider(<BottomEditor />);
 
-    const bottomEditor = screen.getByTestId('exploreReusableEditor');
+    const bottomEditor = screen.getByTestId('exploreBottomEditor');
     expect(bottomEditor).not.toHaveClass('exploreBottomEditor--readonly');
   });
 
@@ -136,7 +136,7 @@ describe('BottomEditor', () => {
 
     renderWithProvider(<BottomEditor />);
 
-    const bottomEditor = screen.getByTestId('exploreReusableEditor');
+    const bottomEditor = screen.getByTestId('exploreBottomEditor');
     expect(bottomEditor).toHaveClass('exploreBottomEditor--focused');
   });
 
@@ -149,14 +149,14 @@ describe('BottomEditor', () => {
 
     renderWithProvider(<BottomEditor />);
 
-    const bottomEditor = screen.getByTestId('exploreReusableEditor');
+    const bottomEditor = screen.getByTestId('exploreBottomEditor');
     expect(bottomEditor).not.toHaveClass('exploreBottomEditor--focused');
   });
 
   it('renders overlay div', () => {
     const { container } = renderWithProvider(<BottomEditor />);
 
-    const overlay = container.querySelector('.exploreTopEditor__overlay');
+    const overlay = container.querySelector('.exploreBottomEditor__overlay');
     expect(overlay).toBeInTheDocument();
   });
 
@@ -217,7 +217,7 @@ describe('BottomEditor', () => {
       } as any);
 
       const { container } = renderWithProvider(<BottomEditor />);
-      const editorWrapper = container.querySelector('[data-test-subj="exploreReusableEditor"]');
+      const editorWrapper = container.querySelector('[data-test-subj="exploreBottomEditor"]');
 
       expect(mockOnWrapperClick).not.toHaveBeenCalled();
 

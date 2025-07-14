@@ -28,8 +28,6 @@ export const BottomEditor = () => {
   const editorMode = useSelector(selectEditorMode);
   const text = useBottomEditorText();
   const { isFocused, onWrapperClick, ...editorProps } = useBottomEditor();
-  // TODO: change me
-  const editorClassPrefix = 'queryEditor';
   const isReadOnly = editorMode !== EditorMode.DualQuery;
   const isVisible = useSelector(selectIsDualEditorMode);
   const showPlaceholder = !text.length && !isReadOnly;
@@ -43,13 +41,13 @@ export const BottomEditor = () => {
         ['exploreBottomEditor--focused']: isFocused,
         ['exploreBottomEditor--hidden']: !isVisible,
       })}
-      data-test-subj="exploreReusableEditor"
+      data-test-subj="exploreBottomEditor"
       onClick={onWrapperClick}
     >
-      <div className="exploreTopEditor__overlay" />
+      <div className="exploreBottomEditor__overlay" />
       <CodeEditor {...editorProps} />
       {showPlaceholder ? (
-        <div className={`${editorClassPrefix}__placeholder`}>{placeholder}</div>
+        <div className="exploreBottomEditor__placeholder">{placeholder}</div>
       ) : null}
     </div>
   );

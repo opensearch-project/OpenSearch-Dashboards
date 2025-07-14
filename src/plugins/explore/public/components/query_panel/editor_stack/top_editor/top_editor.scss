@@ -35,11 +35,11 @@
         background:
           linear-gradient(
             90deg,
-            #005eb8 0%,
-            #e47fb2 25%,
-            #1f9eff 50%,
-            #00d4aa 75%,
-            #005eb8 100%
+            #a855f7 0%,
+            #3b82f6 25%,
+            #06b6d4 50%,
+            #ec4899 75%,
+            #a855f7 100%
           );
         background-size: 300% 100%;
         animation: aiMode 10s ease-in-out infinite;
@@ -47,10 +47,11 @@
     }
   }
 
-  &--readonly {
-    .exploreTopEditor__overlay {
-      background-color: rgba($ouiColorLightShade, 0.2);
-    }
+  &__promptIcon {
+    color: $ouiColorDarkShade;
+    position: absolute;
+    left: $ouiSizeXXS;
+    top: 9px; // hard-coding to align it to editor
   }
 }
 

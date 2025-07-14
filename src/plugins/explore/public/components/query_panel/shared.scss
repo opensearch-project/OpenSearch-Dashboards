@@ -13,12 +13,6 @@ $exploreQueryPanelEditToolbarZIndex: 2;
   padding: $ouiSizeS $ouiSizeXS;
   position: relative;
 
-  &--focused {
-    border-bottom-width: 2px;
-    border-bottom-color: $ouiColorPrimary;
-    margin-bottom: -1px; // prevent layout shifting due to increase in border width;
-  }
-
   &__overlay {
     border-radius: $ouiBorderRadius;
     height: 100%;
@@ -27,6 +21,34 @@ $exploreQueryPanelEditToolbarZIndex: 2;
     top: 0;
     width: 100%;
     z-index: $exploreQueryPanelOverlayZIndex;
+  }
+
+  &--readonly {
+    .exploreBottomEditor__overlay,
+    .exploreTopEditor__overlay {
+      /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+      background-color: rgba($ouiColorLightShade, 0.2);
+    }
+  }
+
+  &--focused {
+    border-bottom-width: 2px;
+    border-bottom-color: $ouiColorPrimary;
+    margin-bottom: -1px; // prevent layout shifting due to increase in border width;
+
+    .exploreBottomEditor__overlay,
+    .exploreTopEditor__overlay {
+      display: none; // hide it when focused so you can highlight
+    }
+  }
+
+  &__placeholder {
+    position: absolute;
+    left: 29px; // hard-code to match where the text is in editor
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: $ouiFontSizeXS;
+    color: $ouiColorDisabledText;
   }
 }
 

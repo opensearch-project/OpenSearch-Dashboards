@@ -37,6 +37,14 @@ jest.mock('../../../../application/hooks', () => ({
   useTopEditorText: jest.fn(),
 }));
 
+jest.mock('@elastic/eui', () => ({
+  EuiIcon: ({ type, size, className }: any) => (
+    <div data-test-subj="eui-icon" data-type={type} data-size={size} className={className}>
+      EuiIcon Mock
+    </div>
+  ),
+}));
+
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useSelector: (selector: any) => selector(),
@@ -188,14 +196,50 @@ describe('TopEditor', () => {
     expect(screen.queryByTestId('edit-toolbar')).not.toBeInTheDocument();
   });
 
-  it('does not show placeholder (showPlaceholder is hardcoded to false)', () => {
+  it('shows placeholder when text is empty and not readonly', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
     mockUseTopEditorText.mockReturnValue('');
 
     renderWithProvider(<TopEditor />);
 
-    // The current implementation has showPlaceholder hardcoded to false
+    expect(screen.getByText('Ask a question or search using </> PPL')).toBeInTheDocument();
+  });
+
+  it('does not show placeholder when text is present', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+    mockUseTopEditorText.mockReturnValue('SELECT * FROM logs');
+
+    renderWithProvider(<TopEditor />);
+
     expect(screen.queryByText('Ask a question or search using </> PPL')).not.toBeInTheDocument();
+  });
+
+  it('does not show placeholder when readonly (DualQuery mode)', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
+    mockUseTopEditorText.mockReturnValue('');
+
+    renderWithProvider(<TopEditor />);
+
+    expect(screen.queryByText('Ask a question or search using </> PPL')).not.toBeInTheDocument();
+  });
+
+  it('shows different placeholder for dual prompt mode', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.DualPrompt);
+    mockUseTopEditorText.mockReturnValue('');
+
+    renderWithProvider(<TopEditor />);
+
+    expect(screen.getByText('Ask a question')).toBeInTheDocument();
+  });
+
+  it('shows disabled prompt placeholder when prompt mode is not available', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+    mockSelectPromptModeIsAvailable.mockReturnValue(false);
+    mockUseTopEditorText.mockReturnValue('');
+
+    renderWithProvider(<TopEditor />);
+
+    expect(screen.getByText('Search using </> PPL')).toBeInTheDocument();
   });
 
   it('passes correct props to CodeEditor', () => {
@@ -216,6 +260,37 @@ describe('TopEditor', () => {
     const codeEditor = screen.getByTestId('code-editor');
     expect(codeEditor).toHaveAttribute('value', 'SELECT COUNT(*) FROM users');
     expect(codeEditor).toHaveAttribute('language', 'ppl');
+  });
+
+  it('renders prompt icon when in prompt mode', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.SinglePrompt);
+    mockSelectIsDualEditorMode.mockReturnValue(false);
+
+    renderWithProvider(<TopEditor />);
+
+    const promptIcon = screen.getByTestId('eui-icon');
+    expect(promptIcon).toBeInTheDocument();
+    expect(promptIcon).toHaveAttribute('data-type', 'sparkleFilled');
+    expect(promptIcon).toHaveAttribute('data-size', 'm');
+    expect(promptIcon).toHaveClass('exploreTopEditor__promptIcon');
+  });
+
+  it('renders prompt icon when in dual mode', () => {
+    mockSelectIsDualEditorMode.mockReturnValue(true);
+
+    renderWithProvider(<TopEditor />);
+
+    const promptIcon = screen.getByTestId('eui-icon');
+    expect(promptIcon).toBeInTheDocument();
+  });
+
+  it('does not render prompt icon when not in prompt mode', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+    mockSelectIsDualEditorMode.mockReturnValue(false);
+
+    renderWithProvider(<TopEditor />);
+
+    expect(screen.queryByTestId('eui-icon')).not.toBeInTheDocument();
   });
 
   describe('onWrapperClick', () => {

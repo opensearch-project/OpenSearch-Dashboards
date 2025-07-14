@@ -12,8 +12,9 @@
   align-items: center;
   position: absolute;
   right: $ouiSizeS;
-  bottom: -12px;
+  bottom: 0;
   z-index: $exploreQueryPanelEditToolbarZIndex;
+  transform: translateY(50%);
 
   @include exploreQueryPanelButton;
   @include exploreQueryPanelVerticalSeparator;

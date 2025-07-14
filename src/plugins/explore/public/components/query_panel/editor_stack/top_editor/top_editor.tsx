@@ -7,6 +7,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
 import classNames from 'classnames';
+import { EuiIcon } from '@elastic/eui';
 import { useTopEditor } from '../../utils';
 import {
   selectEditorMode,
@@ -49,8 +50,10 @@ export const TopEditor = () => {
   const text = useTopEditorText();
   const { isFocused, onWrapperClick, ...editorProps } = useTopEditor();
   const isReadOnly = editorMode === EditorMode.DualQuery;
-  const showPlaceholder = !text.length && !isReadOnly && false;
+  const showPlaceholder = !text.length && !isReadOnly;
   const isDualMode = useSelector(selectIsDualEditorMode);
+  const isPromptMode =
+    isDualMode || editorMode === EditorMode.SinglePrompt || editorMode === EditorMode.SingleEmpty;
 
   const placeholderText = useMemo(() => {
     if (!promptModeIsAvailable) {
@@ -68,15 +71,15 @@ export const TopEditor = () => {
         ['exploreTopEditor--readonly']: isReadOnly,
         ['exploreTopEditor--focused']: isFocused,
         ['exploreTopEditor--dualMode']: isDualMode,
-        ['exploreTopEditor--promptMode']:
-          isDualMode ||
-          editorMode === EditorMode.SinglePrompt ||
-          editorMode === EditorMode.SingleEmpty,
+        ['exploreTopEditor--promptMode']: isPromptMode,
       })}
       data-test-subj="exploreTopEditor"
       onClick={onWrapperClick}
     >
       <div className="exploreTopEditor__overlay" />
+      {isPromptMode ? (
+        <EuiIcon type="sparkleFilled" size="m" className="exploreTopEditor__promptIcon" />
+      ) : null}
       {isDualMode ? <EditToolbar /> : null}
       <CodeEditor {...editorProps} />
       {showPlaceholder ? (

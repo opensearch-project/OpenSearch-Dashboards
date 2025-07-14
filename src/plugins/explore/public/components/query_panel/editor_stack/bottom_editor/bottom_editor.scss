@@ -15,13 +15,6 @@
     display: none;
   }
 
-  &--readonly {
-    .exploreTopEditor__overlay {
-      /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
-      background-color: rgba($ouiColorLightShade, 0.2);
-    }
-  }
-
   &__overlay {
     border-top: none;
     border-top-left-radius: 0;
