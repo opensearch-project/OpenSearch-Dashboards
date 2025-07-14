@@ -12,7 +12,7 @@ export interface PatternsTableProps {
 }
 
 export interface PatternItem {
-  pattern: string;
+  sample: string;
   ratio: number;
   count: number;
 }
