@@ -7,6 +7,7 @@ import { i18n } from '@osd/i18n';
 import { ExploreServices } from '../../../../types';
 import { resetExploreStateActionCreator } from '../../../../application/utils/state_management/actions/reset_explore_state';
 import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
+import { useClearEditors } from '../../../../application/hooks';
 
 export const newTopNavData: TopNavMenuIconUIData = {
   tooltip: i18n.translate('explore.topNav.newTitle', {
@@ -20,6 +21,9 @@ export const newTopNavData: TopNavMenuIconUIData = {
   controlType: 'icon',
 };
 
-export const getNewButtonRun = (services: ExploreServices): TopNavMenuIconRun => () => {
-  services.store.dispatch(resetExploreStateActionCreator(services));
+export const getNewButtonRun = (
+  services: ExploreServices,
+  clearEditors: ReturnType<typeof useClearEditors>
+): TopNavMenuIconRun => () => {
+  services.store.dispatch(resetExploreStateActionCreator(services, clearEditors));
 };
