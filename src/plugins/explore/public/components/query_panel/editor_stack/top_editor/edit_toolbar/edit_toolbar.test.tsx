@@ -8,18 +8,18 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { EditToolbar } from './edit_toolbar';
-import { EditorMode } from '../../../../application/utils/state_management/types';
+import { EditorMode } from '../../../../../application/utils/state_management/types';
 
-jest.mock('../../../../application/hooks', () => ({
+jest.mock('../../../../../application/hooks', () => ({
   useClearEditors: jest.fn(),
   useToggleDualEditorMode: jest.fn(),
 }));
 
-jest.mock('../../../../application/utils/state_management/actions/query_editor', () => ({
+jest.mock('../../../../../application/utils/state_management/actions/query_editor', () => ({
   clearEditorActionCreator: jest.fn(),
 }));
 
-jest.mock('../../../../application/utils/state_management/selectors', () => ({
+jest.mock('../../../../../application/utils/state_management/selectors', () => ({
   selectEditorMode: jest.fn(),
 }));
 
@@ -29,9 +29,9 @@ jest.mock('react-redux', () => ({
   useSelector: (selector: any) => selector(),
 }));
 
-import { clearEditorActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
-import { selectEditorMode } from '../../../../application/utils/state_management/selectors';
-import { useClearEditors, useToggleDualEditorMode } from '../../../../application/hooks';
+import { clearEditorActionCreator } from '../../../../../application/utils/state_management/actions/query_editor';
+import { selectEditorMode } from '../../../../../application/utils/state_management/selectors';
+import { useClearEditors, useToggleDualEditorMode } from '../../../../../application/hooks';
 
 const mockDispatch = jest.fn();
 const mockToggleDualEditorMode = jest.fn();

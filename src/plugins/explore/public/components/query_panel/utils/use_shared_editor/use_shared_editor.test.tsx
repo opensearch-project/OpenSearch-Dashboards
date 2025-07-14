@@ -25,6 +25,7 @@ jest.mock('../../../../application/hooks', () => ({
   useOnEditorRunContext: jest.fn(),
   useSetEditorText: jest.fn(),
   useToggleDualEditorMode: jest.fn(),
+  useEditorRefs: jest.fn(),
 }));
 
 jest.mock('../../../../application/context', () => ({
@@ -82,6 +83,7 @@ import {
   useOnEditorRunContext,
   useSetEditorText,
   useToggleDualEditorMode,
+  useEditorRefs,
 } from '../../../../application/hooks';
 import IActionDescriptor = monaco.editor.IActionDescriptor;
 
@@ -96,6 +98,7 @@ const mockUseSetEditorText = useSetEditorText as jest.MockedFunction<typeof useS
 const mockUseToggleDualEditorMode = useToggleDualEditorMode as jest.MockedFunction<
   typeof useToggleDualEditorMode
 >;
+const mockUseEditorRefs = useEditorRefs as jest.MockedFunction<typeof useEditorRefs>;
 const mockOnEditorChangeActionCreator = onEditorChangeActionCreator as jest.MockedFunction<
   typeof onEditorChangeActionCreator
 >;
@@ -151,6 +154,10 @@ describe('useSharedEditor', () => {
     mockUseOnEditorRunContext.mockReturnValue(mockOnEditorRunContext);
     mockUseSetEditorText.mockReturnValue(mockSetEditorText);
     mockUseToggleDualEditorMode.mockReturnValue(mockToggleDualEditorMode);
+    mockUseEditorRefs.mockReturnValue({
+      topEditorRef: { current: { focus: jest.fn() } as any },
+      bottomEditorRef: { current: { focus: jest.fn() } as any },
+    });
 
     mockGetCommandEnterAction.mockReturnValue({ id: 'command-enter' } as IActionDescriptor);
     mockGetShiftEnterAction.mockReturnValue({ id: 'shift-enter' } as IActionDescriptor);
@@ -192,7 +199,7 @@ describe('useSharedEditor', () => {
         })
     );
 
-    mockUseDatasetContext.mockReturnValue({ indexPattern: { id: 'test' } } as any);
+    mockUseDatasetContext.mockReturnValue({ dataset: { id: 'test' } } as any);
     mockGetEffectiveLanguageForAutoComplete.mockReturnValue('SQL');
 
     return renderHook(() => useSharedEditor({ ...defaultProps, ...props }), {
@@ -205,7 +212,6 @@ describe('useSharedEditor', () => {
 
     expect(result.current).toEqual({
       isFocused: false,
-      height: 32,
       useLatestTheme: true,
       editorDidMount: expect.any(Function),
       onChange: expect.any(Function),
@@ -218,6 +224,7 @@ describe('useSharedEditor', () => {
           { open: '"', close: '"' },
           { open: "'", close: "'" },
         ],
+        wordPattern: /@?\w[\w@'.-]*[?!,;:"]*/,
       },
     });
   });
