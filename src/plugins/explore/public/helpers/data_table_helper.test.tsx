@@ -106,7 +106,7 @@ describe('data_table_helper', () => {
         name: 'field1',
         displayName: 'field1',
         isSortable: true,
-        isRemoveable: false,
+        isRemoveable: true,
         colLeftIdx: -1,
         colRightIdx: 1,
       });
@@ -114,7 +114,7 @@ describe('data_table_helper', () => {
         name: 'field2',
         displayName: 'field2',
         isSortable: true,
-        isRemoveable: false,
+        isRemoveable: true,
         colLeftIdx: 0,
         colRightIdx: -1,
       });
@@ -138,7 +138,7 @@ describe('data_table_helper', () => {
         name: 'field1',
         displayName: 'field1',
         isSortable: true,
-        isRemoveable: false,
+        isRemoveable: true,
         colLeftIdx: -1,
         colRightIdx: -1,
       });
@@ -165,15 +165,33 @@ describe('data_table_helper', () => {
       expect(result[0].displayName).toBe('field...dots');
     });
 
-    it('should handle field sortability from indexPattern', () => {
+    it('should handle field sortability from indexPattern when osdFieldOverrides.sortable is undefined', () => {
       const columns = ['field1'];
+      mockGetOsdFieldOverrides.mockReturnValue({});
       (mockIndexPattern.getFieldByName as jest.Mock).mockReturnValue({
         sortable: false,
       });
 
       const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
 
-      expect(result[0].isSortable).toBe(true); // Should use osdFieldOverrides.sortable
+      expect(result[0].isSortable).toBe(false); // Should use field.sortable when osdFieldOverrides.sortable is undefined
+    });
+
+    it('should handle _source column removability correctly', () => {
+      const columns = ['_source'];
+
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
+
+      expect(result[0].isRemoveable).toBe(false); // _source is not removeable when it's the only column
+    });
+
+    it('should make _source column removeable when there are multiple columns', () => {
+      const columns = ['_source', 'field1'];
+
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
+
+      expect(result[0].isRemoveable).toBe(true); // _source is removeable when there are other columns
+      expect(result[1].isRemoveable).toBe(true);
     });
   });
 });

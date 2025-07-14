@@ -258,7 +258,7 @@ export function DiscoverFieldSearch({
         onChange={(event) => onChange('name', event.currentTarget.value)}
         placeholder={searchPlaceholder}
         value={value}
-        className="dscSideBar_searchInput"
+        className="exploreSideBar_searchInput"
       />
     </EuiOutsideClickDetector>
   );

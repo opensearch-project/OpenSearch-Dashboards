@@ -32,7 +32,7 @@ import { groupFields } from './group_fields';
 import { getDefaultFieldFilter } from './field_filter';
 
 describe('group_fields', function () {
-  it('should group fields into resultFields and schemaFields', function () {
+  it('should group fields into selectedFields, queryFields, and discoveredFields', function () {
     const fields = [
       {
         name: 'category',
@@ -69,44 +69,20 @@ describe('group_fields', function () {
       },
     ];
 
+    const columns = ['category'];
     const fieldCounts = {
       category: 1,
       currency: 1,
-      customer_birth_date: 1,
     };
 
     const fieldFilterState = getDefaultFieldFilter();
+    // Set missing to false to include fields not in fieldCounts
+    fieldFilterState.missing = false;
 
-    const actual = groupFields(fields as any, fieldCounts, fieldFilterState);
+    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "resultFields": Array [
-          Object {
-            "aggregatable": true,
-            "count": 1,
-            "displayName": "Category",
-            "esTypes": Array [
-              "text",
-            ],
-            "name": "category",
-            "readFromDocValues": true,
-            "scripted": false,
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "count": 0,
-            "displayName": "Currency",
-            "esTypes": Array [
-              "keyword",
-            ],
-            "name": "currency",
-            "readFromDocValues": true,
-            "scripted": false,
-            "searchable": true,
-            "type": "string",
-          },
+        "discoveredFields": Array [
           Object {
             "aggregatable": true,
             "count": 0,
@@ -121,7 +97,36 @@ describe('group_fields', function () {
             "type": "date",
           },
         ],
-        "schemaFields": Array [],
+        "queryFields": Array [
+          Object {
+            "aggregatable": true,
+            "count": 0,
+            "displayName": "Currency",
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "currency",
+            "readFromDocValues": true,
+            "scripted": false,
+            "searchable": true,
+            "type": "string",
+          },
+        ],
+        "selectedFields": Array [
+          Object {
+            "aggregatable": true,
+            "count": 1,
+            "displayName": "Category",
+            "esTypes": Array [
+              "text",
+            ],
+            "name": "category",
+            "readFromDocValues": true,
+            "scripted": false,
+            "searchable": true,
+            "type": "string",
+          },
+        ],
       }
     `);
   });

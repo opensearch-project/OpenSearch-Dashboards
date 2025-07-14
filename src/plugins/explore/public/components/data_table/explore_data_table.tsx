@@ -5,6 +5,7 @@
 
 import React, { useCallback, useMemo, useRef, memo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -15,12 +16,14 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { UI_SETTINGS } from '../../../../data/public';
 import { DocViewFilterFn } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
-import { useSelector } from '../../application/legacy/discover/application/utils/state_management';
 import { filterColumns } from '../../application/legacy/discover/application/view_components/utils/filter_columns';
 import { getLegacyDisplayedColumns } from '../../helpers/data_table_helper';
 import { getDocViewsRegistry } from '../../application/legacy/discover/opensearch_dashboards_services';
 import { ExploreServices } from '../../types';
-import { selectSavedSearch } from '../../application/utils/state_management/selectors';
+import {
+  selectColumns,
+  selectSavedSearch,
+} from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
 import {
   defaultPrepareQueryString,
@@ -30,6 +33,7 @@ import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { useChangeQueryEditor } from '../../application/hooks';
 import { useDatasetContext } from '../../application/context';
+import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -37,6 +41,7 @@ const ExploreDataTableComponent = () => {
 
   const { onAddFilter } = useChangeQueryEditor();
   const savedSearch = useSelector(selectSavedSearch);
+  const columns = useSelector(selectColumns);
   const { dataset } = useDatasetContext();
 
   const results = useSelector((state: RootState) => state.results);
@@ -85,6 +90,7 @@ const ExploreDataTableComponent = () => {
     }
 
     let filteredColumns = filterColumns(
+      columns,
       dataset,
       uiSettings.get(DEFAULT_COLUMNS_SETTING),
       uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
@@ -104,7 +110,7 @@ const ExploreDataTableComponent = () => {
     );
 
     return displayedColumns;
-  }, [dataset, processedResults?.fieldCounts, uiSettings]);
+  }, [columns, dataset, processedResults?.fieldCounts, uiSettings]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -115,6 +121,21 @@ const ExploreDataTableComponent = () => {
   }, []);
 
   const docViewsRegistry = useMemo(() => getDocViewsRegistry(), []);
+
+  const dispatch = useDispatch();
+  const onAddColumn = useCallback(
+    (col: string) => {
+      dispatch(addColumn({ column: col }));
+    },
+    [dispatch]
+  );
+
+  const onRemoveColumn = useCallback(
+    (col: string) => {
+      dispatch(removeColumn(col));
+    },
+    [dispatch]
+  );
 
   return (
     <div
@@ -150,6 +171,8 @@ const ExploreDataTableComponent = () => {
             isShortDots={uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE)}
             onFilter={onAddFilter as DocViewFilterFn}
             scrollToTop={scrollToTop}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
