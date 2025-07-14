@@ -12,6 +12,7 @@ import {
   DataGridTable,
   DataGridTableProps,
 } from '../application/legacy/discover/application/components/data_grid/data_grid_table';
+import { TableVis } from '../components/visualizations/table/table_vis';
 interface ExploreEmbeddableProps {
   searchProps: SearchProps;
 }
@@ -45,6 +46,37 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
     showPagination: true,
   } as DataGridTableProps;
 
+  const getEmbeddableContent = () => {
+    if (searchProps?.rows?.length === 0) {
+      return (
+        <EuiFlexItem>
+          <VisualizationNoResults />
+        </EuiFlexItem>
+      );
+    }
+
+    if (searchProps.activeTab === 'logs') {
+      return <DataGridTableMemoized {...tableProps} />;
+    }
+
+    if (searchProps.chartType === 'table') {
+      return (
+        <TableVis
+          columns={searchProps.tableData?.columns ?? []}
+          rows={searchProps.tableData?.rows ?? []}
+        />
+      );
+    }
+
+    return (
+      <ReactExpressionRenderer
+        expression={searchProps.expression ?? ''}
+        searchContext={searchProps.searchContext}
+        key={JSON.stringify(searchProps.searchContext) + searchProps.expression}
+      />
+    );
+  };
+
   return (
     <EuiFlexGroup
       gutterSize="xs"
@@ -54,21 +86,7 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       className="eui-xScrollWithShadows eui-yScrollWithShadows"
     >
       <EuiFlexItem style={{ minHeight: 0 }} data-test-subj="osdExploreContainer">
-        {searchProps?.rows?.length === 0 ? (
-          <EuiFlexItem>
-            <VisualizationNoResults />
-          </EuiFlexItem>
-        ) : searchProps.activeTab === 'logs' ? (
-          // Render table
-          <DataGridTableMemoized {...tableProps} />
-        ) : (
-          // Render visualization
-          <ReactExpressionRenderer
-            expression={searchProps.expression ?? ''}
-            searchContext={searchProps.searchContext}
-            key={JSON.stringify(searchProps.searchContext) + searchProps.expression}
-          />
-        )}
+        {getEmbeddableContent()}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
