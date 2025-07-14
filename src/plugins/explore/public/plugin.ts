@@ -355,7 +355,8 @@ export class ExplorePlugin
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
-      {
+      // uncomment when traces and metrics are ready for launch
+      /* {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
@@ -366,7 +367,7 @@ export class ExplorePlugin
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
-      },
+      }, */
     ]);
     this.registerEmbeddable(core, setupDeps);
 
