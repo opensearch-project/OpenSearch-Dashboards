@@ -29,8 +29,14 @@ jest.mock('../../../../../data/public', () => ({
   },
 }));
 
+// Mock the selectors
+jest.mock('../../../application/utils/state_management/selectors', () => ({
+  selectQueryStatus: jest.fn(),
+  selectEditorMode: jest.fn(),
+}));
+
 // Mock all child components
-jest.mock('./save_query/save_query', () => ({
+jest.mock('./save_query', () => ({
   SaveQueryButton: () => <div data-test-subj="save-query-button">Save Query</div>,
 }));
 
@@ -59,7 +65,6 @@ jest.mock('../../../application/context', () => ({
 }));
 
 const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
-
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 
 describe('QueryPanelFooter', () => {
@@ -70,15 +75,31 @@ describe('QueryPanelFooter', () => {
     body: undefined,
   };
 
+  const mockEditorMode = 'single-query';
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSelector.mockReturnValue(mockQueryStatus);
+
+    // Mock useSelector to return different values based on call order
+    let callCount = 0;
+    mockUseSelector.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return mockQueryStatus; // First call is selectQueryStatus
+      }
+      if (callCount === 2) {
+        return mockEditorMode; // Second call is selectEditorMode
+      }
+      return mockQueryStatus; // fallback
+    });
   });
 
   it('renders all footer components with correct layout', () => {
     mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: '@timestamp' },
-    } as any);
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
 
     const { container } = render(<QueryPanelFooter />);
 
@@ -98,8 +119,10 @@ describe('QueryPanelFooter', () => {
 
   it('shows date time picker when dataset has time field', () => {
     mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: '@timestamp' },
-    } as any);
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
 
     render(<QueryPanelFooter />);
 
@@ -108,8 +131,10 @@ describe('QueryPanelFooter', () => {
 
   it('hides date time picker when dataset has no time field', () => {
     mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: null },
-    } as any);
+      dataset: { timeFieldName: undefined } as any,
+      isLoading: false,
+      error: null,
+    });
 
     render(<QueryPanelFooter />);
 
@@ -119,7 +144,9 @@ describe('QueryPanelFooter', () => {
   it('hides date time picker when dataset is undefined', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: undefined,
-    } as any);
+      isLoading: false,
+      error: null,
+    });
 
     render(<QueryPanelFooter />);
 
@@ -128,8 +155,10 @@ describe('QueryPanelFooter', () => {
 
   it('hides date time picker when dataset is null', () => {
     mockUseDatasetContext.mockReturnValue({
-      dataset: null,
-    } as any);
+      dataset: undefined,
+      isLoading: false,
+      error: null,
+    });
 
     render(<QueryPanelFooter />);
 
@@ -138,8 +167,10 @@ describe('QueryPanelFooter', () => {
 
   it('does not render QueryResult component when status is not error', () => {
     mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: '@timestamp' },
-    } as any);
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
 
     render(<QueryPanelFooter />);
 
@@ -159,23 +190,134 @@ describe('QueryPanelFooter', () => {
       },
     };
 
-    mockUseSelector.mockReturnValue(errorQueryStatus);
+    let callCount = 0;
+    mockUseSelector.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return errorQueryStatus; // First call is selectQueryStatus
+      }
+      if (callCount === 2) {
+        return mockEditorMode; // Second call is selectEditorMode
+      }
+      return errorQueryStatus; // fallback
+    });
+
     mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: '@timestamp' },
-    } as any);
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
 
     render(<QueryPanelFooter />);
 
     expect(screen.getByTestId('query-result')).toHaveTextContent('Query Result: error - 500ms');
   });
 
-  it('calls selectQueryStatus selector', () => {
+  it('shows save button for SingleQuery editor mode', () => {
+    let callCount = 0;
+    mockUseSelector.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return mockQueryStatus; // First call is selectQueryStatus
+      }
+      if (callCount === 2) {
+        return 'single-query'; // Second call is selectEditorMode (EditorMode.SingleQuery)
+      }
+      return mockQueryStatus; // fallback
+    });
+
     mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: '@timestamp' },
-    } as any);
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
 
     render(<QueryPanelFooter />);
 
-    expect(mockUseSelector).toHaveBeenCalled();
+    expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
+  });
+
+  it('shows save button for DualQuery editor mode', () => {
+    let callCount = 0;
+    mockUseSelector.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return mockQueryStatus; // First call is selectQueryStatus
+      }
+      if (callCount === 2) {
+        return 'dual-query'; // Second call is selectEditorMode (EditorMode.DualQuery)
+      }
+      return mockQueryStatus; // fallback
+    });
+
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    render(<QueryPanelFooter />);
+
+    expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
+  });
+
+  it('hides save button for SingleEmpty editor mode', () => {
+    let callCount = 0;
+    mockUseSelector.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return mockQueryStatus; // First call is selectQueryStatus
+      }
+      if (callCount === 2) {
+        return 'single-empty'; // Second call is selectEditorMode (EditorMode.SingleEmpty)
+      }
+      return mockQueryStatus; // fallback
+    });
+
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    render(<QueryPanelFooter />);
+
+    expect(screen.queryByTestId('save-query-button')).not.toBeInTheDocument();
+  });
+
+  it('hides save button for SinglePrompt editor mode', () => {
+    let callCount = 0;
+    mockUseSelector.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return mockQueryStatus; // First call is selectQueryStatus
+      }
+      if (callCount === 2) {
+        return 'single-prompt'; // Second call is selectEditorMode (EditorMode.SinglePrompt)
+      }
+      return mockQueryStatus; // fallback
+    });
+
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    render(<QueryPanelFooter />);
+
+    expect(screen.queryByTestId('save-query-button')).not.toBeInTheDocument();
+  });
+
+  it('calls selectQueryStatus and selectEditorMode selectors', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    render(<QueryPanelFooter />);
+
+    expect(mockUseSelector).toHaveBeenCalledTimes(2); // Once for each selector
   });
 });

@@ -7,11 +7,10 @@ import { setChartType, setStyleOptions, setTabState, tabReducer, TabState } from
 import { ColorSchemas } from '../../../../../components/visualizations/types';
 
 describe('tabSlice reducers', () => {
-  // Define the initial state for testing
   const initialState: TabState = {
     logs: {},
     visualizations: {
-      chartType: 'metric',
+      chartType: undefined,
       styleOptions: {
         colorSchema: ColorSchemas.BLUES,
         fontSize: 60,
@@ -19,6 +18,7 @@ describe('tabSlice reducers', () => {
         title: '',
         useColor: false,
       },
+      axesMapping: {},
     },
   };
 
@@ -34,6 +34,7 @@ describe('tabSlice reducers', () => {
         visualizations: {
           chartType: 'bar',
           styleOptions: { addTooltip: false } as any,
+          axesMapping: {},
         },
       };
 
@@ -47,6 +48,7 @@ describe('tabSlice reducers', () => {
         visualizations: {
           chartType: 'pie',
           styleOptions: undefined,
+          axesMapping: {},
         },
       };
 
@@ -125,6 +127,7 @@ describe('tabSlice reducers', () => {
         visualizations: {
           chartType: 'pie',
           styleOptions: undefined,
+          axesMapping: {},
         },
       };
       state = tabReducer(state, setTabState(newTabState));
@@ -157,6 +160,7 @@ describe('tabSlice reducers', () => {
         visualizations: {
           chartType: 'scatter',
           styleOptions: { addTooltip: true } as any,
+          axesMapping: {},
         },
       };
 

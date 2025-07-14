@@ -24,36 +24,18 @@ import { DiscoverChartContainer } from '../../../../components/chart/discover_ch
 import { useDatasetContext } from '../../../../application/context';
 
 export const BottomRightContainer = () => {
-  const { dataset } = useDatasetContext();
   const dispatch = useDispatch();
-
+  const { dataset } = useDatasetContext();
   const { services } = useOpenSearchDashboards<ExploreServices>();
 
-  // Function to refresh data (for uninitialized state)
   const onRefresh = () => {
     if (services) {
       dispatch(executeQueries({ services }));
     }
   };
 
-  // Get status for conditional rendering
   const status = useSelector((state: RootState) => {
-    return state.queryEditor.queryStatus.status || QueryExecutionStatus.UNINITIALIZED;
-  });
-
-  const rows = useSelector((state: RootState) => {
-    const query = state.query;
-    const results = state.results;
-
-    const cacheKey = defaultPrepareQueryString(query);
-    const rawResults = results.hasOwnProperty(cacheKey) ? results[cacheKey] : null;
-
-    if (rawResults) {
-      const hits = rawResults.hits?.hits || [];
-      return hits;
-    }
-
-    return [];
+    return state.queryEditor.overallQueryStatus.status || QueryExecutionStatus.UNINITIALIZED;
   });
 
   if (dataset == null) {
@@ -88,7 +70,7 @@ export const BottomRightContainer = () => {
     );
   }
 
-  if (status === QueryExecutionStatus.LOADING && !rows?.length) {
+  if (status === QueryExecutionStatus.LOADING) {
     return (
       <CanvasPanel>
         <LoadingSpinner />
@@ -96,7 +78,7 @@ export const BottomRightContainer = () => {
     );
   }
 
-  if (status === QueryExecutionStatus.ERROR && !rows?.length) {
+  if (status === QueryExecutionStatus.ERROR) {
     return (
       <CanvasPanel>
         <DiscoverUninitialized onRefresh={onRefresh} />
@@ -104,11 +86,7 @@ export const BottomRightContainer = () => {
     );
   }
 
-  if (
-    status === QueryExecutionStatus.READY ||
-    (status === QueryExecutionStatus.LOADING && !!rows?.length) ||
-    (status === QueryExecutionStatus.ERROR && !!rows?.length)
-  ) {
+  if (status === QueryExecutionStatus.READY) {
     return (
       <>
         <ResultsSummaryPanel />

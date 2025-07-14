@@ -13,13 +13,19 @@ import { RecentQueriesButton } from './recent_queries_button';
 import { useDatasetContext } from '../../../application/context';
 import { DetectedLanguage } from './detected_language';
 import { QueryResult, ResultStatus } from '../../../../../data/public';
-import { selectQueryStatus } from '../../../application/utils/state_management/selectors';
+import {
+  selectQueryStatus,
+  selectEditorMode,
+} from '../../../application/utils/state_management/selectors';
+import { EditorMode } from '../../../application/utils/state_management/types';
 import './query_panel_footer.scss';
 
 export const QueryPanelFooter = () => {
   const { dataset } = useDatasetContext();
   const showDatePicker = Boolean(dataset?.timeFieldName);
   const queryStatus = useSelector(selectQueryStatus);
+  const editorMode = useSelector(selectEditorMode);
+  const shouldShowSaveButton = [EditorMode.SingleQuery, EditorMode.DualQuery].includes(editorMode);
 
   return (
     <div className="exploreQueryPanelFooter">
@@ -28,8 +34,12 @@ export const QueryPanelFooter = () => {
         <FilterPanelToggle />
         <div className="exploreQueryPanelFooter__verticalSeparator" />
         <RecentQueriesButton />
-        <div className="exploreQueryPanelFooter__verticalSeparator" />
-        <SaveQueryButton />
+        {shouldShowSaveButton && (
+          <>
+            <div className="exploreQueryPanelFooter__verticalSeparator" />
+            <SaveQueryButton />
+          </>
+        )}
         <div className="exploreQueryPanelFooter__verticalSeparator" />
         <DetectedLanguage />
         {queryStatus.status === ResultStatus.ERROR && <QueryResult queryStatus={queryStatus} />}

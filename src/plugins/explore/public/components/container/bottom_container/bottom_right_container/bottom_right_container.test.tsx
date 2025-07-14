@@ -75,7 +75,7 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 
 // Mock query actions to prevent slice import issues
 jest.mock('../../../../application/utils/state_management/actions/query_actions', () => ({
-  executeQueries: jest.fn(),
+  executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
   defaultPrepareQueryString: jest.fn(() => 'mock-query-string'),
 }));
 
@@ -91,21 +91,38 @@ const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFuncti
 >;
 
 describe('BottomRightContainer', () => {
-  const mockStore = configureStore({
-    reducer: {
-      legacy: (state = {}) => state,
-      ui: (state = {}) => state,
-      queryEditor: (state = { queryStatus: { status: QueryExecutionStatus.UNINITIALIZED } }) =>
-        state,
-      query: (state = {}) => state,
-      results: (state = {}) => state,
-    },
-  });
+  const createMockStore = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
+    return configureStore({
+      reducer: {
+        legacy: (state = {}) => state,
+        ui: (state = {}) => state,
+        queryEditor: (
+          state = {
+            queryStatusMap: {},
+            overallQueryStatus: {
+              status,
+              elapsedMs: undefined,
+              startTime: undefined,
+              body: undefined,
+            },
+            promptModeIsAvailable: false,
+            editorMode: 'single-query',
+            lastExecutedPrompt: '',
+          }
+        ) => state,
+        query: (state = {}) => state,
+        results: (state = {}) => state,
+        tab: (state = {}) => state,
+      },
+    });
+  };
 
   const mockServices = {
     data: {
       query: {
-        queryString: {},
+        queryString: {
+          getQuery: jest.fn(() => ({ query: 'test query', language: 'PPL' })),
+        },
         savedQueries: {},
       },
     },
@@ -118,9 +135,10 @@ describe('BottomRightContainer', () => {
     } as any);
   });
 
-  const renderComponent = () => {
+  const renderComponent = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
+    const store = createMockStore(status);
     return render(
-      <Provider store={mockStore}>
+      <Provider store={store}>
         <BottomRightContainer />
       </Provider>
     );
@@ -144,61 +162,118 @@ describe('BottomRightContainer', () => {
       error: null,
     });
 
-    renderComponent();
+    renderComponent(QueryExecutionStatus.UNINITIALIZED);
     expect(screen.getByTestId('uninitialized')).toBeInTheDocument();
   });
 
-  it('renders loading spinner when status is LOADING and no rows', () => {
-    const storeWithLoading = configureStore({
-      reducer: {
-        legacy: (state = {}) => state,
-        ui: (state = {}) => state,
-        queryEditor: (state = { queryStatus: { status: QueryExecutionStatus.LOADING } }) => state,
-        query: (state = {}) => state,
-        results: (state = {}) => state,
-      },
-    });
-
+  it('renders loading spinner when status is LOADING', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: { timeFieldName: 'timestamp' } as any,
       isLoading: false,
       error: null,
     });
 
-    render(
-      <Provider store={storeWithLoading}>
-        <BottomRightContainer />
-      </Provider>
-    );
-
+    renderComponent(QueryExecutionStatus.LOADING);
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
 
-  it('renders content when status is READY', () => {
-    const storeWithReady = configureStore({
-      reducer: {
-        legacy: (state = {}) => state,
-        ui: (state = {}) => state,
-        queryEditor: (state = { queryStatus: { status: QueryExecutionStatus.READY } }) => state,
-        query: (state = {}) => state,
-        results: (state = {}) => state,
-      },
-    });
-
+  it('renders no results when status is NO_RESULTS', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: { timeFieldName: 'timestamp' } as any,
       isLoading: false,
       error: null,
     });
 
-    render(
-      <Provider store={storeWithReady}>
-        <BottomRightContainer />
-      </Provider>
-    );
+    renderComponent(QueryExecutionStatus.NO_RESULTS);
+    expect(screen.getByTestId('no-results')).toBeInTheDocument();
+  });
+
+  it('renders uninitialized state when status is ERROR', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    renderComponent(QueryExecutionStatus.ERROR);
+    expect(screen.getByTestId('uninitialized')).toBeInTheDocument();
+  });
+
+  it('renders content when status is READY', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    renderComponent(QueryExecutionStatus.READY);
 
     expect(screen.getByTestId('results-summary')).toBeInTheDocument();
     expect(screen.getByTestId('chart-container')).toBeInTheDocument();
     expect(screen.getByTestId('explore-tabs')).toBeInTheDocument();
+  });
+
+  it('returns null for unknown status', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    // Create a store with an unknown status
+    const store = configureStore({
+      reducer: {
+        legacy: (state = {}) => state,
+        ui: (state = {}) => state,
+        queryEditor: (
+          state = {
+            queryStatusMap: {},
+            overallQueryStatus: {
+              status: 'UNKNOWN_STATUS' as any,
+              elapsedMs: undefined,
+              startTime: undefined,
+              body: undefined,
+            },
+            promptModeIsAvailable: false,
+            editorMode: 'single-query',
+            lastExecutedPrompt: '',
+          }
+        ) => state,
+        query: (state = {}) => state,
+        results: (state = {}) => state,
+        tab: (state = {}) => state,
+      },
+    });
+
+    const { container } = render(
+      <Provider store={store}>
+        <BottomRightContainer />
+      </Provider>
+    );
+
+    // Should render nothing (null)
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('should handle dataset with null value correctly', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: undefined,
+      isLoading: false,
+      error: null,
+    });
+
+    renderComponent();
+    expect(screen.getByTestId('no-index-patterns')).toBeInTheDocument();
+  });
+
+  it('should pass correct props to DiscoverNoResults', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: '@timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    renderComponent(QueryExecutionStatus.NO_RESULTS);
+    expect(screen.getByTestId('no-results')).toBeInTheDocument();
   });
 });

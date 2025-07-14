@@ -22,13 +22,14 @@ import { useTimeFilter } from '../../utils';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { RootState } from '../../../../application/utils/state_management/store';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
-import { useClearEditorsAndSetText } from '../../../../application/hooks';
+import { useClearEditorsAndSetText, useEditorText } from '../../../../application/hooks';
 import './save_query.scss';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { timeFilter } = useTimeFilter();
   const query = useSelector(selectQuery);
+  const userInputText = useEditorText();
   const savedQueryService = services.data.query.savedQueries;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const dispatch = useDispatch();
@@ -59,18 +60,21 @@ export const SaveQueryButton = () => {
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  // Handle save query with Redux state management
   const handleSaveQuery = async (meta: SavedQueryMeta, saveAsNew?: boolean) => {
     try {
       if (!query) return;
       const clonedQuery = cloneDeep(query);
       delete clonedQuery.dataset;
 
-      // Compose the SavedQueryAttributes object
+      const queryToSave = {
+        ...clonedQuery,
+        query: userInputText,
+      };
+
       const attributes: any = {
         title: meta.title,
         description: meta.description,
-        query: { ...clonedQuery },
+        query: queryToSave,
       };
 
       if (meta.shouldIncludeTimeFilter && timeFilter && typeof timeFilter.getTime === 'function') {
@@ -100,7 +104,6 @@ export const SaveQueryButton = () => {
 
       services.notifications.toasts.addSuccess(`Your query "${attributes.title}" was saved`);
 
-      // Auto-close panel and execute current query
       setIsPopoverOpen(false);
     } catch (error) {
       services.notifications.toasts.addDanger(
@@ -115,7 +118,6 @@ export const SaveQueryButton = () => {
 
   const handleLoadSavedQuery = useCallback(
     (savedQuery: SavedQuery) => {
-      // 1. Update Redux state with saved query ID
       dispatch(setSavedQuery(savedQuery.id));
       dispatch(setQueryState(savedQuery.attributes.query));
       dispatch(
@@ -126,7 +128,6 @@ export const SaveQueryButton = () => {
         )
       );
 
-      // 3. Update timefilter if present
       if (savedQuery.attributes.timefilter && timeFilter) {
         timeFilter.setTime({
           from: savedQuery.attributes.timefilter.from,
@@ -137,7 +138,6 @@ export const SaveQueryButton = () => {
         }
       }
 
-      // 4. Auto-close panel and execute
       setIsPopoverOpen(false);
       dispatch(clearResults());
       dispatch(executeQueries({ services }));

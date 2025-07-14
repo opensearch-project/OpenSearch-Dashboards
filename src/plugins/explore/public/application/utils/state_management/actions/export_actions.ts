@@ -5,8 +5,6 @@
 
 import { Dispatch } from 'redux';
 import { saveAs } from 'file-saver';
-// TODO: What is this import?
-import { createTabCacheKey } from './query_actions';
 import { ExploreServices } from '../../../../types';
 import { AppDispatch, RootState } from '../store';
 
@@ -31,14 +29,8 @@ export const exportToCsv = (options: { fileName?: string; services?: ExploreServ
     // Prepare query for the tab
     const preparedQuery = tabDefinition?.prepareQuery ? tabDefinition.prepareQuery(query) : query;
 
-    // Get current time range
-    const timeRange = services.data.query.timefilter.timefilter.getTime();
-
-    // Create cache key
-    const cacheKey = createTabCacheKey(preparedQuery, timeRange);
-
     // Get results from cache
-    const results = state.results[cacheKey];
+    const results = state.results[preparedQuery];
 
     if (!results || !results.hits || !results.hits.hits) {
       throw new Error('No results available for export');
