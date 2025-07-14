@@ -16,6 +16,8 @@ jest.mock('@osd/i18n', () => ({
 
 describe('HeatmapVisStyleControls', () => {
   const mockProps: HeatmapVisStyleControlsProps = {
+    axisColumnMappings: {},
+    updateVisualization: jest.fn(),
     styleOptions: defaultHeatmapChartStyles,
     onStyleChange: jest.fn(),
     numericalColumns: [
