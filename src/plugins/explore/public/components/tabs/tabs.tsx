@@ -8,10 +8,15 @@ import React, { useCallback, memo } from 'react';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveTab } from '../../application/utils/state_management/slices';
-import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
+import { clearQueryStatusMapByKey } from '../../application/utils/state_management/slices';
+import {
+  defaultPrepareQueryString,
+  executeTabQuery,
+} from '../../application/utils/state_management/actions/query_actions';
 import { selectActiveTab } from '../../application/utils/state_management/selectors';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
+import { RootState } from '../../application/utils/state_management/store';
 
 /**
  * Rendering tabs with different views of 1 OpenSearch hit in Discover.
@@ -21,18 +26,33 @@ import { ExploreServices } from '../../types';
  */
 export const ExploreTabsComponent = () => {
   const dispatch = useDispatch();
-  // Get services from context
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const registryTabs = services.tabRegistry.getAllTabs();
-
+  const results = useSelector((state: RootState) => state.results);
+  const query = useSelector((state: RootState) => state.query);
   const activeTabId = useSelector(selectActiveTab);
 
   const onTabsClick = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
       dispatch(setActiveTab(selectedTab.id));
-      dispatch(executeQueries({ services }));
+
+      const activeTab = services.tabRegistry.getTab(selectedTab.id);
+      const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
+      const newTabCacheKey = prepareQuery(query);
+
+      const needsExecution = !results[newTabCacheKey];
+
+      if (needsExecution) {
+        dispatch(clearQueryStatusMapByKey(newTabCacheKey));
+        dispatch(
+          executeTabQuery({
+            services,
+            cacheKey: newTabCacheKey,
+          })
+        );
+      }
     },
-    [dispatch, services]
+    [query, results, dispatch, services]
   );
 
   const tabs: EuiTabbedContentTab[] = registryTabs.map((registryTab) => {
@@ -43,9 +63,10 @@ export const ExploreTabsComponent = () => {
     };
   });
 
-  const activeTab = tabs.find((tab) => {
-    return tab.id === activeTabId;
-  });
+  const activeTab =
+    tabs.find((tab) => {
+      return tab.id === activeTabId;
+    }) || tabs.find((tab) => tab.id === 'logs');
 
   return (
     <EuiTabbedContent

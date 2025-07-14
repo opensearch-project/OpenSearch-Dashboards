@@ -232,7 +232,7 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
  */
 const getPreloadedUIState = (services: ExploreServices): UIState => {
   return {
-    activeTabId: 'logs',
+    activeTabId: '',
     showFilterPanel: true,
     showHistogram: true,
   };
@@ -257,7 +257,8 @@ const getPreloadedQueryEditorState = async (
       : DEFAULT_EDITOR_MODE;
 
   return {
-    queryStatus: {
+    queryStatusMap: {},
+    overallQueryStatus: {
       status: QueryExecutionStatus.UNINITIALIZED,
       elapsedMs: undefined,
       startTime: undefined,
