@@ -2,8 +2,11 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+@import "../shared";
 
 .exploreQueryPanelFooter {
+  @include exploreQueryPanelVerticalSeparator;
+
   display: flex;
   justify-content: space-between;
 
@@ -18,12 +21,5 @@
     gap: $ouiSizeXS;
     justify-content: end;
     flex-wrap: wrap;
-  }
-
-  &__verticalSeparator {
-    width: 1px;
-    height: $ouiSize;
-    background: $euiColorLightShade;
-    margin: $ouiSizeXS $ouiSizeXXS;
   }
 }

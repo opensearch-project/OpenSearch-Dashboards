@@ -11,15 +11,11 @@ import './query_panel.scss';
 
 const QueryPanel = () => {
   return (
-    <EuiPanel paddingSize="s" className="queryPanel__container">
-      <div className="queryPanel__layout" data-test-subj="exploreQueryPanelLayout">
-        <div className="queryPanel__editorArea" data-test-subj="exploreQueryPanelEditorArea">
-          <EditorStack />
-        </div>
-        <div className="queryPanel__footerArea" data-test-subj="exploreQueryPanelFooterArea">
-          <QueryPanelFooter />
-        </div>
+    <EuiPanel paddingSize="s">
+      <div className="exploreQueryPanel__editorStackWrapper">
+        <EditorStack />
       </div>
+      <QueryPanelFooter />
     </EuiPanel>
   );
 };
