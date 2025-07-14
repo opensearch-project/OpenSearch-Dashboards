@@ -93,7 +93,7 @@ describe('ExploreEmbeddable', () => {
           return { id: 'test-index' };
         }
         if (field === 'query') {
-          return { query: 'test', language: 'kuery' };
+          return { query: 'test', language: 'PPL' };
         }
         return null;
       }),
@@ -135,7 +135,7 @@ describe('ExploreEmbeddable', () => {
       id: 'test-embeddable',
       timeRange: { from: 'now-15m', to: 'now' },
       filters: [],
-      query: { query: '', language: 'kuery' },
+      query: { query: '', language: 'PPL' },
     };
 
     // Create mock executeTriggerActions

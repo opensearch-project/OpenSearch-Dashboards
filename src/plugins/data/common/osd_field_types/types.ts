@@ -64,6 +64,7 @@ export enum OPENSEARCH_FIELD_TYPES {
   DOUBLE = 'double',
   INTEGER = 'integer',
   INT = 'int',
+  BIGINT = 'bigint',
   LONG = 'long',
   SHORT = 'short',
   UNSIGNED_LONG = 'unsigned_long',

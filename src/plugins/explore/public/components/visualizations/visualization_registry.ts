@@ -21,6 +21,7 @@ import {
 } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
 import { getColumnMatchFromMapping } from './visualization_container_utils';
+import { createTableConfig } from './table/table_vis_config';
 
 /**
  * Registry for visualization rules and configurations.
@@ -180,6 +181,8 @@ export class VisualizationRegistry {
         return createBarConfig();
       case 'area':
         return createAreaConfig();
+      case 'table':
+        return createTableConfig();
       // TODO: Add other chart types' configs here
       default:
         return;

@@ -19,8 +19,17 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
 import { UpdateVisualizationProps } from '../visualization_container';
+import { TableChartStyleControls } from '../table/table_vis_config';
 
-export type ChartType = 'line' | 'pie' | 'metric' | 'heatmap' | 'scatter' | 'bar' | 'area';
+export type ChartType =
+  | 'line'
+  | 'pie'
+  | 'metric'
+  | 'heatmap'
+  | 'scatter'
+  | 'bar'
+  | 'area'
+  | 'table';
 
 export interface ChartStyleControlMap {
   line: LineChartStyleControls;
@@ -30,6 +39,7 @@ export interface ChartStyleControlMap {
   scatter: ScatterChartStyleControls;
   bar: BarChartStyleControls;
   area: AreaChartStyleControls;
+  table: TableChartStyleControls;
   // NOTE: Log table does not have style controls.
   // log is one of chart types?
   // logs: {};
@@ -44,7 +54,8 @@ export type AllChartStyleControls =
   | MetricChartStyleControls
   | HeatmapChartStyleControls
   | ScatterChartStyleControls
-  | AreaChartStyleControls;
+  | AreaChartStyleControls
+  | TableChartStyleControls;
 
 export interface StyleControlsProps<T extends AllChartStyleControls> {
   styleOptions: T;
@@ -96,6 +107,7 @@ const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [OPENSEARCH_FIELD_TYPES.DOUBLE]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.INTEGER]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.INT]: VisFieldType.Numerical,
+  [OPENSEARCH_FIELD_TYPES.BIGINT]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.LONG]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.SHORT]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.UNSIGNED_LONG]: VisFieldType.Numerical,
