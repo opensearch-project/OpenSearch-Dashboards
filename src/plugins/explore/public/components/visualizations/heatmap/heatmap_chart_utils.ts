@@ -4,7 +4,7 @@
  */
 
 import type { Encoding } from 'vega-lite/build/src/encoding';
-import { LabelAggregationType, VisColumn, ColorSchemas, FieldSetting } from '../types';
+import { LabelAggregationType, VisColumn, ColorSchemas } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { generateColorBySchema } from '../utils/utils';
 
