@@ -8,7 +8,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import { executeQueries } from '../state_management/actions/query_actions';
-import { clearResults } from '../state_management/slices';
+import { clearResults, clearQueryStatusMap } from '../state_management/slices';
+import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
 
 /**
  * Hook to handle initial query execution on page load
@@ -23,18 +24,23 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   }, [services?.uiSettings]);
 
   useEffect(() => {
-    if (!isInitialized && queryState.dataset && shouldSearchOnPageLoad && services) {
-      // Add initial default query to history
-      const timefilter = services?.data?.query?.timefilter?.timefilter;
-      if (timefilter && queryState.query.trim()) {
-        services.data.query.queryString.addToQueryHistory(queryState, timefilter.getTime());
-      }
+    const initializePage = async () => {
+      if (!isInitialized && queryState.dataset && shouldSearchOnPageLoad && services) {
+        // Add initial default query to history
+        const timefilter = services?.data?.query?.timefilter?.timefilter;
+        if (timefilter && queryState.query.trim()) {
+          services.data.query.queryString.addToQueryHistory(queryState, timefilter.getTime());
+        }
+        dispatch(clearResults());
+        dispatch(clearQueryStatusMap());
 
-      // Execute the initial query
-      dispatch(clearResults());
-      dispatch(executeQueries({ services }) as unknown);
-      setIsInitialized(true);
-    }
+        await dispatch(executeQueries({ services }));
+        dispatch(detectAndSetOptimalTab({ services }));
+        setIsInitialized(true);
+      }
+    };
+
+    initializePage();
   }, [isInitialized, queryState, shouldSearchOnPageLoad, dispatch, services]);
 
   return { isInitialized };

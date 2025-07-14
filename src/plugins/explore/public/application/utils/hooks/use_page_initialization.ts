@@ -16,6 +16,8 @@ import {
   setAxesMapping,
   setQueryState,
   setActiveTab,
+  clearResults,
+  clearQueryStatusMap,
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
@@ -73,6 +75,8 @@ export const useInitPage = () => {
           { type: 'explore' }
         );
 
+        dispatch(clearResults());
+        dispatch(clearQueryStatusMap());
         dispatch(executeQueries({ services }));
       }
     }

@@ -8,7 +8,10 @@ import { OnTimeChangeProps } from '@elastic/eui';
 import { useCallback } from 'react';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
-import { clearResults } from '../../../../application/utils/state_management/slices';
+import {
+  clearResults,
+  clearQueryStatusMap,
+} from '../../../../application/utils/state_management/slices';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
 
 export const useTimeFilter = () => {
@@ -27,10 +30,8 @@ export const useTimeFilter = () => {
       }
 
       if (isQuickSelection) {
-        // EXPLICIT cache clear - same pattern as other triggers
         dispatch(clearResults());
-
-        // Execute queries - interval will be picked up from Redux state
+        dispatch(clearQueryStatusMap());
         dispatch(executeQueries({ services }));
       }
     },

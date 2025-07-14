@@ -34,7 +34,6 @@ const resultsSlice = createSlice({
       return {};
     },
     clearResultsByKey: (state, action: PayloadAction<string>) => {
-      // Clear results for a specific cache key
       const cacheKey = action.payload;
       delete state[cacheKey];
     },

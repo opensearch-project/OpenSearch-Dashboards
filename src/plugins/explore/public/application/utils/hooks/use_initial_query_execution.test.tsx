@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -18,19 +18,28 @@ import {
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults } from '../state_management/slices';
+import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
 
 // Mock Redux actions
 jest.mock('../state_management/actions/query_actions', () => ({
   executeQueries: jest.fn().mockReturnValue({ type: 'EXECUTE_QUERIES' }),
 }));
 
+jest.mock('../state_management/actions/detect_optimal_tab', () => ({
+  detectAndSetOptimalTab: jest.fn().mockReturnValue({ type: 'DETECT_AND_SET_OPTIMAL_TAB' }),
+}));
+
 jest.mock('../state_management/slices', () => ({
   ...jest.requireActual('../state_management/slices'),
   clearResults: jest.fn().mockReturnValue({ type: 'CLEAR_RESULTS' }),
+  clearQueryStatusMap: jest.fn().mockReturnValue({ type: 'CLEAR_QUERY_STATUS_MAP' }),
 }));
 
 const mockExecuteQueries = executeQueries as jest.MockedFunction<typeof executeQueries>;
 const mockClearResults = clearResults as jest.MockedFunction<typeof clearResults>;
+const mockDetectAndSetOptimalTab = detectAndSetOptimalTab as jest.MockedFunction<
+  typeof detectAndSetOptimalTab
+>;
 
 // Mock store state type
 interface MockRootState {
@@ -51,7 +60,13 @@ describe('useInitialQueryExecution', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockDispatch = jest.fn();
+    mockDispatch = jest.fn().mockImplementation((action) => {
+      // Mock async thunk actions to return resolved promises
+      if (typeof action === 'function') {
+        return Promise.resolve();
+      }
+      return action;
+    });
 
     mockServices = {
       uiSettings: {
@@ -82,6 +97,9 @@ describe('useInitialQueryExecution', () => {
             },
           },
         },
+      },
+      tabRegistry: {
+        getTab: jest.fn(),
       },
     } as any;
 
@@ -136,8 +154,15 @@ describe('useInitialQueryExecution', () => {
   };
 
   describe('when all conditions are met', () => {
-    it('should execute initial query and add to history', () => {
-      const { result } = renderHookWithProvider(mockServices);
+    it('should execute initial query and add to history', async () => {
+      let result: any;
+
+      await act(async () => {
+        const hookResult = renderHookWithProvider(mockServices);
+        result = hookResult.result;
+        // Wait for async operations to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
 
       expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledWith(
         {
@@ -150,6 +175,7 @@ describe('useInitialQueryExecution', () => {
 
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
       expect(result.current.isInitialized).toBe(true);
     });
 
@@ -187,13 +213,20 @@ describe('useInitialQueryExecution', () => {
   });
 
   describe('when query is whitespace only', () => {
-    it('should not add whitespace-only query to history but should execute', () => {
-      const { result } = renderHookWithProvider(mockServices, {
-        query: {
-          query: '   ',
-          language: 'ppl',
-          dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
-        },
+    it('should not add whitespace-only query to history but should execute', async () => {
+      let result: any;
+
+      await act(async () => {
+        const hookResult = renderHookWithProvider(mockServices, {
+          query: {
+            query: '   ',
+            language: 'ppl',
+            dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
+          },
+        });
+        result = hookResult.result;
+        // Wait for async operations to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
       // Should not add to history due to trim() check
@@ -202,6 +235,7 @@ describe('useInitialQueryExecution', () => {
       // But should still execute query (business logic decision)
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
       expect(result.current.isInitialized).toBe(true);
     });
   });
@@ -224,7 +258,7 @@ describe('useInitialQueryExecution', () => {
   });
 
   describe('when timefilter is missing', () => {
-    it('should execute query but not add to history', () => {
+    it('should execute query but not add to history', async () => {
       const servicesWithoutTimefilter = {
         ...mockServices,
         data: {
@@ -236,7 +270,14 @@ describe('useInitialQueryExecution', () => {
         },
       } as any;
 
-      const { result } = renderHookWithProvider(servicesWithoutTimefilter);
+      let result: any;
+
+      await act(async () => {
+        const hookResult = renderHookWithProvider(servicesWithoutTimefilter);
+        result = hookResult.result;
+        // Wait for async operations to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
 
       // Should not add to history due to missing timefilter
       expect(mockServices.data.query.queryString.addToQueryHistory).not.toHaveBeenCalled();
@@ -244,6 +285,9 @@ describe('useInitialQueryExecution', () => {
       // But should still execute query
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: servicesWithoutTimefilter });
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({
+        services: servicesWithoutTimefilter,
+      });
       expect(result.current.isInitialized).toBe(true);
     });
   });
@@ -292,13 +336,20 @@ describe('useInitialQueryExecution', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle query with leading/trailing whitespace', () => {
-      const { result } = renderHookWithProvider(mockServices, {
-        query: {
-          query: '  source=logs  ',
-          language: 'ppl',
-          dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
-        },
+    it('should handle query with leading/trailing whitespace', async () => {
+      let result: any;
+
+      await act(async () => {
+        const hookResult = renderHookWithProvider(mockServices, {
+          query: {
+            query: '  source=logs  ',
+            language: 'ppl',
+            dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
+          },
+        });
+        result = hookResult.result;
+        // Wait for async operations to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
       // Should add to history because trim() returns non-empty string
@@ -313,16 +364,24 @@ describe('useInitialQueryExecution', () => {
 
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalled();
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalled();
       expect(result.current.isInitialized).toBe(true);
     });
 
-    it('should handle mixed whitespace characters', () => {
-      const { result } = renderHookWithProvider(mockServices, {
-        query: {
-          query: '\n\t  \r',
-          language: 'ppl',
-          dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
-        },
+    it('should handle mixed whitespace characters', async () => {
+      let result: any;
+
+      await act(async () => {
+        const hookResult = renderHookWithProvider(mockServices, {
+          query: {
+            query: '\n\t  \r',
+            language: 'ppl',
+            dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
+          },
+        });
+        result = hookResult.result;
+        // Wait for async operations to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
       // Should not add to history due to trim() returning empty string
@@ -331,6 +390,7 @@ describe('useInitialQueryExecution', () => {
       // But should still execute query
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalled();
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalled();
       expect(result.current.isInitialized).toBe(true);
     });
   });
