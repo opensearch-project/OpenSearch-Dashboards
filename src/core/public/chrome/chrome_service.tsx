@@ -316,6 +316,7 @@ export class ChromeService {
                 surveyLink={injectedMetadata.getSurvey()}
                 useUpdatedAppearance
                 isNavDrawerLocked$={getIsNavDrawerLocked$}
+                isChromeVisible$={this.isVisible$}
               />
             </I18nProvider>,
             element

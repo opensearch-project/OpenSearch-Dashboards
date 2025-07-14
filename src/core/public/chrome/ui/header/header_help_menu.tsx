@@ -127,6 +127,7 @@ interface Props {
   surveyLink?: string;
   useUpdatedAppearance?: boolean;
   isNavDrawerLocked$?: Rx.Observable<boolean>;
+  isChromeVisible$?: Rx.Observable<boolean>;
 }
 
 interface State {
@@ -334,6 +335,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           defaultMessage: 'About',
         })}
         isNavDrawerLocked$={this.props.isNavDrawerLocked$ || Rx.of(false)}
+        isChromeVisible$={this.props.isChromeVisible$ || Rx.of(true)}
       />
     ) : (
       <EuiToolTip
