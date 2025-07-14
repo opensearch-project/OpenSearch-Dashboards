@@ -60,22 +60,23 @@ const MockReactExpressionRenderer: React.FC<any> = ({ expression }) => {
 
 const mockStyleOptions: LineChartStyleControls = {
   // Basic controls
-  addTooltip: true,
+  tooltipOptions: { mode: 'all' },
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
-  showLine: true,
+  lineStyle: 'both',
   lineMode: 'smooth',
   lineWidth: 2,
-  showDots: true,
   // Threshold and grid
-  thresholdLine: {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-  },
+  thresholdLines: [
+    {
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+    },
+  ],
   grid: {
     categoryLines: true,
     valueLines: true,
@@ -125,6 +126,7 @@ const mockLineConfig: VisualizationType<'line'> = {
         return <LineVisStyleControls {...props} />;
       },
     },
+    availableMappings: [],
   },
 };
 
@@ -194,12 +196,12 @@ WithThresholdLine.args = {
   ...Default.args,
   styleOptions: {
     ...mockStyleOptions,
-    thresholdLine: {
-      ...mockStyleOptions.thresholdLine,
+    thresholdLines: mockStyleOptions.thresholdLines.map((t) => ({
+      ...t,
       show: true,
       value: 150,
       color: '#FF0000',
-    },
+    })),
   },
 };
 
@@ -208,8 +210,7 @@ HiddenLineShowDots.args = {
   ...Default.args,
   styleOptions: {
     ...mockStyleOptions,
-    showLine: false,
-    showDots: true,
+    lineStyle: 'dots',
   },
 };
 
@@ -265,8 +266,8 @@ MinimalConfiguration.args = {
   styleOptions: {
     ...mockStyleOptions,
     addLegend: false,
-    addTooltip: false,
-    showDots: false,
+    tooltipOptions: { mode: 'hidden' },
+    lineStyle: 'line',
     categoryAxes: [
       {
         ...mockStyleOptions.categoryAxes[0],
@@ -284,13 +285,15 @@ CustomColors.args = {
   ...Default.args,
   styleOptions: {
     ...mockStyleOptions,
-    thresholdLine: {
-      show: true,
-      value: 140,
-      color: '#00BFB3',
-      style: ThresholdLineStyle.Dashed,
-      width: 3,
-    },
+    thresholdLines: [
+      {
+        show: true,
+        value: 140,
+        color: '#00BFB3',
+        style: ThresholdLineStyle.Dashed,
+        width: 3,
+      },
+    ],
     addTimeMarker: true,
   },
 };

@@ -31,11 +31,13 @@ const mockVisualizationType: VisualizationType<'line'> = {
       defaults: {} as LineChartStyleControls,
       render: jest.fn(),
     },
+    availableMappings: [],
   },
 };
 
 describe('Visualization', () => {
   const defaultProps: VisualizationProps<'line'> = {
+    updateVisualization: jest.fn(),
     expression: 'mock-expression',
     searchContext: {},
     styleOptions: {} as LineChartStyleControls,
@@ -102,6 +104,7 @@ describe('Visualization', () => {
           defaults: {} as LineChartStyleControls,
           render: mockStyleRender,
         },
+        availableMappings: [],
       },
     };
 

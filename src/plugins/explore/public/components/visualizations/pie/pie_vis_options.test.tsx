@@ -16,6 +16,8 @@ jest.mock('@osd/i18n', () => ({
 
 describe('PieVisStyleControls', () => {
   const mockProps: PieVisStyleControlsProps = {
+    axisColumnMappings: {},
+    updateVisualization: jest.fn(),
     styleOptions: defaultPieChartStyles,
     onStyleChange: jest.fn(),
     numericalColumns: [

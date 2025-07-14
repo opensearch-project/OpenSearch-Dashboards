@@ -74,7 +74,7 @@ describe('createHeatmapeConfig', () => {
     // Mock props
     const mockProps = {
       styleOptions: {
-        addTooltip: false,
+        tooltipOptions: { mode: 'hidden' as const },
         addLegend: false,
         legendPosition: Positions.RIGHT,
         exclusive: {
@@ -93,6 +93,8 @@ describe('createHeatmapeConfig', () => {
       numericalColumns: [],
       categoricalColumns: [],
       dateColumns: [],
+      axisColumnMappings: {},
+      updateVisualization: jest.fn(),
     };
     // Call the render function
     renderFunction(mockProps);
