@@ -25,23 +25,16 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
       }
       return `${(val * 100).toFixed(2)}%`;
     },
-    width: '15%',
-  },
-  {
-    field: 'pattern',
-    name: i18n.translate('explore.patterns.table.column.pattern', {
-      defaultMessage: 'Pattern',
-    }),
-    render: (pattern: string) => {
-      return <mark>{pattern || '-'}</mark>;
-    },
+    width: '10%',
   },
   {
     field: 'sample',
     name: i18n.translate('explore.patterns.table.column.sampleLog', {
-      defaultMessage: 'Sample Log',
+      defaultMessage: 'Pattern Sample Log',
     }),
-    render: (sample: string[]) => sample[0] || '—',
+    render: (sample: string) => {
+      return <span dangerouslySetInnerHTML={{ __html: sample || '-' }} />;
+    },
   },
   {
     field: 'count',
@@ -55,5 +48,6 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
       return val;
     },
     align: 'right',
+    width: '10%',
   },
 ];
