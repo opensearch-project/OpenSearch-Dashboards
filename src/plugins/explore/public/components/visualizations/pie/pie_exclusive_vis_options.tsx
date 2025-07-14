@@ -4,14 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTitle,
-  EuiFormRow,
-  EuiButtonGroup,
-} from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 import { PieChartStyleControls } from './pie_vis_config';
 import { DebouncedTruncateField } from '../style_panel/utils';

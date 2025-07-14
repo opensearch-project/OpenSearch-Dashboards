@@ -77,24 +77,25 @@ const mockDateColumns: VisColumn[] = [
 // Default style options
 const defaultStyleOptions: LineChartStyleControls = {
   // Basic controls
-  addTooltip: true,
+  tooltipOptions: { mode: 'all' },
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
 
-  showLine: true,
+  lineStyle: 'dots',
   lineMode: 'smooth',
   lineWidth: 2,
-  showDots: true,
 
   // Threshold and grid
-  thresholdLine: {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-  },
+  thresholdLines: [
+    {
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+    },
+  ],
   grid: {
     categoryLines: true,
     valueLines: true,
@@ -176,10 +177,10 @@ export const WithThreshold = Template.bind({});
 WithThreshold.args = {
   styleOptions: {
     ...defaultStyleOptions,
-    thresholdLine: {
-      ...defaultStyleOptions.thresholdLine,
+    thresholdLines: [...defaultStyleOptions.thresholdLines].map((thresholdLine) => ({
+      ...thresholdLine,
       show: true,
-    },
+    })),
   },
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
