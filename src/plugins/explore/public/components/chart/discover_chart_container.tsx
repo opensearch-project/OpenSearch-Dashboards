@@ -17,6 +17,7 @@ import {
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
 import { CanvasPanel } from '../../application/legacy/discover/application/components/panel/canvas_panel';
+import { Chart } from './utils';
 
 export const DiscoverChartContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -66,7 +67,7 @@ export const DiscoverChartContainer = () => {
       <div className="dscCanvas__chart">
         <DiscoverChart
           bucketInterval={processedResults.bucketInterval}
-          chartData={processedResults.chartData}
+          chartData={processedResults.chartData as Chart}
           config={uiSettings}
           data={data}
           services={services}
