@@ -247,7 +247,6 @@ describe('DiscoverChart', () => {
 
   it('should handle timefilter update correctly', () => {
     const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
-    const dispatchSpy = jest.spyOn(mockStore, 'dispatch');
 
     renderComponent({ chartData });
 

@@ -94,7 +94,7 @@ export const useDiscoverDownloadCsv = ({
         const size = Math.min(hits || 0, MAX_DOWNLOAD_CSV_COUNT);
         // Replace fetchForMaxCsvOption with Redux action
         const services = getServices();
-        const result = await dispatch(
+        await dispatch(
           exportMaxSizeCsv({
             maxSize: size,
             services,

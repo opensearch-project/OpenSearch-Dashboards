@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Column, Dimension, Ordered } from '../utils';
+
 export interface Chart {
   values: Array<{
     x: number;
