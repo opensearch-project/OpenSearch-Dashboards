@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { saveSavedExplore } from './save_explore'; // adjust path if needed
+import { saveSavedExplore } from './save_explore'; // adjust path
 import { setSavedSearch } from '../application/utils/state_management/slices';
 
 jest.mock('../application/utils/state_management/slices', () => ({
