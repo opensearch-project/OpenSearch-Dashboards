@@ -20,10 +20,8 @@ const ActionBarComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset } = useDatasetContext();
   const { results } = useTabResults();
-  const { core } = services;
-
+  const { core, inspector, inspectorAdapters } = services;
   const savedSearch = useSelector(selectSavedSearch);
-  const { inspector, inspectorAdapters } = services;
 
   const openInspector = () => {
     if (inspector) {
