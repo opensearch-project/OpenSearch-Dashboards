@@ -64,6 +64,9 @@ import { DocViewsRegistry } from './types/doc_views_types';
 import { ExploreEmbeddableFactory } from './embeddable';
 import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
 import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
+import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
+import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
+import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 
 export class ExplorePlugin
   implements
@@ -310,12 +313,20 @@ export class ExplorePlugin
         );
         services.store = store;
 
+        // Register abort action
+        const abortActionId = `${PLUGIN_ID}`;
+        const abortAction = createAbortDataQueryAction(abortActionId);
+        services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
+
         appMounted();
 
         // Call renderApp with params, services, and store
         const unmount = renderApp(params, services, store, flavor);
 
         return () => {
+          abortAllActiveQueries();
+          services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
+
           appUnMounted();
           unmount();
           unsubscribeStore();
