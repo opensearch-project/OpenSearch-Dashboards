@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SimplePopover /> spec renders the component 1`] = `
+HTMLCollection [
+  <div>
+    <div
+      class="euiPopover euiPopover--anchorDownCenter"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <div>
+          123
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;
