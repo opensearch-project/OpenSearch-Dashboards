@@ -107,9 +107,7 @@ const setupPPLTokenization = () => {
           }
         }
       } catch (error) {
-        // If ANTLR fails, return empty tokens (no fallback)
-        // eslint-disable-next-line no-console
-        console.warn('PPL tokenization failed for line:', line, error);
+        // If ANTLR fails, return empty tokens
       }
 
       return {
@@ -182,8 +180,6 @@ const setupPPLSyntaxHighlighting = () => {
       }
     } catch (error) {
       // Silent error handling - continue without worker-based highlighting
-      // eslint-disable-next-line no-console
-      console.warn('PPL Worker Syntax Highlighting Error:', error);
     }
   };
 
