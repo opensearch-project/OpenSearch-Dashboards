@@ -195,6 +195,7 @@ const DefaultDiscoverTableUI = ({
   const indexOfRenderedData = rows?.[0]?._index;
   const timeFromFirstRow =
     typeof indexPattern?.timeFieldName === 'string' &&
+    // @ts-expect-error This is from legacy code, which appears to be working
     rows?.[0]?._source?.[indexPattern.timeFieldName];
 
   useEffect(() => {

@@ -193,7 +193,7 @@
     "@aws-sdk/signature-v4": "^3.374.0",
     "@dagrejs/dagre": "^1.1.5",
     "@elastic/datemath": "5.0.3",
-    "@elastic/eui": "npm:@opensearch-project/oui@1.19.0",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.20.0",
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/numeral": "npm:@amoo-miki/numeral@2.6.0",
     "@elastic/request-crypto": "2.0.0",

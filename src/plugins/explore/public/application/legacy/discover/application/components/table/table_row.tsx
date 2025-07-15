@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';

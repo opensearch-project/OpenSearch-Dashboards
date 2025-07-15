@@ -14,6 +14,7 @@ import { createSavedExploreLoader } from './saved_explore';
 import { getHistory } from './application/legacy/discover/opensearch_dashboards_services';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { VisualizationRegistryService } from './services/visualization_registry_service';
+import { AppStore } from './application/utils/state_management/store';
 
 export function buildServices(
   core: CoreStart,
@@ -75,7 +76,7 @@ export function buildServices(
     overlays: core.overlays,
 
     // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
-    store: undefined, // Will be set by the store
+    store: (undefined as unknown) as AppStore, // Will be set by the store
     viewRegistry: undefined, // Will be replaced with tabRegistry
     embeddable: plugins.embeddable,
     scopedHistory: undefined, // Will be set by the app

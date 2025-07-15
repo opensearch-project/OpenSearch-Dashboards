@@ -23,7 +23,6 @@ export const getPromptModeIsAvailable = async (services: ExploreServices): Promi
       queryAssistExtension.isEnabled$({} as QueryEditorExtensionDependencies)
     );
   } catch (error) {
-    // Fallback to false
     return false;
   }
 };
