@@ -30,8 +30,8 @@ describe('ResultsSummary', () => {
   it('should render component with basic elements', () => {
     render(<ResultsSummary {...defaultProps} />);
     expect(screen.getByTestId('exploreResultsSummary')).toBeInTheDocument();
-    expect(screen.getByText('Test Brand Results summary')).toBeInTheDocument();
-    expect(screen.getByLabelText('Summary based on first 100 records')).toBeInTheDocument();
+    expect(screen.getByText('Results summary')).toBeInTheDocument();
+    expect(screen.getByLabelText('Summary based on first 10 records')).toBeInTheDocument();
     expect(screen.getByText('Panel message')).toBeInTheDocument();
   });
 
