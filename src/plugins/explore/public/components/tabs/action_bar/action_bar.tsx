@@ -48,7 +48,6 @@ const ActionBarComponent = () => {
       elapsedMs={elapsedMs}
       dataset={dataset}
       inspectionHanlder={openInspector}
-      services={services}
     />
   );
 };

@@ -13,6 +13,36 @@ import configureMockStore from 'redux-mock-store';
 
 const mockStore = configureMockStore([]);
 
+// mock functions
+const mockToastAdd = jest.fn();
+const mockGetUrlForApp = jest.fn().mockReturnValue('/app/dashboards#/view/123');
+const mockGetTab = jest.fn(() => ({ id: 'mockTab' }));
+
+const mockServices = {
+  core: {
+    application: {
+      getUrlForApp: mockGetUrlForApp,
+    },
+  },
+  dashboard: {},
+  savedObjects: {
+    client: {},
+  },
+  toastNotifications: {
+    add: mockToastAdd,
+  },
+  uiSettings: {
+    get: jest.fn().mockReturnValue(false),
+  },
+  history: jest.fn(() => ({ listen: jest.fn() })),
+  data: {
+    query: {},
+  },
+  tabRegistry: {
+    getTab: mockGetTab,
+  },
+};
+
 jest.mock('../../helpers/save_explore', () => ({
   saveSavedExplore: jest.fn(),
 }));
@@ -36,6 +66,14 @@ jest.mock('../query_panel/utils/use_search_context', () => {
   };
 });
 
+jest.mock('../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: () => ({
+    services: mockServices,
+  }),
+  withOpenSearchDashboards: (component: any) => component,
+  toMountPoint: jest.fn(),
+}));
+
 jest.mock('./add_to_dashboard_modal', () => ({
   AddToDashboardModal: ({ onCancel, onConfirm }: any) => (
     <div data-test-subj="mock-modal">
@@ -58,31 +96,6 @@ jest.mock('./add_to_dashboard_modal', () => ({
   ),
 }));
 
-const mockServices = {
-  core: {
-    application: {
-      getUrlForApp: jest.fn().mockReturnValue('/app/dashboards#/view/123'),
-    },
-  },
-  dashboard: {},
-  savedObjects: {
-    client: {},
-  },
-  toastNotifications: {
-    add: jest.fn(),
-  },
-  uiSettings: {
-    get: jest.fn().mockReturnValue(false),
-  },
-  history: jest.fn(() => ({ listen: jest.fn() })),
-  data: {
-    query: {},
-  },
-  tabRegistry: {
-    getTab: jest.fn(() => ({ id: 'mockTab' })),
-  },
-};
-
 const store = mockStore({
   ui: { activeTabId: 'vis' },
 });
@@ -95,7 +108,7 @@ describe('SaveAndAddButtonWithModal', () => {
   it('renders the add button and opens modal on click', async () => {
     render(
       <Provider store={store}>
-        <SaveAndAddButtonWithModal services={mockServices as any} dataset={undefined} />
+        <SaveAndAddButtonWithModal dataset={undefined} />
       </Provider>
     );
 
@@ -116,7 +129,7 @@ describe('SaveAndAddButtonWithModal', () => {
 
     render(
       <Provider store={store}>
-        <SaveAndAddButtonWithModal services={mockServices as any} dataset={undefined} />
+        <SaveAndAddButtonWithModal dataset={undefined} />
       </Provider>
     );
 
@@ -126,7 +139,7 @@ describe('SaveAndAddButtonWithModal', () => {
     await waitFor(() => {
       expect(saveSavedExplore).toHaveBeenCalled();
       expect(addToDashboard).toHaveBeenCalled();
-      expect(mockServices.toastNotifications.add).toHaveBeenCalledWith(
+      expect(mockToastAdd).toHaveBeenCalledWith(
         expect.objectContaining({
           title: expect.any(String),
           color: 'success',
@@ -141,7 +154,7 @@ describe('SaveAndAddButtonWithModal', () => {
 
     render(
       <Provider store={store}>
-        <SaveAndAddButtonWithModal services={mockServices as any} dataset={undefined} />
+        <SaveAndAddButtonWithModal dataset={undefined} />
       </Provider>
     );
 
@@ -149,7 +162,7 @@ describe('SaveAndAddButtonWithModal', () => {
     fireEvent.click(screen.getByText('Confirm'));
 
     await waitFor(() => {
-      expect(mockServices.toastNotifications.add).toHaveBeenCalledWith(
+      expect(mockToastAdd).toHaveBeenCalledWith(
         expect.objectContaining({
           title: expect.any(String),
           color: 'danger',

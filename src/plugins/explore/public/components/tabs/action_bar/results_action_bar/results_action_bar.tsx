@@ -8,14 +8,14 @@ import './results_action_bar.scss';
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { CoreStart } from 'opensearch-dashboards/public';
+import { useSelector } from 'react-redux';
 import { HitsCounter } from '../hits_counter';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
 import { DataView as Dataset } from '../../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 import { SaveAndAddButtonWithModal } from '../../../visualizations/add_to_dashboard_button';
-import { ExploreServices } from '../../../../types';
+import { selectActiveTabId } from '../../../../application/utils/state_management/selectors';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
@@ -25,7 +25,6 @@ export interface DiscoverResultsActionBarProps {
   elapsedMs?: number;
   dataset?: Dataset;
   inspectionHanlder?: () => void;
-  services: Partial<CoreStart> & ExploreServices;
 }
 
 export const DiscoverResultsActionBar = ({
@@ -36,8 +35,10 @@ export const DiscoverResultsActionBar = ({
   elapsedMs,
   dataset,
   inspectionHanlder,
-  services,
 }: DiscoverResultsActionBarProps) => {
+  const currentTab = useSelector(selectActiveTabId);
+  const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
+
   return (
     <EuiFlexGroup
       direction="row"
@@ -82,9 +83,11 @@ export const DiscoverResultsActionBar = ({
                 <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
               </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <SaveAndAddButtonWithModal dataset={dataset} services={services} />
-              </EuiFlexItem>
+              {shouldShowAddToDashboardButton && (
+                <EuiFlexItem grow={false}>
+                  <SaveAndAddButtonWithModal dataset={dataset} />
+                </EuiFlexItem>
+              )}
             </>
           ) : null}
         </EuiFlexGroup>
