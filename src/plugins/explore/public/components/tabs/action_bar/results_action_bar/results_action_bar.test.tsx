@@ -36,27 +36,27 @@ const props: DiscoverResultsActionBarProps = {
   showResetButton: false,
   resetQuery: jest.fn(),
   rows: [mockRow1],
-  indexPattern: {} as any,
+  dataset: {} as any,
   inspectionHanlder: mockInspectionHanlder,
 };
 
 describe('ResultsActionBar', () => {
-  test('renders the component', () => {
+  test('should render the action bar component', () => {
     render(<DiscoverResultsActionBar {...props} />);
     expect(screen.getByTestId('dscResultsActionBar')).toBeInTheDocument();
   });
 
-  test('renders the HitCounter component', () => {
+  test('should render the hits counter component', () => {
     render(<DiscoverResultsActionBar {...props} />);
     expect(screen.getByTestId('dscResultCount')).toBeInTheDocument();
   });
 
-  test('renders the DownloadCsv component when !!indexPattern and !!rows.length', () => {
+  test('should render the download CSV button when dataset and rows are available', () => {
     render(<DiscoverResultsActionBar {...props} />);
     expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
   });
 
-  test('render open inspector button', async () => {
+  test('should render inspector button and handle click events', async () => {
     const user = userEvent.setup();
     render(<DiscoverResultsActionBar {...props} rows={[]} />);
 
@@ -67,12 +67,12 @@ describe('ResultsActionBar', () => {
     expect(mockInspectionHanlder).toHaveBeenCalled();
   });
 
-  test('hides the DownloadCsv component when !indexPattern', () => {
-    render(<DiscoverResultsActionBar {...props} indexPattern={undefined} />);
+  test('should hide the download CSV button when dataset is not provided', () => {
+    render(<DiscoverResultsActionBar {...props} dataset={undefined} />);
     expect(screen.queryByTestId('discoverDownloadCsvButton')).not.toBeInTheDocument();
   });
 
-  test('hides the DownloadCsv component when !rows.length', () => {
+  test('should hide the download CSV button when no rows are available', () => {
     render(<DiscoverResultsActionBar {...props} rows={[]} />);
     expect(screen.queryByTestId('discoverDownloadCsvButton')).not.toBeInTheDocument();
   });
