@@ -29,6 +29,7 @@
  */
 
 import { coreMock } from 'opensearch-dashboards/public/mocks';
+import { BehaviorSubject } from 'rxjs';
 import { ExplorePluginSetup, ExplorePluginStart } from '../../../types';
 import { chartPluginMock } from '../../../../../charts/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
@@ -41,18 +42,23 @@ import { urlForwardingPluginMock } from '../../../../../url_forwarding/public/mo
 import { visualizationsPluginMock } from '../../../../../visualizations/public/mocks';
 import { ExploreServices } from '../../../types';
 import { buildServices } from '../../../build_services';
+import { VisualizationRegistry } from '../../../components/visualizations/visualization_registry';
+import { expressionsPluginMock } from '../../../../../expressions/public/mocks';
+import { dashboardPluginMock } from '../../../../../dashboard/public/mocks';
 
 export type Setup = jest.Mocked<ExplorePluginSetup>;
 export type Start = jest.Mocked<ExplorePluginStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
+    visualizationRegistry: (jest.fn() as unknown) as VisualizationRegistry,
     docViews: {
       addDocView: jest.fn(),
     },
     docViewsLinks: {
       addDocViewLink: jest.fn(),
     },
+    isSummaryAgentAvailable$: new BehaviorSubject(true as boolean),
   };
   return setupContract;
 };
@@ -61,6 +67,7 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     savedExploreLoader: {} as any,
     savedSearchLoader: {} as any,
+    visualizationRegistry: {} as VisualizationRegistry,
     urlGenerator: {
       createUrl: jest.fn(),
     } as any,
@@ -81,9 +88,13 @@ const createExploreServicesMock = (): ExploreServices =>
       urlForwarding: urlForwardingPluginMock.createStartContract(),
       visualizations: visualizationsPluginMock.createStartContract(),
       opensearchDashboardsLegacy: opensearchDashboardsLegacyPluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
+      dashboard: dashboardPluginMock.createStartContract(),
     },
     coreMock.createPluginInitializerContext(),
-    {} as any // Mock tabRegistry
+    {} as any, // Mock tabRegistry
+    {} as any, // Mock visualizationRegistry
+    new BehaviorSubject(true as boolean)
   );
 
 export const discoverPluginMock = {
