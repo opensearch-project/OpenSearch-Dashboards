@@ -39,8 +39,8 @@ describe('bar_vis_config', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       });
 
