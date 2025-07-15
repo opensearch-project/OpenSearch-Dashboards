@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { saveSavedExplore } from './save_explore'; // adjust path if needed
-// import { setSavedSearch } from '../application/utils/state_management/slices';
+import { setSavedSearch } from '../application/utils/state_management/slices';
 
 jest.mock('../application/utils/state_management/slices', () => ({
   setSavedSearch: jest.fn(),
@@ -76,6 +76,67 @@ describe('saveSavedExplore', () => {
     };
 
     startSyncingQueryStateWithUrl = jest.fn();
+  });
+
+  it('should save and update title (same id)', async () => {
+    savedExplore.save.mockResolvedValue('123');
+    const result = await saveSavedExplore({
+      savedExplore,
+      newTitle: 'New Title',
+      saveOptions,
+      searchContext,
+      services,
+      startSyncingQueryStateWithUrl: jest.fn(),
+      openAfterSave: false,
+      newCopyOnSave: false,
+    });
+
+    expect(savedExplore.title).toBe('New Title');
+    expect(savedExplore.save).toHaveBeenCalledTimes(1);
+    expect(savedExplore.save).toHaveBeenCalledWith(saveOptions);
+    expect(result).toEqual({ id: '123' });
+  });
+
+  it('should save a new save explore and redirect if id changes', async () => {
+    savedExplore.save.mockResolvedValue('456');
+
+    const result = await saveSavedExplore({
+      savedExplore,
+      newTitle: 'Updated Title',
+      saveOptions,
+      searchContext,
+      services,
+      startSyncingQueryStateWithUrl: jest.fn(),
+      openAfterSave: true,
+      newCopyOnSave: true,
+    });
+    expect(result).toEqual({ id: '456' });
+    expect(services.toastNotifications.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Search 'Updated Title' was saved",
+      })
+    );
+    expect(services.store.dispatch).toHaveBeenCalledWith(setSavedSearch('456'));
+  });
+
+  it('should handle save failure', async () => {
+    savedExplore.save.mockRejectedValue(new Error('Save failed'));
+
+    await saveSavedExplore({
+      savedExplore,
+      newTitle: 'Failed Title',
+      saveOptions,
+      searchContext,
+      services,
+      startSyncingQueryStateWithUrl: jest.fn(),
+      openAfterSave: true,
+    });
+
+    expect.objectContaining({
+      title: "Search 'Failed Title' was not saved.",
+      text: 'Save failed',
+    });
+    expect(savedExplore.title).toBe('Old Title'); // title restored
   });
 
   it('should save without newCopyOnSave provided', async () => {
