@@ -12,7 +12,7 @@ import {
   queryInitialState,
 } from './query_slice';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
-import { Query, DataView } from '../../../../../../../data/common';
+import { Query } from '../../../../../../../data/common';
 
 describe('querySlice reducers', () => {
   const initialState: QueryState = queryInitialState;
@@ -40,36 +40,9 @@ describe('querySlice reducers', () => {
       });
     });
 
-    it('should handle DataView dataset by converting to Dataset', () => {
-      const mockDataView = ({
-        id: 'dataview-id',
-        title: 'DataView Title',
-        toDataset: jest.fn().mockReturnValue({
-          id: 'dataview-id',
-          title: 'DataView Title',
-          type: 'INDEX_PATTERN',
-        }),
-      } as unknown) as DataView;
-
-      const newQuery = {
-        query: 'SELECT * FROM table',
-        language: 'sql',
-        dataset: mockDataView,
-      } as Query;
-
-      const state = queryReducer(initialState, setQueryState(newQuery));
-
-      expect(mockDataView.toDataset).toHaveBeenCalled();
-      expect(state.dataset).toEqual({
-        id: 'dataview-id',
-        title: 'DataView Title',
-        type: 'INDEX_PATTERN',
-      });
-    });
-
     it('should convert non-string query to string', () => {
       const newQuery = {
-        query: { match_all: {} }, // Non-string query
+        query: { match_all: {} },
         language: 'dsl',
       } as Query;
 
@@ -124,33 +97,6 @@ describe('querySlice reducers', () => {
         },
       });
       expect(action.meta).toEqual({ addToHistory: true });
-    });
-
-    it('should handle DataView dataset by converting to Dataset', () => {
-      const mockDataView = ({
-        id: 'dataview-id',
-        title: 'DataView Title',
-        toDataset: jest.fn().mockReturnValue({
-          id: 'dataview-id',
-          title: 'DataView Title',
-          type: 'INDEX_PATTERN',
-        }),
-      } as unknown) as DataView;
-
-      const newQuery = {
-        query: 'SELECT * FROM table',
-        language: 'sql',
-        dataset: mockDataView,
-      } as Query;
-
-      const state = queryReducer(initialState, setQueryWithHistory(newQuery));
-
-      expect(mockDataView.toDataset).toHaveBeenCalled();
-      expect(state.dataset).toEqual({
-        id: 'dataview-id',
-        title: 'DataView Title',
-        type: 'INDEX_PATTERN',
-      });
     });
 
     it('should convert non-string query to string', () => {

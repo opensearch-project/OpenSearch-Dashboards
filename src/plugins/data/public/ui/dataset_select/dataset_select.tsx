@@ -212,7 +212,13 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         defaultMessage: 'Data',
       })}
     >
-      <EuiFlexGroup gutterSize="none" alignItems="center" wrap={false} responsive={false}>
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        wrap={false}
+        responsive={false}
+        className="datasetSelect__container"
+      >
         <EuiFlexItem className="datasetSelect__mainContent">
           <EuiPopover
             button={
@@ -361,7 +367,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
             </EuiPopoverFooter>
           </EuiPopover>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="datasetSelect__detailsContainer">
           <DatasetDetails
             dataset={selectedDataset}
             isDefault={selectedDataset?.id === defaultDatasetId}
