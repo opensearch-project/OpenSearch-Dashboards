@@ -15,7 +15,6 @@ import { NavGroupType } from '../../../../types';
 import { ChromeNavControl, ChromeNavLink } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { createEuiListItem } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import {
   ChromeNavGroupServiceStartContract,
@@ -29,10 +28,11 @@ import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
 import { NavGroups } from './collapsible_nav_groups';
 import { HeaderSearchBar, HeaderSearchBarIcon } from './header_search_bar';
+import { CollapsibleNavHeaderRender } from '../../chrome_service';
 
 export interface CollapsibleNavGroupEnabledProps {
   appId$: InternalApplicationStart['currentAppId$'];
-  collapsibleNavHeaderRender?: () => JSX.Element | null;
+  collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
   basePath: HttpStart['basePath'];
   id: string;
   isNavOpen: boolean;
@@ -51,10 +51,6 @@ export interface CollapsibleNavGroupEnabledProps {
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   globalSearchCommands?: GlobalSearchCommand[];
 }
-
-const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
-  defaultMessage: 'See all...',
-});
 
 enum NavWidth {
   Expanded = 270,
@@ -155,29 +151,6 @@ export function CollapsibleNavGroupEnabled({
     return NavWidth.Expanded;
   }, [isNavOpen]);
 
-  const onGroupClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    group: NavGroupItemInMap
-  ) => {
-    const fulfilledLinks = fulfillRegistrationLinksToChromeNavLinks(
-      navGroupsMap[group.id]?.navLinks,
-      navLinks
-    );
-    setCurrentNavGroup(group.id);
-
-    // the `navGroupsMap[group.id]?.navLinks` has already been sorted
-    const firstLink = fulfilledLinks[0];
-    if (firstLink) {
-      const propsForEui = createEuiListItem({
-        link: firstLink,
-        appId,
-        dataTestSubj: 'collapsibleNavAppLink',
-        navigateToApp,
-      });
-      propsForEui.onClick(e);
-    }
-  };
-
   const rendeLeftNav = (props?: Partial<EuiFlyoutProps>) => (
     <EuiFlyout
       data-test-subj="collapsibleNav"
@@ -189,7 +162,7 @@ export function CollapsibleNavGroupEnabled({
       type="push"
       onClose={closeNav}
       outsideClickCloses={false}
-      className="context-nav-wrapper"
+      className={`context-nav-wrapper leftNavIsOpen-${!!isNavOpen}`}
       size={width}
       closeButtonPosition="outside"
       hideCloseButton
@@ -198,28 +171,26 @@ export function CollapsibleNavGroupEnabled({
       {...props}
     >
       <div className="eui-fullHeight left-navigation-wrapper">
-        {!isNavOpen ? null : (
-          <EuiPanel
-            hasBorder={false}
-            borderRadius="none"
-            paddingSize="s"
-            hasShadow={false}
-            color="transparent"
-            style={{ flexGrow: 0 }}
-          >
-            <CollapsibleNavTop
-              homeLink={homeLink}
-              collapsibleNavHeaderRender={collapsibleNavHeaderRender}
-              navigateToApp={navigateToApp}
-              logos={logos}
-              currentNavGroup={currentNavGroupId ? navGroupsMap[currentNavGroupId] : undefined}
-              shouldShrinkNavigation={!isNavOpen}
-              onClickShrink={closeNav}
-            />
-          </EuiPanel>
-        )}
+        <EuiPanel
+          hasBorder={false}
+          borderRadius="none"
+          paddingSize="s"
+          hasShadow={false}
+          color="transparent"
+          style={{ flexGrow: 0 }}
+        >
+          <CollapsibleNavTop
+            homeLink={homeLink}
+            collapsibleNavHeaderRender={collapsibleNavHeaderRender}
+            navigateToApp={navigateToApp}
+            logos={logos}
+            currentNavGroup={currentNavGroupId ? navGroupsMap[currentNavGroupId] : undefined}
+            isNavOpen={isNavOpen}
+            onClickShrink={closeNav}
+          />
+        </EuiPanel>
         {!isNavOpen ? (
-          <div className="searchBarIcon euiHeaderSectionItemButton">
+          <div className="searchBarIcon">
             {globalSearchCommands && (
               <HeaderSearchBarIcon globalSearchCommands={globalSearchCommands} />
             )}
@@ -236,35 +207,28 @@ export function CollapsibleNavGroupEnabled({
             )}
           </EuiPanel>
         )}
-        {!isNavOpen ? null : (
-          <EuiPanel
-            hasBorder={false}
-            borderRadius="none"
-            paddingSize={!isNavOpen ? 's' : 'm'}
-            hasShadow={false}
-            className="eui-yScroll flex-1-container"
-            color="transparent"
-            style={{ paddingTop: 0 }}
-          >
-            <NavGroups
-              navLinks={navLinksForRender}
-              navigateToApp={navigateToApp}
-              onNavItemClick={(event, navItem) => {
-                if (navItem.title === titleForSeeAll && navItem.category?.id) {
-                  const navGroup = navGroupsMap[navItem.category.id];
-                  onGroupClick(event, navGroup);
-                }
-              }}
-              appId={appId}
-              categoryCollapsible={currentNavGroupId === ALL_USE_CASE_ID}
-              currentWorkspaceId={currentWorkspace?.id}
-            />
-          </EuiPanel>
-        )}
-        {
-          // This element is used to push icons to the bottom of left navigation when collapsed
-          !isNavOpen ? <div className="flex-1-container" /> : null
-        }
+        <EuiPanel
+          hasBorder={false}
+          borderRadius="none"
+          paddingSize="none"
+          hasShadow={false}
+          className="eui-yScroll flex-1-container"
+          color="transparent"
+          style={{ paddingTop: 0 }}
+        >
+          <NavGroups
+            navLinks={navLinksForRender}
+            navigateToApp={(...args) => {
+              closeNav();
+              return navigateToApp(...args);
+            }}
+            appId={appId}
+            categoryCollapsible={currentNavGroupId === ALL_USE_CASE_ID}
+            currentWorkspaceId={currentWorkspace?.id}
+            isNavOpen={isNavOpen}
+            basePath={basePath}
+          />
+        </EuiPanel>
         <div
           className={classNames({
             'bottom-container': true,
