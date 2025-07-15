@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   EuiButton,
   EuiSmallButtonEmpty,
@@ -26,7 +26,7 @@ import {
   useOpenSearchDashboards,
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
-import { DataView as Dataset, Query } from '../../../common';
+import { DataView, Query } from '../../../common';
 import { DEFAULT_DATA } from '../../../common/constants';
 import { IDataPluginServices } from '../../types';
 import { DatasetDetails } from './dataset_details';
@@ -34,73 +34,87 @@ import { AdvancedSelector } from '../dataset_selector/advanced_selector';
 import './_index.scss';
 
 export interface DatasetSelectProps {
-  onSelect: (dataset: Dataset) => void;
+  onSelect: (dataset: DataView) => void;
   appName: string;
 }
 
+/**
+ * @experimental This component is experimental and may change in future versions
+ */
 const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const initialDatasetSet = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>();
+  const [datasets, setDatasets] = useState<DataView[]>([]);
+  const [selectedDataset, setSelectedDataset] = useState<DataView | undefined>();
   const [defaultDatasetId, setDefaultDatasetId] = useState<string | undefined>();
   const [, setIsLoading] = useState(true);
   const { data, overlays } = services;
   const {
-    dataViews: datasetsService,
+    dataViews,
     query: { queryString },
   } = data;
   const datasetService = queryString.getDatasetService();
 
-  const getTypeFromUri = useCallback((uri?: string): string | undefined => {
-    if (!uri) return undefined;
+  const extractDataSourceInfo = useCallback((uri?: string): { type?: string; name?: string } => {
+    if (!uri) return {};
 
     if (uri.includes('://')) {
       const parts = uri.split('://');
       if (parts.length >= 2) {
-        return parts[0].toUpperCase();
+        const type = parts[0].toUpperCase();
+        const pathParts = parts[1].split('/');
+        const name = pathParts[0];
+        return { type, name };
       }
     }
 
-    return undefined;
+    return { name: uri };
   }, []);
+
+  const getTypeFromUri = useCallback(
+    (uri?: string): string | undefined => {
+      return extractDataSourceInfo(uri).type;
+    },
+    [extractDataSourceInfo]
+  );
 
   const fetchDatasets = useCallback(async () => {
     setIsLoading(true);
-
     try {
-      const datasetIds = await datasetsService.getIds(true);
-      const fetchedDatasets: Dataset[] = [];
+      const datasetIds = await dataViews.getIds(true);
+      const fetchedDataViews = [];
+
       for (const id of datasetIds) {
         try {
-          const dataset = await datasetsService.get(id);
-          fetchedDatasets.push(dataset);
+          const dataView = await dataViews.get(id);
+          fetchedDataViews.push(dataView);
         } catch (e) {
           throw new Error(
             i18n.translate('data.datasetSelect.fetchError', {
               defaultMessage: 'Failed to fetch dataset with ID {id}: {error}',
-              values: { id, error: (e as Error).message },
+              values: {
+                id,
+                error: e.message,
+              },
             })
           );
         }
       }
 
-      const defaultDataset = await datasetsService.getDefault();
-      if (defaultDataset && isMounted.current) {
-        setDefaultDatasetId(defaultDataset.id);
+      const defaultDataView = await dataViews.getDefault();
+      if (defaultDataView && isMounted.current) {
+        setDefaultDatasetId(defaultDataView.id);
       }
 
       if (isMounted.current) {
-        setDatasets(fetchedDatasets);
-
-        if (!initialDatasetSet.current && fetchedDatasets.length > 0) {
-          setSelectedDataset(fetchedDatasets[0]);
-          onSelect(fetchedDatasets[0]);
+        setDatasets(fetchedDataViews);
+        if (!initialDatasetSet.current && fetchedDataViews.length > 0) {
+          setSelectedDataset(fetchedDataViews[0]);
+          onSelect(fetchedDataViews[0]);
           initialDatasetSet.current = true;
         }
-
         setIsLoading(false);
       }
     } catch (e) {
@@ -108,13 +122,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         setIsLoading(false);
       }
     }
-  }, [datasetsService, onSelect]);
+  }, [dataViews, onSelect]);
 
   useEffect(() => {
     isMounted.current = true;
-
     fetchDatasets();
-
     return () => {
       isMounted.current = false;
     };
@@ -150,8 +162,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
       const iconType = datasetService.getType(datasetType)?.meta.icon.type || 'database';
 
+      const label = displayName || title;
+
       return {
-        label: displayName || title,
+        label,
         searchableLabel: description || title,
         key: id,
         checked: isSelected ? 'on' : undefined,
@@ -174,11 +188,21 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
 
   const datasetIcon = datasetService.getType(datasetType)?.meta.icon.type || 'database';
-  const datasetTitle = selectedDataset
-    ? selectedDataset.displayName || selectedDataset.title
-    : i18n.translate('data.datasetSelect.selectDataLabel', {
+
+  const datasetTitle = useMemo(() => {
+    if (!selectedDataset) {
+      return i18n.translate('data.datasetSelect.selectDataLabel', {
         defaultMessage: 'Select data',
       });
+    }
+
+    if (selectedDataset.displayName) {
+      return selectedDataset.displayName;
+    }
+
+    return selectedDataset.title;
+  }, [selectedDataset]);
+
   return (
     <EuiFormRow
       fullWidth={true}
@@ -188,8 +212,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         defaultMessage: 'Data',
       })}
     >
-      <EuiFlexGroup gutterSize="none" alignItems="center" wrap={false} responsive={false}>
-        <EuiFlexItem>
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        wrap={false}
+        responsive={false}
+        className="datasetSelect__container"
+      >
+        <EuiFlexItem className="datasetSelect__mainContent">
           <EuiPopover
             button={
               <EuiToolTip display="block" content={datasetTitle}>
@@ -267,31 +297,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                 responsive={false}
                 className="datasetSelect__footer"
               >
-                {/* TODO: Re-add once we have a way to create datasets that aren't index patterns */}
-                {/* <EuiFlexItem grow={false} className="datasetSelect__footerItem">
-                  <EuiSmallButtonEmpty
-                    onClick={() => {}}
-                    data-test-subj="datasetSelectManageButton"
-                  >
-                    {i18n.translate('data.datasetSelect.manageButton', {
-                      defaultMessage: 'Manage',
-                    })}
-                  </EuiSmallButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} className="datasetSelect__footerItem">
-                  <EuiSmallButton
-                    iconType="plusInCircle"
-                    onClick={() => {
-                      closePopover();
-                      fetchDatasets();
-                    }}
-                    data-test-subj="datasetSelectCreateButton"
-                  >
-                    {i18n.translate('data.dataSelector.createButton', {
-                      defaultMessage: 'Create',
-                    })}
-                  </EuiSmallButton>
-                </EuiFlexItem> */}
                 <EuiFlexItem grow={false} className="datasetSelect__footerItem">
                   <EuiButton
                     className="datasetSelect__advancedButton"
@@ -322,8 +327,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                                         type: dataSource.type,
                                       },
                                     }),
-                                    type:
-                                      query.dataset.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+                                    type: query.dataset.type,
                                     timeFieldName,
                                   };
 
@@ -332,8 +336,8 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                                     services,
                                     false
                                   );
-                                  setSelectedDataset(updatedDataset as Dataset);
-                                  onSelect(updatedDataset as Dataset);
+                                  setSelectedDataset(updatedDataset as DataView);
+                                  onSelect(updatedDataset as DataView);
                                 } catch (error) {
                                   services.notifications?.toasts.addError(error, {
                                     title: i18n.translate('data.datasetSelect.errorTitle', {
@@ -363,7 +367,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
             </EuiPopoverFooter>
           </EuiPopover>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="datasetSelect__detailsContainer">
           <DatasetDetails
             dataset={selectedDataset}
             isDefault={selectedDataset?.id === defaultDatasetId}

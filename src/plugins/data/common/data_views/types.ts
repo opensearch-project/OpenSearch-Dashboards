@@ -3,195 +3,140 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ErrorToastOptions, ToastInputFields } from 'src/core/public/notifications';
-// eslint-disable-next-line
-import type { SavedObject } from 'src/core/server';
-import { FieldFormat, DataViewField, OSD_FIELD_TYPES } from '..';
-import { SerializedFieldFormat } from '../../../expressions/common';
-import { IDataViewFieldType } from './fields';
+import {
+  IIndexPattern,
+  IndexPatternAttributes,
+  OnNotification,
+  OnError,
+  OnUnsupportedTimePattern,
+  UiSettingsCommon,
+  SavedObjectsClientCommonFindArgs,
+  SavedObjectsClientCommon,
+  GetFieldsOptions,
+  IIndexPatternsApiClient,
+  SavedObject,
+  AggregationRestrictions,
+  IFieldSubType,
+  TypeMeta,
+  FieldSpecConflictDescriptions,
+  FieldSpecExportFmt,
+  FieldSpec,
+  IndexPatternFieldMap,
+  SavedObjectReference,
+  IndexPatternSpec,
+  SourceFilter,
+} from '../index_patterns/types';
 
-export type DataViewFieldFormatMap = Record<string, SerializedFieldFormat>;
-
-export interface IDataView {
-  fields: IDataViewFieldType[];
-  title: string;
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export interface IDataView extends IIndexPattern {
   displayName?: string;
   description?: string;
-  id?: string;
   type?: string;
-  timeFieldName?: string;
-  intervalName?: string | null;
-  getTimeField?(): IDataViewFieldType | undefined;
-  fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
-  getFormatterForField?: (
-    field: DataViewField | DataViewField['spec'] | IDataViewFieldType
-  ) => FieldFormat;
+  dataSourceRef?: DataViewSavedObjectReference;
+
   /**
-   * Converts a DataView to a serializable Dataset object suitable for storage in Redux
-   * Maps dataSource to dataSourceRef and includes only essential properties
+   * @experimental This method is experimental and may change in future versions
    */
-  toDataset?(): any;
+  initializeDataSourceRef?(): Promise<void>;
 }
 
-export interface DataViewAttributes {
-  type: string;
-  fields: string;
-  title: string;
-  displayName?: string;
-  description?: string;
-  typeMeta: string;
-  timeFieldName?: string;
-  intervalName?: string;
-  sourceFilters?: string;
-  fieldFormatMap?: string;
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewAttributes = IndexPatternAttributes;
 
-export type DataViewOnNotification = (toastInputFields: ToastInputFields) => void;
-export type DataViewOnError = (error: Error, toastInputFields: ErrorToastOptions) => void;
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewOnNotification = OnNotification;
 
-export type DataViewOnUnsupportedTimePattern = ({
-  id,
-  title,
-  index,
-}: {
-  id: string;
-  title: string;
-  index: string;
-}) => void;
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewOnError = OnError;
 
-export interface DataViewUiSettingsCommon {
-  get: (key: string) => Promise<any>;
-  getAll: () => Promise<Record<string, any>>;
-  set: (key: string, value: any) => Promise<void>;
-  remove: (key: string) => Promise<void>;
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewOnUnsupportedTimePattern = OnUnsupportedTimePattern;
 
-export interface DataViewSavedObjectsClientCommonFindArgs {
-  type: string | string[];
-  fields?: string[];
-  perPage?: number;
-  search?: string;
-  searchFields?: string[];
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewUiSettingsCommon = UiSettingsCommon;
 
-export interface DataViewSavedObjectsClientCommon {
-  find: <T = unknown>(
-    options: DataViewSavedObjectsClientCommonFindArgs
-  ) => Promise<Array<SavedObject<T>>>;
-  get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
-  update: <T = unknown>(
-    type: string,
-    id: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
-  ) => Promise<SavedObject<T>>;
-  create: (
-    type: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
-  ) => Promise<SavedObject>;
-  delete: (type: string, id: string) => Promise<{}>;
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewSavedObjectsClientCommonFindArgs = SavedObjectsClientCommonFindArgs;
 
-export interface DataViewGetFieldsOptions {
-  pattern?: string;
-  type?: string;
-  params?: any;
-  lookBack?: boolean;
-  metaFields?: string[];
-  dataSourceId?: string;
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewSavedObjectsClientCommon = SavedObjectsClientCommon;
 
-export interface IDataViewsApiClient {
-  getFieldsForTimePattern: (options: DataViewGetFieldsOptions) => Promise<any>;
-  getFieldsForWildcard: (options: DataViewGetFieldsOptions) => Promise<any>;
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewGetFieldsOptions = GetFieldsOptions;
+
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type IDataViewsApiClient = IIndexPatternsApiClient;
 
 export type { SavedObject };
 
-export type DataViewAggregationRestrictions = Record<
-  string,
-  {
-    agg?: string;
-    interval?: number;
-    fixed_interval?: string;
-    calendar_interval?: string;
-    delay?: string;
-    time_zone?: string;
-  }
->;
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewAggregationRestrictions = AggregationRestrictions;
 
-export interface IDataViewFieldSubType {
-  multi?: { parent: string };
-  nested?: { path: string };
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type IDataViewFieldSubType = IFieldSubType;
 
-export interface DataViewTypeMeta {
-  aggs?: Record<string, DataViewAggregationRestrictions>;
-  [key: string]: any;
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewTypeMeta = TypeMeta;
 
-export type DataViewFieldSpecConflictDescriptions = Record<string, string[]>;
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewFieldSpecConflictDescriptions = FieldSpecConflictDescriptions;
 
-// This should become FieldSpec once types are cleaned up
-export interface DataViewFieldSpecExportFmt {
-  count?: number;
-  script?: string;
-  lang?: string;
-  conflictDescriptions?: DataViewFieldSpecConflictDescriptions;
-  name: string;
-  type: OSD_FIELD_TYPES;
-  esTypes?: string[];
-  scripted: boolean;
-  searchable: boolean;
-  aggregatable: boolean;
-  readFromDocValues?: boolean;
-  subType?: IDataViewFieldSubType;
-  format?: SerializedFieldFormat;
-  indexed?: boolean;
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewFieldSpecExportFmt = FieldSpecExportFmt;
 
-export interface DataViewFieldSpec {
-  count?: number;
-  script?: string;
-  lang?: string;
-  conflictDescriptions?: Record<string, string[]>;
-  format?: SerializedFieldFormat;
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewFieldSpec = FieldSpec;
 
-  name: string;
-  type: string;
-  esTypes?: string[];
-  scripted?: boolean;
-  searchable: boolean;
-  aggregatable: boolean;
-  readFromDocValues?: boolean;
-  subType?: IDataViewFieldSubType;
-  indexed?: boolean;
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewFieldMap = IndexPatternFieldMap;
 
-export type DataViewFieldMap = Record<string, DataViewFieldSpec>;
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewSavedObjectReference = SavedObjectReference;
 
-export interface DataViewSavedObjectReference {
-  name?: string;
-  id: string;
-  type: string;
-}
-export interface DataViewSpec {
-  id?: string;
-  version?: string;
-  title?: string;
-  displayName?: string;
-  description?: string;
-  intervalName?: string;
-  timeFieldName?: string;
-  sourceFilters?: DataViewSourceFilter[];
-  fields?: DataViewFieldMap;
-  typeMeta?: DataViewTypeMeta;
-  type?: string;
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewSpec = IndexPatternSpec & {
   dataSourceRef?: DataViewSavedObjectReference;
-  fieldsLoading?: boolean;
-}
+};
 
-export interface DataViewSourceFilter {
-  value: string;
-}
+/**
+ * @experimental DataView functionality is experimental and may change in future versions
+ */
+export type DataViewSourceFilter = SourceFilter;

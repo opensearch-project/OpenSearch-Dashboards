@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
-import { DataView as Dataset } from 'src/plugins/data/common';
+import { DataView } from '../../../../data/common';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -63,11 +63,11 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   });
 
   const { dataset } = useDatasetContext();
-  const [datasets, setDatasets] = useState<Dataset[] | undefined>(undefined);
+  const [datasets, setDatasets] = useState<DataView[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
 
   useEffect(() => {
-    const subscription = services.data.query.state$.subscribe(({ state }) => {
+    const subscription = data.query.state$.subscribe(({ state }) => {
       setSearchContext({
         query: state.query,
         timeRange: state.time,
@@ -78,7 +78,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     return () => {
       subscription.unsubscribe();
     };
-  }, [services.data.query.state$]);
+  }, [data.query.state$]);
 
   // Create osdUrlStateStorage from storage
   const osdUrlStateStorage = useMemo(() => {
@@ -126,7 +126,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       const defaultDataset = await data.dataViews.getDefault();
       if (!isMounted) return;
 
-      setDatasets(defaultDataset ? [(defaultDataset as unknown) as Dataset] : undefined);
+      setDatasets(defaultDataset ? [defaultDataset] : undefined);
     };
 
     initializeDataset();
@@ -152,30 +152,24 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const dispatch = useDispatch();
 
-  const handleDatasetSelect = (newDataset: any) => {
-    if (!newDataset) return;
-    const currentQuery = queryString.getQuery();
-    const serializableDataset =
-      'toDataset' in newDataset && typeof (newDataset as any).toDataset === 'function'
-        ? (newDataset as any).toDataset()
-        : {
-            id: newDataset.id,
-            title: newDataset.title,
-            type: newDataset.type || '',
-            timeFieldName: newDataset.timeFieldName,
-            dataSource: newDataset.dataSource,
-          };
+  const handleDatasetSelect = useCallback(
+    async (view: DataView) => {
+      if (!view) return;
 
-    dispatch(
-      setQueryState({
-        ...currentQuery,
-        query: queryString.getInitialQueryByDataset(newDataset).query,
-        dataset: serializableDataset,
-      })
-    );
+      const currentQuery = queryString.getQuery();
 
-    dispatch(setDatasetActionCreator(services, clearEditors));
-  };
+      const newDataset = data.dataViews.convertToDataset(view);
+      dispatch(
+        setQueryState({
+          ...currentQuery,
+          query: queryString.getInitialQueryByDataset(newDataset).query,
+          dataset: newDataset,
+        })
+      );
+      dispatch(setDatasetActionCreator(services, clearEditors));
+    },
+    [queryString, data.dataViews, dispatch, services, clearEditors]
+  );
 
   return (
     <TopNavMenu
