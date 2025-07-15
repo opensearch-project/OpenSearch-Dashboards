@@ -40,7 +40,7 @@ docViewsRegistry.addDocView({
 
 const mockProps: DataTableProps = {
   columns: mockColumns,
-  indexPattern: indexPatternMock,
+  dataset: indexPatternMock,
   rows: mockRows,
   sampleSize: 500,
   isShortDots: false,

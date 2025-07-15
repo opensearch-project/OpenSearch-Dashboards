@@ -21,6 +21,7 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 
 jest.mock('../../../../application/utils/state_management/slices', () => ({
   clearResults: jest.fn(),
+  clearQueryStatusMap: jest.fn(),
 }));
 
 jest.mock('../../../../application/utils/state_management/actions/query_actions', () => ({
@@ -29,7 +30,10 @@ jest.mock('../../../../application/utils/state_management/actions/query_actions'
 
 import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { clearResults } from '../../../../application/utils/state_management/slices';
+import {
+  clearResults,
+  clearQueryStatusMap,
+} from '../../../../application/utils/state_management/slices';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
 
 const mockUseDispatch = useDispatch as jest.MockedFunction<typeof useDispatch>;
@@ -37,6 +41,9 @@ const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFuncti
   typeof useOpenSearchDashboards
 >;
 const mockClearResults = clearResults as jest.MockedFunction<typeof clearResults>;
+const mockClearQueryStatusMap = clearQueryStatusMap as jest.MockedFunction<
+  typeof clearQueryStatusMap
+>;
 const mockExecuteQueries = executeQueries as jest.MockedFunction<typeof executeQueries>;
 
 describe('useTimeFilter', () => {
@@ -63,6 +70,7 @@ describe('useTimeFilter', () => {
     mockUseDispatch.mockReturnValue(mockDispatch);
     mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices } as any);
     mockClearResults.mockReturnValue({ type: 'CLEAR_RESULTS' } as any);
+    mockClearQueryStatusMap.mockReturnValue({ type: 'CLEAR_QUERY_STATUS_MAP' } as any);
     mockExecuteQueries.mockReturnValue({ type: 'EXECUTE_QUERIES' } as any);
   });
 
@@ -132,6 +140,8 @@ describe('useTimeFilter', () => {
 
         expect(mockClearResults).toHaveBeenCalled();
         expect(mockDispatch).toHaveBeenCalledWith({ type: 'CLEAR_RESULTS' });
+        expect(mockClearQueryStatusMap).toHaveBeenCalled();
+        expect(mockDispatch).toHaveBeenCalledWith({ type: 'CLEAR_QUERY_STATUS_MAP' });
         expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
         expect(mockDispatch).toHaveBeenCalledWith({ type: 'EXECUTE_QUERIES' });
       });
@@ -171,6 +181,7 @@ describe('useTimeFilter', () => {
         });
 
         expect(mockClearResults).not.toHaveBeenCalled();
+        expect(mockClearQueryStatusMap).not.toHaveBeenCalled();
         expect(mockExecuteQueries).not.toHaveBeenCalled();
         expect(mockDispatch).toHaveBeenCalledTimes(0);
       });

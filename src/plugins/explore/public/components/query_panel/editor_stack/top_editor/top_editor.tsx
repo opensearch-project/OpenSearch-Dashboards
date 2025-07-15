@@ -3,18 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
 import classNames from 'classnames';
+import { EuiIcon } from '@elastic/eui';
 import { useTopEditor } from '../../utils';
 import {
   selectEditorMode,
+  selectIsDualEditorMode,
   selectPromptModeIsAvailable,
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
-import { useEditorContextByEditorComponent } from '../../../../application/context';
+import { useTopEditorText } from '../../../../application/hooks';
+import { EditToolbar } from './edit_toolbar';
+import './top_editor.scss';
 
 const singleEditorPlaceholder = i18n.translate(
   'explore.queryPanel.promptEditor.singlePlaceholder',
@@ -43,18 +47,13 @@ const dualEditorPlaceholder = i18n.translate('explore.queryPanel.promptEditor.du
 export const TopEditor = () => {
   const editorMode = useSelector(selectEditorMode);
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
-  const { topEditorRef, topEditorText } = useEditorContextByEditorComponent();
+  const text = useTopEditorText();
   const { isFocused, onWrapperClick, ...editorProps } = useTopEditor();
-  // TODO: change me
-  const editorClassPrefix = [
-    EditorMode.SingleEmpty,
-    EditorMode.SinglePrompt,
-    EditorMode.DualPrompt,
-  ].includes(editorMode)
-    ? 'promptEditor'
-    : 'queryEditor';
   const isReadOnly = editorMode === EditorMode.DualQuery;
-  const showPlaceholder = !topEditorText.length && !isReadOnly;
+  const showPlaceholder = !text.length && !isReadOnly;
+  const isDualMode = useSelector(selectIsDualEditorMode);
+  const isPromptMode =
+    isDualMode || editorMode === EditorMode.SinglePrompt || editorMode === EditorMode.SingleEmpty;
 
   const placeholderText = useMemo(() => {
     if (!promptModeIsAvailable) {
@@ -64,31 +63,28 @@ export const TopEditor = () => {
     return editorMode === EditorMode.DualPrompt ? dualEditorPlaceholder : singleEditorPlaceholder;
   }, [editorMode, promptModeIsAvailable]);
 
-  // This is here to autofocus when toggling between the dual editors
-  // TODO: Ideally we don't need an useEffect here and do this explicitly.
-  useEffect(() => {
-    if (editorMode === EditorMode.DualPrompt) {
-      topEditorRef.current?.focus();
-    }
-  }, [editorMode, topEditorRef]);
-
   return (
-    <div className={`${editorClassPrefix}Wrapper`}>
-      {/* Suppressing below as this should only happen for click events.  */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-      <div
-        className={classNames(editorClassPrefix, {
-          [`${editorClassPrefix}--readonly`]: isReadOnly,
-          [`${editorClassPrefix}--focused`]: isFocused,
-        })}
-        data-test-subj="exploreReusableEditor"
-        onClick={onWrapperClick}
-      >
-        <CodeEditor {...editorProps} />
-        {showPlaceholder ? (
-          <div className={`${editorClassPrefix}__placeholder`}>{placeholderText}</div>
-        ) : null}
-      </div>
+    // Suppressing below as this should only happen for click events.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+    <div
+      className={classNames('exploreTopEditor', {
+        ['exploreTopEditor--readonly']: isReadOnly,
+        ['exploreTopEditor--focused']: isFocused,
+        ['exploreTopEditor--dualMode']: isDualMode,
+        ['exploreTopEditor--promptMode']: isPromptMode,
+      })}
+      data-test-subj="exploreTopEditor"
+      onClick={onWrapperClick}
+    >
+      <div className="exploreTopEditor__overlay" />
+      {isPromptMode ? (
+        <EuiIcon type="sparkleFilled" size="m" className="exploreTopEditor__promptIcon" />
+      ) : null}
+      {isDualMode ? <EditToolbar /> : null}
+      <CodeEditor {...editorProps} />
+      {showPlaceholder ? (
+        <div className={`exploreTopEditor__placeholder`}>{placeholderText}</div>
+      ) : null}
     </div>
   );
 };

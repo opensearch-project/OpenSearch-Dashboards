@@ -8,11 +8,14 @@ import './results_action_bar.scss';
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { useSelector } from 'react-redux';
 import { HitsCounter } from '../hits_counter';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
-import { IndexPattern } from '../../../../../../data/common';
+import { DataView as Dataset } from '../../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
+import { SaveAndAddButtonWithModal } from '../../../visualizations/add_to_dashboard_button';
+import { selectActiveTabId } from '../../../../application/utils/state_management/selectors';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
@@ -20,7 +23,7 @@ export interface DiscoverResultsActionBarProps {
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
   elapsedMs?: number;
-  indexPattern?: IndexPattern;
+  dataset?: Dataset;
   inspectionHanlder?: () => void;
 }
 
@@ -30,9 +33,12 @@ export const DiscoverResultsActionBar = ({
   resetQuery,
   rows,
   elapsedMs,
-  indexPattern,
+  dataset,
   inspectionHanlder,
 }: DiscoverResultsActionBarProps) => {
+  const currentTab = useSelector(selectActiveTabId);
+  const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
+
   return (
     <EuiFlexGroup
       direction="row"
@@ -68,13 +74,21 @@ export const DiscoverResultsActionBar = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {indexPattern && rows?.length ? (
-            <EuiFlexItem
-              grow={false}
-              className="explore-results-action-bar__explore-download-csv-flex-item"
-            >
-              <DiscoverDownloadCsv indexPattern={indexPattern} rows={rows} hits={hits} />
-            </EuiFlexItem>
+          {dataset && rows?.length ? (
+            <>
+              <EuiFlexItem
+                grow={false}
+                className="explore-results-action-bar__explore-download-csv-flex-item"
+              >
+                <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
+              </EuiFlexItem>
+
+              {shouldShowAddToDashboardButton && (
+                <EuiFlexItem grow={false}>
+                  <SaveAndAddButtonWithModal dataset={dataset} />
+                </EuiFlexItem>
+              )}
+            </>
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>

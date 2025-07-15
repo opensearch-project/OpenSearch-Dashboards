@@ -29,12 +29,12 @@ export const createTwoMetricScatter = (
       x: {
         field: xAxis?.field?.default?.column,
         type: 'quantitative',
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
       },
       y: {
         field: yAxis?.field?.default?.column,
         type: 'quantitative',
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
       },
     },
   };
@@ -71,12 +71,12 @@ export const createTwoMetricOneCateScatter = (
       x: {
         field: xAxis?.field?.default?.column,
         type: 'quantitative',
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
       },
       y: {
         field: yAxis?.field?.default?.column,
         type: 'quantitative',
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
       },
       color: {
         field: categoryFields,
@@ -126,12 +126,12 @@ export const createThreeMetricOneCateScatter = (
       x: {
         field: xAxis?.field?.default?.column,
         type: 'quantitative',
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
       },
       y: {
         field: yAxis?.field?.default?.column,
         type: 'quantitative',
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
       },
       color: {
         field: categoryFields,

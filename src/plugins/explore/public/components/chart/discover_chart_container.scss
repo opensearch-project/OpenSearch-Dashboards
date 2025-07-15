@@ -13,13 +13,12 @@
   }
 }
 
-.dscHistogram {
+.exploreHistogram {
   display: flex;
-  height: 200px;
-  padding: $euiSizeS;
+  height: 160px;
 }
 
-.dscHistogram__header--partial {
+.exploreHistogram__header--partial {
   font-weight: $euiFontWeightRegular;
   min-width: $euiSize * 12;
 }

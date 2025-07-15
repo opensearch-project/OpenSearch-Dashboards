@@ -11,7 +11,7 @@ import { EXPLORE_DEFAULT_LANGUAGE } from '../../../common';
 import { EditorMode, QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { EditorContextProvider } from '../../application/context';
-import { IndexPatternProvider } from '../../application/components/index_pattern_context';
+import { DatasetProvider } from '../../application/context';
 
 const mockServices = {
   uiSettings: {
@@ -36,7 +36,7 @@ const mockServices = {
           return defaultValue;
       }
     },
-    get$: (key: string, defaultValue: any) => ({
+    get$: (_key: string, defaultValue: any) => ({
       subscribe: (cb: any) => {
         cb(defaultValue);
         return { unsubscribe: () => {} };
@@ -161,9 +161,8 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
       },
       ui: {
         activeTabId: 'logs',
-        showDatasetFields: true,
+        showFilterPanel: true,
         showHistogram: true,
-        prompt: '',
       },
       results: {},
       tab: {
@@ -188,6 +187,7 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
         },
         editorMode,
         promptModeIsAvailable: false,
+        lastExecutedPrompt: '',
       },
     },
   });
@@ -203,7 +203,7 @@ export const StorybookProviders: React.FC<{
     <Provider store={store}>
       <OpenSearchDashboardsContextProvider services={mockServices}>
         <EditorContextProvider>
-          <IndexPatternProvider>{children}</IndexPatternProvider>
+          <DatasetProvider>{children}</DatasetProvider>
         </EditorContextProvider>
       </OpenSearchDashboardsContextProvider>
     </Provider>

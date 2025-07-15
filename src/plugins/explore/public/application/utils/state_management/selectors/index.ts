@@ -20,8 +20,9 @@ export const selectTabState = (state: RootState) => state.tab;
  */
 export const selectQuery = createSelector([selectQueryState], (queryState) => queryState);
 
-export const selectQueryString = createSelector([selectQueryState], (queryState) =>
-  typeof queryState.query === 'string' ? queryState.query : ''
+export const selectQueryString = createSelector(
+  [selectQueryState],
+  (queryState) => queryState.query
 );
 
 export const selectQueryLanguage = createSelector(
@@ -36,11 +37,9 @@ export const selectDataset = createSelector([selectQueryState], (queryState) => 
  */
 export const selectActiveTabId = createSelector([selectUIState], (uiState) => uiState.activeTabId);
 
-export const selectQueryPrompt = createSelector([selectUIState], (uiState) => uiState.prompt);
-
-export const selectShowDataSetFields = createSelector(
+export const selectShowDatasetFields = createSelector(
   [selectUIState],
-  (uiState) => uiState.showDatasetFields
+  (uiState) => uiState.showFilterPanel
 );
 
 export const selectShowHistogram = createSelector(

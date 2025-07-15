@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ScatterChartStyleControls } from './scatter_vis_config';
 import { AxisRole, StandardAxes } from '../types';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
-import { AllAxesOptions } from '../style_panel/standard_axes_options';
+import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { swapAxes } from '../utils/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { GridOptionsPanel } from '../style_panel/grid/grid';
 
 export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
 
@@ -80,6 +82,10 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
     }
   };
 
+  // The mapping object will be an empty object if no fields are selected on the axes selector. No
+  // visualization is generated in this case so we shouldn't display style option panels.
+  const hasMappingSelected = !isEmpty(axisColumnMappings);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -92,52 +98,61 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           chartType="scatter"
         />
       </EuiFlexItem>
-      {shouldShowLegend && (
-        <EuiFlexItem grow={false}>
-          <LegendOptionsPanel
-            shouldShowLegend={true}
-            legendOptions={{
-              show: styleOptions.addLegend,
-              position: styleOptions.legendPosition,
-            }}
-            onLegendOptionsChange={(legendOptions) => {
-              if (legendOptions.show !== undefined) {
-                updateStyleOption('addLegend', legendOptions.show);
+      {hasMappingSelected && (
+        <>
+          <EuiFlexItem grow={false}>
+            <AllAxesOptions
+              standardAxes={styleOptions.StandardAxes}
+              onChangeSwitchAxes={handleSwitchAxes}
+              onStandardAxesChange={(standardAxes) =>
+                updateStyleOption('StandardAxes', standardAxes)
               }
-              if (legendOptions.position !== undefined) {
-                updateStyleOption('legendPosition', legendOptions.position);
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ScatterExclusiveVisOptions
+              styles={styleOptions.exclusive}
+              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <GridOptionsPanel
+              grid={styleOptions.grid}
+              onGridChange={(gridOption) => updateStyleOption('grid', gridOption)}
+            />
+          </EuiFlexItem>
+          {shouldShowLegend && (
+            <EuiFlexItem grow={false}>
+              <LegendOptionsPanel
+                shouldShowLegend={true}
+                legendOptions={{
+                  show: styleOptions.addLegend,
+                  position: styleOptions.legendPosition,
+                }}
+                onLegendOptionsChange={(legendOptions) => {
+                  if (legendOptions.show !== undefined) {
+                    updateStyleOption('addLegend', legendOptions.show);
+                  }
+                  if (legendOptions.position !== undefined) {
+                    updateStyleOption('legendPosition', legendOptions.position);
+                  }
+                }}
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <TooltipOptionsPanel
+              tooltipOptions={styleOptions.tooltipOptions}
+              onTooltipOptionsChange={(tooltipOptions) =>
+                updateStyleOption('tooltipOptions', {
+                  ...styleOptions.tooltipOptions,
+                  ...tooltipOptions,
+                })
               }
-            }}
-          />
-        </EuiFlexItem>
+            />
+          </EuiFlexItem>
+        </>
       )}
-      <EuiFlexItem grow={false}>
-        <TooltipOptionsPanel
-          tooltipOptions={styleOptions.tooltipOptions}
-          onTooltipOptionsChange={(tooltipOptions) =>
-            updateStyleOption('tooltipOptions', {
-              ...styleOptions.tooltipOptions,
-              ...tooltipOptions,
-            })
-          }
-        />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <ScatterExclusiveVisOptions
-          styles={styleOptions.exclusive}
-          onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-        />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <AllAxesOptions
-          disableGrid={false}
-          standardAxes={styleOptions.StandardAxes}
-          onChangeSwitchAxes={handleSwitchAxes}
-          onStandardAxesChange={(standardAxes) => updateStyleOption('StandardAxes', standardAxes)}
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

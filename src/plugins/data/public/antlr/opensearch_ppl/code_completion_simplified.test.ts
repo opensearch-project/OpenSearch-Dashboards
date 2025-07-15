@@ -208,8 +208,7 @@ describe('ppl code_completion', () => {
 
     it('should suggest aggregate functions for stats', async () => {
       const result = await getSimpleSuggestions('source = test-index | stats ');
-
-      [...PPL_AGGREGATE_FUNCTIONS, 'count'].forEach((af) => {
+      Object.keys(PPL_AGGREGATE_FUNCTIONS).forEach((af) => {
         checkSuggestionsContain(result, {
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
@@ -330,6 +329,75 @@ describe('ppl code_completion', () => {
 
       const resultField = results.find((result) => result.text === '_field5');
       expect(resultField?.sortText).toBe('9');
+    });
+
+    it('should have appropriate insert text corresponding to each of the stats function', async () => {
+      const results = await getSimpleSuggestions('source = test-index | stats ');
+
+      const resultAggFunc1 = results.find((result) => result.text === 'count()');
+      expect(resultAggFunc1?.insertText).toBe('count() $0');
+
+      const resultAggFunc2 = results.find((result) => result.text === 'avg()');
+      expect(resultAggFunc2?.insertText).toBe('avg($0)');
+    });
+
+    it('should set the value of suggestFieldsInAggregateFunction appropriately', async () => {
+      const results = await getSimpleSuggestions('source = test-index | stats avg( ');
+
+      const resultField = results.find((result) => result.text === 'field1');
+      expect(resultField?.insertText).toBe('field1');
+
+      const results1 = await getSimpleSuggestions('source = test-index | where ');
+
+      const resultField1 = results1.find((result) => result.text === 'field1');
+      expect(resultField1?.insertText).toBe('field1 ');
+    });
+
+    it('should show the documentations for PPL commands', async () => {
+      const results = await getSimpleSuggestions('source = test-index | ');
+
+      const resultField = results.find((result) => result.text === 'where');
+      expect(resultField?.documentation).not.toBeFalsy();
+    });
+
+    it('should not show the documentations unsupported PPL commands', async () => {
+      const results = await getSimpleSuggestions('source = test-index ');
+
+      const resultField = results.find((result) => result.text === '|');
+      expect(resultField?.documentation).toBeFalsy();
+    });
+
+    it('should suggest span method in by clause', async () => {
+      const results = await getSimpleSuggestions('source = test-index | stats count() by ');
+
+      checkSuggestionsContain(results, {
+        text: 'span()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
+    });
+
+    it('should suggest match method in where clause', async () => {
+      const results = await getSimpleSuggestions('source = test-index | where ');
+
+      checkSuggestionsContain(results, {
+        text: 'match()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
+
+      checkSuggestionsContain(results, {
+        text: 'match_phrase()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
+
+      checkSuggestionsContain(results, {
+        text: 'match_phrase_prefix()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
+
+      checkSuggestionsContain(results, {
+        text: 'match_bool_prefix()',
+        type: monaco.languages.CompletionItemKind.Function,
+      });
     });
   });
 });

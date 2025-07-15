@@ -4,17 +4,16 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { createPortal } from 'react-dom';
 import { useDispatch } from 'react-redux';
 import { Query, RecentQueriesTable, TimeRange } from '../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { loadQueryActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { useTimeFilter } from '../../utils';
-import { useEditorContext } from '../../../../application/context';
-import { RECENT_QUERIES_TABLE_WRAPPER_EL } from '../../utils/constants';
+import { useClearEditorsAndSetText } from '../../../../application/hooks';
+import './recent_queries_button.scss';
 
 const label = i18n.translate('explore.queryPanel.recentQueryLabel', {
   defaultMessage: 'Recent Queries',
@@ -22,19 +21,14 @@ const label = i18n.translate('explore.queryPanel.recentQueryLabel', {
 
 export const RecentQueriesButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const editorContext = useEditorContext();
+  const clearEditorsAndSetText = useClearEditorsAndSetText();
   const { handleTimeChange } = useTimeFilter();
   const dispatch = useDispatch();
-  const [queriesAreVisible, setQueriesAreVisible] = useState(false);
-  const recentQueriesTableWrapperEl = document.getElementById(RECENT_QUERIES_TABLE_WRAPPER_EL);
-
-  const toggleVisibility = () => {
-    setQueriesAreVisible(!queriesAreVisible);
-  };
+  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
 
   const onClick = (selectedQuery: Query, timeRange?: TimeRange) => {
     const updatedQuery = typeof selectedQuery.query === 'string' ? selectedQuery.query : '';
-    setQueriesAreVisible(false);
+    setPopoverIsOpen(false);
     if (timeRange) {
       handleTimeChange({
         start: timeRange.from,
@@ -43,28 +37,36 @@ export const RecentQueriesButton = () => {
         isQuickSelection: true,
       });
     }
-    dispatch(loadQueryActionCreator(services, editorContext, updatedQuery));
+    dispatch(loadQueryActionCreator(services, clearEditorsAndSetText, updatedQuery));
   };
 
   return (
-    <>
-      <EuiButtonEmpty
-        onClick={toggleVisibility}
-        iconType="clock"
-        data-test-subj="exploreRecentQueriesButton"
-      >
-        {label}
-      </EuiButtonEmpty>
-      {recentQueriesTableWrapperEl
-        ? createPortal(
-            <RecentQueriesTable
-              isVisible={queriesAreVisible}
-              queryString={services.data.query.queryString}
-              onClickRecentQuery={onClick}
-            />,
-            recentQueriesTableWrapperEl
-          )
-        : null}
-    </>
+    <EuiPopover
+      id="languageReferencePopover"
+      button={
+        <EuiButtonEmpty
+          onClick={() => setPopoverIsOpen((state) => !state)}
+          data-test-subj="exploreRecentQueriesButton"
+          size="xs"
+        >
+          <div className="exploreRecentQueriesButton__buttonTextWrapper">
+            <EuiIcon type="clock" size="s" />
+            <EuiText size="xs">{label}</EuiText>
+            <EuiIcon type="arrowDown" size="s" />
+          </div>
+        </EuiButtonEmpty>
+      }
+      isOpen={popoverIsOpen}
+      closePopover={() => setPopoverIsOpen(false)}
+      panelPaddingSize="s"
+      anchorPosition="downCenter"
+      panelClassName="exploreRecentQueriesButton__popover"
+    >
+      <RecentQueriesTable
+        isVisible={popoverIsOpen}
+        queryString={services.data.query.queryString}
+        onClickRecentQuery={onClick}
+      />
+    </EuiPopover>
   );
 };

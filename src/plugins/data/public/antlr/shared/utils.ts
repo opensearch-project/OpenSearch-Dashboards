@@ -149,18 +149,17 @@ export const formatValuesToSuggestions = <T extends { toString(): string }>(
   values: T[], // generic for any value type
   modifyInsertText?: (input: T) => string
 ) => {
-  let i = 0;
-
-  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values.map((val: T) => {
-    i++;
-    return {
-      text: val.toString(),
-      type: monaco.languages.CompletionItemKind.Value,
-      detail: SuggestionItemDetailsTags.Value,
-      sortText: i.toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
-      ...(modifyInsertText && { insertText: modifyInsertText(val) }),
-    };
-  });
+  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values
+    .filter((val) => val !== null) // Only using the notNull values
+    .map((val: T, i) => {
+      return {
+        text: val.toString(),
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: (i + 1).toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
+        ...(modifyInsertText && { insertText: modifyInsertText(val) }),
+      };
+    });
 
   return valueSuggestions;
 };
@@ -333,6 +332,32 @@ export const parseQuery = <
             ],
           };
         }
+        continue;
+      }
+
+      if (field === 'suggestKeywords') {
+        // combine suggestKeywords arrays with smarter deduplication
+        const currentKeywords = result.suggestKeywords ?? [];
+        const nextKeywords = nextResult.suggestKeywords ?? [];
+
+        // Create a Map to handle deduplication by id, preferring existing entries
+        const keywordMap = new Map<number, KeywordSuggestion>();
+
+        // Add current keywords first (they take precedence)
+        currentKeywords.forEach((keyword) => {
+          if (keyword?.id !== undefined) {
+            keywordMap.set(keyword.id, keyword);
+          }
+        });
+
+        // Add next keywords only if they don't already exist
+        nextKeywords.forEach((keyword) => {
+          if (keyword?.id !== undefined && !keywordMap.has(keyword.id)) {
+            keywordMap.set(keyword.id, keyword);
+          }
+        });
+
+        result.suggestKeywords = Array.from(keywordMap.values());
         continue;
       }
 

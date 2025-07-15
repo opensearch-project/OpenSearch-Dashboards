@@ -19,8 +19,8 @@ export interface MockStore {
 export const createMockStore = (initialState?: Partial<RootState>): MockStore => ({
   getState: jest.fn().mockReturnValue({
     query: {
-      query: 'SELECT * FROM logs',
-      language: 'sql',
+      query: 'source=hello',
+      language: 'PPL',
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     },
     ui: {
@@ -48,12 +48,12 @@ export const createMockStore = (initialState?: Partial<RootState>): MockStore =>
 export const createMockRootState = (overrides?: Partial<RootState>): RootState =>
   ({
     query: {
-      query: 'SELECT * FROM logs',
-      language: 'sql',
+      query: 'source hello',
+      language: 'PPL',
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     },
     ui: {
-      showDatasetFields: false,
+      showFilterPanel: false,
       prompt: '',
     },
     results: {},

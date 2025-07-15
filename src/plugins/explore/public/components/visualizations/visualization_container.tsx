@@ -4,8 +4,9 @@
  */
 
 import './visualization_container.scss';
+import { i18n } from '@osd/i18n';
 import { isEmpty, isEqual } from 'lodash';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -22,7 +23,7 @@ import {
 import './visualization_container.scss';
 import { AxisColumnMappings, VisColumn, VisualizationRule } from './types';
 import { toExpression } from './utils/to_expression';
-import { useIndexPatternContext } from '../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import { ExploreServices } from '../../types';
 import {
   setStyleOptions,
@@ -35,8 +36,6 @@ import {
   selectAxesMapping,
 } from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
-import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
-import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import {
   applyDefaultVisualization,
@@ -47,11 +46,27 @@ import {
   getColumnMatchFromMapping,
   isValidMapping,
 } from './visualization_container_utils';
+import { useSearchContext } from '../query_panel/utils/use_search_context';
 
 export interface UpdateVisualizationProps {
   rule?: Partial<VisualizationRule>;
   mappings: AxisColumnMappings;
 }
+
+const VISUALIZATION_TOAST_MSG = {
+  useRule: i18n.translate('explore.visualize.toast.useRule', {
+    defaultMessage: 'Cannot apply previous configured visualization, use rule matched',
+  }),
+  reset: i18n.translate('explore.visualize.toast.reset', {
+    defaultMessage: 'Cannot apply previous configured visualization, reset',
+  }),
+  metricReset: i18n.translate('explore.visualize.toast.metricReset', {
+    defaultMessage: 'Cannot apply metric type visualization, reset',
+  }),
+  switchReset: i18n.translate('explore.visualize.toast.switchReset', {
+    defaultMessage: 'Cannot apply configured visualization to the current chart type, reset',
+  }),
+};
 
 export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -60,8 +75,9 @@ export const VisualizationContainer = () => {
     data,
     expressions: { ReactExpressionRenderer },
   } = services;
-  const { indexPattern } = useIndexPatternContext();
+  const { dataset } = useDatasetContext();
   const { results } = useTabResults();
+  const searchContext = useSearchContext();
 
   // TODO: Register custom processor for visualization tab
   // const tabDefinition = services.tabRegistry?.getTab?.('explore_visualization_tab');
@@ -117,20 +133,26 @@ export const VisualizationContainer = () => {
     originalVisualizationData.current = visualizationTypeResult;
     const allColumns = getAllColumns(visualizationTypeResult);
 
-    if (visualizationTypeResult?.ruleId && visualizationTypeResult.visualizationType) {
+    // Cannot display metric with new query result if we have more than one value
+    const cannotDisplayAsMetric =
+      selectedChartType === 'metric' && allColumns[0].uniqueValuesCount > 1;
+
+    if (
+      visualizationTypeResult?.ruleId &&
+      visualizationTypeResult.visualizationType &&
+      selectedChartType !== 'table'
+    ) {
       // Rule matched and visualization can be automatically generated
       if (selectedChartType && !isEmpty(selectedAxesMapping) && !isEmpty(styleOptions)) {
         // Has a visualization generated previously
         const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
 
         // Check if the chart type and axes selection previously can continue be used on
-        // the new query. The checkingis base on compare current availble columns and previous
+        // the new query. The checking is based on compare current available columns and previous
         // selected axes-column mappings.
-        if (!isValidMapping(selectedAxesMapping, allColumns)) {
+        if (!isValidMapping(selectedAxesMapping ?? {}, allColumns) || cannotDisplayAsMetric) {
           // Cannot apply, use the auto rule-matched visualization
-          services.notifications.toasts.addInfo(
-            'Cannot apply previous configured visualization, use rule matched'
-          ); // FIXME message
+          services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.useRule);
 
           applyDefaultVisualization(
             visualizationTypeResult,
@@ -143,7 +165,7 @@ export const VisualizationContainer = () => {
           setVisualizationData({
             ...visualizationTypeResult,
             visualizationType: chartConfig as VisualizationType<ChartType>,
-            axisColumnMappings: convertStringsToMappings(selectedAxesMapping, allColumns),
+            axisColumnMappings: convertStringsToMappings(selectedAxesMapping ?? {}, allColumns),
           });
         }
       } else {
@@ -160,12 +182,22 @@ export const VisualizationContainer = () => {
       const chartConfig = visualizationRegistry.getVisualizationConfig(selectedChartType);
 
       // Similar check with the above if branch
-      if (!isValidMapping(selectedAxesMapping, allColumns)) {
+      if (selectedChartType === 'table') {
+        dispatch(setAxesMapping(undefined));
+        setVisualizationData({
+          ...visualizationTypeResult,
+          visualizationType: chartConfig as VisualizationType<ChartType>,
+          axisColumnMappings: {},
+        });
+      } else if (cannotDisplayAsMetric) {
+        // Empty state
+        setVisualizationData(visualizationTypeResult);
+        dispatch(setSelectedChartType(undefined));
+        services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.metricReset);
+      } else if (!isValidMapping(selectedAxesMapping ?? {}, allColumns)) {
         // Cannot apply, use empty state
-        services.notifications.toasts.addInfo(
-          'Cannot apply previous configured visualization, reset'
-        ); // FIXME message
-        dispatch(setAxesMapping({}));
+        services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.reset);
+        dispatch(setAxesMapping(undefined));
 
         setVisualizationData({
           ...visualizationTypeResult,
@@ -174,13 +206,13 @@ export const VisualizationContainer = () => {
         });
       } else {
         // Use saved visualization selections
-        const ruleToUse = findRuleByIndex(selectedAxesMapping, allColumns);
+        const ruleToUse = findRuleByIndex(selectedAxesMapping ?? {}, allColumns);
         setCurrentRuleId(ruleToUse?.id);
         dispatch(setAxesMapping(selectedAxesMapping));
         setVisualizationData({
           ...visualizationTypeResult,
           visualizationType: chartConfig as VisualizationType<ChartType>,
-          axisColumnMappings: convertStringsToMappings(selectedAxesMapping, allColumns),
+          axisColumnMappings: convertStringsToMappings(selectedAxesMapping ?? {}, allColumns),
           ruleId: ruleToUse?.id,
           toExpression: ruleToUse?.toExpression,
         });
@@ -200,22 +232,20 @@ export const VisualizationContainer = () => {
     styleOptions,
   ]);
 
-  const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
-    query: data.query.queryString.getQuery(),
-    filters: data.query.filterManager.getFilters(),
-    timeRange: data.query.timefilter.timefilter.getTime(),
-  });
-
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
     if (
       !rows ||
-      !indexPattern ||
+      !dataset ||
       !visualizationData ||
-      !currentRuleId ||
       !styleOptions ||
       !visualizationData.transformedData
     ) {
+      return null;
+    }
+
+    if (selectedChartType === 'table') {
+      // TODO: we may need to use expression to render a table for PPL results
       return null;
     }
 
@@ -247,7 +277,7 @@ export const VisualizationContainer = () => {
     // Create a complete expression using the toExpression function including the OpenSearch Dashboards context and the Vega spec
     return toExpression(
       searchContext,
-      indexPattern,
+      dataset,
       ruleBasedToExpressionFn,
       visualizationData.transformedData,
       visualizationData.numericalColumns,
@@ -258,7 +288,7 @@ export const VisualizationContainer = () => {
   }, [
     searchContext,
     rows,
-    indexPattern,
+    dataset,
     styleOptions,
     visualizationData,
     visualizationRegistry,
@@ -266,52 +296,38 @@ export const VisualizationContainer = () => {
     currentRuleId,
   ]);
 
-  // Hook to update the search context whenever the query state changes
-  // This will ensure that the visualization is always up-to-date with the latest query and filters
-  // Also updates the enableViz state based on the query language
-  useEffect(() => {
-    const subscription = services.data.query.state$.subscribe(({ state }) => {
-      setSearchContext({
-        query: state.query,
-        timeRange: state.time,
-        filters: state.filters,
-      });
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [data.query.queryString, services.data.query.state$]);
-
-  const handleStyleChange = (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {
-    if (styleOptions) {
-      // TODO: needs proper refactor
-      // 1. The below `setStyleOptions` call
-      // 2. Another `setStyleOptions` triggered above via:
-      //    dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
-      //
-      // Root cause:
-      // HeatmapVisStyleControls currently performs default style initialization inside a `useEffect`,
-      // which internally calls `updateStyleOption`. This introduces a race condition when initializing styles.
-      //
-      // Proper solution:
-      // Refactor HeatmapVisStyleControls (and any other style controls components) to **not** handle default style initialization.
-      // Instead, this logic should be centralized and performed earlier, during the visualization type resolution phase.
-      //
-      // Replace static access to `visualizationData.visualizationType.ui.style.defaults` with a method like:
-      //   `visualizationData.visualizationType.ui.style.getDefaults(rows, fieldSchema)`
-      // This allows default styles to be computed dynamically based on actual data (`rows`, `fieldSchema`),
-      // avoiding conflicts during rendering.
-      setTimeout(() => {
-        dispatch(
-          setStyleOptions({
-            ...styleOptions,
-            ...newOptions,
-          } as ChartStyleControlMap[ChartType])
-        );
-      }, 50);
-    }
-  };
+  const handleStyleChange = useCallback(
+    (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {
+      if (styleOptions) {
+        // TODO: needs proper refactor
+        // 1. The below `setStyleOptions` call
+        // 2. Another `setStyleOptions` triggered above via:
+        //    dispatch(setStyleOptions(visualizationData.visualizationType.ui.style.defaults));
+        //
+        // Root cause:
+        // HeatmapVisStyleControls currently performs default style initialization inside a `useEffect`,
+        // which internally calls `updateStyleOption`. This introduces a race condition when initializing styles.
+        //
+        // Proper solution:
+        // Refactor HeatmapVisStyleControls (and any other style controls components) to **not** handle default style initialization.
+        // Instead, this logic should be centralized and performed earlier, during the visualization type resolution phase.
+        //
+        // Replace static access to `visualizationData.visualizationType.ui.style.defaults` with a method like:
+        //   `visualizationData.visualizationType.ui.style.getDefaults(rows, fieldSchema)`
+        // This allows default styles to be computed dynamically based on actual data (`rows`, `fieldSchema`),
+        // avoiding conflicts during rendering.
+        setTimeout(() => {
+          dispatch(
+            setStyleOptions({
+              ...styleOptions,
+              ...newOptions,
+            } as ChartStyleControlMap[ChartType])
+          );
+        }, 50);
+      }
+    },
+    [dispatch, styleOptions]
+  );
 
   const handleChartTypeChange = (chartType: ChartType) => {
     isVisualizationUpdated.current = true;
@@ -344,11 +360,13 @@ export const VisualizationContainer = () => {
                 const usedColumns = new Set<string>();
                 const updatedMapping = Object.fromEntries(
                   Object.entries(reusedMapping).map(([key, config]) => {
-                    const matchingColumn = Object.values(selectedAxesMapping).find((columnName) => {
-                      if (usedColumns.has(columnName)) return false;
-                      const column = allColumns.find((col) => col.name === columnName);
-                      return column?.schema === config.type;
-                    });
+                    const matchingColumn = Object.values(selectedAxesMapping ?? {}).find(
+                      (columnName) => {
+                        if (usedColumns.has(columnName)) return false;
+                        const column = allColumns.find((col) => col.name === columnName);
+                        return column?.schema === config.type;
+                      }
+                    );
                     if (matchingColumn) usedColumns.add(matchingColumn);
                     return [key, matchingColumn];
                   })
@@ -366,9 +384,7 @@ export const VisualizationContainer = () => {
                 return;
               }
             }
-            services.notifications.toasts.addInfo(
-              'Cannot apply configured visualization to the current chart type, reset'
-            ); // FIXME message
+            services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.switchReset);
           }
         }
       }
@@ -378,7 +394,7 @@ export const VisualizationContainer = () => {
         visualizationType: chartConfig as VisualizationType<ChartType>,
         axisColumnMappings: {},
       });
-      dispatch(setAxesMapping({}));
+      dispatch(setAxesMapping(undefined));
     }
   };
 
@@ -389,20 +405,10 @@ export const VisualizationContainer = () => {
 
   return (
     <div className="exploreVisContainer">
-      <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
-        <EuiFlexItem>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ alignItems: 'flex-end' }}>
-          <SaveAndAddButtonWithModal
-            searchContext={searchContext}
-            indexPattern={indexPattern}
-            services={services}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={true} style={{ minHeight: 0 }}>
           <Visualization<ChartType>
-            expression={expression!}
+            expression={expression}
             searchContext={searchContext}
             styleOptions={styleOptions}
             visualizationData={visualizationData as VisualizationTypeResult<ChartType>}

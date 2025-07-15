@@ -5,17 +5,17 @@
 
 import { OpenSearchPPLParser } from '@osd/antlr-grammar';
 
-export const PPL_AGGREGATE_FUNCTIONS = [
-  'avg',
-  'count',
-  'sum',
-  'min',
-  'max',
-  'var_samp',
-  'var_pop',
-  'stddev_samp',
-  'stddev_pop',
-];
+export const PPL_AGGREGATE_FUNCTIONS = {
+  avg: { optionalParam: false },
+  count: { optionalParam: true },
+  sum: { optionalParam: false },
+  min: { optionalParam: false },
+  max: { optionalParam: false },
+  var_samp: { optionalParam: false },
+  var_pop: { optionalParam: false },
+  stddev_samp: { optionalParam: false },
+  stddev_pop: { optionalParam: false },
+};
 
 export const PPL_SUGGESTION_IMPORTANCE = new Map<number, string>([
   [OpenSearchPPLParser.PIPE, '0'],
@@ -25,4 +25,12 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<number, string>([
   [OpenSearchPPLParser.MINUS, '2'],
   [OpenSearchPPLParser.SOURCE, '2'],
   [OpenSearchPPLParser.RT_PRTHS, '2'],
+]);
+
+export const PPL_FUNCTIONAL_KEYWORDS = new Map<number, { optionalParam: boolean }>([
+  [OpenSearchPPLParser.SPAN, { optionalParam: false }],
+  [OpenSearchPPLParser.MATCH, { optionalParam: false }],
+  [OpenSearchPPLParser.MATCH_PHRASE, { optionalParam: false }],
+  [OpenSearchPPLParser.MATCH_BOOL_PREFIX, { optionalParam: false }],
+  [OpenSearchPPLParser.MATCH_PHRASE_PREFIX, { optionalParam: false }],
 ]);

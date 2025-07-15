@@ -28,12 +28,30 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../../../../../../data/public';
+import { difference } from 'lodash';
+import {
+  DataView as Dataset,
+  IndexPattern,
+  IndexPatternField,
+} from '../../../../../../../../../data/public';
 
 export function getIndexPatternFieldList(
-  indexPattern?: IndexPattern,
+  indexPattern?: IndexPattern | Dataset,
   fieldCounts?: Record<string, number>
 ) {
   if (!indexPattern || !fieldCounts) return [];
-  return [...indexPattern.fields.getAll()];
+
+  const fieldNamesInDocs = Object.keys(fieldCounts);
+  const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
+  const unknownTypes: IndexPatternField[] = [];
+
+  difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
+    unknownTypes.push({
+      displayName: String(unknownFieldName),
+      name: String(unknownFieldName),
+      type: 'unknown',
+    } as IndexPatternField);
+  });
+
+  return [...indexPattern.fields.getAll(), ...unknownTypes];
 }

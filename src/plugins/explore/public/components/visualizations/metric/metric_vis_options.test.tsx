@@ -16,6 +16,8 @@ jest.mock('@osd/i18n', () => ({
 
 describe('MetricVisStyleControls', () => {
   const mockProps: MetricVisStyleControlsProps = {
+    axisColumnMappings: {},
+    updateVisualization: jest.fn(),
     styleOptions: defaultMetricChartStyles,
     onStyleChange: jest.fn(),
     numericalColumns: [
@@ -30,30 +32,28 @@ describe('MetricVisStyleControls', () => {
     ],
     categoricalColumns: [],
     dateColumns: [],
+    axisColumnMappings: { value: 'field-1' },
+    updateVisualization: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders all tabs', () => {
+  it('renders the metric accordion', () => {
     render(<MetricVisStyleControls {...mockProps} />);
 
-    expect(screen.getByText('Exclusive')).toBeInTheDocument();
+    expect(screen.getByText('Metric')).toBeInTheDocument();
   });
 
-  it('renders the exclusive options component in the first tab', () => {
+  it('renders the show title switch', () => {
     render(<MetricVisStyleControls {...mockProps} />);
-    const tab = screen.getByRole('tab', { name: /exclusive/i });
-    fireEvent.click(tab);
-    expect(screen.getByTestId('metricExclusivePanel')).toBeInTheDocument();
+    expect(screen.getByTestId('showTitleSwitch')).toBeInTheDocument();
   });
 
-  it('calls onStyleChange with the correct parameters when a style option changes', () => {
+  it('calls onStyleChange when show title switch is toggled', () => {
     render(<MetricVisStyleControls {...mockProps} />);
-    const tab = screen.getByRole('tab', { name: /exclusive/i });
-    fireEvent.click(tab);
-    const switchButton = screen.getByTestId('showTitleButton');
+    const switchButton = screen.getByTestId('showTitleSwitch');
     fireEvent.click(switchButton);
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ showTitle: false });

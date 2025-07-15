@@ -62,7 +62,20 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     // Query state handling
     let finalQueryState: QueryState;
     if (queryState?.dataset) {
-      finalQueryState = queryState;
+      // The dataset from URL should already be minimal, but ensure it only has the necessary properties
+      finalQueryState = {
+        ...queryState,
+        dataset: queryState.dataset
+          ? {
+              id: queryState.dataset.id,
+              title: queryState.dataset.title,
+              type: queryState.dataset.type,
+              timeFieldName: queryState.dataset.timeFieldName,
+              // Map dataSource if it exists
+              dataSource: queryState.dataset.dataSource,
+            }
+          : undefined,
+      };
     } else {
       finalQueryState = await getPreloadedQueryState(services);
     }
@@ -175,9 +188,26 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
   // Resolve the dataset to use for the initial query state
   const selectedDataset = await resolveDataset(services);
 
+  // Use toDataset method if available, otherwise extract minimal properties
+  let minimalDataset: Dataset | undefined;
   if (selectedDataset) {
+    // Use type assertion to check for toDataset method
+    if (typeof (selectedDataset as any).toDataset === 'function') {
+      minimalDataset = (selectedDataset as any).toDataset();
+    } else {
+      minimalDataset = {
+        id: selectedDataset.id,
+        title: selectedDataset.title,
+        type: selectedDataset.type,
+        timeFieldName: selectedDataset.timeFieldName,
+        dataSource: selectedDataset.dataSource,
+      };
+    }
+  }
+
+  if (minimalDataset) {
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
-      ...selectedDataset,
+      ...minimalDataset,
       language: EXPLORE_DEFAULT_LANGUAGE,
     });
 
@@ -185,12 +215,14 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
     return {
       ...initialQueryByDataset,
       query: '',
+      // Ensure we use the minimal dataset
+      dataset: minimalDataset,
     };
   } else {
     return {
       query: '',
       language: EXPLORE_DEFAULT_LANGUAGE,
-      dataset: selectedDataset,
+      dataset: undefined,
     };
   }
 };
@@ -200,10 +232,9 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
  */
 const getPreloadedUIState = (services: ExploreServices): UIState => {
   return {
-    activeTabId: 'logs',
-    showDatasetFields: true,
+    activeTabId: '',
+    showFilterPanel: true,
     showHistogram: true,
-    prompt: '',
   };
 };
 
@@ -226,7 +257,8 @@ const getPreloadedQueryEditorState = async (
       : DEFAULT_EDITOR_MODE;
 
   return {
-    queryStatus: {
+    queryStatusMap: {},
+    overallQueryStatus: {
       status: QueryExecutionStatus.UNINITIALIZED,
       elapsedMs: undefined,
       startTime: undefined,
@@ -234,6 +266,7 @@ const getPreloadedQueryEditorState = async (
     },
     promptModeIsAvailable,
     editorMode,
+    lastExecutedPrompt: '',
   };
 };
 

@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern } from '../../../../data/public';
-import { QueryState } from './state_management/slices';
+import { Duration, Moment } from 'moment';
+import { DataView as Dataset, DataPublicPluginStart } from '../../../../data/public';
+import { QueryState, ISearchResult } from './state_management/slices';
 import { ExploreServices } from '../../types';
 
 /**
@@ -16,13 +17,28 @@ export interface ChartDataBucket {
 }
 
 /**
+ * Interface for Ordered
+ */
+interface Ordered {
+  date: true;
+  interval: Duration;
+  intervalOpenSearchUnit: string;
+  intervalOpenSearchValue: number;
+  min: Moment;
+  max: Moment;
+}
+
+/**
  * Interface for chart data
  */
 export interface ChartData {
   values: Array<{ x: number | string; y: number }>;
   xAxisOrderedValues: Array<number | string>;
   xAxisFormat: { id: string; params: { pattern: string } };
+  xAxisLabel: string;
+  yAxisLabel: string;
   buckets?: ChartDataBucket[];
+  ordered: Ordered;
 }
 
 /**
@@ -32,6 +48,7 @@ export interface BucketInterval {
   scaled?: boolean;
   description?: string;
   scale?: number;
+  interval?: string;
 }
 
 /**
@@ -72,23 +89,39 @@ export interface RawSearchResults {
 }
 
 /**
- * Interface for processed search results
+ * Base interface for processed search results
  */
-export interface ProcessedSearchResults {
-  hits: number;
-  rows: OpenSearchHitRecord[];
-  chartData?: ChartData;
-  bucketInterval?: BucketInterval;
-  fieldCounts?: Record<string, number>;
+export interface BaseProcessedSearchResults {
+  hits: ISearchResult['hits'];
+  fieldCounts: Record<string, number>;
+  dataset: Dataset;
+  elapsedMs: number;
 }
 
 /**
- * Type for data processor function
+ * Interface for processed search results
  */
-export type DataProcessor = (
-  rawResults: RawSearchResults,
-  indexPattern: IndexPattern,
-  includeHistogram?: boolean
+export interface ProcessedSearchResults extends BaseProcessedSearchResults {
+  chartData?: ChartData;
+  bucketInterval?: BucketInterval;
+}
+
+/**
+ * Type for default data processor function
+ */
+export type DefaultDataProcessor = (
+  rawResults: ISearchResult,
+  dataset: Dataset
+) => ProcessedSearchResults;
+
+/**
+ * Type for histogram data processor function
+ */
+export type HistogramDataProcessor = (
+  rawResults: ISearchResult,
+  dataset: Dataset,
+  data: DataPublicPluginStart,
+  interval: string
 ) => ProcessedSearchResults;
 
 /**

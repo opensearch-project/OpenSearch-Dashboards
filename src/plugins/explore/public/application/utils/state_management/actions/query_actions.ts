@@ -6,110 +6,89 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import { IBucketDateHistogramAggConfig, Query, DataView as Dataset } from 'src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
-import { setResults, ISearchResult, setQueryStatus, updateQueryStatus } from '../slices';
+import { setResults, ISearchResult } from '../slices';
+import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
 import { ExploreServices } from '../../../../types';
-import { IndexPattern } from '../../../legacy/discover/opensearch_dashboards_services';
 import {
   DataPublicPluginStart,
-  search,
   indexPatterns as indexPatternUtils,
-  Query,
+  search,
 } from '../../../../../../data/public';
 import {
+  buildPointSeriesData,
   createHistogramConfigs,
   getDimensions,
-  buildPointSeriesData,
 } from '../../../../components/chart/utils';
-import { IBucketDateHistogramAggConfig } from '../../../../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
+import {
+  ChartData,
+  DefaultDataProcessor,
+  HistogramDataProcessor,
+  ProcessedSearchResults,
+} from '../../interfaces';
+import { defaultPreparePplQuery } from '../../languages';
 
 /**
- * Adds a source if query string does not have it
+ * Default query preparation for tabs
  */
-export const prependSourceIfNecessary = (query: Query): string => {
-  const queryString = typeof query.query === 'string' ? query.query : '';
-  const lowerCaseQuery = queryString.toLowerCase();
-  const hasSource = /^(search\s+)?source\s*=/.test(lowerCaseQuery);
-
-  if (hasSource) {
-    return queryString;
+export const defaultPrepareQueryString = (query: Query): string => {
+  switch (query.language) {
+    case 'PPL':
+      return defaultPreparePplQuery(query).query;
+    default:
+      throw new Error(
+        `defaultPrepareQueryString encountered unhandled language: ${query.language}`
+      );
   }
-
-  const datasetTitle = query.dataset?.title || '';
-
-  if (queryString.trim() === '') {
-    return `source=${datasetTitle}`;
-  } else {
-    if (queryString.trim().startsWith('|')) {
-      return `source=${datasetTitle} ${queryString}`;
-    } else {
-      return `source=${datasetTitle} | ${queryString}`;
-    }
-  }
-};
-
-/**
- * Removes stats pipe for histogram compatibility
- * Returns only the prepared query string for cache key usage
- */
-export const stripStatsFromQuery = (queryString: string): string => {
-  // Remove stats pipe for histogram compatibility
-  return typeof queryString === 'string'
-    ? queryString.replace(/\s*\|\s*stats.*$/i, '')
-    : queryString;
-};
-
-/**
- * Default query preparation for tabs (removes stats pipe for histogram compatibility)
- * TODO: This only works for PPL. When other languages are introduced we must revisit this
- */
-export const defaultPrepareQuery = (query: Query): string => {
-  return stripStatsFromQuery(prependSourceIfNecessary(query));
 };
 
 /**
  * Default results processor for tabs
  * Processes raw hits to calculate field counts and optionally includes histogram data
  */
-export const defaultResultsProcessor = (rawResults: ISearchResult, indexPattern: IndexPattern) => {
+export const defaultResultsProcessor: DefaultDataProcessor = (
+  rawResults: ISearchResult,
+  dataset: Dataset
+): ProcessedSearchResults => {
   const fieldCounts: Record<string, number> = {};
-  if (rawResults.hits && rawResults.hits.hits && indexPattern) {
+  if (rawResults.hits && rawResults.hits.hits && dataset) {
     for (const hit of rawResults.hits.hits) {
-      const fields = Object.keys(indexPattern.flattenHit(hit));
+      const fields = Object.keys(dataset.flattenHit(hit));
       for (const fieldName of fields) {
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
       }
     }
   }
 
-  const result: any = {
+  const result: ProcessedSearchResults = {
     hits: rawResults.hits,
     fieldCounts,
-    indexPattern, // Include IndexPattern for LogsTab (passed from TabContent)
-    elapsedMs: rawResults.elapsedMs, // Include timing info from raw results
+    dataset,
+    elapsedMs: rawResults.elapsedMs,
   };
 
   // Add histogram data if requested and available
-  if (rawResults.aggregations && indexPattern) {
-    result.chartData = transformAggregationToChartData(rawResults, indexPattern);
+  if (rawResults.aggregations && dataset) {
+    result.chartData = transformAggregationToChartData(rawResults, dataset);
     result.bucketInterval = { interval: 'auto', scale: 1 };
   }
 
   return result;
 };
 
-export const histogramResultsProcessor = (
+export const histogramResultsProcessor: HistogramDataProcessor = (
   rawResults: ISearchResult,
-  indexPattern: IndexPattern,
+  dataset: Dataset,
   data: DataPublicPluginStart,
   interval: string
-) => {
-  const result = defaultResultsProcessor(rawResults, indexPattern);
-  const histogramConfigs = indexPattern.timeFieldName
-    ? createHistogramConfigs(indexPattern, interval, data)
+): ProcessedSearchResults => {
+  const result = defaultResultsProcessor(rawResults, dataset);
+  const histogramConfigs = dataset.timeFieldName
+    ? createHistogramConfigs(dataset, interval, data)
     : undefined;
 
   if (histogramConfigs) {
@@ -135,28 +114,40 @@ export const executeQueries = createAsyncThunk<
 >('query/executeQueries', async ({ services }, { getState, dispatch }) => {
   const state = getState();
   const query = state.query;
-  const activeTabId = state.ui.activeTabId || 'logs';
+  const activeTabId = state.ui.activeTabId;
   const results = state.results;
 
   if (!services) {
     return;
   }
 
-  // Direct cache key computation (no computeQueryContext)
-  const defaultCacheKey = defaultPrepareQuery(query);
+  const defaultCacheKey = defaultPrepareQueryString(query);
+  const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
+  const visualizationTabPrepareQuery = visualizationTab?.prepareQuery || defaultPrepareQueryString;
+  const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
 
-  const activeTab = services.tabRegistry?.getTab(activeTabId);
-  const activeTabPrepareQuery = activeTab?.prepareQuery || defaultPrepareQuery;
-  const activeTabCacheKey = activeTabPrepareQuery(query);
-  const queriesEqual = defaultCacheKey === activeTabCacheKey;
+  let activeTabCacheKey = defaultCacheKey;
+  if (activeTabId && activeTabId !== '') {
+    const activeTab = services.tabRegistry.getTab(activeTabId);
+    const activeTabPrepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
+    activeTabCacheKey = activeTabPrepareQuery(query);
+  }
 
-  // Check what needs execution (for tab switching case)
+  // Check what needs execution
   const needsDefaultQuery = !results[defaultCacheKey];
-  const needsActiveTabQuery = !results[activeTabCacheKey];
+  const needsVisualizationTabQuery =
+    query.query !== '' &&
+    visualizationTabCacheKey !== defaultCacheKey &&
+    !results[visualizationTabCacheKey];
+  const needsActiveTabQuery =
+    query.query !== '' &&
+    activeTabCacheKey !== visualizationTabCacheKey &&
+    activeTabCacheKey !== defaultCacheKey &&
+    !results[activeTabCacheKey];
 
   const promises = [];
 
-  // ALWAYS execute default query
+  // Execute default query for histogram/sidebar
   if (needsDefaultQuery) {
     const interval = state.legacy?.interval;
     promises.push(
@@ -170,8 +161,20 @@ export const executeQueries = createAsyncThunk<
     );
   }
 
-  // CONDITIONALLY execute tab query (only if queries are different and needed)
-  if (!queriesEqual && needsActiveTabQuery) {
+  // Execute visualization tab query for dynamic tab selection
+  if (needsVisualizationTabQuery) {
+    promises.push(
+      dispatch(
+        executeTabQuery({
+          services,
+          cacheKey: visualizationTabCacheKey,
+        })
+      )
+    );
+  }
+
+  // Execute active tab query if needed and different from default and visualization tab
+  if (needsActiveTabQuery) {
     promises.push(
       dispatch(
         executeTabQuery({
@@ -181,6 +184,8 @@ export const executeQueries = createAsyncThunk<
       )
     );
   }
+
+  // Wait for all queries to complete
   await Promise.all(promises);
 });
 
@@ -208,13 +213,18 @@ const executeQueryBase = async (
 
   const query = getState().query;
 
+  const queryStartTime = Date.now();
+
   try {
     dispatch(
-      setQueryStatus({
-        status: QueryExecutionStatus.LOADING,
-        startTime: Date.now(),
-        elapsedMs: undefined,
-        body: undefined,
+      setIndividualQueryStatus({
+        cacheKey,
+        status: {
+          status: QueryExecutionStatus.LOADING,
+          startTime: queryStartTime,
+          elapsedMs: undefined,
+          body: undefined,
+        },
       })
     );
 
@@ -234,18 +244,36 @@ const executeQueryBase = async (
 
     const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
-    // Get IndexPattern
-    let indexPattern;
-    if (query.dataset) {
-      indexPattern = await services.data.indexPatterns.get(
-        query.dataset.id,
-        query.dataset.type !== 'INDEX_PATTERN'
-      );
-    } else {
-      indexPattern = (services.data as any).indexPattern;
+    // Ensure data views are properly initialized
+    await services.data.dataViews.ensureDefaultDataView();
+
+    // Get Dataset
+    let dataset;
+    try {
+      if (query.dataset) {
+        // Try to get the dataset by ID
+        dataset = await services.data.dataViews.get(
+          query.dataset.id,
+          query.dataset.type !== 'INDEX_PATTERN'
+        );
+      } else {
+        // If no dataset in query, use the default one
+        dataset = await services.data.dataViews.getDefault();
+      }
+    } catch (error) {
+      // If we can't get the specific dataset, try to get the default one
+      if (!dataset) {
+        try {
+          dataset = await services.data.dataViews.getDefault();
+        } catch (defaultError) {
+          // If we can't get any dataset, throw an error
+          throw new Error('Unable to find any index pattern for query execution');
+        }
+      }
     }
 
-    if (!indexPattern) {
+    // If we still don't have a dataset, throw an error
+    if (!dataset) {
       throw new Error('IndexPattern not found for query execution');
     }
 
@@ -262,7 +290,7 @@ const executeQueryBase = async (
       const effectiveInterval = interval || state.legacy?.interval || 'auto';
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
-        indexPattern,
+        dataset,
         services,
         true, // Include histogram
         effectiveInterval
@@ -271,7 +299,7 @@ const executeQueryBase = async (
       // Tab-specific: Create without aggregations
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
-        indexPattern,
+        dataset,
         services,
         false // No histogram
       );
@@ -309,14 +337,18 @@ const executeQueryBase = async (
 
     dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
 
-    // Set completion status with timing
     dispatch(
-      updateQueryStatus({
-        status:
-          rawResults.hits?.hits?.length > 0
-            ? QueryExecutionStatus.READY
-            : QueryExecutionStatus.NO_RESULTS,
-        elapsedMs: inspectorRequest.getTime()!,
+      setIndividualQueryStatus({
+        cacheKey,
+        status: {
+          status:
+            rawResults.hits?.hits?.length > 0
+              ? QueryExecutionStatus.READY
+              : QueryExecutionStatus.NO_RESULTS,
+          startTime: queryStartTime,
+          elapsedMs: inspectorRequest.getTime()!,
+          body: undefined,
+        },
       })
     );
 
@@ -330,19 +362,26 @@ const executeQueryBase = async (
     // Use search service to show error (like Discover does)
     services.data.search.showError(error as Error);
 
-    // Set error status with data plugin's error format
+    // Update individual query status for this specific error
+    // This triggers middleware → setOverallQueryStatus (since it's an error)
     dispatch(
-      updateQueryStatus({
-        status: QueryExecutionStatus.ERROR,
-        body: {
-          error: {
-            error: error.message || 'Unknown error',
-            message: { error: error.message },
-            statusCode: error.statusCode,
+      setIndividualQueryStatus({
+        cacheKey,
+        status: {
+          status: QueryExecutionStatus.ERROR,
+          startTime: queryStartTime,
+          elapsedMs: undefined,
+          body: {
+            error: {
+              error: error.message || 'Unknown error',
+              message: { error: error.message },
+              statusCode: error.statusCode,
+            },
           },
         },
       })
     );
+
     throw error;
   }
 };
@@ -448,9 +487,9 @@ export const executeTabQuery = createAsyncThunk<
 /**
  * Helper function to transform aggregation results into chart data
  */
-function transformAggregationToChartData(results: any, indexPattern: any) {
+function transformAggregationToChartData(results: any, indexPattern: any): ChartData | undefined {
   if (!results.aggregations || !results.aggregations.histogram) {
-    return null;
+    return undefined;
   }
 
   const buckets = results.aggregations.histogram.buckets;

@@ -198,6 +198,7 @@ export class VisBuilderPlugin
       icon: 'visBuilder',
       aliasApp: PLUGIN_ID,
       aliasPath: '#/',
+      isClassic: true,
       appExtensions: {
         visualizations: {
           docTypes: [VISBUILDER_SAVED_OBJECT],

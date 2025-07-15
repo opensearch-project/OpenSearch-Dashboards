@@ -43,8 +43,8 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectPromptModeIsAvailable: jest.fn(),
 }));
 
-jest.mock('../../../../application/components/index_pattern_context', () => ({
-  useIndexPatternContext: jest.fn(),
+jest.mock('../../../../application/context', () => ({
+  useDatasetContext: jest.fn(),
 }));
 
 jest.mock('../use_shared_editor', () => ({
@@ -56,8 +56,9 @@ jest.mock('../editor_options', () => ({
   queryEditorOptions: { placeholder: 'Enter query...' },
 }));
 
-jest.mock('../../../../application/context', () => ({
-  useEditorContextByEditorComponent: jest.fn(),
+jest.mock('../../../../application/hooks', () => ({
+  useEditorRefs: jest.fn(),
+  useTopEditorText: jest.fn(),
 }));
 
 import { useSelector } from 'react-redux';
@@ -67,9 +68,9 @@ import {
   selectEditorMode,
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
-import { useIndexPatternContext } from '../../../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../../../application/context';
 import { useSharedEditor } from '../use_shared_editor';
-import { useEditorContextByEditorComponent } from '../../../../application/context';
+import { useTopEditorText, useEditorRefs } from '../../../../application/hooks';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
@@ -79,18 +80,15 @@ const mockGetEffectiveLanguageForAutoComplete = getEffectiveLanguageForAutoCompl
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
   typeof useOpenSearchDashboards
 >;
-const mockUseIndexPatternContext = useIndexPatternContext as jest.MockedFunction<
-  typeof useIndexPatternContext
->;
+const mockuseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseSharedEditor = useSharedEditor as jest.MockedFunction<typeof useSharedEditor>;
-const mockUseEditorContextByEditorComponent = useEditorContextByEditorComponent as jest.MockedFunction<
-  typeof useEditorContextByEditorComponent
->;
+const mockUseTopEditorText = useTopEditorText as jest.MockedFunction<typeof useTopEditorText>;
+const mockUseEditorRefs = useEditorRefs as jest.MockedFunction<typeof useEditorRefs>;
 
 describe('useTopEditor', () => {
   let mockServices: any;
   let mockIndexPattern: any;
-  let mockEditorContext: any;
+  let mockTopEditorRef: any;
   let mockSharedEditorReturn: any;
 
   beforeEach(() => {
@@ -127,10 +125,7 @@ describe('useTopEditor', () => {
 
     mockIndexPattern = { id: 'test-index', title: 'test-index' };
 
-    mockEditorContext = {
-      topEditorText: 'SELECT * FROM logs',
-      topEditorRef: { current: null },
-    };
+    mockTopEditorRef = { current: null };
 
     mockSharedEditorReturn = {
       isFocused: false,
@@ -147,13 +142,17 @@ describe('useTopEditor', () => {
 
     // Setup mocks
     mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices } as any);
-    mockUseIndexPatternContext.mockReturnValue({ indexPattern: mockIndexPattern } as any);
+    mockuseDatasetContext.mockReturnValue({ indexPattern: mockIndexPattern } as any);
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectQueryLanguage) return 'SQL';
       if (selector === selectEditorMode) return EditorMode.SingleQuery;
       return undefined;
     });
-    mockUseEditorContextByEditorComponent.mockReturnValue(mockEditorContext);
+    mockUseTopEditorText.mockReturnValue('SELECT * FROM logs');
+    mockUseEditorRefs.mockReturnValue({
+      topEditorRef: mockTopEditorRef,
+      bottomEditorRef: { current: null },
+    });
     mockUseSharedEditor.mockReturnValue(mockSharedEditorReturn);
     mockGetEffectiveLanguageForAutoComplete.mockReturnValue('SQL');
 
@@ -189,7 +188,7 @@ describe('useTopEditor', () => {
       ...mockSharedEditorReturn,
       languageId: 'SQL',
       options: { placeholder: 'Enter query...' },
-      triggerSuggestOnFocus: true,
+      triggerSuggestOnFocus: false,
       value: 'SELECT * FROM logs',
     });
   });
@@ -249,21 +248,15 @@ describe('useTopEditor', () => {
       setEditorRefCall(mockEditor as any);
     });
 
-    expect(mockEditorContext.topEditorRef.current).toBe(mockEditor);
+    expect(mockTopEditorRef.current).toBe(mockEditor);
   });
 
-  it('should set triggerSuggestOnFocus based on editor mode', () => {
-    // Test query mode (should trigger suggest on focus)
-    mockUseSelector.mockImplementation((selector) => {
-      if (selector === selectQueryLanguage) return 'SQL';
-      if (selector === selectEditorMode) return EditorMode.SingleQuery;
-      return undefined;
-    });
-
+  it('should always set triggerSuggestOnFocus to false', () => {
+    // Test query mode
     const { result: queryResult } = renderUseTopEditor();
-    expect(queryResult.current.triggerSuggestOnFocus).toBe(true);
+    expect(queryResult.current.triggerSuggestOnFocus).toBe(false);
 
-    // Test prompt mode (should not trigger suggest on focus)
+    // Test prompt mode
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectQueryLanguage) return 'SQL';
       if (selector === selectEditorMode) return EditorMode.SinglePrompt;
@@ -273,7 +266,7 @@ describe('useTopEditor', () => {
     const { result: promptResult } = renderUseTopEditor();
     expect(promptResult.current.triggerSuggestOnFocus).toBe(false);
 
-    // Test empty mode (should not trigger suggest on focus)
+    // Test empty mode
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectQueryLanguage) return 'SQL';
       if (selector === selectEditorMode) return EditorMode.SingleEmpty;
@@ -282,6 +275,87 @@ describe('useTopEditor', () => {
 
     const { result: emptyResult } = renderUseTopEditor();
     expect(emptyResult.current.triggerSuggestOnFocus).toBe(false);
+  });
+
+  describe('manual suggestion triggering', () => {
+    it('should set up onDidFocusEditorWidget listener in query mode', () => {
+      const mockOnDidFocusDisposable = { dispose: jest.fn() };
+      const mockEditor = {
+        onDidFocusEditorWidget: jest.fn().mockReturnValue(mockOnDidFocusDisposable),
+        trigger: jest.fn(),
+      };
+
+      mockTopEditorRef.current = mockEditor;
+
+      const { unmount } = renderUseTopEditor();
+
+      expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalledWith(expect.any(Function));
+
+      // Cleanup
+      unmount();
+      expect(mockOnDidFocusDisposable.dispose).toHaveBeenCalled();
+    });
+
+    it('should trigger suggestions when editor is focused in query mode', () => {
+      const mockEditor = {
+        onDidFocusEditorWidget: jest.fn(),
+        trigger: jest.fn(),
+      };
+
+      mockTopEditorRef.current = mockEditor;
+
+      renderUseTopEditor();
+
+      // Get the callback function passed to onDidFocusEditorWidget
+      const focusCallback = mockEditor.onDidFocusEditorWidget.mock.calls[0][0];
+
+      // Call the callback to simulate editor focus
+      focusCallback();
+
+      expect(mockEditor.trigger).toHaveBeenCalledWith(
+        'keyboard',
+        'editor.action.triggerSuggest',
+        {}
+      );
+    });
+
+    it('should not set up focus listener in prompt mode', () => {
+      mockUseSelector.mockImplementation((selector) => {
+        if (selector === selectQueryLanguage) return 'SQL';
+        if (selector === selectEditorMode) return EditorMode.SinglePrompt;
+        return undefined;
+      });
+
+      const mockEditor = {
+        onDidFocusEditorWidget: jest.fn(),
+        trigger: jest.fn(),
+      };
+
+      mockTopEditorRef.current = mockEditor;
+
+      renderUseTopEditor();
+
+      expect(mockEditor.onDidFocusEditorWidget).not.toHaveBeenCalled();
+    });
+
+    it('should not set up focus listener in empty mode', () => {
+      mockUseSelector.mockImplementation((selector) => {
+        if (selector === selectQueryLanguage) return 'SQL';
+        if (selector === selectEditorMode) return EditorMode.SingleEmpty;
+        return undefined;
+      });
+
+      const mockEditor = {
+        onDidFocusEditorWidget: jest.fn(),
+        trigger: jest.fn(),
+      };
+
+      mockTopEditorRef.current = mockEditor;
+
+      renderUseTopEditor();
+
+      expect(mockEditor.onDidFocusEditorWidget).not.toHaveBeenCalled();
+    });
   });
 
   describe('editor mode changes', () => {

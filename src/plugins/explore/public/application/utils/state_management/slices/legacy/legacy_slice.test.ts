@@ -17,6 +17,7 @@ import {
   setLineCount,
   LegacyState,
 } from './legacy_slice';
+import { SortOrder } from '../../../../../types/saved_explore_types';
 
 describe('legacySlice reducers', () => {
   const initialState: LegacyState = {
@@ -87,7 +88,7 @@ describe('legacySlice reducers', () => {
   });
 
   it('setSort sets sort', () => {
-    const sort = [['b', 'desc']];
+    const sort: SortOrder[] = [['b', 'desc']];
     const state = legacyReducer(initialState, setSort(sort));
     expect(state.sort).toEqual(sort);
   });

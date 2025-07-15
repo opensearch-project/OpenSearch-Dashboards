@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { i18n } from '@osd/i18n';
+import { isEmpty } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { PieChartStyleControls } from './pie_vis_config';
 import { PieExclusiveVisOptions } from './pie_exclusive_vis_options';
@@ -34,6 +34,10 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
+  // The mapping object will be an empty object if no fields are selected on the axes selector. No
+  // visualization is generated in this case so we shouldn't display style option panels.
+  const hasMappingSelected = !isEmpty(axisColumnMappings);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -46,40 +50,44 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
           chartType="pie"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <LegendOptionsPanel
-          shouldShowLegend={true}
-          legendOptions={{
-            show: styleOptions.addLegend,
-            position: styleOptions.legendPosition,
-          }}
-          onLegendOptionsChange={(legendOptions) => {
-            if (legendOptions.show !== undefined) {
-              updateStyleOption('addLegend', legendOptions.show);
-            }
-            if (legendOptions.position !== undefined) {
-              updateStyleOption('legendPosition', legendOptions.position);
-            }
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <TooltipOptionsPanel
-          tooltipOptions={styleOptions.tooltipOptions}
-          onTooltipOptionsChange={(tooltipOptions) =>
-            updateStyleOption('tooltipOptions', {
-              ...styleOptions.tooltipOptions,
-              ...tooltipOptions,
-            })
-          }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <PieExclusiveVisOptions
-          styles={styleOptions.exclusive}
-          onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-        />
-      </EuiFlexItem>
+      {hasMappingSelected && (
+        <>
+          <EuiFlexItem grow={false}>
+            <PieExclusiveVisOptions
+              styles={styleOptions.exclusive}
+              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LegendOptionsPanel
+              shouldShowLegend={true}
+              legendOptions={{
+                show: styleOptions.addLegend,
+                position: styleOptions.legendPosition,
+              }}
+              onLegendOptionsChange={(legendOptions) => {
+                if (legendOptions.show !== undefined) {
+                  updateStyleOption('addLegend', legendOptions.show);
+                }
+                if (legendOptions.position !== undefined) {
+                  updateStyleOption('legendPosition', legendOptions.position);
+                }
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TooltipOptionsPanel
+              tooltipOptions={styleOptions.tooltipOptions}
+              onTooltipOptionsChange={(tooltipOptions) =>
+                updateStyleOption('tooltipOptions', {
+                  ...styleOptions.tooltipOptions,
+                  ...tooltipOptions,
+                })
+              }
+            />
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -4,35 +4,57 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Query } from '../../../../../../../data/common';
+import { Query, DataView, Dataset } from '../../../../../../../data/common';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
+import { QueryWithQueryAsString } from '../../../languages';
 
-export type QueryState = Query;
+export type QueryState = QueryWithQueryAsString;
+
+const getSerializableDataset = (dataset?: Dataset | DataView): Dataset | undefined => {
+  if (!dataset) return undefined;
+
+  if (!('toDataset' in dataset)) {
+    return dataset as Dataset;
+  }
+
+  return dataset.toDataset();
+};
 
 const initialState: QueryState = {
   query: '',
   language: EXPLORE_DEFAULT_LANGUAGE,
-  dataset: undefined, // Store dataset here
+  dataset: undefined,
 };
 
 const querySlice = createSlice({
   name: 'query',
   initialState,
   reducers: {
-    setQueryState: (_, action: PayloadAction<QueryState>) => {
+    setQueryState: (_, action: PayloadAction<Query>) => {
+      const payload = { ...action.payload };
+      if (payload.dataset) {
+        payload.dataset = getSerializableDataset(payload.dataset);
+      }
       return {
         ...action.payload,
+        ...(payload.dataset ? { dataset: getSerializableDataset(payload.dataset) } : {}),
+        query: typeof action.payload.query === 'string' ? action.payload.query : '',
       };
     },
     setQueryWithHistory: {
       reducer: (_, action: PayloadAction<QueryState>) => {
         // Same logic as setQueryState but with meta flag for history
-        return {
-          ...action.payload,
-        };
+        const payload = { ...action.payload };
+        if (payload.dataset) {
+          payload.dataset = getSerializableDataset(payload.dataset);
+        }
+        return payload;
       },
-      prepare: (query: QueryState) => ({
-        payload: query,
+      prepare: (query: Query) => ({
+        payload: {
+          ...query,
+          query: typeof query.query === 'string' ? query.query : '',
+        },
         meta: { addToHistory: true },
       }),
     },

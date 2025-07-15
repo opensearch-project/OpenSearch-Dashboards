@@ -15,6 +15,7 @@ import {
 import { loadReduxState } from './utils/redux_persistence';
 import { createQuerySyncMiddleware } from './middleware/query_sync_middleware';
 import { createPersistenceMiddleware } from './middleware/persistence_middleware';
+import { createOverallStatusMiddleware } from './middleware/overall_status_middleware';
 import { ExploreServices } from '../../../types';
 
 export const rootReducer = combineReducers({
@@ -42,6 +43,7 @@ export const configurePreloadedStore = (
         ? getDefaultMiddleware()
             .concat(createPersistenceMiddleware(services))
             .concat(createQuerySyncMiddleware(services))
+            .concat(createOverallStatusMiddleware())
         : getDefaultMiddleware(),
   });
 };

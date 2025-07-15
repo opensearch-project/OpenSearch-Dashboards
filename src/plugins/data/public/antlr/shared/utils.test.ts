@@ -247,6 +247,35 @@ describe('formatValuesToSuggestions', () => {
     ]);
   });
 
+  it('should filter out null values', () => {
+    const values = ['apple', 'banana', 'cherry', null];
+    const result = formatValuesToSuggestions(values, stringQuoter);
+
+    expect(result).toEqual([
+      {
+        text: 'apple',
+        insertText: '"apple" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '01',
+      },
+      {
+        text: 'banana',
+        insertText: '"banana" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '02',
+      },
+      {
+        text: 'cherry',
+        insertText: '"cherry" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '03',
+      },
+    ]);
+  });
+
   it('should format numeric values correctly', () => {
     const values = [1, 2, 3];
     const result = formatValuesToSuggestions(values);

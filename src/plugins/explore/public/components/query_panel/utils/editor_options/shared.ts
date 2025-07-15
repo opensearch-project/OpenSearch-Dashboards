@@ -9,14 +9,10 @@ export type IEditorConstructionOptions = monaco.editor.IEditorConstructionOption
 
 export const sharedEditorOptions: IEditorConstructionOptions = {
   minimap: { enabled: false },
-  automaticLayout: true,
   scrollBeyondLastLine: false,
   lineHeight: 18,
-  fontSize: 14,
-  padding: {
-    top: 7,
-    bottom: 7,
-  },
+  fontSize: 12,
+  cursorStyle: 'line-thin',
   wordWrap: 'on',
   lineDecorationsWidth: 0,
   scrollbar: {

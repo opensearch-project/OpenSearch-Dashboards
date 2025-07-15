@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { IndexPattern, Dataset } from '../../../opensearch_dashboards_services';
+import { getIndexPatternFieldList } from '../../components/sidebar/lib/get_index_pattern_field_list';
 import { buildColumns } from '../../utils/columns';
 
 /**
@@ -18,19 +19,25 @@ import { buildColumns } from '../../utils/columns';
  */
 export function filterColumns(
   columns: string[],
-  indexPattern: IndexPattern | undefined,
+  indexPattern: IndexPattern | Dataset | undefined,
   defaultColumns: string[],
-  modifyColumn: boolean
+  modifyColumn: boolean,
+  fieldCounts?: Record<string, number>
 ) {
   // if false, we keep all the chosen columns
   if (!modifyColumn) {
-    return columns.length > 0 ? columns : ['_source'];
+    return columns.length > 0 ? buildColumns(columns) : ['_source'];
   }
   // if true, we keep columns that exist in the new index pattern
-  const fieldsName = indexPattern?.fields?.getAll?.()?.map((fld) => fld.name) || [];
+  // const fieldsName = indexPattern?.fields?.getAll?.()?.map((fld) => fld.name) || [];
+  const fieldsName = (fieldCounts
+    ? getIndexPatternFieldList(indexPattern, fieldCounts)
+    : indexPattern?.fields.getAll() || []
+  ).map((fld) => fld.name);
   // combine columns and defaultColumns without duplicates
   const combinedColumns = [...new Set([...columns, ...defaultColumns])];
   const filteredColumns = combinedColumns.filter((column) => fieldsName.includes(column));
   const adjustedColumns = buildColumns(filteredColumns);
+  // show all columns if query fields are less than 8
   return adjustedColumns.length > 0 ? adjustedColumns : ['_source'];
 }

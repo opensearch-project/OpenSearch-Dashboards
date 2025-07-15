@@ -8,7 +8,7 @@ import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useSelector } from '../../../application/legacy/discover/application/utils/state_management';
 import { selectSavedSearch } from '../../../application/utils/state_management/selectors';
-import { useIndexPatternContext } from '../../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../../application/context';
 import { ExploreFlavor } from '../../../../common';
 import { useTabResults } from '../../../application/utils/hooks/use_tab_results';
 
@@ -18,12 +18,10 @@ import { useTabResults } from '../../../application/utils/hooks/use_tab_results'
  */
 const ActionBarComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { indexPattern } = useIndexPatternContext();
+  const { dataset } = useDatasetContext();
   const { results } = useTabResults();
-  const { core } = services;
-
+  const { core, inspector, inspectorAdapters } = services;
   const savedSearch = useSelector(selectSavedSearch);
-  const { inspector, inspectorAdapters } = services;
 
   const openInspector = () => {
     if (inspector) {
@@ -48,7 +46,7 @@ const ActionBarComponent = () => {
       }}
       rows={rows}
       elapsedMs={elapsedMs}
-      indexPattern={indexPattern}
+      dataset={dataset}
       inspectionHanlder={openInspector}
     />
   );

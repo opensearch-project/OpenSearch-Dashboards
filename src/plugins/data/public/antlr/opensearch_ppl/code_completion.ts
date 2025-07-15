@@ -23,7 +23,12 @@ import { openSearchPplAutocompleteData as defaultPplAutocompleteData } from './d
 import { getAvailableFieldsForAutocomplete } from './simplified_ppl_grammar/symbol_table_parser';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
-import { PPL_AGGREGATE_FUNCTIONS, PPL_SUGGESTION_IMPORTANCE } from './constants';
+import {
+  PPL_AGGREGATE_FUNCTIONS,
+  PPL_FUNCTIONAL_KEYWORDS,
+  PPL_SUGGESTION_IMPORTANCE,
+} from './constants';
+import { Documentation } from './ppl_documentation';
 
 export const getDefaultSuggestions = async ({
   selectionStart,
@@ -66,7 +71,7 @@ export const getDefaultSuggestions = async ({
 
     if (suggestions.suggestAggregateFunctions) {
       finalSuggestions.push(
-        ...PPL_AGGREGATE_FUNCTIONS.map((af) => ({
+        ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
           insertText: af + ' ',
@@ -130,7 +135,6 @@ export const getSimplifiedPPLSuggestions = async ({
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
     });
-
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
@@ -148,7 +152,7 @@ export const getSimplifiedPPLSuggestions = async ({
       finalSuggestions.push(
         ...formatAvailableFieldsToSuggestions(
           availableFields,
-          (f: string) => `${f} `,
+          (f: string) => (suggestions.suggestFieldsInAggregateFunction ? `${f}` : `${f} `),
           (f: string) => {
             return f.startsWith('_') ? `9` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
           }
@@ -173,10 +177,11 @@ export const getSimplifiedPPLSuggestions = async ({
 
     if (suggestions.suggestAggregateFunctions) {
       finalSuggestions.push(
-        ...PPL_AGGREGATE_FUNCTIONS.map((af) => ({
+        ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
-          insertText: af + ' ',
+          insertText: prop?.optionalParam ? `${af}() $0` : `${af}($0)`,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
           detail: SuggestionItemDetailsTags.AggregateFunction,
         }))
       );
@@ -203,17 +208,34 @@ export const getSimplifiedPPLSuggestions = async ({
     // Fill in PPL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
-        ...suggestions.suggestKeywords.map((sk) => ({
-          text: sk.value.toLowerCase(),
-          insertText: `${sk.value.toLowerCase()} `,
-          type: monaco.languages.CompletionItemKind.Keyword,
-          detail: SuggestionItemDetailsTags.Keyword,
-          // sortText is the only option to sort suggestions, compares strings
-          sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
-        }))
+        ...suggestions.suggestKeywords.map((sk) => {
+          if (PPL_FUNCTIONAL_KEYWORDS.has(sk.id)) {
+            const functionalKeywordDetails = PPL_FUNCTIONAL_KEYWORDS.get(sk.id);
+            const functionName = sk.value.toLowerCase();
+
+            return {
+              text: `${functionName}()`,
+              type: monaco.languages.CompletionItemKind.Function,
+              insertText: functionalKeywordDetails?.optionalParam
+                ? `${functionName}() $0`
+                : `${functionName}($0)`,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+              detail: SuggestionItemDetailsTags.Function,
+            };
+          } else {
+            return {
+              text: sk.value.toLowerCase(),
+              insertText: `${sk.value.toLowerCase()} `,
+              type: monaco.languages.CompletionItemKind.Keyword,
+              detail: SuggestionItemDetailsTags.Keyword,
+              // sortText is the only option to sort suggestions, compares strings
+              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
+              documentation: Documentation[sk.value.toUpperCase()],
+            };
+          }
+        })
       );
     }
-
     return finalSuggestions;
   } catch (e) {
     return [];

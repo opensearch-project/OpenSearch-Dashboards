@@ -96,7 +96,8 @@ export class DatasetService {
 
   public async cacheDataset(
     dataset: Dataset,
-    services: Partial<IDataPluginServices>
+    services: Partial<IDataPluginServices>,
+    defaultCache: boolean = true
   ): Promise<void> {
     const type = this.getType(dataset?.type);
     try {
@@ -119,32 +120,58 @@ export class DatasetService {
               }
             : undefined,
         } as IndexPatternSpec;
-        const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
 
-        // Load schema asynchronously if it's an async index pattern
-        if (asyncType && temporaryIndexPattern) {
-          type!
-            .fetchFields(dataset, services)
-            .then((fields) => {
-              temporaryIndexPattern.fields.replaceAll([...fields]);
-              this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
-            })
-            .catch((error) => {
-              throw new Error(`Error while fetching fields for dataset ${dataset.id}:`);
-            })
-            .finally(() => {
-              temporaryIndexPattern.setFieldsLoading(false);
-            });
-        }
+        if (defaultCache) {
+          const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
 
-        if (temporaryIndexPattern) {
-          this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+          // Load schema asynchronously if it's an async index pattern
+          if (asyncType && temporaryIndexPattern) {
+            type!
+              .fetchFields(dataset, services)
+              .then((fields) => {
+                temporaryIndexPattern.fields.replaceAll([...fields] as any);
+                this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+              })
+              .catch(() => {
+                throw new Error(`Error while fetching fields for dataset ${dataset.id}:`);
+              })
+              .finally(() => {
+                temporaryIndexPattern.setFieldsLoading(false);
+              });
+          }
+
+          if (temporaryIndexPattern) {
+            this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+          }
+        } else {
+          const temporaryDataView = await services.data?.dataViews.create(spec, true);
+
+          // Load schema asynchronously if it's an async index pattern
+          if (asyncType && temporaryDataView) {
+            type!
+              .fetchFields(dataset, services)
+              .then((fields) => {
+                temporaryDataView.fields.replaceAll([...fields] as any);
+                services.data?.dataViews?.saveToCache(dataset.id, temporaryDataView);
+              })
+              .catch(() => {
+                throw new Error(`Error while fetching fields for dataset ${dataset.id}:`);
+              })
+              .finally(() => {
+                temporaryDataView.setFieldsLoading(false);
+              });
+          }
+
+          if (temporaryDataView) {
+            services.data?.dataViews.saveToCache(dataset.id, temporaryDataView);
+          }
         }
       }
     } catch (error) {
       throw new Error(`Failed to load dataset: ${dataset?.id}`);
     }
   }
+
   public async fetchOptions(
     services: IDataPluginServices,
     path: DataStructure[],

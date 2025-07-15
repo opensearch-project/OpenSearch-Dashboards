@@ -4,7 +4,7 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   onEditorChangeActionCreator,
@@ -13,22 +13,25 @@ import {
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { UseSharedEditorProps, UseSharedEditorReturnType } from '../types';
-import { useEditorContext } from '../../../../application/context';
 import { getCommandEnterAction } from './command_enter_action';
 import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
-import { useIndexPatternContext } from '../../../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../../../application/context';
 import {
   selectEditorMode,
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
-import { toggleDualEditorMode } from '../../../../application/utils/state_management/slices';
+import {
+  useEditorRefs,
+  useOnEditorRunContext,
+  useSetEditorText,
+  useToggleDualEditorMode,
+} from '../../../../application/hooks';
 
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
-type CompletionItemProvider = monaco.languages.CompletionItemProvider;
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
 const TRIGGER_CHARACTERS = [' '];
@@ -41,6 +44,7 @@ const languageConfiguration: LanguageConfiguration = {
     { open: '"', close: '"' },
     { open: "'", close: "'" },
   ],
+  wordPattern: /@?\w[\w@'.-]*[?!,;:"]*/, // Consider tokens containing . @ as words while applying suggestions. Refer https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10118#discussion_r2201428532 for details.
 };
 
 /**
@@ -50,27 +54,34 @@ export const useSharedEditor = ({
   setEditorRef,
   editorPosition,
 }: UseSharedEditorProps): UseSharedEditorReturnType => {
-  const { indexPattern } = useIndexPatternContext();
+  const { dataset } = useDatasetContext();
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const {
+    data: {
+      query: { queryString },
+    },
+  } = services;
   const editorMode = useSelector(selectEditorMode);
+  const toggleDualEditorMode = useToggleDualEditorMode();
   // using a ref as provideCompletionItems uses a stale version of editorMode
   const editorModeRef = useRef<EditorMode>(editorMode);
-  const editorContext = useEditorContext();
+  const setEditorText = useSetEditorText();
+  const onEditorRunContext = useOnEditorRunContext();
   // The 'onRun' functions in editorDidMount uses the context values when the editor is mounted.
   // Using a ref will ensure it always uses the latest value
-  const editorContextRef = useRef(editorContext);
+  const onEditorRunContextRef = useRef(onEditorRunContext);
   const dispatch = useDispatch();
   const [isFocused, setIsFocused] = useState(false);
   const queryLanguage = useSelector(selectQueryLanguage);
-  const [editorHeight, setEditorHeight] = useState(32);
+  const { topEditorRef, bottomEditorRef } = useEditorRefs();
 
   // Keep the refs updated with latest context
   useEffect(() => {
     editorModeRef.current = editorMode;
   }, [editorMode]);
   useEffect(() => {
-    editorContextRef.current = editorContext;
-  }, [editorContext]);
+    onEditorRunContextRef.current = onEditorRunContext;
+  }, [onEditorRunContext]);
 
   // Real autocomplete implementation using the data plugin's autocomplete service
   const provideCompletionItems = useCallback(
@@ -80,8 +91,6 @@ export const useSharedEditor = ({
       _: monaco.languages.CompletionContext,
       token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> => {
-      // TODO: There is a bug where editorModeRef.current does not use the updated value when you go from one explore app to another
-      // ex: start from traces page, go to logs page, then type "source". autocomplete does not work because editorModeRef.current is stale
       if (
         (editorPosition === 'top' && editorModeRef.current !== EditorMode.SingleQuery) ||
         (editorPosition === 'bottom' && editorModeRef.current !== EditorMode.DualQuery) ||
@@ -94,29 +103,29 @@ export const useSharedEditor = ({
         const effectiveLanguage = getEffectiveLanguageForAutoComplete(queryLanguage, 'explore');
 
         // Get the current dataset from Query Service to avoid stale closure values
-        const currentDataset = services?.data?.query?.queryString?.getQuery().dataset;
+        const currentDataView = queryString?.getQuery().dataset;
 
-        // Get the current indexPattern from services to avoid stale closure values
-        let currentIndexPattern = indexPattern;
-        if (currentDataset) {
+        // Get the current dataset from services to avoid stale closure values
+        let currentDataset = dataset;
+        if (currentDataView) {
           try {
-            currentIndexPattern = await services?.indexPatterns?.get(
-              currentDataset.id,
-              currentDataset.type !== 'INDEX_PATTERN'
+            currentDataset = await services?.datasets?.get(
+              currentDataView.id,
+              currentDataView.type !== 'INDEX_PATTERN'
             );
           } catch (error) {
-            // Fallback to the prop indexPattern if fetching fails
-            currentIndexPattern = indexPattern;
+            // Fallback to the prop dataset if fetching fails
+            currentDataset = dataset;
           }
         }
 
-        // Use the current IndexPattern to avoid stale data
+        // Use the current Dataset to avoid stale data
         const suggestions = await services?.data?.autocomplete?.getQuerySuggestions({
           query: model.getValue(), // Use the current editor content, using the local query results in a race condition where we can get stale query data
           selectionStart: model.getOffsetAt(position),
           selectionEnd: model.getOffsetAt(position),
           language: effectiveLanguage,
-          indexPattern: currentIndexPattern as any,
+          indexPattern: currentDataset as any,
           datasetType: currentDataset?.type,
           position,
           services: services as any, // ExploreServices storage type incompatible with IDataPluginServices.DataStorage
@@ -142,6 +151,16 @@ export const useSharedEditor = ({
           range: defaultRange,
           detail: s.detail,
           sortText: s.sortText,
+          documentation: s.documentation
+            ? {
+                value: s.documentation,
+                isTrusted: true,
+              }
+            : '',
+          command: {
+            id: 'editor.action.triggerSuggest',
+            title: 'Trigger Next Suggestion',
+          },
         }));
 
         return {
@@ -152,18 +171,22 @@ export const useSharedEditor = ({
         return { suggestions: [], incomplete: false };
       }
     },
-    [editorPosition, queryLanguage, services, indexPattern]
+    [editorPosition, queryLanguage, services, queryString, dataset]
   );
 
-  const suggestionProvider = useMemo<CompletionItemProvider>(() => {
-    return {
+  // We need to manually register completion provider if it gets re-created,
+  // because monaco.languages.onLanguage will not trigger registration
+  // callbacks if the language is the same.
+  useEffect(() => {
+    const disposable = monaco.languages.registerCompletionItemProvider(queryLanguage, {
       triggerCharacters: TRIGGER_CHARACTERS,
       provideCompletionItems,
-    };
-  }, [provideCompletionItems]);
+    });
+    return () => disposable?.dispose();
+  }, [provideCompletionItems, queryLanguage]);
 
   const handleRun = useCallback(() => {
-    dispatch(onEditorRunActionCreator(services, editorContextRef.current));
+    dispatch(onEditorRunActionCreator(services, onEditorRunContextRef.current));
   }, [dispatch, services]);
 
   const editorDidMount = useCallback(
@@ -191,8 +214,6 @@ export const useSharedEditor = ({
         const maxHeight = 100;
         const finalHeight = Math.min(contentHeight, maxHeight);
 
-        setEditorHeight(finalHeight);
-
         editor.layout({
           width: editor.getLayoutInfo().width,
           height: finalHeight,
@@ -217,9 +238,9 @@ export const useSharedEditor = ({
 
   const onChange = useCallback(
     (text: string) => {
-      dispatch(onEditorChangeActionCreator(text, editorContext));
+      dispatch(onEditorChangeActionCreator(text, setEditorText));
     },
-    [dispatch, editorContext]
+    [dispatch, setEditorText]
   );
 
   const onWrapperClick = useCallback(() => {
@@ -227,14 +248,16 @@ export const useSharedEditor = ({
       (editorPosition === 'top' && editorMode === EditorMode.DualQuery) ||
       (editorPosition === 'bottom' && editorMode === EditorMode.DualPrompt)
     ) {
-      dispatch(toggleDualEditorMode());
+      toggleDualEditorMode();
+    } else if (editorPosition === 'top') {
+      topEditorRef.current?.focus();
+    } else if (editorPosition === 'bottom') {
+      bottomEditorRef.current?.focus();
     }
-  }, [dispatch, editorMode, editorPosition]);
+  }, [editorMode, editorPosition, toggleDualEditorMode, topEditorRef, bottomEditorRef]);
 
   return {
     isFocused,
-    height: editorHeight,
-    suggestionProvider,
     useLatestTheme: true,
     editorDidMount,
     onChange,

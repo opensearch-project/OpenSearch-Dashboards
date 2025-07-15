@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useRef, memo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -15,12 +16,6 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { UI_SETTINGS } from '../../../../data/public';
 import { DocViewFilterFn } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
-import {
-  useDispatch,
-  useSelector,
-} from '../../application/legacy/discover/application/utils/state_management';
-import { popularizeField } from '../../application/legacy/discover/application/helpers/popularize_field';
-import { buildColumns } from '../../application/legacy/discover/application/utils/columns';
 import { filterColumns } from '../../application/legacy/discover/application/view_components/utils/filter_columns';
 import { getLegacyDisplayedColumns } from '../../helpers/data_table_helper';
 import { getDocViewsRegistry } from '../../application/legacy/discover/opensearch_dashboards_services';
@@ -30,78 +25,70 @@ import {
   selectSavedSearch,
 } from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
-import { useIndexPatternContext } from '../../application/components/index_pattern_context';
-import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
-import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
-import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
-import { ExecutionContextSearch } from '../../../../expressions/common/';
+import {
+  defaultPrepareQueryString,
+  defaultResultsProcessor,
+} from '../../application/utils/state_management/actions/query_actions';
 import { useChangeQueryEditor } from '../../application/hooks';
+import { useDatasetContext } from '../../application/context';
+import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { uiSettings, data, capabilities, indexPatterns } = services;
+  const { uiSettings } = services;
 
   const { onAddFilter } = useChangeQueryEditor();
   const savedSearch = useSelector(selectSavedSearch);
   const columns = useSelector(selectColumns);
-  const { indexPattern } = useIndexPatternContext();
+  const { dataset } = useDatasetContext();
 
   const results = useSelector((state: RootState) => state.results);
 
   // Use default cache key computation for this component
   const query = useSelector((state: RootState) => state.query);
-  const cacheKey = useMemo(() => defaultPrepareQuery(query), [query]);
+  const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
 
   const rawResults = cacheKey ? results[cacheKey] : null;
   const rows = rawResults?.hits?.hits || [];
 
-  const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
-    query: data.query.queryString.getQuery(),
-    filters: data.query.filterManager.getFilters(),
-    timeRange: data.query.timefilter.timefilter.getTime(),
-  });
+  // Process raw results to get field counts and rows
+  const processedResults = useMemo(() => {
+    if (!rawResults || !dataset) {
+      return null;
+    }
 
-  useEffect(() => {
-    const subscription = services.data.query.state$.subscribe(({ state }) => {
-      setSearchContext({
-        query: state.query,
-        timeRange: state.time,
-        filters: state.filters,
-      });
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [services.data.query.state$]);
+    // Use defaultResultsProcessor without histogram (DiscoverPanel doesn't need chart data)
+    const processed = defaultResultsProcessor(rawResults, dataset);
+    return processed;
+  }, [rawResults, dataset]);
 
   const tableColumns = useMemo(() => {
-    if (indexPattern == null) {
+    if (dataset == null) {
       return [];
     }
 
-    const filteredColumns = filterColumns(
+    let filteredColumns = filterColumns(
       columns,
-      indexPattern,
+      dataset,
       uiSettings.get(DEFAULT_COLUMNS_SETTING),
-      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
+      uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+      processedResults?.fieldCounts
     );
 
-    let adjustedColumns = buildColumns(filteredColumns);
     // Handle the case where all fields/columns are removed except the time-field one
-    if (adjustedColumns.length === 1 && adjustedColumns[0] === indexPattern.timeFieldName) {
-      adjustedColumns = [...adjustedColumns, '_source'];
+    if (filteredColumns.length === 1 && filteredColumns[0] === dataset.timeFieldName) {
+      filteredColumns = [...filteredColumns, '_source'];
     }
 
     const displayedColumns = getLegacyDisplayedColumns(
-      adjustedColumns,
-      indexPattern,
+      filteredColumns,
+      dataset,
       uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
       uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING)
     );
 
     return displayedColumns;
-  }, [columns, indexPattern, uiSettings]);
+  }, [columns, dataset, processedResults?.fieldCounts, uiSettings]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -116,24 +103,16 @@ const ExploreDataTableComponent = () => {
   const dispatch = useDispatch();
   const onAddColumn = useCallback(
     (col: string) => {
-      if (indexPattern && capabilities.discover?.save) {
-        popularizeField(indexPattern, col, indexPatterns);
-      }
-
       dispatch(addColumn({ column: col }));
     },
-    [indexPattern, capabilities.discover?.save, indexPatterns, dispatch]
+    [dispatch]
   );
 
   const onRemoveColumn = useCallback(
     (col: string) => {
-      if (indexPattern && capabilities.discover?.save) {
-        popularizeField(indexPattern, col, indexPatterns);
-      }
-
       dispatch(removeColumn(col));
     },
-    [indexPattern, capabilities.discover?.save, indexPatterns, dispatch]
+    [dispatch]
   );
 
   return (
@@ -151,25 +130,18 @@ const ExploreDataTableComponent = () => {
         <EuiFlexItem>
           <EuiSpacer size="s" />
         </EuiFlexItem>
-        <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
-          <SaveAndAddButtonWithModal
-            searchContext={searchContext}
-            indexPattern={indexPattern}
-            services={services}
-          />
-        </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <DataTable
             columns={tableColumns}
-            indexPattern={indexPattern}
+            dataset={dataset!}
             rows={rows}
             docViewsRegistry={docViewsRegistry}
             sampleSize={uiSettings.get(SAMPLE_SIZE_SETTING)}
             isShortDots={uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE)}
-            onAddColumn={onAddColumn}
             onFilter={onAddFilter as DocViewFilterFn}
-            onRemoveColumn={onRemoveColumn}
             scrollToTop={scrollToTop}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

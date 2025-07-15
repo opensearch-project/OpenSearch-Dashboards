@@ -26,6 +26,7 @@ export interface BarChartStyleControls {
   tooltipOptions: TooltipOptions;
 
   // Bar specific controls
+  barSizeMode: 'auto' | 'manual';
   barWidth: number;
   barPadding: number;
   showBarBorder: boolean;
@@ -50,6 +51,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   },
 
   // Bar specific controls
+  barSizeMode: 'auto',
   barWidth: 0.7,
   barPadding: 0.1,
   showBarBorder: false,
@@ -69,8 +71,8 @@ export const defaultBarChartStyles: BarChartStyleControls = {
     },
   ],
   grid: {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   },
 
   // Category axes

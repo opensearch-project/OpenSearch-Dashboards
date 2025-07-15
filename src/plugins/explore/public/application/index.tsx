@@ -12,7 +12,7 @@ import { AppMountParameters } from '../../../../core/public';
 import { ExploreServices } from '../types';
 import { LogsPage } from './pages/logs';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
-import { IndexPatternProvider } from './components/index_pattern_context';
+import { DatasetProvider } from './context';
 import { ExploreFlavor } from '../../common';
 import { TracesPage } from './pages/traces';
 import { TraceDetails } from './pages/traces/trace_details/trace_view';
@@ -66,7 +66,7 @@ export const renderApp = (
       <OpenSearchDashboardsContextProvider services={services}>
         <ReduxProvider store={store}>
           <EditorContextProvider>
-            <IndexPatternProvider>
+            <DatasetProvider>
               <services.core.i18n.Context>
                 <Switch>
                   {/* View route for saved searches */}
@@ -86,7 +86,7 @@ export const renderApp = (
                   </Route>
                 </Switch>
               </services.core.i18n.Context>
-            </IndexPatternProvider>
+            </DatasetProvider>
           </EditorContextProvider>
         </ReduxProvider>
       </OpenSearchDashboardsContextProvider>

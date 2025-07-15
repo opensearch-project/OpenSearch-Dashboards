@@ -52,6 +52,8 @@ describe('createMetrictmapeConfig', () => {
       numericalColumns: [],
       categoricalColumns: [],
       dateColumns: [],
+      axisColumnMappings: {},
+      updateVisualization: jest.fn(),
     };
     // Call the render function
     renderFunction(mockProps);

@@ -7,14 +7,21 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
 
+export interface QueryStatusMap {
+  [cacheKey: string]: QueryResultStatus;
+}
+
 export interface QueryEditorSliceState {
-  queryStatus: QueryResultStatus;
+  queryStatusMap: QueryStatusMap;
+  overallQueryStatus: QueryResultStatus;
   editorMode: EditorMode;
   promptModeIsAvailable: boolean;
+  lastExecutedPrompt: string;
 }
 
 const initialState: QueryEditorSliceState = {
-  queryStatus: {
+  queryStatusMap: {},
+  overallQueryStatus: {
     status: QueryExecutionStatus.UNINITIALIZED,
     elapsedMs: undefined,
     startTime: undefined,
@@ -22,6 +29,7 @@ const initialState: QueryEditorSliceState = {
   },
   editorMode: DEFAULT_EDITOR_MODE,
   promptModeIsAvailable: false,
+  lastExecutedPrompt: '',
 };
 
 const queryEditorSlice = createSlice({
@@ -31,40 +39,79 @@ const queryEditorSlice = createSlice({
     setQueryEditorState: (_, action: PayloadAction<QueryEditorSliceState>) => {
       return action.payload;
     },
+
+    setIndividualQueryStatus: (
+      state,
+      action: PayloadAction<{
+        cacheKey: string;
+        status: QueryResultStatus;
+      }>
+    ) => {
+      const { cacheKey, status } = action.payload;
+      state.queryStatusMap[cacheKey] = status;
+    },
+
+    setOverallQueryStatus: (state, action: PayloadAction<QueryResultStatus>) => {
+      state.overallQueryStatus = action.payload;
+    },
+
+    updateOverallQueryStatus: (state, action: PayloadAction<Partial<QueryResultStatus>>) => {
+      state.overallQueryStatus = {
+        ...state.overallQueryStatus,
+        ...action.payload,
+      };
+    },
+
+    clearQueryStatusMapByKey: (state, action: PayloadAction<string>) => {
+      const cacheKey = action.payload;
+      if (state.queryStatusMap[cacheKey]) {
+        delete state.queryStatusMap[cacheKey];
+      }
+    },
+
+    clearQueryStatusMap: (state) => {
+      state.queryStatusMap = {};
+      state.overallQueryStatus = {
+        status: QueryExecutionStatus.UNINITIALIZED,
+        elapsedMs: undefined,
+        startTime: undefined,
+        body: undefined,
+      };
+    },
+
+    // Legacy actions for backward compatibility
     setQueryStatus: (state, action: PayloadAction<QueryResultStatus>) => {
-      state.queryStatus = action.payload;
+      state.overallQueryStatus = action.payload;
     },
     updateQueryStatus: (state, action: PayloadAction<Partial<QueryResultStatus>>) => {
-      state.queryStatus = { ...state.queryStatus, ...action.payload };
+      state.overallQueryStatus = { ...state.overallQueryStatus, ...action.payload };
     },
+
+    // Keep existing actions unchanged
     setEditorMode: (state, action: PayloadAction<EditorMode>) => {
       state.editorMode = action.payload;
     },
     setPromptModeIsAvailable: (state, action: PayloadAction<boolean>) => {
       state.promptModeIsAvailable = action.payload;
     },
-    resetEditorMode: (state) => {
-      state.editorMode = DEFAULT_EDITOR_MODE;
-    },
-    toggleDualEditorMode: (state) => {
-      if (state.editorMode === EditorMode.DualQuery) {
-        state.editorMode = EditorMode.DualPrompt;
-      } else if (state.editorMode === EditorMode.DualPrompt) {
-        state.editorMode = EditorMode.DualQuery;
-      }
+    setLastExecutedPrompt: (state, action: PayloadAction<string>) => {
+      state.lastExecutedPrompt = action.payload;
     },
   },
 });
 
 export const {
   setQueryEditorState,
+  setIndividualQueryStatus,
+  setOverallQueryStatus,
+  updateOverallQueryStatus,
+  clearQueryStatusMapByKey,
+  clearQueryStatusMap,
   setQueryStatus,
   updateQueryStatus,
   setEditorMode,
-  // TODO: Need to use this when we change data set
+  setLastExecutedPrompt,
   setPromptModeIsAvailable,
-  resetEditorMode,
-  toggleDualEditorMode,
 } = queryEditorSlice.actions;
 export const queryEditorReducer = queryEditorSlice.reducer;
 export const queryEditorInitialState = initialState;

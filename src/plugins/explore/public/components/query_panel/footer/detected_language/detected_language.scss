@@ -4,6 +4,20 @@
  */
 
 .exploreDetectedLanguage {
-  color: $euiColorDarkShade; // Use closest match from OUI
+  color: $euiColorMediumShade;
   font-size: $euiFontSizeXS;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &__buttonTextWrapper {
+    align-items: center;
+    display: flex;
+    gap: $ouiSizeXS;
+  }
+
+  &__popoverBody {
+    width: 350px;
+  }
 }

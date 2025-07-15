@@ -16,7 +16,12 @@ jest.mock('../../utils', () => ({
 
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectEditorMode: jest.fn(),
+  selectIsDualEditorMode: jest.fn(),
   selectPromptModeIsAvailable: jest.fn(),
+}));
+
+jest.mock('./edit_toolbar', () => ({
+  EditToolbar: () => <div data-test-subj="edit-toolbar">Edit Toolbar Mock</div>,
 }));
 
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
@@ -28,8 +33,16 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   withOpenSearchDashboards: jest.fn((component: any) => component),
 }));
 
-jest.mock('../../../../application/context', () => ({
-  useEditorContextByEditorComponent: jest.fn(),
+jest.mock('../../../../application/hooks', () => ({
+  useTopEditorText: jest.fn(),
+}));
+
+jest.mock('@elastic/eui', () => ({
+  EuiIcon: ({ type, size, className }: any) => (
+    <div data-test-subj="eui-icon" data-type={type} data-size={size} className={className}>
+      EuiIcon Mock
+    </div>
+  ),
 }));
 
 jest.mock('react-redux', () => ({
@@ -40,26 +53,22 @@ jest.mock('react-redux', () => ({
 import { useTopEditor } from '../../utils';
 import {
   selectEditorMode,
+  selectIsDualEditorMode,
   selectPromptModeIsAvailable,
 } from '../../../../application/utils/state_management/selectors';
-import { useEditorContextByEditorComponent } from '../../../../application/context';
+import { useTopEditorText } from '../../../../application/hooks';
 
 const mockUseTopEditor = useTopEditor as jest.MockedFunction<typeof useTopEditor>;
 const mockSelectEditorMode = selectEditorMode as jest.MockedFunction<typeof selectEditorMode>;
+const mockSelectIsDualEditorMode = selectIsDualEditorMode as jest.MockedFunction<
+  typeof selectIsDualEditorMode
+>;
 const mockSelectPromptModeIsAvailable = selectPromptModeIsAvailable as jest.MockedFunction<
   typeof selectPromptModeIsAvailable
 >;
-const mockUseEditorContextByEditorComponent = useEditorContextByEditorComponent as jest.MockedFunction<
-  typeof useEditorContextByEditorComponent
->;
+const mockUseTopEditorText = useTopEditorText as jest.MockedFunction<typeof useTopEditorText>;
 
 describe('TopEditor', () => {
-  const mockTopEditorRef = {
-    current: {
-      focus: jest.fn(),
-    },
-  };
-
   const mockEditorProps = {
     value: 'SELECT * FROM logs',
     onChange: jest.fn(),
@@ -78,15 +87,14 @@ describe('TopEditor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseEditorContextByEditorComponent.mockReturnValue({
-      topEditorRef: mockTopEditorRef,
-      topEditorText: '',
-    } as any);
+    mockUseTopEditorText.mockReturnValue('');
     mockUseTopEditor.mockReturnValue({
       isFocused: false,
+      onWrapperClick: jest.fn(),
       ...mockEditorProps,
     } as any);
     mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+    mockSelectIsDualEditorMode.mockReturnValue(false);
     mockSelectPromptModeIsAvailable.mockReturnValue(true);
   });
 
@@ -95,122 +103,149 @@ describe('TopEditor', () => {
     return render(<Provider store={store}>{component}</Provider>);
   };
 
-  it('renders the top editor component', () => {
+  it('renders the top editor with correct test subject', () => {
     renderWithProvider(<TopEditor />);
 
+    expect(screen.getByTestId('exploreTopEditor')).toBeInTheDocument();
     expect(screen.getByTestId('code-editor')).toBeInTheDocument();
     expect(screen.getByText('Code Editor Mock')).toBeInTheDocument();
   });
 
-  it('is readonly when in DualQuery mode', () => {
+  it('applies readonly class when in DualQuery mode', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
 
-    const { container } = renderWithProvider(<TopEditor />);
+    renderWithProvider(<TopEditor />);
 
-    const editor = container.querySelector('.queryEditor');
-    expect(editor).toHaveClass('queryEditor--readonly');
+    const topEditor = screen.getByTestId('exploreTopEditor');
+    expect(topEditor).toHaveClass('exploreTopEditor--readonly');
   });
 
-  it('is not readonly when not in DualQuery mode', () => {
+  it('does not apply readonly class when not in DualQuery mode', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
 
-    const { container } = renderWithProvider(<TopEditor />);
+    renderWithProvider(<TopEditor />);
 
-    const editor = container.querySelector('.queryEditor');
-    expect(editor).not.toHaveClass('queryEditor--readonly');
+    const topEditor = screen.getByTestId('exploreTopEditor');
+    expect(topEditor).not.toHaveClass('exploreTopEditor--readonly');
   });
 
-  it('shows focused state when editor is focused', () => {
+  it('applies focused class when editor is focused', () => {
     mockUseTopEditor.mockReturnValue({
       isFocused: true,
+      onWrapperClick: jest.fn(),
       ...mockEditorProps,
     } as any);
 
-    const { container } = renderWithProvider(<TopEditor />);
+    renderWithProvider(<TopEditor />);
 
-    const editor = container.querySelector('.queryEditor');
-    expect(editor).toHaveClass('queryEditor--focused');
+    const topEditor = screen.getByTestId('exploreTopEditor');
+    expect(topEditor).toHaveClass('exploreTopEditor--focused');
   });
 
-  it('does not show focused state when editor is not focused', () => {
+  it('does not apply focused class when editor is not focused', () => {
     mockUseTopEditor.mockReturnValue({
       isFocused: false,
+      onWrapperClick: jest.fn(),
       ...mockEditorProps,
     } as any);
 
-    const { container } = renderWithProvider(<TopEditor />);
+    renderWithProvider(<TopEditor />);
 
-    const editor = container.querySelector('.queryEditor');
-    expect(editor).not.toHaveClass('queryEditor--focused');
+    const topEditor = screen.getByTestId('exploreTopEditor');
+    expect(topEditor).not.toHaveClass('exploreTopEditor--focused');
   });
 
-  it('shows single editor placeholder when text is empty and not readonly', () => {
+  it('applies dual mode class when isDualMode is true', () => {
+    mockSelectIsDualEditorMode.mockReturnValue(true);
+
+    renderWithProvider(<TopEditor />);
+
+    const topEditor = screen.getByTestId('exploreTopEditor');
+    expect(topEditor).toHaveClass('exploreTopEditor--dualMode');
+  });
+
+  it('applies prompt mode class when in prompt mode', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.SinglePrompt);
+
+    renderWithProvider(<TopEditor />);
+
+    const topEditor = screen.getByTestId('exploreTopEditor');
+    expect(topEditor).toHaveClass('exploreTopEditor--promptMode');
+  });
+
+  it('renders overlay div', () => {
+    const { container } = renderWithProvider(<TopEditor />);
+
+    const overlay = container.querySelector('.exploreTopEditor__overlay');
+    expect(overlay).toBeInTheDocument();
+  });
+
+  it('renders EditToolbar when in dual mode', () => {
+    mockSelectIsDualEditorMode.mockReturnValue(true);
+
+    renderWithProvider(<TopEditor />);
+
+    expect(screen.getByTestId('edit-toolbar')).toBeInTheDocument();
+  });
+
+  it('does not render EditToolbar when not in dual mode', () => {
+    mockSelectIsDualEditorMode.mockReturnValue(false);
+
+    renderWithProvider(<TopEditor />);
+
+    expect(screen.queryByTestId('edit-toolbar')).not.toBeInTheDocument();
+  });
+
+  it('shows placeholder when text is empty and not readonly', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
-    mockUseEditorContextByEditorComponent.mockReturnValue({
-      topEditorRef: mockTopEditorRef,
-      topEditorText: '',
-    } as any);
+    mockUseTopEditorText.mockReturnValue('');
 
     renderWithProvider(<TopEditor />);
 
     expect(screen.getByText('Ask a question or search using </> PPL')).toBeInTheDocument();
   });
 
-  it('shows dual editor placeholder when in DualPrompt mode', () => {
+  it('does not show placeholder when text is present', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+    mockUseTopEditorText.mockReturnValue('SELECT * FROM logs');
+
+    renderWithProvider(<TopEditor />);
+
+    expect(screen.queryByText('Ask a question or search using </> PPL')).not.toBeInTheDocument();
+  });
+
+  it('does not show placeholder when readonly (DualQuery mode)', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
+    mockUseTopEditorText.mockReturnValue('');
+
+    renderWithProvider(<TopEditor />);
+
+    expect(screen.queryByText('Ask a question or search using </> PPL')).not.toBeInTheDocument();
+  });
+
+  it('shows different placeholder for dual prompt mode', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.DualPrompt);
-    mockUseEditorContextByEditorComponent.mockReturnValue({
-      topEditorRef: mockTopEditorRef,
-      topEditorText: '',
-    } as any);
+    mockUseTopEditorText.mockReturnValue('');
 
     renderWithProvider(<TopEditor />);
 
     expect(screen.getByText('Ask a question')).toBeInTheDocument();
   });
 
-  it('does not show placeholder when text is present', () => {
+  it('shows disabled prompt placeholder when prompt mode is not available', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
-    mockUseEditorContextByEditorComponent.mockReturnValue({
-      topEditorRef: mockTopEditorRef,
-      topEditorText: 'SELECT * FROM logs',
-    } as any);
+    mockSelectPromptModeIsAvailable.mockReturnValue(false);
+    mockUseTopEditorText.mockReturnValue('');
 
     renderWithProvider(<TopEditor />);
 
-    expect(screen.queryByText('Ask a question or search using </> PPL')).not.toBeInTheDocument();
-  });
-
-  it('does not show placeholder when readonly', () => {
-    mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
-    mockUseEditorContextByEditorComponent.mockReturnValue({
-      topEditorRef: mockTopEditorRef,
-      topEditorText: '',
-    } as any);
-
-    renderWithProvider(<TopEditor />);
-
-    expect(screen.queryByText('Ask a question or search using </> PPL')).not.toBeInTheDocument();
-  });
-
-  it('focuses editor when in DualPrompt mode', () => {
-    mockSelectEditorMode.mockReturnValue(EditorMode.DualPrompt);
-
-    renderWithProvider(<TopEditor />);
-
-    expect(mockTopEditorRef.current.focus).toHaveBeenCalled();
-  });
-
-  it('does not focus editor when not in DualPrompt mode', () => {
-    mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
-
-    renderWithProvider(<TopEditor />);
-
-    expect(mockTopEditorRef.current.focus).not.toHaveBeenCalled();
+    expect(screen.getByText('Search using </> PPL')).toBeInTheDocument();
   });
 
   it('passes correct props to CodeEditor', () => {
     const customProps = {
       isFocused: false,
+      onWrapperClick: jest.fn(),
       value: 'SELECT COUNT(*) FROM users',
       onChange: jest.fn(),
       language: 'ppl',
@@ -227,65 +262,39 @@ describe('TopEditor', () => {
     expect(codeEditor).toHaveAttribute('language', 'ppl');
   });
 
-  describe('placeholder based on promptModeIsAvailable', () => {
-    it('shows disabled prompt placeholder when promptModeIsAvailable is false', () => {
-      mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
-      mockSelectPromptModeIsAvailable.mockReturnValue(false);
-      mockUseEditorContextByEditorComponent.mockReturnValue({
-        topEditorRef: mockTopEditorRef,
-        topEditorText: '',
-      } as any);
+  it('renders prompt icon when in prompt mode', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.SinglePrompt);
+    mockSelectIsDualEditorMode.mockReturnValue(false);
 
-      renderWithProvider(<TopEditor />);
+    renderWithProvider(<TopEditor />);
 
-      expect(screen.getByText('Search using </> PPL')).toBeInTheDocument();
-    });
+    const promptIcon = screen.getByTestId('eui-icon');
+    expect(promptIcon).toBeInTheDocument();
+    expect(promptIcon).toHaveAttribute('data-type', 'sparkleFilled');
+    expect(promptIcon).toHaveAttribute('data-size', 'm');
+    expect(promptIcon).toHaveClass('exploreTopEditor__promptIcon');
+  });
 
-    it('shows normal single placeholder when promptModeIsAvailable is true', () => {
-      mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
-      mockSelectPromptModeIsAvailable.mockReturnValue(true);
-      mockUseEditorContextByEditorComponent.mockReturnValue({
-        topEditorRef: mockTopEditorRef,
-        topEditorText: '',
-      } as any);
+  it('renders prompt icon when in dual mode', () => {
+    mockSelectIsDualEditorMode.mockReturnValue(true);
 
-      renderWithProvider(<TopEditor />);
+    renderWithProvider(<TopEditor />);
 
-      expect(screen.getByText('Ask a question or search using </> PPL')).toBeInTheDocument();
-    });
+    const promptIcon = screen.getByTestId('eui-icon');
+    expect(promptIcon).toBeInTheDocument();
+  });
 
-    it('shows dual prompt placeholder when in DualPrompt mode regardless of promptModeIsAvailable', () => {
-      mockSelectEditorMode.mockReturnValue(EditorMode.DualPrompt);
-      mockSelectPromptModeIsAvailable.mockReturnValue(false);
-      mockUseEditorContextByEditorComponent.mockReturnValue({
-        topEditorRef: mockTopEditorRef,
-        topEditorText: '',
-      } as any);
+  it('does not render prompt icon when not in prompt mode', () => {
+    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+    mockSelectIsDualEditorMode.mockReturnValue(false);
 
-      renderWithProvider(<TopEditor />);
+    renderWithProvider(<TopEditor />);
 
-      expect(screen.getByText('Search using </> PPL')).toBeInTheDocument();
-    });
+    expect(screen.queryByTestId('eui-icon')).not.toBeInTheDocument();
   });
 
   describe('onWrapperClick', () => {
-    it('calls onWrapperClick when editor wrapper is clicked', () => {
-      const mockOnWrapperClick = jest.fn();
-      mockUseTopEditor.mockReturnValue({
-        isFocused: false,
-        onWrapperClick: mockOnWrapperClick,
-        ...mockEditorProps,
-      } as any);
-
-      const { container } = renderWithProvider(<TopEditor />);
-      const editorWrapper = container.querySelector('[data-test-subj="exploreReusableEditor"]');
-
-      fireEvent.click(editorWrapper!);
-
-      expect(mockOnWrapperClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not call onWrapperClick when editor wrapper is not clicked', () => {
+    it('calls onWrapperClick when top editor wrapper is clicked', () => {
       const mockOnWrapperClick = jest.fn();
       mockUseTopEditor.mockReturnValue({
         isFocused: false,
@@ -296,6 +305,11 @@ describe('TopEditor', () => {
       renderWithProvider(<TopEditor />);
 
       expect(mockOnWrapperClick).not.toHaveBeenCalled();
+
+      const topEditor = screen.getByTestId('exploreTopEditor');
+      fireEvent.click(topEditor);
+
+      expect(mockOnWrapperClick).toHaveBeenCalledTimes(1);
     });
   });
 });

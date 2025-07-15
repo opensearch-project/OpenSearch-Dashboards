@@ -35,7 +35,7 @@ describe('HeatmapExclusiveVisOptions', () => {
 
   it('renders exclusive settings title', () => {
     render(<HeatmapExclusiveVisOptions {...defaultProps} />);
-    expect(screen.getByText('Heatmap Settings')).toBeInTheDocument();
+    expect(screen.getByText('Heatmap')).toBeInTheDocument();
   });
   it('calls onChange when change is made(reverse schema)', () => {
     render(<HeatmapExclusiveVisOptions {...defaultProps} />);
@@ -72,7 +72,7 @@ describe('HeatmapLabelVisOptions', () => {
 
   it('renders exclusive settings title', () => {
     render(<HeatmapLabelVisOptions {...defaultProps} />);
-    expect(screen.getByText('Heatmap Label Settings')).toBeInTheDocument();
+    expect(screen.getByText('Labels')).toBeInTheDocument();
   });
 
   it('calls onChange when change is made(show label)', () => {

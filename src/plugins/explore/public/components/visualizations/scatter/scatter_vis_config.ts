@@ -13,6 +13,7 @@ import {
   Positions,
   TooltipOptions,
   VisFieldType,
+  GridOptions,
 } from '../types';
 
 export interface ExclusiveScatterConfig {
@@ -26,7 +27,7 @@ export interface ScatterChartStyleControls {
   tooltipOptions: TooltipOptions;
   addLegend: boolean;
   legendPosition: Positions;
-
+  grid: GridOptions;
   // Axes configuration
   StandardAxes: StandardAxes[];
 
@@ -47,7 +48,10 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
     angle: 0,
     filled: false,
   },
-
+  grid: {
+    xLines: true,
+    yLines: true,
+  },
   // Standard axes
   StandardAxes: [
     {
@@ -64,7 +68,6 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
       title: {
         text: '',
       },
-      grid: { showLines: true },
       axisRole: AxisRole.X,
     },
     {
@@ -81,7 +84,6 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
       title: {
         text: '',
       },
-      grid: { showLines: true },
       axisRole: AxisRole.Y,
     },
   ],

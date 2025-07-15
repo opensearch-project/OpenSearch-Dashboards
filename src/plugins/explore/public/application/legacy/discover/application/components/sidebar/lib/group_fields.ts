@@ -32,8 +32,9 @@ import { IndexPatternField } from '../../../../../../../../../data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 interface GroupedFields {
-  resultFields: IndexPatternField[];
-  schemaFields: IndexPatternField[];
+  selectedFields: IndexPatternField[];
+  queryFields: IndexPatternField[];
+  discoveredFields: IndexPatternField[];
 }
 
 /**
@@ -41,12 +42,14 @@ interface GroupedFields {
  */
 export function groupFields(
   fields: IndexPatternField[] | null,
+  columns: string[],
   fieldCounts: Record<string, number>,
   fieldFilterState: FieldFilterState
 ): GroupedFields {
   const result: GroupedFields = {
-    resultFields: [],
-    schemaFields: [],
+    selectedFields: [],
+    queryFields: [],
+    discoveredFields: [],
   };
   if (!Array.isArray(fields) || typeof fieldCounts !== 'object') {
     return result;
@@ -69,10 +72,12 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts) || field.type === '_source') {
       continue;
     }
-    if (field.name in fieldCounts) {
-      result.resultFields.push(field);
+    if (columns.includes(field.name)) {
+      result.selectedFields.push(field);
+    } else if (field.name in fieldCounts) {
+      result.queryFields.push(field);
     } else {
-      result.schemaFields.push(field);
+      result.discoveredFields.push(field);
     }
   }
 

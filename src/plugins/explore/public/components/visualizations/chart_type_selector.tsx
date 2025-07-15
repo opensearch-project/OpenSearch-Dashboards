@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -18,14 +19,15 @@ import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { VisualizationRule } from './types';
 import { ChartType, VisualizationTypeResult } from './utils/use_visualization_types';
 import { CHART_METADATA } from './constants';
-import { StyleAccordion } from './style_panel/style_accordion';
 import { selectChartType } from '../../application/utils/state_management/selectors';
+import { isChartType } from './utils/is_chart_type';
 
 interface ChartTypeSelectorProps<T extends ChartType> {
   visualizationData: VisualizationTypeResult<T>;
   onChartTypeChange?: (chartType: ChartType) => void;
 }
 
+// TODO: rename it, this is chart type selector option, not rule
 interface AvailableRuleOption {
   value: string;
   inputDisplay: React.ReactNode;
@@ -54,26 +56,10 @@ export const ChartTypeSelector = <T extends ChartType>({
 
   // Get icon type based on chart type
   const getChartIconType = (type: string): string => {
-    switch (type) {
-      case 'line':
-        return 'visLine';
-      case 'area':
-        return 'visArea';
-      case 'bar':
-        return 'visBarVertical';
-      case 'pie':
-        return 'visPie';
-      case 'metric':
-        return 'visMetric';
-      case 'heatmap':
-        return 'heatmap';
-      case 'scatterpoint':
-        return 'visScatter';
-      case 'table':
-        return 'tableOfContents';
-      default:
-        return 'visualizeApp';
+    if (isChartType(type)) {
+      return CHART_METADATA[type].icon;
     }
+    return '';
   };
 
   // Create base mapping once with all visualization rules
@@ -123,31 +109,13 @@ export const ChartTypeSelector = <T extends ChartType>({
         // Mark chart type as disabled if it has no valid rules
         const isDisabled = filteredRules.length === 0;
 
-        // Create custom option content with greyed out text for disabled options
-        const optionContent = (
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon
-                type={chartType.iconType || 'visualizeApp'}
-                size="m"
-                color={isDisabled ? 'subdued' : 'default'}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color={isDisabled ? 'subdued' : 'default'}>
-                {chartType.inputDisplay}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-
         return [
           type,
           {
-            ...chartType,
+            inputDisplay: chartType.inputDisplay,
+            value: chartType.value,
+            iconType: chartType.iconType,
             disabled: isDisabled,
-            optionContent,
-            rules: filteredRules,
           },
         ];
       })
@@ -155,6 +123,44 @@ export const ChartTypeSelector = <T extends ChartType>({
 
     return processed;
   }, [baseChartTypeMapping, numericalColumns, categoricalColumns.length, dateColumns.length]);
+
+  const selectOptions = useMemo(() => {
+    const allTypes = [
+      ...Object.values(chartTypeMappedOptions).map((t) => ({
+        value: t.value,
+        disabled: t.disabled,
+        inputDisplay: t.inputDisplay,
+        iconType: t.iconType,
+      })),
+      {
+        value: 'table',
+        iconType: getChartIconType('table'),
+        disabled: false,
+        inputDisplay: 'Table',
+      },
+    ];
+    const options = allTypes.map((option) => ({
+      value: option.value,
+      disabled: option.disabled,
+      inputDisplay: (
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={option.iconType || 'visualizeApp'}
+              size="m"
+              color={option.disabled ? 'subdued' : 'default'}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s" color={option.disabled ? 'subdued' : 'default'}>
+              {option.inputDisplay}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    }));
+    return options;
+  }, [chartTypeMappedOptions]);
 
   const updateChartTypeSelection = (chartTypeId: ChartType) => {
     shouldManuallyGenerate.current = true;
@@ -166,57 +172,25 @@ export const ChartTypeSelector = <T extends ChartType>({
   if (!visualizationData || !Boolean(Object.keys(chartTypeMappedOptions).length)) return null;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" key="ChartTypeSelector">
-      <EuiFlexItem grow={false}>
-        <StyleAccordion
-          id="generalSection"
-          accordionLabel={i18n.translate('explore.stylePanel.tabs.general', {
-            defaultMessage: 'General',
-          })}
-          initialIsOpen={true}
-        >
-          <EuiFormRow
-            label={i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
-              defaultMessage: 'Visualization Type',
-            })}
-          >
-            <EuiSuperSelect
-              id="chartType"
-              compressed
-              valueOfSelected={
-                currChartTypeId && chartTypeMappedOptions[currChartTypeId]
-                  ? chartTypeMappedOptions[currChartTypeId].disabled
-                    ? undefined
-                    : currChartTypeId
-                  : undefined
-              }
-              placeholder="Select a visualization type"
-              options={Object.values(chartTypeMappedOptions).map((option) => ({
-                ...option,
-                inputDisplay: (
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={option.iconType || 'visualizeApp'}
-                        size="m"
-                        color={option.disabled ? 'subdued' : 'default'}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s" color={option.disabled ? 'subdued' : 'default'}>
-                        {option.inputDisplay}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ),
-              }))}
-              onChange={(value) => {
-                updateChartTypeSelection(value as ChartType);
-              }}
-            />
-          </EuiFormRow>
-        </StyleAccordion>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFormRow
+        key="ChartTypeSelector"
+        label={i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
+          defaultMessage: 'Visualization type',
+        })}
+      >
+        <EuiSuperSelect
+          id="chartType"
+          compressed
+          valueOfSelected={currChartTypeId}
+          placeholder="Select a visualization type"
+          options={selectOptions}
+          onChange={(value) => {
+            updateChartTypeSelection(value as ChartType);
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="s" />
+    </>
   );
 };

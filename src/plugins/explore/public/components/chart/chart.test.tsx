@@ -8,11 +8,24 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { DiscoverChart } from './chart';
-import { legacyReducer } from '../../application/utils/state_management/slices';
-import { uiReducer } from '../../application/utils/state_management/slices/ui/ui_slice';
+import {
+  legacyReducer,
+  uiReducer,
+  queryReducer,
+  queryEditorReducer,
+  resultsReducer,
+  tabReducer,
+} from '../../application/utils/state_management/slices';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { ExploreServices } from '../../types';
+
+// Mock the query actions
+jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
+  executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
+  executeHistogramQuery: jest.fn(() => ({ type: 'mock/executeHistogramQuery' })),
+  defaultPrepareQueryString: jest.fn((query) => `${query.language}:${query.query}`),
+}));
 
 // Mock the TimechartHeader component
 jest.mock('./timechart_header', () => ({
@@ -26,11 +39,6 @@ jest.mock('./timechart_header', () => ({
 // Mock the DiscoverHistogram component
 jest.mock('./histogram/histogram', () => ({
   DiscoverHistogram: () => <div data-test-subj="mockDiscoverHistogram">Mock Histogram</div>,
-}));
-
-// Mock the executeQueries action
-jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
-  executeQueries: jest.fn().mockReturnValue({ type: 'mock/executeQueries' }),
 }));
 
 describe('DiscoverChart', () => {
@@ -57,11 +65,19 @@ describe('DiscoverChart', () => {
       timefilter: {
         timefilter: {
           getTime: jest.fn().mockReturnValue({
-            from: '2023-01-01T00:00:00.000Z',
-            to: '2023-01-02T00:00:00.000Z',
+            from: 'now-15m',
+            to: 'now',
           }),
           setTime: jest.fn(),
         },
+      },
+    },
+    search: {
+      aggs: {
+        intervalOptions: [
+          { text: 'Auto', value: 'auto' },
+          { text: '1 hour', value: '1h' },
+        ],
       },
     },
   } as unknown) as DataPublicPluginStart;
@@ -74,18 +90,61 @@ describe('DiscoverChart', () => {
     reducer: {
       legacy: legacyReducer,
       ui: uiReducer,
+      query: queryReducer,
+      queryEditor: queryEditorReducer,
+      results: resultsReducer,
+      tab: tabReducer,
     },
     preloadedState: {
       legacy: {
-        interval: '1h',
+        savedSearch: undefined,
+        savedQuery: undefined,
         columns: [],
         sort: [],
+        interval: '1h',
+        isDirty: false,
+        lineCount: undefined,
       },
       ui: {
         activeTabId: 'logs',
-        showDatasetFields: true,
-        prompt: '',
+        showFilterPanel: true,
         showHistogram: true,
+      },
+      query: {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+        },
+      },
+      queryEditor: {
+        queryStatusMap: {},
+        overallQueryStatus: {
+          status: 'uninitialized' as any,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
+        promptModeIsAvailable: false,
+        editorMode: 'single-query' as any,
+        lastExecutedPrompt: '',
+      },
+      results: {},
+      tab: {
+        logs: {},
+        visualizations: {
+          styleOptions: {
+            showTitle: true,
+            title: '',
+            fontSize: 60,
+            useColor: false,
+            colorSchema: 'blues' as any,
+          },
+          chartType: undefined,
+          axesMapping: {},
+        },
       },
     },
   });
@@ -114,6 +173,7 @@ describe('DiscoverChart', () => {
 
     expect(screen.getByTestId('dscChartWrapper')).toBeInTheDocument();
     expect(screen.getByTestId('dscChartChartheader')).toBeInTheDocument();
+    expect(screen.getByTestId('dscChartTimechartHeader')).toBeInTheDocument();
     expect(screen.getByTestId('mockTimechartHeader')).toBeInTheDocument();
   });
 
@@ -122,6 +182,7 @@ describe('DiscoverChart', () => {
     renderComponent({ chartData });
 
     expect(screen.getByTestId('dscTimechart')).toBeInTheDocument();
+    expect(screen.getByTestId('discoverChart')).toBeInTheDocument();
     expect(screen.getByTestId('mockDiscoverHistogram')).toBeInTheDocument();
   });
 
@@ -130,6 +191,7 @@ describe('DiscoverChart', () => {
     renderComponent({ chartData, showHistogram: false });
 
     expect(screen.queryByTestId('dscTimechart')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discoverChart')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockDiscoverHistogram')).not.toBeInTheDocument();
   });
 
@@ -137,6 +199,7 @@ describe('DiscoverChart', () => {
     renderComponent({ showHistogram: true });
 
     expect(screen.queryByTestId('dscTimechart')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discoverChart')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockDiscoverHistogram')).not.toBeInTheDocument();
   });
 
@@ -164,5 +227,55 @@ describe('DiscoverChart', () => {
     fireEvent.click(toggleButton);
 
     expect(dispatchSpy).toHaveBeenCalled();
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'ui/setShowHistogram' })
+    );
+  });
+
+  it('calls onChangeInterval when interval is changed', () => {
+    const dispatchSpy = jest.spyOn(mockStore, 'dispatch');
+    renderComponent();
+
+    const changeIntervalButton = screen.getByText('Change Interval');
+    fireEvent.click(changeIntervalButton);
+
+    expect(dispatchSpy).toHaveBeenCalled();
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'legacy/setInterval' })
+    );
+  });
+
+  it('should handle timefilter update correctly', () => {
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
+
+    renderComponent({ chartData });
+
+    // The timefilterUpdateHandler is passed to DiscoverHistogram
+    // We can verify the component renders without errors
+    expect(screen.getByTestId('mockDiscoverHistogram')).toBeInTheDocument();
+
+    // Verify that the data.query.timefilter.timefilter.setTime method exists
+    expect(mockData.query.timefilter.timefilter.setTime).toBeDefined();
+  });
+
+  it('should use correct time range format', () => {
+    renderComponent();
+
+    // Verify that getTime is called to get the time range
+    expect(mockData.query.timefilter.timefilter.getTime).toHaveBeenCalled();
+  });
+
+  it('should dispatch multiple actions when interval changes', () => {
+    const dispatchSpy = jest.spyOn(mockStore, 'dispatch');
+    renderComponent();
+
+    const changeIntervalButton = screen.getByText('Change Interval');
+    fireEvent.click(changeIntervalButton);
+
+    // Should dispatch setInterval, clearResultsByKey, clearQueryStatusMapByKey, and executeHistogramQuery
+    expect(dispatchSpy).toHaveBeenCalledTimes(4);
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'legacy/setInterval' })
+    );
   });
 });

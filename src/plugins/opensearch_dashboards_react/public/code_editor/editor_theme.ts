@@ -130,7 +130,7 @@ export function createTheme(
   selectionBackgroundColor: string
 ): monaco.editor.IStandaloneThemeData {
   return {
-    base: 'vs',
+    base: euiTheme === lightTheme ? 'vs' : 'vs-dark', // Change the base theme based on theme selected
     inherit: true,
     rules: [
       {
@@ -169,11 +169,11 @@ export function createTheme(
       'editorLineNumber.activeForeground': standardizeColor(euiTheme.euiColorDarkShade),
       'editorIndentGuide.background': standardizeColor(euiTheme.euiColorLightShade),
       'editorWidget.border': standardizeColor(euiTheme.euiColorLightShade),
-      'editorWidget.background': standardizeColor(euiTheme.euiColorLightestShade),
+      'editorWidget.background': standardizeColor(euiTheme.euiColorEmptyShade),
       'editorCursor.foreground': standardizeColor(euiTheme.euiColorDarkestShade),
       'list.hoverBackground': standardizeColor(euiTheme.euiColorLightShade),
       'list.highlightForeground': standardizeColor(euiTheme.euiColorPrimary),
-      'editor.lineHighlightBorder': standardizeColor(euiTheme.euiColorLightestShade),
+      'editor.lineHighlightBorder': standardizeColor(euiTheme.euiColorEmptyShade),
     },
   };
 }

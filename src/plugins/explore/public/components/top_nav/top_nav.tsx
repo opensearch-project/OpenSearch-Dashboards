@@ -6,14 +6,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import { useSelector as useNewStateSelector } from 'react-redux';
+import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
+import { DataView as Dataset } from 'src/plugins/data/common';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { PLUGIN_ID } from '../../../common';
 import { ExploreServices } from '../../types';
-import { IndexPattern } from '../../application/legacy/discover/opensearch_dashboards_services';
-import { useIndexPatternContext } from '../../application/components/index_pattern_context';
+import { useDatasetContext } from '../../application/context';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
@@ -24,6 +24,9 @@ import {
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
 import { SavedExplore } from '../../saved_explore';
+import { setQueryState } from '../../application/utils/state_management/slices';
+import { setDatasetActionCreator } from '../../application/utils/state_management/actions/set_dataset';
+import { useClearEditors } from '../../application/hooks';
 
 export interface TopNavProps {
   savedExplore?: SavedExplore;
@@ -32,6 +35,8 @@ export interface TopNavProps {
 
 export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const clearEditors = useClearEditors();
+
   const flavorId = useFlavorId();
   const {
     data: {
@@ -57,9 +62,8 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     timeRange: timefilter.timefilter.getTime(),
   });
 
-  // Get IndexPattern from centralized context
-  const { indexPattern } = useIndexPatternContext();
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
+  const { dataset } = useDatasetContext();
+  const [datasets, setDatasets] = useState<Dataset[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
 
   useEffect(() => {
@@ -95,32 +99,34 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       startSyncingQueryStateWithUrl,
       searchContext,
       {
-        indexPattern,
+        dataset,
         tabState,
         flavorId,
         tabDefinition,
       },
+      clearEditors,
       savedExplore
     );
   }, [
     savedExplore,
-    indexPattern,
+    dataset,
     searchContext,
     tabState,
     services,
     startSyncingQueryStateWithUrl,
     flavorId,
     tabDefinition,
+    clearEditors,
   ]);
 
   useEffect(() => {
     let isMounted = true;
     const initializeDataset = async () => {
-      await data.indexPatterns.ensureDefaultIndexPattern();
-      const defaultIndexPattern = await data.indexPatterns.getDefault();
+      await data.dataViews.ensureDefaultDataView();
+      const defaultDataset = await data.dataViews.getDefault();
       if (!isMounted) return;
 
-      setIndexPatterns(defaultIndexPattern ? [defaultIndexPattern] : undefined);
+      setDatasets(defaultDataset ? [(defaultDataset as unknown) as Dataset] : undefined);
     };
 
     initializeDataset();
@@ -128,7 +134,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     return () => {
       isMounted = false;
     };
-  }, [data.indexPatterns, data.query]);
+  }, [data.dataViews, data.query]);
 
   useEffect(() => {
     // capitalize first letter
@@ -142,7 +148,34 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     );
   }, [flavorId, savedExplore?.title]);
 
-  const showDatePicker = useMemo(() => indexPattern?.isTimeBased() ?? false, [indexPattern]);
+  const showDatePicker = useMemo(() => dataset?.isTimeBased() ?? false, [dataset]);
+
+  const dispatch = useDispatch();
+
+  const handleDatasetSelect = (newDataset: any) => {
+    if (!newDataset) return;
+    const currentQuery = queryString.getQuery();
+    const serializableDataset =
+      'toDataset' in newDataset && typeof (newDataset as any).toDataset === 'function'
+        ? (newDataset as any).toDataset()
+        : {
+            id: newDataset.id,
+            title: newDataset.title,
+            type: newDataset.type || '',
+            timeFieldName: newDataset.timeFieldName,
+            dataSource: newDataset.dataSource,
+          };
+
+    dispatch(
+      setQueryState({
+        ...currentQuery,
+        query: queryString.getInitialQueryByDataset(newDataset).query,
+        dataset: serializableDataset,
+      })
+    );
+
+    dispatch(setDatasetActionCreator(services, clearEditors));
+  };
 
   return (
     <TopNavMenu
@@ -152,9 +185,13 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showSearchBar={false}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
       showSaveQuery={false}
+      showDatasetSelect={true}
+      datasetSelectProps={{
+        onSelect: handleDatasetSelect,
+      }}
       useDefaultBehaviors
       setMenuMountPoint={setHeaderActionMenu}
-      indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
+      indexPatterns={dataset ? [dataset] : datasets}
       savedQueryId={undefined}
       onSavedQueryIdChange={() => {}}
       groupActions={true}

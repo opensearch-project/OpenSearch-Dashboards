@@ -8,14 +8,14 @@ import { setEditorMode } from '../../../slices';
 import { EditorMode } from '../../../types';
 import { runQueryActionCreator } from '../run_query';
 import { ExploreServices } from '../../../../../../types';
-import { EditorContextValue } from '../../../../../context';
+import { useClearEditorsAndSetText } from '../../../../../hooks';
 
 /**
  * This is called when you need to load a query
  */
 export const loadQueryActionCreator = (
   services: ExploreServices,
-  editorContext: EditorContextValue,
+  clearEditorsAndSetText: ReturnType<typeof useClearEditorsAndSetText>,
   query: string
 ) => (dispatch: AppDispatch, getState: () => RootState) => {
   const {
@@ -23,7 +23,7 @@ export const loadQueryActionCreator = (
   } = getState();
 
   // When you load a query, it should always go to single query mode
-  editorContext.clearEditorsAndSetText(query);
+  clearEditorsAndSetText(query);
   if (editorMode !== EditorMode.SingleQuery) {
     dispatch(setEditorMode(EditorMode.SingleQuery));
   }

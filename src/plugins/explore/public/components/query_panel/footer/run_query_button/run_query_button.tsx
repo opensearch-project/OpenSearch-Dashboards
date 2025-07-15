@@ -11,16 +11,16 @@ import { onEditorRunActionCreator } from '../../../../application/utils/state_ma
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { selectIsLoading } from '../../../../application/utils/state_management/selectors';
-import { useEditorContext } from '../../../../application/context';
+import { useOnEditorRunContext } from '../../../../application/hooks';
 
 export const RunQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const editorContext = useEditorContext();
+  const onEditorRunContext = useOnEditorRunContext();
   const isLoading = useSelector(selectIsLoading);
   const dispatch = useDispatch();
 
   const handleClick = () => {
-    dispatch(onEditorRunActionCreator(services, editorContext));
+    dispatch(onEditorRunActionCreator(services, onEditorRunContext));
   };
 
   return (
@@ -30,7 +30,6 @@ export const RunQueryButton = () => {
       data-test-subj="queryPanelFooterRunQueryButton"
       size="s"
       isLoading={isLoading}
-      style={{ marginLeft: '4px' }}
     >
       {i18n.translate('explore.queryPanel.runQueryButton.label', {
         defaultMessage: 'Run query',

@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { EuiPanel, EuiFormRow, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiSpacer, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { Positions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
 
@@ -29,43 +29,28 @@ export const LegendOptionsPanel = ({
     return null;
   }
 
-  const legendModeOptions = [
-    {
-      id: 'true',
-      label: i18n.translate('explore.stylePanel.legend.mode.shown', {
-        defaultMessage: 'Shown',
-      }),
-    },
-    {
-      id: 'false',
-      label: i18n.translate('explore.stylePanel.legend.mode.hidden', {
-        defaultMessage: 'Hidden',
-      }),
-    },
-  ];
-
   const legendPositionOptions = [
     {
-      id: Positions.RIGHT,
-      label: i18n.translate('explore.stylePanel.legend.position.right', {
+      value: Positions.RIGHT,
+      text: i18n.translate('explore.stylePanel.legend.position.right', {
         defaultMessage: 'Right',
       }),
     },
     {
-      id: Positions.BOTTOM,
-      label: i18n.translate('explore.stylePanel.legend.position.bottom', {
+      value: Positions.BOTTOM,
+      text: i18n.translate('explore.stylePanel.legend.position.bottom', {
         defaultMessage: 'Bottom',
       }),
     },
     {
-      id: Positions.LEFT,
-      label: i18n.translate('explore.stylePanel.legend.position.left', {
+      value: Positions.LEFT,
+      text: i18n.translate('explore.stylePanel.legend.position.left', {
         defaultMessage: 'Left',
       }),
     },
     {
-      id: Positions.TOP,
-      label: i18n.translate('explore.stylePanel.legend.position.top', {
+      value: Positions.TOP,
+      text: i18n.translate('explore.stylePanel.legend.position.top', {
         defaultMessage: 'Top',
       }),
     },
@@ -79,42 +64,30 @@ export const LegendOptionsPanel = ({
       })}
       initialIsOpen={true}
     >
-      <EuiFormRow
+      <EuiSwitch
+        compressed
         label={i18n.translate('explore.stylePanel.legend.mode', {
-          defaultMessage: 'Legend mode',
+          defaultMessage: 'Show legend',
         })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.legend.mode', {
-            defaultMessage: 'Legend mode',
-          })}
-          options={legendModeOptions}
-          idSelected={legendOptions.show.toString()}
-          onChange={(id) => onLegendOptionsChange({ show: id === 'true' })}
-          buttonSize="compressed"
-          isFullWidth
-          data-test-subj="legendModeButtonGroup"
-        />
-      </EuiFormRow>
+        checked={legendOptions.show}
+        onChange={(e) => onLegendOptionsChange({ show: e.target.checked })}
+        data-test-subj="legendModeSwitch"
+      />
 
       {legendOptions.show && (
         <>
           <EuiSpacer size="s" />
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.legend.position', {
-              defaultMessage: 'Legend position',
+              defaultMessage: 'Position',
             })}
           >
-            <EuiButtonGroup
-              legend={i18n.translate('explore.stylePanel.legend.position', {
-                defaultMessage: 'Legend position',
-              })}
+            <EuiSelect
+              compressed
               options={legendPositionOptions}
-              idSelected={legendOptions.position}
-              onChange={(id) => onLegendOptionsChange({ position: id as Positions })}
-              buttonSize="compressed"
-              isFullWidth
-              data-test-subj="legendPositionButtonGroup"
+              value={legendOptions.position}
+              onChange={(e) => onLegendOptionsChange({ position: e.target.value as Positions })}
+              data-test-subj="legendPositionSelect"
             />
           </EuiFormRow>
         </>

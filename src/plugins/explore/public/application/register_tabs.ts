@@ -4,11 +4,11 @@
  */
 
 import { LogsTab } from '../components/tabs/logs_tab';
-import { VisualizationContainer } from '../components/visualizations/visualization_container';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { PatternsTab } from '../components/tabs/patterns_tab';
 import { ExploreServices } from '../types';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
+import { VisTab } from '../components/tabs/vis_tab';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -72,7 +72,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
       return typeof query.query === 'string' ? query.query : '';
     },
 
-    component: VisualizationContainer,
+    component: VisTab,
 
     // Add lifecycle hooks
     onActive: () => {
@@ -101,7 +101,4 @@ export const registerTabs = (services: ExploreServices) => {
       services.tabRegistry.registerTab(tabDefinition);
     }
   );
-
-  // Get the number of registered tabs
-  const tabCount = services.tabRegistry.getAllTabs().length;
 };

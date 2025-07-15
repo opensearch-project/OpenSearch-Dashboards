@@ -23,7 +23,7 @@ export const createSingleMetric = (
   axisColumnMappings?: AxisColumnMappings
 ) => {
   // Only contains one and the only one value, use x-axis key for now
-  const valueMapping = axisColumnMappings?.[AxisRole.X];
+  const valueMapping = axisColumnMappings?.[AxisRole.Value];
   const numericFields = valueMapping?.column;
   const numericNames = valueMapping?.name;
 

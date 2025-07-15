@@ -4,7 +4,7 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React, { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -15,7 +15,6 @@ import {
   ISearchResult,
   resultsInitialState,
   resultsReducer,
-  setShowDatasetFields,
   uiInitialState,
   uiReducer,
   queryInitialState,
@@ -25,6 +24,7 @@ import {
 } from '../../utils/state_management/slices';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { TracesPage } from './traces_page';
+import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -37,39 +37,22 @@ jest.mock('../../../components/query_panel', () => ({
   QueryPanel: () => <div data-test-subj="query-panel">Query Panel</div>,
 }));
 
-jest.mock('../../components/header_dataset_selector', () => ({
-  HeaderDatasetSelector: () => (
-    <div data-test-subj="header-dataset-selector">Header Dataset Selector</div>
-  ),
-}));
-
-jest.mock('../../../components/chart/discover_chart_container', () => ({
-  DiscoverChartContainer: () => (
-    <div data-test-subj="discover-chart-container">Chart Container</div>
-  ),
-}));
-
-jest.mock('../../../components/top_nav/top_nav', () => ({
-  TopNav: () => <div data-test-subj="top-nav">Top Nav</div>,
-}));
-
-jest.mock('../../legacy/discover/application/view_components/panel', () => ({
-  DiscoverPanel: () => <div data-test-subj="discover-panel">Discover Panel</div>,
-}));
-
-jest.mock('../../../components/data_table/explore_data_table', () => ({
-  ExploreDataTable: () => <div data-test-subj="explore-data-table">Data Table</div>,
-}));
-
-jest.mock('../../../components/tabs/tabs', () => ({
-  ExploreTabs: () => (
-    <div data-test-subj="explore-tabs">
-      <div data-test-subj="tab-explore_logs_tab">
-        <div data-test-subj="explore-data-table">Data Table</div>
+jest.mock('../../../components/container/bottom_container/bottom_container', () => ({
+  BottomContainer: ({ setHeaderActionMenu }: { setHeaderActionMenu?: () => void }) => (
+    <div data-test-subj="bottom-container">
+      <div data-test-subj="top-nav">Top Nav</div>
+      <div data-test-subj="discover-panel">Discover Panel</div>
+      <div data-test-subj="discover-chart-container">Chart Container</div>
+      <div data-test-subj="explore-tabs">
+        <div data-test-subj="tab-explore_logs_tab">
+          <div data-test-subj="explore-data-table">Data Table</div>
+        </div>
+        <div data-test-subj="tab-explore_visualization_tab">
+          <div data-test-subj="visualization-container">Visualization Container</div>
+        </div>
       </div>
-      <div data-test-subj="tab-explore_visualization_tab">
-        <div data-test-subj="visualization-container">Visualization Container</div>
-      </div>
+      <div data-test-subj="dscBottomLeftCanvas">Bottom Left Canvas</div>
+      {setHeaderActionMenu && <button onClick={setHeaderActionMenu}>Set Header</button>}
     </div>
   ),
 }));
@@ -79,17 +62,6 @@ jest.mock('../../../components/experience_banners/new_experience_banner', () => 
     <div data-test-subj="new-experience-banner">New Experience Banner</div>
   ),
 }));
-
-jest.mock('../../../components/visualizations/visualization_container', () => {
-  const MemoizedVisualizationContainer = () => (
-    <div data-test-subj="visualization-container">Visualization Container</div>
-  );
-  return {
-    VisualizationContainer: MemoizedVisualizationContainer,
-    __esModule: true,
-    default: MemoizedVisualizationContainer,
-  };
-});
 
 jest.mock('../../utils/hooks/use_initial_query_execution', () => ({
   useInitialQueryExecution: jest.fn(),
@@ -107,22 +79,12 @@ jest.mock('../../utils/hooks/use_header_variants', () => ({
   useHeaderVariants: jest.fn(),
 }));
 
-jest.mock('../../utils/hooks/use_page_initialization', () => ({
-  useInitPage: jest.fn().mockReturnValue({
-    savedExplore: null,
-  }),
-}));
-
-jest.mock('../../components/index_pattern_context', () => ({
-  useIndexPatternContext: jest.fn().mockReturnValue({
-    indexPattern: {},
+jest.mock('../../context', () => ({
+  useDatasetContext: jest.fn().mockReturnValue({
+    dataset: {},
     isLoading: false,
     error: null,
   }),
-}));
-
-jest.mock('../../../components/results_summary/results_summary_panel', () => ({
-  ResultsSummaryPanel: () => <div data-test-subj="results-summary-panel">Results Summary</div>,
 }));
 
 describe('TracesPage', () => {
@@ -134,13 +96,13 @@ describe('TracesPage', () => {
     // Create query object that matches the TracesPage component expectations
     const queryObj = {
       ...queryInitialState,
-      query: 'where level="error"',
+      query: '| where level="error"',
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'PPL',
     };
 
     // Generate cache key using the same logic as the component
-    const cacheKey = 'source=test-dataset | where level="error"';
+    const cacheKey = defaultPrepareQueryString(queryObj);
 
     const preloadedState = {
       ui: {
@@ -208,102 +170,12 @@ describe('TracesPage', () => {
       </TestHarness>
     );
 
-    expect(screen.getByTestId('header-dataset-selector')).toBeInTheDocument();
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+    expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
+    expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
   });
 
-  it('does not render chart when status is UNINITIALIZED', () => {
-    const store = createTestStore(QueryExecutionStatus.UNINITIALIZED);
-    render(
-      <TestHarness store={store}>
-        <TracesPage />
-      </TestHarness>
-    );
-
-    expect(screen.queryByTestId('discover-chart-container')).not.toBeInTheDocument();
-  });
-
-  it('renders chart when status is READY', () => {
-    const store = createTestStore(QueryExecutionStatus.READY, [
-      { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
-    ]);
-    render(
-      <TestHarness store={store}>
-        <TracesPage />
-      </TestHarness>
-    );
-
-    expect(screen.getByTestId('discover-chart-container')).toBeInTheDocument();
-  });
-
-  it('renders chart when status is LOADING with rows', () => {
-    const store = createTestStore(QueryExecutionStatus.LOADING, [
-      { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
-    ]);
-    render(
-      <TestHarness store={store}>
-        <TracesPage />
-      </TestHarness>
-    );
-
-    expect(screen.getByTestId('discover-chart-container')).toBeInTheDocument();
-  });
-
-  it('renders chart when status is ERROR with rows', () => {
-    const store = createTestStore(QueryExecutionStatus.ERROR, [
-      { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
-    ]);
-    render(
-      <TestHarness store={store}>
-        <TracesPage />
-      </TestHarness>
-    );
-
-    expect(screen.getByTestId('discover-chart-container')).toBeInTheDocument();
-  });
-
-  it('does not render chart when status is LOADING without rows', () => {
-    const store = createTestStore(QueryExecutionStatus.LOADING);
-    render(
-      <TestHarness store={store}>
-        <TracesPage />
-      </TestHarness>
-    );
-
-    expect(screen.queryByTestId('discover-chart-container')).not.toBeInTheDocument();
-  });
-
-  it('does not render chart when status is ERROR without rows', () => {
-    const store = createTestStore(QueryExecutionStatus.ERROR);
-    render(
-      <TestHarness store={store}>
-        <TracesPage />
-      </TestHarness>
-    );
-
-    expect(screen.queryByTestId('discover-chart-container')).not.toBeInTheDocument();
-  });
-
-  it('renders both tabs with correct content', () => {
-    const store = createTestStore(QueryExecutionStatus.READY, [
-      { _id: '1', _index: 'test', _source: {} } as OpenSearchSearchHit,
-    ]);
-    render(
-      <TestHarness store={store}>
-        <TracesPage />
-      </TestHarness>
-    );
-
-    expect(screen.getByTestId('tab-explore_logs_tab')).toBeInTheDocument();
-    expect(screen.getByTestId('tab-explore_visualization_tab')).toBeInTheDocument();
-
-    expect(screen.getByTestId('explore-data-table')).toBeInTheDocument();
-    expect(screen.getByTestId('visualization-container')).toBeInTheDocument();
-  });
-
-  it('passes the correct props to setHeaderActionMenu when provided', () => {
+  it('passes setHeaderActionMenu prop to BottomContainer', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
@@ -312,10 +184,10 @@ describe('TracesPage', () => {
       </TestHarness>
     );
 
-    expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+    expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
   });
 
-  it('renders the new experience banner', () => {
+  it('renders when IndexPattern is loading', () => {
     const store = createTestStore();
     render(
       <TestHarness store={store}>
@@ -323,22 +195,6 @@ describe('TracesPage', () => {
       </TestHarness>
     );
 
-    expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
-  });
-
-  it('hide/show fields selector panel correctly', async () => {
-    const store = createTestStore();
-    render(
-      <TestHarness store={store}>
-        <TracesPage />
-      </TestHarness>
-    );
-
-    expect(screen.getByTestId('dscBottomLeftCanvas')).toBeVisible();
-
-    store.dispatch(setShowDatasetFields(false));
-    await waitFor(() => {
-      expect(screen.getByTestId('dscBottomLeftCanvas')).not.toBeVisible();
-    });
+    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
   });
 });

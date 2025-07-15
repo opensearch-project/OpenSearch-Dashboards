@@ -8,9 +8,20 @@ import { DiscoverResultsActionBar, DiscoverResultsActionBarProps } from './resul
 import { render, screen } from '@testing-library/react';
 import { OpenSearchSearchHit } from '../../../../application/legacy/discover/application/doc_views/doc_views_types';
 import userEvent from '@testing-library/user-event';
+import { Provider } from 'react-redux';
+import configureMockStore from 'redux-mock-store';
+
+const mockStore = configureMockStore([]);
+const initialState = {
+  ui: { activeTabId: 'logs' },
+};
+const store = mockStore(initialState);
 
 jest.mock('../download_csv', () => ({
   DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
+}));
+jest.mock('../../../visualizations/add_to_dashboard_button', () => ({
+  SaveAndAddButtonWithModal: () => <div data-test-subj="saveAndAddButtonWithModal" />,
 }));
 
 const mockRow1: OpenSearchSearchHit<Record<string, number | string>> = {
@@ -36,29 +47,46 @@ const props: DiscoverResultsActionBarProps = {
   showResetButton: false,
   resetQuery: jest.fn(),
   rows: [mockRow1],
-  indexPattern: {} as any,
+  dataset: {} as any,
   inspectionHanlder: mockInspectionHanlder,
 };
 
 describe('ResultsActionBar', () => {
-  test('renders the component', () => {
-    render(<DiscoverResultsActionBar {...props} />);
+  test('should render the action bar component', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
     expect(screen.getByTestId('dscResultsActionBar')).toBeInTheDocument();
   });
 
-  test('renders the HitCounter component', () => {
-    render(<DiscoverResultsActionBar {...props} />);
+  test('should render the hits counter component', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
     expect(screen.getByTestId('dscResultCount')).toBeInTheDocument();
   });
 
-  test('renders the DownloadCsv component when !!indexPattern and !!rows.length', () => {
-    render(<DiscoverResultsActionBar {...props} />);
+  test('should render the download CSV button when dataset and rows are available', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
     expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
   });
 
-  test('render open inspector button', async () => {
+  test('should render inspector button and handle click events', async () => {
     const user = userEvent.setup();
-    render(<DiscoverResultsActionBar {...props} rows={[]} />);
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} rows={[]} />
+      </Provider>
+    );
 
     const openInspectorButton = screen.queryByTestId('openInspectorButton');
     expect(openInspectorButton).toBeInTheDocument();
@@ -67,13 +95,33 @@ describe('ResultsActionBar', () => {
     expect(mockInspectionHanlder).toHaveBeenCalled();
   });
 
-  test('hides the DownloadCsv component when !indexPattern', () => {
-    render(<DiscoverResultsActionBar {...props} indexPattern={undefined} />);
+  test('should hide the download CSV button and add to dashboard button when dataset is not provided', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} dataset={undefined} />
+      </Provider>
+    );
     expect(screen.queryByTestId('discoverDownloadCsvButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
   });
 
-  test('hides the DownloadCsv component when !rows.length', () => {
-    render(<DiscoverResultsActionBar {...props} rows={[]} />);
+  test('should hide the download CSV button and add to dashboard button when no rows are available', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} rows={[]} />
+      </Provider>
+    );
     expect(screen.queryByTestId('discoverDownloadCsvButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
+  });
+
+  test('should hide add to dashboard button if current tab is patterns', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} rows={[]} />
+      </Provider>
+    );
+    expect(screen.queryByTestId('discoverDownloadCsvButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
   });
 });
