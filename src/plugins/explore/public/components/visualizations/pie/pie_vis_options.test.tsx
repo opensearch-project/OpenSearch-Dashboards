@@ -5,7 +5,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { PieVisStyleControls, PieVisStyleControlsProps } from './pie_vis_options';
-import { VisFieldType } from '../types';
+import { VisFieldType, AxisRole } from '../types';
 import { defaultPieChartStyles } from './pie_vis_config';
 
 jest.mock('@osd/i18n', () => ({
@@ -15,31 +15,34 @@ jest.mock('@osd/i18n', () => ({
 }));
 
 describe('PieVisStyleControls', () => {
+  const numericalColumn = {
+    id: 1,
+    name: 'value',
+    schema: VisFieldType.Numerical,
+    column: 'field-1',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  };
+
+  const categoricalColumn = {
+    id: 2,
+    name: 'category',
+    schema: VisFieldType.Categorical,
+    column: 'field-2',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  };
+
   const mockProps: PieVisStyleControlsProps = {
-    axisColumnMappings: {},
+    axisColumnMappings: {
+      [AxisRole.SIZE]: numericalColumn,
+      [AxisRole.COLOR]: categoricalColumn,
+    },
     updateVisualization: jest.fn(),
     styleOptions: defaultPieChartStyles,
     onStyleChange: jest.fn(),
-    numericalColumns: [
-      {
-        id: 1,
-        name: 'value',
-        schema: VisFieldType.Numerical,
-        column: 'field-1',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
-      },
-    ],
-    categoricalColumns: [
-      {
-        id: 2,
-        name: 'category',
-        schema: VisFieldType.Categorical,
-        column: 'field-2',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
-      },
-    ],
+    numericalColumns: [numericalColumn],
+    categoricalColumns: [categoricalColumn],
     dateColumns: [],
   };
 
@@ -47,32 +50,26 @@ describe('PieVisStyleControls', () => {
     jest.clearAllMocks();
   });
 
-  it('renders all tabs', () => {
+  it('renders the fields accordion', () => {
     render(<PieVisStyleControls {...mockProps} />);
 
-    expect(screen.getByText('Basic')).toBeInTheDocument();
-    expect(screen.getByText('Exclusive')).toBeInTheDocument();
+    expect(screen.getByText('Fields')).toBeInTheDocument();
   });
 
-  it('renders the BasicVisOptions component in the first tab', () => {
+  it('renders the pie exclusive options accordion', () => {
     render(<PieVisStyleControls {...mockProps} />);
-    const tab = screen.getByRole('tab', { name: /basic/i });
-    fireEvent.click(tab);
-    expect(screen.getByTestId('generalSettingsPanel')).toBeInTheDocument();
+    // Use a more specific selector to find the accordion header
+    expect(screen.getByRole('button', { name: /show as/i })).toBeInTheDocument();
   });
 
-  it('renders the exclusive options component in the first tab', () => {
+  it('renders the legend options accordion', () => {
     render(<PieVisStyleControls {...mockProps} />);
-    const tab = screen.getByRole('tab', { name: /exclusive/i });
-    fireEvent.click(tab);
-    expect(screen.getByTestId('pieExclusivePanel')).toBeInTheDocument();
+    expect(screen.getByText('Legend')).toBeInTheDocument();
   });
 
-  it('calls onStyleChange with the correct parameters when a style option changes', () => {
+  it('calls onStyleChange with the correct parameters when a legend option changes', () => {
     render(<PieVisStyleControls {...mockProps} />);
-    const tab = screen.getByRole('tab', { name: /basic/i });
-    fireEvent.click(tab);
-    const switchButton = screen.getByTestId('showLegendSwitch');
+    const switchButton = screen.getByTestId('legendModeSwitch');
     fireEvent.click(switchButton);
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
