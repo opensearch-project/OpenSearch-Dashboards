@@ -77,11 +77,13 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
 
           <EuiFlexItem grow={false}>
             <BarExclusiveVisOptions
+              barSizeMode={styleOptions.barSizeMode}
               barWidth={styleOptions.barWidth}
               barPadding={styleOptions.barPadding}
               showBarBorder={styleOptions.showBarBorder}
               barBorderWidth={styleOptions.barBorderWidth}
               barBorderColor={styleOptions.barBorderColor}
+              onBarSizeModeChange={(barSizeMode) => updateStyleOption('barSizeMode', barSizeMode)}
               onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
               onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}
               onShowBarBorderChange={(showBarBorder) =>
