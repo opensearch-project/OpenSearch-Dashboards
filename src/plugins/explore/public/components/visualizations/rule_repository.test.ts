@@ -128,7 +128,8 @@ describe('rule_repository', () => {
         transformedData,
         numericalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        undefined
       );
     });
   });
@@ -163,7 +164,8 @@ describe('rule_repository', () => {
         transformedData,
         numericalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        undefined
       );
     });
   });
@@ -196,7 +198,8 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        undefined
       );
     });
   });
@@ -232,7 +235,8 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        undefined
       );
     });
   });

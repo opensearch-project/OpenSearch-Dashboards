@@ -89,7 +89,7 @@ describe('VisualizationRegistry', () => {
   });
 
   describe('getVisualizationType', () => {
-    it('should return undefined if no rule matches', () => {
+    it('should return an object with undefined visualizationType if no rule matches', () => {
       (mockRule.matches as jest.Mock).mockReturnValue(false);
       registry.registerRule(mockRule);
 
@@ -106,7 +106,15 @@ describe('VisualizationRegistry', () => {
 
       const result = registry.getVisualizationType(columns);
 
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result?.visualizationType).toBeUndefined();
+      expect(result?.ruleId).toBeUndefined();
+      expect(result?.toExpression).toBeUndefined();
+      expect(result?.availableChartTypes).toEqual([]);
+      expect(result?.axisColumnMappings).toEqual({});
+      expect(result?.numericalColumns).toHaveLength(1);
+      expect(result?.categoricalColumns).toHaveLength(0);
+      expect(result?.dateColumns).toHaveLength(0);
       expect(mockRule.matches).toHaveBeenCalled();
     });
 

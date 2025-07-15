@@ -133,7 +133,7 @@ describe('addTransform', () => {
         joinaggregate: [{ op: 'max', field: 'sales', as: 'max_value' }],
       },
       {
-        calculate: `(datum["sales"] / datum.max_value)`,
+        calculate: `(datum.max_value === 0 ? datum["sales"] : datum["sales"] / datum.max_value)`,
         as: 'sales',
       },
     ]);

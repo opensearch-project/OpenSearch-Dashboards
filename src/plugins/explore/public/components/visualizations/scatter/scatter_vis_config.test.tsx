@@ -29,7 +29,7 @@ describe('createScatterConfig', () => {
     const config = createScatterConfig();
     const defaults = config.ui.style.defaults as ScatterChartStyleControls;
     // Verify basic controls
-    expect(defaults.addTooltip).toBe(true);
+    expect(defaults.tooltipOptions.mode).toBe('all');
     expect(defaults.addLegend).toBe(true);
     expect(defaults.legendPosition).toBe(Positions.RIGHT);
     // Verify exclusive style
@@ -50,7 +50,9 @@ describe('createScatterConfig', () => {
     // Mock props
     const mockProps = {
       styleOptions: {
-        addTooltip: false,
+        tooltipOptions: {
+          mode: 'hidden' as 'hidden',
+        },
         addLegend: false,
         legendPosition: Positions.RIGHT,
         exclusive: {
@@ -59,11 +61,17 @@ describe('createScatterConfig', () => {
           filled: false,
         },
         StandardAxes: [] as StandardAxes[],
+        grid: {
+          xLines: true,
+          yLines: true,
+        },
       },
       onStyleChange: jest.fn(),
       numericalColumns: [],
       categoricalColumns: [],
       dateColumns: [],
+      axisColumnMappings: {},
+      updateVisualization: jest.fn(),
     };
     // Call the render function
     renderFunction(mockProps);

@@ -10,7 +10,15 @@ import {
   createFacetedMultiLineChart,
   createCategoryLineChart,
 } from './to_expression';
-import { ThresholdLineStyle, VisColumn, VisFieldType, Positions, TooltipOptions } from '../types';
+import {
+  ThresholdLineStyle,
+  VisColumn,
+  VisFieldType,
+  Positions,
+  TooltipOptions,
+  AxisRole,
+  AxisColumnMappings,
+} from '../types';
 import * as lineChartUtils from './line_chart_utils';
 import * as thresholdUtils from '../style_panel/threshold/utils';
 
@@ -115,11 +123,17 @@ describe('to_expression', () => {
       (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
       (lineChartUtils.createTimeMarkerLayer as jest.Mock).mockReturnValueOnce(mockTimeMarkerLayer);
 
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+      };
+
       const result = createSimpleLineChart(
         transformedData,
         [numericColumn1],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        mockAxisColumnMappings
       );
 
       // Verify the result structure
@@ -147,11 +161,18 @@ describe('to_expression', () => {
 
   describe('createLineBarChart', () => {
     it('should create a combined line and bar chart with two metrics and one date', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.Y_SECOND]: numericColumn2,
+      };
+
       const result = createLineBarChart(
         transformedData,
         [numericColumn1, numericColumn2],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        mockAxisColumnMappings
       );
 
       // Verify the result structure
@@ -183,12 +204,19 @@ describe('to_expression', () => {
 
   describe('createMultiLineChart', () => {
     it('should create a multi-line chart with one metric, one date, and one categorical column', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.COLOR]: categoricalColumn1,
+      };
+
       const result = createMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        mockAxisColumnMappings
       );
 
       // Verify the result structure
@@ -215,12 +243,20 @@ describe('to_expression', () => {
       styleOptions.thresholdLines[0].show = true;
       styleOptions.addTimeMarker = true;
 
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.COLOR]: categoricalColumn1,
+        [AxisRole.FACET]: categoricalColumn2,
+      };
+
       const result = createFacetedMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1, categoricalColumn2],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        mockAxisColumnMappings
       );
 
       // Verify the result structure
@@ -260,12 +296,18 @@ describe('to_expression', () => {
       const mockThresholdLayer = { mark: { type: 'rule' } };
       (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
 
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: categoricalColumn1,
+      };
+
       const result = createCategoryLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1],
         [],
-        styleOptions
+        styleOptions,
+        mockAxisColumnMappings
       );
 
       // Verify the result structure
