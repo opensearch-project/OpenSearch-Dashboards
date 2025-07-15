@@ -4,7 +4,7 @@
  */
 
 import { createBarSpec, createStackedBarSpec, createTimeBarChart } from './to_expression';
-import { defaultBarChartStyles } from './bar_vis_config';
+import { defaultBarChartStyles, BarChartStyleControls } from './bar_vis_config';
 import { VisColumn, VisFieldType, VEGASCHEMA, AxisRole, ThresholdLineStyle } from '../types';
 
 describe('bar to_expression', () => {
@@ -81,8 +81,9 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles = {
+      const customStyles: Partial<BarChartStyleControls> = {
         ...defaultBarChartStyles,
+        barSizeMode: 'manual',
         barWidth: 0.5,
         barPadding: 0.2,
         showBarBorder: true,
@@ -90,12 +91,18 @@ describe('bar to_expression', () => {
         barBorderWidth: 2,
       };
 
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockCategoricalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
       const spec = createBarSpec(
         mockData,
         [mockNumericalColumn],
         [mockCategoricalColumn],
         [],
-        customStyles
+        customStyles,
+        mockAxisColumnMappings
       );
 
       // Check bar styling
@@ -122,12 +129,18 @@ describe('bar to_expression', () => {
         ],
       };
 
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockCategoricalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
       const spec = createBarSpec(
         mockData,
         [mockNumericalColumn],
         [mockCategoricalColumn],
         [],
-        customStyles
+        customStyles,
+        mockAxisColumnMappings
       );
 
       // Check threshold line
@@ -249,15 +262,17 @@ describe('bar to_expression', () => {
 
   describe('createTimeBarChart', () => {
     test('creates a basic time bar chart spec', () => {
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
       const spec = createTimeBarChart(
         mockData,
         [mockNumericalColumn],
         [mockDateColumn],
         defaultBarChartStyles,
-        {
-          [AxisRole.X]: mockDateColumn,
-          [AxisRole.Y]: mockNumericalColumn,
-        }
+        mockAxisColumnMappings
       );
 
       // Check basic structure
@@ -277,8 +292,9 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles = {
+      const customStyles: Partial<BarChartStyleControls> = {
         ...defaultBarChartStyles,
+        barSizeMode: 'manual',
         barWidth: 0.5,
         barPadding: 0.2,
         showBarBorder: true,
@@ -286,11 +302,17 @@ describe('bar to_expression', () => {
         barBorderWidth: 2,
       };
 
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
       const spec = createTimeBarChart(
         mockData,
         [mockNumericalColumn],
         [mockDateColumn],
-        customStyles
+        customStyles,
+        mockAxisColumnMappings
       );
 
       // Check bar styling
@@ -317,11 +339,17 @@ describe('bar to_expression', () => {
         ],
       };
 
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
       const spec = createTimeBarChart(
         mockData,
         [mockNumericalColumn],
         [mockDateColumn],
-        customStyles
+        customStyles,
+        mockAxisColumnMappings
       );
 
       // Check threshold line

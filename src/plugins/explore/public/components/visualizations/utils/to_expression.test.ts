@@ -4,7 +4,7 @@
  */
 
 import { toExpression } from './to_expression';
-import { VisColumn, VisFieldType } from '../types';
+import { VisColumn, VisFieldType, AxisColumnMappings, AxisRole } from '../types';
 import * as expressionsPublic from '../../../../../expressions/public';
 
 // Mock the expressions module
@@ -138,8 +138,7 @@ describe('to_expression', () => {
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions,
-      'line'
+      styleOptions
     );
 
     // Verify that the expression functions were built correctly
@@ -200,8 +199,7 @@ describe('to_expression', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
-      'line'
+      undefined
     );
   });
 });
