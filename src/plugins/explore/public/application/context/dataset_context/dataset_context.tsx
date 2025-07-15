@@ -5,14 +5,14 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { DataView as Dataset } from 'src/plugins/data/common';
+import { DataView } from 'src/plugins/data/common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';
 
 interface DatasetContextValue {
-  dataset: Dataset | undefined;
-  isLoading: boolean;
+  dataset: DataView | undefined;
+  isLoading: boolean | null;
   error: string | null;
 }
 
@@ -30,8 +30,9 @@ const DatasetContext = createContext<DatasetContextValue>({
  */
 export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const [dataset, setDataset] = useState<Dataset | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
+  const { dataViews } = services.data;
+  const [dataset, setDataset] = useState<DataView | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const datasetFromState = useSelector((state: RootState) => state.query?.dataset);
@@ -51,43 +52,19 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setError(null);
 
       try {
-        let view = await services.data.dataViews.get(
-          datasetFromState.id,
-          datasetFromState.type !== 'INDEX_PATTERN'
-        );
+        const view = await dataViews
+          .get(datasetFromState.id)
+          .catch(() => dataViews.createFromDataset(datasetFromState));
 
-        if (!view) {
-          // Cache the dataset first (for INDEX type datasets)
-          await services.data.query.queryString.getDatasetService().cacheDataset(datasetFromState, {
-            uiSettings: services.uiSettings,
-            savedObjects: services.savedObjects,
-            notifications: services.notifications,
-            http: services.http,
-            data: services.data,
-          });
+        if (!isMounted) return;
 
-          // Try again after caching
-          view = await services.data.dataViews.get(
-            datasetFromState.id,
-            datasetFromState.type !== 'INDEX_PATTERN'
-          );
-        }
-
-        if (isMounted) {
-          if (view) {
-            setDataset(view);
-          } else {
-            const errorMsg = `Failed to fetch dataset: ${datasetFromState.id}`;
-            setError(errorMsg);
-          }
-          setIsLoading(false);
-        }
+        setDataset(view || undefined);
+        setError(view ? null : `Failed to fetch dataset: ${datasetFromState.id}`);
       } catch (err) {
-        if (isMounted) {
-          const errorMsg = `Error fetching IndexPattern: ${(err as Error).message}`;
-          setError(errorMsg);
-          setIsLoading(false);
-        }
+        if (!isMounted) return;
+        setError(`Error fetching dataset: ${(err as Error).message}`);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
 
@@ -96,7 +73,7 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => {
       isMounted = false;
     };
-  }, [datasetFromState, services]);
+  }, [datasetFromState, dataViews]);
 
   const contextValue = useMemo<DatasetContextValue>(
     () => ({

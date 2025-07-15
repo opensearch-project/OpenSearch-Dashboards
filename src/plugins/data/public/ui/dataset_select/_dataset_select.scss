@@ -8,6 +8,17 @@
   border: $euiBorderThin;
   background-color: $euiColorLightestShade;
   width: 400px;
+  max-width: 400px;
+
+  &__container {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  &__detailsContainer {
+    width: 32px;
+    max-width: 32px;
+  }
 
   div:is([class$="labelWrapper"]) {
     width: fit-content;
@@ -27,23 +38,38 @@
     flex-direction: row;
   }
 
+  &__mainContent {
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 32px);
+  }
+
   &__button {
     background-color: $euiColorEmptyShade;
     width: 100%;
     height: 32px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
   }
 
   &__icon {
     margin-right: $euiSizeXS;
+    flex-shrink: 0;
   }
 
   &__text {
     text-align: left;
-    width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: $euiFontSizeXS;
+    font-size: $euiFontSizeS;
+    flex: 1;
+    width: 250px;
+    min-width: 0;
+    max-width: calc(100% - 32px);
   }
 
   &__checkbox {
@@ -55,10 +81,10 @@
     width: 365px;
     padding: $euiSizeXS;
     overflow-y: auto;
-    
+
     span:is([class*="euiSelectableListItem__text"]) {
       :first-child {
-        font-size: $euiFontSizeXS;
+        font-size: $euiFontSizeS;
       }
     }
   }
@@ -96,9 +122,5 @@
 
     // euiOverlayMask pushes the modal up due to having padding-bottom: 10vh
     max-height: calc(90vh - $euiSizeL);
-
-    .euiModal__flex {
-      max-height: none;
-    }
   }
 }

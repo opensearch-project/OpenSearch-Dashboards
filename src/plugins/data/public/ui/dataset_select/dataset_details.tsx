@@ -13,7 +13,6 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
   EuiDescriptionList,
   EuiBadge,
 } from '@elastic/eui';
@@ -34,7 +33,7 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
   const [isDefaultDataset, setIsDefaultDataset] = useState(isDefault);
   const {
     query: { queryString },
-    dataViews: datasetsService,
+    dataViews,
   } = services.data;
   const datasetService = queryString.getDatasetService();
 
@@ -47,10 +46,10 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
     if (isDefaultDataset) {
       return;
     } else {
-      await datasetsService.setDefault(dataset.id as string, true);
+      await dataViews.setDefault(dataset.id as string, true);
       setIsDefaultDataset(true);
     }
-  }, [dataset, isDefaultDataset, datasetsService]);
+  }, [dataset, isDefaultDataset, dataViews]);
 
   const getTypeFromUri = useCallback((uri?: string): string | undefined => {
     if (!uri) return undefined;
@@ -64,26 +63,6 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
 
     return undefined;
   }, []);
-
-  const buildTimeFieldOptions = useCallback(() => {
-    if (!dataset || !dataset.fields) {
-      return [];
-    }
-
-    const dateFields = dataset.fields.getAll().filter((field) => field.type === 'date');
-    const noTimeFilter = i18n.translate('data.datasetDetails.noTimeFilter', {
-      defaultMessage: "I don't want to use a time filter",
-    });
-
-    return [
-      ...dateFields.map((field) => ({
-        text: field.name,
-        value: field.name,
-      })),
-      { text: '-----', value: '-----', disabled: true },
-      { text: noTimeFilter, value: noTimeFilter },
-    ];
-  }, [dataset]);
 
   if (!dataset) {
     return null;
@@ -182,7 +161,7 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
             title: (
               <EuiText size="xs">
                 {i18n.translate('data.datasetDetails.dataDefinitionTitle', {
-                  defaultMessage: 'Definition',
+                  defaultMessage: 'Data Definition',
                 })}
               </EuiText>
             ),

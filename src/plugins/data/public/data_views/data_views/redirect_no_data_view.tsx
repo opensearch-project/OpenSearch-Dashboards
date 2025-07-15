@@ -11,6 +11,9 @@ import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 
 let bannerId: string;
 
+/**
+ * @experimental This function is experimental and may change in future versions
+ */
 export const onRedirectNoDataView = (
   capabilities: CoreStart['application']['capabilities'],
   navigateToApp: CoreStart['application']['navigateToApp'],
