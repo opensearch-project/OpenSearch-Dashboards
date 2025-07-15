@@ -72,7 +72,6 @@ export const VisualizationContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const {
-    data,
     expressions: { ReactExpressionRenderer },
   } = services;
   const { dataset } = useDatasetContext();
