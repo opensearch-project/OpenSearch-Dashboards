@@ -28,12 +28,7 @@
  * under the License.
  */
 
-import {
-  Filter,
-  // @ts-expect-error TS6133 TODO(ts-error): fixme
-  IndexPatternsContract,
-  IndexPattern,
-} from '../../../../../../../../../../data/public';
+import { Filter, IndexPattern } from '../../../../../../../../../../data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
