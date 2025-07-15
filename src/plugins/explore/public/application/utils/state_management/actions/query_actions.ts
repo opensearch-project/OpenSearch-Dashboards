@@ -30,7 +30,7 @@ import {
   HistogramDataProcessor,
   ProcessedSearchResults,
 } from '../../interfaces';
-import { defaultPreparePplQuery } from '../../languages';
+import { defaultPreparePplQuery, getQueryWithSource } from '../../languages';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -134,13 +134,25 @@ export const executeQueries = createAsyncThunk<
 
   const defaultCacheKey = defaultPrepareQueryString(query);
   const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
-  const visualizationTabPrepareQuery = visualizationTab?.prepareQuery || defaultPrepareQueryString;
+  let visualizationTabPrepareQuery = defaultPrepareQueryString;
+  if (visualizationTab?.prepareQuery) {
+    const prepareQuery = visualizationTab.prepareQuery;
+    visualizationTabPrepareQuery = (queryParam: Query): string => {
+      return prepareQuery(getQueryWithSource(queryParam));
+    };
+  }
   const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
 
   let activeTabCacheKey = defaultCacheKey;
   if (activeTabId && activeTabId !== '') {
     const activeTab = services.tabRegistry.getTab(activeTabId);
-    const activeTabPrepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
+    let activeTabPrepareQuery = defaultPrepareQueryString;
+    if (activeTab?.prepareQuery) {
+      const prepareQuery = activeTab.prepareQuery;
+      activeTabPrepareQuery = (queryParam: Query): string => {
+        return prepareQuery(getQueryWithSource(queryParam));
+      };
+    }
     activeTabCacheKey = activeTabPrepareQuery(query);
   }
 
