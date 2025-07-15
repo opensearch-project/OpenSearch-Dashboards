@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
@@ -152,21 +152,24 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const dispatch = useDispatch();
 
-  const handleDatasetSelect = async (view: DataView) => {
-    if (!view) return;
+  const handleDatasetSelect = useCallback(
+    async (view: DataView) => {
+      if (!view) return;
 
-    const currentQuery = queryString.getQuery();
+      const currentQuery = queryString.getQuery();
 
-    const newDataset = data.dataViews.convertToDataset(view);
-    dispatch(
-      setQueryState({
-        ...currentQuery,
-        query: queryString.getInitialQueryByDataset(newDataset).query,
-        dataset: newDataset,
-      })
-    );
-    dispatch(setDatasetActionCreator(services, clearEditors));
-  };
+      const newDataset = data.dataViews.convertToDataset(view);
+      dispatch(
+        setQueryState({
+          ...currentQuery,
+          query: queryString.getInitialQueryByDataset(newDataset).query,
+          dataset: newDataset,
+        })
+      );
+      dispatch(setDatasetActionCreator(services, clearEditors));
+    },
+    [queryString, data.dataViews, dispatch, services, clearEditors]
+  );
 
   return (
     <TopNavMenu

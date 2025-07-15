@@ -12,7 +12,7 @@ import { RootState } from '../../utils/state_management/store';
 
 interface DatasetContextValue {
   dataset: DataView | undefined;
-  isLoading: boolean;
+  isLoading: boolean | null;
   error: string | null;
 }
 
@@ -32,7 +32,7 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataViews } = services.data;
   const [dataset, setDataset] = useState<DataView | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const datasetFromState = useSelector((state: RootState) => state.query?.dataset);

@@ -26,7 +26,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { dataset } = useDatasetContext();
+  const { dataset, isLoading } = useDatasetContext();
 
   useInitialQueryExecution(services);
   useUrlStateSync(services);
@@ -40,7 +40,9 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
           <EuiPageBody className="explore-layout__page-body">
             <NewExperienceBanner />
 
-            <div className="dscCanvas__queryPanel">{dataset ? <QueryPanel /> : null}</div>
+            <div className="dscCanvas__queryPanel">
+              {dataset && !isLoading ? <QueryPanel /> : null}
+            </div>
 
             {/* Main content area with resizable panels under QueryPanel */}
             <BottomContainer setHeaderActionMenu={setHeaderActionMenu} />
