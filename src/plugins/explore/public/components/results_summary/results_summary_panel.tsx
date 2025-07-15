@@ -36,32 +36,24 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
 
   const isSummaryAgentAvailable = useSelector(selectSummaryAgentIsAvailable);
 
-  const [accordionState, setAccordionState] = useState<AccordionState>('open');
+  const [accordionState, setAccordionState] = useState<AccordionState>('closed');
   const [summary, setSummary] = useState(''); // store fetched data
   const [loading, setLoading] = useState(false); // track loading state
   const [feedback, setFeedback] = useState(FeedbackStatus.NONE);
 
   const { reportMetric, reportCountMetric } = useMetrics(props.usageCollection);
 
-  const {
-    queryState,
-    status,
-    queryPromptState,
-    dataSetState,
-    queryResults,
-    editorMode,
-  } = useSelector((state: RootState) => ({
-    queryState: state.query,
-    status: state.queryEditor.queryStatus.status || QueryExecutionStatus.UNINITIALIZED,
-    queryPromptState: state.queryEditor.lastExecutedPrompt,
-    dataSetState: state.query.dataset,
-    queryResults: state.results[state.query.query as string]?.hits?.hits,
-    editorMode: state.queryEditor.editorMode,
-  }));
+  const { queryState, lastExecutedPrompt, dataSetState, queryResults, editorMode } = useSelector(
+    (state: RootState) => ({
+      queryState: state.query,
+      lastExecutedPrompt: state.queryEditor.lastExecutedPrompt,
+      dataSetState: state.query.dataset,
+      queryResults: state.results[state.query.query as string]?.hits?.hits,
+      editorMode: state.queryEditor.editorMode,
+    })
+  );
 
-  const assistantEnabled = useMemo(() => !!core.application.capabilities?.assistant?.enabled, [
-    core.application.capabilities?.assistant?.enabled,
-  ]);
+  const assistantEnabled = core.application.capabilities?.assistant?.enabled;
   const queryExecutedInPromptMode = useMemo(
     // Only read the mode when the query result changed
     () => [EditorMode.DualPrompt, EditorMode.SinglePrompt].includes(editorMode),
@@ -70,10 +62,7 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
   );
 
   const canGenerateSummary =
-    Boolean(queryResults?.length) &&
-    Boolean(queryState.query) &&
-    status === QueryExecutionStatus.READY &&
-    queryExecutedInPromptMode;
+    Boolean(queryResults?.length) && Boolean(queryState.query) && queryExecutedInPromptMode;
 
   // The visibility of panel action buttons: thumbs up/down and copy to clipboard buttons
   const actionButtonVisible = Boolean(summary) && !loading && queryExecutedInPromptMode;
@@ -142,18 +131,18 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
       canGenerateSummary &&
       !summary &&
       !loading &&
-      queryPromptState &&
-      queryPromptState !== ''
+      lastExecutedPrompt &&
+      lastExecutedPrompt !== ''
     ) {
       fetchSummary({
-        question: queryPromptState,
+        question: lastExecutedPrompt,
         query: queryState.query as string,
         queryRes: queryResults,
       });
     }
   }, [
     canGenerateSummary,
-    queryPromptState,
+    lastExecutedPrompt,
     queryState.query,
     queryResults,
     fetchSummary,
@@ -222,7 +211,7 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
       loading={loading}
       onGenerateSummary={() =>
         fetchSummary({
-          question: queryPromptState,
+          question: lastExecutedPrompt,
           query: queryState.query as string,
           queryRes: queryResults,
         })
