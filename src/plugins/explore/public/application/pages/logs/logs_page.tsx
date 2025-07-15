@@ -18,6 +18,8 @@ import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
 import { useDatasetContext } from '../../context';
 import { BottomContainer } from '../../../components/container/bottom_container/bottom_container';
+import { TopNav } from '../../../components/top_nav/top_nav';
+import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 
 /**
  * Main application component for the Explore plugin
@@ -27,6 +29,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset, isLoading } = useDatasetContext();
+  const { savedExplore } = useInitPage();
 
   useInitialQueryExecution(services);
   useUrlStateSync(services);
@@ -38,6 +41,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
       <div className="mainPage">
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
+            <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
             <NewExperienceBanner />
 
             <div className="dscCanvas__queryPanel">
@@ -45,7 +49,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             </div>
 
             {/* Main content area with resizable panels under QueryPanel */}
-            <BottomContainer setHeaderActionMenu={setHeaderActionMenu} />
+            <BottomContainer />
           </EuiPageBody>
         </EuiPage>
       </div>
