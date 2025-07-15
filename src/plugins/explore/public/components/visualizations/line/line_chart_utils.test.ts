@@ -11,22 +11,7 @@ import {
   ValueAxisPosition,
 } from './line_chart_utils';
 import { VisColumn, VisFieldType, Positions } from '../types';
-import { LineStyle } from './exclusive_style';
-
-// Mock the threshold utils
-jest.mock('../style_panel/threshold/utils', () => ({
-  getStrokeDash: jest.fn((style) => {
-    switch (style) {
-      case 'dashed':
-        return [5, 5];
-      case 'dot-dashed':
-        return [5, 5, 1, 5];
-      default:
-        return undefined;
-    }
-  }),
-  createThresholdLayer: jest.fn(),
-}));
+import { LineChartStyleControls } from './line_vis_config';
 
 describe('Line Chart Utils', () => {
   describe('getVegaInterpolation', () => {
@@ -61,8 +46,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should build a point-only mark config when lineStyle is dots', () => {
-      const styles = {
-        lineStyle: 'dots' as LineStyle,
+      const styles: Partial<LineChartStyleControls> = {
+        lineStyle: 'dots',
         tooltipOptions: { mode: 'all' as const },
       };
       const result = buildMarkConfig(styles);
@@ -74,8 +59,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should build a line-only mark config when lineStyle is line', () => {
-      const styles = {
-        lineStyle: 'line' as LineStyle,
+      const styles: Partial<LineChartStyleControls> = {
+        lineStyle: 'line',
         lineWidth: 3,
         lineMode: 'straight',
         tooltipOptions: { mode: 'all' as const },
@@ -90,8 +75,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should build a line with points mark config when lineStyle is both', () => {
-      const styles = {
-        lineStyle: 'both' as LineStyle,
+      const styles: Partial<LineChartStyleControls> = {
+        lineStyle: 'both',
         lineWidth: 2,
         lineMode: 'smooth',
         tooltipOptions: { mode: 'all' as const },
@@ -110,24 +95,24 @@ describe('Line Chart Utils', () => {
       const result = buildMarkConfig(undefined);
       expect(result).toEqual({
         type: 'line',
+        point: true,
         tooltip: true,
         strokeWidth: 2,
         interpolate: 'monotone',
-        point: true,
       });
     });
   });
 
   describe('createTimeMarkerLayer', () => {
     it('should return null when time marker is not enabled', () => {
-      const styles = {
+      const styles: Partial<LineChartStyleControls> = {
         addTimeMarker: false,
       };
       expect(createTimeMarkerLayer(styles)).toBeNull();
     });
 
     it('should create a time marker layer with tooltip when enabled', () => {
-      const styles = {
+      const styles: Partial<LineChartStyleControls> = {
         addTimeMarker: true,
         tooltipOptions: { mode: 'all' as const },
       };
@@ -153,7 +138,7 @@ describe('Line Chart Utils', () => {
     });
 
     it('should create a time marker layer without tooltip when tooltips are disabled', () => {
-      const styles = {
+      const styles: Partial<LineChartStyleControls> = {
         addTimeMarker: true,
         tooltipOptions: { mode: 'hidden' as const },
       };
@@ -218,13 +203,13 @@ describe('Line Chart Utils', () => {
     });
 
     it('should apply category axis styling', () => {
-      const styles = {
+      const styles: Partial<LineChartStyleControls> = {
         categoryAxes: [
           {
             id: 'CategoryAxis-1',
             type: 'category' as const,
             title: { text: 'Custom Category Title' },
-            position: Positions.TOP as Positions.TOP,
+            position: Positions.TOP,
             show: true,
             labels: {
               show: true,
@@ -235,8 +220,8 @@ describe('Line Chart Utils', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
@@ -252,12 +237,12 @@ describe('Line Chart Utils', () => {
     });
 
     it('should hide category axis when show is false', () => {
-      const styles = {
+      const styles: Partial<LineChartStyleControls> = {
         categoryAxes: [
           {
             id: 'CategoryAxis-1',
             type: 'category' as const,
-            position: Positions.BOTTOM as Positions.BOTTOM,
+            position: Positions.BOTTOM,
             show: false,
             labels: {
               show: true,
@@ -271,8 +256,8 @@ describe('Line Chart Utils', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
@@ -287,14 +272,14 @@ describe('Line Chart Utils', () => {
     });
 
     it('should apply value axis styling', () => {
-      const styles = {
+      const styles: Partial<LineChartStyleControls> = {
         valueAxes: [
           {
             id: 'ValueAxis-1',
             name: 'LeftAxis-1',
             type: 'value' as const,
             title: { text: 'Custom Value Title' },
-            position: Positions.RIGHT as Positions.RIGHT,
+            position: Positions.RIGHT,
             show: true,
             labels: {
               show: true,
@@ -305,8 +290,8 @@ describe('Line Chart Utils', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
@@ -322,13 +307,13 @@ describe('Line Chart Utils', () => {
     });
 
     it('should hide value axis when show is false', () => {
-      const styles = {
+      const styles: Partial<LineChartStyleControls> = {
         valueAxes: [
           {
             id: 'ValueAxis-1',
             name: 'LeftAxis-1',
             type: 'value' as const,
-            position: Positions.LEFT as Positions.LEFT,
+            position: Positions.LEFT,
             show: false,
             labels: {
               show: true,
@@ -342,8 +327,8 @@ describe('Line Chart Utils', () => {
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
@@ -358,13 +343,13 @@ describe('Line Chart Utils', () => {
     });
 
     it('should handle Rule 2 (two metrics, one date) correctly', () => {
-      const styles = {
+      const styles: Partial<LineChartStyleControls> = {
         valueAxes: [
           {
             id: 'ValueAxis-1',
             name: 'LeftAxis-1',
             type: 'value' as const,
-            position: Positions.LEFT as Positions.LEFT,
+            position: Positions.LEFT,
             show: true,
             labels: {
               show: true,
@@ -373,14 +358,14 @@ describe('Line Chart Utils', () => {
               truncate: 100,
             },
             title: {
-              text: '',
+              text: 'Left Axis',
             },
           },
           {
             id: 'ValueAxis-2',
             name: 'RightAxis-1',
             type: 'value' as const,
-            position: Positions.RIGHT as Positions.RIGHT,
+            position: Positions.RIGHT,
             show: true,
             labels: {
               show: true,
@@ -389,13 +374,13 @@ describe('Line Chart Utils', () => {
               truncate: 100,
             },
             title: {
-              text: '',
+              text: 'Right Axis',
             },
           },
         ],
         grid: {
-          categoryLines: true,
-          valueLines: true,
+          xLines: true,
+          yLines: true,
         },
       };
 
@@ -410,6 +395,7 @@ describe('Line Chart Utils', () => {
         ValueAxisPosition.Left
       );
       expect(leftResult.orient).toBe(Positions.LEFT);
+      expect(leftResult.title).toBe('Left Axis');
 
       // Test right axis
       const rightResult = applyAxisStyling(
@@ -422,6 +408,7 @@ describe('Line Chart Utils', () => {
         ValueAxisPosition.Right
       );
       expect(rightResult.orient).toBe(Positions.RIGHT);
+      expect(rightResult.title).toBe('Right Axis');
     });
   });
 });
