@@ -16,26 +16,51 @@ import { BannerPluginConfigType } from './config';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 import { defineRoutes } from './routes/get_config';
 import { BannerConfig } from '../common';
+import { getBannerSettings } from './ui_settings';
 
 export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart> {
   private readonly config$: Observable<BannerPluginConfigType>;
+  private pluginConfig!: BannerPluginConfigType;
 
   constructor(private initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<BannerPluginConfigType>();
   }
 
   public async setup(core: CoreSetup<BannerPluginStart>) {
-    const pluginConfig: BannerPluginConfigType = await this.config$.pipe(first()).toPromise();
+    this.pluginConfig = await this.config$.pipe(first()).toPromise();
+
+    // Get the default UI settings
+    const bannerSettings = getBannerSettings();
+
+    // Override the default values with values from YAML config
+    if (bannerSettings['banner:content']) {
+      bannerSettings['banner:content'].value = this.pluginConfig.content;
+    }
+    if (bannerSettings['banner:color']) {
+      bannerSettings['banner:color'].value = this.pluginConfig.color;
+    }
+    if (bannerSettings['banner:iconType']) {
+      bannerSettings['banner:iconType'].value = this.pluginConfig.iconType;
+    }
+    if (bannerSettings['banner:active']) {
+      bannerSettings['banner:active'].value = this.pluginConfig.isVisible;
+    }
+    if (bannerSettings['banner:useMarkdown']) {
+      bannerSettings['banner:useMarkdown'].value = this.pluginConfig.useMarkdown;
+    }
+
+    // Register UI settings with updated default values
+    core.uiSettings.register(bannerSettings);
 
     const bannerSetup = {
-      bannerEnabled: () => pluginConfig.enabled,
+      bannerEnabled: () => this.pluginConfig.enabled,
       getConfig: (): BannerConfig => ({
-        content: pluginConfig.content,
-        color: pluginConfig.color,
-        iconType: pluginConfig.iconType,
-        isVisible: pluginConfig.isVisible,
-        useMarkdown: pluginConfig.useMarkdown,
-        size: pluginConfig.size,
+        content: this.pluginConfig.content,
+        color: this.pluginConfig.color,
+        iconType: this.pluginConfig.iconType,
+        isVisible: this.pluginConfig.isVisible,
+        useMarkdown: this.pluginConfig.useMarkdown,
+        size: this.pluginConfig.size,
       }),
     };
 
