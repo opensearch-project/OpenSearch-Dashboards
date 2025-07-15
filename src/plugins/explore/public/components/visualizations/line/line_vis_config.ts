@@ -16,7 +16,7 @@ import {
   AxisRole,
   VisFieldType,
 } from '../types';
-import { LineStyle } from './exclusive_style';
+import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
 
 // Complete line chart style controls interface

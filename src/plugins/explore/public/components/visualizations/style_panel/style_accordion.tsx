@@ -6,6 +6,8 @@
 import { EuiText, EuiPanel, EuiAccordion, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
+import './style_accordion.scss';
+
 export interface StyleAccordionProps {
   id: string;
   accordionLabel: React.ReactNode;
@@ -19,7 +21,13 @@ export const StyleAccordion: React.FC<StyleAccordionProps> = ({
   children,
 }) => {
   return (
-    <EuiPanel paddingSize="none" borderRadius="none" hasBorder={false} hasShadow={false}>
+    <EuiPanel
+      paddingSize="none"
+      borderRadius="none"
+      hasBorder={false}
+      hasShadow={false}
+      className="style-accordion"
+    >
       <EuiAccordion
         id={id}
         buttonContent={
@@ -34,9 +42,11 @@ export const StyleAccordion: React.FC<StyleAccordionProps> = ({
           {children}
         </EuiPanel>
       </EuiAccordion>
-      <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" />
-      <EuiSpacer size="s" />
+      <div className="style-accordion-separator">
+        <EuiSpacer size="s" />
+        <EuiHorizontalRule margin="none" />
+        <EuiSpacer size="s" />
+      </div>
     </EuiPanel>
   );
 };

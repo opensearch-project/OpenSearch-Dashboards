@@ -14,7 +14,7 @@ import {
   Positions,
   TooltipOptions,
 } from '../types';
-import { LineStyle } from './exclusive_style';
+import { LineStyle } from './line_exclusive_vis_options';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({
@@ -72,15 +72,52 @@ describe('line_vis_config', () => {
 
       // Verify grid settings
       expect(defaults.grid).toEqual({
-        categoryLines: true,
-        valueLines: true,
+        xLines: true,
+        yLines: true,
       });
 
       // Verify axes
       expect(defaults.categoryAxes).toHaveLength(1);
-      expect(defaults.categoryAxes[0]).toHaveProperty('position', Positions.BOTTOM);
+      expect(defaults.categoryAxes[0]).toEqual({
+        id: 'CategoryAxis-1',
+        type: 'category',
+        position: Positions.BOTTOM,
+        show: true,
+        labels: {
+          show: true,
+          filter: true,
+          rotate: 0,
+          truncate: 100,
+        },
+        title: {
+          text: '',
+        },
+      });
       expect(defaults.valueAxes).toHaveLength(1);
-      expect(defaults.valueAxes[0]).toHaveProperty('position', Positions.LEFT);
+      expect(defaults.valueAxes[0]).toEqual({
+        id: 'ValueAxis-1',
+        name: 'LeftAxis-1',
+        type: 'value',
+        position: Positions.LEFT,
+        show: true,
+        labels: {
+          show: true,
+          rotate: 0,
+          filter: false,
+          truncate: 100,
+        },
+        title: {
+          text: '',
+        },
+      });
+    });
+
+    it('should have available mappings configured', () => {
+      const config = createLineConfig();
+
+      expect(config.ui.availableMappings).toHaveLength(5);
+      expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty('x');
+      expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty('y');
     });
 
     it('should render the LineVisStyleControls component with the provided props', () => {

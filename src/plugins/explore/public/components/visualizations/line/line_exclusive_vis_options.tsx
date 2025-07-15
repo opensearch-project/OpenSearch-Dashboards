@@ -52,18 +52,18 @@ export const LineExclusiveVisOptions = ({
     <StyleAccordion
       id="lineSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.line', {
-        defaultMessage: 'Line Settings',
+        defaultMessage: 'Line',
       })}
       initialIsOpen={true}
     >
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.linestyle', {
-          defaultMessage: 'Line style',
+          defaultMessage: 'Style',
         })}
       >
         <EuiButtonGroup
           legend={i18n.translate('explore.stylePanel.basic.linestyle', {
-            defaultMessage: 'Line style',
+            defaultMessage: 'Style',
           })}
           options={[
             {
@@ -100,12 +100,12 @@ export const LineExclusiveVisOptions = ({
 
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.lineMode', {
-          defaultMessage: 'Line Mode',
+          defaultMessage: 'Interpolation',
         })}
       >
         <EuiButtonGroup
           legend={i18n.translate('explore.stylePanel.basic.lineMode', {
-            defaultMessage: 'Line Mode',
+            defaultMessage: 'Interpolation',
           })}
           options={lineModeOptions.map((option) => ({
             id: option.value,
