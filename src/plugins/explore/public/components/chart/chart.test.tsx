@@ -130,6 +130,7 @@ describe('DiscoverChart', () => {
         promptModeIsAvailable: false,
         editorMode: 'single-query' as any,
         lastExecutedPrompt: '',
+        promptToQueryIsLoading: false,
       },
       results: {},
       tab: {

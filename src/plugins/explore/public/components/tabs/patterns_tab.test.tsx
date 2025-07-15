@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { PatternsTab } from './patterns_tab';
 
 // Mock the dependencies
