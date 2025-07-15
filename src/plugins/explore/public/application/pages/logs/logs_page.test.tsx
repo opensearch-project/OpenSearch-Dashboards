@@ -38,9 +38,8 @@ jest.mock('../../../components/query_panel', () => ({
 }));
 
 jest.mock('../../../components/container/bottom_container/bottom_container', () => ({
-  BottomContainer: ({ setHeaderActionMenu }: { setHeaderActionMenu?: () => void }) => (
+  BottomContainer: () => (
     <div data-test-subj="bottom-container">
-      <div data-test-subj="top-nav">Top Nav</div>
       <div data-test-subj="discover-panel">Discover Panel</div>
       <div data-test-subj="discover-chart-container">Chart Container</div>
       <div data-test-subj="explore-tabs">
@@ -52,7 +51,6 @@ jest.mock('../../../components/container/bottom_container/bottom_container', () 
         </div>
       </div>
       <div data-test-subj="dscBottomLeftCanvas">Bottom Left Canvas</div>
-      {setHeaderActionMenu && <button onClick={setHeaderActionMenu}>Set Header</button>}
     </div>
   ),
 }));
@@ -60,6 +58,15 @@ jest.mock('../../../components/container/bottom_container/bottom_container', () 
 jest.mock('../../../components/experience_banners/new_experience_banner', () => ({
   NewExperienceBanner: () => (
     <div data-test-subj="new-experience-banner">New Experience Banner</div>
+  ),
+}));
+
+jest.mock('../../../components/top_nav/top_nav', () => ({
+  TopNav: ({ setHeaderActionMenu }: { setHeaderActionMenu?: () => void }) => (
+    <div data-test-subj="top-nav">
+      Top Nav
+      {setHeaderActionMenu && <button onClick={setHeaderActionMenu}>Set Header</button>}
+    </div>
   ),
 }));
 
@@ -84,6 +91,12 @@ jest.mock('../../context', () => ({
     dataset: {},
     isLoading: false,
     error: null,
+  }),
+}));
+
+jest.mock('../../../application/utils/hooks/use_page_initialization', () => ({
+  useInitPage: jest.fn().mockReturnValue({
+    savedExplore: { id: 'test-id', title: 'Test Explore' },
   }),
 }));
 
@@ -173,9 +186,10 @@ describe('LogsPage', () => {
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
     expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
+    expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 
-  it('passes setHeaderActionMenu prop to BottomContainer', () => {
+  it('passes setHeaderActionMenu prop to TopNav', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
@@ -184,10 +198,11 @@ describe('LogsPage', () => {
       </TestHarness>
     );
 
+    expect(screen.getByTestId('top-nav')).toBeInTheDocument();
     expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
   });
 
-  it('renders when IndexPattern is loading', () => {
+  it('renders when dataset is loading', () => {
     const store = createTestStore();
     render(
       <TestHarness store={store}>
@@ -196,5 +211,6 @@ describe('LogsPage', () => {
     );
 
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 });

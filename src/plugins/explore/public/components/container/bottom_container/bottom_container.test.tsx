@@ -22,75 +22,21 @@ jest.mock('./bottom_right_container/bottom_right_container', () => ({
   ),
 }));
 
-jest.mock('../../../components/top_nav/top_nav', () => ({
-  TopNav: ({ setHeaderActionMenu }: { setHeaderActionMenu?: () => void }) => (
-    <div data-test-subj="top-nav">
-      Top Nav
-      {setHeaderActionMenu && <button onClick={setHeaderActionMenu}>Set Header</button>}
-    </div>
-  ),
+// Mock EUI hooks
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useIsWithinBreakpoints: jest.fn(() => false),
 }));
 
-// Mock the hooks
-jest.mock('../../../application/utils/hooks/use_page_initialization', () => ({
-  useInitPage: jest.fn(),
-}));
+import { useIsWithinBreakpoints } from '@elastic/eui';
 
-import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
-
-const mockUseInitPage = useInitPage as jest.MockedFunction<typeof useInitPage>;
+const mockUseIsWithinBreakpoints = useIsWithinBreakpoints as jest.MockedFunction<
+  typeof useIsWithinBreakpoints
+>;
 
 describe('BottomContainer', () => {
-  const mockStore = configureStore({
-    reducer: {
-      legacy: legacyReducer,
-      ui: uiReducer,
-    },
-    preloadedState: {
-      legacy: {
-        savedSearch: undefined,
-        savedQuery: undefined,
-        columns: [],
-        sort: [],
-        interval: 'auto',
-        isDirty: false,
-        lineCount: undefined,
-      },
-      ui: {
-        activeTabId: 'logs',
-        showFilterPanel: true,
-        showHistogram: true,
-      },
-    },
-  });
-
-  const mockSetHeaderActionMenu = jest.fn();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseInitPage.mockReturnValue({
-      savedExplore: { id: 'test-id', title: 'Test Explore' } as any,
-    });
-  });
-
-  const renderComponent = (props = {}) => {
-    return render(
-      <Provider store={mockStore}>
-        <BottomContainer setHeaderActionMenu={mockSetHeaderActionMenu} {...props} />
-      </Provider>
-    );
-  };
-
-  it('renders the resizable container with both panels', () => {
-    renderComponent();
-
-    expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
-    expect(screen.getByTestId('top-nav')).toBeInTheDocument();
-  });
-
-  it('shows left panel when showDataSetFields is true', () => {
-    const storeWithDataSetFields = configureStore({
+  const createMockStore = (showFilterPanel = false) =>
+    configureStore({
       reducer: {
         legacy: legacyReducer,
         ui: uiReducer,
@@ -107,48 +53,60 @@ describe('BottomContainer', () => {
         },
         ui: {
           activeTabId: 'logs',
-          showFilterPanel: true,
+          showFilterPanel,
           showHistogram: true,
         },
       },
     });
 
-    render(
-      <Provider store={storeWithDataSetFields}>
-        <BottomContainer setHeaderActionMenu={mockSetHeaderActionMenu} />
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseIsWithinBreakpoints.mockReturnValue(false);
+  });
+
+  const renderComponent = (showFilterPanel = false) => {
+    const store = createMockStore(showFilterPanel);
+    return render(
+      <Provider store={store}>
+        <BottomContainer />
       </Provider>
     );
+  };
+
+  it('renders the resizable container with both panels', () => {
+    renderComponent();
+
+    expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+  });
+
+  it('shows left panel when showFilterPanel is true', () => {
+    renderComponent(true);
 
     // The left panel should be visible
     const leftPanel = screen.getByTestId('dscBottomLeftCanvas');
     expect(leftPanel).toBeInTheDocument();
+    expect(leftPanel.closest('.euiResizablePanel')).toHaveStyle('display: block');
   });
 
-  it('renders without setHeaderActionMenu prop', () => {
-    render(
-      <Provider store={mockStore}>
-        <BottomContainer />
-      </Provider>
-    );
+  it('hides left panel when showFilterPanel is false', () => {
+    renderComponent(false);
 
-    expect(screen.getByTestId('discover-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
-    expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+    const leftPanel = screen.getByTestId('dscBottomLeftCanvas');
+    expect(leftPanel).toBeInTheDocument();
+    // The parent EuiResizablePanel should have display: none
+    expect(leftPanel.closest('.euiResizablePanel')).toHaveStyle('display: none');
   });
 
-  it('passes setHeaderActionMenu to TopNav component', () => {
-    renderComponent();
+  it('renders with correct resizable panel sizes', () => {
+    renderComponent(true);
 
-    expect(screen.getByTestId('top-nav')).toBeInTheDocument();
-    // The TopNav component should receive the setHeaderActionMenu prop
+    const container = document.querySelector('.explore-layout__bottom-panel');
+    expect(container).toBeInTheDocument();
   });
 
   it('renders with mobile layout', () => {
-    // Mock useIsWithinBreakpoints to return true for mobile
-    jest.doMock('@elastic/eui', () => ({
-      ...jest.requireActual('@elastic/eui'),
-      useIsWithinBreakpoints: jest.fn(() => true),
-    }));
+    mockUseIsWithinBreakpoints.mockReturnValue(true);
 
     renderComponent();
 
