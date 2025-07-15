@@ -7,6 +7,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { PointShape } from '../types';
 
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn().mockImplementation((id, { defaultMessage }) => defaultMessage),
+  },
+}));
+
 describe('ScatterExclusiveVisOptions', () => {
   const defaultProps = {
     styles: {
@@ -26,14 +32,15 @@ describe('ScatterExclusiveVisOptions', () => {
     expect(container).toBeInTheDocument();
   });
 
-  it('renders exclusive settings title', () => {
+  it('renders scatter accordion', () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
-    expect(screen.getByText('Scatter Settings')).toBeInTheDocument();
+    expect(screen.getByText('Scatter')).toBeInTheDocument();
   });
-  it('calls onChange when change is made(filled)', () => {
+
+  it('calls onChange when filled switch is toggled', () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
-    const filled = screen.getAllByRole('switch')[0];
-    fireEvent.click(filled);
+    const filledSwitch = screen.getByRole('switch');
+    fireEvent.click(filledSwitch);
     expect(defaultProps.onChange).toHaveBeenCalledWith({
       ...defaultProps.styles,
       filled: true,

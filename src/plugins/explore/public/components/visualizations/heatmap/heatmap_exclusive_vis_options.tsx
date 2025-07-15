@@ -58,7 +58,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
     <StyleAccordion
       id="heatmapSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.heatmap', {
-        defaultMessage: 'Heatmap Settings',
+        defaultMessage: 'Heatmap',
       })}
       initialIsOpen={true}
     >
@@ -75,14 +75,12 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.heatmap.exclusive.reverseColorSchema', {
-          defaultMessage: 'Reverse Schema',
-        })}
-      >
+      <EuiFormRow>
         <EuiSwitch
           compressed
-          label=""
+          label={i18n.translate('explore.stylePanel.heatmap.exclusive.reverseColorSchema', {
+            defaultMessage: 'Reverse Schema',
+          })}
           checked={styles.reverseSchema}
           onChange={(e) => updateExclusiveOption('reverseSchema', e.target.checked)}
         />
@@ -127,28 +125,24 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.heatmap.exclusive.scaleToDataBounds', {
-          defaultMessage: 'Scale to data bounds',
-        })}
-      >
+      <EuiFormRow>
         <EuiSwitch
           compressed
-          label=""
+          label={i18n.translate('explore.stylePanel.heatmap.exclusive.scaleToDataBounds', {
+            defaultMessage: 'Scale to data bounds',
+          })}
           checked={styles.scaleToDataBounds}
           disabled={styles.percentageMode || styles.useCustomRanges}
           onChange={(e) => updateExclusiveOption('scaleToDataBounds', e.target.checked)}
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.heatmap.exclusive.percentageMode', {
-          defaultMessage: 'Percentage mode',
-        })}
-      >
+      <EuiFormRow>
         <EuiSwitch
           compressed
-          label=""
+          label={i18n.translate('explore.stylePanel.heatmap.exclusive.percentageMode', {
+            defaultMessage: 'Percentage mode',
+          })}
           disabled={styles.useCustomRanges || styles.scaleToDataBounds}
           checked={styles.percentageMode}
           onChange={(e) => updateExclusiveOption('percentageMode', e.target.checked)}
@@ -170,14 +164,12 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.heatmap.exclusive.useCustomRanges', {
-          defaultMessage: 'Use custom ranges',
-        })}
-      >
+      <EuiFormRow>
         <EuiSwitch
           compressed
-          label=""
+          label={i18n.translate('explore.stylePanel.heatmap.exclusive.useCustomRanges', {
+            defaultMessage: 'Use custom ranges',
+          })}
           disabled={styles.percentageMode || styles.scaleToDataBounds}
           checked={styles.useCustomRanges}
           onChange={(e) => updateExclusiveOption('useCustomRanges', e.target.checked)}
@@ -219,18 +211,16 @@ export const HeatmapLabelVisOptions = ({
     <StyleAccordion
       id="heatmapLabelSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.heatmap.label', {
-        defaultMessage: 'Heatmap Label Settings',
+        defaultMessage: 'Labels',
       })}
       initialIsOpen={true}
     >
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.heatmap.label.showLabels', {
-          defaultMessage: 'Show Labels',
-        })}
-      >
+      <EuiFormRow>
         <EuiSwitch
           compressed
-          label=""
+          label={i18n.translate('explore.stylePanel.heatmap.label.showLabels', {
+            defaultMessage: 'Show Labels',
+          })}
           checked={styles.show}
           onChange={(e) => updateLabelOption('show', e.target.checked)}
         />
@@ -238,27 +228,23 @@ export const HeatmapLabelVisOptions = ({
 
       {styles.show && (
         <>
-          <EuiFormRow
-            label={i18n.translate('explore.stylePanel.heatmap.label.rotate', {
-              defaultMessage: 'Rotate',
-            })}
-          >
+          <EuiFormRow>
             <EuiSwitch
               compressed
-              label=""
+              label={i18n.translate('explore.stylePanel.heatmap.label.rotate', {
+                defaultMessage: 'Rotate',
+              })}
               checked={styles.rotate}
               onChange={(e) => updateLabelOption('rotate', e.target.checked)}
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            label={i18n.translate('explore.stylePanel.heatmap.label.overwriteColor', {
-              defaultMessage: 'Overwrite automatic color',
-            })}
-          >
+          <EuiFormRow>
             <EuiSwitch
               compressed
-              label=""
+              label={i18n.translate('explore.stylePanel.heatmap.label.overwriteColor', {
+                defaultMessage: 'Overwrite automatic color',
+              })}
               checked={styles.overwriteColor}
               onChange={(e) => updateLabelOption('overwriteColor', e.target.checked)}
             />

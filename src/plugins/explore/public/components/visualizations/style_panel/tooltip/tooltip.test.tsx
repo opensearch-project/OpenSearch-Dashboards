@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { TooltipOptionsPanel } from './tooltip';
 import { TooltipOptions } from '../../types';
 
@@ -22,7 +22,7 @@ describe('TooltipOptionsPanel', () => {
         onTooltipOptionsChange={mockOnTooltipChange}
       />
     );
-    const toolTip = screen.getByTestId('tooltipModeButtonGroup');
+    const toolTip = screen.getByTestId('tooltipModeSwitch');
     expect(toolTip).toBeInTheDocument();
   });
 
@@ -34,10 +34,9 @@ describe('TooltipOptionsPanel', () => {
       />
     );
 
-    const toolTipModeGroup = screen.getByTestId('tooltipModeButtonGroup');
-    const hiddenButton = within(toolTipModeGroup).getByTestId('hidden');
+    const tooltipSwitch = screen.getByTestId('tooltipModeSwitch');
 
-    fireEvent.click(hiddenButton);
+    fireEvent.click(tooltipSwitch);
     expect(mockOnTooltipChange).toHaveBeenLastCalledWith({
       mode: 'hidden',
     });

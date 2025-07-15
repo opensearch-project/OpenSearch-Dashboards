@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LineChartStyleControls } from './line_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { ThresholdOptions } from '../style_panel/threshold/threshold';
-import { LineExclusiveVisOptions } from './exclusive_style';
+import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { GridOptionsPanel } from '../style_panel/grid/grid';
@@ -39,6 +40,10 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
       dateColumns.length === 1) ||
     (numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0);
 
+  // The mapping object will be an empty object if no fields are selected on the axes selector. No
+  // visualization is generated in this case so we shouldn't display style option panels.
+  const hasMappingSelected = !isEmpty(axisColumnMappings);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
@@ -52,78 +57,84 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <AxesOptions
-          categoryAxes={styleOptions.categoryAxes}
-          valueAxes={styleOptions.valueAxes}
-          onCategoryAxesChange={(categoryAxes) => updateStyleOption('categoryAxes', categoryAxes)}
-          onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-        />
-      </EuiFlexItem>
+      {hasMappingSelected && (
+        <>
+          <EuiFlexItem grow={false}>
+            <AxesOptions
+              categoryAxes={styleOptions.categoryAxes}
+              valueAxes={styleOptions.valueAxes}
+              onCategoryAxesChange={(categoryAxes) =>
+                updateStyleOption('categoryAxes', categoryAxes)
+              }
+              onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
+              numericalColumns={numericalColumns}
+              categoricalColumns={categoricalColumns}
+              dateColumns={dateColumns}
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <ThresholdOptions
-          thresholdLines={styleOptions.thresholdLines}
-          onThresholdLinesChange={(thresholdLines) =>
-            updateStyleOption('thresholdLines', thresholdLines)
-          }
-        />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LineExclusiveVisOptions
+              addTimeMarker={styleOptions.addTimeMarker}
+              lineStyle={styleOptions.lineStyle}
+              lineMode={styleOptions.lineMode}
+              lineWidth={styleOptions.lineWidth}
+              onAddTimeMarkerChange={(addTimeMarker) =>
+                updateStyleOption('addTimeMarker', addTimeMarker)
+              }
+              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
+              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
+              onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <GridOptionsPanel
-          grid={styleOptions.grid}
-          onGridChange={(grid) => updateStyleOption('grid', grid)}
-        />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ThresholdOptions
+              thresholdLines={styleOptions.thresholdLines}
+              onThresholdLinesChange={(thresholdLines) =>
+                updateStyleOption('thresholdLines', thresholdLines)
+              }
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <LegendOptionsPanel
-          shouldShowLegend={!notShowLegend}
-          legendOptions={{
-            show: styleOptions.addLegend,
-            position: styleOptions.legendPosition,
-          }}
-          onLegendOptionsChange={(legendOptions) => {
-            if (legendOptions.show !== undefined) {
-              updateStyleOption('addLegend', legendOptions.show);
-            }
-            if (legendOptions.position !== undefined) {
-              updateStyleOption('legendPosition', legendOptions.position);
-            }
-          }}
-        />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <GridOptionsPanel
+              grid={styleOptions.grid}
+              onGridChange={(grid) => updateStyleOption('grid', grid)}
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <TooltipOptionsPanel
-          tooltipOptions={styleOptions.tooltipOptions}
-          onTooltipOptionsChange={(tooltipOptions) =>
-            updateStyleOption('tooltipOptions', {
-              ...styleOptions.tooltipOptions,
-              ...tooltipOptions,
-            })
-          }
-        />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LegendOptionsPanel
+              shouldShowLegend={!notShowLegend}
+              legendOptions={{
+                show: styleOptions.addLegend,
+                position: styleOptions.legendPosition,
+              }}
+              onLegendOptionsChange={(legendOptions) => {
+                if (legendOptions.show !== undefined) {
+                  updateStyleOption('addLegend', legendOptions.show);
+                }
+                if (legendOptions.position !== undefined) {
+                  updateStyleOption('legendPosition', legendOptions.position);
+                }
+              }}
+            />
+          </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <LineExclusiveVisOptions
-          addTimeMarker={styleOptions.addTimeMarker}
-          lineStyle={styleOptions.lineStyle}
-          lineMode={styleOptions.lineMode}
-          lineWidth={styleOptions.lineWidth}
-          onAddTimeMarkerChange={(addTimeMarker) =>
-            updateStyleOption('addTimeMarker', addTimeMarker)
-          }
-          onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
-          onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
-          onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
-        />
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TooltipOptionsPanel
+              tooltipOptions={styleOptions.tooltipOptions}
+              onTooltipOptionsChange={(tooltipOptions) =>
+                updateStyleOption('tooltipOptions', {
+                  ...styleOptions.tooltipOptions,
+                  ...tooltipOptions,
+                })
+              }
+            />
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -11,8 +11,8 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
-  EuiButtonGroup,
   EuiColorPicker,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -61,26 +61,11 @@ export const BarExclusiveVisOptions = ({
     { min: 1, max: 10, defaultValue: 1 }
   );
 
-  const visibilityOptions = [
-    {
-      id: 'shown',
-      label: i18n.translate('explore.stylePanel.bar.shown', {
-        defaultMessage: 'Shown',
-      }),
-    },
-    {
-      id: 'hidden',
-      label: i18n.translate('explore.stylePanel.bar.hidden', {
-        defaultMessage: 'Hidden',
-      }),
-    },
-  ];
-
   return (
     <StyleAccordion
       id="barSection"
       accordionLabel={i18n.translate('explore.vis.barChart.exclusiveSettings', {
-        defaultMessage: 'Bar Settings',
+        defaultMessage: 'Bar',
       })}
       initialIsOpen={true}
     >
@@ -88,7 +73,7 @@ export const BarExclusiveVisOptions = ({
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.bar.barWidth', {
-              defaultMessage: 'Bar width',
+              defaultMessage: 'Width',
             })}
             helpText={i18n.translate('explore.stylePanel.bar.barWidthHelp', {
               defaultMessage: 'Value between 0.1 and 1',
@@ -108,7 +93,7 @@ export const BarExclusiveVisOptions = ({
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.bar.barPadding', {
-              defaultMessage: 'Bar padding',
+              defaultMessage: 'Padding',
             })}
             helpText={i18n.translate('explore.stylePanel.bar.barPaddingHelp', {
               defaultMessage: 'Value between 0 and 0.5',
@@ -129,23 +114,15 @@ export const BarExclusiveVisOptions = ({
 
       <EuiSpacer size="s" />
 
-      <EuiFormRow
+      <EuiSwitch
+        compressed
         label={i18n.translate('explore.stylePanel.bar.barBorder', {
-          defaultMessage: 'Bar border',
+          defaultMessage: 'Show border',
         })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.bar.barBorder', {
-            defaultMessage: 'Bar border',
-          })}
-          options={visibilityOptions}
-          idSelected={showBarBorder ? 'shown' : 'hidden'}
-          onChange={(id) => onShowBarBorderChange(id === 'shown')}
-          buttonSize="compressed"
-          isFullWidth
-          data-test-subj="barBorderButtonGroup"
-        />
-      </EuiFormRow>
+        checked={showBarBorder}
+        onChange={(e) => onShowBarBorderChange(e.target.checked)}
+        data-test-subj="barBorderSwitch"
+      />
 
       {showBarBorder && (
         <>

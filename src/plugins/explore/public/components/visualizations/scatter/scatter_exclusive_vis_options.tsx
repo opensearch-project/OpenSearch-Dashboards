@@ -33,7 +33,7 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
       data-test-subj="scatterExclusivePanel"
       id="scatterSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.scatter', {
-        defaultMessage: 'Scatter Settings',
+        defaultMessage: 'Scatter',
       })}
       initialIsOpen={true}
     >
