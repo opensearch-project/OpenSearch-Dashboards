@@ -69,7 +69,7 @@ export interface Dimensions {
   y: Dimension;
 }
 
-interface Ordered {
+export interface Ordered {
   date: true;
   interval: Duration;
   intervalOpenSearchUnit: string;
