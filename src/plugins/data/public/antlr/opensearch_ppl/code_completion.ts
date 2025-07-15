@@ -154,7 +154,7 @@ export const getSimplifiedPPLSuggestions = async ({
           availableFields,
           (f: string) => (suggestions.suggestFieldsInAggregateFunction ? `${f}` : `${f} `),
           (f: string) => {
-            return f.startsWith('_') ? `9` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
+            return f.startsWith('_') ? `99` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
           }
         )
       );
@@ -183,6 +183,7 @@ export const getSimplifiedPPLSuggestions = async ({
           insertText: prop?.optionalParam ? `${af}() $0` : `${af}($0)`,
           insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
           detail: SuggestionItemDetailsTags.AggregateFunction,
+          sortText: PPL_SUGGESTION_IMPORTANCE.get(prop.id) ?? '97' + af.toLowerCase(), // '99' used to devalue every other suggestion
         }))
       );
     }
@@ -221,6 +222,7 @@ export const getSimplifiedPPLSuggestions = async ({
                 : `${functionName}($0)`,
               insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
               detail: SuggestionItemDetailsTags.Function,
+              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '97' + sk.value.toLowerCase(), // '99' used to devalue every other suggestion
             };
           } else {
             return {
@@ -229,7 +231,7 @@ export const getSimplifiedPPLSuggestions = async ({
               type: monaco.languages.CompletionItemKind.Keyword,
               detail: SuggestionItemDetailsTags.Keyword,
               // sortText is the only option to sort suggestions, compares strings
-              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
+              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '98' + sk.value.toLowerCase(), // '99' used to devalue every other suggestion
               documentation: Documentation[sk.value.toUpperCase()],
             };
           }
