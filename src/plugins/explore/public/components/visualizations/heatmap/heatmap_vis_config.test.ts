@@ -68,6 +68,23 @@ describe('createHeatmapeConfig', () => {
     const yAxis = defaults.StandardAxes.find((axis) => axis.axisRole === AxisRole.Y);
     expect(yAxis).toHaveProperty('position', Positions.LEFT);
   });
+  it('should have available mappings configured', () => {
+    const config = createHeatmapConfig();
+
+    expect(config.ui.availableMappings).toBeDefined();
+    expect(config.ui.availableMappings).toHaveLength(2);
+
+    // Check first mapping
+    expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty(AxisRole.X);
+    expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty(AxisRole.Y);
+    expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty(AxisRole.COLOR);
+
+    // Check second mapping
+    expect(config.ui.availableMappings[1].mapping[0]).toHaveProperty(AxisRole.X);
+    expect(config.ui.availableMappings[1].mapping[0]).toHaveProperty(AxisRole.Y);
+    expect(config.ui.availableMappings[1].mapping[0]).toHaveProperty(AxisRole.COLOR);
+  });
+
   it('should render the HeatmapVisStyleControls component with the provided props', () => {
     const config = createHeatmapConfig();
     const renderFunction = config.ui.style.render;
@@ -88,6 +105,10 @@ describe('createHeatmapeConfig', () => {
         },
         label: {} as HeatmapLabels,
         StandardAxes: [] as StandardAxes[],
+        grid: {
+          xLines: true,
+          yLines: true,
+        },
       },
       onStyleChange: jest.fn(),
       numericalColumns: [],

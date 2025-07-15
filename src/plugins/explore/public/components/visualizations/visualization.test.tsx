@@ -22,6 +22,11 @@ jest.mock('./utils/use_visualization_types', () => ({
   }),
 }));
 
+// Mock the ChartTypeSelector component to avoid Redux dependency
+jest.mock('./chart_type_selector', () => ({
+  ChartTypeSelector: () => <div data-testid="chart-type-selector">Chart Type Selector</div>,
+}));
+
 // Mock the visualization type
 const mockVisualizationType: VisualizationType<'line'> = {
   name: 'line',
@@ -68,6 +73,24 @@ describe('Visualization', () => {
       ],
       availableChartTypes: [{ type: 'line', priority: 100, name: 'Line Chart', icon: '' }],
       toExpression: jest.fn(),
+      axisColumnMappings: {
+        x: {
+          id: 2,
+          name: 'x',
+          schema: VisFieldType.Date,
+          column: 'x',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        y: {
+          id: 1,
+          name: 'y',
+          schema: VisFieldType.Numerical,
+          column: 'y',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+      },
     },
     onStyleChange: jest.fn(),
     ReactExpressionRenderer: ({ expression }) => (
@@ -125,6 +148,8 @@ describe('Visualization', () => {
         numericalColumns: props.visualizationData.numericalColumns,
         categoricalColumns: props.visualizationData.categoricalColumns,
         dateColumns: props.visualizationData.dateColumns,
+        axisColumnMappings: props.visualizationData.axisColumnMappings,
+        updateVisualization: props.updateVisualization,
       })
     );
   });
@@ -142,7 +167,7 @@ describe('Visualization', () => {
 
   it('renders the style panel', () => {
     const { container } = render(<Visualization {...defaultProps} />);
-    const stylePanel = container.querySelector('[data-test-subj="exploreStylePanel"]');
+    const stylePanel = container.querySelector('.exploreVisStylePanel');
     expect(stylePanel).toBeInTheDocument();
   });
 
@@ -166,12 +191,19 @@ describe('Visualization', () => {
 
     render(<Visualization<'line'> {...props} />);
 
-    expect(renderStyleMock).toHaveBeenCalledWith({
-      styleOptions: props.styleOptions,
-      onStyleChange: props.onStyleChange,
-      numericalColumns: props.visualizationData.numericalColumns,
-      categoricalColumns: props.visualizationData.categoricalColumns,
-      dateColumns: props.visualizationData.dateColumns,
-    });
+    expect(renderStyleMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        styleOptions: props.styleOptions,
+        onStyleChange: props.onStyleChange,
+        numericalColumns: props.visualizationData.numericalColumns,
+        categoricalColumns: props.visualizationData.categoricalColumns,
+        dateColumns: props.visualizationData.dateColumns,
+        axisColumnMappings: props.visualizationData.axisColumnMappings,
+        updateVisualization: props.updateVisualization,
+        availableChartTypes: props.visualizationData.availableChartTypes,
+        selectedChartType: props.selectedChartType,
+        onChartTypeChange: props.onChartTypeChange,
+      })
+    );
   });
 });

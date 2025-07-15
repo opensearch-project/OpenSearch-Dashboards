@@ -10,7 +10,15 @@ import {
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
-import { VisColumn, VisFieldType, VEGASCHEMA, ThresholdLineStyle, Positions } from '../types';
+import {
+  VisColumn,
+  VisFieldType,
+  VEGASCHEMA,
+  ThresholdLineStyle,
+  Positions,
+  AxisRole,
+  AxisColumnMappings,
+} from '../types';
 import { AreaChartStyleControls } from './area_vis_config';
 
 describe('Area Chart to_expression', () => {
@@ -92,11 +100,17 @@ describe('Area Chart to_expression', () => {
 
   describe('createSimpleAreaChart', () => {
     it('should create a simple area chart with one metric and one date', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+      };
+
       const result = createSimpleAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockDateColumns,
-        mockStyles
+        mockStyles,
+        mockAxisColumnMappings
       );
 
       // Verify the basic structure
@@ -124,11 +138,17 @@ describe('Area Chart to_expression', () => {
         addTimeMarker: true,
       };
 
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+      };
+
       const result = createSimpleAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockDateColumns,
-        stylesWithTimeMarker
+        stylesWithTimeMarker,
+        mockAxisColumnMappings
       );
 
       // Verify time marker layer exists
@@ -157,11 +177,17 @@ describe('Area Chart to_expression', () => {
         ],
       };
 
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+      };
+
       const result = createSimpleAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockDateColumns,
-        stylesWithThreshold
+        stylesWithThreshold,
+        mockAxisColumnMappings
       );
 
       // Verify threshold layer exists
@@ -178,12 +204,19 @@ describe('Area Chart to_expression', () => {
 
   describe('createMultiAreaChart', () => {
     it('should create a multi-area chart with one metric, one date, and one categorical column', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+      };
+
       const result = createMultiAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         [mockCategoricalColumns[0]],
         mockDateColumns,
-        mockStyles
+        mockStyles,
+        mockAxisColumnMappings
       );
 
       // Verify the basic structure
@@ -210,12 +243,20 @@ describe('Area Chart to_expression', () => {
 
   describe('createFacetedMultiAreaChart', () => {
     it('should create a faceted multi-area chart with one metric, one date, and two categorical columns', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+        [AxisRole.FACET]: mockCategoricalColumns[1],
+      };
+
       const result = createFacetedMultiAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockCategoricalColumns,
         mockDateColumns,
-        mockStyles
+        mockStyles,
+        mockAxisColumnMappings
       );
 
       // Verify the basic structure
@@ -260,12 +301,20 @@ describe('Area Chart to_expression', () => {
         ],
       };
 
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+        [AxisRole.FACET]: mockCategoricalColumns[1],
+      };
+
       const result = createFacetedMultiAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockCategoricalColumns,
         mockDateColumns,
-        stylesWithThreshold
+        stylesWithThreshold,
+        mockAxisColumnMappings
       );
 
       // Verify threshold layer exists in each facet
@@ -282,12 +331,18 @@ describe('Area Chart to_expression', () => {
 
   describe('createCategoryAreaChart', () => {
     it('should create a category-based area chart with one metric and one category', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockCategoricalColumns[0],
+      };
+
       const result = createCategoryAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         [mockCategoricalColumns[0]],
         [],
-        mockStyles
+        mockStyles,
+        mockAxisColumnMappings
       );
 
       // Verify the basic structure
@@ -321,12 +376,19 @@ describe('Area Chart to_expression', () => {
 
   describe('createStackedAreaChart', () => {
     it('should create a stacked area chart with one metric and two categorical columns', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[1],
+      };
+
       const result = createStackedAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockCategoricalColumns,
         [],
-        mockStyles
+        mockStyles,
+        mockAxisColumnMappings
       );
 
       // Verify the basic structure
@@ -376,12 +438,19 @@ describe('Area Chart to_expression', () => {
         ],
       };
 
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[1],
+      };
+
       const result = createStackedAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockCategoricalColumns,
         [],
-        stylesWithThreshold
+        stylesWithThreshold,
+        mockAxisColumnMappings
       );
 
       // Verify the chart structure has changed to use layers

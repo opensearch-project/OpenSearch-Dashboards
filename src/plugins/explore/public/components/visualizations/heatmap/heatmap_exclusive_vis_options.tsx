@@ -61,6 +61,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         defaultMessage: 'Heatmap',
       })}
       initialIsOpen={true}
+      data-test-subj="heatmapExclusivePanel"
     >
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.heatmap.exclusive.colorSchema', {
@@ -214,6 +215,7 @@ export const HeatmapLabelVisOptions = ({
         defaultMessage: 'Labels',
       })}
       initialIsOpen={true}
+      data-test-subj="heatmapLabelPanel"
     >
       <EuiFormRow>
         <EuiSwitch
