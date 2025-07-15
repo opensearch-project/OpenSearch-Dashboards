@@ -81,11 +81,10 @@ export const DiscoverResultsActionBar = ({
               >
                 <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
               </EuiFlexItem>
-              {dataset && (
-                <EuiFlexItem grow={false}>
-                  <SaveAndAddButtonWithModal dataset={dataset} services={services} />
-                </EuiFlexItem>
-              )}
+
+              <EuiFlexItem grow={false}>
+                <SaveAndAddButtonWithModal dataset={dataset} services={services} />
+              </EuiFlexItem>
             </>
           ) : null}
         </EuiFlexGroup>
