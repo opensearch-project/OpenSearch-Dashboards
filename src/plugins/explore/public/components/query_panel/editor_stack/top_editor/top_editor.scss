@@ -47,8 +47,15 @@
     }
   }
 
+  &--focused {
+    .exploreTopEditor__promptIcon {
+      display: block;
+    }
+  }
+
   &__promptIcon {
     color: $ouiColorDarkShade;
+    display: none;
     position: absolute;
     left: $ouiSizeXXS;
     top: 9px; // hard-coding to align it to editor
