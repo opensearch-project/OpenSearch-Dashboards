@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiSwitch } from '@elastic/eui';
 import React from 'react';
 import { PieChartStyleControls } from './pie_vis_config';
 import { DebouncedTruncateField } from '../style_panel/utils';
@@ -29,111 +29,68 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
     <StyleAccordion
       id="pieSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.pie', {
-        defaultMessage: 'Pie Settings',
+        defaultMessage: 'Pie',
       })}
       initialIsOpen={true}
     >
       <EuiFormRow
-        label={i18n.translate('explore.vis.pie.exclusive.donut', {
-          defaultMessage: 'Donut',
+        label={i18n.translate('explore.vis.pie.exclusive.showAs', {
+          defaultMessage: 'Show as',
         })}
       >
         <EuiButtonGroup
-          legend={i18n.translate('explore.vis.pie.exclusive.donut', {
-            defaultMessage: 'Donut',
+          legend={i18n.translate('explore.vis.pie.exclusive.showAs', {
+            defaultMessage: 'Show as',
           })}
           options={[
             {
-              id: 'on',
-              label: i18n.translate('explore.vis.pie.exclusive.on', {
-                defaultMessage: 'On',
+              id: 'pie',
+              label: i18n.translate('explore.vis.pie.exclusive.pie', {
+                defaultMessage: 'Pie',
               }),
             },
             {
-              id: 'off',
-              label: i18n.translate('explore.vis.pie.exclusive.off', {
-                defaultMessage: 'Off',
+              id: 'donut',
+              label: i18n.translate('explore.vis.pie.exclusive.donut', {
+                defaultMessage: 'Donut',
               }),
             },
           ]}
-          idSelected={styles.donut ? 'on' : 'off'}
-          onChange={(id) => updateStyle('donut', id === 'on')}
+          idSelected={styles.donut ? 'donut' : 'pie'}
+          onChange={(id) => updateStyle('donut', id === 'donut')}
           buttonSize="compressed"
           isFullWidth={true}
           type="single"
           data-test-subj="donutButtonGroup"
         />
       </EuiFormRow>
-
-      <EuiFormRow
-        label={i18n.translate('explore.vis.pie.exclusive.showValues', {
-          defaultMessage: 'Show Values',
-        })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.vis.pie.exclusive.showValues', {
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.vis.pie.exclusive.showValues', {
             defaultMessage: 'Show Values',
           })}
-          options={[
-            {
-              id: 'on',
-              label: i18n.translate('explore.vis.pie.exclusive.on', {
-                defaultMessage: 'On',
-              }),
-            },
-            {
-              id: 'off',
-              label: i18n.translate('explore.vis.pie.exclusive.off', {
-                defaultMessage: 'Off',
-              }),
-            },
-          ]}
-          idSelected={styles.showValues ? 'on' : 'off'}
-          onChange={(id) => updateStyle('showValues', id === 'on')}
-          buttonSize="compressed"
-          isFullWidth={true}
-          type="single"
-          data-test-subj="showValuesButtonGroup"
+          checked={styles.showValues}
+          onChange={(e) => updateStyle('showValues', e.target.checked)}
+          data-test-subj="showValuesSwtich"
         />
       </EuiFormRow>
-
-      <EuiFormRow
-        label={i18n.translate('explore.vis.pie.exclusive.showLabels', {
-          defaultMessage: 'Show Labels',
-        })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.vis.pie.exclusive.showLabels', {
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.vis.pie.exclusive.showLabels', {
             defaultMessage: 'Show Labels',
           })}
-          options={[
-            {
-              id: 'on',
-              label: i18n.translate('explore.vis.pie.exclusive.on', {
-                defaultMessage: 'On',
-              }),
-            },
-            {
-              id: 'off',
-              label: i18n.translate('explore.vis.pie.exclusive.off', {
-                defaultMessage: 'Off',
-              }),
-            },
-          ]}
-          idSelected={styles.showLabels ? 'on' : 'off'}
-          onChange={(id) => updateStyle('showLabels', id === 'on')}
-          buttonSize="compressed"
-          isFullWidth={true}
-          type="single"
-          data-test-subj="showLabelsButtonGroup"
+          checked={styles.showLabels}
+          onChange={(e) => updateStyle('showLabels', e.target.checked)}
+          data-test-subj="showLabelsSwitch"
         />
       </EuiFormRow>
-
       <DebouncedTruncateField
         value={styles.truncate ?? 100}
         onChange={(truncateValue) => updateStyle('truncate', truncateValue)}
         label={i18n.translate('explore.vis.pie.exclusive.labelTruncate', {
-          defaultMessage: 'Label truncate',
+          defaultMessage: 'Truncate after',
         })}
       />
     </StyleAccordion>

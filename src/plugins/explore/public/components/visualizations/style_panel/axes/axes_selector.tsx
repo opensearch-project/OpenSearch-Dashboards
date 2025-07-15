@@ -11,7 +11,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { isEmpty, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
@@ -240,7 +240,6 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
           return (
             <AxisSelector
               key={axisRole}
-              chartType={chartType}
               axisRole={axisRole}
               selectedColumn={currentSelection?.name || ''}
               allColumnOptions={getAvailableColumnsForAxis(axisRole)}
@@ -267,7 +266,6 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 };
 
 interface AxesSelectorOptions {
-  chartType: ChartType;
   axisRole: AxisRole;
   selectedColumn: string;
   allColumnOptions: Array<EuiComboBoxOptionOption<VisColumnOption>>;
@@ -276,7 +274,6 @@ interface AxesSelectorOptions {
 }
 
 export const AxisSelector: React.FC<AxesSelectorOptions> = ({
-  chartType,
   axisRole,
   selectedColumn,
   allColumnOptions,
