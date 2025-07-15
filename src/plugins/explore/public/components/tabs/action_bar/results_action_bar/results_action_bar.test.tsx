@@ -6,8 +6,7 @@
 import React from 'react';
 import { DiscoverResultsActionBar, DiscoverResultsActionBarProps } from './results_action_bar';
 import { render, screen } from '@testing-library/react';
-import { OpenSearchSearchHit } from '../../../../application/legacy/discover/application/doc_views/doc_views_types';
-import userEvent from '@testing-library/user-event';
+import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { Provider } from 'react-redux';
 import configureMockStore from 'redux-mock-store';
 
@@ -80,8 +79,7 @@ describe('ResultsActionBar', () => {
     expect(screen.queryByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
   });
 
-  test('should render inspector button and handle click events', async () => {
-    const user = userEvent.setup();
+  test('should not render inspector button as it is commented out', () => {
     render(
       <Provider store={store}>
         <DiscoverResultsActionBar {...props} rows={[]} />
@@ -89,10 +87,7 @@ describe('ResultsActionBar', () => {
     );
 
     const openInspectorButton = screen.queryByTestId('openInspectorButton');
-    expect(openInspectorButton).toBeInTheDocument();
-
-    await user.click(screen.getByTestId('openInspectorButton'));
-    expect(mockInspectionHanlder).toHaveBeenCalled();
+    expect(openInspectorButton).not.toBeInTheDocument();
   });
 
   test('should hide the download CSV button and add to dashboard button when dataset is not provided', () => {
@@ -116,12 +111,15 @@ describe('ResultsActionBar', () => {
   });
 
   test('should hide add to dashboard button if current tab is patterns', () => {
+    const patternsStore = mockStore({
+      ui: { activeTabId: 'explore_patterns_tab' },
+    });
     render(
-      <Provider store={store}>
-        <DiscoverResultsActionBar {...props} rows={[]} />
+      <Provider store={patternsStore}>
+        <DiscoverResultsActionBar {...props} />
       </Provider>
     );
-    expect(screen.queryByTestId('discoverDownloadCsvButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
     expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
   });
 });

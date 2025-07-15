@@ -30,7 +30,18 @@ import {
   HistogramDataProcessor,
   ProcessedSearchResults,
 } from '../../interfaces';
-import { defaultPreparePplQuery } from '../../languages';
+import { defaultPreparePplQuery, getQueryWithSource } from '../../languages';
+
+// Module-level storage for abort controllers keyed by cacheKey
+const activeQueryAbortControllers = new Map<string, AbortController>();
+
+// Helper function to abort all active queries
+export const abortAllActiveQueries = () => {
+  activeQueryAbortControllers.forEach((controller, cacheKey) => {
+    controller.abort();
+  });
+  activeQueryAbortControllers.clear();
+};
 
 /**
  * Default query preparation for tabs
@@ -123,13 +134,25 @@ export const executeQueries = createAsyncThunk<
 
   const defaultCacheKey = defaultPrepareQueryString(query);
   const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
-  const visualizationTabPrepareQuery = visualizationTab?.prepareQuery || defaultPrepareQueryString;
+  let visualizationTabPrepareQuery = defaultPrepareQueryString;
+  if (visualizationTab?.prepareQuery) {
+    const prepareQuery = visualizationTab.prepareQuery;
+    visualizationTabPrepareQuery = (queryParam: Query): string => {
+      return prepareQuery(getQueryWithSource(queryParam));
+    };
+  }
   const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
 
   let activeTabCacheKey = defaultCacheKey;
   if (activeTabId && activeTabId !== '') {
     const activeTab = services.tabRegistry.getTab(activeTabId);
-    const activeTabPrepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
+    let activeTabPrepareQuery = defaultPrepareQueryString;
+    if (activeTab?.prepareQuery) {
+      const prepareQuery = activeTab.prepareQuery;
+      activeTabPrepareQuery = (queryParam: Query): string => {
+        return prepareQuery(getQueryWithSource(queryParam));
+      };
+    }
     activeTabCacheKey = activeTabPrepareQuery(query);
   }
 
@@ -228,7 +251,19 @@ const executeQueryBase = async (
       })
     );
 
+    // Abort any existing query with the same cacheKey (prevents duplicate queries)
+    const existingController = activeQueryAbortControllers.get(cacheKey);
+    if (existingController) {
+      existingController.abort();
+    }
+
+    // Create abort controller for this specific query
     const abortController = new AbortController();
+
+    // Store controller by cacheKey for individual query abort
+    activeQueryAbortControllers.set(cacheKey, abortController);
+
+    // Reset inspector adapter
     services.inspectorAdapters.requests.reset();
 
     const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
@@ -322,16 +357,20 @@ const executeQueryBase = async (
       })
     );
 
+    // Clean up completed query from active controllers
+    activeQueryAbortControllers.delete(cacheKey);
+
     return rawResultsWithMeta;
   } catch (error: any) {
+    // Clean up aborted/failed query from active controllers
+    activeQueryAbortControllers.delete(cacheKey);
+
+    // Handle abort errors
     if (error instanceof Error && error.name === 'AbortError') {
       return;
     }
 
     services.data.search.showError(error as Error);
-
-    // Update individual query status for this specific error
-    // This triggers middleware → setOverallQueryStatus (since it's an error)
     dispatch(
       setIndividualQueryStatus({
         cacheKey,

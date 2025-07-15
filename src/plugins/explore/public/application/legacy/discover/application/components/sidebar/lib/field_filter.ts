@@ -40,7 +40,7 @@ export interface FieldFilterState {
 
 export function getDefaultFieldFilter(): FieldFilterState {
   return {
-    missing: true,
+    missing: false,
     type: 'any',
     name: '',
     aggregatable: null,

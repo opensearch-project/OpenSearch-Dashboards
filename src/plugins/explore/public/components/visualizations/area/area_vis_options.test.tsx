@@ -7,9 +7,38 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AreaVisStyleControls } from './area_vis_options';
-import { Positions, ThresholdLineStyle, VisFieldType, TooltipOptions } from '../types';
+import {
+  Positions,
+  ThresholdLineStyle,
+  VisFieldType,
+  TooltipOptions,
+  AxisRole,
+  AxisColumnMappings,
+} from '../types';
 
 // Mock child components
+jest.mock('../style_panel/axes/axes_selector', () => ({
+  AxesSelectPanel: jest.fn(({ updateVisualization }) => (
+    <div data-test-subj="axes-select-panel">
+      <button
+        data-test-subj="update-mapping"
+        onClick={() => {
+          const mockVisColumn = {
+            id: 1,
+            name: 'Date',
+            schema: 'date',
+            column: 'date',
+            validValuesCount: 100,
+            uniqueValuesCount: 50,
+          };
+          updateVisualization({ x: mockVisColumn });
+        }}
+      >
+        Update Mapping
+      </button>
+    </div>
+  )),
+}));
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => (
     <div data-test-subj="legend-panel" data-show-legend={shouldShowLegend}>
@@ -194,7 +223,24 @@ describe('AreaVisStyleControls', () => {
       grid: { xLines: true, yLines: true },
     },
     onStyleChange: jest.fn(),
-    axisColumnMappings: {},
+    axisColumnMappings: {
+      [AxisRole.X]: {
+        id: 1,
+        name: 'Date',
+        schema: VisFieldType.Date,
+        column: 'date',
+        validValuesCount: 100,
+        uniqueValuesCount: 50,
+      },
+      [AxisRole.Y]: {
+        id: 2,
+        name: 'Count',
+        schema: VisFieldType.Numerical,
+        column: 'count',
+        validValuesCount: 100,
+        uniqueValuesCount: 50,
+      },
+    },
     updateVisualization: jest.fn(),
   };
 
@@ -202,7 +248,7 @@ describe('AreaVisStyleControls', () => {
     jest.clearAllMocks();
   });
 
-  test('renders all panels correctly', () => {
+  test('renders all panels correctly when mappings are provided', () => {
     render(<AreaVisStyleControls {...defaultProps} />);
 
     expect(screen.getByTestId('legend-panel')).toBeInTheDocument();
@@ -434,6 +480,23 @@ describe('AreaVisStyleControls', () => {
     });
   });
 
+  test('does not render style panels when no mappings are selected', () => {
+    const props = {
+      ...defaultProps,
+      axisColumnMappings: {} as AxisColumnMappings,
+    };
+
+    render(<AreaVisStyleControls {...props} />);
+
+    // Only the axes select panel should be rendered
+    expect(screen.getByTestId('axes-select-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('legend-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('threshold-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('tooltip-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('axes-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('grid-panel')).not.toBeInTheDocument();
+  });
+
   test('handles empty arrays for columns', () => {
     const props = {
       ...defaultProps,
@@ -443,6 +506,23 @@ describe('AreaVisStyleControls', () => {
     };
 
     expect(() => render(<AreaVisStyleControls {...props} />)).not.toThrow();
+  });
+
+  test('updates visualization when mapping is changed', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('update-mapping'));
+
+    expect(defaultProps.updateVisualization).toHaveBeenCalledWith({
+      x: {
+        id: 1,
+        name: 'Date',
+        schema: 'date',
+        column: 'date',
+        validValuesCount: 100,
+        uniqueValuesCount: 50,
+      },
+    });
   });
 
   test('handles missing optional props', () => {
