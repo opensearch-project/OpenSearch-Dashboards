@@ -83,6 +83,8 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
     }
   };
 
+  // The mapping object will be an empty object if no fields are selected on the axes selector. No
+  // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
 
   return (

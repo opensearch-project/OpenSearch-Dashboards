@@ -193,12 +193,10 @@ export const VisualizationContainer = () => {
         // Empty state
         setVisualizationData(visualizationTypeResult);
         dispatch(setSelectedChartType(undefined));
-        services.notifications.toasts.addInfo('Cannot apply metric type visualization, reset'); // FIXME message
+        services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.metricReset);
       } else if (!isValidMapping(selectedAxesMapping ?? {}, allColumns)) {
         // Cannot apply, use empty state
-        services.notifications.toasts.addInfo(
-          'Cannot apply previous configured visualization, reset'
-        ); // FIXME message
+        services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.reset);
         dispatch(setAxesMapping(undefined));
 
         setVisualizationData({

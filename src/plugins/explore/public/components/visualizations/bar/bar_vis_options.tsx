@@ -43,6 +43,8 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
       dateColumns.length === 1) ||
     (numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0);
 
+  // The mapping object will be an empty object if no fields are selected on the axes selector. No
+  // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
 
   return (
