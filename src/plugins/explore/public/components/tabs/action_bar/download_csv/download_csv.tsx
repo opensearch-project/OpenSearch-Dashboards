@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiSmallButton } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_content';
 import { useDiscoverDownloadCsv } from './use_download_csv';
@@ -43,7 +43,8 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
   return (
     <EuiPopover
       button={
-        <EuiSmallButton
+        <EuiButtonEmpty
+          size="s"
           data-test-subj="dscDownloadCsvButton"
           disabled={isLoading}
           iconType="arrowDown"
@@ -51,7 +52,7 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
           onClick={openPopover}
         >
           <FormattedMessage id="explore.discover.downloadCsvButtonText" defaultMessage="Export" />
-        </EuiSmallButton>
+        </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
