@@ -26,10 +26,6 @@ import {
 import { Query } from '../../../../../../data/public';
 import { defaultPreparePplQuery } from '../../languages';
 
-jest.mock('../../languages', () => ({
-  defaultPreparePplQuery: jest.fn(),
-}));
-
 jest.mock('../../../../../../data/public', () => ({
   indexPatterns: {
     isDefault: jest.fn().mockReturnValue(true),
@@ -37,6 +33,21 @@ jest.mock('../../../../../../data/public', () => ({
   search: {
     tabifyAggResponse: jest.fn(),
   },
+}));
+
+jest.mock('../../../../components/chart/utils', () => ({
+  createHistogramConfigs: jest.fn(),
+  getDimensions: jest.fn(),
+  buildPointSeriesData: jest.fn(),
+}));
+
+jest.mock('../../../../application/legacy/discover/opensearch_dashboards_services', () => ({
+  getResponseInspectorStats: jest.fn().mockReturnValue({}),
+}));
+
+jest.mock('../../languages', () => ({
+  defaultPreparePplQuery: jest.fn(),
+  getQueryWithSource: jest.fn(),
 }));
 
 global.AbortController = jest.fn().mockImplementation(() => ({
@@ -505,6 +516,11 @@ describe('Query Actions', () => {
               id: 'default-pattern',
               title: 'default-pattern',
               fields: [],
+            }),
+            convertToDataset: jest.fn().mockReturnValue({
+              id: 'test-dataset',
+              title: 'test-dataset',
+              type: 'INDEX_PATTERN',
             }),
           },
           search: {
