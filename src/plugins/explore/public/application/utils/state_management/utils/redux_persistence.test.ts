@@ -113,6 +113,7 @@ describe('redux_persistence', () => {
             body: undefined,
           },
           promptModeIsAvailable: false,
+          promptToQueryIsLoading: false,
           editorMode: 'SingleQuery' as any,
           lastExecutedPrompt: '',
         },
