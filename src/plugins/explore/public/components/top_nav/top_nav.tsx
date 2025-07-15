@@ -104,6 +104,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         flavorId,
         tabDefinition,
       },
+      clearEditors,
       savedExplore
     );
   }, [
@@ -115,6 +116,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     startSyncingQueryStateWithUrl,
     flavorId,
     tabDefinition,
+    clearEditors,
   ]);
 
   useEffect(() => {

@@ -19,6 +19,7 @@ const startSyncingQueryStateWithUrl = jest.fn();
 const searchContext = {} as any;
 const indexPattern = {} as any;
 const savedExplore = {} as any;
+const clearEditors = jest.fn();
 
 describe('getTopNavLinks', () => {
   it('returns save, open, new, and share links when all capabilities and services are present', () => {
@@ -27,6 +28,7 @@ describe('getTopNavLinks', () => {
       startSyncingQueryStateWithUrl,
       searchContext,
       indexPattern,
+      clearEditors,
       savedExplore
     );
     expect(links).toHaveLength(4);

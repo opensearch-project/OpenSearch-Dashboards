@@ -27,11 +27,12 @@ describe('getNewButtonRun', () => {
   it('should dispatch resetExploreStateActionCreator', () => {
     const dispatch = jest.fn();
     const services = ({ store: { dispatch } } as unknown) as ExploreServices;
+    const clearEditors = jest.fn();
 
-    const run = getNewButtonRun(services);
+    const run = getNewButtonRun(services, clearEditors);
     run({} as HTMLElement);
 
-    expect(resetExploreStateActionCreator).toHaveBeenCalledWith(services);
+    expect(resetExploreStateActionCreator).toHaveBeenCalledWith(services, clearEditors);
     expect(dispatch).toHaveBeenCalledWith('RESET_ACTION');
   });
 });
