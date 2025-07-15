@@ -161,7 +161,7 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
             title: (
               <EuiText size="xs">
                 {i18n.translate('data.datasetDetails.dataDefinitionTitle', {
-                  defaultMessage: 'Data Definition',
+                  defaultMessage: 'Data definition',
                 })}
               </EuiText>
             ),
