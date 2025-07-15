@@ -164,15 +164,27 @@ export const SaveAndAddButtonWithModal = ({
           </div>
         );
 
-        toastNotifications.add({
-          title: i18n.translate('explore.addToDashboard.notification.success', {
-            defaultMessage: mode === 'new' ? 'Dashboard Generation' : 'Panel added to dashboard',
-          }),
-          color: 'success',
-          iconType: 'check',
-          text: toMountPoint(toastContent),
-          'data-test-subj': 'addToNewDashboardSuccessToast',
-        });
+        if (mode === 'new') {
+          toastNotifications.add({
+            title: i18n.translate('explore.addToDashboard.notification.success.new', {
+              defaultMessage: 'Dashboard Generation',
+            }),
+            color: 'success',
+            iconType: 'check',
+            text: toMountPoint(toastContent),
+            'data-test-subj': 'addToNewDashboardSuccessToast',
+          });
+        } else {
+          toastNotifications.add({
+            title: i18n.translate('explore.addToDashboard.notification.success.existing', {
+              defaultMessage: 'Panel added to dashboard',
+            }),
+            color: 'success',
+            iconType: 'check',
+            text: toMountPoint(toastContent),
+            'data-test-subj': 'addToNewDashboardSuccessToast',
+          });
+        }
 
         setShowAddToDashboardModal(false);
       }

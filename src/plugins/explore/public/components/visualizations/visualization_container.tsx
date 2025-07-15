@@ -5,7 +5,7 @@
 
 import './visualization_container.scss';
 import { isEmpty, isEqual } from 'lodash';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -35,7 +35,6 @@ import {
   selectAxesMapping,
 } from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
-import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import {
@@ -419,16 +418,6 @@ export const VisualizationContainer = () => {
   return (
     <div className="exploreVisContainer">
       <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ alignItems: 'flex-end' }}>
-          <SaveAndAddButtonWithModal
-            searchContext={searchContext}
-            indexPattern={dataset as any}
-            services={services}
-          />
-        </EuiFlexItem>
         <EuiFlexItem grow={true} style={{ minHeight: 0 }}>
           <Visualization<ChartType>
             expression={expression}
