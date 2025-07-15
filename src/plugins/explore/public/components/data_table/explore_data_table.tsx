@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useRef, memo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -29,15 +29,13 @@ import {
   defaultPrepareQueryString,
   defaultResultsProcessor,
 } from '../../application/utils/state_management/actions/query_actions';
-import { SaveAndAddButtonWithModal } from '.././visualizations/add_to_dashboard_button';
-import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { useChangeQueryEditor } from '../../application/hooks';
 import { useDatasetContext } from '../../application/context';
 import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { uiSettings, data } = services;
+  const { uiSettings } = services;
 
   const { onAddFilter } = useChangeQueryEditor();
   const savedSearch = useSelector(selectSavedSearch);
@@ -52,26 +50,6 @@ const ExploreDataTableComponent = () => {
 
   const rawResults = cacheKey ? results[cacheKey] : null;
   const rows = rawResults?.hits?.hits || [];
-
-  const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
-    query: data.query.queryString.getQuery(),
-    filters: data.query.filterManager.getFilters(),
-    timeRange: data.query.timefilter.timefilter.getTime(),
-  });
-
-  useEffect(() => {
-    const subscription = services.data.query.state$.subscribe(({ state }) => {
-      setSearchContext({
-        query: state.query,
-        timeRange: state.time,
-        filters: state.filters,
-      });
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [services.data.query.state$]);
 
   // Process raw results to get field counts and rows
   const processedResults = useMemo(() => {
@@ -151,15 +129,6 @@ const ExploreDataTableComponent = () => {
       <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
         <EuiFlexItem>
           <EuiSpacer size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
-          {dataset && (
-            <SaveAndAddButtonWithModal
-              searchContext={searchContext}
-              dataset={dataset}
-              services={services}
-            />
-          )}
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <DataTable

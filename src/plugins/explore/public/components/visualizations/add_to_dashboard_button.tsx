@@ -7,14 +7,15 @@ import { i18n } from '@osd/i18n';
 import { EuiText, EuiButton, EuiLink } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { SimpleSavedObject, CoreStart } from 'src/core/public';
-import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
+import { SimpleSavedObject } from 'src/core/public';
+import {
+  toMountPoint,
+  useOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
-import { ExploreServices } from '../../types';
 import { selectUIState, selectTabState } from '../../application/utils/state_management/selectors';
-import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
   DataView as Dataset,
   IndexPattern,
@@ -25,6 +26,8 @@ import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from '../../helpers/save_explore';
 import { useCurrentExploreId } from '../../application/utils/hooks/use_current_explore_id';
 import { useFlavorId } from '../../../public/helpers/use_flavor_id';
+import { useSearchContext } from '../query_panel/utils/use_search_context';
+import { ExploreServices } from '../../types';
 
 interface DashboardAttributes {
   title?: string;
@@ -41,16 +44,11 @@ export interface OnSaveProps {
   newDashboardName: string;
 }
 
-export const SaveAndAddButtonWithModal = ({
-  services,
-  searchContext,
-  dataset,
-}: {
-  services: Partial<CoreStart> & ExploreServices;
-  searchContext: ExecutionContextSearch;
-  dataset?: IndexPattern | Dataset;
-}) => {
+export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern | Dataset }) => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const { core, dashboard, savedObjects, toastNotifications, uiSettings, history, data } = services;
+
+  const searchContext = useSearchContext();
 
   // Create osdUrlStateStorage from storage
   const osdUrlStateStorage = useMemo(() => {
@@ -164,15 +162,27 @@ export const SaveAndAddButtonWithModal = ({
           </div>
         );
 
-        toastNotifications.add({
-          title: i18n.translate('explore.addToDashboard.notification.success', {
-            defaultMessage: mode === 'new' ? 'Dashboard Generation' : 'Panel added to dashboard',
-          }),
-          color: 'success',
-          iconType: 'check',
-          text: toMountPoint(toastContent),
-          'data-test-subj': 'addToNewDashboardSuccessToast',
-        });
+        if (mode === 'new') {
+          toastNotifications.add({
+            title: i18n.translate('explore.addToDashboard.notification.success.new', {
+              defaultMessage: 'Dashboard Generation',
+            }),
+            color: 'success',
+            iconType: 'check',
+            text: toMountPoint(toastContent),
+            'data-test-subj': 'addToNewDashboardSuccessToast',
+          });
+        } else {
+          toastNotifications.add({
+            title: i18n.translate('explore.addToDashboard.notification.success.existing', {
+              defaultMessage: 'Panel added to dashboard',
+            }),
+            color: 'success',
+            iconType: 'check',
+            text: toMountPoint(toastContent),
+            'data-test-subj': 'addToNewDashboardSuccessToast',
+          });
+        }
 
         setShowAddToDashboardModal(false);
       }
