@@ -36,7 +36,7 @@ describe('field_filter', function () {
     expect(getDefaultFieldFilter()).toMatchInlineSnapshot(`
       Object {
         "aggregatable": null,
-        "missing": true,
+        "missing": false,
         "name": "",
         "searchable": null,
         "type": "any",
