@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { DevToolsModal } from './dev_tools_modal';
 import { coreMock } from '../../../core/public/mocks';
 import { urlForwardingPluginMock } from 'src/plugins/url_forwarding/public/mocks';
