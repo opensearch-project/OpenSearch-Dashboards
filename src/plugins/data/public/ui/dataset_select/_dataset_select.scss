@@ -54,7 +54,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: $euiFontSizeXS;
+    font-size: $euiFontSizeS;
     flex: 1;
     min-width: 0;
   }
@@ -71,7 +71,7 @@
 
     span:is([class*="euiSelectableListItem__text"]) {
       :first-child {
-        font-size: $euiFontSizeXS;
+        font-size: $euiFontSizeS;
       }
     }
   }
