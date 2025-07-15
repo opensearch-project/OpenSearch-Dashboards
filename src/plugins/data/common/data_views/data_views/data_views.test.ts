@@ -9,6 +9,7 @@ import { fieldFormatsMock } from '../../field_formats/mocks';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { DataViewUiSettingsCommon, DataViewSavedObjectsClientCommon, SavedObject } from '../types';
 import { UI_SETTINGS } from '../../constants';
+import { IndexPatternsService } from '../../index_patterns';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -20,12 +21,21 @@ const createFieldsFetcher = jest.fn().mockImplementation(() => ({
 const fieldFormats = fieldFormatsMock;
 let object: any = {};
 
+const indexPatternsMock = ({
+  clearCache: jest.fn(),
+  get: jest.fn().mockImplementation((id, onlyCheckCache) => {
+    return onlyCheckCache ? null : Promise.resolve(null);
+  }),
+  getByTitle: jest.fn(),
+  saveToCache: jest.fn(),
+} as unknown) as IndexPatternsService;
+
 function setDocsourcePayload(id: string | null, providedPayload: any) {
   object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
 }
 
 describe('DataViews', () => {
-  let indexPatterns: DataViewsService;
+  let dataViews: DataViewsService;
   let savedObjectsClient: DataViewSavedObjectsClientCommon;
   const uiSettingsGet = jest.fn();
 
@@ -63,7 +73,8 @@ describe('DataViews', () => {
     uiSettingsGet.mockClear();
     uiSettingsGet.mockReturnValue(Promise.resolve(false));
 
-    indexPatterns = new DataViewsService({
+    dataViews = new DataViewsService({
+      patterns: indexPatternsMock,
       uiSettings: ({
         get: uiSettingsGet,
         getAll: () => {},
@@ -88,14 +99,14 @@ describe('DataViews', () => {
       },
     });
 
-    const indexPattern = await indexPatterns.get(id);
+    const indexPattern = await dataViews.get(id);
 
     expect(indexPattern).toBeDefined();
-    expect(indexPattern).toBe(await indexPatterns.get(id));
+    expect(indexPattern).toBe(await dataViews.get(id));
   });
 
   test('savedObjectCache pre-fetches only title', async () => {
-    expect(await indexPatterns.getIds()).toEqual(['id']);
+    expect(await dataViews.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
       fields: ['title'],
@@ -104,24 +115,24 @@ describe('DataViews', () => {
   });
 
   test('caches saved objects', async () => {
-    await indexPatterns.getIds();
-    await indexPatterns.getTitles();
+    await dataViews.getIds();
+    await dataViews.getTitles();
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
   });
 
   test('can refresh the saved objects caches', async () => {
-    await indexPatterns.getIds();
-    await indexPatterns.getTitles(true);
+    await dataViews.getIds();
+    await dataViews.getTitles(true);
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
   });
 
   test('deletes the index pattern', async () => {
     const id = '1';
-    const indexPattern = await indexPatterns.get(id);
+    const indexPattern = await dataViews.get(id);
 
     expect(indexPattern).toBeDefined();
-    await indexPatterns.delete(id);
-    expect(indexPattern).not.toBe(await indexPatterns.get(id));
+    await dataViews.delete(id);
+    expect(indexPattern).not.toBe(await dataViews.get(id));
   });
 
   test('should handle version conflicts', async () => {
@@ -134,27 +145,27 @@ describe('DataViews', () => {
     });
 
     // Create a normal index patterns
-    const pattern = await indexPatterns.get('foo');
+    const pattern = await dataViews.get('foo');
 
     expect(pattern.version).toBe('fooa');
-    indexPatterns.clearCache();
+    dataViews.clearCache();
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = await indexPatterns.get('foo');
+    const samePattern = await dataViews.get('foo');
 
     expect(samePattern.version).toBe('fooaa');
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
     pattern.title = 'foo2';
-    await indexPatterns.updateSavedObject(pattern);
+    await dataViews.updateSavedObject(pattern);
 
     // This should not be able to recover
     samePattern.title = 'foo3';
 
     let result;
     try {
-      await indexPatterns.updateSavedObject(samePattern);
+      await dataViews.updateSavedObject(samePattern);
     } catch (err) {
       result = err;
     }
@@ -164,24 +175,24 @@ describe('DataViews', () => {
 
   test('create', async () => {
     const title = 'opensearch-dashboards-*';
-    indexPatterns.refreshFields = jest.fn();
+    dataViews.refreshFields = jest.fn();
 
-    const indexPattern = await indexPatterns.create({ title }, true);
+    const indexPattern = await dataViews.create({ title }, true);
     expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.title).toBe(title);
-    expect(indexPatterns.refreshFields).not.toBeCalled();
+    expect(dataViews.refreshFields).not.toBeCalled();
 
-    await indexPatterns.create({ title });
-    expect(indexPatterns.refreshFields).toBeCalled();
+    await dataViews.create({ title });
+    expect(dataViews.refreshFields).toBeCalled();
   });
 
   test('createAndSave', async () => {
     const title = 'opensearch-dashboards-*';
-    indexPatterns.createSavedObject = jest.fn();
-    indexPatterns.setDefault = jest.fn();
-    await indexPatterns.createAndSave({ title });
-    expect(indexPatterns.createSavedObject).toBeCalled();
-    expect(indexPatterns.setDefault).toBeCalled();
+    dataViews.createSavedObject = jest.fn();
+    dataViews.setDefault = jest.fn();
+    await dataViews.createAndSave({ title });
+    expect(dataViews.createSavedObject).toBeCalled();
+    expect(dataViews.setDefault).toBeCalled();
   });
 
   test('savedObjectToSpec', () => {
@@ -201,7 +212,7 @@ describe('DataViews', () => {
       references: [],
     };
 
-    expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
+    expect(dataViews.savedObjectToSpec(savedObject)).toMatchSnapshot();
   });
 
   test('savedObjectToSpecWithDataSource', () => {
@@ -227,15 +238,15 @@ describe('DataViews', () => {
       ],
     };
 
-    expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
+    expect(dataViews.savedObjectToSpec(savedObject)).toMatchSnapshot();
   });
 
   test('correctly detects long-numerals support', async () => {
-    expect(await indexPatterns.isLongNumeralsSupported()).toBe(false);
+    expect(await dataViews.isLongNumeralsSupported()).toBe(false);
 
     uiSettingsGet.mockImplementation((key: string) =>
       Promise.resolve(key === UI_SETTINGS.DATA_WITH_LONG_NUMERALS ? true : undefined)
     );
-    expect(await indexPatterns.isLongNumeralsSupported()).toBe(true);
+    expect(await dataViews.isLongNumeralsSupported()).toBe(true);
   });
 });

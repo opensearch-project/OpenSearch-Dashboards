@@ -230,33 +230,6 @@ export class DataPublicPlugin
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const dataViews = new DataViewsService({
-      uiSettings: new DataViewsUiSettingsPublicToCommon(uiSettings),
-      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
-      apiClient: new DataViewsApiClient(http),
-      fieldFormats,
-      onNotification: (toastInputFields) => {
-        notifications.toasts.add(toastInputFields);
-      },
-      onError: notifications.toasts.addError.bind(notifications.toasts),
-      onRedirectNoDataView: onRedirectNoDataView(
-        application.capabilities,
-        application.navigateToApp,
-        overlays
-      ),
-      onUnsupportedTimePattern: onUnsupportedDataViewTimePattern(
-        notifications.toasts,
-        application.navigateToApp
-      ),
-      // If workspace is enabled, only workspace owner/OSD admin can update ui setting.
-      ...(application.capabilities.workspaces.enabled && {
-        canUpdateUiSetting:
-          workspaces?.currentWorkspace$.getValue()?.owner ||
-          application.capabilities?.dashboards?.isDashboardAdmin !== false,
-      }),
-    });
-    setDataViews(dataViews);
-
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
@@ -283,6 +256,34 @@ export class DataPublicPlugin
       }),
     });
     setIndexPatterns(indexPatterns);
+
+    const dataViews = new DataViewsService({
+      patterns: indexPatterns,
+      uiSettings: new DataViewsUiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      apiClient: new DataViewsApiClient(http),
+      fieldFormats,
+      onNotification: (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
+      onError: notifications.toasts.addError.bind(notifications.toasts),
+      onRedirectNoDataView: onRedirectNoDataView(
+        application.capabilities,
+        application.navigateToApp,
+        overlays
+      ),
+      onUnsupportedTimePattern: onUnsupportedDataViewTimePattern(
+        notifications.toasts,
+        application.navigateToApp
+      ),
+      // If workspace is enabled, only workspace owner/OSD admin can update ui setting.
+      ...(application.capabilities.workspaces.enabled && {
+        canUpdateUiSetting:
+          workspaces?.currentWorkspace$.getValue()?.owner ||
+          application.capabilities?.dashboards?.isDashboardAdmin !== false,
+      }),
+    });
+    setDataViews(dataViews);
 
     const query = this.queryService.start({
       storage: this.storage,

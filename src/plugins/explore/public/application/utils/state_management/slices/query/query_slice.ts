@@ -4,21 +4,11 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Query, DataView, Dataset } from '../../../../../../../data/common';
+import { Query } from '../../../../../../../data/common';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../../common';
 import { QueryWithQueryAsString } from '../../../languages';
 
 export type QueryState = QueryWithQueryAsString;
-
-const getSerializableDataset = (dataset?: Dataset | DataView): Dataset | undefined => {
-  if (!dataset) return undefined;
-
-  if (!('toDataset' in dataset)) {
-    return dataset as Dataset;
-  }
-
-  return dataset.toDataset();
-};
 
 const initialState: QueryState = {
   query: '',
@@ -31,24 +21,14 @@ const querySlice = createSlice({
   initialState,
   reducers: {
     setQueryState: (_, action: PayloadAction<Query>) => {
-      const payload = { ...action.payload };
-      if (payload.dataset) {
-        payload.dataset = getSerializableDataset(payload.dataset);
-      }
       return {
         ...action.payload,
-        ...(payload.dataset ? { dataset: getSerializableDataset(payload.dataset) } : {}),
         query: typeof action.payload.query === 'string' ? action.payload.query : '',
       };
     },
     setQueryWithHistory: {
       reducer: (_, action: PayloadAction<QueryState>) => {
-        // Same logic as setQueryState but with meta flag for history
-        const payload = { ...action.payload };
-        if (payload.dataset) {
-          payload.dataset = getSerializableDataset(payload.dataset);
-        }
-        return payload;
+        return action.payload;
       },
       prepare: (query: Query) => ({
         payload: {
@@ -60,7 +40,6 @@ const querySlice = createSlice({
     },
     setQueryStringWithHistory: {
       reducer: (state, action: PayloadAction<string>) => {
-        // Same logic as setQueryState but with meta flag for history
         state.query = action.payload;
       },
       prepare: (query: string) => ({
