@@ -14,6 +14,7 @@ import { getSaveButtonRun, saveTopNavData } from './top_nav_save';
 import { getShareButtonRun, shareTopNavData } from './top_nav_share';
 import { TabState } from '../../../application/utils/state_management/slices';
 import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
+import { useClearEditors } from '../../../application/hooks';
 
 export const getTopNavLinks = (
   services: ExploreServices,
@@ -25,6 +26,7 @@ export const getTopNavLinks = (
     flavorId: string | null;
     tabDefinition: TabDefinition | undefined;
   },
+  clearEditors: ReturnType<typeof useClearEditors>,
   savedExplore?: SavedExplore
 ) => {
   const { capabilities, share } = services;
@@ -50,7 +52,7 @@ export const getTopNavLinks = (
   });
   topNavLinks.push({
     ...newTopNavData,
-    run: getNewButtonRun(services),
+    run: getNewButtonRun(services, clearEditors),
   });
 
   if (share) {
