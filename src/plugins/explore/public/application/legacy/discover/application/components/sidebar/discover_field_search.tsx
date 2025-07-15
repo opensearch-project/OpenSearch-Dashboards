@@ -115,7 +115,7 @@ export function DiscoverFieldSearch({
     searchable: 'any',
     aggregatable: 'any',
     type: 'any',
-    missing: true,
+    missing: false,
   });
 
   const filterBtnAriaLabel = isPopoverOpen

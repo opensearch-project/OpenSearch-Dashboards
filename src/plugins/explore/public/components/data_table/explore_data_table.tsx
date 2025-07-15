@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -127,9 +127,6 @@ const ExploreDataTableComponent = () => {
       ref={containerRef}
     >
       <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
-        <EuiFlexItem>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <DataTable
             columns={tableColumns}
