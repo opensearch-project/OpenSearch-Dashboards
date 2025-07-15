@@ -5,21 +5,13 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { MountPoint } from 'opensearch-dashboards/public';
 import { EuiResizableContainer, EuiPageBody, useIsWithinBreakpoints } from '@elastic/eui';
-import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 import { selectShowDatasetFields } from '../../../application/utils/state_management/selectors';
 import { CanvasPanel } from '../../../application/legacy/discover/application/components/panel/canvas_panel';
 import { DiscoverPanel } from '../../../application/legacy/discover/application/view_components/panel';
 import { BottomRightContainer } from './bottom_right_container/bottom_right_container';
-import { TopNav } from '../../../components/top_nav/top_nav';
 
-export interface IBottomContainer {
-  setHeaderActionMenu?: (menuMount: MountPoint | undefined) => void;
-}
-
-export const BottomContainer = ({ setHeaderActionMenu }: IBottomContainer) => {
-  const { savedExplore } = useInitPage();
+export const BottomContainer = () => {
   const showDataSetFields = useSelector(selectShowDatasetFields);
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
@@ -49,7 +41,6 @@ export const BottomContainer = ({ setHeaderActionMenu }: IBottomContainer) => {
             paddingSize="none"
           >
             <EuiPageBody className="explore-layout__canvas">
-              <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
               <BottomRightContainer />
             </EuiPageBody>
           </EuiResizablePanel>
