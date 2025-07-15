@@ -16,11 +16,13 @@ jest.mock('../utils/use_debounced_value', () => ({
 
 describe('BarExclusiveVisOptions', () => {
   const defaultProps = {
+    barSizeMode: 'manual' as 'manual' | 'auto',
     barWidth: 0.7,
     barPadding: 0.1,
     showBarBorder: false,
     barBorderWidth: 1,
     barBorderColor: '#000000',
+    onBarSizeModeChange: jest.fn(),
     onBarWidthChange: jest.fn(),
     onBarPaddingChange: jest.fn(),
     onShowBarBorderChange: jest.fn(),
@@ -141,9 +143,8 @@ describe('BarExclusiveVisOptions', () => {
   test('renders form labels correctly', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    // Check if labels are rendered correctly
-    expect(screen.getByText('Width')).toBeInTheDocument();
-    expect(screen.getByText('Padding')).toBeInTheDocument();
+    expect(screen.getByText('Bar width')).toBeInTheDocument();
+    expect(screen.getByText('Bar padding')).toBeInTheDocument();
     expect(screen.getByText('Show border')).toBeInTheDocument();
   });
 
