@@ -305,7 +305,9 @@ export class ExplorePlugin
         registerTabs(services);
 
         // Instantiate the store
-        const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(services);
+        const { store, unsubscribe: unsubscribeStore, reset: resetStore } = await getPreloadedStore(
+          services
+        );
         services.store = store;
 
         appMounted();
@@ -317,6 +319,7 @@ export class ExplorePlugin
           appUnMounted();
           unmount();
           unsubscribeStore();
+          resetStore();
         };
       },
       ...options,
