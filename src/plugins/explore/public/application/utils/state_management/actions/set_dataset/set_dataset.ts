@@ -23,44 +23,46 @@ export const setDatasetActionCreator = (
   services: ExploreServices,
   clearEditors: ReturnType<typeof useClearEditors>
 ) => async (dispatch: AppDispatch, getState: () => RootState) => {
-  const queryStringState = services.data.query.queryString.getQuery();
+  const {
+    data: {
+      dataViews,
+      query: { queryString },
+    },
+  } = services;
+  const currentQuery = queryString.getQuery();
   const {
     queryEditor: { editorMode, promptModeIsAvailable },
-    query: { dataset },
+    query,
   } = getState();
-
-  let dataView;
-  if (dataset && dataset.id) {
-    await services.data.dataViews.ensureDefaultDataView();
-    dataView = await services.data.dataViews.get(
-      dataset.id,
-      dataset.type ? dataset.type !== 'INDEX_PATTERN' : false
-    );
-  }
 
   dispatch(setActiveTab(''));
   dispatch(clearResults());
   dispatch(clearQueryStatusMap());
-  dispatch(setQueryWithHistory(queryStringState));
 
-  const datasetFromDataView = dataView ? await dataView.toDataset() : undefined;
+  await dataViews.ensureDefaultDataView();
+  const dataView = query.dataset
+    ? await dataViews
+        .get(query.dataset.id, query.dataset.type !== 'INDEX_PATTERN')
+        .catch(() => dataViews.createFromDataset(query.dataset!))
+    : await dataViews.getDefault();
+
   const updatedQuery = {
-    ...queryStringState,
-    ...(datasetFromDataView ? { dataset: datasetFromDataView } : {}),
+    ...currentQuery,
+    ...(dataView ? { dataset: dataViews.convertToDataset(dataView) } : {}),
   };
 
   dispatch(setQueryWithHistory(updatedQuery));
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
 
+  const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
   if (newPromptModeIsAvailable !== promptModeIsAvailable) {
     dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable));
   }
 
   clearEditors();
-  if (newPromptModeIsAvailable && editorMode !== EditorMode.SingleEmpty) {
+
+  if (newPromptModeIsAvailable && editorMode === EditorMode.SingleQuery) {
     dispatch(setEditorMode(EditorMode.SingleEmpty));
-  } else if (!newPromptModeIsAvailable && editorMode !== EditorMode.SingleQuery) {
+  } else if (!newPromptModeIsAvailable && editorMode === EditorMode.SingleEmpty) {
     dispatch(setEditorMode(EditorMode.SingleQuery));
   }
 

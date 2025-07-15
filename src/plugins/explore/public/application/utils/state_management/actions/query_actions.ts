@@ -6,7 +6,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { IBucketDateHistogramAggConfig, Query, DataView as Dataset } from 'src/plugins/data/common';
+import { IBucketDateHistogramAggConfig, Query, DataView } from 'src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -52,7 +52,7 @@ export const defaultPrepareQueryString = (query: Query): string => {
  */
 export const defaultResultsProcessor: DefaultDataProcessor = (
   rawResults: ISearchResult,
-  dataset: Dataset
+  dataset: DataView
 ): ProcessedSearchResults => {
   const fieldCounts: Record<string, number> = {};
   if (rawResults.hits && rawResults.hits.hits && dataset) {
@@ -82,7 +82,7 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
 
 export const histogramResultsProcessor: HistogramDataProcessor = (
   rawResults: ISearchResult,
-  dataset: Dataset,
+  dataset: DataView,
   data: DataPublicPluginStart,
   interval: string
 ): ProcessedSearchResults => {
@@ -228,59 +228,33 @@ const executeQueryBase = async (
       })
     );
 
-    // Create abort controller
     const abortController = new AbortController();
-
-    // Reset inspector adapter
     services.inspectorAdapters.requests.reset();
 
-    // Create inspector request
     const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
       defaultMessage: 'data',
     });
     const description = i18n.translate('explore.discover.inspectorRequestDescription', {
       defaultMessage: 'This request queries OpenSearch to fetch the data for the search.',
     });
-
     const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
     await services.data.dataViews.ensureDefaultDataView();
-
-    let dataset;
-    try {
-      if (query.dataset) {
-        dataset = await services.data.dataViews.get(
-          query.dataset.id,
-          query.dataset.type !== 'INDEX_PATTERN'
-        );
-      } else {
-        dataset = await services.data.dataViews.getDefault();
-      }
-    } catch (error) {
-      if (!dataset) {
-        try {
-          dataset = await services.data.dataViews.getDefault();
-        } catch (defaultError) {
-          throw new Error('Unable to find any dataset for query execution');
-        }
-      }
-    }
-
-    // If we still don't have a dataset, throw an error
-    if (!dataset) {
+    const dataView = query.dataset
+      ? await services.data.dataViews.get(query.dataset.id, query.dataset.type !== 'INDEX_PATTERN')
+      : await services.data.dataViews.getDefault();
+    if (!dataView) {
       throw new Error('Dataset not found for query execution');
     }
 
-    // Convert dataset to serializable format for Redux
-    const serializedDataset = dataset.toDataset();
+    const dataset = services.data.dataViews.convertToDataset(dataView);
 
     const preparedQueryObject = {
       ...query,
-      dataset: serializedDataset,
+      dataset,
       query: cacheKey,
     };
 
-    // Create SearchSource based on histogram flag
     let searchSource;
     if (includeHistogram) {
       // Histogram-specific: Get interval and create with aggregations
@@ -288,7 +262,7 @@ const executeQueryBase = async (
       const effectiveInterval = interval || state.legacy?.interval || 'auto';
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
-        dataset,
+        dataView,
         services,
         true, // Include histogram
         effectiveInterval
@@ -297,18 +271,16 @@ const executeQueryBase = async (
       // Tab-specific: Create without aggregations
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
-        dataset,
+        dataView,
         services,
         false // No histogram
       );
     }
 
-    // Add inspector stats
     if ((services as any).getRequestInspectorStats && inspectorRequest) {
       inspectorRequest.stats((services as any).getRequestInspectorStats(searchSource));
     }
 
-    // Get search request body for inspector
     if (inspectorRequest) {
       searchSource.getSearchRequestBody().then((body: object) => {
         inspectorRequest.json(body);
@@ -352,12 +324,10 @@ const executeQueryBase = async (
 
     return rawResultsWithMeta;
   } catch (error: any) {
-    // Handle abort errors
     if (error instanceof Error && error.name === 'AbortError') {
       return;
     }
 
-    // Use search service to show error (like Discover does)
     services.data.search.showError(error as Error);
 
     // Update individual query status for this specific error
@@ -389,14 +359,13 @@ const executeQueryBase = async (
  */
 const createSearchSourceWithQuery = async (
   preparedQuery: any,
-  indexPattern: any,
+  dataView: DataView,
   services: ExploreServices,
   includeHistogram: boolean = false,
   customInterval?: string,
   sizeParam?: number
 ) => {
   const { uiSettings, data } = services;
-  const dataset = indexPattern;
   const size = sizeParam || uiSettings.get(SAMPLE_SIZE_SETTING);
   const filters = data.query.filterManager.getFilters();
   // Create new SearchSource for this query
@@ -404,11 +373,11 @@ const createSearchSourceWithQuery = async (
 
   const timeRangeSearchSource = await data.search.searchSource.create();
   const { isDefault } = indexPatternUtils;
-  if (isDefault(dataset)) {
+  if (isDefault(dataView)) {
     const timefilter = data.query.timefilter.timefilter;
 
     timeRangeSearchSource.setField('filter', () => {
-      return timefilter.createFilter(dataset);
+      return timefilter.createFilter(dataView);
     });
   }
 
@@ -419,7 +388,7 @@ const createSearchSourceWithQuery = async (
   };
 
   searchSource.setFields({
-    index: dataset,
+    index: dataView,
     size,
     query: queryStringWithExecutedQuery || null,
     highlightAll: true,
@@ -427,12 +396,12 @@ const createSearchSourceWithQuery = async (
     filter: filters,
   });
 
-  if (!includeHistogram || !indexPattern.timeFieldName || !customInterval) {
+  if (!includeHistogram || !dataView.timeFieldName || !customInterval) {
     return searchSource;
   }
 
   // Add histogram aggregations if requested and time-based
-  const histogramConfigs = createHistogramConfigs(indexPattern, customInterval, services.data);
+  const histogramConfigs = createHistogramConfigs(dataView, customInterval, services.data);
   if (histogramConfigs) {
     searchSource.setField('aggs', histogramConfigs.toDsl());
   }
@@ -455,7 +424,7 @@ export const executeHistogramQuery = createAsyncThunk<
   return executeQueryBase(
     {
       ...params,
-      includeHistogram: true, // Histogram-specific flag
+      includeHistogram: true,
     },
     thunkAPI
   );
