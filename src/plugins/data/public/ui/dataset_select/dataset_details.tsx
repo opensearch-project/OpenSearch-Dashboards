@@ -30,26 +30,13 @@ export interface DatasetDetailsProps {
 export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefault }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDefaultDataset, setIsDefaultDataset] = useState(isDefault);
   const {
     query: { queryString },
-    dataViews,
   } = services.data;
   const datasetService = queryString.getDatasetService();
 
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const closePopover = useCallback(() => setIsOpen(false), []);
-
-  const handleDefaultDatasetClicked = useCallback(async () => {
-    if (!dataset) return;
-
-    if (isDefaultDataset) {
-      return;
-    } else {
-      await dataViews.setDefault(dataset.id as string, true);
-      setIsDefaultDataset(true);
-    }
-  }, [dataset, isDefaultDataset, dataViews]);
 
   const getTypeFromUri = useCallback((uri?: string): string | undefined => {
     if (!uri) return undefined;
@@ -113,21 +100,15 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
             }
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <div
-              onClick={handleDefaultDatasetClicked}
-              data-test-subj="datasetDetailsDefaultButton"
-              tabIndex={0}
-              onKeyDown={() => {}}
+            <EuiBadge
+              color={isDefault ? 'default' : 'hollow'}
+              className="datasetDetails__defaultBadge"
+              data-test-subj="datasetDetailsDefault"
             >
-              <EuiBadge
-                color={isDefault ? 'default' : 'hollow'}
-                className="datasetDetails__defaultBadge"
-              >
-                {i18n.translate('data.datasetDetails.defaultLabel', {
-                  defaultMessage: 'Default',
-                })}
-              </EuiBadge>
-            </div>
+              {i18n.translate('data.datasetDetails.defaultLabel', {
+                defaultMessage: 'Default',
+              })}
+            </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>

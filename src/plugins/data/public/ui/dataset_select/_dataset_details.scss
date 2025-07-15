@@ -35,12 +35,6 @@
     min-width: 0;
   }
 
-  &__defaultBadge {
-    span:is([class*="euiBadge__text"]) {
-      cursor: pointer;
-    }
-  }
-
   &__footer {
     padding: 0;
   }
