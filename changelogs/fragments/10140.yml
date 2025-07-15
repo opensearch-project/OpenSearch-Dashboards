@@ -1,2 +1,2 @@
 feat:
-- Move add to dashboard button into action bar ([#10140](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10140))
+- Change fields selector default setting to show missing fields ([#10140](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10140))
