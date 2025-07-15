@@ -29,9 +29,9 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
 
 // Mock the TimechartHeader component
 jest.mock('./timechart_header', () => ({
-  TimechartHeader: ({ onChangeInterval }: { onChangeInterval: (interval: string) => void }) => (
+  TimechartHeader: (props: { onChangeInterval: (interval: string) => void }) => (
     <div data-test-subj="mockTimechartHeader">
-      <button onClick={() => onChangeInterval('1h')}>Change Interval</button>
+      <button onClick={() => props.onChangeInterval('1h')}>Change Interval</button>
     </div>
   ),
 }));
