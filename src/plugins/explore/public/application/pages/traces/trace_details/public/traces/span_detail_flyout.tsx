@@ -312,7 +312,6 @@ export function SpanDetailFlyout(props: {
       'durationInNanos',
       'startTime',
       'endTime',
-      'status.code',
       'events',
       'traceId',
       'traceGroup',

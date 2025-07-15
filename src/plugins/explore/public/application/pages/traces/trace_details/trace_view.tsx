@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiPage, EuiPageBody, EuiSpacer, EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
@@ -13,7 +13,7 @@ import { TracePPLService } from './server/ppl_request_trace';
 import { MountPoint } from '../../../../../../../core/public';
 import { transformPPLDataToTraceHits } from './public/traces/ppl_to_trace_hits';
 import { DataExplorerServices } from '../../../../../../data_explorer/public';
-// import { LogsDetails } from './public/logs/log_detail';
+import { LogsDetails } from './public/logs/log_detail';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
 import { ServiceMap } from './public/services/service_map';
@@ -39,8 +39,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState<boolean>(false);
   const [unfilteredHits, setUnfilteredHits] = useState<any[]>([]);
-  // const [logsAvailableWidth, setLogsAvailableWidth] = useState<number>(window.innerWidth);
-  // const logsContainerRef = useRef<HTMLDivElement | null>(null);
+  const [logsAvailableWidth, setLogsAvailableWidth] = useState<number>(window.innerWidth);
+  const logsContainerRef = useRef<HTMLDivElement | null>(null);
   const traceId = qs.get('traceId') || '';
   const dataSourceId = qs.get('datasourceId') || '';
   const indexPattern = qs.get('indexPattern') || 'otel-v1-apm-span-*';
@@ -67,26 +67,26 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
   };
 
   // Update logs container width
-  // const updateLogsAvailableWidth = () => {
-  //   if (logsContainerRef.current) {
-  //     const w = logsContainerRef.current.getBoundingClientRect().width;
-  //     setLogsAvailableWidth(w - 32);
-  //   } else {
-  //     setLogsAvailableWidth(window.innerWidth - 80);
-  //   }
-  // };
+  const updateLogsAvailableWidth = () => {
+    if (logsContainerRef.current) {
+      const w = logsContainerRef.current.getBoundingClientRect().width;
+      setLogsAvailableWidth(w - 32);
+    } else {
+      setLogsAvailableWidth(window.innerWidth - 80);
+    }
+  };
 
-  // useEffect(() => {
-  //   window.addEventListener('resize', updateLogsAvailableWidth);
-  //   setTimeout(updateLogsAvailableWidth, 100);
-  //   return () => window.removeEventListener('resize', updateLogsAvailableWidth);
-  // }, []);
+  useEffect(() => {
+    window.addEventListener('resize', updateLogsAvailableWidth);
+    setTimeout(updateLogsAvailableWidth, 100);
+    return () => window.removeEventListener('resize', updateLogsAvailableWidth);
+  }, []);
 
-  // useEffect(() => {
-  //   if (logsContainerRef.current) {
-  //     updateLogsAvailableWidth();
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (logsContainerRef.current) {
+      updateLogsAvailableWidth();
+    }
+  }, []);
 
   useEffect(() => {
     chrome?.setBreadcrumbs([
@@ -198,8 +198,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
                     colorMap={colorMap}
                   />
                   <EuiSpacer size="m" />
-                  {/* Pending logs correlation */}
-                  {/* <div ref={logsContainerRef}>
+
+                  <div ref={logsContainerRef}>
                     <LogsDetails
                       traceId={traceId}
                       dataSourceId={dataSourceId}
@@ -207,7 +207,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
                       availableWidth={logsAvailableWidth}
                       traceData={transformedHits}
                     />
-                  </div> */}
+                  </div>
                 </>
               )}
             </>
