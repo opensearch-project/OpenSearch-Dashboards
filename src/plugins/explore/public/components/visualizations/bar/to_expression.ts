@@ -8,6 +8,14 @@ import { BarChartStyleControls } from './bar_vis_config';
 import { applyAxisStyling } from '../line/line_chart_utils';
 import { getStrokeDash, createThresholdLayer } from '../style_panel/threshold/utils';
 
+// Only set size and binSpacing in manual mode
+const configureBarSizeAndSpacing = (barMark: any, styles: Partial<BarChartStyleControls>) => {
+  if (styles.barSizeMode === 'manual') {
+    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
+    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
+  }
+};
+
 export const createBarSpec = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
@@ -40,12 +48,7 @@ export const createBarSpec = (
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
-
-  // Only set size and binSpacing in manual mode
-  if (styles.barSizeMode === 'manual') {
-    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14; // Scale the bar width
-    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1; // Scale the bar padding
-  }
+  configureBarSizeAndSpacing(barMark, styles);
 
   // Add border if enabled
   if (styles.showBarBorder) {
@@ -144,12 +147,7 @@ export const createTimeBarChart = (
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
-
-  // Only set size and binSpacing in manual mode
-  if (styles.barSizeMode === 'manual') {
-    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
-    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
-  }
+  configureBarSizeAndSpacing(barMark, styles);
 
   // Add border if enabled
   if (styles.showBarBorder) {
@@ -256,12 +254,7 @@ export const createGroupedTimeBarChart = (
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
-
-  // Only set size and binSpacing in manual mode
-  if (styles.barSizeMode === 'manual') {
-    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
-    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
-  }
+  configureBarSizeAndSpacing(barMark, styles);
 
   // Add border if enabled
   if (styles.showBarBorder) {
@@ -375,12 +368,7 @@ export const createFacetedTimeBarChart = (
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
-
-  // Only set size and binSpacing in manual mode
-  if (styles.barSizeMode === 'manual') {
-    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
-    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
-  }
+  configureBarSizeAndSpacing(barMark, styles);
 
   // Add border if enabled
   if (styles.showBarBorder) {
@@ -514,12 +502,7 @@ export const createStackedBarSpec = (
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
-
-  // Only set size and binSpacing in manual mode
-  if (styles.barSizeMode === 'manual') {
-    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
-    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
-  }
+  configureBarSizeAndSpacing(barMark, styles);
 
   // Add border if enabled
   if (styles.showBarBorder) {
