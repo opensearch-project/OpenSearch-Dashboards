@@ -32,10 +32,6 @@ jest.mock('react-redux', () => ({
   connect: () => (component: any) => component,
 }));
 
-jest.mock('../../application/components/index_pattern_context', () => ({
-  useIndexPatternContext: () => ({ indexPattern: {} }),
-}));
-
 jest.mock('../../application/utils/hooks/use_tab_results', () => ({
   useTabResults: () => ({ results: { hits: { hits: [] } } }),
 }));

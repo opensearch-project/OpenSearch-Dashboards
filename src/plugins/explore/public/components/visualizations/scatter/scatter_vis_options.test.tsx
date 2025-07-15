@@ -5,7 +5,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ScatterVisStyleControls, ScatterVisStyleControlsProps } from './scatter_vis_options';
-import { VisFieldType, Positions } from '../types';
+import { VisFieldType, Positions, AxisRole } from '../types';
 import { defaultScatterChartStyles } from './scatter_vis_config';
 
 jest.mock('@osd/i18n', () => ({
@@ -38,39 +38,49 @@ describe('ScatterVisStyleControls', () => {
     ],
     categoricalColumns: [],
     dateColumns: [],
+    axisColumnMappings: {
+      [AxisRole.X]: {
+        id: 1,
+        name: 'value',
+        schema: VisFieldType.Numerical,
+        column: 'field-1',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+      [AxisRole.Y]: {
+        id: 2,
+        name: 'value',
+        schema: VisFieldType.Numerical,
+        column: 'field-2',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+    },
+    updateVisualization: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders all tabs', () => {
+  it('renders the Fields section', () => {
     render(<ScatterVisStyleControls {...mockProps} />);
-
-    expect(screen.getByText('Basic')).toBeInTheDocument();
-    expect(screen.getByText('Exclusive')).toBeInTheDocument();
-    expect(screen.getByText('Axes')).toBeInTheDocument();
+    expect(screen.getByText('Fields')).toBeInTheDocument();
   });
 
-  it('renders the BasicVisOptions component in the first tab', () => {
+  it('renders the Axis section', () => {
     render(<ScatterVisStyleControls {...mockProps} />);
-    const tab = screen.getByRole('tab', { name: /basic/i });
-    fireEvent.click(tab);
-    expect(screen.getByTestId('generalSettingsPanel')).toBeInTheDocument();
+    expect(screen.getByText('Axis')).toBeInTheDocument();
   });
 
-  it('renders the exclusive options component in the first tab', () => {
+  it('renders the Scatter section', () => {
     render(<ScatterVisStyleControls {...mockProps} />);
-    const tab = screen.getByRole('tab', { name: /exclusive/i });
-    fireEvent.click(tab);
-    expect(screen.getByTestId('scatterExclusivePanel')).toBeInTheDocument();
+    expect(screen.getByText('Scatter')).toBeInTheDocument();
   });
 
-  it('renders the axes options component in the first tab', () => {
+  it('renders the Grid section', () => {
     render(<ScatterVisStyleControls {...mockProps} />);
-    const tab = screen.getByRole('tab', { name: /axes/i });
-    fireEvent.click(tab);
-    expect(screen.getByTestId('standardAxesPanel')).toBeInTheDocument();
+    expect(screen.getByText('Grid')).toBeInTheDocument();
   });
 
   it('calls onStyleChange to infer fields for StandardAxes when component renders', () => {
@@ -100,11 +110,11 @@ describe('ScatterVisStyleControls', () => {
     );
   });
 
-  it('calls onStyleChange with the correct parameters when a style option changes', () => {
+  it('calls onStyleChange with the correct parameters when the switch axes button is clicked', () => {
     render(<ScatterVisStyleControls {...mockProps} />);
-    const tab = screen.getByRole('tab', { name: /axes/i });
-    fireEvent.click(tab);
-    const switchButton = screen.getByTestId('switchAxesButton');
+
+    // Find the Switch X and Y button
+    const switchButton = screen.getByText('Switch X and Y');
     fireEvent.click(switchButton);
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith(
@@ -131,5 +141,10 @@ describe('ScatterVisStyleControls', () => {
         ]),
       })
     );
+  });
+
+  it('renders the Tooltip section', () => {
+    render(<ScatterVisStyleControls {...mockProps} />);
+    expect(screen.getByText('Tooltip')).toBeInTheDocument();
   });
 });
