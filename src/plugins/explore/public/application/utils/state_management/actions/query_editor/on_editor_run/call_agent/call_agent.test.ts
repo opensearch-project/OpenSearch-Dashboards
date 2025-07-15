@@ -4,7 +4,11 @@
  */
 
 import { callAgentActionCreator } from './call_agent';
-import { setEditorMode } from '../../../../slices';
+import {
+  setEditorMode,
+  setPromptToQueryIsLoading,
+  setLastExecutedPrompt,
+} from '../../../../slices';
 import { EditorMode } from '../../../../types';
 import { runQueryActionCreator } from '../../run_query';
 import { useOnEditorRunContext } from '../../../../../../hooks';
@@ -18,6 +22,8 @@ import {
 // Mock the dependencies
 jest.mock('../../../../slices', () => ({
   setEditorMode: jest.fn(),
+  setPromptToQueryIsLoading: jest.fn(),
+  setLastExecutedPrompt: jest.fn(),
 }));
 
 jest.mock('../../run_query', () => ({
@@ -25,6 +31,12 @@ jest.mock('../../run_query', () => ({
 }));
 
 const mockSetEditorMode = setEditorMode as jest.MockedFunction<typeof setEditorMode>;
+const mockSetPromptToQueryIsLoading = setPromptToQueryIsLoading as jest.MockedFunction<
+  typeof setPromptToQueryIsLoading
+>;
+const mockSetLastExecutedPrompt = setLastExecutedPrompt as jest.MockedFunction<
+  typeof setLastExecutedPrompt
+>;
 const mockRunQueryActionCreator = runQueryActionCreator as jest.MockedFunction<
   typeof runQueryActionCreator
 >;
@@ -81,6 +93,14 @@ describe('callAgentActionCreator', () => {
     mockSetEditorMode.mockReturnValue({
       type: 'queryEditor/setEditorMode',
       payload: EditorMode.DualPrompt,
+    });
+    mockSetPromptToQueryIsLoading.mockReturnValue({
+      type: 'queryEditor/setPromptToQueryIsLoading',
+      payload: true,
+    });
+    mockSetLastExecutedPrompt.mockReturnValue({
+      type: 'queryEditor/setLastExecutedPrompt',
+      payload: 'test prompt',
     });
     mockRunQueryActionCreator.mockReturnValue(jest.fn());
   });
@@ -202,6 +222,30 @@ describe('callAgentActionCreator', () => {
 
       expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, mockResponse.query);
       expect(mockDispatch).toHaveBeenCalledWith(mockRunAction);
+    });
+
+    it('should set loading state to true before API call and false after completion', async () => {
+      const thunk = callAgentActionCreator({
+        services: mockServices,
+        onEditorRunContext: mockOnEditorRunContext,
+      });
+
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledWith(true);
+      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledWith(false);
+      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledTimes(2);
+    });
+
+    it('should set last executed prompt after successful API call', async () => {
+      const thunk = callAgentActionCreator({
+        services: mockServices,
+        onEditorRunContext: mockOnEditorRunContext,
+      });
+
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSetLastExecutedPrompt).toHaveBeenCalledWith('What are the top 10 users?');
     });
   });
 
@@ -368,6 +412,36 @@ describe('callAgentActionCreator', () => {
       expect(mockOnEditorRunContext.setBottomEditorText).not.toHaveBeenCalled();
       expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
     });
+
+    it('should set loading to false even when error occurs', async () => {
+      const error = new Error('API error');
+      (mockServices.http.post as jest.Mock).mockRejectedValue(error);
+
+      const thunk = callAgentActionCreator({
+        services: mockServices,
+        onEditorRunContext: mockOnEditorRunContext,
+      });
+
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledWith(true);
+      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledWith(false);
+      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not set last executed prompt when error occurs', async () => {
+      const error = new Error('API error');
+      (mockServices.http.post as jest.Mock).mockRejectedValue(error);
+
+      const thunk = callAgentActionCreator({
+        services: mockServices,
+        onEditorRunContext: mockOnEditorRunContext,
+      });
+
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSetLastExecutedPrompt).not.toHaveBeenCalled();
+    });
   });
 
   describe('dataset variations', () => {
@@ -445,6 +519,10 @@ describe('callAgentActionCreator', () => {
         dispatchCallCount++;
         if (action.type === 'queryEditor/setEditorMode') {
           calls.push('setEditorMode');
+        } else if (action.type === 'queryEditor/setPromptToQueryIsLoading') {
+          calls.push('setPromptToQueryIsLoading');
+        } else if (action.type === 'queryEditor/setLastExecutedPrompt') {
+          calls.push('setLastExecutedPrompt');
         } else if (typeof action === 'function') {
           // This is the runQuery thunk
           calls.push('runQuery');
@@ -469,8 +547,16 @@ describe('callAgentActionCreator', () => {
 
       await thunk(mockDispatch, mockGetState, undefined);
 
-      expect(calls).toEqual(['setBottomEditorText', 'setEditorMode', 'setTime', 'runQuery']);
-      expect(dispatchCallCount).toBe(4);
+      expect(calls).toEqual([
+        'setPromptToQueryIsLoading',
+        'setBottomEditorText',
+        'setEditorMode',
+        'setTime',
+        'runQuery',
+        'setLastExecutedPrompt',
+        'setPromptToQueryIsLoading',
+      ]);
+      expect(dispatchCallCount).toBe(7);
     });
   });
 });

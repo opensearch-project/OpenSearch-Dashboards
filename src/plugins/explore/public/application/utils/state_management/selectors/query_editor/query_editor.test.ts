@@ -13,6 +13,7 @@ import {
   selectEditorMode,
   selectIsDualEditorMode,
   selectPromptModeIsAvailable,
+  selectPromptToQueryIsLoading,
 } from './query_editor';
 import { RootState } from '../../store';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
@@ -29,6 +30,7 @@ describe('query_editor selectors', () => {
       },
       editorMode: EditorMode.SingleQuery,
       promptModeIsAvailable: false,
+      promptToQueryIsLoading: false,
       lastExecutedPrompt: '',
       ...queryEditorState,
     },
@@ -255,6 +257,28 @@ describe('query_editor selectors', () => {
       });
 
       const result = selectPromptModeIsAvailable(state);
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('selectPromptToQueryIsLoading', () => {
+    it('should return true when promptToQueryIsLoading is true', () => {
+      const state = createMockState({
+        promptToQueryIsLoading: true,
+      });
+
+      const result = selectPromptToQueryIsLoading(state);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when promptToQueryIsLoading is false', () => {
+      const state = createMockState({
+        promptToQueryIsLoading: false,
+      });
+
+      const result = selectPromptToQueryIsLoading(state);
 
       expect(result).toBe(false);
     });
