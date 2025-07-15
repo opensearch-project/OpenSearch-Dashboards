@@ -265,6 +265,7 @@ const getPreloadedQueryEditorState = async (
       body: undefined,
     },
     promptModeIsAvailable,
+    promptToQueryIsLoading: false,
     editorMode,
     lastExecutedPrompt: '',
   };

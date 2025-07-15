@@ -15,7 +15,11 @@ import {
   AgentError,
   ProhibitedQueryError,
 } from '../../../../../../../components/query_panel/utils/error';
-import { setEditorMode, setLastExecutedPrompt } from '../../../../slices';
+import {
+  setEditorMode,
+  setLastExecutedPrompt,
+  setPromptToQueryIsLoading,
+} from '../../../../slices';
 import { EditorMode } from '../../../../types';
 import { runQueryActionCreator } from '../../run_query';
 import { useOnEditorRunContext } from '../../../../../../hooks';
@@ -59,6 +63,7 @@ export const callAgentActionCreator = createAsyncThunk<
   }
 
   try {
+    dispatch(setPromptToQueryIsLoading(true));
     const params: QueryAssistParameters = {
       question: prompt,
       index: dataset.title,
@@ -111,5 +116,7 @@ export const callAgentActionCreator = createAsyncThunk<
         }),
       });
     }
+  } finally {
+    dispatch(setPromptToQueryIsLoading(false));
   }
 });
