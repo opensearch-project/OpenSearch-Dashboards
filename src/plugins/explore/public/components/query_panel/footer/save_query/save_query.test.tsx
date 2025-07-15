@@ -7,6 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { EditorMode } from '../../../../application/utils/state_management/types';
 
 // Mock all modules before importing the component
 const mockDispatch = jest.fn();
@@ -69,14 +70,27 @@ jest.doMock('../../../../application/utils/state_management/actions/query_editor
   loadQueryActionCreator: mockLoadQueryActionCreator,
 }));
 
+// Mock the selectors - make them mutable for testing different modes
+const mockSelectEditorMode = jest.fn(() => EditorMode.SingleQuery);
+const mockSelectQuery = jest.fn(() => ({
+  query: 'SELECT * FROM logs',
+  language: 'SQL',
+  dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+}));
+
+jest.doMock('../../../../application/utils/state_management/selectors', () => ({
+  selectEditorMode: mockSelectEditorMode,
+  selectQuery: mockSelectQuery,
+}));
+
 jest.doMock('../../../../application/utils/state_management/actions/query_actions', () => ({
-  executeQueries: jest.fn(() => ({ type: 'EXECUTE_QUERIES' })),
+  executeQueries: jest.fn(() => ({ type: 'query/executeQueries/pending' })),
 }));
 
 jest.doMock('../../../../application/utils/state_management/slices', () => ({
-  clearResults: jest.fn(() => ({ type: 'CLEAR_RESULTS' })),
-  setSavedQuery: jest.fn(() => ({ type: 'SET_SAVED_QUERY' })),
-  setQueryState: jest.fn(() => ({ type: 'SET_QUERY_STATE' })),
+  clearResults: jest.fn(() => ({ type: 'results/clearResults' })),
+  setSavedQuery: jest.fn(() => ({ type: 'legacy/setSavedQuery' })),
+  setQueryState: jest.fn(() => ({ type: 'query/setQueryState' })),
 }));
 
 // Mock SavedQueryManagementComponent
@@ -86,6 +100,7 @@ jest.doMock('../../../../../../data/public', () => ({
     onClearSavedQuery,
     saveQuery,
     loadedSavedQuery,
+    saveQueryIsDisabled,
   }: any) => (
     <div data-test-subj="saved-query-management">
       <button
@@ -97,6 +112,7 @@ jest.doMock('../../../../../../data/public', () => ({
             shouldIncludeTimeFilter: true,
           })
         }
+        disabled={saveQueryIsDisabled}
       >
         Save Query
       </button>
@@ -126,6 +142,7 @@ jest.doMock('../../../../../../data/public', () => ({
           Loaded: {loadedSavedQuery.attributes?.query?.query}
         </div>
       )}
+      {saveQueryIsDisabled && <div data-test-subj="save-disabled-indicator">Save Disabled</div>}
     </div>
   ),
 }));
@@ -138,6 +155,7 @@ const createMockStore = (initialState = {}) => {
     reducer: {
       query: (state = {}) => state,
       legacy: (state = {}) => state,
+      queryEditor: (state = {}) => state,
     },
     preloadedState: {
       query: {
@@ -147,6 +165,9 @@ const createMockStore = (initialState = {}) => {
       },
       legacy: {
         savedQuery: undefined,
+      },
+      queryEditor: {
+        editorMode: 'SingleQuery',
       },
       ...initialState,
     },
@@ -165,6 +186,7 @@ const renderWithStore = (initialState = {}) => {
 describe('SaveQueryButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
     mockSavedQueryService.saveQuery.mockResolvedValue({ id: 'saved-query-id' });
     mockSavedQueryService.getSavedQuery.mockResolvedValue({
       id: 'test-query-id',
@@ -256,9 +278,25 @@ describe('SaveQueryButton', () => {
     fireEvent.click(loadButton);
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_SAVED_QUERY' });
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_QUERY_STATE' });
-      expect(mockLoadQueryActionCreator).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'legacy/setSavedQuery' });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'query/setQueryState' });
+      expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            query: expect.objectContaining({
+              savedQueries: mockSavedQueryService,
+            }),
+          }),
+          notifications: expect.objectContaining({
+            toasts: expect.objectContaining({
+              addSuccess: expect.any(Function),
+              addDanger: expect.any(Function),
+            }),
+          }),
+        }),
+        mockClearEditorsAndSetText,
+        'SELECT * FROM test'
+      );
       expect(mockTimeFilter.setTime).toHaveBeenCalledWith({
         from: 'now-1h',
         to: 'now',
@@ -279,7 +317,7 @@ describe('SaveQueryButton', () => {
     const clearButton = screen.getByTestId('mock-clear-button');
     fireEvent.click(clearButton);
 
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_SAVED_QUERY' });
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'legacy/setSavedQuery' });
   });
 
   it('loads current saved query when savedQueryId exists in state', async () => {
@@ -304,7 +342,7 @@ describe('SaveQueryButton', () => {
     });
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_SAVED_QUERY' });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'legacy/setSavedQuery' });
     });
   });
 
@@ -344,6 +382,48 @@ describe('SaveQueryButton', () => {
 
     await waitFor(() => {
       expect(mockSavedQueryService.saveQuery).toHaveBeenCalled();
+    });
+  });
+
+  describe('saveQueryIsDisabled', () => {
+    beforeEach(() => {
+      mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+    });
+
+    it('enables save query when editor mode is SingleQuery', () => {
+      mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+      renderWithStore();
+
+      const button = screen.getByTestId('queryPanelFooterSaveQueryButton');
+      fireEvent.click(button);
+
+      const saveButton = screen.getByTestId('mock-save-button');
+      expect(saveButton).not.toBeDisabled();
+      expect(screen.queryByTestId('save-disabled-indicator')).not.toBeInTheDocument();
+    });
+
+    it('enables save query when editor mode is DualQuery', () => {
+      mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
+      renderWithStore();
+
+      const button = screen.getByTestId('queryPanelFooterSaveQueryButton');
+      fireEvent.click(button);
+
+      const saveButton = screen.getByTestId('mock-save-button');
+      expect(saveButton).not.toBeDisabled();
+      expect(screen.queryByTestId('save-disabled-indicator')).not.toBeInTheDocument();
+    });
+
+    it('disables save query when editor mode is not SingleQuery or DualQuery', () => {
+      mockSelectEditorMode.mockReturnValue(EditorMode.SinglePrompt);
+      renderWithStore();
+
+      const button = screen.getByTestId('queryPanelFooterSaveQueryButton');
+      fireEvent.click(button);
+
+      const saveButton = screen.getByTestId('mock-save-button');
+      expect(saveButton).toBeDisabled();
+      expect(screen.getByTestId('save-disabled-indicator')).toBeInTheDocument();
     });
   });
 });
