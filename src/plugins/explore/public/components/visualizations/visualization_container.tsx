@@ -35,7 +35,6 @@ import {
   selectAxesMapping,
 } from '../../application/utils/state_management/selectors';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
-import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import {
   applyDefaultVisualization,
@@ -46,6 +45,7 @@ import {
   getColumnMatchFromMapping,
   isValidMapping,
 } from './visualization_container_utils';
+import { useSearchContext } from '../query_panel/utils/use_search_context';
 
 export interface UpdateVisualizationProps {
   rule?: Partial<VisualizationRule>;
@@ -61,6 +61,7 @@ export const VisualizationContainer = () => {
   } = services;
   const { dataset } = useDatasetContext();
   const { results } = useTabResults();
+  const searchContext = useSearchContext();
 
   // TODO: Register custom processor for visualization tab
   // const tabDefinition = services.tabRegistry?.getTab?.('explore_visualization_tab');
@@ -219,12 +220,6 @@ export const VisualizationContainer = () => {
     styleOptions,
   ]);
 
-  const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
-    query: data.query.queryString.getQuery(),
-    filters: data.query.filterManager.getFilters(),
-    timeRange: data.query.timefilter.timefilter.getTime(),
-  });
-
   // Hook to generate the expression based on the visualization type and data
   const expression = useMemo(() => {
     if (
@@ -288,23 +283,6 @@ export const VisualizationContainer = () => {
     selectedChartType,
     currentRuleId,
   ]);
-
-  // Hook to update the search context whenever the query state changes
-  // This will ensure that the visualization is always up-to-date with the latest query and filters
-  // Also updates the enableViz state based on the query language
-  useEffect(() => {
-    const subscription = services.data.query.state$.subscribe(({ state }) => {
-      setSearchContext({
-        query: state.query,
-        timeRange: state.time,
-        filters: state.filters,
-      });
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [data.query.queryString, services.data.query.state$]);
 
   const handleStyleChange = useCallback(
     (newOptions: Partial<ChartStyleControlMap[ChartType]>) => {

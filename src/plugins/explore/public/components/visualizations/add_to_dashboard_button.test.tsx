@@ -28,6 +28,13 @@ jest.mock('../../application/utils/hooks/use_current_explore_id', () => ({
 jest.mock('../../../public/helpers/use_flavor_id', () => ({
   useFlavorId: jest.fn(() => 'logs'),
 }));
+jest.mock('../query_panel/utils/use_search_context', () => {
+  return {
+    useSearchContext: jest.fn(() => ({
+      searchContext: {},
+    })),
+  };
+});
 
 jest.mock('./add_to_dashboard_modal', () => ({
   AddToDashboardModal: ({ onCancel, onConfirm }: any) => (
@@ -88,11 +95,7 @@ describe('SaveAndAddButtonWithModal', () => {
   it('renders the add button and opens modal on click', async () => {
     render(
       <Provider store={store}>
-        <SaveAndAddButtonWithModal
-          services={mockServices as any}
-          searchContext={{} as any}
-          dataset={undefined}
-        />
+        <SaveAndAddButtonWithModal services={mockServices as any} dataset={undefined} />
       </Provider>
     );
 
@@ -113,11 +116,7 @@ describe('SaveAndAddButtonWithModal', () => {
 
     render(
       <Provider store={store}>
-        <SaveAndAddButtonWithModal
-          services={mockServices as any}
-          searchContext={{} as any}
-          dataset={undefined}
-        />
+        <SaveAndAddButtonWithModal services={mockServices as any} dataset={undefined} />
       </Provider>
     );
 
@@ -142,11 +141,7 @@ describe('SaveAndAddButtonWithModal', () => {
 
     render(
       <Provider store={store}>
-        <SaveAndAddButtonWithModal
-          services={mockServices as any}
-          searchContext={{} as any}
-          dataset={undefined}
-        />
+        <SaveAndAddButtonWithModal services={mockServices as any} dataset={undefined} />
       </Provider>
     );
 

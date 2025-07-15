@@ -14,7 +14,6 @@ import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
 import { ExploreServices } from '../../types';
 import { selectUIState, selectTabState } from '../../application/utils/state_management/selectors';
-import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
   DataView as Dataset,
   IndexPattern,
@@ -25,6 +24,7 @@ import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from '../../helpers/save_explore';
 import { useCurrentExploreId } from '../../application/utils/hooks/use_current_explore_id';
 import { useFlavorId } from '../../../public/helpers/use_flavor_id';
+import { useSearchContext } from '../query_panel/utils/use_search_context';
 
 interface DashboardAttributes {
   title?: string;
@@ -43,14 +43,13 @@ export interface OnSaveProps {
 
 export const SaveAndAddButtonWithModal = ({
   services,
-  searchContext,
   dataset,
 }: {
   services: Partial<CoreStart> & ExploreServices;
-  searchContext: ExecutionContextSearch;
   dataset?: IndexPattern | Dataset;
 }) => {
   const { core, dashboard, savedObjects, toastNotifications, uiSettings, history, data } = services;
+  const searchContext = useSearchContext();
 
   // Create osdUrlStateStorage from storage
   const osdUrlStateStorage = useMemo(() => {

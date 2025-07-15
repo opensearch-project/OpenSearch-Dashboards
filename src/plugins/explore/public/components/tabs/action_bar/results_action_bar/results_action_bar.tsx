@@ -86,11 +86,7 @@ export const DiscoverResultsActionBar = ({
               </EuiFlexItem>
               {dataset && (
                 <EuiFlexItem grow={false}>
-                  <SaveAndAddButtonWithModal
-                    searchContext={searchContext}
-                    dataset={dataset}
-                    services={services}
-                  />
+                  <SaveAndAddButtonWithModal dataset={dataset} services={services} />
                 </EuiFlexItem>
               )}
             </>
