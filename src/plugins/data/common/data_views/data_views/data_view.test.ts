@@ -183,9 +183,7 @@ describe('DataView', () => {
 
       const scriptedFields = dataView.getScriptedFields();
       expect(scriptedFields).toHaveLength(oldCount + 1);
-      expect((dataView.fields.getByName(scriptedField.name) as DataViewField).name).toEqual(
-        scriptedField.name
-      );
+      expect(dataView.fields.getByName(scriptedField.name)?.name).toEqual(scriptedField.name);
     });
 
     test('should remove scripted field, by name', async () => {
