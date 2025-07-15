@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TimeRange, RefreshInterval } from '../../data/public';
-import { QueryState } from './application/utils/state_management/slices';
+import { TimeRange, RefreshInterval, QueryState as DataQueryState } from '../../data/public';
+import { QueryState as ExploreQueryState } from './application/utils/state_management/slices';
 import { setStateToOsdUrl } from '../../opensearch_dashboards_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
 
@@ -35,7 +35,7 @@ export interface ExploreUrlGeneratorState {
    * Optionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the
    * saved dashboard has a query saved with it, this will _replace_ that query.
    */
-  query?: QueryState;
+  query?: ExploreQueryState;
 
   /**
    * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
