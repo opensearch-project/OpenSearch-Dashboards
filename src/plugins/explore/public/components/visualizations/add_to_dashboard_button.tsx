@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiText, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject } from 'src/core/public';
@@ -203,11 +203,11 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
 
   return (
     <>
-      <EuiButton size="s" onClick={() => setShowAddToDashboardModal(true)}>
+      <EuiButtonEmpty size="s" onClick={() => setShowAddToDashboardModal(true)}>
         {i18n.translate('explore.addtoDashboardButton.name', {
           defaultMessage: 'Add to dashboard',
         })}
-      </EuiButton>
+      </EuiButtonEmpty>
       {showAddToDashboardModal && (
         <AddToDashboardModal
           savedExploreId={savedExploreIdFromUrl}

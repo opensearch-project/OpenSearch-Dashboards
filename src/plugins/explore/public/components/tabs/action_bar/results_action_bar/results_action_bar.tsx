@@ -63,7 +63,8 @@ export const DiscoverResultsActionBar = ({
               elapsedMs={elapsedMs}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          {/* TODO: Fix data consistency issue with inspection panel */}
+          {/* <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
               onClick={inspectionHanlder}
@@ -73,7 +74,7 @@ export const DiscoverResultsActionBar = ({
                 defaultMessage: 'Explain',
               })}
             </EuiButtonEmpty>
-          </EuiFlexItem>
+          </EuiFlexItem> */}
           {dataset && rows?.length ? (
             <>
               <EuiFlexItem
