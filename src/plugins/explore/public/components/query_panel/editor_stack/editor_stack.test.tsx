@@ -19,6 +19,7 @@ jest.mock('./bottom_editor', () => ({
 
 jest.mock('../../../application/utils/state_management/selectors', () => ({
   selectIsLoading: jest.fn(),
+  selectPromptToQueryIsLoading: jest.fn(),
 }));
 
 jest.mock('react-redux', () => ({
@@ -26,9 +27,15 @@ jest.mock('react-redux', () => ({
   useSelector: (selector: any) => selector(),
 }));
 
-import { selectIsLoading } from '../../../application/utils/state_management/selectors';
+import {
+  selectIsLoading,
+  selectPromptToQueryIsLoading,
+} from '../../../application/utils/state_management/selectors';
 
 const mockSelectIsLoading = selectIsLoading as jest.MockedFunction<typeof selectIsLoading>;
+const mockSelectPromptToQueryIsLoading = selectPromptToQueryIsLoading as jest.MockedFunction<
+  typeof selectPromptToQueryIsLoading
+>;
 
 describe('EditorStack', () => {
   const createMockStore = () => {
@@ -42,6 +49,7 @@ describe('EditorStack', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSelectIsLoading.mockReturnValue(false);
+    mockSelectPromptToQueryIsLoading.mockReturnValue(false);
   });
 
   const renderWithProvider = (component: React.ReactElement) => {
@@ -58,14 +66,25 @@ describe('EditorStack', () => {
 
   it('does not show progress bar when not loading', () => {
     mockSelectIsLoading.mockReturnValue(false);
+    mockSelectPromptToQueryIsLoading.mockReturnValue(false);
 
     renderWithProvider(<EditorStack />);
 
     expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
   });
 
-  it('shows progress bar when loading', () => {
+  it('shows progress bar when query is loading', () => {
     mockSelectIsLoading.mockReturnValue(true);
+    mockSelectPromptToQueryIsLoading.mockReturnValue(false);
+
+    renderWithProvider(<EditorStack />);
+
+    expect(screen.getByTestId('exploreQueryPanelIsLoading')).toBeInTheDocument();
+  });
+
+  it('shows progress bar when prompt to query is loading', () => {
+    mockSelectIsLoading.mockReturnValue(false);
+    mockSelectPromptToQueryIsLoading.mockReturnValue(true);
 
     renderWithProvider(<EditorStack />);
 

@@ -40,6 +40,10 @@ const singleDisabledPromptEditorPlaceholder = i18n.translate(
   }
 );
 
+const promptIconLabel = i18n.translate('explore.queryPanel.promptEditor.promptIcon', {
+  defaultMessage: 'Search using natural language',
+});
+
 const dualEditorPlaceholder = i18n.translate('explore.queryPanel.promptEditor.dualPlaceholder', {
   defaultMessage: 'Ask a question',
 });
@@ -78,7 +82,12 @@ export const TopEditor = () => {
     >
       <div className="exploreTopEditor__overlay" />
       {isPromptMode ? (
-        <EuiIcon type="sparkleFilled" size="m" className="exploreTopEditor__promptIcon" />
+        <EuiIcon
+          type="sparkleFilled"
+          size="m"
+          className="exploreTopEditor__promptIcon"
+          aria-label={promptIconLabel}
+        />
       ) : null}
       {isDualMode ? <EditToolbar /> : null}
       <CodeEditor {...editorProps} />

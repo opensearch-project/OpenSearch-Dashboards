@@ -17,6 +17,7 @@ import {
   updateQueryStatus,
   setEditorMode,
   setPromptModeIsAvailable,
+  setPromptToQueryIsLoading,
   setLastExecutedPrompt,
 } from './query_editor_slice';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
@@ -33,6 +34,7 @@ describe('QueryEditor Slice', () => {
     },
     editorMode: DEFAULT_EDITOR_MODE,
     promptModeIsAvailable: false,
+    promptToQueryIsLoading: false,
     lastExecutedPrompt: '',
   };
 
@@ -64,6 +66,7 @@ describe('QueryEditor Slice', () => {
         },
         editorMode: EditorMode.DualQuery,
         promptModeIsAvailable: true,
+        promptToQueryIsLoading: false,
         lastExecutedPrompt: 'test prompt',
       };
 
@@ -434,6 +437,57 @@ describe('QueryEditor Slice', () => {
       expect(result.promptModeIsAvailable).toBe(true);
       expect(result.overallQueryStatus).toEqual(existingState.overallQueryStatus);
       expect(result.editorMode).toBe(EditorMode.DualQuery);
+    });
+  });
+
+  describe('setPromptToQueryIsLoading', () => {
+    it('should handle setPromptToQueryIsLoading action', () => {
+      const action = setPromptToQueryIsLoading(true);
+
+      expect(action.type).toBe('queryEditor/setPromptToQueryIsLoading');
+      expect(action.payload).toBe(true);
+
+      const newState = queryEditorReducer(initialState, action);
+      expect(newState.promptToQueryIsLoading).toBe(true);
+      expect(newState.overallQueryStatus).toEqual(initialState.overallQueryStatus);
+      expect(newState.editorMode).toBe(initialState.editorMode);
+      expect(newState.promptModeIsAvailable).toBe(initialState.promptModeIsAvailable);
+    });
+
+    it('should set loading to false', () => {
+      const existingState: QueryEditorSliceState = {
+        ...initialState,
+        promptToQueryIsLoading: true,
+      };
+
+      const action = setPromptToQueryIsLoading(false);
+      const result = queryEditorReducer(existingState, action);
+
+      expect(result.promptToQueryIsLoading).toBe(false);
+    });
+
+    it('should preserve other state properties', () => {
+      const existingState: QueryEditorSliceState = {
+        ...initialState,
+        overallQueryStatus: {
+          status: QueryExecutionStatus.READY,
+          elapsedMs: 300,
+          startTime: Date.now(),
+          body: undefined,
+        },
+        editorMode: EditorMode.DualPrompt,
+        promptModeIsAvailable: true,
+        promptToQueryIsLoading: false,
+        lastExecutedPrompt: 'test prompt',
+      };
+
+      const result = queryEditorReducer(existingState, setPromptToQueryIsLoading(true));
+
+      expect(result.promptToQueryIsLoading).toBe(true);
+      expect(result.overallQueryStatus).toEqual(existingState.overallQueryStatus);
+      expect(result.editorMode).toBe(EditorMode.DualPrompt);
+      expect(result.promptModeIsAvailable).toBe(true);
+      expect(result.lastExecutedPrompt).toBe('test prompt');
     });
   });
 

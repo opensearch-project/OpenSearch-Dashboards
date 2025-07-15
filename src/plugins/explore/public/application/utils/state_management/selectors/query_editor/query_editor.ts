@@ -38,6 +38,11 @@ export const selectPromptModeIsAvailable = createSelector(
   (state) => state.promptModeIsAvailable
 );
 
+export const selectPromptToQueryIsLoading = createSelector(
+  [selectState],
+  (state) => state.promptToQueryIsLoading
+);
+
 export const selectEditorMode = createSelector([selectState], (state) => state.editorMode);
 
 export const selectIsDualEditorMode = createSelector([selectState], (state) =>
