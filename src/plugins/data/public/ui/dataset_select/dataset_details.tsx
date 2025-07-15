@@ -10,7 +10,6 @@ import {
   EuiPopoverTitle,
   EuiTitle,
   EuiText,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
@@ -31,12 +30,21 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const [isOpen, setIsOpen] = useState(false);
   const {
+    dataViews,
     query: { queryString },
   } = services.data;
   const datasetService = queryString.getDatasetService();
 
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const closePopover = useCallback(() => setIsOpen(false), []);
+
+  const handleDataDefinitionClicked = useCallback(async () => {
+    if (!dataset || !dataset.dataSourceRef) {
+      return;
+    }
+
+    services.application!.navigateToApp('dataSources', { path: `/${dataset.dataSourceRef.id}` });
+  }, [dataset, services.application]);
 
   const getTypeFromUri = useCallback((uri?: string): string | undefined => {
     if (!uri) return undefined;
@@ -56,11 +64,7 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
   }
 
   const datasetType =
-    getTypeFromUri(dataset.dataSourceRef?.name) ||
-    dataset.type ||
-    DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
-  const datasetIcon = datasetService.getType(datasetType)?.meta.icon.type || 'database';
-
+    getTypeFromUri(dataset.dataSourceRef?.name) || dataViews.convertToDataset(dataset).type;
   const dataSourceName = dataset.dataSourceRef?.name || `default`;
   const datasetTitle = dataset.displayName || dataset.title;
   const datasetDescription = dataset.description || '';
@@ -147,16 +151,28 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
               </EuiText>
             ),
             description: (
-              <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={datasetIcon} size="s" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" className="datasetDetails__textTruncate">
-                    {dataSourceName}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiBadge
+                color="hollow"
+                iconType={
+                  (datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+                    ? 'logoOpenSearch'
+                    : datasetService.getType(datasetType)?.meta.icon.type)!
+                }
+                onClick={handleDataDefinitionClicked}
+                onClickAriaLabel={i18n.translate('data.datasetDetails.dataDefinitionAriaLabel', {
+                  defaultMessage: 'View data definition',
+                })}
+                className="datasetDetails__dataDefinition"
+                data-test-subj="datasetDetailsDataDefinition"
+              >
+                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" className="datasetDetails__textTruncate">
+                      {dataSourceName}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiBadge>
             ),
           },
           {
