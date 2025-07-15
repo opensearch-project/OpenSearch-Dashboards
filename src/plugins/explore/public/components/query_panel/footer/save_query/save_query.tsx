@@ -13,7 +13,10 @@ import {
   SavedQueryMeta,
   SavedQuery,
 } from '../../../../../../data/public';
-import { selectQuery } from '../../../../application/utils/state_management/selectors';
+import {
+  selectEditorMode,
+  selectQuery,
+} from '../../../../application/utils/state_management/selectors';
 import { clearResults, setSavedQuery } from '../../../../application/utils/state_management/slices';
 import { ExploreServices } from '../../../../types';
 import { setQueryState } from '../../../../application/utils/state_management/slices';
@@ -24,10 +27,12 @@ import { RootState } from '../../../../application/utils/state_management/store'
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
 import { useClearEditorsAndSetText, useEditorText } from '../../../../application/hooks';
 import './save_query.scss';
+import { EditorMode } from '../../../../application/utils/state_management/types';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { timeFilter } = useTimeFilter();
+  const editorMode = useSelector(selectEditorMode);
   const query = useSelector(selectQuery);
   const userInputText = useEditorText();
   const savedQueryService = services.data.query.savedQueries;
@@ -40,6 +45,7 @@ export const SaveQueryButton = () => {
 
   // Get the actual saved query object if we have an ID
   const [currentSavedQuery, setCurrentSavedQuery] = useState<SavedQuery | undefined>();
+  const saveButtonIsDisabled = ![EditorMode.SingleQuery, EditorMode.DualQuery].includes(editorMode);
 
   // Load saved query when ID changes
   useEffect(() => {
@@ -185,6 +191,7 @@ export const SaveQueryButton = () => {
         showSaveQuery={!!services.capabilities?.explore?.saveQuery}
         saveQuery={handleSaveQuery}
         useNewSavedQueryUI={true}
+        saveQueryIsDisabled={saveButtonIsDisabled}
       />
     </EuiPopover>
   );
