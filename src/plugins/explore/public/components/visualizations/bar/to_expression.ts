@@ -39,9 +39,13 @@ export const createBarSpec = (
   const barMark: any = {
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
-    size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
-    binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
+
+  // Only set size and binSpacing in manual mode
+  if (styles.barSizeMode === 'manual') {
+    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14; // Scale the bar width
+    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1; // Scale the bar padding
+  }
 
   // Add border if enabled
   if (styles.showBarBorder) {
@@ -139,9 +143,13 @@ export const createTimeBarChart = (
   const barMark: any = {
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
-    size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
-    binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
+
+  // Only set size and binSpacing in manual mode
+  if (styles.barSizeMode === 'manual') {
+    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
+    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
+  }
 
   // Add border if enabled
   if (styles.showBarBorder) {
@@ -247,9 +255,13 @@ export const createGroupedTimeBarChart = (
   const barMark: any = {
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
-    size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
-    binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
+
+  // Only set size and binSpacing in manual mode
+  if (styles.barSizeMode === 'manual') {
+    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
+    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
+  }
 
   // Add border if enabled
   if (styles.showBarBorder) {
@@ -362,9 +374,13 @@ export const createFacetedTimeBarChart = (
   const barMark: any = {
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
-    size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
-    binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
+
+  // Only set size and binSpacing in manual mode
+  if (styles.barSizeMode === 'manual') {
+    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
+    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
+  }
 
   // Add border if enabled
   if (styles.showBarBorder) {
@@ -497,9 +513,13 @@ export const createStackedBarSpec = (
   const barMark: any = {
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
-    size: styles.barWidth ? styles.barWidth * 20 : 14, // Scale the bar width
-    binSpacing: styles.barPadding ? styles.barPadding * 10 : 1, // Scale the bar padding
   };
+
+  // Only set size and binSpacing in manual mode
+  if (styles.barSizeMode === 'manual') {
+    barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
+    barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
+  }
 
   // Add border if enabled
   if (styles.showBarBorder) {
