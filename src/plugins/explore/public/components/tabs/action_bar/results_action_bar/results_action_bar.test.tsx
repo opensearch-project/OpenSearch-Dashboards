@@ -41,7 +41,6 @@ const props: DiscoverResultsActionBarProps = {
   rows: [mockRow1],
   dataset: {} as any,
   inspectionHanlder: mockInspectionHanlder,
-  searchContext: {} as any,
   services: {} as any,
 };
 

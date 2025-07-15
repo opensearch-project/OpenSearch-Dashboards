@@ -11,7 +11,6 @@ import { selectSavedSearch } from '../../../application/utils/state_management/s
 import { useDatasetContext } from '../../../application/context';
 import { ExploreFlavor } from '../../../../common';
 import { useTabResults } from '../../../application/utils/hooks/use_tab_results';
-import { useSearchContext } from '../../query_panel/utils/use_search_context';
 
 /**
  * Logs tab component for displaying log entries
@@ -23,7 +22,6 @@ const ActionBarComponent = () => {
   const { results } = useTabResults();
   const { core, inspector, inspectorAdapters } = services;
   const savedSearch = useSelector(selectSavedSearch);
-  const searchContext = useSearchContext();
 
   const openInspector = () => {
     if (inspector) {
@@ -50,7 +48,6 @@ const ActionBarComponent = () => {
       elapsedMs={elapsedMs}
       dataset={dataset}
       inspectionHanlder={openInspector}
-      searchContext={searchContext}
       services={services}
     />
   );

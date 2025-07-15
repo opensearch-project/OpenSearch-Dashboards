@@ -15,7 +15,6 @@ import { DiscoverDownloadCsv } from '../download_csv';
 import { DataView as Dataset } from '../../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 import { SaveAndAddButtonWithModal } from '../../../visualizations/add_to_dashboard_button';
-import { ExecutionContextSearch } from '../../../../../../expressions/common/';
 import { ExploreServices } from '../../../../types';
 
 export interface DiscoverResultsActionBarProps {
@@ -26,7 +25,6 @@ export interface DiscoverResultsActionBarProps {
   elapsedMs?: number;
   dataset?: Dataset;
   inspectionHanlder?: () => void;
-  searchContext: ExecutionContextSearch;
   services: Partial<CoreStart> & ExploreServices;
 }
 
@@ -38,7 +36,6 @@ export const DiscoverResultsActionBar = ({
   elapsedMs,
   dataset,
   inspectionHanlder,
-  searchContext,
   services,
 }: DiscoverResultsActionBarProps) => {
   return (
