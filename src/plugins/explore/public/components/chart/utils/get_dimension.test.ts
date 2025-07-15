@@ -8,11 +8,7 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { search } from '../../../../../data/public';
 import { dataPluginMock } from '../../../../../data/public/mocks';
-import {
-  calculateBounds,
-  IBucketDateHistogramAggConfig,
-  IAggConfigs,
-} from '../../../../../data/common';
+import { calculateBounds, IAggConfigs } from '../../../../../data/common';
 
 describe('getDimensions', () => {
   it('should return dimensions when buckets and bounds are defined', () => {
@@ -27,7 +23,7 @@ describe('getDimensions', () => {
     const metric = {
       toSerializedFieldFormat: jest.fn(() => 'metric-format'),
       makeLabel: jest.fn(() => 'metric-label'),
-    };
+    } as any;
     const agg = {
       params: { timeRange: null },
       buckets: {
@@ -37,16 +33,14 @@ describe('getDimensions', () => {
       },
       makeLabel: jest.fn(() => 'agg-label'),
       toSerializedFieldFormat: jest.fn(() => 'agg-format'),
-    };
+    } as any;
     const aggs: IAggConfigs = {
       aggs: [metric, agg],
-    };
+    } as any;
 
     // Mocking external dependencies
-    dateMath.parse = jest.fn((date, options) => moment(date));
-    search.aggs.isDateHistogramBucketAggConfig = jest.fn(
-      (bucketAgg: any): bucketAgg is IBucketDateHistogramAggConfig => true
-    );
+    dateMath.parse = jest.fn((date) => moment(date));
+    search.aggs.isDateHistogramBucketAggConfig = jest.fn(() => true) as any;
 
     const result = getDimensions(aggs, dataMock);
 

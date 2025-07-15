@@ -101,7 +101,4 @@ export const registerTabs = (services: ExploreServices) => {
       services.tabRegistry.registerTab(tabDefinition);
     }
   );
-
-  // Get the number of registered tabs
-  const tabCount = services.tabRegistry.getAllTabs().length;
 };
