@@ -3,12 +3,6 @@
    ================================================================= */
 
 /**
- * Header spacing variables
- */
-$headerWidth: $ouiSizeL * 2 + 1px;
-$expandedHeaderWidth: $headerWidth * 2;
-
-/**
  * 1. CSS Variable - Defines the space needed for the global banner
  *    Default value is 0px when no banner is present
  *    Will be dynamically set to the actual banner height when visible
@@ -30,7 +24,13 @@ $expandedHeaderWidth: $headerWidth * 2;
   min-height: var(--global-banner-height);
 }
 
+/**
+ * 3. Smooth transitions - Prevents jarring layout shifts when banner height changes
+ */
 /* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+.euiHeader {
+  transition: top 0.3s ease;
+}
 
 /**
  * 4. Header positioning - Places headers below the banner
@@ -42,39 +42,23 @@ $expandedHeaderWidth: $headerWidth * 2;
 }
 
 .primaryHeader:not(.newTopNavHeader) {
-  top: calc(var(--global-banner-height) + $headerWidth) !important;
+  top: calc(var(--global-banner-height) + $euiSizeXL + $euiSizeM) !important;
 }
 
 /**
- * 4. Fix for body padding when header is expanded and fixed
+ * 5. Fix for body padding when header is expanded and fixed
  *    Ensures content doesn't overlap with headers
  */
 .headerIsExpanded.euiBody--headerIsFixed {
-  padding-top: calc(var(--global-banner-height) + $expandedHeaderWidth) !important;
+  padding-top: calc(var(--global-banner-height) + $euiSizeXL + $euiSizeM + $euiSizeXL + $euiSizeM) !important;
 }
 
 /**
- * 5. Fix for flayout position when header is expanded and fixed
+ * 6. Fix for flayout position when header is expanded and fixed
  *    Ensures content doesn't overlap with headers
  */
 .euiOverlayMask {
-  top: calc(var(--global-banner-height) + $expandedHeaderWidth) !important;
-}
-
-.euiFlyout {
-  top: calc(var(--global-banner-height) + $expandedHeaderWidth) !important;
-}
-
-/**
- * 6. Override content area min-height to account for global banner
- *    Ensures content area is properly sized when banner is present
- */
-.app-wrapper {
-  min-height: calc(100vh - $expandedHeaderWidth - var(--global-banner-height)) !important;
-}
-
-.headerIsExpanded .homWrapper {
-  min-height: calc(100vh - $expandedHeaderWidth - var(--global-banner-height)) !important;
+  top: calc(var(--global-banner-height) + $euiSizeXL + $euiSizeM + $euiSizeXL + $euiSizeM) !important;
 }
 /* stylelint-enable @osd/stylelint/no_modifying_global_selectors */
 
