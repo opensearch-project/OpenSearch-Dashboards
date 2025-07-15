@@ -126,7 +126,7 @@ export const useSharedEditor = ({
           selectionEnd: model.getOffsetAt(position),
           language: effectiveLanguage,
           indexPattern: currentDataset as any,
-          datasetType: currentDataset?.type,
+          datasetType: currentDataView?.type,
           position,
           services: services as any, // ExploreServices storage type incompatible with IDataPluginServices.DataStorage
         });

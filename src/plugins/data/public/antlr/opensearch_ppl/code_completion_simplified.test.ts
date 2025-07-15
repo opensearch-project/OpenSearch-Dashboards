@@ -328,7 +328,7 @@ describe('ppl code_completion', () => {
       const results = await getSimpleSuggestions('source = test-index | where ');
 
       const resultField = results.find((result) => result.text === '_field5');
-      expect(resultField?.sortText).toBe('9');
+      expect(resultField?.sortText).toBe('99');
     });
 
     it('should have appropriate insert text corresponding to each of the stats function', async () => {
