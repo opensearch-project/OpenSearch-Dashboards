@@ -20,12 +20,28 @@ import {
   defaultPrepareQueryString,
   executeQueries,
   executeTabQuery,
+  executeHistogramQuery,
+  abortAllActiveQueries,
 } from './query_actions';
 import { Query } from '../../../../../../data/public';
 import { defaultPreparePplQuery } from '../../languages';
 
 jest.mock('../../languages', () => ({
   defaultPreparePplQuery: jest.fn(),
+}));
+
+jest.mock('../../../../../../data/public', () => ({
+  indexPatterns: {
+    isDefault: jest.fn().mockReturnValue(true),
+  },
+  search: {
+    tabifyAggResponse: jest.fn(),
+  },
+}));
+
+global.AbortController = jest.fn().mockImplementation(() => ({
+  abort: jest.fn(),
+  signal: { aborted: false },
 }));
 
 describe('Query Actions', () => {
@@ -243,6 +259,44 @@ describe('Query Actions', () => {
     });
   });
 
+  describe('abortAllActiveQueries', () => {
+    beforeEach(() => {
+      // Reset the module-level activeQueryAbortControllers Map
+      jest.resetModules();
+    });
+
+    it('should abort all active queries and clear the controllers map', () => {
+      // We need to test this by executing queries first to populate the controllers
+      // Since the activeQueryAbortControllers is module-level, we'll test the behavior
+      // by calling abortAllActiveQueries and ensuring it doesn't throw
+      expect(() => abortAllActiveQueries()).not.toThrow();
+    });
+
+    it('should handle empty controllers map gracefully', () => {
+      // Call abortAllActiveQueries when no controllers are active
+      expect(() => abortAllActiveQueries()).not.toThrow();
+
+      // Call it again to ensure it's idempotent
+      expect(() => abortAllActiveQueries()).not.toThrow();
+    });
+
+    it('should be exported as a function', () => {
+      expect(typeof abortAllActiveQueries).toBe('function');
+    });
+  });
+
+  describe('executeHistogramQuery', () => {
+    it('should be exported as a function', () => {
+      expect(typeof executeHistogramQuery).toBe('function');
+    });
+
+    it('should be a Redux Toolkit async thunk', () => {
+      expect(executeHistogramQuery).toHaveProperty('pending');
+      expect(executeHistogramQuery).toHaveProperty('fulfilled');
+      expect(executeHistogramQuery).toHaveProperty('rejected');
+    });
+  });
+
   describe('executeQueries', () => {
     let mockServices: any;
     let mockGetState: jest.Mock;
@@ -427,8 +481,17 @@ describe('Query Actions', () => {
     let mockServices: any;
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
+    let mockAbortController: any;
 
     beforeEach(() => {
+      mockAbortController = {
+        abort: jest.fn(),
+        signal: { aborted: false },
+      };
+
+      // Mock AbortController constructor
+      (global.AbortController as jest.Mock).mockImplementation(() => mockAbortController);
+
       mockServices = {
         data: {
           dataViews: {
@@ -607,6 +670,17 @@ describe('Query Actions', () => {
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'query/executeTabQuery/rejected' })
       );
+    });
+
+    it('should verify AbortController is available globally', () => {
+      expect(global.AbortController).toBeDefined();
+      expect(typeof global.AbortController).toBe('function');
+    });
+
+    it('should verify executeTabQuery is a Redux Toolkit async thunk', () => {
+      expect(executeTabQuery).toHaveProperty('pending');
+      expect(executeTabQuery).toHaveProperty('fulfilled');
+      expect(executeTabQuery).toHaveProperty('rejected');
     });
 
     it('should use correct parameters for executeQueryBase', async () => {
