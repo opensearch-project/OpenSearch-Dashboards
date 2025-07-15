@@ -268,7 +268,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.m?js$/,
-          include: [/node_modules[\\/]@xyflow/],
+          include: [/node_modules[\\/]@dagrejs/, /node_modules[\\/]@xyflow/],
           use: {
             loader: 'babel-loader',
             options: {

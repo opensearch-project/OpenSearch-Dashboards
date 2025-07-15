@@ -34,7 +34,7 @@ import {
   useReactFlow,
   MarkerType,
 } from '@xyflow/react';
-import ELK from 'elkjs/lib/elk.bundled.js';
+import dagre from '@dagrejs/dagre';
 import '@xyflow/react/dist/style.css';
 
 interface SpanHit {
@@ -383,74 +383,62 @@ const nodeTypes = (
   ),
 });
 
-// Initialize ELK
-const elk = new ELK();
+// Dagre layout configuration
+const dagreGraph = new dagre.graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-// ELK layout function
-const getLayoutedElements = async (nodes: ServiceNodeType[], edges: Edge[]) => {
-  // Create the ELK graph structure
-  const elkGraph = {
-    id: 'root',
-    layoutOptions: {
-      'elk.algorithm': 'layered',
-      'elk.direction': 'RIGHT',
-      'elk.spacing.nodeNode': '75',
-      'elk.layered.spacing.nodeNodeBetweenLayers': '100',
-      'elk.margins': '30',
-    },
-    children: nodes.map((node) => ({
-      id: node.id,
-      width: 180,
-      height: 140, // Height to account for expanded state
-    })),
-    edges: edges.map((edge) => ({
-      id: edge.id,
-      sources: [edge.source],
-      targets: [edge.target],
-    })),
-  };
-
-  // Run the layout algorithm
-  const elkLayout = await elk.layout(elkGraph);
-
-  // Apply the layout to the nodes
-  const layoutedNodes = nodes.map((node) => {
-    const elkNode = elkLayout.children?.find((n) => n.id === node.id);
-    if (!elkNode || elkNode.x === undefined || elkNode.y === undefined) {
-      return node; // Return original node if ELK didn't provide a position
-    }
-
-    return {
-      ...node,
-      targetPosition: Position.Left,
-      sourcePosition: Position.Right,
-      position: {
-        x: elkNode.x,
-        y: elkNode.y,
-      },
-    };
+const getLayoutedElements = (nodes: ServiceNodeType[], edges: Edge[]) => {
+  // Always use horizontal layout (LR)
+  dagreGraph.setGraph({
+    rankdir: 'LR',
+    nodesep: 120,
+    ranksep: 180,
+    marginx: 60,
+    marginy: 60,
   });
 
-  return { nodes: layoutedNodes, edges };
-};
+  // Clear previous graph
+  dagreGraph.removeNode = dagreGraph.removeNode || (() => {});
+  dagreGraph.removeEdge = dagreGraph.removeEdge || (() => {});
 
-// Synchronous wrapper for the async ELK layout function
-const getLayoutedElementsSync = (nodes: ServiceNodeType[], edges: Edge[]) => {
-  // For initial positioning, use a simple grid layout
-  const GRID_SIZE = 250; // Space between nodes
-  const GRID_COLS = Math.ceil(Math.sqrt(nodes.length)); // Number of columns in the grid
+  // Remove existing nodes and edges safely
+  try {
+    nodes.forEach((node) => {
+      if (dagreGraph.hasNode(node.id)) {
+        dagreGraph.removeNode(node.id);
+      }
+    });
+    edges.forEach((edge) => {
+      if (dagreGraph.hasEdge(edge.source, edge.target)) {
+        dagreGraph.removeEdge(edge.source, edge.target);
+      }
+    });
+  } catch (e) {
+    // Handle error silently or use a proper error handling mechanism
+    // console.warn('Error removing nodes/edges:', e);
+  }
 
-  const layoutedNodes = nodes.map((node, index) => {
-    const col = index % GRID_COLS;
-    const row = Math.floor(index / GRID_COLS);
+  // Add nodes with proper dimensions
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: 180, height: 100 });
+  });
 
+  // Add edges
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  const layoutedNodes = nodes.map((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
     return {
       ...node,
       targetPosition: Position.Left,
       sourcePosition: Position.Right,
       position: {
-        x: col * GRID_SIZE,
-        y: row * GRID_SIZE,
+        x: nodeWithPosition.x - 90, // Center the node (width/2)
+        y: nodeWithPosition.y - 50, // Center the node (height/2)
       },
     };
   });
@@ -521,28 +509,18 @@ const FlowComponent: React.FC<{
     // Show loading spinner
     setIsLayoutLoading(true);
 
-    // Apply the ELK layout asynchronously
-    getLayoutedElements(nodes, edges)
-      .then((layouted) => {
-        setNodes([...layouted.nodes]);
-        setEdges([...layouted.edges]);
+    const layouted = getLayoutedElements(nodes, edges);
+    setNodes([...layouted.nodes]);
+    setEdges([...layouted.edges]);
 
-        // Fit view after layout
-        setTimeout(() => {
-          fitView({
-            padding: 0.2,
-            duration: 800, // Add animation duration for smoother zoom
-          });
-          setIsLayoutLoading(false);
-        }, 100);
-      })
-      .catch((error) => {
-        // If ELK fails, use the grid layout as fallback
-        const fallbackLayout = getLayoutedElementsSync(nodes, edges);
-        setNodes([...fallbackLayout.nodes]);
-        setEdges([...fallbackLayout.edges]);
-        setIsLayoutLoading(false);
+    // Fit view after layout
+    setTimeout(() => {
+      fitView({
+        padding: 0.2,
+        duration: 800, // Add animation duration for smoother zoom
       });
+      setIsLayoutLoading(false);
+    }, 100);
   }, [nodes, edges, setNodes, setEdges, fitView]);
 
   // Apply layout when nodes change
@@ -1041,17 +1019,14 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
       };
     });
 
-    // For initial display, just return the nodes with basic positioning
-    // The actual layout will be applied when the component mounts
+    // Apply horizontal layout if we have nodes
+    if (nodes.length > 0) {
+      const layouted = getLayoutedElements(nodes, edges);
+      return { initialNodes: layouted.nodes, initialEdges: layouted.edges };
+    }
+
     return { initialNodes: nodes, initialEdges: edges };
   }, [hits, colorMap]);
-
-  // Clear loading state when nodes are ready
-  useEffect(() => {
-    if (initialNodes.length > 0) {
-      setIsInitialLayoutLoading(false);
-    }
-  }, [initialNodes]);
 
   const nodesAndEdges = useMemo(() => {
     if (!focusedService || initialNodes.length === 0) {
@@ -1110,7 +1085,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
 
     // When clearing focus, immediately show the main loading spinner
     if (selectedOptions.length === 0) {
-      setIsInitialLayoutLoading(true);
+      // No need to set loading state for synchronous layout
     }
 
     if (selectedOptions.length > 0 && selectedOptions[0].value) {
@@ -1142,7 +1117,6 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
           });
           // Re-enable the dropdown after layout is complete
           setIsRefocusing(false);
-          setIsInitialLayoutLoading(false);
         }, 200);
       }
     }
@@ -1198,25 +1172,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
 
   return (
     <EuiPanel {...panelProps}>
-      <div style={{ height: '500px', width: '100%', position: 'relative' }}>
-        {isInitialLayoutLoading && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: 'rgba(250, 250, 250, 0.7)',
-              zIndex: 5,
-            }}
-          >
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        )}
+      <div style={{ height: '500px', width: '100%' }}>
         <ReactFlowProvider>
           <FlowComponent
             initialNodes={filteredNodes}

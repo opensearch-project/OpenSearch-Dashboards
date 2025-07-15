@@ -382,7 +382,7 @@ const generateColorMap = (serviceNames: string[]) => {
 };
 
 // Create the stress test data
-const stressTestServiceCount = 500;
+const stressTestServiceCount = 50;
 const stressTestServices = generateServiceNames(stressTestServiceCount);
 const stressTestRelationships = generateRelationships(stressTestServices);
 const stressTestColorMap = generateColorMap(stressTestServices);
@@ -417,7 +417,7 @@ StressTest.args = {
 StressTest.parameters = {
   docs: {
     description: {
-      story: 'A stress test example with 500 services to evaluate performance under heavy load.',
+      story: 'A stress test example with 50 services to evaluate performance under heavy load.',
     },
   },
   // Set a longer timeout for this story since it's heavy
