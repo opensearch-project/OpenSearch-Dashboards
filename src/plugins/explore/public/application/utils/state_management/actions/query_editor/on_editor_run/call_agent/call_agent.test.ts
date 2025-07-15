@@ -13,7 +13,7 @@ import { EditorMode } from '../../../../types';
 import { runQueryActionCreator } from '../../run_query';
 import { useOnEditorRunContext } from '../../../../../../hooks';
 import { ExploreServices } from '../../../../../../../types';
-import { RootState } from '../../../../store';
+import { RootState, AppDispatch } from '../../../../store';
 import {
   AgentError,
   ProhibitedQueryError,
@@ -45,7 +45,7 @@ describe('callAgentActionCreator', () => {
   let mockServices: ExploreServices;
   let mockOnEditorRunContext: ReturnType<typeof useOnEditorRunContext>;
   let mockGetState: jest.MockedFunction<() => RootState>;
-  let mockDispatch: jest.MockedFunction<any>;
+  let mockDispatch: jest.MockedFunction<AppDispatch>;
 
   beforeEach(() => {
     jest.clearAllMocks();
