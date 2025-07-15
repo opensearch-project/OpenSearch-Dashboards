@@ -14,10 +14,7 @@ import { LoadingSpinner } from '../../../../application/legacy/discover/applicat
 import { DiscoverNoResults } from '../../../../application/legacy/discover/application/components/no_results/no_results';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
-import {
-  executeQueries,
-  defaultPrepareQueryString,
-} from '../../../../application/utils/state_management/actions/query_actions';
+import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
 import { ExploreTabs } from '../../../../components/tabs/tabs';
 import { ResultsSummaryPanel } from '../../../../components/results_summary/results_summary_panel';
 import { DiscoverChartContainer } from '../../../../components/chart/discover_chart_container';

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { MemoExoticComponent } from 'react';
 import { QueryState } from '../../application/utils/state_management/slices';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { Query } from '../../../../data/common';
@@ -37,7 +38,7 @@ export interface TabDefinition {
   resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;
 
   // UI Components
-  component: () => React.JSX.Element | null;
+  component: (() => React.JSX.Element | null) | MemoExoticComponent<() => React.JSX.Element>;
 
   // Optional lifecycle hooks
   onActive?: () => void;
