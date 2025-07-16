@@ -8,7 +8,8 @@
     margin-left: $euiSizeXS;
     white-space: nowrap;
     flex-shrink: 0;
-    width: 32px;
+    width: $euiSizeXL;
+    height: $euiSizeXL;
   }
 
   &__panel {
@@ -32,12 +33,6 @@
 
   &__minWidth {
     min-width: 0;
-  }
-
-  &__defaultBadge {
-    span:is([class*="euiBadge__text"]) {
-      cursor: pointer;
-    }
   }
 
   &__footer {
