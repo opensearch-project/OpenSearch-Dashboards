@@ -109,7 +109,7 @@ jest.mock('../style_panel/grid/grid', () => ({
     <div data-test-subj="mockGridOptionsPanel">
       <button
         data-test-subj="mockUpdateGrid"
-        onClick={() => onGridChange({ ...grid, categoryLines: !grid.categoryLines })}
+        onClick={() => onGridChange({ ...grid, xLines: !grid.xLines })}
       >
         Update Grid
       </button>
@@ -178,8 +178,8 @@ describe('LineVisStyleControls', () => {
   const defaultThresholdLines: ThresholdLines = [defaultThresholdLine];
 
   const defaultGrid: GridOptions = {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   };
 
   const defaultCategoryAxis: CategoryAxis = {
@@ -386,7 +386,7 @@ describe('LineVisStyleControls', () => {
     expect(onStyleChange).toHaveBeenCalledWith({
       grid: {
         ...mockProps.styleOptions.grid,
-        categoryLines: !mockProps.styleOptions.grid.categoryLines,
+        xLines: !mockProps.styleOptions.grid.xLines,
       },
     });
   });

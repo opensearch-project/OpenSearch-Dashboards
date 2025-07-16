@@ -360,4 +360,339 @@ describe('AxesOptions', () => {
       ])
     );
   });
+
+  // New tests to improve coverage
+
+  it('handles angled label rotation', () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    const splitButton = screen.getByTestId('categoryAxis-0-button');
+    fireEvent.click(splitButton);
+
+    const comboboxes = screen.getAllByRole('combobox');
+    const alignmentSelect = comboboxes.find((select) => select.innerHTML.includes('horizontal'));
+
+    if (!alignmentSelect) {
+      throw new Error('Alignment select not found');
+    }
+
+    fireEvent.change(alignmentSelect, { target: { value: 'angled' } });
+
+    expect(defaultProps.onCategoryAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ rotate: -45 }),
+        }),
+      ])
+    );
+  });
+
+  it('uses default title when title text is empty', () => {
+    const propsWithEmptyTitle = {
+      ...defaultProps,
+      categoryAxes: [
+        {
+          ...mockCategoryAxes[0],
+          title: { text: '' },
+        },
+      ],
+    };
+
+    render(<AxesOptions {...propsWithEmptyTitle} />);
+    const splitButton = screen.getByTestId('categoryAxis-0-button');
+    fireEvent.click(splitButton);
+
+    // Check that the title input has the default value (from the first date or categorical column)
+    const titleInput = screen.getAllByRole('textbox')[0];
+    expect(titleInput).toHaveValue('timestamp');
+  });
+
+  it('uses default value axis title when title text is empty', () => {
+    const propsWithEmptyTitle = {
+      ...defaultProps,
+      valueAxes: [
+        {
+          ...mockValueAxes[0],
+          title: { text: '' },
+        },
+      ],
+    };
+
+    render(<AxesOptions {...propsWithEmptyTitle} />);
+    const splitButton = screen.getByTestId('valueAxis-0-button');
+    fireEvent.click(splitButton);
+
+    // Check that the title input has the default value (from the first numerical column)
+    const titleInput = screen.getAllByRole('textbox')[0];
+    expect(titleInput).toHaveValue('count');
+  });
+
+  it('handles Rule 2 scenario with incomplete value axes', () => {
+    // Test the useEffect that ensures we have exactly 2 value axes for Rule 2
+    const rule2Props = {
+      ...defaultProps,
+      categoricalColumns: [],
+      dateColumns: [mockDateColumns[0]],
+      numericalColumns: [
+        {
+          id: 1,
+          name: 'Bar Chart Metric',
+          schema: VisFieldType.Numerical,
+          column: 'count',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 2,
+          name: 'Line Chart Metric',
+          schema: VisFieldType.Numerical,
+          column: 'price',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+      ],
+      valueAxes: [
+        {
+          id: 'ValueAxis-1',
+          name: 'LeftAxis-1',
+          type: 'value',
+          position: Positions.LEFT,
+          show: true,
+          labels: {
+            show: true,
+            rotate: 0,
+            filter: false,
+            truncate: 100,
+          },
+          title: {
+            text: 'Bar Chart Metric',
+          },
+        },
+      ] as ValueAxis[],
+    };
+
+    render(<AxesOptions {...rule2Props} />);
+
+    // The useEffect should have added a second value axis
+    expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          position: Positions.LEFT,
+        }),
+        expect.objectContaining({
+          position: Positions.RIGHT,
+        }),
+      ])
+    );
+  });
+
+  it('handles Rule 2 scenario with incorrect axis positions', () => {
+    // Test the useEffect that ensures correct positions for Rule 2
+    const rule2Props = {
+      ...defaultProps,
+      categoricalColumns: [],
+      dateColumns: [mockDateColumns[0]],
+      numericalColumns: [
+        {
+          id: 1,
+          name: 'Bar Chart Metric',
+          schema: VisFieldType.Numerical,
+          column: 'count',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 2,
+          name: 'Line Chart Metric',
+          schema: VisFieldType.Numerical,
+          column: 'price',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+      ],
+      valueAxes: [
+        {
+          id: 'ValueAxis-1',
+          name: 'LeftAxis-1',
+          type: 'value',
+          position: Positions.RIGHT, // Incorrect position
+          show: true,
+          labels: {
+            show: true,
+            rotate: 0,
+            filter: false,
+            truncate: 100,
+          },
+          title: {
+            text: 'Bar Chart Metric',
+          },
+        },
+        {
+          id: 'ValueAxis-2',
+          name: 'RightAxis-1',
+          type: 'value',
+          position: Positions.LEFT, // Incorrect position
+          show: true,
+          labels: {
+            show: true,
+            rotate: 0,
+            filter: false,
+            truncate: 100,
+          },
+          title: {
+            text: 'Line Chart Metric',
+          },
+        },
+      ] as ValueAxis[],
+    };
+
+    render(<AxesOptions {...rule2Props} />);
+
+    // The useEffect should have corrected the positions
+    expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'ValueAxis-1',
+          position: Positions.LEFT,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
+          position: Positions.RIGHT,
+        }),
+      ])
+    );
+  });
+
+  it('handles null props gracefully', () => {
+    const nullProps = {
+      categoryAxes: null,
+      valueAxes: null,
+      onCategoryAxesChange: null,
+      onValueAxesChange: null,
+      numericalColumns: [],
+      categoricalColumns: [],
+      dateColumns: [],
+    };
+
+    // @ts-ignore - Testing with null props
+    const { container } = render(<AxesOptions {...nullProps} />);
+    expect(container).toBeInTheDocument();
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('displays correct default title for category axis with no columns', () => {
+    const propsWithNoColumns = {
+      ...defaultProps,
+      dateColumns: [],
+      categoricalColumns: [],
+      categoryAxes: [
+        {
+          ...mockCategoryAxes[0],
+          title: { text: '' },
+        },
+      ],
+    };
+
+    render(<AxesOptions {...propsWithNoColumns} />);
+    const splitButton = screen.getByTestId('categoryAxis-0-button');
+    fireEvent.click(splitButton);
+
+    // Check that the title input has the default value "Category"
+    const titleInput = screen.getAllByRole('textbox')[0];
+    expect(titleInput).toHaveValue('Category');
+  });
+
+  it('displays correct default title for value axis with no columns', () => {
+    const propsWithNoColumns = {
+      ...defaultProps,
+      numericalColumns: [],
+      valueAxes: [
+        {
+          ...mockValueAxes[0],
+          title: { text: '' },
+        },
+      ],
+    };
+
+    render(<AxesOptions {...propsWithNoColumns} />);
+    const splitButton = screen.getByTestId('valueAxis-0-button');
+    fireEvent.click(splitButton);
+
+    // Check that the title input has the default value "Metric 1"
+    const titleInput = screen.getAllByRole('textbox')[0];
+    expect(titleInput).toHaveValue('Metric 1');
+  });
+
+  it('handles multiple category axes', () => {
+    const propsWithMultipleAxes = {
+      ...defaultProps,
+      categoryAxes: [
+        mockCategoryAxes[0],
+        {
+          id: 'CategoryAxis-2',
+          type: 'category' as const,
+          position: Positions.TOP,
+          show: true,
+          labels: {
+            show: true,
+            filter: true,
+            rotate: 0,
+            truncate: 100,
+          },
+          title: {
+            text: 'Second Category Axis',
+          },
+        } as CategoryAxis,
+      ],
+    };
+
+    render(<AxesOptions {...propsWithMultipleAxes} />);
+
+    // Should render both axes
+    const buttons = screen.getAllByTestId(/categoryAxis-\d-button/);
+    expect(buttons).toHaveLength(2);
+
+    // Click on the second axis button
+    fireEvent.click(buttons[1]);
+
+    // Check that the title is displayed correctly
+    expect(screen.getByDisplayValue('Second Category Axis')).toBeInTheDocument();
+  });
+
+  it('handles multiple value axes', () => {
+    const propsWithMultipleAxes = {
+      ...defaultProps,
+      valueAxes: [
+        mockValueAxes[0],
+        {
+          id: 'ValueAxis-2',
+          name: 'RightAxis-1',
+          type: 'value' as const,
+          position: Positions.RIGHT,
+          show: true,
+          labels: {
+            show: true,
+            rotate: 0,
+            filter: false,
+            truncate: 100,
+          },
+          title: {
+            text: 'Second Value Axis',
+          },
+        } as ValueAxis,
+      ],
+    };
+
+    render(<AxesOptions {...propsWithMultipleAxes} />);
+
+    // Should render both axes
+    const buttons = screen.getAllByTestId(/valueAxis-\d-button/);
+    expect(buttons).toHaveLength(2);
+
+    // Click on the second axis button
+    fireEvent.click(buttons[1]);
+
+    // Check that the title is displayed correctly
+    expect(screen.getByDisplayValue('Second Value Axis')).toBeInTheDocument();
+  });
 });
