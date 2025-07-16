@@ -290,11 +290,12 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                 </>
               )}
             </EuiSelectable>
-            <EuiPopoverFooter paddingSize="s">
+            <EuiPopoverFooter paddingSize="none">
               <EuiFlexGroup
                 justifyContent="spaceBetween"
                 alignItems="center"
                 responsive={false}
+                gutterSize="none"
                 className="datasetSelect__footer"
               >
                 <EuiFlexItem grow={false} className="datasetSelect__footerItem">
