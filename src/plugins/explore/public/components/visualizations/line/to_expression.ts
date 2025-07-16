@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { field } from 'vega';
+import { title } from 'vega-lite/build/src/channeldef';
 import { LineChartStyleControls } from './line_vis_config';
 import { VisColumn, Positions, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import {
@@ -33,8 +35,8 @@ export const createSimpleLineChart = (
 
   const metricField = yAxisColumn?.column;
   const dateField = xAxisColumn?.column;
-  const metricName = yAxisColumn?.name;
-  const dateName = xAxisColumn?.name;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
 
   const mainLayer = {
@@ -67,6 +69,12 @@ export const createSimpleLineChart = (
           dateColumns
         ),
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: dateField, type: 'temporal', title: dateName },
+          { field: metricField, type: 'quantitative', title: metricName },
+        ],
+      }),
     },
   };
 
@@ -114,9 +122,12 @@ export const createLineBarChart = (
   const metric1Field = yAxisMapping?.column;
   const metric2Field = secondYAxisMapping?.column;
   const dateField = xAxisMapping?.column;
-  const metric1Name = yAxisMapping?.name;
-  const metric2Name = secondYAxisMapping?.name;
-  const dateName = xAxisMapping?.name;
+  // const metric1Name = yAxisMapping?.name;
+  // const metric2Name = secondYAxisMapping?.name;
+  // const dateName = xAxisMapping?.name;
+  const metric1Name = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
+  const metric2Name = styles.valueAxes?.[1]?.title?.text || secondYAxisMapping?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const layers: any[] = [];
 
   const barLayer = {
@@ -159,6 +170,12 @@ export const createLineBarChart = (
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: dateField, type: 'temporal', title: dateName },
+          { field: metric1Field, type: 'quantitative', title: metric1Name },
+        ],
+      }),
     },
   };
 
@@ -195,6 +212,12 @@ export const createLineBarChart = (
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: dateField, type: 'temporal', title: dateName },
+          { field: metric2Field, type: 'quantitative', title: metric2Name },
+        ],
+      }),
     },
   };
 
@@ -247,8 +270,8 @@ export const createMultiLineChart = (
   const metricField = yAxisColumn?.column;
   const dateField = xAxisColumn?.column;
   const categoryField = colorColumn?.column;
-  const metricName = yAxisColumn?.name;
-  const dateName = xAxisColumn?.name;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
 
@@ -293,6 +316,13 @@ export const createMultiLineChart = (
               }
             : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: dateField, type: 'temporal', title: dateName },
+          { field: metricField, type: 'quantitative', title: metricName },
+          { field: categoryField, type: 'nominal', title: categoryName },
+        ],
+      }),
     },
   };
 
@@ -344,8 +374,8 @@ export const createFacetedMultiLineChart = (
   const dateField = xAxisMapping?.column;
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
-  const metricName = yAxisMapping?.name;
-  const dateName = xAxisMapping?.name;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
 
@@ -413,6 +443,13 @@ export const createFacetedMultiLineChart = (
                     }
                   : null,
             },
+            ...(styles.tooltipOptions?.mode !== 'hidden' && {
+              tooltip: [
+                { field: dateField, type: 'temporal', title: dateName },
+                { field: metricField, type: 'quantitative', title: metricName },
+                { field: category1Field, type: 'nominal', title: category1Name },
+              ],
+            }),
           },
         },
         // Add threshold layer to each facet if enabled
@@ -501,8 +538,8 @@ export const createCategoryLineChart = (
 
   const metricField = yAxisColumn?.column;
   const categoryField = xAxisColumn?.column;
-  const metricName = yAxisColumn?.name;
-  const categoryName = xAxisColumn?.name;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
+  const categoryName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
 
   const mainLayer = {
@@ -535,6 +572,12 @@ export const createCategoryLineChart = (
           dateColumns
         ),
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: categoryField, type: 'nominal', title: categoryName },
+          { field: metricField, type: 'quantitative', title: metricName },
+        ],
+      }),
     },
   };
 

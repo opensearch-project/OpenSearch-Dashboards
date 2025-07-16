@@ -18,6 +18,12 @@ export const createHeatmapWithBin = (
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
 
   const colorFieldColumn = axisColumnMappings?.color as any;
+  const xField = xAxis?.field?.default?.column;
+  const yField = yAxis?.field?.default?.column;
+  const colorField = colorFieldColumn?.column;
+  const xName = xAxis?.title?.text || xAxis?.field?.default?.name;
+  const yName = yAxis?.title?.text || yAxis?.field?.default?.name || 'Y-Axis';
+  const colorName = colorFieldColumn?.name;
 
   const markLayer: any = {
     mark: {
@@ -28,19 +34,19 @@ export const createHeatmapWithBin = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
+        field: xField,
         type: 'quantitative',
         bin: true,
         axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
       },
       y: {
-        field: yAxis?.field?.default?.column,
+        field: yField,
         type: 'quantitative',
         bin: true,
         axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
       },
       color: {
-        field: colorFieldColumn?.column,
+        field: colorField,
         type: 'quantitative',
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
         bin: !styles.exclusive?.useCustomRanges
@@ -53,29 +59,30 @@ export const createHeatmapWithBin = (
         },
         legend: styles.addLegend
           ? {
-              title: colorFieldColumn?.name || 'Metrics',
+              title: colorName || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: xField, type: 'quantitative', title: xName },
+          { field: yField, type: 'quantitative', title: yName },
+          { field: colorField, type: 'quantitative', title: colorName },
+        ],
+      }),
     },
   };
 
-  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn?.column);
+  enhanceStyle(markLayer, styles, transformedData, colorField);
 
   const baseSpec = {
     $schema: VEGASCHEMA,
     data: { values: transformedData },
-    transform: addTransform(styles, colorFieldColumn?.column),
+    transform: addTransform(styles, colorField),
     layer: [
       markLayer,
-      createlabelLayer(
-        styles,
-        false,
-        colorFieldColumn?.column,
-        xAxis?.field?.default,
-        yAxis?.field?.default
-      ),
+      createlabelLayer(styles, false, colorField, xAxis?.field?.default, yAxis?.field?.default),
     ].filter(Boolean),
   };
   return baseSpec;
@@ -91,6 +98,13 @@ export const createRegularHeatmap = (
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
 
   const colorFieldColumn = axisColumnMappings?.color!;
+  const xField = xAxis?.field?.default?.column;
+  const yField = yAxis?.field?.default?.column;
+  const colorField = colorFieldColumn?.column;
+  const xName = xAxis?.title?.text || xAxis?.field?.default?.name;
+  const yName = yAxis?.title?.text || yAxis?.field?.default?.name;
+  const colorName = colorFieldColumn?.name;
+
   const markLayer: any = {
     mark: {
       type: 'rect',
@@ -100,18 +114,18 @@ export const createRegularHeatmap = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
+        field: xField,
         type: 'nominal',
         axis: applyAxisStyling(xAxis, false),
         // for regular heatmap, both x and y refer to categorical fields, we shall disable grid line for this case
       },
       y: {
-        field: yAxis?.field?.default?.column,
+        field: yField,
         type: 'nominal',
         axis: applyAxisStyling(yAxis, false),
       },
       color: {
-        field: colorFieldColumn?.column,
+        field: colorField,
         type: 'quantitative',
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
         bin: !styles.exclusive?.useCustomRanges
@@ -124,29 +138,30 @@ export const createRegularHeatmap = (
         },
         legend: styles.addLegend
           ? {
-              title: colorFieldColumn?.name || 'Metrics',
+              title: colorName || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: xField, type: 'nominal', title: xName },
+          { field: yField, type: 'nominal', title: yName },
+          { field: colorField, type: 'quantitative', title: colorName },
+        ],
+      }),
     },
   };
 
-  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn?.column);
+  enhanceStyle(markLayer, styles, transformedData, colorField);
 
   const baseSpec = {
     $schema: VEGASCHEMA,
     data: { values: transformedData },
-    transform: addTransform(styles, colorFieldColumn?.column),
+    transform: addTransform(styles, colorField),
     layer: [
       markLayer,
-      createlabelLayer(
-        styles,
-        true,
-        colorFieldColumn?.column,
-        xAxis?.field?.default,
-        yAxis?.field?.default
-      ),
+      createlabelLayer(styles, true, colorField, xAxis?.field?.default, yAxis?.field?.default),
     ].filter(Boolean),
   };
 

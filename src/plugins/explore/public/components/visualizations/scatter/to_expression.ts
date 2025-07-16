@@ -17,6 +17,11 @@ export const createTwoMetricScatter = (
 ): any => {
   const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
+  const xField = xAxis?.field?.default?.column;
+  const yField = yAxis?.field?.default?.column;
+  const xName = xAxis?.title?.text || xAxis?.field?.default?.name;
+  const yName = yAxis?.title?.text || yAxis?.field?.default?.name;
+
   const markLayer = {
     mark: {
       type: 'point',
@@ -27,15 +32,21 @@ export const createTwoMetricScatter = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
+        field: xField,
         type: 'quantitative',
         axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
       },
       y: {
-        field: yAxis?.field?.default?.column,
+        field: yField,
         type: 'quantitative',
         axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: xField, type: 'quantitative', title: xName },
+          { field: yField, type: 'quantitative', title: yName },
+        ],
+      }),
     },
   };
 
@@ -59,6 +70,11 @@ export const createTwoMetricOneCateScatter = (
   const categoryNames = axisColumnMappings?.color?.name!;
   const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
+  const xField = xAxis?.field?.default?.column;
+  const yField = yAxis?.field?.default?.column;
+  const xName = xAxis?.title?.text || xAxis?.field?.default?.name;
+  const yName = yAxis?.title?.text || yAxis?.field?.default?.name;
+
   const markLayer = {
     mark: {
       type: 'point',
@@ -69,12 +85,12 @@ export const createTwoMetricOneCateScatter = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
+        field: xField,
         type: 'quantitative',
         axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
       },
       y: {
-        field: yAxis?.field?.default?.column,
+        field: yField,
         type: 'quantitative',
         axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
       },
@@ -89,6 +105,13 @@ export const createTwoMetricOneCateScatter = (
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: xField, type: 'quantitative', title: xName },
+          { field: yField, type: 'quantitative', title: yName },
+          { field: categoryFields, type: 'nominal', title: categoryNames },
+        ],
+      }),
     },
   };
 
@@ -114,6 +137,12 @@ export const createThreeMetricOneCateScatter = (
   const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
   const numericalSize = axisColumnMappings?.size;
+  const xField = xAxis?.field?.default?.column;
+  const yField = yAxis?.field?.default?.column;
+  const sizeField = numericalSize?.column;
+  const xName = xAxis?.title?.text || xAxis?.field?.default?.name;
+  const yName = yAxis?.title?.text || yAxis?.field?.default?.name;
+  const sizeName = numericalSize?.name;
   const markLayer = {
     mark: {
       type: 'point',
@@ -124,12 +153,12 @@ export const createThreeMetricOneCateScatter = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
+        field: xField,
         type: 'quantitative',
         axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
       },
       y: {
-        field: yAxis?.field?.default?.column,
+        field: yField,
         type: 'quantitative',
         axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
       },
@@ -145,16 +174,24 @@ export const createThreeMetricOneCateScatter = (
           : null,
       },
       size: {
-        field: numericalSize?.column,
+        field: sizeField,
         type: 'quantitative',
         legend: styles?.addLegend
           ? {
-              title: numericalSize?.name || 'Metrics',
+              title: sizeName || 'Metrics',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: xField, type: 'quantitative', title: xName },
+          { field: yField, type: 'quantitative', title: yName },
+          { field: categoryFields, type: 'nominal', title: categoryNames },
+          { field: sizeField, type: 'quantitative', title: sizeName },
+        ],
+      }),
     },
   };
 
