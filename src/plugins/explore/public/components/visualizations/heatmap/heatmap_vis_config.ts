@@ -16,7 +16,6 @@ import {
   TooltipOptions,
   LabelAggregationType,
   VisFieldType,
-  GridOptions,
 } from '../types';
 
 export interface HeatmapLabels {
@@ -44,7 +43,7 @@ export interface HeatmapChartStyleControls {
   legendPosition: Positions;
 
   // Axes configuration
-  StandardAxes: StandardAxes[];
+  standardAxes: StandardAxes[];
 
   exclusive: ExclusiveHeatmapConfig;
   label: HeatmapLabels;
@@ -79,7 +78,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
   },
 
   // Standard axes
-  StandardAxes: [
+  standardAxes: [
     {
       id: 'Axis-1',
       position: Positions.LEFT,

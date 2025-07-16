@@ -7,7 +7,6 @@ import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 
 import {
-  GridOptions,
   Positions,
   ThresholdLines,
   ThresholdLineStyle,
@@ -34,10 +33,8 @@ export interface BarChartStyleControls {
 
   // Threshold and grid
   thresholdLines: ThresholdLines;
-  grid: GridOptions;
-
   // Axes configuration
-  StandardAxes: StandardAxes[];
+  standardAxes: StandardAxes[];
 
   switchAxes: boolean;
 }
@@ -71,12 +68,8 @@ export const defaultBarChartStyles: BarChartStyleControls = {
       name: '',
     },
   ],
-  grid: {
-    xLines: true,
-    yLines: true,
-  },
 
-  StandardAxes: [
+  standardAxes: [
     {
       id: 'Axis-1',
       position: Positions.LEFT,

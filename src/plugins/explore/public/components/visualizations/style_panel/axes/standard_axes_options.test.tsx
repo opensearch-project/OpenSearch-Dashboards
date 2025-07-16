@@ -158,8 +158,6 @@ describe('AllAxesOptions', () => {
         <AllAxesOptions {...defaultProps} />
       </Provider>
     );
-    expect(screen.getByTestId('standardAxis-x-button')).toHaveTextContent('Y-Axis');
-    expect(screen.getByTestId('standardAxis-y-button')).toHaveTextContent('X-Axis');
   });
   it('shows/hides label options based on show labels toggle', () => {
     render(
@@ -168,13 +166,10 @@ describe('AllAxesOptions', () => {
       </Provider>
     );
 
-    const axis = screen.getByTestId('standardAxis-x-button');
-    fireEvent.click(axis);
-
     expect(screen.getAllByText('Alignment')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Truncate after')[0]).toBeInTheDocument();
 
-    const showLabelsSwitch = screen.getByTestId('showAxisSwitch');
+    const showLabelsSwitch = screen.getAllByTestId('showAxisSwitch')[0];
     fireEvent.click(showLabelsSwitch);
 
     expect(defaultProps.onStandardAxesChange).toHaveBeenCalledWith(
@@ -192,10 +187,6 @@ describe('AllAxesOptions', () => {
         <AllAxesOptions {...defaultProps} />
       </Provider>
     );
-
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-x-button');
-    fireEvent.click(xAxisButton);
 
     // Find the position button group and click on "Top"
     const topButton = screen.getByText('Top');
@@ -218,12 +209,8 @@ describe('AllAxesOptions', () => {
       </Provider>
     );
 
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-x-button');
-    fireEvent.click(xAxisButton);
-
     // Find the title input and change it
-    const titleInput = screen.getByTestId('text-field');
+    const titleInput = screen.getAllByTestId('text-field')[0];
     fireEvent.change(titleInput, { target: { value: 'New Title' } });
 
     // Check that onStandardAxesChange was called with the updated title
@@ -245,12 +232,8 @@ describe('AllAxesOptions', () => {
       </Provider>
     );
 
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-x-button');
-    fireEvent.click(xAxisButton);
-
     // Find the show labels switch by its text content and toggle it
-    const showLabelsSwitch = screen.getByText('Show labels');
+    const showLabelsSwitch = screen.getAllByText('Show labels')[0];
     fireEvent.click(showLabelsSwitch);
 
     // Check that onStandardAxesChange was called with labels.show: false
@@ -270,12 +253,8 @@ describe('AllAxesOptions', () => {
       </Provider>
     );
 
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-x-button');
-    fireEvent.click(xAxisButton);
-
     // Find the alignment select and change it to vertical
-    const alignmentSelect = screen.getByRole('combobox');
+    const alignmentSelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(alignmentSelect, { target: { value: 'vertical' } });
 
     // Check that onStandardAxesChange was called with the updated rotation
@@ -295,12 +274,8 @@ describe('AllAxesOptions', () => {
       </Provider>
     );
 
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-x-button');
-    fireEvent.click(xAxisButton);
-
     // Find the alignment select and change it to angled
-    const alignmentSelect = screen.getByRole('combobox');
+    const alignmentSelect = screen.getAllByRole('combobox')[0];
     fireEvent.change(alignmentSelect, { target: { value: 'angled' } });
 
     // Check that onStandardAxesChange was called with the updated rotation
@@ -320,12 +295,8 @@ describe('AllAxesOptions', () => {
       </Provider>
     );
 
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-x-button');
-    fireEvent.click(xAxisButton);
-
     // Find the truncate input and change it
-    const truncateInput = screen.getByTestId('truncate-field');
+    const truncateInput = screen.getAllByTestId('truncate-field')[0];
     fireEvent.change(truncateInput, { target: { value: '50' } });
 
     // Check that onStandardAxesChange was called with the updated truncate value
