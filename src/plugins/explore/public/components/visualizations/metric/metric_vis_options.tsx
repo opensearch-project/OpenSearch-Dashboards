@@ -126,6 +126,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                       onChange={(e) =>
                         updateStyleOption('colorSchema', e.target.value as ColorSchemas)
                       }
+                      data-test-subj="colorSchemaSelect"
                     />
                   </EuiFormRow>
                   <EuiFormRow>
