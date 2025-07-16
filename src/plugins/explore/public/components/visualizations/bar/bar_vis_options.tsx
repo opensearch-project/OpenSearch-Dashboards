@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BarChartStyleControls } from './bar_vis_config';
@@ -12,11 +12,8 @@ import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
-import { AxesOptions } from '../style_panel/axes/axes';
-import { GridOptionsPanel } from '../style_panel/grid/grid';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
-import { AxisRole } from '../types';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
 
@@ -66,9 +63,9 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
-              standardAxes={styleOptions.StandardAxes}
+              standardAxes={styleOptions.standardAxes}
               onStandardAxesChange={(standardAxes) =>
-                updateStyleOption('StandardAxes', standardAxes)
+                updateStyleOption('standardAxes', standardAxes)
               }
             />
           </EuiFlexItem>

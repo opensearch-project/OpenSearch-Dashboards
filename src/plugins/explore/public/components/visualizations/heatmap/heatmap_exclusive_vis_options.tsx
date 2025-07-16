@@ -129,6 +129,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
       <EuiFormRow>
         <EuiSwitch
           compressed
+          data-test-subj="scaleToDataBounds"
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.scaleToDataBounds', {
             defaultMessage: 'Scale to data bounds',
           })}
@@ -141,6 +142,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
       <EuiFormRow>
         <EuiSwitch
           compressed
+          data-test-subj="percentageMode"
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.percentageMode', {
             defaultMessage: 'Percentage mode',
           })}
@@ -238,6 +240,7 @@ export const HeatmapLabelVisOptions = ({
               })}
               checked={styles.rotate}
               onChange={(e) => updateLabelOption('rotate', e.target.checked)}
+              data-test-subj="rotateLabel"
             />
           </EuiFormRow>
 
@@ -249,6 +252,7 @@ export const HeatmapLabelVisOptions = ({
               })}
               checked={styles.overwriteColor}
               onChange={(e) => updateLabelOption('overwriteColor', e.target.checked)}
+              data-test-subj="overwriteColor"
             />
           </EuiFormRow>
 

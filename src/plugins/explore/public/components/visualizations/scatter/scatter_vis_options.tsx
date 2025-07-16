@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ScatterChartStyleControls } from './scatter_vis_config';
@@ -59,9 +59,9 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
-              standardAxes={styleOptions.StandardAxes}
+              standardAxes={styleOptions.standardAxes}
               onStandardAxesChange={(standardAxes) =>
-                updateStyleOption('StandardAxes', standardAxes)
+                updateStyleOption('standardAxes', standardAxes)
               }
             />
           </EuiFlexItem>

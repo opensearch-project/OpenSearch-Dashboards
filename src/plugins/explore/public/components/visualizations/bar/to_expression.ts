@@ -5,7 +5,7 @@
 
 import { AxisColumnMappings, AxisRole, VEGASCHEMA, VisColumn, VisFieldType } from '../types';
 import { BarChartStyleControls } from './bar_vis_config';
-import { getStrokeDash, createThresholdLayer } from '../style_panel/threshold/utils';
+import { createThresholdLayer } from '../style_panel/threshold/utils';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 
 // Only set size and binSpacing in manual mode
@@ -307,7 +307,6 @@ export const createFacetedTimeBarChart = (
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
   const metricName = yAxis?.name;
-  const dateName = xAxis?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
 
