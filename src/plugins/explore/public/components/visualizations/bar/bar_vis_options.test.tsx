@@ -9,7 +9,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import configureMockStore from 'redux-mock-store';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 import { defaultBarChartStyles } from './bar_vis_config';
-import { Positions, VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
+import { VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
 // Mock store setup
 const mockStore = configureMockStore([]);
 const store = mockStore({
