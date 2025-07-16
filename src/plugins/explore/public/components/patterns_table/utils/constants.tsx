@@ -6,6 +6,7 @@
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import dompurify from 'dompurify';
 import { PatternItem } from '../patterns_table';
 import { isValidFiniteNumber } from './utils';
 
@@ -33,7 +34,9 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
       defaultMessage: 'Pattern Sample Log',
     }),
     render: (sample: string) => {
-      return <span dangerouslySetInnerHTML={{ __html: sample || '-' }} />;
+      const sanitizedSampleLog = dompurify.sanitize(sample);
+      // eslint-disable-next-line react/no-danger
+      return <span dangerouslySetInnerHTML={{ __html: sanitizedSampleLog || '—' }} />;
     },
   },
   {

@@ -26,13 +26,49 @@ jest.mock('../../application/utils/hooks/use_tab_results', () => ({
       hits: {
         hits: mockPatternItems.map((item) => ({
           _source: {
-            patterns_field: item.pattern,
-            count: item.count,
+            sample_logs: [item.sample],
+            pattern_count: item.count,
+            patterns_field: 'test pattern',
           },
         })),
+        total: 2096,
       },
     },
   })),
+}));
+
+// Mock the redux hooks
+jest.mock('react-redux', () => ({
+  useSelector: jest.fn((selector) => {
+    // Mock state for query
+    if (selector.toString().includes('state.query')) {
+      return { query: 'test query' };
+    }
+    // Mock state for results
+    if (selector.toString().includes('state.results')) {
+      return {
+        'test query': {
+          hits: {
+            hits: mockPatternItems.map((item) => ({
+              _source: {
+                // Use string literals instead of constants to avoid Jest errors
+                sample_logs: [item.sample],
+                pattern_count: item.count,
+                patterns_field: 'test pattern',
+              },
+            })),
+            total: 2096,
+          },
+        },
+      };
+    }
+    // Mock state for UI
+    if (selector.toString().includes('state.ui.activeTabId')) {
+      return 'patterns';
+    }
+    return null;
+  }),
+  connect: jest.fn(() => (Component: React.ComponentType<any>) => Component),
 }));
 
 describe('PatternsContainer', () => {
