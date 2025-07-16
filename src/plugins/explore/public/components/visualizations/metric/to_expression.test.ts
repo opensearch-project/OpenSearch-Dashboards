@@ -25,24 +25,6 @@ describe('to_expression', () => {
     uniqueValuesCount: 1,
   };
 
-  const categoricalColumn: VisColumn = {
-    id: 2,
-    name: 'category1',
-    schema: VisFieldType.Categorical,
-    column: 'field-2',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
-  };
-
-  const dateColumn: VisColumn = {
-    id: 3,
-    name: 'date1',
-    schema: VisFieldType.Date,
-    column: 'field-3',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
-  };
-
   const defaultStyleOptions = {
     showTitle: true,
     title: 'Test Metric',
