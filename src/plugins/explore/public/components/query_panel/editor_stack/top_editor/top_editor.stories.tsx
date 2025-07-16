@@ -8,7 +8,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { TopEditor } from './top_editor';
 import { StorybookProviders } from '../../mock_provider.mocks';
 import { EditorMode } from '../../../../application/utils/state_management/types';
-import '../editor_stack.scss';
+// import '../editor_stack.scss';
 
 const meta: Meta<typeof TopEditor> = {
   title: 'src/plugins/explore/public/components/query_panel/editor_stack/top_editor',

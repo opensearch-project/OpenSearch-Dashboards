@@ -50,6 +50,7 @@ describe('createScatterConfig', () => {
     // Mock props
     const mockProps = {
       styleOptions: {
+        switchAxes: false,
         tooltipOptions: {
           mode: 'hidden' as 'hidden',
         },
@@ -61,11 +62,7 @@ describe('createScatterConfig', () => {
           filled: false,
         },
         StandardAxes: [] as StandardAxes[],
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
-      },
+      } as ScatterChartStyleControls,
       onStyleChange: jest.fn(),
       numericalColumns: [],
       categoricalColumns: [],

@@ -16,7 +16,6 @@ import {
   TooltipOptions,
   LabelAggregationType,
   VisFieldType,
-  GridOptions,
 } from '../types';
 
 export interface HeatmapLabels {

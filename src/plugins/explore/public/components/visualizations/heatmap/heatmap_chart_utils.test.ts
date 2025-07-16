@@ -2,27 +2,44 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { createlabelLayer, getDataBound, addTransform } from './heatmap_chart_utils';
-import { LabelAggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
+import {
+  createlabelLayer,
+  getDataBound,
+  addTransform,
+  setRange,
+  enhanceStyle,
+} from './heatmap_chart_utils';
+import * as utils from './heatmap_chart_utils';
+import {
+  LabelAggregationType,
+  VisFieldType,
+  ColorSchemas,
+  ScaleType,
+  CompleteAxisWithStyle,
+  StandardAxes,
+} from '../types';
 
 import { defaultHeatmapChartStyles } from './heatmap_vis_config';
+import * as colorUtil from '../utils/utils';
 
 describe('createlabelLayer', () => {
-  const xAxis: VisColumn = {
+  const xAxis: CompleteAxisWithStyle = {
     id: 2,
     name: 'category',
     schema: VisFieldType.Categorical,
     column: 'category',
     validValuesCount: 1,
     uniqueValuesCount: 1,
+    styles: {} as StandardAxes,
   };
-  const yAxis: VisColumn = {
+  const yAxis: CompleteAxisWithStyle = {
     id: 3,
     name: 'product',
     schema: VisFieldType.Categorical,
     column: 'product',
     validValuesCount: 1,
     uniqueValuesCount: 1,
+    styles: {} as StandardAxes,
   };
 
   const colorField = 'value';
@@ -151,5 +168,174 @@ describe('addTransform', () => {
     );
 
     expect(result).toEqual([]);
+  });
+});
+
+describe('setRange', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('returns correct range of colors based on customRanges and schema', () => {
+    const mockColors = ['#111', '#222', '#333'];
+    jest.spyOn(colorUtil, 'generateColorBySchema').mockReturnValue(mockColors);
+
+    const styles = {
+      exclusive: {
+        customRanges: [
+          { min: 1, max: 5 },
+          { min: 6, max: 10 },
+        ],
+        colorSchema: ColorSchemas.GREENS,
+        percentageMode: true,
+        reverseSchema: false,
+        colorScaleType: ScaleType.LINEAR,
+        scaleToDataBounds: false,
+        maxNumberOfColors: 4,
+        useCustomRanges: true,
+      },
+    };
+
+    const result = setRange(styles);
+    expect(colorUtil.generateColorBySchema).toHaveBeenCalledWith(3, ColorSchemas.GREENS);
+    expect(result).toEqual(mockColors);
+  });
+
+  it('returns one color if no customRanges are defined but user turns on useCustomRanges', () => {
+    const styles = {
+      exclusive: {
+        customRanges: [],
+        useCustomRanges: true,
+        colorSchema: ColorSchemas.GREENS,
+        percentageMode: true,
+        reverseSchema: false,
+        colorScaleType: ScaleType.LINEAR,
+        scaleToDataBounds: false,
+        maxNumberOfColors: 4,
+      },
+    };
+
+    const result = setRange(styles);
+    expect(result).toEqual(['#ccffcc']);
+  });
+});
+
+describe('enhanceStyle', () => {
+  const baseMarkLayer = {
+    encoding: {
+      color: {
+        scale: {},
+        legend: {},
+      },
+    },
+  };
+
+  const transformedData = [{ sales: 5 }, { sales: 10 }, { sales: 15 }];
+
+  const colorField = 'sales';
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('applies percentageMode settings if enabled and addLegend is true', () => {
+    const styles = {
+      exclusive: {
+        customRanges: [],
+        useCustomRanges: true,
+        colorSchema: ColorSchemas.GREENS,
+        percentageMode: true,
+        reverseSchema: false,
+        colorScaleType: ScaleType.LINEAR,
+        scaleToDataBounds: false,
+        maxNumberOfColors: 4,
+      },
+      addLegend: true,
+    };
+
+    const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
+    enhanceStyle(markLayer, styles, transformedData, colorField);
+
+    expect(markLayer.encoding.color.scale.domain).toEqual([0, 1]);
+    expect(markLayer.encoding.color.legend.format).toBe('.0%');
+  });
+
+  it('applies scaleToDataBounds if enabled', () => {
+    const styles = {
+      exclusive: {
+        customRanges: [],
+        useCustomRanges: true,
+        colorSchema: ColorSchemas.GREENS,
+        percentageMode: true,
+        reverseSchema: false,
+        colorScaleType: ScaleType.LINEAR,
+        scaleToDataBounds: true,
+        maxNumberOfColors: 4,
+      },
+    };
+
+    const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
+    enhanceStyle(markLayer, styles, transformedData, colorField);
+
+    expect(markLayer.encoding.color.scale.domain).toEqual([5, 15]);
+  });
+
+  it('applies customRanges if enabled and sets correct scale and range', () => {
+    const mockRange = ['#ccffcc', '#669966', '#003300'];
+    jest.spyOn(utils, 'setRange').mockReturnValue(mockRange);
+
+    const styles = {
+      exclusive: {
+        colorSchema: ColorSchemas.GREENS,
+        percentageMode: true,
+        reverseSchema: false,
+        colorScaleType: ScaleType.LINEAR,
+        scaleToDataBounds: true,
+        maxNumberOfColors: 4,
+        useCustomRanges: true,
+        customRanges: [
+          { min: 0, max: 5 },
+          { min: 6, max: 10 },
+        ],
+      },
+    };
+
+    const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
+    enhanceStyle(markLayer, styles, transformedData, colorField);
+
+    expect(markLayer.encoding.color.scale.type).toBe('quantize');
+    expect(markLayer.encoding.color.scale.domain).toEqual([0, 10]);
+    expect(markLayer.encoding.color.scale.range).toEqual(mockRange);
+  });
+
+  it('prefers customRanges over scaleToDataBounds when both are enabled', () => {
+    const mockRange = ['#ccffcc', '#003300'];
+    jest.spyOn(utils, 'setRange').mockReturnValue(mockRange);
+
+    const styles = {
+      exclusive: {
+        colorSchema: ColorSchemas.GREENS,
+        percentageMode: true,
+        reverseSchema: false,
+        colorScaleType: ScaleType.LINEAR,
+        maxNumberOfColors: 4,
+        useCustomRanges: true,
+        customRanges: [{ min: 2, max: 8 }],
+        scaleToDataBounds: true,
+      },
+    };
+
+    const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
+    enhanceStyle(markLayer, styles, transformedData, colorField);
+
+    expect(markLayer.encoding.color.scale.domain).toEqual([2, 8]);
+    expect(markLayer.encoding.color.scale.range).toEqual(mockRange);
+  });
+
+  it('does nothing if no matching flags are set', () => {
+    const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
+    enhanceStyle(markLayer, {}, transformedData, colorField);
+
+    expect(markLayer).toEqual(baseMarkLayer);
   });
 });

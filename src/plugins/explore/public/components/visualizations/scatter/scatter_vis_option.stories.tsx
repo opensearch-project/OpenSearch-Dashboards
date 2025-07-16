@@ -127,10 +127,6 @@ ScatterWithField.args = {
       {
         id: '1',
         position: Positions.RIGHT,
-        field: {
-          default: mockThreeNumericalColumns[1],
-          options: mockThreeNumericalColumns,
-        },
         show: true,
         style: {},
         labels: {
@@ -142,15 +138,14 @@ ScatterWithField.args = {
         title: {
           text: 'Count as new title',
         },
+        grid: {
+          showLines: true,
+        },
         axisRole: AxisRole.X,
       },
       {
         id: '3',
         position: Positions.RIGHT,
-        field: {
-          default: mockThreeNumericalColumns[2],
-          options: mockThreeNumericalColumns,
-        },
         show: true,
         style: {},
         labels: {
@@ -158,6 +153,9 @@ ScatterWithField.args = {
           rotate: 0,
           filter: false,
           truncate: 100,
+        },
+        grid: {
+          showLines: true,
         },
         title: {
           text: 'Min as new title',

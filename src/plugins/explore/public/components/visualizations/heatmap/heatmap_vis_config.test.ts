@@ -91,6 +91,7 @@ describe('createHeatmapeConfig', () => {
     // Mock props
     const mockProps = {
       styleOptions: {
+        switchAxes: false,
         tooltipOptions: { mode: 'hidden' as const },
         addLegend: false,
         legendPosition: Positions.RIGHT,
@@ -105,11 +106,7 @@ describe('createHeatmapeConfig', () => {
         },
         label: {} as HeatmapLabels,
         StandardAxes: [] as StandardAxes[],
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
-      },
+      } as HeatmapChartStyleControls,
       onStyleChange: jest.fn(),
       numericalColumns: [],
       categoricalColumns: [],

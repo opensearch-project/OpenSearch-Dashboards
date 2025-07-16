@@ -46,6 +46,70 @@ describe('HeatmapExclusiveVisOptions', () => {
       reverseSchema: true,
     });
   });
+
+  it('calls onChange when color schema is changed', () => {
+    render(<HeatmapExclusiveVisOptions {...defaultProps} />);
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: ColorSchemas.GREENS } });
+
+    expect(defaultProps.onChange).toHaveBeenCalledWith({
+      ...defaultProps.styles,
+      colorSchema: ColorSchemas.GREENS,
+    });
+  });
+
+  it('calls onChange when color scale type is changed to log', () => {
+    render(<HeatmapExclusiveVisOptions {...defaultProps} />);
+
+    const logButton = screen.getByTestId('log');
+    fireEvent.click(logButton);
+
+    expect(defaultProps.onChange).toHaveBeenCalledWith({
+      ...defaultProps.styles,
+      colorScaleType: ScaleType.LOG,
+    });
+  });
+
+  it('disables scaleToDataBounds switch when percentageMode is true', () => {
+    const props = {
+      ...defaultProps,
+      styles: {
+        ...defaultProps.styles,
+        percentageMode: true,
+      },
+    };
+
+    render(<HeatmapExclusiveVisOptions {...props} />);
+    const switchEl = screen.getByTestId('scaleToDataBounds');
+    expect(switchEl).toBeDisabled();
+  });
+
+  it('disables percentageMode switch when useCustomRanges is true', () => {
+    const props = {
+      ...defaultProps,
+      styles: {
+        ...defaultProps.styles,
+        useCustomRanges: true,
+      },
+    };
+
+    render(<HeatmapExclusiveVisOptions {...props} />);
+    const switchEl = screen.getByTestId('percentageMode');
+    expect(switchEl).toBeDisabled();
+  });
+
+  it('disables maxNumberOfColors input when useCustomRanges is true', () => {
+    const props = {
+      ...defaultProps,
+      styles: {
+        ...defaultProps.styles,
+        useCustomRanges: true,
+      },
+    };
+
+    render(<HeatmapExclusiveVisOptions {...props} />);
+    const input = screen.getByPlaceholderText(/Max number of colors/i);
+    expect(input).toBeDisabled();
+  });
 });
 
 describe('HeatmapLabelVisOptions', () => {
@@ -99,5 +163,44 @@ describe('HeatmapLabelVisOptions', () => {
     };
     render(<HeatmapLabelVisOptions {...props} />);
     expect(screen.getByText('Type')).toBeInTheDocument();
+  });
+
+  it('toggles rotate label and calls onChange', () => {
+    const props = {
+      ...defaultProps,
+      styles: {
+        ...defaultProps.styles,
+        show: true,
+      },
+    };
+
+    render(<HeatmapLabelVisOptions {...props} />);
+    const rotateSwitch = screen.getByTestId('rotateLabel');
+    fireEvent.click(rotateSwitch);
+
+    expect(props.onChange).toHaveBeenCalledWith({
+      ...props.styles,
+      rotate: true,
+    });
+  });
+
+  it('toggles overwriteColor and shows color picker', () => {
+    const props = {
+      ...defaultProps,
+      styles: {
+        ...defaultProps.styles,
+        show: true,
+        overwriteColor: false,
+      },
+    };
+
+    render(<HeatmapLabelVisOptions {...props} />);
+    const overwriteSwitch = screen.getByTestId('overwriteColor');
+    fireEvent.click(overwriteSwitch);
+
+    expect(props.onChange).toHaveBeenCalledWith({
+      ...props.styles,
+      overwriteColor: true,
+    });
   });
 });

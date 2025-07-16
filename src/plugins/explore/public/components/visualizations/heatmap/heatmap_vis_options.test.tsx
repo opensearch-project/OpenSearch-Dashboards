@@ -3,10 +3,58 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
+import { Provider } from 'react-redux';
 import { render, screen, fireEvent } from '@testing-library/react';
+import configureMockStore from 'redux-mock-store';
 import { HeatmapVisStyleControls, HeatmapVisStyleControlsProps } from './heatmap_vis_options';
-import { VisFieldType, Positions } from '../types';
+import { VisFieldType, AxisRole, VisColumn, AxisColumnMappings, Positions } from '../types';
 import { defaultHeatmapChartStyles } from './heatmap_vis_config';
+
+// Mock store setup
+const mockStore = configureMockStore([]);
+const store = mockStore({
+  tab: {
+    visualizations: {
+      styleOptions: {
+        switchAxes: false,
+      },
+    },
+  },
+});
+
+// Shared column mocks
+const mockNumericalColumns: VisColumn[] = [
+  {
+    id: 1,
+    name: 'value 1',
+    schema: VisFieldType.Numerical,
+    column: 'x1',
+    validValuesCount: 6,
+    uniqueValuesCount: 6,
+  },
+  {
+    id: 2,
+    name: 'value 2',
+    schema: VisFieldType.Numerical,
+    column: 'x2',
+    validValuesCount: 6,
+    uniqueValuesCount: 6,
+  },
+  {
+    id: 3,
+    name: 'value 3',
+    schema: VisFieldType.Numerical,
+    column: 'x3',
+    validValuesCount: 6,
+    uniqueValuesCount: 6,
+  },
+];
+
+const mockAxisColumnMappings: AxisColumnMappings = {
+  [AxisRole.X]: mockNumericalColumns[0],
+  [AxisRole.Y]: mockNumericalColumns[1],
+  [AxisRole.COLOR]: mockNumericalColumns[2],
+};
 
 jest.mock('@osd/i18n', () => ({
   i18n: {
@@ -14,40 +62,153 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+jest.mock('./heatmap_exclusive_vis_options', () => ({
+  HeatmapExclusiveVisOptions: jest.fn(({ onChange }) => (
+    <div data-test-subj="heatmapExclusiveOptions">
+      <button
+        data-test-subj="changeHeatmapColorScale"
+        onClick={() =>
+          onChange({
+            colorScaleType: 'log',
+          })
+        }
+      >
+        Update Heatmap Color Scale
+      </button>
+
+      <button
+        data-test-subj="changeHeatmapReverseSchema"
+        onClick={() =>
+          onChange({
+            reverseSchema: true,
+          })
+        }
+      >
+        Toggle Reverse Schema
+      </button>
+
+      <button
+        data-test-subj="changeHeatmapUseCustomRanges"
+        onClick={() =>
+          onChange({
+            useCustomRanges: true,
+          })
+        }
+      >
+        Enable Custom Ranges
+      </button>
+    </div>
+  )),
+  HeatmapLabelVisOptions: jest.fn(({ onChange }) => (
+    <div data-test-subj="heatmapLabelOptions">
+      <button
+        data-test-subj="toggleShowLabels"
+        onClick={() =>
+          onChange({
+            show: true,
+          })
+        }
+      >
+        Show Labels
+      </button>
+
+      <button
+        data-test-subj="toggleRotateLabels"
+        onClick={() =>
+          onChange({
+            rotate: true,
+          })
+        }
+      >
+        Rotate Labels
+      </button>
+
+      <button
+        data-test-subj="overwriteLabelColor"
+        onClick={() =>
+          onChange({
+            overwriteColor: true,
+            color: '#FF0000',
+          })
+        }
+      >
+        Overwrite Label Color
+      </button>
+    </div>
+  )),
+}));
+
+jest.mock('../style_panel/legend/legend', () => {
+  // Import Positions inside the mock to avoid reference error
+  const { Positions: PositionsEnum } = jest.requireActual('../types');
+
+  return {
+    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => (
+      <div data-test-subj="mockLegendOptionsPanel">
+        <button
+          data-test-subj="mockLegendShow"
+          onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+        >
+          Toggle Legend
+        </button>
+        <button
+          data-test-subj="mockLegendPosition"
+          onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
+        >
+          Change Position
+        </button>
+        <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
+      </div>
+    )),
+  };
+});
+
+jest.mock('../style_panel/tooltip/tooltip', () => ({
+  TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
+    <div data-test-subj="mockTooltipOptionsPanel">
+      <button
+        data-test-subj="mockUpdateTooltip"
+        onClick={() => onTooltipOptionsChange({ mode: 'hidden' })}
+      >
+        Update Tooltip
+      </button>
+    </div>
+  )),
+}));
+
+jest.mock('../style_panel/axes/standard_axes_options', () => ({
+  AllAxesOptions: jest.fn(({ onStandardAxesChange }) => (
+    <div data-test-subj="allAxesOptions">
+      <button
+        data-test-subj="changeAxis"
+        onClick={() =>
+          onStandardAxesChange([
+            {
+              id: 'axis-id',
+              axisRole: 'y',
+              show: false,
+              title: { text: 'Mock Y Axis' },
+              position: 'left',
+              labels: { show: true, rotate: 0 },
+              grid: { showLines: true },
+            },
+          ])
+        }
+      >
+        Mock Axis Change
+      </button>
+    </div>
+  )),
+}));
+
 describe('HeatmapVisStyleControls', () => {
   const mockProps: HeatmapVisStyleControlsProps = {
-    axisColumnMappings: {},
+    axisColumnMappings: mockAxisColumnMappings,
     updateVisualization: jest.fn(),
     styleOptions: defaultHeatmapChartStyles,
     onStyleChange: jest.fn(),
-    numericalColumns: [
-      {
-        id: 1,
-        name: 'value',
-        schema: VisFieldType.Numerical,
-        column: 'field-1',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
-      },
-    ],
-    categoricalColumns: [
-      {
-        id: 2,
-        name: 'category',
-        schema: VisFieldType.Categorical,
-        column: 'field-2',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
-      },
-      {
-        id: 3,
-        name: 'category',
-        schema: VisFieldType.Categorical,
-        column: 'field-2',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
-      },
-    ],
+    numericalColumns: mockNumericalColumns,
+    categoricalColumns: [],
     dateColumns: [],
   };
 
@@ -55,117 +216,138 @@ describe('HeatmapVisStyleControls', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the axes selector panel', () => {
-    render(<HeatmapVisStyleControls {...mockProps} />);
-    expect(screen.getByText('Fields')).toBeInTheDocument();
-  });
-
-  it('renders the axes options panel when mapping is selected', () => {
-    render(<HeatmapVisStyleControls {...mockProps} />);
-    expect(screen.getByText('X-Axis')).toBeInTheDocument();
-    expect(screen.getByText('Y-Axis')).toBeInTheDocument();
-    expect(screen.getByText('Color')).toBeInTheDocument();
-  });
-
-  it('renders the exclusive options panel when mapping is selected', () => {
-    // Create props with actual axis mappings
-    const propsWithMappings = {
-      ...mockProps,
-      axisColumnMappings: {
-        x: mockProps.categoricalColumns![0],
-        y: mockProps.categoricalColumns![1],
-      },
-    };
-
-    render(<HeatmapVisStyleControls {...propsWithMappings} />);
-    expect(screen.getByText('Heatmap')).toBeInTheDocument();
-    expect(screen.getByText('Color schema')).toBeInTheDocument();
-  });
-
-  it('renders the label options panel when mapping is selected', () => {
-    // Create props with actual axis mappings
-    const propsWithMappings = {
-      ...mockProps,
-      axisColumnMappings: {
-        x: mockProps.categoricalColumns![0],
-        y: mockProps.categoricalColumns![1],
-      },
-    };
-
-    render(<HeatmapVisStyleControls {...propsWithMappings} />);
-    // Check for the presence of the HeatmapLabelVisOptions component by looking for its content
-    expect(screen.getByText('Labels')).toBeInTheDocument();
-    expect(screen.getByText('Show Labels')).toBeInTheDocument();
-  });
-
-  it('calls onStyleChange to infer fields for StandardAxes when component renders', () => {
-    render(<HeatmapVisStyleControls {...mockProps} />);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith(
-      expect.objectContaining({
-        StandardAxes: expect.any(Array),
-      })
+  it('renders correctly', () => {
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...mockProps} />
+      </Provider>
     );
 
-    // Get the actual call arguments - cast to jest.Mock to access mock properties
-    const onStyleChangeMock = mockProps.onStyleChange as jest.Mock;
-    const callArgs = onStyleChangeMock.mock.calls[0][0];
-
-    // Check that the StandardAxes array has the expected structure
-    expect(callArgs.StandardAxes.length).toBe(2);
-
-    // Find the X and Y axes in the array
-    const xAxis = callArgs.StandardAxes.find((axis: { axisRole: string }) => axis.axisRole === 'x');
-    const yAxis = callArgs.StandardAxes.find((axis: { axisRole: string }) => axis.axisRole === 'y');
-
-    // Verify they exist
-    expect(xAxis).toBeDefined();
-    expect(yAxis).toBeDefined();
-
-    // Verify they have field properties
-    expect(xAxis.field).toBeDefined();
-    expect(yAxis.field).toBeDefined();
+    expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
+    expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('heatmapLabelOptions')).toBeInTheDocument();
+    expect(screen.getByTestId('heatmapExclusiveOptions')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
   });
 
-  it('calls updateVisualization when axes are switched', () => {
-    // Ensure categoricalColumns are defined
-    if (!mockProps.categoricalColumns || mockProps.categoricalColumns.length < 2) {
-      // Skip test if not enough categorical columns
-      return;
-    }
+  it('calls onStyleChange with correct parameters for legend options', () => {
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...mockProps} />
+      </Provider>
+    );
 
-    // Create props with actual axis mappings
-    const propsWithMappings = {
-      ...mockProps,
-      axisColumnMappings: {
-        x: mockProps.categoricalColumns[0],
-        y: mockProps.categoricalColumns[1],
+    // Test legend show toggle
+    fireEvent.click(screen.getByTestId('mockLegendShow'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      addLegend: !mockProps.styleOptions.addLegend,
+    });
+
+    // Test legend position change
+    fireEvent.click(screen.getByTestId('mockLegendPosition'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      legendPosition: Positions.BOTTOM,
+    });
+  });
+
+  it('calls onStyleChange with correct parameters for tooltip options', () => {
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...mockProps} />
+      </Provider>
+    );
+
+    // Test tooltip update
+    fireEvent.click(screen.getByTestId('mockUpdateTooltip'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      tooltipOptions: { ...mockProps.styleOptions.tooltipOptions, mode: 'hidden' },
+    });
+  });
+
+  it('calls onStyleChange with correct parameters for axes options', () => {
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...mockProps} />
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('changeAxis'));
+
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      StandardAxes: [
+        {
+          id: 'axis-id',
+          axisRole: 'y',
+          show: false,
+          title: { text: 'Mock Y Axis' },
+          position: 'left',
+          labels: { show: true, rotate: 0 },
+          grid: { showLines: true },
+        },
+      ],
+    });
+  });
+  it('calls onStyleChange with correct parameters for heatmap exclusive options', () => {
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...mockProps} />
+      </Provider>
+    );
+
+    // Test heatmap color scale type change
+    fireEvent.click(screen.getByTestId('changeHeatmapColorScale'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      exclusive: {
+        colorScaleType: 'log',
       },
-    };
+    });
 
-    const { container } = render(<HeatmapVisStyleControls {...propsWithMappings} />);
+    // Test reverse schema toggle
+    fireEvent.click(screen.getByTestId('changeHeatmapReverseSchema'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      exclusive: {
+        reverseSchema: true,
+      },
+    });
 
-    // Find the switch axes button if it exists
-    const switchButton = container.querySelector('[data-test-subj="switchAxesButton"]');
+    // Test enabling custom ranges
+    fireEvent.click(screen.getByTestId('changeHeatmapUseCustomRanges'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      exclusive: {
+        useCustomRanges: true,
+      },
+    });
+  });
+  it('calls onStyleChange with correct parameters for heatmap label options', () => {
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...mockProps} />
+      </Provider>
+    );
 
-    // If the button exists, click it and verify updateVisualization was called
-    if (switchButton) {
-      fireEvent.click(switchButton);
+    // Show Labels
+    fireEvent.click(screen.getByTestId('toggleShowLabels'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      label: {
+        show: true,
+      },
+    });
 
-      // Cast updateVisualization to jest.Mock to access mock properties
-      const updateVisualizationMock = mockProps.updateVisualization as jest.Mock;
-      expect(updateVisualizationMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          mappings: expect.objectContaining({
-            x: mockProps.categoricalColumns[1],
-            y: mockProps.categoricalColumns[0],
-          }),
-        })
-      );
-    } else {
-      // If the button doesn't exist, mark the test as skipped
-      // Using test.todo would be better but we're already inside the test
-      expect(true).toBe(true); // Always passes
-    }
+    // Rotate Labels
+    fireEvent.click(screen.getByTestId('toggleRotateLabels'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      label: {
+        rotate: true,
+      },
+    });
+
+    // Overwrite Label Color
+    fireEvent.click(screen.getByTestId('overwriteLabelColor'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      label: {
+        overwriteColor: true,
+        color: '#FF0000',
+      },
+    });
   });
 });
