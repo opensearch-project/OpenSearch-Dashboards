@@ -39,7 +39,7 @@ import {
   getVisualizeHref,
 } from './lib/visualize_trigger_utils';
 import { Bucket, FieldDetails } from './types';
-import { IndexPatternField, IndexPattern } from '../../../../../../../../data/public';
+import { IndexPatternField, IndexPattern } from '../../../../data/public';
 
 interface DiscoverFieldDetailsProps {
   columns: string[];

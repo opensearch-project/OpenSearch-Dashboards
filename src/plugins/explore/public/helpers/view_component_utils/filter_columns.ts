@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern, Dataset } from '../../../opensearch_dashboards_services';
-import { getIndexPatternFieldList } from '../../components/sidebar/lib/get_index_pattern_field_list';
-import { buildColumns } from '../../utils/columns';
+import {
+  IndexPattern,
+  Dataset,
+} from '../../application/legacy/discover/opensearch_dashboards_services';
+import { getIndexPatternFieldList } from '../../components/fields_selector/lib/get_index_pattern_field_list';
+import { buildColumns } from '../../application/legacy/discover/application/utils/columns';
 
 /**
  * Helper function to filter columns based on the fields of the index pattern.
