@@ -9,12 +9,9 @@ import { LegacyState } from '../../../../application/utils/state_management/slic
 import { ExploreServices } from '../../../../types';
 
 // Mock dependencies
-jest.mock(
-  '../../../../application/legacy/discover/application/view_components/utils/get_sort_for_search_source',
-  () => ({
-    getSortForSearchSource: jest.fn(() => [{ timestamp: { order: 'desc' } }]),
-  })
-);
+jest.mock('../../../../helpers/view_component_utils/get_sort_for_search_source', () => ({
+  getSortForSearchSource: jest.fn(() => [{ timestamp: { order: 'desc' } }]),
+}));
 
 describe('helpers', () => {
   describe('getSharingDataFields', () => {
