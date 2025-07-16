@@ -113,7 +113,7 @@ describe('ExploreEmbeddable', () => {
     };
 
     // Create a function that returns a new mock search source
-    const createMockSearchSource = (): typeof mockSearchSourceBase & { create: jest.Mock } => ({
+    const createMockSearchSource = (): any => ({
       ...mockSearchSourceBase,
       create: jest.fn().mockImplementation(() => createMockSearchSource()),
     });
