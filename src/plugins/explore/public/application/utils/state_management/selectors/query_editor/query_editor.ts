@@ -48,3 +48,14 @@ export const selectEditorMode = createSelector([selectState], (state) => state.e
 export const selectIsDualEditorMode = createSelector([selectState], (state) =>
   [EditorMode.DualQuery, EditorMode.DualPrompt].includes(state.editorMode)
 );
+
+export const selectTopEditorIsQueryMode = createSelector(
+  [selectEditorMode, selectPromptModeIsAvailable],
+  (editorMode, promptModeIsAvailable) => {
+    if (!promptModeIsAvailable) {
+      return true;
+    }
+
+    return editorMode === EditorMode.SingleQuery;
+  }
+);

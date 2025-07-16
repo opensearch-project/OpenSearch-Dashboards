@@ -38,9 +38,8 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 }));
 
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
-  selectEditorMode: jest.fn(),
   selectQueryLanguage: jest.fn(),
-  selectPromptModeIsAvailable: jest.fn(),
+  selectTopEditorIsQueryMode: jest.fn(),
 }));
 
 jest.mock('../../../../application/context', () => ({
@@ -65,13 +64,12 @@ import { useSelector } from 'react-redux';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import {
-  selectEditorMode,
   selectQueryLanguage,
+  selectTopEditorIsQueryMode,
 } from '../../../../application/utils/state_management/selectors';
 import { useDatasetContext } from '../../../../application/context';
 import { useSharedEditor } from '../use_shared_editor';
 import { useTopEditorText, useEditorRefs } from '../../../../application/hooks';
-import { EditorMode } from '../../../../application/utils/state_management/types';
 
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 const mockGetEffectiveLanguageForAutoComplete = getEffectiveLanguageForAutoComplete as jest.MockedFunction<
@@ -145,7 +143,7 @@ describe('useTopEditor', () => {
     mockuseDatasetContext.mockReturnValue({ indexPattern: mockIndexPattern } as any);
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectQueryLanguage) return 'SQL';
-      if (selector === selectEditorMode) return EditorMode.SingleQuery;
+      if (selector === selectTopEditorIsQueryMode) return true;
       return undefined;
     });
     mockUseTopEditorText.mockReturnValue('SELECT * FROM logs');
@@ -196,7 +194,7 @@ describe('useTopEditor', () => {
   it('should return correct editor configuration for prompt mode', () => {
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectQueryLanguage) return 'SQL';
-      if (selector === selectEditorMode) return EditorMode.SinglePrompt;
+      if (selector === selectTopEditorIsQueryMode) return false;
       return undefined;
     });
 
@@ -211,10 +209,10 @@ describe('useTopEditor', () => {
     });
   });
 
-  it('should return correct editor configuration for empty mode', () => {
+  it('should return correct editor configuration when not in query mode', () => {
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectQueryLanguage) return 'SQL';
-      if (selector === selectEditorMode) return EditorMode.SingleEmpty;
+      if (selector === selectTopEditorIsQueryMode) return false;
       return undefined;
     });
 
@@ -259,22 +257,22 @@ describe('useTopEditor', () => {
     // Test prompt mode
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectQueryLanguage) return 'SQL';
-      if (selector === selectEditorMode) return EditorMode.SinglePrompt;
+      if (selector === selectTopEditorIsQueryMode) return false;
       return undefined;
     });
 
     const { result: promptResult } = renderUseTopEditor();
     expect(promptResult.current.triggerSuggestOnFocus).toBe(false);
 
-    // Test empty mode
+    // Test when not in query mode
     mockUseSelector.mockImplementation((selector) => {
       if (selector === selectQueryLanguage) return 'SQL';
-      if (selector === selectEditorMode) return EditorMode.SingleEmpty;
+      if (selector === selectTopEditorIsQueryMode) return false;
       return undefined;
     });
 
-    const { result: emptyResult } = renderUseTopEditor();
-    expect(emptyResult.current.triggerSuggestOnFocus).toBe(false);
+    const { result: nonQueryResult } = renderUseTopEditor();
+    expect(nonQueryResult.current.triggerSuggestOnFocus).toBe(false);
   });
 
   describe('manual suggestion triggering', () => {
@@ -293,6 +291,33 @@ describe('useTopEditor', () => {
 
       // Cleanup
       unmount();
+      expect(mockOnDidFocusDisposable.dispose).toHaveBeenCalled();
+    });
+
+    it('should clean up focus listener when isQueryMode changes', () => {
+      const mockOnDidFocusDisposable = { dispose: jest.fn() };
+      const mockEditor = {
+        onDidFocusEditorWidget: jest.fn().mockReturnValue(mockOnDidFocusDisposable),
+        trigger: jest.fn(),
+      };
+
+      mockTopEditorRef.current = mockEditor;
+
+      const { rerender } = renderUseTopEditor();
+
+      // Verify listener is set up initially
+      expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalled();
+
+      // Change to non-query mode
+      mockUseSelector.mockImplementation((selector) => {
+        if (selector === selectQueryLanguage) return 'SQL';
+        if (selector === selectTopEditorIsQueryMode) return false;
+        return undefined;
+      });
+
+      rerender();
+
+      // Should dispose previous listener
       expect(mockOnDidFocusDisposable.dispose).toHaveBeenCalled();
     });
 
@@ -319,10 +344,10 @@ describe('useTopEditor', () => {
       );
     });
 
-    it('should not set up focus listener in prompt mode', () => {
+    it('should not set up focus listener when not in query mode', () => {
       mockUseSelector.mockImplementation((selector) => {
         if (selector === selectQueryLanguage) return 'SQL';
-        if (selector === selectEditorMode) return EditorMode.SinglePrompt;
+        if (selector === selectTopEditorIsQueryMode) return false;
         return undefined;
       });
 
@@ -338,10 +363,10 @@ describe('useTopEditor', () => {
       expect(mockEditor.onDidFocusEditorWidget).not.toHaveBeenCalled();
     });
 
-    it('should not set up focus listener in empty mode', () => {
+    it('should not set up focus listener when isQueryMode changes to false', () => {
       mockUseSelector.mockImplementation((selector) => {
         if (selector === selectQueryLanguage) return 'SQL';
-        if (selector === selectEditorMode) return EditorMode.SingleEmpty;
+        if (selector === selectTopEditorIsQueryMode) return false;
         return undefined;
       });
 
@@ -358,21 +383,21 @@ describe('useTopEditor', () => {
     });
   });
 
-  describe('editor mode changes', () => {
-    it('should update editor mode ref when editor mode changes', () => {
+  describe('query mode changes', () => {
+    it('should respond to isQueryMode changes', () => {
       const { rerender } = renderUseTopEditor();
 
-      // Change editor mode
+      // Change from query mode to prompt mode
       mockUseSelector.mockImplementation((selector) => {
         if (selector === selectQueryLanguage) return 'SQL';
-        if (selector === selectEditorMode) return EditorMode.SinglePrompt;
+        if (selector === selectTopEditorIsQueryMode) return false;
         return undefined;
       });
 
       rerender();
 
-      // The ref should be updated through useEffect
-      expect(mockUseSelector).toHaveBeenCalledWith(selectEditorMode);
+      // The selector should be called
+      expect(mockUseSelector).toHaveBeenCalledWith(selectTopEditorIsQueryMode);
     });
   });
 });

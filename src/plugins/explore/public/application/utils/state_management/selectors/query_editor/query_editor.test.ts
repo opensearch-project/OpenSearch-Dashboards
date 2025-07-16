@@ -14,6 +14,7 @@ import {
   selectIsDualEditorMode,
   selectPromptModeIsAvailable,
   selectPromptToQueryIsLoading,
+  selectTopEditorIsQueryMode,
 } from './query_editor';
 import { RootState } from '../../store';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
@@ -337,6 +338,83 @@ describe('query_editor selectors', () => {
         const result = selectIsDualEditorMode(state);
         expect(result).toBe(false);
       });
+    });
+  });
+
+  describe('selectTopEditorIsQueryMode', () => {
+    it('should return true when promptModeIsAvailable is false regardless of editorMode', () => {
+      const testModes = [
+        EditorMode.SingleEmpty,
+        EditorMode.SinglePrompt,
+        EditorMode.SingleQuery,
+        EditorMode.DualPrompt,
+        EditorMode.DualQuery,
+      ];
+
+      testModes.forEach((mode) => {
+        const state = createMockState({
+          editorMode: mode,
+          promptModeIsAvailable: false,
+        });
+
+        const result = selectTopEditorIsQueryMode(state);
+        expect(result).toBe(true);
+      });
+    });
+
+    it('should return true when promptModeIsAvailable is true and editorMode is SingleQuery', () => {
+      const state = createMockState({
+        editorMode: EditorMode.SingleQuery,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when promptModeIsAvailable is true and editorMode is SingleEmpty', () => {
+      const state = createMockState({
+        editorMode: EditorMode.SingleEmpty,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when promptModeIsAvailable is true and editorMode is SinglePrompt', () => {
+      const state = createMockState({
+        editorMode: EditorMode.SinglePrompt,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when promptModeIsAvailable is true and editorMode is DualPrompt', () => {
+      const state = createMockState({
+        editorMode: EditorMode.DualPrompt,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when promptModeIsAvailable is true and editorMode is DualQuery', () => {
+      const state = createMockState({
+        editorMode: EditorMode.DualQuery,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(false);
     });
   });
 });
