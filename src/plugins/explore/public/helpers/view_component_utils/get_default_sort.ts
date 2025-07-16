@@ -28,30 +28,22 @@
  * under the License.
  */
 
-import { difference } from 'lodash';
-import {
-  DataView as Dataset,
-  IndexPattern,
-  IndexPatternField,
-} from '../../../../../../../../../data/public';
+import { IndexPattern } from '../../application/legacy/discover/opensearch_dashboards_services';
+import { SortOrder } from '../../types/saved_explore_types';
+// @ts-ignore
+import { isSortable } from './get_sort';
 
-export function getIndexPatternFieldList(
-  indexPattern?: IndexPattern | Dataset,
-  fieldCounts?: Record<string, number>
-) {
-  if (!indexPattern || !fieldCounts) return [];
-
-  const fieldNamesInDocs = Object.keys(fieldCounts);
-  const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
-  const unknownTypes: IndexPatternField[] = [];
-
-  difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
-    unknownTypes.push({
-      displayName: String(unknownFieldName),
-      name: String(unknownFieldName),
-      type: 'unknown',
-    } as IndexPatternField);
-  });
-
-  return [...indexPattern.fields.getAll(), ...unknownTypes];
+/**
+ * use in case the user didn't manually sort.
+ * the default sort is returned depending of the index pattern
+ */
+export function getDefaultSort(
+  indexPattern: IndexPattern,
+  defaultSortOrder: 'asc' | 'desc' = 'desc'
+): SortOrder[] {
+  if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
+    return [[indexPattern.timeFieldName, defaultSortOrder]];
+  } else {
+    return [['_score', defaultSortOrder]];
+  }
 }

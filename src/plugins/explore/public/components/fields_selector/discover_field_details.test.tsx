@@ -37,8 +37,8 @@ import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { IndexPatternField } from '../../../../../../../../data/public';
-import { getStubIndexPattern } from '../../../../../../../../data/public/test_utils';
+import { IndexPatternField } from '../../../../data/public';
+import { getStubIndexPattern } from '../../../../data/public/test_utils';
 
 const mockGetHref = jest.fn();
 const mockGetTriggerCompatibleActions = jest.fn();

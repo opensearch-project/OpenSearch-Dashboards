@@ -16,7 +16,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { UI_SETTINGS } from '../../../../data/public';
 import { DocViewFilterFn } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
-import { filterColumns } from '../../application/legacy/discover/application/view_components/utils/filter_columns';
+import { filterColumns } from '../../helpers/view_component_utils/filter_columns';
 import { getLegacyDisplayedColumns } from '../../helpers/data_table_helper';
 import { getDocViewsRegistry } from '../../application/legacy/discover/opensearch_dashboards_services';
 import { ExploreServices } from '../../types';

@@ -28,22 +28,28 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { SortOrder } from '../../../../../../types/saved_explore_types';
-// @ts-ignore
-import { isSortable } from './get_sort';
+import { i18n } from '@osd/i18n';
+import { IndexPatternField } from '../../../../../data/public';
 
-/**
- * use in case the user didn't manually sort.
- * the default sort is returned depending of the index pattern
- */
-export function getDefaultSort(
-  indexPattern: IndexPattern,
-  defaultSortOrder: 'asc' | 'desc' = 'desc'
-): SortOrder[] {
-  if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
-    return [[indexPattern.timeFieldName, defaultSortOrder]];
-  } else {
-    return [['_score', defaultSortOrder]];
+export function getWarnings(field: IndexPatternField) {
+  let warnings = [];
+
+  if (field.scripted) {
+    warnings.push(
+      i18n.translate(
+        'explore.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription',
+        {
+          defaultMessage: 'Scripted fields can take a long time to execute.',
+        }
+      )
+    );
   }
+
+  if (warnings.length > 1) {
+    warnings = warnings.map(function (warning, i) {
+      return (i > 0 ? '\n' : '') + (i + 1) + ' - ' + warning;
+    });
+  }
+
+  return warnings;
 }

@@ -28,10 +28,13 @@
  * under the License.
  */
 
-import { OpenSearchQuerySortValue, IndexPattern } from '../../../opensearch_dashboards_services';
+import {
+  OpenSearchQuerySortValue,
+  IndexPattern,
+} from '../../application/legacy/discover/opensearch_dashboards_services';
 import { getSort } from './get_sort';
 import { getDefaultSort } from './get_default_sort';
-import { SortDirection, SortOrder } from '../../../../../../types/saved_explore_types';
+import { SortDirection, SortOrder } from '../../types/saved_explore_types';
 
 /**
  * Prepares sort for search source, that's sending the request to OpenSearch

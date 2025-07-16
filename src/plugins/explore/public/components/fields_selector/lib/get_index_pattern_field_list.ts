@@ -28,45 +28,26 @@
  * under the License.
  */
 
-// @ts-ignore
-import { i18n } from '@osd/i18n';
-import { getFieldValueCounts } from './field_calculator';
-import { IndexPattern, IndexPatternField } from '../../../../../../../../../data/public';
-import { OpenSearchSearchHit } from '../../../../../../../types/doc_views_types';
+import { difference } from 'lodash';
+import { DataView as Dataset, IndexPattern, IndexPatternField } from '../../../../../data/public';
 
-export function getDetails(
-  field: IndexPatternField,
-  hits: Array<OpenSearchSearchHit<Record<string, any>>>,
-  indexPattern?: IndexPattern
+export function getIndexPatternFieldList(
+  indexPattern?: IndexPattern | Dataset,
+  fieldCounts?: Record<string, number>
 ) {
-  const defaultDetails = {
-    error: '',
-    exists: 0,
-    total: 0,
-    buckets: [],
-  };
-  if (!indexPattern) {
-    return {
-      ...defaultDetails,
-      error: i18n.translate('explore.discover.fieldChooser.noIndexPatternSelectedErrorMessage', {
-        defaultMessage: 'Index pattern not specified.',
-      }),
-    };
-  }
-  const details = {
-    ...defaultDetails,
-    ...getFieldValueCounts({
-      hits,
-      field,
-      indexPattern,
-      count: 5,
-      grouped: false,
-    }),
-  };
-  if (details.buckets) {
-    for (const bucket of details.buckets) {
-      bucket.display = indexPattern.getFormatterForField(field).convert(bucket.value);
-    }
-  }
-  return details;
+  if (!indexPattern || !fieldCounts) return [];
+
+  const fieldNamesInDocs = Object.keys(fieldCounts);
+  const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
+  const unknownTypes: IndexPatternField[] = [];
+
+  difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
+    unknownTypes.push({
+      displayName: String(unknownFieldName),
+      name: String(unknownFieldName),
+      type: 'unknown',
+    } as IndexPatternField);
+  });
+
+  return [...indexPattern.fields.getAll(), ...unknownTypes];
 }
