@@ -6,9 +6,11 @@
 .datasetSelect {
   margin: 0;
   border: $euiBorderThin;
-  background-color: $euiColorLightestShade;
+  border-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
   width: 400px;
   max-width: 400px;
+  height: $euiSizeXL - 1px;
 
   &__container {
     width: 100%;
@@ -16,18 +18,22 @@
   }
 
   &__detailsContainer {
-    width: 32px;
-    max-width: 32px;
+    width: $euiSizeXL;
+    max-width: $euiSizeXL;
   }
 
   div:is([class$="labelWrapper"]) {
-    width: fit-content;
+    width: $euiSizeXL;
+    height: $euiSizeXL - 1px;
     padding: 0 $euiSizeXS;
     margin-right: $euiSizeXS;
 
     :first-child {
       word-wrap: normal;
       word-break: normal;
+      height: $euiSizeXL - 1px;
+      display: block;
+      line-height: $euiSizeXL - 1px;
     }
   }
 
@@ -47,7 +53,7 @@
   &__button {
     background-color: $euiColorEmptyShade;
     width: 100%;
-    height: 32px;
+    height: $euiSizeXL;
     min-width: 0;
     display: flex;
     align-items: center;
@@ -62,6 +68,7 @@
 
   &__text {
     text-align: left;
+    align-items: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -69,7 +76,9 @@
     flex: 1;
     width: 250px;
     min-width: 0;
-    max-width: calc(100% - 32px);
+    max-width: calc(100% - $euiSizeXL);
+    height: $euiSizeXL - 1px;
+    line-height: $euiSizeXL - 1px;
   }
 
   &__checkbox {
@@ -92,6 +101,7 @@
   &__searchContainer {
     padding: $euiSizeXS;
     border-bottom: $euiBorderThin;
+    font-size: $euiFontSizeS;
   }
 
   &__list {
@@ -109,7 +119,7 @@
   }
 
   &__footer {
-    padding: 0;
+    padding: $euiSizeXS;
   }
 
   &__footerItem {
