@@ -111,8 +111,26 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
       if (isMounted.current) {
         setDatasets(fetchedDataViews);
         if (!initialDatasetSet.current && fetchedDataViews.length > 0) {
-          setSelectedDataset(fetchedDataViews[0]);
-          onSelect(fetchedDataViews[0]);
+          // Check if there's already a dataset from query string (URL state)
+          const currentQuery = queryString.getQuery();
+          const existingDataset = currentQuery?.dataset;
+
+          if (existingDataset) {
+            // If there's already a dataset from URL, find it in the fetched datasets
+            const urlDataset = fetchedDataViews.find((d) => d.id === existingDataset.id);
+            if (urlDataset) {
+              setSelectedDataset(urlDataset);
+              // Don't call onSelect during initialization if dataset exists in URL
+            } else {
+              // Fallback to first dataset if URL dataset not found
+              setSelectedDataset(fetchedDataViews[0]);
+              onSelect(fetchedDataViews[0]);
+            }
+          } else {
+            // No dataset in URL, select first one and call onSelect
+            setSelectedDataset(fetchedDataViews[0]);
+            onSelect(fetchedDataViews[0]);
+          }
           initialDatasetSet.current = true;
         }
         setIsLoading(false);
@@ -122,7 +140,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         setIsLoading(false);
       }
     }
-  }, [dataViews, onSelect]);
+  }, [dataViews, onSelect, queryString]);
 
   useEffect(() => {
     isMounted.current = true;
