@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TableVis } from './table_vis';
 import { VisColumn, VisFieldType } from '../types';
 

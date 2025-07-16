@@ -97,8 +97,8 @@ const defaultStyleOptions: LineChartStyleControls = {
     },
   ],
   grid: {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   },
 
   // Category axes
@@ -223,8 +223,8 @@ NoGridLines.args = {
   styleOptions: {
     ...defaultStyleOptions,
     grid: {
-      categoryLines: false,
-      valueLines: false,
+      xLines: false,
+      yLines: false,
     },
   },
   numericalColumns: mockNumericalColumns,
