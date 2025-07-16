@@ -31,7 +31,7 @@ export const setDatasetActionCreator = (
   } = services;
   const currentQuery = queryString.getQuery();
   const {
-    queryEditor: { editorMode, promptModeIsAvailable },
+    queryEditor: { promptModeIsAvailable },
     query,
   } = getState();
 
@@ -60,9 +60,9 @@ export const setDatasetActionCreator = (
 
   clearEditors();
 
-  if (newPromptModeIsAvailable && editorMode === EditorMode.SingleQuery) {
+  if (newPromptModeIsAvailable) {
     dispatch(setEditorMode(EditorMode.SingleEmpty));
-  } else if (!newPromptModeIsAvailable && editorMode === EditorMode.SingleEmpty) {
+  } else {
     dispatch(setEditorMode(EditorMode.SingleQuery));
   }
 
