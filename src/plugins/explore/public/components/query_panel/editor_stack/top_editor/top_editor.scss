@@ -49,13 +49,12 @@
 
   &--focused {
     .exploreTopEditor__promptIcon {
-      display: block;
+      color: $ouiColorDarkShade;
     }
   }
 
   &__promptIcon {
-    color: $ouiColorDarkShade;
-    display: none;
+    color: $ouiColorDisabledText;
     position: absolute;
     left: $ouiSizeXXS;
     top: 9px; // hard-coding to align it to editor
