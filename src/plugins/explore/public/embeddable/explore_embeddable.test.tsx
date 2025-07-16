@@ -250,59 +250,56 @@ describe('ExploreEmbeddable', () => {
   test('reload calls updateHandler when searchProps exists', () => {
     // @ts-ignore
     const updateHandlerSpy = jest.spyOn(embeddable, 'updateHandler').mockResolvedValue(undefined);
-    // @ts-ignore
     embeddable.reload();
     expect(updateHandlerSpy).toHaveBeenCalled();
   });
 
   test('reload does nothing when searchProps does not exist', () => {
-    // @ts-ignore
+    // @ts-ignore - accessing private property for testing
     embeddable.searchProps = undefined;
-    // @ts-ignore
+    // @ts-ignore - accessing private method for testing
     const updateHandlerSpy = jest.spyOn(embeddable, 'updateHandler');
-    // @ts-ignore
     embeddable.reload();
     expect(updateHandlerSpy).not.toHaveBeenCalled();
   });
 
   test('onContainerError aborts and updates output', () => {
-    // @ts-ignore
+    // @ts-ignore - accessing private property for testing
     embeddable.abortController = { abort: jest.fn() };
-    // @ts-ignore
+    // @ts-ignore - accessing private property for testing
     embeddable.renderComplete = { dispatchError: jest.fn() };
-    // @ts-ignore
+    // @ts-ignore - accessing private method for testing
     embeddable.updateOutput = jest.fn();
     const error = new Error('test error');
-    // @ts-ignore
     embeddable.onContainerError(error);
-    // @ts-ignore
+    // @ts-ignore - accessing private property for testing
     expect(embeddable.abortController.abort).toHaveBeenCalled();
-    // @ts-ignore
+    // @ts-ignore - accessing private property for testing
     expect(embeddable.renderComplete.dispatchError).toHaveBeenCalled();
-    // @ts-ignore
+    // @ts-ignore - accessing private method for testing
     expect(embeddable.updateOutput).toHaveBeenCalledWith({ loading: false, error });
   });
 
   test('onContainerError works when abortController is undefined', () => {
-    // @ts-ignore
+    // @ts-ignore - accessing private property for testing
     embeddable.abortController = undefined;
-    // @ts-ignore
+    // @ts-ignore - accessing private property for testing
     embeddable.renderComplete = { dispatchError: jest.fn() };
-    // @ts-ignore
+    // @ts-ignore - accessing private method for testing
     embeddable.updateOutput = jest.fn();
     const error = new Error('test error');
-    // @ts-ignore
+    // @ts-ignore - accessing private method for testing
     embeddable.onContainerError(error);
-    // @ts-ignore
+    // @ts-ignore - accessing private property for testing
     expect(embeddable.renderComplete.dispatchError).toHaveBeenCalled();
-    // @ts-ignore
+    // @ts-ignore - accessing private method for testing
     expect(embeddable.updateOutput).toHaveBeenCalledWith({ loading: false, error });
   });
 
   test('renderComponent does nothing if searchProps is undefined', () => {
-    // @ts-ignore
+    // @ts-ignore - accessing private property for testing
     embeddable.searchProps = undefined;
-    // @ts-ignore
+    // @ts-ignore - accessing private method for testing
     expect(() => embeddable.renderComponent(mockNode, undefined)).not.toThrow();
   });
 
