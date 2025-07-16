@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BarChartStyleControls } from './bar_vis_config';
@@ -15,6 +15,8 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { GridOptionsPanel } from '../style_panel/grid/grid';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
+import { AxisRole } from '../types';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
 
@@ -62,19 +64,14 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>
-            <AxesOptions
-              categoryAxes={styleOptions.categoryAxes}
-              valueAxes={styleOptions.valueAxes}
-              onCategoryAxesChange={(categoryAxes) =>
-                updateStyleOption('categoryAxes', categoryAxes)
+            <AllAxesOptions
+              axisColumnMappings={axisColumnMappings}
+              standardAxes={styleOptions.StandardAxes}
+              onStandardAxesChange={(standardAxes) =>
+                updateStyleOption('StandardAxes', standardAxes)
               }
-              onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
-              numericalColumns={numericalColumns}
-              categoricalColumns={categoricalColumns}
-              dateColumns={dateColumns}
             />
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
             <BarExclusiveVisOptions
               barSizeMode={styleOptions.barSizeMode}
@@ -97,7 +94,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               }
             />
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
             <ThresholdOptions
               thresholdLines={styleOptions.thresholdLines}
@@ -106,14 +102,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               }
             />
           </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <GridOptionsPanel
-              grid={styleOptions.grid}
-              onGridChange={(grid) => updateStyleOption('grid', grid)}
-            />
-          </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
             <LegendOptionsPanel
               shouldShowLegend={!notShowLegend}
@@ -131,7 +119,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               }}
             />
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
             <TooltipOptionsPanel
               tooltipOptions={styleOptions.tooltipOptions}

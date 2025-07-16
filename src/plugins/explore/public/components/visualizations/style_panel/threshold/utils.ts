@@ -31,12 +31,14 @@ export const getStrokeDash = (style: string): number[] | undefined => {
  */
 export const createThresholdLayer = (
   thresholdLines: ThresholdLines | undefined,
-  tooltipMode: string = 'all'
+  tooltipMode: string = 'all',
+  encodingDefault: 'x' | 'y'
 ): any => {
   if (!thresholdLines || thresholdLines.length === 0) {
     return null;
   }
 
+  const encodingChannel = encodingDefault ?? 'y';
   // Filter active thresholds
   const activeThresholds = thresholdLines.filter((threshold) => threshold.show);
 
@@ -69,7 +71,7 @@ export const createThresholdLayer = (
         ...markConfig,
       },
       encoding: {
-        y: {
+        [encodingChannel]: {
           datum: threshold.value,
           type: 'quantitative',
         },
