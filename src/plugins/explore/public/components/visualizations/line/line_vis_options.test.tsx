@@ -21,6 +21,19 @@ import {
 import { LineStyle } from './line_exclusive_vis_options';
 
 // Mock the child components
+jest.mock('../style_panel/axes/axes_selector', () => ({
+  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
+    <div data-test-subj="mockAxesSelectPanel">
+      <div data-test-subj="chartType">{chartType}</div>
+      <button
+        data-test-subj="mockUpdateVisualization"
+        onClick={() => updateVisualization({ mappings: { x: 'date', y: 'value' } })}
+      >
+        Update Visualization
+      </button>
+    </div>
+  )),
+}));
 jest.mock('../style_panel/legend/legend', () => {
   // Import Positions inside the mock to avoid reference error
   const { Positions: PositionsEnum } = jest.requireActual('../types');
