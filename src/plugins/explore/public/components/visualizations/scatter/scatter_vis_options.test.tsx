@@ -274,7 +274,7 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     fireEvent.click(screen.getByTestId('changeAxis'));
 
     expect(onStyleChange).toHaveBeenCalledWith({
-      StandardAxes: [
+      standardAxes: [
         {
           id: 'axis-id',
           axisRole: 'y',

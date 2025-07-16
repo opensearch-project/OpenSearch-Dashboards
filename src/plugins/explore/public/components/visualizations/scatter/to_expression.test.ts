@@ -81,7 +81,7 @@ describe('Scatter Chart to_expression', () => {
       angle: 0,
       filled: false,
     },
-    StandardAxes: [
+    standardAxes: [
       {
         id: 'Axis-1',
         position: Positions.BOTTOM,
@@ -221,7 +221,7 @@ describe('Scatter Chart to_expression', () => {
     it('should apply grid settings', () => {
       const stylesWithoutGrid = {
         ...mockStyles,
-        StandardAxes: mockStyles.StandardAxes?.map((axis) => ({
+        standardAxes: mockStyles.standardAxes?.map((axis) => ({
           ...axis,
           grid: { showLines: false },
         })),

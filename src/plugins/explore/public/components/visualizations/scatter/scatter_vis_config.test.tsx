@@ -38,10 +38,10 @@ describe('createScatterConfig', () => {
     expect(defaults.exclusive.filled).toBe(false);
 
     // Verify axes
-    expect(defaults.StandardAxes).toHaveLength(2);
-    const xAxis = defaults.StandardAxes.find((axis) => axis.axisRole === AxisRole.X);
+    expect(defaults.standardAxes).toHaveLength(2);
+    const xAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.X);
     expect(xAxis).toHaveProperty('position', Positions.BOTTOM);
-    const yAxis = defaults.StandardAxes.find((axis) => axis.axisRole === AxisRole.Y);
+    const yAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.Y);
     expect(yAxis).toHaveProperty('position', Positions.LEFT);
   });
   it('should render the ScatterVisStyleControls component with the provided props', () => {
@@ -61,7 +61,7 @@ describe('createScatterConfig', () => {
           angle: 0,
           filled: false,
         },
-        StandardAxes: [] as StandardAxes[],
+        standardAxes: [] as StandardAxes[],
       } as ScatterChartStyleControls,
       onStyleChange: jest.fn(),
       numericalColumns: [],

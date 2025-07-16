@@ -27,7 +27,7 @@ export interface ScatterChartStyleControls {
   addLegend: boolean;
   legendPosition: Positions;
   // Axes configuration
-  StandardAxes: StandardAxes[];
+  standardAxes: StandardAxes[];
 
   exclusive: ExclusiveScatterConfig;
   switchAxes: boolean;
@@ -48,7 +48,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
     filled: false,
   },
   // Standard axes
-  StandardAxes: [
+  standardAxes: [
     {
       id: 'Axis-1',
       position: Positions.BOTTOM,

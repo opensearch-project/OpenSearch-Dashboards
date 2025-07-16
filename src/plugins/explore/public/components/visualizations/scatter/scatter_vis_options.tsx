@@ -59,9 +59,9 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
-              standardAxes={styleOptions.StandardAxes}
+              standardAxes={styleOptions.standardAxes}
               onStandardAxesChange={(standardAxes) =>
-                updateStyleOption('StandardAxes', standardAxes)
+                updateStyleOption('standardAxes', standardAxes)
               }
             />
           </EuiFlexItem>

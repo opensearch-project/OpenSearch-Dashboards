@@ -274,7 +274,7 @@ describe('HeatmapVisStyleControls', () => {
     fireEvent.click(screen.getByTestId('changeAxis'));
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      StandardAxes: [
+      standardAxes: [
         {
           id: 'axis-id',
           axisRole: 'y',

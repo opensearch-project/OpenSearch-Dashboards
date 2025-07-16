@@ -123,7 +123,7 @@ export const ScatterWithField = Template.bind({});
 ScatterWithField.args = {
   styleOptions: {
     ...defaultScatterChartStyles,
-    StandardAxes: [
+    standardAxes: [
       {
         id: '1',
         position: Positions.RIGHT,
