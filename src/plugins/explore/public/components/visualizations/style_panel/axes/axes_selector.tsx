@@ -273,6 +273,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
               compressed
               checked={styles.switchAxes}
               onChange={swapAxes}
+              disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
             />
           </EuiFormRow>
         )}
