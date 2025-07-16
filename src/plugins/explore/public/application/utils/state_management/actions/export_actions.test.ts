@@ -101,7 +101,7 @@ describe('export_actions', () => {
           status: 'UNINITIALIZED' as any,
           elapsedMs: undefined,
           startTime: undefined,
-          body: undefined,
+          error: undefined,
         },
         editorMode: 'single-query' as any,
         promptModeIsAvailable: false,

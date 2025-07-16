@@ -4,17 +4,12 @@
  */
 @import "../../shared";
 
-.exploreDetectedLanguage {
+.exploreQueryPanelError {
   @include exploreQueryPanelButton;
 
-  color: $euiColorMediumShade;
   font-size: $euiFontSizeXS;
 
-  &:disabled {
-    cursor: default;
-  }
-
   &__popoverBody {
-    width: 350px;
+    width: 250px;
   }
 }

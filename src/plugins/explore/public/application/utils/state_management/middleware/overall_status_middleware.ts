@@ -53,7 +53,7 @@ const computeOverallStatus = (statusMap: QueryStatusMap): QueryResultStatus => {
       status: QueryExecutionStatus.UNINITIALIZED,
       elapsedMs: undefined,
       startTime: undefined,
-      body: undefined,
+      error: undefined,
     };
   }
 
@@ -67,7 +67,7 @@ const computeOverallStatus = (statusMap: QueryStatusMap): QueryResultStatus => {
       status: QueryExecutionStatus.LOADING,
       startTime: earliestStartTime || Date.now(),
       elapsedMs: undefined,
-      body: undefined,
+      error: undefined,
     };
   }
 
@@ -89,7 +89,7 @@ const computeOverallStatus = (statusMap: QueryStatusMap): QueryResultStatus => {
       status: overallStatus,
       startTime: slowestQuery.startTime,
       elapsedMs: slowestQuery.elapsedMs,
-      body: slowestQuery.body,
+      error: slowestQuery.error,
     };
   }
 

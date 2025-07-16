@@ -4,14 +4,26 @@
  */
 
 import { RootState } from './store';
-import {
-  QueryStatus as DataPluginQueryStatus,
-  ResultStatus as DataPluginResultStatus,
-} from '../../../../../data/public';
+import { ResultStatus as DataPluginResultStatus } from '../../../../../data/public';
 
-export type QueryResultStatus = DataPluginQueryStatus;
-export const QueryExecutionStatus = DataPluginResultStatus;
 export type QueryExecutionStatus = DataPluginResultStatus;
+export const QueryExecutionStatus = DataPluginResultStatus;
+
+export interface QueryResultStatus {
+  status: QueryExecutionStatus;
+  error?: {
+    statusCode: number;
+    error: string;
+    message: {
+      details: string;
+      reason: string;
+      type?: string;
+    };
+    originalErrorMessage: string;
+  };
+  elapsedMs?: number;
+  startTime?: number;
+}
 
 /**
  * Interface for search data
