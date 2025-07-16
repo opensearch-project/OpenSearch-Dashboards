@@ -758,7 +758,14 @@ describe('Query Actions - Comprehensive Test Suite', () => {
     });
 
     it('should handle search errors gracefully', async () => {
-      const error = new Error('Search failed');
+      const error = {
+        body: {
+          error: 'Search failed',
+          message:
+            '{"error":{"details":"Query syntax error","reason":"Invalid query","type":"parsing_exception"}}',
+          statusCode: 400,
+        },
+      };
       mockSearchSource.fetch.mockRejectedValue(error);
 
       const params = {
@@ -775,7 +782,18 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         expect(e).toBe(error);
       }
 
-      expect(mockServices.data.search.showError).toHaveBeenCalledWith(error);
+      // Verify error status is set in Redux
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.stringContaining('setIndividualQueryStatus'),
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.ERROR,
+            }),
+          }),
+        })
+      );
     });
 
     it('should handle AbortError gracefully', async () => {
