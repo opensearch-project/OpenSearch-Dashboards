@@ -44,16 +44,16 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     order: 15,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
-    prepareQuery: (queryString) => {
+    prepareQuery: (query) => {
       const patternsField = 'message'; // TODO: pull from patterns field configured in dataset
 
       // TODO: add quotes around take patternsField
       // ` | patterns ${patternsField} method=brain | stats count() as count, take(${patternsField}, 1) as sample by patterns_field | sort - count | fields patterns_field, count, sample`
 
-      return (
-        queryString +
-        ` | patterns ${patternsField} method=brain mode=aggregation | sort - pattern_count`
-      );
+      return typeof query.query === 'string' && query.query !== ''
+        ? query.query +
+            ` | patterns ${patternsField} method=brain mode=aggregation | sort - pattern_count`
+        : '';
     },
 
     component: PatternsTab,
