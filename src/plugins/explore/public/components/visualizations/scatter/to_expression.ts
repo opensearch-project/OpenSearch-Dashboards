@@ -38,8 +38,16 @@ export const createTwoMetricScatter = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: xField, type: 'quantitative', title: xName },
-          { field: yField, type: 'quantitative', title: yName },
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
         ],
       }),
     },
@@ -97,8 +105,16 @@ export const createTwoMetricOneCateScatter = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: xField, type: 'quantitative', title: xName },
-          { field: yField, type: 'quantitative', title: yName },
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
           { field: categoryFields, type: 'nominal', title: categoryNames },
         ],
       }),
@@ -128,12 +144,6 @@ export const createThreeMetricOneCateScatter = (
   const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
 
   const numericalSize = axisColumnMappings?.size;
-  const xField = xAxis?.field?.default?.column;
-  const yField = yAxis?.field?.default?.column;
-  const sizeField = numericalSize?.column;
-  const xName = xAxis?.title?.text || xAxis?.field?.default?.name;
-  const yName = yAxis?.title?.text || yAxis?.field?.default?.name;
-  const sizeName = numericalSize?.name;
   const markLayer = {
     mark: {
       type: 'point',
@@ -169,7 +179,7 @@ export const createThreeMetricOneCateScatter = (
         type: getSchemaByAxis(numericalSize),
         legend: styles?.addLegend
           ? {
-              title: sizeName || 'Metrics',
+              title: numericalSize?.name || 'Metrics',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
@@ -177,10 +187,18 @@ export const createThreeMetricOneCateScatter = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: xField, type: 'quantitative', title: xName },
-          { field: yField, type: 'quantitative', title: yName },
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
           { field: categoryFields, type: 'nominal', title: categoryNames },
-          { field: sizeField, type: 'quantitative', title: sizeName },
+          { field: numericalSize?.column, type: 'quantitative', title: numericalSize?.name },
         ],
       }),
     },

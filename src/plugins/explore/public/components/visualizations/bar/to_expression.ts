@@ -67,8 +67,16 @@ export const createBarSpec = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: categoryField, type: 'nominal', title: categoryName },
-          { field: metricField, type: 'quantitative', title: metricName },
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
         ],
       }),
     },
@@ -154,8 +162,16 @@ export const createTimeBarChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
-          { field: metricField, type: 'quantitative', title: metricName },
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
         ],
       }),
     },
@@ -263,9 +279,17 @@ export const createGroupedTimeBarChart = (
       },
       // Optional: Add tooltip with all information
       tooltip: [
-        { field: xAxis?.column, type: getSchemaByAxis(xAxis), title: xAxis?.name },
+        {
+          field: xAxis?.column,
+          type: getSchemaByAxis(xAxis),
+          title: xAxis?.styles?.title?.text || xAxis?.name,
+        },
         { field: categoryField, type: getSchemaByAxis(colorColumn), title: categoryName },
-        { field: yAxis?.column, type: getSchemaByAxis(yAxis), title: yAxis?.name },
+        {
+          field: yAxis?.column,
+          type: getSchemaByAxis(yAxis),
+          title: yAxis?.styles?.title?.text || yAxis?.name,
+        },
       ],
     },
   };
@@ -318,8 +342,8 @@ export const createFacetedTimeBarChart = (
   const dateField = xAxis?.column;
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
-  const metricName = yAxis?.name;
-  const dateName = xAxis?.name;
+  const metricName = yAxis?.styles?.title?.text || yAxis?.name;
+  const dateName = xAxis?.styles?.title?.text || xAxis?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
 
@@ -389,8 +413,8 @@ export const createFacetedTimeBarChart = (
             },
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [
-                { field: dateField, type: 'temporal', title: dateName },
-                { field: metricField, type: 'quantitative', title: metricName },
+                { field: metricField, type: getSchemaByAxis(yAxis), title: metricName },
+                { field: dateField, type: getSchemaByAxis(xAxis), title: dateName },
                 { field: category1Field, type: 'nominal', title: category1Name },
               ],
             }),
@@ -475,9 +499,17 @@ export const createStackedBarSpec = (
       // Optional: Add tooltip with all information if tooltip mode is not hidden
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: xAxis?.column, type: getSchemaByAxis(xAxis), title: xAxis?.name },
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
           { field: categoryField2, type: 'nominal', title: categoryName2 },
-          { field: yAxis?.column, type: getSchemaByAxis(yAxis), title: yAxis?.name },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
         ],
       }),
     },

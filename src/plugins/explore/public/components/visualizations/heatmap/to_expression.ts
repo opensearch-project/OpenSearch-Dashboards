@@ -17,11 +17,7 @@ export const createHeatmapWithBin = (
   const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
 
   const colorFieldColumn = axisColumnMappings?.color as any;
-  const xField = xAxis?.field?.default?.column;
-  const yField = yAxis?.field?.default?.column;
   const colorField = colorFieldColumn?.column;
-  const xName = xAxis?.title?.text || xAxis?.field?.default?.name;
-  const yName = yAxis?.title?.text || yAxis?.field?.default?.name || 'Y-Axis';
   const colorName = colorFieldColumn?.name;
 
   const markLayer: any = {
@@ -65,8 +61,16 @@ export const createHeatmapWithBin = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: xField, type: 'quantitative', title: xName },
-          { field: yField, type: 'quantitative', title: yName },
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
           { field: colorField, type: 'quantitative', title: colorName },
         ],
       }),
@@ -79,10 +83,7 @@ export const createHeatmapWithBin = (
     $schema: VEGASCHEMA,
     data: { values: transformedData },
     transform: addTransform(styles, colorField),
-    layer: [
-      markLayer,
-      createlabelLayer(styles, false, colorFieldColumn?.column, xAxis, yAxis),
-    ].filter(Boolean),
+    layer: [markLayer, createlabelLayer(styles, false, colorField, xAxis, yAxis)].filter(Boolean),
   };
   return baseSpec;
 };
@@ -96,11 +97,7 @@ export const createRegularHeatmap = (
   const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
 
   const colorFieldColumn = axisColumnMappings?.color!;
-  const xField = xAxis?.field?.default?.column;
-  const yField = yAxis?.field?.default?.column;
   const colorField = colorFieldColumn?.column;
-  const xName = xAxis?.title?.text || xAxis?.field?.default?.name;
-  const yName = yAxis?.title?.text || yAxis?.field?.default?.name;
   const colorName = colorFieldColumn?.name;
 
   const markLayer: any = {
@@ -143,8 +140,16 @@ export const createRegularHeatmap = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: xField, type: 'nominal', title: xName },
-          { field: yField, type: 'nominal', title: yName },
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
           { field: colorField, type: 'quantitative', title: colorName },
         ],
       }),
@@ -157,10 +162,7 @@ export const createRegularHeatmap = (
     $schema: VEGASCHEMA,
     data: { values: transformedData },
     transform: addTransform(styles, colorField),
-    layer: [
-      markLayer,
-      createlabelLayer(styles, true, colorFieldColumn?.column, xAxis, yAxis),
-    ].filter(Boolean),
+    layer: [markLayer, createlabelLayer(styles, true, colorField, xAxis, yAxis)].filter(Boolean),
   };
 
   return baseSpec;
