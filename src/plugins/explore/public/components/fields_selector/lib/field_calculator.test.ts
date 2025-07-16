@@ -34,8 +34,8 @@ import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { IndexPattern, IndexPatternField } from '../../../../../../../../../data/public';
-import { getStubIndexPattern } from '../../../../../../../../../data/public/test_utils';
+import { IndexPattern, IndexPatternField } from '../../../../../data/public';
+import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 import {
   groupValues,
   getFieldValues,

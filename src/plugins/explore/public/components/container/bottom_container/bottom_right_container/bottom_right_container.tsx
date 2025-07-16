@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import { RootState } from '../../../../application/utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../application/utils/state_management/types';
-import { CanvasPanel } from '../../../../application/legacy/discover/application/components/panel/canvas_panel';
+import { CanvasPanel } from '../../../panel/canvas_panel';
 import { DiscoverNoIndexPatterns } from '../../../../application/legacy/discover/application/components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../../../application/legacy/discover/application/components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../../../application/legacy/discover/application/components/loading_spinner/loading_spinner';

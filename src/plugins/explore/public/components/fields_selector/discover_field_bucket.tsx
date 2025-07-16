@@ -40,7 +40,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
-import { IndexPatternField } from '../../../../../../../../data/public';
+import { IndexPatternField } from '../../../../data/public';
 import './discover_field_bucket.scss';
 
 interface Props {

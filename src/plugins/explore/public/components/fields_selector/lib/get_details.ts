@@ -28,28 +28,45 @@
  * under the License.
  */
 
+// @ts-ignore
 import { i18n } from '@osd/i18n';
-import { IndexPatternField } from '../../../../../../../../../data/public';
+import { getFieldValueCounts } from './field_calculator';
+import { IndexPattern, IndexPatternField } from '../../../../../data/public';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
-export function getWarnings(field: IndexPatternField) {
-  let warnings = [];
-
-  if (field.scripted) {
-    warnings.push(
-      i18n.translate(
-        'explore.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription',
-        {
-          defaultMessage: 'Scripted fields can take a long time to execute.',
-        }
-      )
-    );
+export function getDetails(
+  field: IndexPatternField,
+  hits: Array<OpenSearchSearchHit<Record<string, any>>>,
+  indexPattern?: IndexPattern
+) {
+  const defaultDetails = {
+    error: '',
+    exists: 0,
+    total: 0,
+    buckets: [],
+  };
+  if (!indexPattern) {
+    return {
+      ...defaultDetails,
+      error: i18n.translate('explore.discover.fieldChooser.noIndexPatternSelectedErrorMessage', {
+        defaultMessage: 'Index pattern not specified.',
+      }),
+    };
   }
-
-  if (warnings.length > 1) {
-    warnings = warnings.map(function (warning, i) {
-      return (i > 0 ? '\n' : '') + (i + 1) + ' - ' + warning;
-    });
+  const details = {
+    ...defaultDetails,
+    ...getFieldValueCounts({
+      hits,
+      field,
+      indexPattern,
+      count: 5,
+      grouped: false,
+    }),
+  };
+  if (details.buckets) {
+    for (const bucket of details.buckets) {
+      bucket.display = indexPattern.getFormatterForField(field).convert(bucket.value);
+    }
   }
-
-  return warnings;
+  return details;
 }
