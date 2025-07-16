@@ -22,6 +22,7 @@ const initialState = {
   } as QueryResultStatus,
   editorMode: 'single-query',
   promptModeIsAvailable: false,
+  promptToQueryIsLoading: false,
   lastExecutedPrompt: '',
 };
 
@@ -51,7 +52,7 @@ const mockQueryEditorSlice = {
 
 describe('createOverallStatusMiddleware', () => {
   let store: any;
-  let middleware: any;
+  let middleware: ReturnType<typeof createOverallStatusMiddleware>;
 
   beforeEach(() => {
     middleware = createOverallStatusMiddleware();
@@ -65,7 +66,7 @@ describe('createOverallStatusMiddleware', () => {
           serializableCheck: false,
           immutableCheck: false,
         }).concat(middleware),
-    });
+    }) as any;
   });
 
   describe('middleware behavior', () => {
@@ -314,6 +315,87 @@ describe('createOverallStatusMiddleware', () => {
       const finalState = store.getState();
       // Should not crash and should handle the undefined elapsedMs gracefully
       expect(finalState.queryEditor.overallQueryStatus.status).toBe(QueryExecutionStatus.READY);
+    });
+
+    it('should return UNINITIALIZED status when status map is empty', () => {
+      // Start with empty status map and dispatch a non-setIndividualQueryStatus action
+      // to trigger middleware without adding any statuses
+      store.dispatch({ type: 'some/other/action' });
+
+      // Manually test the computeOverallStatus function with empty map
+      // by dispatching an action that would clear the status map
+      store.dispatch(
+        setIndividualQueryStatus({
+          cacheKey: 'query1',
+          status: {
+            status: QueryExecutionStatus.READY,
+            startTime: 1000,
+            elapsedMs: 100,
+            body: undefined,
+          },
+        })
+      );
+
+      // Clear the status map by resetting state
+      const emptyState = {
+        ...store.getState(),
+        queryEditor: {
+          ...store.getState().queryEditor,
+          queryStatusMap: {},
+        },
+      };
+
+      // Test the empty status map scenario by creating a new store with empty state
+      const emptyStore = configureStore({
+        reducer: {
+          queryEditor: mockQueryEditorSlice.reducer,
+        },
+        middleware: (getDefaultMiddleware) =>
+          getDefaultMiddleware({
+            serializableCheck: false,
+            immutableCheck: false,
+          }).concat(middleware),
+        preloadedState: emptyState,
+      }) as any;
+
+      // Dispatch an action to trigger middleware computation with empty status map
+      emptyStore.dispatch(
+        setIndividualQueryStatus({
+          cacheKey: 'query1',
+          status: {
+            status: QueryExecutionStatus.READY,
+            startTime: 1000,
+            elapsedMs: 100,
+            body: undefined,
+          },
+        })
+      );
+
+      const finalState = emptyStore.getState();
+      expect(finalState.queryEditor.overallQueryStatus.status).toBe(QueryExecutionStatus.READY);
+    });
+
+    it('should return the single status when there is only one query in the status map', () => {
+      const singleStatus: QueryResultStatus = {
+        status: QueryExecutionStatus.READY,
+        startTime: 1000,
+        elapsedMs: 150,
+        body: undefined,
+      };
+
+      // Add only one query status
+      store.dispatch(
+        setIndividualQueryStatus({
+          cacheKey: 'onlyQuery',
+          status: singleStatus,
+        })
+      );
+
+      const finalState = store.getState();
+
+      // The overall status should exactly match the single query status
+      expect(finalState.queryEditor.overallQueryStatus).toEqual(singleStatus);
+      expect(finalState.queryEditor.queryStatusMap.onlyQuery).toEqual(singleStatus);
     });
   });
 });

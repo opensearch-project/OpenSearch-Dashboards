@@ -18,7 +18,8 @@ export const createPersistenceMiddleware = (services: ExploreServices): Middlewa
 
     // Only persist state for actions that should trigger URL updates
     const persistTriggeringActions = ['query/', 'ui/', 'tab/', 'legacy/'];
-    const shouldPersist = persistTriggeringActions.some((prefix) => action.type.startsWith(prefix));
+    const shouldPersist =
+      action.type && persistTriggeringActions.some((prefix) => action.type.startsWith(prefix));
 
     if (shouldPersist) {
       const state = store.getState() as RootState;
