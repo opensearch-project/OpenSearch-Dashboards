@@ -178,6 +178,7 @@ export function getSwappedAxes(
   };
 
   // Swap X and Y axis data
+  // TODO it's not safe to create a new type, refactor to return  return [xAxis, xMapping, yAxis, yMapping]
   return [swappedYAxis, swappedXAxis];
 }
 
@@ -185,8 +186,8 @@ export const getSwappedAxisRole = (
   styles: Partial<AxisSupportedStyles>,
   axisColumnMappings?: AxisColumnMappings
 ): [CompleteAxisWithStyle | undefined, CompleteAxisWithStyle | undefined] => {
-  const xMapping = axisColumnMappings?.x;
-  const yMapping = axisColumnMappings?.y;
+  const xColumn = axisColumnMappings?.x;
+  const yColumn = axisColumnMappings?.y;
 
   const xAxis = getAxisByRole(styles.StandardAxes ?? [], AxisRole.X);
   const yAxis = getAxisByRole(styles.StandardAxes ?? [], AxisRole.Y);
@@ -196,12 +197,12 @@ export const getSwappedAxisRole = (
   }
 
   const xAxisWithMapping: CompleteAxisWithStyle = {
-    ...xMapping,
+    ...xColumn,
     styles: xAxis,
   };
 
   const yAxisWithMapping: CompleteAxisWithStyle = {
-    ...yMapping,
+    ...yColumn,
     styles: yAxis,
   };
 

@@ -32,13 +32,13 @@ export const getStrokeDash = (style: string): number[] | undefined => {
 export const createThresholdLayer = (
   thresholdLines: ThresholdLines | undefined,
   tooltipMode: string = 'all',
-  encodingDefault: 'x' | 'y'
+  barEncodingDefault?: 'x' | 'y'
 ): any => {
   if (!thresholdLines || thresholdLines.length === 0) {
     return null;
   }
 
-  const encodingChannel = encodingDefault ?? 'y';
+  const encodingChannel = barEncodingDefault ?? 'y';
   // Filter active thresholds
   const activeThresholds = thresholdLines.filter((threshold) => threshold.show);
 

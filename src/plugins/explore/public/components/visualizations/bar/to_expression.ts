@@ -70,13 +70,13 @@ export const createBarSpec = (
 
   layers.push(mainLayer);
 
-  const encodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
+  const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(
     styles.thresholdLines,
     styles.tooltipOptions?.mode,
-    encodingDefault
+    barEncodingDefault
   );
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
@@ -151,12 +151,12 @@ export const createTimeBarChart = (
 
   layers.push(mainLayer);
 
-  const encodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
+  const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(
     styles.thresholdLines,
     styles.tooltipOptions?.mode,
-    encodingDefault
+    barEncodingDefault
   );
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
@@ -259,11 +259,11 @@ export const createGroupedTimeBarChart = (
   };
 
   // Add threshold layer if enabled
-  const encodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
+  const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
   const thresholdLayer = createThresholdLayer(
     styles.thresholdLines,
     styles.tooltipOptions?.mode,
-    encodingDefault
+    barEncodingDefault
   );
   if (thresholdLayer) {
     spec.layer = [{ mark: barMark, encoding: spec.encoding }, ...thresholdLayer.layer];
@@ -324,7 +324,13 @@ export const createFacetedTimeBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
-  const encodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
+  const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
+
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    barEncodingDefault
+  );
 
   return {
     $schema: VEGASCHEMA,
@@ -371,30 +377,9 @@ export const createFacetedTimeBarChart = (
             },
           },
         },
+
         // Add threshold layer to each facet if enabled
-        ...(styles.thresholdLines && styles.thresholdLines.length > 0
-          ? styles.thresholdLines
-              .filter((threshold) => threshold.show)
-              .map((threshold) => ({
-                mark: {
-                  type: 'rule',
-                  color: threshold.color || '#E7664C',
-                  strokeWidth: threshold.width || 1,
-                  strokeDash: getStrokeDash(threshold.style),
-                  tooltip: styles.tooltipOptions?.mode !== 'hidden',
-                },
-                encoding: {
-                  [encodingDefault]: { value: threshold.value || 0 },
-                  ...(styles.tooltipOptions?.mode !== 'hidden' && {
-                    tooltip: {
-                      value: `${threshold.name ? threshold.name + ': ' : ''}Threshold: ${
-                        threshold.value
-                      }`,
-                    },
-                  }),
-                },
-              }))
-          : []),
+        ...(thresholdLayer?.layer ?? []),
       ],
     },
   };
@@ -480,11 +465,11 @@ export const createStackedBarSpec = (
   };
 
   // Add threshold layer if enabled
-  const encodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
+  const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
   const thresholdLayer = createThresholdLayer(
     styles.thresholdLines,
     styles.tooltipOptions?.mode,
-    encodingDefault
+    barEncodingDefault
   );
   if (thresholdLayer) {
     spec.layer = [{ mark: barMark, encoding: spec.encoding }, ...thresholdLayer.layer];

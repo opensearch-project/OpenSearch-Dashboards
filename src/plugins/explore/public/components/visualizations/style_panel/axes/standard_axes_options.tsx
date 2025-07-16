@@ -126,7 +126,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
               iconType={expandedAxes[axis.id] ? 'arrowDown' : 'arrowRight'}
               onClick={() => toggleAxisExpansion(axis.id)}
               size="xs"
-              data-test-subj={`standardAxis-${index}-button`}
+              data-test-subj={`standardAxis-${axis.axisRole}-button`}
             >
               {(styles?.switchAxes ? !isYAxis : isYAxis)
                 ? i18n.translate('explore.vis.gridOptions.categoryXAxis', {
@@ -145,6 +145,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                     label={i18n.translate('explore.vis.standardAxes.showAxis', {
                       defaultMessage: 'Show Axis',
                     })}
+                    data-test-subj="showAxisSwitch"
                     checked={axis.show}
                     onChange={(e) => updateAxis(index, { show: e.target.checked })}
                   />

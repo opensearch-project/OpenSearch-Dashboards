@@ -4,9 +4,23 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AllAxesOptions, StandardAxesOptions } from './standard_axes_options';
-import { StandardAxes, Positions, AxisRole, VisFieldType } from '../../types';
+import { Provider } from 'react-redux';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { AllAxesOptions } from './standard_axes_options';
+import { StandardAxes, Positions, AxisRole } from '../../types';
+import configureMockStore from 'redux-mock-store';
+
+const mockStore = configureMockStore([]);
+
+const store = mockStore({
+  tab: {
+    visualizations: {
+      styleOptions: {
+        switchAxes: false,
+      },
+    },
+  },
+});
 
 // Mock the debounced components
 jest.mock('../../style_panel/utils', () => ({
@@ -71,6 +85,9 @@ describe('AllAxesOptions', () => {
       title: {
         text: '',
       },
+      grid: {
+        showLines: true,
+      },
       axisRole: AxisRole.X,
     },
     {
@@ -87,6 +104,9 @@ describe('AllAxesOptions', () => {
       title: {
         text: '',
       },
+      grid: {
+        showLines: true,
+      },
       axisRole: AxisRole.Y,
     },
   ];
@@ -96,6 +116,7 @@ describe('AllAxesOptions', () => {
     onStandardAxesChange: jest.fn(),
     onChangeSwitchAxes: jest.fn(),
     disableGrid: false,
+    axisColumnMappings: {},
   };
 
   beforeEach(() => {
@@ -103,40 +124,63 @@ describe('AllAxesOptions', () => {
   });
 
   it('renders without crashing', () => {
-    const { container } = render(<AllAxesOptions {...defaultProps} />);
+    const { container } = render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
     expect(container).toBeInTheDocument();
   });
 
   it('renders axis section', () => {
-    render(<AllAxesOptions {...defaultProps} />);
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
     expect(screen.getByText('X-Axis')).toBeInTheDocument();
     expect(screen.getByText('Y-Axis')).toBeInTheDocument();
   });
 
-  it('calls onChangeSwitchAxes when position is switched', () => {
-    render(<AllAxesOptions {...defaultProps} />);
-    const button = screen.getByTestId('switchAxesButton');
-    fireEvent.click(button);
+  it('should switch label is switchAxes is true', () => {
+    const switchStore = mockStore({
+      tab: {
+        visualizations: {
+          styleOptions: {
+            switchAxes: true,
+          },
+        },
+      },
+    });
 
-    expect(defaultProps.onChangeSwitchAxes).toHaveBeenCalled();
+    render(
+      <Provider store={switchStore}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
+    expect(screen.getByTestId('standardAxis-x-button')).toHaveTextContent('Y-Axis');
+    expect(screen.getByTestId('standardAxis-y-button')).toHaveTextContent('X-Axis');
   });
-
   it('shows/hides label options based on show labels toggle', () => {
-    render(<AllAxesOptions {...defaultProps} />);
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
 
-    const axis = screen.getByTestId('standardAxis-0-button');
+    const axis = screen.getByTestId('standardAxis-x-button');
     fireEvent.click(axis);
 
-    expect(screen.getAllByText('Aligned')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Truncate')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Alignment')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Truncate after')[0]).toBeInTheDocument();
 
-    const showLabelsSwitch = screen.getAllByRole('switch')[1];
+    const showLabelsSwitch = screen.getByTestId('showAxisSwitch');
     fireEvent.click(showLabelsSwitch);
 
     expect(defaultProps.onStandardAxesChange).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          labels: expect.objectContaining({ show: false }),
+          show: false,
         }),
       ])
     );
