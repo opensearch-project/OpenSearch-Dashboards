@@ -29,9 +29,9 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { IndexPattern, IndexPatternField } from '../../../../../../../../../data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../data/public';
 import { FieldValueCounts } from '../types';
-import { OpenSearchSearchHit } from '../../../../../../../types/doc_views_types';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 const NO_ANALYSIS_TYPES = ['geo_point', 'geo_shape', 'attachment'];
 

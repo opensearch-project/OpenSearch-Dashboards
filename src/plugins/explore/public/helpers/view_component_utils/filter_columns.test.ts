@@ -4,9 +4,9 @@
  */
 
 import { filterColumns } from './filter_columns';
-import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { getIndexPatternFieldList } from '../../components/sidebar/lib/get_index_pattern_field_list';
-import { buildColumns } from '../../utils/columns';
+import { IndexPattern } from '../../application/legacy/discover/opensearch_dashboards_services';
+import { getIndexPatternFieldList } from '../../components/fields_selector/lib/get_index_pattern_field_list';
+import { buildColumns } from '../../application/legacy/discover/application/utils/columns';
 
 jest.mock('../../components/sidebar/lib/get_index_pattern_field_list');
 jest.mock('../../utils/columns');

@@ -37,8 +37,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { getStubIndexPattern } from '../../../../../../../../data/public/test_utils';
-import { OpenSearchSearchHit } from '../../../../../../types/doc_views_types';
+import { getStubIndexPattern } from '../../../../data/public/test_utils';
+import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import * as fieldFilter from './lib/field_filter';
 
 jest.mock('../../../opensearch_dashboards_services', () => ({

@@ -29,7 +29,7 @@
  */
 
 import _ from 'lodash';
-import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { IndexPattern } from '../../application/legacy/discover/opensearch_dashboards_services';
 
 export type SortPairObj = Record<string, string>;
 export type SortPairArr = [string, string];
