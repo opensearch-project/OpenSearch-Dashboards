@@ -10,16 +10,29 @@ import {
   EuiFlexItem,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiSwitch,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
-
-import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  AxisColumnMappings,
+  AxisRole,
+  VisColumn,
+  VisFieldType,
+  AxisSupportedStyles,
+} from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
 import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
-import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
+import {
+  ChartType,
+  useVisualizationRegistry,
+  StyleOptions,
+} from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
 import { getColumnMatchFromMapping } from '../../visualization_container_utils';
+import { selectStyleOptions } from '../../../../application/utils/state_management/selectors';
+import { setStyleOptions } from '../../../../application/utils/state_management/slices';
 
 interface VisColumnOption {
   column: VisColumn;
@@ -68,6 +81,22 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   updateVisualization,
 }) => {
   const visualizationRegistry = useVisualizationRegistry();
+
+  // switchAxes only support heatmap scatter and bar
+  const showSwitch = chartType === 'heatmap' || chartType === 'bar' || chartType === 'scatter';
+  const styles = useSelector(selectStyleOptions) as AxisSupportedStyles;
+  const dispatch = useDispatch();
+
+  const swapAxes = () => {
+    if (showSwitch) {
+      dispatch(
+        setStyleOptions({
+          ...(styles as AxisSupportedStyles),
+          switchAxes: !styles.switchAxes,
+        } as StyleOptions)
+      );
+    }
+  };
 
   const possibleMapping = useMemo(
     () => visualizationRegistry.getVisualizationConfig(chartType)?.ui.availableMappings!,
@@ -235,6 +264,16 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       initialIsOpen={true}
     >
       <>
+        {showSwitch && (
+          <EuiFormRow
+            label={i18n.translate('explore.vis.axesSwitch.switchAxes', {
+              defaultMessage: 'Switch Axes',
+            })}
+          >
+            <EuiSwitch label="" compressed checked={styles.switchAxes} onChange={swapAxes} />
+          </EuiFormRow>
+        )}
+
         {Array.from(allAxisRolesFromSelection).map((axisRole) => {
           const currentSelection = currentSelections[axisRole];
           return (
@@ -280,9 +319,20 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
   onRemove,
   onChange,
 }) => {
+  const styles = useSelector(selectStyleOptions) as AxisSupportedStyles;
+
+  const getLabel = () => {
+    if (styles?.switchAxes && (axisRole === AxisRole.X || axisRole === AxisRole.Y)) {
+      const swappedRole = axisRole === AxisRole.X ? AxisRole.Y : AxisRole.X;
+      return AXIS_SELECT_LABEL[swappedRole];
+    }
+
+    return AXIS_SELECT_LABEL[axisRole];
+  };
+
   return (
     <React.Fragment key={`${axisRole}Selector`}>
-      <EuiFormRow label={AXIS_SELECT_LABEL[axisRole]}>
+      <EuiFormRow label={getLabel()}>
         <EuiFlexItem>
           <EuiComboBox
             compressed
