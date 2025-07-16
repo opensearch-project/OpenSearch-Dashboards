@@ -43,7 +43,7 @@ import { getStubIndexPattern } from '../../../../data/public/test_utils';
 const mockGetHref = jest.fn();
 const mockGetTriggerCompatibleActions = jest.fn();
 
-jest.mock('../../../opensearch_dashboards_services', () => ({
+jest.mock('../../application/legacy/discover/opensearch_dashboards_services', () => ({
   getUiActions: () => ({
     getTriggerCompatibleActions: mockGetTriggerCompatibleActions,
   }),
