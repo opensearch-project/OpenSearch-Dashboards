@@ -7,6 +7,7 @@ import {
   legacyReducer,
   setLegacyState,
   setSavedSearch,
+  setSavedQuery,
   setColumns,
   addColumn,
   removeColumn,
@@ -45,6 +46,21 @@ describe('legacySlice reducers', () => {
   it('setSavedSearch sets savedSearch', () => {
     const state = legacyReducer(initialState, setSavedSearch('search-id'));
     expect(state.savedSearch).toBe('search-id');
+  });
+
+  it('setSavedQuery sets savedQuery', () => {
+    const state = legacyReducer(initialState, setSavedQuery('query-id'));
+    expect(state.savedQuery).toBe('query-id');
+  });
+
+  it('setSavedQuery removes savedQuery when payload is undefined', () => {
+    const stateWithSavedQuery = {
+      ...initialState,
+      savedQuery: 'existing-query-id',
+    };
+    const state = legacyReducer(stateWithSavedQuery, setSavedQuery(undefined));
+    expect(state.savedQuery).toBeUndefined();
+    expect(state).not.toHaveProperty('savedQuery');
   });
 
   it('setColumns sets columns', () => {

@@ -19,6 +19,7 @@ import {
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults } from '../state_management/slices';
 import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
+import { MockStore } from '../state_management/__mocks__';
 
 // Mock Redux actions
 jest.mock('../state_management/actions/query_actions', () => ({
@@ -54,7 +55,7 @@ interface MockRootState {
 
 describe('useInitialQueryExecution', () => {
   let mockServices: ExploreServices;
-  let mockStore: any;
+  let mockStore: MockStore;
   let mockDispatch: jest.Mock;
 
   beforeEach(() => {
