@@ -6,6 +6,7 @@
 import { clearEditorActionCreator } from './clear_editor';
 import { setEditorMode } from '../../../slices';
 import { EditorMode } from '../../../types';
+import { AppDispatch, RootState } from '../../../store';
 
 // Mock the setEditorMode action
 jest.mock('../../../slices', () => ({
@@ -16,8 +17,8 @@ const mockSetEditorMode = setEditorMode as jest.MockedFunction<typeof setEditorM
 
 describe('clearEditorActionCreator', () => {
   let mockClearEditors = jest.fn();
-  let mockDispatch: jest.MockedFunction<any>;
-  let mockGetState: jest.MockedFunction<any>;
+  let mockDispatch: jest.MockedFunction<AppDispatch>;
+  let mockGetState: jest.MockedFunction<() => RootState>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,8 +35,20 @@ describe('clearEditorActionCreator', () => {
 
   it('should call clearEditors on the editor context', () => {
     mockGetState.mockReturnValue({
-      queryEditor: { promptModeIsAvailable: true },
-    });
+      queryEditor: {
+        promptModeIsAvailable: true,
+        queryStatusMap: {},
+        overallQueryStatus: {
+          status: 'UNINITIALIZED' as any,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
+        editorMode: EditorMode.SingleEmpty,
+        promptToQueryIsLoading: false,
+        lastExecutedPrompt: '',
+      },
+    } as any);
 
     const actionCreator = clearEditorActionCreator(mockClearEditors);
     actionCreator(mockDispatch, mockGetState);
@@ -45,8 +58,20 @@ describe('clearEditorActionCreator', () => {
 
   it('should dispatch setEditorMode with SingleEmpty when promptModeIsAvailable is true', () => {
     mockGetState.mockReturnValue({
-      queryEditor: { promptModeIsAvailable: true },
-    });
+      queryEditor: {
+        promptModeIsAvailable: true,
+        queryStatusMap: {},
+        overallQueryStatus: {
+          status: 'UNINITIALIZED' as any,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
+        editorMode: EditorMode.SingleEmpty,
+        promptToQueryIsLoading: false,
+        lastExecutedPrompt: '',
+      },
+    } as any);
 
     const actionCreator = clearEditorActionCreator(mockClearEditors);
     actionCreator(mockDispatch, mockGetState);
@@ -60,8 +85,20 @@ describe('clearEditorActionCreator', () => {
 
   it('should dispatch setEditorMode with SingleQuery when promptModeIsAvailable is false', () => {
     mockGetState.mockReturnValue({
-      queryEditor: { promptModeIsAvailable: false },
-    });
+      queryEditor: {
+        promptModeIsAvailable: false,
+        queryStatusMap: {},
+        overallQueryStatus: {
+          status: 'UNINITIALIZED' as any,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
+        editorMode: EditorMode.SingleQuery,
+        promptToQueryIsLoading: false,
+        lastExecutedPrompt: '',
+      },
+    } as any);
 
     mockSetEditorMode.mockReturnValue({
       type: 'queryEditor/setEditorMode',
@@ -82,8 +119,20 @@ describe('clearEditorActionCreator', () => {
     const calls: string[] = [];
 
     mockGetState.mockReturnValue({
-      queryEditor: { promptModeIsAvailable: true },
-    });
+      queryEditor: {
+        promptModeIsAvailable: true,
+        queryStatusMap: {},
+        overallQueryStatus: {
+          status: 'UNINITIALIZED' as any,
+          elapsedMs: undefined,
+          startTime: undefined,
+          body: undefined,
+        },
+        editorMode: EditorMode.SingleEmpty,
+        promptToQueryIsLoading: false,
+        lastExecutedPrompt: '',
+      },
+    } as any);
 
     mockClearEditors = jest.fn(() => {
       calls.push('clearEditors');

@@ -71,7 +71,7 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
   const [isEnabledBySetting, setIsEnabledBySetting] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
   const queryState = useSelector((state: any) => state.query);
-  const status = useSelector((state: RootState) => state.ui.status);
+  const status = useSelector((state: RootState) => state.queryEditor.overallQueryStatus);
   const updateQueryState = useCallback((x: any) => {}, []); // FIXME
 
   const isQueryDirty =
@@ -81,7 +81,7 @@ export const ResultsSummaryPanel: React.FC<ResultsSummaryPanelProps> = (props) =
     Boolean(results.length) &&
     Boolean(queryState.query) &&
     !isQueryDirty &&
-    status === QueryExecutionStatus.READY;
+    status.status === QueryExecutionStatus.READY;
 
   // The visibility of panel action buttons: thumbs up/down and copy to clipboard buttons
   const actionButtonVisible = Boolean(summary) && !loading && !isQueryDirty;
