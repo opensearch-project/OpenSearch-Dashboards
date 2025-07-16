@@ -111,11 +111,38 @@ describe('ExploreEmbeddableComponent', () => {
     expect(screen.getByTestId('mockNoResults')).toBeInTheDocument();
   });
 
-  test('renders with the correct data-test-subj attributes', () => {
+  test('renders wreith the correct data-test-subj attributes', () => {
     render(<ExploreEmbeddableComponent searchProps={mockSearchProps} />);
 
     // Check if the container has the correct data-test-subj
     expect(screen.getByTestId('embeddedSavedExplore')).toBeInTheDocument();
+    expect(screen.getByTestId('osdExploreContainer')).toBeInTheDocument();
+  });
+
+  test('renders expression renderer with empty expression', () => {
+    const emptyExpProps = {
+      ...mockSearchProps,
+      activeTab: 'visualization',
+      expression: '',
+      searchContext: {
+        query: { query: 'test', language: 'kuery' },
+        filters: [],
+        timeRange: { from: 'now-15m', to: 'now' },
+      },
+    };
+    render(<ExploreEmbeddableComponent searchProps={emptyExpProps} />);
+    expect(screen.getByTestId('mockExpressionRenderer')).toBeInTheDocument();
+    expect(screen.getByTestId('mockExpression')).toHaveTextContent('');
+  });
+
+  test('renders gracefully with missing optional fields in searchProps', () => {
+    const minimalProps = {
+      services: {} as any,
+      displayTimeColumn: true,
+      title: 'Minimal',
+      rows: [{ _id: '1' }],
+    };
+    render(<ExploreEmbeddableComponent searchProps={minimalProps as any} />);
     expect(screen.getByTestId('osdExploreContainer')).toBeInTheDocument();
   });
 });

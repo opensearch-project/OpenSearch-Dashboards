@@ -56,4 +56,24 @@ describe('PieExclusiveVisOptions', () => {
       showValues: false,
     });
   });
+
+  it('calls onChange when show labels switch is toggled', () => {
+    render(<PieExclusiveVisOptions {...defaultProps} />);
+    const showLabelsSwitch = screen.getByTestId('showLabelsSwitch');
+    fireEvent.click(showLabelsSwitch);
+    expect(defaultProps.onChange).toHaveBeenCalledWith({
+      ...defaultProps.styles,
+      showLabels: true,
+    });
+  });
+
+  it('renders with all switches off', () => {
+    const props = {
+      ...defaultProps,
+      styles: { donut: false, showValues: false, showLabels: false, truncate: 100 },
+    };
+    render(<PieExclusiveVisOptions {...props} />);
+    expect(screen.getByTestId('showValuesSwtich')).toBeInTheDocument();
+    expect(screen.getByTestId('showLabelsSwitch')).toBeInTheDocument();
+  });
 });

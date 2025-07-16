@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { createPieConfig, PieChartStyleControls } from './pie_vis_config';
+import { createPieConfig, PieChartStyleControls, defaultPieChartStyles } from './pie_vis_config';
 import { PieVisStyleControls } from './pie_vis_options';
 import { Positions } from '../types';
 
@@ -67,5 +67,47 @@ describe('createPieConfig', () => {
     renderFunction(mockProps);
     // Verify that React.createElement was called with the correct arguments
     expect(React.createElement).toHaveBeenCalledWith(PieVisStyleControls, mockProps);
+  });
+
+  it('should handle missing styleOptions in render function', () => {
+    const config = createPieConfig();
+    const renderFunction = config.ui.style.render;
+    const mockProps = {
+      styleOptions: {} as PieChartStyleControls,
+      onStyleChange: jest.fn(),
+      numericalColumns: [],
+      categoricalColumns: [],
+      dateColumns: [],
+      axisColumnMappings: {},
+      updateVisualization: jest.fn(),
+    };
+    expect(() => renderFunction(mockProps)).not.toThrow();
+  });
+
+  it('should handle missing axisColumnMappings in render function', () => {
+    const config = createPieConfig();
+    const renderFunction = config.ui.style.render;
+    const mockProps = {
+      styleOptions: config.ui.style.defaults,
+      onStyleChange: jest.fn(),
+      numericalColumns: [],
+      categoricalColumns: [],
+      dateColumns: [],
+      axisColumnMappings: {},
+      updateVisualization: jest.fn(),
+    };
+    expect(() => renderFunction(mockProps)).not.toThrow();
+  });
+
+  it('should have correct defaultPieChartStyles edge values', () => {
+    const defaults = defaultPieChartStyles;
+    expect(typeof defaults.addTooltip).toBe('boolean');
+    expect(typeof defaults.addLegend).toBe('boolean');
+    expect(['right', 'left', 'top', 'bottom']).toContain(defaults.legendPosition);
+    expect(defaults.tooltipOptions).toHaveProperty('mode');
+    expect(typeof defaults.exclusive.donut).toBe('boolean');
+    expect(typeof defaults.exclusive.showValues).toBe('boolean');
+    expect(typeof defaults.exclusive.showLabels).toBe('boolean');
+    expect(typeof defaults.exclusive.truncate).toBe('number');
   });
 });
