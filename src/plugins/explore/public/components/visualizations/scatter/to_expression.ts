@@ -4,8 +4,8 @@
  */
 
 import { ScatterChartStyleControls } from './scatter_vis_config';
-import { VisColumn, AxisRole, VEGASCHEMA, AxisColumnMappings } from '../types';
-import { applyAxisStyling, getAxisByRole } from '../utils/utils';
+import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
+import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
@@ -15,8 +15,8 @@ export const createTwoMetricScatter = (
   styles: Partial<ScatterChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
+  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+
   const markLayer = {
     mark: {
       type: 'point',
@@ -27,14 +27,14 @@ export const createTwoMetricScatter = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
-        type: 'quantitative',
-        axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
+        field: xAxis?.column,
+        type: getSchemaByAxis(xAxis),
+        axis: applyAxisStyling(xAxis),
       },
       y: {
-        field: yAxis?.field?.default?.column,
-        type: 'quantitative',
-        axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
+        field: yAxis?.column,
+        type: getSchemaByAxis(yAxis),
+        axis: applyAxisStyling(yAxis),
       },
     },
   };
@@ -55,10 +55,10 @@ export const createTwoMetricOneCateScatter = (
   styles: Partial<ScatterChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  const colorColumn = axisColumnMappings?.color;
   const categoryFields = axisColumnMappings?.color?.column!;
   const categoryNames = axisColumnMappings?.color?.name!;
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
+  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
   const markLayer = {
     mark: {
       type: 'point',
@@ -69,18 +69,18 @@ export const createTwoMetricOneCateScatter = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
-        type: 'quantitative',
-        axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
+        field: xAxis?.column,
+        type: getSchemaByAxis(xAxis),
+        axis: applyAxisStyling(xAxis),
       },
       y: {
-        field: yAxis?.field?.default?.column,
-        type: 'quantitative',
-        axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
+        field: yAxis?.column,
+        type: getSchemaByAxis(yAxis),
+        axis: applyAxisStyling(yAxis),
       },
       color: {
         field: categoryFields,
-        type: 'nominal',
+        type: getSchemaByAxis(colorColumn),
         legend: styles?.addLegend
           ? {
               title: categoryNames || 'Metrics',
@@ -109,10 +109,11 @@ export const createThreeMetricOneCateScatter = (
   styles: Partial<ScatterChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  const colorColumn = axisColumnMappings?.color;
   const categoryFields = axisColumnMappings?.color?.column!;
   const categoryNames = axisColumnMappings?.color?.name!;
-  const xAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.X);
-  const yAxis = getAxisByRole(styles?.StandardAxes ?? [], AxisRole.Y);
+  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+
   const numericalSize = axisColumnMappings?.size;
   const markLayer = {
     mark: {
@@ -124,18 +125,18 @@ export const createThreeMetricOneCateScatter = (
     },
     encoding: {
       x: {
-        field: xAxis?.field?.default?.column,
-        type: 'quantitative',
-        axis: applyAxisStyling(xAxis, styles?.grid?.xLines),
+        field: xAxis?.column,
+        type: getSchemaByAxis(xAxis),
+        axis: applyAxisStyling(xAxis),
       },
       y: {
-        field: yAxis?.field?.default?.column,
-        type: 'quantitative',
-        axis: applyAxisStyling(yAxis, styles?.grid?.yLines),
+        field: yAxis?.column,
+        type: getSchemaByAxis(yAxis),
+        axis: applyAxisStyling(yAxis),
       },
       color: {
         field: categoryFields,
-        type: 'nominal',
+        type: getSchemaByAxis(colorColumn),
         legend: styles?.addLegend
           ? {
               title: categoryNames || 'Metrics',
@@ -146,7 +147,7 @@ export const createThreeMetricOneCateScatter = (
       },
       size: {
         field: numericalSize?.column,
-        type: 'quantitative',
+        type: getSchemaByAxis(numericalSize),
         legend: styles?.addLegend
           ? {
               title: numericalSize?.name || 'Metrics',
