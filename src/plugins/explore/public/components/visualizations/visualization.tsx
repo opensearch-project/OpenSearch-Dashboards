@@ -15,6 +15,7 @@ import { ChartTypeSelector } from './chart_type_selector';
 import { UpdateVisualizationProps } from './visualization_container';
 import { TableVis } from './table/table_vis';
 import { TableChartStyleControls } from './table/table_vis_config';
+import { VisualizationEmptyState } from './visualization_empty_state';
 
 export interface VisualizationProps<T extends ChartType> {
   expression: string | null;
@@ -80,13 +81,7 @@ export const Visualization = <T extends ChartType>({
         />
       );
     }
-    return (
-      <EuiEmptyPrompt
-        iconType="visualizeApp"
-        title={<h2>Select a chart type, and x and y axes fields to get started</h2>}
-        body={<p>Try writing an aggregated query like this one:</p>}
-      />
-    );
+    return <VisualizationEmptyState />;
   };
   return (
     <EuiFlexGroup gutterSize="none" style={{ minHeight: 0 }}>
