@@ -227,7 +227,7 @@ describe('bar to_expression', () => {
       // Check encoding
       expect(spec.encoding.x.field).toBe('category');
       expect(spec.encoding.y.field).toBe('count');
-      expect(spec.encoding.y.stack).toBe('normalize');
+      expect(spec.encoding.y.stack).toBe('zero');
       expect(spec.encoding.color.field).toBe('category2');
     });
 
@@ -663,7 +663,7 @@ describe('bar to_expression', () => {
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
       expect(thresholdLayer.mark.strokeWidth).toBe(2);
-      expect(thresholdLayer.encoding.y.value).toBe(15);
+      expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
     test('throws error when required columns are missing', () => {

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { createBarConfig, defaultBarChartStyles } from './bar_vis_config';
-import { Positions, ThresholdLineStyle } from '../types';
+import { Positions, ThresholdLineStyle, AxisRole } from '../types';
 import { BarVisStyleControls } from './bar_vis_options';
 
 describe('bar_vis_config', () => {
@@ -38,37 +38,15 @@ describe('bar_vis_config', () => {
             name: '',
           },
         ],
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
       });
 
       // Check axes configuration
-      expect(defaultBarChartStyles.categoryAxes).toHaveLength(1);
-      expect(defaultBarChartStyles.categoryAxes[0]).toMatchObject({
-        id: 'CategoryAxis-1',
-        type: 'category',
-        position: Positions.BOTTOM,
-        show: true,
-        labels: {
-          show: true,
-          filter: true,
-          rotate: 0,
-          truncate: 100,
-        },
-        title: {
-          text: '',
-        },
-      });
-
-      expect(defaultBarChartStyles.valueAxes).toHaveLength(1);
-      expect(defaultBarChartStyles.valueAxes[0]).toMatchObject({
-        id: 'ValueAxis-1',
-        name: 'LeftAxis-1',
-        type: 'value',
+      expect(defaultBarChartStyles.standardAxes).toHaveLength(2);
+      expect(defaultBarChartStyles.standardAxes[0]).toMatchObject({
+        id: 'Axis-1',
         position: Positions.LEFT,
         show: true,
+        style: {},
         labels: {
           show: true,
           rotate: 0,
@@ -78,6 +56,30 @@ describe('bar_vis_config', () => {
         title: {
           text: '',
         },
+        grid: {
+          showLines: true,
+        },
+        axisRole: AxisRole.Y,
+      });
+
+      expect(defaultBarChartStyles.standardAxes[1]).toMatchObject({
+        id: 'Axis-2',
+        position: Positions.BOTTOM,
+        show: true,
+        style: {},
+        labels: {
+          show: true,
+          rotate: 0,
+          filter: false,
+          truncate: 100,
+        },
+        title: {
+          text: '',
+        },
+        grid: {
+          showLines: true,
+        },
+        axisRole: AxisRole.X,
       });
     });
   });
