@@ -1,0 +1,2 @@
+fix:
+- Add explicit tooltip configurations with user-modified display names for multiple charts ([#10180](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10180))
