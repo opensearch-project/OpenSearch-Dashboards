@@ -30,7 +30,7 @@
 
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../common';
+import { IIndexPattern, IFieldType, UI_SETTINGS, IndexPattern } from '../../../common';
 
 function resolver(title: string, field: IFieldType, query: string, boolFilter: any) {
   // Only cache results for a minute
@@ -92,7 +92,7 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
       query,
       boolFilter,
       signal,
-      indexPattern.dataSourceRef?.id
+      (indexPattern as IndexPattern).dataSourceRef?.id
     );
   };
 };
