@@ -7,15 +7,20 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { ResultsSummaryPanel } from './results_summary_panel';
-import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
-import { EditorMode, QueryExecutionStatus } from '../../application/utils/state_management/types';
+import { ResultsSummary } from './results_summary';
+import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
+import { EditorMode } from '../../../application/utils/state_management/types';
+import { ResultStatus } from '../../../../../data/public';
 
 jest.mock('./use_metrics', () => ({
   useMetrics: () => ({
     reportMetric: jest.fn(),
     reportCountMetric: jest.fn(),
   }),
+}));
+
+jest.mock('../../../services/usage_collector', () => ({
+  getUsageCollector: () => ({}),
 }));
 
 const mockServices = {
@@ -38,15 +43,15 @@ const createMockStore = (overrides = {}) => {
       dataset: { dataSource: { id: 'test-ds' } },
     },
     queryEditor: {
-      queryStatus: { status: QueryExecutionStatus.READY },
-      editorMode: EditorMode.SingleEmpty,
-      lastExecutedPrompt: '',
+      overallQueryStatus: { status: ResultStatus.READY },
+      editorMode: EditorMode.SinglePrompt,
+      lastExecutedPrompt: 'test prompt',
       summaryAgentIsAvailable: true,
     },
     results: {
       'source = opensearch_dashboards_sample_data_logs': {
         hits: {
-          hits: [],
+          hits: [{ _source: { test: 'data' } }],
         },
       },
     },
@@ -81,8 +86,8 @@ describe('ResultsSummaryPanel', () => {
   });
 
   it('renders when assistant is enabled and agent is available', () => {
-    renderWithProviders(<ResultsSummaryPanel />);
-    expect(screen.getByTestId('exploreResultsSummary')).toBeInTheDocument();
+    renderWithProviders(<ResultsSummary />);
+    expect(screen.getByRole('button', { name: 'Generate Summary' })).toBeInTheDocument();
   });
 
   it('does not render when assistant is disabled', () => {
@@ -99,16 +104,31 @@ describe('ResultsSummaryPanel', () => {
     render(
       <Provider store={createMockStore()}>
         <OpenSearchDashboardsContextProvider services={servicesWithDisabledAssistant}>
-          <ResultsSummaryPanel />
+          <ResultsSummary />
         </OpenSearchDashboardsContextProvider>
       </Provider>
     );
 
-    expect(screen.queryByTestId('exploreResultsSummary')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Generate Summary' })).not.toBeInTheDocument();
   });
 
-  it('does not generate summary when conditions not met', () => {
-    renderWithProviders(<ResultsSummaryPanel />);
-    expect(mockServices.http.post).not.toHaveBeenCalled();
+  it('does not render when agent is not available', () => {
+    const storeOverrides = {
+      queryEditor: {
+        overallQueryStatus: { status: ResultStatus.READY },
+        editorMode: EditorMode.SinglePrompt,
+        lastExecutedPrompt: 'test prompt',
+        summaryAgentIsAvailable: false,
+      },
+    };
+
+    renderWithProviders(<ResultsSummary />, storeOverrides);
+    expect(screen.queryByRole('button', { name: 'Generate Summary' })).not.toBeInTheDocument();
+  });
+
+  it('renders with correct props when conditions are met', () => {
+    renderWithProviders(<ResultsSummary />);
+    const summaryButton = screen.getByRole('button', { name: 'Generate Summary' });
+    expect(summaryButton).toBeInTheDocument();
   });
 });
