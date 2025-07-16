@@ -75,12 +75,9 @@ jest.mock('./data_table', () => ({
   ),
 }));
 
-jest.mock(
-  '../../application/legacy/discover/application/view_components/utils/filter_columns',
-  () => ({
-    filterColumns: jest.fn((columns) => columns || ['_source']),
-  })
-);
+jest.mock('../../helpers/view_component_utils/filter_columns', () => ({
+  filterColumns: jest.fn((columns) => columns || ['_source']),
+}));
 
 jest.mock('../../helpers/data_table_helper', () => ({
   getLegacyDisplayedColumns: jest.fn((columns) => columns),

@@ -41,7 +41,7 @@ import { getStubIndexPattern } from '../../../../data/public/test_utils';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import * as fieldFilter from './lib/field_filter';
 
-jest.mock('../../../opensearch_dashboards_services', () => ({
+jest.mock('../../application/legacy/discover/opensearch_dashboards_services', () => ({
   getServices: () => ({
     history: () => ({
       location: {

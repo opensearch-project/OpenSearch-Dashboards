@@ -37,7 +37,7 @@ import { coreMock } from 'opensearch-dashboards/public/mocks';
 import { IndexPatternField } from '../../../../data/public';
 import { getStubIndexPattern } from '../../../../data/public/test_utils';
 
-jest.mock('../../../opensearch_dashboards_services', () => ({
+jest.mock('../../application/legacy/discover/opensearch_dashboards_services', () => ({
   getServices: () => ({
     history: () => ({
       location: {

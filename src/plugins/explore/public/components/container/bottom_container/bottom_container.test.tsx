@@ -12,7 +12,7 @@ import { legacyReducer } from '../../../application/utils/state_management/slice
 import { uiReducer } from '../../../application/utils/state_management/slices/ui/ui_slice';
 
 // Mock the components
-jest.mock('../../../application/legacy/discover/application/view_components/panel', () => ({
+jest.mock('../../fields_selector/fields_selector_panel', () => ({
   DiscoverPanel: () => <div data-test-subj="discover-panel">Discover Panel</div>,
 }));
 
