@@ -10,7 +10,6 @@ import {
   createLineBarChart,
   createMultiLineChart,
   createFacetedMultiLineChart,
-  createCategoryLineChart,
 } from './line/to_expression';
 import { createHeatmapWithBin, createRegularHeatmap } from './heatmap/to_expression';
 import { createPieSpec } from './pie/to_expression';
@@ -20,14 +19,7 @@ import {
   createThreeMetricOneCateScatter,
 } from './scatter/to_expression';
 import { createSingleMetric } from './metric/to_expression';
-import { createBarSpec, createStackedBarSpec, createTimeBarChart } from './bar/to_expression';
-import {
-  createSimpleAreaChart,
-  createMultiAreaChart,
-  createFacetedMultiAreaChart,
-  createStackedAreaChart,
-  createCategoryAreaChart,
-} from './area/to_expression';
+import { createBarSpec, createStackedBarSpec } from './bar/to_expression';
 
 // Mock the chart expression functions
 jest.mock('./line/to_expression', () => ({
