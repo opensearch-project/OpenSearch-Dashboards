@@ -194,9 +194,9 @@ const DefaultDiscoverTableUI = ({
    */
   const indexOfRenderedData = rows?.[0]?._index;
   const timeFromFirstRow =
-    typeof indexPattern?.timeFieldName === 'string' &&
-    // @ts-expect-error TS2571 TODO(ts-error): fixme
-    rows?.[0]?._source?.[indexPattern.timeFieldName];
+    typeof indexPattern?.timeFieldName === 'string'
+      ? (rows?.[0]?._source as Record<string, any>)?.[indexPattern.timeFieldName]
+      : undefined;
 
   useEffect(() => {
     if (tableElement) {
@@ -256,7 +256,7 @@ const DefaultDiscoverTableUI = ({
           </thead>
           <tbody>
             {(showPagination ? displayedRows : rows.slice(0, renderedRowCount)).map(
-              (row: OpenSearchSearchHit, index: number) => {
+              (row: OpenSearchSearchHit) => {
                 return (
                   <TableRow
                     key={row._id}
