@@ -78,8 +78,8 @@ const mockStyleOptions: LineChartStyleControls = {
     },
   ],
   grid: {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   },
   // Axes
   categoryAxes: [
