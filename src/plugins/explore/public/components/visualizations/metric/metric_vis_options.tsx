@@ -13,7 +13,6 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiFormRow,
-  EuiButtonGroup,
 } from '@elastic/eui';
 import { MetricChartStyleControls } from './metric_vis_config';
 import { RangeValue, ColorSchemas } from '../types';
