@@ -230,7 +230,6 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
 
         clauses.forEach((clause: any) => {
           const fieldName = this.extractFieldName(clause.fieldExpression());
-          const expression = this.extractExpression(clause.expression());
 
           // Create a calculated field object
           const calculatedField: IFieldType = {
@@ -315,14 +314,6 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
       return fields;
     } catch (error) {
       return [];
-    }
-  }
-
-  private extractExpression(expressionCtx: any): string {
-    try {
-      return expressionCtx.getText() || '';
-    } catch (error) {
-      return '';
     }
   }
 
