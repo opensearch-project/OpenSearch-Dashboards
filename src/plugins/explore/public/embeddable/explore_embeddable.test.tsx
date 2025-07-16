@@ -113,7 +113,7 @@ describe('ExploreEmbeddable', () => {
     };
 
     // Create a function that returns a new mock search source
-    const createMockSearchSource = () => ({
+    const createMockSearchSource = (): typeof mockSearchSourceBase & { create: jest.Mock } => ({
       ...mockSearchSourceBase,
       create: jest.fn().mockImplementation(() => createMockSearchSource()),
     });
@@ -247,14 +247,71 @@ describe('ExploreEmbeddable', () => {
     expect(embeddable.updateHandler).toHaveBeenCalledWith(expect.anything(), true);
   });
 
-  test('handles container error correctly', () => {
-    // Call onContainerError
-    const error = new Error('Test error');
-    embeddable.onContainerError(error as any);
+  test('reload calls updateHandler when searchProps exists', () => {
+    // @ts-ignore
+    const updateHandlerSpy = jest.spyOn(embeddable, 'updateHandler').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.reload();
+    expect(updateHandlerSpy).toHaveBeenCalled();
+  });
 
-    // Check that the output was updated with the error
-    expect(embeddable.getOutput().loading).toBe(false);
-    expect(embeddable.getOutput().error).toBe(error);
+  test('reload does nothing when searchProps does not exist', () => {
+    // @ts-ignore
+    embeddable.searchProps = undefined;
+    // @ts-ignore
+    const updateHandlerSpy = jest.spyOn(embeddable, 'updateHandler');
+    // @ts-ignore
+    embeddable.reload();
+    expect(updateHandlerSpy).not.toHaveBeenCalled();
+  });
+
+  test('onContainerError aborts and updates output', () => {
+    // @ts-ignore
+    embeddable.abortController = { abort: jest.fn() };
+    // @ts-ignore
+    embeddable.renderComplete = { dispatchError: jest.fn() };
+    // @ts-ignore
+    embeddable.updateOutput = jest.fn();
+    const error = new Error('test error');
+    // @ts-ignore
+    embeddable.onContainerError(error);
+    // @ts-ignore
+    expect(embeddable.abortController.abort).toHaveBeenCalled();
+    // @ts-ignore
+    expect(embeddable.renderComplete.dispatchError).toHaveBeenCalled();
+    // @ts-ignore
+    expect(embeddable.updateOutput).toHaveBeenCalledWith({ loading: false, error });
+  });
+
+  test('onContainerError works when abortController is undefined', () => {
+    // @ts-ignore
+    embeddable.abortController = undefined;
+    // @ts-ignore
+    embeddable.renderComplete = { dispatchError: jest.fn() };
+    // @ts-ignore
+    embeddable.updateOutput = jest.fn();
+    const error = new Error('test error');
+    // @ts-ignore
+    embeddable.onContainerError(error);
+    // @ts-ignore
+    expect(embeddable.renderComplete.dispatchError).toHaveBeenCalled();
+    // @ts-ignore
+    expect(embeddable.updateOutput).toHaveBeenCalledWith({ loading: false, error });
+  });
+
+  test('renderComponent does nothing if searchProps is undefined', () => {
+    // @ts-ignore
+    embeddable.searchProps = undefined;
+    // @ts-ignore
+    expect(() => embeddable.renderComponent(mockNode, undefined)).not.toThrow();
+  });
+
+  test('destroy is idempotent (can be called multiple times safely)', () => {
+    expect(() => {
+      embeddable.destroy();
+      embeddable.destroy();
+      embeddable.destroy();
+    }).not.toThrow();
   });
 
   test('handles column actions correctly', () => {
@@ -330,5 +387,89 @@ describe('ExploreEmbeddable', () => {
 
     // Expect render to throw an error
     expect(() => newEmbeddable.render(mockNode)).toThrow('Search scope not defined');
+  });
+
+  test('constructor handles missing indexPattern gracefully', () => {
+    const mockSavedExploreNoIndex = {
+      ...mockSavedExplore,
+      searchSource: {
+        ...mockSavedExplore.searchSource,
+        getField: jest.fn().mockImplementation((field) => {
+          if (field === 'index') return null;
+          if (field === 'query') return { query: 'test', language: 'PPL' };
+          return null;
+        }),
+      },
+    };
+    const embeddableNoIndex = new ExploreEmbeddable(
+      {
+        savedExplore: mockSavedExploreNoIndex,
+        editUrl: '/app/explore/logs/test',
+        editPath: 'test',
+        indexPatterns: [],
+        editable: true,
+        filterManager: {} as any,
+        services: {} as any,
+        editApp: 'explore/logs',
+      },
+      mockInput,
+      mockExecuteTriggerActions
+    );
+    // @ts-ignore
+    expect(embeddableNoIndex.searchProps).toBeUndefined();
+    expect(() => embeddableNoIndex.render(mockNode)).toThrow('Search scope not defined');
+  });
+
+  test('onAddColumn/onRemoveColumn/onMoveColumn/onSetColumns handle undefined columns gracefully', () => {
+    // @ts-ignore
+    const searchProps = embeddable.searchProps;
+    if (searchProps) {
+      searchProps.columns = undefined;
+      expect(() => searchProps.onAddColumn && searchProps.onAddColumn('col')).not.toThrow();
+      expect(() => searchProps.onRemoveColumn && searchProps.onRemoveColumn('col')).not.toThrow();
+      expect(() => searchProps.onMoveColumn && searchProps.onMoveColumn('col', 1)).not.toThrow();
+      expect(() => searchProps.onSetColumns && searchProps.onSetColumns(['a', 'b'])).not.toThrow();
+    }
+  });
+
+  test('updateHandler handles force/needFetch/this.node branches', async () => {
+    // @ts-ignore
+    const searchProps = embeddable.searchProps;
+    // @ts-ignore
+    const fetchSpy = jest.spyOn(embeddable, 'fetch').mockResolvedValue(undefined);
+    // @ts-ignore
+    embeddable.node = mockNode;
+    // @ts-ignore
+    await embeddable.updateHandler(searchProps, true);
+    expect(fetchSpy).toHaveBeenCalled();
+    fetchSpy.mockClear();
+    // @ts-ignore
+    embeddable.prevState = { filters: [], query: {}, timeRange: {} };
+    // @ts-ignore
+    embeddable.input = { filters: [], query: {}, timeRange: {} };
+    // @ts-ignore
+    await embeddable.updateHandler(searchProps, false);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  test('fetch handles missing searchProps gracefully', async () => {
+    // @ts-ignore
+    embeddable.searchProps = undefined;
+    // @ts-ignore
+    await expect(embeddable.fetch()).resolves.toBeUndefined();
+  });
+
+  test('destroy handles missing resources gracefully', () => {
+    // @ts-ignore
+    embeddable.subscription = undefined;
+    // @ts-ignore
+    embeddable.autoRefreshFetchSubscription = undefined;
+    // @ts-ignore
+    embeddable.abortController = undefined;
+    // @ts-ignore
+    embeddable.searchProps = undefined;
+    // @ts-ignore
+    embeddable.node = undefined;
+    expect(() => embeddable.destroy()).not.toThrow();
   });
 });

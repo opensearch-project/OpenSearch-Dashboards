@@ -173,4 +173,38 @@ describe('ExploreEmbeddableFactory', () => {
     const iconType = factory.savedObjectMetaData.getIconForSavedObject(savedObject as any);
     expect(iconType).toBe('');
   });
+
+  test('createFromSavedObject returns error object when exception thrown', async () => {
+    jest.spyOn(OsdServices, 'getServices').mockReturnValue({
+      ...mockedGetServicesResults,
+      getSavedExploreById: jest.fn().mockImplementation(() => {
+        throw new Error('fail');
+      }),
+    } as any);
+    const input = { id: 'test', timeRange: { from: 'now-15m', to: 'now' } };
+    const result = await factory.createFromSavedObject('error-id', input as any);
+    expect(result).toBeInstanceOf(ErrorEmbeddable);
+  });
+
+  test('createFromSavedObject works when indexPattern is null', async () => {
+    jest.spyOn(OsdServices, 'getServices').mockReturnValue({
+      ...mockedGetServicesResults,
+      getSavedExploreById: jest.fn().mockResolvedValue({
+        ...mockedGetServicesResults.getSavedExploreById(),
+        searchSource: {
+          getField: jest.fn(() => null),
+        },
+      }),
+    } as any);
+    const input = { id: 'test', timeRange: { from: 'now-15m', to: 'now' } };
+    await factory.createFromSavedObject('test-id', input as any);
+    expect(ExploreEmbeddable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [],
+      }),
+      input,
+      mockStartServices.executeTriggerActions,
+      undefined
+    );
+  });
 });

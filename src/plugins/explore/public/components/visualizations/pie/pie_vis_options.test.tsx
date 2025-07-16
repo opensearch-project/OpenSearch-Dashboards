@@ -74,4 +74,46 @@ describe('PieVisStyleControls', () => {
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
   });
+
+  it('calls onStyleChange when PieExclusiveVisOptions onChange is triggered', () => {
+    render(<PieVisStyleControls {...mockProps} />);
+    const showValuesSwitch = screen.getByTestId('showValuesSwtich');
+    fireEvent.click(showValuesSwitch);
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      exclusive: { ...mockProps.styleOptions.exclusive, showValues: false },
+    });
+  });
+
+  it('calls onStyleChange when tooltip options change', () => {
+    render(<PieVisStyleControls {...mockProps} />);
+    const tooltipSwitch = screen.getByTestId('tooltipModeSwitch');
+    fireEvent.click(tooltipSwitch);
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      tooltipOptions: { ...mockProps.styleOptions.tooltipOptions, mode: 'hidden' },
+    });
+  });
+
+  it('does not render style panels when axisColumnMappings is empty', () => {
+    render(<PieVisStyleControls {...mockProps} axisColumnMappings={{}} />);
+    expect(screen.queryByText('Legend')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('showValuesSwtich')).not.toBeInTheDocument();
+  });
+
+  it('renders with availableChartTypes, selectedChartType, onChartTypeChange props', () => {
+    const availableChartTypes = [
+      { type: 'pie', name: 'Pie', icon: 'pieIcon', priority: 1 },
+      { type: 'donut', name: 'Donut', icon: 'donutIcon', priority: 2 },
+    ];
+    const selectedChartType = 'pie';
+    const onChartTypeChange = jest.fn();
+    render(
+      <PieVisStyleControls
+        {...mockProps}
+        availableChartTypes={availableChartTypes}
+        selectedChartType={selectedChartType}
+        onChartTypeChange={onChartTypeChange}
+      />
+    );
+    expect(screen.getByText('Fields')).toBeInTheDocument();
+  });
 });
