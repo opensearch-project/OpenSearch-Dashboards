@@ -59,6 +59,7 @@ describe('convertResult', () => {
         fields: [],
         size: 0,
         name: 'test-index',
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         values: [],
       },
       type: DATA_FRAME_TYPES.DEFAULT,
@@ -179,6 +180,7 @@ describe('convertResult', () => {
     );
 
     // Mock IndexPattern with fields property using IIndexPatternFieldList
+    // @ts-expect-error TS2740 TODO(ts-error): fixme
     const mockIndexPattern: IndexPattern = {
       fields: mockFields,
       title: 'test-index',

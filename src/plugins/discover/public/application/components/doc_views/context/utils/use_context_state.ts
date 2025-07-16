@@ -29,6 +29,7 @@ export const useContextState = ({ services, indexPattern }: Props) => {
   } = useMemo(() => {
     return getState({
       defaultStepSize: uiSettings.get(CONTEXT_DEFAULT_SIZE_SETTING),
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       timeFieldName: indexPattern.timeFieldName,
       storeInSessionStorage: uiSettings.get('state:storeInSessionStorage'),
       history: history(),
@@ -36,6 +37,7 @@ export const useContextState = ({ services, indexPattern }: Props) => {
     });
   }, [uiSettings, history, core.notifications.toasts, indexPattern.timeFieldName]);
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const [contextAppState, setContextState] = useState<AppState>(appStateContainer.getState());
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export const useContextState = ({ services, indexPattern }: Props) => {
 
     startSync();
 
+    // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
     const unsubscribeFromAppStateChanges = appStateContainer.subscribe((newState) => {
       setContextState((currentState) => ({ ...currentState, ...newState }));
     });

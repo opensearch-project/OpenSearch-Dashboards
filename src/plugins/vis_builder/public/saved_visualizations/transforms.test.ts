@@ -15,7 +15,9 @@ const getConfig = (cfg: any) => cfg;
 
 describe('transforms', () => {
   describe('saveStateToSavedObject', () => {
+    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let TEST_INDEX_PATTERN_ID;
+    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let savedObject;
     let rootState: RootState;
     let indexPattern: IndexPattern;
@@ -46,11 +48,16 @@ describe('transforms', () => {
     });
 
     test('should save root state information into saved object', async () => {
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       saveStateToSavedObject(savedObject, rootState, indexPattern);
 
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       expect(savedObject.visualizationState).not.toContain(TEST_INDEX_PATTERN_ID);
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       expect(savedObject.styleState).toEqual(JSON.stringify(rootState.style));
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       expect(savedObject.uiState).toEqual(JSON.stringify(rootState.ui));
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
       expect(savedObject.searchSourceFields?.index?.id).toEqual(TEST_INDEX_PATTERN_ID);
     });
 
@@ -58,6 +65,7 @@ describe('transforms', () => {
       rootState.visualization.indexPattern = 'Some-other-pattern';
 
       expect(() =>
+        // @ts-expect-error TS7005 TODO(ts-error): fixme
         saveStateToSavedObject(savedObject, rootState, indexPattern)
       ).toThrowErrorMatchingInlineSnapshot(
         `"indexPattern id should match the value in redux state"`

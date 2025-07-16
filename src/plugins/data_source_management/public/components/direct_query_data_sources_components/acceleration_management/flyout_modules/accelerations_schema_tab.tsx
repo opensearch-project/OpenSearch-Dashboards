@@ -12,8 +12,11 @@ interface AccelerationSchemaTabProps {
 }
 
 export const AccelerationSchemaTab = ({ mappings, indexInfo }: AccelerationSchemaTabProps) => {
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const indexName = indexInfo.data[0]?.index;
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const indexData = mappings.data[indexName]?.mappings._meta?.indexedColumns;
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const indexType = mappings.data[indexName]?.mappings._meta?.kind;
   const isSkippingIndex = indexType === 'skipping';
 

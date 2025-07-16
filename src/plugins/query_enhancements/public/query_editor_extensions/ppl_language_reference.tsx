@@ -47,6 +47,7 @@ const PPLReference = () => {
   );
 };
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const pplLanguageReference = (selectedLanguage) => {
   const hasSeenInfoBox = localStorage.getItem('hasSeenInfoBox_PPL') === 'true';
   const shouldAutoShow = selectedLanguage === 'PPL' && !hasSeenInfoBox;

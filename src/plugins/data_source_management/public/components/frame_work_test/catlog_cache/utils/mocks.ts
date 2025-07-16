@@ -884,6 +884,7 @@ export const mockShowIndexesPollingResult: AsyncPollingResult = {
   ],
 };
 
+// @ts-expect-error TS2741 TODO(ts-error): fixme
 export const mockDatasource: DatasourceDetails = {
   allowedRoles: ['admin'],
   name: 'mock_data_source',
@@ -991,12 +992,14 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     datasource: 'flint_s3',
     name: 'Table_name_1',
     database: 'db1',
+    // @ts-expect-error TS2820 TODO(ts-error): fixme
     type: 'Table',
     createdByIntegration: 'integration_1',
     accelerations: [
       {
         name: 'skipping_index_1',
         status: 'ACTIVE',
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: 'skip',
         database: 'db1',
         table: 'Table_name_1',
@@ -1031,12 +1034,14 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     datasource: 'flint_s3',
     name: 'Table_name_2',
     database: 'db1',
+    // @ts-expect-error TS2820 TODO(ts-error): fixme
     type: 'Table',
     createdByIntegration: 'integration_1',
     accelerations: [
       {
         name: 'skipping_index_2',
         status: 'ACTIVE',
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: 'skip',
         database: 'db1',
         table: 'Table_name_1',
@@ -1054,12 +1059,14 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     datasource: 'flint_s3',
     name: 'skipping_index_2',
     database: 'db1',
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     type: 'Skip Index',
     createdByIntegration: 'integration_1',
     accelerations: [
       {
         name: 'skipping_index_2',
         status: 'ACTIVE',
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: 'skip',
         database: 'db1',
         table: 'Table_name_1',
@@ -1077,12 +1084,14 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     datasource: 'flint_s3',
     name: 'Table_name_4',
     database: 'db2',
+    // @ts-expect-error TS2820 TODO(ts-error): fixme
     type: 'Table',
     createdByIntegration: 'integration_1',
     accelerations: [
       {
         name: 'skipping_index_2',
         status: 'ACTIVE',
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: 'skip',
         database: 'db1',
         table: 'Table_name_1',
@@ -1095,10 +1104,12 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     ],
     columns: [
       {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         name: 'column1',
         dataType: 'dataType1',
       },
       {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         name: 'column2',
         dataType: 'dataType2',
       },
@@ -1109,15 +1120,18 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     datasource: 'flint_s3',
     name: 'Table_name_5',
     database: 'db3',
+    // @ts-expect-error TS2820 TODO(ts-error): fixme
     type: 'Table',
     createdByIntegration: 'integration_1',
     accelerations: [],
     columns: [
       {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         name: 'column1',
         dataType: 'dataType1',
       },
       {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         name: 'column2',
         dataType: 'dataType2',
       },
@@ -1128,12 +1142,14 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     datasource: 'flint_s3',
     name: 'covering_index_3',
     database: 'db3',
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     type: 'Cover Index',
     createdByIntegration: '',
     accelerations: [
       {
         name: 'covering_index_3',
         status: 'ACTIVE',
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: 'skip',
         database: 'db1',
         table: 'Table_name_1',
@@ -1146,10 +1162,12 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     ],
     columns: [
       {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         name: 'column1',
         dataType: 'dataType1',
       },
       {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         name: 'column2',
         dataType: 'dataType2',
       },
@@ -1160,12 +1178,14 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     datasource: 'flint_s3',
     name: 'Table_name_6',
     database: 'db3',
+    // @ts-expect-error TS2820 TODO(ts-error): fixme
     type: 'Table',
     createdByIntegration: '',
     accelerations: [
       {
         name: 'skipping_index_4',
         status: 'ACTIVE',
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: 'skip',
         database: 'db1',
         table: 'Table_name_1',
@@ -1178,6 +1198,7 @@ export const mockAssociatedObjects: AssociatedObject[] = [
       {
         name: 'skipping_index_5',
         status: 'ACTIVE',
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: 'skip',
         database: 'db1',
         table: 'Table_name_1',
@@ -1190,10 +1211,12 @@ export const mockAssociatedObjects: AssociatedObject[] = [
     ],
     columns: [
       {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         name: 'column1',
         dataType: 'dataType1',
       },
       {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         name: 'column2',
         dataType: 'dataType2',
       },

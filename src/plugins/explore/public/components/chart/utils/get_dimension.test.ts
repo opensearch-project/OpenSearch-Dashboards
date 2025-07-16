@@ -35,6 +35,7 @@ describe('getDimensions', () => {
       toSerializedFieldFormat: jest.fn(() => 'agg-format'),
     } as any;
     const aggs: IAggConfigs = {
+      // @ts-expect-error TS2740 TODO(ts-error): fixme
       aggs: [metric, agg],
     } as any;
 

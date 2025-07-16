@@ -26,6 +26,7 @@ describe('App', () => {
 
   it('should render without MDS', () => {
     const container = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataImporterPluginApp
         basename={PLUGIN_ID}
         notifications={notificationsMock}
@@ -50,6 +51,7 @@ describe('App', () => {
     dataSourceManagementMock.ui.getDataSourceMenu = jest.fn(() => <div>DataSourceMenu</div>);
 
     const container = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataImporterPluginApp
         basename={PLUGIN_ID}
         notifications={notificationsMock}

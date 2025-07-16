@@ -43,6 +43,7 @@ export class Pr {
     return parseInt(input, 10);
   }
 
+  // @ts-expect-error TS2729 TODO(ts-error): fixme
   public readonly remoteRef = `pull/${this.number}/head`;
 
   constructor(

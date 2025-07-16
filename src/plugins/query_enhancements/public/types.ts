@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS6192 TODO(ts-error): fixme
 import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import { DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';

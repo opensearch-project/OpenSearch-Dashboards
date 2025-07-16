@@ -98,6 +98,7 @@ describe('parseClientOptions', () => {
         pingTimeout: 2000,
       })
     );
+    // @ts-expect-error TS2722, TS2554 TODO(ts-error): fixme
     expect(parsedConfig.ssl?.checkServerIdentity()).toBeUndefined();
   });
 

@@ -350,6 +350,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     if (!this.inputRef) {
       return;
     }
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { type, text, start, end, cursorIndex } = suggestion;
 
     this.handleNestedFieldSyntaxNotification(suggestion);

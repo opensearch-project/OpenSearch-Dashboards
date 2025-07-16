@@ -6,8 +6,10 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { AssociatedObjectsTabEmpty } from './associated_objects_tab_empty';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DataSourceManagementContext } from 'src/plugins/data_source_management/public/types';
 
 // Mock useOpenSearchDashboards hook

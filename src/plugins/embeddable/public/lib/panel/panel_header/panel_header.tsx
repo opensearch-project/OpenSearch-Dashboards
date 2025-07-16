@@ -66,6 +66,7 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
       className="embPanel__headerBadge"
       iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
       onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     >
       {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}

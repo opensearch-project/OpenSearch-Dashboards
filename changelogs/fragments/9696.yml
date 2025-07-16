@@ -1,2 +1,0 @@
-feat:
-- Ui action supports `isDisabled` and `getTooltip` ([#9696](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9696))
