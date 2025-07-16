@@ -42,7 +42,7 @@ jest.mock('react-redux', () => ({
   useSelector: jest.fn((selector) => {
     // Mock state for query
     if (selector.toString().includes('state.query')) {
-      return { query: 'test query' };
+      return { query: 'test query', language: 'PPL' };
     }
     // Mock state for results
     if (selector.toString().includes('state.results')) {
