@@ -19,23 +19,20 @@ jest.mock('./patterns_table', () => ({
   ),
 }));
 
-// Mock the redux hooks
-jest.mock('react-redux', () => ({
-  useSelector: jest.fn((selector) => {
-    if (selector.name === 'selectRows') {
-      return mockPatternItems.map((item) => ({
-        _source: {
-          // Use string literals instead of constants to avoid Jest errors
-          patterns_field: item.pattern,
-          count: item.count,
-        },
-      }));
-    }
-    if (selector.name === 'selectTotalHits') {
-      return 2096;
-    }
-    return null;
-  }),
+// Mock the useTabResults hook
+jest.mock('../../application/utils/hooks/use_tab_results', () => ({
+  useTabResults: jest.fn(() => ({
+    results: {
+      hits: {
+        hits: mockPatternItems.map((item) => ({
+          _source: {
+            patterns_field: item.pattern,
+            count: item.count,
+          },
+        })),
+      },
+    },
+  })),
 }));
 
 describe('PatternsContainer', () => {
