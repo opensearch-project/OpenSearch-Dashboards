@@ -44,6 +44,8 @@ export const createMockExecutionContext = <ExtraContext extends object = object>
       dispatchEvent: jest.fn(),
       onabort: jest.fn(),
       removeEventListener: jest.fn(),
+      reason: undefined,
+      throwIfAborted: jest.fn(),
     },
     inspectorAdapters: {
       requests: {} as any,

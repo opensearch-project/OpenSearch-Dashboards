@@ -119,7 +119,7 @@ describe('useInitialQueryExecution', () => {
         ui: uiInitialState,
         results: resultsInitialState,
       },
-    });
+    }) as any;
 
     // Mock dispatch
     jest.spyOn(mockStore, 'dispatch').mockImplementation(mockDispatch);
@@ -145,12 +145,12 @@ describe('useInitialQueryExecution', () => {
           ui: initialState.ui || uiInitialState,
           results: initialState.results || resultsInitialState,
         },
-      });
+      }) as any;
       jest.spyOn(mockStore, 'dispatch').mockImplementation(mockDispatch);
     }
 
     return renderHook(() => useInitialQueryExecution(services), {
-      wrapper: ({ children }) => <Provider store={mockStore}>{children}</Provider>,
+      wrapper: ({ children }) => <Provider store={mockStore as any}>{children}</Provider>,
     });
   };
 
