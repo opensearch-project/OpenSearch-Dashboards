@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { indexPatterns } from '../../../data/public';
+import { indexPatterns, IndexPatternField } from '../../../data/public';
 import { IndexPattern } from '../opensearch_dashboards_services';
 import { IIndexPatternFieldList } from '../../../data/common';
 
@@ -66,7 +66,7 @@ const flatternHitMock = indexPatterns.flattenHitWrapper(
 indexPatternInitialMock.flattenHit = flatternHitMock;
 
 // Add a formatField method to the initial index pattern mock
-const formatFieldMock = (hit, field) => {
+const formatFieldMock = (hit: Record<string, any>, field: string) => {
   return field === '_source' ? hit._source : indexPatternInitialMock.flattenHit(hit)[field];
 };
 indexPatternInitialMock.formatField = formatFieldMock;
@@ -75,7 +75,7 @@ indexPatternInitialMock.formatField = formatFieldMock;
 export const indexPatternMock = indexPatternInitialMock;
 
 // Export a function that allows customization of index pattern mocks, by adding extra fields to the fieldsData
-export const getMockedIndexPatternWithCustomizedFields = (fields) => {
+export const getMockedIndexPatternWithCustomizedFields = (fields: IndexPatternField[]) => {
   const customizedFieldsData = [...fieldsData, ...fields];
   const customizedFieldsMock = {
     getAll: () => customizedFieldsData,
@@ -90,7 +90,10 @@ export const getMockedIndexPatternWithCustomizedFields = (fields) => {
 };
 
 // Export a function that allows customization of index pattern mocks with both extra fields and time field
-export const getMockedIndexPatternWithTimeField = (fields, timeFiledName: string) => {
+export const getMockedIndexPatternWithTimeField = (
+  fields: IndexPatternField[],
+  timeFiledName: string
+) => {
   const indexPatternWithTimeFieldMock = getMockedIndexPatternWithCustomizedFields(fields);
 
   return {

@@ -88,67 +88,11 @@ jest.mock('../style_panel/threshold/threshold', () => ({
   )),
 }));
 
-jest.mock('../style_panel/legend/legend', () => {
-  // Import Positions inside the mock to avoid reference error
-  const { Positions: PositionsEnum } = jest.requireActual('../types');
-
-  return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => {
-      if (!shouldShowLegend) return null;
-      return (
-        <div data-test-subj="mockLegendOptionsPanel">
-          <button
-            data-test-subj="mockLegendShow"
-            onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
-          >
-            Toggle Legend
-          </button>
-          <button
-            data-test-subj="mockLegendPosition"
-            onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
-          >
-            Change Position
-          </button>
-          <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
-        </div>
-      );
-    }),
-  };
-});
-
-jest.mock('../style_panel/tooltip/tooltip', () => ({
-  TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
-    <div data-test-subj="mockTooltipOptionsPanel">
-      <button
-        data-test-subj="mockUpdateTooltip"
-        onClick={() => onTooltipOptionsChange({ mode: 'hidden' })}
-      >
-        Update Tooltip
-      </button>
-    </div>
-  )),
-}));
-
-jest.mock('../style_panel/axes/standard_axes_options', () => ({
-  AllAxesOptions: jest.fn(({ onStandardAxesChange }) => (
-    <div data-test-subj="allAxesOptions">
-      <button
-        data-test-subj="changeAxis"
-        onClick={() =>
-          onStandardAxesChange([
-            {
-              id: 'axis-id',
-              axisRole: 'y',
-              show: false,
-              title: { text: 'Mock Y Axis' },
-              position: 'left',
-              labels: { show: true, rotate: 0 },
-              grid: { showLines: true },
-            },
-          ])
-        }
-      >
-        Mock Axis Change
+jest.mock('../style_panel/grid/grid', () => ({
+  GridOptionsPanel: jest.fn(({ grid, onGridChange }) => (
+    <div data-test-subj="mockGridOptionsPanel">
+      <button data-test-subj="mockUpdateGrid" onClick={() => onGridChange({ ...grid })}>
+        Update Grid
       </button>
     </div>
   )),
@@ -347,17 +291,24 @@ describe('BarVisStyleControls', () => {
     fireEvent.click(screen.getByTestId('changeAxis'));
 
     expect(onStyleChange).toHaveBeenCalledWith({
-      standardAxes: [
-        {
-          id: 'axis-id',
-          axisRole: 'y',
-          show: false,
-          title: { text: 'Mock Y Axis' },
-          position: 'left',
-          labels: { show: true, rotate: 0 },
-          grid: { showLines: true },
-        },
-      ],
+      standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
+    });
+
+    // Test value axes update
+    fireEvent.click(screen.getByTestId('mockUpdateValueAxes'));
+    expect(onStyleChange).toHaveBeenCalledWith({
+      standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
+    });
+  });
+
+  test('calls onStyleChange with correct parameters for grid options', () => {
+    const onStyleChange = jest.fn();
+    render(<BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />);
+
+    // Test grid update
+    fireEvent.click(screen.getByTestId('mockUpdateGrid'));
+    expect(onStyleChange).toHaveBeenCalledWith({
+      switchAxes: !defaultProps.styleOptions.switchAxes,
     });
   });
 
