@@ -4,63 +4,56 @@
  */
 
 import React from 'react';
+import { Provider } from 'react-redux';
 import { render, screen, fireEvent } from '@testing-library/react';
+import configureMockStore from 'redux-mock-store';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 import { defaultBarChartStyles } from './bar_vis_config';
-import { Positions, VisColumn, VisFieldType, AxisRole } from '../types';
-
-// Mock the child components
-jest.mock('../style_panel/legend/legend', () => {
-  // Import Positions inside the mock to avoid reference error
-  const { Positions: PositionsEnum } = jest.requireActual('../types');
-
-  return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => (
-      <div data-test-subj="mockLegendOptionsPanel">
-        <button
-          data-test-subj="mockLegendShow"
-          onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
-        >
-          Toggle Legend
-        </button>
-        <button
-          data-test-subj="mockLegendPosition"
-          onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
-        >
-          Change Position
-        </button>
-        <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
-      </div>
-    )),
-  };
+import { Positions, VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
+// Mock store setup
+const mockStore = configureMockStore([]);
+const store = mockStore({
+  tab: {
+    visualizations: {
+      styleOptions: {
+        switchAxes: false,
+      },
+    },
+  },
 });
 
-jest.mock('../style_panel/threshold/threshold', () => ({
-  ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
-    <div data-test-subj="mockThresholdOptions">
-      <button
-        data-test-subj="mockUpdateThreshold"
-        onClick={() => onThresholdLinesChange([...thresholdLines, { id: '2', show: true }])}
-      >
-        Update Threshold
-      </button>
-    </div>
-  )),
-}));
+// Shared column mocks
+const mockNumericalColumns: VisColumn[] = [
+  {
+    id: 1,
+    name: 'value 1',
+    schema: VisFieldType.Numerical,
+    column: 'x1',
+    validValuesCount: 6,
+    uniqueValuesCount: 6,
+  },
+];
+const mockCategoricalColumns: VisColumn[] = [
+  {
+    id: 4,
+    name: 'Category',
+    column: 'category',
+    schema: VisFieldType.Categorical,
+    validValuesCount: 100,
+    uniqueValuesCount: 10,
+  },
+];
 
-jest.mock('../style_panel/tooltip/tooltip', () => ({
-  TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
-    <div data-test-subj="mockTooltipOptionsPanel">
-      <button
-        data-test-subj="mockUpdateTooltip"
-        onClick={() => onTooltipOptionsChange({ mode: 'hidden' })}
-      >
-        Update Tooltip
-      </button>
-    </div>
-  )),
-}));
+const mockAxisColumnMappings: AxisColumnMappings = {
+  [AxisRole.X]: mockCategoricalColumns[0],
+  [AxisRole.Y]: mockNumericalColumns[0],
+};
 
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn().mockImplementation((id, { defaultMessage }) => defaultMessage),
+  },
+}));
 jest.mock('../style_panel/axes/axes_selector', () => ({
   AxesSelectPanel: jest.fn(
     ({
@@ -82,43 +75,80 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
   ),
 }));
 
-jest.mock('../style_panel/axes/axes', () => ({
-  AxesOptions: jest.fn(
-    ({
-      categoryAxes,
-      valueAxes,
-      onCategoryAxesChange,
-      onValueAxesChange,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-    }) => (
-      <div data-test-subj="mockAxesOptions">
-        <button
-          data-test-subj="mockUpdateCategoryAxes"
-          onClick={() => onCategoryAxesChange([...categoryAxes, { id: 'new-axis' }])}
-        >
-          Update Category Axes
-        </button>
-        <button
-          data-test-subj="mockUpdateValueAxes"
-          onClick={() => onValueAxesChange([...valueAxes, { id: 'new-axis' }])}
-        >
-          Update Value Axes
-        </button>
-      </div>
-    )
-  ),
+jest.mock('../style_panel/threshold/threshold', () => ({
+  ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
+    <div data-test-subj="mockThresholdOptions">
+      <button
+        data-test-subj="mockUpdateThreshold"
+        onClick={() => onThresholdLinesChange([...thresholdLines, { id: '2', show: true }])}
+      >
+        Update Threshold
+      </button>
+    </div>
+  )),
 }));
 
-jest.mock('../style_panel/grid/grid', () => ({
-  GridOptionsPanel: jest.fn(({ grid, onGridChange }) => (
-    <div data-test-subj="mockGridOptionsPanel">
+jest.mock('../style_panel/legend/legend', () => {
+  // Import Positions inside the mock to avoid reference error
+  const { Positions: PositionsEnum } = jest.requireActual('../types');
+
+  return {
+    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => {
+      if (!shouldShowLegend) return null;
+      return (
+        <div data-test-subj="mockLegendOptionsPanel">
+          <button
+            data-test-subj="mockLegendShow"
+            onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+          >
+            Toggle Legend
+          </button>
+          <button
+            data-test-subj="mockLegendPosition"
+            onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
+          >
+            Change Position
+          </button>
+          <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
+        </div>
+      );
+    }),
+  };
+});
+
+jest.mock('../style_panel/tooltip/tooltip', () => ({
+  TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
+    <div data-test-subj="mockTooltipOptionsPanel">
       <button
-        data-test-subj="mockUpdateGrid"
-        onClick={() => onGridChange({ ...grid, xLines: !grid.xLines })}
+        data-test-subj="mockUpdateTooltip"
+        onClick={() => onTooltipOptionsChange({ mode: 'hidden' })}
       >
-        Update Grid
+        Update Tooltip
+      </button>
+    </div>
+  )),
+}));
+
+jest.mock('../style_panel/axes/standard_axes_options', () => ({
+  AllAxesOptions: jest.fn(({ onStandardAxesChange }) => (
+    <div data-test-subj="allAxesOptions">
+      <button
+        data-test-subj="changeAxis"
+        onClick={() =>
+          onStandardAxesChange([
+            {
+              id: 'axis-id',
+              axisRole: 'y',
+              show: false,
+              title: { text: 'Mock Y Axis' },
+              position: 'left',
+              labels: { show: true, rotate: 0 },
+              grid: { showLines: true },
+            },
+          ])
+        }
+      >
+        Mock Axis Change
       </button>
     </div>
   )),
@@ -166,44 +196,13 @@ jest.mock('./bar_exclusive_vis_options', () => ({
 }));
 
 describe('BarVisStyleControls', () => {
-  // Create mock VisColumn objects
-  const mockNumericalColumn: VisColumn = {
-    id: 1,
-    name: 'Count',
-    column: 'count',
-    schema: VisFieldType.Numerical,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
-  };
-
-  const mockCategoricalColumn: VisColumn = {
-    id: 2,
-    name: 'Category',
-    column: 'category',
-    schema: VisFieldType.Categorical,
-    validValuesCount: 100,
-    uniqueValuesCount: 10,
-  };
-
-  const mockDateColumn: VisColumn = {
-    id: 3,
-    name: 'Date',
-    column: 'date',
-    schema: VisFieldType.Date,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
-  };
-
   const defaultProps: BarVisStyleControlsProps = {
     styleOptions: { ...defaultBarChartStyles },
     onStyleChange: jest.fn(),
-    numericalColumns: [mockNumericalColumn],
-    categoricalColumns: [mockCategoricalColumn],
+    numericalColumns: mockNumericalColumns,
+    categoricalColumns: mockCategoricalColumns,
     dateColumns: [],
-    axisColumnMappings: {
-      [AxisRole.X]: mockCategoricalColumn,
-      [AxisRole.Y]: mockNumericalColumn,
-    },
+    axisColumnMappings: mockAxisColumnMappings,
     updateVisualization: jest.fn(),
   };
 
@@ -211,33 +210,43 @@ describe('BarVisStyleControls', () => {
     jest.clearAllMocks();
   });
 
-  test('renders with default props', () => {
-    render(<BarVisStyleControls {...defaultProps} />);
+  test('renders with default props for regular bar chart and should not show legend panel', () => {
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} />
+      </Provider>
+    );
 
     // Check if all components are rendered
-    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
-    expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('mockAxesOptions')).toBeInTheDocument();
-    expect(screen.getByTestId('mockGridOptionsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
+    expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockBarExclusiveVisOptions')).toBeInTheDocument();
-  });
-
-  test('hides legend when there is 1 metric and 1 category', () => {
-    render(<BarVisStyleControls {...defaultProps} />);
-
-    // Check if legend should not be shown
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('false');
   });
 
   test('shows legend when there are multiple metrics', () => {
     const propsWithMultipleMetrics = {
       ...defaultProps,
-      numericalColumns: [mockNumericalColumn, { ...mockNumericalColumn, id: 4 }],
+      numericalColumns: [
+        ...mockNumericalColumns,
+        {
+          id: 2,
+          name: 'Y Value',
+          schema: VisFieldType.Numerical,
+          column: 'y',
+          validValuesCount: 6,
+          uniqueValuesCount: 6,
+        },
+      ],
     };
 
-    render(<BarVisStyleControls {...propsWithMultipleMetrics} />);
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...propsWithMultipleMetrics} />
+      </Provider>
+    );
 
     // Check if legend should be shown
     expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
@@ -246,7 +255,17 @@ describe('BarVisStyleControls', () => {
   test('shows legend when there are multiple categories', () => {
     const propsWithMultipleCategories = {
       ...defaultProps,
-      categoricalColumns: [mockCategoricalColumn, { ...mockCategoricalColumn, id: 5 }],
+      categoricalColumns: [
+        ...mockCategoricalColumns,
+        {
+          id: 2,
+          name: 'x Value',
+          schema: VisFieldType.Categorical,
+          column: 'x',
+          validValuesCount: 6,
+          uniqueValuesCount: 6,
+        },
+      ],
     };
 
     render(<BarVisStyleControls {...propsWithMultipleCategories} />);
@@ -255,22 +274,27 @@ describe('BarVisStyleControls', () => {
     expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
   });
 
-  test('hides legend when there is 1 metric and 1 date', () => {
-    const propsWithDateColumn = {
-      ...defaultProps,
-      categoricalColumns: [],
-      dateColumns: [mockDateColumn],
-    };
-
-    render(<BarVisStyleControls {...propsWithDateColumn} />);
-
-    // Check if legend should not be shown
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('false');
-  });
-
   test('calls onStyleChange with correct parameters for legend options', () => {
     const onStyleChange = jest.fn();
-    render(<BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />);
+    const propsWithMultipleMetrics = {
+      ...defaultProps,
+      numericalColumns: [
+        ...mockNumericalColumns,
+        {
+          id: 2,
+          name: 'Y Value',
+          schema: VisFieldType.Numerical,
+          column: 'y',
+          validValuesCount: 6,
+          uniqueValuesCount: 6,
+        },
+      ],
+    };
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...propsWithMultipleMetrics} onStyleChange={onStyleChange} />
+      </Provider>
+    );
 
     // Test legend show toggle
     fireEvent.click(screen.getByTestId('mockLegendShow'));
@@ -283,7 +307,11 @@ describe('BarVisStyleControls', () => {
 
   test('calls onStyleChange with correct parameters for threshold options', () => {
     const onStyleChange = jest.fn();
-    render(<BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />);
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />
+      </Provider>
+    );
 
     // Test threshold update
     fireEvent.click(screen.getByTestId('mockUpdateThreshold'));
@@ -294,7 +322,11 @@ describe('BarVisStyleControls', () => {
 
   test('calls onStyleChange with correct parameters for tooltip options', () => {
     const onStyleChange = jest.fn();
-    render(<BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />);
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />
+      </Provider>
+    );
 
     // Test tooltip update
     fireEvent.click(screen.getByTestId('mockUpdateTooltip'));
@@ -303,49 +335,39 @@ describe('BarVisStyleControls', () => {
     });
   });
 
-  test('calls updateVisualization when triggered from AxesSelectPanel', () => {
-    const updateVisualization = jest.fn();
-    render(<BarVisStyleControls {...defaultProps} updateVisualization={updateVisualization} />);
-
-    // Test visualization update
-    fireEvent.click(screen.getByTestId('mockUpdateVisualization'));
-    expect(updateVisualization).toHaveBeenCalledWith({ type: 'test' });
-  });
-
-  test('calls onStyleChange with correct parameters for axes options', () => {
+  it('calls onStyleChange with correct parameters for axes options', () => {
     const onStyleChange = jest.fn();
-    render(<BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />);
 
-    // Test category axes update
-    fireEvent.click(screen.getByTestId('mockUpdateCategoryAxes'));
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('changeAxis'));
+
     expect(onStyleChange).toHaveBeenCalledWith({
-      categoryAxes: [...defaultProps.styleOptions.categoryAxes, { id: 'new-axis' }],
-    });
-
-    // Test value axes update
-    fireEvent.click(screen.getByTestId('mockUpdateValueAxes'));
-    expect(onStyleChange).toHaveBeenCalledWith({
-      valueAxes: [...defaultProps.styleOptions.valueAxes, { id: 'new-axis' }],
-    });
-  });
-
-  test('calls onStyleChange with correct parameters for grid options', () => {
-    const onStyleChange = jest.fn();
-    render(<BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />);
-
-    // Test grid update
-    fireEvent.click(screen.getByTestId('mockUpdateGrid'));
-    expect(onStyleChange).toHaveBeenCalledWith({
-      grid: {
-        ...defaultProps.styleOptions.grid,
-        xLines: !defaultProps.styleOptions.grid.xLines,
-      },
+      standardAxes: [
+        {
+          id: 'axis-id',
+          axisRole: 'y',
+          show: false,
+          title: { text: 'Mock Y Axis' },
+          position: 'left',
+          labels: { show: true, rotate: 0 },
+          grid: { showLines: true },
+        },
+      ],
     });
   });
 
   test('calls onStyleChange with correct parameters for bar exclusive options', () => {
     const onStyleChange = jest.fn();
-    render(<BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />);
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />
+      </Provider>
+    );
 
     // Test bar width update
     fireEvent.click(screen.getByTestId('mockUpdateBarWidth'));

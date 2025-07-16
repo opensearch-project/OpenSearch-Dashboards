@@ -265,12 +265,16 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     >
       <>
         {showSwitch && (
-          <EuiFormRow
-            label={i18n.translate('explore.vis.axesSwitch.switchAxes', {
-              defaultMessage: 'Switch Axes',
-            })}
-          >
-            <EuiSwitch label="" compressed checked={styles.switchAxes} onChange={swapAxes} />
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate('explore.vis.axesSwitch.switchAxes', {
+                defaultMessage: 'Switch Axes',
+              })}
+              compressed
+              checked={styles.switchAxes}
+              onChange={swapAxes}
+              disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
+            />
           </EuiFormRow>
         )}
 

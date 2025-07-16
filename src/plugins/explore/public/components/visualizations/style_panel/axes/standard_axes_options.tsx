@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiFormRow,
   EuiButtonGroup,
   EuiSelect,
   EuiSwitch,
   EuiSplitPanel,
-  EuiButtonEmpty,
   EuiFlexGroup,
+  EuiText,
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
@@ -36,14 +36,6 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   disableGrid = false,
 }) => {
   const styles = useSelector(selectStyleOptions) as AxisSupportedStyles;
-  const [expandedAxes, setExpandedAxes] = useState<Record<string, boolean>>({});
-
-  const toggleAxisExpansion = (axisId: string) => {
-    setExpandedAxes({
-      ...expandedAxes,
-      [axisId]: !expandedAxes[axisId],
-    });
-  };
 
   const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
     const updatedAxes = [...standardAxes];
@@ -120,14 +112,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
 
         return (
           <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
-            <EuiButtonEmpty
-              iconSide="left"
-              color="text"
-              iconType={expandedAxes[axis.id] ? 'arrowDown' : 'arrowRight'}
-              onClick={() => toggleAxisExpansion(axis.id)}
-              size="xs"
-              data-test-subj={`standardAxis-${axis.axisRole}-button`}
-            >
+            <EuiText size="s" style={{ fontWeight: 600 }}>
               {(styles?.switchAxes ? !isYAxis : isYAxis)
                 ? i18n.translate('explore.vis.gridOptions.categoryXAxis', {
                     defaultMessage: 'Y-Axis',
@@ -135,9 +120,9 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                 : i18n.translate('explore.vis.gridOptions.categoryYAxis', {
                     defaultMessage: 'X-Axis',
                   })}
-            </EuiButtonEmpty>
+            </EuiText>
             <EuiSpacer size="m" />
-            {expandedAxes[axis.id] && (
+            {
               <div>
                 <EuiFormRow>
                   <EuiSwitch
@@ -282,7 +267,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                   </>
                 )}
               </div>
-            )}
+            }
           </EuiSplitPanel.Inner>
         );
       })}

@@ -189,8 +189,8 @@ export const getSwappedAxisRole = (
   const xColumn = axisColumnMappings?.x;
   const yColumn = axisColumnMappings?.y;
 
-  const xAxis = getAxisByRole(styles.StandardAxes ?? [], AxisRole.X);
-  const yAxis = getAxisByRole(styles.StandardAxes ?? [], AxisRole.Y);
+  const xAxis = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
+  const yAxis = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
 
   if (!xAxis || !yAxis) {
     return [undefined, undefined];
