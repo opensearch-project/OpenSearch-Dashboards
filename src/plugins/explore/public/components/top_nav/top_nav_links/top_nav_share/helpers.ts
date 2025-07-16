@@ -10,7 +10,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../common/legacy/discover';
-import { getSortForSearchSource } from '../../../../application/legacy/discover/application/view_components/utils/get_sort_for_search_source';
+import { getSortForSearchSource } from '../../../../helpers/view_component_utils/get_sort_for_search_source';
 
 /**
  * TODO: Fix up this file and add unit tests

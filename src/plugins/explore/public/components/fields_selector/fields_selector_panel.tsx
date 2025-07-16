@@ -5,24 +5,24 @@
 
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { IndexPattern, UI_SETTINGS } from '../../../../../../../../data/public';
-import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
+import { IndexPattern, UI_SETTINGS } from '../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
   addColumn,
   removeColumn,
   moveColumn,
   setColumns,
-} from '../../../../../utils/state_management/slices';
-import { selectColumns, selectQuery } from '../../../../../utils/state_management/selectors';
-import { DiscoverSidebar } from '../../components/sidebar';
-import { ExploreServices } from '../../../../../../types';
-import { buildColumns } from '../../utils/columns';
-import { useDatasetContext } from '../../../../../context';
+} from '../../application/utils/state_management/slices';
+import { selectColumns, selectQuery } from '../../application/utils/state_management/selectors';
+import { DiscoverSidebar } from '.';
+import { ExploreServices } from '../../types';
+import { buildColumns } from '../../application/legacy/discover/application/utils/columns';
+import { useDatasetContext } from '../../application/context';
 import {
   defaultResultsProcessor,
   defaultPrepareQueryString,
-} from '../../../../../utils/state_management/actions/query_actions';
-import { useChangeQueryEditor } from '../../../../../hooks';
+} from '../../application/utils/state_management/actions/query_actions';
+import { useChangeQueryEditor } from '../../application/hooks';
 
 export function DiscoverPanel() {
   const { services } = useOpenSearchDashboards<ExploreServices>();
