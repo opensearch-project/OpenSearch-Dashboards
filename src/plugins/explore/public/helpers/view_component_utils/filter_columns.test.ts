@@ -8,8 +8,8 @@ import { IndexPattern } from '../../application/legacy/discover/opensearch_dashb
 import { getIndexPatternFieldList } from '../../components/fields_selector/lib/get_index_pattern_field_list';
 import { buildColumns } from '../../application/legacy/discover/application/utils/columns';
 
-jest.mock('../../components/sidebar/lib/get_index_pattern_field_list');
-jest.mock('../../utils/columns');
+jest.mock('../../components/fields_selector/lib/get_index_pattern_field_list');
+jest.mock('../../application/legacy/discover/application/utils/columns');
 
 const mockGetIndexPatternFieldList = getIndexPatternFieldList as jest.MockedFunction<
   typeof getIndexPatternFieldList

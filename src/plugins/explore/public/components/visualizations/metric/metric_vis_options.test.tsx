@@ -194,7 +194,7 @@ describe('MetricVisStyleControls', () => {
       styleOptions: { ...defaultMetricChartStyles, useColor: true },
     };
     renderWithProvider(<MetricVisStyleControls {...propsWithColor} />);
-    const colorSchemaSelect = screen.getByRole('combobox');
+    const colorSchemaSelect = screen.getByTestId('colorSchemaSelect');
     fireEvent.change(colorSchemaSelect, { target: { value: 'greens' } });
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ colorSchema: 'greens' });

@@ -13,6 +13,7 @@ import {
   selectEditorMode,
   selectIsDualEditorMode,
   selectPromptModeIsAvailable,
+  selectTopEditorIsQueryMode,
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
@@ -56,8 +57,8 @@ export const TopEditor = () => {
   const isReadOnly = editorMode === EditorMode.DualQuery;
   const showPlaceholder = !text.length && !isReadOnly;
   const isDualMode = useSelector(selectIsDualEditorMode);
-  const isPromptMode =
-    isDualMode || editorMode === EditorMode.SinglePrompt || editorMode === EditorMode.SingleEmpty;
+  const isQueryMode = useSelector(selectTopEditorIsQueryMode);
+  const isPromptMode = !isQueryMode;
 
   const placeholderText = useMemo(() => {
     if (!promptModeIsAvailable) {
