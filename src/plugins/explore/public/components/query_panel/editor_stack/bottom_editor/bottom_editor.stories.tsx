@@ -8,7 +8,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { BottomEditor } from './bottom_editor';
 import { StorybookProviders } from '../../mock_provider.mocks';
 import { EditorMode } from '../../../../application/utils/state_management/types';
-import '../editor_stack.scss';
 
 const meta: Meta<typeof BottomEditor> = {
   title: 'src/plugins/explore/public/components/query_panel/editor_stack/bottom_editor',

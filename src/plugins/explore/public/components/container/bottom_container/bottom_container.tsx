@@ -9,7 +9,7 @@ import { EuiResizableContainer, EuiPageBody, useIsWithinBreakpoints } from '@ela
 import { selectShowDatasetFields } from '../../../application/utils/state_management/selectors';
 import { CanvasPanel } from '../../panel/canvas_panel';
 import { DiscoverPanel } from '../../fields_selector/fields_selector_panel';
-import { BottomRightContainer } from './bottom_right_container/bottom_right_container';
+import { BottomRightContainer } from './bottom_right_container';
 
 export const BottomContainer = () => {
   const showDataSetFields = useSelector(selectShowDatasetFields);

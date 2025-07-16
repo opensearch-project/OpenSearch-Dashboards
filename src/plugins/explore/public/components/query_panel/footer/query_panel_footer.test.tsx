@@ -15,20 +15,6 @@ jest.mock('react-redux', () => ({
   Provider: ({ children }: any) => children,
 }));
 
-jest.mock('../../../../../data/public', () => ({
-  QueryResult: ({ queryStatus }: any) => (
-    <div data-test-subj="query-result">
-      Query Result: {queryStatus.status} - {queryStatus.elapsedMs}ms
-    </div>
-  ),
-  ResultStatus: {
-    ERROR: 'error',
-    LOADING: 'loading',
-    READY: 'ready',
-    UNINITIALIZED: 'uninitialized',
-  },
-}));
-
 // Mock the selectors
 jest.mock('../../../application/utils/state_management/selectors', () => ({
   selectQueryStatus: jest.fn(),
@@ -58,6 +44,10 @@ jest.mock('./recent_queries_button', () => ({
 
 jest.mock('./detected_language', () => ({
   DetectedLanguage: () => <div data-test-subj="detected-language">Detected Language</div>,
+}));
+
+jest.mock('./query_panel_error', () => ({
+  QueryPanelError: () => <div data-test-subj="query-panel-error">Query Panel Error</div>,
 }));
 
 jest.mock('../../../application/context', () => ({
@@ -99,6 +89,7 @@ describe('QueryPanelFooter', () => {
     expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
     expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
     expect(screen.getByTestId('detected-language')).toBeInTheDocument();
+    expect(screen.getByTestId('query-panel-error')).toBeInTheDocument();
 
     // Check right section components
     expect(screen.getByTestId('date-time-range-picker')).toBeInTheDocument();
@@ -151,55 +142,5 @@ describe('QueryPanelFooter', () => {
     render(<QueryPanelFooter />);
 
     expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
-  });
-
-  it('does not render QueryResult component when status is not error', () => {
-    mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: '@timestamp' } as any,
-      isLoading: false,
-      error: null,
-    });
-
-    render(<QueryPanelFooter />);
-
-    expect(screen.queryByTestId('query-result')).not.toBeInTheDocument();
-  });
-
-  it('renders QueryResult component only when status is error', () => {
-    const errorQueryStatus = {
-      status: 'error',
-      elapsedMs: 500,
-      startTime: Date.now(),
-      body: {
-        error: {
-          error: 'Query execution failed',
-          message: { error: 'Syntax error in query' },
-        },
-      },
-    };
-
-    mockUseSelector.mockReturnValue(errorQueryStatus);
-
-    mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: '@timestamp' } as any,
-      isLoading: false,
-      error: null,
-    });
-
-    render(<QueryPanelFooter />);
-
-    expect(screen.getByTestId('query-result')).toHaveTextContent('Query Result: error - 500ms');
-  });
-
-  it('calls selectQueryStatus selector', () => {
-    mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: '@timestamp' } as any,
-      isLoading: false,
-      error: null,
-    });
-
-    render(<QueryPanelFooter />);
-
-    expect(mockUseSelector).toHaveBeenCalledTimes(1); // Once for selectQueryStatus
   });
 });

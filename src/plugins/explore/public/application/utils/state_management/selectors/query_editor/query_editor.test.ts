@@ -26,7 +26,7 @@ describe('query_editor selectors', () => {
         status: QueryExecutionStatus.UNINITIALIZED,
         elapsedMs: undefined,
         startTime: undefined,
-        body: undefined,
+        error: undefined,
       },
       editorMode: EditorMode.SingleQuery,
       promptModeIsAvailable: false,
@@ -84,7 +84,7 @@ describe('query_editor selectors', () => {
         status: QueryExecutionStatus.LOADING,
         elapsedMs: 100,
         startTime: Date.now(),
-        body: undefined,
+        error: undefined,
       };
       const state = createMockState({
         queryStatusMap: {
@@ -93,7 +93,7 @@ describe('query_editor selectors', () => {
             status: QueryExecutionStatus.READY,
             elapsedMs: 200,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         },
       });
@@ -110,7 +110,7 @@ describe('query_editor selectors', () => {
             status: QueryExecutionStatus.READY,
             elapsedMs: 100,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         },
       });
@@ -127,7 +127,7 @@ describe('query_editor selectors', () => {
         status: QueryExecutionStatus.LOADING,
         elapsedMs: 100,
         startTime: Date.now(),
-        body: undefined,
+        error: undefined,
       };
       const state = createMockState({
         overallQueryStatus: mockOverallStatus,
@@ -145,7 +145,7 @@ describe('query_editor selectors', () => {
         status: QueryExecutionStatus.LOADING,
         elapsedMs: 100,
         startTime: Date.now(),
-        body: undefined,
+        error: undefined,
       };
       const state = createMockState({
         overallQueryStatus: mockOverallStatus,
@@ -166,7 +166,7 @@ describe('query_editor selectors', () => {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: undefined,
           startTime: undefined,
-          body: undefined,
+          error: undefined,
         },
       });
 
@@ -190,7 +190,7 @@ describe('query_editor selectors', () => {
             status,
             elapsedMs: undefined,
             startTime: undefined,
-            body: undefined,
+            error: undefined,
           },
         });
 
@@ -207,7 +207,7 @@ describe('query_editor selectors', () => {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: undefined,
           startTime: undefined,
-          body: undefined,
+          error: undefined,
         },
       });
 
@@ -230,7 +230,7 @@ describe('query_editor selectors', () => {
             status,
             elapsedMs: 100,
             startTime: undefined,
-            body: undefined,
+            error: undefined,
           },
         });
 

@@ -26,7 +26,6 @@ const initialState: QueryEditorSliceState = {
     status: QueryExecutionStatus.UNINITIALIZED,
     elapsedMs: undefined,
     startTime: undefined,
-    body: undefined,
   },
   editorMode: DEFAULT_EDITOR_MODE,
   promptModeIsAvailable: false,
@@ -77,7 +76,7 @@ const queryEditorSlice = createSlice({
         status: QueryExecutionStatus.UNINITIALIZED,
         elapsedMs: undefined,
         startTime: undefined,
-        body: undefined,
+        error: undefined,
       };
     },
 
