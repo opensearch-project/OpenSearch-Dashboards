@@ -88,7 +88,12 @@ describe('createOverallStatusMiddleware', () => {
           status: QueryExecutionStatus.ERROR,
           elapsedMs: 100,
           startTime: Date.now(),
-          body: { error: { error: 'Test error' } },
+          error: {
+            statusCode: 400,
+            error: 'Error',
+            message: { details: 'something happened', reason: 'something bad happened' },
+            originalErrorMessage: 'Something terrible has happened',
+          },
         })
       );
 
@@ -103,7 +108,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.READY,
             elapsedMs: 50,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -120,7 +125,12 @@ describe('createOverallStatusMiddleware', () => {
         status: QueryExecutionStatus.ERROR,
         elapsedMs: 100,
         startTime: Date.now(),
-        body: { error: { error: 'Query failed' } },
+        error: {
+          statusCode: 400,
+          error: 'Error',
+          message: { details: 'something happened', reason: 'something bad happened' },
+          originalErrorMessage: 'Something terrible has happened',
+        },
       };
 
       const action = setIndividualQueryStatus({
@@ -147,7 +157,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.LOADING,
             startTime: 1000,
             elapsedMs: undefined,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -160,7 +170,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.READY,
             startTime: 1100,
             elapsedMs: 200,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -183,7 +193,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.LOADING,
             startTime: 1000,
             elapsedMs: undefined,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -196,7 +206,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.READY,
             startTime: 1100,
             elapsedMs: 200,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -209,7 +219,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.LOADING,
             startTime: 900,
             elapsedMs: undefined,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -228,7 +238,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.READY,
             startTime: 1000,
             elapsedMs: 150,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -241,7 +251,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.NO_RESULTS,
             startTime: 1100,
             elapsedMs: 200,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -260,7 +270,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.NO_RESULTS,
             startTime: 1000,
             elapsedMs: 150,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -273,7 +283,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.NO_RESULTS,
             startTime: 1100,
             elapsedMs: 200,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -294,7 +304,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.READY,
             startTime: 1000,
             elapsedMs: undefined,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -307,7 +317,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.READY,
             startTime: 1100,
             elapsedMs: 200,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -331,7 +341,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.READY,
             startTime: 1000,
             elapsedMs: 100,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -366,7 +376,7 @@ describe('createOverallStatusMiddleware', () => {
             status: QueryExecutionStatus.READY,
             startTime: 1000,
             elapsedMs: 100,
-            body: undefined,
+            error: undefined,
           },
         })
       );
@@ -380,7 +390,7 @@ describe('createOverallStatusMiddleware', () => {
         status: QueryExecutionStatus.READY,
         startTime: 1000,
         elapsedMs: 150,
-        body: undefined,
+        error: undefined,
       };
 
       // Add only one query status
