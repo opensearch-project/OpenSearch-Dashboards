@@ -1,0 +1,21 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@import "../shared";
+
+.exploreResultsSummary {
+  @include exploreQueryPanelButton;
+  @include exploreQueryPanelVerticalSeparator;
+}
+
+.exploreResultsSummary_popover_tooltip {
+  display: flex;
+  padding-inline-start: 2px;
+  transform: translate(-1px);
+}
+
+.exploreResultsSummary__summaryContent {
+  padding: $ouiSizeS;
+}
