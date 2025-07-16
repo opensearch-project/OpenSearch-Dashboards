@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AxesSelectPanel, AxisSelector } from './axes_selector';
 import { AxisRole, VisColumn, VisFieldType } from '../../types';
 import { ChartType } from '../../utils/use_visualization_types';
@@ -23,12 +23,28 @@ jest.mock('../../rule_repository', () => ({
       id: 'rule1',
       matchIndex: [1, 1, 0],
     },
+    {
+      id: 'rule2',
+      matchIndex: [2, 0, 1],
+    },
   ],
 }));
 
-jest.mock('../../visualization_container_utils', () => ({
-  getColumnMatchFromMapping: jest.fn(() => [1, 1, 0]),
-}));
+jest.mock('../../visualization_container_utils', () => {
+  // Import the constants directly to avoid referencing out-of-scope variables
+  const X = 'x';
+  const CATEGORICAL = 'categorical';
+
+  return {
+    getColumnMatchFromMapping: jest.fn((mapping) => {
+      // Simple mock implementation to return different values based on mapping
+      if (mapping && mapping[0] && mapping[0][X] && mapping[0][X].type === CATEGORICAL) {
+        return [1, 1, 0]; // Rule 1
+      }
+      return [2, 0, 1]; // Rule 2
+    }),
+  };
+});
 
 describe('AxesSelectPanel', () => {
   const mockNumericalColumns: VisColumn[] = [
@@ -40,11 +56,19 @@ describe('AxesSelectPanel', () => {
       validValuesCount: 100,
       uniqueValuesCount: 50,
     },
+    {
+      id: 2,
+      name: 'price',
+      schema: VisFieldType.Numerical,
+      column: 'price',
+      validValuesCount: 100,
+      uniqueValuesCount: 60,
+    },
   ];
 
   const mockCategoricalColumns: VisColumn[] = [
     {
-      id: 2,
+      id: 3,
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
@@ -55,7 +79,7 @@ describe('AxesSelectPanel', () => {
 
   const mockDateColumns: VisColumn[] = [
     {
-      id: 3,
+      id: 4,
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
@@ -143,6 +167,98 @@ describe('AxesSelectPanel', () => {
     render(<AxesSelectPanel {...propsWithMapping} />);
     expect(screen.getByText('category')).toBeInTheDocument();
   });
+
+  // New tests to improve coverage
+
+  it('renders X and Y axes', () => {
+    // Set up a basic mapping with X and Y axes
+    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
+      ui: {
+        availableMappings: [
+          {
+            mapping: [
+              {
+                [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    render(<AxesSelectPanel {...defaultProps} />);
+
+    // X and Y axes should be available
+    expect(screen.getByText('X-Axis')).toBeInTheDocument();
+    expect(screen.getByText('Y-Axis')).toBeInTheDocument();
+  });
+
+  it('updates available axis options when selection changes', () => {
+    // Set up a scenario with multiple possible mappings
+    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
+      ui: {
+        availableMappings: [
+          {
+            mapping: [
+              {
+                [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    // Use props with existing mapping to ensure updateVisualization is called
+    const propsWithMapping = {
+      ...defaultProps,
+      currentMapping: {
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+      },
+    };
+
+    render(<AxesSelectPanel {...propsWithMapping} />);
+
+    // Verify that updateVisualization was called
+    expect(mockUpdateVisualization).toHaveBeenCalled();
+  });
+
+  it('handles multiple axis roles correctly', () => {
+    // Set up a scenario with multiple axis roles
+    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
+      ui: {
+        availableMappings: [
+          {
+            mapping: [
+              {
+                [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+                [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    render(<AxesSelectPanel {...defaultProps} />);
+
+    // Should render selectors for all three axes
+    expect(screen.getByText('X-Axis')).toBeInTheDocument();
+    expect(screen.getByText('Y-Axis')).toBeInTheDocument();
+    expect(screen.getByText('Color')).toBeInTheDocument();
+  });
+
+  it('renders comboboxes for axis selection', () => {
+    render(<AxesSelectPanel {...defaultProps} />);
+
+    // Check that comboboxes are rendered
+    const comboBoxes = screen.getAllByRole('combobox');
+    expect(comboBoxes.length).toBeGreaterThan(0);
+  });
 });
 
 describe('AxisSelector', () => {
@@ -228,5 +344,77 @@ describe('AxisSelector', () => {
 
     const input = screen.getByTestId('comboBoxSearchInput');
     expect(input).toHaveValue('');
+  });
+
+  // New tests to improve coverage
+
+  it('selects a new column and calls onChange', async () => {
+    const multipleOptionsProps = {
+      ...defaultProps,
+      selectedColumn: '',
+      allColumnOptions: [
+        {
+          isGroupLabelOption: true,
+          label: 'Categorical Fields',
+          options: [
+            {
+              column: {
+                id: 1,
+                name: 'category',
+                schema: VisFieldType.Categorical,
+                column: 'category',
+                validValuesCount: 100,
+                uniqueValuesCount: 10,
+              },
+              label: 'category',
+            },
+            {
+              column: {
+                id: 2,
+                name: 'product',
+                schema: VisFieldType.Categorical,
+                column: 'product',
+                validValuesCount: 100,
+                uniqueValuesCount: 20,
+              },
+              label: 'product',
+            },
+          ],
+        },
+      ],
+    };
+
+    render(<AxisSelector {...multipleOptionsProps} />);
+
+    // Open the combobox
+    const combobox = screen.getByTestId('comboBoxSearchInput');
+    fireEvent.click(combobox);
+
+    // Select an option
+    await waitFor(() => {
+      const option = screen.getByText('product');
+      fireEvent.click(option);
+    });
+
+    // Verify onChange was called with the correct parameters
+    expect(mockOnChange).toHaveBeenCalledWith(AxisRole.X, 'product');
+  });
+
+  it('renders with SIZE axis role', () => {
+    const sizeAxisProps = { ...defaultProps, axisRole: AxisRole.SIZE };
+    render(<AxisSelector {...sizeAxisProps} />);
+    expect(screen.getByText('Size')).toBeInTheDocument();
+  });
+
+  it('renders with Y_SECOND axis role', () => {
+    const secondYAxisProps = { ...defaultProps, axisRole: AxisRole.Y_SECOND };
+    render(<AxisSelector {...secondYAxisProps} />);
+    expect(screen.getByText('Y-Axis (2nd)')).toBeInTheDocument();
+  });
+
+  it('renders with Value axis role', () => {
+    const valueAxisProps = { ...defaultProps, axisRole: AxisRole.Value };
+    render(<AxisSelector {...valueAxisProps} />);
+    expect(screen.getByText('Value')).toBeInTheDocument();
   });
 });

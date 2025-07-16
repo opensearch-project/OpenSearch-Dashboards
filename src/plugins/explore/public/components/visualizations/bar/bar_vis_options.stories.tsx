@@ -115,8 +115,8 @@ WithCustomStyles.args = {
       width: 2,
     })),
     grid: {
-      categoryLines: false,
-      valueLines: true,
+      xLines: false,
+      yLines: true,
     },
   },
   numericalColumns: mockNumericalColumns,
