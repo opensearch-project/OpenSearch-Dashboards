@@ -62,10 +62,10 @@ describe('createHeatmapeConfig', () => {
     });
 
     // Verify axes
-    expect(defaults.StandardAxes).toHaveLength(2);
-    const xAxis = defaults.StandardAxes.find((axis) => axis.axisRole === AxisRole.X);
+    expect(defaults.standardAxes).toHaveLength(2);
+    const xAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.X);
     expect(xAxis).toHaveProperty('position', Positions.BOTTOM);
-    const yAxis = defaults.StandardAxes.find((axis) => axis.axisRole === AxisRole.Y);
+    const yAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.Y);
     expect(yAxis).toHaveProperty('position', Positions.LEFT);
   });
   it('should have available mappings configured', () => {
@@ -91,6 +91,7 @@ describe('createHeatmapeConfig', () => {
     // Mock props
     const mockProps = {
       styleOptions: {
+        switchAxes: false,
         tooltipOptions: { mode: 'hidden' as const },
         addLegend: false,
         legendPosition: Positions.RIGHT,
@@ -104,12 +105,8 @@ describe('createHeatmapeConfig', () => {
           useCustomRanges: false,
         },
         label: {} as HeatmapLabels,
-        StandardAxes: [] as StandardAxes[],
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
-      },
+        standardAxes: [] as StandardAxes[],
+      } as HeatmapChartStyleControls,
       onStyleChange: jest.fn(),
       numericalColumns: [],
       categoricalColumns: [],

@@ -3,6 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ChartStyleControlMap } from '../visualizations/utils/use_visualization_types';
+
+type AxisSupportedChartTypes = 'bar' | 'scatter' | 'heatmap';
+export type AxisSupportedStyles = ChartStyleControlMap[AxisSupportedChartTypes];
+export interface CompleteAxisWithStyle extends Partial<VisColumn> {
+  styles: StandardAxes;
+}
+
 export enum Positions {
   RIGHT = 'right',
   LEFT = 'left',
@@ -162,6 +170,7 @@ export interface StandardAxes {
   labels: AxisLabels;
   title: AxisTitle;
   axisRole: AxisRole;
+  grid: Grid;
 }
 
 export enum ScaleType {

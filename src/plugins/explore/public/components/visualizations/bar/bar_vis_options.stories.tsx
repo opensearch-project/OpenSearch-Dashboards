@@ -114,10 +114,6 @@ WithCustomStyles.args = {
       color: '#00FF00',
       width: 2,
     })),
-    grid: {
-      categoryLines: false,
-      valueLines: true,
-    },
   },
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
@@ -128,21 +124,19 @@ export const WithCustomAxes = Template.bind({});
 WithCustomAxes.args = {
   styleOptions: {
     ...defaultBarChartStyles,
-    categoryAxes: [
+    standardAxes: [
       {
-        ...defaultBarChartStyles.categoryAxes[0],
+        ...defaultBarChartStyles.standardAxes[0],
         title: {
           text: 'Custom Category Axis',
         },
         labels: {
-          ...defaultBarChartStyles.categoryAxes[0].labels,
+          ...defaultBarChartStyles.standardAxes[0].labels,
           rotate: 45,
         },
       },
-    ],
-    valueAxes: [
       {
-        ...defaultBarChartStyles.valueAxes[0],
+        ...defaultBarChartStyles.standardAxes[1],
         title: {
           text: 'Custom Value Axis',
         },

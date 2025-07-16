@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { setChartType, setStyleOptions, setTabState, tabReducer, TabState } from './tab_slice';
+import {
+  setAxesMapping,
+  setChartType,
+  setStyleOptions,
+  setTabState,
+  tabReducer,
+  TabState,
+} from './tab_slice';
 import { ColorSchemas } from '../../../../../components/visualizations/types';
 
 describe('tabSlice reducers', () => {
@@ -99,6 +106,35 @@ describe('tabSlice reducers', () => {
         const newState = tabReducer(initialState, action);
         expect(newState.visualizations.chartType).toBe(chartType);
       });
+    });
+  });
+
+  describe('setAxesMapping', () => {
+    it('should update the axes mapping for visualizations', () => {
+      const newAxesMapping = {
+        x: 'timestamp',
+        y: 'value',
+        series: 'category',
+      };
+
+      const newState = tabReducer(initialState, setAxesMapping(newAxesMapping));
+      expect(newState.visualizations.axesMapping).toEqual(newAxesMapping);
+
+      // Other state properties should remain unchanged
+      expect(newState.logs).toEqual(initialState.logs);
+      expect(newState.visualizations.chartType).toBe(initialState.visualizations.chartType);
+      expect(newState.visualizations.styleOptions).toBe(initialState.visualizations.styleOptions);
+    });
+
+    it('should handle undefined axes mapping', () => {
+      const newState = tabReducer(initialState, setAxesMapping(undefined));
+      expect(newState.visualizations.axesMapping).toBeUndefined();
+    });
+
+    it('should handle partial axes mapping', () => {
+      const partialMapping = { x: 'date' };
+      const newState = tabReducer(initialState, setAxesMapping(partialMapping));
+      expect(newState.visualizations.axesMapping).toEqual(partialMapping);
     });
   });
 

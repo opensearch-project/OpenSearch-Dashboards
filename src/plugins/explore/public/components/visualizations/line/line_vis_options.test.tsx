@@ -21,6 +21,19 @@ import {
 import { LineStyle } from './line_exclusive_vis_options';
 
 // Mock the child components
+jest.mock('../style_panel/axes/axes_selector', () => ({
+  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
+    <div data-test-subj="mockAxesSelectPanel">
+      <div data-test-subj="chartType">{chartType}</div>
+      <button
+        data-test-subj="mockUpdateVisualization"
+        onClick={() => updateVisualization({ mappings: { x: 'date', y: 'value' } })}
+      >
+        Update Visualization
+      </button>
+    </div>
+  )),
+}));
 jest.mock('../style_panel/legend/legend', () => {
   // Import Positions inside the mock to avoid reference error
   const { Positions: PositionsEnum } = jest.requireActual('../types');
@@ -109,7 +122,7 @@ jest.mock('../style_panel/grid/grid', () => ({
     <div data-test-subj="mockGridOptionsPanel">
       <button
         data-test-subj="mockUpdateGrid"
-        onClick={() => onGridChange({ ...grid, categoryLines: !grid.categoryLines })}
+        onClick={() => onGridChange({ ...grid, xLines: !grid.xLines })}
       >
         Update Grid
       </button>
@@ -178,8 +191,8 @@ describe('LineVisStyleControls', () => {
   const defaultThresholdLines: ThresholdLines = [defaultThresholdLine];
 
   const defaultGrid: GridOptions = {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   };
 
   const defaultCategoryAxis: CategoryAxis = {
@@ -386,7 +399,7 @@ describe('LineVisStyleControls', () => {
     expect(onStyleChange).toHaveBeenCalledWith({
       grid: {
         ...mockProps.styleOptions.grid,
-        categoryLines: !mockProps.styleOptions.grid.categoryLines,
+        xLines: !mockProps.styleOptions.grid.xLines,
       },
     });
   });

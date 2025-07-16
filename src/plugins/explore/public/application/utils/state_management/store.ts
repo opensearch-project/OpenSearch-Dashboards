@@ -36,7 +36,7 @@ const baseRootReducer = combineReducers({
   queryEditor: queryEditorReducer,
 });
 
-const rootReducer: Reducer<RootState, AnyAction> = (state, action) => {
+export const rootReducer: Reducer<RootState, AnyAction> = (state, action) => {
   if (resetState.match(action)) {
     return action.payload;
   }

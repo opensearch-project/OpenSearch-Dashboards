@@ -11,6 +11,7 @@ import { useToggleDualEditorMode } from './use_toggle_dual_editor_mode';
 import { EditorContext } from '../../../context';
 import { EditorMode } from '../../../utils/state_management/types';
 import { setEditorMode } from '../../../utils/state_management/slices';
+import { AppDispatch } from '../../../utils/state_management/store';
 
 // Mock Redux hooks
 jest.mock('react-redux', () => ({
@@ -37,7 +38,7 @@ const mockUseDispatch = useDispatch as jest.MockedFunction<typeof useDispatch>;
 const mockSetEditorMode = setEditorMode as jest.MockedFunction<typeof setEditorMode>;
 
 describe('useToggleDualEditorMode', () => {
-  let mockDispatch: jest.MockedFunction<any>;
+  let mockDispatch: jest.MockedFunction<AppDispatch>;
   let mockTopEditor: any;
   let mockBottomEditor: any;
   let mockEditorContext: any;

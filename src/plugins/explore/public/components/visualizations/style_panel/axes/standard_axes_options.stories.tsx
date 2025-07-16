@@ -7,7 +7,14 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { AllAxesOptions } from './standard_axes_options';
-import { VisColumn, StandardAxes, Positions, AxisRole, VisFieldType } from '../../types';
+import {
+  VisColumn,
+  StandardAxes,
+  Positions,
+  AxisRole,
+  VisFieldType,
+  AxisColumnMappings,
+} from '../../types';
 
 export default {
   component: AllAxesOptions,
@@ -43,6 +50,25 @@ const mockNumericalColumns: VisColumn[] = [
   },
 ];
 
+const mockAxisColumnMappings: AxisColumnMappings = {
+  x: {
+    id: 1,
+    schema: VisFieldType.Categorical,
+    name: 'OriginCityName',
+    column: 'field-1',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+  y: {
+    id: 0,
+    schema: VisFieldType.Numerical,
+    name: 'num_flights',
+    column: 'field-0',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+};
+
 const mockStandardAxes: StandardAxes[] = [
   {
     id: 'Axis-1',
@@ -57,6 +83,9 @@ const mockStandardAxes: StandardAxes[] = [
     },
     title: {
       text: '',
+    },
+    grid: {
+      showLines: true,
     },
 
     axisRole: AxisRole.Y,
@@ -74,6 +103,9 @@ const mockStandardAxes: StandardAxes[] = [
     },
     title: {
       text: '',
+    },
+    grid: {
+      showLines: true,
     },
     axisRole: AxisRole.X,
   },
@@ -93,14 +125,6 @@ const Template: ComponentStory<typeof AllAxesOptions> = (args) => {
           setStandardAxes(axes);
           action('onStandardAxesChange')(axes);
         }}
-        onChangeSwitchAxes={(prevAxes) => {
-          const switched = prevAxes.map((axis) =>
-            axis.axisRole === AxisRole.X
-              ? { ...axis, axisRole: AxisRole.Y }
-              : { ...axis, axisRole: AxisRole.X }
-          );
-          setStandardAxes(switched);
-        }}
       />
     </div>
   );
@@ -110,6 +134,7 @@ const Template: ComponentStory<typeof AllAxesOptions> = (args) => {
 export const Primary = Template.bind({});
 Primary.args = {
   standardAxes: mockStandardAxes,
+  axisColumnMappings: {},
 };
 
 export const AxesWithField = Template.bind({});
@@ -123,6 +148,7 @@ AxesWithField.args = {
       },
     },
   ],
+  axisColumnMappings: mockAxisColumnMappings,
 };
 
 // Story with rotated labels
@@ -137,4 +163,5 @@ RotatedLabels.args = {
       },
     },
   ],
+  axisColumnMappings: mockAxisColumnMappings,
 };

@@ -76,16 +76,12 @@ describe('Scatter Chart to_expression', () => {
     tooltipOptions: {
       mode: 'all',
     },
-    grid: {
-      xLines: true,
-      yLines: true,
-    },
     exclusive: {
       pointShape: PointShape.CIRCLE,
       angle: 0,
       filled: false,
     },
-    StandardAxes: [
+    standardAxes: [
       {
         id: 'Axis-1',
         position: Positions.BOTTOM,
@@ -100,6 +96,7 @@ describe('Scatter Chart to_expression', () => {
         title: {
           text: 'X Axis',
         },
+        grid: { showLines: true },
         axisRole: AxisRole.X,
         field: {
           default: mockNumericalColumns[0],
@@ -116,6 +113,7 @@ describe('Scatter Chart to_expression', () => {
           filter: false,
           truncate: 100,
         },
+        grid: { showLines: true },
         title: {
           text: 'Y Axis',
         },
@@ -223,10 +221,10 @@ describe('Scatter Chart to_expression', () => {
     it('should apply grid settings', () => {
       const stylesWithoutGrid = {
         ...mockStyles,
-        grid: {
-          xLines: false,
-          yLines: false,
-        },
+        standardAxes: mockStyles.standardAxes?.map((axis) => ({
+          ...axis,
+          grid: { showLines: false },
+        })),
       };
 
       const mockAxisColumnMappings: AxisColumnMappings = {

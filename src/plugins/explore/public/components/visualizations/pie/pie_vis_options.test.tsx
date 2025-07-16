@@ -14,6 +14,21 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+// Mock the AxesSelectPanel component that uses Redux hooks
+jest.mock('../style_panel/axes/axes_selector', () => ({
+  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
+    <div data-test-subj="mockAxesSelectPanel">
+      <div data-test-subj="chartType">{chartType}</div>
+      <button
+        data-test-subj="mockUpdateVisualization"
+        onClick={() => updateVisualization({ mappings: { size: 'value', color: 'category' } })}
+      >
+        Update Visualization
+      </button>
+    </div>
+  )),
+}));
+
 describe('PieVisStyleControls', () => {
   const numericalColumn = {
     id: 1,
@@ -50,12 +65,6 @@ describe('PieVisStyleControls', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the fields accordion', () => {
-    render(<PieVisStyleControls {...mockProps} />);
-
-    expect(screen.getByText('Fields')).toBeInTheDocument();
-  });
-
   it('renders the pie exclusive options accordion', () => {
     render(<PieVisStyleControls {...mockProps} />);
     // Use a more specific selector to find the accordion header
@@ -73,5 +82,29 @@ describe('PieVisStyleControls', () => {
     fireEvent.click(switchButton);
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
+  });
+
+  it('calls onStyleChange when PieExclusiveVisOptions onChange is triggered', () => {
+    render(<PieVisStyleControls {...mockProps} />);
+    const showValuesSwitch = screen.getByTestId('showValuesSwtich');
+    fireEvent.click(showValuesSwitch);
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      exclusive: { ...mockProps.styleOptions.exclusive, showValues: false },
+    });
+  });
+
+  it('calls onStyleChange when tooltip options change', () => {
+    render(<PieVisStyleControls {...mockProps} />);
+    const tooltipSwitch = screen.getByTestId('tooltipModeSwitch');
+    fireEvent.click(tooltipSwitch);
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      tooltipOptions: { ...mockProps.styleOptions.tooltipOptions, mode: 'hidden' },
+    });
+  });
+
+  it('does not render style panels when axisColumnMappings is empty', () => {
+    render(<PieVisStyleControls {...mockProps} axisColumnMappings={{}} />);
+    expect(screen.queryByText('Legend')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('showValuesSwtich')).not.toBeInTheDocument();
   });
 });
