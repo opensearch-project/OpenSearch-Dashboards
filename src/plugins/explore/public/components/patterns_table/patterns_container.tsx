@@ -9,7 +9,7 @@ import { PatternItem, PatternsTable } from './patterns_table';
 import { COUNT_FIELD, PATTERNS_FIELD, SAMPLE_FIELD } from './utils/constants';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { RootState } from '../../application/utils/state_management/store';
-import { defaultPrepareQuery } from '../../application/utils/state_management/actions/query_actions';
+import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
 import { highlightLogUsingPattern } from './utils/utils';
 
 export const PatternsContainer = () => {
@@ -18,9 +18,8 @@ export const PatternsContainer = () => {
   const querySelector = useSelector((state: RootState) => state.query);
   const resultsSelector = useSelector((state: RootState) => state.results);
 
-  const queryInput = typeof querySelector.query === 'string' ? querySelector.query : '';
   // the default prepare query is the one for logs, so it uses the user's query and generates the log cache key
-  const logsCacheKey = defaultPrepareQuery(queryInput);
+  const logsCacheKey = defaultPrepareQueryString(querySelector);
 
   const logsResults = resultsSelector[logsCacheKey] ?? null;
   const logsTotal = logsResults?.hits?.total;
