@@ -262,7 +262,7 @@ const getPreloadedQueryEditorState = async (
       status: QueryExecutionStatus.UNINITIALIZED,
       elapsedMs: undefined,
       startTime: undefined,
-      body: undefined,
+      error: undefined,
     },
     promptModeIsAvailable,
     promptToQueryIsLoading: false,

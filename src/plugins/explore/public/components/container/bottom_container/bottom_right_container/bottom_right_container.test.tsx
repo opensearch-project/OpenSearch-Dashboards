@@ -8,16 +8,6 @@ import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
-// Mock canvas panel
-jest.mock(
-  '../../../../application/legacy/discover/application/components/panel/canvas_panel',
-  () => ({
-    CanvasPanel: ({ children }: { children: React.ReactNode }) => (
-      <div data-test-subj="canvas-panel">{children}</div>
-    ),
-  })
-);
-
 // Mock the components
 jest.mock(
   '../../../../application/legacy/discover/application/components/no_index_patterns/no_index_patterns',
@@ -61,6 +51,10 @@ jest.mock('../../../../components/results_summary/results_summary_panel', () => 
 
 jest.mock('../../../../components/chart/discover_chart_container', () => ({
   DiscoverChartContainer: () => <div data-test-subj="chart-container">Chart Container</div>,
+}));
+
+jest.mock('../../../error_panel', () => ({
+  ErrorPanel: () => <div data-test-subj="error-panel">Error Panel</div>,
 }));
 
 // Mock the context
@@ -188,7 +182,7 @@ describe('BottomRightContainer', () => {
     expect(screen.getByTestId('no-results')).toBeInTheDocument();
   });
 
-  it('renders uninitialized state when status is ERROR', () => {
+  it('renders error panel when status is ERROR', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: { timeFieldName: 'timestamp' } as any,
       isLoading: false,
@@ -196,7 +190,7 @@ describe('BottomRightContainer', () => {
     });
 
     renderComponent(QueryExecutionStatus.ERROR);
-    expect(screen.getByTestId('uninitialized')).toBeInTheDocument();
+    expect(screen.getByTestId('error-panel')).toBeInTheDocument();
   });
 
   it('renders content when status is READY', () => {

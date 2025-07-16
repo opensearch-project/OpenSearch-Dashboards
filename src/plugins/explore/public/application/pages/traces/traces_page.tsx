@@ -17,7 +17,7 @@ import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subs
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
 import { useDatasetContext } from '../../context';
-import { BottomContainer } from '../../../components/container/bottom_container/bottom_container';
+import { BottomContainer } from '../../../components/container/bottom_container';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 
