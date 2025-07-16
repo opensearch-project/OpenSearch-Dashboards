@@ -54,22 +54,6 @@ export const VisualizationEmptyState = () => {
 
   const tabs = [
     {
-      id: 'help',
-      name: 'Help',
-      content: (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <EuiText size="s">Some help information</EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="s">
-            <EuiLink href="https://opensearch.org/" target="_blank">
-              {refLinkLabel}
-            </EuiLink>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-    {
       id: 'sample',
       name: 'Sample queries',
       content: (
@@ -98,11 +82,6 @@ export const VisualizationEmptyState = () => {
         </Fragment>
       ),
     },
-    // {
-    //   id: 'saved',
-    //   name: 'Saved queries',
-    //   content: <Fragment>Hello</Fragment>,
-    // },
   ];
 
   return (
