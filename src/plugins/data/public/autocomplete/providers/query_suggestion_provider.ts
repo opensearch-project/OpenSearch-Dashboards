@@ -68,6 +68,9 @@ export interface QuerySuggestionBasic {
   start: number;
   text: string;
   cursorIndex?: number;
+  sortText?: string;
+  documentation?: string;
+  insertText?: string;
 }
 
 /** @public **/

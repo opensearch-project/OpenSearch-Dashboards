@@ -145,7 +145,7 @@ export const fetchColumnValues = async (
   ).body.fields[0].values;
 };
 
-export const formatValuesToSuggestions = <T extends { toString(): string }>(
+export const formatValuesToSuggestions = <T extends { toString(): string | null } | null>(
   values: T[], // generic for any value type
   modifyInsertText?: (input: T) => string
 ) => {
@@ -153,7 +153,7 @@ export const formatValuesToSuggestions = <T extends { toString(): string }>(
     .filter((val) => val !== null) // Only using the notNull values
     .map((val: T, i) => {
       return {
-        text: val.toString(),
+        text: val?.toString() || '',
         type: monaco.languages.CompletionItemKind.Value,
         detail: SuggestionItemDetailsTags.Value,
         sortText: (i + 1).toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
@@ -374,14 +374,11 @@ export const parseQuery = <
           if (Array.isArray(value)) {
             // combine arrays
             const combined = [
-              // @ts-expect-error TS2352 TODO(ts-error): fixme
-              ...((result[field as keyof A] as any[]) ?? []),
-              // @ts-expect-error TS2352 TODO(ts-error): fixme
-              ...((nextResult[field as keyof A] as any[]) ?? []),
+              ...(((result[field as keyof A] as unknown) as any[]) ?? []),
+              ...(((nextResult[field as keyof A] as unknown) as any[]) ?? []),
             ];
             // ES6 magic to filter out duplicate objects based on id field
-            // @ts-expect-error TS2352 TODO(ts-error): fixme
-            (result[field as keyof A] as any[]) = combined.filter(
+            ((result[field as keyof A] as unknown) as any[]) = combined.filter(
               (item, index, self) => index === self.findIndex((other) => other.id === item.id)
             );
             break;
