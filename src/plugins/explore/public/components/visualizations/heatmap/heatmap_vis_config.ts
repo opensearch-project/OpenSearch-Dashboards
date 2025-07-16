@@ -46,13 +46,13 @@ export interface HeatmapChartStyleControls {
   // Axes configuration
   StandardAxes: StandardAxes[];
 
-  grid: GridOptions;
-
   exclusive: ExclusiveHeatmapConfig;
   label: HeatmapLabels;
+  switchAxes: false;
 }
 
 export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
+  switchAxes: false,
   // Basic controls
   tooltipOptions: {
     mode: 'all',
@@ -77,10 +77,6 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     overwriteColor: false,
     color: 'black',
   },
-  grid: {
-    xLines: true,
-    yLines: true,
-  },
 
   // Standard axes
   StandardAxes: [
@@ -98,6 +94,9 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
       title: {
         text: '',
       },
+      grid: {
+        showLines: true,
+      },
       axisRole: AxisRole.Y,
     },
     {
@@ -113,6 +112,9 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
       },
       title: {
         text: '',
+      },
+      grid: {
+        showLines: true,
       },
       axisRole: AxisRole.X,
     },
