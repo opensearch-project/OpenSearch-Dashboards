@@ -254,4 +254,74 @@ describe('to_expression', () => {
       expect(result.encoding.color.legend).toBeNull();
     });
   });
+
+  describe('edge and error cases', () => {
+    it('should handle empty transformedData', () => {
+      const result = createPieSpec(
+        [],
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        defaultStyleOptions,
+        { [AxisRole.SIZE]: numericColumn, [AxisRole.COLOR]: categoricalColumn }
+      );
+      expect(result.data.values).toEqual([]);
+    });
+
+    it('should handle empty numericalColumns and categoricalColumns', () => {
+      const result = createPieSpec(
+        [{ 'field-1': 1, 'field-2': 'A' }],
+        [],
+        [],
+        [],
+        defaultStyleOptions,
+        { [AxisRole.SIZE]: undefined, [AxisRole.COLOR]: undefined }
+      );
+      expect(result.encoding.theta.field).toBeUndefined();
+      expect(result.encoding.color.field).toBeUndefined();
+    });
+
+    it('should handle missing styleOptions fields', () => {
+      const partialStyleOptions = {
+        addLegend: true,
+        legendPosition: Positions.RIGHT,
+        exclusive: { donut: false },
+      };
+      const result = createPieSpec(
+        [{ 'field-1': 1, 'field-2': 'A' }],
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        partialStyleOptions as any,
+        { [AxisRole.SIZE]: numericColumn, [AxisRole.COLOR]: categoricalColumn }
+      );
+      expect(result.layer.length).toBeGreaterThan(0);
+    });
+
+    it('should handle missing axisColumnMappings', () => {
+      const result = createPieSpec(
+        [{ 'field-1': 1, 'field-2': 'A' }],
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        defaultStyleOptions,
+        undefined
+      );
+      expect(result.encoding.theta.field).toBeUndefined();
+      expect(result.encoding.color.field).toBeUndefined();
+    });
+
+    it('should handle incomplete axisColumnMappings', () => {
+      const result = createPieSpec(
+        [{ 'field-1': 1, 'field-2': 'A' }],
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        defaultStyleOptions,
+        { [AxisRole.SIZE]: numericColumn }
+      );
+      expect(result.encoding.theta.field).toBe('field-1');
+      expect(result.encoding.color.field).toBeUndefined();
+    });
+  });
 });
