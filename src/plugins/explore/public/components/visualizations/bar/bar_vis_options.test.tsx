@@ -116,7 +116,7 @@ jest.mock('../style_panel/grid/grid', () => ({
     <div data-test-subj="mockGridOptionsPanel">
       <button
         data-test-subj="mockUpdateGrid"
-        onClick={() => onGridChange({ ...grid, categoryLines: !grid.categoryLines })}
+        onClick={() => onGridChange({ ...grid, xLines: !grid.xLines })}
       >
         Update Grid
       </button>
@@ -338,7 +338,7 @@ describe('BarVisStyleControls', () => {
     expect(onStyleChange).toHaveBeenCalledWith({
       grid: {
         ...defaultProps.styleOptions.grid,
-        categoryLines: !defaultProps.styleOptions.grid.categoryLines,
+        xLines: !defaultProps.styleOptions.grid.xLines,
       },
     });
   });
