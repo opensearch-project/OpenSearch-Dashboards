@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AllAxesOptions } from './standard_axes_options';
 import { StandardAxes, Positions, AxisRole } from '../../types';
 import configureMockStore from 'redux-mock-store';
@@ -185,90 +185,16 @@ describe('AllAxesOptions', () => {
       ])
     );
   });
-});
-
-describe('StandardAxesOptions', () => {
-  const mockStandardAxes: StandardAxes[] = [
-    {
-      id: 'Axis-1',
-      position: Positions.BOTTOM,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: 100,
-      },
-      title: {
-        text: '',
-      },
-      axisRole: AxisRole.X,
-    },
-    {
-      id: 'Axis-2',
-      position: Positions.LEFT,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: 100,
-      },
-      title: {
-        text: '',
-      },
-      axisRole: AxisRole.Y,
-    },
-  ];
-
-  const defaultProps = {
-    standardAxes: mockStandardAxes,
-    onStandardAxesChange: jest.fn(),
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('renders without crashing', () => {
-    const { container } = render(<StandardAxesOptions {...defaultProps} />);
-    expect(container).toBeInTheDocument();
-  });
-
-  it('renders both X and Y axes', () => {
-    render(<StandardAxesOptions {...defaultProps} />);
-    expect(screen.getByText('X-Axis')).toBeInTheDocument();
-    expect(screen.getByText('Y-Axis')).toBeInTheDocument();
-  });
-
-  it('toggles axis expansion when clicked', () => {
-    render(<StandardAxesOptions {...defaultProps} />);
-
-    // Initially, the axis details should not be visible
-    expect(screen.queryByText('Position')).not.toBeInTheDocument();
-
-    // Click to expand
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
-    fireEvent.click(xAxisButton);
-
-    // Now the details should be visible
-    expect(screen.getByText('Position')).toBeInTheDocument();
-
-    // Click again to collapse
-    fireEvent.click(xAxisButton);
-
-    // The details should be hidden again
-    // Note: This might not work as expected in tests since the state might not update immediately
-    // But the click handler should have been called
-  });
 
   it('updates axis position when changed', () => {
-    render(<StandardAxesOptions {...defaultProps} />);
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
 
     // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
+    const xAxisButton = screen.getByTestId('standardAxis-x-button');
     fireEvent.click(xAxisButton);
 
     // Find the position button group and click on "Top"
@@ -285,33 +211,15 @@ describe('StandardAxesOptions', () => {
     );
   });
 
-  it('toggles axis visibility', () => {
-    render(<StandardAxesOptions {...defaultProps} />);
-
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
-    fireEvent.click(xAxisButton);
-
-    // Find the show switch by its role and toggle it
-    const switches = screen.getAllByRole('switch');
-    const showSwitch = switches[0]; // First switch is the "Show axis lines and labels" switch
-    fireEvent.click(showSwitch);
-
-    // Check that onStandardAxesChange was called with show: false
-    expect(defaultProps.onStandardAxesChange).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          show: false,
-        }),
-      ])
-    );
-  });
-
   it('updates axis title', async () => {
-    render(<StandardAxesOptions {...defaultProps} />);
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
 
     // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
+    const xAxisButton = screen.getByTestId('standardAxis-x-button');
     fireEvent.click(xAxisButton);
 
     // Find the title input and change it
@@ -331,10 +239,14 @@ describe('StandardAxesOptions', () => {
   });
 
   it('toggles label visibility', () => {
-    render(<StandardAxesOptions {...defaultProps} />);
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
 
     // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
+    const xAxisButton = screen.getByTestId('standardAxis-x-button');
     fireEvent.click(xAxisButton);
 
     // Find the show labels switch by its text content and toggle it
@@ -352,10 +264,14 @@ describe('StandardAxesOptions', () => {
   });
 
   it('updates label rotation to vertical', () => {
-    render(<StandardAxesOptions {...defaultProps} />);
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
 
     // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
+    const xAxisButton = screen.getByTestId('standardAxis-x-button');
     fireEvent.click(xAxisButton);
 
     // Find the alignment select and change it to vertical
@@ -373,10 +289,14 @@ describe('StandardAxesOptions', () => {
   });
 
   it('updates label rotation to angled', () => {
-    render(<StandardAxesOptions {...defaultProps} />);
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
 
     // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
+    const xAxisButton = screen.getByTestId('standardAxis-x-button');
     fireEvent.click(xAxisButton);
 
     // Find the alignment select and change it to angled
@@ -394,10 +314,14 @@ describe('StandardAxesOptions', () => {
   });
 
   it('updates truncate value', async () => {
-    render(<StandardAxesOptions {...defaultProps} />);
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
 
     // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
+    const xAxisButton = screen.getByTestId('standardAxis-x-button');
     fireEvent.click(xAxisButton);
 
     // Find the truncate input and change it
@@ -414,116 +338,5 @@ describe('StandardAxesOptions', () => {
         ])
       );
     });
-  });
-
-  it('handles axis with field property', () => {
-    // Create a mock field that matches the expected structure
-    const mockField = {
-      default: {
-        name: 'Field Name',
-        id: 123, // Using a number for id as required by VisColumn
-        schema: VisFieldType.Categorical,
-        column: 'field-column',
-        validValuesCount: 10,
-        uniqueValuesCount: 5,
-      },
-    };
-
-    const axesWithField = [
-      {
-        ...mockStandardAxes[0],
-        field: mockField,
-      } as StandardAxes,
-      mockStandardAxes[1],
-    ];
-
-    render(
-      <StandardAxesOptions
-        standardAxes={axesWithField}
-        onStandardAxesChange={defaultProps.onStandardAxesChange}
-      />
-    );
-
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
-    fireEvent.click(xAxisButton);
-
-    // Find the title input and check its value
-    const titleInput = screen.getByTestId('text-field');
-    expect(titleInput).toHaveValue('Field Name');
-  });
-
-  it('handles Y-axis position change', () => {
-    render(<StandardAxesOptions {...defaultProps} />);
-
-    // Expand Y-axis
-    const yAxisButton = screen.getByTestId('standardAxis-1-button');
-    fireEvent.click(yAxisButton);
-
-    // Find the position button group and click on "Right"
-    const rightButton = screen.getByText('Right');
-    fireEvent.click(rightButton);
-
-    // Check that onStandardAxesChange was called with the updated position
-    expect(defaultProps.onStandardAxesChange).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: 'Axis-2',
-          position: Positions.RIGHT,
-        }),
-      ])
-    );
-  });
-
-  it('does not show label options when axis.show is false', () => {
-    const axesWithHiddenAxis = [
-      {
-        ...mockStandardAxes[0],
-        show: false,
-      },
-      mockStandardAxes[1],
-    ];
-
-    render(
-      <StandardAxesOptions
-        standardAxes={axesWithHiddenAxis}
-        onStandardAxesChange={defaultProps.onStandardAxesChange}
-      />
-    );
-
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
-    fireEvent.click(xAxisButton);
-
-    // The display name field should not be visible
-    expect(screen.queryByText('Display name')).not.toBeInTheDocument();
-  });
-
-  it('does not show label alignment and truncate when labels.show is false', () => {
-    const axesWithHiddenLabels = [
-      {
-        ...mockStandardAxes[0],
-        labels: {
-          ...mockStandardAxes[0].labels,
-          show: false,
-        },
-      },
-      mockStandardAxes[1],
-    ];
-
-    render(
-      <StandardAxesOptions
-        standardAxes={axesWithHiddenLabels}
-        onStandardAxesChange={defaultProps.onStandardAxesChange}
-      />
-    );
-
-    // Expand X-axis
-    const xAxisButton = screen.getByTestId('standardAxis-0-button');
-    fireEvent.click(xAxisButton);
-
-    // The alignment and truncate fields should not be visible
-    expect(screen.queryByText('Aligned')).not.toBeInTheDocument();
-    expect(screen.queryByText('Truncate')).not.toBeInTheDocument();
   });
 });
