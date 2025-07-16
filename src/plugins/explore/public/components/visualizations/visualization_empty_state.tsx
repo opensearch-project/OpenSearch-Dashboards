@@ -54,22 +54,6 @@ export const VisualizationEmptyState = () => {
 
   const tabs = [
     {
-      id: 'help',
-      name: 'Help',
-      content: (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <EuiText size="s">Some help information</EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="s">
-            <EuiLink href="https://opensearch.org/" target="_blank">
-              {refLinkLabel}
-            </EuiLink>
-          </EuiText>
-        </Fragment>
-      ),
-    },
-    {
       id: 'sample',
       name: 'Sample queries',
       content: (
@@ -98,35 +82,33 @@ export const VisualizationEmptyState = () => {
         </Fragment>
       ),
     },
-    // {
-    //   id: 'saved',
-    //   name: 'Saved queries',
-    //   content: <Fragment>Hello</Fragment>,
-    // },
   ];
 
   return (
-    <EuiEmptyPrompt
-      icon={<EuiIcon type="visualizeApp" size="xl" />}
-      style={{ padding: 0 }}
-      title={
-        <h3>
-          {i18n.translate('explore.visualize.emptyState.title', {
-            defaultMessage: 'Select a visualization type and fields to get started',
-          })}
-        </h3>
-      }
-      body={
-        <EuiPanel>
-          <EuiTabbedContent
-            tabs={tabs}
-            initialSelectedTab={tabs[0]}
-            size="s"
-            autoFocus="selected"
-            style={{ textAlign: 'start' }}
-          />
-        </EuiPanel>
-      }
-    />
+    <>
+      <EuiSpacer size="m" />
+      <EuiEmptyPrompt
+        icon={<EuiIcon type="visualizeApp" size="xl" />}
+        style={{ padding: 0 }}
+        title={
+          <h3>
+            {i18n.translate('explore.visualize.emptyState.title', {
+              defaultMessage: 'Select a visualization type and fields to get started',
+            })}
+          </h3>
+        }
+        body={
+          <EuiPanel>
+            <EuiTabbedContent
+              tabs={tabs}
+              initialSelectedTab={tabs[0]}
+              size="s"
+              autoFocus="selected"
+              style={{ textAlign: 'start' }}
+            />
+          </EuiPanel>
+        }
+      />
+    </>
   );
 };
