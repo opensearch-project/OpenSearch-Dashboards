@@ -52,43 +52,45 @@ jest.mock('../../../opensearch_dashboards_services', () => {
   };
 });
 
-beforeEach(() => {
-  (getDocViewsRegistry() as any).resetRegistry();
-  jest.clearAllMocks();
-});
-
-test('Render <DocViewer/> with 3 different tabs', () => {
-  const registry = getDocViewsRegistry();
-  registry.addDocView({ order: 10, title: 'Render function', render: jest.fn() });
-  registry.addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
-  registry.addDocView({ order: 30, title: 'Invalid doc view' });
-
-  const renderProps = { hit: {} } as DocViewRenderProps;
-
-  const wrapper = shallow(<DocViewer {...renderProps} />);
-
-  expect(wrapper).toMatchSnapshot();
-});
-
-test('Render <DocViewer/> with 1 tab displaying error message', () => {
-  function SomeComponent() {
-    // this is just a placeholder
-    return null;
-  }
-
-  const registry = getDocViewsRegistry();
-  registry.addDocView({
-    order: 10,
-    title: 'React component',
-    component: SomeComponent,
+describe('DocViewer', () => {
+  beforeEach(() => {
+    (getDocViewsRegistry() as any).resetRegistry();
+    jest.clearAllMocks();
   });
 
-  const renderProps = { hit: {} } as DocViewRenderProps;
-  const errorMsg = 'Catch me if you can!';
+  test('Render <DocViewer/> with 3 different tabs', () => {
+    const registry = getDocViewsRegistry();
+    registry.addDocView({ order: 10, title: 'Render function', render: jest.fn() });
+    registry.addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
+    registry.addDocView({ order: 30, title: 'Invalid doc view' });
 
-  const wrapper = mount(<DocViewer {...renderProps} />);
-  const error = new Error(errorMsg);
-  wrapper.find(SomeComponent).simulateError(error);
-  const errorMsgComponent = findTestSubject(wrapper, 'docViewerError');
-  expect(errorMsgComponent.text()).toMatch(new RegExp(`${errorMsg}`));
+    const renderProps = { hit: {} } as DocViewRenderProps;
+
+    const wrapper = shallow(<DocViewer {...renderProps} />);
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  test('Render <DocViewer/> with 1 tab displaying error message', () => {
+    function SomeComponent() {
+      // this is just a placeholder
+      return null;
+    }
+
+    const registry = getDocViewsRegistry();
+    registry.addDocView({
+      order: 10,
+      title: 'React component',
+      component: SomeComponent,
+    });
+
+    const renderProps = { hit: {} } as DocViewRenderProps;
+    const errorMsg = 'Catch me if you can!';
+
+    const wrapper = mount(<DocViewer {...renderProps} />);
+    const error = new Error(errorMsg);
+    wrapper.find(SomeComponent).simulateError(error);
+    const errorMsgComponent = findTestSubject(wrapper, 'docViewerError');
+    expect(errorMsgComponent.text()).toMatch(new RegExp(`${errorMsg}`));
+  });
 });
