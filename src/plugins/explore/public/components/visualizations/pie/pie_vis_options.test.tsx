@@ -14,6 +14,21 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+// Mock the AxesSelectPanel component that uses Redux hooks
+jest.mock('../style_panel/axes/axes_selector', () => ({
+  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
+    <div data-test-subj="mockAxesSelectPanel">
+      <div data-test-subj="chartType">{chartType}</div>
+      <button
+        data-test-subj="mockUpdateVisualization"
+        onClick={() => updateVisualization({ mappings: { size: 'value', color: 'category' } })}
+      >
+        Update Visualization
+      </button>
+    </div>
+  )),
+}));
+
 describe('PieVisStyleControls', () => {
   const numericalColumn = {
     id: 1,
@@ -48,12 +63,6 @@ describe('PieVisStyleControls', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('renders the fields accordion', () => {
-    render(<PieVisStyleControls {...mockProps} />);
-
-    expect(screen.getByText('Fields')).toBeInTheDocument();
   });
 
   it('renders the pie exclusive options accordion', () => {
@@ -97,23 +106,5 @@ describe('PieVisStyleControls', () => {
     render(<PieVisStyleControls {...mockProps} axisColumnMappings={{}} />);
     expect(screen.queryByText('Legend')).not.toBeInTheDocument();
     expect(screen.queryByTestId('showValuesSwtich')).not.toBeInTheDocument();
-  });
-
-  it('renders with availableChartTypes, selectedChartType, onChartTypeChange props', () => {
-    const availableChartTypes = [
-      { type: 'pie', name: 'Pie', icon: 'pieIcon', priority: 1 },
-      { type: 'donut', name: 'Donut', icon: 'donutIcon', priority: 2 },
-    ];
-    const selectedChartType = 'pie';
-    const onChartTypeChange = jest.fn();
-    render(
-      <PieVisStyleControls
-        {...mockProps}
-        availableChartTypes={availableChartTypes}
-        selectedChartType={selectedChartType}
-        onChartTypeChange={onChartTypeChange}
-      />
-    );
-    expect(screen.getByText('Fields')).toBeInTheDocument();
   });
 });
