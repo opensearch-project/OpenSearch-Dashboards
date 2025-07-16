@@ -152,100 +152,13 @@ describe('setDatasetActionCreator', () => {
     expect(setPromptModeIsAvailable).not.toHaveBeenCalled();
   });
 
-  it('should set editor mode to SingleQuery when prompt mode is not available and current mode is not SingleQuery', async () => {
+  it('should set editor mode to SingleQuery when prompt mode is not available', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
-    mockGetState.mockReturnValue({
-      queryEditor: {
-        editorMode: EditorMode.SingleEmpty,
-        promptModeIsAvailable: false,
-        queryStatusMap: {},
-        overallQueryStatus: {
-          status: 'UNINITIALIZED' as any,
-          elapsedMs: undefined,
-          startTime: undefined,
-          body: undefined,
-        },
-        promptToQueryIsLoading: false,
-        lastExecutedPrompt: '',
-      },
-      query: {
-        query: 'SELECT * FROM test',
-        language: 'PPL',
-        dataset: undefined,
-      },
-      ui: {
-        activeTabId: 'test-tab',
-        showFilterPanel: true,
-        showHistogram: true,
-      },
-      results: {},
-      tab: {
-        logs: {},
-        visualizations: {
-          styleOptions: undefined,
-          chartType: undefined,
-          axesMapping: {},
-        },
-      },
-      legacy: {
-        columns: [],
-        sort: [],
-        interval: 'auto',
-      },
-    } as any);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
 
     expect(setEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
-  });
-
-  it('should not dispatch set editor mode if editorMode is SingleQuery', async () => {
-    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
-    mockGetState.mockReturnValue({
-      queryEditor: {
-        editorMode: EditorMode.SingleQuery,
-        promptModeIsAvailable: false,
-        queryStatusMap: {},
-        overallQueryStatus: {
-          status: 'UNINITIALIZED' as any,
-          elapsedMs: undefined,
-          startTime: undefined,
-          body: undefined,
-        },
-        promptToQueryIsLoading: false,
-        lastExecutedPrompt: '',
-      },
-      query: {
-        query: 'SELECT * FROM test',
-        language: 'PPL',
-        dataset: undefined,
-      },
-      ui: {
-        activeTabId: 'test-tab',
-        showFilterPanel: true,
-        showHistogram: true,
-      },
-      results: {},
-      tab: {
-        logs: {},
-        visualizations: {
-          styleOptions: undefined,
-          chartType: undefined,
-          axesMapping: {},
-        },
-      },
-      legacy: {
-        columns: [],
-        sort: [],
-        interval: 'auto',
-      },
-    } as any);
-
-    const actionCreator = setDatasetActionCreator(services, mockClearEditors);
-    await actionCreator(mockDispatch, mockGetState);
-
-    expect(setEditorMode).not.toHaveBeenCalled();
   });
 
   it('should call clearEditors', async () => {
@@ -315,137 +228,12 @@ describe('setDatasetActionCreator', () => {
     expect(setPromptModeIsAvailable).toHaveBeenCalledWith(false);
   });
 
-  it('should set editor mode to SingleEmpty when prompt mode is available and current mode is not SingleEmpty', async () => {
+  it('should set editor mode to SingleEmpty when prompt mode is available', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(true);
-    mockGetState.mockReturnValue({
-      queryEditor: {
-        editorMode: EditorMode.SingleQuery,
-        promptModeIsAvailable: false,
-        queryStatusMap: {},
-        overallQueryStatus: {
-          status: 'UNINITIALIZED' as any,
-          elapsedMs: undefined,
-          startTime: undefined,
-          body: undefined,
-        },
-        promptToQueryIsLoading: false,
-        lastExecutedPrompt: '',
-      },
-      query: {
-        query: 'SELECT * FROM test',
-        language: 'PPL',
-        dataset: undefined,
-      },
-      ui: {
-        activeTabId: 'test-tab',
-        showFilterPanel: true,
-        showHistogram: true,
-      },
-      results: {},
-      tab: {
-        logs: {},
-        visualizations: {
-          styleOptions: undefined,
-          chartType: undefined,
-          axesMapping: {},
-        },
-      },
-      legacy: {
-        columns: [],
-        sort: [],
-        interval: 'auto',
-      },
-    } as any);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
 
     expect(setEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
-  });
-
-  it('should not set editor mode when prompt mode is available and current mode is SingleEmpty', async () => {
-    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(true);
-    mockGetState.mockReturnValue({
-      queryEditor: {
-        editorMode: EditorMode.SingleEmpty,
-        promptModeIsAvailable: false,
-        queryStatusMap: {},
-        overallQueryStatus: {
-          status: 'UNINITIALIZED' as any,
-          elapsedMs: undefined,
-          startTime: undefined,
-          body: undefined,
-        },
-        promptToQueryIsLoading: false,
-        lastExecutedPrompt: '',
-      },
-      query: {
-        query: 'SELECT * FROM test',
-        language: 'PPL',
-        dataset: undefined,
-      },
-      ui: {
-        activeTabId: 'test-tab',
-        showFilterPanel: true,
-        showHistogram: true,
-      },
-      results: {},
-      tab: {
-        activeTabId: 'test-tab',
-      },
-      legacy: {
-        columns: [],
-        sort: [],
-        interval: 'auto',
-      },
-    } as any);
-
-    const actionCreator = setDatasetActionCreator(services, mockClearEditors);
-    await actionCreator(mockDispatch, mockGetState);
-
-    expect(setEditorMode).not.toHaveBeenCalled();
-  });
-
-  it('should not set editor mode when prompt mode is not available and current mode is already SingleQuery', async () => {
-    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
-    mockGetState.mockReturnValue({
-      queryEditor: {
-        editorMode: EditorMode.SingleQuery,
-        promptModeIsAvailable: false,
-        queryStatusMap: {},
-        overallQueryStatus: {
-          status: 'UNINITIALIZED' as any,
-          elapsedMs: undefined,
-          startTime: undefined,
-          body: undefined,
-        },
-        promptToQueryIsLoading: false,
-        lastExecutedPrompt: '',
-      },
-      query: {
-        query: 'SELECT * FROM test',
-        language: 'PPL',
-        dataset: undefined,
-      },
-      ui: {
-        activeTabId: 'test-tab',
-        showFilterPanel: true,
-        showHistogram: true,
-      },
-      results: {},
-      tab: {
-        activeTabId: 'test-tab',
-      },
-      legacy: {
-        columns: [],
-        sort: [],
-        interval: 'auto',
-      },
-    } as any);
-
-    const actionCreator = setDatasetActionCreator(services, mockClearEditors);
-    await actionCreator(mockDispatch, mockGetState);
-
-    expect(setEditorMode).not.toHaveBeenCalled();
   });
 });
