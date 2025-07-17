@@ -21,12 +21,14 @@ import {
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
+import { useSetEditorText } from '../../hooks';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const exploreId = useCurrentExploreId();
   const { savedExplore, error } = useSavedExplore(exploreId);
+  const setEditorText = useSetEditorText();
   const { chrome, data } = services;
 
   useEffect(() => {
@@ -46,6 +48,7 @@ export const useInitPage = () => {
           const query = searchSource.query;
           if (query) {
             dispatch(setQueryState(query));
+            setEditorText(query.query);
           }
         }
 
@@ -87,7 +90,7 @@ export const useInitPage = () => {
         chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: 'Error' }]);
       }
     }
-  }, [chrome, data.query.queryString, dispatch, error, savedExplore, services]);
+  }, [chrome, data.query.queryString, dispatch, error, savedExplore, services, setEditorText]);
 
   const pageContext = { savedExplore };
 
