@@ -98,6 +98,16 @@ const mockIndexPattern: IIndexPattern = {
       return fields.some(predicate);
     },
   } as any,
+  getFieldByName: jest.fn(),
+  getComputedFields: jest.fn(() => ({})),
+  getScriptedFields: jest.fn(() => []),
+  getNonScriptedFields: jest.fn(() => []),
+  addScriptedField: async (name: string, script: string, fieldType?: string): Promise<void> => {
+    return;
+  },
+  removeScriptedField: () => {
+    return;
+  },
 };
 
 describe('convertFiltersToClause', () => {

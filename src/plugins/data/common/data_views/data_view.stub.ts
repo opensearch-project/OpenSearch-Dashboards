@@ -11,6 +11,23 @@ export const stubDataView: IDataView = {
   fields: stubFields,
   title: 'logstash-*',
   timeFieldName: '@timestamp',
+  getFieldByName: (name: string) => {
+    return stubDataView.fields.find((field) => field.name === name);
+  },
+  getComputedFields: () => ({
+    scriptFields: {},
+    docvalueFields: [],
+    storedFields: [],
+    runtimeFields: {},
+  }),
+  getScriptedFields: () => [],
+  getNonScriptedFields: () => stubDataView.fields,
+  addScriptedField: async (name: string, script: string, fieldType?: string): Promise<void> => {
+    return;
+  },
+  removeScriptedField: () => {
+    return;
+  },
 };
 
 export const stubDataViewWithFields: IDataView = {
@@ -26,4 +43,22 @@ export const stubDataViewWithFields: IDataView = {
       searchable: true,
     },
   ],
+  timeFieldName: '@timestamp',
+  getFieldByName: (name: string) => {
+    return stubDataViewWithFields.fields.find((field) => field.name === name);
+  },
+  getComputedFields: () => ({
+    scriptFields: {},
+    docvalueFields: [],
+    storedFields: [],
+    runtimeFields: {},
+  }),
+  getScriptedFields: () => [],
+  getNonScriptedFields: () => stubDataViewWithFields.fields,
+  addScriptedField: async (name: string, script: string, fieldType?: string): Promise<void> => {
+    return;
+  },
+  removeScriptedField: () => {
+    return;
+  },
 };

@@ -85,6 +85,7 @@ export const registerServices = async (
     registry.register({
       id: 'savedExplore',
       title: 'explore',
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       service: explore.savedExploreLoader,
     });
   }
