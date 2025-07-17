@@ -152,24 +152,27 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
       {displayToNavLinkInPortal &&
         createPortal(
           <EuiFlexGroup gutterSize="m">
-            {topNavLinks.map((topNavLink, index) => (
-              <EuiFlexItem grow={false} key={(topNavLink as any).id || index}>
-                <EuiToolTip
-                  position="bottom"
-                  content={(topNavLink as any).label || (topNavLink as any).tooltip}
-                >
+            {topNavLinks.map((topNavLink) => (
+              // @ts-expect-error TS2339 TODO(ts-error): fixme
+              <EuiFlexItem grow={false} key={topNavLink.id}>
+                {/* @ts-expect-error TS2339 TODO(ts-error): fixme */}
+                <EuiToolTip position="bottom" content={topNavLink.label}>
                   <EuiButtonIcon
-                    onClick={(event: any) => {
-                      (topNavLink as any).run(event.currentTarget);
+                    // @ts-expect-error TS7006 TODO(ts-error): fixme
+                    onClick={(event) => {
+                      // @ts-expect-error TS2722, TS2554 TODO(ts-error): fixme
+                      topNavLink.run(event.currentTarget);
                     }}
-                    iconType={(topNavLink as any).iconType}
-                    aria-label={(topNavLink as any).ariaLabel}
+                    // @ts-expect-error TS2339 TODO(ts-error): fixme
+                    iconType={topNavLink.iconType}
+                    aria-label={topNavLink.ariaLabel}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>,
-          opts.optionalRef?.topLinkRef?.current!
+          // @ts-expect-error TS2532, TS2345 TODO(ts-error): fixme
+          opts.optionalRef.topLinkRef.current
         )}
       <TopNavMenu
         appName={PLUGIN_ID}
