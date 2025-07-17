@@ -39,6 +39,7 @@ import {
   QueryStatus,
   SearchBarProps,
   StatefulSearchBarProps,
+  DatasetSelectProps,
 } from '../../../data/public';
 import { DataSourceMenuProps, createDataSourceMenu } from '../../../data_source_management/public';
 import { MountPointPortal } from '../../../opensearch_dashboards_react/public';
@@ -61,6 +62,11 @@ export type TopNavMenuProps = Omit<StatefulSearchBarProps, 'showDatePicker'> &
     showDatePicker?: boolean | TopNavMenuItemRenderType;
     showFilterBar?: boolean;
     showDataSourceMenu?: boolean;
+    showDatasetSelect?: boolean | TopNavMenuItemRenderType;
+    datasetSelectProps?: {
+      onSelect?: (dataset: any) => void;
+      appName?: string;
+    };
     data?: DataPublicPluginStart;
     groupActions?: boolean;
     className?: string;
@@ -102,6 +108,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     showSearchBar,
     showDatePicker,
     showDataSourceMenu,
+    showDatasetSelect,
     dataSourceMenuConfig,
     groupActions,
     screenTitle,
@@ -110,25 +117,33 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
 
   const datePickerRef = useRef<HTMLDivElement>(null);
 
-  if (
+  // DEBUG: Check early return condition
+  const shouldReturnNull =
     (!config || config.length === 0) &&
     (!showSearchBar || !props.data) &&
-    (!showDataSourceMenu || !dataSourceMenuConfig)
-  ) {
+    (!showDataSourceMenu || !dataSourceMenuConfig) &&
+    (!showDatasetSelect || !props.data);
+
+  if (shouldReturnNull) {
     return null;
   }
 
   function renderItems(): ReactElement | ReactElement[] | null {
-    if (!config || config.length === 0) return null;
+    if (!config || config.length === 0) {
+      return null;
+    }
+
     const renderedItems = config.map((menuItem: TopNavMenuData, i: number) => {
       return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
     });
 
-    return groupActions ? (
+    const result = groupActions ? (
       <div className="osdTopNavMenuGroupedActions">{renderedItems}</div>
     ) : (
       renderedItems
     );
+
+    return result;
   }
 
   function renderMenu(className: string, spreadSections: boolean = false): ReactElement | null {
@@ -146,6 +161,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
       >
         {renderItems()}
         {renderDataSourceMenu()}
+        {renderDatasetSelect()}
       </EuiHeaderLinks>
     );
   }
@@ -154,6 +170,18 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     if (!showDataSourceMenu) return null;
     const DataSourceMenu = createDataSourceMenu();
     return <DataSourceMenu {...dataSourceMenuConfig!} />;
+  }
+
+  function renderDatasetSelect(): ReactElement | null {
+    if (!showDatasetSelect || !props.data) return null;
+    const { DatasetSelect } = props.data.ui;
+
+    return (
+      <DatasetSelect
+        onSelect={props.datasetSelectProps?.onSelect || (() => {})}
+        appName={props.datasetSelectProps?.appName || props.appName || ''}
+      />
+    );
   }
 
   function renderSearchBar(overrides: Partial<SearchBarProps> = {}): ReactElement | null {
@@ -174,7 +202,10 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     const { setMenuMountPoint } = props;
     const menuClassName = classNames('osdTopNavMenu', props.className);
 
-    if (setMenuMountPoint) {
+    // Check if setMenuMountPoint is a meaningful function (not just an empty function)
+    const hasValidMountPoint = setMenuMountPoint && setMenuMountPoint.toString() !== '() => {}';
+
+    if (hasValidMountPoint) {
       if (groupActions) {
         switch (showSearchBar) {
           case TopNavMenuItemRenderType.IN_PORTAL:
@@ -273,6 +304,7 @@ TopNavMenu.defaultProps = {
   showDatePicker: true,
   showFilterBar: true,
   showDataSourceMenu: false,
+  showDatasetSelect: false,
   screenTitle: '',
   groupActions: false,
 };
