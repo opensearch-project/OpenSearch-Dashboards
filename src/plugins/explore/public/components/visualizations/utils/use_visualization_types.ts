@@ -20,6 +20,7 @@ import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
 import { UpdateVisualizationProps } from '../visualization_container';
 import { TableChartStyleControls } from '../table/table_vis_config';
+import { PPL_FIELD_TYPES } from '../../../../../query_enhancements/public';
 
 export type ChartType =
   | 'line'
@@ -107,13 +108,25 @@ const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [OPENSEARCH_FIELD_TYPES.DOUBLE]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.INTEGER]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.INT]: VisFieldType.Numerical,
-  [OPENSEARCH_FIELD_TYPES.BIGINT]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.LONG]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.SHORT]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.UNSIGNED_LONG]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.TEXT]: VisFieldType.Categorical,
   [OPENSEARCH_FIELD_TYPES.KEYWORD]: VisFieldType.Categorical,
   [OPENSEARCH_FIELD_TYPES.WILDCARD]: VisFieldType.Categorical,
+
+  // Map rest of PPL_FIELD_TYPES to VisFieldType
+  [PPL_FIELD_TYPES.TINYINT]: VisFieldType.Numerical,
+  [PPL_FIELD_TYPES.SMALLINT]: VisFieldType.Numerical,
+  [PPL_FIELD_TYPES.BIGINT]: VisFieldType.Numerical,
+  [PPL_FIELD_TYPES.TIMESTAMP]: VisFieldType.Date,
+  [PPL_FIELD_TYPES.TIME]: VisFieldType.Date,
+  [PPL_FIELD_TYPES.INTERVAL]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.IP]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.GEO_POINT]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.BINARY]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.STRUCT]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.ARRAY]: VisFieldType.Unknown,
 };
 
 export interface VisualizationTypeResult<T extends ChartType> {

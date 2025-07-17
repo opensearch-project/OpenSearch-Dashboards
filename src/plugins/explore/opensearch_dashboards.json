@@ -18,7 +18,8 @@
     "usageCollection",
     "visualizations",
     "expressions",
-    "dashboard"
+    "dashboard",
+    "queryEnhancements"
   ],
   "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "dashboard"],
   "optionalPlugins": ["home", "share"],

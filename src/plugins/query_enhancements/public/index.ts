@@ -12,3 +12,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart } from './types';
+export { PPL_FIELD_TYPES, S3_FIELD_TYPES } from '../common/types';
