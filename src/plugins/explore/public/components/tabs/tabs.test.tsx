@@ -188,7 +188,7 @@ describe('ExploreTabsComponent', () => {
     expect(screen.getByText('Visualization Content')).toBeInTheDocument();
   });
 
-  it('should fallback to logs tab when activeTabId is empty', () => {
+  it('should fallback to first tab when activeTabId is empty', () => {
     const store = createMockStore({
       ui: {
         activeTabId: '',
@@ -205,7 +205,7 @@ describe('ExploreTabsComponent', () => {
       </Provider>
     );
 
-    // The component should render and fallback to logs tab
+    // The component should render and fallback to the first tab
     expect(screen.getByText('Logs Content')).toBeInTheDocument();
   });
 });
