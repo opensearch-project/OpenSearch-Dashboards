@@ -85,7 +85,7 @@ export const runSharedLinksTests = () => {
 
         it(`should handle shared document links correctly for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
           if (config.hasDocLinks) {
@@ -129,7 +129,7 @@ export const runSharedLinksTests = () => {
 
         it(`should persist state in shared links for ${config.testName}`, () => {
           // Set dataset and language
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
           // Set interval

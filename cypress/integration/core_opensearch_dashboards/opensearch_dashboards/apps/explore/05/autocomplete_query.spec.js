@@ -48,7 +48,7 @@ export const runAutocompleteTests = () => {
         describe(`${config.testName}`, () => {
           it('should show and select suggestions progressively', () => {
             // Setup
-            cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.wait(2000);
             cy.explore.clearQueryEditor();

@@ -70,7 +70,7 @@ export const verifyBaseState = (dataset) => {
 
 export const setUpBaseState = (dataset, dataSourceName) => {
   // Setting up the dataset
-  cy.setDataset(dataset, dataSourceName, 'INDEX_PATTERN');
+  cy.explore.setDataset(dataset, dataSourceName, 'INDEX_PATTERN');
 
   // Setting the TimeRange
   setDatePickerDatesAndSearchIfRelevant(language);

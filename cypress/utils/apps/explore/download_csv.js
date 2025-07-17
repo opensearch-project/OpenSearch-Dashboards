@@ -218,9 +218,9 @@ export const prepareDiscoverPageForDownload = (config, workspaceName) => {
   });
 
   if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-    cy.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
+    cy.explore.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
   } else {
-    cy.setIndexAsDataset(
+    cy.explore.setIndexAsDataset(
       config.dataset,
       DATASOURCE_NAME,
       'PPL',

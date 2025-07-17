@@ -45,7 +45,11 @@ const cachingTestSuite = () => {
       const alternativeIndexPatternName = 'data';
       const alternativeIndexPattern = alternativeIndexPatternName + '*';
 
-      cy.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, DatasetTypes.INDEX_PATTERN.name);
+      cy.explore.setDataset(
+        INDEX_PATTERN_WITH_TIME,
+        DATASOURCE_NAME,
+        DatasetTypes.INDEX_PATTERN.name
+      );
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: alternativeIndexPatternName,
@@ -61,8 +65,8 @@ const cachingTestSuite = () => {
         isEnhancement: true,
       });
 
-      cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
-      cy.getElementByTestId('datasetSelectorAdvancedButton').click();
+      cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+      cy.getElementByTestId('datasetSelectAdvancedButton').click();
       cy.intercept('GET', '**/api/saved_objects/_find?fields*').as('getIndexPatternRequest');
       cy.get(`[title="Index Patterns"]`).click();
 

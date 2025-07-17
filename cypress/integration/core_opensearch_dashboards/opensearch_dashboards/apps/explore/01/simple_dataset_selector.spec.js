@@ -77,7 +77,7 @@ export const runSimpleDatasetSelectorTests = () => {
         });
 
         // Select the index pattern
-        cy.setIndexPatternAsDataset(config.indexPattern, DATASOURCE_NAME);
+        cy.explore.setIndexPatternAsDataset(config.indexPattern, DATASOURCE_NAME);
 
         // Verify if the language is unchanged, we get a default query populated, and correct dataset is set
         verifyDiscoverPageState({
@@ -135,7 +135,7 @@ export const runSimpleDatasetSelectorTests = () => {
 
       for (let i = 1; i <= noIndexPatterns; i++) {
         validateItemsInSimpleDatasetSelectorDropDown(
-          `::${INDEX_PATTERN_WITH_TIME.slice(0, i)}`,
+          `${INDEX_PATTERN_WITH_TIME.slice(0, i)}`,
           noIndexPatterns - i + 1
         );
       }

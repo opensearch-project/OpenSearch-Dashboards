@@ -132,7 +132,7 @@ const getLanguageSpecificConfig = (language, config) => {
           { value: '|' },
           { value: 'where', input: 'w' },
         ],
-        editorType: 'exploreReusableEditor-top',
+        editorType: 'exploreTopEditor',
         andOperator: 'and',
       };
     default:
@@ -311,7 +311,7 @@ export const hideWidgets = (maxAttempts = 3) => {
  * @param {boolean} useKeyboard - Whether to use keyboard instead of mouse
  */
 export const createQuery = (config, useKeyboard = false) => {
-  const editorType = 'exploreReusableEditor-top';
+  const editorType = 'exploreTopEditor';
 
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')

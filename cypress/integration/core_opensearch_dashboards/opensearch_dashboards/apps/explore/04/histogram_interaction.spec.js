@@ -47,7 +47,7 @@ const runHistogramInteractionTests = () => {
 
     generateAllTestConfigurations(generateHistogramTestConfigurations).forEach((config) => {
       it(`check histogram visibility for ${config.testName}`, () => {
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
         if (config.isHistogramVisible) {
           cy.getElementByTestId('dscChartChartheader').should('be.visible');
@@ -60,7 +60,7 @@ const runHistogramInteractionTests = () => {
 
       it(`check the Auto interval value for ${config.testName}`, () => {
         if (!config.isHistogramVisible) return;
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
         const intervals = ['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
         cy.getElementByTestId('discoverIntervalSelect').should('have.value', intervals[0]);
@@ -105,7 +105,7 @@ const runHistogramInteractionTests = () => {
             .find('button')
             .click({ force: true }); // reset state
         };
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         if (config.isHistogramVisible) {
           // TODO: related bug
           // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9294
@@ -133,7 +133,7 @@ const runHistogramInteractionTests = () => {
 
       it(`check collapse/expand functionality and state persistence for ${config.testName}`, () => {
         if (!config.isHistogramVisible) return;
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.getElementByTestId('dscChartChartheader').should('be.visible');

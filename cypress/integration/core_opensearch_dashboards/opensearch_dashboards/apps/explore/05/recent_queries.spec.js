@@ -61,7 +61,7 @@ const runRecentQueryTests = () => {
       .filter(Boolean) // removes undefined values
       .forEach((config) => {
         it(`check max queries for ${config.testName}`, () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const currentLang = BaseQuery[config.datasetType][config.language.name];
           const currentBaseQuery = currentLang.query;
@@ -143,7 +143,7 @@ const runRecentQueryTests = () => {
         });
 
         it(`check duplicate query for ${config.testName}`, () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const currentLang = BaseQuery[config.datasetType][config.language];
           const currentBaseQuery = currentLang.query;

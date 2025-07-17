@@ -8,7 +8,6 @@ import {
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
-  QueryLanguages,
 } from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
@@ -54,14 +53,14 @@ export const runDisplayTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         // testing the query editor
         if (config.multilineQuery) {
-          cy.getElementByTestId('exploreReusableEditor-top').should('be.visible');
-          cy.getElementByTestId('queryResultCompleteMsg').contains(/Completed in [0-9]+/);
+          cy.getElementByTestId('exploreTopEditor').should('be.visible');
+          cy.getElementByTestId('discoverQueryElapsedMs').should('be.visible');
           cy.getElementByTestId('exploreRecentQueriesButton').click();
           cy.getElementByTestId('recentQueryTable').should('be.visible');
           cy.getElementByTestId('exploreRecentQueriesButton').click();
@@ -84,10 +83,10 @@ export const runDisplayTests = () => {
         );
 
         // testing the language information popup button
-        cy.getElementByTestId('languageReferenceButton').click();
+        cy.getElementByTestId('exploreDetectedLanguage').click();
         cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
         cy.get('.euiPanel').contains(getLanguageReferenceTestText(config.language));
-        cy.getElementByTestId('languageReferenceButton').click();
+        cy.getElementByTestId('exploreDetectedLanguage').click();
 
         // testing the saved queries management button
         cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();

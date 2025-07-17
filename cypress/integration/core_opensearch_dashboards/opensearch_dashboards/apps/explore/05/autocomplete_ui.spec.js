@@ -50,12 +50,12 @@ export const runAutocompleteTests = () => {
         describe(`${config.testName}`, () => {
           it('should verify suggestion widget and its hint', () => {
             // Setup
-            cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.wait(2000);
             cy.explore.clearQueryEditor();
 
-            const editorType = 'exploreReusableEditor-top';
+            const editorType = 'exploreTopEditor';
 
             cy.getElementByTestId(editorType)
               .find('.monaco-editor')
@@ -77,7 +77,7 @@ export const runAutocompleteTests = () => {
 
           it('should build query using mouse interactions', () => {
             // Setup
-            cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.wait(2000);
             cy.explore.clearQueryEditor();
@@ -93,7 +93,7 @@ export const runAutocompleteTests = () => {
           });
 
           it('should build query using keyboard shortcuts', () => {
-            cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.wait(2000);
             cy.explore.clearQueryEditor();

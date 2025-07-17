@@ -249,9 +249,8 @@ export const runSideBarTests = () => {
 
           cy.wait(1000);
 
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
-          // sideBar.removeAllSelectedFields();
         });
 
         it('adds simple fields', () => {
@@ -303,7 +302,7 @@ export const runSideBarTests = () => {
           });
           cy.getElementByTestId('discoverNewButton').click();
           // Setting the dataset and query language again to ensure the date picker is not missing
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
           nestedFieldsToTest.forEach((nestedField) => {
             verifyFieldShowDetailsShowsTopValuesAndViewVisualization(config, nestedField, false);

@@ -57,7 +57,7 @@ const inspectTestSuite = () => {
         });
         cy.getElementByTestId('discoverNewButton').click();
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.intercept('POST', '**/search/*').as('docTablePostRequest');

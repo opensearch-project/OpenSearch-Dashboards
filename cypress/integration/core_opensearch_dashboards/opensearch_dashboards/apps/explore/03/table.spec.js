@@ -84,7 +84,7 @@ export const runTableTests = () => {
       describe(`${config.testName}`, () => {
         it(`should allow expand multiple documents for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
           setDatePickerDatesAndSearchIfRelevant(config.language);
 

@@ -82,7 +82,7 @@ export const runQueryTests = () => {
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         it('should show correct documentation link in language reference popover', () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           // First get the version from help menu
           cy.get('button[aria-label="Help menu"]').click();
           cy.get('.chrHeaderHelpMenu__version')
@@ -120,13 +120,13 @@ export const runQueryTests = () => {
 
                 // If popover is already open, close it first
                 if (isPopoverOpen) {
-                  cy.getElementByTestId('languageReferenceButton').click();
+                  cy.getElementByTestId('exploreDetectedLanguage').click();
                   // Verify it's closed
                   cy.get('.euiPopover__panel-isOpen').should('not.exist');
                 }
 
                 // Now click to open
-                cy.getElementByTestId('languageReferenceButton').click();
+                cy.getElementByTestId('exploreDetectedLanguage').click();
 
                 // Verify popover appears with title
                 cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');

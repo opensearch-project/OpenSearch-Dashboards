@@ -46,7 +46,7 @@ const queriesTestSuite = () => {
 
     describe('send queries', () => {
       it('with PPL', () => {
-        cy.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
+        cy.explore.setIndexPatternAsDataset(`${INDEX_WITH_TIME_1}*`, DATASOURCE_NAME);
         cy.explore.setTopNavDate(START_TIME, END_TIME);
 
         // Default PPL query should be set
@@ -60,12 +60,12 @@ const queriesTestSuite = () => {
           language: 'PPL',
           hitCount: '10,000',
         });
-        cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
         cy.osd.verifyResultsCount(10000);
 
         // Query should persist across refresh
         cy.reload();
-        cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
+        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
 
         // Verify the state again after reload
         verifyDiscoverPageState({
