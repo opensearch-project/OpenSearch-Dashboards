@@ -5,11 +5,14 @@
 
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import React from 'react';
+import dompurify from 'dompurify';
 import { PatternItem } from '../patterns_table';
 import { isValidFiniteNumber } from './utils';
 
 export const PATTERNS_FIELD = 'patterns_field';
-export const COUNT_FIELD = 'count';
+export const COUNT_FIELD = 'pattern_count';
+export const SAMPLE_FIELD = 'sample_logs';
 
 export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
   {
@@ -23,14 +26,18 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
       }
       return `${(val * 100).toFixed(2)}%`;
     },
-    width: '15%',
+    width: '10%',
   },
   {
-    field: 'pattern',
-    name: i18n.translate('explore.patterns.table.column.pattern', {
-      defaultMessage: 'Pattern',
+    field: 'sample',
+    name: i18n.translate('explore.patterns.table.column.sampleLog', {
+      defaultMessage: 'Pattern Sample Log',
     }),
-    render: (pattern: string) => pattern || '—',
+    render: (sample: string) => {
+      const sanitizedSampleLog = dompurify.sanitize(sample);
+      // eslint-disable-next-line react/no-danger
+      return <span dangerouslySetInnerHTML={{ __html: sanitizedSampleLog || '—' }} />;
+    },
   },
   {
     field: 'count',
@@ -44,5 +51,6 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
       return val;
     },
     align: 'right',
+    width: '10%',
   },
 ];

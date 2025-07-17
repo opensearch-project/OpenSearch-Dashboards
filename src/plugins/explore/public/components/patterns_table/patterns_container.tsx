@@ -4,26 +4,32 @@
  */
 
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { PatternItem, PatternsTable } from './patterns_table';
-import { COUNT_FIELD, PATTERNS_FIELD } from './utils/constants';
+import { COUNT_FIELD, PATTERNS_FIELD, SAMPLE_FIELD } from './utils/constants';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
+import { RootState } from '../../application/utils/state_management/store';
+import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
+import { highlightLogUsingPattern } from './utils/utils';
 
 export const PatternsContainer = () => {
-  const { results } = useTabResults();
+  const { results: patternResults } = useTabResults();
 
-  // TODO: Register custom processor for patterns tab if needed
-  //       If no need, feel free to remove this comment
-  // const tabDefinition = services.tabRegistry?.getTab?.('patterns');
-  // const processor = tabDefinition?.resultsProcessor || defaultResultsProcessor;
-  // const processedResults = processor(rawResults, indexPattern);
+  const querySelector = useSelector((state: RootState) => state.query);
+  const resultsSelector = useSelector((state: RootState) => state.results);
 
-  const rows = results?.hits?.hits || [];
+  // the default prepare query is the one for logs, so it uses the user's query and generates the log cache key
+  const logsCacheKey = defaultPrepareQueryString(querySelector);
 
+  const logsResults = resultsSelector[logsCacheKey] ?? null;
+  const logsTotal = logsResults?.hits?.total;
+
+  const hits = patternResults?.hits?.hits || [];
   // Convert rows to pattern items or use default if rows is undefined
-  const items: PatternItem[] = rows?.map((row) => ({
-    pattern: row._source[PATTERNS_FIELD],
-    ratio: row._source[COUNT_FIELD] / 2096, // TODO: pull from total hits
+  const items: PatternItem[] = hits?.map((row: any) => ({
+    ratio: row._source[COUNT_FIELD] / logsTotal,
     count: row._source[COUNT_FIELD],
+    sample: highlightLogUsingPattern(row._source[SAMPLE_FIELD][0], row._source[PATTERNS_FIELD]),
   }));
 
   return <PatternsTable items={items} />;
