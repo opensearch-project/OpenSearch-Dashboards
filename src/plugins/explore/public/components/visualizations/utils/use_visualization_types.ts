@@ -12,7 +12,11 @@ import { AreaChartStyleControls } from '../area/area_vis_config';
 import { IFieldType } from '../../../application/legacy/discover/opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
-import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
+import {
+  OPENSEARCH_FIELD_TYPES,
+  OSD_FIELD_TYPES,
+  PPL_FIELD_TYPES,
+} from '../../../../../data/common';
 import { AxisColumnMappings, AxisRole, ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -20,7 +24,6 @@ import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
 import { UpdateVisualizationProps } from '../visualization_container';
 import { TableChartStyleControls } from '../table/table_vis_config';
-import { PPL_FIELD_TYPES } from '../../../../../query_enhancements/public';
 
 export type ChartType =
   | 'line'
