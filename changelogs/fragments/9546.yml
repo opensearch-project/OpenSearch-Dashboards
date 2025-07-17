@@ -1,0 +1,2 @@
+security:
+- Fix GHSA-vjh7-7g9h-fjfh by bumping elliptic to 6.6.1 ([#9546](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9546))
