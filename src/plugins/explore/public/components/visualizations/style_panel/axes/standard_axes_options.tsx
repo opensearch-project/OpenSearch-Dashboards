@@ -102,7 +102,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
     <StyleAccordion
       id="allAxesSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.allAxes', {
-        defaultMessage: 'Axis',
+        defaultMessage: 'Axes',
       })}
       initialIsOpen={true}
       data-test-subj="standardAxesPanel"
