@@ -36,6 +36,20 @@ export const stubIndexPattern: IIndexPattern = {
   fields: stubFields,
   title: 'logstash-*',
   timeFieldName: '@timestamp',
+  getFieldByName: (name: string) => stubFields.find((f) => f.name === name),
+  getComputedFields: () => ({
+    storedFields: [],
+    scriptFields: {},
+    docvalueFields: [],
+  }),
+  getScriptedFields: () => stubFields.filter((f) => f.scripted),
+  getNonScriptedFields: () => stubFields.filter((f) => !f.scripted),
+  addScriptedField: async (name: string, script: string, fieldType?: string): Promise<void> => {
+    return;
+  },
+  removeScriptedField: () => {
+    return;
+  },
 };
 
 export const stubIndexPatternWithFields: IIndexPattern = {
@@ -51,4 +65,18 @@ export const stubIndexPatternWithFields: IIndexPattern = {
       searchable: true,
     },
   ],
+  getFieldByName: (name: string) => stubFields.find((f) => f.name === name),
+  getComputedFields: () => ({
+    storedFields: [],
+    scriptFields: {},
+    docvalueFields: [],
+  }),
+  getScriptedFields: () => stubFields.filter((f) => f.scripted),
+  getNonScriptedFields: () => stubFields.filter((f) => !f.scripted),
+  addScriptedField: async (name: string, script: string, fieldType?: string): Promise<void> => {
+    return;
+  },
+  removeScriptedField: () => {
+    return;
+  },
 };

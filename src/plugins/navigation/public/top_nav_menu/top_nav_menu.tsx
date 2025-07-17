@@ -39,7 +39,6 @@ import {
   QueryStatus,
   SearchBarProps,
   StatefulSearchBarProps,
-  DatasetSelectProps,
 } from '../../../data/public';
 import { DataSourceMenuProps, createDataSourceMenu } from '../../../data_source_management/public';
 import { MountPointPortal } from '../../../opensearch_dashboards_react/public';

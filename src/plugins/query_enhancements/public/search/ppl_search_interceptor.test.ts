@@ -432,10 +432,6 @@ describe('PPLSearchInterceptor', () => {
           },
         });
 
-      const strategy = SEARCH_STRATEGY.PPL;
-
-      // Create a minimalist test that just checks if buildQuery was called
-      const { id, ...searchRequest } = mockRequest;
       await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
       expect(buildQuerySpy).toHaveBeenCalled();
