@@ -17,6 +17,8 @@ export const createHeatmapWithBin = (
   const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
 
   const colorFieldColumn = axisColumnMappings?.color as any;
+  const colorField = colorFieldColumn?.column;
+  const colorName = colorFieldColumn?.name;
 
   const markLayer: any = {
     mark: {
@@ -39,7 +41,7 @@ export const createHeatmapWithBin = (
         axis: applyAxisStyling(yAxis),
       },
       color: {
-        field: colorFieldColumn?.column,
+        field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
         bin: !styles.exclusive?.useCustomRanges
@@ -52,24 +54,36 @@ export const createHeatmapWithBin = (
         },
         legend: styles.addLegend
           ? {
-              title: colorFieldColumn?.name || 'Metrics',
+              title: colorName || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
+          { field: colorField, type: 'quantitative', title: colorName },
+        ],
+      }),
     },
   };
 
-  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn?.column);
+  enhanceStyle(markLayer, styles, transformedData, colorField);
 
   const baseSpec = {
     $schema: VEGASCHEMA,
     data: { values: transformedData },
-    transform: addTransform(styles, colorFieldColumn?.column),
-    layer: [
-      markLayer,
-      createlabelLayer(styles, false, colorFieldColumn?.column, xAxis, yAxis),
-    ].filter(Boolean),
+    transform: addTransform(styles, colorField),
+    layer: [markLayer, createlabelLayer(styles, false, colorField, xAxis, yAxis)].filter(Boolean),
   };
   return baseSpec;
 };
@@ -83,6 +97,9 @@ export const createRegularHeatmap = (
   const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
 
   const colorFieldColumn = axisColumnMappings?.color!;
+  const colorField = colorFieldColumn?.column;
+  const colorName = colorFieldColumn?.name;
+
   const markLayer: any = {
     mark: {
       type: 'rect',
@@ -103,7 +120,7 @@ export const createRegularHeatmap = (
         axis: applyAxisStyling(yAxis, true),
       },
       color: {
-        field: colorFieldColumn?.column,
+        field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
         bin: !styles.exclusive?.useCustomRanges
@@ -116,24 +133,36 @@ export const createRegularHeatmap = (
         },
         legend: styles.addLegend
           ? {
-              title: colorFieldColumn?.name || 'Metrics',
+              title: colorName || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
+          { field: colorField, type: 'quantitative', title: colorName },
+        ],
+      }),
     },
   };
 
-  enhanceStyle(markLayer, styles, transformedData, colorFieldColumn?.column);
+  enhanceStyle(markLayer, styles, transformedData, colorField);
 
   const baseSpec = {
     $schema: VEGASCHEMA,
     data: { values: transformedData },
-    transform: addTransform(styles, colorFieldColumn?.column),
-    layer: [
-      markLayer,
-      createlabelLayer(styles, true, colorFieldColumn?.column, xAxis, yAxis),
-    ].filter(Boolean),
+    transform: addTransform(styles, colorField),
+    layer: [markLayer, createlabelLayer(styles, true, colorField, xAxis, yAxis)].filter(Boolean),
   };
 
   return baseSpec;

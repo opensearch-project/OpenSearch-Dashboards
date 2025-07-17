@@ -20,6 +20,7 @@ export const createPieSpec = (
   const numericField = thetaColumn?.column;
   const numericName = thetaColumn?.name;
   const categoryField = colorColumn?.column;
+  const categoryName = colorColumn?.name;
 
   const encodingBase = {
     theta: {
@@ -34,6 +35,12 @@ export const createPieSpec = (
         ? { title: numericName, orient: styleOptions.legendPosition, symbolLimit: 10 }
         : null,
     },
+    ...(styleOptions.tooltipOptions?.mode !== 'hidden' && {
+      tooltip: [
+        { field: categoryField, type: 'nominal', title: categoryName },
+        { field: numericField, type: 'quantitative', title: numericName },
+      ],
+    }),
   };
 
   const markLayer = {
