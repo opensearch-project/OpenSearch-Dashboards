@@ -155,6 +155,8 @@ export enum ValueAxisPosition {
  * @param axisIndex The position of the value axis; default value axis is at left
  * @returns The styled axis configuration
  */
+
+// TODO move applyAxisStyling out line folder as it is also used in area
 export const applyAxisStyling = (
   baseAxis: any,
   styles: Partial<LineChartStyleControls>,
