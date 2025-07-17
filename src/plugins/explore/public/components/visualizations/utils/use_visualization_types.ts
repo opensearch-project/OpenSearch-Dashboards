@@ -12,7 +12,11 @@ import { AreaChartStyleControls } from '../area/area_vis_config';
 import { IFieldType } from '../../../application/legacy/discover/opensearch_dashboards_services';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
-import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../../../../data/common';
+import {
+  OPENSEARCH_FIELD_TYPES,
+  OSD_FIELD_TYPES,
+  PPL_FIELD_TYPES,
+} from '../../../../../data/common';
 import { AxisColumnMappings, AxisRole, ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -107,13 +111,25 @@ const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [OPENSEARCH_FIELD_TYPES.DOUBLE]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.INTEGER]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.INT]: VisFieldType.Numerical,
-  [OPENSEARCH_FIELD_TYPES.BIGINT]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.LONG]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.SHORT]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.UNSIGNED_LONG]: VisFieldType.Numerical,
   [OPENSEARCH_FIELD_TYPES.TEXT]: VisFieldType.Categorical,
   [OPENSEARCH_FIELD_TYPES.KEYWORD]: VisFieldType.Categorical,
   [OPENSEARCH_FIELD_TYPES.WILDCARD]: VisFieldType.Categorical,
+
+  // Map rest of PPL_FIELD_TYPES to VisFieldType
+  [PPL_FIELD_TYPES.TINYINT]: VisFieldType.Numerical,
+  [PPL_FIELD_TYPES.SMALLINT]: VisFieldType.Numerical,
+  [PPL_FIELD_TYPES.BIGINT]: VisFieldType.Numerical,
+  [PPL_FIELD_TYPES.TIMESTAMP]: VisFieldType.Date,
+  [PPL_FIELD_TYPES.TIME]: VisFieldType.Date,
+  [PPL_FIELD_TYPES.INTERVAL]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.IP]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.GEO_POINT]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.BINARY]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.STRUCT]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.ARRAY]: VisFieldType.Unknown,
 };
 
 export interface VisualizationTypeResult<T extends ChartType> {

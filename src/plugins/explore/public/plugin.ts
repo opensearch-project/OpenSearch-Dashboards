@@ -258,6 +258,7 @@ export class ExplorePlugin
         // If there's no flavor id, by default redirect to the logs flavor.
         if (!flavor) {
           coreStart.application.navigateToApp(`${PLUGIN_ID}/${ExploreFlavor.Logs}`, {
+            path: '#/',
             replace: true,
           });
           return () => {};
