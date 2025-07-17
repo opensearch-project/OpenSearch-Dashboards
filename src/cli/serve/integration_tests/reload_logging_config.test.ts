@@ -133,6 +133,7 @@ describe('Server logging configuration', function () {
           '--verbose',
         ]);
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
@@ -204,6 +205,7 @@ describe('Server logging configuration', function () {
           configFilePath,
         ]);
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );

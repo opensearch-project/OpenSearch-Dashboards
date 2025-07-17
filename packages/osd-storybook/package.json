@@ -28,7 +28,6 @@
     "autoprefixer": "^10.4.1",
     "babel-loader": "^8.2.3",
     "copy-webpack-plugin": "^6.0.2",
-    "jest-specific-snapshot": "2.0.0",
     "jest-styled-components": "^7.0.8",
     "mkdirp": "0.5.1",
     "mini-css-extract-plugin": "^1.6.0",

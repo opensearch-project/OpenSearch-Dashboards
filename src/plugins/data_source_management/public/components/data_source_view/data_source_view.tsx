@@ -182,10 +182,12 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
+        {/* @ts-expect-error TS2741 TODO(ts-error): fixme */}
         <DataSourceDropDownHeader totalDataSourceCount={1} application={this.props.application} />
         <EuiContextMenuPanel className={'dataSourceViewOuiPanel'}>
           <EuiPanel color="subdued" paddingSize="none" borderRadius="none">
             <EuiSelectable
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
               options={options}
               singleSelection={true}
               data-test-subj={'dataSourceView'}

@@ -56,6 +56,7 @@ interface State {
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
 
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: DashboardReactContextValue;
   private subscription?: Subscription;
   private mounted: boolean = false;

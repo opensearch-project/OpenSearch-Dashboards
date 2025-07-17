@@ -90,7 +90,9 @@ export class VegaAdapter {
       map((debugValues) => {
         const runtimeScope = getVegaRuntimeScope(debugValues);
 
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         return Object.keys(runtimeScope.data || []).reduce((acc: InspectDataSets[], key) => {
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           const value = runtimeScope.data[key].values.value;
 
           if (value && value[0]) {
@@ -114,6 +116,7 @@ export class VegaAdapter {
         const runtimeScope = getVegaRuntimeScope(debugValues);
 
         return merge(
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           ...Object.keys(runtimeScope.signals).map((key: string) =>
             fromEventPattern(
               (handler) => debugValues.view.addSignalListener(key, handler),
@@ -137,10 +140,12 @@ export class VegaAdapter {
             { id: vegaAdapterSignalLabel, schema: 'text' },
             { id: vegaAdapterValueLabel, schema: 'json' },
           ],
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           data: Object.keys(runtimeScope.signals).map((key: string) =>
             serializeColumns(
               {
                 [vegaAdapterSignalLabel]: key,
+                // @ts-expect-error TS2339 TODO(ts-error): fixme
                 [vegaAdapterValueLabel]: runtimeScope.signals[key].value,
               },
               [vegaAdapterSignalLabel, vegaAdapterValueLabel]

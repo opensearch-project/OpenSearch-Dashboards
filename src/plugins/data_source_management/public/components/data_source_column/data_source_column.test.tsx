@@ -57,6 +57,7 @@ describe('DataSourceColumn', () => {
     ];
     const getDataSourcesMock = jest.fn(() => Promise.resolve(dataSources));
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     jest.spyOn(utils, 'getDataSources').mockImplementation(getDataSourcesMock);
 
     await dataSourceColumn.loadData();

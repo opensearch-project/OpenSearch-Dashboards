@@ -368,6 +368,7 @@ export const AccelerationTable = ({
             items={accelerations}
             columns={accelerationTableColumns}
             pagination={pagination}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             sorting={sorting}
           />
         )}

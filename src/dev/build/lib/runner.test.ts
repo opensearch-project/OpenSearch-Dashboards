@@ -72,6 +72,7 @@ const setup = async () => {
     isRelease: true,
     targetAllPlatforms: true,
     versionQualifier: '-SNAPSHOT',
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     targetPlatforms: {
       linux: false,
       linuxArm: false,

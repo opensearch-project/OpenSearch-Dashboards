@@ -34,6 +34,7 @@ import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { SearchSource } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
+// @ts-expect-error TS2741 TODO(ts-error): fixme
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),
   setFields: jest.fn().mockReturnThis(),

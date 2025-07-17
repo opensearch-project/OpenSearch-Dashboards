@@ -51,6 +51,7 @@ const INVALID_TUTORIAL: TutorialSchema = {
   completionTimeMinutes: 10,
   previewImagePath: 'path',
   onPrem: { instructionSets: [], params: [] },
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   OpenSearchCloud: { instructionSets: [], params: [] },
   onPremElasticCloud: { instructionSets: [], params: [] },
   artifacts: {
@@ -73,6 +74,7 @@ const VALID_TUTORIAL: TutorialSchema = {
   completionTimeMinutes: 10,
   previewImagePath: 'path',
   onPrem: { instructionSets: [], params: [] },
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   OpenSearchCloud: { instructionSets: [], params: [] },
   onPremElasticCloud: { instructionSets: [], params: [] },
   artifacts: {

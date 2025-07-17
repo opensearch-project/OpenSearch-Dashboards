@@ -11,10 +11,12 @@ import {
   PluginInitializerContext,
 } from '../../../core/server';
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { createCspRulesPreResponseHandler } from './csp_handlers';
 import { AppPluginSetupDependencies, CspHandlerPluginSetup, CspHandlerPluginStart } from './types';
 
 export class CspHandlerPlugin implements Plugin<CspHandlerPluginSetup, CspHandlerPluginStart> {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

@@ -222,6 +222,12 @@ describe('start', () => {
       // Don't capture the snapshot because it's 600+ lines long.
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
     });
+
+    it('passes injectedMetadata to the Header component', async () => {
+      const { chrome, startDeps } = await start();
+      const headerComponent = shallow(React.createElement(() => chrome.getHeaderComponent()));
+      expect(headerComponent.prop('injectedMetadata')).toBe(startDeps.injectedMetadata);
+    });
   });
 
   describe('visibility', () => {

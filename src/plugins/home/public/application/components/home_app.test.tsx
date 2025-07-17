@@ -7,6 +7,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { setServices } from '../opensearch_dashboards_services';
 import { getMockedServices } from '../opensearch_dashboards_services.mock';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import { ImportSampleDataApp, HomeApp } from './home_app';
 
 jest.mock('./legacy/home', () => ({
@@ -30,6 +31,7 @@ describe('<HomeApp />', () => {
   let currentService: ReturnType<typeof getMockedServices>;
   beforeEach(() => {
     currentService = getMockedServices();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     setServices(currentService);
   });
 
@@ -49,6 +51,7 @@ describe('<ImportSampleDataApp />', () => {
   let currentService: ReturnType<typeof getMockedServices>;
   beforeEach(() => {
     currentService = getMockedServices();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     setServices(currentService);
   });
 

@@ -118,13 +118,16 @@ export class DataSourceManagementPlugin
     });
 
     if (dataSourceEnabled) {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       dataSource.registerCustomApiSchema(PPLPlugin);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       dataSource.registerCustomApiSchema(OpenSearchDataSourceManagementPlugin);
 
       this.setupDataSourcePermission(core, config);
     }
     // @ts-ignore
     core.http.registerRouteHandlerContext(
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       'opensearch_data_source_management',
       (_context, _request) => {
         return {

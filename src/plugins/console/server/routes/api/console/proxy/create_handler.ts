@@ -158,6 +158,7 @@ export const createHandler = ({
     });
     return response.customError({
       statusCode: e.statusCode || 502,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       body: errorResponseBody,
       headers: {
         'Content-Type': 'application/json',

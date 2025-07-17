@@ -161,7 +161,9 @@ describe('DefaultEditorAgg component', () => {
     });
 
     expect(reorderAggs).toHaveBeenCalledWith(
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       defaultProps.state.data.aggs!.aggs[0],
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       defaultProps.state.data.aggs!.aggs[1]
     );
   });

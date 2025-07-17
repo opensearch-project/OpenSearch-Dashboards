@@ -86,6 +86,7 @@ describe('sample data list route', () => {
       dataSource: {
         opensearch: {
           legacy: {
+            // @ts-expect-error TS7006 TODO(ts-error): fixme
             getClient: (id) => {
               return {
                 callAPI: mockClient,
@@ -192,6 +193,7 @@ describe('sample data list route', () => {
       dataSource: {
         opensearch: {
           legacy: {
+            // @ts-expect-error TS7006 TODO(ts-error): fixme
             getClient: (id) => {
               return {
                 callAPI: mockClient,

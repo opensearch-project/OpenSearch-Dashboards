@@ -1,0 +1,2 @@
+chore:
+- Use `// @ts-expect-error` instead of ts_error_baseline ([#9931](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9931))

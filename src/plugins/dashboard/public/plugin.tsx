@@ -373,7 +373,7 @@ export class DashboardPlugin
       title: 'Dashboards',
       order: 2500,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-      euiIconType: 'inputOutput',
+      euiIconType: core.chrome.navGroup.getNavGroupEnabled() ? 'dashboard' : 'inputOutput',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
@@ -431,6 +431,7 @@ export class DashboardPlugin
           uiSettings: coreStart.uiSettings,
           savedQueryService: dataStart.query.savedQueries,
           embeddable: embeddableStart,
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
           embeddableCapabilities: {
             visualizeCapabilities: coreStart.application.capabilities.visualize,

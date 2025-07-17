@@ -31,6 +31,7 @@
       - [I18n](../src/dev/i18n/README.md)
     - plugins
       - [Application_config](../src/plugins/application_config/README.md)
+      - [Banner](../src/plugins/banner/README.md)
       - [Bfetch](../src/plugins/bfetch/README.md)
       - [Charts](../src/plugins/charts/README.md)
       - console
@@ -196,6 +197,7 @@
     - [Opensearch dashboards.release notes 3.0.0 alpha1](../release-notes/opensearch-dashboards.release-notes-3.0.0-alpha1.md)
     - [Opensearch dashboards.release notes 3.0.0 beta1](../release-notes/opensearch-dashboards.release-notes-3.0.0-beta1.md)
     - [Opensearch dashboards.release notes 3.0.0](../release-notes/opensearch-dashboards.release-notes-3.0.0.md)
+    - [Opensearch dashboards.release notes 3.1.0](../release-notes/opensearch-dashboards.release-notes-3.1.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)

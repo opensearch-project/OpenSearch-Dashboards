@@ -109,6 +109,7 @@ export class DataSourceSavedObjectsClientWrapper {
             wrapperOptions,
             id,
             attributes,
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             options
           );
 
@@ -149,6 +150,7 @@ export class DataSourceSavedObjectsClientWrapper {
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
     await this.validateAttributes(attributes);
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { endpoint, auth } = attributes;
 
     switch (auth.type) {
@@ -186,6 +188,7 @@ export class DataSourceSavedObjectsClientWrapper {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions = {}
   ) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { auth, endpoint } = attributes;
 
     if (endpoint) {
@@ -252,6 +255,7 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private async validateAttributes<T = unknown>(attributes: T) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { title, endpoint, auth } = attributes;
     this.validateTitle(title);
     this.validateEndpoint(endpoint);
@@ -285,6 +289,7 @@ export class DataSourceSavedObjectsClientWrapper {
       throw SavedObjectsErrorHelpers.createBadRequestError('"auth" attribute is required');
     }
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { type, credentials } = auth;
 
     if (!type) {
@@ -476,6 +481,7 @@ export class DataSourceSavedObjectsClientWrapper {
     encryptionContext: EncryptionContext
   ) {
     const {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       credentials: { username, password },
     } = auth;
 
@@ -490,6 +496,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
   private async encryptSigV4Credential<T = unknown>(auth: T, encryptionContext: EncryptionContext) {
     const {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       credentials: { accessKey, secretKey, region, service },
     } = auth;
 

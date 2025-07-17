@@ -34,6 +34,7 @@ const props: DiscoverResultsActionBarProps = {
   showResetButton: false,
   resetQuery: jest.fn(),
   rows: [mockRow1],
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   isEnhancementsEnabled: true,
   indexPattern: {} as any,
 };

@@ -128,7 +128,7 @@ export interface StartDeps {
   workspaces: WorkspacesStart;
 }
 
-type CollapsibleNavHeaderRender = () => JSX.Element | null;
+export type CollapsibleNavHeaderRender = (props: { isNavOpen: boolean }) => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {
@@ -420,6 +420,7 @@ export class ChromeService {
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
           globalSearchCommands={globalSearch.getAllSearchCommands()}
+          injectedMetadata={injectedMetadata}
         />
       ),
 

@@ -35,6 +35,7 @@ describe('Remote Connections', () => {
 
       mockHttp.get.mockResolvedValueOnce(mockResponse);
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = await getRemoteClusterConnections(mockDataSource, mockHttp);
 
       expect(mockHttp.get).toHaveBeenCalledWith('/api/enhancements/remote_cluster/list', {
@@ -54,6 +55,7 @@ describe('Remote Connections', () => {
     it('should return empty array when API call fails', async () => {
       mockHttp.get.mockRejectedValueOnce(new Error('API Error'));
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = await getRemoteClusterConnections(mockDataSource, mockHttp);
 
       expect(result).toEqual([]);
@@ -85,6 +87,7 @@ describe('Remote Connections', () => {
       mockHttp.get.mockResolvedValueOnce(mockRemoteConnections);
       mockHttp.get.mockResolvedValueOnce([]);
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = await populateRemoteClusterConnectionForDatasources(mockDataSources, mockHttp);
 
       expect(result).toHaveLength(2);
@@ -95,6 +98,7 @@ describe('Remote Connections', () => {
     it('should handle API errors gracefully', async () => {
       mockHttp.get.mockRejectedValue(new Error('API Error'));
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = await populateRemoteClusterConnectionForDatasources(mockDataSources, mockHttp);
 
       expect(result).toHaveLength(2);

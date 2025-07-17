@@ -163,6 +163,7 @@ export class UiActionsService {
     // by this type of trigger, typescript will complain. yay!
     action: ActionDefinition<TriggerContextMapping[T]> | Action<TriggerContextMapping[T]> // TODO: remove `Action` https://github.com/elastic/kibana/issues/74501
   ): void => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
   };

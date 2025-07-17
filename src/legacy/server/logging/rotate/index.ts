@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error TS2614, TS2724 TODO(ts-error): fixme
 import { isMaster as isClusterManager, isWorker } from 'cluster';
 import { Server } from '@hapi/hapi';
 import { LogRotator } from './log_rotator';
