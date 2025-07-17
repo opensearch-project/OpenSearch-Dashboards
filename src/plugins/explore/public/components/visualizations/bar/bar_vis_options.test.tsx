@@ -54,57 +54,6 @@ jest.mock('@osd/i18n', () => ({
     translate: jest.fn().mockImplementation((id, { defaultMessage }) => defaultMessage),
   },
 }));
-
-jest.mock('../style_panel/axes/standard_axes_options', () => ({
-  AllAxesOptions: jest.fn(({ standardAxes, onStandardAxesChange }) => (
-    <div data-test-subj="allAxesOptions">
-      <button
-        data-test-subj="changeAxis"
-        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
-      >
-        Change Axis
-      </button>
-      <button
-        data-test-subj="mockUpdateValueAxes"
-        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
-      >
-        Update Value Axes
-      </button>
-    </div>
-  )),
-}));
-
-jest.mock('../style_panel/tooltip/tooltip', () => ({
-  TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
-    <div data-test-subj="mockTooltipOptionsPanel">
-      <button
-        data-test-subj="mockUpdateTooltip"
-        onClick={() => onTooltipOptionsChange({ ...tooltipOptions, mode: 'hidden' })}
-      >
-        Update Tooltip
-      </button>
-    </div>
-  )),
-}));
-
-jest.mock('../style_panel/legend/legend', () => ({
-  LegendOptionsPanel: jest.fn(({ addLegend, legendPosition, onLegendOptionsChange }) => (
-    <div data-test-subj="mockLegendOptionsPanel">
-      <button
-        data-test-subj="mockLegendShow"
-        onClick={() => onLegendOptionsChange({ addLegend: !addLegend })}
-      >
-        Toggle Legend
-      </button>
-      <button
-        data-test-subj="mockLegendPosition"
-        onClick={() => onLegendOptionsChange({ legendPosition: 'bottom' })}
-      >
-        Change Legend Position
-      </button>
-    </div>
-  )),
-}));
 jest.mock('../style_panel/axes/axes_selector', () => ({
   AxesSelectPanel: jest.fn(
     ({
@@ -139,14 +88,61 @@ jest.mock('../style_panel/threshold/threshold', () => ({
   )),
 }));
 
-jest.mock('../style_panel/grid/grid', () => ({
-  GridOptionsPanel: jest.fn(({ grid, onGridChange }) => (
-    <div data-test-subj="mockGridOptionsPanel">
+jest.mock('../style_panel/legend/legend', () => {
+  // Import Positions inside the mock to avoid reference error
+  const { Positions: PositionsEnum } = jest.requireActual('../types');
+
+  return {
+    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => {
+      if (!shouldShowLegend) return null;
+      return (
+        <div data-test-subj="mockLegendOptionsPanel">
+          <button
+            data-test-subj="mockLegendShow"
+            onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+          >
+            Toggle Legend
+          </button>
+          <button
+            data-test-subj="mockLegendPosition"
+            onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
+          >
+            Change Position
+          </button>
+          <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
+        </div>
+      );
+    }),
+  };
+});
+
+jest.mock('../style_panel/tooltip/tooltip', () => ({
+  TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
+    <div data-test-subj="mockTooltipOptionsPanel">
       <button
-        data-test-subj="mockUpdateGrid"
-        onClick={() => onGridChange({ switchAxes: !grid.switchAxes })}
+        data-test-subj="mockUpdateTooltip"
+        onClick={() => onTooltipOptionsChange({ mode: 'hidden' })}
       >
-        Update Grid
+        Update Tooltip
+      </button>
+    </div>
+  )),
+}));
+
+jest.mock('../style_panel/axes/standard_axes_options', () => ({
+  AllAxesOptions: jest.fn(({ standardAxes, onStandardAxesChange }) => (
+    <div data-test-subj="allAxesOptions">
+      <button
+        data-test-subj="changeAxis"
+        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
+      >
+        Change Axis
+      </button>
+      <button
+        data-test-subj="mockUpdateValueAxes"
+        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
+      >
+        Update Value Axes
       </button>
     </div>
   )),
@@ -209,8 +205,6 @@ describe('BarVisStyleControls', () => {
   });
 
   test('renders with default props for regular bar chart and should not show legend panel', () => {
-    // For this test, we'll skip checking for the legend panel
-    // since the mock doesn't support conditional rendering
     render(
       <Provider store={store}>
         <BarVisStyleControls {...defaultProps} />
@@ -221,9 +215,9 @@ describe('BarVisStyleControls', () => {
     expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockBarExclusiveVisOptions')).toBeInTheDocument();
-    // We're not checking for the legend panel here since our mock doesn't support conditional rendering
   });
 
   test('shows legend when there are multiple metrics', () => {
@@ -245,7 +239,6 @@ describe('BarVisStyleControls', () => {
     render(
       <Provider store={store}>
         <BarVisStyleControls {...propsWithMultipleMetrics} />
-        <div data-test-subj="shouldShowLegend">true</div>
       </Provider>
     );
 
@@ -269,12 +262,7 @@ describe('BarVisStyleControls', () => {
       ],
     };
 
-    render(
-      <Provider store={store}>
-        <BarVisStyleControls {...propsWithMultipleCategories} />
-        <div data-test-subj="shouldShowLegend">true</div>
-      </Provider>
-    );
+    render(<BarVisStyleControls {...propsWithMultipleCategories} />);
 
     // Check if legend should be shown
     expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
@@ -283,15 +271,15 @@ describe('BarVisStyleControls', () => {
   test('calls onStyleChange with correct parameters for legend options', () => {
     // For this test, we'll directly test the mock's callback
     const onLegendOptionsChange = jest.fn();
-    const addLegend = true;
-    const legendPosition = 'right';
+    const shouldShowLegend = true;
+    const legendOptions = { show: true };
 
     // Render the mock directly
     render(
       <div>
         {jest.requireMock('../style_panel/legend/legend').LegendOptionsPanel({
-          addLegend,
-          legendPosition,
+          shouldShowLegend,
+          legendOptions,
           onLegendOptionsChange,
         })}
       </div>
@@ -299,11 +287,11 @@ describe('BarVisStyleControls', () => {
 
     // Test legend show toggle
     fireEvent.click(screen.getByTestId('mockLegendShow'));
-    expect(onLegendOptionsChange).toHaveBeenCalledWith({ addLegend: !addLegend });
+    expect(onLegendOptionsChange).toHaveBeenCalledWith({ show: !legendOptions.show });
 
     // Test legend position change
     fireEvent.click(screen.getByTestId('mockLegendPosition'));
-    expect(onLegendOptionsChange).toHaveBeenCalledWith({ legendPosition: 'bottom' });
+    expect(onLegendOptionsChange).toHaveBeenCalledWith({ position: 'bottom' });
   });
 
   test('calls onStyleChange with correct parameters for threshold options', () => {
@@ -350,32 +338,6 @@ describe('BarVisStyleControls', () => {
     expect(onStyleChange).toHaveBeenCalledWith({
       standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
     });
-
-    // Test value axes update
-    fireEvent.click(screen.getByTestId('mockUpdateValueAxes'));
-    expect(onStyleChange).toHaveBeenCalledWith({
-      standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
-    });
-  });
-
-  test('calls onStyleChange with correct parameters for grid options', () => {
-    // For this test, we'll directly test the mock's callback
-    const onGridChange = jest.fn();
-    const grid = { switchAxes: false };
-
-    // Render the mock directly
-    render(
-      <div>
-        {jest.requireMock('../style_panel/grid/grid').GridOptionsPanel({
-          grid,
-          onGridChange,
-        })}
-      </div>
-    );
-
-    // Test grid update
-    fireEvent.click(screen.getByTestId('mockUpdateGrid'));
-    expect(onGridChange).toHaveBeenCalledWith({ switchAxes: !grid.switchAxes });
   });
 
   test('calls onStyleChange with correct parameters for bar exclusive options', () => {
