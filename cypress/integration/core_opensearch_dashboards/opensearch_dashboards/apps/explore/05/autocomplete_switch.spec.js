@@ -45,7 +45,7 @@ export const runAutocompleteTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -60,8 +60,9 @@ export const runAutocompleteTests = () => {
     generateAutocompleteTestConfigurations(generateAutocompleteTestConfiguration, {
       languageConfig: LanguageConfigs.SQL_PPL,
     }).forEach((config) => {
+      // Since the query is no longer updated with source=<dataset>, this test is no longer needed
       describe(`${config.testName}`, () => {
-        it('should update default query when switching index patterns and languages', () => {
+        it.skip('should update default query when switching index patterns and languages', () => {
           // Setup
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
@@ -70,13 +71,13 @@ export const runAutocompleteTests = () => {
           const secondDataset = getDatasetName('data_logs_small_time_2', config.datasetType);
 
           // Verify initial default query
-          cy.getElementByTestId('exploreReusableEditor').contains(firstDataset);
+          cy.getElementByTestId('exploreTopEditor').contains(firstDataset);
 
           // Switch to second index pattern
           cy.setDataset(secondDataset, DATASOURCE_NAME, config.datasetType);
 
           // Verify query updated for new index pattern
-          cy.getElementByTestId('exploreReusableEditor').contains(secondDataset);
+          cy.getElementByTestId('exploreTopEditor').contains(secondDataset);
         });
       });
     });

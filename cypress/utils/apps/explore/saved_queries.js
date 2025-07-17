@@ -182,8 +182,8 @@ export const verifyAlternateDiscoverPageState = ({
   }
 
   if (startTime && endTime) {
-    cy.getElementByTestId('osdQueryEditorUpdateButton').contains(startTime).should('exist');
-    cy.getElementByTestId('osdQueryEditorUpdateButton').contains(endTime).should('exist');
+    cy.getElementByTestId('discoverIntervalDateRange').contains(startTime).should('exist');
+    cy.getElementByTestId('discoverIntervalDateRange').contains(endTime).should('exist');
   }
 };
 
@@ -235,7 +235,8 @@ export const setAlternateQueryConfigurations = ({ filters, queryString, histogra
  */
 export const verifyQueryDoesNotExistInSavedQueries = (deletedQueryName) => {
   cy.reload();
-  cy.getElementByTestId('saved-query-management-popover-button').click();
+  cy.wait(3000);
+  cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
   cy.getElementByTestId('saved-query-management-open-button').click();
   cy.getElementByTestId('savedQueriesFlyoutBody').contains(deletedQueryName).should('not.exist');
   // Two references to two buttons layered over each other.
@@ -249,7 +250,7 @@ export const verifyQueryDoesNotExistInSavedQueries = (deletedQueryName) => {
 export const updateAndVerifySavedQuery = (config) => {
   // Create alternate config
   const alternateConfig = generateAlternateTestConfiguration(config);
-  cy.loadSavedQuery(config.saveName);
+  cy.explore.loadSavedQuery(config.saveName);
 
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
@@ -262,10 +263,11 @@ export const updateAndVerifySavedQuery = (config) => {
 
   setAlternateQueryConfigurations(alternateConfig);
   verifyAlternateDiscoverPageState(alternateConfig);
-  cy.updateSavedQuery('', false, true, true);
+  cy.explore.updateSavedQuery('', false, true, true);
 
   cy.reload();
-  cy.loadSavedQuery(config.saveName);
+  cy.wait(3000);
+  cy.explore.loadSavedQuery(config.saveName);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
   verifyAlternateDiscoverPageState(alternateConfig);
@@ -277,7 +279,7 @@ export const updateAndVerifySavedQuery = (config) => {
  */
 export const validateSaveAsNewQueryMatchingNameHasError = (matchingName) => {
   cy.whenTestIdNotFound('saved-query-management-popover', () => {
-    cy.getElementByTestId('saved-query-management-popover-button').click();
+    cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
   });
   cy.getElementByTestId('saved-query-management-save-button').click();
 

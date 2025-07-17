@@ -58,7 +58,7 @@ export const runTableTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -84,7 +84,7 @@ export const runTableTests = () => {
       describe(`${config.testName}`, () => {
         it(`should allow expand multiple documents for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
           setDatePickerDatesAndSearchIfRelevant(config.language);
 

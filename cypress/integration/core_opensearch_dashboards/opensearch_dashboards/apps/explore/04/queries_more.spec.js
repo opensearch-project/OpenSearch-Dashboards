@@ -51,7 +51,7 @@ export const runQueryTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -68,7 +68,7 @@ export const runQueryTests = () => {
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         it('should highlight filter and query field', () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const query = `unique_category:Caching`;
           cy.setQueryEditor(query);
@@ -85,7 +85,7 @@ export const runQueryTests = () => {
 
           // Get dataset names based on type
           const noTime = getDatasetName(INDEX_WITHOUT_TIME_1, config.datasetType);
-          cy.setDataset(noTime, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(noTime, DATASOURCE_NAME, config.datasetType);
           cy.setQueryEditor(query);
           cy.submitFilterFromDropDown('category', 'is', 'Database', true);
           getDocTableField(0, 0).within(() => {
