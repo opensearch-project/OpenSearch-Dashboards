@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { isEmpty } from 'lodash';
@@ -26,9 +26,10 @@ export const ResultsSummary: React.FC = () => {
   const isSummaryAgentAvailable = useSelector(selectSummaryAgentIsAvailable);
 
   const [summary, setSummary] = useState(''); // store fetched data
-  const [loading, setLoading] = useState(false); // track loading state
+  const [loading, setLoading] = useState(true); // track loading state
   const [feedback, setFeedback] = useState(FeedbackStatus.NONE);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [generateError, setGenerateError] = useState(false);
 
   const usageCollection = getUsageCollector();
   const { reportMetric, reportCountMetric } = useMetrics(usageCollection);
@@ -57,14 +58,9 @@ export const ResultsSummary: React.FC = () => {
     [queryResults]
   );
 
-  useEffect(() => {
-    // Close popover and reset summary when a query is re-executed
-    setIsPopoverOpen(false);
-    setSummary('');
-  }, [queryResults, setIsPopoverOpen, setSummary]);
-
   // The visibility of panel action buttons: thumbs up/down and copy to clipboard buttons
-  const actionButtonVisible = Boolean(summary) && !loading && queryExecutedInPromptMode;
+  const actionButtonVisible =
+    Boolean(summary) && !loading && queryExecutedInPromptMode && !generateError;
 
   const fetchSummary = useCallback(
     async ({ question, query, queryRes }: { question: string; query: string; queryRes: any }) => {
@@ -72,6 +68,7 @@ export const ResultsSummary: React.FC = () => {
         return;
       }
 
+      setGenerateError(false);
       setLoading(true);
       setFeedback(FeedbackStatus.NONE);
 
@@ -103,12 +100,32 @@ export const ResultsSummary: React.FC = () => {
             defaultMessage: 'I am unable to respond to this query. Try another question.',
           })
         );
+        setGenerateError(true);
       } finally {
         setLoading(false);
       }
     },
     [http, reportCountMetric, dataSetState?.dataSource?.id, summary, queryStatus]
   );
+
+  useEffect(() => {
+    // Close popover and reset summary when a query is re-executed
+    setIsPopoverOpen(false);
+    setSummary('');
+  }, [queryResults, setIsPopoverOpen, setSummary]);
+
+  const autoTriggered = useRef(false);
+  // Trigger auto generating for the first query
+  useEffect(() => {
+    if (!autoTriggered.current && !isEmpty(queryResults)) {
+      autoTriggered.current = true;
+      fetchSummary({
+        question: lastExecutedPrompt,
+        query: queryState.query,
+        queryRes: queryResults,
+      });
+    }
+  }, [queryResults, queryState.query, lastExecutedPrompt, fetchSummary]);
 
   const onFeedback = useCallback(
     (satisfied: boolean) => {
@@ -141,6 +158,7 @@ export const ResultsSummary: React.FC = () => {
       sampleSize={SUMMARY_REQUEST_SAMPLE_SIZE}
       isPopoverOpen={isPopoverOpen}
       setIsPopoverOpen={setIsPopoverOpen}
+      generateError={generateError}
     />
   );
 };
