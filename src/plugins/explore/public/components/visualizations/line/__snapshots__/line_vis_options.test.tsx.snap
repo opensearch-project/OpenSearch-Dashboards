@@ -28,6 +28,7 @@ exports[`LineVisStyleControls handles empty column arrays gracefully 1`] = `
       "name": "Basic",
     }
   }
+  preserveTabContent={false}
   size="s"
   tabs={
     Array [
@@ -165,6 +166,7 @@ exports[`LineVisStyleControls renders without crashing 1`] = `
       "name": "Basic",
     }
   }
+  preserveTabContent={false}
   size="s"
   tabs={
     Array [
