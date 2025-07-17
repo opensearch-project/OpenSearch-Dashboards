@@ -34,8 +34,8 @@ jest.mock('../../../../../../data/public', () => ({
   },
 }));
 
-jest.mock('../../../components/index_pattern_context', () => ({
-  useIndexPatternContext: jest.fn(),
+jest.mock('../../../context', () => ({
+  useDatasetContext: jest.fn(),
 }));
 
 jest.mock('../use_editor_query_text', () => ({

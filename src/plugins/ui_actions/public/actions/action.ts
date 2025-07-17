@@ -65,6 +65,7 @@ export type ActionDefinitionContext<Context extends BaseContext = BaseContext> =
   | Context
   | ActionExecutionContext<Context>;
 
+// @ts-expect-error TS2430 TODO(ts-error): fixme
 export interface Action<Context extends BaseContext = {}, T = ActionType>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
   /**

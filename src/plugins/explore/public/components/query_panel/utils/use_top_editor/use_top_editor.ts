@@ -7,23 +7,21 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { monaco } from '@osd/monaco';
 import { useSelector } from 'react-redux';
 import {
-  selectEditorMode,
   selectQueryLanguage,
+  selectTopEditorIsQueryMode,
 } from '../../../../application/utils/state_management/selectors';
 import { useSharedEditor } from '../use_shared_editor';
 import { promptEditorOptions, queryEditorOptions } from '../editor_options';
 import { UseEditorReturnType } from '../types';
-import { EditorMode } from '../../../../application/utils/state_management/types';
 import { useEditorRefs, useTopEditorText } from '../../../../application/hooks';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
 export const useTopEditor = (): UseEditorReturnType => {
   const queryLanguage = useSelector(selectQueryLanguage);
-  const editorMode = useSelector(selectEditorMode);
   const text = useTopEditorText();
   const { topEditorRef } = useEditorRefs();
-  const isQueryMode = editorMode === EditorMode.SingleQuery;
+  const isQueryMode = useSelector(selectTopEditorIsQueryMode);
 
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally setting it false
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode

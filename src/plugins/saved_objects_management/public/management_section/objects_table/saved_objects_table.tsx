@@ -202,6 +202,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       currentWorkspace: this.props.workspaces.currentWorkspace$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
       workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
@@ -373,6 +374,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const workspace = this.props.workspaces;
     this.currentWorkspaceSubscription = workspace.currentWorkspace$.subscribe((newValue) =>
       this.setState({
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         currentWorkspace: newValue,
       })
     );
@@ -1214,11 +1216,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           useUpdatedUX={useUpdatedUX}
           navigationUI={navigationUI}
           applications={applications}
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           currentWorkspaceName={currentWorkspace?.name}
           showImportButton={!workspaceEnabled || !!currentWorkspace}
         />
         {!useUpdatedUX && <EuiSpacer size="xs" />}
         <RedirectAppLinks application={applications}>
+          {/* @ts-expect-error TS2741 TODO(ts-error): fixme */}
           <Table
             basePath={http.basePath}
             itemId={'id'}
@@ -1230,6 +1234,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onTableChange={this.onTableChange}
             filters={filters}
             onExport={this.onExport}
+            // @ts-expect-error TS2532 TODO(ts-error): fixme
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
             onDuplicate={() =>

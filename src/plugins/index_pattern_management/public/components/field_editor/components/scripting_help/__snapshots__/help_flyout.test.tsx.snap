@@ -16,6 +16,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
           "name": "Syntax",
         }
       }
+      preserveTabContent={false}
       size="s"
       tabs={
         Array [
@@ -58,6 +59,7 @@ exports[`ScriptingHelpFlyout should render nothing if not visible 1`] = `
           "name": "Syntax",
         }
       }
+      preserveTabContent={false}
       size="s"
       tabs={
         Array [

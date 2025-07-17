@@ -4,7 +4,6 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { SaveQueryButton } from './save_query';
 import { DateTimeRangePicker } from './date_time_range_picker';
 import { RunQueryButton } from './run_query_button';
@@ -12,14 +11,12 @@ import { FilterPanelToggle } from './filter_panel_toggle';
 import { RecentQueriesButton } from './recent_queries_button';
 import { useDatasetContext } from '../../../application/context';
 import { DetectedLanguage } from './detected_language';
-import { QueryResult, ResultStatus } from '../../../../../data/public';
-import { selectQueryStatus } from '../../../application/utils/state_management/selectors';
+import { QueryPanelError } from './query_panel_error';
 import './query_panel_footer.scss';
 
 export const QueryPanelFooter = () => {
   const { dataset } = useDatasetContext();
   const showDatePicker = Boolean(dataset?.timeFieldName);
-  const queryStatus = useSelector(selectQueryStatus);
 
   return (
     <div className="exploreQueryPanelFooter">
@@ -32,7 +29,7 @@ export const QueryPanelFooter = () => {
         <SaveQueryButton />
         <div className="exploreQueryPanelFooter__verticalSeparator" />
         <DetectedLanguage />
-        {queryStatus.status === ResultStatus.ERROR && <QueryResult queryStatus={queryStatus} />}
+        <QueryPanelError />
       </div>
 
       {/* Right Section */}

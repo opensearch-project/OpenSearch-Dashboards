@@ -203,18 +203,20 @@ export class VisBuilderPlugin
         visualizations: {
           docTypes: [VISBUILDER_SAVED_OBJECT],
           toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
-            description: attributes?.description,
+            description: attributes?.description as string,
             editApp: PLUGIN_ID,
             editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
             icon: 'visBuilder',
             id,
             savedObjectType: VISBUILDER_SAVED_OBJECT,
-            title: attributes?.title,
+            title: attributes?.title as string,
             typeTitle: VIS_BUILDER_CHART_TYPE,
             updated_at: updatedAt,
+            stage: 'production',
           }),
         },
       },
+      stage: 'production',
     });
 
     return {

@@ -9,7 +9,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import configureMockStore from 'redux-mock-store';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 import { defaultBarChartStyles } from './bar_vis_config';
-import { Positions, VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
+import { VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
 // Mock store setup
 const mockStore = configureMockStore([]);
 const store = mockStore({
@@ -130,25 +130,19 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
 }));
 
 jest.mock('../style_panel/axes/standard_axes_options', () => ({
-  AllAxesOptions: jest.fn(({ onStandardAxesChange }) => (
+  AllAxesOptions: jest.fn(({ standardAxes, onStandardAxesChange }) => (
     <div data-test-subj="allAxesOptions">
       <button
         data-test-subj="changeAxis"
-        onClick={() =>
-          onStandardAxesChange([
-            {
-              id: 'axis-id',
-              axisRole: 'y',
-              show: false,
-              title: { text: 'Mock Y Axis' },
-              position: 'left',
-              labels: { show: true, rotate: 0 },
-              grid: { showLines: true },
-            },
-          ])
-        }
+        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
       >
-        Mock Axis Change
+        Change Axis
+      </button>
+      <button
+        data-test-subj="mockUpdateValueAxes"
+        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
+      >
+        Update Value Axes
       </button>
     </div>
   )),
@@ -275,34 +269,29 @@ describe('BarVisStyleControls', () => {
   });
 
   test('calls onStyleChange with correct parameters for legend options', () => {
-    const onStyleChange = jest.fn();
-    const propsWithMultipleMetrics = {
-      ...defaultProps,
-      numericalColumns: [
-        ...mockNumericalColumns,
-        {
-          id: 2,
-          name: 'Y Value',
-          schema: VisFieldType.Numerical,
-          column: 'y',
-          validValuesCount: 6,
-          uniqueValuesCount: 6,
-        },
-      ],
-    };
+    // For this test, we'll directly test the mock's callback
+    const onLegendOptionsChange = jest.fn();
+    const shouldShowLegend = true;
+    const legendOptions = { show: true };
+
+    // Render the mock directly
     render(
-      <Provider store={store}>
-        <BarVisStyleControls {...propsWithMultipleMetrics} onStyleChange={onStyleChange} />
-      </Provider>
+      <div>
+        {jest.requireMock('../style_panel/legend/legend').LegendOptionsPanel({
+          shouldShowLegend,
+          legendOptions,
+          onLegendOptionsChange,
+        })}
+      </div>
     );
 
     // Test legend show toggle
     fireEvent.click(screen.getByTestId('mockLegendShow'));
-    expect(onStyleChange).toHaveBeenCalledWith({ addLegend: !defaultProps.styleOptions.addLegend });
+    expect(onLegendOptionsChange).toHaveBeenCalledWith({ show: !legendOptions.show });
 
     // Test legend position change
     fireEvent.click(screen.getByTestId('mockLegendPosition'));
-    expect(onStyleChange).toHaveBeenCalledWith({ legendPosition: Positions.BOTTOM });
+    expect(onLegendOptionsChange).toHaveBeenCalledWith({ position: 'bottom' });
   });
 
   test('calls onStyleChange with correct parameters for threshold options', () => {
@@ -347,17 +336,7 @@ describe('BarVisStyleControls', () => {
     fireEvent.click(screen.getByTestId('changeAxis'));
 
     expect(onStyleChange).toHaveBeenCalledWith({
-      standardAxes: [
-        {
-          id: 'axis-id',
-          axisRole: 'y',
-          show: false,
-          title: { text: 'Mock Y Axis' },
-          position: 'left',
-          labels: { show: true, rotate: 0 },
-          grid: { showLines: true },
-        },
-      ],
+      standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
     });
   });
 

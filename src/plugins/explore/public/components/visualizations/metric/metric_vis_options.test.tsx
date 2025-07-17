@@ -20,16 +20,14 @@ jest.mock('@osd/i18n', () => ({
 describe('MetricVisStyleControls', () => {
   const mockProps: MetricVisStyleControlsProps = {
     axisColumnMappings: {
-      value: [
-        {
-          id: 1,
-          name: 'value',
-          schema: VisFieldType.Numerical,
-          column: 'field-1',
-          validValuesCount: 1,
-          uniqueValuesCount: 1,
-        },
-      ] as any,
+      value: {
+        id: 1,
+        name: 'value',
+        schema: VisFieldType.Numerical,
+        column: 'field-1',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
     },
     updateVisualization: jest.fn(),
     styleOptions: defaultMetricChartStyles,
@@ -196,7 +194,7 @@ describe('MetricVisStyleControls', () => {
       styleOptions: { ...defaultMetricChartStyles, useColor: true },
     };
     renderWithProvider(<MetricVisStyleControls {...propsWithColor} />);
-    const colorSchemaSelect = screen.getByRole('combobox');
+    const colorSchemaSelect = screen.getByTestId('colorSchemaSelect');
     fireEvent.change(colorSchemaSelect, { target: { value: 'greens' } });
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ colorSchema: 'greens' });

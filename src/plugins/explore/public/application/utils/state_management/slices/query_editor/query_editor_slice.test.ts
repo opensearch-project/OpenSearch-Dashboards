@@ -30,7 +30,7 @@ describe('QueryEditor Slice', () => {
       status: QueryExecutionStatus.UNINITIALIZED,
       elapsedMs: undefined,
       startTime: undefined,
-      body: undefined,
+      error: undefined,
     },
     editorMode: DEFAULT_EDITOR_MODE,
     promptModeIsAvailable: false,
@@ -55,14 +55,14 @@ describe('QueryEditor Slice', () => {
             status: QueryExecutionStatus.LOADING,
             elapsedMs: 100,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         },
         overallQueryStatus: {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: 100,
           startTime: Date.now(),
-          body: undefined,
+          error: undefined,
         },
         editorMode: EditorMode.DualQuery,
         promptModeIsAvailable: true,
@@ -86,7 +86,7 @@ describe('QueryEditor Slice', () => {
         status: QueryExecutionStatus.LOADING,
         elapsedMs: 150,
         startTime: Date.now(),
-        body: undefined,
+        error: undefined,
       };
 
       const action = setIndividualQueryStatus({ cacheKey, status });
@@ -106,13 +106,13 @@ describe('QueryEditor Slice', () => {
             status: QueryExecutionStatus.LOADING,
             elapsedMs: undefined,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
           key2: {
             status: QueryExecutionStatus.READY,
             elapsedMs: 200,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         },
       };
@@ -121,15 +121,11 @@ describe('QueryEditor Slice', () => {
         status: QueryExecutionStatus.READY,
         elapsedMs: 300,
         startTime: Date.now(),
-        body: {
-          error: {
-            error: 'test error',
-            message: {
-              error: 'test message',
-              status: 500,
-            },
-            statusCode: 500,
-          },
+        error: {
+          statusCode: 400,
+          error: 'Error',
+          message: { details: 'something happened', reason: 'something bad happened' },
+          originalErrorMessage: 'Something terrible has happened',
         },
       };
 
@@ -149,7 +145,7 @@ describe('QueryEditor Slice', () => {
         status: QueryExecutionStatus.LOADING,
         elapsedMs: 150,
         startTime: Date.now(),
-        body: undefined,
+        error: undefined,
       };
 
       const action = setOverallQueryStatus(newStatus);
@@ -170,7 +166,7 @@ describe('QueryEditor Slice', () => {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: undefined,
           startTime: Date.now(),
-          body: undefined,
+          error: undefined,
         },
       };
 
@@ -187,7 +183,7 @@ describe('QueryEditor Slice', () => {
       expect(result.overallQueryStatus.status).toBe(QueryExecutionStatus.READY);
       expect(result.overallQueryStatus.elapsedMs).toBe(300);
       expect(result.overallQueryStatus.startTime).toBe(existingState.overallQueryStatus.startTime);
-      expect(result.overallQueryStatus.body).toBe(existingState.overallQueryStatus.body);
+      expect(result.overallQueryStatus.error).toBe(existingState.overallQueryStatus.error);
     });
   });
 
@@ -200,13 +196,13 @@ describe('QueryEditor Slice', () => {
             status: QueryExecutionStatus.LOADING,
             elapsedMs: undefined,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
           key2: {
             status: QueryExecutionStatus.READY,
             elapsedMs: 200,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         },
       };
@@ -228,7 +224,7 @@ describe('QueryEditor Slice', () => {
             status: QueryExecutionStatus.READY,
             elapsedMs: 200,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         },
       };
@@ -248,28 +244,24 @@ describe('QueryEditor Slice', () => {
             status: QueryExecutionStatus.LOADING,
             elapsedMs: undefined,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
           key2: {
             status: QueryExecutionStatus.READY,
             elapsedMs: 200,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         },
         overallQueryStatus: {
           status: QueryExecutionStatus.READY,
           elapsedMs: 500,
           startTime: Date.now(),
-          body: {
-            error: {
-              error: 'test error',
-              message: {
-                error: 'test message',
-                status: 500,
-              },
-              statusCode: 500,
-            },
+          error: {
+            statusCode: 400,
+            error: 'Error',
+            message: { details: 'something happened', reason: 'something bad happened' },
+            originalErrorMessage: 'Something terrible has happened',
           },
         },
       };
@@ -283,7 +275,7 @@ describe('QueryEditor Slice', () => {
         status: QueryExecutionStatus.UNINITIALIZED,
         elapsedMs: undefined,
         startTime: undefined,
-        body: undefined,
+        error: undefined,
       });
       expect(result.editorMode).toBe(existingState.editorMode);
       expect(result.promptModeIsAvailable).toBe(existingState.promptModeIsAvailable);
@@ -297,7 +289,7 @@ describe('QueryEditor Slice', () => {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: 150,
           startTime: Date.now(),
-          body: undefined,
+          error: undefined,
         };
         const action = setQueryStatus(newQueryStatus);
 
@@ -322,7 +314,7 @@ describe('QueryEditor Slice', () => {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: 200,
           startTime: Date.now(),
-          body: undefined,
+          error: undefined,
         };
 
         const result = queryEditorReducer(existingState, setQueryStatus(newQueryStatus));
@@ -341,7 +333,7 @@ describe('QueryEditor Slice', () => {
             status: QueryExecutionStatus.LOADING,
             elapsedMs: undefined,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
           editorMode: EditorMode.SingleQuery,
           promptModeIsAvailable: false,
@@ -362,7 +354,7 @@ describe('QueryEditor Slice', () => {
         expect(result.overallQueryStatus.startTime).toBe(
           existingState.overallQueryStatus.startTime
         );
-        expect(result.overallQueryStatus.body).toBe(existingState.overallQueryStatus.body);
+        expect(result.overallQueryStatus.error).toBe(existingState.overallQueryStatus.error);
         expect(result.editorMode).toBe(existingState.editorMode);
         expect(result.promptModeIsAvailable).toBe(existingState.promptModeIsAvailable);
       });
@@ -390,7 +382,7 @@ describe('QueryEditor Slice', () => {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: 100,
           startTime: Date.now(),
-          body: undefined,
+          error: undefined,
         },
         editorMode: EditorMode.SingleQuery,
         promptModeIsAvailable: true,
@@ -425,7 +417,7 @@ describe('QueryEditor Slice', () => {
           status: QueryExecutionStatus.READY,
           elapsedMs: 250,
           startTime: Date.now(),
-          body: undefined,
+          error: undefined,
         },
         editorMode: EditorMode.DualQuery,
         promptModeIsAvailable: false,
@@ -473,7 +465,7 @@ describe('QueryEditor Slice', () => {
           status: QueryExecutionStatus.READY,
           elapsedMs: 300,
           startTime: Date.now(),
-          body: undefined,
+          error: undefined,
         },
         editorMode: EditorMode.DualPrompt,
         promptModeIsAvailable: true,
@@ -513,7 +505,7 @@ describe('QueryEditor Slice', () => {
           status: QueryExecutionStatus.READY,
           elapsedMs: 300,
           startTime: Date.now(),
-          body: undefined,
+          error: undefined,
         },
         editorMode: EditorMode.DualPrompt,
         promptModeIsAvailable: true,

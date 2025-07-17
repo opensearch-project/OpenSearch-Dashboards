@@ -21,6 +21,7 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+// @ts-expect-error TS2739 TODO(ts-error): fixme
 const mockDataSourceAttributesWithAuth: DataSourceAttributes = {
   id: '1',
   title: 'Test Data Source',
@@ -42,6 +43,7 @@ describe('DataSourceManagement: breadcrumbs.ts', () => {
   });
 
   test('get create OpenSearch breadcrumb', () => {
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const bc = getCreateOpenSearchDataSourceBreadcrumbs();
     expect(bc.length).toBe(3);
     expect(bc[2].text).toBe('Open Search');
@@ -49,6 +51,7 @@ describe('DataSourceManagement: breadcrumbs.ts', () => {
   });
 
   test('get create Amazon S3 breadcrumb', () => {
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const bc = getCreateAmazonS3DataSourceBreadcrumbs();
     expect(bc.length).toBe(3);
     expect(bc[2].text).toBe('Amazon S3');
@@ -56,6 +59,7 @@ describe('DataSourceManagement: breadcrumbs.ts', () => {
   });
 
   test('get create Prometheus breadcrumb', () => {
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const bc = getCreatePrometheusDataSourceBreadcrumbs();
     expect(bc.length).toBe(3);
     expect(bc[2].text).toBe('Prometheus');

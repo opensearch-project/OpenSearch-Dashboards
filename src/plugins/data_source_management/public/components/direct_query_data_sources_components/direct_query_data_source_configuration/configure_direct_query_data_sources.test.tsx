@@ -79,6 +79,7 @@ describe('ConfigureDirectQueryDataSourceWithRouter', () => {
       <MemoryRouter>
         <ConfigureDirectQueryDataSourceWithRouter
           notifications={mockNotifications}
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           history={mockHistory as any}
           location={mockLocation}
           match={{ ...mockMatch, params: { type } }}

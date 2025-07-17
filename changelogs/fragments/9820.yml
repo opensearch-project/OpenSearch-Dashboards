@@ -1,2 +1,0 @@
-fix:
-- UI setting will give error if a specific setting is not defined. ([#9820](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9820))

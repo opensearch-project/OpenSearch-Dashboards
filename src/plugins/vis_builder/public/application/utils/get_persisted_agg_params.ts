@@ -15,6 +15,7 @@ export const getPersistedAggParams = (
 ): CreateAggConfigParams[] => {
   const updatedAggConfigParams: CreateAggConfigParams[] = [];
   const newVisSchemaCounts: Record<string, number> = newVisSchemas.reduce((acc, schema: Schema) => {
+    // @ts-expect-error TS7053 TODO(ts-error): fixme
     acc[schema.name] = schema.max;
     return acc;
   }, {});

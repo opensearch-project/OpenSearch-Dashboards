@@ -18,6 +18,7 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectEditorMode: jest.fn(),
   selectIsDualEditorMode: jest.fn(),
   selectPromptModeIsAvailable: jest.fn(),
+  selectTopEditorIsQueryMode: jest.fn(),
 }));
 
 jest.mock('./edit_toolbar', () => ({
@@ -55,6 +56,7 @@ import {
   selectEditorMode,
   selectIsDualEditorMode,
   selectPromptModeIsAvailable,
+  selectTopEditorIsQueryMode,
 } from '../../../../application/utils/state_management/selectors';
 import { useTopEditorText } from '../../../../application/hooks';
 
@@ -65,6 +67,9 @@ const mockSelectIsDualEditorMode = selectIsDualEditorMode as jest.MockedFunction
 >;
 const mockSelectPromptModeIsAvailable = selectPromptModeIsAvailable as jest.MockedFunction<
   typeof selectPromptModeIsAvailable
+>;
+const mockSelectTopEditorIsQueryMode = selectTopEditorIsQueryMode as jest.MockedFunction<
+  typeof selectTopEditorIsQueryMode
 >;
 const mockUseTopEditorText = useTopEditorText as jest.MockedFunction<typeof useTopEditorText>;
 
@@ -96,6 +101,7 @@ describe('TopEditor', () => {
     mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
     mockSelectIsDualEditorMode.mockReturnValue(false);
     mockSelectPromptModeIsAvailable.mockReturnValue(true);
+    mockSelectTopEditorIsQueryMode.mockReturnValue(true);
   });
 
   const renderWithProvider = (component: React.ReactElement) => {
@@ -164,13 +170,22 @@ describe('TopEditor', () => {
     expect(topEditor).toHaveClass('exploreTopEditor--dualMode');
   });
 
-  it('applies prompt mode class when in prompt mode', () => {
-    mockSelectEditorMode.mockReturnValue(EditorMode.SinglePrompt);
+  it('applies prompt mode class when not in query mode', () => {
+    mockSelectTopEditorIsQueryMode.mockReturnValue(false);
 
     renderWithProvider(<TopEditor />);
 
     const topEditor = screen.getByTestId('exploreTopEditor');
     expect(topEditor).toHaveClass('exploreTopEditor--promptMode');
+  });
+
+  it('does not apply prompt mode class when in query mode', () => {
+    mockSelectTopEditorIsQueryMode.mockReturnValue(true);
+
+    renderWithProvider(<TopEditor />);
+
+    const topEditor = screen.getByTestId('exploreTopEditor');
+    expect(topEditor).not.toHaveClass('exploreTopEditor--promptMode');
   });
 
   it('renders overlay div', () => {
@@ -262,8 +277,8 @@ describe('TopEditor', () => {
     expect(codeEditor).toHaveAttribute('language', 'ppl');
   });
 
-  it('renders prompt icon when in prompt mode', () => {
-    mockSelectEditorMode.mockReturnValue(EditorMode.SinglePrompt);
+  it('renders prompt icon when not in query mode', () => {
+    mockSelectTopEditorIsQueryMode.mockReturnValue(false);
     mockSelectIsDualEditorMode.mockReturnValue(false);
 
     renderWithProvider(<TopEditor />);
@@ -275,8 +290,9 @@ describe('TopEditor', () => {
     expect(promptIcon).toHaveClass('exploreTopEditor__promptIcon');
   });
 
-  it('renders prompt icon when in dual mode', () => {
+  it('renders prompt icon when in dual mode and not in query mode', () => {
     mockSelectIsDualEditorMode.mockReturnValue(true);
+    mockSelectTopEditorIsQueryMode.mockReturnValue(false);
 
     renderWithProvider(<TopEditor />);
 
@@ -284,8 +300,8 @@ describe('TopEditor', () => {
     expect(promptIcon).toBeInTheDocument();
   });
 
-  it('does not render prompt icon when not in prompt mode', () => {
-    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+  it('does not render prompt icon when in query mode', () => {
+    mockSelectTopEditorIsQueryMode.mockReturnValue(true);
     mockSelectIsDualEditorMode.mockReturnValue(false);
 
     renderWithProvider(<TopEditor />);

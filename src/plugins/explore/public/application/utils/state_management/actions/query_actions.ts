@@ -246,7 +246,7 @@ const executeQueryBase = async (
           status: QueryExecutionStatus.LOADING,
           startTime: queryStartTime,
           elapsedMs: undefined,
-          body: undefined,
+          error: undefined,
         },
       })
     );
@@ -352,7 +352,7 @@ const executeQueryBase = async (
               : QueryExecutionStatus.NO_RESULTS,
           startTime: queryStartTime,
           elapsedMs: inspectorRequest.getTime()!,
-          body: undefined,
+          error: undefined,
         },
       })
     );
@@ -370,7 +370,8 @@ const executeQueryBase = async (
       return;
     }
 
-    services.data.search.showError(error as Error);
+    const parsedError = JSON.parse(error.body.message);
+
     dispatch(
       setIndividualQueryStatus({
         cacheKey,
@@ -378,12 +379,15 @@ const executeQueryBase = async (
           status: QueryExecutionStatus.ERROR,
           startTime: queryStartTime,
           elapsedMs: undefined,
-          body: {
-            error: {
-              error: error.message || 'Unknown error',
-              message: { error: error.message },
-              statusCode: error.statusCode,
+          error: {
+            error: error.body.error || 'Unknown Error',
+            message: {
+              details: parsedError?.error?.details || 'Unknown Error',
+              reason: parsedError?.error?.reason || 'Unknown Error',
+              type: parsedError?.error?.type,
             },
+            statusCode: error.body.statusCode,
+            originalErrorMessage: error.body.message,
           },
         },
       })

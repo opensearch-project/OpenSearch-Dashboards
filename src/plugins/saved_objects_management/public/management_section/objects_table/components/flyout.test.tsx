@@ -76,6 +76,7 @@ describe('Flyout', () => {
     const { http, overlays } = coreMock.createStart();
     const search = dataPluginMock.createStartContract().search;
 
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     defaultProps = {
       close: jest.fn(),
       done: jest.fn(),
@@ -109,6 +110,7 @@ describe('Flyout', () => {
     const component = shallowRender({
       ...defaultProps,
       dataSourceEnabled: true,
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       dataSourceManagement: dataSourceManagementMock,
       notifications: notificationServiceMock.createStartContract(),
     });

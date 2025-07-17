@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import { render, screen, fireEvent } from '@testing-library/react';
 import configureMockStore from 'redux-mock-store';
 import { HeatmapVisStyleControls, HeatmapVisStyleControlsProps } from './heatmap_vis_options';
-import { VisFieldType, AxisRole, VisColumn, AxisColumnMappings, Positions } from '../types';
+import { VisColumn, VisFieldType, AxisColumnMappings, AxisRole, Positions } from '../types';
 import { defaultHeatmapChartStyles } from './heatmap_vis_config';
 
 // Mock store setup

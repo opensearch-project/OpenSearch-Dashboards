@@ -117,6 +117,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
       <Fragment>
         {showExample && (
           <OptInExampleFlyout
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             fetchExample={telemetryService.fetchExample}
             onClose={this.toggleExample}
           />

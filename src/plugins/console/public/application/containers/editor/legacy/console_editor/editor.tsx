@@ -189,6 +189,7 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
       http,
       settingsService,
       settingsService.getAutocomplete(),
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dataSourceId
     );
 

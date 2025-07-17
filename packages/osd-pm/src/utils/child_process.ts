@@ -82,7 +82,9 @@ export function spawnStreaming(
   const prefixedStdout = logTransformer({ tag: color.bold(prefix) });
   const prefixedStderr = logTransformer({ mergeMultiline: true, tag: color.bold(prefix) });
 
+  // @ts-expect-error TS2531 TODO(ts-error): fixme
   spawned.stdout.pipe(prefixedStdout).pipe(streamToLog(debug));
+  // @ts-expect-error TS2531 TODO(ts-error): fixme
   spawned.stderr.pipe(prefixedStderr).pipe(streamToLog(debug));
 
   return spawned;

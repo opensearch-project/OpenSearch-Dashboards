@@ -125,7 +125,7 @@ describe('DiscoverChart', () => {
           status: 'uninitialized' as any,
           elapsedMs: undefined,
           startTime: undefined,
-          body: undefined,
+          error: undefined,
         },
         promptModeIsAvailable: false,
         editorMode: 'single-query' as any,

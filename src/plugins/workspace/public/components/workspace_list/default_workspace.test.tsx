@@ -120,7 +120,9 @@ function getWrapUserDefaultWorkspaceList(
   return (
     <I18nProvider>
       <UserDefaultWorkspace
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         registeredUseCases$={createMockedRegisteredUseCases$()}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         services={services}
       />
     </I18nProvider>

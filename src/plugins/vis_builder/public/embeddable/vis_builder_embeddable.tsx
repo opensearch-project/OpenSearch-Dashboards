@@ -83,6 +83,7 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
   private savedVis?: VisBuilderSavedVis;
   private serializedState?: string;
   private uiState: PersistedState;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private readonly deps: VisBuilderEmbeddableFactoryDeps;
 
   constructor(
@@ -258,7 +259,9 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
     let pipeline = `opensearchDashboards | opensearch_dashboards_context `;
 
     // Access the query and filters from savedObject if available.
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const query = this.savedVis?.searchSourceFields?.query;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const filters = this.savedVis?.searchSourceFields?.filter;
 
     // Append query and filters to the pipeline string if they exist.

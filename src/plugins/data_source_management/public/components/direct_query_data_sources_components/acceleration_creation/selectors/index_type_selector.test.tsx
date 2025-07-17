@@ -163,6 +163,7 @@ describe('IndexTypeSelector', () => {
 
     const options = wrapper.find(EuiSuperSelect).prop('options');
     expect(options).toHaveLength(3);
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     expect(options.map((option) => option.value)).toEqual(['skipping', 'covering', 'materialized']);
   });
 });

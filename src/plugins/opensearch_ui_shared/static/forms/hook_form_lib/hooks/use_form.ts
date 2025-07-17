@@ -198,6 +198,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
           // Recursively wait for all the fields to finish validating.
           return waitForFieldsToFinishValidating().then(resolve);
         }
+        // @ts-expect-error TS2794 TODO(ts-error): fixme
         resolve();
       }, 100);
     });

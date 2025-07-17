@@ -36,6 +36,20 @@ export const createTwoMetricScatter = (
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling(yAxis),
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
+        ],
+      }),
     },
   };
 
@@ -89,6 +103,21 @@ export const createTwoMetricOneCateScatter = (
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
+          { field: categoryFields, type: 'nominal', title: categoryNames },
+        ],
+      }),
     },
   };
 
@@ -156,6 +185,22 @@ export const createThreeMetricOneCateScatter = (
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            title: xAxis?.styles?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            title: yAxis?.styles?.title?.text || yAxis?.name,
+          },
+          { field: categoryFields, type: 'nominal', title: categoryNames },
+          { field: numericalSize?.column, type: 'quantitative', title: numericalSize?.name },
+        ],
+      }),
     },
   };
 

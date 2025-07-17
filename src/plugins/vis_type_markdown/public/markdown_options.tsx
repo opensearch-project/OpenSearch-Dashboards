@@ -33,6 +33,7 @@ import {
   EuiPanel,
   EuiTitle,
   EuiLink,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiIcon,
   EuiCompressedTextArea,
   EuiFlexGroup,

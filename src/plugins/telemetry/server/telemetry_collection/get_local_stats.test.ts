@@ -57,6 +57,7 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   opensearchClient.nodes.usage.mockResolvedValue(
     // @ts-ignore we only care about the response body
     {
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       body: {
         cluster_name: 'testCluster',
         nodes: {

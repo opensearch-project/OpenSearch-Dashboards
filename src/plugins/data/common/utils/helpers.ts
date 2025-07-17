@@ -52,6 +52,7 @@ export const handleQueryResults = async <T>(
   } while (queryStatus !== 'SUCCESS' && queryStatus !== 'FAILED');
 
   if (queryStatus === 'FAILED') {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     throw new Error(queryResultsRes?.body.error);
   }
 

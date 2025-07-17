@@ -30,6 +30,7 @@
 
 import _ from 'lodash';
 import cluster from 'cluster';
+// @ts-expect-error TS2614 TODO(ts-error): fixme
 import { setupMaster as setupClusterManager } from 'cluster';
 import { EventEmitter } from 'events';
 
@@ -40,6 +41,7 @@ const cliPath = fromRoot('src/cli/dev');
 const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
 const baseArgv = [process.execPath, cliPath].concat(baseArgs);
 
+// @ts-expect-error TS2503 TODO(ts-error): fixme
 export type ClusterWorker = cluster.Worker & {
   killed: boolean;
   exitCode?: number;

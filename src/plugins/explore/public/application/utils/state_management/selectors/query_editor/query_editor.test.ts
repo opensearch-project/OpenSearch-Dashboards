@@ -14,6 +14,7 @@ import {
   selectIsDualEditorMode,
   selectPromptModeIsAvailable,
   selectPromptToQueryIsLoading,
+  selectTopEditorIsQueryMode,
 } from './query_editor';
 import { RootState } from '../../store';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
@@ -26,7 +27,7 @@ describe('query_editor selectors', () => {
         status: QueryExecutionStatus.UNINITIALIZED,
         elapsedMs: undefined,
         startTime: undefined,
-        body: undefined,
+        error: undefined,
       },
       editorMode: EditorMode.SingleQuery,
       promptModeIsAvailable: false,
@@ -84,7 +85,7 @@ describe('query_editor selectors', () => {
         status: QueryExecutionStatus.LOADING,
         elapsedMs: 100,
         startTime: Date.now(),
-        body: undefined,
+        error: undefined,
       };
       const state = createMockState({
         queryStatusMap: {
@@ -93,7 +94,7 @@ describe('query_editor selectors', () => {
             status: QueryExecutionStatus.READY,
             elapsedMs: 200,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         },
       });
@@ -110,7 +111,7 @@ describe('query_editor selectors', () => {
             status: QueryExecutionStatus.READY,
             elapsedMs: 100,
             startTime: Date.now(),
-            body: undefined,
+            error: undefined,
           },
         },
       });
@@ -127,7 +128,7 @@ describe('query_editor selectors', () => {
         status: QueryExecutionStatus.LOADING,
         elapsedMs: 100,
         startTime: Date.now(),
-        body: undefined,
+        error: undefined,
       };
       const state = createMockState({
         overallQueryStatus: mockOverallStatus,
@@ -145,7 +146,7 @@ describe('query_editor selectors', () => {
         status: QueryExecutionStatus.LOADING,
         elapsedMs: 100,
         startTime: Date.now(),
-        body: undefined,
+        error: undefined,
       };
       const state = createMockState({
         overallQueryStatus: mockOverallStatus,
@@ -166,7 +167,7 @@ describe('query_editor selectors', () => {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: undefined,
           startTime: undefined,
-          body: undefined,
+          error: undefined,
         },
       });
 
@@ -190,7 +191,7 @@ describe('query_editor selectors', () => {
             status,
             elapsedMs: undefined,
             startTime: undefined,
-            body: undefined,
+            error: undefined,
           },
         });
 
@@ -207,7 +208,7 @@ describe('query_editor selectors', () => {
           status: QueryExecutionStatus.LOADING,
           elapsedMs: undefined,
           startTime: undefined,
-          body: undefined,
+          error: undefined,
         },
       });
 
@@ -230,7 +231,7 @@ describe('query_editor selectors', () => {
             status,
             elapsedMs: 100,
             startTime: undefined,
-            body: undefined,
+            error: undefined,
           },
         });
 
@@ -337,6 +338,83 @@ describe('query_editor selectors', () => {
         const result = selectIsDualEditorMode(state);
         expect(result).toBe(false);
       });
+    });
+  });
+
+  describe('selectTopEditorIsQueryMode', () => {
+    it('should return true when promptModeIsAvailable is false regardless of editorMode', () => {
+      const testModes = [
+        EditorMode.SingleEmpty,
+        EditorMode.SinglePrompt,
+        EditorMode.SingleQuery,
+        EditorMode.DualPrompt,
+        EditorMode.DualQuery,
+      ];
+
+      testModes.forEach((mode) => {
+        const state = createMockState({
+          editorMode: mode,
+          promptModeIsAvailable: false,
+        });
+
+        const result = selectTopEditorIsQueryMode(state);
+        expect(result).toBe(true);
+      });
+    });
+
+    it('should return true when promptModeIsAvailable is true and editorMode is SingleQuery', () => {
+      const state = createMockState({
+        editorMode: EditorMode.SingleQuery,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when promptModeIsAvailable is true and editorMode is SingleEmpty', () => {
+      const state = createMockState({
+        editorMode: EditorMode.SingleEmpty,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when promptModeIsAvailable is true and editorMode is SinglePrompt', () => {
+      const state = createMockState({
+        editorMode: EditorMode.SinglePrompt,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when promptModeIsAvailable is true and editorMode is DualPrompt', () => {
+      const state = createMockState({
+        editorMode: EditorMode.DualPrompt,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when promptModeIsAvailable is true and editorMode is DualQuery', () => {
+      const state = createMockState({
+        editorMode: EditorMode.DualQuery,
+        promptModeIsAvailable: true,
+      });
+
+      const result = selectTopEditorIsQueryMode(state);
+
+      expect(result).toBe(false);
     });
   });
 });

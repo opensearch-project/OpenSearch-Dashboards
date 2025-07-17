@@ -59,7 +59,9 @@ describe('DataSourceManagement: Form Validation', () => {
       expect(result).toBe(false);
     });
     test('should fail validation when password is empty', () => {
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       form.auth.credentials.username = 'test';
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       form.auth.credentials.password = '';
       const result = performDataSourceFormValidation(form, [], '', authenticationMethodRegistry);
       expect(result).toBe(false);

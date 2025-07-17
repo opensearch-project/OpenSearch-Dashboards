@@ -32,6 +32,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/helpers';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DiscoverFieldSearch, NUM_FILTERS, Props } from './discover_field_search';
 import { EuiButtonGroupProps, EuiPopover } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
@@ -45,6 +46,7 @@ describe('DiscoverFieldSearch', () => {
 
   function mountComponent(props?: Props) {
     const compProps = props || defaultProps;
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     return mountWithIntl(<DiscoverFieldSearch {...compProps} />);
   }
 
@@ -61,6 +63,7 @@ describe('DiscoverFieldSearch', () => {
 
   test('change in active filters should change facet selection and call onChange', () => {
     const onChange = jest.fn();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     let btn = findTestSubject(component, 'toggleFieldFilterButton');
     expect(btn.hasClass('euiFilterButton-hasActiveFilters')).toBeFalsy();
@@ -122,6 +125,7 @@ describe('DiscoverFieldSearch', () => {
 
   test('change in filters triggers onChange', () => {
     const onChange = jest.fn();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
@@ -137,6 +141,7 @@ describe('DiscoverFieldSearch', () => {
 
   test('change in type filters triggers onChange with appropriate value', () => {
     const onChange = jest.fn();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');

@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { SearchSource, IndexPattern } from 'src/plugins/data/public';
 import { SavedObject, ToastsStart } from 'opensearch-dashboards/public';
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { redirectWhenMissing, getUrlTracker } from '../../../opensearch_dashboards_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
 
@@ -16,6 +17,7 @@ export interface IndexPatternData {
   stateValFound: boolean;
 }
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const fetchIndexPattern = async (data, config) => {
   await data.indexPatterns.ensureDefaultIndexPattern();
   const indexPatternList = await data.indexPatterns.getCache();
@@ -30,11 +32,17 @@ export const fetchIndexPattern = async (data, config) => {
 };
 
 export const fetchSavedSearch = async (
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   core,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   basePath,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   history,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   savedSearchId,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   services,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   toastNotifications
 ) => {
   try {

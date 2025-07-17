@@ -16,7 +16,7 @@ import {
 } from '../../application/utils/state_management/actions/query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
-import { CanvasPanel } from '../../application/legacy/discover/application/components/panel/canvas_panel';
+import { CanvasPanel } from '../panel/canvas_panel';
 import { Chart } from './utils';
 
 export const DiscoverChartContainer = () => {

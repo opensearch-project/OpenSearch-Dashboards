@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import { RootState } from '../../../../application/utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../application/utils/state_management/types';
-import { CanvasPanel } from '../../../../application/legacy/discover/application/components/panel/canvas_panel';
+import { CanvasPanel } from '../../../panel/canvas_panel';
 import { DiscoverNoIndexPatterns } from '../../../../application/legacy/discover/application/components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../../../application/legacy/discover/application/components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../../../application/legacy/discover/application/components/loading_spinner/loading_spinner';
@@ -19,6 +19,7 @@ import { ExploreTabs } from '../../../../components/tabs/tabs';
 import { ResultsSummaryPanel } from '../../../../components/results_summary/results_summary_panel';
 import { DiscoverChartContainer } from '../../../../components/chart/discover_chart_container';
 import { useDatasetContext } from '../../../../application/context';
+import { ErrorPanel } from '../../../error_panel';
 
 export const BottomRightContainer = () => {
   const dispatch = useDispatch();
@@ -76,11 +77,7 @@ export const BottomRightContainer = () => {
   }
 
   if (status === QueryExecutionStatus.ERROR) {
-    return (
-      <CanvasPanel>
-        <DiscoverUninitialized onRefresh={onRefresh} />
-      </CanvasPanel>
-    );
+    return <ErrorPanel />;
   }
 
   if (status === QueryExecutionStatus.READY) {

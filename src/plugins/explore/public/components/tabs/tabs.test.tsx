@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { ExploreTabsComponent } from './tabs';
+import { ExploreTabs } from './tabs';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { uiReducer } from '../../application/utils/state_management/slices';
 import { queryReducer } from '../../application/utils/state_management/slices';
@@ -102,7 +102,7 @@ describe('ExploreTabsComponent', () => {
     render(
       <Provider store={store}>
         <OpenSearchDashboardsContextProvider services={mockServices}>
-          <ExploreTabsComponent />
+          <ExploreTabs />
         </OpenSearchDashboardsContextProvider>
       </Provider>
     );
@@ -124,7 +124,7 @@ describe('ExploreTabsComponent', () => {
     render(
       <Provider store={store}>
         <OpenSearchDashboardsContextProvider services={mockServices}>
-          <ExploreTabsComponent />
+          <ExploreTabs />
         </OpenSearchDashboardsContextProvider>
       </Provider>
     );
@@ -155,7 +155,7 @@ describe('ExploreTabsComponent', () => {
     render(
       <Provider store={store}>
         <OpenSearchDashboardsContextProvider services={mockServices}>
-          <ExploreTabsComponent />
+          <ExploreTabs />
         </OpenSearchDashboardsContextProvider>
       </Provider>
     );
@@ -180,7 +180,7 @@ describe('ExploreTabsComponent', () => {
     render(
       <Provider store={store}>
         <OpenSearchDashboardsContextProvider services={mockServices}>
-          <ExploreTabsComponent />
+          <ExploreTabs />
         </OpenSearchDashboardsContextProvider>
       </Provider>
     );
@@ -200,7 +200,7 @@ describe('ExploreTabsComponent', () => {
     render(
       <Provider store={store}>
         <OpenSearchDashboardsContextProvider services={mockServices}>
-          <ExploreTabsComponent />
+          <ExploreTabs />
         </OpenSearchDashboardsContextProvider>
       </Provider>
     );

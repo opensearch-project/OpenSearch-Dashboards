@@ -132,6 +132,7 @@ export const ColumnExpression = ({
                         ]}
                         selectedOptions={[
                           {
+                            // @ts-expect-error TS2769 TODO(ts-error): fixme
                             label: currentColumnExpressionValue.functionParam,
                           },
                         ]}
