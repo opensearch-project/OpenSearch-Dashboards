@@ -53,7 +53,7 @@ describe('AddToDashboardModal', () => {
       />
     );
 
-    const titleInput = await screen.findByPlaceholderText('Save Explore name');
+    const titleInput = await screen.findByPlaceholderText('Enter save search name');
     fireEvent.change(titleInput, { target: { value: 'My Saved Explore' } });
 
     const select = await screen.findByLabelText('Select a dashboard');
@@ -90,10 +90,10 @@ describe('AddToDashboardModal', () => {
     const newRadio = screen.getByLabelText('Save to new dashboard');
     fireEvent.click(newRadio);
 
-    const newDashboardInput = await screen.findByPlaceholderText('Enter Dashboard name');
+    const newDashboardInput = await screen.findByPlaceholderText('Enter dashboard name');
     fireEvent.change(newDashboardInput, { target: { value: 'New Dashboard' } });
 
-    const titleInput = await screen.findByPlaceholderText('Save Explore name');
+    const titleInput = await screen.findByPlaceholderText('Enter save search name');
     fireEvent.change(titleInput, { target: { value: 'Explore Title' } });
 
     const addButton = screen.getByRole('button', { name: 'Add' });
