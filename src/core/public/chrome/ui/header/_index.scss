@@ -3,7 +3,7 @@
 }
 
 .headerIsExpanded {
-  @include euiHeaderAffordForFixed($osdHeaderOffset * 2);
+  @include euiHeaderAffordForFixed($osdHeaderOffsetExpanded);
 }
 
 .headerGlobalNav .euiHeaderSectionItem:empty {
