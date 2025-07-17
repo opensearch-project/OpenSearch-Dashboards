@@ -214,5 +214,4 @@
   - [TESTING](../TESTING.md)
   - [TRIAGING](../TRIAGING.md)
   - [TYPESCRIPT](../TYPESCRIPT.md)
-  - [Data_explorer_decoupling](../data_explorer_decoupling.md)
   - [Testing_strategy](../testing_strategy.md)
