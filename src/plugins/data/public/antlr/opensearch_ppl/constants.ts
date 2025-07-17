@@ -51,3 +51,8 @@ export const PPL_FUNCTIONAL_KEYWORDS = new Map<number, { optionalParam: boolean 
   [OpenSearchPPLParser.CASE, { optionalParam: false }],
   [OpenSearchPPLParser.CAST, { optionalParam: false }],
 ]);
+
+export const SUPPORTED_NON_LITERAL_KEYWORDS = new Map<
+  number,
+  { insertText: string; label: string; sortText: string }
+>([[OpenSearchPPLParser.SQUOTA_STRING, { insertText: `'$1'`, label: "''", sortText: '0' }]]);
