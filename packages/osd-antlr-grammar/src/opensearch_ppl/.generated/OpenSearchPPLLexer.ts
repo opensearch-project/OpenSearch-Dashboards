@@ -1,7 +1,6 @@
 // Generated from ./src/opensearch_ppl/grammar/OpenSearchPPLLexer.g4 by ANTLR 4.13.1
 
 import * as antlr from "antlr4ng";
-// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { Token } from "antlr4ng";
 
 
