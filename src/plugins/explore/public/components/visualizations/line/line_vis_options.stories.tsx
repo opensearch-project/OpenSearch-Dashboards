@@ -96,10 +96,6 @@ const defaultStyleOptions: LineChartStyleControls = {
       width: 1,
     },
   ],
-  grid: {
-    xLines: true,
-    yLines: true,
-  },
 
   // Category axes
   categoryAxes: [
@@ -117,6 +113,7 @@ const defaultStyleOptions: LineChartStyleControls = {
       title: {
         text: 'Category Axis',
       },
+      grid: { showLines: true },
     },
   ],
 
@@ -137,6 +134,7 @@ const defaultStyleOptions: LineChartStyleControls = {
       title: {
         text: 'Value Axis',
       },
+      grid: { showLines: true },
     },
   ],
 };
@@ -209,6 +207,7 @@ MultipleValueAxes.args = {
         title: {
           text: 'Secondary Value Axis',
         },
+        grid: { showLines: true },
       },
     ],
   },
@@ -222,10 +221,6 @@ export const NoGridLines = Template.bind({});
 NoGridLines.args = {
   styleOptions: {
     ...defaultStyleOptions,
-    grid: {
-      xLines: false,
-      yLines: false,
-    },
   },
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,

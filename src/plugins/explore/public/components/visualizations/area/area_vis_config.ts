@@ -8,7 +8,6 @@ import { AreaVisStyleControls } from './area_vis_options';
 import { VisualizationType } from '../utils/use_visualization_types';
 import {
   CategoryAxis,
-  GridOptions,
   ThresholdLines,
   ThresholdLineStyle,
   ValueAxis,
@@ -29,7 +28,6 @@ export interface AreaChartStyleControls {
 
   // Threshold and grid
   thresholdLines: ThresholdLines;
-  grid: GridOptions;
 
   // Axes configuration
   categoryAxes: CategoryAxis[];
@@ -57,10 +55,6 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
       name: '',
     },
   ],
-  grid: {
-    xLines: true,
-    yLines: true,
-  },
 
   // Category axes
   categoryAxes: [
@@ -74,6 +68,9 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
         filter: true,
         rotate: 0,
         truncate: 100,
+      },
+      grid: {
+        showLines: true,
       },
       title: {
         text: '',
@@ -94,6 +91,9 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
         rotate: 0,
         filter: false,
         truncate: 100,
+      },
+      grid: {
+        showLines: true,
       },
       title: {
         text: '',

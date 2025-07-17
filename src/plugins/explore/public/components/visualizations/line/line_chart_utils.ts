@@ -190,8 +190,9 @@ export const applyAxisStyling = (
       orient: categoryAxis.position || baseAxis.orient,
       labelAngle: categoryAxis.labels?.rotate || 0,
       labelLimit: categoryAxis.labels?.truncate || 100,
-      grid: styles.grid ? styles.grid.xLines : true, // Explicitly check grid object
+      grid: categoryAxis?.grid?.showLines ?? false, // Explicitly check grid object
       labels: categoryAxis.labels?.show,
+      labelOverlap: 'greedy',
     };
   } else if (axisType === 'value') {
     // Make sure we have the correct number of value axes for Rule 2
@@ -239,8 +240,9 @@ export const applyAxisStyling = (
         orient,
         labelAngle: valueAxis.labels?.rotate || 0,
         labelLimit: valueAxis.labels?.truncate || 100,
-        grid: styles.grid ? styles.grid.yLines : true, // Explicitly check grid object
+        grid: valueAxis?.grid?.showLines ?? false, // Explicitly check grid object
         labels: valueAxis.labels?.show !== false, // Show labels by default
+        labelOverlap: 'greedy',
       };
     }
   }
