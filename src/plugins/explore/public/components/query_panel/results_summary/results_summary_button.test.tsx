@@ -18,6 +18,7 @@ describe('ResultsSummary', () => {
     sampleSize: 10,
     isPopoverOpen: false,
     setIsPopoverOpen: jest.fn(),
+    generateError: false,
   };
 
   beforeEach(() => {
