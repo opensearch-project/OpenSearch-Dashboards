@@ -12,7 +12,6 @@ import {
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
-  getDefaultQuery,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { verifyDiscoverPageState } from '../../../../../../utils/apps/explore/saved';
@@ -73,17 +72,17 @@ export const runSimpleDatasetSelectorTests = () => {
       } from the simple dataset selector`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 
         // Select the index pattern
-        cy.setIndexPatternAsDataset(config.indexPattern, DATASOURCE_NAME);
+        cy.explore.setIndexPatternAsDataset(config.indexPattern, DATASOURCE_NAME);
 
         // Verify if the language is unchanged, we get a default query populated, and correct dataset is set
         verifyDiscoverPageState({
           dataset: config.indexPattern,
-          queryString: getDefaultQuery(config.indexPattern, config.language),
+          queryString: '',
           language: config.language,
           hitCount: null,
           filters: null,
@@ -130,13 +129,13 @@ export const runSimpleDatasetSelectorTests = () => {
     it('validate filtering index pattern in simple dataset selector', () => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
 
       for (let i = 1; i <= noIndexPatterns; i++) {
         validateItemsInSimpleDatasetSelectorDropDown(
-          `::${INDEX_PATTERN_WITH_TIME.slice(0, i)}`,
+          `${INDEX_PATTERN_WITH_TIME.slice(0, i)}`,
           noIndexPatterns - i + 1
         );
       }

@@ -33,30 +33,30 @@ const workspaceName = getRandomizedWorkspaceName();
 const createSavedQuery = (config) => {
   cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
-    page: 'explore',
+    page: 'explore/logs',
     isEnhancement: true,
   });
 
-  cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+  cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
   setDatePickerDatesAndSearchIfRelevant(config.language);
 
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
 
-  cy.saveQuery(`${workspaceName}-${config.saveName}`, ' ', true, true);
+  cy.explore.saveQuery(`${workspaceName}-${config.saveName}`, ' ', true, true);
 };
 
 const loadSavedQuery = (config) => {
   cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
-    page: 'explore',
+    page: 'explore/logs',
     isEnhancement: true,
   });
 
   cy.getElementByTestId('discoverNewButton').click();
   // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
-  cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+  cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
   setDatePickerDatesAndSearchIfRelevant(
     config.language,
@@ -64,7 +64,7 @@ const loadSavedQuery = (config) => {
     'Aug 30, 2020 @ 00:00:00.000'
   );
 
-  cy.loadSavedQuery(`${workspaceName}-${config.saveName}`);
+  cy.explore.loadSavedQuery(`${workspaceName}-${config.saveName}`);
   // wait for saved queries to load.
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
@@ -79,10 +79,10 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
   setQueryConfigurations(config);
   verifyDiscoverPageState(config);
   validateSaveAsNewQueryMatchingNameHasError(`${workspaceName}-${config.saveName}`);
-  cy.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
+  cy.explore.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
 
   cy.reload();
-  cy.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
+  cy.explore.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
@@ -91,11 +91,11 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
 const deleteSavedQuery = (saveAsNewQueryName) => {
   cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
-    page: 'explore',
+    page: 'explore/logs',
     isEnhancement: true,
   });
 
-  cy.deleteSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
+  cy.explore.deleteSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   verifyQueryDoesNotExistInSavedQueries(`${workspaceName}-${saveAsNewQueryName}`);
 };
 
