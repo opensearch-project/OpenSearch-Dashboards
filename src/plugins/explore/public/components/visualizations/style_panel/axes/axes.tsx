@@ -185,7 +185,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     <StyleAccordion
       id="axesSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.axes', {
-        defaultMessage: 'Axis',
+        defaultMessage: 'Axes',
       })}
       initialIsOpen={true}
     >
