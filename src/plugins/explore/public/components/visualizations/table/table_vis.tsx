@@ -50,6 +50,7 @@ export const TableVis = React.memo(({ rows, columns, pageSize = 10 }: TableVisPr
       rowCount={rows.length}
       pagination={{ ...pagination, onChangePage, onChangeItemsPerPage, pageSize }}
       renderCellValue={renderCellValue}
+      toolbarVisibility={{ showFullScreenSelector: false }}
     />
   );
 });
