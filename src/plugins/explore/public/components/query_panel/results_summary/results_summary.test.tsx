@@ -87,7 +87,7 @@ describe('ResultsSummaryPanel', () => {
 
   it('renders when assistant is enabled and agent is available', () => {
     renderWithProviders(<ResultsSummary />);
-    expect(screen.getByRole('button', { name: 'Generate Summary' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Generating...' })).toBeInTheDocument();
   });
 
   it('does not render when assistant is disabled', () => {
@@ -128,7 +128,7 @@ describe('ResultsSummaryPanel', () => {
 
   it('renders with correct props when conditions are met', () => {
     renderWithProviders(<ResultsSummary />);
-    const summaryButton = screen.getByRole('button', { name: 'Generate Summary' });
+    const summaryButton = screen.getByRole('button', { name: 'Generating...' });
     expect(summaryButton).toBeInTheDocument();
   });
 });

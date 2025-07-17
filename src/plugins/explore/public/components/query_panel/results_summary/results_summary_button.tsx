@@ -15,6 +15,8 @@ import {
   EuiPopover,
   EuiHorizontalRule,
   EuiMarkdownFormat,
+  EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
@@ -37,6 +39,7 @@ interface ResultsSummaryButtonProps {
   sampleSize: number;
   isPopoverOpen: boolean;
   setIsPopoverOpen: (state: boolean) => void;
+  generateError: boolean;
 }
 
 export const ResultsSummaryButton: React.FC<ResultsSummaryButtonProps> = ({
@@ -49,6 +52,7 @@ export const ResultsSummaryButton: React.FC<ResultsSummaryButtonProps> = ({
   sampleSize,
   isPopoverOpen,
   setIsPopoverOpen,
+  generateError,
 }) => {
   const infoIconTooltip = i18n.translate('explore.resultsSummary.summary.sampletip', {
     defaultMessage: 'Summary based on first {sampleSize} records',
@@ -96,7 +100,7 @@ export const ResultsSummaryButton: React.FC<ResultsSummaryButtonProps> = ({
             onClick={handlePopoverButtonClick}
           >
             <div className="exploreResultsSummary__buttonTextWrapper">
-              <EuiIcon type="sparkleFilled" size="s" />
+              {loading ? <EuiLoadingSpinner /> : <EuiIcon type="generateContent" size="s" />}
               <EuiText size="xs">{generateSummaryText}</EuiText>
             </div>
           </EuiButtonEmpty>
@@ -113,8 +117,8 @@ export const ResultsSummaryButton: React.FC<ResultsSummaryButtonProps> = ({
           alignItems="center"
           justifyContent="spaceBetween"
         >
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiIcon type="sparkleFilled" />
+          <EuiFlexGroup alignItems="center" gutterSize="none" style={{ gap: 2 }}>
+            <EuiIcon type="generateContent" />
             <EuiText size="s">
               <b>
                 {i18n.translate('explore.resultsSummary.summary.panelTitle', {
@@ -122,67 +126,13 @@ export const ResultsSummaryButton: React.FC<ResultsSummaryButtonProps> = ({
                 })}
               </b>
             </EuiText>
-            <EuiIconTip
-              type="iInCircle"
-              anchorClassName="exploreResultsSummary_popover_tooltip"
-              content={infoIconTooltip}
-              aria-label={infoIconTooltip}
-            />
-            {actionButtonVisible && (
-              <EuiFlexGroup gutterSize="none" alignItems="center" style={{ marginInlineStart: 4 }}>
-                <EuiText size="xs">
-                  {i18n.translate('explore.resultsSummary.summary.responseText', {
-                    defaultMessage: 'Was this helpful?',
-                  })}
-                </EuiText>
-                {feedback !== FeedbackStatus.THUMB_DOWN && (
-                  <EuiSmallButtonIcon
-                    aria-label="feedback thumbs up"
-                    color={feedback === FeedbackStatus.THUMB_UP ? 'primary' : 'text'}
-                    iconType="thumbsUp"
-                    title={
-                      !feedback
-                        ? i18n.translate('explore.resultsSummary.summary.goodResponse', {
-                            defaultMessage: `Good response`,
-                          })
-                        : afterFeedbackTip
-                    }
-                    onClick={() => onFeedback(true)}
-                    data-test-subj="exploreResultsSummary_summary_buttons_thumbup"
-                  />
-                )}
-                {feedback !== FeedbackStatus.THUMB_UP && (
-                  <EuiSmallButtonIcon
-                    aria-label="feedback thumbs down"
-                    color={feedback === FeedbackStatus.THUMB_DOWN ? 'primary' : 'text'}
-                    title={
-                      !feedback
-                        ? i18n.translate('explore.resultsSummary.summary.badResponse', {
-                            defaultMessage: `Bad response`,
-                          })
-                        : afterFeedbackTip
-                    }
-                    iconType="thumbsDown"
-                    onClick={() => onFeedback(false)}
-                    data-test-subj="exploreResultsSummary_summary_buttons_thumbdown"
-                  />
-                )}
-                <div className="exploreResultsSummary__verticalSeparator" />
-                <EuiCopy textToCopy={summary ?? ''}>
-                  {(copy) => (
-                    <EuiSmallButtonIcon
-                      aria-label="Copy to clipboard"
-                      title={i18n.translate('explore.resultsSummary.summary.copy', {
-                        defaultMessage: `Copy to clipboard`,
-                      })}
-                      onClick={copy}
-                      color="text"
-                      iconType="copy"
-                      data-test-subj="exploreResultsSummary_summary_buttons_copy"
-                    />
-                  )}
-                </EuiCopy>
-              </EuiFlexGroup>
+            {!generateError && (
+              <EuiIconTip
+                type="iInCircle"
+                anchorClassName="exploreResultsSummary_popover_tooltip"
+                content={infoIconTooltip}
+                aria-label={infoIconTooltip}
+              />
             )}
           </EuiFlexGroup>
           <EuiSmallButtonIcon
@@ -200,7 +150,12 @@ export const ResultsSummaryButton: React.FC<ResultsSummaryButtonProps> = ({
           hasBorder={false}
           borderRadius="none"
           hasShadow={false}
-          style={{ width: '30vw', maxHeight: '60vh', overflowY: 'auto' }}
+          style={{
+            width: '30vw',
+            maxHeight: '60vh',
+            overflowY: 'auto',
+            textAlign: generateError ? 'center' : 'unset',
+          }}
         >
           {loading ? (
             <EuiText size="s" data-test-subj="exploreResultsSummary_summary_loading">
@@ -209,9 +164,74 @@ export const ResultsSummaryButton: React.FC<ResultsSummaryButtonProps> = ({
               })}
             </EuiText>
           ) : (
-            <EuiText size="s" data-test-subj="exploreResultsSummary_summary_result">
-              <EuiMarkdownFormat>{summary}</EuiMarkdownFormat>
-            </EuiText>
+            <>
+              <EuiText size="s" data-test-subj="exploreResultsSummary_summary_result">
+                <EuiMarkdownFormat>{summary}</EuiMarkdownFormat>
+              </EuiText>
+              {actionButtonVisible && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup
+                    gutterSize="none"
+                    alignItems="center"
+                    style={{ marginInlineStart: 4 }}
+                  >
+                    <EuiText size="xs">
+                      {i18n.translate('explore.resultsSummary.summary.responseText', {
+                        defaultMessage: 'Was this helpful?',
+                      })}
+                    </EuiText>
+                    {feedback !== FeedbackStatus.THUMB_DOWN && (
+                      <EuiSmallButtonIcon
+                        aria-label="feedback thumbs up"
+                        color={feedback === FeedbackStatus.THUMB_UP ? 'primary' : 'text'}
+                        iconType="thumbsUp"
+                        title={
+                          !feedback
+                            ? i18n.translate('explore.resultsSummary.summary.goodResponse', {
+                                defaultMessage: `Good response`,
+                              })
+                            : afterFeedbackTip
+                        }
+                        onClick={() => onFeedback(true)}
+                        data-test-subj="exploreResultsSummary_summary_buttons_thumbup"
+                      />
+                    )}
+                    {feedback !== FeedbackStatus.THUMB_UP && (
+                      <EuiSmallButtonIcon
+                        aria-label="feedback thumbs down"
+                        color={feedback === FeedbackStatus.THUMB_DOWN ? 'primary' : 'text'}
+                        title={
+                          !feedback
+                            ? i18n.translate('explore.resultsSummary.summary.badResponse', {
+                                defaultMessage: `Bad response`,
+                              })
+                            : afterFeedbackTip
+                        }
+                        iconType="thumbsDown"
+                        onClick={() => onFeedback(false)}
+                        data-test-subj="exploreResultsSummary_summary_buttons_thumbdown"
+                      />
+                    )}
+                    <div className="exploreResultsSummary__verticalSeparator" />
+                    <EuiCopy textToCopy={summary ?? ''}>
+                      {(copy) => (
+                        <EuiSmallButtonIcon
+                          aria-label="Copy to clipboard"
+                          title={i18n.translate('explore.resultsSummary.summary.copy', {
+                            defaultMessage: `Copy to clipboard`,
+                          })}
+                          onClick={copy}
+                          color="text"
+                          iconType="copy"
+                          data-test-subj="exploreResultsSummary_summary_buttons_copy"
+                        />
+                      )}
+                    </EuiCopy>
+                  </EuiFlexGroup>
+                </>
+              )}
+            </>
           )}
         </EuiPanel>
       </EuiPopover>
