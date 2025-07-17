@@ -339,6 +339,7 @@ export const VisualizationContainer = () => {
       dispatch(setStyleOptions(chartConfig.ui.style.defaults));
       // Update the visualizationData with the new visualization type
       if (visualizationData) {
+        // Try to reuse the previous selected fields for the new chart type
         if (!isEmpty(selectedAxesMapping)) {
           // Attempt to reuse the mapping for new chart type, find the rule used firstly
           const currentRule = ALL_VISUALIZATION_RULES.find((rule) => rule.id === currentRuleId);
@@ -382,8 +383,36 @@ export const VisualizationContainer = () => {
                 dispatch(setAxesMapping(updatedMapping));
                 return;
               }
+              // services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.switchReset);
             }
-            services.notifications.toasts.addInfo(VISUALIZATION_TOAST_MSG.switchReset);
+          }
+        }
+        // if no fields selected previously, try to create a visualization if current data matched any rules
+        const currentRule = ALL_VISUALIZATION_RULES.find((rule) => rule.id === currentRuleId);
+        if (currentRule) {
+          const axisColumnMappings = visualizationRegistry.getDefaultAxesMapping(
+            currentRule,
+            chartType,
+            visualizationData.numericalColumns ?? [],
+            visualizationData.categoricalColumns ?? [],
+            visualizationData.dateColumns ?? []
+          );
+          if (!isEmpty(axisColumnMappings)) {
+            dispatch(
+              setAxesMapping(
+                Object.fromEntries(
+                  Object.entries(axisColumnMappings).map(([key, config]) => {
+                    return [key, config.name];
+                  })
+                )
+              )
+            );
+            setVisualizationData({
+              ...visualizationData,
+              visualizationType: chartConfig as VisualizationType<ChartType>,
+              axisColumnMappings,
+            });
+            return;
           }
         }
       }
