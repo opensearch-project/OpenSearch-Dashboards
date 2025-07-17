@@ -207,7 +207,8 @@ jobs:
         with:
           path: ${{ env.FTR_PATH }}
           repository: ${{ env.TEST_REPO }}
-          ref: '${{ env.TEST_BRANCH }}'
+          # Change this back before merging in, this is just to get tests to run
+          ref: 'main'
           clean: true
 
       - name: Setup spec files by input

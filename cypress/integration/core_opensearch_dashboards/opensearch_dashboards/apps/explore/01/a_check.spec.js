@@ -24,7 +24,7 @@ const noIndexPatternTestSuite = () => {
         // Go to the Discover page
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName: workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
         cy.osd.waitForLoader(true);
