@@ -28,8 +28,8 @@ export const createSimpleAreaChart = (
 
   const metricField = yAxisColumn?.column;
   const dateField = xAxisColumn?.column;
-  const metricName = yAxisColumn?.name;
-  const dateName = xAxisColumn?.name;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
 
   const layers: any[] = [];
 
@@ -68,6 +68,12 @@ export const createSimpleAreaChart = (
           dateColumns
         ),
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: dateField, type: 'temporal', title: dateName },
+          { field: metricField, type: 'quantitative', title: metricName },
+        ],
+      }),
     },
   };
 
@@ -123,8 +129,8 @@ export const createMultiAreaChart = (
   const metricField = yAxisColumn?.column;
   const dateField = xAxisColumn?.column;
   const categoryField = colorColumn?.column;
-  const metricName = yAxisColumn?.name;
-  const dateName = xAxisColumn?.name;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
 
@@ -232,8 +238,8 @@ export const createFacetedMultiAreaChart = (
   const dateField = xAxisMapping?.column;
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
-  const metricName = yAxisMapping?.name;
-  const dateName = xAxisMapping?.name;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
 
@@ -395,8 +401,8 @@ export const createCategoryAreaChart = (
 
   const metricField = yAxisColumn?.column;
   const categoryField = xAxisColumn?.column;
-  const metricName = yAxisColumn?.name;
-  const categoryName = xAxisColumn?.name;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
+  const categoryName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
 
   const mainLayer = {
@@ -488,9 +494,8 @@ export const createStackedAreaChart = (
   const metricField = yAxisMapping?.column;
   const categoryField1 = xAxisMapping?.column; // X-axis (categories)
   const categoryField2 = colorMapping?.column; // Color (stacking)
-
-  const metricName = yAxisMapping?.name;
-  const categoryName1 = xAxisMapping?.name;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
+  const categoryName1 = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const categoryName2 = colorMapping?.name;
 
   const spec: any = {
