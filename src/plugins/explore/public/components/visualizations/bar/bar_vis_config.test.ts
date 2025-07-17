@@ -42,8 +42,8 @@ describe('bar_vis_config', () => {
 
       // Check axes configuration
       expect(defaultBarChartStyles.standardAxes).toHaveLength(2);
-      expect(defaultBarChartStyles.standardAxes[0]).toMatchObject({
-        id: 'Axis-1',
+      expect(defaultBarChartStyles.standardAxes[1]).toMatchObject({
+        id: 'Axis-2',
         position: Positions.LEFT,
         show: true,
         style: {},
@@ -62,8 +62,8 @@ describe('bar_vis_config', () => {
         axisRole: AxisRole.Y,
       });
 
-      expect(defaultBarChartStyles.standardAxes[1]).toMatchObject({
-        id: 'Axis-2',
+      expect(defaultBarChartStyles.standardAxes[0]).toMatchObject({
+        id: 'Axis-1',
         position: Positions.BOTTOM,
         show: true,
         style: {},

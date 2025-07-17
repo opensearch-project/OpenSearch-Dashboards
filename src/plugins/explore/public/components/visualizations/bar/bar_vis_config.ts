@@ -72,25 +72,6 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   standardAxes: [
     {
       id: 'Axis-1',
-      position: Positions.LEFT,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: 100,
-      },
-      title: {
-        text: '',
-      },
-      grid: {
-        showLines: true,
-      },
-      axisRole: AxisRole.Y,
-    },
-    {
-      id: 'Axis-2',
       position: Positions.BOTTOM,
       show: true,
       style: {},
@@ -107,6 +88,25 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         showLines: true,
       },
       axisRole: AxisRole.X,
+    },
+    {
+      id: 'Axis-2',
+      position: Positions.LEFT,
+      show: true,
+      style: {},
+      labels: {
+        show: true,
+        rotate: 0,
+        filter: false,
+        truncate: 100,
+      },
+      title: {
+        text: '',
+      },
+      grid: {
+        showLines: true,
+      },
+      axisRole: AxisRole.Y,
     },
   ],
 };
