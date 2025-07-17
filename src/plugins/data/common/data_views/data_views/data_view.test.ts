@@ -14,7 +14,7 @@ import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_
 import { DataViewField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { FieldFormat } from '../..';
+import { DataViewSavedObjectsClientCommon, FieldFormat, SavedObject } from '../..';
 
 class MockFieldFormatter {}
 
@@ -48,6 +48,32 @@ jest.mock('../../field_mapping', () => {
   };
 });
 
+const object: any = {};
+const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
+
+const savedObjectsClient = {} as DataViewSavedObjectsClientCommon;
+savedObjectsClient.find = jest.fn(
+  () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
+);
+savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
+savedObjectsClient.create = jest.fn();
+savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+savedObjectsClient.update = jest.fn().mockImplementation(async (_type, _id, body, { version }) => {
+  if (object.version !== version) {
+    throw new Object({
+      res: {
+        status: 409,
+      },
+    });
+  }
+  object.attributes.title = body.title;
+  object.version += 'a';
+  return {
+    id: object.id,
+    version: object.version,
+  };
+});
+
 // helper function to create index patterns
 function create(id: string) {
   const {
@@ -76,7 +102,7 @@ function createWithDataSource(id: string) {
   const dataSourceRef = { id: reference[0].id, type: reference[0].type };
   return new DataView({
     spec: { id, type, version, timeFieldName, fields, title, dataSourceRef },
-    savedObjectsClient: {} as any,
+    savedObjectsClient,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
     metaFields: [],
@@ -265,7 +291,7 @@ describe('DataViewWithDataSource', () => {
       const spec = dataView.toSpec();
       const restoredPattern = new DataView({
         spec,
-        savedObjectsClient: {} as any,
+        savedObjectsClient,
         fieldFormats: fieldFormatsMock,
         shortDotsEnable: false,
         metaFields: [],
