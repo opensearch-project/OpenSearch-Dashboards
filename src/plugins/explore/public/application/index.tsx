@@ -15,6 +15,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboa
 import { DatasetProvider } from './context';
 import { ExploreFlavor } from '../../common';
 import { TracesPage } from './pages/traces';
+import { TraceDetails } from './pages/traces/trace_details/trace_view';
 import { MetricsPage } from './pages/metrics';
 import { EditorContextProvider } from './context';
 
@@ -73,6 +74,12 @@ export const renderApp = (
                   <Route path="/view/:id" exact>
                     <ViewRoute {...mainRouteProps} />
                   </Route>
+
+                  {flavor === ExploreFlavor.Traces && (
+                    <Route path="/traceDetails" exact={false}>
+                      <TraceDetails setMenuMountPoint={setHeaderActionMenu} />
+                    </Route>
+                  )}
 
                   <Route path={[`/`]} exact={false}>
                     {renderExploreFlavor(flavor, mainRouteProps)}
