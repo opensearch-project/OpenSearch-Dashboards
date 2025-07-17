@@ -235,6 +235,7 @@ export const setAlternateQueryConfigurations = ({ filters, queryString, histogra
  */
 export const verifyQueryDoesNotExistInSavedQueries = (deletedQueryName) => {
   cy.reload();
+  cy.wait(3000);
   cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
   cy.getElementByTestId('saved-query-management-open-button').click();
   cy.getElementByTestId('savedQueriesFlyoutBody').contains(deletedQueryName).should('not.exist');
@@ -265,6 +266,7 @@ export const updateAndVerifySavedQuery = (config) => {
   cy.explore.updateSavedQuery('', false, true, true);
 
   cy.reload();
+  cy.wait(3000);
   cy.explore.loadSavedQuery(config.saveName);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
