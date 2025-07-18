@@ -62,6 +62,8 @@ interface IndexPatternDeps {
 
 interface SavedObjectBody {
   title?: string;
+  displayName?: string;
+  description?: string;
   timeFieldName?: string;
   intervalName?: string;
   fields?: string;
@@ -81,6 +83,8 @@ const DATA_SOURCE_REFERNECE_NAME = 'dataSource';
 export class IndexPattern implements IIndexPattern {
   public id?: string;
   public title: string = '';
+  public displayName?: string;
+  public description?: string;
   public fieldFormatMap: Record<string, any>;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
@@ -131,6 +135,8 @@ export class IndexPattern implements IIndexPattern {
     this.version = spec.version;
 
     this.title = spec.title || '';
+    this.displayName = spec.displayName;
+    this.description = spec.description;
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
@@ -231,6 +237,8 @@ export class IndexPattern implements IIndexPattern {
       id: this.id,
       version: this.version,
       title: this.title,
+      displayName: this.displayName,
+      description: this.description,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
@@ -238,6 +246,14 @@ export class IndexPattern implements IIndexPattern {
       type: this.type,
       dataSourceRef: this.dataSourceRef,
     };
+  }
+
+  /**
+   * The display name of the index pattern. If the index pattern has a name, it will return that;
+   * otherwise, it will return the title.
+   */
+  getDisplayName(): string {
+    return this.displayName || this.title;
   }
 
   /**
@@ -281,7 +297,6 @@ export class IndexPattern implements IIndexPattern {
    * Remove scripted field from field list
    * @param fieldName
    */
-
   removeScriptedField(fieldName: string) {
     const field = this.fields.getByName(fieldName);
     if (field) {
@@ -361,6 +376,8 @@ export class IndexPattern implements IIndexPattern {
 
     return {
       title: this.title,
+      displayName: this.displayName,
+      description: this.description,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
