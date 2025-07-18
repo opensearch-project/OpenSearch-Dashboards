@@ -33,10 +33,10 @@ import { FieldFormatsContentType, SavedObjectsClientCommon } from '../..';
 import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
 
 import { SerializedFieldFormat } from '../../../../expressions/common';
-import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../osd_field_types/types';
-import { FieldFormatNotFoundError } from '../../field_formats/errors';
-import { IIndexPattern } from '../types';
+import { FieldFormatNotFoundError } from '../../field_formats';
 import { IFieldType } from '../fields/types';
+import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../osd_field_types/types';
+import { IIndexPattern } from '../types';
 import { FieldFormat, FieldFormatsStartCommon } from '../../field_formats';
 import { IIndexPatternFieldList, IndexPatternField, fieldList } from '../fields';
 import {
