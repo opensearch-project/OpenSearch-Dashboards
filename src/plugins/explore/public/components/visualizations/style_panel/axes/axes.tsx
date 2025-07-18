@@ -182,7 +182,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
             <EuiSwitch
               compressed
               label={i18n.translate('explore.vis.gridOptions.showXAxis', {
-                defaultMessage: 'Show Axis',
+                defaultMessage: 'Show axis',
               })}
               data-test-subj="showXAxisSwitch"
               checked={axis.show}
@@ -343,7 +343,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                     data-test-subj="showYAxisSwitch"
                     compressed
                     label={i18n.translate('explore.vis.gridOptions.showYAxis', {
-                      defaultMessage: 'Show Axis',
+                      defaultMessage: 'Show axis',
                     })}
                     checked={axis.show}
                     onChange={(e) => updateValueAxis(index, { show: e.target.checked })}
@@ -495,7 +495,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   <EuiSwitch
                     compressed
                     label={i18n.translate('explore.vis.gridOptions.showYAxis', {
-                      defaultMessage: 'Show Axis',
+                      defaultMessage: 'Show axis',
                     })}
                     data-test-subj="showOnlyOneYAxisSwitch"
                     checked={axis.show}

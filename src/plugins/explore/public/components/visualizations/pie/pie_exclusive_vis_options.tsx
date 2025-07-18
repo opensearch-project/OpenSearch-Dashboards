@@ -68,7 +68,7 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
         <EuiSwitch
           compressed
           label={i18n.translate('explore.vis.pie.exclusive.showValues', {
-            defaultMessage: 'Show Values',
+            defaultMessage: 'Show values',
           })}
           checked={styles.showValues}
           onChange={(e) => updateStyle('showValues', e.target.checked)}
@@ -79,7 +79,7 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
         <EuiSwitch
           compressed
           label={i18n.translate('explore.vis.pie.exclusive.showLabels', {
-            defaultMessage: 'Show Labels',
+            defaultMessage: 'Show labels',
           })}
           checked={styles.showLabels}
           onChange={(e) => updateStyle('showLabels', e.target.checked)}

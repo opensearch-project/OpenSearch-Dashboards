@@ -53,7 +53,7 @@ describe('createHeatmapeConfig', () => {
     expect(defaults.exclusive.customRanges).toBeUndefined();
 
     // Verify label settings
-    expect(defaults.label).toEqual({
+    expect(defaults.exclusive.label).toEqual({
       show: false,
       rotate: false,
       overwriteColor: false,
@@ -103,8 +103,8 @@ describe('createHeatmapeConfig', () => {
           percentageMode: false,
           maxNumberOfColors: 4,
           useCustomRanges: false,
+          label: {} as HeatmapLabels,
         },
-        label: {} as HeatmapLabels,
         standardAxes: [] as StandardAxes[],
       } as HeatmapChartStyleControls,
       onStyleChange: jest.fn(),

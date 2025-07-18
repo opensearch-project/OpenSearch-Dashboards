@@ -125,7 +125,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                 <EuiSwitch
                   compressed
                   label={i18n.translate('explore.vis.standardAxes.showAxis', {
-                    defaultMessage: 'Show Axis',
+                    defaultMessage: 'Show axis',
                   })}
                   data-test-subj="showAxisSwitch"
                   checked={axis.show}

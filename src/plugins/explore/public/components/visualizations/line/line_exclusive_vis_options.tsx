@@ -121,7 +121,7 @@ export const LineExclusiveVisOptions = ({
 
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.linewidth', {
-          defaultMessage: 'Line Width',
+          defaultMessage: 'Line width',
         })}
       >
         <EuiRange
@@ -132,7 +132,7 @@ export const LineExclusiveVisOptions = ({
           max={10}
           step={1}
           aria-label={i18n.translate('explore.stylePanel.basic.linewidth', {
-            defaultMessage: 'Line Width',
+            defaultMessage: 'Line width',
           })}
           showLabels
           showValue
