@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { DiscoverServices } from '../../../build_services';
+import { ExploreServices } from '../../../../../../types';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { Doc } from '../doc/doc';
@@ -24,7 +24,7 @@ function useQueryString() {
 export function SingleDocApp() {
   const {
     services: { chrome, timefilter, indexPatterns },
-  } = useOpenSearchDashboards<DiscoverServices>();
+  } = useOpenSearchDashboards<ExploreServices>();
 
   const { index, indexPatternId } = useParams<SingleDocUrlParams>();
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);

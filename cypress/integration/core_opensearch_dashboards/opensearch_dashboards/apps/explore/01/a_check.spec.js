@@ -4,7 +4,7 @@
  */
 
 import { INDEX_WITH_TIME_1 } from '../../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
@@ -24,7 +24,7 @@ const noIndexPatternTestSuite = () => {
         // Go to the Discover page
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName: workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
         cy.osd.waitForLoader(true);

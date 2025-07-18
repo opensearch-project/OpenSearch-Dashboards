@@ -1,0 +1,24 @@
+.dscTimechart {
+  display: block;
+  position: relative;
+
+  // SASSTODO: the visualizing component should have an option or a modifier
+  .series > rect {
+    fill-opacity: 0.5;
+    stroke-width: 1;
+  }
+
+  &__nonEnhanced {
+    border-bottom: $ouiBorderThin;
+  }
+}
+
+.exploreHistogram {
+  display: flex;
+  height: 160px;
+}
+
+.exploreHistogram__header--partial {
+  font-weight: $euiFontWeightRegular;
+  min-width: $euiSize * 12;
+}

@@ -28,27 +28,27 @@
  * under the License.
  */
 
-import { IndexPattern, IndexPatternsService } from '../../../../../../../data/public';
+import { DataView, DataViewsService } from '../../../../../../../data/public';
 import { popularizeField } from './popularize_field';
 
 describe('Popularize field', () => {
   test('returns undefined if index pattern lacks id', async () => {
-    const indexPattern = ({} as unknown) as IndexPattern;
+    const dataView = ({} as unknown) as DataView;
     const fieldName = '@timestamp';
-    const indexPatternsService = ({} as unknown) as IndexPatternsService;
-    const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
+    const dataViewService = ({} as unknown) as DataViewsService;
+    const result = await popularizeField(dataView, fieldName, dataViewService);
     expect(result).toBeUndefined();
   });
 
   test('returns undefined if field not found', async () => {
-    const indexPattern = ({
+    const dataView = ({
       fields: {
         getByName: () => {},
       },
-    } as unknown) as IndexPattern;
+    } as unknown) as DataView;
     const fieldName = '@timestamp';
-    const indexPatternsService = ({} as unknown) as IndexPatternsService;
-    const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
+    const dataViewService = ({} as unknown) as DataViewsService;
+    const result = await popularizeField(dataView, fieldName, dataViewService);
     expect(result).toBeUndefined();
   });
 
@@ -56,17 +56,17 @@ describe('Popularize field', () => {
     const field = {
       count: 0,
     };
-    const indexPattern = ({
+    const dataView = ({
       id: 'id',
       fields: {
         getByName: () => field,
       },
-    } as unknown) as IndexPattern;
+    } as unknown) as DataView;
     const fieldName = '@timestamp';
-    const indexPatternsService = ({
+    const dataViewService = ({
       updateSavedObject: async () => {},
-    } as unknown) as IndexPatternsService;
-    const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
+    } as unknown) as DataViewsService;
+    const result = await popularizeField(dataView, fieldName, dataViewService);
     expect(result).toBeUndefined();
     expect(field.count).toEqual(1);
   });
@@ -75,19 +75,19 @@ describe('Popularize field', () => {
     const field = {
       count: 0,
     };
-    const indexPattern = ({
+    const dataView = ({
       id: 'id',
       fields: {
         getByName: () => field,
       },
-    } as unknown) as IndexPattern;
+    } as unknown) as DataView;
     const fieldName = '@timestamp';
-    const indexPatternsService = ({
+    const dataViewService = ({
       updateSavedObject: async () => {
         throw new Error('unknown error');
       },
-    } as unknown) as IndexPatternsService;
-    const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
+    } as unknown) as DataViewsService;
+    const result = await popularizeField(dataView, fieldName, dataViewService);
     expect(result).toBeUndefined();
   });
 });

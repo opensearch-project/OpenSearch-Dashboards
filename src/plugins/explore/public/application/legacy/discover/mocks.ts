@@ -29,7 +29,8 @@
  */
 
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { DiscoverSetup, ExploreStart } from './index';
+import { BehaviorSubject } from 'rxjs';
+import { ExplorePluginSetup, ExplorePluginStart } from '../../../types';
 import { chartPluginMock } from '../../../../../charts/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import { embeddablePluginMock } from '../../../../../embeddable/public/mocks';
@@ -39,19 +40,25 @@ import { opensearchDashboardsLegacyPluginMock } from '../../../../../opensearch_
 import { uiActionsPluginMock } from '../../../../../ui_actions/public/mocks';
 import { urlForwardingPluginMock } from '../../../../../url_forwarding/public/mocks';
 import { visualizationsPluginMock } from '../../../../../visualizations/public/mocks';
-import { buildServices, DiscoverServices } from './build_services';
+import { ExploreServices } from '../../../types';
+import { buildServices } from '../../../build_services';
+import { VisualizationRegistry } from '../../../components/visualizations/visualization_registry';
+import { expressionsPluginMock } from '../../../../../expressions/public/mocks';
+import { dashboardPluginMock } from '../../../../../dashboard/public/mocks';
 
-export type Setup = jest.Mocked<DiscoverSetup>;
-export type Start = jest.Mocked<ExploreStart>;
+export type Setup = jest.Mocked<ExplorePluginSetup>;
+export type Start = jest.Mocked<ExplorePluginStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
+    visualizationRegistry: (jest.fn() as unknown) as VisualizationRegistry,
     docViews: {
       addDocView: jest.fn(),
     },
     docViewsLinks: {
       addDocViewLink: jest.fn(),
     },
+    isSummaryAgentAvailable$: new BehaviorSubject(true as boolean),
   };
   return setupContract;
 };
@@ -59,6 +66,8 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     savedExploreLoader: {} as any,
+    savedSearchLoader: {} as any,
+    visualizationRegistry: {} as VisualizationRegistry,
     urlGenerator: {
       createUrl: jest.fn(),
     } as any,
@@ -66,7 +75,7 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
-const createDiscoverServicesMock = (): DiscoverServices =>
+const createExploreServicesMock = (): ExploreServices =>
   buildServices(
     coreMock.createStart(),
     {
@@ -79,12 +88,17 @@ const createDiscoverServicesMock = (): DiscoverServices =>
       urlForwarding: urlForwardingPluginMock.createStartContract(),
       visualizations: visualizationsPluginMock.createStartContract(),
       opensearchDashboardsLegacy: opensearchDashboardsLegacyPluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
+      dashboard: dashboardPluginMock.createStartContract(),
     },
-    coreMock.createPluginInitializerContext()
+    coreMock.createPluginInitializerContext(),
+    {} as any, // Mock tabRegistry
+    {} as any, // Mock visualizationRegistry
+    new BehaviorSubject(true as boolean)
   );
 
 export const discoverPluginMock = {
-  createDiscoverServicesMock,
+  createExploreServicesMock,
   createSetupContract,
   createStartContract,
 };

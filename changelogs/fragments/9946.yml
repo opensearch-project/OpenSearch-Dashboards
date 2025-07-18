@@ -1,0 +1,2 @@
+fix:
+- Preserve selected tab when query run, correctly update cacheKeys when query run ([#9946](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9946))

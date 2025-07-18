@@ -39,9 +39,16 @@ export function getFromSavedObject(
     return;
   }
 
+  const fields = JSON.parse(savedObject.attributes.fields!);
   return {
     id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields!),
+    fields,
     title: savedObject.attributes.title,
+    getFieldByName: (name: string) => fields.find((field: any) => field.name === name),
+    getComputedFields: () => ({}),
+    getScriptedFields: () => fields.filter((field: any) => field.scripted),
+    getNonScriptedFields: () => fields.filter((field: any) => !field.scripted),
+    addScriptedField: async () => {},
+    removeScriptedField: () => {},
   };
 }

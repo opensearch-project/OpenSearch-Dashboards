@@ -13,7 +13,17 @@ import { IntlProvider } from 'react-intl';
 import { IndexHeader } from './index_header';
 
 describe('IndexHeader at new home page', () => {
-  const indexPattern = { id: 'default-index', title: 'Test Index Pattern', fields: [] };
+  const indexPattern = {
+    id: 'default-index',
+    title: 'Test Index Pattern',
+    fields: [],
+    getFieldByName: (name: string) => undefined,
+    getComputedFields: () => ({}),
+    getScriptedFields: () => [],
+    getNonScriptedFields: () => [],
+    addScriptedField: async () => {},
+    removeScriptedField: () => {},
+  };
   const mockCoreStart = coreMock.createStart();
   const workspaceObject = {
     id: 'foo_id',

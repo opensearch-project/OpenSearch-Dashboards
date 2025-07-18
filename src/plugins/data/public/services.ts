@@ -32,6 +32,7 @@ import { NotificationsStart, CoreStart, ApplicationStart } from 'src/core/public
 import { FieldFormatsStart } from './field_formats';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { IndexPatternsContract } from './index_patterns';
+import { DataViewsContract } from './data_views';
 import { DataPublicPluginStart } from './types';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
@@ -47,6 +48,8 @@ export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormat
 );
 
 export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays']>('Overlays');
+
+export const [getDataViews, setDataViews] = createGetterSetter<DataViewsContract>('DataViews');
 
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
   'IndexPatterns'

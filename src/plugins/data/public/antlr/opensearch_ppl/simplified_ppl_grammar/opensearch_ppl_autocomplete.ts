@@ -6,6 +6,11 @@
 import * as c3 from 'antlr4-c3';
 import { ParseTree, Token, TokenStream } from 'antlr4ng';
 import {
+  SimplifiedOpenSearchPPLLexer as OpenSearchPPLLexer,
+  SimplifiedOpenSearchPPLParser as OpenSearchPPLParser,
+} from '@osd/antlr-grammar';
+
+import {
   AutocompleteData,
   AutocompleteResultBase,
   CursorPosition,
@@ -14,11 +19,10 @@ import {
   SourceOrTableSuggestion,
   TableContextSuggestion,
 } from '../../shared/types';
-import { OpenSearchPPLLexer } from './.generated/OpenSearchPPLLexer';
-import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
+
 import { removePotentialBackticks } from '../../shared/utils';
 
-// These are keywords that we do not want to show in autocomplete
+// These are keywords that we want to show in autocomplete
 const operatorsToInclude = [
   OpenSearchPPLParser.PIPE,
   OpenSearchPPLParser.EQUAL,
@@ -38,6 +42,17 @@ const operatorsToInclude = [
   OpenSearchPPLParser.LT_PRTHS,
   OpenSearchPPLParser.RT_PRTHS,
   OpenSearchPPLParser.IN,
+  OpenSearchPPLParser.SPAN,
+  OpenSearchPPLParser.MATCH,
+  OpenSearchPPLParser.MATCH_PHRASE,
+  OpenSearchPPLParser.MATCH_BOOL_PREFIX,
+  OpenSearchPPLParser.MATCH_PHRASE_PREFIX,
+];
+
+const fieldRuleList = [
+  OpenSearchPPLParser.RULE_fieldList,
+  OpenSearchPPLParser.RULE_wcFieldList,
+  OpenSearchPPLParser.RULE_sortField,
 ];
 
 export function getIgnoredTokens(): number[] {
@@ -47,7 +62,9 @@ export function getIgnoredTokens(): number[] {
   const firstOperatorIndex = OpenSearchPPLParser.MATCH;
   const lastOperatorIndex = OpenSearchPPLParser.ERROR_RECOGNITION;
   for (let i = firstOperatorIndex; i <= lastOperatorIndex; i++) {
-    tokens.push(i);
+    if (!operatorsToInclude.includes(i)) {
+      tokens.push(i);
+    }
   }
 
   const firstFunctionIndex = OpenSearchPPLParser.CASE;
@@ -83,11 +100,8 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_statsFunctionName,
   OpenSearchPPLParser.RULE_percentileAggFunction,
   OpenSearchPPLParser.RULE_takeAggFunction,
-  OpenSearchPPLParser.RULE_timestampFunctionName,
   OpenSearchPPLParser.RULE_getFormatFunction,
   OpenSearchPPLParser.RULE_tableIdent,
-  OpenSearchPPLParser.RULE_singleFieldRelevanceFunctionName,
-  OpenSearchPPLParser.RULE_multiFieldRelevanceFunctionName,
   OpenSearchPPLParser.RULE_positionFunctionName,
   OpenSearchPPLParser.RULE_evalFunctionName,
   OpenSearchPPLParser.RULE_literalValue,
@@ -107,6 +121,7 @@ export function processVisitedRules(
   let suggestSourcesOrTables: OpenSearchPplAutocompleteResult['suggestSourcesOrTables'];
   let suggestAggregateFunctions = false;
   let shouldSuggestColumns = false;
+  let suggestFieldsInAggregateFunction = false;
   let suggestValuesForColumn: string | undefined;
   let suggestRenameAs: boolean = false;
   const rerunWithoutRules: number[] = [];
@@ -125,18 +140,34 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchPPLParser.RULE_qualifiedName: {
+        // Check if we're in a stats function context
+        const isInStatsFunction = (parentRuleList ?? []).includes(
+          OpenSearchPPLParser.RULE_statsFunction
+        );
+
+        if (isInStatsFunction) {
+          suggestFieldsInAggregateFunction = true;
+        }
+
         // Avoids suggestion fieldNames when last token is source. eg: source = , should suggest only tableName and not fieldname
         const lastTokenResult = findLastNonSpaceOperatorToken(tokenStream, cursorTokenIndex);
         if (lastTokenResult?.token.type === tokenDictionary.SOURCE) {
           break;
         }
-        // In case we have a command with a field list for example source = abc | fields field1, field2, ... . Always suggest a column Don't evaluate other conditions
+        // In case we have a command with a field list for example source = abc | fields field1, field2, ... .
+        // Suggest a fieldname only if the lastCharacter is not a fieldName. eg: source = abc | fields field1 -> should suggest | and , but source = abc | fields field1, -> should suggest fields
+        if ((parentRuleList ?? []).some((parentRule) => fieldRuleList.includes(parentRule))) {
+          const lastNonSpaceToken = findLastNonSpaceToken(tokenStream, cursorTokenIndex);
+          if (lastNonSpaceToken?.token.type === tokenDictionary.ID) {
+            break;
+          } else {
+            shouldSuggestColumns = true;
+            break;
+          }
+        }
+
         // handling the scenario if the last Token is ID, we Don't suggest Column except in the case the second last token is Source to handle the scenario source = tablename fieldname suggestions
-        if (
-          !(parentRuleList ?? []).includes(OpenSearchPPLParser.RULE_fieldList) &&
-          lastTokenResult &&
-          lastTokenResult?.token.type === tokenDictionary.ID
-        ) {
+        if (lastTokenResult && lastTokenResult?.token.type === tokenDictionary.ID) {
           const secondLastTokenResult = findLastNonSpaceOperatorToken(
             tokenStream,
             lastTokenResult.index
@@ -240,6 +271,7 @@ export function processVisitedRules(
     suggestSourcesOrTables,
     suggestAggregateFunctions,
     shouldSuggestColumns,
+    suggestFieldsInAggregateFunction,
     suggestValuesForColumn,
     suggestRenameAs,
     rerunWithoutRules,
@@ -254,10 +286,24 @@ function findLastNonSpaceOperatorToken(
   for (let i = currentIndex - 1; i >= 0; i--) {
     const token = tokenStream.get(i);
     if (
-      token.type !== tokenDictionary.SPACE &&
-      token.type !== tokenDictionary.EOF &&
+      token.type !== OpenSearchPPLParser.SPACE &&
+      token.type !== OpenSearchPPLParser.EOF &&
       !operatorsToInclude.includes(token.type)
     ) {
+      return { token, index: i };
+    }
+  }
+  return null;
+}
+
+// Helper functions for implicit where expression detection
+function findLastNonSpaceToken(
+  tokenStream: TokenStream,
+  currentIndex: number
+): { token: Token; index: number } | null {
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const token = tokenStream.get(i);
+    if (token.type !== OpenSearchPPLParser.SPACE && token.type !== OpenSearchPPLParser.EOF) {
       return { token, index: i };
     }
   }

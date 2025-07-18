@@ -56,11 +56,10 @@ export async function fetchAnchor(
     );
   }
 
-  // @ts-expect-error TS2352 TODO(ts-error): fixme
-  return {
+  return ({
     ...doc,
     isAnchor: true,
-  } as OpenSearchHitRecord;
+  } as unknown) as OpenSearchHitRecord;
 }
 
 export function updateSearchSource(

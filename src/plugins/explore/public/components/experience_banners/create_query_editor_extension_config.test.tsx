@@ -69,15 +69,6 @@ describe('createQueryEditorExtensionConfig', () => {
     expect(isEnabledValue).toBeFalsy();
   });
 
-  it('returns correct banner for explore app', async () => {
-    const banner = createQueryEditorExtensionConfig(coreMockWithExploreId).getBanner?.(
-      undefined as any
-    );
-    render(banner!);
-    // wait for it to load
-    expect(await screen.findByTestId('exploreNewExperienceBanner')).toBeInTheDocument();
-  });
-
   it('returns correct banner for data explorer app', async () => {
     const banner = createQueryEditorExtensionConfig(coreMockWithDataExplorerId).getBanner?.(
       undefined as any

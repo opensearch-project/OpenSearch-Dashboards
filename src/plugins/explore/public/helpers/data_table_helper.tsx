@@ -28,7 +28,11 @@
  * under the License.
  */
 
-import { getOsdFieldOverrides, IndexPattern } from '../../../../plugins/data/public';
+import {
+  getOsdFieldOverrides,
+  IndexPattern,
+  DataView as Dataset,
+} from '../../../../plugins/data/public';
 import { shortenDottedString } from './shorten_dotted_string';
 
 export interface LegacyDisplayedColumn {
@@ -82,11 +86,11 @@ export function getTimeColumn(
  */
 export function getLegacyDisplayedColumns(
   columns: string[],
-  indexPattern: IndexPattern,
+  indexPattern: IndexPattern | Dataset,
   hideTimeField: boolean,
   isShortDots: boolean
 ): LegacyDisplayedColumn[] {
-  if (!Array.isArray(columns) || typeof indexPattern !== 'object' || !indexPattern.getFieldByName) {
+  if (!Array.isArray(columns) || !indexPattern || !indexPattern.getFieldByName) {
     return [];
   }
   // TODO: Remove overrides once we support PPL/SQL sorting

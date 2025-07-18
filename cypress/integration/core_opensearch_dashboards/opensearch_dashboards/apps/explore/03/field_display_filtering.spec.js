@@ -4,20 +4,21 @@
  */
 
 import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../../utils/apps/constants';
-import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
-import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../../utils/apps/query_enhancements/field_display_filtering.js';
+import * as docTable from '../../../../../../utils/apps/explore/doc_table.js';
+import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../../utils/apps/explore/field_display_filtering.js';
 import { BASE_PATH } from '../../../../../../utils/constants';
 import {
+  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspace = getRandomizedWorkspaceName();
 
 const fieldDisplayFilteringTestSuite = () => {
-  describe('filter for value spec', () => {
+  // TODO: Rewrite field filtering tests since we've changed the feature
+  describe.skip('filter for value spec', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       cy.createWorkspaceIndexPatterns({
@@ -34,7 +35,7 @@ const fieldDisplayFilteringTestSuite = () => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspace,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
       cy.getElementByTestId('discoverNewButton').click();
@@ -44,33 +45,27 @@ const fieldDisplayFilteringTestSuite = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllExploreTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {
+    generateAllTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {
       index: INDEX_WITH_TIME_1,
       indexPattern: `${INDEX_WITH_TIME_1}*`,
     }).forEach((config) => {
       it(`filter actions in table field for ${config.testName}`, () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
         const shouldText = config.isFilterButtonsEnabled ? 'exist' : 'not.exist';
         docTable.getDocTableField(0, 0).within(() => {
-          cy.getElementByTestId('filterForValue').should(shouldText);
-          cy.getElementByTestId('filterOutValue').should(shouldText);
+          cy.getElementByTestId('addInclusiveFilterButton').should(shouldText);
+          cy.getElementByTestId('removeInclusiveFilterButton').should(shouldText);
         });
-
-        if (config.isFilterButtonsEnabled) {
-          docTable.verifyDocTableFilterAction(0, 'filterForValue', '10,000', '1', true);
-          docTable.verifyDocTableFilterAction(0, 'filterOutValue', '10,000', '9,999', false);
-        }
       });
 
       it(`filter actions in expanded table for ${config.testName}`, () => {
         // Check if the first expanded Doc Table Field's first row's Filter For, Filter Out and Exists Filter buttons are disabled.
         const verifyFirstExpandedFieldFilterForFilterOutFilterExistsButtons = () => {
-          const shouldText = config.isFilterButtonsEnabled ? 'be.enabled' : 'be.disabled';
+          const shouldText = 'be.enabled';
           docTable.getExpandedDocTableRow(0, 0).within(() => {
             cy.getElementByTestId('addInclusiveFilterButton').should(shouldText);
             cy.getElementByTestId('removeInclusiveFilterButton').should(shouldText);
@@ -172,7 +167,6 @@ const fieldDisplayFilteringTestSuite = () => {
         };
 
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.

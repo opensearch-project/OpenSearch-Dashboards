@@ -13,6 +13,7 @@ function createSetupContract(): jest.Mocked<IUiSetup> {
 
 function createStartContract(): jest.Mocked<IUiStart> {
   return {
+    DatasetSelect: jest.fn(),
     IndexPatternSelect: jest.fn(),
     SearchBar: jest.fn(),
     SuggestionsComponent: jest.fn(),

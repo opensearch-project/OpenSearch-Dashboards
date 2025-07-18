@@ -42,7 +42,7 @@ describe('DefaultDiscoverTable', () => {
         <DataTable
           columns={mockColumns}
           rows={rows}
-          indexPattern={indexPatternMock}
+          dataset={indexPatternMock}
           sampleSize={rows.length}
           isShortDots={false}
           docViewsRegistry={docViewsRegistry}
