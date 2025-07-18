@@ -21,7 +21,6 @@ import {
 
 import { defaultHeatmapChartStyles, HeatmapLabels } from './heatmap_vis_config';
 import * as colorUtil from '../utils/utils';
-import { label } from 'joi';
 
 describe('createlabelLayer', () => {
   const xAxis: CompleteAxisWithStyle = {
