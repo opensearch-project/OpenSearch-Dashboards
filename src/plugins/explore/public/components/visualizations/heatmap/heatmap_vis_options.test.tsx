@@ -64,77 +64,83 @@ jest.mock('@osd/i18n', () => ({
 
 jest.mock('./heatmap_exclusive_vis_options', () => ({
   HeatmapExclusiveVisOptions: jest.fn(({ onChange }) => (
-    <div data-test-subj="heatmapExclusiveOptions">
-      <button
-        data-test-subj="changeHeatmapColorScale"
-        onClick={() =>
-          onChange({
-            colorScaleType: 'log',
-          })
-        }
-      >
-        Update Heatmap Color Scale
-      </button>
+    <>
+      <div data-test-subj="heatmapExclusiveOptions">
+        <button
+          data-test-subj="changeHeatmapColorScale"
+          onClick={() =>
+            onChange({
+              colorScaleType: 'log',
+            })
+          }
+        >
+          Update Heatmap Color Scale
+        </button>
 
-      <button
-        data-test-subj="changeHeatmapReverseSchema"
-        onClick={() =>
-          onChange({
-            reverseSchema: true,
-          })
-        }
-      >
-        Toggle Reverse Schema
-      </button>
+        <button
+          data-test-subj="changeHeatmapReverseSchema"
+          onClick={() =>
+            onChange({
+              reverseSchema: true,
+            })
+          }
+        >
+          Toggle Reverse Schema
+        </button>
 
-      <button
-        data-test-subj="changeHeatmapUseCustomRanges"
-        onClick={() =>
-          onChange({
-            useCustomRanges: true,
-          })
-        }
-      >
-        Enable Custom Ranges
-      </button>
-    </div>
-  )),
-  HeatmapLabelVisOptions: jest.fn(({ onChange }) => (
-    <div data-test-subj="heatmapLabelOptions">
-      <button
-        data-test-subj="toggleShowLabels"
-        onClick={() =>
-          onChange({
-            show: true,
-          })
-        }
-      >
-        Show Labels
-      </button>
+        <button
+          data-test-subj="changeHeatmapUseCustomRanges"
+          onClick={() =>
+            onChange({
+              useCustomRanges: true,
+            })
+          }
+        >
+          Enable Custom Ranges
+        </button>
+      </div>
+      <div data-test-subj="heatmapLabelOptions">
+        <button
+          data-test-subj="toggleShowLabels"
+          onClick={() =>
+            onChange({
+              label: {
+                show: true,
+              },
+            })
+          }
+        >
+          Show Labels
+        </button>
 
-      <button
-        data-test-subj="toggleRotateLabels"
-        onClick={() =>
-          onChange({
-            rotate: true,
-          })
-        }
-      >
-        Rotate Labels
-      </button>
+        <button
+          data-test-subj="toggleRotateLabels"
+          onClick={() =>
+            onChange({
+              label: {
+                rotate: true,
+              },
+            })
+          }
+        >
+          Rotate Labels
+        </button>
 
-      <button
-        data-test-subj="overwriteLabelColor"
-        onClick={() =>
-          onChange({
-            overwriteColor: true,
-            color: '#FF0000',
-          })
-        }
-      >
-        Overwrite Label Color
-      </button>
-    </div>
+        <button
+          data-test-subj="overwriteLabelColor"
+          onClick={() =>
+            onChange({
+              label: {
+                overwriteColor: true,
+                color: '#FF0000',
+              },
+            })
+          }
+        >
+          Overwrite Label Color
+        </button>
+      </div>
+    </>
   )),
 }));
 
@@ -328,25 +334,31 @@ describe('HeatmapVisStyleControls', () => {
     // Show Labels
     fireEvent.click(screen.getByTestId('toggleShowLabels'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      label: {
-        show: true,
+      exclusive: {
+        label: {
+          show: true,
+        },
       },
     });
 
     // Rotate Labels
     fireEvent.click(screen.getByTestId('toggleRotateLabels'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      label: {
-        rotate: true,
+      exclusive: {
+        label: {
+          rotate: true,
+        },
       },
     });
 
     // Overwrite Label Color
     fireEvent.click(screen.getByTestId('overwriteLabelColor'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      label: {
-        overwriteColor: true,
-        color: '#FF0000',
+      exclusive: {
+        label: {
+          overwriteColor: true,
+          color: '#FF0000',
+        },
       },
     });
   });

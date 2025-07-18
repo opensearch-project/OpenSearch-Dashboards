@@ -16,7 +16,7 @@ export const createlabelLayer = (
   xAxis?: CompleteAxisWithStyle,
   yAxis?: CompleteAxisWithStyle
 ) => {
-  if (!styles.label?.show) {
+  if (!styles.exclusive?.label.show) {
     return null;
   }
   const textEncoding: Encoding<string>['text'] = {
@@ -27,13 +27,17 @@ export const createlabelLayer = (
   // For heatmaps with binned x and y axes, aggregation on the label is typically applied to avoid overlapping marks,
   // as multiple data points may fall into the same bin.
 
-  if (!isRegular && styles.label.type !== LabelAggregationType.NONE && styles.label.type) {
-    textEncoding.aggregate = styles.label.type;
+  if (
+    !isRegular &&
+    styles.exclusive?.label.type !== LabelAggregationType.NONE &&
+    styles.exclusive?.label.type
+  ) {
+    textEncoding.aggregate = styles.exclusive?.label.type;
   }
   const labelLayer = {
     mark: {
       type: 'text',
-      color: styles.label.overwriteColor ? styles.label.color : 'black',
+      color: styles.exclusive?.label.overwriteColor ? styles.exclusive?.label.color : 'black',
     },
     encoding: {
       x: {
@@ -47,7 +51,7 @@ export const createlabelLayer = (
         bin: !isRegular ? true : false,
       },
       text: textEncoding,
-      angle: { value: styles.label.rotate ? 45 : 0 },
+      angle: { value: styles.exclusive?.label.rotate ? 45 : 0 },
     },
   };
   return labelLayer;

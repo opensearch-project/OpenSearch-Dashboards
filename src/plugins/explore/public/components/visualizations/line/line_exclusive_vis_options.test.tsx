@@ -36,7 +36,7 @@ describe('LineExclusiveVisOptions', () => {
     expect(screen.getByText('Line')).toBeInTheDocument();
     expect(screen.getAllByText('Style')).toHaveLength(2);
     expect(screen.getAllByText('Interpolation')).toHaveLength(2);
-    expect(screen.getByText('Line Width')).toBeInTheDocument();
+    expect(screen.getByText('Line width')).toBeInTheDocument();
     expect(screen.getByText('Show current time marker')).toBeInTheDocument();
   });
 

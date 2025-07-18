@@ -77,10 +77,6 @@ const mockStyleOptions: LineChartStyleControls = {
       width: 1,
     },
   ],
-  grid: {
-    xLines: true,
-    yLines: true,
-  },
   // Axes
   categoryAxes: [
     {
@@ -94,6 +90,7 @@ const mockStyleOptions: LineChartStyleControls = {
         rotate: 0,
         truncate: 100,
       },
+      grid: { showLines: true },
       title: { text: 'Time' },
     },
   ],
@@ -110,6 +107,7 @@ const mockStyleOptions: LineChartStyleControls = {
         filter: false,
         truncate: 100,
       },
+      grid: { showLines: true },
       title: { text: 'Sales' },
     },
   ],
@@ -254,6 +252,7 @@ MultipleAxes.args = {
           filter: false,
           truncate: 100,
         },
+        grid: { showLines: true },
         title: { text: 'Profit' },
       },
     ],

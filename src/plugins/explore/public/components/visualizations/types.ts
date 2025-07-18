@@ -125,6 +125,7 @@ export interface CategoryAxis {
   show: boolean;
   labels: AxisLabels;
   title: AxisTitle;
+  grid: Grid;
 }
 
 // Styling: Value axis configuration
@@ -136,6 +137,7 @@ export interface ValueAxis {
   show: boolean;
   labels: AxisLabels;
   title: AxisTitle;
+  grid: Grid;
 }
 
 export interface FieldSetting {
