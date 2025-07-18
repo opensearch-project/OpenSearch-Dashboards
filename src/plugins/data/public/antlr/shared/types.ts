@@ -42,6 +42,7 @@ export interface TokenPosition {
 
 export interface KeywordSuggestion {
   value: string;
+  symbolicName?: string;
   id: number;
 }
 
@@ -157,4 +158,5 @@ export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {
   query: string;
   cursor: CursorPosition;
   context?: ParserRuleContext;
+  skipSymbolicKeywords?: boolean;
 }

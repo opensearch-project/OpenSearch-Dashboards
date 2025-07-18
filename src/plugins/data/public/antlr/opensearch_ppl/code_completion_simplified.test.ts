@@ -399,5 +399,26 @@ describe('ppl code_completion', () => {
         type: monaco.languages.CompletionItemKind.Function,
       });
     });
+
+    it('should suggest match method in parse clause', async () => {
+      const results = await getSimpleSuggestions('source = test-index | parse ');
+
+      checkSuggestionsContain(results, {
+        text: 'field1',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+
+      checkSuggestionsContain(results, {
+        text: 'field4',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+
+      const results1 = await getSimpleSuggestions('source = test-index | parse field1 ');
+
+      checkSuggestionsContain(results1, {
+        text: "''",
+        type: monaco.languages.CompletionItemKind.Keyword,
+      });
+    });
   });
 });
