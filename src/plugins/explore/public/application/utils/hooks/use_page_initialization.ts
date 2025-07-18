@@ -18,10 +18,13 @@ import {
   setActiveTab,
   clearResults,
   clearQueryStatusMap,
+  clearLastExecutedData,
+  setEditorMode,
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
 import { useSetEditorText } from '../../hooks';
+import { EditorMode } from '../state_management/types';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -78,6 +81,8 @@ export const useInitPage = () => {
           { type: 'explore' }
         );
 
+        dispatch(clearLastExecutedData());
+        dispatch(setEditorMode(EditorMode.Query));
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
         dispatch(executeQueries({ services }));

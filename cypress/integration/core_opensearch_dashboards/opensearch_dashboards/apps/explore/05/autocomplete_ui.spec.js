@@ -55,7 +55,7 @@ export const runAutocompleteTests = () => {
             cy.wait(2000);
             cy.explore.clearQueryEditor();
 
-            const editorType = 'exploreTopEditor';
+            const editorType = 'exploreQueryPanelEditor';
 
             cy.getElementByTestId(editorType)
               .find('.monaco-editor')

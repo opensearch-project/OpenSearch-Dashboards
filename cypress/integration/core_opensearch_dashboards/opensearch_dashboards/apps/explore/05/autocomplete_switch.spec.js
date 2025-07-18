@@ -71,13 +71,13 @@ export const runAutocompleteTests = () => {
           const secondDataset = getDatasetName('data_logs_small_time_2', config.datasetType);
 
           // Verify initial default query
-          cy.getElementByTestId('exploreTopEditor').contains(firstDataset);
+          cy.getElementByTestId('exploreQueryPanelEditor').contains(firstDataset);
 
           // Switch to second index pattern
           cy.setDataset(secondDataset, DATASOURCE_NAME, config.datasetType);
 
           // Verify query updated for new index pattern
-          cy.getElementByTestId('exploreTopEditor').contains(secondDataset);
+          cy.getElementByTestId('exploreQueryPanelEditor').contains(secondDataset);
         });
       });
     });

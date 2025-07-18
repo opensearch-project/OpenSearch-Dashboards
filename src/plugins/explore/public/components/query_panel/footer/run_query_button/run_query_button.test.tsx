@@ -22,13 +22,13 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 }));
 
 jest.mock('../../../../application/hooks', () => ({
-  useOnEditorRunContext: jest.fn(),
+  useEditorText: jest.fn(),
 }));
 
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { selectIsLoading } from '../../../../application/utils/state_management/selectors';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { useOnEditorRunContext } from '../../../../application/hooks';
+import { useEditorText } from '../../../../application/hooks';
 
 const mockDispatch = jest.fn();
 const mockOnEditorRunActionCreator = onEditorRunActionCreator as jest.MockedFunction<
@@ -38,9 +38,7 @@ const mockSelectIsLoading = selectIsLoading as jest.MockedFunction<typeof select
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
   typeof useOpenSearchDashboards
 >;
-const mockUseOnEditorRunContext = useOnEditorRunContext as jest.MockedFunction<
-  typeof useOnEditorRunContext
->;
+const mockUseEditorText = useEditorText as jest.MockedFunction<typeof useEditorText>;
 
 // Mock redux hooks
 jest.mock('react-redux', () => ({
@@ -65,13 +63,6 @@ describe('RunQueryButton', () => {
     },
   };
 
-  const mockOnEditorRunContext = {
-    setBottomEditorText: jest.fn(),
-    clearEditorsAndSetText: jest.fn(),
-    query: 'SELECT * FROM logs',
-    prompt: 'Show me all logs',
-  };
-
   const createMockStore = () => {
     return configureStore({
       reducer: {
@@ -83,7 +74,7 @@ describe('RunQueryButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices } as any);
-    mockUseOnEditorRunContext.mockReturnValue(mockOnEditorRunContext as any);
+    mockUseEditorText.mockReturnValue('SELECT * FROM logs');
     mockSelectIsLoading.mockReturnValue(false);
     mockOnEditorRunActionCreator.mockReturnValue({ type: 'MOCK_ACTION' } as any);
   });
@@ -106,29 +97,32 @@ describe('RunQueryButton', () => {
     const button = screen.getByRole('button', { name: /run query/i });
     fireEvent.click(button);
 
-    expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, mockOnEditorRunContext);
+    expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, 'SELECT * FROM logs');
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'MOCK_ACTION' });
   });
 
   it('calls onEditorRunActionCreator with correct parameters', () => {
-    const customOnEditorRunContext = {
-      setBottomEditorText: jest.fn(),
-      clearEditorsAndSetText: jest.fn(),
-      query: 'SELECT COUNT(*) FROM users',
-      prompt: 'Count all users',
-    };
-
-    mockUseOnEditorRunContext.mockReturnValue(customOnEditorRunContext as any);
+    const customEditorText = 'SELECT COUNT(*) FROM users';
+    mockUseEditorText.mockReturnValue(customEditorText);
 
     renderWithProvider(<RunQueryButton />);
 
     const button = screen.getByRole('button', { name: /run query/i });
     fireEvent.click(button);
 
-    expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(
-      mockServices,
-      customOnEditorRunContext
-    );
+    expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, customEditorText);
+  });
+
+  it('uses current editor text when button is clicked', () => {
+    const editorText = 'SHOW TABLES';
+    mockUseEditorText.mockReturnValue(editorText);
+
+    renderWithProvider(<RunQueryButton />);
+
+    const button = screen.getByRole('button', { name: /run query/i });
+    fireEvent.click(button);
+
+    expect(mockOnEditorRunActionCreator).toHaveBeenCalledWith(mockServices, editorText);
   });
 
   it('shows loading state when isLoading is true', () => {

@@ -14,8 +14,8 @@ import {
   SavedQuery,
 } from '../../../../../../data/public';
 import {
-  selectEditorMode,
   selectQuery,
+  selectIsPromptEditorMode,
 } from '../../../../application/utils/state_management/selectors';
 import { clearResults, setSavedQuery } from '../../../../application/utils/state_management/slices';
 import { ExploreServices } from '../../../../types';
@@ -25,27 +25,26 @@ import { useTimeFilter } from '../../utils';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { RootState } from '../../../../application/utils/state_management/store';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
-import { useClearEditorsAndSetText, useEditorText } from '../../../../application/hooks';
+import { useEditorText, useSetEditorTextWithQuery } from '../../../../application/hooks';
 import './save_query.scss';
-import { EditorMode } from '../../../../application/utils/state_management/types';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { timeFilter } = useTimeFilter();
-  const editorMode = useSelector(selectEditorMode);
   const query = useSelector(selectQuery);
   const userInputText = useEditorText();
   const savedQueryService = services.data.query.savedQueries;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const isPromptMode = useSelector(selectIsPromptEditorMode);
   const dispatch = useDispatch();
-  const clearEditorsAndSetText = useClearEditorsAndSetText();
+  const setEditorTextWithQuery = useSetEditorTextWithQuery();
 
   // Get current saved query ID from Redux state
   const currentSavedQueryId = useSelector((state: RootState) => state.legacy.savedQuery);
 
   // Get the actual saved query object if we have an ID
   const [currentSavedQuery, setCurrentSavedQuery] = useState<SavedQuery | undefined>();
-  const saveButtonIsDisabled = ![EditorMode.SingleQuery, EditorMode.DualQuery].includes(editorMode);
+  const saveButtonIsDisabled = isPromptMode;
 
   // Load saved query when ID changes
   useEffect(() => {
@@ -129,7 +128,7 @@ export const SaveQueryButton = () => {
       dispatch(
         loadQueryActionCreator(
           services,
-          clearEditorsAndSetText,
+          setEditorTextWithQuery,
           savedQuery.attributes.query.query as string
         )
       );
@@ -148,7 +147,7 @@ export const SaveQueryButton = () => {
       dispatch(clearResults());
       dispatch(executeQueries({ services }));
     },
-    [dispatch, services, clearEditorsAndSetText, timeFilter]
+    [dispatch, services, setEditorTextWithQuery, timeFilter]
   );
 
   const handleClearSavedQuery = useCallback(() => {

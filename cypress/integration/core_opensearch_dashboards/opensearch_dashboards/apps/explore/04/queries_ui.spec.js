@@ -120,13 +120,13 @@ export const runQueryTests = () => {
 
                 // If popover is already open, close it first
                 if (isPopoverOpen) {
-                  cy.getElementByTestId('exploreDetectedLanguage').click();
+                  cy.getElementByTestId('exploreSelectedLanguage').click();
                   // Verify it's closed
                   cy.get('.euiPopover__panel-isOpen').should('not.exist');
                 }
 
                 // Now click to open
-                cy.getElementByTestId('exploreDetectedLanguage').click();
+                cy.getElementByTestId('exploreSelectedLanguage').click();
 
                 // Verify popover appears with title
                 cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');

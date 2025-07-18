@@ -16,9 +16,12 @@ import {
   setQueryStatus,
   updateQueryStatus,
   setEditorMode,
+  resetEditorMode,
   setPromptModeIsAvailable,
   setPromptToQueryIsLoading,
   setLastExecutedPrompt,
+  setLastExecutedTranslatedQuery,
+  clearLastExecutedData,
 } from './query_editor_slice';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
@@ -36,6 +39,7 @@ describe('QueryEditor Slice', () => {
     promptModeIsAvailable: false,
     promptToQueryIsLoading: false,
     lastExecutedPrompt: '',
+    lastExecutedTranslatedQuery: '',
   };
 
   it('should return the initial state', () => {
@@ -64,10 +68,11 @@ describe('QueryEditor Slice', () => {
           startTime: Date.now(),
           error: undefined,
         },
-        editorMode: EditorMode.DualQuery,
+        editorMode: EditorMode.Query,
         promptModeIsAvailable: true,
         promptToQueryIsLoading: false,
         lastExecutedPrompt: 'test prompt',
+        lastExecutedTranslatedQuery: 'test translated query',
       };
 
       const action = setQueryEditorState(newState);
@@ -305,7 +310,7 @@ describe('QueryEditor Slice', () => {
       it('should preserve other state properties', () => {
         const existingState: QueryEditorSliceState = {
           ...initialState,
-          editorMode: EditorMode.DualPrompt,
+          editorMode: EditorMode.Prompt,
           promptModeIsAvailable: true,
           lastExecutedPrompt: 'existing prompt',
         };
@@ -320,7 +325,7 @@ describe('QueryEditor Slice', () => {
         const result = queryEditorReducer(existingState, setQueryStatus(newQueryStatus));
 
         expect(result.overallQueryStatus).toEqual(newQueryStatus);
-        expect(result.editorMode).toBe(EditorMode.DualPrompt);
+        expect(result.editorMode).toBe(EditorMode.Prompt);
         expect(result.promptModeIsAvailable).toBe(true);
       });
     });
@@ -335,7 +340,7 @@ describe('QueryEditor Slice', () => {
             startTime: Date.now(),
             error: undefined,
           },
-          editorMode: EditorMode.SingleQuery,
+          editorMode: EditorMode.Query,
           promptModeIsAvailable: false,
         };
 
@@ -363,7 +368,7 @@ describe('QueryEditor Slice', () => {
 
   describe('setEditorMode', () => {
     it('should handle setEditorMode action', () => {
-      const newMode = EditorMode.DualQuery;
+      const newMode = EditorMode.Query;
       const action = setEditorMode(newMode);
 
       expect(action.type).toBe('queryEditor/setEditorMode');
@@ -373,27 +378,6 @@ describe('QueryEditor Slice', () => {
       expect(newState.editorMode).toBe(newMode);
       expect(newState.overallQueryStatus).toEqual(initialState.overallQueryStatus);
       expect(newState.promptModeIsAvailable).toBe(initialState.promptModeIsAvailable);
-    });
-
-    it('should preserve other state properties', () => {
-      const existingState: QueryEditorSliceState = {
-        ...initialState,
-        overallQueryStatus: {
-          status: QueryExecutionStatus.LOADING,
-          elapsedMs: 100,
-          startTime: Date.now(),
-          error: undefined,
-        },
-        editorMode: EditorMode.SingleQuery,
-        promptModeIsAvailable: true,
-        lastExecutedPrompt: 'original prompt',
-      };
-
-      const result = queryEditorReducer(existingState, setEditorMode(EditorMode.DualPrompt));
-
-      expect(result.editorMode).toBe(EditorMode.DualPrompt);
-      expect(result.overallQueryStatus).toEqual(existingState.overallQueryStatus);
-      expect(result.promptModeIsAvailable).toBe(true);
     });
   });
 
@@ -419,7 +403,7 @@ describe('QueryEditor Slice', () => {
           startTime: Date.now(),
           error: undefined,
         },
-        editorMode: EditorMode.DualQuery,
+        editorMode: EditorMode.Query,
         promptModeIsAvailable: false,
         lastExecutedPrompt: 'some prompt',
       };
@@ -428,7 +412,7 @@ describe('QueryEditor Slice', () => {
 
       expect(result.promptModeIsAvailable).toBe(true);
       expect(result.overallQueryStatus).toEqual(existingState.overallQueryStatus);
-      expect(result.editorMode).toBe(EditorMode.DualQuery);
+      expect(result.editorMode).toBe(EditorMode.Query);
     });
   });
 
@@ -467,7 +451,7 @@ describe('QueryEditor Slice', () => {
           startTime: Date.now(),
           error: undefined,
         },
-        editorMode: EditorMode.DualPrompt,
+        editorMode: EditorMode.Prompt,
         promptModeIsAvailable: true,
         promptToQueryIsLoading: false,
         lastExecutedPrompt: 'test prompt',
@@ -477,7 +461,7 @@ describe('QueryEditor Slice', () => {
 
       expect(result.promptToQueryIsLoading).toBe(true);
       expect(result.overallQueryStatus).toEqual(existingState.overallQueryStatus);
-      expect(result.editorMode).toBe(EditorMode.DualPrompt);
+      expect(result.editorMode).toBe(EditorMode.Prompt);
       expect(result.promptModeIsAvailable).toBe(true);
       expect(result.lastExecutedPrompt).toBe('test prompt');
     });
@@ -507,7 +491,7 @@ describe('QueryEditor Slice', () => {
           startTime: Date.now(),
           error: undefined,
         },
-        editorMode: EditorMode.DualPrompt,
+        editorMode: EditorMode.Prompt,
         promptModeIsAvailable: true,
         lastExecutedPrompt: 'old prompt',
       };
@@ -517,8 +501,58 @@ describe('QueryEditor Slice', () => {
 
       expect(result.lastExecutedPrompt).toBe(newPrompt);
       expect(result.overallQueryStatus).toEqual(existingState.overallQueryStatus);
-      expect(result.editorMode).toBe(EditorMode.DualPrompt);
+      expect(result.editorMode).toBe(EditorMode.Prompt);
       expect(result.promptModeIsAvailable).toBe(true);
+    });
+  });
+
+  describe('resetEditorMode', () => {
+    it('should reset editor mode to default', () => {
+      const existingState: QueryEditorSliceState = {
+        ...initialState,
+        editorMode: EditorMode.Prompt,
+      };
+
+      const action = resetEditorMode();
+      const result = queryEditorReducer(existingState, action);
+
+      expect(action.type).toBe('queryEditor/resetEditorMode');
+      expect(result.editorMode).toBe(DEFAULT_EDITOR_MODE);
+    });
+  });
+
+  describe('setLastExecutedTranslatedQuery', () => {
+    it('should handle setLastExecutedTranslatedQuery action', () => {
+      const newQuery = '| where user_count > 0 | head 10';
+      const action = setLastExecutedTranslatedQuery(newQuery);
+
+      expect(action.type).toBe('queryEditor/setLastExecutedTranslatedQuery');
+      expect(action.payload).toBe(newQuery);
+
+      const newState = queryEditorReducer(initialState, action);
+      expect(newState.lastExecutedTranslatedQuery).toBe(newQuery);
+      expect(newState.overallQueryStatus).toEqual(initialState.overallQueryStatus);
+      expect(newState.editorMode).toBe(initialState.editorMode);
+      expect(newState.promptModeIsAvailable).toBe(initialState.promptModeIsAvailable);
+    });
+  });
+
+  describe('clearLastExecutedData', () => {
+    it('should clear both lastExecutedPrompt and lastExecutedTranslatedQuery', () => {
+      const existingState: QueryEditorSliceState = {
+        ...initialState,
+        lastExecutedPrompt: 'Show me all users',
+        lastExecutedTranslatedQuery: '| where user_count > 0',
+        editorMode: EditorMode.Prompt,
+        promptModeIsAvailable: true,
+      };
+
+      const action = clearLastExecutedData();
+      const result = queryEditorReducer(existingState, action);
+
+      expect(action.type).toBe('queryEditor/clearLastExecutedData');
+      expect(result.lastExecutedPrompt).toBe('');
+      expect(result.lastExecutedTranslatedQuery).toBe('');
     });
   });
 });

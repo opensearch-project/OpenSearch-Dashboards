@@ -3,17 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useContext } from 'react';
-import { EditorContext } from '../../../context';
+import { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { resetEditorMode } from '../../../utils/state_management/slices';
+import { useSetEditorText } from '../use_set_editor_text';
 
 /**
- * Clears both editors
+ * Clear editors
  */
 export const useClearEditors = () => {
-  const { setTopEditorText, setBottomEditorText } = useContext(EditorContext);
+  const setEditorText = useSetEditorText();
+  const dispatch = useDispatch();
 
   return useCallback(() => {
-    setBottomEditorText('');
-    setTopEditorText('');
-  }, [setBottomEditorText, setTopEditorText]);
+    setEditorText('');
+    dispatch(resetEditorMode());
+  }, [dispatch, setEditorText]);
 };
