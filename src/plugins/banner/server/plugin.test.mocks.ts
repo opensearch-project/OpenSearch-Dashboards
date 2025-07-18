@@ -9,12 +9,11 @@
  * GitHub history for details.
  */
 
-import { BannerConfig } from '../common';
+// Mock the routes module
+const mockDefineRoutes = jest.fn();
 
-export interface BannerPluginSetup {
-  bannerEnabled: () => boolean;
-  getConfig: () => BannerConfig;
-}
+jest.mock('./routes/get_config', () => ({
+  defineRoutes: mockDefineRoutes,
+}));
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface BannerPluginStart {}
+export const defineRoutesMock = mockDefineRoutes;

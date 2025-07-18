@@ -18,6 +18,14 @@ To enable or disable the banner plugin, add the following to your `opensearch_da
 ```yaml
 # Enable or disable the banner plugin (default: false)
 banner.enabled: true
+
+# Configure the banner content and appearance
+banner.content: "Important announcement or notification"
+banner.color: "primary" # Options: primary, success, warning
+banner.iconType: "iInCircle" # Any valid EUI icon type
+banner.isVisible: true # Whether the banner is initially visible
+banner.useMarkdown: true # Whether to render content as markdown
+banner.size: "m" # Options: s (small), m (medium)
 ```
 
 ## Usage

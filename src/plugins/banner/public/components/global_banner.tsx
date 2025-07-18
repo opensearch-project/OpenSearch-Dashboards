@@ -11,58 +11,56 @@
 
 import React, { Fragment, useEffect, useState, Suspense, useRef } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import { BannerConfig, DEFAULT_BANNER_HEIGHT, HIDDEN_BANNER_HEIGHT } from '../../common';
-import { BannerService } from '../services/banner_service';
+import { act } from 'react-dom/test-utils';
+import { BannerConfig, HIDDEN_BANNER_HEIGHT, DEFAULT_BANNER_CONFIG } from '../../common';
 import { LinkRenderer } from './link_renderer';
+import { HttpStart } from '../../../../core/public';
 
 const ReactMarkdownLazy = React.lazy(() => import('react-markdown'));
 
 interface GlobalBannerProps {
-  bannerService?: BannerService;
+  http: HttpStart;
 }
 
-export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService }) => {
+export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
   const [bannerConfig, setBannerConfig] = useState<BannerConfig | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const bannerRef = useRef<HTMLDivElement>(null);
 
-  if (!bannerService) {
-    throw new Error('BannerService is required');
-  }
-
+  // Fetch banner config from API when component mounts
   useEffect(() => {
-    const subscription = bannerService.getBannerConfig$().subscribe((config) => {
-      setBannerConfig(config);
-    });
-
-    return () => {
-      subscription.unsubscribe();
+    const fetchBannerConfig = async () => {
+      try {
+        setIsLoading(true);
+        const response = await http.get<BannerConfig>('/api/_plugins/_banner/content');
+        act(() => {
+          setBannerConfig(response);
+        });
+      } catch (error) {
+        // Hide banner on error
+        setBannerConfig({
+          ...DEFAULT_BANNER_CONFIG,
+        });
+      } finally {
+        act(() => {
+          setIsLoading(false);
+        });
+      }
     };
-  }, [bannerService]);
+
+    fetchBannerConfig();
+  }, [http]);
 
   // Update the CSS variable with the banner's height
   useEffect(() => {
-    // Add a smooth transition when changing banner visibility
-    document.documentElement.style.transition = 'padding-top 0.3s ease';
+    // No transition needed
 
     // If banner is not visible, set height to 0
     if (!bannerConfig?.isVisible) {
       document.documentElement.style.setProperty('--global-banner-height', HIDDEN_BANNER_HEIGHT);
 
-      // Reset the transition after a delay
-      setTimeout(() => {
-        document.documentElement.style.transition = '';
-      }, 300);
-
       return;
     }
-
-    // Set an initial non-zero value to ensure CSS takes effect
-    document.documentElement.style.setProperty('--global-banner-height', DEFAULT_BANNER_HEIGHT);
-
-    // Reset the transition after a delay
-    setTimeout(() => {
-      document.documentElement.style.transition = '';
-    }, 300);
 
     // Use ResizeObserver to detect height changes
     const resizeObserver = new ResizeObserver((entries) => {
@@ -86,29 +84,27 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService }) => 
     return () => {
       resizeObserver.disconnect();
 
-      // Don't reset the height on page navigation - only when the banner is actually being hidden
-      // We can detect this by checking if the banner config is still visible
       if (!bannerConfig || !bannerConfig.isVisible) {
-        // Use a transition when removing the banner to prevent sudden layout shifts
-        document.documentElement.style.transition = 'padding-top 0.3s ease';
-
         // Reset the height when banner is removed
         document.documentElement.style.setProperty('--global-banner-height', HIDDEN_BANNER_HEIGHT);
-
-        // Reset the transition after a delay
-        setTimeout(() => {
-          document.documentElement.style.transition = '';
-        }, 300);
       }
     };
   }, [bannerConfig]);
 
   // Hide banner when close button is clicked
   const hideBanner = () => {
-    bannerService.updateBannerConfig({
-      isVisible: false,
-    });
+    setBannerConfig((prevConfig) => (prevConfig ? { ...prevConfig, isVisible: false } : null));
   };
+
+  if (isLoading) {
+    return (
+      <div ref={bannerRef}>
+        <EuiCallOut iconType="loading">
+          <EuiLoadingSpinner size="m" /> Loading banner...
+        </EuiCallOut>
+      </div>
+    );
+  }
 
   if (!bannerConfig || !bannerConfig.isVisible) {
     return null;
@@ -129,13 +125,13 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService }) => 
               root: Fragment,
               link: LinkRenderer,
             }}
-            source={bannerConfig.text.trim()}
+            source={bannerConfig.content.trim()}
           />
         </Suspense>
       );
     }
 
-    return bannerConfig.text;
+    return bannerConfig.content;
   };
 
   return (
@@ -146,6 +142,7 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ bannerService }) => 
         iconType={bannerConfig.iconType}
         dismissible={true}
         onDismiss={hideBanner}
+        size={bannerConfig.size}
       />
     </div>
   );

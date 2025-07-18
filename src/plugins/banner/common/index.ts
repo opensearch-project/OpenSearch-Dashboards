@@ -15,9 +15,10 @@ export const PLUGIN_NAME = 'banner';
 export * from './constants';
 
 export interface BannerConfig {
-  text: string;
+  content: string;
   color: 'primary' | 'success' | 'warning';
   iconType?: string;
   isVisible: boolean;
   useMarkdown?: boolean;
+  size?: 's' | 'm';
 }
