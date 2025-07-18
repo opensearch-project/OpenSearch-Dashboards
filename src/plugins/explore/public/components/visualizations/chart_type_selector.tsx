@@ -175,7 +175,7 @@ export const ChartTypeSelector = <T extends ChartType>({
     <>
       <EuiFormRow
         key="ChartTypeSelector"
-        label={i18n.translate('explore.stylePanel.chartTypeSwitcher.title', {
+        label={i18n.translate('explore.chartTypeSwitcher.title', {
           defaultMessage: 'Visualization type',
         })}
       >
