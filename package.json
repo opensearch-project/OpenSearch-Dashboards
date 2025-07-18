@@ -106,6 +106,7 @@
     "**/d3-color": "^3.1.0",
     "**/flat": "^5.0.2",
     "**/elasticsearch/agentkeepalive": "^4.5.0",
+    "**/elliptic": "^6.6.1",
     "**/eslint/cross-spawn": "^7.0.5",
     "**/es5-ext": "^0.10.63",
     "**/fetch-mock/path-to-regexp": "^3.3.0",
