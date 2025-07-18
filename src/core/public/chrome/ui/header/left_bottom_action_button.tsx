@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiIconProps,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiIconProps, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -24,6 +17,7 @@ interface LeftBottomActionButtonProps {
   icon?: React.ReactNode;
   onClick?: () => void;
   title: string;
+  ['arial-label']?: string;
 }
 
 export const LeftBottomActionButton = (props: LeftBottomActionButtonProps) => {
@@ -37,23 +31,28 @@ export const LeftBottomActionButton = (props: LeftBottomActionButtonProps) => {
   }
 
   return isNavOpen && isVisible ? (
-    <EuiFlexGroup
-      style={{ cursor: 'pointer' }}
-      gutterSize="s"
-      alignItems="center"
+    <EuiButtonEmpty
+      color="text"
+      aria-label={props['arial-label'] || props.title}
+      flush="both"
       onClick={props.onClick}
     >
-      <EuiFlexItem className="leftBottomActionButtonIconItem" grow={false}>
-        {finalIcon}
-      </EuiFlexItem>
-      <EuiFlexItem className="leftBottomActionButtonTitleItem">{props.title}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <div className="leftBottomActionButton">
+        <div className="leftBottomActionButtonIconItem">{finalIcon}</div>
+        <div className="leftBottomActionButtonTitleItem">{props.title}</div>
         <EuiIcon type="arrowRight" color="text" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </div>
+    </EuiButtonEmpty>
   ) : (
     <EuiToolTip content={props.title}>
-      <EuiButtonEmpty onClick={props.onClick}>{finalIcon}</EuiButtonEmpty>
+      <EuiButtonEmpty
+        aria-label={props['arial-label'] || props.title}
+        flush="both"
+        size="xs"
+        onClick={props.onClick}
+      >
+        {finalIcon}
+      </EuiButtonEmpty>
     </EuiToolTip>
   );
 };

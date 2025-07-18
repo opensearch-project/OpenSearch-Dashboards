@@ -222,6 +222,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       // Dev tool needs to be mount so that it can listen UI Actions events.
       this.devToolsMountDom = document.createElement('div');
+      this.devToolsMountDom.dataset.testSubj = 'devToolsModalMountDom';
       document.body.appendChild(this.devToolsMountDom);
       this.unmountDevToolsModal = toMountPoint(
         React.createElement(DevToolsModal, {
