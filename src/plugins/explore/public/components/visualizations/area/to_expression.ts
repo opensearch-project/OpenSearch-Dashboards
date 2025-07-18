@@ -93,7 +93,9 @@ export const createSimpleAreaChart = (
 
   return {
     $schema: VEGASCHEMA,
-    title: `${metricName} Over Time`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} Over Time`
+      : undefined,
     data: { values: transformedData },
     layer: layers,
     // Add legend configuration if needed, or explicitly set to null if disabled
@@ -206,7 +208,9 @@ export const createMultiAreaChart = (
 
   return {
     $schema: VEGASCHEMA,
-    title: `${metricName} Over Time by ${categoryName}`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} Over Time by ${categoryName}`
+      : undefined,
     data: { values: transformedData },
     layer: layers,
   };
@@ -245,7 +249,10 @@ export const createFacetedMultiAreaChart = (
 
   return {
     $schema: VEGASCHEMA,
-    title: `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName ||
+        `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
+      : undefined,
     data: { values: transformedData },
     // Add a max width to the entire visualization and make it scrollable
     width: 'container',
@@ -460,7 +467,9 @@ export const createCategoryAreaChart = (
 
   return {
     $schema: VEGASCHEMA,
-    title: `${metricName} by ${categoryName}`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName}`
+      : undefined,
     data: { values: transformedData },
     layer: layers,
     // Add legend configuration if needed, or explicitly set to null if disabled
@@ -500,7 +509,9 @@ export const createStackedAreaChart = (
 
   const spec: any = {
     $schema: VEGASCHEMA,
-    title: `${metricName} by ${categoryName1} and ${categoryName2}`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName1} and ${categoryName2}`
+      : undefined,
     data: { values: transformedData },
     mark: {
       type: 'area',
