@@ -91,12 +91,12 @@ export const BarExclusiveVisOptions = ({
     >
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.bar.sizeMode', {
-          defaultMessage: 'Bar size',
+          defaultMessage: 'Size',
         })}
       >
         <EuiButtonGroup
           legend={i18n.translate('explore.stylePanel.bar.sizeMode', {
-            defaultMessage: 'Bar size',
+            defaultMessage: 'Size',
           })}
           options={sizeModeOptions}
           idSelected={barSizeMode}
@@ -114,7 +114,7 @@ export const BarExclusiveVisOptions = ({
             <EuiFlexItem>
               <EuiFormRow
                 label={i18n.translate('explore.stylePanel.bar.barWidth', {
-                  defaultMessage: 'Bar width',
+                  defaultMessage: 'Width',
                 })}
                 helpText={i18n.translate('explore.stylePanel.bar.barWidthHelp', {
                   defaultMessage: 'Value between 0.1 and 1',
@@ -134,7 +134,7 @@ export const BarExclusiveVisOptions = ({
             <EuiFlexItem>
               <EuiFormRow
                 label={i18n.translate('explore.stylePanel.bar.barPadding', {
-                  defaultMessage: 'Bar padding',
+                  defaultMessage: 'Padding',
                 })}
                 helpText={i18n.translate('explore.stylePanel.bar.barPaddingHelp', {
                   defaultMessage: 'Value between 0 and 0.5',

@@ -79,11 +79,14 @@ export const ShowLabel = Template.bind({});
 ShowLabel.args = {
   styleOptions: {
     ...defaultHeatmapChartStyles,
-    label: {
-      show: true,
-      rotate: true,
-      overwriteColor: false,
-      color: 'black',
+    exclusive: {
+      ...defaultHeatmapChartStyles.exclusive,
+      label: {
+        show: true,
+        rotate: true,
+        overwriteColor: false,
+        color: 'black',
+      },
     },
   },
   numericalColumns: mockNumericalColumns,

@@ -33,6 +33,7 @@ export interface ExclusiveHeatmapConfig {
   percentageMode: boolean;
   maxNumberOfColors: number;
   useCustomRanges: boolean;
+  label: HeatmapLabels;
   customRanges?: RangeValue[];
 }
 // Complete heatmap chart style controls interface
@@ -46,7 +47,6 @@ export interface HeatmapChartStyleControls {
   standardAxes: StandardAxes[];
 
   exclusive: ExclusiveHeatmapConfig;
-  label: HeatmapLabels;
   switchAxes: false;
 }
 
@@ -68,13 +68,13 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     percentageMode: false,
     maxNumberOfColors: 4,
     useCustomRanges: false,
-  },
-  label: {
-    type: LabelAggregationType.SUM,
-    show: false,
-    rotate: false,
-    overwriteColor: false,
-    color: 'black',
+    label: {
+      type: LabelAggregationType.SUM,
+      show: false,
+      rotate: false,
+      overwriteColor: false,
+      color: 'black',
+    },
   },
 
   // Standard axes

@@ -69,17 +69,18 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <HeatmapExclusiveVisOptions
+              shouldShowType={shouldShowTypeAndGrid}
               styles={styleOptions.exclusive}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          {/* <EuiFlexItem grow={false}>
             <HeatmapLabelVisOptions
               shouldShowType={shouldShowTypeAndGrid}
               styles={styleOptions.label}
               onChange={(label) => updateStyleOption('label', label)}
             />
-          </EuiFlexItem>
+          </EuiFlexItem> */}
           <EuiFlexItem grow={false}>
             <LegendOptionsPanel
               shouldShowLegend={true}
