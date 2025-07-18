@@ -13,6 +13,7 @@ import { HeatmapExclusiveVisOptions } from './heatmap_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { TitleOptionsPanel } from '../style_panel/title/title';
 
 export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyleControls>;
 
@@ -85,6 +86,17 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
                 if (legendOptions.position !== undefined) {
                   updateStyleOption('legendPosition', legendOptions.position);
                 }
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TitleOptionsPanel
+              titleOptions={styleOptions.titleOptions}
+              onShowTitleChange={(titleOptions) => {
+                updateStyleOption('titleOptions', {
+                  ...styleOptions.titleOptions,
+                  ...titleOptions,
+                });
               }}
             />
           </EuiFlexItem>

@@ -14,6 +14,7 @@ import {
   Positions,
   AxisRole,
   VisFieldType,
+  TitleOptions,
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
@@ -35,6 +36,8 @@ export interface LineChartStyleControls {
   // Axes configuration
   categoryAxes: CategoryAxis[];
   valueAxes: ValueAxis[];
+
+  titleOptions: TitleOptions;
 }
 
 const defaultLineChartStyles: LineChartStyleControls = {
@@ -105,6 +108,11 @@ const defaultLineChartStyles: LineChartStyleControls = {
       },
     },
   ],
+
+  titleOptions: {
+    show: true,
+    titleName: '',
+  },
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({

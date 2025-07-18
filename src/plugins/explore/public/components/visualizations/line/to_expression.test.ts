@@ -109,6 +109,10 @@ describe('to_expression', () => {
       mode: 'all' as TooltipOptions['mode'],
     },
     addTimeMarker: false,
+    titleOptions: {
+      show: true,
+      titleName: '',
+    },
   };
 
   beforeEach(() => {

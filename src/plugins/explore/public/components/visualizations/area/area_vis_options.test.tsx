@@ -213,6 +213,10 @@ describe('AreaVisStyleControls', () => {
           },
         },
       ],
+      titleOptions: {
+        show: true,
+        titleName: '',
+      },
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {

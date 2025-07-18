@@ -148,6 +148,10 @@ describe('line_vis_config', () => {
           grid: {} as GridOptions,
           categoryAxes: [] as CategoryAxis[],
           valueAxes: [] as ValueAxis[],
+          titleOptions: {
+            show: true,
+            titleName: '',
+          },
         },
         onStyleChange: jest.fn(),
         numericalColumns: [],

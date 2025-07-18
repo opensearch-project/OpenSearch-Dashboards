@@ -92,6 +92,10 @@ describe('Area Chart to_expression', () => {
         name: '',
       },
     ],
+    titleOptions: {
+      show: true,
+      titleName: '',
+    },
   };
 
   describe('createSimpleAreaChart', () => {

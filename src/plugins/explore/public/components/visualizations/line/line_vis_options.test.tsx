@@ -259,6 +259,10 @@ describe('LineVisStyleControls', () => {
       tooltipOptions: defaultTooltipOptions,
       categoryAxes: [defaultCategoryAxis],
       valueAxes: [defaultValueAxis],
+      titleOptions: {
+        show: true,
+        titleName: '',
+      },
     },
     onStyleChange: jest.fn(),
     numericalColumns: [mockNumericalColumn],
