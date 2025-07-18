@@ -24,7 +24,7 @@ export const DebouncedTruncateField: React.FC<{
         compressed
         value={localValue}
         onChange={(e) => handleChange(e.target.value)}
-        append={<EuiText size="s">px</EuiText>}
+        append={<EuiText size="s">PX</EuiText>}
       />
     </EuiFormRow>
   );
