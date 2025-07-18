@@ -221,6 +221,10 @@ describe('AreaVisStyleControls', () => {
         },
       ],
       grid: { xLines: true, yLines: true },
+      titleOptions: {
+        show: true,
+        titleName: '',
+      },
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {

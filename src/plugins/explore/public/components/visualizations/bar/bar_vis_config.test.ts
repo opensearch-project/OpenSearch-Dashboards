@@ -38,6 +38,10 @@ describe('bar_vis_config', () => {
             name: '',
           },
         ],
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
       });
 
       // Check axes configuration

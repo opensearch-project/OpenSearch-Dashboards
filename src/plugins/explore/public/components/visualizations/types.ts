@@ -104,6 +104,11 @@ export interface GridOptions {
   yLines: boolean;
 }
 
+export interface TitleOptions {
+  show: boolean;
+  titleName: string;
+}
+
 // Styling: Axis label configuration
 export interface AxisLabels {
   show: boolean;

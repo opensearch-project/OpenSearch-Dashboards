@@ -13,6 +13,7 @@ import {
   Positions,
   TooltipOptions,
   VisFieldType,
+  TitleOptions,
 } from '../types';
 
 export interface ExclusiveScatterConfig {
@@ -31,6 +32,8 @@ export interface ScatterChartStyleControls {
 
   exclusive: ExclusiveScatterConfig;
   switchAxes: boolean;
+
+  titleOptions: TitleOptions;
 }
 
 export const defaultScatterChartStyles: ScatterChartStyleControls = {
@@ -89,6 +92,10 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
     },
   ],
   switchAxes: false,
+  titleOptions: {
+    show: true,
+    titleName: '',
+  },
 };
 
 export const createScatterConfig = (): VisualizationType<'scatter'> => ({

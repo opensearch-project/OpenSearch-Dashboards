@@ -55,6 +55,10 @@ describe('createPieConfig', () => {
           showLabels: false,
           truncate: 100,
         },
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
       },
       onStyleChange: jest.fn(),
       numericalColumns: [],

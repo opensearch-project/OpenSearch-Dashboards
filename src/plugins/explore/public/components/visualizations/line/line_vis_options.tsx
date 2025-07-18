@@ -15,6 +15,7 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { GridOptionsPanel } from '../style_panel/grid/grid';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { TitleOptionsPanel } from '../style_panel/title/title';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
@@ -118,6 +119,18 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
                 if (legendOptions.position !== undefined) {
                   updateStyleOption('legendPosition', legendOptions.position);
                 }
+              }}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <TitleOptionsPanel
+              titleOptions={styleOptions.titleOptions}
+              onShowTitleChange={(titleOptions) => {
+                updateStyleOption('titleOptions', {
+                  ...styleOptions.titleOptions,
+                  ...titleOptions,
+                });
               }}
             />
           </EuiFlexItem>
