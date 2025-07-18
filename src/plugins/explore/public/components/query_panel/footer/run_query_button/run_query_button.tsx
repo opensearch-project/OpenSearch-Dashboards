@@ -11,16 +11,16 @@ import { onEditorRunActionCreator } from '../../../../application/utils/state_ma
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { selectIsLoading } from '../../../../application/utils/state_management/selectors';
-import { useOnEditorRunContext } from '../../../../application/hooks';
+import { useEditorText } from '../../../../application/hooks';
 
 export const RunQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const onEditorRunContext = useOnEditorRunContext();
+  const editorText = useEditorText();
   const isLoading = useSelector(selectIsLoading);
   const dispatch = useDispatch();
 
   const handleClick = () => {
-    dispatch(onEditorRunActionCreator(services, onEditorRunContext));
+    dispatch(onEditorRunActionCreator(services, editorText));
   };
 
   return (

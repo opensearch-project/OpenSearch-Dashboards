@@ -10,8 +10,9 @@ import { RunQueryButton } from './run_query_button';
 import { FilterPanelToggle } from './filter_panel_toggle';
 import { RecentQueriesButton } from './recent_queries_button';
 import { useDatasetContext } from '../../../application/context';
-import { DetectedLanguage } from './detected_language';
+import { SelectedLanguage } from './selected_language';
 import { QueryPanelError } from './query_panel_error';
+import { LanguageToggle } from './language_toggle';
 import './query_panel_footer.scss';
 
 export const QueryPanelFooter = () => {
@@ -28,7 +29,8 @@ export const QueryPanelFooter = () => {
         <div className="exploreQueryPanelFooter__verticalSeparator" />
         <SaveQueryButton />
         <div className="exploreQueryPanelFooter__verticalSeparator" />
-        <DetectedLanguage />
+        <SelectedLanguage />
+        <LanguageToggle />
         <QueryPanelError />
       </div>
 

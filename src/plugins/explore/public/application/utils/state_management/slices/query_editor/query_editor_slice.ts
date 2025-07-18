@@ -18,6 +18,7 @@ export interface QueryEditorSliceState {
   promptModeIsAvailable: boolean;
   promptToQueryIsLoading: boolean;
   lastExecutedPrompt: string;
+  lastExecutedTranslatedQuery: string;
 }
 
 const initialState: QueryEditorSliceState = {
@@ -31,6 +32,7 @@ const initialState: QueryEditorSliceState = {
   promptModeIsAvailable: false,
   promptToQueryIsLoading: false,
   lastExecutedPrompt: '',
+  lastExecutedTranslatedQuery: '',
 };
 
 const queryEditorSlice = createSlice({
@@ -101,6 +103,16 @@ const queryEditorSlice = createSlice({
     setLastExecutedPrompt: (state, action: PayloadAction<string>) => {
       state.lastExecutedPrompt = action.payload;
     },
+    resetEditorMode: (state) => {
+      state.editorMode = DEFAULT_EDITOR_MODE;
+    },
+    setLastExecutedTranslatedQuery: (state, action: PayloadAction<string>) => {
+      state.lastExecutedTranslatedQuery = action.payload;
+    },
+    clearLastExecutedData: (state) => {
+      state.lastExecutedPrompt = '';
+      state.lastExecutedTranslatedQuery = '';
+    },
   },
 });
 
@@ -113,10 +125,13 @@ export const {
   clearQueryStatusMap,
   setQueryStatus,
   updateQueryStatus,
+  resetEditorMode,
   setEditorMode,
   setLastExecutedPrompt,
+  setLastExecutedTranslatedQuery,
   setPromptModeIsAvailable,
   setPromptToQueryIsLoading,
+  clearLastExecutedData,
 } = queryEditorSlice.actions;
 export const queryEditorReducer = queryEditorSlice.reducer;
 export const queryEditorInitialState = initialState;

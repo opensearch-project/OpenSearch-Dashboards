@@ -8,10 +8,13 @@ import { ExploreServices } from '../../../../../types';
 import { EditorMode } from '../../types';
 import {
   clearResults,
-  setEditorMode,
   setPromptModeIsAvailable,
   setQueryWithHistory,
+  setActiveTab,
+  clearLastExecutedData,
 } from '../../slices';
+import { clearQueryStatusMap } from '../../slices/query_editor/query_editor_slice';
+import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 import { executeQueries } from '../query_actions';
 import { getPromptModeIsAvailable } from '../../../get_prompt_mode_is_available';
 import { AppDispatch, RootState } from '../../store';
@@ -19,10 +22,10 @@ import { AppDispatch, RootState } from '../../store';
 // Mock dependencies
 jest.mock('../../slices', () => ({
   clearResults: jest.fn(),
-  setEditorMode: jest.fn(),
   setPromptModeIsAvailable: jest.fn(),
   setQueryWithHistory: jest.fn(),
   setActiveTab: jest.fn(),
+  clearLastExecutedData: jest.fn(),
 }));
 
 jest.mock('../../slices/query_editor/query_editor_slice', () => ({
@@ -54,7 +57,7 @@ describe('setDatasetActionCreator', () => {
 
   const mockRootState = {
     queryEditor: {
-      editorMode: EditorMode.SingleQuery,
+      editorMode: EditorMode.Query,
       promptModeIsAvailable: false,
       queryStatusMap: {},
       overallQueryStatus: {
@@ -65,6 +68,7 @@ describe('setDatasetActionCreator', () => {
       },
       promptToQueryIsLoading: false,
       lastExecutedPrompt: '',
+      lastExecutedTranslatedQuery: '',
     },
     query: {
       query: 'SELECT * FROM test',
@@ -102,7 +106,7 @@ describe('setDatasetActionCreator', () => {
           getDefault: jest.fn().mockResolvedValue({ id: 'default-dataview' }),
           convertToDataset: jest
             .fn()
-            .mockReturnValue({ id: 'test-dataset', type: 'INDEX_PATTERN' }),
+            .mockReturnValue({ id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' }),
         },
         query: {
           queryString: {
@@ -121,16 +125,27 @@ describe('setDatasetActionCreator', () => {
     jest.clearAllMocks();
   });
 
-  it('should dispatch clearResults and setQueryWithHistory actions', async () => {
+  it('should dispatch all initial cleanup actions', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
 
+    expect(setActiveTab).toHaveBeenCalledWith('');
     expect(clearResults).toHaveBeenCalledTimes(1);
+    expect(clearQueryStatusMap).toHaveBeenCalledTimes(1);
+    expect(clearLastExecutedData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should dispatch setQueryWithHistory with dataset', async () => {
+    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+
+    const actionCreator = setDatasetActionCreator(services, mockClearEditors);
+    await actionCreator(mockDispatch, mockGetState);
+
     expect(setQueryWithHistory).toHaveBeenCalledWith({
       ...mockQueryState,
-      dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
+      dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
     });
   });
 
@@ -152,15 +167,6 @@ describe('setDatasetActionCreator', () => {
     expect(setPromptModeIsAvailable).not.toHaveBeenCalled();
   });
 
-  it('should set editor mode to SingleQuery when prompt mode is not available', async () => {
-    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
-
-    const actionCreator = setDatasetActionCreator(services, mockClearEditors);
-    await actionCreator(mockDispatch, mockGetState);
-
-    expect(setEditorMode).toHaveBeenCalledWith(EditorMode.SingleQuery);
-  });
-
   it('should call clearEditors', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
@@ -170,13 +176,14 @@ describe('setDatasetActionCreator', () => {
     expect(mockClearEditors).toHaveBeenCalledTimes(1);
   });
 
-  it('should dispatch executeQueries action', async () => {
+  it('should dispatch executeQueries and detectAndSetOptimalTab actions', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
 
     expect(executeQueries).toHaveBeenCalledWith({ services });
+    expect(detectAndSetOptimalTab).toHaveBeenCalledWith({ services });
   });
 
   it('should handle prompt mode availability change from true to false', async () => {
@@ -190,9 +197,10 @@ describe('setDatasetActionCreator', () => {
           startTime: undefined,
           body: undefined,
         },
-        editorMode: EditorMode.SingleEmpty,
+        editorMode: EditorMode.Prompt,
         promptToQueryIsLoading: false,
         lastExecutedPrompt: '',
+        lastExecutedTranslatedQuery: '',
       },
       query: {
         query: 'SELECT * FROM test',
@@ -228,12 +236,20 @@ describe('setDatasetActionCreator', () => {
     expect(setPromptModeIsAvailable).toHaveBeenCalledWith(false);
   });
 
-  it('should set editor mode to SingleEmpty when prompt mode is available', async () => {
-    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(true);
+  it('should handle dataset creation from existing dataset query', async () => {
+    const stateWithDataset = {
+      ...mockRootState,
+      query: {
+        ...mockRootState.query,
+        dataset: { id: 'existing-dataset', title: 'existing-dataset', type: 'INDEX_PATTERN' },
+      },
+    };
+    mockGetState.mockReturnValue(stateWithDataset);
+    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
 
-    expect(setEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
+    expect(services.data.dataViews.get).toHaveBeenCalledWith('existing-dataset', false);
   });
 });

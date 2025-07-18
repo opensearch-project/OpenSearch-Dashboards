@@ -5,15 +5,13 @@
 
 import { callAgentActionCreator } from './call_agent';
 import {
-  setEditorMode,
   setPromptToQueryIsLoading,
   setLastExecutedPrompt,
+  setLastExecutedTranslatedQuery,
 } from '../../../../slices';
-import { EditorMode } from '../../../../types';
 import { runQueryActionCreator } from '../../run_query';
-import { useOnEditorRunContext } from '../../../../../../hooks';
 import { ExploreServices } from '../../../../../../../types';
-import { RootState, AppDispatch } from '../../../../store';
+import { AppDispatch } from '../../../../store';
 import {
   AgentError,
   ProhibitedQueryError,
@@ -21,21 +19,23 @@ import {
 
 // Mock the dependencies
 jest.mock('../../../../slices', () => ({
-  setEditorMode: jest.fn(),
   setPromptToQueryIsLoading: jest.fn(),
   setLastExecutedPrompt: jest.fn(),
+  setLastExecutedTranslatedQuery: jest.fn(),
 }));
 
 jest.mock('../../run_query', () => ({
   runQueryActionCreator: jest.fn(),
 }));
 
-const mockSetEditorMode = setEditorMode as jest.MockedFunction<typeof setEditorMode>;
 const mockSetPromptToQueryIsLoading = setPromptToQueryIsLoading as jest.MockedFunction<
   typeof setPromptToQueryIsLoading
 >;
 const mockSetLastExecutedPrompt = setLastExecutedPrompt as jest.MockedFunction<
   typeof setLastExecutedPrompt
+>;
+const mockSetLastExecutedTranslatedQuery = setLastExecutedTranslatedQuery as jest.MockedFunction<
+  typeof setLastExecutedTranslatedQuery
 >;
 const mockRunQueryActionCreator = runQueryActionCreator as jest.MockedFunction<
   typeof runQueryActionCreator
@@ -43,15 +43,13 @@ const mockRunQueryActionCreator = runQueryActionCreator as jest.MockedFunction<
 
 describe('callAgentActionCreator', () => {
   let mockServices: ExploreServices;
-  let mockOnEditorRunContext: ReturnType<typeof useOnEditorRunContext>;
-  let mockGetState: jest.MockedFunction<() => RootState>;
   let mockDispatch: jest.MockedFunction<AppDispatch>;
+  const testEditorText = 'What are the top 10 users?';
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockDispatch = jest.fn();
-    mockGetState = jest.fn();
 
     mockServices = ({
       data: {
@@ -82,18 +80,7 @@ describe('callAgentActionCreator', () => {
       },
     } as unknown) as ExploreServices;
 
-    mockOnEditorRunContext = {
-      setBottomEditorText: jest.fn(),
-      clearEditorsAndSetText: jest.fn(),
-      query: 'current query',
-      prompt: 'What are the top 10 users?',
-    };
-
-    // Mock return values
-    mockSetEditorMode.mockReturnValue({
-      type: 'queryEditor/setEditorMode',
-      payload: EditorMode.DualPrompt,
-    });
+    // Mock return values for action creators
     mockSetPromptToQueryIsLoading.mockReturnValue({
       type: 'queryEditor/setPromptToQueryIsLoading',
       payload: true,
@@ -101,6 +88,10 @@ describe('callAgentActionCreator', () => {
     mockSetLastExecutedPrompt.mockReturnValue({
       type: 'queryEditor/setLastExecutedPrompt',
       payload: 'test prompt',
+    });
+    mockSetLastExecutedTranslatedQuery.mockReturnValue({
+      type: 'queryEditor/setLastExecutedTranslatedQuery',
+      payload: 'test query',
     });
     mockRunQueryActionCreator.mockReturnValue(jest.fn());
   });
@@ -115,24 +106,20 @@ describe('callAgentActionCreator', () => {
     };
 
     beforeEach(() => {
-      mockGetState.mockReturnValue({
-        queryEditor: { editorMode: EditorMode.SinglePrompt },
-      } as RootState);
-
       (mockServices.http.post as jest.Mock).mockResolvedValue(mockResponse);
     });
 
     it('should call the agent API with correct parameters', async () => {
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.http.post).toHaveBeenCalledWith('/api/enhancements/assist/generate', {
         body: JSON.stringify({
-          question: 'What are the top 10 users?',
+          question: testEditorText,
           index: 'test-index',
           language: 'PPL',
           dataSourceId: 'test-datasource',
@@ -140,57 +127,44 @@ describe('callAgentActionCreator', () => {
       });
     });
 
-    it('should set the bottom editor text with the response query', async () => {
-      const thunk = callAgentActionCreator({
-        services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
-      });
-
-      await thunk(mockDispatch, mockGetState, undefined);
-
-      expect(mockOnEditorRunContext.setBottomEditorText).toHaveBeenCalledWith(mockResponse.query);
-    });
-
-    it('should change to DualPrompt mode when not already in that mode', async () => {
-      const thunk = callAgentActionCreator({
-        services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
-      });
-
-      await thunk(mockDispatch, mockGetState, undefined);
-
-      expect(mockSetEditorMode).toHaveBeenCalledWith(EditorMode.DualPrompt);
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'queryEditor/setEditorMode',
-        payload: EditorMode.DualPrompt,
-      });
-    });
-
-    it('should not change mode when already in DualPrompt mode', async () => {
-      mockGetState.mockReturnValue({
-        queryEditor: { editorMode: EditorMode.DualPrompt },
-      } as RootState);
+    it('should dispatch runQueryActionCreator with the response query', async () => {
+      const mockRunAction = jest.fn();
+      mockRunQueryActionCreator.mockReturnValue(mockRunAction);
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockSetEditorMode).not.toHaveBeenCalled();
+      expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, mockResponse.query);
+      expect(mockDispatch).toHaveBeenCalledWith(mockRunAction);
     });
 
     it('should set time range when provided in response', async () => {
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.data.query.timefilter.timefilter.setTime).toHaveBeenCalledWith(
         mockResponse.timeRange
+      );
+    });
+
+    it('should set last executed translated query', async () => {
+      const thunk = callAgentActionCreator({
+        services: mockServices,
+        editorText: testEditorText,
+      });
+
+      await thunk(mockDispatch, jest.fn(), undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        mockSetLastExecutedTranslatedQuery(mockResponse.query)
       );
     });
 
@@ -201,70 +175,46 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.data.query.timefilter.timefilter.setTime).not.toHaveBeenCalled();
-    });
-
-    it('should dispatch runQueryActionCreator with the response query', async () => {
-      const mockRunAction = jest.fn();
-      mockRunQueryActionCreator.mockReturnValue(mockRunAction);
-
-      const thunk = callAgentActionCreator({
-        services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
-      });
-
-      await thunk(mockDispatch, mockGetState, undefined);
-
-      expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, mockResponse.query);
-      expect(mockDispatch).toHaveBeenCalledWith(mockRunAction);
-    });
-
-    it('should set loading state to true before API call and false after completion', async () => {
-      const thunk = callAgentActionCreator({
-        services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
-      });
-
-      await thunk(mockDispatch, mockGetState, undefined);
-
-      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledWith(true);
-      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledWith(false);
-      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledTimes(2);
     });
 
     it('should set last executed prompt after successful API call', async () => {
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockSetLastExecutedPrompt).toHaveBeenCalledWith('What are the top 10 users?');
+      expect(mockDispatch).toHaveBeenCalledWith(mockSetLastExecutedPrompt(testEditorText));
+    });
+
+    it('should set loading state to true before API call and false after completion', async () => {
+      const thunk = callAgentActionCreator({
+        services: mockServices,
+        editorText: testEditorText,
+      });
+
+      await thunk(mockDispatch, jest.fn(), undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith(mockSetPromptToQueryIsLoading(true));
+      expect(mockDispatch).toHaveBeenCalledWith(mockSetPromptToQueryIsLoading(false));
     });
   });
 
   describe('validation errors', () => {
-    beforeEach(() => {
-      mockGetState.mockReturnValue({
-        queryEditor: { editorMode: EditorMode.SinglePrompt },
-      } as RootState);
-    });
-
-    it('should show warning when prompt is empty', async () => {
-      mockOnEditorRunContext.prompt = '';
-
+    it('should show warning when editor text is empty', async () => {
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: '',
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.notifications.toasts.addWarning).toHaveBeenCalledWith({
         title: 'Missing prompt',
@@ -274,22 +224,21 @@ describe('callAgentActionCreator', () => {
       expect(mockServices.http.post).not.toHaveBeenCalled();
     });
 
-    it('should show warning when prompt is only whitespace', async () => {
-      mockOnEditorRunContext.prompt = '   \n\t  ';
+    it('should allow whitespace editor text and make API call', async () => {
+      const whitespaceText = '   \n\t  ';
       (mockServices.http.post as jest.Mock).mockResolvedValue({ query: 'test query' });
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: whitespaceText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
-      // The actual code only checks !prompt.length, so whitespace prompts with length > 0 will not trigger warning
-      // This test should verify that the API call is made with whitespace prompt
+      // The actual code only checks !editorText.length, so whitespace text with length > 0 will not trigger warning
       expect(mockServices.http.post).toHaveBeenCalledWith('/api/enhancements/assist/generate', {
         body: JSON.stringify({
-          question: '   \n\t  ',
+          question: whitespaceText,
           index: 'test-index',
           language: 'PPL',
           dataSourceId: 'test-datasource',
@@ -304,10 +253,10 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.notifications.toasts.addWarning).toHaveBeenCalledWith({
         title: 'Select a dataset to ask a question',
@@ -321,10 +270,10 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.notifications.toasts.addWarning).toHaveBeenCalledWith({
         title: 'Select a dataset to ask a question',
@@ -334,22 +283,16 @@ describe('callAgentActionCreator', () => {
   });
 
   describe('error handling', () => {
-    beforeEach(() => {
-      mockGetState.mockReturnValue({
-        queryEditor: { editorMode: EditorMode.SinglePrompt },
-      } as RootState);
-    });
-
     it('should handle ProhibitedQueryError', async () => {
       const prohibitedError = new ProhibitedQueryError('Query not allowed');
       (mockServices.http.post as jest.Mock).mockRejectedValue(prohibitedError);
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(prohibitedError, {
         id: 'prohibited-query-error',
@@ -370,10 +313,10 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(agentError, {
         id: 'agent-error',
@@ -387,10 +330,10 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(genericError, {
         id: 'miscellaneous-prompt-error',
@@ -398,18 +341,17 @@ describe('callAgentActionCreator', () => {
       });
     });
 
-    it('should not set bottom editor text or run query when error occurs', async () => {
+    it('should not run query when error occurs', async () => {
       const error = new Error('API error');
       (mockServices.http.post as jest.Mock).mockRejectedValue(error);
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockOnEditorRunContext.setBottomEditorText).not.toHaveBeenCalled();
       expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
     });
 
@@ -419,36 +361,33 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledWith(true);
-      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledWith(false);
-      expect(mockSetPromptToQueryIsLoading).toHaveBeenCalledTimes(2);
+      expect(mockDispatch).toHaveBeenCalledWith(mockSetPromptToQueryIsLoading(true));
+      expect(mockDispatch).toHaveBeenCalledWith(mockSetPromptToQueryIsLoading(false));
     });
 
-    it('should not set last executed prompt when error occurs', async () => {
+    it('should not set last executed data when error occurs', async () => {
       const error = new Error('API error');
       (mockServices.http.post as jest.Mock).mockRejectedValue(error);
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockSetLastExecutedPrompt).not.toHaveBeenCalled();
+      expect(mockSetLastExecutedTranslatedQuery).not.toHaveBeenCalled();
     });
   });
 
   describe('dataset variations', () => {
     beforeEach(() => {
-      mockGetState.mockReturnValue({
-        queryEditor: { editorMode: EditorMode.SinglePrompt },
-      } as RootState);
       (mockServices.http.post as jest.Mock).mockResolvedValue({ query: 'test query' });
     });
 
@@ -461,14 +400,14 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.http.post).toHaveBeenCalledWith('/api/enhancements/assist/generate', {
         body: JSON.stringify({
-          question: 'What are the top 10 users?',
+          question: testEditorText,
           index: 'test-index',
           language: 'PPL',
           dataSourceId: undefined,
@@ -486,14 +425,14 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(mockServices.http.post).toHaveBeenCalledWith('/api/enhancements/assist/generate', {
         body: JSON.stringify({
-          question: 'What are the top 10 users?',
+          question: testEditorText,
           index: 'test-index',
           language: 'PPL',
           dataSourceId: undefined,
@@ -506,23 +445,15 @@ describe('callAgentActionCreator', () => {
     it('should execute steps in correct order on success', async () => {
       const calls: string[] = [];
 
-      mockGetState.mockReturnValue({
-        queryEditor: { editorMode: EditorMode.SinglePrompt },
-      } as RootState);
-
-      mockOnEditorRunContext.setBottomEditorText = jest.fn(() => {
-        calls.push('setBottomEditorText');
-      });
-
       let dispatchCallCount = 0;
       mockDispatch.mockImplementation((action: any) => {
         dispatchCallCount++;
-        if (action.type === 'queryEditor/setEditorMode') {
-          calls.push('setEditorMode');
-        } else if (action.type === 'queryEditor/setPromptToQueryIsLoading') {
+        if (action.type === 'queryEditor/setPromptToQueryIsLoading') {
           calls.push('setPromptToQueryIsLoading');
         } else if (action.type === 'queryEditor/setLastExecutedPrompt') {
           calls.push('setLastExecutedPrompt');
+        } else if (action.type === 'queryEditor/setLastExecutedTranslatedQuery') {
+          calls.push('setLastExecutedTranslatedQuery');
         } else if (typeof action === 'function') {
           // This is the runQuery thunk
           calls.push('runQuery');
@@ -542,17 +473,16 @@ describe('callAgentActionCreator', () => {
 
       const thunk = callAgentActionCreator({
         services: mockServices,
-        onEditorRunContext: mockOnEditorRunContext,
+        editorText: testEditorText,
       });
 
-      await thunk(mockDispatch, mockGetState, undefined);
+      await thunk(mockDispatch, jest.fn(), undefined);
 
       expect(calls).toEqual([
         'setPromptToQueryIsLoading',
-        'setBottomEditorText',
-        'setEditorMode',
         'setTime',
         'runQuery',
+        'setLastExecutedTranslatedQuery',
         'setLastExecutedPrompt',
         'setPromptToQueryIsLoading',
       ]);

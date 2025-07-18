@@ -1,6 +1,0 @@
-/*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
-
-export * from './use_clear_editors_and_set_text';
