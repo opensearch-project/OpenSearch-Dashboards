@@ -118,6 +118,7 @@ describe('VisualizationContainer', () => {
     mockUseVisualizationRegistry.mockReturnValue(mockVisualizationRegistry);
     mockUseDatasetContext.mockReturnValue({ dataset: null });
     mockUseSearchContext.mockReturnValue({});
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('react-redux').useDispatch = jest.fn(() => mockDispatch);
   });
 
