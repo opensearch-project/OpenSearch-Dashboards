@@ -83,7 +83,7 @@ export const generateRecentQueriesTestConfiguration = (dataset, datasetType, lan
     PPL: 'OpenSearch SQL',
     'OpenSearch SQL': 'PPL',
   };
-  const defaultQuery = language.name === 'PPL' ? '' : ' LIMIT 10';
+  const defaultQuery = language.name === 'PPL' ? ' | head 500' : '';
   const customDatasetType = RecentQueriesDataTypes[datasetType].name;
   return {
     dataset,

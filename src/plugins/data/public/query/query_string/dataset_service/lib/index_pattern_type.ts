@@ -89,7 +89,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
             title: i18n.translate('data.indexPatternType.sampleQuery.basicSQLQuery', {
               defaultMessage: 'Sample query for SQL',
             }),
-            query: `SELECT * FROM ${dataset.title} LIMIT 10`,
+            query: `SELECT * FROM ${dataset.title}`,
           },
         ];
     }

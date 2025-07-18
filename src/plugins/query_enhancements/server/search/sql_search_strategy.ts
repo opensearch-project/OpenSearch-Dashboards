@@ -34,7 +34,12 @@ export const sqlSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const query: Query = request.body.query;
-        const rawResponse: any = await sqlFacet.describeQuery(context, request);
+        request.body.fetch_size = await context.core.uiSettings.client.get('discover:sampleSize');
+        const requestWithFetchSize = {
+          ...request,
+          body: { ...request.body, fetch_size: request.body.fetch_size },
+        };
+        const rawResponse: any = await sqlFacet.describeQuery(context, requestWithFetchSize);
 
         if (!rawResponse.success) throwFacetError(rawResponse);
 

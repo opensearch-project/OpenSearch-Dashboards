@@ -53,6 +53,10 @@ const runHistogramInteractionTests = () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
+        //TODO: Set the query to not include head 500 because https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9421
+        if (language.name === QueryLanguages.PPL.name) {
+          cy.setQueryEditor(`source = ${INDEX_PATTERN_WITH_TIME}`);
+        }
         if (config.isHistogramVisible) {
           cy.getElementByTestId('dscChartChartheader').should('be.visible');
           cy.getElementByTestId('discoverChart').should('be.visible');
@@ -87,6 +91,10 @@ const runHistogramInteractionTests = () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
+        //TODO: Set the query to not include head 500 because https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9421
+        if (language.name === QueryLanguages.PPL.name) {
+          cy.setQueryEditor(`source = ${INDEX_PATTERN_WITH_TIME}`);
+        }
         const intervals = ['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
         cy.getElementByTestId('discoverIntervalSelect').should('have.value', intervals[0]);
         intervals.forEach((interval) => {
@@ -131,6 +139,10 @@ const runHistogramInteractionTests = () => {
             .click({ force: true }); // reset state
         };
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        //TODO: Set the query to not include head 500 because https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9421
+        if (language.name === QueryLanguages.PPL.name) {
+          cy.setQueryEditor(`source = ${INDEX_PATTERN_WITH_TIME}`);
+        }
         cy.setQueryLanguage(config.language);
         if (config.isHistogramVisible) {
           // TODO: related bug
@@ -163,6 +175,10 @@ const runHistogramInteractionTests = () => {
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
+        //TODO: Set the query to not include head 500 because https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9421
+        if (language.name === QueryLanguages.PPL.name) {
+          cy.setQueryEditor(`source = ${INDEX_PATTERN_WITH_TIME}`);
+        }
 
         cy.getElementByTestId('dscChartChartheader').should('be.visible');
         cy.getElementByTestId('discoverChart').should('be.visible');

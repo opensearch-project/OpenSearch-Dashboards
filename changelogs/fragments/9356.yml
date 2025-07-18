@@ -1,0 +1,2 @@
+feat:
+- Remove sample size in default query string but use advanced setting ([#9356](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9356))

@@ -86,7 +86,8 @@ export class QueryStringManager {
     }
 
     return (
-      typeConfig?.getInitialQueryString?.(query) ?? (languageConfig?.getQueryString(query) || '')
+      typeConfig?.getInitialQueryString?.(query, this.uiSettings) ??
+      (languageConfig?.getQueryString(query) || '')
     );
   }
 
