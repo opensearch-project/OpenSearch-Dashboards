@@ -336,6 +336,10 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         })}
         isNavDrawerLocked$={this.props.isNavDrawerLocked$ || Rx.of(false)}
         isChromeVisible$={this.props.isChromeVisible$ || Rx.of(true)}
+        arial-label={intl.formatMessage({
+          id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
+          defaultMessage: 'Help menu',
+        })}
       />
     ) : (
       <EuiToolTip

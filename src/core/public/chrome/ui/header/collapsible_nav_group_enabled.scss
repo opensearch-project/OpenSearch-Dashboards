@@ -174,23 +174,9 @@ $iconWidth: 16px;
     border-top: $euiBorderThin;
     border-color: $euiBorderColor;
     flex-direction: column;
-
-    &.bottom-container-collapsed {
-      align-items: center;
-      gap: $euiSize;
-      padding-top: $euiSizeS;
-      padding-bottom: $euiSizeS;
-
-      > * {
-        justify-content: center;
-      }
-    }
-
-    &.bottom-container-expanded {
-      gap: 16px;
-      padding-top: $euiSizeM;
-      padding-bottom: $euiSizeM;
-    }
+    gap: $euiSize;
+    padding-top: $euiSizeS;
+    padding-bottom: $euiSizeS;
   }
 
   .navGroupEnabledNavTopWrapper {
