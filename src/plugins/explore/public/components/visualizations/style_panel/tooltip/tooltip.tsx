@@ -32,7 +32,7 @@ export const TooltipOptionsPanel = ({
     >
       <EuiSwitch
         compressed
-        label={i18n.translate('explore.stylePanel.heatmap.label.showLabels', {
+        label={i18n.translate('explore.stylePanel.tabs.tooltip.show', {
           defaultMessage: 'Show tooltip',
         })}
         checked={tooltipOptions.mode === 'all'}
