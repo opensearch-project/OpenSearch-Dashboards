@@ -9,9 +9,6 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSwitch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldNumber,
   EuiFieldText,
   EuiText,
   EuiSplitPanel,
@@ -19,8 +16,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CategoryAxis, VisColumn, ValueAxis, Positions } from '../../types';
-import { useDebouncedValue, useDebouncedNumericValue } from '../../utils/use_debounced_value';
+import { useDebouncedValue } from '../../utils/use_debounced_value';
 import { StyleAccordion } from '../style_accordion';
+import { DebouncedTruncateField } from '.././utils';
 
 interface AxesOptionsProps {
   categoryAxes: CategoryAxis[];
@@ -68,29 +66,6 @@ const DebouncedAxisTitle: React.FC<{
         value={localValue}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
-      />
-    </EuiFormRow>
-  );
-};
-
-// Component for a truncate field with debouncing
-const DebouncedTruncateField: React.FC<{
-  value: number;
-  onChange: (value: number) => void;
-  label: string;
-}> = ({ value, onChange, label }) => {
-  const [localValue, handleChange] = useDebouncedNumericValue(value, onChange, {
-    delay: 500,
-    min: 1,
-    defaultValue: 100,
-  });
-
-  return (
-    <EuiFormRow label={label}>
-      <EuiFieldNumber
-        compressed
-        value={localValue}
-        onChange={(e) => handleChange(e.target.value)}
       />
     </EuiFormRow>
   );
@@ -280,61 +255,55 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
               </EuiFormRow>
               {axis.labels.show && (
                 <>
-                  <EuiSpacer size="m" />
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <EuiFormRow
-                        label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
-                          defaultMessage: 'Alignment',
-                        })}
-                      >
-                        <EuiSelect
-                          compressed
-                          data-test-subj="xLinesAlignment"
-                          value={
-                            axis.labels.rotate === 0
-                              ? 'horizontal'
-                              : axis.labels.rotate === -90
-                              ? 'vertical'
-                              : 'angled'
-                          }
-                          onChange={(e) => {
-                            let rotationValue = 0;
-                            if (e.target.value === 'vertical') rotationValue = -90;
-                            else if (e.target.value === 'angled') rotationValue = -45;
+                  <EuiFormRow
+                    label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
+                      defaultMessage: 'Alignment',
+                    })}
+                  >
+                    <EuiSelect
+                      compressed
+                      data-test-subj="xLinesAlignment"
+                      value={
+                        axis.labels.rotate === 0
+                          ? 'horizontal'
+                          : axis.labels.rotate === -90
+                          ? 'vertical'
+                          : 'angled'
+                      }
+                      onChange={(e) => {
+                        let rotationValue = 0;
+                        if (e.target.value === 'vertical') rotationValue = -90;
+                        else if (e.target.value === 'angled') rotationValue = -45;
 
-                            updateCategoryAxis(index, {
-                              labels: {
-                                ...axis.labels,
-                                rotate: rotationValue,
-                              },
-                            });
-                          }}
-                          options={[
-                            { value: 'horizontal', text: 'Horizontal' },
-                            { value: 'vertical', text: 'Vertical' },
-                            { value: 'angled', text: 'Angled' },
-                          ]}
-                        />
-                      </EuiFormRow>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <DebouncedTruncateField
-                        value={axis.labels.truncate ?? 100}
-                        onChange={(truncateValue) => {
-                          updateCategoryAxis(index, {
-                            labels: {
-                              ...axis.labels,
-                              truncate: truncateValue,
-                            },
-                          });
-                        }}
-                        label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
-                          defaultMessage: 'Truncate after',
-                        })}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                        updateCategoryAxis(index, {
+                          labels: {
+                            ...axis.labels,
+                            rotate: rotationValue,
+                          },
+                        });
+                      }}
+                      options={[
+                        { value: 'horizontal', text: 'Horizontal' },
+                        { value: 'vertical', text: 'Vertical' },
+                        { value: 'angled', text: 'Angled' },
+                      ]}
+                    />
+                  </EuiFormRow>
+
+                  <DebouncedTruncateField
+                    value={axis.labels.truncate ?? 100}
+                    onChange={(truncateValue) => {
+                      updateCategoryAxis(index, {
+                        labels: {
+                          ...axis.labels,
+                          truncate: truncateValue,
+                        },
+                      });
+                    }}
+                    label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
+                      defaultMessage: 'Truncate after',
+                    })}
+                  />
                 </>
               )}
             </>
@@ -452,60 +421,54 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
 
                     {axis.labels.show && (
                       <>
-                        <EuiSpacer size="m" />
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <EuiFormRow
-                              label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
-                                defaultMessage: 'Alignment',
-                              })}
-                            >
-                              <EuiSelect
-                                compressed
-                                value={
-                                  axis.labels.rotate === 0
-                                    ? 'horizontal'
-                                    : axis.labels.rotate === -90
-                                    ? 'vertical'
-                                    : 'angled'
-                                }
-                                onChange={(e) => {
-                                  let rotationValue = 0;
-                                  if (e.target.value === 'vertical') rotationValue = -90;
-                                  else if (e.target.value === 'angled') rotationValue = -45;
+                        <EuiFormRow
+                          label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
+                            defaultMessage: 'Alignment',
+                          })}
+                        >
+                          <EuiSelect
+                            compressed
+                            value={
+                              axis.labels.rotate === 0
+                                ? 'horizontal'
+                                : axis.labels.rotate === -90
+                                ? 'vertical'
+                                : 'angled'
+                            }
+                            onChange={(e) => {
+                              let rotationValue = 0;
+                              if (e.target.value === 'vertical') rotationValue = -90;
+                              else if (e.target.value === 'angled') rotationValue = -45;
 
-                                  updateValueAxis(index, {
-                                    labels: {
-                                      ...axis.labels,
-                                      rotate: rotationValue,
-                                    },
-                                  });
-                                }}
-                                options={[
-                                  { value: 'horizontal', text: 'Horizontal' },
-                                  { value: 'vertical', text: 'Vertical' },
-                                  { value: 'angled', text: 'Angled' },
-                                ]}
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <DebouncedTruncateField
-                              value={axis.labels.truncate ?? 100}
-                              onChange={(truncateValue) => {
-                                updateValueAxis(index, {
-                                  labels: {
-                                    ...axis.labels,
-                                    truncate: truncateValue,
-                                  },
-                                });
-                              }}
-                              label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
-                                defaultMessage: 'Truncate after',
-                              })}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
+                              updateValueAxis(index, {
+                                labels: {
+                                  ...axis.labels,
+                                  rotate: rotationValue,
+                                },
+                              });
+                            }}
+                            options={[
+                              { value: 'horizontal', text: 'Horizontal' },
+                              { value: 'vertical', text: 'Vertical' },
+                              { value: 'angled', text: 'Angled' },
+                            ]}
+                          />
+                        </EuiFormRow>
+
+                        <DebouncedTruncateField
+                          value={axis.labels.truncate ?? 100}
+                          onChange={(truncateValue) => {
+                            updateValueAxis(index, {
+                              labels: {
+                                ...axis.labels,
+                                truncate: truncateValue,
+                              },
+                            });
+                          }}
+                          label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
+                            defaultMessage: 'Truncate after',
+                          })}
+                        />
                       </>
                     )}
                   </>
@@ -609,60 +572,54 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
 
                     {axis.labels.show && (
                       <>
-                        <EuiSpacer size="m" />
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <EuiFormRow
-                              label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
-                                defaultMessage: 'Alignment',
-                              })}
-                            >
-                              <EuiSelect
-                                compressed
-                                value={
-                                  axis.labels.rotate === 0
-                                    ? 'horizontal'
-                                    : axis.labels.rotate === -90
-                                    ? 'vertical'
-                                    : 'angled'
-                                }
-                                onChange={(e) => {
-                                  let rotationValue = 0;
-                                  if (e.target.value === 'vertical') rotationValue = -90;
-                                  else if (e.target.value === 'angled') rotationValue = -45;
+                        <EuiFormRow
+                          label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
+                            defaultMessage: 'Alignment',
+                          })}
+                        >
+                          <EuiSelect
+                            compressed
+                            value={
+                              axis.labels.rotate === 0
+                                ? 'horizontal'
+                                : axis.labels.rotate === -90
+                                ? 'vertical'
+                                : 'angled'
+                            }
+                            onChange={(e) => {
+                              let rotationValue = 0;
+                              if (e.target.value === 'vertical') rotationValue = -90;
+                              else if (e.target.value === 'angled') rotationValue = -45;
 
-                                  updateValueAxis(index, {
-                                    labels: {
-                                      ...axis.labels,
-                                      rotate: rotationValue,
-                                    },
-                                  });
-                                }}
-                                options={[
-                                  { value: 'horizontal', text: 'Horizontal' },
-                                  { value: 'vertical', text: 'Vertical' },
-                                  { value: 'angled', text: 'Angled' },
-                                ]}
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <DebouncedTruncateField
-                              value={axis.labels.truncate ?? 100}
-                              onChange={(truncateValue) => {
-                                updateValueAxis(index, {
-                                  labels: {
-                                    ...axis.labels,
-                                    truncate: truncateValue,
-                                  },
-                                });
-                              }}
-                              label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
-                                defaultMessage: 'Truncate after',
-                              })}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
+                              updateValueAxis(index, {
+                                labels: {
+                                  ...axis.labels,
+                                  rotate: rotationValue,
+                                },
+                              });
+                            }}
+                            options={[
+                              { value: 'horizontal', text: 'Horizontal' },
+                              { value: 'vertical', text: 'Vertical' },
+                              { value: 'angled', text: 'Angled' },
+                            ]}
+                          />
+                        </EuiFormRow>
+
+                        <DebouncedTruncateField
+                          value={axis.labels.truncate ?? 100}
+                          onChange={(truncateValue) => {
+                            updateValueAxis(index, {
+                              labels: {
+                                ...axis.labels,
+                                truncate: truncateValue,
+                              },
+                            });
+                          }}
+                          label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
+                            defaultMessage: 'Truncate after',
+                          })}
+                        />
                       </>
                     )}
                   </>
