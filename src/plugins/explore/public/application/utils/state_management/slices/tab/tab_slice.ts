@@ -18,6 +18,9 @@ export interface TabState {
     chartType: ChartType | undefined;
     axesMapping?: Partial<Record<AxisRole, string>>;
   };
+  patterns: {
+    patterns_field?: string; // change the type to be some sort of index field type
+  };
 }
 
 const initialState: TabState = {
@@ -26,6 +29,9 @@ const initialState: TabState = {
     styleOptions: defaultMetricChartStyles,
     chartType: undefined,
     axesMapping: {},
+  },
+  patterns: {
+    patterns_field: undefined,
   },
 };
 
