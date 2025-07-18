@@ -113,6 +113,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const isQueryMode = !isPromptMode;
   const isPromptModeRef = useRef(isPromptMode);
+  const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -121,6 +122,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   useEffect(() => {
     isPromptModeRef.current = isPromptMode;
   }, [isPromptMode]);
+  useEffect(() => {
+    promptModeIsAvailableRef.current = promptModeIsAvailable;
+  }, [promptModeIsAvailable]);
 
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
@@ -272,7 +276,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
 
       // Add Space bar key handling to switch to prompt mode
       editor.addAction(
-        getSpacebarAction(isPromptModeRef, editorTextRef, () =>
+        getSpacebarAction(promptModeIsAvailableRef, isPromptModeRef, editorTextRef, () =>
           dispatch(setEditorMode(EditorMode.Prompt))
         )
       );
@@ -307,13 +311,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     [setEditorRef, handleRun, handleEscape, setEditorIsFocused, dispatch]
   );
 
-  const onChange = useCallback(
-    (newText: string) => {
-      dispatch(setEditorText(newText));
-    },
-    [dispatch, setEditorText]
-  );
-
   const options = useMemo(() => {
     if (isQueryMode) {
       return queryEditorOptions;
@@ -340,7 +337,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     isPromptMode,
     languageConfiguration,
     languageId: queryLanguage,
-    onChange,
+    onChange: setEditorText,
     onEditorClick,
     options,
     placeholder,

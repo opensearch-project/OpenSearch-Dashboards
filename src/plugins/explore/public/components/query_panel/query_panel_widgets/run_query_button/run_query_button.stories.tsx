@@ -9,7 +9,7 @@ import { RunQueryButton } from './run_query_button';
 import { StorybookProviders } from '../../mock_provider.mocks';
 
 const meta: Meta<typeof RunQueryButton> = {
-  title: 'src/plugins/explore/public/components/query_panel/footer/run_query_button',
+  title: 'src/plugins/explore/public/components/query_panel/query_panel_widgets/run_query_button',
   component: RunQueryButton,
   decorators: [
     (Story) => (
