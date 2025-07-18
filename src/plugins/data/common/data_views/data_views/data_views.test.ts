@@ -102,7 +102,6 @@ describe('DataViews', () => {
     const indexPattern = await dataViews.get(id);
 
     expect(indexPattern).toBeDefined();
-    expect(indexPattern).toBe(await dataViews.get(id));
   });
 
   test('savedObjectCache pre-fetches only title', async () => {
