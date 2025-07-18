@@ -129,15 +129,14 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   });
 
   const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
+  const [lastSentMappings, setLastSentMappings] = useState<AxisColumnMappings>({});
 
   useEffect(() => {
-    // This is an intentional design since we want to modify the mapping object from outside
-    // to intermediately synchronize the internal state, but we don't want the internal state
-    // change to also trigger changes in the state, resulting in an infinite loop.
-    setCurrentSelections((prevCurrentSelections) =>
-      isEqual(prevCurrentSelections, currentMapping) ? prevCurrentSelections : currentMapping
-    );
-  }, [currentMapping]);
+    // Only update currentSelections if currentMapping is not empty and differs from currentSelections
+    if (Object.keys(currentMapping).length > 0 && !isEqual(currentSelections, currentMapping)) {
+      setCurrentSelections(currentMapping);
+    }
+  }, [currentMapping]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter out those mapping (combination of axes selection) that no longer be satisify
   // by the current combination of axes selection
@@ -176,7 +175,10 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   }, [availableMappingsFromSelection, currentSelections, possibleMapping]);
 
   useEffect(() => {
-    if (currentValidSelection) {
+    const isValidBarChartMapping =
+      chartType === 'bar' && currentSelections[AxisRole.X] && currentSelections[AxisRole.Y];
+
+    if (currentValidSelection && isValidBarChartMapping) {
       const ruleToUse = ALL_VISUALIZATION_RULES.find((rule) =>
         isEqual(rule.matchIndex, currentValidSelection.columnMatch)
       );
@@ -189,10 +191,18 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
           }
         });
 
-        updateVisualization({ rule: ruleToUse, mappings: updatedAxes });
+        // Only call updateVisualization if mappings have changed
+        if (!isEqual(updatedAxes, lastSentMappings)) {
+          updateVisualization({ rule: ruleToUse, mappings: updatedAxes });
+          setLastSentMappings(updatedAxes);
+        }
       }
+    } else if (!isEqual(lastSentMappings, {})) {
+      // Clear visualization when required axes are missing, but only if we previously sent non-empty mappings
+      updateVisualization({ rule: undefined, mappings: {} });
+      setLastSentMappings({});
     }
-  }, [currentValidSelection, updateVisualization, currentSelections]);
+  }, [currentValidSelection, updateVisualization, chartType, lastSentMappings]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const findColumns = useMemo(
     () => (type: VisFieldType) => {
