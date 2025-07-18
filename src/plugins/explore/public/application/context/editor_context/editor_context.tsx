@@ -21,52 +21,49 @@ type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type EditorRef = MutableRefObject<IStandaloneCodeEditor | null>;
 
 export interface InternalEditorContextValue {
-  topEditorRef: EditorRef;
-  bottomEditorRef: EditorRef;
-  topEditorText: string;
-  setTopEditorText: Dispatch<SetStateAction<string>>;
-  bottomEditorText: string;
-  setBottomEditorText: Dispatch<SetStateAction<string>>;
+  editorRef: EditorRef;
+  editorText: string;
+  setEditorText: Dispatch<SetStateAction<string>>;
+  editorIsFocused: boolean;
+  setEditorIsFocused: Dispatch<SetStateAction<boolean>>;
 }
 
 /**
- * Provides the text values, setText functions, as well as the refs of the queryEditors
+ * Provides editor refs as well as editor-related state
  *
  * You can access these values via the hooks in the hooks directory.
  * Why so many hooks? We have specific hooks that get specific parts of this only to maximize performance,
  * because text values frequently updates
  */
 export const EditorContext = createContext<InternalEditorContextValue>({
-  topEditorRef: { current: null },
-  bottomEditorRef: { current: null },
-  topEditorText: '',
-  setTopEditorText: () => {},
-  bottomEditorText: '',
-  setBottomEditorText: () => {},
+  editorRef: { current: null },
+  editorText: '',
+  setEditorText: () => {},
+  editorIsFocused: false,
+  setEditorIsFocused: () => {},
 });
 
 /**
  * Editor Context Provider
  *
- * Globally manages the dual editors so that we have access to them throughout the page
+ * Globally manages the editors so that we have access to them throughout the page.
+ * Since a ref is not serializable, we cannot store it in the Redux store.
  */
 export const EditorContextProvider: FC = ({ children }) => {
   const queryString = useSelector(selectQueryString);
-  const topEditorRef = useRef<IStandaloneCodeEditor | null>(null);
-  const bottomEditorRef = useRef<IStandaloneCodeEditor | null>(null);
-  const [topEditorText, setTopEditorText] = useState<string>(queryString);
-  const [bottomEditorText, setBottomEditorText] = useState<string>('');
+  const editorRef = useRef<IStandaloneCodeEditor | null>(null);
+  const [editorText, setEditorText] = useState<string>(queryString);
+  const [editorIsFocused, setEditorIsFocused] = useState<boolean>(false);
 
   const contextValue = useMemo(
     () => ({
-      topEditorRef,
-      bottomEditorRef,
-      topEditorText,
-      bottomEditorText,
-      setTopEditorText,
-      setBottomEditorText,
+      editorRef,
+      editorText,
+      setEditorText,
+      editorIsFocused,
+      setEditorIsFocused,
     }),
-    [topEditorText, bottomEditorText]
+    [editorIsFocused, editorText]
   );
 
   return <EditorContext.Provider value={contextValue}>{children}</EditorContext.Provider>;

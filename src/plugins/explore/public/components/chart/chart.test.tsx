@@ -131,6 +131,7 @@ describe('DiscoverChart', () => {
         editorMode: 'single-query' as any,
         lastExecutedPrompt: '',
         promptToQueryIsLoading: false,
+        lastExecutedTranslatedQuery: '',
       },
       results: {},
       tab: {

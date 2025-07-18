@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { ExploreServices } from '../../../../../../../types';
-import { AppDispatch, RootState } from '../../../../store';
+import { AppDispatch } from '../../../../store';
 import {
   QueryAssistParameters,
   QueryAssistResponse,
@@ -16,30 +16,23 @@ import {
   ProhibitedQueryError,
 } from '../../../../../../../components/query_panel/utils/error';
 import {
-  setEditorMode,
   setLastExecutedPrompt,
+  setLastExecutedTranslatedQuery,
   setPromptToQueryIsLoading,
 } from '../../../../slices';
-import { EditorMode } from '../../../../types';
 import { runQueryActionCreator } from '../../run_query';
-import { useOnEditorRunContext } from '../../../../../../hooks';
 
 export const callAgentActionCreator = createAsyncThunk<
   void,
   {
     services: ExploreServices;
-    onEditorRunContext: ReturnType<typeof useOnEditorRunContext>;
+    editorText: string;
   },
-  { state: RootState; dispatch: AppDispatch }
->('queryEditor/callAgent', async ({ services, onEditorRunContext }, { getState, dispatch }) => {
-  const {
-    queryEditor: { editorMode },
-  } = getState();
+  { dispatch: AppDispatch }
+>('queryEditor/callAgent', async ({ services, editorText }, { dispatch }) => {
   const dataset = services.data.query.queryString.getQuery().dataset;
 
-  const prompt = onEditorRunContext.prompt;
-
-  if (!prompt.length) {
+  if (!editorText.length) {
     services.notifications.toasts.addWarning({
       title: i18n.translate('explore.queryPanel.missing-prompt-warning-title', {
         defaultMessage: 'Missing prompt',
@@ -65,7 +58,7 @@ export const callAgentActionCreator = createAsyncThunk<
   try {
     dispatch(setPromptToQueryIsLoading(true));
     const params: QueryAssistParameters = {
-      question: prompt,
+      question: editorText,
       index: dataset.title,
       // TODO: when we introduce more query languages, this should be no longer be hardcoded to PPL
       language: 'PPL',
@@ -79,20 +72,15 @@ export const callAgentActionCreator = createAsyncThunk<
       }
     );
 
-    onEditorRunContext.setBottomEditorText(response.query);
-
-    if (editorMode !== EditorMode.DualPrompt) {
-      dispatch(setEditorMode(EditorMode.DualPrompt));
-    }
-
     if (response.timeRange) {
       services.data.query.timefilter.timefilter.setTime(response.timeRange);
     }
 
     dispatch(runQueryActionCreator(services, response.query));
 
-    // update the lastExecutedPrompt
-    dispatch(setLastExecutedPrompt(prompt));
+    // update the lastExecutedPrompt and lastExecutedTranslatedQuery
+    dispatch(setLastExecutedTranslatedQuery(response.query));
+    dispatch(setLastExecutedPrompt(editorText));
   } catch (error) {
     if (error instanceof ProhibitedQueryError) {
       services.notifications.toasts.addError(error, {

@@ -45,17 +45,16 @@ export const selectPromptToQueryIsLoading = createSelector(
 
 export const selectEditorMode = createSelector([selectState], (state) => state.editorMode);
 
-export const selectIsDualEditorMode = createSelector([selectState], (state) =>
-  [EditorMode.DualQuery, EditorMode.DualPrompt].includes(state.editorMode)
+export const selectIsPromptEditorMode = createSelector([selectEditorMode], (editorMode) => {
+  return editorMode === EditorMode.Prompt;
+});
+
+export const selectLastExecutedPrompt = createSelector(
+  [selectState],
+  (state) => state.lastExecutedPrompt
 );
 
-export const selectTopEditorIsQueryMode = createSelector(
-  [selectEditorMode, selectPromptModeIsAvailable],
-  (editorMode, promptModeIsAvailable) => {
-    if (!promptModeIsAvailable) {
-      return true;
-    }
-
-    return editorMode === EditorMode.SingleQuery;
-  }
+export const selectLastExecutedTranslatedQuery = createSelector(
+  [selectState],
+  (state) => state.lastExecutedTranslatedQuery
 );

@@ -7,6 +7,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { SaveQueryButton } from './save_query';
 import { StorybookProviders } from '../../mock_provider.mocks';
+import { EditorMode } from '../../../../application/utils/state_management/types';
 
 const meta: Meta<typeof SaveQueryButton> = {
   title: 'src/plugins/explore/public/components/query_panel/footer/save_query',
@@ -27,4 +28,12 @@ type Story = StoryObj<typeof SaveQueryButton>;
 
 export const Default: Story = {
   render: () => <SaveQueryButton />,
+};
+
+export const PromptMode: Story = {
+  render: () => (
+    <StorybookProviders editorMode={EditorMode.Prompt}>
+      <SaveQueryButton />
+    </StorybookProviders>
+  ),
 };

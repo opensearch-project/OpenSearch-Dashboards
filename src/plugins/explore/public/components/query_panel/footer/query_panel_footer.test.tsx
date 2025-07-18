@@ -42,8 +42,12 @@ jest.mock('./recent_queries_button', () => ({
   RecentQueriesButton: () => <div data-test-subj="recent-queries-button">Recent Queries</div>,
 }));
 
-jest.mock('./detected_language', () => ({
-  DetectedLanguage: () => <div data-test-subj="detected-language">Detected Language</div>,
+jest.mock('./selected_language', () => ({
+  SelectedLanguage: () => <div data-test-subj="selected-language">Selected Language</div>,
+}));
+
+jest.mock('./language_toggle', () => ({
+  LanguageToggle: () => <div data-test-subj="language-toggle">Language Toggle</div>,
 }));
 
 jest.mock('./query_panel_error', () => ({
@@ -88,7 +92,8 @@ describe('QueryPanelFooter', () => {
     expect(screen.getByTestId('filter-panel-toggle')).toBeInTheDocument();
     expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
     expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
-    expect(screen.getByTestId('detected-language')).toBeInTheDocument();
+    expect(screen.getByTestId('selected-language')).toBeInTheDocument();
+    expect(screen.getByTestId('language-toggle')).toBeInTheDocument();
     expect(screen.getByTestId('query-panel-error')).toBeInTheDocument();
 
     // Check right section components

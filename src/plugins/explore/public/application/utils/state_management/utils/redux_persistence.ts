@@ -4,7 +4,7 @@
  */
 
 import { RootState } from '../store';
-import { AppState, EditorMode, QueryExecutionStatus } from '../types';
+import { AppState, QueryExecutionStatus } from '../types';
 import { ExploreServices } from '../../../../types';
 import {
   LegacyState,
@@ -250,12 +250,6 @@ const getPreloadedQueryEditorState = async (
     promptModeIsAvailable = await getPromptModeIsAvailable(services);
   }
 
-  // If !query.length, default to SingleEmpty
-  const editorMode =
-    typeof queryState?.query === 'string' && !queryState.query.trim().length
-      ? EditorMode.SingleEmpty
-      : DEFAULT_EDITOR_MODE;
-
   return {
     queryStatusMap: {},
     overallQueryStatus: {
@@ -266,7 +260,8 @@ const getPreloadedQueryEditorState = async (
     },
     promptModeIsAvailable,
     promptToQueryIsLoading: false,
-    editorMode,
+    editorMode: DEFAULT_EDITOR_MODE,
+    lastExecutedTranslatedQuery: '',
     lastExecutedPrompt: '',
   };
 };

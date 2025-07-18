@@ -21,7 +21,7 @@ const mockSavedQueryService = {
   saveQuery: jest.fn(),
   getSavedQuery: jest.fn(),
 };
-const mockClearEditorsAndSetText = jest.fn();
+const mockSetEditorTextWithQuery = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
 
 jest.doMock('react-redux', () => {
@@ -62,7 +62,7 @@ jest.doMock('../../utils', () => ({
 }));
 
 jest.doMock('../../../../application/hooks', () => ({
-  useClearEditorsAndSetText: () => mockClearEditorsAndSetText,
+  useSetEditorTextWithQuery: () => mockSetEditorTextWithQuery,
   useEditorText: () => 'SELECT * FROM logs',
 }));
 
@@ -71,7 +71,7 @@ jest.doMock('../../../../application/utils/state_management/actions/query_editor
 }));
 
 // Mock the selectors - make them mutable for testing different modes
-const mockSelectEditorMode = jest.fn(() => EditorMode.SingleQuery);
+const mockSelectIsPromptEditorMode = jest.fn(() => false);
 const mockSelectQuery = jest.fn(() => ({
   query: 'SELECT * FROM logs',
   language: 'SQL',
@@ -79,7 +79,7 @@ const mockSelectQuery = jest.fn(() => ({
 }));
 
 jest.doMock('../../../../application/utils/state_management/selectors', () => ({
-  selectEditorMode: mockSelectEditorMode,
+  selectIsPromptEditorMode: mockSelectIsPromptEditorMode,
   selectQuery: mockSelectQuery,
 }));
 
@@ -167,7 +167,7 @@ const createMockStore = (initialState = {}) => {
         savedQuery: undefined,
       },
       queryEditor: {
-        editorMode: 'SingleQuery',
+        editorMode: EditorMode.Query,
       },
       ...initialState,
     },
@@ -186,7 +186,7 @@ const renderWithStore = (initialState = {}) => {
 describe('SaveQueryButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+    mockSelectIsPromptEditorMode.mockReturnValue(false);
     mockSavedQueryService.saveQuery.mockResolvedValue({ id: 'saved-query-id' });
     mockSavedQueryService.getSavedQuery.mockResolvedValue({
       id: 'test-query-id',
@@ -216,9 +216,6 @@ describe('SaveQueryButton', () => {
     // Click to show
     fireEvent.click(button);
     expect(screen.getByTestId('saved-query-management')).toBeInTheDocument();
-
-    // Note: The popover behavior might not hide immediately on second click
-    // due to the EuiPopover implementation, so we'll just test that it shows
   });
 
   it('calls saveQuery with correct parameters when save is triggered', async () => {
@@ -294,7 +291,7 @@ describe('SaveQueryButton', () => {
             }),
           }),
         }),
-        mockClearEditorsAndSetText,
+        mockSetEditorTextWithQuery,
         'SELECT * FROM test'
       );
       expect(mockTimeFilter.setTime).toHaveBeenCalledWith({
@@ -386,12 +383,8 @@ describe('SaveQueryButton', () => {
   });
 
   describe('saveQueryIsDisabled', () => {
-    beforeEach(() => {
-      mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
-    });
-
-    it('enables save query when editor mode is SingleQuery', () => {
-      mockSelectEditorMode.mockReturnValue(EditorMode.SingleQuery);
+    it('enables save query when not in prompt mode', () => {
+      mockSelectIsPromptEditorMode.mockReturnValue(false);
       renderWithStore();
 
       const button = screen.getByTestId('queryPanelFooterSaveQueryButton');
@@ -402,20 +395,8 @@ describe('SaveQueryButton', () => {
       expect(screen.queryByTestId('save-disabled-indicator')).not.toBeInTheDocument();
     });
 
-    it('enables save query when editor mode is DualQuery', () => {
-      mockSelectEditorMode.mockReturnValue(EditorMode.DualQuery);
-      renderWithStore();
-
-      const button = screen.getByTestId('queryPanelFooterSaveQueryButton');
-      fireEvent.click(button);
-
-      const saveButton = screen.getByTestId('mock-save-button');
-      expect(saveButton).not.toBeDisabled();
-      expect(screen.queryByTestId('save-disabled-indicator')).not.toBeInTheDocument();
-    });
-
-    it('disables save query when editor mode is not SingleQuery or DualQuery', () => {
-      mockSelectEditorMode.mockReturnValue(EditorMode.SinglePrompt);
+    it('disables save query when in prompt mode', () => {
+      mockSelectIsPromptEditorMode.mockReturnValue(true);
       renderWithStore();
 
       const button = screen.getByTestId('queryPanelFooterSaveQueryButton');

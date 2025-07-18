@@ -12,7 +12,7 @@ import { configureStore } from '@reduxjs/toolkit';
 const mockDispatch = jest.fn();
 const mockHandleTimeChange = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
-const mockClearEditorsAndSetText = jest.fn();
+const mockSetEditorTextWithQuery = jest.fn();
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -52,7 +52,7 @@ jest.doMock('../../../../application/utils/state_management/actions/query_editor
 }));
 
 jest.doMock('../../../../application/hooks', () => ({
-  useClearEditorsAndSetText: () => mockClearEditorsAndSetText,
+  useSetEditorTextWithQuery: () => mockSetEditorTextWithQuery,
 }));
 
 jest.doMock('../../../../../../data/public', () => ({
@@ -170,7 +170,7 @@ describe('RecentQueriesButton', () => {
           }),
         }),
       }),
-      mockClearEditorsAndSetText,
+      mockSetEditorTextWithQuery,
       'SELECT * FROM test'
     );
     expect(mockDispatch).toHaveBeenCalled();
@@ -205,7 +205,7 @@ describe('RecentQueriesButton', () => {
     expect(mockHandleTimeChange).not.toHaveBeenCalled();
     expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
       expect.any(Object),
-      mockClearEditorsAndSetText,
+      mockSetEditorTextWithQuery,
       'SELECT * FROM test2'
     );
   });

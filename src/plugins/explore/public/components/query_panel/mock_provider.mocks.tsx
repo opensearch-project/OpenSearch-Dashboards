@@ -150,7 +150,11 @@ const mockServices = {
   },
 };
 
-const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
+const createMockStore = (
+  editorMode: EditorMode = EditorMode.Query,
+  promptModeIsAvailable: boolean = false,
+  lastExecutedTranslatedQuery: string = ''
+) => {
   return configureStore({
     reducer: rootReducer,
     preloadedState: {
@@ -187,9 +191,10 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
           error: undefined,
         },
         editorMode,
-        promptModeIsAvailable: false,
+        promptModeIsAvailable,
         promptToQueryIsLoading: false,
         lastExecutedPrompt: '',
+        lastExecutedTranslatedQuery,
       },
     },
   });
@@ -198,8 +203,10 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
 export const StorybookProviders: React.FC<{
   children: React.ReactNode;
   editorMode?: EditorMode;
-}> = ({ children, editorMode }) => {
-  const store = createMockStore(editorMode);
+  promptModeIsAvailable?: boolean;
+  lastExecutedTranslatedQuery?: string;
+}> = ({ children, editorMode, promptModeIsAvailable, lastExecutedTranslatedQuery }) => {
+  const store = createMockStore(editorMode, promptModeIsAvailable, lastExecutedTranslatedQuery);
 
   return (
     <Provider store={store}>

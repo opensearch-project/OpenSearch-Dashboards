@@ -13,6 +13,7 @@ import { opensearchFilters } from '../../../../../../data/public';
 import { useDatasetContext } from '../../../context';
 import { EditorMode } from '../../../utils/state_management/types';
 import { useSetEditorText } from '../use_set_editor_text';
+import { useEditorFocus } from '../use_editor_focus';
 
 export const useChangeQueryEditor = () => {
   const {
@@ -26,6 +27,7 @@ export const useChangeQueryEditor = () => {
   const setEditorText = useSetEditorText();
   const editorMode = useSelector(selectEditorMode);
   const query = useSelector(selectQuery);
+  const { focusOnEditor } = useEditorFocus();
 
   const onAddFilter = useCallback(
     (field: string | IndexPatternField | DataViewField, values: string, operation: '+' | '-') => {
@@ -42,14 +44,15 @@ export const useChangeQueryEditor = () => {
       );
       setEditorText((text) => {
         const newText =
-          editorMode === EditorMode.SinglePrompt || editorMode === EditorMode.DualPrompt
+          editorMode === EditorMode.Prompt
             ? languageConfig.addFiltersToPrompt?.(text, newFilters)
             : languageConfig.addFiltersToQuery?.(text, newFilters);
         if (newText) return newText;
         return text;
       });
+      focusOnEditor();
     },
-    [editorMode, filterManager, dataset, query.language, queryString, setEditorText]
+    [dataset, queryString, query.language, filterManager, setEditorText, focusOnEditor, editorMode]
   );
 
   return { onAddFilter };
