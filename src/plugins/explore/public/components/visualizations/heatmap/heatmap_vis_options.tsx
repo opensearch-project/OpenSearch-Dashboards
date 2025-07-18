@@ -9,10 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
-import {
-  HeatmapLabelVisOptions,
-  HeatmapExclusiveVisOptions,
-} from './heatmap_exclusive_vis_options';
+import { HeatmapExclusiveVisOptions } from './heatmap_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
