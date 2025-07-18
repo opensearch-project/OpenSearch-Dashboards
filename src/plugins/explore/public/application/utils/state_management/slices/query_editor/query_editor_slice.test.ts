@@ -19,6 +19,7 @@ import {
   setPromptModeIsAvailable,
   setPromptToQueryIsLoading,
   setLastExecutedPrompt,
+  setSummaryAgentIsAvailable,
 } from './query_editor_slice';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
@@ -35,6 +36,7 @@ describe('QueryEditor Slice', () => {
     editorMode: DEFAULT_EDITOR_MODE,
     promptModeIsAvailable: false,
     promptToQueryIsLoading: false,
+    summaryAgentIsAvailable: false,
     lastExecutedPrompt: '',
   };
 
@@ -67,6 +69,7 @@ describe('QueryEditor Slice', () => {
         editorMode: EditorMode.DualQuery,
         promptModeIsAvailable: true,
         promptToQueryIsLoading: false,
+        summaryAgentIsAvailable: true,
         lastExecutedPrompt: 'test prompt',
       };
 
@@ -519,6 +522,45 @@ describe('QueryEditor Slice', () => {
       expect(result.overallQueryStatus).toEqual(existingState.overallQueryStatus);
       expect(result.editorMode).toBe(EditorMode.DualPrompt);
       expect(result.promptModeIsAvailable).toBe(true);
+    });
+  });
+
+  describe('setSummaryAgentIsAvailable', () => {
+    it('should handle setSummaryAgentIsAvailable action', () => {
+      const action = setSummaryAgentIsAvailable(true);
+
+      expect(action.type).toBe('queryEditor/setSummaryAgentIsAvailable');
+      expect(action.payload).toBe(true);
+
+      const newState = queryEditorReducer(initialState, action);
+      expect(newState.summaryAgentIsAvailable).toBe(true);
+      expect(newState.overallQueryStatus).toEqual(initialState.overallQueryStatus);
+      expect(newState.editorMode).toBe(initialState.editorMode);
+      expect(newState.promptModeIsAvailable).toBe(initialState.promptModeIsAvailable);
+    });
+
+    it('should preserve other state properties', () => {
+      const existingState: QueryEditorSliceState = {
+        ...initialState,
+        overallQueryStatus: {
+          status: QueryExecutionStatus.READY,
+          elapsedMs: 250,
+          startTime: Date.now(),
+          error: undefined,
+        },
+        editorMode: EditorMode.DualQuery,
+        promptModeIsAvailable: true,
+        summaryAgentIsAvailable: false,
+        lastExecutedPrompt: 'some prompt',
+      };
+
+      const result = queryEditorReducer(existingState, setSummaryAgentIsAvailable(true));
+
+      expect(result.summaryAgentIsAvailable).toBe(true);
+      expect(result.overallQueryStatus).toEqual(existingState.overallQueryStatus);
+      expect(result.editorMode).toBe(EditorMode.DualQuery);
+      expect(result.promptModeIsAvailable).toBe(true);
+      expect(result.lastExecutedPrompt).toBe('some prompt');
     });
   });
 });

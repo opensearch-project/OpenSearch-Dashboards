@@ -12,6 +12,7 @@ import { useClearEditors, useToggleDualEditorMode } from '../../../../../applica
 import { selectEditorMode } from '../../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../../application/utils/state_management/types';
 import './edit_toolbar.scss';
+import { ResultsSummary } from '../../../results_summary/results_summary';
 
 const editQueryText = i18n.translate('explore.queryPanel.queryEditor.editQuery', {
   defaultMessage: 'Edit Query',
@@ -64,6 +65,8 @@ export const EditToolbar = () => {
           <EuiText size="xs">{clearText}</EuiText>
         </div>
       </EuiButtonEmpty>
+      <div className="exploreEditToolbar__verticalSeparator" />
+      <ResultsSummary />
     </div>
   );
 };

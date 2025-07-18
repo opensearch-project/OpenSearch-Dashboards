@@ -23,6 +23,10 @@ jest.mock('../../../../../application/utils/state_management/selectors', () => (
   selectEditorMode: jest.fn(),
 }));
 
+jest.mock('../../../results_summary/results_summary', () => ({
+  ResultsSummary: () => <div data-test-subj="resultsSummary">Results Summary</div>,
+}));
+
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useDispatch: () => mockDispatch,

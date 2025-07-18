@@ -189,6 +189,7 @@ const createMockStore = (editorMode: EditorMode = EditorMode.SingleQuery) => {
         editorMode,
         promptModeIsAvailable: false,
         promptToQueryIsLoading: false,
+        summaryAgentIsAvailable: false,
         lastExecutedPrompt: '',
       },
     },
