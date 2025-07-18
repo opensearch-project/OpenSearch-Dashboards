@@ -71,13 +71,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
             />
           </EuiFlexItem>
-          {/* <EuiFlexItem grow={false}>
-            <HeatmapLabelVisOptions
-              shouldShowType={shouldShowTypeAndGrid}
-              styles={styleOptions.label}
-              onChange={(label) => updateStyleOption('label', label)}
-            />
-          </EuiFlexItem> */}
           <EuiFlexItem grow={false}>
             <LegendOptionsPanel
               shouldShowLegend={true}
