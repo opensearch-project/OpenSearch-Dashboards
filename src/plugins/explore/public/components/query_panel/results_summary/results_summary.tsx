@@ -2,18 +2,21 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { isEmpty } from 'lodash';
 
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { EditorMode } from '../../../application/utils/state_management/types';
 import { ExploreServices } from '../../../types';
 import { ResultsSummaryButton, FeedbackStatus } from './results_summary_button';
 import { RootState } from '../../../application/utils/state_management/store';
 import { useMetrics } from './use_metrics';
-import { selectSummaryAgentIsAvailable } from '../../../application/utils/state_management/selectors';
+import {
+  selectSummaryAgentIsAvailable,
+  selectDataset,
+  selectQueryStatus,
+} from '../../../application/utils/state_management/selectors';
 import { getUsageCollector } from '../../../services/usage_collector';
 import { ResultStatus } from '../../../../../data/public';
 
@@ -24,6 +27,15 @@ export const ResultsSummary: React.FC = () => {
   const { core, http } = services;
 
   const isSummaryAgentAvailable = useSelector(selectSummaryAgentIsAvailable);
+  const queryState = useSelector((state: RootState) => state.query);
+  const lastExecutedPrompt = useSelector(
+    (state: RootState) => state.queryEditor.lastExecutedPrompt
+  );
+  const dataSetState = useSelector(selectDataset);
+  const queryResults = useSelector(
+    (state: RootState) => state.results[state.query.query as string]?.hits?.hits
+  );
+  const queryStatus = useSelector(selectQueryStatus);
 
   const [summary, setSummary] = useState(''); // store fetched data
   const [loading, setLoading] = useState(true); // track loading state
@@ -34,37 +46,15 @@ export const ResultsSummary: React.FC = () => {
   const usageCollection = getUsageCollector();
   const { reportMetric, reportCountMetric } = useMetrics(usageCollection);
 
-  const {
-    queryState,
-    lastExecutedPrompt,
-    dataSetState,
-    queryResults,
-    editorMode,
-    queryStatus,
-  } = useSelector((state: RootState) => ({
-    queryState: state.query,
-    lastExecutedPrompt: state.queryEditor.lastExecutedPrompt,
-    dataSetState: state.query.dataset,
-    queryResults: state.results[state.query.query as string]?.hits?.hits,
-    editorMode: state.queryEditor.editorMode,
-    queryStatus: state.queryEditor.overallQueryStatus.status,
-  }));
-
   const assistantEnabled = core.application.capabilities?.assistant?.enabled;
-  const queryExecutedInPromptMode = useMemo(
-    // Only read the mode when the query result changed
-    () => [EditorMode.DualPrompt, EditorMode.SinglePrompt].includes(editorMode),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [queryResults]
-  );
 
   // The visibility of panel action buttons: thumbs up/down and copy to clipboard buttons
   const actionButtonVisible =
-    Boolean(summary) && !loading && queryExecutedInPromptMode && !generateError;
+    Boolean(summary) && !isEmpty(lastExecutedPrompt) && !loading && !generateError;
 
   const fetchSummary = useCallback(
     async ({ question, query, queryRes }: { question: string; query: string; queryRes: any }) => {
-      if (isEmpty(queryRes) && !isEmpty(summary) && queryStatus !== ResultStatus.READY) {
+      if (isEmpty(queryRes) && !isEmpty(summary) && queryStatus.status !== ResultStatus.READY) {
         return;
       }
 
@@ -114,11 +104,11 @@ export const ResultsSummary: React.FC = () => {
     setSummary('');
   }, [queryResults, setIsPopoverOpen, setSummary]);
 
-  const autoTriggered = useRef(false);
+  const isMounted = useRef(false);
   // Trigger auto generating for the first query
   useEffect(() => {
-    if (!autoTriggered.current && !isEmpty(queryResults)) {
-      autoTriggered.current = true;
+    if (!isMounted.current && !isEmpty(queryResults)) {
+      isMounted.current = true;
       fetchSummary({
         question: lastExecutedPrompt,
         query: queryState.query,
@@ -137,6 +127,14 @@ export const ResultsSummary: React.FC = () => {
     [feedback, reportMetric]
   );
 
+  const onGenerateSummary = useCallback(() => {
+    fetchSummary({
+      question: lastExecutedPrompt,
+      query: queryState.query as string,
+      queryRes: queryResults,
+    });
+  }, [fetchSummary, lastExecutedPrompt, queryState.query, queryResults]);
+
   if (!assistantEnabled || !isSummaryAgentAvailable) {
     return null;
   }
@@ -148,13 +146,7 @@ export const ResultsSummary: React.FC = () => {
       onFeedback={onFeedback}
       summary={summary}
       loading={loading}
-      onGenerateSummary={() =>
-        fetchSummary({
-          question: lastExecutedPrompt,
-          query: queryState.query as string,
-          queryRes: queryResults,
-        })
-      }
+      onGenerateSummary={onGenerateSummary}
       sampleSize={SUMMARY_REQUEST_SAMPLE_SIZE}
       isPopoverOpen={isPopoverOpen}
       setIsPopoverOpen={setIsPopoverOpen}

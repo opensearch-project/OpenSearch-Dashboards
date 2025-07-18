@@ -8,14 +8,14 @@
 .exploreResultsSummary {
   @include exploreQueryPanelButton;
   @include exploreQueryPanelVerticalSeparator;
-}
 
-.exploreResultsSummary_popover_tooltip {
-  display: flex;
-  padding-inline-start: 2px;
-  transform: translate(-1px);
-}
+  &_popover_tooltip {
+    display: flex;
+    padding-inline-start: $ouiSizeXXS;
+    transform: translateY(-1px);
+  }
 
-.exploreResultsSummary__summaryContent {
-  padding: $ouiSizeS;
+  &__summaryContent {
+    padding: $ouiSizeS;
+  }
 }

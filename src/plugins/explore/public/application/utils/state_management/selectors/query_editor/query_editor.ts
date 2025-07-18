@@ -42,6 +42,7 @@ export const selectPromptToQueryIsLoading = createSelector(
   [selectState],
   (state) => state.promptToQueryIsLoading
 );
+
 export const selectSummaryAgentIsAvailable = createSelector(
   [selectState],
   (state) => state.summaryAgentIsAvailable

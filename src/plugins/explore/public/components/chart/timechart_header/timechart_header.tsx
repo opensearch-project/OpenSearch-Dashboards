@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import './_toggle_button_group.scss';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlexGroup,
@@ -36,10 +38,14 @@ import {
   EuiText,
   EuiSelect,
   EuiIconTip,
+  EuiButtonGroup,
+  EuiSplitPanel,
+  EuiIcon,
 } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import { DiscoverChartToggleId } from '../utils/use_persist_chart_state';
 
 export interface TimechartHeaderBucketInterval {
   scaled?: boolean;
@@ -79,6 +85,18 @@ export interface TimechartHeaderProps {
    * selected interval
    */
   stateInterval: string;
+  /**
+   * Toggle the displaying of histogram or results summary
+   */
+  toggleIdSelected: DiscoverChartToggleId;
+  /**
+   * Change toggle state
+   */
+  onToggleChange: (optionId: DiscoverChartToggleId) => void;
+  /**
+   * is summary component enabled by capability and summary agent
+   */
+  isSummaryAvailable: boolean;
 }
 
 export function TimechartHeader({
@@ -88,8 +106,12 @@ export function TimechartHeader({
   options,
   onChangeInterval,
   stateInterval,
+  toggleIdSelected,
+  onToggleChange,
+  isSummaryAvailable,
 }: TimechartHeaderProps) {
   const [interval, setInterval] = useState(stateInterval);
+
   const toMoment = useCallback(
     (datetime: string) => {
       if (!datetime) {
@@ -116,6 +138,22 @@ export function TimechartHeader({
     return null;
   }
 
+  const toggleButtons = [
+    {
+      id: 'histogram',
+      label: 'Histogram',
+    },
+    {
+      id: 'summary',
+      label: (
+        <>
+          <EuiIcon type="generate" />
+          AI Summary
+        </>
+      ),
+    },
+  ];
+
   return (
     <I18nProvider>
       <EuiFlexGroup gutterSize="s" responsive alignItems="center" justifyContent="flexEnd">
@@ -130,91 +168,125 @@ export function TimechartHeader({
             })}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('explore.discover.howToChangeTheTimeTooltip', {
-              defaultMessage: 'To change the time, use the global time filter above',
-            })}
-            delay="long"
-          >
-            <EuiText data-test-subj="discoverIntervalDateRange" size="s">
-              {`${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${
-                interval !== 'auto'
-                  ? i18n.translate('explore.discover.timechartHeader.timeIntervalSelect.per', {
-                      defaultMessage: 'per',
-                    })
-                  : ''
-              }`}
-            </EuiText>
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSelect
-            className="exploreChart__TimechartHeader__selection"
-            aria-label={i18n.translate(
-              'explore.discover.timechartHeader.timeIntervalSelect.ariaLabel',
-              {
-                defaultMessage: 'Time interval',
-              }
-            )}
-            compressed
-            id="dscResultsIntervalSelector"
-            data-test-subj="discoverIntervalSelect"
-            options={options
-              .filter(({ val }) => val !== 'custom')
-              .map(({ display, val }) => {
-                return {
-                  text: display,
-                  value: val,
-                  label: display,
-                };
-              })}
-            value={interval}
-            onChange={handleIntervalChange}
-            prepend={
-              <EuiText
-                className="exploreChart__TimechartHeader__selection__prependText"
-                data-test-subj="discoverTimechartHeaderInterval"
-                size="s"
-              >
-                {i18n.translate('explore.discover.timechartHeader.interval', {
-                  defaultMessage: 'Interval',
+        {toggleIdSelected === 'histogram' && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('explore.discover.howToChangeTheTimeTooltip', {
+                  defaultMessage: 'To change the time, use the global time filter above',
                 })}
-              </EuiText>
-            }
-            append={
-              bucketInterval.scaled ? (
-                <EuiIconTip
-                  id="discoverIntervalIconTip"
-                  content={i18n.translate('explore.discover.bucketIntervalTooltip', {
-                    defaultMessage:
-                      'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
-                    values: {
-                      bucketsDescription:
-                        bucketInterval!.scale && bucketInterval!.scale > 1
-                          ? i18n.translate(
-                              'explore.explore.discover.bucketIntervalTooltip.tooLargeBucketsText',
-                              {
-                                defaultMessage: 'buckets that are too large',
-                              }
-                            )
-                          : i18n.translate(
-                              'explore.explore.discover.bucketIntervalTooltip.tooManyBucketsText',
-                              {
-                                defaultMessage: 'too many buckets',
-                              }
-                            ),
-                      bucketIntervalDescription: bucketInterval.description,
-                    },
+                delay="long"
+              >
+                <EuiText data-test-subj="discoverIntervalDateRange" size="s">
+                  {`${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${
+                    interval !== 'auto'
+                      ? i18n.translate('explore.discover.timechartHeader.timeIntervalSelect.per', {
+                          defaultMessage: 'per',
+                        })
+                      : ''
+                  }`}
+                </EuiText>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSelect
+                className="exploreChart__TimechartHeader__selection"
+                aria-label={i18n.translate(
+                  'explore.discover.timechartHeader.timeIntervalSelect.ariaLabel',
+                  {
+                    defaultMessage: 'Time interval',
+                  }
+                )}
+                compressed
+                id="dscResultsIntervalSelector"
+                data-test-subj="discoverIntervalSelect"
+                options={options
+                  .filter(({ val }) => val !== 'custom')
+                  .map(({ display, val }) => {
+                    return {
+                      text: display,
+                      value: val,
+                      label: display,
+                    };
                   })}
-                  color="warning"
-                  size="s"
-                  type="alert"
+                value={interval}
+                onChange={handleIntervalChange}
+                prepend={
+                  <EuiText
+                    className="exploreChart__TimechartHeader__selection__prependText"
+                    data-test-subj="discoverTimechartHeaderInterval"
+                    size="s"
+                  >
+                    {i18n.translate('explore.discover.timechartHeader.interval', {
+                      defaultMessage: 'Interval',
+                    })}
+                  </EuiText>
+                }
+                append={
+                  bucketInterval.scaled ? (
+                    <EuiIconTip
+                      id="discoverIntervalIconTip"
+                      content={i18n.translate('explore.discover.bucketIntervalTooltip', {
+                        defaultMessage:
+                          'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
+                        values: {
+                          bucketsDescription:
+                            bucketInterval!.scale && bucketInterval!.scale > 1
+                              ? i18n.translate(
+                                  'explore.explore.discover.bucketIntervalTooltip.tooLargeBucketsText',
+                                  {
+                                    defaultMessage: 'buckets that are too large',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'explore.explore.discover.bucketIntervalTooltip.tooManyBucketsText',
+                                  {
+                                    defaultMessage: 'too many buckets',
+                                  }
+                                ),
+                          bucketIntervalDescription: bucketInterval.description,
+                        },
+                      })}
+                      color="warning"
+                      size="s"
+                      type="alert"
+                    />
+                  ) : undefined
+                }
+              />
+            </EuiFlexItem>
+          </>
+        )}
+        {isSummaryAvailable && (
+          <EuiFlexItem grow={false}>
+            <EuiSplitPanel.Outer
+              grow={false}
+              direction="row"
+              hasShadow={false}
+              style={{ borderRadius: 2 }}
+            >
+              <EuiSplitPanel.Inner
+                color="subdued"
+                paddingSize="none"
+                style={{ paddingInline: 8, alignContent: 'center' }}
+              >
+                <EuiText style={{ fontWeight: 600 }} size="s">
+                  View as
+                </EuiText>
+              </EuiSplitPanel.Inner>
+              <EuiSplitPanel.Inner paddingSize="none">
+                <EuiButtonGroup
+                  className="exploreChartToggleButtonGroup"
+                  buttonSize="compressed"
+                  legend="This is a basic group"
+                  options={toggleButtons}
+                  idSelected={toggleIdSelected}
+                  onChange={(id) => onToggleChange(id as DiscoverChartToggleId)}
                 />
-              ) : undefined
-            }
-          />
-        </EuiFlexItem>
+              </EuiSplitPanel.Inner>
+            </EuiSplitPanel.Outer>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </I18nProvider>
   );
