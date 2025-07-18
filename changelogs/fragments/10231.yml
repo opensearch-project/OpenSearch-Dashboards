@@ -1,0 +1,2 @@
+feat:
+- Refactor dual query editor to single ([#10231](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10231))
