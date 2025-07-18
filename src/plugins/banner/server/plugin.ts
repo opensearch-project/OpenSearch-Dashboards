@@ -14,7 +14,7 @@ import { first } from 'rxjs/operators';
 import { BannerPluginSetup, BannerPluginStart } from './types';
 import { BannerPluginConfigType } from './config';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
-import { defineRoutes } from './routes';
+import { defineRoutes } from './routes/get_config';
 import { BannerConfig } from '../common';
 
 export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart> {

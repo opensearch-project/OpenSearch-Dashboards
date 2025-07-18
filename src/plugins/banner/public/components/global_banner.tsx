@@ -11,6 +11,7 @@
 
 import React, { Fragment, useEffect, useState, Suspense, useRef } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+import { act } from 'react-dom/test-utils';
 import { BannerConfig, HIDDEN_BANNER_HEIGHT, DEFAULT_BANNER_CONFIG } from '../../common';
 import { LinkRenderer } from './link_renderer';
 import { HttpStart } from '../../../../core/public';
@@ -32,15 +33,18 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
       try {
         setIsLoading(true);
         const response = await http.get<BannerConfig>('/api/_plugins/_banner/content');
-
-        setBannerConfig(response);
+        act(() => {
+          setBannerConfig(response);
+        });
       } catch (error) {
         // Hide banner on error
         setBannerConfig({
           ...DEFAULT_BANNER_CONFIG,
         });
       } finally {
-        setIsLoading(false);
+        act(() => {
+          setIsLoading(false);
+        });
       }
     };
 
