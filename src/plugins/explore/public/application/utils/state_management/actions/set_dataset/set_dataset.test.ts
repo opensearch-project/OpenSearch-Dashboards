@@ -11,9 +11,11 @@ import {
   setEditorMode,
   setPromptModeIsAvailable,
   setQueryWithHistory,
+  setSummaryAgentIsAvailable,
 } from '../../slices';
 import { executeQueries } from '../query_actions';
 import { getPromptModeIsAvailable } from '../../../get_prompt_mode_is_available';
+import { getSummaryAgentIsAvailable } from '../../../get_summary_agent_is_available';
 import { AppDispatch, RootState } from '../../store';
 
 // Mock dependencies
@@ -23,6 +25,7 @@ jest.mock('../../slices', () => ({
   setPromptModeIsAvailable: jest.fn(),
   setQueryWithHistory: jest.fn(),
   setActiveTab: jest.fn(),
+  setSummaryAgentIsAvailable: jest.fn(),
 }));
 
 jest.mock('../../slices/query_editor/query_editor_slice', () => ({
@@ -41,6 +44,10 @@ jest.mock('../../../get_prompt_mode_is_available', () => ({
   getPromptModeIsAvailable: jest.fn(),
 }));
 
+jest.mock('../../../get_summary_agent_is_available', () => ({
+  getSummaryAgentIsAvailable: jest.fn(),
+}));
+
 describe('setDatasetActionCreator', () => {
   let services: jest.Mocked<ExploreServices>;
   let mockClearEditors: jest.MockedFunction<any>;
@@ -56,6 +63,7 @@ describe('setDatasetActionCreator', () => {
     queryEditor: {
       editorMode: EditorMode.SingleQuery,
       promptModeIsAvailable: false,
+      summaryAgentIsAvailable: false,
       queryStatusMap: {},
       overallQueryStatus: {
         status: 'UNINITIALIZED' as any,
@@ -69,7 +77,11 @@ describe('setDatasetActionCreator', () => {
     query: {
       query: 'SELECT * FROM test',
       language: 'PPL',
-      dataset: undefined,
+      dataset: {
+        id: 'test-dataset',
+        type: 'INDEX_PATTERN',
+        dataSource: { id: 'test-datasource' },
+      },
     },
     ui: {
       activeTabId: 'test-tab',
@@ -136,6 +148,7 @@ describe('setDatasetActionCreator', () => {
 
   it('should dispatch setPromptModeIsAvailable when prompt mode availability changes', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(true);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
@@ -145,6 +158,7 @@ describe('setDatasetActionCreator', () => {
 
   it('should not dispatch setPromptModeIsAvailable when prompt mode availability stays the same', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
@@ -154,6 +168,7 @@ describe('setDatasetActionCreator', () => {
 
   it('should set editor mode to SingleQuery when prompt mode is not available', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
@@ -163,6 +178,7 @@ describe('setDatasetActionCreator', () => {
 
   it('should call clearEditors', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
@@ -172,6 +188,7 @@ describe('setDatasetActionCreator', () => {
 
   it('should dispatch executeQueries action', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
@@ -183,6 +200,7 @@ describe('setDatasetActionCreator', () => {
     const stateWithPromptMode = {
       queryEditor: {
         promptModeIsAvailable: true,
+        summaryAgentIsAvailable: false,
         queryStatusMap: {},
         overallQueryStatus: {
           status: 'UNINITIALIZED' as any,
@@ -221,6 +239,7 @@ describe('setDatasetActionCreator', () => {
     };
     mockGetState.mockReturnValue(stateWithPromptMode);
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
@@ -230,10 +249,44 @@ describe('setDatasetActionCreator', () => {
 
   it('should set editor mode to SingleEmpty when prompt mode is available', async () => {
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(true);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
 
     const actionCreator = setDatasetActionCreator(services, mockClearEditors);
     await actionCreator(mockDispatch, mockGetState);
 
     expect(setEditorMode).toHaveBeenCalledWith(EditorMode.SingleEmpty);
+  });
+
+  it('should dispatch setSummaryAgentIsAvailable when summary agent availability changes', async () => {
+    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(true);
+
+    const actionCreator = setDatasetActionCreator(services, mockClearEditors);
+    await actionCreator(mockDispatch, mockGetState);
+
+    expect(setSummaryAgentIsAvailable).toHaveBeenCalledWith(true);
+  });
+
+  it('should not dispatch setSummaryAgentIsAvailable when summary agent availability stays the same', async () => {
+    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+
+    const actionCreator = setDatasetActionCreator(services, mockClearEditors);
+    await actionCreator(mockDispatch, mockGetState);
+
+    expect(setSummaryAgentIsAvailable).not.toHaveBeenCalled();
+  });
+
+  it('should call Promise.all to run availability checks in parallel', async () => {
+    const promiseAllSpy = jest.spyOn(Promise, 'all');
+    (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+    (getSummaryAgentIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
+
+    const actionCreator = setDatasetActionCreator(services, mockClearEditors);
+    await actionCreator(mockDispatch, mockGetState);
+
+    expect(promiseAllSpy).toHaveBeenCalled();
+    expect(promiseAllSpy.mock.calls[0][0].length).toBe(2);
+    promiseAllSpy.mockRestore();
   });
 });

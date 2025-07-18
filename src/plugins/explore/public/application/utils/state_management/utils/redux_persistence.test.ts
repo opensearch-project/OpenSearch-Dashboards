@@ -114,6 +114,7 @@ describe('redux_persistence', () => {
           },
           promptModeIsAvailable: false,
           promptToQueryIsLoading: false,
+          summaryAgentIsAvailable: false,
           editorMode: 'SingleQuery' as any,
           lastExecutedPrompt: '',
         },

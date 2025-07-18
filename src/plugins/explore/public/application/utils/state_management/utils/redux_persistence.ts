@@ -249,11 +249,13 @@ const getPreloadedQueryEditorState = async (
   let promptModeIsAvailable = false;
   let summaryAgentIsAvailable = false;
   if (queryState?.dataset) {
-    promptModeIsAvailable = await getPromptModeIsAvailable(services);
-    summaryAgentIsAvailable = await getSummaryAgentIsAvailable(
-      services,
-      queryState.dataset.dataSource?.id!
-    );
+    const results = await Promise.allSettled([
+      getPromptModeIsAvailable(services),
+      getSummaryAgentIsAvailable(services, queryState.dataset.dataSource?.id ?? ''),
+    ]);
+
+    promptModeIsAvailable = results[0].status === 'fulfilled' ? Boolean(results[0].value) : false;
+    summaryAgentIsAvailable = results[1].status === 'fulfilled' ? Boolean(results[1].value) : false;
   }
 
   // If !query.length, default to SingleEmpty
@@ -272,7 +274,7 @@ const getPreloadedQueryEditorState = async (
     },
     promptModeIsAvailable,
     promptToQueryIsLoading: false,
-    summaryAgentIsAvailable: false,
+    summaryAgentIsAvailable,
     editorMode,
     lastExecutedPrompt: '',
   };
