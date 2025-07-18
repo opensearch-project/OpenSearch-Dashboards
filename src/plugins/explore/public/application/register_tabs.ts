@@ -45,14 +45,14 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
     prepareQuery: (query) => {
-      const patternsField = 'message'; // TODO: pull from patterns field configured in dataset
+      const patternsField = 'Dest'; // TODO: pull from patterns field configured in dataset
 
       // TODO: add quotes around take patternsField
-      // ` | patterns ${patternsField} method=brain | stats count() as count, take(${patternsField}, 1) as sample by patterns_field | sort - count | fields patterns_field, count, sample`
+      // ` | patterns \`${patternsField}\` method=brain | stats count() as count, take(\`${patternsField}\`, 1) as sample by patterns_field | sort - count | fields patterns_field, count, sample`
 
       return typeof query.query === 'string' && query.query !== ''
         ? query.query +
-            ` | patterns ${patternsField} method=brain mode=aggregation | sort - pattern_count`
+            ` | patterns \`${patternsField}\` method=brain mode=aggregation | sort - pattern_count`
         : '';
     },
 
