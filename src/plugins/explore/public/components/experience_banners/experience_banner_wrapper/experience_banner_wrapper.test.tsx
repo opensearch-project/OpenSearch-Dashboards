@@ -32,11 +32,12 @@ describe('ExperienceBannerWrapper', () => {
     expect(screen.queryByTestId('exploreNewExperienceBanner')).not.toBeInTheDocument();
   });
 
-  it('should render new banner if !showClassicExperienceBanner', async () => {
+  it('should render nothing if !showClassicExperienceBanner', async () => {
     render(
       <ExperienceBannerWrapper initializeBannerWrapper={mockInitializeBannerWrapperToFalse} />
     );
-    expect(await screen.findByTestId('exploreNewExperienceBanner')).toBeInTheDocument();
+    expect(screen.queryByTestId('exploreClassicExperienceBanner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exploreNewExperienceBanner')).not.toBeInTheDocument();
   });
 
   it('should render classic banner if showClassicExperienceBanner', async () => {

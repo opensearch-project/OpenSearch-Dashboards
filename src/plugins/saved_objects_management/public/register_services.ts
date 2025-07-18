@@ -85,7 +85,7 @@ export const registerServices = async (
     registry.register({
       id: 'savedExplore',
       title: 'explore',
-      service: explore.savedExploreLoader,
+      service: explore.savedExploreLoader as any,
     });
   }
 

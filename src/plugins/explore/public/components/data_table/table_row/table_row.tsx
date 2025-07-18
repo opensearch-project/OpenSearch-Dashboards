@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSmallButtonIcon } from '@elastic
 import { i18n } from '@osd/i18n';
 import dompurify from 'dompurify';
 import React, { useCallback, useState } from 'react';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { TableSourceCell } from '../tabe_cell/table_source_cell';
 import { TableCell } from '../tabe_cell/table_cell';
 import {
@@ -26,7 +26,7 @@ import { DocViewer } from '../../doc_viewer/doc_viewer';
 export interface TableRowProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
   columns: string[];
-  indexPattern: IndexPattern;
+  dataset: IndexPattern | Dataset;
   onRemoveColumn?: (column: string) => void;
   onAddColumn?: (column: string) => void;
   onFilter?: DocViewFilterFn;
@@ -38,7 +38,7 @@ export interface TableRowProps {
 export const TableRowUI = ({
   row,
   columns,
-  indexPattern,
+  dataset,
   onFilter,
   onRemoveColumn,
   onAddColumn,
@@ -46,7 +46,7 @@ export const TableRowUI = ({
   isShortDots,
   docViewsRegistry,
 }: TableRowProps) => {
-  const flattened = indexPattern.flattenHit(row);
+  const flattened = dataset.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
   const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
     setIsExpanded,
@@ -69,7 +69,7 @@ export const TableRowUI = ({
         />
       </td>
       {columns.map((colName) => {
-        const fieldInfo = indexPattern.fields.getByName(colName);
+        const fieldInfo = dataset.fields.getByName(colName);
         const fieldMapping = flattened[colName];
 
         if (typeof row === 'undefined') {
@@ -92,13 +92,13 @@ export const TableRowUI = ({
               data-test-subj="docTableField"
             >
               <div className="truncate-by-height">
-                <TableSourceCell idxPattern={indexPattern} row={row} isShortDots={isShortDots} />
+                <TableSourceCell idxPattern={dataset} row={row} isShortDots={isShortDots} />
               </div>
             </td>
           );
         }
 
-        const formattedValue = indexPattern.formatField(row, colName);
+        const formattedValue = dataset.formatField(row, colName);
 
         if (typeof formattedValue === 'undefined') {
           return (
@@ -114,13 +114,13 @@ export const TableRowUI = ({
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
-        if (!fieldInfo?.filterable) {
+        if (fieldInfo?.filterable === false) {
           return (
             <td
               key={colName}
               data-test-subj="docTableField"
               className={`exploreDocTableCell ${
-                indexPattern.timeFieldName === colName
+                dataset.timeFieldName === colName
                   ? 'eui-textNoWrap'
                   : 'eui-textBreakAll eui-textBreakWord'
               }`}
@@ -138,7 +138,7 @@ export const TableRowUI = ({
             key={colName}
             columnId={colName}
             onFilter={onFilter}
-            isTimeField={indexPattern.timeFieldName === colName}
+            isTimeField={dataset.timeFieldName === colName}
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
           />
@@ -178,19 +178,25 @@ export const TableRowUI = ({
               renderProps={{
                 hit: row,
                 columns,
-                indexPattern,
-                filter: (mapping, value, mode) => {
-                  onFilter?.(mapping, value, mode);
-                  onClose?.();
-                },
-                onAddColumn: (columnName: string) => {
-                  onAddColumn?.(columnName);
-                  onClose?.();
-                },
-                onRemoveColumn: (columnName: string) => {
-                  onRemoveColumn?.(columnName);
-                  onClose?.();
-                },
+                indexPattern: dataset,
+                filter: onFilter
+                  ? (mapping, value, mode) => {
+                      onFilter(mapping, value, mode);
+                      onClose?.();
+                    }
+                  : undefined,
+                onAddColumn: onAddColumn
+                  ? (columnName: string) => {
+                      onAddColumn(columnName);
+                      onClose?.();
+                    }
+                  : undefined,
+                onRemoveColumn: onRemoveColumn
+                  ? (columnName: string) => {
+                      onRemoveColumn(columnName);
+                      onClose?.();
+                    }
+                  : undefined,
               }}
               docViewsRegistry={docViewsRegistry}
             />

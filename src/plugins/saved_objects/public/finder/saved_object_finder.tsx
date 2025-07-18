@@ -104,7 +104,7 @@ interface BaseSavedObjectFinder {
     id: SimpleSavedObject['id'],
     type: SimpleSavedObject['type'],
     name: string,
-    savedObject: SimpleSavedObject
+    savedObject: SimpleSavedObject<FinderAttributes>
   ) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
@@ -167,7 +167,7 @@ class SavedObjectFinderUi extends React.Component<
     // If the current app id is explore, although explore app might not support
     // a language, it still supports all saved searches that are supported by
     // discover by redirecting to discover for backward compatibility.
-    if (currentAppId === 'explore') {
+    if (currentAppId.includes('explore/')) {
       return (
         (supportedInApp ||
           languageService?.getLanguage(languageId)?.supportedAppNames?.includes('discover')) ??

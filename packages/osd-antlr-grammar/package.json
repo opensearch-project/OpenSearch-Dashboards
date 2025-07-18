@@ -1,0 +1,28 @@
+{
+  "name": "@osd/antlr-grammar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Centralized ANTLR grammar files and generated parsers for OpenSearch Dashboards",
+  "main": "./target/index.js",
+  "types": "./target/index.d.ts",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "../../scripts/use_node ./scripts/build.js",
+    "osd:bootstrap": "yarn build --dev",
+    "generate:opensearchsql": "../../node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/opensearch_sql/.generated -visitor -no-listener -Xexact-output-dir ./src/opensearch_sql/grammar/OpenSearchSQLLexer.g4 ./src/opensearch_sql/grammar/OpenSearchSQLParser.g4",
+    "generate:opensearchppl": "../../node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/opensearch_ppl/.generated -visitor -no-listener -Xexact-output-dir ./src/opensearch_ppl/grammar/OpenSearchPPLLexer.g4 ./src/opensearch_ppl/grammar/OpenSearchPPLParser.g4",
+    "generate:opensearchppl-simplified": "../../node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/opensearch_ppl_simplified/.generated -visitor -no-listener -Xexact-output-dir ./src/opensearch_ppl_simplified/grammar/OpenSearchPPLLexer.g4 ./src/opensearch_ppl_simplified/grammar/OpenSearchPPLParser.g4",
+    "generate:dql": "../../node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/dql/.generated -visitor -no-listener -Xexact-output-dir ./src/dql/grammar/DQLLexer.g4 ./src/dql/grammar/DQLParser.g4",
+    "generate:all": "yarn generate:opensearchsql && yarn generate:opensearchppl && yarn generate:opensearchppl-simplified && yarn generate:dql"
+  },
+  "dependencies": {
+    "antlr4ng": "^3.0.4"
+  },
+  "devDependencies": {
+    "@osd/babel-preset": "1.0.0",
+    "@osd/dev-utils": "1.0.0",
+    "babel-loader": "^8.2.3",
+    "del": "^6.1.1",
+    "typescript": "4.5.5"
+  }
+}

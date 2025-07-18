@@ -64,6 +64,7 @@ export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) 
     return [VIS_EVENT_TO_TRIGGER.filter];
   },
   visualization: createVislibVisController(deps),
+  isClassic: true,
   visConfig: {
     defaults: {
       type: 'heatmap',

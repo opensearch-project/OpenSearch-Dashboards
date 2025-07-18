@@ -3,23 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  INDEX_WITH_TIME_1,
-  QueryLanguages,
-  DATASOURCE_NAME,
-} from '../../../../../../utils/constants';
+import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/explore/shared';
 import {
   validateQueryResults,
   generateAutocompleteTestConfiguration,
+  generateAutocompleteTestConfigurations,
   createOtherQueryUsingAutocomplete,
-  createDQLQueryUsingAutocomplete,
-} from '../../../../../../utils/apps/query_enhancements/autocomplete';
+} from '../../../../../../utils/apps/explore/autocomplete';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAutocompleteTestConfigurations } from '../../../../../../utils/apps/explore/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -39,7 +34,7 @@ export const runAutocompleteTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -53,20 +48,15 @@ export const runAutocompleteTests = () => {
         describe(`${config.testName}`, () => {
           it('should show and select suggestions progressively', () => {
             // Setup
-            cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-            cy.setQueryLanguage(config.language);
+            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.wait(2000);
-            cy.clearQueryEditor();
+            cy.explore.clearQueryEditor();
 
-            if (config.language === QueryLanguages.DQL.name) {
-              createDQLQueryUsingAutocomplete();
-            } else {
-              createOtherQueryUsingAutocomplete(config);
-            }
+            createOtherQueryUsingAutocomplete(config);
 
             // Run the query
-            cy.getElementByTestId('querySubmitButton').click();
+            cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
             cy.osd.waitForLoader(true);
             cy.wait(1000);
             // Validate results meet our conditions

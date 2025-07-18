@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.osdQueryEditor__banner {
+  & > * {
+    margin-bottom: $ouiSizeXS;
+  }
+}
+
 .osdQueryEditor__wrapper {
   display: flex;
 }

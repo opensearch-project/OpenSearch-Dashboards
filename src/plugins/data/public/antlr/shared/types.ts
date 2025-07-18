@@ -101,6 +101,7 @@ export interface OpenSearchSqlAutocompleteResult extends AutocompleteResultBase 
 export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase {
   suggestSourcesOrTables?: SourceOrTableSuggestion;
   suggestRenameAs?: boolean;
+  suggestFieldsInAggregateFunction?: boolean;
 }
 
 export enum TableOrViewSuggestion {

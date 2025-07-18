@@ -8,8 +8,8 @@ import {
   INDEX_WITH_TIME_1,
 } from '../../../../../../utils/apps/constants.js';
 import { BASE_PATH, DATASOURCE_NAME } from '../../../../../../utils/constants.js';
-import { DatasetTypes } from '../../../../../../utils/apps/query_enhancements/constants.js';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared.js';
+import { DatasetTypes } from '../../../../../../utils/apps/explore/constants.js';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared.js';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
@@ -31,7 +31,7 @@ const cachingTestSuite = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
       cy.getElementByTestId('discoverNewButton').click();
@@ -45,7 +45,11 @@ const cachingTestSuite = () => {
       const alternativeIndexPatternName = 'data';
       const alternativeIndexPattern = alternativeIndexPatternName + '*';
 
-      cy.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, DatasetTypes.INDEX_PATTERN.name);
+      cy.explore.setDataset(
+        INDEX_PATTERN_WITH_TIME,
+        DATASOURCE_NAME,
+        DatasetTypes.INDEX_PATTERN.name
+      );
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: alternativeIndexPatternName,
@@ -57,12 +61,12 @@ const cachingTestSuite = () => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
 
-      cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
-      cy.getElementByTestId('datasetSelectorAdvancedButton').click();
+      cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+      cy.getElementByTestId('datasetSelectAdvancedButton').click();
       cy.intercept('GET', '**/api/saved_objects/_find?fields*').as('getIndexPatternRequest');
       cy.get(`[title="Index Patterns"]`).click();
 

@@ -9,7 +9,7 @@ import {
   ExpressionFunctionOpenSearchDashboards,
   IExpressionLoaderParams,
 } from '../../../../../expressions/public';
-import { IndexPattern } from '../../../../../data/public';
+import { IndexPattern, DataView as Dataset } from '../../../../../data/public';
 import { VisColumn } from '../types';
 
 /**
@@ -24,23 +24,22 @@ import { VisColumn } from '../types';
  * @param toExpressionFn Specific function to create the Vega spec based on the rule
  * @returns The expression string
  */
-export const toExpression = async (
+export const toExpression = (
   searchContext: IExpressionLoaderParams['searchContext'],
-  indexPattern: IndexPattern,
+  indexPattern: IndexPattern | Dataset,
   toExpressionFn: (
     transformedData: Array<Record<string, any>>,
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[],
-    styleOptions: any,
-    selectedChartType: string
+    styleOptions: any
   ) => any,
   transformedData?: Array<Record<string, any>>,
   numericalColumns?: VisColumn[],
   categoricalColumns?: VisColumn[],
   dateColumns?: VisColumn[],
   styleOptions?: any
-): Promise<string> => {
+) => {
   if (!indexPattern || !searchContext) {
     return '';
   }
@@ -60,8 +59,7 @@ export const toExpression = async (
     numericalColumns!,
     categoricalColumns!,
     dateColumns!,
-    styleOptions,
-    'line'
+    styleOptions
   );
 
   const vega = buildExpressionFunction<any>('vega', {

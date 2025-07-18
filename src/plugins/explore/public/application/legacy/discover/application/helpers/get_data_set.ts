@@ -4,7 +4,7 @@
  */
 
 import { IndexPattern, IndexPatternsContract } from '../../../../../../../data/public';
-import { SearchData } from '../view_components/utils/use_search';
+import { SearchData } from '../../../../utils/state_management/types';
 
 function getDataSet(
   indexPattern: IndexPattern | undefined,

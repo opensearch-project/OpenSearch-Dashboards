@@ -65,6 +65,7 @@ export function createTileMapTypeDefinition(dependencies) {
       },
     },
     visualization: CoordinateMapsVisualization,
+    isClassic: true,
     responseHandler: convertToGeoJson,
     editorConfig: {
       collections: {

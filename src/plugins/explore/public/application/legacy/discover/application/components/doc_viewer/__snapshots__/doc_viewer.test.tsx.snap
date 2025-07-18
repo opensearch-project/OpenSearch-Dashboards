@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Render <DocViewer/> with 3 different tabs 1`] = `
+exports[`DocViewer Render <DocViewer/> with 3 different tabs 1`] = `
 <div
   className="osdDocViewer"
   data-test-subj="osdDocViewer"

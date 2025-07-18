@@ -7,7 +7,7 @@ import React, { Fragment, useEffect, useRef, useCallback, useMemo } from 'react'
 import { EuiPageContent, EuiPage } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { DiscoverServices } from '../../../build_services';
+import { ExploreServices } from '../../../../../../types';
 import { IndexPatternField, opensearchFilters } from '../../../../../../../../data/public';
 import { AppState, isEqualFilters } from './context/utils/context_state';
 import { useContextState } from './context/utils/use_context_state';
@@ -24,7 +24,7 @@ export interface SurroundingDocsViewParams {
 }
 
 export const SurroundingDocsView = ({ id, indexPattern }: SurroundingDocsViewParams) => {
-  const { services } = useOpenSearchDashboards<DiscoverServices>();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const {
     navigation: {
       ui: { TopNavMenu },

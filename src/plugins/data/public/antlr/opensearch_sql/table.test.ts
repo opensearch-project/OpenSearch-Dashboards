@@ -19,7 +19,6 @@ const mockTokenStream = (tokens: Array<Partial<Token>>): TokenStream => {
   } as TokenStream;
 };
 
-// @ts-expect-error TS2741 TODO(ts-error): fixme
 const tokenDictionary: TokenDictionary = {
   SPACE: 1,
   FROM: 2,
@@ -28,6 +27,7 @@ const tokenDictionary: TokenDictionary = {
   JOIN: 5,
   SEMICOLON: 6,
   SELECT: 7,
+  ID: 8,
 };
 
 describe('Autocomplete Utils', () => {

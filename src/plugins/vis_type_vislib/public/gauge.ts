@@ -70,6 +70,7 @@ export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) =>
   name: 'gauge',
   title: i18n.translate('visTypeVislib.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
+  isClassic: true,
   description: i18n.translate('visTypeVislib.gauge.gaugeDescription', {
     defaultMessage:
       "Gauges indicate the status of a metric. Use it to show how a metric's value relates to reference threshold values.",

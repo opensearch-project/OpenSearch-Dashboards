@@ -258,5 +258,30 @@ declare namespace Cypress {
        */
       verifyResultsError(error: string): Chainable<any>;
     };
+
+    // explore namespace
+    explore: {
+      clearQueryEditor(): Chainable<any>;
+
+      setQueryEditor(
+        value: string,
+        options?: Partial<Cypress.TypeOptions> & { submit?: boolean }
+      ): Chainable<any>;
+
+      /**
+       * Set the top nav date range.
+       * Date format: MMM D, YYYY @ HH:mm:ss.SSS
+       * @example
+       * cy.setTopNavDate('Oct 5, 2022 @ 00:57:06.429', 'Oct 6, 2022 @ 00:57:06.429')
+       */
+      setTopNavDate(start: string, end: string, submit?: boolean): Chainable<any>;
+
+      /**
+       * Sets the top nav date to relative time
+       */
+      setRelativeTopNavDate(time: number, timeUnit: string): Chainable<any>;
+
+      updateTopNav(options: any): Chainable<any>;
+    };
   }
 }

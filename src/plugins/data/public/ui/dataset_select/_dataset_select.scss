@@ -1,0 +1,136 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.datasetSelect {
+  margin: 0;
+  border: $euiBorderThin;
+  border-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
+  width: 400px;
+  max-width: 400px;
+  height: $euiSizeXL - 1px;
+
+  &__container {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  &__detailsContainer {
+    width: $euiSizeXL;
+    max-width: $euiSizeXL;
+  }
+
+  div:is([class$="labelWrapper"]) {
+    width: $euiSizeXL;
+    height: $euiSizeXL - 1px;
+    padding: 0 $euiSizeXS;
+    margin-right: $euiSizeXS;
+
+    :first-child {
+      word-wrap: normal;
+      word-break: normal;
+      height: $euiSizeXL - 1px;
+      display: block;
+      line-height: $euiSizeXL - 1px;
+    }
+  }
+
+  div:is([class$="fieldWrapper"]) {
+    width: 100%;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+  }
+
+  &__mainContent {
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 32px);
+  }
+
+  &__button {
+    background-color: $euiColorEmptyShade;
+    width: 100%;
+    height: $euiSizeXL;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  &__icon {
+    margin-right: $euiSizeXS;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    text-align: left;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: $euiFontSizeS;
+    flex: 1;
+    width: 250px;
+    min-width: 0;
+    max-width: calc(100% - $euiSizeXL);
+    height: $euiSizeXL - 1px;
+    line-height: $euiSizeXL - 1px;
+  }
+
+  &__checkbox {
+    flex: 1;
+    align-self: center;
+  }
+
+  &__selectable {
+    width: 365px;
+    padding: $euiSizeXS;
+    overflow-y: auto;
+
+    span:is([class*="euiSelectableListItem__text"]) {
+      :first-child {
+        font-size: $euiFontSizeS;
+      }
+    }
+  }
+
+  &__searchContainer {
+    padding: $euiSizeXS;
+    border-bottom: $euiBorderThin;
+    font-size: $euiFontSizeS;
+  }
+
+  &__list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  &__infoIcon {
+    margin-left: $euiSizeXS;
+  }
+
+  &__advancedButton {
+    width: 100%;
+    font-size: $euiFontSizeXS;
+  }
+
+  &__footer {
+    padding: $euiSizeXS;
+  }
+
+  &__footerItem {
+    width: 100%;
+  }
+
+  &__advancedModal {
+    width: 1200px;
+    height: 800px;
+
+    // euiOverlayMask pushes the modal up due to having padding-bottom: 10vh
+    max-height: calc(90vh - $euiSizeL);
+  }
+}

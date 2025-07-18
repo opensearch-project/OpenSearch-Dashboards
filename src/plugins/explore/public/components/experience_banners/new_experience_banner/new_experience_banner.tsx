@@ -6,15 +6,29 @@
 import React, { useState } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import './new_experience_banner.scss';
-import { NEW_DISCOVER_INFO_URL, SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY } from '../constants';
+import {
+  HIDE_NEW_DISCOVER_LOCAL_STORAGE_KEY,
+  NEW_DISCOVER_INFO_URL,
+  SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY,
+} from '../constants';
 
 export const NewExperienceBanner = () => {
   const [isVisible, setIsVisible] = useState<boolean>(true);
+
+  // short circuit if the user has already dismissed the banner
+  if (!!localStorage.getItem(HIDE_NEW_DISCOVER_LOCAL_STORAGE_KEY)) {
+    return null;
+  }
 
   // TODO: This should open a modal to add more friction
   const handleSwitch = () => {
     localStorage.setItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY, 'true');
     window.location.reload();
+  };
+
+  const handleDismiss = () => {
+    setIsVisible(false);
+    localStorage.setItem(HIDE_NEW_DISCOVER_LOCAL_STORAGE_KEY, 'true');
   };
 
   return isVisible ? (
@@ -23,7 +37,7 @@ export const NewExperienceBanner = () => {
       data-test-subj="exploreNewExperienceBanner"
       size="s"
       dismissible={true}
-      onDismiss={() => setIsVisible(false)}
+      onDismiss={handleDismiss}
     >
       <span
         className="exploreNewExperienceBanner__img"
