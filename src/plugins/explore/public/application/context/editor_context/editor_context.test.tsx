@@ -24,19 +24,16 @@ const TestComponent: React.FC = () => {
 
   return (
     <div>
-      <div data-test-subj="top-editor-text">{context.topEditorText}</div>
-      <div data-test-subj="bottom-editor-text">{context.bottomEditorText}</div>
+      <div data-test-subj="editor-text">{context.editorText}</div>
+      <div data-test-subj="editor-focused">{context.editorIsFocused.toString()}</div>
       <button
-        data-test-subj="set-top-text"
-        onClick={() => context.setTopEditorText('new top text')}
+        data-test-subj="set-editor-text"
+        onClick={() => context.setEditorText('new editor text')}
       >
-        Set Top Text
+        Set Editor Text
       </button>
-      <button
-        data-test-subj="set-bottom-text"
-        onClick={() => context.setBottomEditorText('new bottom text')}
-      >
-        Set Bottom Text
+      <button data-test-subj="set-editor-focused" onClick={() => context.setEditorIsFocused(true)}>
+        Set Editor Focused
       </button>
     </div>
   );
@@ -74,30 +71,40 @@ describe('EditorContext', () => {
   describe('EditorContextProvider', () => {
     it('should provide context to children', () => {
       renderWithProvider(<TestComponent />);
-      expect(screen.getByTestId('top-editor-text')).toHaveTextContent('initial query');
-      expect(screen.getByTestId('bottom-editor-text')).toHaveTextContent('');
+      expect(screen.getByTestId('editor-text')).toHaveTextContent('initial query');
+      expect(screen.getByTestId('editor-focused')).toHaveTextContent('false');
     });
 
     it('should initialize with query string from selector', () => {
       renderWithProvider(<TestComponent />, 'test query');
-      expect(screen.getByTestId('top-editor-text')).toHaveTextContent('test query');
-      expect(screen.getByTestId('bottom-editor-text')).toHaveTextContent('');
+      expect(screen.getByTestId('editor-text')).toHaveTextContent('test query');
+      expect(screen.getByTestId('editor-focused')).toHaveTextContent('false');
     });
 
-    it('should allow updating top editor text', () => {
+    it('should allow updating editor text', () => {
       renderWithProvider(<TestComponent />);
 
-      fireEvent.click(screen.getByTestId('set-top-text'));
+      fireEvent.click(screen.getByTestId('set-editor-text'));
 
-      expect(screen.getByTestId('top-editor-text')).toHaveTextContent('new top text');
+      expect(screen.getByTestId('editor-text')).toHaveTextContent('new editor text');
     });
 
-    it('should allow updating bottom editor text', () => {
+    it('should allow updating editor focus state', () => {
       renderWithProvider(<TestComponent />);
 
-      fireEvent.click(screen.getByTestId('set-bottom-text'));
+      fireEvent.click(screen.getByTestId('set-editor-focused'));
 
-      expect(screen.getByTestId('bottom-editor-text')).toHaveTextContent('new bottom text');
+      expect(screen.getByTestId('editor-focused')).toHaveTextContent('true');
+    });
+
+    it('should provide editor ref', () => {
+      const TestRefComponent: React.FC = () => {
+        const { editorRef } = useContext(EditorContext);
+        return <div data-test-subj="editor-ref-exists">{editorRef ? 'true' : 'false'}</div>;
+      };
+
+      renderWithProvider(<TestRefComponent />);
+      expect(screen.getByTestId('editor-ref-exists')).toHaveTextContent('true');
     });
   });
 });

@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { persistReduxState, loadReduxState, getPreloadedState } from './redux_persistence';
+import { getPreloadedState, loadReduxState, persistReduxState } from './redux_persistence';
 import { ExploreServices } from '../../../../types';
 import { RootState } from '../store';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
 import { ColorSchemas } from '../../../../components/visualizations/types';
-import { QueryExecutionStatus } from '../types';
+import { EditorMode, QueryExecutionStatus } from '../types';
 
 jest.mock('../../../../components/visualizations/metric/metric_vis_config', () => ({
   defaultMetricChartStyles: {
@@ -114,8 +114,9 @@ describe('redux_persistence', () => {
           },
           promptModeIsAvailable: false,
           promptToQueryIsLoading: false,
-          editorMode: 'SingleQuery' as any,
+          editorMode: EditorMode.Query,
           lastExecutedPrompt: '',
+          lastExecutedTranslatedQuery: '',
         },
       };
 
@@ -276,9 +277,10 @@ describe('redux_persistence', () => {
         status: QueryExecutionStatus.UNINITIALIZED,
         elapsedMs: undefined,
         startTime: undefined,
-        body: undefined,
+        error: undefined,
       });
       expect(result.queryEditor.lastExecutedPrompt).toBe('');
+      expect(result.queryEditor.lastExecutedTranslatedQuery).toBe('');
     });
 
     it('should handle dataset initialization', async () => {
@@ -342,32 +344,9 @@ describe('redux_persistence', () => {
       expect(result.legacy.columns).toEqual(['_source']);
     });
 
-    it('should set correct editor mode based on query content', async () => {
-      // Test with empty query - should default to SingleEmpty
-      const result1 = await getPreloadedState(mockServices);
-      expect(result1.queryEditor.editorMode).toBe('single-empty');
-
-      // Mock a non-empty query
-      (mockServices.data.query.queryString.getInitialQueryByDataset as jest.Mock).mockReturnValue({
-        query: 'source=logs | head 10',
-        language: EXPLORE_DEFAULT_LANGUAGE,
-        dataset: { id: 'test', title: 'test', type: 'INDEX_PATTERN' },
-      });
-
-      // Mock dataset service to return a dataset
-      (mockServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
-        getType: jest.fn(() => ({
-          fetch: jest.fn(() =>
-            Promise.resolve({
-              children: [{ id: 'pattern1', title: 'Pattern 1' }],
-            })
-          ),
-          toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
-        })),
-      });
-
-      const result2 = await getPreloadedState(mockServices);
-      expect(result2.queryEditor.editorMode).toBe('single-empty');
+    it('should set correct editor mode from DEFAULT_EDITOR_MODE', async () => {
+      const result = await getPreloadedState(mockServices);
+      expect(result.queryEditor.editorMode).toBe(EditorMode.Query);
     });
   });
 });

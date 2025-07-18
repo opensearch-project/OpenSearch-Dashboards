@@ -12,7 +12,7 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { ExploreServices } from '../../../../types';
 import { loadQueryActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { useTimeFilter } from '../../utils';
-import { useClearEditorsAndSetText } from '../../../../application/hooks';
+import { useSetEditorTextWithQuery } from '../../../../application/hooks';
 import './recent_queries_button.scss';
 
 const label = i18n.translate('explore.queryPanel.recentQueryLabel', {
@@ -21,7 +21,7 @@ const label = i18n.translate('explore.queryPanel.recentQueryLabel', {
 
 export const RecentQueriesButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const clearEditorsAndSetText = useClearEditorsAndSetText();
+  const setEditorTextWithQuery = useSetEditorTextWithQuery();
   const { handleTimeChange } = useTimeFilter();
   const dispatch = useDispatch();
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
@@ -37,7 +37,7 @@ export const RecentQueriesButton = () => {
         isQuickSelection: true,
       });
     }
-    dispatch(loadQueryActionCreator(services, clearEditorsAndSetText, updatedQuery));
+    dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, updatedQuery));
   };
 
   return (

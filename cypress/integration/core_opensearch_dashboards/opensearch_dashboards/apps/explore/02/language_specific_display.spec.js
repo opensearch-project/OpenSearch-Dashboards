@@ -59,7 +59,7 @@ export const runDisplayTests = () => {
 
         // testing the query editor
         if (config.multilineQuery) {
-          cy.getElementByTestId('exploreTopEditor').should('be.visible');
+          cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
           cy.getElementByTestId('discoverQueryElapsedMs').should('be.visible');
           cy.getElementByTestId('exploreRecentQueriesButton').click();
           cy.getElementByTestId('recentQueryTable').should('be.visible');
@@ -83,10 +83,10 @@ export const runDisplayTests = () => {
         );
 
         // testing the language information popup button
-        cy.getElementByTestId('exploreDetectedLanguage').click();
+        cy.getElementByTestId('exploreSelectedLanguage').click();
         cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
         cy.get('.euiPanel').contains(getLanguageReferenceTestText(config.language));
-        cy.getElementByTestId('exploreDetectedLanguage').click();
+        cy.getElementByTestId('exploreSelectedLanguage').click();
 
         // testing the saved queries management button
         cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();

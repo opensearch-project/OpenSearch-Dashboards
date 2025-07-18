@@ -247,7 +247,7 @@ export const verifyDiscoverPageState = ({
 
   if (queryString) {
     // Use the helper function to verify the Monaco editor content
-    verifyMonacoEditorContent(queryString, 'exploreTopEditor');
+    verifyMonacoEditorContent(queryString, 'exploreQueryPanelEditor');
   }
 
   if (filters) {

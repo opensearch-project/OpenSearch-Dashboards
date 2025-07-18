@@ -5,4 +5,4 @@
 
 import { EditorMode } from './types';
 
-export const DEFAULT_EDITOR_MODE = EditorMode.SingleQuery;
+export const DEFAULT_EDITOR_MODE = EditorMode.Query;

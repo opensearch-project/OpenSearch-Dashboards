@@ -16,7 +16,7 @@ const RETRY_DELAY = 1000;
 
 const forceFocusEditor = () => {
   return cy
-    .get('[data-test-subj="exploreTopEditor"] .react-monaco-editor-container')
+    .get('[data-test-subj="exploreQueryPanelEditor"] .react-monaco-editor-container')
     .click({ force: true })
     .wait(200) // Give editor time to register focus
     .get('.inputarea')
@@ -27,7 +27,7 @@ const forceFocusEditor = () => {
 
 const clearMonacoEditor = () => {
   return cy
-    .get('[data-test-subj="exploreTopEditor"] .react-monaco-editor-container')
+    .get('[data-test-subj="exploreQueryPanelEditor"] .react-monaco-editor-container')
     .should('exist')
     .should('be.visible')
     .then(() => {
@@ -50,7 +50,7 @@ const clearMonacoEditor = () => {
 
 const isEditorEmpty = () => {
   return cy
-    .get('[data-test-subj="exploreTopEditor"] .react-monaco-editor-container')
+    .get('[data-test-subj="exploreQueryPanelEditor"] .react-monaco-editor-container')
     .find('.view-line')
     .invoke('text')
     .then((text) => text.trim() === '');

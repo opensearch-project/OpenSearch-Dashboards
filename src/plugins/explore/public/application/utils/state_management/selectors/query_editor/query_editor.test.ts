@@ -11,10 +11,11 @@ import {
   selectExecutionStatus,
   selectIsLoading,
   selectEditorMode,
-  selectIsDualEditorMode,
   selectPromptModeIsAvailable,
   selectPromptToQueryIsLoading,
-  selectTopEditorIsQueryMode,
+  selectIsPromptEditorMode,
+  selectLastExecutedPrompt,
+  selectLastExecutedTranslatedQuery,
 } from './query_editor';
 import { RootState } from '../../store';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
@@ -29,10 +30,11 @@ describe('query_editor selectors', () => {
         startTime: undefined,
         error: undefined,
       },
-      editorMode: EditorMode.SingleQuery,
+      editorMode: EditorMode.Query,
       promptModeIsAvailable: false,
       promptToQueryIsLoading: false,
       lastExecutedPrompt: '',
+      lastExecutedTranslatedQuery: '',
       ...queryEditorState,
     },
     // Add other required state slices as minimal mocks
@@ -287,13 +289,7 @@ describe('query_editor selectors', () => {
 
   describe('selectEditorMode', () => {
     it('should return the correct editor mode', () => {
-      const testModes = [
-        EditorMode.SingleEmpty,
-        EditorMode.SinglePrompt,
-        EditorMode.SingleQuery,
-        EditorMode.DualPrompt,
-        EditorMode.DualQuery,
-      ];
+      const testModes = [EditorMode.Query, EditorMode.Prompt];
 
       testModes.forEach((mode) => {
         const state = createMockState({
@@ -306,115 +302,71 @@ describe('query_editor selectors', () => {
     });
   });
 
-  describe('selectIsDualEditorMode', () => {
-    it('should return true for DualQuery mode', () => {
+  describe('selectIsPromptEditorMode', () => {
+    it('should return true when editor mode is Prompt', () => {
       const state = createMockState({
-        editorMode: EditorMode.DualQuery,
+        editorMode: EditorMode.Prompt,
       });
 
-      const result = selectIsDualEditorMode(state);
+      const result = selectIsPromptEditorMode(state);
 
       expect(result).toBe(true);
     });
 
-    it('should return true for DualPrompt mode', () => {
+    it('should return false when editor mode is Query', () => {
       const state = createMockState({
-        editorMode: EditorMode.DualPrompt,
+        editorMode: EditorMode.Query,
       });
 
-      const result = selectIsDualEditorMode(state);
+      const result = selectIsPromptEditorMode(state);
 
-      expect(result).toBe(true);
-    });
-
-    it('should return false for single editor modes', () => {
-      const singleModes = [EditorMode.SingleEmpty, EditorMode.SinglePrompt, EditorMode.SingleQuery];
-
-      singleModes.forEach((mode) => {
-        const state = createMockState({
-          editorMode: mode,
-        });
-
-        const result = selectIsDualEditorMode(state);
-        expect(result).toBe(false);
-      });
+      expect(result).toBe(false);
     });
   });
 
-  describe('selectTopEditorIsQueryMode', () => {
-    it('should return true when promptModeIsAvailable is false regardless of editorMode', () => {
-      const testModes = [
-        EditorMode.SingleEmpty,
-        EditorMode.SinglePrompt,
-        EditorMode.SingleQuery,
-        EditorMode.DualPrompt,
-        EditorMode.DualQuery,
-      ];
-
-      testModes.forEach((mode) => {
-        const state = createMockState({
-          editorMode: mode,
-          promptModeIsAvailable: false,
-        });
-
-        const result = selectTopEditorIsQueryMode(state);
-        expect(result).toBe(true);
+  describe('selectLastExecutedPrompt', () => {
+    it('should return the last executed prompt', () => {
+      const testPrompt = 'Show me all users';
+      const state = createMockState({
+        lastExecutedPrompt: testPrompt,
       });
+
+      const result = selectLastExecutedPrompt(state);
+
+      expect(result).toBe(testPrompt);
     });
 
-    it('should return true when promptModeIsAvailable is true and editorMode is SingleQuery', () => {
+    it('should return empty string when no prompt has been executed', () => {
       const state = createMockState({
-        editorMode: EditorMode.SingleQuery,
-        promptModeIsAvailable: true,
+        lastExecutedPrompt: '',
       });
 
-      const result = selectTopEditorIsQueryMode(state);
+      const result = selectLastExecutedPrompt(state);
 
-      expect(result).toBe(true);
+      expect(result).toBe('');
+    });
+  });
+
+  describe('selectLastExecutedTranslatedQuery', () => {
+    it('should return the last executed translated query', () => {
+      const testQuery = '| where user_count > 0 | head 10';
+      const state = createMockState({
+        lastExecutedTranslatedQuery: testQuery,
+      });
+
+      const result = selectLastExecutedTranslatedQuery(state);
+
+      expect(result).toBe(testQuery);
     });
 
-    it('should return false when promptModeIsAvailable is true and editorMode is SingleEmpty', () => {
+    it('should return empty string when no translated query has been executed', () => {
       const state = createMockState({
-        editorMode: EditorMode.SingleEmpty,
-        promptModeIsAvailable: true,
+        lastExecutedTranslatedQuery: '',
       });
 
-      const result = selectTopEditorIsQueryMode(state);
+      const result = selectLastExecutedTranslatedQuery(state);
 
-      expect(result).toBe(false);
-    });
-
-    it('should return false when promptModeIsAvailable is true and editorMode is SinglePrompt', () => {
-      const state = createMockState({
-        editorMode: EditorMode.SinglePrompt,
-        promptModeIsAvailable: true,
-      });
-
-      const result = selectTopEditorIsQueryMode(state);
-
-      expect(result).toBe(false);
-    });
-
-    it('should return false when promptModeIsAvailable is true and editorMode is DualPrompt', () => {
-      const state = createMockState({
-        editorMode: EditorMode.DualPrompt,
-        promptModeIsAvailable: true,
-      });
-
-      const result = selectTopEditorIsQueryMode(state);
-
-      expect(result).toBe(false);
-    });
-
-    it('should return false when promptModeIsAvailable is true and editorMode is DualQuery', () => {
-      const state = createMockState({
-        editorMode: EditorMode.DualQuery,
-        promptModeIsAvailable: true,
-      });
-
-      const result = selectTopEditorIsQueryMode(state);
-
-      expect(result).toBe(false);
+      expect(result).toBe('');
     });
   });
 });

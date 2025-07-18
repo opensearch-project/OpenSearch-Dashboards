@@ -72,7 +72,7 @@ describe('addToDashboard', () => {
       panelsJSON: '[]',
     });
 
-    mockCreateUrl.mockResolvedValue('http://mock-dashboard-url');
+    mockCreateUrl.mockResolvedValue('http://fakenews.co');
 
     await addToDashboard(dashboardService as any, { id: 'new-viz', type: 'lens' }, 'new', {
       newDashboardName: 'My Dashboard',
