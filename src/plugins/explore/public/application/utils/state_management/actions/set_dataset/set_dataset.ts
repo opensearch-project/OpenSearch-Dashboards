@@ -55,17 +55,23 @@ export const setDatasetActionCreator = (
 
   dispatch(setQueryWithHistory(updatedQuery));
 
-  const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
-  if (newPromptModeIsAvailable !== promptModeIsAvailable) {
-    dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable));
+  const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
+    getPromptModeIsAvailable(services),
+    getSummaryAgentIsAvailable(services, query.dataset?.dataSource?.id!),
+  ]);
+
+  if (
+    newPromptModeIsAvailable.status === 'fulfilled' &&
+    newPromptModeIsAvailable.value !== promptModeIsAvailable
+  ) {
+    dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable.value));
   }
 
-  const newSummaryAgentIsAvailable = await getSummaryAgentIsAvailable(
-    services,
-    query.dataset?.dataSource?.id!
-  );
-  if (newSummaryAgentIsAvailable !== summaryAgentIsAvailable) {
-    dispatch(setSummaryAgentIsAvailable(newSummaryAgentIsAvailable));
+  if (
+    newSummaryAgentIsAvailable.status === 'fulfilled' &&
+    newSummaryAgentIsAvailable.value !== summaryAgentIsAvailable
+  ) {
+    dispatch(setSummaryAgentIsAvailable(newSummaryAgentIsAvailable.value));
   }
 
   clearEditors();

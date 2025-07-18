@@ -45,10 +45,6 @@ jest.mock('../../../../components/tabs/tabs', () => ({
   ExploreTabs: () => <div data-test-subj="explore-tabs">Explore Tabs</div>,
 }));
 
-jest.mock('../../../../components/results_summary/results_summary_panel', () => ({
-  ResultsSummaryPanel: () => <div data-test-subj="results-summary">Results Summary</div>,
-}));
-
 jest.mock('../../../../components/chart/discover_chart_container', () => ({
   DiscoverChartContainer: () => <div data-test-subj="chart-container">Chart Container</div>,
 }));
@@ -202,7 +198,6 @@ describe('BottomRightContainer', () => {
 
     renderComponent(QueryExecutionStatus.READY);
 
-    expect(screen.getByTestId('results-summary')).toBeInTheDocument();
     expect(screen.getByTestId('chart-container')).toBeInTheDocument();
     expect(screen.getByTestId('explore-tabs')).toBeInTheDocument();
   });
