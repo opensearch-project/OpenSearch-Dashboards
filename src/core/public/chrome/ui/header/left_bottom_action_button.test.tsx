@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
 import { LeftBottomActionButton } from './left_bottom_action_button';
 
