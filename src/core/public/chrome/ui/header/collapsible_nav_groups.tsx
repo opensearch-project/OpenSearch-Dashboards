@@ -116,7 +116,7 @@ export function NavGroups({
         hidden: isHidden,
         icon:
           !isNavOpen && !isHidden ? (
-            <EuiToolTip content={navLink.link.title}>{result.icon}</EuiToolTip>
+            <EuiToolTip content={navLink.link.title}>{result.icon || <></>}</EuiToolTip>
           ) : (
             result.icon
           ),
