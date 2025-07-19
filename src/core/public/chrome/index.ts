@@ -49,6 +49,7 @@ export {
   RightNavigationButton,
   RightNavigationButtonProps,
   createRecentNavLink,
+  LeftBottomActionButton,
 } from './ui';
 export { ChromeNavLink, ChromeNavLinks, ChromeNavLinkUpdateableFields } from './nav_links';
 export {

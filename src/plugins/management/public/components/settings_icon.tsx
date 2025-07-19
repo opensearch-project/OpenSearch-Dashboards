@@ -4,18 +4,16 @@
  */
 
 import React, { useState, useRef } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { Observable } from 'rxjs';
-import { DEFAULT_NAV_GROUPS, NavGroupItemInMap } from '../../../../core/public';
+import {
+  DEFAULT_NAV_GROUPS,
+  NavGroupItemInMap,
+  LeftBottomActionButton,
+} from '../../../../core/public';
 
 export function SettingsIcon({ core }: { core: CoreStart }) {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -51,19 +49,17 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
   return (
     <EuiPopover
       id="popoverForSettingsIcon"
+      anchorPosition="leftCenter"
       button={
-        <EuiToolTip
-          content={i18n.translate('management.settings.icon.nav.title', {
-            defaultMessage: 'Settings',
+        <LeftBottomActionButton
+          iconType="managementApp"
+          onClick={() => setPopover(true)}
+          title={i18n.translate('management.settings.icon.nav.title', {
+            defaultMessage: 'Administration',
           })}
-        >
-          <EuiButtonIcon
-            aria-label="show-apps"
-            iconType="managementApp"
-            onClick={() => setPopover(true)}
-            color="text"
-          />
-        </EuiToolTip>
+          isNavDrawerLocked$={core.chrome.getIsNavDrawerLocked$()}
+          isChromeVisible$={core.chrome.getIsVisible$()}
+        />
       }
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}

@@ -48,6 +48,16 @@ export interface ChromeRegistrationNavLink extends Pick<App, 'euiIconType' | 'ic
    * use addNavLinksToGroup to keep the interfaces consistent.
    */
   showInAllNavGroup?: boolean;
+
+  /**
+   * Additional onClick handler for the nav link.
+   * This will be called when the nav link is clicked, before the default navigation behavior.
+   * If this handler returns a promise, the default navigation will be delayed until the promise resolves.
+   * This can be used to perform additional actions before navigating, such as logging or analytics.
+   * If the handler returns void, the default navigation will proceed immediately.
+   * You can use event.preventDefault() to prevent the default navigation behavior.
+   */
+  onClick?: (event: React.MouseEvent) => void;
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {
