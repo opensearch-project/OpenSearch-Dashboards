@@ -36,10 +36,14 @@ export const LeftBottomActionButton = (props: LeftBottomActionButtonProps) => {
       aria-label={props['arial-label'] || props.title}
       flush="both"
       onClick={props.onClick}
+      size="xs"
+      className="leftBottomActionButton"
     >
-      <div className="leftBottomActionButton">
+      <div className="leftBottomActionButtonContent">
         <div className="leftBottomActionButtonIconItem">{finalIcon}</div>
-        <div className="leftBottomActionButtonTitleItem">{props.title}</div>
+        <div className="leftBottomActionButtonTitleItem eui-textTruncate" title={props.title}>
+          {props.title}
+        </div>
         <EuiIcon type="arrowRight" color="text" />
       </div>
     </EuiButtonEmpty>

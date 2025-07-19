@@ -16,8 +16,12 @@ $actionMenuHeight: 24px;
   margin-left: $euiSizeS;
 }
 
-.leftBottomActionButton {
+.leftBottomActionButtonContent {
   display: flex;
   align-items: center;
   line-height: $actionMenuHeight;
+}
+
+.leftBottomActionButton {
+  height: auto;
 }
