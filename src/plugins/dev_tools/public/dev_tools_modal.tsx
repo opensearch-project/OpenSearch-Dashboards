@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useCallback, useState, useEffect } from 'react';
+import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -38,16 +38,30 @@ export function DevToolsModal({
 
   const [devToolTab, setDevToolTab] = useState('');
 
-  const createOpenDevToolAction = createAction<typeof DEVTOOL_OPEN_ACTION>({
-    type: DEVTOOL_OPEN_ACTION,
-    getDisplayName: () => 'Open DevTools',
-    execute: async ({ defaultRoute }) => {
-      setModalVisible(true);
-      setDevToolTab(defaultRoute);
-    },
-  });
+  const createOpenDevToolAction = useMemo(
+    () =>
+      createAction<typeof DEVTOOL_OPEN_ACTION>({
+        type: DEVTOOL_OPEN_ACTION,
+        getDisplayName: () => 'Open DevTools',
+        execute: async ({ defaultRoute }) => {
+          setModalVisible(true);
+          setDevToolTab(defaultRoute);
+        },
+      }),
+    []
+  );
 
-  deps.uiActions.addTriggerAction(devToolsTrigger.id, createOpenDevToolAction);
+  useEffect(() => {
+    deps.uiActions.addTriggerAction(devToolsTrigger.id, createOpenDevToolAction);
+    return () => {
+      deps.uiActions.unregisterAction(devToolsTrigger.id);
+    };
+  }, [
+    deps.uiActions,
+    deps.uiActions.addTriggerAction,
+    deps.uiActions.unregisterAction,
+    createOpenDevToolAction,
+  ]);
 
   const elementRef = useRef<HTMLDivElement | null>(null);
   const setMountPoint = useCallback((renderFn) => {
