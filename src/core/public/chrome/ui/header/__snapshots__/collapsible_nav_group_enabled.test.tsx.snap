@@ -63,7 +63,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
         </nav>
       </div>
       <div
-        class="bottom-container eui-xScroll bottom-container-expanded"
+        class="bottom-container eui-xScroll"
       />
     </div>
   </div>
@@ -107,7 +107,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
         </nav>
       </div>
       <div
-        class="bottom-container bottom-container-collapsed"
+        class="bottom-container"
       />
     </div>
   </div>
@@ -177,7 +177,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
         </nav>
       </div>
       <div
-        class="bottom-container eui-xScroll bottom-container-expanded"
+        class="bottom-container eui-xScroll"
       />
     </div>
   </div>
