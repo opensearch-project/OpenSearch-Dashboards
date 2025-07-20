@@ -58,3 +58,10 @@ export const selectLastExecutedTranslatedQuery = createSelector(
   [selectState],
   (state) => state.lastExecutedTranslatedQuery
 );
+
+export const selectDateRange = createSelector([selectState], (state) => state.dateRange);
+
+export const selectQueryExecutionButtonStatus = createSelector(
+  [selectState],
+  (state) => state.queryExecutionButtonStatus
+);

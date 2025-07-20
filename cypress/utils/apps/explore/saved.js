@@ -211,7 +211,7 @@ export const setSearchConfigurations = ({
       cy.getElementByTestId(`fieldToggle-${field}`).click();
     }
 
-    cy.getElementByTestId('queryPanelFooterRunQueryButton').should('be.visible');
+    cy.getElementByTestId('exploreQueryExecutionButton').should('be.visible');
   }
 
   if (sort) {
@@ -224,7 +224,7 @@ export const setSearchConfigurations = ({
 
     cy.getElementByTestId(`docTableHeaderFieldSort_${APPLIED_SORT}`).click();
 
-    cy.getElementByTestId('queryPanelFooterRunQueryButton').should('be.visible');
+    cy.getElementByTestId('exploreQueryExecutionButton').should('be.visible');
   }
 };
 

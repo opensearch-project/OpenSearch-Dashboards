@@ -22,6 +22,8 @@ import {
   setLastExecutedPrompt,
   setLastExecutedTranslatedQuery,
   clearLastExecutedData,
+  setQueryExecutionButtonStatus,
+  setDateRange,
 } from './query_editor_slice';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
@@ -33,13 +35,14 @@ describe('QueryEditor Slice', () => {
       status: QueryExecutionStatus.UNINITIALIZED,
       elapsedMs: undefined,
       startTime: undefined,
-      error: undefined,
     },
     editorMode: DEFAULT_EDITOR_MODE,
     promptModeIsAvailable: false,
     promptToQueryIsLoading: false,
     lastExecutedPrompt: '',
     lastExecutedTranslatedQuery: '',
+    queryExecutionButtonStatus: 'REFRESH',
+    dateRange: undefined,
   };
 
   it('should return the initial state', () => {
@@ -73,6 +76,7 @@ describe('QueryEditor Slice', () => {
         promptToQueryIsLoading: false,
         lastExecutedPrompt: 'test prompt',
         lastExecutedTranslatedQuery: 'test translated query',
+        queryExecutionButtonStatus: 'DISABLED',
       };
 
       const action = setQueryEditorState(newState);
@@ -553,6 +557,62 @@ describe('QueryEditor Slice', () => {
       expect(action.type).toBe('queryEditor/clearLastExecutedData');
       expect(result.lastExecutedPrompt).toBe('');
       expect(result.lastExecutedTranslatedQuery).toBe('');
+    });
+  });
+
+  describe('setQueryExecutionButtonStatus', () => {
+    it('should handle setQueryExecutionButtonStatus action', () => {
+      const action = setQueryExecutionButtonStatus('DISABLED');
+
+      expect(action.type).toBe('queryEditor/setQueryExecutionButtonStatus');
+      expect(action.payload).toBe('DISABLED');
+
+      const newState = queryEditorReducer(initialState, action);
+      expect(newState.queryExecutionButtonStatus).toBe('DISABLED');
+      expect(newState.overallQueryStatus).toEqual(initialState.overallQueryStatus);
+      expect(newState.editorMode).toBe(initialState.editorMode);
+      expect(newState.promptModeIsAvailable).toBe(initialState.promptModeIsAvailable);
+    });
+
+    it('should set query execution button status to UPDATE', () => {
+      const existingState: QueryEditorSliceState = {
+        ...initialState,
+        queryExecutionButtonStatus: 'DISABLED',
+      };
+
+      const action = setQueryExecutionButtonStatus('UPDATE');
+      const result = queryEditorReducer(existingState, action);
+
+      expect(result.queryExecutionButtonStatus).toBe('UPDATE');
+    });
+  });
+
+  describe('setDateRange', () => {
+    it('should handle setDateRange action', () => {
+      const dateRange = { from: 'now-15m', to: 'now' };
+      const action = setDateRange(dateRange);
+
+      expect(action.type).toBe('queryEditor/setDateRange');
+      expect(action.payload).toEqual(dateRange);
+
+      const newState = queryEditorReducer(initialState, action);
+      expect(newState.dateRange).toEqual(dateRange);
+      expect(newState.overallQueryStatus).toEqual(initialState.overallQueryStatus);
+      expect(newState.editorMode).toBe(initialState.editorMode);
+      expect(newState.queryExecutionButtonStatus).toBe(initialState.queryExecutionButtonStatus);
+    });
+
+    it('should update existing dateRange', () => {
+      const existingState: QueryEditorSliceState = {
+        ...initialState,
+        dateRange: { from: 'now-30m', to: 'now' },
+      };
+
+      const newDateRange = { from: 'now-1h', to: 'now' };
+      const action = setDateRange(newDateRange);
+      const result = queryEditorReducer(existingState, action);
+
+      expect(result.dateRange).toEqual(newDateRange);
     });
   });
 });

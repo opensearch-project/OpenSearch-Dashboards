@@ -34,6 +34,21 @@ export const createMockStore = (initialState?: Partial<RootState>): MockStore =>
       columns: [],
       sort: [],
     },
+    queryEditor: {
+      queryStatusMap: {},
+      overallQueryStatus: {
+        status: 'UNINITIALIZED' as any,
+        elapsedMs: undefined,
+        startTime: undefined,
+      },
+      editorMode: 'CODE' as any,
+      promptModeIsAvailable: false,
+      promptToQueryIsLoading: false,
+      lastExecutedPrompt: '',
+      lastExecutedTranslatedQuery: '',
+      queryExecutionButtonStatus: 'REFRESH' as const,
+      dateRange: undefined,
+    },
     system: {
       status: 'UNINITIALIZED',
     },

@@ -7,6 +7,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
 
+export type QueryExecutionButtonStatus = 'UPDATE' | 'REFRESH' | 'DISABLED';
+
 export interface QueryStatusMap {
   [cacheKey: string]: QueryResultStatus;
 }
@@ -19,6 +21,8 @@ export interface QueryEditorSliceState {
   promptToQueryIsLoading: boolean;
   lastExecutedPrompt: string;
   lastExecutedTranslatedQuery: string;
+  queryExecutionButtonStatus: QueryExecutionButtonStatus;
+  dateRange?: { from: string; to: string };
 }
 
 const initialState: QueryEditorSliceState = {
@@ -33,6 +37,8 @@ const initialState: QueryEditorSliceState = {
   promptToQueryIsLoading: false,
   lastExecutedPrompt: '',
   lastExecutedTranslatedQuery: '',
+  queryExecutionButtonStatus: 'REFRESH',
+  dateRange: undefined,
 };
 
 const queryEditorSlice = createSlice({
@@ -113,6 +119,12 @@ const queryEditorSlice = createSlice({
       state.lastExecutedPrompt = '';
       state.lastExecutedTranslatedQuery = '';
     },
+    setQueryExecutionButtonStatus: (state, action: PayloadAction<QueryExecutionButtonStatus>) => {
+      state.queryExecutionButtonStatus = action.payload;
+    },
+    setDateRange: (state, action: PayloadAction<{ from: string; to: string }>) => {
+      state.dateRange = action.payload;
+    },
   },
 });
 
@@ -132,6 +144,8 @@ export const {
   setPromptModeIsAvailable,
   setPromptToQueryIsLoading,
   clearLastExecutedData,
+  setQueryExecutionButtonStatus,
+  setDateRange,
 } = queryEditorSlice.actions;
 export const queryEditorReducer = queryEditorSlice.reducer;
 export const queryEditorInitialState = initialState;

@@ -131,6 +131,7 @@ describe('DiscoverChart', () => {
         lastExecutedPrompt: '',
         promptToQueryIsLoading: false,
         lastExecutedTranslatedQuery: '',
+        queryExecutionButtonStatus: 'REFRESH',
       },
       results: {},
       tab: {

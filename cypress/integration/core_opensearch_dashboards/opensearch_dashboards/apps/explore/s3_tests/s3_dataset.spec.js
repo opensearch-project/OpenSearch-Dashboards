@@ -170,7 +170,7 @@ const s3DatasetTestSuite = () => {
           cy.wait(3000);
 
           cy.intercept('DELETE', `**/${JOBS_API.DELETE}*`).as('cancelRequest');
-          cy.getElementByTestId(`queryPanelFooterRunQueryButton`).click();
+          cy.getElementByTestId(`exploreQueryExecutionButton`).click();
 
           cy.wait('@cancelRequest').then((interception) => {
             console.log('interception.request.url:', interception.request.url);
