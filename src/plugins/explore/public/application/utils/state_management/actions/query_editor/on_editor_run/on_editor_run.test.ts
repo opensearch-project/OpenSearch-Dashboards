@@ -10,6 +10,8 @@ import { clearLastExecutedData } from '../../../slices';
 import { EditorMode } from '../../../types';
 import { ExploreServices } from '../../../../../../types';
 import { AppDispatch, RootState } from '../../../store';
+import { createMockRootState } from '../../../__mocks__/store';
+import { QueryExecutionButtonStatus } from '../../../slices/query_editor/query_editor_slice';
 
 // Mock the dependencies
 jest.mock('./call_agent', () => ({
@@ -40,6 +42,35 @@ describe('onEditorRunActionCreator', () => {
   let mockGetState: jest.MockedFunction<() => RootState>;
   const testEditorText = 'Show me all users';
 
+  // Helper function to create mock state with overrides
+  const createTestState = (overrides: Partial<RootState['queryEditor']> = {}) => {
+    return createMockRootState({
+      queryEditor: {
+        queryStatusMap: {},
+        overallQueryStatus: {
+          status: 'UNINITIALIZED' as any,
+          elapsedMs: undefined,
+          startTime: undefined,
+        },
+        editorMode: EditorMode.Query,
+        promptModeIsAvailable: true,
+        promptToQueryIsLoading: false,
+        summaryAgentIsAvailable: false,
+        lastExecutedPrompt: '',
+        lastExecutedTranslatedQuery: '',
+        queryExecutionButtonStatus: 'REFRESH' as QueryExecutionButtonStatus,
+        dateRange: undefined,
+        isQueryEditorDirty: false,
+        ...overrides,
+      },
+    });
+  };
+
+  // Helper function to set mock state
+  const setMockState = (overrides: Partial<RootState['queryEditor']> = {}) => {
+    mockGetState.mockReturnValue(createTestState(overrides));
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -52,7 +83,19 @@ describe('onEditorRunActionCreator', () => {
           addWarning: jest.fn(),
         },
       },
+      data: {
+        query: {
+          queryString: {
+            getQuery: jest.fn().mockReturnValue({
+              query: '',
+            }),
+          },
+        },
+      },
     } as unknown) as ExploreServices;
+
+    // Default state with REFRESH status
+    setMockState();
 
     // Mock return values
     mockCallAgentActionCreator.mockReturnValue(jest.fn());
@@ -63,13 +106,61 @@ describe('onEditorRunActionCreator', () => {
     mockRunQueryActionCreator.mockReturnValue(jest.fn());
   });
 
-  it('should always dispatch clearLastExecutedData first', () => {
-    mockGetState.mockReturnValue({
-      queryEditor: {
-        editorMode: EditorMode.Query,
-        promptModeIsAvailable: true,
-      },
-    } as RootState);
+  it('should return early when queryExecutionButtonStatus is DISABLED', () => {
+    mockGetState.mockReturnValue(
+      createMockRootState({
+        queryEditor: {
+          queryStatusMap: {},
+          overallQueryStatus: {
+            status: 'UNINITIALIZED' as any,
+            elapsedMs: undefined,
+            startTime: undefined,
+          },
+          editorMode: EditorMode.Query,
+          promptModeIsAvailable: true,
+          promptToQueryIsLoading: false,
+          summaryAgentIsAvailable: false,
+          lastExecutedPrompt: '',
+          lastExecutedTranslatedQuery: '',
+          queryExecutionButtonStatus: 'DISABLED',
+          dateRange: undefined,
+          isQueryEditorDirty: false,
+        },
+      })
+    );
+
+    const actionCreator = onEditorRunActionCreator(mockServices, testEditorText);
+    actionCreator(mockDispatch, mockGetState);
+
+    // Should not dispatch anything when disabled
+    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockClearLastExecutedData).not.toHaveBeenCalled();
+    expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
+    expect(mockCallAgentActionCreator).not.toHaveBeenCalled();
+  });
+
+  it('should always dispatch clearLastExecutedData first when enabled', () => {
+    mockGetState.mockReturnValue(
+      createMockRootState({
+        queryEditor: {
+          queryStatusMap: {},
+          overallQueryStatus: {
+            status: 'UNINITIALIZED' as any,
+            elapsedMs: undefined,
+            startTime: undefined,
+          },
+          editorMode: EditorMode.Query,
+          promptModeIsAvailable: true,
+          promptToQueryIsLoading: false,
+          summaryAgentIsAvailable: false,
+          lastExecutedPrompt: '',
+          lastExecutedTranslatedQuery: '',
+          queryExecutionButtonStatus: 'REFRESH' as QueryExecutionButtonStatus,
+          dateRange: undefined,
+          isQueryEditorDirty: false,
+        },
+      })
+    );
 
     const actionCreator = onEditorRunActionCreator(mockServices, testEditorText);
     actionCreator(mockDispatch, mockGetState);
@@ -79,12 +170,7 @@ describe('onEditorRunActionCreator', () => {
 
   describe('Prompt mode', () => {
     beforeEach(() => {
-      mockGetState.mockReturnValue({
-        queryEditor: {
-          editorMode: EditorMode.Prompt,
-          promptModeIsAvailable: true,
-        },
-      } as RootState);
+      setMockState({ editorMode: EditorMode.Prompt });
     });
 
     it('should dispatch callAgentActionCreator when prompt mode is available', () => {
@@ -102,12 +188,10 @@ describe('onEditorRunActionCreator', () => {
     });
 
     it('should show warning when prompt mode is not available', () => {
-      mockGetState.mockReturnValue({
-        queryEditor: {
-          editorMode: EditorMode.Prompt,
-          promptModeIsAvailable: false,
-        },
-      } as RootState);
+      setMockState({
+        editorMode: EditorMode.Prompt,
+        promptModeIsAvailable: false,
+      });
 
       const actionCreator = onEditorRunActionCreator(mockServices, testEditorText);
       actionCreator(mockDispatch, mockGetState);
@@ -121,17 +205,49 @@ describe('onEditorRunActionCreator', () => {
     });
 
     it('should still dispatch clearLastExecutedData even when prompt mode unavailable', () => {
+      mockGetState.mockReturnValue(
+        createMockRootState({
+          queryEditor: {
+            queryStatusMap: {},
+            overallQueryStatus: {
+              status: 'UNINITIALIZED' as any,
+              elapsedMs: undefined,
+              startTime: undefined,
+            },
+            editorMode: EditorMode.Prompt,
+            promptModeIsAvailable: false,
+            promptToQueryIsLoading: false,
+            summaryAgentIsAvailable: false,
+            lastExecutedPrompt: '',
+            lastExecutedTranslatedQuery: '',
+            queryExecutionButtonStatus: 'REFRESH' as QueryExecutionButtonStatus,
+            dateRange: undefined,
+            isQueryEditorDirty: false,
+          },
+        })
+      );
+
+      const actionCreator = onEditorRunActionCreator(mockServices, testEditorText);
+      actionCreator(mockDispatch, mockGetState);
+
+      expect(mockDispatch).toHaveBeenCalledWith(mockClearLastExecutedData());
+    });
+
+    it('should return early in prompt mode when queryExecutionButtonStatus is DISABLED', () => {
       mockGetState.mockReturnValue({
         queryEditor: {
           editorMode: EditorMode.Prompt,
-          promptModeIsAvailable: false,
+          promptModeIsAvailable: true,
+          queryExecutionButtonStatus: 'DISABLED',
         },
       } as RootState);
 
       const actionCreator = onEditorRunActionCreator(mockServices, testEditorText);
       actionCreator(mockDispatch, mockGetState);
 
-      expect(mockDispatch).toHaveBeenCalledWith(mockClearLastExecutedData());
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockClearLastExecutedData).not.toHaveBeenCalled();
+      expect(mockCallAgentActionCreator).not.toHaveBeenCalled();
     });
 
     it('should work with different editor text', () => {
@@ -160,12 +276,7 @@ describe('onEditorRunActionCreator', () => {
 
   describe('Query mode', () => {
     beforeEach(() => {
-      mockGetState.mockReturnValue({
-        queryEditor: {
-          editorMode: EditorMode.Query,
-          promptModeIsAvailable: true,
-        },
-      } as RootState);
+      setMockState(); // Uses default Query mode
     });
 
     it('should dispatch runQueryActionCreator with editor text', () => {
@@ -197,17 +308,24 @@ describe('onEditorRunActionCreator', () => {
     });
 
     it('should work regardless of promptModeIsAvailable value', () => {
-      mockGetState.mockReturnValue({
-        queryEditor: {
-          editorMode: EditorMode.Query,
-          promptModeIsAvailable: false,
-        },
-      } as RootState);
+      setMockState({ promptModeIsAvailable: false });
 
       const actionCreator = onEditorRunActionCreator(mockServices, testEditorText);
       actionCreator(mockDispatch, mockGetState);
 
       expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, testEditorText);
+    });
+
+    it('should return early in query mode when queryExecutionButtonStatus is DISABLED', () => {
+      setMockState({ queryExecutionButtonStatus: 'DISABLED' as QueryExecutionButtonStatus });
+
+      const actionCreator = onEditorRunActionCreator(mockServices, testEditorText);
+      actionCreator(mockDispatch, mockGetState);
+
+      // Should not dispatch anything when disabled
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockClearLastExecutedData).not.toHaveBeenCalled();
+      expect(mockRunQueryActionCreator).not.toHaveBeenCalled();
     });
   });
 
@@ -215,12 +333,7 @@ describe('onEditorRunActionCreator', () => {
     it('should execute clearLastExecutedData before callAgent in Prompt mode', () => {
       const calls: string[] = [];
 
-      mockGetState.mockReturnValue({
-        queryEditor: {
-          editorMode: EditorMode.Prompt,
-          promptModeIsAvailable: true,
-        },
-      } as RootState);
+      setMockState({ editorMode: EditorMode.Prompt });
 
       mockDispatch.mockImplementation((action: any) => {
         if (action.type === 'queryEditor/clearLastExecutedData') {
@@ -239,12 +352,7 @@ describe('onEditorRunActionCreator', () => {
     it('should execute clearLastExecutedData before runQuery in Query mode', () => {
       const calls: string[] = [];
 
-      mockGetState.mockReturnValue({
-        queryEditor: {
-          editorMode: EditorMode.Query,
-          promptModeIsAvailable: true,
-        },
-      } as RootState);
+      setMockState(); // Uses default Query mode
 
       mockDispatch.mockImplementation((action: any) => {
         if (action.type === 'queryEditor/clearLastExecutedData') {

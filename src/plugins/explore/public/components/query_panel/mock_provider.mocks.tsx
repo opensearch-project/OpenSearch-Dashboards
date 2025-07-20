@@ -190,6 +190,8 @@ const createMockStore = (
         summaryAgentIsAvailable: false,
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery,
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
       },
     },
   });

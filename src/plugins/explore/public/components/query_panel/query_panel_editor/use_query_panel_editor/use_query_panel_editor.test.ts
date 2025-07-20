@@ -205,11 +205,13 @@ describe('useQueryPanelEditor', () => {
 
     // Default selector values
     mockUseSelector.mockImplementation((selector) => {
+      if (!selector) return '';
       const selectorString = selector.toString();
       if (selectorString.includes('selectPromptModeIsAvailable')) return false;
       if (selectorString.includes('selectQueryLanguage')) return 'PPL';
       if (selectorString.includes('selectIsPromptEditorMode')) return false;
       if (selectorString.includes('selectQueryString')) return '';
+      if (selectorString.includes('selectIsQueryEditorDirty')) return false;
       return '';
     });
 
@@ -253,11 +255,13 @@ describe('useQueryPanelEditor', () => {
   describe('basic hook behavior', () => {
     it('should return query editor options when in query mode', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectPromptModeIsAvailable')) return false;
         if (selectorString.includes('selectQueryLanguage')) return 'PPL';
         if (selectorString.includes('selectQueryString')) return '';
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
         return '';
       });
 
@@ -270,11 +274,13 @@ describe('useQueryPanelEditor', () => {
   describe('placeholder text', () => {
     it('should return disabled prompt placeholder when prompt mode is not available', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectPromptModeIsAvailable')) return false;
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectQueryLanguage')) return 'PPL';
         if (selectorString.includes('selectQueryString')) return '';
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
         return '';
       });
 
@@ -374,8 +380,10 @@ describe('useQueryPanelEditor', () => {
         if (selector === selectIsPromptEditorMode) return true;
         if (selector === selectPromptModeIsAvailable) return false;
         if (selector === selectQueryLanguage) return 'PPL';
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectQueryString')) return '';
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
         return '';
       });
 
@@ -394,11 +402,13 @@ describe('useQueryPanelEditor', () => {
 
     it('should not call handleChangeForPromptIsTyping when not in prompt mode', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectPromptModeIsAvailable')) return false;
         if (selectorString.includes('selectQueryLanguage')) return 'PPL';
         if (selectorString.includes('selectQueryString')) return '';
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
         return '';
       });
 
