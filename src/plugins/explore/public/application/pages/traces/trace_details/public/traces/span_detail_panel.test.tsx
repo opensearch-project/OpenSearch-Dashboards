@@ -30,15 +30,6 @@ jest.mock('./span_detail_table', () => ({
   ),
 }));
 
-jest.mock('./span_detail_flyout', () => ({
-  SpanDetailFlyout: ({ spanId, closeFlyout }: any) => (
-    <div data-testid="span-detail-flyout">
-      <div data-testid="span-detail-flyout-id">{spanId}</div>
-      <button onClick={closeFlyout}>Close</button>
-    </div>
-  ),
-}));
-
 jest.mock('../gantt_chart_vega/gantt_chart_vega', () => ({
   GanttChart: ({ data, onSpanClick }: any) => (
     <div data-testid="gantt-chart">
@@ -192,40 +183,21 @@ describe('SpanDetailPanel', () => {
     expect(treeViewInput).toBeInTheDocument();
   });
 
-  it('opens the flyout when a span is clicked in the gantt chart', () => {
-    const { container } = render(<SpanDetailPanel {...defaultProps} />);
+  it('calls onSpanSelect when a span is clicked in the gantt chart', () => {
+    const mockOnSpanSelect = jest.fn();
+    const propsWithSpanSelect = {
+      ...defaultProps,
+      onSpanSelect: mockOnSpanSelect,
+    };
+
+    render(<SpanDetailPanel {...propsWithSpanSelect} />);
 
     // Click a span in the gantt chart
     const spanButton = screen.getByText('Click Span');
     fireEvent.click(spanButton);
 
-    // The flyout should be rendered in the document
-    const flyout = container.querySelector('[data-testid="span-detail-flyout"]');
-    expect(flyout).toBeInTheDocument();
-
-    // Check the span ID
-    const flyoutId = container.querySelector('[data-testid="span-detail-flyout-id"]');
-    expect(flyoutId).toHaveTextContent('span-1');
-  });
-
-  it('closes the flyout when close button is clicked', async () => {
-    const { container } = render(<SpanDetailPanel {...defaultProps} />);
-
-    // Open the flyout
-    const spanButton = screen.getByText('Click Span');
-    fireEvent.click(spanButton);
-
-    // The flyout should be rendered in the document
-    const flyout = container.querySelector('[data-testid="span-detail-flyout"]');
-    expect(flyout).toBeInTheDocument();
-
-    // Store a reference to the flyout ID for later verification
-    const flyoutId = container.querySelector('[data-testid="span-detail-flyout-id"]');
-    expect(flyoutId).toHaveTextContent('span-1');
-
-    // Close the flyout by clicking the close button
-    const closeButton = screen.getByText('Close');
-    fireEvent.click(closeButton);
+    // Check that onSpanSelect was called with the correct span ID
+    expect(mockOnSpanSelect).toHaveBeenCalledWith('span-1');
   });
 
   it('renders filters when they are present', () => {

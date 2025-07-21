@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, parse } from 'vega';
 import { createGanttSpec } from './gantt_chart_spec';
 import { convertToVegaGanttData } from './gantt_data_adapter';
+import { GANTT_CHART_CONSTANTS, TOTAL_PADDING } from './gantt_constants';
 
 interface GanttChartProps {
   data: any[];
@@ -20,55 +21,69 @@ export function GanttChart({ data, colorMap, height, onSpanClick }: GanttChartPr
   const viewRef = useRef<View | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(800);
 
-  // Calculate the maximum label width needed (simplified since text gets truncated)
-  const calculateMaxLabelWidth = (): number => {
-    // Since Vega handles text truncation with the 'limit' property,
-    // we just need a reasonable fixed width rather than calculating actual text width
-    return 70; // Fixed reasonable width since truncation handles overflow
-  };
-
   const calculateHeight = useCallback(
     (dataLength: number): number => {
-      const minRowHeight = 35;
-      const baseHeaderFooterHeight = 100; // Height for axes, padding, etc.
-
       if (dataLength === 0) {
-        return 150; // Minimal height for empty state
+        return GANTT_CHART_CONSTANTS.EMPTY_STATE_HEIGHT;
       }
 
       if (dataLength === 1) {
-        return 120; // Compact height for single span
+        return GANTT_CHART_CONSTANTS.SINGLE_SPAN_HEIGHT;
       }
 
-      // For multiple spans, calculate based on content
-      const contentHeight = dataLength * minRowHeight + baseHeaderFooterHeight;
+      // For multiple spans, calculate based on content - match Vega spec calculation
+      const contentHeight =
+        dataLength * GANTT_CHART_CONSTANTS.MIN_ROW_HEIGHT +
+        GANTT_CHART_CONSTANTS.BASE_CALCULATION_HEIGHT;
+      const finalHeight = contentHeight + TOTAL_PADDING;
 
-      // Set reasonable bounds
-      const minHeight = 150;
-      const maxHeight = 600;
+      const proposedHeight = height > 0 ? Math.max(height, finalHeight) : finalHeight;
 
-      const proposedHeight = height > 0 ? Math.max(height, contentHeight) : contentHeight;
-
-      return Math.max(minHeight, Math.min(maxHeight, proposedHeight));
+      return Math.max(
+        GANTT_CHART_CONSTANTS.MIN_HEIGHT,
+        Math.min(GANTT_CHART_CONSTANTS.MAX_HEIGHT, proposedHeight)
+      );
     },
     [height]
   );
 
-  // Update container width when component mounts or window resizes
+  // Update container width when component mounts, window resizes, or container resizes
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        setContainerWidth(rect.width || 800);
+        const newWidth = rect.width || 800;
+        if (Math.abs(newWidth - containerWidth) > 10) {
+          // Only update if significant change
+          setContainerWidth(newWidth);
+        }
       }
     };
 
     updateWidth();
+
+    // Listen for window resize
     window.addEventListener('resize', updateWidth);
+
+    // Set up ResizeObserver to detect container size changes
+    let resizeObserver: ResizeObserver | null = null;
+    if (containerRef.current && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          // Debounce the resize to avoid too many updates
+          setTimeout(updateWidth, 100);
+        }
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
     return () => {
       window.removeEventListener('resize', updateWidth);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
     };
-  }, []);
+  }, [containerWidth]);
 
   useEffect(() => {
     const initializeView = async () => {
@@ -81,11 +96,9 @@ export function GanttChart({ data, colorMap, height, onSpanClick }: GanttChartPr
       try {
         const vegaData = convertToVegaGanttData(data, colorMap);
 
-        const maxLabelWidth = calculateMaxLabelWidth();
-
         const chartHeight = calculateHeight(data.length);
 
-        const spec = createGanttSpec(chartHeight, data.length, containerWidth, maxLabelWidth);
+        const spec = createGanttSpec(chartHeight, data.length, containerWidth);
 
         const runtime = parse(spec);
         const view = new View(runtime).renderer('svg').initialize(containerRef.current);
@@ -127,8 +140,8 @@ export function GanttChart({ data, colorMap, height, onSpanClick }: GanttChartPr
         height: `${finalHeight}px`,
         position: 'relative',
         overflow: 'visible',
-        minWidth: '400px',
-        minHeight: '120px',
+        minWidth: `${GANTT_CHART_CONSTANTS.MIN_WIDTH}px`,
+        minHeight: `${GANTT_CHART_CONSTANTS.MIN_CONTAINER_HEIGHT}px`,
       }}
     />
   );

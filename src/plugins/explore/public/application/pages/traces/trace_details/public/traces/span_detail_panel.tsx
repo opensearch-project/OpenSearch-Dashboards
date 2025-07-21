@@ -24,7 +24,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { ChromeStart } from 'opensearch-dashboards/public';
 import { TracePPLService } from '../../server/ppl_request_trace';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
-import { SpanDetailFlyout } from './span_detail_flyout';
 import { PanelTitle } from '../utils/helper_functions';
 import { GanttChart } from '../gantt_chart_vega/gantt_chart_vega';
 
@@ -176,13 +175,21 @@ export function SpanDetailPanel(props: {
   pplService?: TracePPLService;
   indexPattern?: string;
   colorMap?: Record<string, string>;
+  onSpanSelect?: (spanId: string) => void;
+  selectedSpanId?: string;
 }) {
-  const { chrome } = props;
+  const {
+    chrome,
+    spanFilters,
+    setSpanFiltersWithStorage,
+    payloadData,
+    onSpanSelect,
+    dataSourceMDSId,
+    colorMap,
+  } = props;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [availableWidth, setAvailableWidth] = useState<number>(window.innerWidth);
   const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
-  const [currentSpan, setCurrentSpan] = useState('');
-  const [filterOperationInProgress, setFilterOperationInProgress] = useState(false);
 
   const updateAvailableWidth = () => {
     if (containerRef.current) {
@@ -201,14 +208,8 @@ export function SpanDetailPanel(props: {
     };
   }, []);
 
-  const { spanFilters, setSpanFiltersWithStorage } = props;
-
   const addSpanFilter = useCallback(
     (field: string, value: any) => {
-      if (currentSpan) {
-        setFilterOperationInProgress(true);
-      }
-
       const newFilters = [...spanFilters];
       const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
       if (index === -1) {
@@ -218,16 +219,11 @@ export function SpanDetailPanel(props: {
       }
       setSpanFiltersWithStorage(newFilters);
     },
-    [spanFilters, setSpanFiltersWithStorage, currentSpan]
+    [spanFilters, setSpanFiltersWithStorage]
   );
 
   const removeSpanFilter = useCallback(
     (field: string) => {
-      // Mark that a filter operation is in progress
-      if (currentSpan) {
-        setFilterOperationInProgress(true);
-      }
-
       const newFilters = [...spanFilters];
       const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
       if (index !== -1) {
@@ -235,11 +231,11 @@ export function SpanDetailPanel(props: {
         setSpanFiltersWithStorage(newFilters);
       }
     },
-    [spanFilters, setSpanFiltersWithStorage, currentSpan]
+    [spanFilters, setSpanFiltersWithStorage]
   );
 
   const renderFilters = useMemo(() => {
-    return props.spanFilters.map(({ field, value }) => (
+    return spanFilters.map(({ field, value }) => (
       <EuiFlexItem grow={false} key={`span-filter-badge-${field}`}>
         <EuiBadge
           iconType="cross"
@@ -256,7 +252,7 @@ export function SpanDetailPanel(props: {
         </EuiBadge>
       </EuiFlexItem>
     ));
-  }, [props.spanFilters, removeSpanFilter]);
+  }, [spanFilters, removeSpanFilter]);
 
   const toggleOptions = [
     {
@@ -286,23 +282,18 @@ export function SpanDetailPanel(props: {
         <SpanDetailTable
           hiddenColumns={['traceId', 'traceGroup']}
           openFlyout={(spanId: string) => {
-            setCurrentSpan(spanId);
+            if (onSpanSelect) {
+              onSpanSelect(spanId);
+            }
           }}
-          dataSourceMDSId={props.dataSourceMDSId}
+          dataSourceMDSId={dataSourceMDSId}
           availableWidth={availableWidth - (isLocked ? 390 : 200)}
-          payloadData={props.payloadData}
-          filters={props.spanFilters}
+          payloadData={payloadData}
+          filters={spanFilters}
         />
       </div>
     ),
-    [
-      setCurrentSpan,
-      props.payloadData,
-      props.spanFilters,
-      availableWidth,
-      isLocked,
-      props.dataSourceMDSId,
-    ]
+    [onSpanSelect, payloadData, spanFilters, availableWidth, isLocked, dataSourceMDSId]
   );
 
   const spanDetailTableHierarchy = useMemo(
@@ -311,53 +302,37 @@ export function SpanDetailPanel(props: {
         <SpanDetailTableHierarchy
           hiddenColumns={['traceId', 'traceGroup']}
           openFlyout={(spanId: string) => {
-            setCurrentSpan(spanId);
+            if (onSpanSelect) {
+              onSpanSelect(spanId);
+            }
           }}
-          dataSourceMDSId={props.dataSourceMDSId}
+          dataSourceMDSId={dataSourceMDSId}
           availableWidth={availableWidth - (isLocked ? 390 : 200)}
-          payloadData={props.payloadData}
-          filters={props.spanFilters}
+          payloadData={payloadData}
+          filters={spanFilters}
         />
       </div>
     ),
-    [
-      setCurrentSpan,
-      props.payloadData,
-      props.spanFilters,
-      availableWidth,
-      isLocked,
-      props.dataSourceMDSId,
-    ]
+    [onSpanSelect, payloadData, spanFilters, availableWidth, isLocked, dataSourceMDSId]
   );
 
   const parsedData = useMemo(() => {
     try {
-      return JSON.parse(props.payloadData);
+      return JSON.parse(payloadData);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error parsing payload data:', error);
       return [];
     }
-  }, [props.payloadData]);
+  }, [payloadData]);
 
   const errorCount = useMemo(() => {
     return parsedData.filter((span: Span) => span.status?.code === 2).length;
   }, [parsedData]);
 
   const handleErrorFilterClick = useCallback(() => {
-    if (currentSpan) {
-      setFilterOperationInProgress(true);
-    }
-
     addSpanFilter('status.code', 2);
-  }, [addSpanFilter, currentSpan]);
-
-  useEffect(() => {
-    // When data changes and a filter operation is in progress, keep the flyout open
-    if (filterOperationInProgress && !currentSpan) {
-      setFilterOperationInProgress(false);
-    }
-  }, [filterOperationInProgress, currentSpan, props.payloadData]);
+  }, [addSpanFilter]);
 
   // Calculate dynamic height based on number of spans
   const calculateGanttHeight = (spanCount: number): number => {
@@ -388,13 +363,17 @@ export function SpanDetailPanel(props: {
       <div style={{ width: '100%' }}>
         <GanttChart
           data={parsedData}
-          colorMap={props.colorMap || {}}
+          colorMap={colorMap || {}}
           height={calculateGanttHeight(parsedData.length)}
-          onSpanClick={(spanId) => setCurrentSpan(spanId)}
+          onSpanClick={(spanId) => {
+            if (onSpanSelect) {
+              onSpanSelect(spanId);
+            }
+          }}
         />
       </div>
     ),
-    [parsedData, props.colorMap, setCurrentSpan]
+    [parsedData, colorMap, onSpanSelect]
   );
 
   return (
@@ -491,23 +470,6 @@ export function SpanDetailPanel(props: {
           )}
         </EuiFlexGroup>
       </EuiPanel>
-      {!!currentSpan && (
-        <SpanDetailFlyout
-          spanId={currentSpan}
-          isFlyoutVisible={!!currentSpan}
-          closeFlyout={() => {
-            setCurrentSpan('');
-            setFilterOperationInProgress(false);
-          }}
-          addSpanFilter={addSpanFilter}
-          dataSourceMDSId={props.dataSourceMDSId}
-          dataSourceMDSLabel={props.dataSourceMDSLabel}
-          traceId={props.traceId}
-          pplService={props.pplService}
-          indexPattern={props.indexPattern}
-          allSpans={parsedData}
-        />
-      )}
     </>
   );
 }

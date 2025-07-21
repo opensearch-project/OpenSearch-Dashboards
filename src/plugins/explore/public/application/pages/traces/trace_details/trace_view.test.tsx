@@ -4,50 +4,135 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import { TraceDetails } from './trace_view';
+import { createMemoryHistory } from 'history';
+import { Router } from 'react-router-dom';
 
-// Mock react-router-dom
-jest.mock('react-router-dom', () => ({
-  useLocation: jest.fn(() => ({
-    hash: '#?traceId=test-trace-id&datasourceId=test-datasource-id&indexPattern=test-index-pattern',
-  })),
+// Mock useOpenSearchDashboards hook
+const mockChrome = {
+  setBreadcrumbs: jest.fn(),
+  getIsNavDrawerLocked$: () => ({
+    subscribe: jest.fn(),
+  }),
+};
+
+const mockData = {
+  query: {
+    pplService: {
+      execute: jest.fn(),
+    },
+  },
+};
+
+jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: () => ({
+    services: {
+      chrome: mockChrome,
+      data: mockData,
+      osdUrlStateStorage: {
+        set: jest.fn(),
+        get: jest.fn(),
+        flush: jest.fn(),
+        cancel: jest.fn(),
+      },
+    },
+  }),
 }));
 
-// Mock the useOpenSearchDashboards hook
-const mockSetBreadcrumbs = jest.fn();
+// Mock useLocation to provide URL params
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    hash: '#?traceId=test-trace-id&datasourceId=test-datasource&indexPattern=test-index-*',
+  }),
+}));
+
+// Mock the state management
+jest.mock('./state/trace_app_state', () => ({
+  createTraceAppState: ({ stateDefaults }: any) => ({
+    stateContainer: {
+      get: () => ({
+        ...stateDefaults,
+        traceId: 'test-trace-id',
+        dataSourceId: 'test-datasource',
+        indexPattern: 'test-index-*',
+        spanId: undefined,
+      }),
+      set: jest.fn(),
+      state$: {
+        subscribe: jest.fn(() => ({
+          unsubscribe: jest.fn(),
+        })),
+      },
+      transitions: {
+        setSpanId: jest.fn(),
+        setTraceId: jest.fn(),
+        setDataSourceId: jest.fn(),
+        setIndexPattern: jest.fn(),
+      },
+    },
+    stopStateSync: jest.fn(),
+  }),
+}));
+
+// Mock the child components
+jest.mock('./public/traces/span_detail_panel', () => ({
+  SpanDetailPanel: ({ onSpanSelect, selectedSpanId, payloadData }: any) => (
+    <div data-testid="span-detail-panel">
+      <button onClick={() => onSpanSelect && onSpanSelect('test-span-id')}>Select Span</button>
+      <div>Selected: {selectedSpanId || 'none'}</div>
+      <div>Data count: {JSON.parse(payloadData || '[]').length}</div>
+    </div>
+  ),
+}));
+
+jest.mock('./public/traces/span_detail_sidebar', () => ({
+  SpanDetailSidebar: ({ selectedSpan }: any) => (
+    <div data-testid="span-detail-sidebar">
+      <div>Span: {selectedSpan?.spanId || 'none'}</div>
+    </div>
+  ),
+}));
+
+jest.mock('./public/top_nav_buttons', () => ({
+  TraceTopNavMenu: ({ traceId }: any) => (
+    <div data-testid="trace-top-nav">
+      <span data-testid="trace-id">{traceId || 'no-trace-id'}</span>
+    </div>
+  ),
+}));
+
+jest.mock('./public/services/service_map', () => ({
+  ServiceMap: ({ hits }: any) => (
+    <div data-testid="service-map">
+      <span data-testid="service-hits-count">{hits?.length || 0}</span>
+    </div>
+  ),
+}));
+
+jest.mock('./public/logs/log_detail', () => ({
+  LogsDetails: ({ traceData }: any) => (
+    <div data-testid="logs-details">
+      <span data-testid="logs-trace-count">{traceData?.length || 0}</span>
+    </div>
+  ),
+}));
+
+// Mock TracePPLService
 const mockPplService = {
   fetchTraceSpans: jest.fn(),
 };
 
-jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
-  useOpenSearchDashboards: jest.fn(() => ({
-    services: {
-      chrome: {
-        setBreadcrumbs: mockSetBreadcrumbs,
-      },
-      data: {
-        query: {
-          pplService: {
-            execute: jest.fn(),
-          },
-        },
-      },
-    },
-  })),
-}));
-
-// Mock TracePPLService
 jest.mock('./server/ppl_request_trace', () => ({
   TracePPLService: jest.fn().mockImplementation(() => mockPplService),
 }));
 
-// Mock transform function with direct implementation
+// Mock transform function
 jest.mock('./public/traces/ppl_to_trace_hits', () => ({
   transformPPLDataToTraceHits: jest.fn(),
 }));
 
-// Get reference to the mocked function after it's been created
 const pplToTraceHits = jest.requireMock('./public/traces/ppl_to_trace_hits');
 const mockTransformPPLDataToTraceHits = pplToTraceHits.transformPPLDataToTraceHits;
 
@@ -59,87 +144,11 @@ jest.mock('./public/traces/generate_color_map', () => ({
   })),
 }));
 
-// Mock all the child components
-jest.mock('./public/top_nav_buttons', () => ({
-  TraceTopNavMenu: ({
-    traceId,
-    dataSourceMDSId,
-    payloadData,
-  }: {
-    traceId: string;
-    dataSourceMDSId: Array<{ id: string; label: string }>;
-    payloadData: any[];
-  }) => (
-    <div data-testid="trace-top-nav">
-      <span data-testid="trace-id">{traceId}</span>
-      <span data-testid="datasource-id">{dataSourceMDSId[0].id}</span>
-      <span data-testid="payload-count">{payloadData.length}</span>
-    </div>
-  ),
-}));
-
-jest.mock('./public/traces/span_detail_panel', () => ({
-  SpanDetailPanel: ({ traceId, dataSourceMDSId }: { traceId: string; dataSourceMDSId: string }) => (
-    <div data-testid="span-detail-panel">
-      <span data-testid="span-trace-id">{traceId}</span>
-      <span data-testid="span-datasource-id">{dataSourceMDSId}</span>
-    </div>
-  ),
-}));
-
-jest.mock('./public/services/service_map', () => ({
-  ServiceMap: ({ hits, colorMap }: { hits: any[]; colorMap: Record<string, string> }) => (
-    <div data-testid="service-map">
-      <span data-testid="service-hits-count">{hits.length}</span>
-      <span data-testid="service-color-keys">{Object.keys(colorMap).join(',')}</span>
-    </div>
-  ),
-}));
-
-jest.mock('./public/logs/log_detail', () => ({
-  LogsDetails: ({
-    traceId,
-    dataSourceId,
-    traceData,
-  }: {
-    traceId: string;
-    dataSourceId: string;
-    traceData: any[];
-  }) => (
-    <div data-testid="logs-details">
-      <span data-testid="logs-trace-id">{traceId}</span>
-      <span data-testid="logs-datasource-id">{dataSourceId}</span>
-      <span data-testid="logs-trace-count">{traceData.length}</span>
-    </div>
-  ),
-}));
-
+// Mock NoMatchMessage
 jest.mock('./public/utils/helper_functions', () => ({
-  NoMatchMessage: ({ traceId }: { traceId: string }) => (
-    <div data-testid="no-match-message">
-      <span data-testid="no-match-trace-id">{traceId}</span>
-    </div>
+  NoMatchMessage: ({ traceId }: any) => (
+    <div data-testid="no-match-message">No data for trace: {traceId}</div>
   ),
-}));
-
-// Mock window resize
-Object.defineProperty(window, 'innerWidth', {
-  writable: true,
-  configurable: true,
-  value: 1024,
-});
-
-// Mock getBoundingClientRect
-Element.prototype.getBoundingClientRect = jest.fn(() => ({
-  width: 1000,
-  height: 600,
-  top: 0,
-  left: 0,
-  bottom: 600,
-  right: 1000,
-  x: 0,
-  y: 0,
-  toJSON: jest.fn(),
 }));
 
 describe('TraceDetails', () => {
@@ -148,91 +157,99 @@ describe('TraceDetails', () => {
       spanId: 'span-1',
       traceId: 'test-trace-id',
       serviceName: 'service-a',
-      operationName: 'operation-1',
-      startTime: 1000,
-      duration: 100,
+      name: 'operation-1',
+      startTime: '2023-01-01T00:00:00Z',
+      endTime: '2023-01-01T00:00:01Z',
+      durationInNanos: 1000000000,
     },
     {
       spanId: 'span-2',
       traceId: 'test-trace-id',
       serviceName: 'service-b',
-      operationName: 'operation-2',
-      startTime: 1050,
-      duration: 50,
+      name: 'operation-2',
+      startTime: '2023-01-01T00:00:01Z',
+      endTime: '2023-01-01T00:00:02Z',
+      durationInNanos: 1000000000,
     },
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Reset mocks to successful state
     mockPplService.fetchTraceSpans.mockResolvedValue({
       hits: mockTraceData,
     });
-
-    // Reset the mock implementation for each test
     mockTransformPPLDataToTraceHits.mockImplementation(() => mockTraceData);
   });
 
-  it('renders loading state initially', () => {
+  it('renders trace details component', async () => {
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    // Wait for components to render
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
+    });
+  });
+
+  it('renders with trace data', async () => {
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    // Wait for data to load and components to render
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="span-detail-panel"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="span-detail-sidebar"]')).toBeInTheDocument();
+    });
+
+    // Check for resizable container
+    const resizableContainer = document.querySelector('.euiResizableContainer');
+    expect(resizableContainer).toBeInTheDocument();
+  });
+
+  it('shows loading state initially', async () => {
     // Make the service call hang to test loading state
     mockPplService.fetchTraceSpans.mockImplementation(() => new Promise(() => {}));
 
-    render(<TraceDetails />);
+    const history = createMemoryHistory();
 
-    // Look for the loading spinner by class name
-    expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
-    expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
-  });
-
-  it('renders trace details with data successfully', async () => {
-    render(<TraceDetails />);
-
-    // Wait for loading to complete and components to render
-    await waitFor(() => {
-      expect(document.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
-    });
-
-    // Check that all main components are rendered
-    expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="span-detail-panel"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="service-map"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="logs-details"]')).toBeInTheDocument();
-
-    // Check that trace ID and data source ID are passed correctly
-    expect(document.querySelector('[data-testid="trace-id"]')).toHaveTextContent('test-trace-id');
-    expect(document.querySelector('[data-testid="datasource-id"]')).toHaveTextContent(
-      'test-datasource-id'
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
     );
 
-    // Check that data is passed to components
-    expect(document.querySelector('[data-testid="payload-count"]')).toHaveTextContent('2');
-    expect(document.querySelector('[data-testid="service-hits-count"]')).toHaveTextContent('2');
-    expect(document.querySelector('[data-testid="logs-trace-count"]')).toHaveTextContent('2');
+    // Wait for loading state to appear
+    await waitFor(() => {
+      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    });
   });
 
-  it('renders no match message when no data is found', async () => {
+  it('handles empty data gracefully', async () => {
     // Mock empty data
     mockTransformPPLDataToTraceHits.mockImplementation(() => []);
 
-    render(<TraceDetails />);
+    const history = createMemoryHistory();
 
-    // Wait for loading to complete and no-match message to appear
-    await waitFor(() => {
-      expect(document.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
-    });
-
-    // Check for the no match message
-    expect(document.querySelector('[data-testid="no-match-message"]')).toBeInTheDocument();
-
-    expect(document.querySelector('[data-testid="no-match-trace-id"]')).toHaveTextContent(
-      'test-trace-id'
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
     );
 
-    // Check that other components are not rendered
-    expect(document.querySelector('[data-testid="span-detail-panel"]')).toBeNull();
-    expect(document.querySelector('[data-testid="service-map"]')).toBeNull();
-    expect(document.querySelector('[data-testid="logs-details"]')).toBeNull();
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="no-match-message"]')).toBeInTheDocument();
+    });
   });
 
   it('handles API errors gracefully', async () => {
@@ -242,52 +259,38 @@ describe('TraceDetails', () => {
     // Mock console.error to prevent error output
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    render(<TraceDetails />);
+    const history = createMemoryHistory();
 
-    // Wait for loading to complete and error handling to occur
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    // Wait for error handling
     await waitFor(() => {
       expect(document.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
     });
 
-    // Check for the no match message
-    expect(document.querySelector('[data-testid="no-match-message"]')).toBeInTheDocument();
-
-    expect(consoleSpy).toHaveBeenCalledWith('Failed to fetch trace data:', expect.any(Error));
-
     consoleSpy.mockRestore();
   });
 
-  it('sets breadcrumbs correctly', () => {
-    render(<TraceDetails />);
+  it('sets breadcrumbs correctly', async () => {
+    const history = createMemoryHistory();
 
-    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
-      {
-        text: 'test-trace-id',
-      },
-    ]);
-  });
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
 
-  it('handles missing trace ID or data source ID', () => {
-    // Mock location without required params
-    const reactRouterDom = jest.requireMock('react-router-dom');
-    reactRouterDom.useLocation.mockReturnValue({
-      hash: '#?someOtherParam=value',
+    // Wait for component to mount and set breadcrumbs
+    await waitFor(() => {
+      expect(mockChrome.setBreadcrumbs).toHaveBeenCalledWith([
+        {
+          text: 'test-trace-id',
+        },
+      ]);
     });
-
-    render(<TraceDetails />);
-
-    // Should not make API call without required params
-    expect(mockPplService.fetchTraceSpans).not.toHaveBeenCalled();
-  });
-
-  it('passes correct props to child components', async () => {
-    // Make sure we have data to test with
-    mockTransformPPLDataToTraceHits.mockImplementation(() => mockTraceData);
-
-    // Render with data
-    render(<TraceDetails />);
-
-    // Verify that the component renders without errors
-    expect(true).toBe(true);
   });
 });

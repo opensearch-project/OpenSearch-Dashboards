@@ -4,10 +4,11 @@
  */
 
 import { createGanttSpec } from './gantt_chart_spec';
+import { GANTT_CHART_CONSTANTS, TOTAL_PADDING, calculateLeftPadding } from './gantt_constants';
 
 describe('gantt_chart_spec', () => {
   it('creates a valid Vega specification', () => {
-    const spec = createGanttSpec(400, 10, 1000, 100);
+    const spec = createGanttSpec(400, 10, 1000);
 
     // Check that the spec has the required top-level properties
     expect(spec).toHaveProperty('$schema');
@@ -28,43 +29,47 @@ describe('gantt_chart_spec', () => {
 
     const spec = createGanttSpec(height, dataLength, containerWidth);
 
-    // Check that width is calculated correctly
-    const leftPadding = Math.max(60, Math.min(90, containerWidth * 0.08));
-    const rightPadding = 50;
-    const expectedWidth = containerWidth - leftPadding - rightPadding;
+    // Check that width is calculated correctly using shared function
+    const leftPadding = calculateLeftPadding(containerWidth);
+    const expectedWidth = containerWidth - leftPadding - GANTT_CHART_CONSTANTS.RIGHT_PADDING;
     expect(spec.width).toBe(expectedWidth);
 
-    // Check that height is calculated correctly
-    const minRowHeight = 30;
-    const calculatedHeight = Math.max(height, dataLength * minRowHeight + 100);
-    const expectedHeight = calculatedHeight - 60; // Account for top/bottom padding
+    // Check that height is calculated correctly using shared constants
+    const calculatedHeight = Math.max(
+      height,
+      dataLength * GANTT_CHART_CONSTANTS.MIN_ROW_HEIGHT +
+        GANTT_CHART_CONSTANTS.BASE_CALCULATION_HEIGHT
+    );
+    const expectedHeight = calculatedHeight - TOTAL_PADDING;
     expect(spec.height).toBe(expectedHeight);
 
-    // Check padding
+    // Check padding using shared constants
     expect(spec.padding).toEqual({
       left: leftPadding,
-      right: rightPadding,
-      top: 30,
-      bottom: 30,
+      right: GANTT_CHART_CONSTANTS.RIGHT_PADDING,
+      top: GANTT_CHART_CONSTANTS.TOP_PADDING,
+      bottom: GANTT_CHART_CONSTANTS.BOTTOM_PADDING,
     });
   });
 
   it('handles zero data length gracefully', () => {
     const spec = createGanttSpec(400, 0, 1000);
 
-    // Should still create a valid spec with minimum height
-    expect(spec.height).toBe(400 - 60); // 400 (input height) - 60 (padding)
+    // Should still create a valid spec with minimum height using shared constants
+    expect(spec.height).toBe(400 - TOTAL_PADDING); // 400 (input height) - TOTAL_PADDING
   });
 
   it('handles minimum height requirements', () => {
     const dataLength = 20;
-    const minRowHeight = 30;
-    const minExpectedHeight = dataLength * minRowHeight + 100 - 60; // Account for padding
+    const minExpectedHeight =
+      dataLength * GANTT_CHART_CONSTANTS.MIN_ROW_HEIGHT +
+      GANTT_CHART_CONSTANTS.BASE_CALCULATION_HEIGHT -
+      TOTAL_PADDING;
 
     // Input height is less than calculated minimum
     const spec = createGanttSpec(200, dataLength, 1000);
 
-    // Should use the calculated minimum height
+    // Should use the calculated minimum height using shared constants
     expect(spec.height).toBe(minExpectedHeight);
   });
 

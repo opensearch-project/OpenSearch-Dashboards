@@ -121,12 +121,16 @@ const ServiceNode = ({
     setOpenPopoverNodeId(null);
   };
 
-  const handleFocusClick = () => {
+  const handleFocusClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Needed to override the resize container
+    e.stopPropagation();
     onFocusService(data.label);
     closePopover();
   };
 
-  const handleExpandCollapseClick = () => {
+  const handleExpandCollapseClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Needed to override the resize container
+    e.stopPropagation();
     onToggleDetails();
     closePopover();
   };
@@ -141,7 +145,7 @@ const ServiceNode = ({
             defaultMessage: 'Focus on this service',
           }),
           icon: <EuiIcon type="magnifyWithPlus" />,
-          onClick: handleFocusClick,
+          onMouseDown: handleFocusClick,
         },
         {
           name: showDetails
@@ -152,7 +156,7 @@ const ServiceNode = ({
                 defaultMessage: 'Expand all cards',
               }),
           icon: <EuiIcon type={showDetails ? 'fold' : 'unfold'} />,
-          onClick: handleExpandCollapseClick,
+          onMouseDown: handleExpandCollapseClick,
         },
       ],
     },
@@ -455,7 +459,6 @@ const FlowComponent: React.FC<{
     selectedOptions: Array<EuiComboBoxOptionOption<string>>,
     fitViewFn?: any
   ) => void;
-  onClearSelection: () => void;
   focusedService: string | null;
   selectedMetrics: MetricOption[];
   onMetricsChange: (metrics: MetricOption[]) => void;
@@ -468,7 +471,6 @@ const FlowComponent: React.FC<{
   serviceOptions,
   selectedServiceOption,
   onServiceSelection,
-  onClearSelection,
   focusedService,
   selectedMetrics,
   onMetricsChange,
@@ -585,6 +587,12 @@ const FlowComponent: React.FC<{
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         style={{ background: '#fafafa' }}
         proOptions={{ hideAttribution: true }}
+        onPaneClick={() => {
+          // Close any open popover when clicking on the background
+          if (openPopoverNodeId) {
+            setOpenPopoverNodeId(null);
+          }
+        }}
       >
         {/* Service focus panel */}
         <div
@@ -1122,12 +1130,6 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
     }
   };
 
-  // Clear service selection
-  const clearServiceSelection = () => {
-    setSelectedServiceOption([]);
-    setFocusedService(null);
-  };
-
   if (!hits || hits.length === 0) {
     return (
       <EuiPanel {...panelProps}>
@@ -1172,7 +1174,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
 
   return (
     <EuiPanel {...panelProps}>
-      <div style={{ height: '500px', width: '100%' }}>
+      <div style={{ height: '350px', width: '100%' }}>
         <ReactFlowProvider>
           <FlowComponent
             initialNodes={filteredNodes}
@@ -1180,7 +1182,6 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
             serviceOptions={serviceOptions}
             selectedServiceOption={selectedServiceOption}
             onServiceSelection={handleServiceSelection}
-            onClearSelection={clearServiceSelection}
             focusedService={focusedService}
             selectedMetrics={selectedMetrics}
             onMetricsChange={setSelectedMetrics}

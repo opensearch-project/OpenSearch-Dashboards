@@ -5,21 +5,23 @@
 
 import { Spec } from 'vega';
 import { i18n } from '@osd/i18n';
+import { GANTT_CHART_CONSTANTS, TOTAL_PADDING, calculateLeftPadding } from './gantt_constants';
 
 export function createGanttSpec(
   height: number,
   dataLength: number = 0,
-  containerWidth: number = 800,
-  maxLabelWidth: number = 80
+  containerWidth: number = 800
 ): Spec {
-  const leftPadding = Math.max(60, Math.min(90, containerWidth * 0.08));
-  const rightPadding = 50;
-  const effectiveWidth = containerWidth - leftPadding - rightPadding;
+  const leftPadding = calculateLeftPadding(containerWidth);
+  const effectiveWidth = containerWidth - leftPadding - GANTT_CHART_CONSTANTS.RIGHT_PADDING;
 
   // Calculate proper height based on number of spans
-  const minRowHeight = 30;
-  const calculatedHeight = Math.max(height, dataLength * minRowHeight + 100);
-  const chartHeight = calculatedHeight - 60; // Account for top/bottom padding
+  const calculatedHeight = Math.max(
+    height,
+    dataLength * GANTT_CHART_CONSTANTS.MIN_ROW_HEIGHT +
+      GANTT_CHART_CONSTANTS.BASE_CALCULATION_HEIGHT
+  );
+  const chartHeight = calculatedHeight - TOTAL_PADDING;
 
   return {
     $schema: 'https://vega.github.io/schema/vega/v5.json',
@@ -27,7 +29,12 @@ export function createGanttSpec(
     autosize: { type: 'fit', resize: true },
     width: effectiveWidth,
     height: chartHeight,
-    padding: { left: leftPadding, right: rightPadding, top: 30, bottom: 30 },
+    padding: {
+      left: leftPadding,
+      right: GANTT_CHART_CONSTANTS.RIGHT_PADDING,
+      top: GANTT_CHART_CONSTANTS.TOP_PADDING,
+      bottom: GANTT_CHART_CONSTANTS.BOTTOM_PADDING,
+    },
 
     signals: [],
 
