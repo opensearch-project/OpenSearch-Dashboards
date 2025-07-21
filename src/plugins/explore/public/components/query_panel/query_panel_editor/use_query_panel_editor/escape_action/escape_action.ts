@@ -17,11 +17,14 @@ export const getEscapeAction = (
     defaultMessage: 'Escape Action',
   }),
   keybindings: [monaco.KeyCode.Escape],
-  run: () => {
+  run: (editor) => {
     // Only execute the action if in Prompt mode
     if (isPromptModeRef.current) {
       handleEscape();
       return;
     }
+
+    // Let the default escape behavior occur
+    editor.trigger('editor', 'hideSuggestWidget', []);
   },
 });

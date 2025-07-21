@@ -3,8 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.exploreQueryPanel {
-  &__editorsWrapper {
-    margin-top: $ouiSizeS;
-  }
-}
+export * from './use_prompt_is_typing';

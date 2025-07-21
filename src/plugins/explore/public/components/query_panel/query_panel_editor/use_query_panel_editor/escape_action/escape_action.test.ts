@@ -73,6 +73,14 @@ describe('getEscapeAction', () => {
 
         expect(mockHandleEscape).not.toHaveBeenCalled();
       });
+
+      it('should trigger hideSuggestWidget for default behavior', () => {
+        const action = getEscapeAction(isPromptModeRef, mockHandleEscape);
+
+        action.run(mockEditor);
+
+        expect(mockEditor.trigger).toHaveBeenCalledWith('editor', 'hideSuggestWidget', []);
+      });
     });
   });
 });

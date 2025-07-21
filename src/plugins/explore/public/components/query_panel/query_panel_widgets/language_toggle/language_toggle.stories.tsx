@@ -10,7 +10,7 @@ import { StorybookProviders } from '../../mock_provider.mocks';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 
 const meta: Meta<typeof LanguageToggle> = {
-  title: 'src/plugins/explore/public/components/query_panel/footer/language_toggle',
+  title: 'src/plugins/explore/public/components/query_panel/query_panel_widgets/language_toggle',
   component: LanguageToggle,
   decorators: [
     (Story) => (

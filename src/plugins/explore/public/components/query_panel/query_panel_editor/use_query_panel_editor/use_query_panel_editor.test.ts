@@ -41,9 +41,9 @@ jest.mock('../../../../../../data/public');
 jest.mock('../../../../application/utils/state_management/actions/query_editor');
 jest.mock('../../../../application/utils/state_management/slices');
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
-  selectIsPromptEditorMode: jest.fn(),
-  selectPromptModeIsAvailable: jest.fn(),
-  selectQueryLanguage: jest.fn(),
+  selectIsPromptEditorMode: jest.fn((state) => state.isPromptEditorMode),
+  selectPromptModeIsAvailable: jest.fn((state) => state.promptModeIsAvailable),
+  selectQueryLanguage: jest.fn((state) => state.queryLanguage),
 }));
 jest.mock('../../../../application/utils/state_management/types', () => ({
   EditorMode: {
@@ -64,6 +64,9 @@ jest.mock('./tab_action');
 jest.mock('./enter_action');
 jest.mock('./spacebar_action');
 jest.mock('./escape_action');
+jest.mock('./use_prompt_is_typing', () => ({
+  usePromptIsTyping: jest.fn(),
+}));
 jest.mock('./editor_options', () => ({
   queryEditorOptions: { readOnly: false },
   promptEditorOptions: { readOnly: false },
@@ -107,6 +110,12 @@ import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/publ
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { setEditorMode } from '../../../../application/utils/state_management/slices';
 import { EditorMode } from '../../../../application/utils/state_management/types';
+import { usePromptIsTyping } from './use_prompt_is_typing';
+import {
+  selectIsPromptEditorMode,
+  selectPromptModeIsAvailable,
+  selectQueryLanguage,
+} from '../../../../application/utils/state_management/selectors';
 
 const mockUseSelector = jest.mocked(useSelector);
 const mockUseDispatch = jest.mocked(useDispatch);
@@ -118,6 +127,7 @@ const mockUseSetEditorText = jest.mocked(useSetEditorText);
 const mockUseDatasetContext = jest.mocked(useDatasetContext);
 const mockUseOpenSearchDashboards = jest.mocked(useOpenSearchDashboards);
 const mockGetEffectiveLanguageForAutoComplete = jest.mocked(getEffectiveLanguageForAutoComplete);
+const mockUsePromptIsTyping = jest.mocked(usePromptIsTyping);
 
 describe('useQueryPanelEditor', () => {
   let mockDispatch: jest.Mock;
@@ -128,12 +138,14 @@ describe('useQueryPanelEditor', () => {
   let mockServices: any;
   let mockDataset: any;
   let mockEditorRef: any;
+  let mockHandleChangeForPromptIsTyping: jest.Mock;
 
   beforeEach(() => {
     mockDispatch = jest.fn();
     mockClearEditors = jest.fn();
     mockSetEditorIsFocused = jest.fn();
     mockSetEditorText = jest.fn();
+    mockHandleChangeForPromptIsTyping = jest.fn();
     mockEditorRef = { current: null };
 
     mockEditor = {
@@ -215,12 +227,17 @@ describe('useQueryPanelEditor', () => {
       },
     });
     mockGetEffectiveLanguageForAutoComplete.mockReturnValue('PPL');
+    mockUsePromptIsTyping.mockReturnValue({
+      promptIsTyping: false,
+      handleChangeForPromptIsTyping: mockHandleChangeForPromptIsTyping,
+    });
 
     // Default selector values
     mockUseSelector.mockImplementation((selector) => {
-      if (selector.toString().includes('selectPromptModeIsAvailable')) return false;
-      if (selector.toString().includes('selectQueryLanguage')) return 'PPL';
-      if (selector.toString().includes('selectIsPromptEditorMode')) return false;
+      const selectorString = selector.toString();
+      if (selectorString.includes('selectPromptModeIsAvailable')) return false;
+      if (selectorString.includes('selectQueryLanguage')) return 'PPL';
+      if (selectorString.includes('selectIsPromptEditorMode')) return false;
       return undefined;
     });
 
@@ -330,14 +347,59 @@ describe('useQueryPanelEditor', () => {
   });
 
   describe('onChange handler', () => {
-    it('should dispatch setEditorText with new text', () => {
+    it('should call setEditorText with new text', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
 
       act(() => {
         result.current.onChange('new text');
       });
 
-      expect(mockDispatch).toHaveBeenCalledWith(mockSetEditorText('new text'));
+      expect(mockSetEditorText).toHaveBeenCalledWith('new text');
+    });
+
+    it('should call handleChangeForPromptIsTyping when in prompt mode', () => {
+      // Create a fresh mock for this test
+      const localMockHandleChangeForPromptIsTyping = jest.fn();
+
+      mockUsePromptIsTyping.mockReturnValue({
+        promptIsTyping: false,
+        handleChangeForPromptIsTyping: localMockHandleChangeForPromptIsTyping,
+      });
+
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsPromptEditorMode) return true;
+        if (selector === selectPromptModeIsAvailable) return false;
+        if (selector === selectQueryLanguage) return 'PPL';
+        return undefined;
+      });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      // First, let's verify that isPromptMode is correctly set
+      expect(result.current.isPromptMode).toBe(true);
+
+      act(() => {
+        result.current.onChange('new text');
+      });
+
+      expect(mockSetEditorText).toHaveBeenCalledWith('new text');
+      expect(localMockHandleChangeForPromptIsTyping).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call handleChangeForPromptIsTyping when not in prompt mode', () => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector.toString().includes('selectIsPromptEditorMode')) return false;
+        return false;
+      });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      act(() => {
+        result.current.onChange('new text');
+      });
+
+      expect(mockSetEditorText).toHaveBeenCalledWith('new text');
+      expect(mockHandleChangeForPromptIsTyping).not.toHaveBeenCalled();
     });
   });
 
@@ -529,6 +591,30 @@ describe('useQueryPanelEditor', () => {
 
       expect(mockClearEditors).toHaveBeenCalled();
       expect(mockDispatch).toHaveBeenCalledWith(setEditorMode(EditorMode.Query));
+    });
+  });
+
+  describe('prompt typing integration', () => {
+    it('should return promptIsTyping value from usePromptIsTyping hook', () => {
+      mockUsePromptIsTyping.mockReturnValue({
+        promptIsTyping: true,
+        handleChangeForPromptIsTyping: mockHandleChangeForPromptIsTyping,
+      });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      expect(result.current.promptIsTyping).toBe(true);
+    });
+
+    it('should return false for promptIsTyping when not typing', () => {
+      mockUsePromptIsTyping.mockReturnValue({
+        promptIsTyping: false,
+        handleChangeForPromptIsTyping: mockHandleChangeForPromptIsTyping,
+      });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      expect(result.current.promptIsTyping).toBe(false);
     });
   });
 });

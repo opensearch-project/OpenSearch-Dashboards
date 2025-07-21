@@ -10,7 +10,7 @@ import { StorybookProviders } from '../../mock_provider.mocks';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 
 const meta: Meta<typeof SaveQueryButton> = {
-  title: 'src/plugins/explore/public/components/query_panel/footer/save_query',
+  title: 'src/plugins/explore/public/components/query_panel/query_panel_widgets/save_query',
   component: SaveQueryButton,
   decorators: [
     (Story) => (

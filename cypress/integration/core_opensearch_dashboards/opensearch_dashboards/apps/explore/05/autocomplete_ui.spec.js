@@ -47,8 +47,7 @@ export const runAutocompleteTests = () => {
 
     generateAutocompleteTestConfigurations(generateAutocompleteTestConfiguration).forEach(
       (config) => {
-        // TODO: Update with new query autocomplete experience
-        describe.skip(`${config.testName}`, () => {
+        describe(`${config.testName}`, () => {
           it('should verify suggestion widget and its hint', () => {
             // Setup
             cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);

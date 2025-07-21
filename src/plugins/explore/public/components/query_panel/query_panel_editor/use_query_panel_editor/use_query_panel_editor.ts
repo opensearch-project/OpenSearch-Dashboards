@@ -34,6 +34,7 @@ import { getSpacebarAction } from './spacebar_action';
 import { setEditorMode } from '../../../../application/utils/state_management/slices';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { getEscapeAction } from './escape_action';
+import { usePromptIsTyping } from './use_prompt_is_typing';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
@@ -86,12 +87,14 @@ export interface UseQueryPanelEditorReturnType {
   onEditorClick: () => void;
   options: IEditorConstructionOptions;
   placeholder: string;
+  promptIsTyping: boolean;
   showPlaceholder: boolean;
   useLatestTheme: true;
   value: string;
 }
 
 export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
+  const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
   const { dataset } = useDatasetContext();
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -113,6 +116,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const isQueryMode = !isPromptMode;
   const isPromptModeRef = useRef(isPromptMode);
+  const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -121,6 +125,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   useEffect(() => {
     isPromptModeRef.current = isPromptMode;
   }, [isPromptMode]);
+  useEffect(() => {
+    promptModeIsAvailableRef.current = promptModeIsAvailable;
+  }, [promptModeIsAvailable]);
 
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
@@ -272,7 +279,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
 
       // Add Space bar key handling to switch to prompt mode
       editor.addAction(
-        getSpacebarAction(isPromptModeRef, editorTextRef, () =>
+        getSpacebarAction(promptModeIsAvailableRef, isPromptModeRef, editorTextRef, () =>
           dispatch(setEditorMode(EditorMode.Prompt))
         )
       );
@@ -307,13 +314,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     [setEditorRef, handleRun, handleEscape, setEditorIsFocused, dispatch]
   );
 
-  const onChange = useCallback(
-    (newText: string) => {
-      dispatch(setEditorText(newText));
-    },
-    [dispatch, setEditorText]
-  );
-
   const options = useMemo(() => {
     if (isQueryMode) {
       return queryEditorOptions;
@@ -334,6 +334,17 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     editorRef.current?.focus();
   }, [editorRef]);
 
+  const onChange = useCallback(
+    (newText: string) => {
+      setEditorText(newText);
+
+      if (isPromptMode) {
+        handleChangeForPromptIsTyping();
+      }
+    },
+    [setEditorText, isPromptMode, handleChangeForPromptIsTyping]
+  );
+
   return {
     editorDidMount,
     isFocused: editorIsFocused,
@@ -344,6 +355,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     onEditorClick,
     options,
     placeholder,
+    promptIsTyping,
     showPlaceholder: !text.length && editorIsFocused,
     useLatestTheme: true,
     value: text,

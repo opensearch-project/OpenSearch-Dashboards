@@ -21,6 +21,7 @@ export const QueryPanelEditor = () => {
     isPromptMode,
     onEditorClick,
     placeholder,
+    promptIsTyping,
     showPlaceholder,
     ...editorProps
   } = useQueryPanelEditor();
@@ -32,13 +33,14 @@ export const QueryPanelEditor = () => {
       className={classNames('exploreQueryPanelEditor', {
         ['exploreQueryPanelEditor--focused']: isFocused,
         ['exploreQueryPanelEditor--promptMode']: isPromptMode,
+        ['exploreQueryPanelEditor--promptIsTyping']: promptIsTyping,
       })}
       data-test-subj="exploreQueryPanelEditor"
       onClick={onEditorClick}
     >
       {isPromptMode ? (
         <EuiIcon
-          type="sparkleFilled"
+          type="generate"
           size="m"
           className="exploreQueryPanelEditor__promptIcon"
           aria-label={promptIconLabel}

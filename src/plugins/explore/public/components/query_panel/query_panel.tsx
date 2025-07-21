@@ -7,7 +7,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { EuiPanel, EuiProgress } from '@elastic/eui';
 import { QueryPanelEditor } from './query_panel_editor';
-import { QueryPanelFooter } from './footer';
+import { QueryPanelWidgets } from './query_panel_widgets';
 import {
   selectIsLoading,
   selectPromptToQueryIsLoading,
@@ -22,11 +22,11 @@ const QueryPanel = () => {
 
   return (
     <EuiPanel paddingSize="s">
+      <QueryPanelWidgets />
       <div className="exploreQueryPanel__editorsWrapper">
         <QueryPanelEditor />
         <QueryPanelGeneratedQuery />
       </div>
-      <QueryPanelFooter />
       {isLoading && (
         <EuiProgress
           size="xs"
