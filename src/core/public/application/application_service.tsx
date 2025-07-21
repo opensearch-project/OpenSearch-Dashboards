@@ -92,8 +92,7 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
   const appBasePath = mounters.get(appId)?.appRoute
     ? `/${mounters.get(appId)!.appRoute}`
     : `/app/${appId}`;
-  const a = appendAppPath(appBasePath, path);
-  return a;
+  return appendAppPath(appBasePath, path);
 };
 
 const allApplicationsFilter = '__ALL__';
@@ -301,8 +300,7 @@ export class ApplicationService {
         if (!navigatingToSameApp) {
           this.appInternalStates.delete(this.currentAppId$.value!);
         }
-        const b = getAppUrl(availableMounters, appId, path);
-        this.navigate!(b, state, replace);
+        this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
         this.currentAppId$.next(appId);
       }
     };

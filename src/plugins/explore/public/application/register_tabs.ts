@@ -10,6 +10,7 @@ import { PatternsTab } from '../components/tabs/patterns_tab';
 import { ExploreServices } from '../types';
 import { EXPLORE_DEFAULT_LANGUAGE, ExploreFlavor } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
+import { getQueryWithSource } from './utils/languages';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -95,7 +96,8 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, flavor?: Ex
     // No query transformation for visualizations tab
     // Visualization tab owner will implement their own prepareQuery
     prepareQuery: (query) => {
-      return typeof query.query === 'string' ? query.query : '';
+      const preparedQuery = getQueryWithSource(query);
+      return preparedQuery.query;
     },
 
     component: VisTab,

@@ -213,14 +213,14 @@ export const downloadCsvAndVerify = (downloadOption, readCsvCallback) => {
 export const prepareDiscoverPageForDownload = (config, workspaceName) => {
   cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
-    page: 'explore',
+    page: 'explore/logs',
     isEnhancement: true,
   });
 
   if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-    cy.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
+    cy.explore.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
   } else {
-    cy.setIndexAsDataset(
+    cy.explore.setIndexAsDataset(
       config.dataset,
       DATASOURCE_NAME,
       'PPL',
