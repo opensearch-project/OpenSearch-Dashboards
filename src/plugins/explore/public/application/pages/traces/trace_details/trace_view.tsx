@@ -199,6 +199,15 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
     }, null);
   }, [spanId, transformedHits]);
 
+  // Update URL state when fallback span selection occurs
+  useEffect(() => {
+    if (selectedSpan && selectedSpan.spanId !== spanId) {
+      // Only update if the selected span is different from the current spanId
+      // This handles the case where filtering causes the original span to disappear
+      stateContainer.transitions.setSpanId(selectedSpan.spanId);
+    }
+  }, [selectedSpan, spanId, stateContainer]);
+
   const handleSpanSelect = (selectedSpanId: string) => {
     stateContainer.transitions.setSpanId(selectedSpanId);
   };
@@ -265,6 +274,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
                         colorMap={colorMap}
                         paddingSize="s"
                         hasShadow={false}
+                        selectedSpanId={spanId}
                       />
                       <EuiSpacer size="m" />
 

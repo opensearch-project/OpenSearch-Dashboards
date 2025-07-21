@@ -370,10 +370,11 @@ export function SpanDetailPanel(props: {
               onSpanSelect(spanId);
             }
           }}
+          selectedSpanId={props.selectedSpanId}
         />
       </div>
     ),
-    [parsedData, colorMap, onSpanSelect]
+    [parsedData, colorMap, onSpanSelect, props.selectedSpanId]
   );
 
   return (

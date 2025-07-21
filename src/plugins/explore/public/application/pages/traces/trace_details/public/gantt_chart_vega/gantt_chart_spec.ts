@@ -10,7 +10,8 @@ import { GANTT_CHART_CONSTANTS, TOTAL_PADDING, calculateLeftPadding } from './ga
 export function createGanttSpec(
   height: number,
   dataLength: number = 0,
-  containerWidth: number = 800
+  containerWidth: number = 800,
+  selectedSpanId?: string
 ): Spec {
   const leftPadding = calculateLeftPadding(containerWidth);
   const effectiveWidth = containerWidth - leftPadding - GANTT_CHART_CONSTANTS.RIGHT_PADDING;
@@ -117,8 +118,7 @@ export function createGanttSpec(
             y: { scale: 'yscale', field: 'label' },
             height: { scale: 'yscale', band: 1.0 }, // 1.0 for text to be in middle
             fill: { field: 'color' },
-            stroke: { value: 'white' },
-            strokeWidth: { value: 1 },
+            cursor: { value: 'pointer' },
             tooltip: {
               signal:
                 "datum.hasError ? {'⚠️ Error': '" +
@@ -151,11 +151,16 @@ export function createGanttSpec(
                 i18n.translate('explore.ganttChart.tooltip.start', { defaultMessage: 'Start' }) +
                 "': datum.startTime + ' ms'}",
             },
-            cursor: { value: 'pointer' },
           },
           update: {
             x: { scale: 'xscale', field: 'startTime' },
             x2: { scale: 'xscale', field: 'endTime' },
+            stroke: selectedSpanId
+              ? { signal: `datum.spanId === '${selectedSpanId}' ? '#000000' : 'white'` }
+              : { value: 'white' },
+            strokeWidth: selectedSpanId
+              ? { signal: `datum.spanId === '${selectedSpanId}' ? 3 : 1` }
+              : { value: 1 },
           },
           hover: {
             fillOpacity: { value: 0.8 },

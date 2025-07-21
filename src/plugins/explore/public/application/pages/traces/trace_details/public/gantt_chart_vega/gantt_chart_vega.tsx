@@ -14,9 +14,16 @@ interface GanttChartProps {
   colorMap: Record<string, string>;
   height: number;
   onSpanClick?: (spanId: string) => void;
+  selectedSpanId?: string;
 }
 
-export function GanttChart({ data, colorMap, height, onSpanClick }: GanttChartProps) {
+export function GanttChart({
+  data,
+  colorMap,
+  height,
+  onSpanClick,
+  selectedSpanId,
+}: GanttChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<View | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(800);
@@ -98,7 +105,7 @@ export function GanttChart({ data, colorMap, height, onSpanClick }: GanttChartPr
 
         const chartHeight = calculateHeight(data.length);
 
-        const spec = createGanttSpec(chartHeight, data.length, containerWidth);
+        const spec = createGanttSpec(chartHeight, data.length, containerWidth, selectedSpanId);
 
         const runtime = parse(spec);
         const view = new View(runtime).renderer('svg').initialize(containerRef.current);
@@ -128,7 +135,7 @@ export function GanttChart({ data, colorMap, height, onSpanClick }: GanttChartPr
         viewRef.current.finalize();
       }
     };
-  }, [data, colorMap, height, onSpanClick, containerWidth, calculateHeight]);
+  }, [data, colorMap, height, onSpanClick, containerWidth, calculateHeight, selectedSpanId]);
 
   const finalHeight = calculateHeight(data.length);
 

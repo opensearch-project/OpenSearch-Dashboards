@@ -17,6 +17,7 @@ import {
   EuiToolTip,
   EuiSmallButton,
   EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
@@ -312,55 +313,66 @@ export const SpanDetailSidebar: React.FC<SpanDetailSidebarProps> = ({
   };
 
   return (
-    <EuiPanel paddingSize="m" hasShadow={false} style={{ height: '100%', overflowY: 'auto' }}>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiText size="s">
-            <h2>
-              {i18n.translate('explore.spanDetailSidebar.header.spanDetail', {
-                defaultMessage: 'Span detail',
-              })}
-            </h2>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {selectedSpan && !isEmpty(selectedSpan) && (
-            <EuiToolTip
-              content={i18n.translate('explore.spanDetailSidebar.tooltip.viewAssociatedLogs', {
-                defaultMessage: 'View associated logs using Span Id',
-              })}
-            >
-              <EuiSmallButton
-                onClick={() => {
-                  // TODO redirect with corelation to logs
-                }}
-                iconType="discoverApp"
-              >
-                {i18n.translate('explore.spanDetailSidebar.button.viewAssociatedLogs', {
-                  defaultMessage: 'View associated logs',
+    <EuiPanel
+      paddingSize="m"
+      hasShadow={false}
+      style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+    >
+      {/* Fixed header section */}
+      <div style={{ flexShrink: 0 }}>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2>
+                {i18n.translate('explore.spanDetailSidebar.header.spanDetail', {
+                  defaultMessage: 'Span details',
                 })}
-              </EuiSmallButton>
-            </EuiToolTip>
-          )}
-        </EuiFlexItem>
-        {serviceName && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="primary"
-              onClick={() => setCurrentSpan && setCurrentSpan('')}
-              iconType="arrowLeft"
-              iconSide="left"
-              size="xs"
-            >
-              {i18n.translate('explore.spanDetailSidebar.button.back', {
-                defaultMessage: 'Back',
-              })}
-            </EuiButtonEmpty>
+              </h2>
+            </EuiTitle>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      {renderContent()}
+          <EuiFlexItem grow={false}>
+            {selectedSpan && !isEmpty(selectedSpan) && (
+              <EuiToolTip
+                content={i18n.translate('explore.spanDetailSidebar.tooltip.viewAssociatedLogs', {
+                  defaultMessage: 'View associated logs using Span Id',
+                })}
+              >
+                <EuiSmallButton
+                  onClick={() => {
+                    // TODO redirect with corelation to logs
+                  }}
+                  iconType="discoverApp"
+                >
+                  {i18n.translate('explore.spanDetailSidebar.button.viewAssociatedLogs', {
+                    defaultMessage: 'View associated logs',
+                  })}
+                </EuiSmallButton>
+              </EuiToolTip>
+            )}
+          </EuiFlexItem>
+          {serviceName && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="primary"
+                onClick={() => setCurrentSpan && setCurrentSpan('')}
+                iconType="arrowLeft"
+                iconSide="left"
+                size="xs"
+              >
+                {i18n.translate('explore.spanDetailSidebar.button.back', {
+                  defaultMessage: 'Back',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+      </div>
+
+      {/* Scrollable content section */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
+        {renderContent()}
+      </div>
     </EuiPanel>
   );
 };

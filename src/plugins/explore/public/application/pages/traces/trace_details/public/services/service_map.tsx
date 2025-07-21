@@ -90,6 +90,7 @@ const ServiceNode = ({
   onToggleDetails,
   openPopoverNodeId,
   setOpenPopoverNodeId,
+  isSelected,
 }: {
   data: ServiceNodeData;
   selectedMetrics: MetricOption[];
@@ -98,6 +99,7 @@ const ServiceNode = ({
   onToggleDetails: () => void;
   openPopoverNodeId: string | null;
   setOpenPopoverNodeId: (id: string | null) => void;
+  isSelected?: boolean;
 }) => {
   const serviceColor = data.color;
 
@@ -177,14 +179,19 @@ const ServiceNode = ({
               borderRadius: '8px',
               background: 'white',
               color: '#333',
-              border: `2px solid ${serviceColor}`,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              border: isSelected ? `4px solid #000000` : `2px solid ${serviceColor}`,
+              boxShadow: isSelected
+                ? '0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.2)'
+                : '0 2px 8px rgba(0,0,0,0.1)',
               minWidth: '180px',
               textAlign: 'left',
               fontSize: '14px',
               fontWeight: '500',
               position: 'relative',
               cursor: 'pointer',
+              opacity: isSelected ? 1 : 1,
+              transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+              transition: 'all 0.2s ease-in-out',
             }}
             onClick={handleCardClick}
             onKeyDown={(e) => {
@@ -372,7 +379,8 @@ const nodeTypes = (
   onFocusService: (serviceName: string) => void,
   onToggleDetails: () => void,
   openPopoverNodeId: string | null,
-  setOpenPopoverNodeId: (id: string | null) => void
+  setOpenPopoverNodeId: (id: string | null) => void,
+  selectedSpanService: string | null
 ) => ({
   serviceNode: (props: { data: ServiceNodeData }) => (
     <ServiceNode
@@ -383,6 +391,7 @@ const nodeTypes = (
       onToggleDetails={onToggleDetails}
       openPopoverNodeId={openPopoverNodeId}
       setOpenPopoverNodeId={setOpenPopoverNodeId}
+      isSelected={selectedSpanService === props.data.label}
     />
   ),
 });
@@ -465,6 +474,7 @@ const FlowComponent: React.FC<{
   showDetails: boolean;
   onToggleDetails: () => void;
   isRefocusing: boolean;
+  selectedSpanService: string | null;
 }> = ({
   initialNodes,
   initialEdges,
@@ -477,6 +487,7 @@ const FlowComponent: React.FC<{
   showDetails,
   onToggleDetails,
   isRefocusing,
+  selectedSpanService,
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceNodeType>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
@@ -578,7 +589,8 @@ const FlowComponent: React.FC<{
             onServiceSelection([{ label: serviceName, value: serviceName }], fitView),
           onToggleDetails,
           openPopoverNodeId,
-          setOpenPopoverNodeId
+          setOpenPopoverNodeId,
+          selectedSpanService
         )}
         connectionMode={ConnectionMode.Loose}
         fitView={false}
@@ -886,9 +898,15 @@ const FlowComponent: React.FC<{
 export type ServiceMap = {
   hits: SpanHit[];
   colorMap?: Record<string, string>;
+  selectedSpanId?: string;
 } & Partial<EuiPanelProps>;
 
-export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panelProps }) => {
+export const ServiceMap: React.FC<ServiceMap> = ({
+  hits,
+  colorMap = {},
+  selectedSpanId,
+  ...panelProps
+}) => {
   const [focusedService, setFocusedService] = useState<string | null>(null);
   const [serviceOptions, setServiceOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedServiceOption, setSelectedServiceOption] = useState<
@@ -905,6 +923,14 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
   const [isInitialLayoutLoading, setIsInitialLayoutLoading] = useState<boolean>(false);
+
+  // Find the service that contains the selected span
+  const selectedSpanService = useMemo(() => {
+    if (!selectedSpanId || !hits || hits.length === 0) return null;
+
+    const selectedSpan = hits.find((hit) => hit.spanId === selectedSpanId);
+    return selectedSpan ? selectedSpan.serviceName : null;
+  }, [selectedSpanId, hits]);
 
   const { initialNodes, initialEdges } = useMemo(() => {
     if (!hits || hits.length === 0) {
@@ -1188,6 +1214,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({ hits, colorMap = {}, ...panel
             showDetails={showDetails}
             onToggleDetails={() => setShowDetails(!showDetails)}
             isRefocusing={isRefocusing}
+            selectedSpanService={selectedSpanService}
           />
         </ReactFlowProvider>
       </div>
