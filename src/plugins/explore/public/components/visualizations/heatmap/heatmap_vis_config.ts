@@ -94,7 +94,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: true,
+        showLines: false,
       },
       axisRole: AxisRole.X,
     },
@@ -113,7 +113,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: true,
+        showLines: false,
       },
       axisRole: AxisRole.Y,
     },

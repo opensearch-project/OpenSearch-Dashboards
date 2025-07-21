@@ -78,7 +78,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: true,
+        showLines: false,
       },
     },
   ],
@@ -101,7 +101,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: true,
+        showLines: false,
       },
     },
   ],

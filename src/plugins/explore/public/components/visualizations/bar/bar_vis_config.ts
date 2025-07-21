@@ -85,7 +85,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: true,
+        showLines: false,
       },
       axisRole: AxisRole.X,
     },
@@ -104,7 +104,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: true,
+        showLines: false,
       },
       axisRole: AxisRole.Y,
     },

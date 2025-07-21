@@ -64,7 +64,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: true,
+        showLines: false,
       },
       axisRole: AxisRole.X,
     },
@@ -83,7 +83,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: true,
+        showLines: false,
       },
       axisRole: AxisRole.Y,
     },
