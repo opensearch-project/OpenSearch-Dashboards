@@ -92,7 +92,7 @@
 .navToggleInLargeScreen {
   position: fixed;
   left: 0;
-  top: 0;
+  top: var(--global-banner-height);
 }
 
 .navToggleInSmallScreen {
