@@ -5,11 +5,10 @@
 
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Visualization } from './visualization';
-import { Positions } from './utils/collections';
+import { Visualization, VisualizationProps } from './visualization';
 import { LineVisStyleControls } from './line/line_vis_options';
 import { VisualizationType, VisualizationTypeResult } from './utils/use_visualization_types';
-import { ThresholdLineStyle, VisFieldType } from './types';
+import { ThresholdLineStyle, VisFieldType, Positions } from './types';
 import { LineChartStyleControls } from './line/line_vis_config';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
 
@@ -61,25 +60,26 @@ const MockReactExpressionRenderer: React.FC<any> = ({ expression }) => {
 
 const mockStyleOptions: LineChartStyleControls = {
   // Basic controls
-  addTooltip: true,
+  tooltipOptions: { mode: 'all' },
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
-  showLine: true,
+  lineStyle: 'both',
   lineMode: 'smooth',
   lineWidth: 2,
-  showDots: true,
   // Threshold and grid
-  thresholdLine: {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-  },
+  thresholdLines: [
+    {
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+    },
+  ],
   grid: {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   },
   // Axes
   categoryAxes: [
@@ -116,21 +116,22 @@ const mockStyleOptions: LineChartStyleControls = {
 };
 
 // Mock the line configuration to avoid importing toExpression
-const mockLineConfig: VisualizationType = {
+const mockLineConfig: VisualizationType<'line'> = {
   name: 'line',
   type: 'line',
   ui: {
     style: {
       defaults: mockStyleOptions,
-      render: (props: any) => {
+      render: (props) => {
         return <LineVisStyleControls {...props} />;
       },
     },
+    availableMappings: [],
   },
 };
 
 // Create mock data
-const mockVisualizationData: VisualizationTypeResult = {
+const mockVisualizationData: VisualizationTypeResult<'line'> = {
   visualizationType: mockLineConfig,
   transformedData: [
     { date: '2024-01-01', value: 100, category: 'A' },
@@ -139,13 +140,34 @@ const mockVisualizationData: VisualizationTypeResult = {
     { date: '2024-01-04', value: 180, category: 'B' },
   ],
   numericalColumns: [
-    { id: 1, column: 'value', name: 'Sales Value', schema: VisFieldType.Numerical },
+    {
+      id: 1,
+      column: 'value',
+      name: 'Sales Value',
+      schema: VisFieldType.Numerical,
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
   ],
   categoricalColumns: [
-    { id: 2, column: 'category', name: 'Product Category', schema: VisFieldType.Categorical },
+    {
+      id: 2,
+      column: 'category',
+      name: 'Product Category',
+      schema: VisFieldType.Categorical,
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
   ],
   dateColumns: [
-    { id: 3, column: VisFieldType.Date, name: VisFieldType.Date, schema: VisFieldType.Categorical },
+    {
+      id: 3,
+      column: VisFieldType.Date,
+      name: VisFieldType.Date,
+      schema: VisFieldType.Categorical,
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
   ],
 };
 
@@ -155,7 +177,9 @@ const mockSearchContext: IExpressionLoaderParams['searchContext'] = {
   timeRange: { from: 'now-7d', to: 'now' },
 };
 
-const Template: ComponentStory<typeof Visualization> = (args) => <Visualization {...args} />;
+const Template: ComponentStory<(props: VisualizationProps<'line'>) => JSX.Element> = (args) => (
+  <Visualization<'line'> {...args} />
+);
 
 export const Default = Template.bind({});
 Default.args = {
@@ -172,12 +196,12 @@ WithThresholdLine.args = {
   ...Default.args,
   styleOptions: {
     ...mockStyleOptions,
-    thresholdLine: {
-      ...mockStyleOptions.thresholdLine,
+    thresholdLines: mockStyleOptions.thresholdLines.map((t) => ({
+      ...t,
       show: true,
       value: 150,
       color: '#FF0000',
-    },
+    })),
   },
 };
 
@@ -186,8 +210,7 @@ HiddenLineShowDots.args = {
   ...Default.args,
   styleOptions: {
     ...mockStyleOptions,
-    showLine: false,
-    showDots: true,
+    lineStyle: 'dots',
   },
 };
 
@@ -197,8 +220,22 @@ MultipleAxes.args = {
   visualizationData: {
     ...mockVisualizationData,
     numericalColumns: [
-      { id: 1, column: 'value1', name: 'Revenue', schema: VisFieldType.Numerical },
-      { id: 2, column: 'value2', name: 'Profit', schema: VisFieldType.Numerical },
+      {
+        id: 1,
+        column: 'value1',
+        name: 'Revenue',
+        schema: VisFieldType.Numerical,
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+      {
+        id: 2,
+        column: 'value2',
+        name: 'Profit',
+        schema: VisFieldType.Numerical,
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
     ],
   },
   styleOptions: {
@@ -229,8 +266,8 @@ MinimalConfiguration.args = {
   styleOptions: {
     ...mockStyleOptions,
     addLegend: false,
-    addTooltip: false,
-    showDots: false,
+    tooltipOptions: { mode: 'hidden' },
+    lineStyle: 'line',
     categoryAxes: [
       {
         ...mockStyleOptions.categoryAxes[0],
@@ -248,13 +285,15 @@ CustomColors.args = {
   ...Default.args,
   styleOptions: {
     ...mockStyleOptions,
-    thresholdLine: {
-      show: true,
-      value: 140,
-      color: '#00BFB3',
-      style: ThresholdLineStyle.Dashed,
-      width: 3,
-    },
+    thresholdLines: [
+      {
+        show: true,
+        value: 140,
+        color: '#00BFB3',
+        style: ThresholdLineStyle.Dashed,
+        width: 3,
+      },
+    ],
     addTimeMarker: true,
   },
 };

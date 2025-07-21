@@ -61,6 +61,7 @@ describe('VisualizationRegistryService', () => {
         id: 'test-rule',
         name: 'Test Rule',
         matches: jest.fn(),
+        matchIndex: [],
         chartTypes: [],
       };
 
@@ -77,12 +78,14 @@ describe('VisualizationRegistryService', () => {
           id: 'test-rule-1',
           name: 'Test Rule 1',
           matches: jest.fn(),
+          matchIndex: [],
           chartTypes: [],
         },
         {
           id: 'test-rule-2',
           name: 'Test Rule 2',
           matches: jest.fn(),
+          matchIndex: [],
           chartTypes: [],
         },
       ];
@@ -112,6 +115,7 @@ describe('VisualizationRegistryService', () => {
         id: 'test-rule',
         name: 'Test Rule',
         matches: jest.fn(),
+        matchIndex: [],
         chartTypes: [],
       };
 
@@ -128,12 +132,14 @@ describe('VisualizationRegistryService', () => {
           id: 'test-rule-1',
           name: 'Test Rule 1',
           matches: jest.fn(),
+          matchIndex: [],
           chartTypes: [],
         },
         {
           id: 'test-rule-2',
           name: 'Test Rule 2',
           matches: jest.fn(),
+          matchIndex: [],
           chartTypes: [],
         },
       ];
@@ -151,6 +157,7 @@ describe('VisualizationRegistryService', () => {
           id: 'test-rule-1',
           name: 'Test Rule 1',
           matches: jest.fn(),
+          matchIndex: [],
           chartTypes: [],
         },
       ];

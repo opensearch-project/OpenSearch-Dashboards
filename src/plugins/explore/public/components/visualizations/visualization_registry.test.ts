@@ -38,10 +38,11 @@ describe('VisualizationRegistry', () => {
     mockRule = {
       id: 'test-rule',
       name: 'Test Rule',
+      matchIndex: [1, 0, 1],
       matches: jest.fn(),
       chartTypes: [
-        { type: 'line', priority: 100, name: 'Line Chart' },
-        { type: 'bar', priority: 90, name: 'Bar Chart' },
+        { type: 'line', priority: 100, name: 'Line Chart', icon: '' },
+        { type: 'bar', priority: 90, name: 'Bar Chart', icon: '' },
       ],
       toExpression: jest.fn(),
     };
@@ -62,7 +63,7 @@ describe('VisualizationRegistry', () => {
 
       const updatedRule = {
         ...mockRule,
-        chartTypes: [{ type: 'bar', priority: 100, name: 'Bar Chart' }],
+        chartTypes: [{ type: 'bar', priority: 100, name: 'Bar Chart', icon: '' }],
       };
 
       registry.registerRule(updatedRule);
@@ -88,17 +89,32 @@ describe('VisualizationRegistry', () => {
   });
 
   describe('getVisualizationType', () => {
-    it('should return undefined if no rule matches', () => {
+    it('should return an object with undefined visualizationType if no rule matches', () => {
       (mockRule.matches as jest.Mock).mockReturnValue(false);
       registry.registerRule(mockRule);
 
       const columns: VisColumn[] = [
-        { id: 1, name: 'value', schema: VisFieldType.Numerical, column: 'field-1' },
+        {
+          id: 1,
+          name: 'value',
+          schema: VisFieldType.Numerical,
+          column: 'field-1',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
       ];
 
       const result = registry.getVisualizationType(columns);
 
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result?.visualizationType).toBeUndefined();
+      expect(result?.ruleId).toBeUndefined();
+      expect(result?.toExpression).toBeUndefined();
+      expect(result?.availableChartTypes).toEqual([]);
+      expect(result?.axisColumnMappings).toEqual({});
+      expect(result?.numericalColumns).toHaveLength(1);
+      expect(result?.categoricalColumns).toHaveLength(0);
+      expect(result?.dateColumns).toHaveLength(0);
       expect(mockRule.matches).toHaveBeenCalled();
     });
 
@@ -107,9 +123,30 @@ describe('VisualizationRegistry', () => {
       registry.registerRule(mockRule);
 
       const columns: VisColumn[] = [
-        { id: 0, name: 'date', schema: VisFieldType.Date, column: 'field-0' },
-        { id: 1, name: 'value', schema: VisFieldType.Numerical, column: 'field-1' },
-        { id: 2, name: 'category', schema: VisFieldType.Categorical, column: 'field-2' },
+        {
+          id: 0,
+          name: 'date',
+          schema: VisFieldType.Date,
+          column: 'field-0',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 1,
+          name: 'value',
+          schema: VisFieldType.Numerical,
+          column: 'field-1',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 2,
+          name: 'category',
+          schema: VisFieldType.Categorical,
+          column: 'field-2',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
       ];
 
       const result = registry.getVisualizationType(columns);
@@ -130,7 +167,8 @@ describe('VisualizationRegistry', () => {
         id: 'low-priority-rule',
         name: 'Low Priority Rule',
         matches: jest.fn().mockReturnValue(true),
-        chartTypes: [{ type: 'bar', priority: 50, name: 'Bar Chart' }],
+        matchIndex: [],
+        chartTypes: [{ type: 'bar', priority: 50, name: 'Bar Chart', icon: '' }],
         toExpression: jest.fn(),
       };
 
@@ -138,14 +176,22 @@ describe('VisualizationRegistry', () => {
         id: 'high-priority-rule',
         name: 'High Priority Rule',
         matches: jest.fn().mockReturnValue(true),
-        chartTypes: [{ type: 'line', priority: 100, name: 'Line Chart' }],
+        matchIndex: [],
+        chartTypes: [{ type: 'line', priority: 100, name: 'Line Chart', icon: '' }],
         toExpression: jest.fn(),
       };
 
       registry.registerRules([lowPriorityRule, highPriorityRule]);
 
       const columns: VisColumn[] = [
-        { id: 1, name: 'value', schema: VisFieldType.Numerical, column: 'field-1' },
+        {
+          id: 1,
+          name: 'value',
+          schema: VisFieldType.Numerical,
+          column: 'field-1',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
       ];
 
       const result = registry.getVisualizationType(columns);
@@ -158,12 +204,54 @@ describe('VisualizationRegistry', () => {
       registry.registerRule(mockRule);
 
       const columns: VisColumn[] = [
-        { id: 0, name: 'date', schema: VisFieldType.Date, column: 'field-0' },
-        { id: 1, name: 'value1', schema: VisFieldType.Numerical, column: 'field-1' },
-        { id: 2, name: 'value2', schema: VisFieldType.Numerical, column: 'field-2' },
-        { id: 3, name: 'category1', schema: VisFieldType.Categorical, column: 'field-3' },
-        { id: 4, name: 'category2', schema: VisFieldType.Categorical, column: 'field-4' },
-        { id: 5, name: 'unknown', schema: VisFieldType.Unknown, column: 'field-5' },
+        {
+          id: 0,
+          name: 'date',
+          schema: VisFieldType.Date,
+          column: 'field-0',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 1,
+          name: 'value1',
+          schema: VisFieldType.Numerical,
+          column: 'field-1',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 2,
+          name: 'value2',
+          schema: VisFieldType.Numerical,
+          column: 'field-2',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 3,
+          name: 'category1',
+          schema: VisFieldType.Categorical,
+          column: 'field-3',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 4,
+          name: 'category2',
+          schema: VisFieldType.Categorical,
+          column: 'field-4',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
+        {
+          id: 5,
+          name: 'unknown',
+          schema: VisFieldType.Unknown,
+          column: 'field-5',
+          validValuesCount: 1,
+          uniqueValuesCount: 1,
+        },
       ];
 
       const result = registry.getVisualizationType(columns);

@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import {
   fetchColumnValues,
   fetchData,
+  formatAvailableFieldsToSuggestions,
   formatFieldsToSuggestions,
   formatValuesToSuggestions,
 } from './utils';
@@ -170,11 +171,84 @@ describe('formatFieldsToSuggestions', () => {
   });
 });
 
+describe('formatAvailableFields', () => {
+  it('should format the availableFields as per the format functions', () => {
+    const availableFields = [
+      { name: 'field1', type: 'text' },
+      { name: '_field2', type: 'text' },
+      { name: 'field3', type: 'boolean' },
+    ];
+
+    const result = formatAvailableFieldsToSuggestions(
+      availableFields,
+      (f: string) => `${f} `,
+      (f: string) => {
+        return f.startsWith('_') ? `9` : `3`;
+      }
+    );
+
+    const expectedResult = [
+      {
+        text: 'field1',
+        type: monaco.languages.CompletionItemKind.Field,
+        detail: 'Field: text',
+        insertText: 'field1 ',
+        sortText: '3',
+      },
+      {
+        text: '_field2',
+        type: monaco.languages.CompletionItemKind.Field,
+        detail: 'Field: text',
+        insertText: '_field2 ',
+        sortText: '9',
+      },
+      {
+        text: 'field3',
+        type: monaco.languages.CompletionItemKind.Field,
+        detail: 'Field: boolean',
+        insertText: 'field3 ',
+        sortText: '3',
+      },
+    ];
+
+    expect(result).toStrictEqual(expectedResult);
+  });
+});
+
 describe('formatValuesToSuggestions', () => {
   const stringQuoter = (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `);
 
   it('should format string values correctly', () => {
     const values = ['apple', 'banana', 'cherry'];
+    const result = formatValuesToSuggestions(values, stringQuoter);
+
+    expect(result).toEqual([
+      {
+        text: 'apple',
+        insertText: '"apple" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '01',
+      },
+      {
+        text: 'banana',
+        insertText: '"banana" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '02',
+      },
+      {
+        text: 'cherry',
+        insertText: '"cherry" ',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: '03',
+      },
+    ]);
+  });
+
+  it('should filter out null values', () => {
+    const values = ['apple', 'banana', 'cherry', null];
     const result = formatValuesToSuggestions(values, stringQuoter);
 
     expect(result).toEqual([

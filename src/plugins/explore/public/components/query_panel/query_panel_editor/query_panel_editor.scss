@@ -1,0 +1,124 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+@import "../shared";
+
+// This is for the animation colors
+/* stylelint-disable  @osd/stylelint/no_restricted_values */
+
+.exploreQueryPanelEditor {
+  @include exploreEditor;
+
+  &--promptMode {
+    padding-left: 27px; // hard-coding to match the start position of query mode. There must be a better way
+
+    // Animated splash background when switching to prompt mode
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(168, 85, 247, 10%) 0%,
+          rgba(59, 130, 246, 10%) 25%,
+          rgba(6, 182, 212, 10%) 50%,
+          rgba(236, 72, 153, 10%) 75%,
+          rgba(168, 85, 247, 10%) 100%
+        );
+      background-size: 300% 100%;
+      animation: promptModeSplash 1.5s ease-out forwards;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    &.exploreQueryPanelEditor--focused {
+      border-bottom-color: transparent;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background:
+          linear-gradient(
+            90deg,
+            #a855f7 0%,
+            #3b82f6 25%,
+            #06b6d4 50%,
+            #ec4899 75%,
+            #a855f7 100%
+          );
+        background-size: 300% 100%;
+        animation: aiMode 10s ease-in-out infinite;
+      }
+    }
+  }
+
+  &--focused {
+    .exploreQueryPanelEditor__promptIcon {
+      animation: aiModeIcon 10s ease-in-out infinite;
+    }
+  }
+
+  &__promptIcon {
+    color: $ouiColorDisabledText;
+    position: absolute;
+    left: $ouiSizeXXS;
+    top: 9px; // hard-coding to align it to editor
+  }
+}
+
+@keyframes aiMode {
+  0%,
+  100% {
+    background-position: 0 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes aiModeIcon {
+  0%,
+  100% {
+    color: #a855f7;
+  }
+
+  25% {
+    color: #3b82f6;
+  }
+
+  50% {
+    color: #06b6d4;
+  }
+
+  75% {
+    color: #ec4899;
+  }
+}
+
+@keyframes promptModeSplash {
+  0% {
+    opacity: 0;
+    background-position: 0 50%;
+  }
+
+  20% {
+    opacity: 1;
+    background-position: 50% 50%;
+  }
+
+  100% {
+    opacity: 0;
+    background-position: 100% 50%;
+  }
+}

@@ -1,0 +1,2 @@
+fix:
+- Fix autocomplete for ne query panel ([#9960](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9960))

@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisFieldType, ThresholdLineStyle } from './types';
-import { Positions } from './utils/collections';
+import { VisFieldType, ThresholdLineStyle, Positions } from './types';
 
 describe('types', () => {
   describe('VisFieldType', () => {

@@ -13,6 +13,8 @@
   - [Openapi](openapi/README.md)
   - Plugins
     - data
+      - datasets
+        - [Data_views](plugins/data/datasets/data_views.md)
       - [Query editor enhancements](plugins/data/query-editor-enhancements.md)
     - discover
       - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
@@ -212,3 +214,4 @@
   - [TESTING](../TESTING.md)
   - [TRIAGING](../TRIAGING.md)
   - [TYPESCRIPT](../TYPESCRIPT.md)
+  - [Testing_strategy](../testing_strategy.md)

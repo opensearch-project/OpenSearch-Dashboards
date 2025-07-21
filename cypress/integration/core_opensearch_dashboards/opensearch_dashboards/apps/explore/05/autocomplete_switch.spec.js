@@ -6,19 +6,16 @@
 import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
-  QueryLanguages,
   DATASOURCE_NAME,
 } from '../../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import {
   generateAutocompleteTestConfiguration,
-  getDatasetName,
-} from '../../../../../../utils/apps/query_enhancements/autocomplete';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
-import {
   generateAutocompleteTestConfigurations,
   LanguageConfigs,
+  getDatasetName,
 } from '../../../../../../utils/apps/explore/autocomplete';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -48,7 +45,7 @@ export const runAutocompleteTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -63,32 +60,24 @@ export const runAutocompleteTests = () => {
     generateAutocompleteTestConfigurations(generateAutocompleteTestConfiguration, {
       languageConfig: LanguageConfigs.SQL_PPL,
     }).forEach((config) => {
+      // Since the query is no longer updated with source=<dataset>, this test is no longer needed
       describe(`${config.testName}`, () => {
-        it('should update default query when switching index patterns and languages', () => {
+        it.skip('should update default query when switching index patterns and languages', () => {
           // Setup
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
 
           // Get dataset names based on type
           const firstDataset = getDatasetName('data_logs_small_time_1', config.datasetType);
           const secondDataset = getDatasetName('data_logs_small_time_2', config.datasetType);
 
           // Verify initial default query
-          cy.getElementByTestId('osdQueryEditor__multiLine').contains(firstDataset);
+          cy.getElementByTestId('exploreQueryPanelEditor').contains(firstDataset);
 
           // Switch to second index pattern
           cy.setDataset(secondDataset, DATASOURCE_NAME, config.datasetType);
 
           // Verify query updated for new index pattern
-          cy.getElementByTestId('osdQueryEditor__multiLine').contains(secondDataset);
-
-          // Switch language and verify index pattern maintained
-          const switchLanguage =
-            config.language === QueryLanguages.SQL.name
-              ? QueryLanguages.PPL.name
-              : QueryLanguages.SQL.name;
-          cy.setQueryLanguage(switchLanguage);
-          cy.getElementByTestId('osdQueryEditor__multiLine').contains(secondDataset);
+          cy.getElementByTestId('exploreQueryPanelEditor').contains(secondDataset);
         });
       });
     });

@@ -32,23 +32,25 @@ import _ from 'lodash';
 import { createHashHistory } from 'history';
 import { ScopedHistory, AppMountParameters } from 'opensearch-dashboards/public';
 import { UiActionsStart } from '../../../../../ui_actions/public';
-import { DiscoverServices } from './build_services';
+import { ExploreServices } from '../../../types';
 import { createGetterSetter } from '../../../../../opensearch_dashboards_utils/public';
 import { search } from '../../../../../data/public';
 import { DocViewsRegistry } from '../../../types/doc_views_types';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
+import { ExpressionsStart } from '../../../../../expressions/public';
+import { DashboardStart } from '../../../../../dashboard/public';
 
-let services: DiscoverServices | null = null;
+let services: ExploreServices | null = null;
 let uiActions: UiActionsStart;
 
-export function getServices(): DiscoverServices {
+export function getServices(): ExploreServices {
   if (!services) {
     throw new Error('Discover services are not yet available');
   }
   return services;
 }
 
-export function setServices(newServices: any) {
+export function setServices(newServices: ExploreServices) {
   services = newServices;
 }
 
@@ -103,4 +105,18 @@ export {
   ISearchSource,
   OpenSearchQuerySortValue,
   SortDirection,
+  DataViewsContract as DatasetsContract,
+  IDataView as IDataset,
+  DataView as Dataset,
+  dataViews as datasets,
 } from '../../../../../data/public';
+
+export const [getExpressionLoader, setExpressionLoader] = createGetterSetter<
+  ExpressionsStart['ExpressionLoader']
+>('expressions.ExpressionLoader');
+
+export const [getDashboard, setDashboard] = createGetterSetter<DashboardStart>('Dashboard');
+
+export const [getDashboardVersion, setDashboardVersion] = createGetterSetter<{ version: string }>(
+  'DashboardVersion'
+);

@@ -4,26 +4,34 @@
  */
 
 import React from 'react';
-import { Positions } from '../utils/collections';
-import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
+import { LineVisStyleControls } from './line_vis_options';
 import { VisualizationType } from '../utils/use_visualization_types';
-import { CategoryAxis, GridOptions, ThresholdLine, ThresholdLineStyle, ValueAxis } from '../types';
+import {
+  CategoryAxis,
+  GridOptions,
+  ThresholdLines,
+  ThresholdLineStyle,
+  ValueAxis,
+  Positions,
+  AxisRole,
+  VisFieldType,
+} from '../types';
+import { LineStyle } from './line_exclusive_vis_options';
+import { TooltipOptions } from '../types';
 
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
-  // Basic controls
-  addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Positions;
   addTimeMarker: boolean;
 
-  showLine: boolean;
+  lineStyle: LineStyle;
   lineMode: string;
   lineWidth: number;
-  showDots: boolean;
+  tooltipOptions: TooltipOptions;
 
   // Threshold and grid
-  thresholdLine: ThresholdLine;
+  thresholdLines: ThresholdLines;
   grid: GridOptions;
 
   // Axes configuration
@@ -32,28 +40,31 @@ export interface LineChartStyleControls {
 }
 
 const defaultLineChartStyles: LineChartStyleControls = {
-  // Basic controls
-  addTooltip: true,
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
 
-  showLine: true,
+  lineStyle: 'both',
   lineMode: 'smooth',
   lineWidth: 2,
-  showDots: true,
-
-  // Threshold and grid
-  thresholdLine: {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
+  tooltipOptions: {
+    mode: 'all',
   },
+
+  thresholdLines: [
+    {
+      id: '1',
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+      name: '',
+    },
+  ],
   grid: {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   },
 
   // Category axes
@@ -96,14 +107,59 @@ const defaultLineChartStyles: LineChartStyleControls = {
   ],
 };
 
-export const createLineConfig = (): VisualizationType => ({
+export const createLineConfig = (): VisualizationType<'line'> => ({
   name: 'line',
   type: 'line',
   ui: {
     style: {
       defaults: defaultLineChartStyles,
-      render: (props: LineVisStyleControlsProps) =>
-        React.createElement(LineVisStyleControls, props),
+      render: (props) => React.createElement(LineVisStyleControls, props),
     },
+    availableMappings: [
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.Y_SECOND]: { type: VisFieldType.Numerical, index: 1 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+          },
+        ],
+      },
+      {
+        mapping: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+          },
+        ],
+      },
+    ],
   },
 });

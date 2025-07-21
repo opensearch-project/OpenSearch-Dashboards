@@ -8,8 +8,7 @@ import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { LineVisStyleControls } from './line_vis_options';
 import { LineChartStyleControls } from './line_vis_config';
-import { Positions } from '../utils/collections';
-import { ThresholdLineStyle, VisColumn, VisFieldType } from '../types';
+import { ThresholdLineStyle, VisColumn, VisFieldType, Positions } from '../types';
 
 export default {
   component: LineVisStyleControls,
@@ -18,44 +17,88 @@ export default {
 
 // Mock data for the component props
 const mockNumericalColumns: VisColumn[] = [
-  { id: 1, name: 'count', schema: VisFieldType.Numerical, column: 'count' },
-  { id: 2, name: 'price', schema: VisFieldType.Numerical, column: 'price' },
-  { id: 3, name: 'revenue', schema: VisFieldType.Numerical, column: 'revenue' },
+  {
+    id: 1,
+    name: 'count',
+    schema: VisFieldType.Numerical,
+    column: 'count',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+  {
+    id: 2,
+    name: 'price',
+    schema: VisFieldType.Numerical,
+    column: 'price',
+
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+  {
+    id: 3,
+    name: 'revenue',
+    schema: VisFieldType.Numerical,
+    column: 'revenue',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
 ];
 
 const mockCategoricalColumns: VisColumn[] = [
-  { id: 4, name: 'category', schema: VisFieldType.Categorical, column: 'category' },
-  { id: 5, name: 'product', schema: VisFieldType.Categorical, column: 'product' },
+  {
+    id: 4,
+    name: 'category',
+    schema: VisFieldType.Categorical,
+    column: 'category',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
+  {
+    id: 5,
+    name: 'product',
+    schema: VisFieldType.Categorical,
+    column: 'product',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
 ];
 
 const mockDateColumns: VisColumn[] = [
-  { id: 6, name: 'timestamp', schema: VisFieldType.Date, column: 'timestamp' },
+  {
+    id: 6,
+    name: 'timestamp',
+    schema: VisFieldType.Date,
+    column: 'timestamp',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
+  },
 ];
 
 // Default style options
 const defaultStyleOptions: LineChartStyleControls = {
   // Basic controls
-  addTooltip: true,
+  tooltipOptions: { mode: 'all' },
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
 
-  showLine: true,
+  lineStyle: 'dots',
   lineMode: 'smooth',
   lineWidth: 2,
-  showDots: true,
 
   // Threshold and grid
-  thresholdLine: {
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-  },
+  thresholdLines: [
+    {
+      color: '#E7664C',
+      show: false,
+      style: ThresholdLineStyle.Full,
+      value: 10,
+      width: 1,
+    },
+  ],
   grid: {
-    categoryLines: true,
-    valueLines: true,
+    xLines: true,
+    yLines: true,
   },
 
   // Category axes
@@ -134,10 +177,10 @@ export const WithThreshold = Template.bind({});
 WithThreshold.args = {
   styleOptions: {
     ...defaultStyleOptions,
-    thresholdLine: {
-      ...defaultStyleOptions.thresholdLine,
+    thresholdLines: [...defaultStyleOptions.thresholdLines].map((thresholdLine) => ({
+      ...thresholdLine,
       show: true,
-    },
+    })),
   },
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
@@ -180,8 +223,8 @@ NoGridLines.args = {
   styleOptions: {
     ...defaultStyleOptions,
     grid: {
-      categoryLines: false,
-      valueLines: false,
+      xLines: false,
+      yLines: false,
     },
   },
   numericalColumns: mockNumericalColumns,
