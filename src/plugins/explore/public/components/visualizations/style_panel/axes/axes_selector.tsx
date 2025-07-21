@@ -132,11 +132,15 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   const [lastSentMappings, setLastSentMappings] = useState<AxisColumnMappings>({});
 
   useEffect(() => {
-    // Only update currentSelections if currentMapping is not empty and differs from currentSelections
+    // Only update if currentMapping has changed and is not empty
     if (Object.keys(currentMapping).length > 0 && !isEqual(currentSelections, currentMapping)) {
-      setCurrentSelections(currentMapping);
+      // Avoid overwriting if the user has just cleared a selection
+      const hasUserCleared = Object.values(currentSelections).some((col) => col === undefined);
+      if (!hasUserCleared) {
+        setCurrentSelections(currentMapping);
+      }
     }
-  }, [currentMapping]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentMapping, currentSelections]);
 
   // Filter out those mapping (combination of axes selection) that no longer be satisify
   // by the current combination of axes selection
@@ -202,7 +206,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       updateVisualization({ rule: undefined, mappings: {} });
       setLastSentMappings({});
     }
-  }, [currentValidSelection, updateVisualization, chartType, lastSentMappings]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentValidSelection, updateVisualization, chartType, lastSentMappings, currentSelections]);
 
   const findColumns = useMemo(
     () => (type: VisFieldType) => {
@@ -334,6 +338,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
   onChange,
 }) => {
   const styles = useSelector(selectStyleOptions) as AxisSupportedStyles;
+  const selectedOptions = selectedColumn ? [{ label: selectedColumn }] : [];
 
   const getLabel = () => {
     if (styles?.switchAxes && (axisRole === AxisRole.X || axisRole === AxisRole.Y)) {
@@ -350,7 +355,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
         <EuiFlexItem>
           <EuiComboBox
             compressed
-            selectedOptions={[{ label: selectedColumn }]}
+            selectedOptions={selectedOptions}
             singleSelection={{ asPlainText: true }}
             options={allColumnOptions}
             onChange={(value) => {
@@ -360,6 +365,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
                 onRemove(axisRole);
               }
             }}
+            isClearable={true}
           />
         </EuiFlexItem>
       </EuiFormRow>
