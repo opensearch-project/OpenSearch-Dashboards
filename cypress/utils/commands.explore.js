@@ -16,17 +16,18 @@ const RETRY_DELAY = 1000;
 
 const forceFocusEditor = () => {
   return cy
-    .get('[data-test-subj="exploreReusableEditor"] .react-monaco-editor-container')
+    .get('[data-test-subj="exploreTopEditor"] .react-monaco-editor-container')
     .click({ force: true })
     .wait(200) // Give editor time to register focus
     .get('.inputarea')
+    .first()
     .focus()
     .wait(200); // Wait for focus to take effect
 };
 
 const clearMonacoEditor = () => {
   return cy
-    .get('[data-test-subj="exploreReusableEditor"] .react-monaco-editor-container')
+    .get('[data-test-subj="exploreTopEditor"] .react-monaco-editor-container')
     .should('exist')
     .should('be.visible')
     .then(() => {
@@ -35,6 +36,7 @@ const clearMonacoEditor = () => {
         // Try different key combinations for selection
         return cy
           .get('.inputarea')
+          .first()
           .type('{ctrl}a', { force: true })
           .wait(100)
           .type('{backspace}', { force: true })
@@ -48,7 +50,7 @@ const clearMonacoEditor = () => {
 
 const isEditorEmpty = () => {
   return cy
-    .get('[data-test-subj="exploreReusableEditor"] .react-monaco-editor-container')
+    .get('[data-test-subj="exploreTopEditor"] .react-monaco-editor-container')
     .find('.view-line')
     .invoke('text')
     .then((text) => text.trim() === '');
@@ -106,6 +108,7 @@ cy.explore.add('setQueryEditor', (value, options = {}) => {
   cy.explore.clearQueryEditor().then(() => {
     return cy
       .get('.inputarea')
+      .first()
       .should('be.visible')
       .wait(200)
       .type(escape ? `${value}{esc}` : value, {
@@ -122,6 +125,8 @@ cy.explore.add('setQueryEditor', (value, options = {}) => {
 
 cy.explore.add('setTopNavDate', (start, end, submit = true) => {
   cy.osd.ensureTopNavExists();
+
+  // cy.wait(3000);
 
   const opts = { log: false };
 
@@ -194,6 +199,8 @@ cy.explore.add('setTopNavDate', (start, end, submit = true) => {
 cy.explore.add('setRelativeTopNavDate', (time, timeUnit) => {
   cy.osd.ensureTopNavExists();
 
+  // cy.wait(3000);
+
   const opts = { log: false };
 
   /* Find any one of the two buttons that change/open the date picker:
@@ -231,3 +238,214 @@ cy.explore.add('setRelativeTopNavDate', (time, timeUnit) => {
 cy.explore.add('updateTopNav', (options) => {
   cy.getElementByTestId('queryPanelFooterRunQueryButton', options).click({ force: true });
 });
+
+cy.explore.add(
+  'saveQuery',
+  (name, description = ' ', includeFilters = true, includeTimeFilter = false) => {
+    cy.whenTestIdNotFound('saved-query-management-popover', () => {
+      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+    });
+    cy.getElementByTestId('saved-query-management-save-button').click();
+
+    cy.getElementByTestId('saveQueryFormTitle').type(name);
+    cy.getElementByTestId('saveQueryFormDescription').type(description);
+
+    if (includeFilters !== true) {
+      cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+    }
+
+    if (includeTimeFilter !== false) {
+      cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+    }
+
+    // The force is necessary as there is occasionally a popover that covers the button
+    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+  }
+);
+
+cy.explore.add(
+  'updateSavedQuery',
+  (name = '', saveAsNewQuery = false, includeFilters = true, includeTimeFilter = false) => {
+    cy.whenTestIdNotFound('saved-query-management-popover', () => {
+      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+    });
+    cy.getElementByTestId('saved-query-management-save-button').click();
+
+    if (saveAsNewQuery) {
+      cy.getElementByTestId('saveAsNewQueryCheckbox')
+        .parent()
+        .find('[class="euiCheckbox__label"]')
+        .click();
+      cy.getElementByTestId('saveQueryFormTitle').should('not.be.disabled').type(name);
+
+      // Selecting the saveAsNewQuery element deselects the include time filter option.
+      if (includeTimeFilter === true) {
+        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+      }
+    } else if (saveAsNewQuery === false) {
+      // defaults to not selected.
+
+      if (includeTimeFilter !== true) {
+        cy.getElementByTestId('saveQueryFormIncludeTimeFilterOption').click();
+      }
+    }
+
+    if (includeFilters !== true) {
+      // Always defaults to selected.
+      cy.getElementByTestId('saveQueryFormIncludeFiltersOption').click();
+    }
+
+    // The force is necessary as there is occasionally a popover that covers the button
+    cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+  }
+);
+
+cy.explore.add('loadSavedQuery', (name) => {
+  cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+
+  cy.getElementByTestId('saved-query-management-open-button').click();
+
+  cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
+  // click button through popover
+  cy.getElementByTestId('open-query-action-button').click({ force: true });
+});
+
+cy.explore.add('clearSavedQuery', () => {
+  cy.whenTestIdNotFound('saved-query-management-popover', () => {
+    cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+  });
+  //clear save queries
+  cy.getElementByTestId('saved-query-management-clear-button').click();
+});
+
+cy.explore.add('deleteSavedQuery', (name) => {
+  cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+
+  cy.getElementByTestId('saved-query-management-open-button').click();
+  cy.getElementByTestId('euiFlyoutCloseButton')
+    .parent()
+    .contains(name)
+    .findElementByTestId('deleteSavedQueryButton')
+    .click();
+
+  cy.getElementByTestId('confirmModalConfirmButton').click();
+});
+
+cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
+  cy.getElementsByTestIds('datasetSelectButton').should('not.contain', 'Select data');
+
+  switch (type) {
+    case 'INDEX_PATTERN':
+      cy.explore.setIndexPatternAsDataset(dataset, dataSourceName);
+      break;
+    case 'INDEXES':
+      cy.explore.setIndexAsDataset(dataset, dataSourceName);
+      break;
+    default:
+      throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
+  }
+
+  cy.wait(3000);
+});
+
+cy.explore.add(
+  'setIndexPatternFromAdvancedSelector',
+  (indexPattern, dataSourceName, language, finalAction = 'submit') => {
+    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+    cy.get(`[title="Index Patterns"]`).click();
+
+    cy.getElementByTestId('datasetExplorerWindow')
+      .find(`[title="${dataSourceName}::${indexPattern}"]`)
+      .should('be.visible')
+      .click({ force: true });
+    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
+
+    if (language) {
+      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
+    }
+
+    if (finalAction === 'submit') {
+      cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
+
+      // verify that it has been selected
+      cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
+    } else {
+      cy.get('[type="button"]').contains('Cancel').click();
+    }
+
+    cy.wait(3000);
+  }
+);
+
+cy.explore.add(
+  'setIndexAsDataset',
+  (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
+    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+    cy.get(`[title="Indexes"]`).click();
+    cy.get(`[title="${dataSourceName}"]`).click();
+    // this element is sometimes dataSourceName masked by another element
+    cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
+
+    if (language) {
+      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
+    }
+
+    cy.getElementByTestId('advancedSelectorTimeFieldSelect')
+      .should('be.visible')
+      .select(timeFieldName);
+
+    if (finalAction === 'submit') {
+      cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
+
+      // verify that it has been selected
+      cy.getElementByTestId('datasetSelectButton').should('contain.text', `${index}`);
+    } else {
+      cy.get('[type="button"]').contains('Cancel').click();
+    }
+    cy.wait(3000);
+  }
+);
+
+cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
+  cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+  cy.get(`[title="${indexPattern}"]`).should('be.visible').click();
+
+  // verify that it has been selected
+  cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
+
+  cy.wait(3000);
+});
+
+cy.explore.add(
+  'setIndexPatternFromAdvancedSelector',
+  (indexPattern, dataSourceName, language, finalAction = 'submit') => {
+    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+    cy.get(`[title="Index Patterns"]`).click();
+
+    cy.getElementByTestId('datasetExplorerWindow')
+      .find(`[title="${dataSourceName}::${indexPattern}"]`)
+      .should('be.visible')
+      .click({ force: true });
+    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
+
+    if (language) {
+      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
+    }
+
+    if (finalAction === 'submit') {
+      cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
+
+      // verify that it has been selected
+      cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
+    } else {
+      cy.get('[type="button"]').contains('Cancel').click();
+    }
+    cy.wait(3000);
+  }
+);

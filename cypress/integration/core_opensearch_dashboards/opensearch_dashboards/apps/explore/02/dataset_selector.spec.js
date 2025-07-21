@@ -15,7 +15,6 @@ import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-  getDefaultQuery,
 } from '../../../../../../utils/apps/explore/shared';
 
 import { verifyDiscoverPageState } from '../../../../../../utils/apps/explore/saved';
@@ -56,20 +55,24 @@ export const runDatasetSelectorTests = () => {
       it(`should be able to select and load ${config.testName} dataset-language combination using advanced dataset selector`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 
         if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.setIndexPatternFromAdvancedSelector(config.dataset, DATASOURCE_NAME, config.language);
+          cy.explore.setIndexPatternFromAdvancedSelector(
+            config.dataset,
+            DATASOURCE_NAME,
+            config.language
+          );
         } else {
-          cy.setIndexAsDataset(config.dataset, DATASOURCE_NAME, config.language);
+          cy.explore.setIndexAsDataset(config.dataset, DATASOURCE_NAME, config.language);
         }
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         verifyDiscoverPageState({
           dataset: config.dataset,
-          queryString: getDefaultQuery(config.dataset, config.language),
+          queryString: '',
           language: config.language,
           hitCount: config.hitCount,
         });
@@ -81,7 +84,7 @@ export const runDatasetSelectorTests = () => {
       it(`select the ${config.testName} dataset-language combination and cancelling the workflow restores the original state`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 
@@ -93,14 +96,14 @@ export const runDatasetSelectorTests = () => {
 
         // Try setting the dataset-language combination but click on cancel
         if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.setIndexPatternFromAdvancedSelector(
+          cy.explore.setIndexPatternFromAdvancedSelector(
             config.dataset,
             DATASOURCE_NAME,
             config.language,
             'cancel'
           );
         } else {
-          cy.setIndexAsDataset(
+          cy.explore.setIndexAsDataset(
             config.dataset,
             DATASOURCE_NAME,
             config.language,

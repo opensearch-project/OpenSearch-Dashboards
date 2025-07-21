@@ -52,11 +52,11 @@ export const runTimeRangeSelectionTests = () => {
       it(`Time Range Selection using the quick select menu ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         if (config.language.supports.datepicker) {
           cy.setQuickSelectTime('Last', 15, 'years');
@@ -71,11 +71,11 @@ export const runTimeRangeSelectionTests = () => {
       it(`Time Range Selection using the relative time select menu ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         if (config.language.supports.datepicker) {
           cy.explore.setRelativeTopNavDate(15, 'Years ago');
@@ -90,11 +90,11 @@ export const runTimeRangeSelectionTests = () => {
       it(`Time Range Selection using the absolute time select menu ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
         if (config.language.supports.datepicker) {
           cy.explore.setTopNavDate('Nov 29, 2021 @ 00:00:00.000', 'Dec 29, 2023 @ 00:00:00.000');

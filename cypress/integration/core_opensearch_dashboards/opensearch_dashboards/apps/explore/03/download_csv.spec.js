@@ -130,7 +130,7 @@ const runDownloadCsvTests = () => {
 
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
 

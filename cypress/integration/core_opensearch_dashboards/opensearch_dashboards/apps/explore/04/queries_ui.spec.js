@@ -37,7 +37,7 @@ export const runQueryTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -82,7 +82,7 @@ export const runQueryTests = () => {
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         it('should show correct documentation link in language reference popover', () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           // First get the version from help menu
           cy.get('button[aria-label="Help menu"]').click();
           cy.get('.chrHeaderHelpMenu__version')
@@ -120,38 +120,23 @@ export const runQueryTests = () => {
 
                 // If popover is already open, close it first
                 if (isPopoverOpen) {
-                  cy.getElementByTestId('languageReferenceButton').click();
+                  cy.getElementByTestId('exploreDetectedLanguage').click();
                   // Verify it's closed
                   cy.get('.euiPopover__panel-isOpen').should('not.exist');
                 }
 
                 // Now click to open
-                cy.getElementByTestId('languageReferenceButton').click();
+                cy.getElementByTestId('exploreDetectedLanguage').click();
 
                 // Verify popover appears with title
                 cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
 
-                // Get current language first
-                cy.getElementByTestId('queryEditorLanguageSelector')
-                  .invoke('text')
-                  .then((language) => {
-                    // Get the link with matching text content and verify href
-                    cy.get('.euiPopover__panel-isOpen')
-                      .find('a.euiLink.euiLink--primary')
-                      .should('have.attr', 'href')
-                      .then((href) => {
-                        let expectedHref;
-
-                        switch (language.trim()) {
-                          case 'PPL':
-                            expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/ppl/syntax/`;
-                            break;
-                          default:
-                            throw new Error(`Unexpected language: ${language}`);
-                        }
-
-                        expect(href).to.equal(expectedHref);
-                      });
+                cy.get('.euiPopover__panel-isOpen')
+                  .find('a.euiLink.euiLink--primary')
+                  .should('have.attr', 'href')
+                  .then((href) => {
+                    const expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/ppl/syntax/`;
+                    expect(href).to.equal(expectedHref);
                   });
               });
             });

@@ -242,12 +242,12 @@ export const verifyDiscoverPageState = ({
   sampleTableData,
 }) => {
   if (dataset) {
-    cy.getElementByTestId('datasetSelectorButton').contains(dataset);
+    cy.getElementByTestId('datasetSelectButton').contains(dataset);
   }
 
   if (queryString) {
     // Use the helper function to verify the Monaco editor content
-    verifyMonacoEditorContent(queryString, 'exploreReusableEditor');
+    verifyMonacoEditorContent(queryString, 'exploreTopEditor');
   }
 
   if (filters) {

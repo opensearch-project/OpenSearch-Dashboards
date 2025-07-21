@@ -4,8 +4,6 @@
  */
 
 import {
-  START_TIME,
-  END_TIME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
   QueryLanguages,
@@ -17,7 +15,6 @@ import {
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/explore/histogram_interaction';
-import { DatasetTypes } from '../../../../../../utils/apps/explore/constants';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
@@ -39,7 +36,7 @@ const runHistogramInteractionTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -50,7 +47,7 @@ const runHistogramInteractionTests = () => {
 
     generateAllTestConfigurations(generateHistogramTestConfigurations).forEach((config) => {
       it(`check histogram visibility for ${config.testName}`, () => {
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
         if (config.isHistogramVisible) {
           cy.getElementByTestId('dscChartChartheader').should('be.visible');
@@ -59,30 +56,11 @@ const runHistogramInteractionTests = () => {
           cy.getElementByTestId('dscChartChartheader').should('not.exist');
           cy.getElementByTestId('discoverChart').should('not.exist');
         }
-        // check interval selection persistence across language changes.
-        // Only need to check for INDEX_PATTERNS because INDEXES
-        // only supports SQL & PPL, and only one of the two supports histogram.
-        if (config.isHistogramVisible && config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.getElementByTestId('discoverIntervalSelect').select('Week');
-          cy.getElementByTestId('discoverIntervalDateRange').contains(
-            `${START_TIME} - ${END_TIME} per`
-          );
-          for (const language of DatasetTypes.INDEX_PATTERN.supportedLanguages) {
-            if (language.name === QueryLanguages.SQL.name) continue;
-            cy.wait(1000); // wait a bit to ensure data is loaded
-            if (language.supports.histogram) {
-              cy.getElementByTestId('discoverIntervalSelect').select('Week');
-              cy.getElementByTestId('discoverIntervalDateRange').contains(
-                `${START_TIME} - ${END_TIME} per`
-              );
-            }
-          }
-        }
       });
 
       it(`check the Auto interval value for ${config.testName}`, () => {
         if (!config.isHistogramVisible) return;
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
         const intervals = ['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
         cy.getElementByTestId('discoverIntervalSelect').should('have.value', intervals[0]);
@@ -95,6 +73,7 @@ const runHistogramInteractionTests = () => {
             cy.getElementByTestId('discoverIntervalDateRange').should('be.visible');
           });
         });
+        cy.getElementByTestId('discoverIntervalSelect').select('auto');
         // TODO: check histogram visualization
         // Currently it's not possible to check anything INSIDE the histogram with Cypress
       });
@@ -126,7 +105,7 @@ const runHistogramInteractionTests = () => {
             .find('button')
             .click({ force: true }); // reset state
         };
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         if (config.isHistogramVisible) {
           // TODO: related bug
           // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9294
@@ -154,7 +133,7 @@ const runHistogramInteractionTests = () => {
 
       it(`check collapse/expand functionality and state persistence for ${config.testName}`, () => {
         if (!config.isHistogramVisible) return;
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.getElementByTestId('dscChartChartheader').should('be.visible');

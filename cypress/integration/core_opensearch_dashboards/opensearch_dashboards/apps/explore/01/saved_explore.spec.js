@@ -54,7 +54,7 @@ const runSavedExploreTests = () => {
       it(`create and load for ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
 
