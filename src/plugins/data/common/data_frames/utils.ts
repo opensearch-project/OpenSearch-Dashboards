@@ -140,7 +140,9 @@ export const convertResult = ({
         const buckets = value as Array<{ key: string; value: number }>;
         searchResponse.aggregations[id] = {
           buckets: buckets.map((bucket) => {
-            const timestamp = new Date(bucket.key).getTime();
+            // PPL returns date strings in UTC timezone
+            // we append 'Z' to indicate date string is UTC timezone and then convert it to a timestamp.
+            const timestamp = new Date(`${bucket.key}Z`).getTime();
             searchResponse.hits.total += bucket.value;
             return {
               key_as_string: bucket.key,

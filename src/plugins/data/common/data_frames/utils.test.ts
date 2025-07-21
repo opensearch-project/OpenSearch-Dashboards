@@ -243,6 +243,10 @@ describe('convertResult', () => {
     const result = convertResult({ response });
     expect(result.aggregations?.timestamp_histogram.buckets).toHaveLength(2);
     expect(result.aggregations?.timestamp_histogram.buckets[0].doc_count).toBe(10);
+    expect(result.aggregations?.timestamp_histogram.buckets[0].key_as_string).toBe(mockDateString);
+    expect(result.aggregations?.timestamp_histogram.buckets[0].key).toBe(
+      new Date(`${mockDateString}Z`).getTime()
+    );
   });
 
   it('should handle error response', () => {
