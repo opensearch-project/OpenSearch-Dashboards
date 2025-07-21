@@ -103,6 +103,8 @@ export interface BaseProcessedSearchResults {
  */
 export interface ProcessedSearchResults extends BaseProcessedSearchResults {
   chartData?: ChartData;
+  errorChart?: ChartData;
+  latencyChart?: ChartData;
   bucketInterval?: BucketInterval;
 }
 

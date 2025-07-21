@@ -49,7 +49,7 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
             </div>
 
             {/* Main content area with resizable panels under QueryPanel */}
-            <BottomContainer />
+            <BottomContainer isTraces={true} />
           </EuiPageBody>
         </EuiPage>
       </div>
