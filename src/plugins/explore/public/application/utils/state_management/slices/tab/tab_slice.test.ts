@@ -27,6 +27,7 @@ describe('tabSlice reducers', () => {
       },
       axesMapping: {},
     },
+    patterns: { patterns_field: undefined },
   };
 
   it('should return the initial state', () => {
@@ -43,6 +44,9 @@ describe('tabSlice reducers', () => {
           styleOptions: { addTooltip: false } as any,
           axesMapping: {},
         },
+        patterns: {
+          patterns_field: 'message',
+        },
       };
 
       const state = tabReducer(initialState, setTabState(newState));
@@ -56,6 +60,9 @@ describe('tabSlice reducers', () => {
           chartType: 'pie',
           styleOptions: undefined,
           axesMapping: {},
+        },
+        patterns: {
+          patterns_field: 'message',
         },
       };
 
@@ -165,6 +172,9 @@ describe('tabSlice reducers', () => {
           styleOptions: undefined,
           axesMapping: {},
         },
+        patterns: {
+          patterns_field: 'message',
+        },
       };
       state = tabReducer(state, setTabState(newTabState));
       expect(state).toEqual(newTabState);
@@ -197,6 +207,9 @@ describe('tabSlice reducers', () => {
           chartType: 'scatter',
           styleOptions: { addTooltip: true } as any,
           axesMapping: {},
+        },
+        patterns: {
+          patterns_field: 'message',
         },
       };
 

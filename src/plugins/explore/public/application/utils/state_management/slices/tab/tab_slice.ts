@@ -54,8 +54,17 @@ const tabSlice = createSlice({
     ) => {
       state.visualizations.axesMapping = action.payload;
     },
+    setPatternsField: (state, action: PayloadAction<string>) => {
+      state.patterns.patterns_field = action.payload;
+    },
   },
 });
 
-export const { setTabState, setStyleOptions, setChartType, setAxesMapping } = tabSlice.actions;
+export const {
+  setTabState,
+  setStyleOptions,
+  setChartType,
+  setAxesMapping,
+  setPatternsField,
+} = tabSlice.actions;
 export const tabReducer = tabSlice.reducer;
