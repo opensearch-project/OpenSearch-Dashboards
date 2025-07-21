@@ -38,7 +38,7 @@ export const QueryPanelEditor = () => {
     >
       {isPromptMode ? (
         <EuiIcon
-          type="sparkleFilled"
+          type="generate"
           size="m"
           className="exploreQueryPanelEditor__promptIcon"
           aria-label={promptIconLabel}

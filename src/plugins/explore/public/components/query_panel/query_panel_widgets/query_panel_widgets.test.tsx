@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { QueryPanelFooter } from './query_panel_footer';
+import { QueryPanelWidgets } from './query_panel_widgets';
 import { useDatasetContext } from '../../../application/context';
 import { useSelector } from 'react-redux';
 
@@ -61,7 +61,7 @@ jest.mock('../../../application/context', () => ({
 const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 
-describe('QueryPanelFooter', () => {
+describe('QueryPanelWidgets', () => {
   const mockQueryStatus = {
     status: 'ready',
     elapsedMs: 150,
@@ -83,10 +83,10 @@ describe('QueryPanelFooter', () => {
       error: null,
     });
 
-    const { container } = render(<QueryPanelFooter />);
+    const { container } = render(<QueryPanelWidgets />);
 
     // Check main container
-    expect(container.querySelector('.exploreQueryPanelFooter')).toBeInTheDocument();
+    expect(container.querySelector('.exploreQueryPanelWidgets')).toBeInTheDocument();
 
     // Check left section components
     expect(screen.getByTestId('filter-panel-toggle')).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('QueryPanelFooter', () => {
       error: null,
     });
 
-    render(<QueryPanelFooter />);
+    render(<QueryPanelWidgets />);
 
     expect(screen.getByTestId('date-time-range-picker')).toBeInTheDocument();
   });
@@ -120,7 +120,7 @@ describe('QueryPanelFooter', () => {
       error: null,
     });
 
-    render(<QueryPanelFooter />);
+    render(<QueryPanelWidgets />);
 
     expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
   });
@@ -132,7 +132,7 @@ describe('QueryPanelFooter', () => {
       error: null,
     });
 
-    render(<QueryPanelFooter />);
+    render(<QueryPanelWidgets />);
 
     expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
   });
@@ -144,7 +144,7 @@ describe('QueryPanelFooter', () => {
       error: null,
     });
 
-    render(<QueryPanelFooter />);
+    render(<QueryPanelWidgets />);
 
     expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
   });

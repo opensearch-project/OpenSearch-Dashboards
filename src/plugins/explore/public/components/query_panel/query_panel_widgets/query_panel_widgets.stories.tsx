@@ -5,12 +5,12 @@
 
 import React, { useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { RecentQueriesButton } from './recent_queries_button';
-import { StorybookProviders } from '../../mock_provider.mocks';
-import { RECENT_QUERIES_TABLE_WRAPPER_EL } from '../../utils/constants';
+import { QueryPanelWidgets } from './query_panel_widgets';
+import { StorybookProviders } from '../mock_provider.mocks';
+import { RECENT_QUERIES_TABLE_WRAPPER_EL } from '../utils/constants';
 
 // Component wrapper to create the portal container
-const RecentQueriesButtonWrapper = () => {
+const QueryPanelWidgetsWrapper = () => {
   useEffect(() => {
     // Create the portal container element if it doesn't exist
     let portalContainer = document.getElementById(RECENT_QUERIES_TABLE_WRAPPER_EL);
@@ -29,16 +29,16 @@ const RecentQueriesButtonWrapper = () => {
     };
   }, []);
 
-  return <RecentQueriesButton />;
+  return <QueryPanelWidgets />;
 };
 
-const meta: Meta<typeof RecentQueriesButton> = {
-  title: 'src/plugins/explore/public/components/query_panel/footer/recent_queries_button',
-  component: RecentQueriesButton,
+const meta: Meta<typeof QueryPanelWidgets> = {
+  title: 'src/plugins/explore/public/components/query_panel/query_panel_widgets',
+  component: QueryPanelWidgets,
   decorators: [
     (Story) => (
       <StorybookProviders>
-        <div style={{ padding: '20px' }}>
+        <div style={{ padding: '20px', width: '100%' }}>
           <Story />
         </div>
       </StorybookProviders>
@@ -47,8 +47,8 @@ const meta: Meta<typeof RecentQueriesButton> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof RecentQueriesButton>;
+type Story = StoryObj<typeof QueryPanelWidgets>;
 
 export const Default: Story = {
-  render: () => <RecentQueriesButtonWrapper />,
+  render: () => <QueryPanelWidgetsWrapper />,
 };

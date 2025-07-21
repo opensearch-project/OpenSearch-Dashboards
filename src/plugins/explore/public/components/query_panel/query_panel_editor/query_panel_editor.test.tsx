@@ -194,7 +194,7 @@ describe('QueryPanelEditor', () => {
 
     const promptIcon = screen.getByTestId('eui-icon');
     expect(promptIcon).toBeInTheDocument();
-    expect(promptIcon).toHaveAttribute('data-type', 'sparkleFilled');
+    expect(promptIcon).toHaveAttribute('data-type', 'generate');
     expect(promptIcon).toHaveAttribute('data-size', 'm');
     expect(promptIcon).toHaveClass('exploreQueryPanelEditor__promptIcon');
   });

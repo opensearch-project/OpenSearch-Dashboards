@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './query_panel_footer';
+export * from './query_panel_widgets';

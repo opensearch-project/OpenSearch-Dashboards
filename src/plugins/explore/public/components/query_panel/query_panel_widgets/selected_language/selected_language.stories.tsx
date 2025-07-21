@@ -10,7 +10,7 @@ import { StorybookProviders } from '../../mock_provider.mocks';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 
 const meta: Meta<typeof SelectedLanguage> = {
-  title: 'src/plugins/explore/public/components/query_panel/footer/selected_language',
+  title: 'src/plugins/explore/public/components/query_panel/query_panel_widgets/selected_language',
   component: SelectedLanguage,
   decorators: [
     (Story) => (

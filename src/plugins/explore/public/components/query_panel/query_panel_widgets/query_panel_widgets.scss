@@ -4,7 +4,7 @@
  */
 @import "../shared";
 
-.exploreQueryPanelFooter {
+.exploreQueryPanelWidgets {
   @include exploreQueryPanelVerticalSeparator;
 
   display: flex;
@@ -17,6 +17,7 @@
   }
 
   &__right {
+    align-items: center;
     display: flex;
     gap: $ouiSizeXS;
     justify-content: end;

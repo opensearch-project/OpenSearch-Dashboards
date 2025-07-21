@@ -330,14 +330,14 @@ describe('useQueryPanelEditor', () => {
   });
 
   describe('onChange handler', () => {
-    it('should dispatch setEditorText with new text', () => {
+    it('should call setEditorText with new text', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
 
       act(() => {
         result.current.onChange('new text');
       });
 
-      expect(mockDispatch).toHaveBeenCalledWith(mockSetEditorText('new text'));
+      expect(mockSetEditorText).toHaveBeenCalledWith('new text');
     });
   });
 

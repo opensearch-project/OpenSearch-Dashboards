@@ -19,8 +19,8 @@ jest.mock('./query_panel_generated_query', () => ({
   ),
 }));
 
-jest.mock('./footer', () => ({
-  QueryPanelFooter: () => <div data-test-subj="query-panel-footer">Query Panel Footer</div>,
+jest.mock('./query_panel_widgets', () => ({
+  QueryPanelWidgets: () => <div data-test-subj="query-panel-widgets">Query Panel Widgets</div>,
 }));
 
 jest.mock('react-redux', () => ({
@@ -60,9 +60,9 @@ describe('QueryPanel', () => {
     expect(screen.getByTestId('query-panel-generated-query')).toBeInTheDocument();
   });
 
-  it('renders QueryPanelFooter component', () => {
+  it('renders QueryPanelWidgets component', () => {
     renderWithProvider(<QueryPanel />);
-    expect(screen.getByTestId('query-panel-footer')).toBeInTheDocument();
+    expect(screen.getByTestId('query-panel-widgets')).toBeInTheDocument();
   });
 
   it('shows loading progress when query is loading', () => {

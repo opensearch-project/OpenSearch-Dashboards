@@ -18,7 +18,7 @@ import {
   selectPromptModeIsAvailable,
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
-import { useClearEditors, useEditorFocus } from '../../../../application/hooks';
+import { useEditorFocus, useEditorRef } from '../../../../application/hooks';
 import { setEditorMode } from '../../../../application/utils/state_management/slices';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
@@ -30,7 +30,7 @@ export const LanguageToggle = () => {
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const dispatch = useDispatch();
-  const clearEditors = useClearEditors();
+  const editorRef = useEditorRef();
   const { focusOnEditor } = useEditorFocus();
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
@@ -39,11 +39,15 @@ export const LanguageToggle = () => {
   const onItemClick = useCallback(
     (editorMode: EditorMode) => {
       closePopover();
-      clearEditors();
       dispatch(setEditorMode(editorMode));
       setTimeout(focusOnEditor);
+      // select all
+      const range = editorRef.current?.getModel()?.getFullModelRange();
+      if (range) {
+        setTimeout(() => editorRef.current?.setSelection(range));
+      }
     },
-    [clearEditors, closePopover, dispatch, focusOnEditor]
+    [closePopover, dispatch, editorRef, focusOnEditor]
   );
 
   const items = useMemo(() => {

@@ -14,11 +14,20 @@ import { EditorMode } from '../../../../application/utils/state_management/types
 const mockDispatch = jest.fn();
 const mockClearEditors = jest.fn();
 const mockFocusOnEditor = jest.fn();
+const mockEditorRef = {
+  current: {
+    getModel: jest.fn(() => ({
+      getFullModelRange: jest.fn(() => 'mockRange'),
+    })),
+    setSelection: jest.fn(),
+  },
+};
 
 // Mock the hooks
 jest.mock('../../../../application/hooks', () => ({
   useClearEditors: () => mockClearEditors,
   useEditorFocus: () => ({ focusOnEditor: mockFocusOnEditor }),
+  useEditorRef: () => mockEditorRef,
 }));
 
 // Mock the action creator
@@ -166,7 +175,6 @@ describe('LanguageToggle', () => {
       const pplOption = screen.getByText('PPL');
       fireEvent.click(pplOption);
 
-      expect(mockClearEditors).toHaveBeenCalledTimes(1);
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SET_EDITOR_MODE',
         payload: EditorMode.Query,
@@ -175,6 +183,7 @@ describe('LanguageToggle', () => {
       // Wait for setTimeout to execute
       await waitFor(() => {
         expect(mockFocusOnEditor).toHaveBeenCalledTimes(1);
+        expect(mockEditorRef.current.setSelection).toHaveBeenCalledWith('mockRange');
       });
     });
 
@@ -187,7 +196,6 @@ describe('LanguageToggle', () => {
       const aiOption = screen.getByText('Ask AI');
       fireEvent.click(aiOption);
 
-      expect(mockClearEditors).toHaveBeenCalledTimes(1);
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SET_EDITOR_MODE',
         payload: EditorMode.Prompt,
@@ -196,6 +204,7 @@ describe('LanguageToggle', () => {
       // Wait for setTimeout to execute
       await waitFor(() => {
         expect(mockFocusOnEditor).toHaveBeenCalledTimes(1);
+        expect(mockEditorRef.current.setSelection).toHaveBeenCalledWith('mockRange');
       });
     });
 
