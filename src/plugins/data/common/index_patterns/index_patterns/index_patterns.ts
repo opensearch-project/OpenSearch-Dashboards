@@ -63,6 +63,7 @@ const savedObjectType = 'index-pattern';
 
 export interface IndexPatternSavedObjectAttrs {
   title: string;
+  displayName?: string;
 }
 
 interface IndexPatternsServiceDeps {
@@ -403,6 +404,8 @@ export class IndexPatternsService {
       version,
       attributes: {
         title,
+        displayName,
+        description,
         timeFieldName,
         intervalName,
         fields,
@@ -425,6 +428,8 @@ export class IndexPatternsService {
       id,
       version,
       title,
+      displayName,
+      description,
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -539,7 +544,6 @@ export class IndexPatternsService {
    * Get an index pattern by title if cached
    * @param id
    */
-
   getByTitle = (title: string, ignoreErrors: boolean = false): IndexPattern => {
     const indexPattern = indexPatternCache.getByTitle(title);
     if (!indexPattern && !ignoreErrors) {

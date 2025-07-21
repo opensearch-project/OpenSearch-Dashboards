@@ -36,7 +36,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       const config: Record<string, any> = {
         configDir,
         mode: flags.site ? 'static' : 'dev',
-        port: 9001,
+        port: flags.port ? parseInt(flags.port as string, 10) : 9001,
         staticDir,
       };
       if (flags.site) {
@@ -52,6 +52,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
     {
       flags: {
         boolean: ['site'],
+        string: ['port'],
       },
       description: `
         Run the storybook examples for ${name}

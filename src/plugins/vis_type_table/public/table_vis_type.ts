@@ -43,6 +43,7 @@ export const getTableVisTypeDefinition = (): BaseVisTypeOptions => ({
     defaultMessage: 'Data Table',
   }),
   icon: 'visTable',
+  isClassic: true,
   description: i18n.translate('visTypeTable.tableVisDescription', {
     defaultMessage: 'Display values in a table',
   }),

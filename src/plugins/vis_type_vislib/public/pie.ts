@@ -59,6 +59,7 @@ export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => (
     defaultMessage: 'Compare parts of a whole',
   }),
   visualization: createVislibVisController(deps),
+  isClassic: true,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];
   },

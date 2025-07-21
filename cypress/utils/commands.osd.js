@@ -247,10 +247,18 @@ cy.osd.add(
         cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
       }
 
-      cy.getElementByTestId(`collapsibleNavAppLink-${page}`).should('exist').click();
+      cy.getElementByTestId(`collapsibleNavAppLink-${page}`)
+        .should('exist')
+        .scrollIntoView()
+        .click();
     });
 
     cy.osd.waitForLoader(isEnhancement);
+
+    // On a new session, a syntax helper popover appears, which obstructs the typing within the query
+    // editor. Clicking on a random element removes the popover.
+    cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
+    cy.wait(1000);
   }
 );
 

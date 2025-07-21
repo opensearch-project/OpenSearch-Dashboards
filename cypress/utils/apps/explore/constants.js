@@ -3,14 +3,50 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export const DATASOURCE_NAME = 'data-logs-1';
+export const START_TIME = 'Jan 1, 2020 @ 00:00:00.000';
+export const END_TIME = 'Jan 1, 2024 @ 00:00:00.000';
+
+export const clusterName = 'test_cluster';
+export const clusterConnection = 'http://localhost:9200';
+
+export const S3_CLUSTER = Cypress.env('S3_ENGINE') || {};
+
+export const DS_API_PREFIX = '/api/saved_objects';
+export const DS_API = {
+  DATA_SOURCES_LISTING: `${DS_API_PREFIX}/_find?fields=id&fields=description&fields=title&per_page=10000&type=data-source`,
+  CREATE_DATA_SOURCE: `${DS_API_PREFIX}/data-source`,
+  DELETE_DATA_SOURCE: `${DS_API_PREFIX}/data-source/`,
+};
+export const DSM_API = '/internal/data-source-management/fetchDataSourceMetaData';
+
+export const BASE_QUERY_ENHANCEMENTS_API = '/api/enhancements';
+export const JOBS_API = {
+  DELETE: `${BASE_QUERY_ENHANCEMENTS_API}/jobs`,
+};
+
+export const INDEX_WITH_TIME_1 = 'data_logs_small_time_1';
+export const INDEX_WITHOUT_TIME_1 = 'data_logs_small_no_time_1';
+export const INDEX_WITH_TIME_2 = 'data_logs_small_time_2';
+export const INDEX_PATTERN_WITH_TIME = 'data_logs_small_time_*';
+export const INDEX_PATTERN_WITH_NO_TIME = 'data_logs_small_no_time_*';
+export const INDEX_PATTERN_WITH_TIME_1 = 'data_logs_small_time_1*';
+export const INDEX_PATTERN_WITH_NO_TIME_1 = 'data_logs_small_no_time_1*';
+export const INVALID_INDEX = 'index_that_does_not_exist';
+
 /**
- * The dataset type in discover
+ * The dataset type in Explore
  * @typedef {('INDEXES'|'INDEX_PATTERN')} ExploreDataset
  */
 
 /**
  * The languages in Explore
  * @typedef {('PPL')} ExploreLanguage
+ */
+
+/**
+ * The histogram interval in discover
+ * @typedef {('auto'|'ms'|'s'|'m'|'h'|'d'|'w'|'M'|'y')} HistogramInterval
  */
 
 /**
@@ -33,13 +69,11 @@
  * @property {ExploreLanguageSupportedFeatures} supports - the list of operations supported by the language
  */
 
-import { QueryLanguages } from '../query_enhancements/constants';
-
 /**
  * Maps all the query languages that is supported by explore to relevant data
  * @property {ExploreLanguageData} PPL
  */
-export const QueryLanguagesExplore = {
+export const QueryLanguages = {
   PPL: {
     name: 'PPL',
     apiName: 'PPL',
@@ -67,7 +101,7 @@ export const QueryLanguagesExplore = {
  * Maps all the dataset that is supported by explore app to relevant data
  * @type {Object.<ExploreDataset, QueryEnhancementDatasetData>}
  */
-export const DatasetTypesExplore = {
+export const DatasetTypes = {
   INDEX_PATTERN: {
     name: 'INDEX_PATTERN',
     supportedLanguages: [QueryLanguages.PPL],

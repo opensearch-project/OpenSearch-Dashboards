@@ -9,12 +9,13 @@ import {
   INDEX_WITH_TIME_1,
   QueryLanguages,
 } from '../../../../../../utils/apps/constants.js';
-import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
+import * as docTable from '../../../../../../utils/apps/explore/doc_table.js';
 import { BASE_PATH } from '../../../../../../utils/constants.js';
 import {
+  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared.js';
+} from '../../../../../../utils/apps/explore/shared.js';
 import {
   generateInspectTestConfiguration,
   getFlattenedFieldsWithValue,
@@ -22,9 +23,8 @@ import {
   verifyVisualizationsWithInspectOption,
   visualizationTitlesWithNoInspectOptions,
   visualizationTitlesWithInspectOptions,
-} from '../../../../../../utils/apps/query_enhancements/inspect.js';
+} from '../../../../../../utils/apps/explore/inspect.js';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -48,33 +48,27 @@ const inspectTestSuite = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllExploreTestConfigurations(generateInspectTestConfiguration).forEach((config) => {
+    generateAllTestConfigurations(generateInspectTestConfiguration).forEach((config) => {
       it(`should inspect and validate the first row data for ${config.testName}`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName: workspaceName,
-          page: 'explore',
+          page: 'explore/logs',
           isEnhancement: true,
         });
         cy.getElementByTestId('discoverNewButton').click();
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.setQueryLanguage(config.language);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
-        if (config.queryString) {
-          cy.setQueryEditor(config.queryString, { submit: false });
-        }
-
         cy.intercept('POST', '**/search/*').as('docTablePostRequest');
-        cy.getElementByTestId('querySubmitButton').click();
+        cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
         docTable.toggleDocTableRow(0);
 
         cy.wait('@docTablePostRequest').then((interceptedDocTableResponse) => {
           const flattenedFieldsWithValues = getFlattenedFieldsWithValue(
-            interceptedDocTableResponse,
-            config.language
+            interceptedDocTableResponse
           );
 
           for (const [key, value] of Object.entries(flattenedFieldsWithValues)) {

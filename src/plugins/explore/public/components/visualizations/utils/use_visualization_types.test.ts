@@ -101,8 +101,22 @@ describe('use_visualization_types', () => {
 
       // Verify that the registry was called with the correct columns
       expect(visualizationRegistry.getVisualizationType).toHaveBeenCalledWith([
-        { id: 0, name: 'timestamp', schema: VisFieldType.Date, column: 'field-0' },
-        { id: 1, name: 'value', schema: VisFieldType.Numerical, column: 'field-1' },
+        {
+          id: 0,
+          name: 'timestamp',
+          schema: VisFieldType.Date,
+          column: 'field-0',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
+        {
+          id: 1,
+          name: 'value',
+          schema: VisFieldType.Numerical,
+          column: 'field-1',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
       ]);
     });
 
@@ -146,14 +160,70 @@ describe('use_visualization_types', () => {
 
       // Verify that the registry was called with the correct column types
       expect(visualizationRegistry.getVisualizationType).toHaveBeenCalledWith([
-        { id: 0, name: 'date', schema: VisFieldType.Date, column: 'field-0' },
-        { id: 1, name: 'number', schema: VisFieldType.Numerical, column: 'field-1' },
-        { id: 2, name: 'boolean', schema: VisFieldType.Categorical, column: 'field-2' },
-        { id: 3, name: 'string', schema: VisFieldType.Categorical, column: 'field-3' },
-        { id: 4, name: 'keyword', schema: VisFieldType.Categorical, column: 'field-4' },
-        { id: 5, name: 'float', schema: VisFieldType.Numerical, column: 'field-5' },
-        { id: 6, name: 'integer', schema: VisFieldType.Numerical, column: 'field-6' },
-        { id: 7, name: 'unknown', schema: VisFieldType.Unknown, column: 'field-7' },
+        {
+          id: 0,
+          name: 'date',
+          schema: VisFieldType.Date,
+          column: 'field-0',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
+        {
+          id: 1,
+          name: 'number',
+          schema: VisFieldType.Numerical,
+          column: 'field-1',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
+        {
+          id: 2,
+          name: 'boolean',
+          schema: VisFieldType.Categorical,
+          column: 'field-2',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
+        {
+          id: 3,
+          name: 'string',
+          schema: VisFieldType.Categorical,
+          column: 'field-3',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
+        {
+          id: 4,
+          name: 'keyword',
+          schema: VisFieldType.Categorical,
+          column: 'field-4',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
+        {
+          id: 5,
+          name: 'float',
+          schema: VisFieldType.Numerical,
+          column: 'field-5',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
+        {
+          id: 6,
+          name: 'integer',
+          schema: VisFieldType.Numerical,
+          column: 'field-6',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
+        {
+          id: 7,
+          name: 'unknown',
+          schema: VisFieldType.Unknown,
+          column: 'field-7',
+          uniqueValuesCount: 1,
+          validValuesCount: 1,
+        },
       ]);
     });
 
@@ -183,7 +253,14 @@ describe('use_visualization_types', () => {
 
       // Verify that the registry was called with an empty name
       expect(visualizationRegistry.getVisualizationType).toHaveBeenCalledWith([
-        { id: 0, name: '', schema: VisFieldType.Numerical, column: 'field-0' },
+        {
+          id: 0,
+          name: '',
+          schema: VisFieldType.Numerical,
+          column: 'field-0',
+          uniqueValuesCount: 0,
+          validValuesCount: 0,
+        },
       ]);
     });
   });

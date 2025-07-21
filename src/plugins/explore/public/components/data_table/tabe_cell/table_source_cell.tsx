@@ -12,12 +12,12 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { shortenDottedString } from '../../../helpers/shorten_dotted_string';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 export interface ITableSourceCellProps {
-  idxPattern: IndexPattern;
+  idxPattern: IndexPattern | Dataset;
   row: OpenSearchSearchHit<Record<string, unknown>>;
   isShortDots: boolean;
 }

@@ -37,13 +37,14 @@ export const createMockExecutionContext = <ExtraContext extends object = object>
     getInitialInput: jest.fn(),
     variables: {},
     types: {},
-    // @ts-expect-error TS2739 TODO(ts-error): fixme
     abortSignal: {
       aborted: false,
       addEventListener: jest.fn(),
       dispatchEvent: jest.fn(),
       onabort: jest.fn(),
       removeEventListener: jest.fn(),
+      reason: undefined,
+      throwIfAborted: jest.fn(),
     },
     inspectorAdapters: {
       requests: {} as any,

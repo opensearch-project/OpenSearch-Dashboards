@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { DataStorage, OSD_FIELD_TYPES } from '../../data/common';
@@ -26,6 +26,8 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
+import { PPLFilterUtils } from './search/filters';
+import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
 
 export class QueryEnhancementsPlugin
   implements
@@ -40,6 +42,8 @@ export class QueryEnhancementsPlugin
   private isQuerySummaryCollapsed$ = new BehaviorSubject<boolean>(false);
   private resultSummaryEnabled$ = new BehaviorSubject<boolean>(false);
   private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(false);
+  private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  private appIdSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -51,6 +55,7 @@ export class QueryEnhancementsPlugin
     { data, usageCollection }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
+    const { currentAppId$ } = this;
 
     // Define controls once for each language and register language configurations outside of `getUpdates$`
     const pplControls = [pplLanguageReference('PPL')];
@@ -68,9 +73,18 @@ export class QueryEnhancementsPlugin
         usageCollector: data.search.usageCollector,
       }),
       getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      addFiltersToQuery: PPLFilterUtils.addFiltersToQuery,
+      addFiltersToPrompt: NaturalLanguageFilterUtils.addFiltersToPrompt,
       fields: {
         sortable: false,
-        filterable: false,
+        get filterable() {
+          const currentAppId = currentAppId$.getValue();
+          // PPL filters are only supported in explore and dashboards, return
+          // undefined to use `filterable` value from field definitions.
+          if (currentAppId?.startsWith('explore/') || currentAppId === 'dashboards')
+            return undefined;
+          return false;
+        },
         visualizable: false,
         formatter: (value: string, type: OSD_FIELD_TYPES) => {
           switch (type) {
@@ -90,7 +104,7 @@ export class QueryEnhancementsPlugin
       },
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
-      editorSupportedAppNames: ['discover'],
+      editorSupportedAppNames: ['discover', 'explore'],
       supportedAppNames: ['discover', 'data-explorer', 'explore'],
       sampleQueries: [
         {
@@ -230,8 +244,16 @@ export class QueryEnhancementsPlugin
     setStorage(this.storage);
     setData(data);
     setUiActions(uiActions);
+    this.appIdSubscription = core.application.currentAppId$.subscribe((appId) => {
+      this.currentAppId$.next(appId);
+    });
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.appIdSubscription) {
+      this.appIdSubscription.unsubscribe();
+    }
+  }
 }

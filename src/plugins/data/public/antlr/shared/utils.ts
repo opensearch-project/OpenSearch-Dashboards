@@ -18,7 +18,7 @@ import { ParsingSubject } from './types';
 import { quotesRegex, SuggestionItemDetailsTags } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
-import { DEFAULT_DATA, UI_SETTINGS } from '../../../common';
+import { DEFAULT_DATA, IFieldType, UI_SETTINGS } from '../../../common';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export interface IDataSourceRequestHandlerParams {
@@ -145,22 +145,21 @@ export const fetchColumnValues = async (
   ).body.fields[0].values;
 };
 
-export const formatValuesToSuggestions = <T extends { toString(): string }>(
+export const formatValuesToSuggestions = <T extends { toString(): string | null } | null>(
   values: T[], // generic for any value type
   modifyInsertText?: (input: T) => string
 ) => {
-  let i = 0;
-
-  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values.map((val: T) => {
-    i++;
-    return {
-      text: val.toString(),
-      type: monaco.languages.CompletionItemKind.Value,
-      detail: SuggestionItemDetailsTags.Value,
-      sortText: i.toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
-      ...(modifyInsertText && { insertText: modifyInsertText(val) }),
-    };
-  });
+  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values
+    .filter((val) => val !== null) // Only using the notNull values
+    .map((val: T, i) => {
+      return {
+        text: val?.toString() || '',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: (i + 1).toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
+        ...(modifyInsertText && { insertText: modifyInsertText(val) }),
+      };
+    });
 
   return valueSuggestions;
 };
@@ -185,6 +184,22 @@ export const formatFieldsToSuggestions = (
   });
 
   return fieldSuggestions;
+};
+
+export const formatAvailableFieldsToSuggestions = (
+  availableFields: IFieldType[],
+  modifyInsertText?: (input: string) => string,
+  sortTextImportanceFunction?: (input: string) => string
+) => {
+  return availableFields.map((field) => {
+    return {
+      text: field.name,
+      type: monaco.languages.CompletionItemKind.Field,
+      detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
+      ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+      ...(sortTextImportanceFunction && { sortText: sortTextImportanceFunction(field.name) }),
+    };
+  });
 };
 
 const singleParseQuery = <
@@ -320,6 +335,32 @@ export const parseQuery = <
         continue;
       }
 
+      if (field === 'suggestKeywords') {
+        // combine suggestKeywords arrays with smarter deduplication
+        const currentKeywords = result.suggestKeywords ?? [];
+        const nextKeywords = nextResult.suggestKeywords ?? [];
+
+        // Create a Map to handle deduplication by id, preferring existing entries
+        const keywordMap = new Map<number, KeywordSuggestion>();
+
+        // Add current keywords first (they take precedence)
+        currentKeywords.forEach((keyword) => {
+          if (keyword?.id !== undefined) {
+            keywordMap.set(keyword.id, keyword);
+          }
+        });
+
+        // Add next keywords only if they don't already exist
+        nextKeywords.forEach((keyword) => {
+          if (keyword?.id !== undefined && !keywordMap.has(keyword.id)) {
+            keywordMap.set(keyword.id, keyword);
+          }
+        });
+
+        result.suggestKeywords = Array.from(keywordMap.values());
+        continue;
+      }
+
       switch (typeof value) {
         case 'boolean':
           // if a boolean is true, keep overall result true
@@ -333,14 +374,11 @@ export const parseQuery = <
           if (Array.isArray(value)) {
             // combine arrays
             const combined = [
-              // @ts-expect-error TS2352 TODO(ts-error): fixme
-              ...((result[field as keyof A] as any[]) ?? []),
-              // @ts-expect-error TS2352 TODO(ts-error): fixme
-              ...((nextResult[field as keyof A] as any[]) ?? []),
+              ...(((result[field as keyof A] as unknown) as any[]) ?? []),
+              ...(((nextResult[field as keyof A] as unknown) as any[]) ?? []),
             ];
             // ES6 magic to filter out duplicate objects based on id field
-            // @ts-expect-error TS2352 TODO(ts-error): fixme
-            (result[field as keyof A] as any[]) = combined.filter(
+            ((result[field as keyof A] as unknown) as any[]) = combined.filter(
               (item, index, self) => index === self.findIndex((other) => other.id === item.id)
             );
             break;

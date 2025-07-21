@@ -4,12 +4,14 @@
  */
 
 import { createAbortDataQueryAction, ACTION_ABORT_DATA_QUERY } from './abort_data_query_action';
+import { abortDataQueryTrigger } from '../../../ui_actions/public';
 
 describe('createAbortDataQueryAction', () => {
   let action: ReturnType<typeof createAbortDataQueryAction>;
   let mockAbortController: AbortController;
   const mockContext = {
     reason: 'test abort',
+    trigger: abortDataQueryTrigger,
   };
   const mockId = 'id';
   let refs: Array<React.MutableRefObject<{ abortController: AbortController | undefined }>>;
@@ -36,7 +38,6 @@ describe('createAbortDataQueryAction', () => {
   });
 
   it('should abort the query when execute is called with valid abort controller', async () => {
-    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await action.execute(mockContext);
     expect(refs[0].current.abortController?.abort).toHaveBeenCalledWith('test abort');
   });
@@ -51,7 +52,6 @@ describe('createAbortDataQueryAction', () => {
       });
     }
 
-    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await action.execute(mockContext);
 
     expect(consoleSpy).toHaveBeenCalledWith(
@@ -63,7 +63,6 @@ describe('createAbortDataQueryAction', () => {
 
   it('should not throw when abort controller is undefined', async () => {
     refs[0].current.abortController = undefined;
-    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await expect(action.execute(mockContext)).resolves.not.toThrow();
   });
 
@@ -80,10 +79,8 @@ describe('createAbortDataQueryAction', () => {
     };
 
     refs.push(secondRef);
-    // @ts-expect-error TS2554 TODO(ts-error): fixme
-    action = createAbortDataQueryAction(refs);
+    action = createAbortDataQueryAction(refs, mockId);
 
-    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await action.execute(mockContext);
 
     expect(refs[0].current.abortController?.abort).toHaveBeenCalledWith('test abort');

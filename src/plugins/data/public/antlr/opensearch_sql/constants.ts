@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OpenSearchSQLParser } from './.generated/OpenSearchSQLParser';
+import { OpenSearchSQLParser } from '@osd/antlr-grammar';
 
 export const SQL_SYMBOLS = {
   AGREGATE_FUNCTIONS: [
