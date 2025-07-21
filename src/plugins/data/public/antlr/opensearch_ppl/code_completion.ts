@@ -26,7 +26,6 @@ import { SuggestionItemDetailsTags } from '../shared/constants';
 import {
   PPL_AGGREGATE_FUNCTIONS,
   PPL_FUNCTIONAL_KEYWORDS,
-  PPL_NON_LITERAL_KEYWORDS,
   PPL_SUGGESTION_IMPORTANCE,
   SUPPORTED_NON_LITERAL_KEYWORDS,
 } from './constants';
