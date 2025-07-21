@@ -9,14 +9,14 @@
   }
 
   // EuiCallOut wraps children within two divs
-  & > div > div {
+  &>div>div {
     display: flex;
     justify-content: space-between;
     align-items: center;
 
     // Adding some specificity by nesting
     .exploreClassicExperienceBanner__newExperienceButton {
-      font-size: $ouiFontSizeXS;
+      font-size: $ouiFontSizeS;
       height: $ouiSizeL;
     }
   }
