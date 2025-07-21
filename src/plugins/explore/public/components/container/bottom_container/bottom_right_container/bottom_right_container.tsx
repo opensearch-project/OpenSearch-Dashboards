@@ -18,10 +18,15 @@ import { executeQueries } from '../../../../application/utils/state_management/a
 import { ExploreTabs } from '../../../../components/tabs/tabs';
 import { ResultsSummaryPanel } from '../../../../components/results_summary/results_summary_panel';
 import { DiscoverChartContainer } from '../../../../components/chart/discover_chart_container';
+import { TracesMetricsPanel } from '../../../../components/chart/traces_metrics_panel';
 import { useDatasetContext } from '../../../../application/context';
 import { ErrorPanel } from '../../../error_panel';
 
-export const BottomRightContainer = () => {
+interface BottomRightContainerProps {
+  isTraces?: boolean;
+}
+
+export const BottomRightContainer: React.FC<BottomRightContainerProps> = ({ isTraces = false }) => {
   const dispatch = useDispatch();
   const { dataset } = useDatasetContext();
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -84,7 +89,7 @@ export const BottomRightContainer = () => {
     return (
       <>
         <ResultsSummaryPanel />
-        <DiscoverChartContainer />
+        {isTraces ? <TracesMetricsPanel /> : <DiscoverChartContainer />}
         <CanvasPanel>
           <ExploreTabs />
         </CanvasPanel>
