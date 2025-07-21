@@ -74,7 +74,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count by Category');
       expect(spec.data.values).toBe(mockData);
       expect(spec.layer).toHaveLength(1);
 
@@ -221,7 +220,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count by Category and Category2');
       expect(spec.data.values).toBe(mockData);
 
       // Check encoding
@@ -316,7 +314,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count Over Time');
       expect(spec.data.values).toBe(mockData);
       expect(spec.layer).toHaveLength(1);
 
@@ -432,7 +429,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count Over Time by Category');
       expect(spec.data.values).toBe(mockData);
 
       // Check encoding
@@ -579,7 +575,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count Over Time by Category (Faceted by Category2)');
       expect(spec.data.values).toBe(mockData);
       expect(spec.facet).toBeDefined();
       expect(spec.facet.field).toBe('category2');

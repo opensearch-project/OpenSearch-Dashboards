@@ -45,7 +45,7 @@ export const defaultPieChartStyles: PieChartStyleControls = {
     truncate: 100,
   },
   titleOptions: {
-    show: true,
+    show: false,
     titleName: '',
   },
 };

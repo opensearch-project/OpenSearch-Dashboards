@@ -93,7 +93,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
   ],
   switchAxes: false,
   titleOptions: {
-    show: true,
+    show: false,
     titleName: '',
   },
 };

@@ -20,7 +20,7 @@ export const TitleOptionsPanel: React.FC<TitleOptionsPanelProps> = ({
   onShowTitleChange,
 }) => {
   const [localTitle, handleTitleChange] = useDebouncedValue(
-    titleOptions.titleName || '',
+    titleOptions?.titleName || '',
     (value) => onShowTitleChange({ titleName: value }),
     500
   );
@@ -39,12 +39,12 @@ export const TitleOptionsPanel: React.FC<TitleOptionsPanelProps> = ({
           label={i18n.translate('explore.stylePanel.title.showTitle', {
             defaultMessage: 'Show title',
           })}
-          checked={titleOptions.show}
+          checked={titleOptions?.show}
           onChange={(e) => onShowTitleChange({ show: e.target.checked })}
           data-test-subj="titleModeSwitch"
         />
       </EuiFormRow>
-      {titleOptions.show && (
+      {titleOptions?.show && (
         <EuiFormRow
           label={i18n.translate('explore.stylePanel.title.displayName', {
             defaultMessage: 'Display name',

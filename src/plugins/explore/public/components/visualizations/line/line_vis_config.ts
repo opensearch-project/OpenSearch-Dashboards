@@ -110,7 +110,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
   ],
 
   titleOptions: {
-    show: true,
+    show: false,
     titleName: '',
   },
 };

@@ -39,7 +39,7 @@ describe('bar_vis_config', () => {
           },
         ],
         titleOptions: {
-          show: true,
+          show: false,
           titleName: '',
         },
       });

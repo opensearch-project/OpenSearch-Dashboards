@@ -113,7 +113,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
     },
   ],
   titleOptions: {
-    show: true,
+    show: false,
     titleName: '',
   },
 };

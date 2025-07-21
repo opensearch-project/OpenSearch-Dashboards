@@ -105,7 +105,7 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
   ],
 
   titleOptions: {
-    show: true,
+    show: false,
     titleName: '',
   },
 };

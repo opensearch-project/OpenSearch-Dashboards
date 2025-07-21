@@ -122,7 +122,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     },
   ],
   titleOptions: {
-    show: true,
+    show: false,
     titleName: '',
   },
 };
