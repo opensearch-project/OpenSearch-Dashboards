@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useSelector } from 'react-redux';
 import { LogsTab } from '../components/tabs/logs_tab';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { PatternsTab } from '../components/tabs/patterns_tab';
@@ -10,6 +11,7 @@ import { ExploreServices } from '../types';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
+import { selectPatternsField } from './utils/state_management/selectors';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -45,9 +47,13 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
     prepareQuery: (query) => {
-      const patternsField = 'Dest'; // TODO: pull from patterns field configured in dataset
+      // Get the selected patterns field from the Redux store
+      // const patternsField = useSelector(selectPatternsField);
 
-      // TODO: add quotes around take patternsField
+      // if (!patternsField) return '';
+
+      const patternsField = 'message';
+
       // ` | patterns \`${patternsField}\` method=brain | stats count() as count, take(\`${patternsField}\`, 1) as sample by patterns_field | sort - count | fields patterns_field, count, sample`
 
       return typeof query.query === 'string' && query.query !== ''
