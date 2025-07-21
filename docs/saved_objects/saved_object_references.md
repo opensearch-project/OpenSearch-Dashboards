@@ -47,7 +47,7 @@ To create a new saved object type that uses references:
 1. **Design your object structure**: Identify which fields should reference other saved objects (typically IDs of index patterns, data sources, etc.)
 
 2. **Extract references during save**: Before saving, pull out the referenced IDs and create reference entries with:
-   - `name`: A unique identifier for this reference
+   - `name`: path + field within the object ([more details](#reference-naming-convention))
    - `type`: The type of saved object being referenced
    - `id`: The ID of the referenced object
 
