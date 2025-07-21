@@ -11,7 +11,8 @@ import { FilterPanelToggle } from './filter_panel_toggle';
 import { rootReducer, RootState } from '../../../../application/utils/state_management/store';
 
 export default {
-  title: 'src/plugins/explore/public/components/query_panel/footer/filter_panel_toggle',
+  title:
+    'src/plugins/explore/public/components/query_panel/query_panel_widgets/filter_panel_toggle',
   component: FilterPanelToggle,
 } as ComponentMeta<typeof FilterPanelToggle>;
 

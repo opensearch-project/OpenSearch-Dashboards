@@ -42,7 +42,7 @@ const createErrorStore = () => {
 };
 
 const meta: Meta<typeof QueryPanelError> = {
-  title: 'src/plugins/explore/public/components/query_panel/footer/query_panel_error',
+  title: 'src/plugins/explore/public/components/query_panel/query_panel_widgets/query_panel_error',
   component: QueryPanelError,
   decorators: [
     (Story) => {

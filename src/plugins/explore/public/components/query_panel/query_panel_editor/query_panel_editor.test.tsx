@@ -52,6 +52,7 @@ describe('QueryPanelEditor', () => {
     onEditorClick: jest.fn(),
     options: {},
     placeholder: 'Ask a question or search using </> PPL',
+    promptIsTyping: false,
     showPlaceholder: false,
     useLatestTheme: true as const,
     value: 'SELECT * FROM logs',
@@ -131,6 +132,30 @@ describe('QueryPanelEditor', () => {
     expect(editor).not.toHaveClass('exploreQueryPanelEditor--promptMode');
   });
 
+  it('applies prompt is typing class when promptIsTyping is true', () => {
+    mockUseQueryPanelEditor.mockReturnValue({
+      ...mockUseQueryPanelEditorReturn,
+      promptIsTyping: true,
+    });
+
+    renderWithProvider(<QueryPanelEditor />);
+
+    const editor = screen.getByTestId('exploreQueryPanelEditor');
+    expect(editor).toHaveClass('exploreQueryPanelEditor--promptIsTyping');
+  });
+
+  it('does not apply prompt is typing class when promptIsTyping is false', () => {
+    mockUseQueryPanelEditor.mockReturnValue({
+      ...mockUseQueryPanelEditorReturn,
+      promptIsTyping: false,
+    });
+
+    renderWithProvider(<QueryPanelEditor />);
+
+    const editor = screen.getByTestId('exploreQueryPanelEditor');
+    expect(editor).not.toHaveClass('exploreQueryPanelEditor--promptIsTyping');
+  });
+
   it('shows placeholder when showPlaceholder is true', () => {
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
@@ -194,7 +219,7 @@ describe('QueryPanelEditor', () => {
 
     const promptIcon = screen.getByTestId('eui-icon');
     expect(promptIcon).toBeInTheDocument();
-    expect(promptIcon).toHaveAttribute('data-type', 'sparkleFilled');
+    expect(promptIcon).toHaveAttribute('data-type', 'generate');
     expect(promptIcon).toHaveAttribute('data-size', 'm');
     expect(promptIcon).toHaveClass('exploreQueryPanelEditor__promptIcon');
   });

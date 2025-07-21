@@ -9,6 +9,7 @@ import { MutableRefObject } from 'react';
 type IActionDescriptor = monaco.editor.IActionDescriptor;
 
 export const getSpacebarAction = (
+  promptModeIsAvailableRef: MutableRefObject<boolean>,
   isPromptModeRef: MutableRefObject<boolean>,
   textRef: MutableRefObject<string>,
   setToPromptMode: () => void
@@ -19,8 +20,12 @@ export const getSpacebarAction = (
   }),
   keybindings: [monaco.KeyCode.Space],
   run: (editor) => {
-    // Only execute the action if in Query mode and no text in editor
-    if (!isPromptModeRef.current && textRef.current.length === 0) {
+    // Only execute the action if in Query mode and no text in editor and promptModeIsAvailable
+    if (
+      promptModeIsAvailableRef.current &&
+      !isPromptModeRef.current &&
+      textRef.current.length === 0
+    ) {
       setToPromptMode();
       return;
     }

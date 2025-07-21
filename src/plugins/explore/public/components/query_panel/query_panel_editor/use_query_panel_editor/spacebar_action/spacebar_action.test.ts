@@ -9,12 +9,14 @@ import { MutableRefObject } from 'react';
 
 describe('getSpacebarAction', () => {
   let mockSetToPromptMode: jest.Mock;
+  let promptModeIsAvailableRef: MutableRefObject<boolean>;
   let isPromptModeRef: MutableRefObject<boolean>;
   let textRef: MutableRefObject<string>;
   let mockEditor: any;
 
   beforeEach(() => {
     mockSetToPromptMode = jest.fn();
+    promptModeIsAvailableRef = { current: true };
     isPromptModeRef = { current: false };
     textRef = { current: '' };
     mockEditor = {
@@ -27,7 +29,12 @@ describe('getSpacebarAction', () => {
   });
 
   it('should return correct action descriptor with proper id, label, and keybindings', () => {
-    const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+    const action = getSpacebarAction(
+      promptModeIsAvailableRef,
+      isPromptModeRef,
+      textRef,
+      mockSetToPromptMode
+    );
 
     expect(action).toEqual({
       id: 'spacebar-action',
@@ -42,21 +49,32 @@ describe('getSpacebarAction', () => {
   });
 
   it('should have Space key as keybinding', () => {
-    const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+    const action = getSpacebarAction(
+      promptModeIsAvailableRef,
+      isPromptModeRef,
+      textRef,
+      mockSetToPromptMode
+    );
 
     expect(action.keybindings).toContain(monaco.KeyCode.Space);
     expect(action.keybindings).toHaveLength(1);
   });
 
   describe('run function', () => {
-    describe('when in Query mode with empty text', () => {
+    describe('when in Query mode with empty text and prompt mode is available', () => {
       beforeEach(() => {
+        promptModeIsAvailableRef.current = true;
         isPromptModeRef.current = false;
         textRef.current = '';
       });
 
       it('should call setToPromptMode', () => {
-        const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
 
         action.run(mockEditor);
 
@@ -64,11 +82,50 @@ describe('getSpacebarAction', () => {
       });
 
       it('should not trigger default spacebar behavior', () => {
-        const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
 
         action.run(mockEditor);
 
         expect(mockEditor.trigger).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when in Query mode with empty text but prompt mode is not available', () => {
+      beforeEach(() => {
+        promptModeIsAvailableRef.current = false;
+        isPromptModeRef.current = false;
+        textRef.current = '';
+      });
+
+      it('should not call setToPromptMode', () => {
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
+
+        action.run(mockEditor);
+
+        expect(mockSetToPromptMode).not.toHaveBeenCalled();
+      });
+
+      it('should trigger default spacebar behavior', () => {
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
+
+        action.run(mockEditor);
+
+        expect(mockEditor.trigger).toHaveBeenCalledWith('keyboard', 'type', { text: ' ' });
       });
     });
 
@@ -79,7 +136,12 @@ describe('getSpacebarAction', () => {
       });
 
       it('should not call setToPromptMode', () => {
-        const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
 
         action.run(mockEditor);
 
@@ -87,7 +149,12 @@ describe('getSpacebarAction', () => {
       });
 
       it('should trigger default spacebar behavior', () => {
-        const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
 
         action.run(mockEditor);
 
@@ -102,7 +169,12 @@ describe('getSpacebarAction', () => {
       });
 
       it('should not call setToPromptMode', () => {
-        const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
 
         action.run(mockEditor);
 
@@ -110,7 +182,12 @@ describe('getSpacebarAction', () => {
       });
 
       it('should trigger default spacebar behavior', () => {
-        const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
 
         action.run(mockEditor);
 
@@ -125,7 +202,12 @@ describe('getSpacebarAction', () => {
       });
 
       it('should not call setToPromptMode', () => {
-        const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
 
         action.run(mockEditor);
 
@@ -133,7 +215,12 @@ describe('getSpacebarAction', () => {
       });
 
       it('should trigger default spacebar behavior', () => {
-        const action = getSpacebarAction(isPromptModeRef, textRef, mockSetToPromptMode);
+        const action = getSpacebarAction(
+          promptModeIsAvailableRef,
+          isPromptModeRef,
+          textRef,
+          mockSetToPromptMode
+        );
 
         action.run(mockEditor);
 

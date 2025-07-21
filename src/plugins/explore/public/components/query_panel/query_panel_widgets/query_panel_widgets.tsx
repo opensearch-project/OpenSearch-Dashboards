@@ -13,30 +13,30 @@ import { useDatasetContext } from '../../../application/context';
 import { SelectedLanguage } from './selected_language';
 import { QueryPanelError } from './query_panel_error';
 import { LanguageToggle } from './language_toggle';
-import './query_panel_footer.scss';
+import './query_panel_widgets.scss';
 
-export const QueryPanelFooter = () => {
+export const QueryPanelWidgets = () => {
   const { dataset } = useDatasetContext();
   const showDatePicker = Boolean(dataset?.timeFieldName);
 
   return (
-    <div className="exploreQueryPanelFooter">
+    <div className="exploreQueryPanelWidgets">
       {/* Left Section */}
-      <div className="exploreQueryPanelFooter__left">
+      <div className="exploreQueryPanelWidgets__left">
         <FilterPanelToggle />
-        <div className="exploreQueryPanelFooter__verticalSeparator" />
+        <div className="exploreQueryPanelWidgets__verticalSeparator" />
         <RecentQueriesButton />
-        <div className="exploreQueryPanelFooter__verticalSeparator" />
+        <div className="exploreQueryPanelWidgets__verticalSeparator" />
         <SaveQueryButton />
-        <div className="exploreQueryPanelFooter__verticalSeparator" />
-        <SelectedLanguage />
-        <LanguageToggle />
+        <div className="exploreQueryPanelWidgets__verticalSeparator" />
+        {/* TODO: Actions should go here */}
         <QueryPanelError />
       </div>
 
       {/* Right Section */}
-      <div className="exploreQueryPanelFooter__right">
-        {/* TODO: Actions should go here */}
+      <div className="exploreQueryPanelWidgets__right">
+        <SelectedLanguage />
+        <LanguageToggle />
         {showDatePicker && <DateTimeRangePicker />}
         <RunQueryButton />
       </div>

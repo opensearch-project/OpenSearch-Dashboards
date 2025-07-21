@@ -9,7 +9,8 @@ import { DateTimeRangePicker } from './date_time_range_picker';
 import { StorybookProviders } from '../../mock_provider.mocks';
 
 const meta: Meta<typeof DateTimeRangePicker> = {
-  title: 'src/plugins/explore/public/components/query_panel/footer/date_time_range_picker',
+  title:
+    'src/plugins/explore/public/components/query_panel/query_panel_widgets/date_time_range_picker',
   component: DateTimeRangePicker,
   decorators: [
     (Story) => (
