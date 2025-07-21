@@ -8,22 +8,35 @@ import {
   createLineBarChart,
   createMultiLineChart,
   createFacetedMultiLineChart,
+  createCategoryLineChart,
 } from './to_expression';
-import { ThresholdLineStyle, VisColumn, VisFieldType } from '../types';
+import {
+  ThresholdLineStyle,
+  VisColumn,
+  VisFieldType,
+  Positions,
+  TooltipOptions,
+  AxisRole,
+  AxisColumnMappings,
+} from '../types';
 import * as lineChartUtils from './line_chart_utils';
-import { Positions } from '../utils/collections';
+import * as thresholdUtils from '../style_panel/threshold/utils';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({
   buildMarkConfig: jest.fn().mockReturnValue({ type: 'line', tooltip: true }),
-  createThresholdLayer: jest.fn().mockReturnValue(null),
   createTimeMarkerLayer: jest.fn().mockReturnValue(null),
   applyAxisStyling: jest.fn().mockReturnValue({ title: 'Mocked Axis' }),
-  getStrokeDash: jest.fn().mockReturnValue([5, 5]),
   ValueAxisPosition: {
     Left: 'left',
     Right: 'right',
   },
+}));
+
+// Mock the threshold utils
+jest.mock('../style_panel/threshold/utils', () => ({
+  getStrokeDash: jest.fn().mockReturnValue([5, 5]),
+  createThresholdLayer: jest.fn().mockReturnValue(null),
 }));
 
 describe('to_expression', () => {
@@ -38,6 +51,8 @@ describe('to_expression', () => {
     name: 'date',
     schema: VisFieldType.Date,
     column: 'field-0',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const numericColumn1: VisColumn = {
@@ -45,6 +60,8 @@ describe('to_expression', () => {
     name: 'value1',
     schema: VisFieldType.Numerical,
     column: 'field-1',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const numericColumn2: VisColumn = {
@@ -52,6 +69,8 @@ describe('to_expression', () => {
     name: 'value2',
     schema: VisFieldType.Numerical,
     column: 'field-2',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const categoricalColumn1: VisColumn = {
@@ -59,6 +78,8 @@ describe('to_expression', () => {
     name: 'category1',
     schema: VisFieldType.Categorical,
     column: 'field-2',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const categoricalColumn2: VisColumn = {
@@ -66,18 +87,26 @@ describe('to_expression', () => {
     name: 'category2',
     schema: VisFieldType.Categorical,
     column: 'field-3',
+    validValuesCount: 1,
+    uniqueValuesCount: 1,
   };
 
   const styleOptions = {
-    addTooltip: true,
     addLegend: true,
     legendPosition: Positions.RIGHT,
-    thresholdLine: {
-      show: false,
-      value: 100,
-      color: 'red',
-      width: 1,
-      style: ThresholdLineStyle.Dashed,
+    thresholdLines: [
+      {
+        id: '1',
+        show: false,
+        value: 100,
+        color: 'red',
+        width: 1,
+        style: ThresholdLineStyle.Dashed,
+        name: '',
+      },
+    ],
+    tooltipOptions: {
+      mode: 'all' as TooltipOptions['mode'],
     },
     addTimeMarker: false,
   };
@@ -91,14 +120,20 @@ describe('to_expression', () => {
       // Enable threshold and time marker for this test
       const mockThresholdLayer = { mark: { type: 'rule' } };
       const mockTimeMarkerLayer = { mark: { type: 'rule' } };
-      (lineChartUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
+      (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
       (lineChartUtils.createTimeMarkerLayer as jest.Mock).mockReturnValueOnce(mockTimeMarkerLayer);
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+      };
 
       const result = createSimpleLineChart(
         transformedData,
         [numericColumn1],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        mockAxisColumnMappings
       );
 
       // Verify the result structure
@@ -116,18 +151,28 @@ describe('to_expression', () => {
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
-      expect(lineChartUtils.createThresholdLayer).toHaveBeenCalledWith(styleOptions);
+      expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
+        styleOptions.thresholdLines,
+        styleOptions.tooltipOptions?.mode
+      );
       expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(styleOptions);
     });
   });
 
   describe('createLineBarChart', () => {
     it('should create a combined line and bar chart with two metrics and one date', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.Y_SECOND]: numericColumn2,
+      };
+
       const result = createLineBarChart(
         transformedData,
         [numericColumn1, numericColumn2],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        mockAxisColumnMappings
       );
 
       // Verify the result structure
@@ -159,12 +204,19 @@ describe('to_expression', () => {
 
   describe('createMultiLineChart', () => {
     it('should create a multi-line chart with one metric, one date, and one categorical column', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.COLOR]: categoricalColumn1,
+      };
+
       const result = createMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        mockAxisColumnMappings
       );
 
       // Verify the result structure
@@ -188,15 +240,23 @@ describe('to_expression', () => {
   describe('createFacetedMultiLineChart', () => {
     it('should create a faceted multi-line chart with one metric, one date, and two categorical columns', () => {
       // Enable threshold and time marker for this test
-      styleOptions.thresholdLine.show = true;
+      styleOptions.thresholdLines[0].show = true;
       styleOptions.addTimeMarker = true;
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.COLOR]: categoricalColumn1,
+        [AxisRole.FACET]: categoricalColumn2,
+      };
 
       const result = createFacetedMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1, categoricalColumn2],
         [dateColumn],
-        styleOptions
+        styleOptions,
+        mockAxisColumnMappings
       );
 
       // Verify the result structure
@@ -226,7 +286,67 @@ describe('to_expression', () => {
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
-      expect(lineChartUtils.getStrokeDash).toHaveBeenCalled();
+      expect(thresholdUtils.getStrokeDash).toHaveBeenCalled();
+    });
+  });
+
+  describe('createCategoryLineChart', () => {
+    it('should create a category-based line chart with one metric and one categorical column', () => {
+      // Enable threshold for this test
+      const mockThresholdLayer = { mark: { type: 'rule' } };
+      (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: categoricalColumn1,
+      };
+
+      const result = createCategoryLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [],
+        styleOptions,
+        mockAxisColumnMappings
+      );
+
+      // Verify the result structure
+      expect(result).toHaveProperty('$schema');
+      expect(result).toHaveProperty('title', 'value1 by category1');
+      expect(result).toHaveProperty('data.values', transformedData);
+      expect(result).toHaveProperty('layer');
+      expect(result.layer).toHaveLength(2); // Main layer + threshold
+
+      // Verify the main layer
+      expect(result.layer[0]).toHaveProperty('mark');
+      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-2');
+      expect(result.layer[0]).toHaveProperty('encoding.x.type', 'nominal');
+      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
+      expect(result.layer[0]).toHaveProperty('encoding.y.type', 'quantitative');
+
+      // Verify utility functions were called
+      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
+      expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
+      expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
+        styleOptions.thresholdLines,
+        styleOptions.tooltipOptions?.mode
+      );
+    });
+
+    it('should throw an error when required columns are missing', () => {
+      // Test with missing numerical column
+      expect(() => {
+        createCategoryLineChart(transformedData, [], [categoricalColumn1], [], styleOptions);
+      }).toThrow(
+        'Category line chart requires at least one numerical column and one categorical column'
+      );
+
+      // Test with missing categorical column
+      expect(() => {
+        createCategoryLineChart(transformedData, [numericColumn1], [], [], styleOptions);
+      }).toThrow(
+        'Category line chart requires at least one numerical column and one categorical column'
+      );
     });
   });
 });

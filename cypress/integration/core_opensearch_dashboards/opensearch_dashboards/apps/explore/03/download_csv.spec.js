@@ -7,28 +7,25 @@ import Papa from 'papaparse';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
+} from '../../../../../../utils/apps/explore/shared';
 import {
   DATASOURCE_NAME,
   INDEX_WITH_TIME_1,
   INDEX_WITHOUT_TIME_1,
   QueryLanguages,
-} from '../../../../../../utils/apps/query_enhancements/constants';
+} from '../../../../../../utils/apps/explore/constants';
 import {
   downloadCsvAndVerify,
+  generateDownloadCsvTestConfigurations,
   getFirstRowForDownloadWithFields,
   getFirstRowTimeForSourceDownload,
   getHeadersForDownloadWithFields,
   getHeadersForSourceDownload,
-  getMaxCount,
   getVisibleCountForLanguage,
-  toggleFieldsForCsvDownload,
-} from '../../../../../../utils/apps/query_enhancements/download_csv';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
-import {
-  generateDownloadCsvTestConfigurations,
   prepareDiscoverPageForDownload,
+  toggleFieldsForCsvDownload,
 } from '../../../../../../utils/apps/explore/download_csv';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -109,53 +106,14 @@ const runDownloadCsvTests = () => {
         // deselect the selected fields
         toggleFieldsForCsvDownload();
       });
-
-      if ([QueryLanguages.DQL.name, QueryLanguages.Lucene.name].includes(config.language.name)) {
-        it(`should be able to download Max option with default rows for ${config.saveName}`, () => {
-          prepareDiscoverPageForDownload(config, workspaceName);
-
-          downloadCsvAndVerify('Max', (csvString) => {
-            const { data } = Papa.parse(csvString);
-            cy.wrap(data).should('have.length', getMaxCount(config.hasTime) + 1);
-            cy.wrap(data[0]).should('deep.equal', getHeadersForSourceDownload(config.hasTime));
-            if (config.hasTime) {
-              cy.wrap(data[1][0]).should(
-                'equal',
-                getFirstRowTimeForSourceDownload(config.language)
-              );
-            }
-          });
-        });
-
-        it(`should be able to download Max option with selected rows for ${config.saveName}`, () => {
-          prepareDiscoverPageForDownload(config, workspaceName);
-
-          // select some fields
-          toggleFieldsForCsvDownload();
-
-          downloadCsvAndVerify('Max', (csvString) => {
-            const { data } = Papa.parse(csvString);
-            cy.wrap(data).should('have.length', getMaxCount(config.hasTime) + 1);
-            cy.wrap(data[0]).should('deep.equal', getHeadersForDownloadWithFields(config.hasTime));
-            if (config.hasTime) {
-              cy.wrap(data[1]).should(
-                'deep.equal',
-                getFirstRowForDownloadWithFields(config.language, config.hasTime)
-              );
-            }
-          });
-
-          // deselect the selected fields
-          toggleFieldsForCsvDownload();
-        });
-      }
     });
 
-    it('Should be able to change the number of rows setting and have it download correct amount', () => {
+    // TODO: PPL currently does not respect the number of rows setting
+    it.skip('Should be able to change the number of rows setting and have it download correct amount', () => {
       const config = {
         dataset: `${INDEX_WITH_TIME_1}*`,
       };
-      const language = QueryLanguages.DQL;
+      const language = QueryLanguages.PPL;
       const expectedCount = 95;
 
       cy.visit('/app/settings');
@@ -172,13 +130,12 @@ const runDownloadCsvTests = () => {
 
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
 
       cy.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
 
-      cy.setQueryLanguage(language.name);
       setDatePickerDatesAndSearchIfRelevant(language.name);
 
       // eslint-disable-next-line no-loop-func

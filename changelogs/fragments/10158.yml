@@ -1,0 +1,2 @@
+fix:
+- Fix a issue causing unnecessary saved object fetch and top nav loading icon flicker flicker ([#10158](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10158))

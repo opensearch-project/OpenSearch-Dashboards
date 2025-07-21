@@ -11,6 +11,7 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
 
 .explore-table td.exploreDocTableCell__toggleDetails {
   padding: 4px 0 0 4px;
+  z-index: 3;
 }
 
 /**
@@ -37,7 +38,8 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
 
     // Just to have some distance from the content behind it; larger for left so we can show a gradiant
     // 8px is set by .table
-    padding: 8px 8px 8px 16px;
+    padding: $euiSizeS - 1px, $euiSizeS;
+    margin-top: 1px;
 
     &::before {
       content: "";

@@ -7,11 +7,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { DiscoverServices } from '../../../build_services';
+import { ExploreServices } from '../../../../../../types';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { SurroundingDocsView } from './surrounding_docs_view';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { PLUGIN_ID } from '../../../../../../../common/legacy/discover';
+import { PLUGIN_ID } from '../../../../../../../common';
 
 export interface SurroundingDocsUrlParams {
   id: string;
@@ -27,7 +27,7 @@ export function SurroundingDocsApp() {
         application: { getUrlForApp },
       },
     },
-  } = useOpenSearchDashboards<DiscoverServices>();
+  } = useOpenSearchDashboards<ExploreServices>();
   const baseUrl = getUrlForApp(PLUGIN_ID);
   const { id, indexPatternId } = useParams<SurroundingDocsUrlParams>();
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);

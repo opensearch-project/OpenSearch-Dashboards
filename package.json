@@ -105,8 +105,11 @@
     "osd:ciGroup14Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/04/*.spec.js\"",
     "osd:ciGroup15Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/05/*.spec.js\"",
     "osd:ciGroupS3Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/s3_tests/*.spec.js\"",
-    "generate:opensearchsqlantlr": "./node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/plugins/data/public/antlr/opensearch_sql/.generated -visitor -no-listener -Xexact-output-dir ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLLexer.g4 ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLParser.g4",
-    "generate:opensearchpplantlr": "./node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/plugins/data/public/antlr/opensearch_ppl/.generated -visitor -no-listener -Xexact-output-dir ./src/plugins/data/public/antlr/opensearch_ppl/grammar/OpenSearchPPLLexer.g4 ./src/plugins/data/public/antlr/opensearch_ppl/grammar/OpenSearchPPLParser.g4"
+    "generate:grammars": "yarn workspace @osd/antlr-grammar generate:all",
+    "generate:grammars:sql": "yarn workspace @osd/antlr-grammar generate:opensearchsql", 
+    "generate:grammars:ppl": "yarn workspace @osd/antlr-grammar generate:opensearchppl",
+    "generate:grammars:ppl-simplified": "yarn workspace @osd/antlr-grammar generate:opensearchppl-simplified",
+    "generate:grammars:dql": "yarn workspace @osd/antlr-grammar generate:dql"
   },
   "repository": {
     "type": "git",
@@ -211,6 +214,7 @@
     "@opensearch/datemath": "5.0.3",
     "@osd/ace": "1.0.0",
     "@osd/analytics": "1.0.0",
+    "@osd/antlr-grammar": "1.0.0",
     "@osd/apm-config-loader": "1.0.0",
     "@osd/config": "1.0.0",
     "@osd/config-schema": "1.0.0",

@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { DocViewerTab, DocViewerTabProps } from './doc_viewer_tab';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
@@ -17,11 +16,11 @@ test('DocViewerTab updated when getting new renderProps', () => {
   const mockProps: DocViewerTabProps = {
     id: 1,
     title: 'Test1',
-    component: MockComp,
+    component: MockComp as any,
     renderProps: {
       hit: { _id: '1' },
       columns: ['test1'],
-    },
+    } as DocViewRenderProps,
   };
 
   const wrapper = mount(<DocViewerTab {...mockProps} />);
@@ -29,7 +28,7 @@ test('DocViewerTab updated when getting new renderProps', () => {
   const div = wrapper.find({ 'data-test-subj': 'test-div' });
   expect(div.text()).toEqual('test1');
 
-  mockProps.renderProps = { hit: { _id: '1' }, columns: ['test2'] };
-  wrapper.setProps(mockProps);
+  mockProps.renderProps = { hit: { _id: '1' }, columns: ['test2'] } as DocViewRenderProps;
+  wrapper.setProps(mockProps as any);
   expect(div.text()).toEqual('test2');
 });

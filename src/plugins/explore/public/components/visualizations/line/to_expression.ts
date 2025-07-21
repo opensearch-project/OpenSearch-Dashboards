@@ -4,16 +4,14 @@
  */
 
 import { LineChartStyleControls } from './line_vis_config';
-import { VisColumn } from '../types';
+import { VisColumn, Positions, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import {
   buildMarkConfig,
-  createThresholdLayer,
   createTimeMarkerLayer,
   applyAxisStyling,
-  getStrokeDash,
   ValueAxisPosition,
 } from './line_chart_utils';
-import { Positions } from '../utils/collections';
+import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -27,12 +25,16 @@ export const createSimpleLineChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>
+  styles: Partial<LineChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const metricField = numericalColumns[0].column;
-  const dateField = dateColumns[0].column;
-  const metricName = numericalColumns[0].name;
-  const dateName = dateColumns[0].name;
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+
+  const metricField = yAxisColumn?.column;
+  const dateField = xAxisColumn?.column;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
 
   const mainLayer = {
@@ -65,13 +67,19 @@ export const createSimpleLineChart = (
           dateColumns
         ),
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: dateField, type: 'temporal', title: dateName },
+          { field: metricField, type: 'quantitative', title: metricName },
+        ],
+      }),
     },
   };
 
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles);
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -83,7 +91,7 @@ export const createSimpleLineChart = (
   }
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     title: `${metricName} Over Time`,
     data: { values: transformedData },
     layer: layers,
@@ -102,14 +110,19 @@ export const createLineBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>
+  styles: Partial<LineChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const metric1Field = numericalColumns[0].column;
-  const metric2Field = numericalColumns[1].column;
-  const dateField = dateColumns[0].column;
-  const metric1Name = numericalColumns[0].name;
-  const metric2Name = numericalColumns[1].name;
-  const dateName = dateColumns[0].name;
+  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
+  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
+  const secondYAxisMapping = axisColumnMappings?.[AxisRole.Y_SECOND];
+
+  const metric1Field = yAxisMapping?.column;
+  const metric2Field = secondYAxisMapping?.column;
+  const dateField = xAxisMapping?.column;
+  const metric1Name = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
+  const metric2Name = styles.valueAxes?.[1]?.title?.text || secondYAxisMapping?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const layers: any[] = [];
 
   const barLayer = {
@@ -152,6 +165,12 @@ export const createLineBarChart = (
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: dateField, type: 'temporal', title: dateName },
+          { field: metric1Field, type: 'quantitative', title: metric1Name },
+        ],
+      }),
     },
   };
 
@@ -188,13 +207,19 @@ export const createLineBarChart = (
             }
           : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: dateField, type: 'temporal', title: dateName },
+          { field: metric2Field, type: 'quantitative', title: metric2Name },
+        ],
+      }),
     },
   };
 
   layers.push(barLayer, lineLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles);
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -206,7 +231,7 @@ export const createLineBarChart = (
   }
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     title: `${metric1Name} (Bar) and ${metric2Name} (Line) Over Time`,
     data: { values: transformedData },
     layer: layers,
@@ -230,14 +255,19 @@ export const createMultiLineChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>
+  styles: Partial<LineChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const metricField = numericalColumns[0].column;
-  const dateField = dateColumns[0].column;
-  const categoryField = categoricalColumns[0].column;
-  const metricName = numericalColumns[0].name;
-  const dateName = dateColumns[0].name;
-  const categoryName = categoricalColumns[0].name;
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+
+  const metricField = yAxisColumn?.column;
+  const dateField = xAxisColumn?.column;
+  const categoryField = colorColumn?.column;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+  const categoryName = colorColumn?.name;
   const layers: any[] = [];
 
   const mainLayer = {
@@ -281,13 +311,20 @@ export const createMultiLineChart = (
               }
             : null,
       },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: dateField, type: 'temporal', title: dateName },
+          { field: metricField, type: 'quantitative', title: metricName },
+          { field: categoryField, type: 'nominal', title: categoryName },
+        ],
+      }),
     },
   };
 
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles);
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -299,7 +336,7 @@ export const createMultiLineChart = (
   }
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     title: `${metricName} Over Time by ${categoryName}`,
     data: { values: transformedData },
     layer: layers,
@@ -320,22 +357,28 @@ export const createFacetedMultiLineChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>
+  styles: Partial<LineChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const metricField = numericalColumns[0].column;
-  const dateField = dateColumns[0].column;
-  const category1Field = categoricalColumns[0].column;
-  const category2Field = categoricalColumns[1].column;
-  const metricName = numericalColumns[0].name;
-  const dateName = dateColumns[0].name;
-  const category1Name = categoricalColumns[0].name;
-  const category2Name = categoricalColumns[1].name;
+  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
+  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
+  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
+  const facetMapping = axisColumnMappings?.[AxisRole.FACET];
+
+  const metricField = yAxisMapping?.column;
+  const dateField = xAxisMapping?.column;
+  const category1Field = colorMapping?.column;
+  const category2Field = facetMapping?.column;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
+  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
+  const category1Name = colorMapping?.name;
+  const category2Name = facetMapping?.name;
 
   // Create a mark config for the faceted spec
   const facetMarkConfig = buildMarkConfig(styles, 'line');
 
   return {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    $schema: VEGASCHEMA,
     title: `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`,
     data: { values: transformedData },
     // Add a max width to the entire visualization and make it scrollable
@@ -395,32 +438,41 @@ export const createFacetedMultiLineChart = (
                     }
                   : null,
             },
+            ...(styles.tooltipOptions?.mode !== 'hidden' && {
+              tooltip: [
+                { field: dateField, type: 'temporal', title: dateName },
+                { field: metricField, type: 'quantitative', title: metricName },
+                { field: category1Field, type: 'nominal', title: category1Name },
+              ],
+            }),
           },
         },
         // Add threshold layer to each facet if enabled
-        ...(styles?.thresholdLine?.show
-          ? [
-              {
+        ...(styles?.thresholdLines && styles.thresholdLines.length > 0
+          ? styles.thresholdLines
+              .filter((threshold) => threshold.show)
+              .map((threshold) => ({
                 mark: {
                   type: 'rule',
-                  color: styles.thresholdLine.color,
-                  strokeWidth: styles.thresholdLine.width,
-                  strokeDash: getStrokeDash(styles.thresholdLine.style),
-                  tooltip: styles?.addTooltip !== false,
+                  color: threshold.color,
+                  strokeWidth: threshold.width,
+                  strokeDash: getStrokeDash(threshold.style),
+                  tooltip: styles?.tooltipOptions?.mode !== 'hidden',
                 },
                 encoding: {
                   y: {
-                    datum: styles.thresholdLine.value,
+                    datum: threshold.value,
                     type: 'quantitative',
                   },
-                  ...(styles?.addTooltip !== false && {
+                  ...(styles?.tooltipOptions?.mode !== 'hidden' && {
                     tooltip: {
-                      value: `Threshold: ${styles.thresholdLine.value}`,
+                      value: `${threshold.name ? threshold.name + ': ' : ''}Threshold: ${
+                        threshold.value
+                      }`,
                     },
                   }),
                 },
-              },
-            ]
+              }))
           : []),
         // Add time marker to each facet if enabled
         ...(styles?.addTimeMarker
@@ -431,14 +483,14 @@ export const createFacetedMultiLineChart = (
                   color: '#FF6B6B',
                   strokeWidth: 2,
                   strokeDash: [3, 3],
-                  tooltip: styles?.addTooltip !== false,
+                  tooltip: styles?.tooltipOptions?.mode !== 'hidden',
                 },
                 encoding: {
                   x: {
                     datum: { expr: 'now()' },
                     type: 'temporal',
                   },
-                  ...(styles?.addTooltip !== false && {
+                  ...(styles?.tooltipOptions?.mode !== 'hidden' && {
                     tooltip: {
                       value: 'Current Time',
                     },
@@ -449,5 +501,93 @@ export const createFacetedMultiLineChart = (
           : []),
       ],
     },
+  };
+};
+
+/**
+ * Create a category-based line chart with one metric and one category
+ * @param transformedData The transformed data
+ * @param numericalColumns The numerical columns
+ * @param categoricalColumns The categorical columns
+ * @param dateColumns The date columns
+ * @param styles The style options
+ * @returns The Vega spec for a category-based line chart
+ */
+export const createCategoryLineChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styles: Partial<LineChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
+): any => {
+  // Check if we have the required columns
+  if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
+    throw new Error(
+      'Category line chart requires at least one numerical column and one categorical column'
+    );
+  }
+
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+
+  const metricField = yAxisColumn?.column;
+  const categoryField = xAxisColumn?.column;
+  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
+  const categoryName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+  const layers: any[] = [];
+
+  const mainLayer = {
+    mark: buildMarkConfig(styles, 'line'),
+    encoding: {
+      x: {
+        field: categoryField,
+        type: 'nominal',
+        axis: applyAxisStyling(
+          {
+            title: categoryName,
+            labelAngle: -45,
+          },
+          styles,
+          'category',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      y: {
+        field: metricField,
+        type: 'quantitative',
+        axis: applyAxisStyling(
+          { title: metricName },
+          styles,
+          'value',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          { field: categoryField, type: 'nominal', title: categoryName },
+          { field: metricField, type: 'quantitative', title: metricName },
+        ],
+      }),
+    },
+  };
+
+  layers.push(mainLayer);
+
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  if (thresholdLayer) {
+    layers.push(thresholdLayer);
+  }
+
+  return {
+    $schema: VEGASCHEMA,
+    title: `${metricName} by ${categoryName}`,
+    data: { values: transformedData },
+    layer: layers,
   };
 };

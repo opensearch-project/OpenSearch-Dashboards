@@ -4,16 +4,19 @@
  */
 
 import './tabs.scss';
-import React from 'react';
-import { EuiTabbedContent } from '@elastic/eui';
-
-export interface IExploreTabsProps {
-  tabs: Array<{
-    id: string;
-    name: string;
-    content: React.JSX.Element;
-  }>;
-}
+import React, { useCallback } from 'react';
+import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux';
+import { setActiveTab } from '../../application/utils/state_management/slices';
+import { clearQueryStatusMapByKey } from '../../application/utils/state_management/slices';
+import {
+  defaultPrepareQueryString,
+  executeTabQuery,
+} from '../../application/utils/state_management/actions/query_actions';
+import { selectActiveTab } from '../../application/utils/state_management/selectors';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../types';
+import { RootState } from '../../application/utils/state_management/store';
 
 /**
  * Rendering tabs with different views of 1 OpenSearch hit in Discover.
@@ -21,8 +24,58 @@ export interface IExploreTabsProps {
  * A view can contain a React `component`, or any JS framework by using
  * a `render` function.
  */
-export const ExploreTabs = ({ tabs }: IExploreTabsProps) => {
+export const ExploreTabs = () => {
+  const dispatch = useDispatch();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  const registryTabs = services.tabRegistry.getAllTabs();
+  const results = useSelector((state: RootState) => state.results);
+  const query = useSelector((state: RootState) => state.query);
+  const activeTabId = useSelector(selectActiveTab);
+
+  const onTabsClick = useCallback(
+    (selectedTab: EuiTabbedContentTab) => {
+      dispatch(setActiveTab(selectedTab.id));
+
+      const activeTab = services.tabRegistry.getTab(selectedTab.id);
+      const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
+      const newTabCacheKey = prepareQuery(query);
+
+      const needsExecution = !results[newTabCacheKey];
+
+      if (needsExecution) {
+        dispatch(clearQueryStatusMapByKey(newTabCacheKey));
+        dispatch(
+          executeTabQuery({
+            services,
+            cacheKey: newTabCacheKey,
+          })
+        );
+      }
+    },
+    [query, results, dispatch, services]
+  );
+
+  const tabs: EuiTabbedContentTab[] = registryTabs.map((registryTab) => {
+    return {
+      id: registryTab.id,
+      name: registryTab.label,
+      content: <registryTab.component />,
+    };
+  });
+
+  const activeTab =
+    tabs.find((tab) => {
+      return tab.id === activeTabId;
+    }) || tabs.find((tab) => tab.id === 'logs');
+
   return (
-    <EuiTabbedContent className="exploreTabs" data-test-subj="exploreTabs" tabs={tabs} size="s" />
+    <EuiTabbedContent
+      className="exploreTabs"
+      data-test-subj="exploreTabs"
+      tabs={tabs}
+      size="s"
+      onTabClick={onTabsClick}
+      selectedTab={activeTab}
+    />
   );
 };

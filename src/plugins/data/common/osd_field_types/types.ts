@@ -96,3 +96,25 @@ export enum OSD_FIELD_TYPES {
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
 }
+
+// Types from opensearch-project/sql/docs/user/ppl/general/datatypes.rst
+/** @public **/
+export enum PPL_FIELD_TYPES {
+  BOOLEAN = 'boolean',
+  TINYINT = 'tinyint',
+  SMALLINT = 'smallint',
+  INT = 'int',
+  BIGINT = 'bigint',
+  FLOAT = 'float',
+  DOUBLE = 'double',
+  STRING = 'string',
+  TIMESTAMP = 'timestamp',
+  DATE = 'date',
+  TIME = 'time',
+  INTERVAL = 'interval',
+  IP = 'ip',
+  GEO_POINT = 'geo_point',
+  BINARY = 'binary',
+  STRUCT = 'struct',
+  ARRAY = 'array',
+}
