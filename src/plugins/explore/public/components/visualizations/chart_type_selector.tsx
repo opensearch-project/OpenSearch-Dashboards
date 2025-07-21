@@ -14,16 +14,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { VisualizationRule } from './types';
-import { ChartType, VisualizationTypeResult } from './utils/use_visualization_types';
+import { ChartType } from './utils/use_visualization_types';
 import { CHART_METADATA } from './constants';
-import { selectChartType } from '../../application/utils/state_management/selectors';
 import { isChartType } from './utils/is_chart_type';
+import { VisData } from './visualization_builder';
 
 interface ChartTypeSelectorProps<T extends ChartType> {
-  visualizationData: VisualizationTypeResult<T>;
+  visualizationData: VisData;
+  chartType?: ChartType;
   onChartTypeChange?: (chartType: ChartType) => void;
 }
 
@@ -36,20 +36,21 @@ interface AvailableRuleOption {
   rules: Array<Partial<VisualizationRule>>;
 }
 
+// TODO: refactor ChartTypeSelector a dumb component so that it won't compute the disabled options internally
 export const ChartTypeSelector = <T extends ChartType>({
   visualizationData,
   onChartTypeChange,
+  chartType,
 }: ChartTypeSelectorProps<T>) => {
   // Indicates no rule is matched and the user should manually generate the visualization
-  const shouldManuallyGenerate = useRef(!Boolean(visualizationData.visualizationType));
+  const shouldManuallyGenerate = useRef(!Boolean(chartType));
 
   // Local state for chart type, initialized from Redux
-  const storedChartTypeId = useSelector(selectChartType);
-  const [currChartTypeId, setCurrChartTypeId] = useState(storedChartTypeId);
+  const [currChartTypeId, setCurrChartTypeId] = useState(chartType);
 
   useEffect(() => {
-    setCurrChartTypeId(storedChartTypeId);
-  }, [storedChartTypeId]);
+    setCurrChartTypeId(chartType);
+  }, [chartType]);
 
   // Map columns to add value and text fields for select component
   const { numericalColumns = [], categoricalColumns = [], dateColumns = [] } = visualizationData;
@@ -90,8 +91,8 @@ export const ChartTypeSelector = <T extends ChartType>({
   const chartTypeMappedOptions = useMemo(() => {
     // First, filter rules for each chart type based on current selected columns
     const processed = Object.fromEntries(
-      Object.entries(baseChartTypeMapping).map(([type, chartType]) => {
-        const filteredRules = chartType.rules.filter((rule) => {
+      Object.entries(baseChartTypeMapping).map(([type, option]) => {
+        const filteredRules = option.rules.filter((rule) => {
           const [numCount, cateCount, dateCount] = rule.matchIndex || [0, 0, 0];
 
           // Special condition for metric type
@@ -112,9 +113,9 @@ export const ChartTypeSelector = <T extends ChartType>({
         return [
           type,
           {
-            inputDisplay: chartType.inputDisplay,
-            value: chartType.value,
-            iconType: chartType.iconType,
+            inputDisplay: option.inputDisplay,
+            value: option.value,
+            iconType: option.iconType,
             disabled: isDisabled,
           },
         ];

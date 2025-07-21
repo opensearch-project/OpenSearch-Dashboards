@@ -14,25 +14,12 @@ import {
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-  AxisColumnMappings,
-  AxisRole,
-  VisColumn,
-  VisFieldType,
-  AxisSupportedStyles,
-} from '../../types';
+import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
 import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
-import {
-  ChartType,
-  useVisualizationRegistry,
-  StyleOptions,
-} from '../../utils/use_visualization_types';
+import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
 import { getColumnMatchFromMapping } from '../../visualization_container_utils';
-import { selectStyleOptions } from '../../../../application/utils/state_management/selectors';
-import { setStyleOptions } from '../../../../application/utils/state_management/slices';
 
 interface VisColumnOption {
   column: VisColumn;
@@ -46,6 +33,8 @@ interface AxesSelectPanelProps {
   dateColumns: VisColumn[];
   currentMapping: AxisColumnMappings;
   updateVisualization: (data: UpdateVisualizationProps) => void;
+  onSwitchAxes?: (v: boolean) => void;
+  switchAxes?: boolean;
 }
 
 const AXIS_SELECT_LABEL = {
@@ -79,22 +68,17 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   dateColumns,
   currentMapping,
   updateVisualization,
+  onSwitchAxes,
+  switchAxes,
 }) => {
   const visualizationRegistry = useVisualizationRegistry();
 
   // switchAxes only support heatmap scatter and bar
   const showSwitch = chartType === 'heatmap' || chartType === 'bar' || chartType === 'scatter';
-  const styles = useSelector(selectStyleOptions) as AxisSupportedStyles;
-  const dispatch = useDispatch();
 
   const swapAxes = () => {
-    if (showSwitch) {
-      dispatch(
-        setStyleOptions({
-          ...(styles as AxisSupportedStyles),
-          switchAxes: !styles.switchAxes,
-        } as StyleOptions)
-      );
+    if (showSwitch && onSwitchAxes) {
+      onSwitchAxes(!switchAxes);
     }
   };
 
@@ -271,7 +255,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
                 defaultMessage: 'Switch axes',
               })}
               compressed
-              checked={styles.switchAxes}
+              checked={!!switchAxes}
               onChange={swapAxes}
               disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
             />
@@ -286,15 +270,16 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
               axisRole={axisRole}
               selectedColumn={currentSelection?.name || ''}
               allColumnOptions={getAvailableColumnsForAxis(axisRole)}
+              switchAxes={switchAxes}
               onRemove={(role) => {
                 setCurrentSelections((prev) => ({
                   ...prev,
                   [role]: undefined,
                 }));
               }}
-              onChange={(role, value) => {
+              onChange={(role, v) => {
                 const allColumns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
-                const selectedCol = allColumns.find((col) => col.name === value);
+                const selectedCol = allColumns.find((col) => col.name === v);
                 setCurrentSelections((prev) => ({
                   ...prev,
                   [role]: selectedCol,
@@ -314,6 +299,7 @@ interface AxesSelectorOptions {
   allColumnOptions: Array<EuiComboBoxOptionOption<VisColumnOption>>;
   onRemove: (axisRole: AxisRole) => void;
   onChange: (axisRole: AxisRole, value: string) => void;
+  switchAxes?: boolean;
 }
 
 export const AxisSelector: React.FC<AxesSelectorOptions> = ({
@@ -322,11 +308,10 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
   allColumnOptions,
   onRemove,
   onChange,
+  switchAxes,
 }) => {
-  const styles = useSelector(selectStyleOptions) as AxisSupportedStyles;
-
   const getLabel = () => {
-    if (styles?.switchAxes && (axisRole === AxisRole.X || axisRole === AxisRole.Y)) {
+    if (switchAxes && (axisRole === AxisRole.X || axisRole === AxisRole.Y)) {
       const swappedRole = axisRole === AxisRole.X ? AxisRole.Y : AxisRole.X;
       return AXIS_SELECT_LABEL[swappedRole];
     }

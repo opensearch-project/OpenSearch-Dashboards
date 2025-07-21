@@ -57,11 +57,6 @@ const createStoreWithQuery = (lastExecutedTranslatedQuery: string = '') => {
       results: {},
       tab: {
         logs: {},
-        visualizations: {
-          styleOptions: undefined,
-          chartType: 'line',
-          axesMapping: {},
-        },
       },
       legacy: {
         columns: [],

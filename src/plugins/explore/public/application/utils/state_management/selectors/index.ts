@@ -42,21 +42,6 @@ export const selectShowHistogram = createSelector(
   (uiState) => uiState.showHistogram
 );
 
-export const selectStyleOptions = createSelector(
-  [selectTabState],
-  (tabState) => tabState.visualizations.styleOptions
-);
-
-export const selectChartType = createSelector(
-  [selectTabState],
-  (tabState) => tabState.visualizations.chartType
-);
-
-export const selectAxesMapping = createSelector(
-  [selectTabState],
-  (tabState) => tabState.visualizations.axesMapping
-);
-
 export const selectActiveTab = createSelector(
   [selectActiveTabId],
   (activeTabId) => activeTabId // Return just the ID, components will resolve the tab via context

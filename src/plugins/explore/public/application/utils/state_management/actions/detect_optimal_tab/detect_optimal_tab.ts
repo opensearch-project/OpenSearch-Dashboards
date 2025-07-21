@@ -8,7 +8,8 @@ import { RootState } from '../../store';
 import { setActiveTab } from '../../slices';
 import { ExploreServices } from '../../../../../types';
 import { defaultPrepareQueryString } from '../query_actions';
-import { getVisualizationType } from '../../../../../components/visualizations/utils/use_visualization_types';
+import { normalizeResultRows } from '../../../../../components/visualizations/utils/normalize_result_rows';
+import { visualizationRegistry } from '../../../../../components/visualizations/visualization_registry';
 
 /**
  * Determine if results can be visualized
@@ -20,9 +21,17 @@ const canResultsBeVisualized = (results: any): boolean => {
 
   const rows = results.hits.hits;
   const fieldSchema = results.fieldSchema;
-  const visualizationData = getVisualizationType(rows, fieldSchema);
+  const { numericalColumns, categoricalColumns, dateColumns } = normalizeResultRows(
+    rows,
+    fieldSchema
+  );
+  const matchedRule = visualizationRegistry.findBestMatch(
+    numericalColumns,
+    categoricalColumns,
+    dateColumns
+  );
 
-  return !!visualizationData?.visualizationType;
+  return !!matchedRule;
 };
 
 /**

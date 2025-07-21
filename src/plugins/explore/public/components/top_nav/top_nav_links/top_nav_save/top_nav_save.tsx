@@ -26,6 +26,7 @@ import { saveSavedExplore } from '../../../../helpers/save_explore';
 import { TabState } from '../../../../application/utils/state_management/slices';
 import { TabDefinition } from '../../../../services/tab_registry/tab_registry_service';
 import { saveStateToSavedObject } from '../../../../saved_explore/transforms';
+import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 
 export const saveTopNavData: TopNavMenuIconUIData = {
   tooltip: i18n.translate('explore.topNav.saveTitle', {
@@ -61,11 +62,14 @@ export const getSaveButtonRun = (
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: OnSaveProps): Promise<SaveResult | undefined> => {
+    const visualizationBuilder = getVisualizationBuilder();
+    const axesMapping = visualizationBuilder.axesMapping$.value;
+    const visConfig = visualizationBuilder.styles$.value;
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       saveStateProps.flavorId ?? 'logs',
       saveStateProps.tabDefinition!,
-      saveStateProps.tabState,
+      { axesMapping, chartType: visConfig?.type, styleOptions: visConfig?.styles },
       saveStateProps.dataset
     );
     const result = await saveSavedExplore({
