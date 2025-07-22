@@ -33,6 +33,7 @@ export interface ExclusiveHeatmapConfig {
   percentageMode: boolean;
   maxNumberOfColors: number;
   useCustomRanges: boolean;
+  label: HeatmapLabels;
   customRanges?: RangeValue[];
 }
 // Complete heatmap chart style controls interface
@@ -46,7 +47,6 @@ export interface HeatmapChartStyleControls {
   standardAxes: StandardAxes[];
 
   exclusive: ExclusiveHeatmapConfig;
-  label: HeatmapLabels;
   switchAxes: false;
 }
 
@@ -68,38 +68,19 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     percentageMode: false,
     maxNumberOfColors: 4,
     useCustomRanges: false,
-  },
-  label: {
-    type: LabelAggregationType.SUM,
-    show: false,
-    rotate: false,
-    overwriteColor: false,
-    color: 'black',
+    label: {
+      type: LabelAggregationType.SUM,
+      show: false,
+      rotate: false,
+      overwriteColor: false,
+      color: 'black',
+    },
   },
 
   // Standard axes
   standardAxes: [
     {
       id: 'Axis-1',
-      position: Positions.LEFT,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: 100,
-      },
-      title: {
-        text: '',
-      },
-      grid: {
-        showLines: true,
-      },
-      axisRole: AxisRole.Y,
-    },
-    {
-      id: 'Axis-2',
       position: Positions.BOTTOM,
       show: true,
       style: {},
@@ -113,9 +94,28 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: true,
+        showLines: false,
       },
       axisRole: AxisRole.X,
+    },
+    {
+      id: 'Axis-2',
+      position: Positions.LEFT,
+      show: true,
+      style: {},
+      labels: {
+        show: true,
+        rotate: 0,
+        filter: false,
+        truncate: 100,
+      },
+      title: {
+        text: '',
+      },
+      grid: {
+        showLines: false,
+      },
+      axisRole: AxisRole.Y,
     },
   ],
 };

@@ -84,6 +84,9 @@ describe('AxesOptions', () => {
         rotate: 0,
         truncate: 100,
       },
+      grid: {
+        showLines: true,
+      },
       title: {
         text: 'Category Axis',
       },
@@ -103,6 +106,9 @@ describe('AxesOptions', () => {
         filter: false,
         truncate: 100,
       },
+      grid: {
+        showLines: true,
+      },
       title: {
         text: 'Value Axis',
       },
@@ -117,6 +123,69 @@ describe('AxesOptions', () => {
     numericalColumns: mockNumericalColumns,
     categoricalColumns: mockCategoricalColumns,
     dateColumns: mockDateColumns,
+  };
+
+  const rule2Props = {
+    ...defaultProps,
+    categoricalColumns: [],
+    numericalColumns: [
+      {
+        id: 1,
+        name: 'Bar Chart Metric',
+        schema: VisFieldType.Numerical,
+        column: 'count',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+      {
+        id: 2,
+        name: 'Line Chart Metric',
+        schema: VisFieldType.Numerical,
+        column: 'price',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+    ],
+    valueAxes: [
+      {
+        id: 'ValueAxis-1',
+        name: 'LeftAxis-1',
+        type: 'value',
+        position: Positions.LEFT,
+        show: true,
+        labels: {
+          show: true,
+          rotate: 0,
+          filter: false,
+          truncate: 100,
+        },
+        grid: {
+          showLines: true,
+        },
+        title: {
+          text: 'Bar Chart Metric',
+        },
+      },
+      {
+        id: 'ValueAxis-2',
+        name: 'RightAxis-1',
+        type: 'value',
+        position: Positions.RIGHT,
+        show: true,
+        labels: {
+          show: true,
+          rotate: 0,
+          filter: false,
+          truncate: 100,
+        },
+        grid: {
+          showLines: true,
+        },
+        title: {
+          text: 'Line Chart Metric',
+        },
+      },
+    ] as ValueAxis[],
   };
 
   beforeEach(() => {
@@ -140,10 +209,8 @@ describe('AxesOptions', () => {
 
   it('calls onCategoryAxesChange when position is changed', () => {
     render(<AxesOptions {...defaultProps} />);
-    const splitButton = screen.getByTestId('categoryAxis-0-button');
-    fireEvent.click(splitButton);
 
-    const buttonGroup = screen.getByRole('group', { name: 'Select axis position' });
+    const buttonGroup = screen.getAllByRole('group', { name: 'Select axis position' })[0];
     const topButton = within(buttonGroup).getByTestId('top');
 
     fireEvent.click(topButton);
@@ -157,10 +224,8 @@ describe('AxesOptions', () => {
 
   it('calls onValueAxesChange when position is changed', () => {
     render(<AxesOptions {...defaultProps} />);
-    const splitButton = screen.getByTestId('valueAxis-0-button');
-    fireEvent.click(splitButton);
 
-    const buttonGroup = screen.getByRole('group', { name: 'Select axis position' });
+    const buttonGroup = screen.getAllByRole('group', { name: 'Select axis position' })[1];
     const topButton = within(buttonGroup).getByTestId('left');
 
     fireEvent.click(topButton);
@@ -175,10 +240,7 @@ describe('AxesOptions', () => {
   it('calls onCategoryAxesChange when show is toggled', () => {
     render(<AxesOptions {...defaultProps} />);
 
-    const splitButton = screen.getByTestId('categoryAxis-0-button');
-    fireEvent.click(splitButton);
-
-    const showSwitch = screen.getAllByRole('switch')[0];
+    const showSwitch = screen.getByTestId('showXAxisSwitch');
     fireEvent.click(showSwitch);
 
     expect(defaultProps.onCategoryAxesChange).toHaveBeenCalledWith([
@@ -192,10 +254,7 @@ describe('AxesOptions', () => {
   it('calls onValueAxesChange when show is toggled', () => {
     render(<AxesOptions {...defaultProps} />);
 
-    const splitButton = screen.getByTestId('valueAxis-0-button');
-    fireEvent.click(splitButton);
-
-    const showSwitch = screen.getAllByRole('switch')[0];
+    const showSwitch = screen.getByTestId('showOnlyOneYAxisSwitch');
     fireEvent.click(showSwitch);
 
     expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith([
@@ -206,11 +265,42 @@ describe('AxesOptions', () => {
     ]);
   });
 
+  it('calls onValueAxesChange when show is toggled and there are 2 value axes', () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const showSwitch = screen.getAllByTestId('showYAxisSwitch');
+    expect(showSwitch.length).toBe(2);
+
+    fireEvent.click(showSwitch[0]);
+
+    expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith([
+      {
+        ...rule2Props.valueAxes[0],
+        show: false,
+      },
+      rule2Props.valueAxes[1],
+    ]);
+  });
+
+  it('updates value axis title with debounced value when there are 2 value axes', async () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const titleInput = screen.getAllByRole('textbox')[1];
+    fireEvent.change(titleInput, { target: { value: 'New Title' } });
+
+    await waitFor(() => {
+      expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith([
+        {
+          ...rule2Props.valueAxes[0],
+          title: { ...rule2Props.valueAxes[0].title, text: 'New Title' },
+        },
+        rule2Props.valueAxes[1],
+      ]);
+    });
+  });
+
   it('updates axis title with debounced value', async () => {
     render(<AxesOptions {...defaultProps} />);
-
-    const splitButton = screen.getByTestId('categoryAxis-0-button');
-    fireEvent.click(splitButton);
 
     const titleInput = screen.getAllByRole('textbox')[0];
     fireEvent.change(titleInput, { target: { value: 'New Title' } });
@@ -228,23 +318,9 @@ describe('AxesOptions', () => {
   it('updates label rotation when alignment is changed', () => {
     render(<AxesOptions {...defaultProps} />);
 
-    const splitButton = screen.getByTestId('categoryAxis-0-button');
-    fireEvent.click(splitButton);
+    const comboboxes = screen.getByTestId('xLinesAlignment');
 
-    const comboboxes = screen.getAllByRole('combobox');
-
-    const alignmentSelect = comboboxes.find(
-      (select) =>
-        select.innerHTML.includes('horizontal') ||
-        select.innerHTML.includes('vertical') ||
-        select.innerHTML.includes('angled')
-    );
-
-    if (!alignmentSelect) {
-      throw new Error('Alignment select not found');
-    }
-
-    fireEvent.change(alignmentSelect, { target: { value: 'vertical' } });
+    fireEvent.change(comboboxes, { target: { value: 'vertical' } });
 
     expect(defaultProps.onCategoryAxesChange).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -257,9 +333,6 @@ describe('AxesOptions', () => {
 
   it('updates truncate value with debounced value', async () => {
     render(<AxesOptions {...defaultProps} />);
-    const splitButton = screen.getByTestId('categoryAxis-0-button');
-    fireEvent.click(splitButton);
-
     const truncateInput = screen.getAllByRole('spinbutton')[0];
     fireEvent.change(truncateInput, { target: { value: '50' } });
 
@@ -274,81 +347,38 @@ describe('AxesOptions', () => {
   });
 
   it('handles Rule 2 scenario with 2 value axes', () => {
-    const rule2Props = {
-      ...defaultProps,
-      categoricalColumns: [],
-      numericalColumns: [
-        {
-          id: 1,
-          name: 'Bar Chart Metric',
-          schema: VisFieldType.Numerical,
-          column: 'count',
-          validValuesCount: 1,
-          uniqueValuesCount: 1,
-        },
-        {
-          id: 2,
-          name: 'Line Chart Metric',
-          schema: VisFieldType.Numerical,
-          column: 'price',
-          validValuesCount: 1,
-          uniqueValuesCount: 1,
-        },
-      ],
-      valueAxes: [
-        {
-          id: 'ValueAxis-1',
-          name: 'LeftAxis-1',
-          type: 'value',
-          position: Positions.LEFT,
-          show: true,
-          labels: {
-            show: true,
-            rotate: 0,
-            filter: false,
-            truncate: 100,
-          },
-          title: {
-            text: 'Bar Chart Metric',
-          },
-        },
-        {
-          id: 'ValueAxis-2',
-          name: 'RightAxis-1',
-          type: 'value',
-          position: Positions.RIGHT,
-          show: true,
-          labels: {
-            show: true,
-            rotate: 0,
-            filter: false,
-            truncate: 100,
-          },
-          title: {
-            text: 'Line Chart Metric',
-          },
-        },
-      ] as ValueAxis[],
-    };
-
     render(<AxesOptions {...rule2Props} />);
 
     expect(screen.getByText('Left Y-Axis (Bar Chart)')).toBeInTheDocument();
     expect(screen.getByText('Right Y-Axis (Line Chart)')).toBeInTheDocument();
   });
 
-  it('shows/hides label options based on show labels toggle', () => {
+  it('shows/hides grid options based on show grid lines toggle', () => {
     render(<AxesOptions {...defaultProps} />);
-
-    const splitButton = screen.getByTestId('categoryAxis-0-button');
-    fireEvent.click(splitButton);
-
-    // Initially label options should be visible
-    expect(screen.getAllByText('Aligned')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Truncate')[0]).toBeInTheDocument();
 
     // Toggle off show labels
     const showLabelsSwitch = screen.getAllByRole('switch')[1];
+    fireEvent.click(showLabelsSwitch);
+
+    // Check that the callback was called with the correct parameters
+    expect(defaultProps.onCategoryAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          grid: expect.objectContaining({ showLines: false }),
+        }),
+      ])
+    );
+  });
+
+  it('shows/hides label options based on show labels toggle', () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    // Initially label options should be visible
+    expect(screen.getAllByText('Alignment')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Truncate after')[0]).toBeInTheDocument();
+
+    // Toggle off show labels
+    const showLabelsSwitch = screen.getAllByRole('switch')[2];
     fireEvent.click(showLabelsSwitch);
 
     // Check that the callback was called with the correct parameters
@@ -365,9 +395,6 @@ describe('AxesOptions', () => {
 
   it('handles angled label rotation', () => {
     render(<AxesOptions {...defaultProps} />);
-
-    const splitButton = screen.getByTestId('categoryAxis-0-button');
-    fireEvent.click(splitButton);
 
     const comboboxes = screen.getAllByRole('combobox');
     const alignmentSelect = comboboxes.find((select) => select.innerHTML.includes('horizontal'));
@@ -399,8 +426,6 @@ describe('AxesOptions', () => {
     };
 
     render(<AxesOptions {...propsWithEmptyTitle} />);
-    const splitButton = screen.getByTestId('categoryAxis-0-button');
-    fireEvent.click(splitButton);
 
     // Check that the title input has the default value (from the first date or categorical column)
     const titleInput = screen.getAllByRole('textbox')[0];
@@ -419,17 +444,15 @@ describe('AxesOptions', () => {
     };
 
     render(<AxesOptions {...propsWithEmptyTitle} />);
-    const splitButton = screen.getByTestId('valueAxis-0-button');
-    fireEvent.click(splitButton);
 
     // Check that the title input has the default value (from the first numerical column)
-    const titleInput = screen.getAllByRole('textbox')[0];
+    const titleInput = screen.getAllByRole('textbox')[1];
     expect(titleInput).toHaveValue('count');
   });
 
   it('handles Rule 2 scenario with incomplete value axes', () => {
     // Test the useEffect that ensures we have exactly 2 value axes for Rule 2
-    const rule2Props = {
+    const newRule2Props = {
       ...defaultProps,
       categoricalColumns: [],
       dateColumns: [mockDateColumns[0]],
@@ -464,6 +487,9 @@ describe('AxesOptions', () => {
             filter: false,
             truncate: 100,
           },
+          grid: {
+            showLines: true,
+          },
           title: {
             text: 'Bar Chart Metric',
           },
@@ -471,7 +497,7 @@ describe('AxesOptions', () => {
       ] as ValueAxis[],
     };
 
-    render(<AxesOptions {...rule2Props} />);
+    render(<AxesOptions {...newRule2Props} />);
 
     // The useEffect should have added a second value axis
     expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith(
@@ -488,7 +514,7 @@ describe('AxesOptions', () => {
 
   it('handles Rule 2 scenario with incorrect axis positions', () => {
     // Test the useEffect that ensures correct positions for Rule 2
-    const rule2Props = {
+    const newRule2Props = {
       ...defaultProps,
       categoricalColumns: [],
       dateColumns: [mockDateColumns[0]],
@@ -523,6 +549,9 @@ describe('AxesOptions', () => {
             filter: false,
             truncate: 100,
           },
+          grid: {
+            showLines: true,
+          },
           title: {
             text: 'Bar Chart Metric',
           },
@@ -539,6 +568,9 @@ describe('AxesOptions', () => {
             filter: false,
             truncate: 100,
           },
+          grid: {
+            showLines: true,
+          },
           title: {
             text: 'Line Chart Metric',
           },
@@ -546,7 +578,7 @@ describe('AxesOptions', () => {
       ] as ValueAxis[],
     };
 
-    render(<AxesOptions {...rule2Props} />);
+    render(<AxesOptions {...newRule2Props} />);
 
     // The useEffect should have corrected the positions
     expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith(
@@ -594,8 +626,6 @@ describe('AxesOptions', () => {
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
-    const splitButton = screen.getByTestId('categoryAxis-0-button');
-    fireEvent.click(splitButton);
 
     // Check that the title input has the default value "Category"
     const titleInput = screen.getAllByRole('textbox')[0];
@@ -615,11 +645,9 @@ describe('AxesOptions', () => {
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
-    const splitButton = screen.getByTestId('valueAxis-0-button');
-    fireEvent.click(splitButton);
 
     // Check that the title input has the default value "Metric 1"
-    const titleInput = screen.getAllByRole('textbox')[0];
+    const titleInput = screen.getAllByRole('textbox')[1];
     expect(titleInput).toHaveValue('Metric 1');
   });
 
@@ -639,6 +667,9 @@ describe('AxesOptions', () => {
             rotate: 0,
             truncate: 100,
           },
+          grid: {
+            showLines: true,
+          },
           title: {
             text: 'Second Category Axis',
           },
@@ -649,11 +680,8 @@ describe('AxesOptions', () => {
     render(<AxesOptions {...propsWithMultipleAxes} />);
 
     // Should render both axes
-    const buttons = screen.getAllByTestId(/categoryAxis-\d-button/);
-    expect(buttons).toHaveLength(2);
-
-    // Click on the second axis button
-    fireEvent.click(buttons[1]);
+    const panels = screen.getAllByTestId('categoryAxesPanel');
+    expect(panels).toHaveLength(2);
 
     // Check that the title is displayed correctly
     expect(screen.getByDisplayValue('Second Category Axis')).toBeInTheDocument();
@@ -662,6 +690,7 @@ describe('AxesOptions', () => {
   it('handles multiple value axes', () => {
     const propsWithMultipleAxes = {
       ...defaultProps,
+      categoricalColumns: [],
       valueAxes: [
         mockValueAxes[0],
         {
@@ -676,6 +705,9 @@ describe('AxesOptions', () => {
             filter: false,
             truncate: 100,
           },
+          grid: {
+            showLines: true,
+          },
           title: {
             text: 'Second Value Axis',
           },
@@ -686,13 +718,144 @@ describe('AxesOptions', () => {
     render(<AxesOptions {...propsWithMultipleAxes} />);
 
     // Should render both axes
-    const buttons = screen.getAllByTestId(/valueAxis-\d-button/);
-    expect(buttons).toHaveLength(2);
-
-    // Click on the second axis button
-    fireEvent.click(buttons[1]);
+    const panels = screen.getAllByTestId('twoValueAxesPanel');
+    expect(panels).toHaveLength(2);
 
     // Check that the title is displayed correctly
     expect(screen.getByDisplayValue('Second Value Axis')).toBeInTheDocument();
+  });
+
+  it('updates value axis grid when there are 2 value axes', async () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    // Toggle off show grid for the first value axis
+    const showGridsSwitch = screen.getAllByRole('switch')[4];
+    fireEvent.click(showGridsSwitch);
+
+    // Check that the callback was called with the correct parameters
+    expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          grid: expect.objectContaining({ showLines: false }),
+        }),
+      ])
+    );
+  });
+
+  it('shows/hides label when there are 2 value axes', async () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    // Toggle off show grid for the first value axis
+    const showLabelsSwitch = screen.getAllByRole('switch')[5];
+    fireEvent.click(showLabelsSwitch);
+
+    // Check that the callback was called with the correct parameters
+    expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ show: false }),
+        }),
+      ])
+    );
+  });
+
+  it('update label alignment when there are 2 value axes', async () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const comboboxes = screen.getAllByTestId('yLinesAlignment')[0];
+
+    fireEvent.change(comboboxes, { target: { value: 'vertical' } });
+
+    // Check that the callback was called with the correct parameters
+    expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ rotate: -90 }),
+        }),
+      ])
+    );
+  });
+
+  it('update label alignment when there is 1 value axis', async () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    const comboboxes = screen.getByTestId('singleyLinesAlignment');
+
+    fireEvent.change(comboboxes, { target: { value: 'vertical' } });
+
+    // Check that the callback was called with the correct parameters
+    expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ rotate: -90 }),
+        }),
+      ])
+    );
+  });
+
+  it('shows/hides label when there is 1 value axis', async () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    // Toggle off show grid for the first value axis
+    const showLabelsSwitch = screen.getAllByRole('switch')[5];
+    fireEvent.click(showLabelsSwitch);
+
+    // Check that the callback was called with the correct parameters
+    expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ show: false }),
+        }),
+      ])
+    );
+  });
+
+  it('should display "vertical" in the select for x axis when rotate is -90', () => {
+    const mockCategoryAxesWithVerticalRotation = [
+      {
+        ...mockCategoryAxes[0],
+        labels: {
+          ...mockCategoryAxes[0].labels,
+          rotate: -90,
+        },
+      },
+    ];
+
+    render(<AxesOptions {...defaultProps} categoryAxes={mockCategoryAxesWithVerticalRotation} />);
+
+    const select = screen.getByTestId('xLinesAlignment');
+    expect(select).toHaveValue('vertical');
+  });
+
+  it('should display "vertical" in the select for y axis when rotate is -90', () => {
+    const mockValueAxesWithVerticalRotation = [
+      {
+        ...mockValueAxes[0],
+        labels: {
+          ...mockValueAxes[0].labels,
+          rotate: -90,
+        },
+      },
+    ];
+
+    render(<AxesOptions {...defaultProps} valueAxes={mockValueAxesWithVerticalRotation} />);
+
+    const select = screen.getByTestId('singleyLinesAlignment');
+    expect(select).toHaveValue('vertical');
+  });
+
+  it('updates truncate value with debounced value for y axis', async () => {
+    render(<AxesOptions {...defaultProps} />);
+    const truncateInput = screen.getAllByRole('spinbutton')[1];
+    fireEvent.change(truncateInput, { target: { value: '50' } });
+
+    await waitFor(() => {
+      expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith([
+        {
+          ...mockValueAxes[0],
+          labels: { ...mockValueAxes[0].labels, truncate: 50 },
+        },
+      ]);
+    });
   });
 });

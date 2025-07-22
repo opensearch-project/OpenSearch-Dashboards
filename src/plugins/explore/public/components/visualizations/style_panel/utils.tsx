@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { EuiFormRow, EuiFieldNumber, EuiFieldText } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiFieldText, EuiText } from '@elastic/eui';
 import { useDebouncedNumericValue, useDebouncedValue } from '../utils/use_debounced_value';
 
 // Component for a single axis title input with debouncing
@@ -24,6 +24,7 @@ export const DebouncedTruncateField: React.FC<{
         compressed
         value={localValue}
         onChange={(e) => handleChange(e.target.value)}
+        append={<EuiText size="s">PX</EuiText>}
       />
     </EuiFormRow>
   );

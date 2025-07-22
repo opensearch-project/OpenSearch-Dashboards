@@ -20,6 +20,7 @@ interface BasicVisOptionsProps {
   onLineModeChange: (lineMode: string) => void;
   onLineWidthChange: (lineWidth: number) => void;
   onLineStyleChange: (style: LineStyle) => void;
+  shouldShowTimeMarker?: boolean;
 }
 
 export const LineExclusiveVisOptions = ({
@@ -31,6 +32,7 @@ export const LineExclusiveVisOptions = ({
   onLineModeChange,
   onLineWidthChange,
   onLineStyleChange,
+  shouldShowTimeMarker = true,
 }: BasicVisOptionsProps) => {
   // Could import and reuse { getConfigCollections } from '../../../../../vis_type_vislib/public';
   // That requires adding vis_type_vislib as a dependency to discover, and somehow that throw errors
@@ -119,7 +121,7 @@ export const LineExclusiveVisOptions = ({
 
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.linewidth', {
-          defaultMessage: 'Line Width',
+          defaultMessage: 'Line width',
         })}
       >
         <EuiRange
@@ -130,7 +132,7 @@ export const LineExclusiveVisOptions = ({
           max={10}
           step={1}
           aria-label={i18n.translate('explore.stylePanel.basic.linewidth', {
-            defaultMessage: 'Line Width',
+            defaultMessage: 'Line width',
           })}
           showLabels
           showValue
@@ -139,18 +141,20 @@ export const LineExclusiveVisOptions = ({
 
       <EuiSpacer size="s" />
 
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
-          defaultMessage: 'Show current time marker',
-        })}
-      >
-        <EuiSwitch
-          compressed
-          label=""
-          checked={addTimeMarker}
-          onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
-        />
-      </EuiFormRow>
+      {shouldShowTimeMarker && (
+        <EuiFormRow
+          label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
+            defaultMessage: 'Show current time marker',
+          })}
+        >
+          <EuiSwitch
+            compressed
+            label=""
+            checked={addTimeMarker}
+            onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
+          />
+        </EuiFormRow>
+      )}
     </StyleAccordion>
   );
 };

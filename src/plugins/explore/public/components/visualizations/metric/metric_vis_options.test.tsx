@@ -126,7 +126,7 @@ describe('MetricVisStyleControls', () => {
   it('renders font size range slider', () => {
     renderWithProvider(<MetricVisStyleControls {...mockProps} />);
 
-    expect(screen.getByRole('slider', { name: 'Font Size' })).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'Font size' })).toBeInTheDocument();
   });
 
   it('renders use color switch', () => {
@@ -180,7 +180,7 @@ describe('MetricVisStyleControls', () => {
 
   it('calls onStyleChange when font size is changed', async () => {
     renderWithProvider(<MetricVisStyleControls {...mockProps} />);
-    const fontSizeSlider = screen.getByRole('slider', { name: 'Font Size' });
+    const fontSizeSlider = screen.getByRole('slider', { name: 'Font size' });
     fireEvent.change(fontSizeSlider, { target: { value: '80' } });
 
     await waitFor(() => {

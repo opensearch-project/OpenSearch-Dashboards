@@ -84,6 +84,9 @@ const mockCategoryAxes: CategoryAxis[] = [
       rotate: 0,
       truncate: 100,
     },
+    grid: {
+      showLines: true,
+    },
     title: {
       text: 'Category Axis',
     },
@@ -102,6 +105,9 @@ const mockValueAxes: ValueAxis[] = [
       rotate: 0,
       filter: false,
       truncate: 100,
+    },
+    grid: {
+      showLines: true,
     },
     title: {
       text: 'Value Axis',
@@ -162,6 +168,9 @@ MultipleValueAxes.args = {
         filter: false,
         truncate: 100,
       },
+      grid: {
+        showLines: true,
+      },
       title: {
         text: 'Secondary Value Axis',
       },
@@ -189,6 +198,9 @@ Rule2Scenario.args = {
         truncate: 100,
         filter: false,
       },
+      grid: {
+        showLines: true,
+      },
       title: {
         text: 'Bar Chart Metric',
       },
@@ -204,6 +216,9 @@ Rule2Scenario.args = {
         rotate: 0,
         truncate: 100,
         filter: false,
+      },
+      grid: {
+        showLines: true,
       },
       title: {
         text: 'Line Chart Metric',

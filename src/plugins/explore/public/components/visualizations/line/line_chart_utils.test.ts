@@ -211,6 +211,9 @@ describe('Line Chart Utils', () => {
             title: { text: 'Custom Category Title' },
             position: Positions.TOP,
             show: true,
+            grid: {
+              showLines: true,
+            },
             labels: {
               show: true,
               filter: true,
@@ -219,10 +222,6 @@ describe('Line Chart Utils', () => {
             },
           },
         ],
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
       };
 
       const result = applyAxisStyling(baseAxis, styles, 'category');
@@ -250,15 +249,14 @@ describe('Line Chart Utils', () => {
               rotate: 0,
               truncate: 100,
             },
+            grid: {
+              showLines: true,
+            },
             title: {
               text: '',
             },
           },
         ],
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
       };
 
       const result = applyAxisStyling(baseAxis, styles, 'category');
@@ -287,12 +285,11 @@ describe('Line Chart Utils', () => {
               rotate: 30,
               truncate: 80,
             },
+            grid: {
+              showLines: true,
+            },
           },
         ],
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
       };
 
       const result = applyAxisStyling(baseAxis, styles, 'value');
@@ -324,12 +321,11 @@ describe('Line Chart Utils', () => {
             title: {
               text: '',
             },
+            grid: {
+              showLines: true,
+            },
           },
         ],
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
       };
 
       const result = applyAxisStyling(baseAxis, styles, 'value');
@@ -357,6 +353,9 @@ describe('Line Chart Utils', () => {
               rotate: 0,
               truncate: 100,
             },
+            grid: {
+              showLines: true,
+            },
             title: {
               text: 'Left Axis',
             },
@@ -373,15 +372,14 @@ describe('Line Chart Utils', () => {
               rotate: 0,
               truncate: 100,
             },
+            grid: {
+              showLines: true,
+            },
             title: {
               text: 'Right Axis',
             },
           },
         ],
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
       };
 
       // Test left axis
