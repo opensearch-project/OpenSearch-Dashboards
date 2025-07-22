@@ -265,7 +265,7 @@ describe('AxesOptions', () => {
     ]);
   });
 
-  it('calls onValueAxesChange when show is toggled and there are 2 value axis', () => {
+  it('calls onValueAxesChange when show is toggled and there are 2 value axes', () => {
     render(<AxesOptions {...rule2Props} />);
 
     const showSwitch = screen.getAllByTestId('showYAxisSwitch');
@@ -282,7 +282,7 @@ describe('AxesOptions', () => {
     ]);
   });
 
-  it('updates value axis title with debounced value when there are 2 value axis', async () => {
+  it('updates value axis title with debounced value when there are 2 value axes', async () => {
     render(<AxesOptions {...rule2Props} />);
 
     const titleInput = screen.getAllByRole('textbox')[1];
@@ -723,5 +723,90 @@ describe('AxesOptions', () => {
 
     // Check that the title is displayed correctly
     expect(screen.getByDisplayValue('Second Value Axis')).toBeInTheDocument();
+  });
+
+  it('updates value axis grid when there are 2 value axes', async () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    // Toggle off show grid for the first value axis
+    const showGridsSwitch = screen.getAllByRole('switch')[4];
+    fireEvent.click(showGridsSwitch);
+
+    // Check that the callback was called with the correct parameters
+    expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          grid: expect.objectContaining({ showLines: false }),
+        }),
+      ])
+    );
+  });
+
+  it('shows/hides label when there are 2 value axes', async () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    // Toggle off show grid for the first value axis
+    const showLabelsSwitch = screen.getAllByRole('switch')[5];
+    fireEvent.click(showLabelsSwitch);
+
+    // Check that the callback was called with the correct parameters
+    expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ show: false }),
+        }),
+      ])
+    );
+  });
+
+  it('update label alignment when there are 2 value axes', async () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const comboboxes = screen.getAllByTestId('yLinesAlignment')[0];
+
+    fireEvent.change(comboboxes, { target: { value: 'vertical' } });
+
+    // Check that the callback was called with the correct parameters
+    expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ rotate: -90 }),
+        }),
+      ])
+    );
+  });
+
+  it('update label alignment when there is 1 value axis', async () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    const comboboxes = screen.getByTestId('singleyLinesAlignment');
+
+    fireEvent.change(comboboxes, { target: { value: 'vertical' } });
+
+    // Check that the callback was called with the correct parameters
+    expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ rotate: -90 }),
+        }),
+      ])
+    );
+  });
+
+  it('shows/hides label when there is 1 value axis', async () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    // Toggle off show grid for the first value axis
+    const showLabelsSwitch = screen.getAllByRole('switch')[5];
+    fireEvent.click(showLabelsSwitch);
+
+    // Check that the callback was called with the correct parameters
+    expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ show: false }),
+        }),
+      ])
+    );
   });
 });

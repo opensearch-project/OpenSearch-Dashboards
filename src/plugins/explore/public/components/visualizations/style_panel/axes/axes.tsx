@@ -427,6 +427,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                           })}
                         >
                           <EuiSelect
+                            data-test-subj="yLinesAlignment"
                             compressed
                             value={
                               axis.labels.rotate === 0
@@ -578,6 +579,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                           })}
                         >
                           <EuiSelect
+                            data-test-subj="singleyLinesAlignment"
                             compressed
                             value={
                               axis.labels.rotate === 0
