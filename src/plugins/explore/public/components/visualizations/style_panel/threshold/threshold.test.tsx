@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { ThresholdOptions } from './threshold';
 import { ThresholdLineStyle } from '../../types';
 
@@ -70,7 +70,7 @@ describe('ThresholdOptions', () => {
     );
   });
 
-  it('should update a threshold value', () => {
+  it('should update a threshold value', async () => {
     render(
       <ThresholdOptions
         thresholdLines={mockThresholdLines}
@@ -79,9 +79,12 @@ describe('ThresholdOptions', () => {
     );
     const valueInput = screen.getAllByTestId('exploreVisThresholdValue')[0];
     fireEvent.change(valueInput, { target: { value: '60' } });
-    expect(mockOnThresholdChange).toHaveBeenCalledWith(
-      expect.arrayContaining([expect.objectContaining({ value: 60 })])
-    );
+
+    await waitFor(() => {
+      expect(mockOnThresholdChange).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ value: 60 })])
+      );
+    });
   });
 
   it('should delete a threshold line', () => {
