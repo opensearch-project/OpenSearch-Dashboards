@@ -26,8 +26,8 @@ import { navigationPluginMock } from '../../navigation/public/mocks';
 import * as registerDefaultCollaboratorTypesExports from './register_default_collaborator_types';
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 
-// Expect 6 app registrations: create, fatal error, detail, initial, navigation, collaborator and list apps.
-const registrationAppNumber = 7;
+// Expect 8 app registrations: create, fatal error, detail, initial, navigation, collaborator, list apps and workspace parent menu.
+const registrationAppNumber = 8;
 
 describe('Workspace plugin', () => {
   const getMockDependencies = () => ({
@@ -449,15 +449,6 @@ describe('Workspace plugin', () => {
     });
 
     expect(navGroupUpdater$.next).toHaveBeenCalled();
-  });
-
-  it('#start register workspace dropdown menu at left navigation bottom when start', async () => {
-    const coreStart = coreMock.createStart();
-    coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
-    const workspacePlugin = new WorkspacePlugin();
-    workspacePlugin.start(coreStart, getMockDependencies());
-
-    expect(coreStart.chrome.navControls.registerLeftBottom).toBeCalledTimes(1);
   });
 
   it('#start should not update systematic use case features after currentWorkspace set', async () => {

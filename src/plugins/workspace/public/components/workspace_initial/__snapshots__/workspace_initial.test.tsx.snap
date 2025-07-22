@@ -715,10 +715,6 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
           class="euiSpacer euiSpacer--s"
         />
         <div />
-        <div
-          class="euiSpacer euiSpacer--s"
-        />
-        <div />
       </div>
     </div>
   </div>
@@ -1306,10 +1302,6 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
       <div
         class="workspace-initial__fixed-left-bottom-icon"
       >
-        <div />
-        <div
-          class="euiSpacer euiSpacer--s"
-        />
         <div />
         <div
           class="euiSpacer euiSpacer--s"
