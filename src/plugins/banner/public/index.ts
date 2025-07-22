@@ -15,6 +15,6 @@ import { PluginInitializerContext } from '../../../core/public';
 import { BannerPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new BannerPlugin(initializerContext);
+  return new BannerPlugin();
 }
 export { BannerPluginSetup, BannerPluginStart } from './types';

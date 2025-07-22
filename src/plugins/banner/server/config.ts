@@ -15,9 +15,8 @@ export type BannerPluginConfigType = TypeOf<typeof configSchema>;
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  text: schema.string({
-    defaultValue:
-      'This is an important announcement for all users. [Learn more](https://opensearch.org) about OpenSearch.',
+  content: schema.string({
+    defaultValue: 'Banner Content',
   }),
   color: schema.oneOf(
     [schema.literal('primary'), schema.literal('success'), schema.literal('warning')],
@@ -26,4 +25,7 @@ export const configSchema = schema.object({
   iconType: schema.string({ defaultValue: 'iInCircle' }),
   isVisible: schema.boolean({ defaultValue: true }),
   useMarkdown: schema.boolean({ defaultValue: true }),
+  size: schema.oneOf([schema.literal('s'), schema.literal('m')], {
+    defaultValue: 'm',
+  }),
 });

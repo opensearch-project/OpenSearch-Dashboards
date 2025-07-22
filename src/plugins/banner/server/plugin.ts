@@ -14,6 +14,8 @@ import { first } from 'rxjs/operators';
 import { BannerPluginSetup, BannerPluginStart } from './types';
 import { BannerPluginConfigType } from './config';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { defineRoutes } from './routes/get_config';
+import { BannerConfig } from '../common';
 
 export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart> {
   private readonly config$: Observable<BannerPluginConfigType>;
@@ -25,16 +27,23 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
   public async setup(core: CoreSetup<BannerPluginStart>) {
     const pluginConfig: BannerPluginConfigType = await this.config$.pipe(first()).toPromise();
 
-    return {
+    const bannerSetup = {
       bannerEnabled: () => pluginConfig.enabled,
-      getConfig: () => ({
-        text: pluginConfig.text,
+      getConfig: (): BannerConfig => ({
+        content: pluginConfig.content,
         color: pluginConfig.color,
         iconType: pluginConfig.iconType,
         isVisible: pluginConfig.isVisible,
         useMarkdown: pluginConfig.useMarkdown,
+        size: pluginConfig.size,
       }),
     };
+
+    // Register server routes
+    const router = core.http.createRouter();
+    defineRoutes(router, bannerSetup);
+
+    return bannerSetup;
   }
 
   public start(core: CoreStart) {

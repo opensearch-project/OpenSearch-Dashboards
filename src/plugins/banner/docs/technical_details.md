@@ -26,18 +26,20 @@ The banner uses a CSS variable (`--global-banner-height`) to dynamically adjust 
 
 The banner's height is calculated using a ResizeObserver to account for different content lengths and screen sizes:
 
-1. When the banner is visible, an initial height is set (default: 40px)
+1. The banner height is determined by the EuiCallOut component's size property
 2. A ResizeObserver monitors the actual rendered height of the banner
 3. The CSS variable is updated with the actual height
 4. When the banner is hidden, the height is set to 0px
 
-## Transitions
+## Banner Size
 
-Smooth transitions are implemented when showing or hiding the banner:
+The banner size can be configured using the `size` property:
 
-1. A CSS transition is applied to the `padding-top` property
-2. The transition duration is 300ms with an ease timing function
-3. The transition is removed after completion to prevent interference with other UI operations
+1. The `size` property accepts values of `s` (small) or `m` (medium)
+2. The default size is `m` (medium)
+3. The size affects the padding and overall appearance of the banner
+4. Smaller size results in a more compact banner with less vertical space
+
 
 ## Feature Flag
 
