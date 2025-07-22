@@ -143,8 +143,8 @@ describe('BarExclusiveVisOptions', () => {
   test('renders form labels correctly', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
-    expect(screen.getByText('Bar width')).toBeInTheDocument();
-    expect(screen.getByText('Bar padding')).toBeInTheDocument();
+    expect(screen.getByText('Width')).toBeInTheDocument();
+    expect(screen.getByText('Padding')).toBeInTheDocument();
     expect(screen.getByText('Show border')).toBeInTheDocument();
   });
 

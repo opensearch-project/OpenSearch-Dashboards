@@ -8,7 +8,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import {
   CategoryAxis,
-  GridOptions,
   ThresholdLineStyle,
   ValueAxis,
   Positions,
@@ -117,19 +116,6 @@ jest.mock('../style_panel/axes/axes', () => ({
   ),
 }));
 
-jest.mock('../style_panel/grid/grid', () => ({
-  GridOptionsPanel: jest.fn(({ grid, onGridChange }) => (
-    <div data-test-subj="mockGridOptionsPanel">
-      <button
-        data-test-subj="mockUpdateGrid"
-        onClick={() => onGridChange({ ...grid, xLines: !grid.xLines })}
-      >
-        Update Grid
-      </button>
-    </div>
-  )),
-}));
-
 jest.mock('./line_exclusive_vis_options', () => ({
   LineExclusiveVisOptions: jest.fn(
     ({
@@ -190,11 +176,6 @@ describe('LineVisStyleControls', () => {
 
   const defaultThresholdLines: ThresholdLines = [defaultThresholdLine];
 
-  const defaultGrid: GridOptions = {
-    xLines: true,
-    yLines: true,
-  };
-
   const defaultCategoryAxis: CategoryAxis = {
     id: 'CategoryAxis-1',
     type: 'category',
@@ -206,6 +187,7 @@ describe('LineVisStyleControls', () => {
       rotate: 0,
       truncate: 100,
     },
+    grid: { showLines: true },
     title: {
       text: '',
     },
@@ -223,6 +205,7 @@ describe('LineVisStyleControls', () => {
       filter: false,
       truncate: 100,
     },
+    grid: { showLines: true },
     title: {
       text: '',
     },
@@ -274,7 +257,6 @@ describe('LineVisStyleControls', () => {
       lineWidth: 2,
       thresholdLines: defaultThresholdLines,
       tooltipOptions: defaultTooltipOptions,
-      grid: defaultGrid,
       categoryAxes: [defaultCategoryAxis],
       valueAxes: [defaultValueAxis],
     },
@@ -298,7 +280,6 @@ describe('LineVisStyleControls', () => {
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockAxesOptions')).toBeInTheDocument();
-    expect(screen.getByTestId('mockGridOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockLineExclusiveVisOptions')).toBeInTheDocument();
   });
 
@@ -387,20 +368,6 @@ describe('LineVisStyleControls', () => {
     fireEvent.click(screen.getByTestId('mockUpdateValueAxes'));
     expect(onStyleChange).toHaveBeenCalledWith({
       valueAxes: [...mockProps.styleOptions.valueAxes, { id: 'new-axis' }],
-    });
-  });
-
-  test('calls onStyleChange with correct parameters for grid options', () => {
-    const onStyleChange = jest.fn();
-    render(<LineVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
-
-    // Test grid update
-    fireEvent.click(screen.getByTestId('mockUpdateGrid'));
-    expect(onStyleChange).toHaveBeenCalledWith({
-      grid: {
-        ...mockProps.styleOptions.grid,
-        xLines: !mockProps.styleOptions.grid.xLines,
-      },
     });
   });
 

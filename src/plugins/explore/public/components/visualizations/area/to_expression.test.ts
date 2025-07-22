@@ -92,10 +92,6 @@ describe('Area Chart to_expression', () => {
         name: '',
       },
     ],
-    grid: {
-      xLines: true,
-      yLines: true,
-    },
   };
 
   describe('createSimpleAreaChart', () => {

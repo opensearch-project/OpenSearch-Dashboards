@@ -14,8 +14,9 @@ export const getQueryWithSource = (query: Query): QueryWithQueryAsString => {
   const lowerCaseQuery = queryString.toLowerCase();
   const hasSource = /^\s*(search\s+)?source\s*=/.test(lowerCaseQuery);
   const hasDescribe = /^\s*describe\s+/.test(lowerCaseQuery);
+  const hasShow = /^\s*show\s+/.test(lowerCaseQuery);
 
-  if (hasSource || hasDescribe) {
+  if (hasSource || hasDescribe || hasShow) {
     return { ...query, query: queryString };
   }
 

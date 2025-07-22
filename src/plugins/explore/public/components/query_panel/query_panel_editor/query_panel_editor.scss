@@ -76,6 +76,7 @@
 
   &__promptIcon {
     color: $ouiColorDisabledText;
+    filter: brightness(0.65);
     position: absolute;
     left: $ouiSizeXXS;
     top: 9px; // hard-coding to align it to editor

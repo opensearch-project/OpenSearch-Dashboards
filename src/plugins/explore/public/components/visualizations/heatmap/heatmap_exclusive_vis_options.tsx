@@ -18,21 +18,26 @@ import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { ColorSchemas, ScaleType, RangeValue, LabelAggregationType } from '../types';
 import { getColorSchemas, getLabelType } from '../utils/collections';
 import { CustomRange } from '../style_panel/custom_ranges';
-import { useDebouncedNumericValue } from '../utils/use_debounced_value';
+import { useDebouncedNumericValue, useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
 interface HeatmapVisOptionsProps {
   styles: HeatmapChartStyleControls['exclusive'];
   onChange: (styles: HeatmapChartStyleControls['exclusive']) => void;
+  shouldShowType: boolean;
 }
 
 interface HeatmapLabelVisOptionsProps {
   shouldShowType: boolean;
-  styles: HeatmapChartStyleControls['label'];
-  onChange: (styles: HeatmapChartStyleControls['label']) => void;
+  styles: HeatmapChartStyleControls['exclusive']['label'];
+  onChange: (styles: HeatmapChartStyleControls['exclusive']['label']) => void;
 }
 
-export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptionsProps) => {
+export const HeatmapExclusiveVisOptions = ({
+  styles,
+  onChange,
+  shouldShowType,
+}: HeatmapVisOptionsProps) => {
   const updateExclusiveOption = <K extends keyof HeatmapChartStyleControls['exclusive']>(
     key: K,
     value: HeatmapChartStyleControls['exclusive'][K]
@@ -80,7 +85,7 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         <EuiSwitch
           compressed
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.reverseColorSchema', {
-            defaultMessage: 'Reverse Schema',
+            defaultMessage: 'Reverse schema',
           })}
           checked={styles.reverseSchema}
           onChange={(e) => updateExclusiveOption('reverseSchema', e.target.checked)}
@@ -89,12 +94,12 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
 
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.heatmap.exclusive.colorScale', {
-          defaultMessage: 'Color Scale',
+          defaultMessage: 'Color scale',
         })}
       >
         <EuiButtonGroup
           legend={i18n.translate('explore.stylePanel.heatmap.exclusive.colorScale', {
-            defaultMessage: 'Color Scale',
+            defaultMessage: 'Color scale',
           })}
           isFullWidth
           options={[
@@ -167,6 +172,14 @@ export const HeatmapExclusiveVisOptions = ({ styles, onChange }: HeatmapVisOptio
         />
       </EuiFormRow>
 
+      <HeatmapLabelVisOptions
+        styles={styles.label}
+        onChange={(changes) => {
+          updateExclusiveOption('label', changes);
+        }}
+        shouldShowType={shouldShowType}
+      />
+
       <EuiFormRow>
         <EuiSwitch
           compressed
@@ -200,30 +213,30 @@ export const HeatmapLabelVisOptions = ({
   onChange,
   shouldShowType,
 }: HeatmapLabelVisOptionsProps) => {
-  const updateLabelOption = <K extends keyof HeatmapChartStyleControls['label']>(
+  const updateLabelOption = <K extends keyof HeatmapChartStyleControls['exclusive']['label']>(
     key: K,
-    value: HeatmapChartStyleControls['label'][K]
+    value: HeatmapChartStyleControls['exclusive']['label'][K]
   ) => {
     onChange({
       ...styles,
       [key]: value,
     });
   };
+
+  const [color, setDebouncedColor] = useDebouncedValue<string>(
+    styles.color,
+    (val) => updateLabelOption('color', val),
+    300
+  );
+
   const labelType = getLabelType();
   return (
-    <StyleAccordion
-      id="heatmapLabelSection"
-      accordionLabel={i18n.translate('explore.stylePanel.tabs.heatmap.label', {
-        defaultMessage: 'Labels',
-      })}
-      initialIsOpen={true}
-      data-test-subj="heatmapLabelPanel"
-    >
+    <>
       <EuiFormRow>
         <EuiSwitch
           compressed
           label={i18n.translate('explore.stylePanel.heatmap.label.showLabels', {
-            defaultMessage: 'Show Labels',
+            defaultMessage: 'Show labels',
           })}
           checked={styles.show}
           onChange={(e) => updateLabelOption('show', e.target.checked)}
@@ -262,11 +275,7 @@ export const HeatmapLabelVisOptions = ({
                 defaultMessage: 'Color',
               })}
             >
-              <EuiColorPicker
-                compressed
-                onChange={(color) => updateLabelOption('color', color)}
-                color={styles.color}
-              />
+              <EuiColorPicker compressed onChange={setDebouncedColor} color={color} />
             </EuiFormRow>
           )}
 
@@ -286,6 +295,6 @@ export const HeatmapLabelVisOptions = ({
           )}
         </>
       )}
-    </StyleAccordion>
+    </>
   );
 };

@@ -201,4 +201,24 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual(query);
   });
+
+  it('should return original query when it starts with "show"', () => {
+    const query: Query = {
+      query: 'show tables',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'ppl',
+    };
+    const result = getQueryWithSource(query);
+    expect(result).toEqual(query);
+  });
+
+  it('should return original query when it starts with "SHOW" (case insensitive)', () => {
+    const query: Query = {
+      query: 'SHOW TABLES',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'ppl',
+    };
+    const result = getQueryWithSource(query);
+    expect(result).toEqual(query);
+  });
 });

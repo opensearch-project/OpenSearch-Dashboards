@@ -217,6 +217,7 @@ const singleParseQuery = <
   query,
   cursor,
   context,
+  skipSymbolicKeywords,
 }: ParsingSubject<A, L, P>): A => {
   const parser = createParser(Lexer, Parser, query);
   const { tokenStream } = parser;
@@ -241,13 +242,17 @@ const singleParseQuery = <
   tokens.forEach((_, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
-
-    if (!literalName) {
+    let symbolicName;
+    if (!skipSymbolicKeywords) {
+      symbolicName = parser.vocabulary.getSymbolicName(tokenType);
+    }
+    if (!literalName && skipSymbolicKeywords) {
       return;
     }
 
     suggestKeywords.push({
-      value: literalName,
+      value: literalName || '',
+      symbolicName: symbolicName || '',
       id: tokenType,
     });
   });
@@ -275,6 +280,7 @@ export const parseQuery = <
   query,
   cursor,
   context,
+  skipSymbolicKeywords = true, // Set it to False to include Keywords(are defined as regex patterns) which don't have a literalName but have a SymbolicName
 }: ParsingSubject<A, L, P>): AutocompleteResultBase => {
   const result = singleParseQuery({
     Lexer,
@@ -287,6 +293,7 @@ export const parseQuery = <
     query,
     cursor,
     context,
+    skipSymbolicKeywords,
   });
 
   if (!result.rerunWithoutRules) {
@@ -309,6 +316,7 @@ export const parseQuery = <
       query,
       cursor,
       context,
+      skipSymbolicKeywords,
     });
 
     // combine results from result and nextResult

@@ -9,10 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
-import {
-  HeatmapLabelVisOptions,
-  HeatmapExclusiveVisOptions,
-} from './heatmap_exclusive_vis_options';
+import { HeatmapExclusiveVisOptions } from './heatmap_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
@@ -69,15 +66,9 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <HeatmapExclusiveVisOptions
+              shouldShowType={shouldShowTypeAndGrid}
               styles={styleOptions.exclusive}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <HeatmapLabelVisOptions
-              shouldShowType={shouldShowTypeAndGrid}
-              styles={styleOptions.label}
-              onChange={(label) => updateStyleOption('label', label)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
