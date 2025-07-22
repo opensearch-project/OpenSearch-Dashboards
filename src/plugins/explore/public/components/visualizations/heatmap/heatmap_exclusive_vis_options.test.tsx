@@ -317,7 +317,7 @@ describe('HeatmapLabelVisOptions', () => {
     });
   });
 
-  it('updates color when color picker changes', () => {
+  it('updates color when color picker changes', async () => {
     const props = {
       ...defaultProps,
       styles: {
@@ -333,9 +333,11 @@ describe('HeatmapLabelVisOptions', () => {
     const colorPicker = screen.getByRole('textbox');
     fireEvent.change(colorPicker, { target: { value: '#ff0000' } });
 
-    expect(props.onChange).toHaveBeenCalledWith({
-      ...props.styles,
-      color: '#ff0000',
+    await waitFor(() => {
+      expect(props.onChange).toHaveBeenCalledWith({
+        ...props.styles,
+        color: '#ff0000',
+      });
     });
   });
 

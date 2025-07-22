@@ -57,7 +57,7 @@ describe('bar_vis_config', () => {
           text: '',
         },
         grid: {
-          showLines: true,
+          showLines: false,
         },
         axisRole: AxisRole.Y,
       });
@@ -77,7 +77,7 @@ describe('bar_vis_config', () => {
           text: '',
         },
         grid: {
-          showLines: true,
+          showLines: false,
         },
         axisRole: AxisRole.X,
       });

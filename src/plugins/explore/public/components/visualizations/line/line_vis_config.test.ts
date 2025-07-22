@@ -84,7 +84,7 @@ describe('line_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: true,
+          showLines: false,
         },
         title: {
           text: '',
@@ -104,7 +104,7 @@ describe('line_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: true,
+          showLines: false,
         },
         title: {
           text: '',

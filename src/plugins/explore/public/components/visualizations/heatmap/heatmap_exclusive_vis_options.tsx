@@ -18,7 +18,7 @@ import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { ColorSchemas, ScaleType, RangeValue, LabelAggregationType } from '../types';
 import { getColorSchemas, getLabelType } from '../utils/collections';
 import { CustomRange } from '../style_panel/custom_ranges';
-import { useDebouncedNumericValue } from '../utils/use_debounced_value';
+import { useDebouncedNumericValue, useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
 interface HeatmapVisOptionsProps {
@@ -222,6 +222,13 @@ export const HeatmapLabelVisOptions = ({
       [key]: value,
     });
   };
+
+  const [color, setDebouncedColor] = useDebouncedValue<string>(
+    styles.color,
+    (val) => updateLabelOption('color', val),
+    300
+  );
+
   const labelType = getLabelType();
   return (
     <>
@@ -268,11 +275,7 @@ export const HeatmapLabelVisOptions = ({
                 defaultMessage: 'Color',
               })}
             >
-              <EuiColorPicker
-                compressed
-                onChange={(color) => updateLabelOption('color', color)}
-                color={styles.color}
-              />
+              <EuiColorPicker compressed onChange={setDebouncedColor} color={color} />
             </EuiFormRow>
           )}
 
