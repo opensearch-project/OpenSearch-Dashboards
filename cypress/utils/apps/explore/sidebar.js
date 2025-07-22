@@ -11,7 +11,7 @@ export const clickSidebarCollapseBtn = (collapse = true) => {
   if (collapse) {
     cy.getElementByTestId('euiResizableButton').trigger('mouseover').click();
   }
-  cy.get('.euiResizableToggleButton').click({ force: true });
+  cy.getElementByTestId('fieldList-collapse-button').click({ force: true });
 };
 
 /**
