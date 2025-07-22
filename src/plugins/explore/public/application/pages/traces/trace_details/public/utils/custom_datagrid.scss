@@ -1,0 +1,59 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Data-grid full-screen overlay wrapper
+.full-screen-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: $euiColorEmptyShade;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+}
+
+// “×” button in full‐screen mode
+.full-screen-close-icon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 10000;
+}
+
+// Container for the grid when full‐screen
+.full-screen-content {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+// Wrapper for non‐fullscreen layout
+.normal-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+
+// Wrapper for fullscreen layout (fills viewport)
+.full-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+// Spinner overlay shown while the grid is loading
+.grid-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $euiColorEmptyShadeHover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
