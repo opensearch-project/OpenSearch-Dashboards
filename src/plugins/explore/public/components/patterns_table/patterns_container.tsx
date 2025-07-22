@@ -11,6 +11,7 @@ import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { RootState } from '../../application/utils/state_management/store';
 import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
 import { highlightLogUsingPattern } from './utils/utils';
+import { PatternsSettingsPopoverContent } from '../tabs/action_bar/patterns_settings/patterns_settings_popover_content';
 
 export const PatternsContainer = () => {
   const { results: patternResults } = useTabResults();
@@ -25,6 +26,20 @@ export const PatternsContainer = () => {
   const logsTotal = logsResults?.hits?.total;
 
   const hits = patternResults?.hits?.hits || [];
+
+  const hit = hits?.[0];
+  if (!hit) {
+    return <PatternsSettingsPopoverContent />;
+  }
+  // Check if each hit has the required fields in row._source
+  const hasCountField = COUNT_FIELD in hit._source;
+  const hasSampleField = SAMPLE_FIELD in hit._source;
+  const hasPatternsField = PATTERNS_FIELD in hit._source;
+
+  if (!(hasCountField && hasSampleField && hasPatternsField)) {
+    return <></>;
+  }
+
   // Convert rows to pattern items or use default if rows is undefined
   const items: PatternItem[] = hits?.map((row: any) => ({
     ratio: row._source[COUNT_FIELD] / logsTotal,
