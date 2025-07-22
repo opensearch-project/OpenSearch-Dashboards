@@ -14,7 +14,6 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { ExploreServices } from '../../../../types';
 import { selectPatternsField } from '../../../../application/utils/state_management/selectors';
 import { useDatasetContext } from '../../../../application/context/dataset_context/dataset_context';
-import { useTabResults } from '../../../../application/utils/hooks/use_tab_results';
 
 export interface PatternsSettingsPopoverContentProps {
   fieldChange?: () => void;
@@ -57,7 +56,6 @@ export const PatternsSettingsPopoverContent = ({
   const patternsField = useSelector(selectPatternsField);
   const { dataset, isLoading, error } = useDatasetContext();
   // get log tab results to sample and find longest value fields
-  const { results: logResults } = useTabResults();
 
   // Generate options from dataset fields if available
   const options = gatherOptions(dataset);
@@ -66,37 +64,6 @@ export const PatternsSettingsPopoverContent = ({
   const chosenPatternsField = (() => {
     if (patternsField && options.some((option) => option.value === patternsField)) {
       return patternsField;
-    }
-
-    // Get the first hit if available
-    const firstHit = logResults?.hits?.hits?.[0];
-
-    if (firstHit && firstHit._source) {
-      // Find the field with the longest value
-      let longestField = '';
-      let maxLength = 0;
-
-      Object.entries(firstHit._source).forEach(([field, value]) => {
-        // Check if the field exists in options
-        if (options.some((option) => option.value === field)) {
-          const valueLength =
-            typeof value === 'string'
-              ? value.length
-              : value !== null && typeof value === 'object'
-              ? JSON.stringify(value).length // double check if we really need JSON cast
-              : String(value).length;
-
-          if (valueLength > maxLength) {
-            maxLength = valueLength;
-            longestField = field;
-          }
-        }
-      });
-
-      if (longestField) {
-        dispatch(setPatternsField(longestField));
-        return longestField;
-      }
     }
 
     return options.length > 0 ? options[0].value : '';
