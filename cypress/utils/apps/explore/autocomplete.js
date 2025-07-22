@@ -370,6 +370,20 @@ export const verifyMonacoEditorContent = (queryString, editorType) => {
     });
 };
 
+/**
+ * Language configurations for different test scenarios
+ */
+export const LanguageConfigs = {
+  SQL_PPL: {
+    INDEX_PATTERN: [QueryLanguages.PPL],
+    INDEXES: [QueryLanguages.PPL],
+  },
+  SQL_PPL_DQL: {
+    INDEX_PATTERN: [QueryLanguages.PPL],
+    INDEXES: [QueryLanguages.PPL],
+  },
+};
+
 // =======================================
 // Test Configuration Generators and other common utilities
 // =======================================

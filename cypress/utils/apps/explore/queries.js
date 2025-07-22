@@ -10,6 +10,16 @@ import { DatasetTypes, INDEX_PATTERN_WITH_TIME_1, INDEX_WITH_TIME_1 } from './co
 // =======================================
 
 /**
+ * Language configurations for different test scenarios
+ */
+export const LanguageConfigs = {
+  SQL_PPL: {
+    INDEX_PATTERN: [QueryLanguages.PPL],
+    INDEXES: [QueryLanguages.PPL],
+  },
+};
+
+/**
  * Generates test configurations for autocomplete tests across different dataset types
  * Used by: autocomplete_query.spec.js, autocomplete_switch.spec.js, autocomplete_ui.spec.js
  * @param {Function} generateTestConfigurationCallback - Callback function to generate test config
