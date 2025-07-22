@@ -90,12 +90,17 @@ export interface UseQueryPanelEditorReturnType {
 
 export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
-  const { dataset } = useDatasetContext();
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const queryString = useSelector(selectQueryString);
-  const [editorText, setEditorText] = useState<string>(queryString);
+  const qs = useSelector(selectQueryString);
+  const [editorText, setEditorText] = useState<string>(qs);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
+  const {
+    data: {
+      dataViews,
+      query: { queryString },
+    },
+  } = services;
   // The 'onRun' functions in editorDidMount uses the context values when the editor is mounted.
   // Using a ref will ensure it always uses the latest value
   const editorTextRef = useRef(editorText);
@@ -155,21 +160,11 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         const effectiveLanguage = getEffectiveLanguageForAutoComplete(queryLanguage, 'explore');
 
         // Get the current dataset from Query Service to avoid stale closure values
-        const currentDataView = services.data.query.queryString.getQuery().dataset;
-
-        // Get the current dataset from services to avoid stale closure values
-        let currentDataset = dataset;
-        if (currentDataView) {
-          try {
-            currentDataset = await services?.datasets?.get(
-              currentDataView.id,
-              currentDataView.type !== 'INDEX_PATTERN'
-            );
-          } catch (error) {
-            // Fallback to the prop dataset if fetching fails
-            currentDataset = dataset;
-          }
-        }
+        const currentDataset = queryString.getQuery().dataset;
+        const currentDataView = await dataViews.get(
+          currentDataset?.id!,
+          currentDataset?.type !== 'INDEX_PATTERN'
+        );
 
         // Use the current Dataset to avoid stale data
         const suggestions = await services?.data?.autocomplete?.getQuerySuggestions({
@@ -177,8 +172,8 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           selectionStart: model.getOffsetAt(position),
           selectionEnd: model.getOffsetAt(position),
           language: effectiveLanguage,
-          indexPattern: currentDataset as any,
-          datasetType: currentDataView?.type,
+          indexPattern: currentDataView,
+          datasetType: currentDataset?.type,
           position,
           services: services as any, // ExploreServices storage type incompatible with IDataPluginServices.DataStorage
         });
@@ -223,7 +218,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         return { suggestions: [], incomplete: false };
       }
     },
-    [isPromptModeRef, queryLanguage, dataset, services]
+    [isPromptModeRef, queryLanguage, queryString, dataViews, services]
   );
 
   // We need to manually register completion provider if it gets re-created,

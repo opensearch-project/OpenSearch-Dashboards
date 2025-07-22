@@ -29,10 +29,10 @@
  */
 
 import { difference } from 'lodash';
-import { DataView as Dataset, IndexPattern, IndexPatternField } from '../../../../../data/public';
+import { DataView, IndexPattern, IndexPatternField } from '../../../../../data/public';
 
 export function getIndexPatternFieldList(
-  indexPattern?: IndexPattern | Dataset,
+  indexPattern?: IndexPattern | DataView,
   fieldCounts?: Record<string, number>
 ) {
   if (!indexPattern || !fieldCounts) return [];

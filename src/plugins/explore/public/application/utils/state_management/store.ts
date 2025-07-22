@@ -23,6 +23,7 @@ import { loadReduxState } from './utils/redux_persistence';
 import { createQuerySyncMiddleware } from './middleware/query_sync_middleware';
 import { createPersistenceMiddleware } from './middleware/persistence_middleware';
 import { createOverallStatusMiddleware } from './middleware/overall_status_middleware';
+import { createDatasetChangeMiddleware } from './middleware/dataset_change_middleware';
 import { ExploreServices } from '../../../types';
 
 const resetState = createAction<RootState>('app/resetState');
@@ -59,6 +60,7 @@ export const configurePreloadedStore = (
         ? getDefaultMiddleware()
             .concat(createPersistenceMiddleware(services))
             .concat(createQuerySyncMiddleware(services))
+            .concat(createDatasetChangeMiddleware(services))
             .concat(createOverallStatusMiddleware())
         : getDefaultMiddleware(),
   });

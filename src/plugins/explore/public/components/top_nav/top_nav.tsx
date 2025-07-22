@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
+import { useSelector as useNewStateSelector } from 'react-redux';
 import { DataView } from '../../../../data/common';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
@@ -24,8 +24,6 @@ import {
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
 import { SavedExplore } from '../../saved_explore';
-import { setQueryState } from '../../application/utils/state_management/slices';
-import { setDatasetActionCreator } from '../../application/utils/state_management/actions/set_dataset';
 import { useClearEditors } from '../../application/hooks';
 
 export interface TopNavProps {
@@ -150,27 +148,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const showDatePicker = useMemo(() => dataset?.isTimeBased() ?? false, [dataset]);
 
-  const dispatch = useDispatch();
-
-  const handleDatasetSelect = useCallback(
-    async (view: DataView) => {
-      if (!view) return;
-
-      const currentQuery = queryString.getQuery();
-
-      const newDataset = data.dataViews.convertToDataset(view);
-      dispatch(
-        setQueryState({
-          ...currentQuery,
-          query: queryString.getInitialQueryByDataset(newDataset).query,
-          dataset: newDataset,
-        })
-      );
-      dispatch(setDatasetActionCreator(services, clearEditors));
-    },
-    [queryString, data.dataViews, dispatch, services, clearEditors]
-  );
-
   return (
     <TopNavMenu
       appName={PLUGIN_ID}
@@ -179,10 +156,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showSearchBar={false}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
       showSaveQuery={false}
-      showDatasetSelect={true}
-      datasetSelectProps={{
-        onSelect: handleDatasetSelect,
-      }}
+      showDatasetSelect={false}
       useDefaultBehaviors
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={dataset ? [dataset] : datasets}
