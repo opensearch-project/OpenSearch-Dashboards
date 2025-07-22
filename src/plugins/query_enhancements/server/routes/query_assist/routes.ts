@@ -98,7 +98,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
         if (request.body.current_time && request.body.time_field) {
           timeRangePromise = requestAgentByConfig({
             context,
-            configName: TEXT2PPL_TIME_RANGE_PARSER_AGENT_CONFIG_ID,
+            configName: languageConfig.timeRangeParserAgentConfig,
             body: {
               parameters: {
                 question: request.body.question,
@@ -136,7 +136,6 @@ export function registerQueryAssistRoutes(router: IRouter) {
               responseBody.timeRange = {
                 from: parsedTimeRange.start,
                 to: parsedTimeRange.end,
-                mode: 'absolute',
               };
             } else {
               responseBody.timeRange = undefined;

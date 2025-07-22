@@ -5,9 +5,6 @@
 
 import { schema, TypeOf } from '@osd/config-schema';
 
-// Agent config IDs
-export const TEXT2PPL_AGENT_CONFIG_ID = 'os_query_assist_ppl';
-export const TEXT2PPL_TIME_RANGE_PARSER_AGENT_CONFIG_ID = 'os_query_time_range_parser';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -16,9 +13,16 @@ export const configSchema = schema.object({
       schema.object({
         language: schema.string(),
         agentConfig: schema.string(),
+        timeRangeParserAgentConfig: schema.string(),
       }),
       {
-        defaultValue: [{ language: 'PPL', agentConfig: TEXT2PPL_AGENT_CONFIG_ID }],
+        defaultValue: [
+          {
+            language: 'PPL',
+            agentConfig: 'os_query_assist_ppl',
+            timeRangeParserAgentConfig: 'os_query_time_range_parser',
+          },
+        ],
       }
     ),
     summary: schema.object({
