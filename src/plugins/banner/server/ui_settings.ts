@@ -16,34 +16,34 @@ import { UiSettingsParams } from 'opensearch-dashboards/server';
 export const getBannerSettings = (): Record<string, UiSettingsParams> => {
   return {
     'banner:active': {
-      name: i18n.translate('core.ui_settings.params.banner.visibleTitle', {
+      name: i18n.translate('banner.ui_settings.params.visibleTitle', {
         defaultMessage: 'Banner visibility',
       }),
       value: true,
       type: 'boolean',
-      description: i18n.translate('core.ui_settings.params.banner.visibleText', {
+      description: i18n.translate('banner.ui_settings.params.visibleText', {
         defaultMessage: 'Controls whether the global banner is visible.',
       }),
       category: ['banner'],
       schema: schema.boolean(),
     },
     'banner:content': {
-      name: i18n.translate('core.ui_settings.params.banner.contentTitle', {
+      name: i18n.translate('banner.ui_settings.params.contentTitle', {
         defaultMessage: 'Banner content',
       }),
       value: '',
       type: 'markdown',
-      description: i18n.translate('core.ui_settings.params.banner.contentText', {
+      description: i18n.translate('banner.ui_settings.params.contentText', {
         defaultMessage:
           'Content for the global banner displayed at the top of the page. {markdownLink}.',
         description:
-          'Part of composite text: core.ui_settings.params.banner.contentText + ' +
-          'core.ui_settings.params.banner.content.markdownLinkText',
+          'Part of composite text: banner.ui_settings.params.contentText + ' +
+          'banner.ui_settings.params.content.markdownLinkText',
         values: {
           markdownLink:
             `<a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
             target="_blank" rel="noopener noreferrer">` +
-            i18n.translate('core.ui_settings.params.banner.content.markdownLinkText', {
+            i18n.translate('banner.ui_settings.params.content.markdownLinkText', {
               defaultMessage: 'Markdown supported',
             }) +
             '</a>',
@@ -53,13 +53,13 @@ export const getBannerSettings = (): Record<string, UiSettingsParams> => {
       schema: schema.string(),
     },
     'banner:color': {
-      name: i18n.translate('core.ui_settings.params.banner.colorTitle', {
+      name: i18n.translate('banner.ui_settings.params.colorTitle', {
         defaultMessage: 'Banner color',
       }),
       value: 'primary',
       type: 'select',
       options: ['primary', 'warning', 'danger'],
-      description: i18n.translate('core.ui_settings.params.banner.colorText', {
+      description: i18n.translate('banner.ui_settings.params.colorText', {
         defaultMessage: 'Color scheme for the global banner.',
       }),
       category: ['banner'],
@@ -70,13 +70,13 @@ export const getBannerSettings = (): Record<string, UiSettingsParams> => {
       ]),
     },
     'banner:iconType': {
-      name: i18n.translate('core.ui_settings.params.banner.iconTypeTitle', {
+      name: i18n.translate('banner.ui_settings.params.iconTypeTitle', {
         defaultMessage: 'Banner icon',
       }),
       value: 'iInCircle',
       type: 'select',
       options: ['iInCircle', 'help', 'alert', 'warning', 'check', 'bell'],
-      description: i18n.translate('core.ui_settings.params.banner.iconTypeText', {
+      description: i18n.translate('banner.ui_settings.params.iconTypeText', {
         defaultMessage: 'Icon to display in the global banner.',
       }),
       category: ['banner'],
@@ -89,12 +89,12 @@ export const getBannerSettings = (): Record<string, UiSettingsParams> => {
       ]),
     },
     'banner:useMarkdown': {
-      name: i18n.translate('core.ui_settings.params.banner.useMarkdownTitle', {
+      name: i18n.translate('banner.ui_settings.params.useMarkdownTitle', {
         defaultMessage: 'Use markdown in banner',
       }),
       value: true,
       type: 'boolean',
-      description: i18n.translate('core.ui_settings.params.banner.useMarkdownText', {
+      description: i18n.translate('banner.ui_settings.params.useMarkdownText', {
         defaultMessage: 'Controls whether markdown is rendered in the banner content.',
       }),
       category: ['banner'],
