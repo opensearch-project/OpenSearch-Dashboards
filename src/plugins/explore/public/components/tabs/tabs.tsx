@@ -30,6 +30,7 @@ export const ExploreTabs = () => {
   const registryTabs = services.tabRegistry.getAllTabs();
   const results = useSelector((state: RootState) => state.results);
   const query = useSelector((state: RootState) => state.query);
+  const fullState = useSelector((state: RootState) => state);
   const activeTabId = useSelector(selectActiveTab);
 
   const onTabsClick = useCallback(
@@ -37,8 +38,13 @@ export const ExploreTabs = () => {
       dispatch(setActiveTab(selectedTab.id));
 
       const activeTab = services.tabRegistry.getTab(selectedTab.id);
+
+      if (activeTab?.onActive) {
+        activeTab?.onActive(fullState);
+      }
+
       const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
-      const newTabCacheKey = prepareQuery(query);
+      const newTabCacheKey = prepareQuery(query, fullState);
 
       const needsExecution = !results[newTabCacheKey];
 
@@ -52,7 +58,7 @@ export const ExploreTabs = () => {
         );
       }
     },
-    [query, results, dispatch, services]
+    [query, results, dispatch, services, fullState]
   );
 
   const tabs: EuiTabbedContentTab[] = registryTabs.map((registryTab) => {

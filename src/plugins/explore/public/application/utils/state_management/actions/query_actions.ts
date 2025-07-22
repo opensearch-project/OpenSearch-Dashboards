@@ -150,7 +150,7 @@ export const executeQueries = createAsyncThunk<
     if (activeTab?.prepareQuery) {
       const prepareQuery = activeTab.prepareQuery;
       activeTabPrepareQuery = (queryParam: Query): string => {
-        return prepareQuery(getQueryWithSource(queryParam), state);
+        return prepareQuery(getQueryWithSource(queryParam), state); // the issue is that it calls state too soon, state is uninitialized
       };
     }
     activeTabCacheKey = activeTabPrepareQuery(query);

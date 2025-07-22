@@ -50,8 +50,8 @@ export interface TabDefinition {
   component: (() => React.JSX.Element | null) | MemoExoticComponent<() => React.JSX.Element>;
 
   // Optional lifecycle hooks
-  onActive?: () => void;
-  onInactive?: () => void;
+  onActive?: (state?: RootState) => void;
+  onInactive?: (state?: RootState) => void;
 }
 
 /**

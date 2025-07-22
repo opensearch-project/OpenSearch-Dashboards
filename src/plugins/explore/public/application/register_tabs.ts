@@ -10,11 +10,17 @@ import { ExploreServices } from '../types';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
+import { setPatternsField } from './utils/state_management/slices/tab/tab_slice';
+import { RootState } from './utils/state_management/store';
+import { defaultPrepareQueryString } from './utils/state_management/actions/query_actions';
 
 /**
  * Registers built-in tabs with the tab registry
  */
-export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
+export const registerBuiltInTabs = (
+  tabRegistry: TabRegistryService,
+  services?: ExploreServices
+) => {
   // Register Logs Tab
   const logsTabDefinition = {
     id: 'logs',
@@ -57,56 +63,60 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
         : '';
     },
 
-    // // New callback for handling query results
-    // handleQueryResult: async (results, error, services, state) => {
-    //   // Check for errors
-    //   if (error) {
-    //     // Cast error to any to access statusCode
-    //     const errorWithStatus = error as any;
-    //     const errorCode = errorWithStatus.statusCode || 500;
-    //     console.log(`Query failed with status code: ${errorCode}`);
-    //   // ` | patterns \`${patternsField}\` method=brain | stats count() as count, take(\`${patternsField}\`, 1) as sample by patterns_field | sort - count | fields patterns_field, count, sample`
-
-    //     // Dispatch error to Redux store
-    //     services.store.dispatch(
-    //       setPatternQueryError({
-    //         code: errorCode,
-    //         message: error.message || 'Unknown error',
-    //       })
-    //     );
-
-    //     // Check specific error types
-    //     if (errorCode === 400 && error.message.includes('patterns command not found')) {
-    //       // Example: Try a different query approach if patterns command isn't available
-    //       // Instead of directly calling search, we would dispatch an action to execute a new query
-    //       // This is just a placeholder for the implementation
-    //       console.log('Would execute fallback query: stats count by message');
-
-    //       // In a real implementation, we would dispatch a thunk action like:
-    //       // services.store.dispatch(executeCustomQuery({
-    //       //   query: state.query.query + ' | stats count by message',
-    //       //   services
-    //       // }));
-    //     }
-    //   } else if (results) {
-    //     // Process successful results
-    //     console.log(`Query succeeded with ${results.hits?.hits?.length || 0} hits`);
-
-    //     // You could perform additional queries based on the results
-    //     if (results.hits?.total === 0) {
-    //       // No results case - could trigger a different query
-    //     }
-    //   }
-    // },
-
     component: PatternsTab,
 
     // Add lifecycle hooks
-    onActive: () => {
-      // Tab activated
+    onActive: (state?: RootState): void => {
+      // set the value for patterns field
+      if (!state || !services?.store) return;
+
+      // Get the log tab's results from the state
+      const query = state.query;
+      const results = state.results;
+
+      // Get the logs tab to find its cache key
+      const logsTab = services.tabRegistry.getTab('logs');
+      if (!logsTab) return;
+
+      // Get the cache key for logs tab results
+      const logsCacheKey = defaultPrepareQueryString(query);
+      const logResults = results[logsCacheKey];
+
+      // Get the first hit if available
+      const firstHit = logResults?.hits?.hits?.[0];
+
+      if (firstHit && firstHit._source) {
+        // Find the field with the longest value
+        let longestField = '';
+        let maxLength = 0;
+
+        Object.entries(firstHit._source).forEach(([field, value]) => {
+          // Check if the field exists in options
+          // if (options.some((option) => option.value === field)) {
+          const valueLength =
+            typeof value === 'string'
+              ? value.length
+              : value !== null && typeof value === 'object'
+              ? JSON.stringify(value).length // double check if we really need JSON cast
+              : String(value).length;
+
+          if (valueLength > maxLength) {
+            maxLength = valueLength;
+            longestField = field;
+          }
+          // }
+        });
+
+        if (longestField) {
+          services.store.dispatch(setPatternsField(longestField));
+        }
+      }
     },
+
     onInactive: () => {
       // Tab deactivated
+      // TODO: maybe implement this to remove the patterns field? this might be needed to not use a field
+      //        from a diff index pattern
     },
   });
 
@@ -143,7 +153,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
  */
 export const registerTabs = (services: ExploreServices) => {
   // Register built-in tabs
-  registerBuiltInTabs(services.tabRegistry);
+  registerBuiltInTabs(services.tabRegistry, services);
 
   // Register plugin-provided tabs
   // This would be called by plugins that want to add tabs
