@@ -11,34 +11,25 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BannerService } from './banner_service';
-import { GlobalBanner } from '../components/global_banner';
-import { BANNER_CONTAINER_ID, DEFAULT_BANNER_HEIGHT, HIDDEN_BANNER_HEIGHT } from '../../common';
-
-/**
- * Sets the initial banner height based on visibility
- * @param isVisible Whether the banner is initially visible
- */
-export const setInitialBannerHeight = (isVisible: boolean): void => {
-  const initialHeight = isVisible ? DEFAULT_BANNER_HEIGHT : HIDDEN_BANNER_HEIGHT;
-  document.documentElement.style.setProperty('--global-banner-height', initialHeight);
-};
+import { GlobalBanner } from './components/global_banner';
+import { BANNER_CONTAINER_ID } from '../common';
+import { HttpStart } from '../../../core/public';
 
 /**
  * Renders the banner component into the DOM
- * @param bannerService The banner service instance
+ * @param http The HTTP client
  */
-export const renderBanner = (bannerService: BannerService): void => {
+export const renderBanner = (http: HttpStart): void => {
   const container = document.getElementById(BANNER_CONTAINER_ID);
 
   if (container) {
-    ReactDOM.render(React.createElement(GlobalBanner, { bannerService }), container);
+    ReactDOM.render(React.createElement(GlobalBanner, { http }), container);
 
     // Trigger resize and reflow for proper height calculation
     window.dispatchEvent(new Event('resize'));
     void document.body.offsetHeight;
   } else {
-    setTimeout(() => renderBanner(bannerService), 50);
+    setTimeout(() => renderBanner(http), 50);
   }
 };
 

@@ -47,6 +47,7 @@ const operatorsToInclude = [
   OpenSearchPPLParser.MATCH_PHRASE,
   OpenSearchPPLParser.MATCH_BOOL_PREFIX,
   OpenSearchPPLParser.MATCH_PHRASE_PREFIX,
+  OpenSearchPPLParser.SQUOTA_STRING,
 ];
 
 const fieldRuleList = [
