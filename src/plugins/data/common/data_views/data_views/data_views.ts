@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
-import { SavedObjectsClientCommon, Dataset, DEFAULT_DATA } from '../..';
+import { SavedObjectsClientCommon, Dataset, DEFAULT_DATA, UI_SETTINGS, SavedObject } from '../..';
 import { DataView } from './data_view';
 import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_data_view';
 import { IndexPatternsService } from '../../index_patterns';
@@ -23,7 +23,6 @@ import {
 } from '../types';
 import { FieldFormatMap } from '../../index_patterns/types';
 import { FieldFormatsStartCommon } from '../../field_formats';
-import { UI_SETTINGS, SavedObject } from '../..';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle, getDataViewTitle } from '../utils';
@@ -135,7 +134,7 @@ export class DataViewsService {
   findDataSourceByTitle = async (title: string, size: number = 10) => {
     const savedObjectsResponse = await this.savedObjectsClient.find<DataSourceAttributes>({
       type: 'data-source',
-      fields: ['title'],
+      fields: ['title', 'dataSourceEngineType'],
       search: title,
       searchFields: ['title'],
       perPage: size,
@@ -722,7 +721,13 @@ export class DataViewsService {
    * @experimental This method is experimental and may change in future versions
    * @param dataView DataView object to convert to Dataset
    */
-  convertToDataset(dataView: DataView): Dataset {
+  async convertToDataset(dataView: DataView): Promise<Dataset> {
+    // Use the DataView's toDataset method if available
+    if (dataView.toDataset) {
+      return await dataView.toDataset();
+    }
+
+    // Fallback for backward compatibility
     return {
       id: dataView.id || '',
       title: dataView.title,

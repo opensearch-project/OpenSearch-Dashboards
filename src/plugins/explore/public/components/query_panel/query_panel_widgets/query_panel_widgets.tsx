@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { DatasetSelectWidget } from './dataset_select';
 import { SaveQueryButton } from './save_query';
 import { RecentQueriesButton } from './recent_queries_button';
 import { SelectedLanguage } from './selected_language';
@@ -16,6 +17,8 @@ export const QueryPanelWidgets = () => {
     <div className="exploreQueryPanelWidgets">
       {/* Left Section */}
       <div className="exploreQueryPanelWidgets__left">
+        <DatasetSelectWidget />
+        <div className="exploreQueryPanelWidgets__verticalSeparator" />
         <RecentQueriesButton />
         <div className="exploreQueryPanelWidgets__verticalSeparator" />
         <SaveQueryButton />

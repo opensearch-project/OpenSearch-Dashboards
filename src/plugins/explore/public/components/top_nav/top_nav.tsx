@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback. useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
@@ -26,7 +26,6 @@ import { getTopNavLinks } from './top_nav_links';
 import { SavedExplore } from '../../saved_explore';
 import { setQueryState } from '../../application/utils/state_management/slices';
 import { setDateRange } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
-import { setDatasetActionCreator } from '../../application/utils/state_management/actions/set_dataset';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { QueryExecutionButton } from './query_execution_button';
@@ -159,25 +158,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     return dataset?.isTimeBased() ?? false;
   }, [dataset]);
 
-  const handleDatasetSelect = useCallback(
-    async (view: DataView) => {
-      if (!view) return;
-
-      const currentQuery = queryString.getQuery();
-
-      const newDataset = data.dataViews.convertToDataset(view);
-      dispatch(
-        setQueryState({
-          ...currentQuery,
-          query: queryString.getInitialQueryByDataset(newDataset).query,
-          dataset: newDataset,
-        })
-      );
-      dispatch(setDatasetActionCreator(services, clearEditors));
-    },
-    [queryString, data.dataViews, dispatch, services, clearEditors]
-  );
-
   // Custom onChange handler to track date range changes in Redux (mirrors SearchBar behavior)
   const handleQueryChange = useCallback(
     (queryAndDateRange: { dateRange: any; query?: Query }) => {
@@ -212,10 +192,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
       showSaveQuery={false}
-      showDatasetSelect={true}
-      datasetSelectProps={{
-        onSelect: handleDatasetSelect,
-      }}
       useDefaultBehaviors={false}
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={dataset ? [dataset] : datasets}
