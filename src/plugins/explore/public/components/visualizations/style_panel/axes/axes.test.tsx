@@ -809,4 +809,53 @@ describe('AxesOptions', () => {
       ])
     );
   });
+
+  it('should display "vertical" in the select for x axis when rotate is -90', () => {
+    const mockCategoryAxesWithVerticalRotation = [
+      {
+        ...mockCategoryAxes[0],
+        labels: {
+          ...mockCategoryAxes[0].labels,
+          rotate: -90,
+        },
+      },
+    ];
+
+    render(<AxesOptions {...defaultProps} categoryAxes={mockCategoryAxesWithVerticalRotation} />);
+
+    const select = screen.getByTestId('xLinesAlignment');
+    expect(select).toHaveValue('vertical');
+  });
+
+  it('should display "vertical" in the select for y axis when rotate is -90', () => {
+    const mockValueAxesWithVerticalRotation = [
+      {
+        ...mockValueAxes[0],
+        labels: {
+          ...mockValueAxes[0].labels,
+          rotate: -90,
+        },
+      },
+    ];
+
+    render(<AxesOptions {...defaultProps} valueAxes={mockValueAxesWithVerticalRotation} />);
+
+    const select = screen.getByTestId('singleyLinesAlignment');
+    expect(select).toHaveValue('vertical');
+  });
+
+  it('updates truncate value with debounced value for y axis', async () => {
+    render(<AxesOptions {...defaultProps} />);
+    const truncateInput = screen.getAllByRole('spinbutton')[1];
+    fireEvent.change(truncateInput, { target: { value: '50' } });
+
+    await waitFor(() => {
+      expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith([
+        {
+          ...mockValueAxes[0],
+          labels: { ...mockValueAxes[0].labels, truncate: 50 },
+        },
+      ]);
+    });
+  });
 });
