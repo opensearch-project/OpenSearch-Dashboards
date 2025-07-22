@@ -8,8 +8,10 @@ import { IRouter } from 'opensearch-dashboards/server';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { isResponseError } from '../../..../../../../../core/server/opensearch/client/errors';
 import { API, ERROR_DETAILS } from '../../../common';
+import { TEXT2PPL_TIME_RANGE_PARSER_AGENT_CONFIG_ID } from '../../../common/config';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 import { createResponseBody } from './createResponse';
+import { parseTimeRangeXML } from './ppl/time_parser_utils';
 
 export function registerQueryAssistRoutes(router: IRouter) {
   router.get(
@@ -56,6 +58,16 @@ export function registerQueryAssistRoutes(router: IRouter) {
           question: schema.string(),
           language: schema.string(),
           dataSourceId: schema.maybe(schema.string()),
+          /**
+           * Current timestamp for the query context, used to infer time-based query ranges.
+           * When not provided, will keep BWC and only return query without time range.
+           */
+          current_time: schema.maybe(schema.nullable(schema.string())),
+          /**
+           * The time field selected by user, when creating index patterns.
+           * When not provided, will keep BWC and only return query without time range.
+           */
+          time_field: schema.maybe(schema.nullable(schema.string())),
         }),
       },
     },
@@ -68,7 +80,8 @@ export function registerQueryAssistRoutes(router: IRouter) {
       );
       if (!languageConfig) return response.badRequest({ body: 'Unsupported language' });
       try {
-        const agentResponse = await requestAgentByConfig({
+        // Execute the main query agent
+        const queryPromise = requestAgentByConfig({
           context,
           configName: languageConfig.agentConfig,
           body: {
@@ -79,7 +92,65 @@ export function registerQueryAssistRoutes(router: IRouter) {
           },
           dataSourceId: request.body.dataSourceId,
         });
-        const responseBody = createResponseBody(languageConfig.language, agentResponse);
+
+        // Only execute time range parser if required parameters are provided
+        let timeRangePromise: Promise<any> = Promise.resolve(null);
+        if (request.body.current_time && request.body.time_field) {
+          timeRangePromise = requestAgentByConfig({
+            context,
+            configName: TEXT2PPL_TIME_RANGE_PARSER_AGENT_CONFIG_ID,
+            body: {
+              parameters: {
+                question: request.body.question,
+                current_time_iso: request.body.current_time,
+                time_field: request.body.time_field,
+                other_time_fields: [],
+              },
+            },
+            dataSourceId: request.body.dataSourceId,
+          }).catch((error) => {
+            // Fallback logic: if time parser fails, log error and return null
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
+            context.query_assist.logger.error(`Time range parser failed: ${error}`);
+            return null;
+          });
+        }
+
+        // Wait for both promises to resolve
+        const [queryResponse, timeRangeResponse] = await Promise.all([queryPromise, timeRangePromise]);
+
+        // Create the response body from the query response
+        const responseBody = createResponseBody(languageConfig.language, queryResponse);
+
+        // Add time range to response if available
+        if (timeRangeResponse) {
+          try {
+            const parsedTimeRange = parseTimeRangeXML(
+              timeRangeResponse.body.inference_results[0].output[0].result,
+              // @ts-expect-error TS2339 TODO(ts-error): fixme
+              context.query_assist.logger
+            );
+            
+            if (parsedTimeRange) {
+              // Convert to TimeRange format
+              responseBody.timeRange = {
+                from: parsedTimeRange.start,
+                to: parsedTimeRange.end,
+                mode: 'absolute',
+              };
+            } else {
+              responseBody.timeRange = undefined;
+            }
+          } catch (timeParseError) {
+            // Fallback if parsing fails
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
+            context.query_assist.logger.error(`Failed to parse time range result: ${timeParseError}`);
+            responseBody.timeRange = undefined;
+          }
+        } else {
+          responseBody.timeRange = undefined;
+        }
+
         return response.ok({ body: responseBody });
       } catch (error) {
         if (isResponseError(error)) {
