@@ -104,6 +104,29 @@ describe('createlabelLayer', () => {
     });
   });
 
+  it('should set aggregate if label.type is defined', () => {
+    const styles = {
+      ...defaultHeatmapChartStyles,
+      label: {
+        show: true,
+        type: LabelAggregationType.SUM,
+      },
+      exclusive: {
+        ...defaultHeatmapChartStyles.exclusive,
+        label: {
+          show: true,
+          overwriteColor: true,
+          color: 'green',
+          rotate: false,
+          type: LabelAggregationType.SUM,
+        },
+      },
+    };
+
+    const result = createlabelLayer(styles, false, colorField, xAxis, yAxis);
+    expect(result?.encoding.text).toHaveProperty('aggregate', LabelAggregationType.SUM);
+  });
+
   it('should not add aggregation if label.type is NONE', () => {
     const baseStyles = {
       ...defaultHeatmapChartStyles,

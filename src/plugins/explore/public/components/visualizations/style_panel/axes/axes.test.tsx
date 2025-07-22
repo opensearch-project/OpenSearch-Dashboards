@@ -265,6 +265,40 @@ describe('AxesOptions', () => {
     ]);
   });
 
+  it('calls onValueAxesChange when show is toggled and there are 2 value axis', () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const showSwitch = screen.getAllByTestId('showYAxisSwitch');
+    expect(showSwitch.length).toBe(2);
+
+    fireEvent.click(showSwitch[0]);
+
+    expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith([
+      {
+        ...rule2Props.valueAxes[0],
+        show: false,
+      },
+      rule2Props.valueAxes[1],
+    ]);
+  });
+
+  it('updates value axis title with debounced value when there are 2 value axis', async () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const titleInput = screen.getAllByRole('textbox')[1];
+    fireEvent.change(titleInput, { target: { value: 'New Title' } });
+
+    await waitFor(() => {
+      expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith([
+        {
+          ...rule2Props.valueAxes[0],
+          title: { ...rule2Props.valueAxes[0].title, text: 'New Title' },
+        },
+        rule2Props.valueAxes[1],
+      ]);
+    });
+  });
+
   it('updates axis title with debounced value', async () => {
     render(<AxesOptions {...defaultProps} />);
 
