@@ -38,10 +38,7 @@ export class DataView extends IndexPattern implements IDataView {
     });
 
     this.savedObjectsClient = savedObjectsClient;
-
-    if (this.dataSourceRef?.id) {
-      this.initializeDataSourceRef();
-    }
+    this.initializeDataSourceRef();
   }
 
   public async initializeDataSourceRef(): Promise<void> {
@@ -53,7 +50,7 @@ export class DataView extends IndexPattern implements IDataView {
     const attributes = dataSourceSavedObject.attributes as any;
     this.dataSourceRef = {
       id: this.dataSourceRef.id,
-      type: this.dataSourceRef.type,
+      type: attributes.dataSourceEngineType || this.dataSourceRef.type,
       name: attributes.title || this.dataSourceRef.name || this.dataSourceRef.id,
     };
   }

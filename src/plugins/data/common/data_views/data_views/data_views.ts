@@ -135,7 +135,7 @@ export class DataViewsService {
   findDataSourceByTitle = async (title: string, size: number = 10) => {
     const savedObjectsResponse = await this.savedObjectsClient.find<DataSourceAttributes>({
       type: 'data-source',
-      fields: ['title'],
+      fields: ['title', 'dataSourceEngineType'],
       search: title,
       searchFields: ['title'],
       perPage: size,

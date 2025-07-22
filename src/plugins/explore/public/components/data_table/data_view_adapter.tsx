@@ -4,8 +4,7 @@
  */
 
 import React from 'react';
-import { IDataView } from '../../../../data/common';
-import { IIndexPattern } from '../../../../data/common/index_patterns/types';
+import { IDataView, IIndexPattern } from '../../../../data/common';
 
 interface DataViewAdapterProps {
   dataView: IDataView;

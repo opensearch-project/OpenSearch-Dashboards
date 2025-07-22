@@ -85,9 +85,9 @@ export const getDataViewTitle = async (
 };
 
 export const concatDataSourceWithDataView = (dataSourceTitle: string, dataViewTitle: string) => {
-  const DATA_SOURCE_INDEX_PATTERN_DELIMITER = '::';
+  const DATA_SOURCE_DATA_VIEW_DELIMITER = '::';
 
-  return dataSourceTitle.concat(DATA_SOURCE_INDEX_PATTERN_DELIMITER).concat(dataViewTitle);
+  return dataSourceTitle.concat(DATA_SOURCE_DATA_VIEW_DELIMITER).concat(dataViewTitle);
 };
 
 export const getDataSourceReference = (references: DataViewSavedObjectReference[]) => {
