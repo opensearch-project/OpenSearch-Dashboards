@@ -13,23 +13,24 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { GlobalBanner } from './components/global_banner';
 import { BANNER_CONTAINER_ID } from '../common';
-import { HttpStart } from '../../../core/public';
+import { HttpStart, IUiSettingsClient } from '../../../core/public';
 
 /**
  * Renders the banner component into the DOM
  * @param http The HTTP client
+ * @param uiSettings The UI settings client
  */
-export const renderBanner = (http: HttpStart): void => {
+export const renderBanner = (http: HttpStart, uiSettings: IUiSettingsClient): void => {
   const container = document.getElementById(BANNER_CONTAINER_ID);
 
   if (container) {
-    ReactDOM.render(React.createElement(GlobalBanner, { http }), container);
+    ReactDOM.render(React.createElement(GlobalBanner, { http, uiSettings }), container);
 
     // Trigger resize and reflow for proper height calculation
     window.dispatchEvent(new Event('resize'));
     void document.body.offsetHeight;
   } else {
-    setTimeout(() => renderBanner(http), 50);
+    setTimeout(() => renderBanner(http, uiSettings), 50);
   }
 };
 

@@ -21,14 +21,13 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
   }
 
   public async start(core: CoreStart): Promise<BannerPluginStart> {
-    // Render the banner component and pass the HTTP client
-    renderBanner(core.http);
+    // Render the banner component and pass the HTTP client and UI settings client
+    renderBanner(core.http, core.uiSettings);
 
     return {};
   }
 
   public stop() {
-    // Unmount the banner component
     unmountBanner();
   }
 }

@@ -18,7 +18,6 @@ export interface BannerPluginSetup {}
 
 /**
  * Start contract for the banner plugin.
- * Intentionally empty as the plugin no longer exposes any services.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BannerPluginStart {}

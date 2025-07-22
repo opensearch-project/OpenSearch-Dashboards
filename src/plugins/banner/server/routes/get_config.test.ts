@@ -38,7 +38,39 @@ describe('Banner routes', () => {
       defineRoutes(mockRouter, mockBannerSetup);
 
       const [[, handler]] = mockRouter.get.mock.calls;
-      const mockContext = {} as any;
+      // Create a mock context with the required properties
+      const mockContext = {
+        core: {
+          uiSettings: {
+            client: {
+              get: jest.fn().mockImplementation((key) => {
+                // Return mock values based on the requested setting
+                switch (key) {
+                  case 'banner:content':
+                    return 'Test Banner Content';
+                  case 'banner:color':
+                    return 'primary';
+                  case 'banner:iconType':
+                    return 'iInCircle';
+                  case 'banner:active':
+                    return true;
+                  case 'banner:useMarkdown':
+                    return true;
+                  case 'banner:size':
+                    return 'm';
+                  default:
+                    return undefined;
+                }
+              }),
+            },
+          },
+        },
+        dataSource: {
+          opensearch: {
+            client: {},
+          },
+        },
+      } as any; // Cast to any to bypass TypeScript checks for the test
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       const mockResponse = httpServerMock.createResponseFactory();
 
