@@ -24,7 +24,11 @@ import {
 } from '../../application/utils/state_management/actions/query_actions';
 import { useChangeQueryEditor } from '../../application/hooks';
 
-export function DiscoverPanel() {
+export interface IDiscoverPanelProps {
+  collapsePanel?: () => void;
+}
+
+export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { uiSettings } = services;
 
@@ -97,6 +101,7 @@ export function DiscoverPanel() {
       }}
       selectedIndexPattern={(dataset as unknown) as IndexPattern}
       onAddFilter={onAddFilter}
+      onCollapse={collapsePanel}
       isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}
     />
   );
