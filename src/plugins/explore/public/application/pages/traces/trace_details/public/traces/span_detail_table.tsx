@@ -8,6 +8,7 @@ import { EuiButtonEmpty, EuiDataGridColumn, EuiIcon, EuiLink, EuiText } from '@e
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import './span_detail_table.scss';
 import { RenderCustomDataGrid } from '../utils/custom_datagrid';
 import { nanoToMilliSec, round } from '../utils/helper_functions';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../utils/shared_const';
@@ -411,7 +412,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
         const indentation = `${(item.level || 0) * 20}px`;
         const isExpanded = expandedRows.has(item.spanId);
         return (
-          <div style={{ display: 'flex', alignItems: 'center', paddingLeft: indentation }}>
+          <div className="span-detail-table__hierarchy-cell" style={{ paddingLeft: indentation }}>
             {item.children && item.children.length > 0 ? (
               <EuiIcon
                 type={isExpanded ? 'arrowDown' : 'arrowRight'}
@@ -426,11 +427,11 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
                     return newSet;
                   });
                 }}
-                style={{ cursor: 'pointer', marginRight: 5 }}
+                className="span-detail-table__expand-icon"
                 data-test-subj="treeViewExpandArrow"
               />
             ) : (
-              <EuiIcon type="empty" style={{ visibility: 'hidden', marginRight: 5 }} />
+              <EuiIcon type="empty" className="span-detail-table__hidden-icon" />
             )}
             <span>{value || '-'}</span>
           </div>

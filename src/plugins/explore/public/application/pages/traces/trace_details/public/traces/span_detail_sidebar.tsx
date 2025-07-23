@@ -18,6 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import './span_detail_sidebar.scss';
 import moment from 'moment';
 import { nanoToMilliSec, get, isEmpty, round } from '../utils/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';
@@ -123,7 +124,7 @@ export const SpanDetailSidebar: React.FC<SpanDetailSidebarProps> = ({
           defaultMessage: 'Span ID',
         }),
         getSpanValue(selectedSpan, 'SPAN_ID') ? (
-          <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
+          <EuiFlexGroup gutterSize="xs" className="span-detail-sidebar__flex-group">
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={getSpanValue(selectedSpan, 'SPAN_ID')}>
                 {(copy) => (
@@ -149,7 +150,7 @@ export const SpanDetailSidebar: React.FC<SpanDetailSidebarProps> = ({
           defaultMessage: 'Parent span ID',
         }),
         getSpanValue(selectedSpan, 'PARENT_SPAN_ID') ? (
-          <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
+          <EuiFlexGroup gutterSize="xs" className="span-detail-sidebar__flex-group">
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={selectedSpan.parentSpanId}>
                 {(copy) => (
@@ -214,7 +215,7 @@ export const SpanDetailSidebar: React.FC<SpanDetailSidebarProps> = ({
           defaultMessage: 'Errors',
         }),
         selectedSpan['status.code'] === 2 ? (
-          <EuiText color="danger" size="s" style={{ fontWeight: 700 }}>
+          <EuiText color="danger" size="s" className="span-detail-sidebar__error-text">
             {i18n.translate('explore.spanDetailSidebar.errors.yes', {
               defaultMessage: 'Yes',
             })}
@@ -311,13 +312,9 @@ export const SpanDetailSidebar: React.FC<SpanDetailSidebarProps> = ({
   };
 
   return (
-    <EuiPanel
-      paddingSize="m"
-      hasShadow={false}
-      style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
-    >
+    <EuiPanel paddingSize="m" hasShadow={false} className="span-detail-sidebar">
       {/* Fixed header section */}
-      <div style={{ flexShrink: 0 }}>
+      <div className="span-detail-sidebar__header">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="s">
@@ -369,9 +366,7 @@ export const SpanDetailSidebar: React.FC<SpanDetailSidebarProps> = ({
       </div>
 
       {/* Scrollable content section */}
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
-        {renderContent()}
-      </div>
+      <div className="span-detail-sidebar__content">{renderContent()}</div>
     </EuiPanel>
   );
 };

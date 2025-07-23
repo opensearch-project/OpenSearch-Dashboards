@@ -6,6 +6,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSpacer, EuiPanel, EuiLoadingSpinner, EuiResizableContainer } from '@elastic/eui';
+import './trace_view.scss';
 import { TraceTopNavMenu } from './public/top_nav_buttons';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { TracePPLService } from './server/ppl_request_trace';
@@ -226,14 +227,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
 
       {isLoading ? (
         <EuiPanel paddingSize="l">
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: 200,
-            }}
-          >
+          <div className="trace-view__loading-container">
             <EuiLoadingSpinner size="xl" />
           </div>
         </EuiPanel>
@@ -242,11 +236,14 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
           {transformedHits.length === 0 && <NoMatchMessage traceId={traceId} />}
 
           {transformedHits.length > 0 && (
-            <EuiResizableContainer direction="horizontal" style={{ height: 'calc(100vh - 100px)' }}>
+            <EuiResizableContainer
+              direction="horizontal"
+              className="trace-view__resizable-container"
+            >
               {(EuiResizablePanel, EuiResizableButton) => (
                 <>
                   <EuiResizablePanel initialSize={70} minSize="50%" wrapperPadding="none">
-                    <div ref={mainPanelRef} style={{ height: '100%' }}>
+                    <div ref={mainPanelRef} className="trace-view__main-panel">
                       <ServiceMap
                         hits={transformedHits}
                         colorMap={colorMap}
@@ -278,7 +275,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
                   <EuiResizableButton />
 
                   <EuiResizablePanel initialSize={30} minSize="300px">
-                    <div style={{ height: '100%' }}>
+                    <div className="trace-view__sidebar-panel">
                       <SpanDetailSidebar
                         selectedSpan={selectedSpan}
                         addSpanFilter={(field: string, value: any) => {

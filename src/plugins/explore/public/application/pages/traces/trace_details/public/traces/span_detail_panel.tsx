@@ -22,6 +22,7 @@ import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { i18n } from '@osd/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { ChromeStart } from 'opensearch-dashboards/public';
+import './span_detail_panel.scss';
 import { TracePPLService } from '../../server/ppl_request_trace';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { PanelTitle } from '../utils/helper_functions';
@@ -75,7 +76,7 @@ const ServiceLegend: React.FC<ServiceLegendProps> = ({ colorMap, data }) => {
   );
 
   const legendContent = (
-    <div style={{ width: '200px' }}>
+    <div className="span-detail-panel__legend-popover">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
@@ -92,12 +93,9 @@ const ServiceLegend: React.FC<ServiceLegendProps> = ({ colorMap, data }) => {
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
                 <div
+                  className="span-detail-panel__legend-color-box"
                   style={{
-                    width: '12px',
-                    height: '12px',
                     backgroundColor: colorMap[service],
-                    borderRadius: '2px',
-                    border: '1px solid #fff',
                   }}
                 />
               </EuiFlexItem>
@@ -281,7 +279,7 @@ export function SpanDetailPanel(props: {
 
   const spanDetailTable = useMemo(
     () => (
-      <div style={{ width: 'auto' }}>
+      <div className="span-detail-panel__table-container">
         <SpanDetailTable
           hiddenColumns={['traceId', 'traceGroup']}
           openFlyout={(spanId: string) => {
@@ -301,7 +299,7 @@ export function SpanDetailPanel(props: {
 
   const spanDetailTableHierarchy = useMemo(
     () => (
-      <div style={{ width: 'auto' }}>
+      <div className="span-detail-panel__table-container">
         <SpanDetailTableHierarchy
           hiddenColumns={['traceId', 'traceGroup']}
           openFlyout={(spanId: string) => {
@@ -363,7 +361,7 @@ export function SpanDetailPanel(props: {
 
   const ganttChart = useMemo(
     () => (
-      <div style={{ width: '100%' }}>
+      <div className="span-detail-panel__gantt-container">
         <GanttChart
           data={parsedData}
           colorMap={colorMap || {}}
@@ -463,7 +461,7 @@ export function SpanDetailPanel(props: {
 
               <EuiHorizontalRule margin="m" />
 
-              <EuiFlexItem style={{ overflowY: 'auto', maxHeight: 800, minHeight: 150 }}>
+              <EuiFlexItem className="span-detail-panel__content-container">
                 {toggleIdSelected === 'timeline'
                   ? ganttChart
                   : toggleIdSelected === 'span_list'

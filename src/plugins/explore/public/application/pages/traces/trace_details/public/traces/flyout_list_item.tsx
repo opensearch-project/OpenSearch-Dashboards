@@ -13,6 +13,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import './flyout_list_item.scss';
 
 interface FlyoutListItemProps {
   title: React.ReactNode;
@@ -27,10 +28,7 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
     props.description !== '-' ? (
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiText
-            size="s"
-            style={{ wordBreak: 'break-all', wordWrap: 'break-word', whiteSpace: 'pre-line' }}
-          >
+          <EuiText size="s" className="flyout-list-item__description-text">
             <b>{props.description}</b>
           </EuiText>
         </EuiFlexItem>
@@ -41,17 +39,14 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
                 aria-label="span-flyout-filter-icon"
                 iconType="filter"
                 onClick={props.addSpanFilter}
-                style={{ margin: -5 }}
+                className="flyout-list-item__filter-button"
               />
             </EuiToolTip>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : (
-      <EuiText
-        size="s"
-        style={{ wordBreak: 'break-all', wordWrap: 'break-word', whiteSpace: 'pre-line' }}
-      >
+      <EuiText size="s" className="flyout-list-item__description-text">
         <b>{props.description}</b>
       </EuiText>
     );
@@ -67,11 +62,7 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
           listItems={[
             {
               title: (
-                <EuiText
-                  size="s"
-                  color="subdued"
-                  style={{ wordBreak: 'break-all', wordWrap: 'break-word' }}
-                >
+                <EuiText size="s" color="subdued" className="flyout-list-item__title-text">
                   {props.title}
                 </EuiText>
               ),

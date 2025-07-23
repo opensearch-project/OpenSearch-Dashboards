@@ -36,6 +36,7 @@ import {
 } from '@xyflow/react';
 import dagre from '@dagrejs/dagre';
 import '@xyflow/react/dist/style.css';
+import './service_map.scss';
 
 interface SpanHit {
   spanId: string;
@@ -167,32 +168,17 @@ const ServiceNode = ({
     <EuiPopover
       button={
         <div style={{ position: 'relative' }}>
-          <Handle
-            type="target"
-            position={Position.Left}
-            style={{ background: '#555', visibility: 'hidden' }}
-          />
+          <Handle type="target" position={Position.Left} className="service-node-handle" />
           {/* Style for the cards */}
           <div
-            style={{
-              padding: '16px 20px',
-              borderRadius: '8px',
-              background: 'white',
-              color: '#333',
-              border: isSelected ? `4px solid #000000` : `2px solid ${serviceColor}`,
-              boxShadow: isSelected
-                ? '0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.2)'
-                : '0 2px 8px rgba(0,0,0,0.1)',
-              minWidth: '180px',
-              textAlign: 'left',
-              fontSize: '14px',
-              fontWeight: '500',
-              position: 'relative',
-              cursor: 'pointer',
-              opacity: isSelected ? 1 : 1,
-              transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-              transition: 'all 0.2s ease-in-out',
-            }}
+            className={`service-card ${
+              isSelected ? 'service-card--selected' : 'service-card--default'
+            }`}
+            style={
+              {
+                '--service-color': serviceColor,
+              } as React.CSSProperties
+            }
             onClick={handleCardClick}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -211,96 +197,61 @@ const ServiceNode = ({
             data-test-subj="serviceMapCard"
           >
             {/* Service name */}
-            <div
-              style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#232F3E',
-                lineHeight: '1.2',
-                marginBottom: '8px',
-              }}
-            >
-              {data.label}
-            </div>
+            <div className="service-card__name">{data.label}</div>
 
             {/* Metric bars */}
             <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '4px',
-                marginBottom: showDetails ? '8px' : '0',
-              }}
+              className={`service-card__metrics ${
+                showDetails
+                  ? 'service-card__metrics--with-details'
+                  : 'service-card__metrics--without-details'
+              }`}
             >
               {selectedMetrics.includes('requestRate') && (
                 <div
                   title={`Request Rate: ${data.spanCount}`}
-                  style={{
-                    width: '100%',
-                    height: '6px',
-                    position: 'relative',
-                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                    borderRadius: '1px',
-                  }}
+                  className="metric-bar metric-bar--request-rate"
                 >
                   <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      height: '100%',
-                      width: `${requestRateIntensity * 100}%`,
-                      backgroundColor: `rgba(0, 0, 255, ${0.3 + requestRateIntensity * 0.7})`,
-                      borderRadius: '1px',
-                    }}
+                    className="metric-bar__fill"
+                    style={
+                      {
+                        '--fill-width': `${requestRateIntensity * 100}%`,
+                        '--intensity': 0.3 + requestRateIntensity * 0.7,
+                      } as React.CSSProperties
+                    }
                   />
                 </div>
               )}
               {selectedMetrics.includes('errorRate') && (
                 <div
                   title={`Error Rate: ${(data.errorRate * 100).toFixed(1)}%`}
-                  style={{
-                    width: '100%',
-                    height: '6px',
-                    position: 'relative',
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                    borderRadius: '1px',
-                  }}
+                  className="metric-bar metric-bar--error-rate"
                 >
                   <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      height: '100%',
-                      width: `${errorRateIntensity * 100}%`,
-                      backgroundColor: `rgba(255, 0, 0, ${0.3 + errorRateIntensity * 0.7})`,
-                      borderRadius: '1px',
-                    }}
+                    className="metric-bar__fill"
+                    style={
+                      {
+                        '--fill-width': `${errorRateIntensity * 100}%`,
+                        '--intensity': 0.3 + errorRateIntensity * 0.7,
+                      } as React.CSSProperties
+                    }
                   />
                 </div>
               )}
               {selectedMetrics.includes('duration') && (
                 <div
                   title={`Avg Duration: ${formatLatency(data.avgLatency)}`}
-                  style={{
-                    width: '100%',
-                    height: '6px',
-                    position: 'relative',
-                    backgroundColor: 'rgba(128, 0, 128, 0.1)',
-                    borderRadius: '1px',
-                  }}
+                  className="metric-bar metric-bar--duration"
                 >
                   <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      height: '100%',
-                      width: `${durationIntensity * 100}%`,
-                      backgroundColor: `rgba(128, 0, 128, ${0.3 + durationIntensity * 0.7})`,
-                      borderRadius: '1px',
-                    }}
+                    className="metric-bar__fill"
+                    style={
+                      {
+                        '--fill-width': `${durationIntensity * 100}%`,
+                        '--intensity': 0.3 + durationIntensity * 0.7,
+                      } as React.CSSProperties
+                    }
                   />
                 </div>
               )}
@@ -308,34 +259,18 @@ const ServiceNode = ({
 
             {/* Metrics section - only shown when showDetails is true */}
             {showDetails && (
-              <div
-                style={{
-                  borderTop: '1px solid #eee',
-                  paddingTop: '8px',
-                  marginTop: '8px',
-                }}
-              >
+              <div className="service-card__details">
                 {/* Request rate */}
                 {selectedMetrics.includes('requestRate') && (
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: '#666',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    Request rate: {data.spanCount}
-                  </div>
+                  <div className="service-card__metric-text">Request rate: {data.spanCount}</div>
                 )}
 
                 {/* Error rate */}
                 {selectedMetrics.includes('errorRate') && (
                   <div
-                    style={{
-                      fontSize: '12px',
-                      color: data.errorRate > 0 ? '#DE1B1B' : '#666',
-                      marginBottom: '4px',
-                    }}
+                    className={`service-card__metric-text ${
+                      data.errorRate > 0 ? 'service-card__metric-text--error' : ''
+                    }`}
                   >
                     Error rate: {(data.errorRate * 100).toFixed(1)}%
                   </div>
@@ -343,13 +278,7 @@ const ServiceNode = ({
 
                 {/* Latency metrics */}
                 {selectedMetrics.includes('duration') && (
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: '#666',
-                      marginBottom: '4px',
-                    }}
-                  >
+                  <div className="service-card__metric-text">
                     Avg duration: {formatLatency(data.avgLatency)}
                   </div>
                 )}
@@ -558,22 +487,9 @@ const FlowComponent: React.FC<{
   }, [fitView, nodes.length]);
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div className="service-map">
       {isLayoutLoading && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(250, 250, 250, 0.7)',
-            zIndex: 10,
-          }}
-        >
+        <div className="service-map__loading-overlay">
           <EuiLoadingSpinner size="xl" />
         </div>
       )}
@@ -607,22 +523,8 @@ const FlowComponent: React.FC<{
         }}
       >
         {/* Service focus panel */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '10px',
-            left: '10px',
-            zIndex: 5,
-            background: 'white',
-            padding: '8px',
-            borderRadius: '6px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            border: '1px solid #ddd',
-            width: '250px',
-            display: 'flex',
-          }}
-        >
-          <div style={{ flex: 1 }}>
+        <div className="service-focus-panel">
+          <div className="service-focus-panel__content">
             <EuiComboBox
               placeholder={i18n.translate('explore.serviceMap.placeholder.focusOnService', {
                 defaultMessage: 'Focus on service',
@@ -640,20 +542,7 @@ const FlowComponent: React.FC<{
         </div>
 
         {/* Metrics panel */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '10px',
-            right: '10px',
-            zIndex: 5,
-            background: 'white',
-            padding: '12px',
-            borderRadius: '6px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            border: '1px solid #ddd',
-            width: '180px',
-          }}
-        >
+        <div className="metrics-panel">
           <EuiTitle size="xxs">
             <h4>
               {i18n.translate('explore.serviceMap.title.metrics', {
@@ -752,32 +641,16 @@ const FlowComponent: React.FC<{
           </div>
 
           {/* Gradient legends */}
-          <div style={{ marginTop: '12px' }}>
+          <div className="metrics-panel__legends">
             {selectedMetrics.includes('requestRate') && (
-              <div style={{ marginBottom: '8px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '2px' }}>
+              <div className="metrics-panel__legend-item">
+                <div className="metrics-panel__legend-title">
                   {i18n.translate('explore.serviceMap.legend.requestRate', {
                     defaultMessage: 'Request Rate',
                   })}
                 </div>
-                <div
-                  style={{
-                    height: '6px',
-                    width: '100%',
-                    background:
-                      'linear-gradient(to right, rgba(0, 0, 255, 0.2), rgba(0, 0, 255, 0.9))',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    fontSize: '10px',
-                    color: '#666',
-                    marginTop: '2px',
-                  }}
-                >
+                <div className="metrics-panel__legend-gradient metrics-panel__legend-gradient--request-rate" />
+                <div className="metrics-panel__legend-labels">
                   <span>0</span>
                   <span>
                     {initialNodes.length > 0
@@ -789,30 +662,14 @@ const FlowComponent: React.FC<{
             )}
 
             {selectedMetrics.includes('errorRate') && (
-              <div style={{ marginBottom: '8px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '2px' }}>
+              <div className="metrics-panel__legend-item">
+                <div className="metrics-panel__legend-title">
                   {i18n.translate('explore.serviceMap.legend.errorRate', {
                     defaultMessage: 'Error Rate',
                   })}
                 </div>
-                <div
-                  style={{
-                    height: '6px',
-                    width: '100%',
-                    background:
-                      'linear-gradient(to right, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.9))',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    fontSize: '10px',
-                    color: '#666',
-                    marginTop: '2px',
-                  }}
-                >
+                <div className="metrics-panel__legend-gradient metrics-panel__legend-gradient--error-rate" />
+                <div className="metrics-panel__legend-labels">
                   <span>0%</span>
                   <span>
                     {initialNodes.length > 0
@@ -824,30 +681,14 @@ const FlowComponent: React.FC<{
             )}
 
             {selectedMetrics.includes('duration') && (
-              <div style={{ marginBottom: '8px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '2px' }}>
+              <div className="metrics-panel__legend-item">
+                <div className="metrics-panel__legend-title">
                   {i18n.translate('explore.serviceMap.legend.duration', {
                     defaultMessage: 'Duration',
                   })}
                 </div>
-                <div
-                  style={{
-                    height: '6px',
-                    width: '100%',
-                    background:
-                      'linear-gradient(to right, rgba(128, 0, 128, 0.2), rgba(128, 0, 128, 0.9))',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    fontSize: '10px',
-                    color: '#666',
-                    marginTop: '2px',
-                  }}
-                >
+                <div className="metrics-panel__legend-gradient metrics-panel__legend-gradient--duration" />
+                <div className="metrics-panel__legend-labels">
                   <span>0</span>
                   <span>
                     {initialNodes.length > 0
@@ -1145,16 +986,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
   if (!hits || hits.length === 0) {
     return (
       <EuiPanel {...panelProps}>
-        <div
-          style={{
-            height: '500px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#666',
-            backgroundColor: '#fafafa',
-          }}
-        >
+        <div className="service-map__empty-state">
           {i18n.translate('explore.serviceMap.emptyState.noTraceData', {
             defaultMessage: 'No trace data available',
           })}
@@ -1166,16 +998,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
   if (initialNodes.length === 0) {
     return (
       <EuiPanel {...panelProps}>
-        <div
-          style={{
-            height: '500px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#666',
-            backgroundColor: '#fafafa',
-          }}
-        >
+        <div className="service-map__empty-state">
           {i18n.translate('explore.serviceMap.emptyState.noServicesFound', {
             defaultMessage: 'No services found in trace data',
           })}
@@ -1186,7 +1009,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
 
   return (
     <EuiPanel {...panelProps}>
-      <div style={{ height: '350px', width: '100%' }}>
+      <div className="service-map__container">
         <ReactFlowProvider>
           <FlowComponent
             initialNodes={filteredNodes}

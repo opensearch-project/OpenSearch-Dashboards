@@ -8,6 +8,7 @@ import { View, parse } from 'vega';
 import { createGanttSpec } from './gantt_chart_spec';
 import { convertToVegaGanttData } from './gantt_data_adapter';
 import { GANTT_CHART_CONSTANTS, TOTAL_PADDING } from './gantt_constants';
+import './gantt_chart_vega.scss';
 
 interface GanttChartProps {
   data: any[];
@@ -142,11 +143,9 @@ export function GanttChart({
   return (
     <div
       ref={containerRef}
+      className="gantt-chart__container"
       style={{
-        width: '100%',
         height: `${finalHeight}px`,
-        position: 'relative',
-        overflow: 'visible',
         minWidth: `${GANTT_CHART_CONSTANTS.MIN_WIDTH}px`,
         minHeight: `${GANTT_CHART_CONSTANTS.MIN_CONTAINER_HEIGHT}px`,
       }}
