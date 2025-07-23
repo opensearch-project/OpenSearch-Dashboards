@@ -13,10 +13,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: $ouiFontSizeS;
 
     // Adding some specificity by nesting
     .exploreClassicExperienceBanner__newExperienceButton {
-      font-size: $ouiFontSizeXS;
       height: $ouiSizeL;
     }
   }

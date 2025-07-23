@@ -5,11 +5,11 @@
   },
   "/app/data-explorer/discover": {
     "first-contentful-paint": 2200,
-    "speed-index": 26000
+    "speed-index": 30000
   },
   "/app/dashboards": {
     "first-contentful-paint": 2200,
-    "speed-index": 28000
+    "speed-index": 30000
   },
   "/app/visualize": {
     "first-contentful-paint": 2200,

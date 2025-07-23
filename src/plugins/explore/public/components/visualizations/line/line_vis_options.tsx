@@ -13,7 +13,6 @@ import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
-import { GridOptionsPanel } from '../style_panel/grid/grid';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
@@ -40,6 +39,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
       dateColumns.length === 1) ||
     (numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0);
 
+  const shouldShowTimeMarker = dateColumns.length !== 0;
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
@@ -75,6 +75,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
 
           <EuiFlexItem grow={false}>
             <LineExclusiveVisOptions
+              shouldShowTimeMarker={shouldShowTimeMarker}
               addTimeMarker={styleOptions.addTimeMarker}
               lineStyle={styleOptions.lineStyle}
               lineMode={styleOptions.lineMode}
@@ -94,13 +95,6 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               onThresholdLinesChange={(thresholdLines) =>
                 updateStyleOption('thresholdLines', thresholdLines)
               }
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <GridOptionsPanel
-              grid={styleOptions.grid}
-              onGridChange={(grid) => updateStyleOption('grid', grid)}
             />
           </EuiFlexItem>
 

@@ -27,6 +27,7 @@ import {
   PPL_AGGREGATE_FUNCTIONS,
   PPL_FUNCTIONAL_KEYWORDS,
   PPL_SUGGESTION_IMPORTANCE,
+  SUPPORTED_NON_LITERAL_KEYWORDS,
 } from './constants';
 import { Documentation } from './ppl_documentation';
 
@@ -208,8 +209,9 @@ export const getSimplifiedPPLSuggestions = async ({
 
     // Fill in PPL keywords
     if (suggestions.suggestKeywords?.length) {
+      const literalKeywords = suggestions.suggestKeywords.filter((sk) => sk.value);
       finalSuggestions.push(
-        ...suggestions.suggestKeywords.map((sk) => {
+        ...literalKeywords.map((sk) => {
           if (PPL_FUNCTIONAL_KEYWORDS.has(sk.id)) {
             const functionalKeywordDetails = PPL_FUNCTIONAL_KEYWORDS.get(sk.id);
             const functionName = sk.value.toLowerCase();
@@ -237,6 +239,27 @@ export const getSimplifiedPPLSuggestions = async ({
           }
         })
       );
+
+      const supportedSymbolicKeywords = suggestions.suggestKeywords.filter(
+        (sk) => !sk.value && SUPPORTED_NON_LITERAL_KEYWORDS.has(sk.id)
+      );
+
+      if (supportedSymbolicKeywords) {
+        finalSuggestions.push(
+          ...supportedSymbolicKeywords.map((sk) => {
+            const details = SUPPORTED_NON_LITERAL_KEYWORDS.get(sk.id);
+            return {
+              text: details!.label,
+              insertText: details!.insertText,
+              type: monaco.languages.CompletionItemKind.Keyword,
+              detail: SuggestionItemDetailsTags.Keyword,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+              // sortText is the only option to sort suggestions, compares strings
+              sortText: details!.sortText,
+            };
+          })
+        );
+      }
     }
     return finalSuggestions;
   } catch (e) {
@@ -275,6 +298,7 @@ export const getSimplifiedOpenSearchPplAutoCompleteSuggestions = (
     enrichAutocompleteResult: simplifiedPplAutocompleteData.enrichAutocompleteResult,
     query,
     cursor,
+    skipSymbolicKeywords: false,
   });
   return res;
 };

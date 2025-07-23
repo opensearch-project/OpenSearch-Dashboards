@@ -3,25 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiSpacer,
   EuiFormRow,
   EuiSelect,
   EuiSwitch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldNumber,
   EuiFieldText,
   EuiText,
-  EuiButtonEmpty,
   EuiSplitPanel,
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CategoryAxis, VisColumn, ValueAxis, Positions } from '../../types';
-import { useDebouncedValue, useDebouncedNumericValue } from '../../utils/use_debounced_value';
+import { useDebouncedValue } from '../../utils/use_debounced_value';
 import { StyleAccordion } from '../style_accordion';
+import { DebouncedTruncateField } from '.././utils';
 
 interface AxesOptionsProps {
   categoryAxes: CategoryAxis[];
@@ -74,29 +71,6 @@ const DebouncedAxisTitle: React.FC<{
   );
 };
 
-// Component for a truncate field with debouncing
-const DebouncedTruncateField: React.FC<{
-  value: number;
-  onChange: (value: number) => void;
-  label: string;
-}> = ({ value, onChange, label }) => {
-  const [localValue, handleChange] = useDebouncedNumericValue(value, onChange, {
-    delay: 500,
-    min: 1,
-    defaultValue: 100,
-  });
-
-  return (
-    <EuiFormRow label={label}>
-      <EuiFieldNumber
-        compressed
-        value={localValue}
-        onChange={(e) => handleChange(e.target.value)}
-      />
-    </EuiFormRow>
-  );
-};
-
 export const AxesOptions: React.FC<AxesOptionsProps> = ({
   categoryAxes,
   valueAxes,
@@ -106,17 +80,6 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
   categoricalColumns,
   dateColumns,
 }) => {
-  // State to track expanded/collapsed state of each axis
-  const [expandedAxes, setExpandedAxes] = useState<Record<string, boolean>>({});
-
-  // Toggle expansion state for a specific axis
-  const toggleAxisExpansion = (axisId: string) => {
-    setExpandedAxes({
-      ...expandedAxes,
-      [axisId]: !expandedAxes[axisId],
-    });
-  };
-
   const updateCategoryAxis = (index: number, updates: Partial<CategoryAxis>) => {
     const updatedAxes = [...categoryAxes];
     updatedAxes[index] = {
@@ -197,178 +160,155 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     <StyleAccordion
       id="axesSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.axes', {
-        defaultMessage: 'Axis',
+        defaultMessage: 'Axes',
       })}
       initialIsOpen={true}
     >
       {/* Category Axes */}
       {categoryAxes.map((axis, index) => (
-        <>
-          <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
-            <EuiButtonEmpty
-              iconSide="left"
-              color="text"
-              iconType={expandedAxes[axis.id] ? 'arrowDown' : 'arrowRight'}
-              onClick={() => toggleAxisExpansion(axis.id)}
-              size="xs"
-              data-test-subj={`categoryAxis-${index}-button`}
-            >
-              {i18n.translate('explore.vis.gridOptions.categoryAxis', {
-                defaultMessage: 'X-Axis',
+        <EuiSplitPanel.Inner
+          paddingSize="s"
+          key={axis.id}
+          color="subdued"
+          data-test-subj="categoryAxesPanel"
+        >
+          <EuiText size="s" style={{ fontWeight: 600 }}>
+            {i18n.translate('explore.vis.gridOptions.categoryAxis', {
+              defaultMessage: 'X-Axis',
+            })}
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFormRow>
+            <EuiSwitch
+              compressed
+              label={i18n.translate('explore.vis.gridOptions.showXAxis', {
+                defaultMessage: 'Show axis',
               })}
-            </EuiButtonEmpty>
+              data-test-subj="showXAxisSwitch"
+              checked={axis.show}
+              onChange={(e) => updateCategoryAxis(index, { show: e.target.checked })}
+            />
+          </EuiFormRow>
+          {axis.show && (
+            <>
+              <DebouncedAxisTitle
+                value={getCategoryAxisDisplayTitle(axis)}
+                placeholder={getDefaultCategoryAxisTitle(dateColumns, categoricalColumns)}
+                onChange={(text) =>
+                  updateCategoryAxis(index, {
+                    title: { ...axis.title, text },
+                  })
+                }
+                label={i18n.translate('explore.vis.gridOptions.axisTitle', {
+                  defaultMessage: 'Title',
+                })}
+              />
+              <EuiFormRow
+                label={i18n.translate('explore.vis.gridOptions.axisPosition', {
+                  defaultMessage: 'Position',
+                })}
+              >
+                <EuiButtonGroup
+                  name={`categoryAxisPosition-${index}`}
+                  legend="Select axis position"
+                  options={[
+                    { id: Positions.BOTTOM, label: 'Bottom' },
+                    { id: Positions.TOP, label: 'Top' },
+                  ]}
+                  idSelected={axis.position}
+                  onChange={(id) =>
+                    updateCategoryAxis(index, {
+                      position: id as Positions.BOTTOM | Positions.TOP,
+                    })
+                  }
+                  buttonSize="compressed"
+                  isFullWidth
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  checked={axis.grid?.showLines ?? false}
+                  onChange={(e) =>
+                    updateCategoryAxis(index, {
+                      grid: { ...axis.grid, showLines: e.target.checked },
+                    })
+                  }
+                  label={i18n.translate('explore.vis.gridOptions.showAxisGrid.switchLabel', {
+                    defaultMessage: 'Show grid lines',
+                  })}
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('explore.vis.gridOptions.showLabels', {
+                    defaultMessage: 'Show labels',
+                  })}
+                  checked={axis.labels.show}
+                  onChange={(e) =>
+                    updateCategoryAxis(index, {
+                      labels: { ...axis.labels, show: e.target.checked },
+                    })
+                  }
+                />
+              </EuiFormRow>
+              {axis.labels.show && (
+                <>
+                  <EuiFormRow
+                    label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
+                      defaultMessage: 'Alignment',
+                    })}
+                  >
+                    <EuiSelect
+                      compressed
+                      data-test-subj="xLinesAlignment"
+                      value={
+                        axis.labels.rotate === 0
+                          ? 'horizontal'
+                          : axis.labels.rotate === -90
+                          ? 'vertical'
+                          : 'angled'
+                      }
+                      onChange={(e) => {
+                        let rotationValue = 0;
+                        if (e.target.value === 'vertical') rotationValue = -90;
+                        else if (e.target.value === 'angled') rotationValue = -45;
 
-            {expandedAxes[axis.id] && (
-              <div>
-                <EuiSpacer size="m" />
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={i18n.translate('explore.vis.gridOptions.axisPosition', {
-                        defaultMessage: 'Position',
-                      })}
-                    >
-                      <EuiButtonGroup
-                        name={`categoryAxisPosition-${index}`}
-                        legend="Select axis position"
-                        options={[
-                          { id: Positions.BOTTOM, label: 'Bottom' },
-                          { id: Positions.TOP, label: 'Top' },
-                        ]}
-                        idSelected={axis.position}
-                        onChange={(id) =>
-                          updateCategoryAxis(index, {
-                            position: id as Positions.BOTTOM | Positions.TOP,
-                          })
-                        }
-                        buttonSize="compressed"
-                        isFullWidth
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                        updateCategoryAxis(index, {
+                          labels: {
+                            ...axis.labels,
+                            rotate: rotationValue,
+                          },
+                        });
+                      }}
+                      options={[
+                        { value: 'horizontal', text: 'Horizontal' },
+                        { value: 'vertical', text: 'Vertical' },
+                        { value: 'angled', text: 'Angled' },
+                      ]}
+                    />
+                  </EuiFormRow>
 
-                <EuiSpacer size="m" />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFormRow>
-                      <EuiSwitch
-                        compressed
-                        label={i18n.translate('explore.vis.gridOptions.showAxisLinesAndLabels', {
-                          defaultMessage: 'Show axis lines and labels',
-                        })}
-                        checked={axis.show}
-                        onChange={(e) => updateCategoryAxis(index, { show: e.target.checked })}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                {axis.show && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <DebouncedAxisTitle
-                          value={getCategoryAxisDisplayTitle(axis)}
-                          placeholder={getDefaultCategoryAxisTitle(dateColumns, categoricalColumns)}
-                          onChange={(text) =>
-                            updateCategoryAxis(index, {
-                              title: { ...axis.title, text },
-                            })
-                          }
-                          label={i18n.translate('explore.vis.gridOptions.axisTitle', {
-                            defaultMessage: 'Display name',
-                          })}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-
-                    <EuiSpacer size="m" />
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <EuiFormRow>
-                          <EuiSwitch
-                            compressed
-                            label={i18n.translate('explore.vis.gridOptions.showLabels', {
-                              defaultMessage: 'Show labels',
-                            })}
-                            checked={axis.labels.show}
-                            onChange={(e) =>
-                              updateCategoryAxis(index, {
-                                labels: { ...axis.labels, show: e.target.checked },
-                              })
-                            }
-                          />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-
-                    {axis.labels.show && (
-                      <>
-                        <EuiSpacer size="m" />
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <EuiFormRow
-                              label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
-                                defaultMessage: 'Aligned',
-                              })}
-                            >
-                              <EuiSelect
-                                compressed
-                                value={
-                                  axis.labels.rotate === 0
-                                    ? 'horizontal'
-                                    : axis.labels.rotate === -90
-                                    ? 'vertical'
-                                    : 'angled'
-                                }
-                                onChange={(e) => {
-                                  let rotationValue = 0;
-                                  if (e.target.value === 'vertical') rotationValue = -90;
-                                  else if (e.target.value === 'angled') rotationValue = -45;
-
-                                  updateCategoryAxis(index, {
-                                    labels: {
-                                      ...axis.labels,
-                                      rotate: rotationValue,
-                                    },
-                                  });
-                                }}
-                                options={[
-                                  { value: 'horizontal', text: 'Horizontal' },
-                                  { value: 'vertical', text: 'Vertical' },
-                                  { value: 'angled', text: 'Angled' },
-                                ]}
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <DebouncedTruncateField
-                              value={axis.labels.truncate ?? 100}
-                              onChange={(truncateValue) => {
-                                updateCategoryAxis(index, {
-                                  labels: {
-                                    ...axis.labels,
-                                    truncate: truncateValue,
-                                  },
-                                });
-                              }}
-                              label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
-                                defaultMessage: 'Truncate',
-                              })}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-          </EuiSplitPanel.Inner>
-        </>
+                  <DebouncedTruncateField
+                    value={axis.labels.truncate ?? 100}
+                    onChange={(truncateValue) => {
+                      updateCategoryAxis(index, {
+                        labels: {
+                          ...axis.labels,
+                          truncate: truncateValue,
+                        },
+                      });
+                    }}
+                    label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
+                      defaultMessage: 'Truncate after',
+                    })}
+                  />
+                </>
+              )}
+            </>
+          )}
+        </EuiSplitPanel.Inner>
       ))}
 
       {/* Value Axes Configuration */}
@@ -376,15 +316,13 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
         ? // Special rendering for Rule 2: Show both axes with clear labels
           valueAxes.slice(0, 2).map((axis, index) => (
             <>
-              <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
-                <EuiButtonEmpty
-                  iconSide="left"
-                  color="text"
-                  iconType={expandedAxes[axis.id] ? 'arrowDown' : 'arrowRight'}
-                  onClick={() => toggleAxisExpansion(axis.id)}
-                  size="xs"
-                  data-test-subj={`valueAxis-${index}-button`}
-                >
+              <EuiSplitPanel.Inner
+                paddingSize="s"
+                key={axis.id}
+                color="subdued"
+                data-test-subj="twoValueAxesPanel"
+              >
+                <EuiText size="s" style={{ fontWeight: 600 }}>
                   {index === 0
                     ? i18n.translate('explore.vis.gridOptions.leftYAxis', {
                         defaultMessage: 'Left Y-Axis (Bar Chart)',
@@ -392,167 +330,149 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                     : i18n.translate('explore.vis.gridOptions.rightYAxis', {
                         defaultMessage: 'Right Y-Axis (Line Chart)',
                       })}
-                </EuiButtonEmpty>
+                </EuiText>
+                <EuiText size="xs" color="subdued">
+                  {index === 0
+                    ? `Controls the ${numericalColumns[0]?.name || 'first metric'} (bar chart)`
+                    : `Controls the ${numericalColumns[1]?.name || 'second metric'} (line chart)`}
+                </EuiText>
 
-                {expandedAxes[axis.id] && (
-                  <div>
-                    <EuiSpacer size="m" />
-                    <EuiText size="xs" color="subdued">
-                      {index === 0
-                        ? `Controls the ${numericalColumns[0]?.name || 'first metric'} (bar chart)`
-                        : `Controls the ${
-                            numericalColumns[1]?.name || 'second metric'
-                          } (line chart)`}
-                    </EuiText>
-                    <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
+                <EuiFormRow>
+                  <EuiSwitch
+                    data-test-subj="showYAxisSwitch"
+                    compressed
+                    label={i18n.translate('explore.vis.gridOptions.showYAxis', {
+                      defaultMessage: 'Show axis',
+                    })}
+                    checked={axis.show}
+                    onChange={(e) => updateValueAxis(index, { show: e.target.checked })}
+                  />
+                </EuiFormRow>
 
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
+                {axis.show && (
+                  <>
+                    <DebouncedAxisTitle
+                      value={getValueAxisDisplayTitle(axis, index)}
+                      placeholder={getDefaultValueAxisTitle(numericalColumns, index)}
+                      onChange={(text) =>
+                        updateValueAxis(index, {
+                          title: { ...axis.title, text },
+                        })
+                      }
+                      label={i18n.translate('explore.vis.gridOptions.axisTitle', {
+                        defaultMessage: 'Title',
+                      })}
+                    />
+
+                    <EuiFormRow
+                      label={i18n.translate('explore.vis.gridOptions.axisPosition', {
+                        defaultMessage: 'Position',
+                      })}
+                    >
+                      <EuiButtonGroup
+                        name={`valueAxisPosition-${index}`}
+                        legend="Select axis position"
+                        options={[
+                          { id: Positions.LEFT, label: 'Left' },
+                          { id: Positions.RIGHT, label: 'Right' },
+                        ]}
+                        idSelected={axis.position}
+                        onChange={(id) =>
+                          updateValueAxis(index, {
+                            position: id as Positions.LEFT | Positions.RIGHT,
+                          })
+                        }
+                        buttonSize="compressed"
+                        isFullWidth
+                        isDisabled={isRule2} // Position is fixed in Rule 2
+                      />
+                    </EuiFormRow>
+
+                    <EuiFormRow>
+                      <EuiSwitch
+                        compressed
+                        checked={axis.grid?.showLines ?? false}
+                        onChange={(e) =>
+                          updateValueAxis(index, {
+                            grid: { ...axis.grid, showLines: e.target.checked },
+                          })
+                        }
+                        label={i18n.translate('explore.vis.gridOptions.showAxisGrid.switchLabel', {
+                          defaultMessage: 'Show grid lines',
+                        })}
+                      />
+                    </EuiFormRow>
+
+                    <EuiFormRow>
+                      <EuiSwitch
+                        compressed
+                        label={i18n.translate('explore.vis.gridOptions.showLabels', {
+                          defaultMessage: 'Show labels',
+                        })}
+                        checked={axis.labels.show}
+                        onChange={(e) =>
+                          updateValueAxis(index, {
+                            labels: { ...axis.labels, show: e.target.checked },
+                          })
+                        }
+                      />
+                    </EuiFormRow>
+
+                    {axis.labels.show && (
+                      <>
                         <EuiFormRow
-                          label={i18n.translate('explore.vis.gridOptions.axisPosition', {
-                            defaultMessage: 'Position',
+                          label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
+                            defaultMessage: 'Alignment',
                           })}
                         >
-                          <EuiButtonGroup
-                            name={`valueAxisPosition-${index}`}
-                            legend="Select axis position"
-                            options={[
-                              { id: Positions.LEFT, label: 'Left' },
-                              { id: Positions.RIGHT, label: 'Right' },
-                            ]}
-                            idSelected={axis.position}
-                            onChange={(id) =>
-                              updateValueAxis(index, {
-                                position: id as Positions.LEFT | Positions.RIGHT,
-                              })
-                            }
-                            buttonSize="compressed"
-                            isFullWidth
-                            isDisabled={isRule2} // Position is fixed in Rule 2
-                          />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-
-                    <EuiSpacer size="m" />
-
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <EuiFormRow>
-                          <EuiSwitch
+                          <EuiSelect
+                            data-test-subj="yLinesAlignment"
                             compressed
-                            label={i18n.translate('explore.vis.gridOptions.showAxisLineAndLabels', {
-                              defaultMessage: 'Show axis line and labels',
-                            })}
-                            checked={axis.show}
-                            onChange={(e) => updateValueAxis(index, { show: e.target.checked })}
+                            value={
+                              axis.labels.rotate === 0
+                                ? 'horizontal'
+                                : axis.labels.rotate === -90
+                                ? 'vertical'
+                                : 'angled'
+                            }
+                            onChange={(e) => {
+                              let rotationValue = 0;
+                              if (e.target.value === 'vertical') rotationValue = -90;
+                              else if (e.target.value === 'angled') rotationValue = -45;
+
+                              updateValueAxis(index, {
+                                labels: {
+                                  ...axis.labels,
+                                  rotate: rotationValue,
+                                },
+                              });
+                            }}
+                            options={[
+                              { value: 'horizontal', text: 'Horizontal' },
+                              { value: 'vertical', text: 'Vertical' },
+                              { value: 'angled', text: 'Angled' },
+                            ]}
                           />
                         </EuiFormRow>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
 
-                    {axis.show && (
-                      <>
-                        <EuiSpacer size="m" />
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <DebouncedAxisTitle
-                              value={getValueAxisDisplayTitle(axis, index)}
-                              placeholder={getDefaultValueAxisTitle(numericalColumns, index)}
-                              onChange={(text) =>
-                                updateValueAxis(index, {
-                                  title: { ...axis.title, text },
-                                })
-                              }
-                              label={i18n.translate('explore.vis.gridOptions.axisTitle', {
-                                defaultMessage: 'Display name',
-                              })}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-
-                        <EuiSpacer size="m" />
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <EuiFormRow>
-                              <EuiSwitch
-                                compressed
-                                label={i18n.translate('explore.vis.gridOptions.showLabels', {
-                                  defaultMessage: 'Show labels',
-                                })}
-                                checked={axis.labels.show}
-                                onChange={(e) =>
-                                  updateValueAxis(index, {
-                                    labels: { ...axis.labels, show: e.target.checked },
-                                  })
-                                }
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          <EuiFlexItem>{/* Empty flex item for spacing */}</EuiFlexItem>
-                        </EuiFlexGroup>
-
-                        {axis.labels.show && (
-                          <>
-                            <EuiSpacer size="m" />
-                            <EuiFlexGroup>
-                              <EuiFlexItem>
-                                <EuiFormRow
-                                  label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
-                                    defaultMessage: 'Aligned',
-                                  })}
-                                >
-                                  <EuiSelect
-                                    compressed
-                                    value={
-                                      axis.labels.rotate === 0
-                                        ? 'horizontal'
-                                        : axis.labels.rotate === -90
-                                        ? 'vertical'
-                                        : 'angled'
-                                    }
-                                    onChange={(e) => {
-                                      let rotationValue = 0;
-                                      if (e.target.value === 'vertical') rotationValue = -90;
-                                      else if (e.target.value === 'angled') rotationValue = -45;
-
-                                      updateValueAxis(index, {
-                                        labels: {
-                                          ...axis.labels,
-                                          rotate: rotationValue,
-                                        },
-                                      });
-                                    }}
-                                    options={[
-                                      { value: 'horizontal', text: 'Horizontal' },
-                                      { value: 'vertical', text: 'Vertical' },
-                                      { value: 'angled', text: 'Angled' },
-                                    ]}
-                                  />
-                                </EuiFormRow>
-                              </EuiFlexItem>
-                              <EuiFlexItem>
-                                <DebouncedTruncateField
-                                  value={axis.labels.truncate ?? 100}
-                                  onChange={(truncateValue) => {
-                                    updateValueAxis(index, {
-                                      labels: {
-                                        ...axis.labels,
-                                        truncate: truncateValue,
-                                      },
-                                    });
-                                  }}
-                                  label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
-                                    defaultMessage: 'Truncate',
-                                  })}
-                                />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </>
-                        )}
+                        <DebouncedTruncateField
+                          value={axis.labels.truncate ?? 100}
+                          onChange={(truncateValue) => {
+                            updateValueAxis(index, {
+                              labels: {
+                                ...axis.labels,
+                                truncate: truncateValue,
+                              },
+                            });
+                          }}
+                          label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
+                            defaultMessage: 'Truncate after',
+                          })}
+                        />
                       </>
                     )}
-                  </div>
+                  </>
                 )}
               </EuiSplitPanel.Inner>
             </>
@@ -560,168 +480,151 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
         : // Standard rendering for other rules
           valueAxes.map((axis, index) => (
             <>
-              <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
-                <EuiButtonEmpty
-                  iconSide="left"
-                  color="text"
-                  iconType={expandedAxes[axis.id] ? 'arrowDown' : 'arrowRight'}
-                  onClick={() => toggleAxisExpansion(axis.id)}
-                  size="xs"
-                  data-test-subj={`valueAxis-${index}-button`}
-                >
+              <EuiSplitPanel.Inner
+                paddingSize="s"
+                key={axis.id}
+                color="subdued"
+                data-test-subj="ValueAxisPanel"
+              >
+                <EuiText size="s" style={{ fontWeight: 600 }}>
                   {i18n.translate('explore.vis.gridOptions.valueAxis', {
                     defaultMessage: 'Y-Axis',
                   })}
-                </EuiButtonEmpty>
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiFormRow>
+                  <EuiSwitch
+                    compressed
+                    label={i18n.translate('explore.vis.gridOptions.showYAxis', {
+                      defaultMessage: 'Show axis',
+                    })}
+                    data-test-subj="showOnlyOneYAxisSwitch"
+                    checked={axis.show}
+                    onChange={(e) => updateValueAxis(index, { show: e.target.checked })}
+                  />
+                </EuiFormRow>
+                {axis.show && (
+                  <>
+                    <DebouncedAxisTitle
+                      value={getValueAxisDisplayTitle(axis, index)}
+                      placeholder={getDefaultValueAxisTitle(numericalColumns, index)}
+                      onChange={(text) =>
+                        updateValueAxis(index, {
+                          title: { ...axis.title, text },
+                        })
+                      }
+                      label={i18n.translate('explore.vis.gridOptions.axisTitle', {
+                        defaultMessage: 'Title',
+                      })}
+                    />
 
-                {expandedAxes[axis.id] && (
-                  <div>
-                    <EuiSpacer size="m" />
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
+                    <EuiFormRow
+                      label={i18n.translate('explore.vis.gridOptions.axisPosition', {
+                        defaultMessage: 'Position',
+                      })}
+                    >
+                      <EuiButtonGroup
+                        name={`valueAxisPosition-${index}`}
+                        legend="Select axis position"
+                        options={[
+                          { id: Positions.LEFT, label: 'Left' },
+                          { id: Positions.RIGHT, label: 'Right' },
+                        ]}
+                        idSelected={axis.position}
+                        onChange={(id) =>
+                          updateValueAxis(index, {
+                            position: id as Positions.LEFT | Positions.RIGHT,
+                          })
+                        }
+                        buttonSize="compressed"
+                        isFullWidth
+                      />
+                    </EuiFormRow>
+
+                    <EuiFormRow>
+                      <EuiSwitch
+                        compressed
+                        checked={axis.grid?.showLines ?? false}
+                        onChange={(e) =>
+                          updateValueAxis(index, {
+                            grid: { ...axis.grid, showLines: e.target.checked },
+                          })
+                        }
+                        label={i18n.translate('explore.vis.gridOptions.showAxisGrid.switchLabel', {
+                          defaultMessage: 'Show grid lines',
+                        })}
+                      />
+                    </EuiFormRow>
+
+                    <EuiFormRow>
+                      <EuiSwitch
+                        compressed
+                        label={i18n.translate('explore.vis.gridOptions.showLabels', {
+                          defaultMessage: 'Show labels',
+                        })}
+                        checked={axis.labels.show}
+                        onChange={(e) =>
+                          updateValueAxis(index, {
+                            labels: { ...axis.labels, show: e.target.checked },
+                          })
+                        }
+                      />
+                    </EuiFormRow>
+
+                    {axis.labels.show && (
+                      <>
                         <EuiFormRow
-                          label={i18n.translate('explore.vis.gridOptions.axisPosition', {
-                            defaultMessage: 'Position',
+                          label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
+                            defaultMessage: 'Alignment',
                           })}
                         >
-                          <EuiButtonGroup
-                            name={`valueAxisPosition-${index}`}
-                            legend="Select axis position"
-                            options={[
-                              { id: Positions.LEFT, label: 'Left' },
-                              { id: Positions.RIGHT, label: 'Right' },
-                            ]}
-                            idSelected={axis.position}
-                            onChange={(id) =>
-                              updateValueAxis(index, {
-                                position: id as Positions.LEFT | Positions.RIGHT,
-                              })
-                            }
-                            buttonSize="compressed"
-                            isFullWidth
-                          />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-
-                    <EuiSpacer size="m" />
-
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <EuiFormRow>
-                          <EuiSwitch
+                          <EuiSelect
+                            data-test-subj="singleyLinesAlignment"
                             compressed
-                            label={i18n.translate('explore.vis.gridOptions.showAxisLineAndLabels', {
-                              defaultMessage: 'Show axis line and labels',
-                            })}
-                            checked={axis.show}
-                            onChange={(e) => updateValueAxis(index, { show: e.target.checked })}
+                            value={
+                              axis.labels.rotate === 0
+                                ? 'horizontal'
+                                : axis.labels.rotate === -90
+                                ? 'vertical'
+                                : 'angled'
+                            }
+                            onChange={(e) => {
+                              let rotationValue = 0;
+                              if (e.target.value === 'vertical') rotationValue = -90;
+                              else if (e.target.value === 'angled') rotationValue = -45;
+
+                              updateValueAxis(index, {
+                                labels: {
+                                  ...axis.labels,
+                                  rotate: rotationValue,
+                                },
+                              });
+                            }}
+                            options={[
+                              { value: 'horizontal', text: 'Horizontal' },
+                              { value: 'vertical', text: 'Vertical' },
+                              { value: 'angled', text: 'Angled' },
+                            ]}
                           />
                         </EuiFormRow>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
 
-                    {axis.show && (
-                      <>
-                        <EuiSpacer size="m" />
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <DebouncedAxisTitle
-                              value={getValueAxisDisplayTitle(axis, index)}
-                              placeholder={getDefaultValueAxisTitle(numericalColumns, index)}
-                              onChange={(text) =>
-                                updateValueAxis(index, {
-                                  title: { ...axis.title, text },
-                                })
-                              }
-                              label={i18n.translate('explore.vis.gridOptions.axisTitle', {
-                                defaultMessage: 'Display name',
-                              })}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-
-                        <EuiSpacer size="m" />
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <EuiFormRow>
-                              <EuiSwitch
-                                compressed
-                                label={i18n.translate('explore.vis.gridOptions.showLabels', {
-                                  defaultMessage: 'Show labels',
-                                })}
-                                checked={axis.labels.show}
-                                onChange={(e) =>
-                                  updateValueAxis(index, {
-                                    labels: { ...axis.labels, show: e.target.checked },
-                                  })
-                                }
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-
-                        {axis.labels.show && (
-                          <>
-                            <EuiSpacer size="m" />
-                            <EuiFlexGroup>
-                              <EuiFlexItem>
-                                <EuiFormRow
-                                  label={i18n.translate('explore.vis.gridOptions.labelAlignment', {
-                                    defaultMessage: 'Aligned',
-                                  })}
-                                >
-                                  <EuiSelect
-                                    compressed
-                                    value={
-                                      axis.labels.rotate === 0
-                                        ? 'horizontal'
-                                        : axis.labels.rotate === -90
-                                        ? 'vertical'
-                                        : 'angled'
-                                    }
-                                    onChange={(e) => {
-                                      let rotationValue = 0;
-                                      if (e.target.value === 'vertical') rotationValue = -90;
-                                      else if (e.target.value === 'angled') rotationValue = -45;
-
-                                      updateValueAxis(index, {
-                                        labels: {
-                                          ...axis.labels,
-                                          rotate: rotationValue,
-                                        },
-                                      });
-                                    }}
-                                    options={[
-                                      { value: 'horizontal', text: 'Horizontal' },
-                                      { value: 'vertical', text: 'Vertical' },
-                                      { value: 'angled', text: 'Angled' },
-                                    ]}
-                                  />
-                                </EuiFormRow>
-                              </EuiFlexItem>
-                              <EuiFlexItem>
-                                <DebouncedTruncateField
-                                  value={axis.labels.truncate ?? 100}
-                                  onChange={(truncateValue) => {
-                                    updateValueAxis(index, {
-                                      labels: {
-                                        ...axis.labels,
-                                        truncate: truncateValue,
-                                      },
-                                    });
-                                  }}
-                                  label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
-                                    defaultMessage: 'Truncate',
-                                  })}
-                                />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </>
-                        )}
+                        <DebouncedTruncateField
+                          value={axis.labels.truncate ?? 100}
+                          onChange={(truncateValue) => {
+                            updateValueAxis(index, {
+                              labels: {
+                                ...axis.labels,
+                                truncate: truncateValue,
+                              },
+                            });
+                          }}
+                          label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
+                            defaultMessage: 'Truncate after',
+                          })}
+                        />
                       </>
                     )}
-                  </div>
+                  </>
                 )}
               </EuiSplitPanel.Inner>
             </>

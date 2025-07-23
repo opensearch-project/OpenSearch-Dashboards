@@ -12,7 +12,6 @@ import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
-import { GridOptionsPanel } from '../style_panel/grid/grid';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 
 export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyleControls>;
@@ -81,13 +80,6 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               onThresholdLinesChange={(thresholdLines) =>
                 updateStyleOption('thresholdLines', thresholdLines)
               }
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <GridOptionsPanel
-              grid={styleOptions.grid}
-              onGridChange={(grid) => updateStyleOption('grid', grid)}
             />
           </EuiFlexItem>
 

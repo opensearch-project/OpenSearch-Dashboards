@@ -19,7 +19,7 @@ import {
   StandardAxes,
 } from '../types';
 
-import { defaultHeatmapChartStyles } from './heatmap_vis_config';
+import { defaultHeatmapChartStyles, HeatmapLabels } from './heatmap_vis_config';
 import * as colorUtil from '../utils/utils';
 
 describe('createlabelLayer', () => {
@@ -47,12 +47,15 @@ describe('createlabelLayer', () => {
   it('should return null if label.show is false', () => {
     const styles = {
       ...defaultHeatmapChartStyles,
-      label: {
-        show: false,
-        overwriteColor: true,
-        color: 'black',
-        rotate: false,
-        type: LabelAggregationType.SUM,
+      exclusive: {
+        ...defaultHeatmapChartStyles.exclusive,
+        label: {
+          show: false,
+          overwriteColor: true,
+          color: 'black',
+          rotate: false,
+          type: LabelAggregationType.SUM,
+        },
       },
     };
     const result = createlabelLayer(styles, true, colorField, xAxis, yAxis);
@@ -62,12 +65,15 @@ describe('createlabelLayer', () => {
   it('should create label layer for regular heatmap (isRegular=true)', () => {
     const baseStyles = {
       ...defaultHeatmapChartStyles,
-      label: {
-        show: true,
-        overwriteColor: true,
-        color: 'black',
-        rotate: false,
-        type: LabelAggregationType.SUM,
+      exclusive: {
+        ...defaultHeatmapChartStyles.exclusive,
+        label: {
+          show: true,
+          overwriteColor: true,
+          color: 'black',
+          rotate: false,
+          type: LabelAggregationType.SUM,
+        },
       },
     };
 
@@ -98,15 +104,41 @@ describe('createlabelLayer', () => {
     });
   });
 
-  it('should not add aggregation if label.type is NONE', () => {
-    const baseStyles = {
+  it('should set aggregate if label.type is defined', () => {
+    const styles = {
       ...defaultHeatmapChartStyles,
       label: {
         show: true,
-        overwriteColor: true,
-        color: 'blue',
-        rotate: false,
-        type: LabelAggregationType.NONE,
+        type: LabelAggregationType.SUM,
+      },
+      exclusive: {
+        ...defaultHeatmapChartStyles.exclusive,
+        label: {
+          show: true,
+          overwriteColor: true,
+          color: 'green',
+          rotate: false,
+          type: LabelAggregationType.SUM,
+        },
+      },
+    };
+
+    const result = createlabelLayer(styles, false, colorField, xAxis, yAxis);
+    expect(result?.encoding.text).toHaveProperty('aggregate', LabelAggregationType.SUM);
+  });
+
+  it('should not add aggregation if label.type is NONE', () => {
+    const baseStyles = {
+      ...defaultHeatmapChartStyles,
+      exclusive: {
+        ...defaultHeatmapChartStyles.exclusive,
+        label: {
+          show: true,
+          overwriteColor: true,
+          color: 'blue',
+          rotate: false,
+          type: LabelAggregationType.NONE,
+        },
       },
     };
 
@@ -141,6 +173,7 @@ describe('addTransform', () => {
       maxNumberOfColors: 4,
       useCustomRanges: false,
       customRanges: [],
+      label: {} as HeatmapLabels,
     },
   };
   it('should return transformation steps when percentageMode is enabled', () => {
@@ -193,6 +226,7 @@ describe('setRange', () => {
         scaleToDataBounds: false,
         maxNumberOfColors: 4,
         useCustomRanges: true,
+        label: {} as HeatmapLabels,
       },
     };
 
@@ -212,6 +246,7 @@ describe('setRange', () => {
         colorScaleType: ScaleType.LINEAR,
         scaleToDataBounds: false,
         maxNumberOfColors: 4,
+        label: {} as HeatmapLabels,
       },
     };
 
@@ -249,6 +284,7 @@ describe('enhanceStyle', () => {
         colorScaleType: ScaleType.LINEAR,
         scaleToDataBounds: false,
         maxNumberOfColors: 4,
+        label: {} as HeatmapLabels,
       },
       addLegend: true,
     };
@@ -271,6 +307,7 @@ describe('enhanceStyle', () => {
         colorScaleType: ScaleType.LINEAR,
         scaleToDataBounds: true,
         maxNumberOfColors: 4,
+        label: {} as HeatmapLabels,
       },
     };
 
@@ -293,6 +330,7 @@ describe('enhanceStyle', () => {
         scaleToDataBounds: true,
         maxNumberOfColors: 4,
         useCustomRanges: true,
+        label: {} as HeatmapLabels,
         customRanges: [
           { min: 0, max: 5 },
           { min: 6, max: 10 },
@@ -322,6 +360,7 @@ describe('enhanceStyle', () => {
         useCustomRanges: true,
         customRanges: [{ min: 2, max: 8 }],
         scaleToDataBounds: true,
+        label: {} as HeatmapLabels,
       },
     };
 

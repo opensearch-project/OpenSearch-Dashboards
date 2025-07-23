@@ -340,5 +340,27 @@ describe('Header', () => {
       const component = mountWithIntl(<Header {...props} />);
       expect(component.find('#pluginGlobalBanner').exists()).toBeFalsy();
     });
+
+    it('does not render banner container when useUpdatedHeader is true', () => {
+      const injectedMetadata = ({
+        getPlugins: jest.fn().mockReturnValue([
+          {
+            id: 'banner',
+            config: {
+              enabled: true,
+            },
+          },
+        ]),
+      } as unknown) as InjectedMetadataStart;
+
+      const props = {
+        ...mockProps(),
+        injectedMetadata,
+        useUpdatedHeader: true,
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('#pluginGlobalBanner').exists()).toBeFalsy();
+    });
   });
 });

@@ -8,7 +8,6 @@ import { LineVisStyleControls } from './line_vis_options';
 import { VisualizationType } from '../utils/use_visualization_types';
 import {
   CategoryAxis,
-  GridOptions,
   ThresholdLines,
   ThresholdLineStyle,
   ValueAxis,
@@ -32,7 +31,6 @@ export interface LineChartStyleControls {
 
   // Threshold and grid
   thresholdLines: ThresholdLines;
-  grid: GridOptions;
 
   // Axes configuration
   categoryAxes: CategoryAxis[];
@@ -62,10 +60,6 @@ const defaultLineChartStyles: LineChartStyleControls = {
       name: '',
     },
   ],
-  grid: {
-    xLines: true,
-    yLines: true,
-  },
 
   // Category axes
   categoryAxes: [
@@ -82,6 +76,9 @@ const defaultLineChartStyles: LineChartStyleControls = {
       },
       title: {
         text: '',
+      },
+      grid: {
+        showLines: false,
       },
     },
   ],
@@ -102,6 +99,9 @@ const defaultLineChartStyles: LineChartStyleControls = {
       },
       title: {
         text: '',
+      },
+      grid: {
+        showLines: false,
       },
     },
   ],

@@ -154,19 +154,6 @@ jest.mock('../style_panel/axes/axes', () => ({
   )),
 }));
 
-jest.mock('../style_panel/grid/grid', () => ({
-  GridOptionsPanel: jest.fn(({ grid, onGridChange }) => (
-    <div data-test-subj="grid-panel">
-      <button
-        data-test-subj="update-grid"
-        onClick={() => onGridChange({ ...grid, xLines: !grid.xLines })}
-      >
-        Update Grid
-      </button>
-    </div>
-  )),
-}));
-
 describe('AreaVisStyleControls', () => {
   const defaultProps = {
     styleOptions: {
@@ -197,6 +184,9 @@ describe('AreaVisStyleControls', () => {
             rotate: 0,
             truncate: 100,
           },
+          grid: {
+            showLines: true,
+          },
           title: {
             text: '',
           },
@@ -215,12 +205,14 @@ describe('AreaVisStyleControls', () => {
             filter: false,
             truncate: 100,
           },
+          grid: {
+            showLines: true,
+          },
           title: {
             text: '',
           },
         },
       ],
-      grid: { xLines: true, yLines: true },
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {
@@ -255,7 +247,6 @@ describe('AreaVisStyleControls', () => {
     expect(screen.getByTestId('threshold-panel')).toBeInTheDocument();
     expect(screen.getByTestId('tooltip-panel')).toBeInTheDocument();
     expect(screen.getByTestId('axes-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('grid-panel')).toBeInTheDocument();
   });
 
   test('shows legend when notShowLegend is false', () => {
@@ -470,16 +461,6 @@ describe('AreaVisStyleControls', () => {
     });
   });
 
-  test('updates grid options correctly', async () => {
-    render(<AreaVisStyleControls {...defaultProps} />);
-
-    await userEvent.click(screen.getByTestId('update-grid'));
-
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      grid: { ...defaultProps.styleOptions.grid, xLines: false },
-    });
-  });
-
   test('does not render style panels when no mappings are selected', () => {
     const props = {
       ...defaultProps,
@@ -494,7 +475,6 @@ describe('AreaVisStyleControls', () => {
     expect(screen.queryByTestId('threshold-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('tooltip-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('axes-panel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('grid-panel')).not.toBeInTheDocument();
   });
 
   test('handles empty arrays for columns', () => {

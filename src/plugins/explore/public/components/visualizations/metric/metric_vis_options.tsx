@@ -84,7 +84,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             >
               <EuiFormRow
                 label={i18n.translate('explore.vis.metric.fontSize', {
-                  defaultMessage: 'Font Size',
+                  defaultMessage: 'Font size',
                 })}
               >
                 <EuiRange
@@ -97,7 +97,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   showLabels
                   showValue
                   aria-label={i18n.translate('explore.vis.metric.fontSize', {
-                    defaultMessage: 'Font Size',
+                    defaultMessage: 'Font size',
                   })}
                 />
               </EuiFormRow>

@@ -21,10 +21,6 @@ describe('area_vis_config', () => {
         tooltipOptions: {
           mode: 'all',
         },
-        grid: {
-          xLines: true,
-          yLines: true,
-        },
       });
 
       // Check threshold lines
@@ -52,6 +48,9 @@ describe('area_vis_config', () => {
           rotate: 0,
           truncate: 100,
         },
+        grid: {
+          showLines: false,
+        },
         title: {
           text: '',
         },
@@ -69,6 +68,9 @@ describe('area_vis_config', () => {
           rotate: 0,
           filter: false,
           truncate: 100,
+        },
+        grid: {
+          showLines: false,
         },
         title: {
           text: '',

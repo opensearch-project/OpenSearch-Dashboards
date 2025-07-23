@@ -1,0 +1,2 @@
+fix:
+- Update lighthouse baseline limit for dashboard and discover ([#10254](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10254))

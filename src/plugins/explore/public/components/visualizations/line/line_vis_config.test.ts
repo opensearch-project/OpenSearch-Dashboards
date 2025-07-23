@@ -70,12 +70,6 @@ describe('line_vis_config', () => {
         },
       ]);
 
-      // Verify grid settings
-      expect(defaults.grid).toEqual({
-        xLines: true,
-        yLines: true,
-      });
-
       // Verify axes
       expect(defaults.categoryAxes).toHaveLength(1);
       expect(defaults.categoryAxes[0]).toEqual({
@@ -88,6 +82,9 @@ describe('line_vis_config', () => {
           filter: true,
           rotate: 0,
           truncate: 100,
+        },
+        grid: {
+          showLines: false,
         },
         title: {
           text: '',
@@ -105,6 +102,9 @@ describe('line_vis_config', () => {
           rotate: 0,
           filter: false,
           truncate: 100,
+        },
+        grid: {
+          showLines: false,
         },
         title: {
           text: '',
