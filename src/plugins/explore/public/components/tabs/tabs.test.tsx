@@ -78,7 +78,6 @@ describe('ExploreTabsComponent', () => {
       preloadedState: {
         ui: {
           activeTabId: '',
-          showFilterPanel: false,
           showHistogram: true,
         },
         query: {
@@ -115,7 +114,6 @@ describe('ExploreTabsComponent', () => {
     const store = createMockStore({
       ui: {
         activeTabId: 'logs',
-        showFilterPanel: false,
         showHistogram: true,
       },
       results: {},
@@ -141,7 +139,6 @@ describe('ExploreTabsComponent', () => {
     const store = createMockStore({
       ui: {
         activeTabId: 'logs',
-        showFilterPanel: false,
         showHistogram: true,
       },
       results: {
@@ -172,7 +169,6 @@ describe('ExploreTabsComponent', () => {
     const store = createMockStore({
       ui: {
         activeTabId: 'explore_visualization_tab',
-        showFilterPanel: false,
         showHistogram: true,
       },
     });
@@ -192,7 +188,6 @@ describe('ExploreTabsComponent', () => {
     const store = createMockStore({
       ui: {
         activeTabId: '',
-        showFilterPanel: false,
         showHistogram: true,
       },
     });
