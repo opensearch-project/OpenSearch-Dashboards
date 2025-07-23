@@ -10,6 +10,12 @@
     flex-shrink: 0;
     width: $euiSizeXL;
     height: $euiSizeXL;
+
+    &:hover,
+    &:focus {
+      background-color: transparent !important;
+      transform: none !important;
+    }
   }
 
   &__panel {

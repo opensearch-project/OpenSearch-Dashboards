@@ -222,14 +222,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   }, [selectedDataset]);
 
   return (
-    <EuiFormRow
-      fullWidth={true}
-      display="columnCompressed"
-      className="datasetSelect"
-      label={i18n.translate('data.datasetSelect.formRowLabel', {
-        defaultMessage: 'Data',
-      })}
-    >
+    <EuiFormRow fullWidth={true} display="columnCompressed" className="datasetSelect">
       <EuiFlexGroup
         gutterSize="none"
         alignItems="center"
