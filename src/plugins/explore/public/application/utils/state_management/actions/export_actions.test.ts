@@ -46,7 +46,6 @@ describe('export_actions', () => {
     mockState = {
       ui: {
         activeTabId: 'test-tab',
-        showFilterPanel: true,
         showHistogram: true,
       },
       query: {

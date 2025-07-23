@@ -34,10 +34,6 @@ jest.mock('./run_query_button', () => ({
   RunQueryButton: () => <div data-test-subj="run-query-button">Run Query</div>,
 }));
 
-jest.mock('./filter_panel_toggle', () => ({
-  FilterPanelToggle: () => <div data-test-subj="filter-panel-toggle">Filter Panel Toggle</div>,
-}));
-
 jest.mock('./recent_queries_button', () => ({
   RecentQueriesButton: () => <div data-test-subj="recent-queries-button">Recent Queries</div>,
 }));
@@ -89,7 +85,6 @@ describe('QueryPanelWidgets', () => {
     expect(container.querySelector('.exploreQueryPanelWidgets')).toBeInTheDocument();
 
     // Check left section components
-    expect(screen.getByTestId('filter-panel-toggle')).toBeInTheDocument();
     expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
     expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
     expect(screen.getByTestId('selected-language')).toBeInTheDocument();
