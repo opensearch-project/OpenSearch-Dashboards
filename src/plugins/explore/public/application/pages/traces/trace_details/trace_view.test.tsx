@@ -47,7 +47,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('./state/trace_app_state', () => ({
-  createTraceAppState: ({ stateDefaults }: any) => ({
+  createTraceAppState: jest.fn(({ stateDefaults }: any) => ({
     stateContainer: {
       get: () => ({
         ...stateDefaults,
@@ -70,7 +70,7 @@ jest.mock('./state/trace_app_state', () => ({
       },
     },
     stopStateSync: jest.fn(),
-  }),
+  })),
 }));
 
 jest.mock('./public/traces/span_detail_panel', () => ({
@@ -163,6 +163,44 @@ describe('TraceDetails', () => {
       hits: mockTraceData,
     });
     mockTransformPPLDataToTraceHits.mockImplementation(() => mockTraceData);
+  });
+
+  it('handles color map generation errors', async () => {
+    const generateColorMap = jest.requireMock('./public/traces/generate_color_map')
+      .generateColorMap;
+    generateColorMap.mockImplementation(() => {
+      throw new Error('Color map generation failed');
+    });
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  it('handles missing data service gracefully', async () => {
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
+    });
   });
 
   it('renders trace details component', async () => {
@@ -263,9 +301,155 @@ describe('TraceDetails', () => {
     await waitFor(() => {
       expect(mockChrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'test-trace-id',
+          text: 'Trace: test-trace-id',
         },
       ]);
     });
+  });
+
+  it('sets breadcrumb for unknown trace', async () => {
+    // Mock state container to return empty traceId
+    const mockCreateTraceAppState = jest.requireMock('./state/trace_app_state').createTraceAppState;
+    mockCreateTraceAppState.mockReturnValueOnce({
+      stateContainer: {
+        get: () => ({
+          traceId: '', // Empty trace ID
+          dataSourceId: 'test-datasource',
+          indexPattern: 'test-index-*',
+          spanId: undefined,
+        }),
+        set: jest.fn(),
+        state$: {
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        },
+        transitions: {
+          setSpanId: jest.fn(),
+          setTraceId: jest.fn(),
+          setDataSourceId: jest.fn(),
+          setIndexPattern: jest.fn(),
+        },
+      },
+      stopStateSync: jest.fn(),
+    });
+
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(mockChrome.setBreadcrumbs).toHaveBeenCalledWith([
+        {
+          text: 'Unknown Trace',
+        },
+      ]);
+    });
+  });
+
+  it('handles span filter updates', async () => {
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="span-detail-panel"]')).toBeInTheDocument();
+    });
+
+    // Simulate filter update through SpanDetailSidebar
+    const sidebar = document.querySelector('[data-testid="span-detail-sidebar"]');
+    expect(sidebar).toBeInTheDocument();
+  });
+
+  it('handles span filtering when no filters applied', async () => {
+    mockTransformPPLDataToTraceHits.mockImplementation(() => mockTraceData);
+
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="span-detail-panel"]')).toBeInTheDocument();
+    });
+  });
+
+  it('handles span selection fallback to earliest span', async () => {
+    const mockDataWithoutParent = [
+      {
+        spanId: 'span-1',
+        traceId: 'test-trace-id',
+        serviceName: 'service-a',
+        name: 'operation-1',
+        startTime: '2023-01-01T00:00:02Z', // Later start time
+        parentSpanId: 'parent-1', // Has parent
+      },
+      {
+        spanId: 'span-2',
+        traceId: 'test-trace-id',
+        serviceName: 'service-b',
+        name: 'operation-2',
+        startTime: '2023-01-01T00:00:01Z', // Earlier start time
+        parentSpanId: 'parent-2', // Has parent
+      },
+    ];
+
+    mockTransformPPLDataToTraceHits.mockImplementation(() => mockDataWithoutParent);
+
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="span-detail-sidebar"]')).toBeInTheDocument();
+    });
+  });
+
+  it('handles visualization resize trigger', async () => {
+    const mockObserve = jest.fn();
+    const mockDisconnect = jest.fn();
+    let resizeCallback: any;
+    const mockResizeObserver = jest.fn().mockImplementation((callback) => {
+      resizeCallback = callback;
+      return {
+        observe: mockObserve,
+        disconnect: mockDisconnect,
+      };
+    });
+
+    global.ResizeObserver = mockResizeObserver;
+
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="span-detail-panel"]')).toBeInTheDocument();
+    });
+
+    // Simulate resize event
+    if (resizeCallback) {
+      resizeCallback([{ target: document.createElement('div') }]);
+    }
+
+    // Wait for debounced resize
+    await new Promise((resolve) => setTimeout(resolve, 150));
   });
 });

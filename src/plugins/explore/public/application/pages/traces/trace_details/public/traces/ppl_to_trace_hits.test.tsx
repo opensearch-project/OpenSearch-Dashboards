@@ -218,5 +218,213 @@ describe('ppl_to_trace_hits', () => {
       expect(result).toHaveLength(2);
       expect(result[0].sort[0]).toBeLessThan(result[1].sort[0]);
     });
+
+    it('handles error during span processing in datarows format', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const pplResponse: PPLResponse = {
+        schema: [
+          { name: 'traceId', type: 'string', values: [] },
+          { name: 'startTime', type: 'string', values: [] },
+        ],
+        datarows: [
+          ['trace1', '2025-05-29 03:11:25.29217459'],
+          // @ts-ignore - Testing error handling with null row
+          null, // This will cause an error
+          ['trace3', '2025-05-29 03:11:27.29217459'],
+        ],
+        fields: [],
+        size: 3,
+      };
+
+      const result = transformPPLDataToTraceHits(pplResponse);
+      expect(result).toHaveLength(2); // Should skip the null row
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Error processing span at index 1:',
+        expect.any(Error)
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('handles error during span processing in fields format', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // Create a response that will cause an error during processing
+      const pplResponse: PPLResponse = {
+        fields: [
+          {
+            name: 'traceId',
+            type: 'string',
+            values: ['trace1'],
+          },
+        ],
+        size: 1,
+      };
+
+      const result = transformPPLDataToTraceHits(pplResponse);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]?.traceId).toBe('trace1');
+      consoleSpy.mockRestore();
+    });
+
+    it('handles empty datarows', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const pplResponse: PPLResponse = {
+        schema: [{ name: 'traceId', type: 'string', values: [] }],
+        datarows: [],
+        fields: [],
+        size: 0,
+      };
+
+      const result = transformPPLDataToTraceHits(pplResponse);
+      expect(result).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith('Invalid datarows format response');
+
+      consoleSpy.mockRestore();
+    });
+
+    it('handles response with no fields but has size', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const pplResponse: PPLResponse = {
+        fields: undefined,
+        size: 1,
+      };
+
+      const result = transformPPLDataToTraceHits(pplResponse);
+      expect(result).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith('PPL response has no data:', {
+        hasFields: false,
+        size: 1,
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('handles different timestamp formats in convertTimestampToNanos', () => {
+      // Test with number timestamp
+      const pplResponse1: PPLResponse = {
+        fields: [
+          {
+            name: 'startTime',
+            type: 'number',
+            values: [1622246485292],
+          },
+        ],
+        size: 1,
+      };
+      const result1 = transformPPLDataToTraceHits(pplResponse1);
+      expect(result1[0]?.sort[0]).toBeGreaterThan(0);
+
+      // Test with object timestamp
+      const pplResponse2: PPLResponse = {
+        fields: [
+          {
+            name: 'startTime',
+            type: 'object',
+            values: [new Date('2025-05-29T03:11:25.292Z')],
+          },
+        ],
+        size: 1,
+      };
+      const result2 = transformPPLDataToTraceHits(pplResponse2);
+      expect(result2[0]?.sort[0]).toBeGreaterThan(0);
+
+      // Test with null timestamp
+      const pplResponse3: PPLResponse = {
+        fields: [
+          {
+            name: 'startTime',
+            type: 'string',
+            values: [null],
+          },
+        ],
+        size: 1,
+      };
+      const result3 = transformPPLDataToTraceHits(pplResponse3);
+      expect(result3[0]?.sort[0]).toBe(0);
+    });
+
+    it('handles timestamp conversion errors', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const pplResponse: PPLResponse = {
+        fields: [
+          {
+            name: 'startTime',
+            type: 'string',
+            values: [
+              {
+                toString: () => {
+                  throw new Error('toString error');
+                },
+              },
+            ],
+          },
+        ],
+        size: 1,
+      };
+
+      const result = transformPPLDataToTraceHits(pplResponse);
+      expect(result[0]?.sort[0]).toBe(0);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Error converting timestamp to nanos:',
+        expect.any(Object),
+        expect.any(Error)
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('handles extractStatusCode with null status', () => {
+      const pplResponse: PPLResponse = {
+        fields: [
+          {
+            name: 'status',
+            type: 'object',
+            values: [null],
+          },
+        ],
+        size: 1,
+      };
+      const result = transformPPLDataToTraceHits(pplResponse);
+      expect(result[0]?.['status.code']).toBe(0);
+    });
+
+    it('handles traceGroupFields with nested values', () => {
+      const pplResponse: PPLResponse = {
+        fields: [
+          {
+            name: 'traceId',
+            type: 'string',
+            values: ['trace1'],
+          },
+          {
+            name: 'traceGroupFields',
+            type: 'object',
+            values: [
+              {
+                endTime: '2025-05-29T03:11:25.392Z',
+                durationInNanos: 100000000,
+                statusCode: 200,
+              },
+            ],
+          },
+          {
+            name: 'durationInNanos',
+            type: 'number',
+            values: [50000000],
+          },
+        ],
+        size: 1,
+      };
+      const result = transformPPLDataToTraceHits(pplResponse);
+      expect(result[0]?.traceGroupFields.endTime).toBe('2025-05-29T03:11:25.392Z');
+      expect(result[0]?.traceGroupFields.durationInNanos).toBe(100000000);
+      expect(result[0]?.traceGroupFields.statusCode).toBe(200);
+    });
   });
 });

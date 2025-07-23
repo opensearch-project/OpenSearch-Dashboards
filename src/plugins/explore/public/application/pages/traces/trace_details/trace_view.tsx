@@ -89,11 +89,14 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
   useEffect(() => {
     chrome?.setBreadcrumbs([
       {
-        text:
-          traceId ||
-          i18n.translate('explore.traceDetails.breadcrumb.unknownTrace', {
-            defaultMessage: 'Unknown Trace',
-          }),
+        text: traceId
+          ? i18n.translate('explore.traceDetails.breadcrumb.traceTitle', {
+              defaultMessage: 'Trace: {traceId}',
+              values: { traceId },
+            })
+          : i18n.translate('explore.traceDetails.breadcrumb.unknownTrace', {
+              defaultMessage: 'Unknown Trace',
+            }),
       },
     ]);
   }, [chrome, traceId]);

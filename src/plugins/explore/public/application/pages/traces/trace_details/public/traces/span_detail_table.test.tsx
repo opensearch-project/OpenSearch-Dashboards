@@ -6,13 +6,14 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
+import { RenderCustomDataGrid } from '../utils/custom_datagrid';
 
 jest.mock('../utils/helper_functions', () => ({
   nanoToMilliSec: jest.fn((nanos: number) => nanos / 1000000),
 }));
 
 jest.mock('../utils/custom_datagrid', () => ({
-  RenderCustomDataGrid: jest.fn(({ renderCellValue, rowCount, toolbarButtons, props }) => {
+  RenderCustomDataGrid: jest.fn(({ toolbarButtons, props }) => {
     const mockData = {
       serviceName: 'service-1',
       name: 'operation-1',
@@ -105,6 +106,56 @@ describe('SpanDetailTable', () => {
     jest.clearAllMocks();
   });
 
+  it('handles parseHits with invalid JSON', () => {
+    const propsWithInvalidJson = {
+      ...defaultProps,
+      payloadData: 'invalid json',
+    };
+
+    render(<SpanDetailTable {...propsWithInvalidJson} />);
+    // Should render without crashing and show empty state
+    expect(screen.getByTestId('mockDataGrid')).toBeInTheDocument();
+  });
+
+  it('handles parseHits with array format', () => {
+    const propsWithArrayFormat = {
+      ...defaultProps,
+      payloadData: JSON.stringify([
+        {
+          spanId: 'span-1',
+          serviceName: 'service-1',
+          name: 'operation-1',
+          durationInNanos: 1000000000,
+          'status.code': 0,
+        },
+      ]),
+    };
+
+    render(<SpanDetailTable {...propsWithArrayFormat} />);
+    expect(screen.getByTestId('mockDataGrid')).toBeInTheDocument();
+  });
+
+  it('calls setTotal when provided', () => {
+    const setTotalMock = jest.fn();
+    const propsWithSetTotal = {
+      ...defaultProps,
+      setTotal: setTotalMock,
+    };
+
+    render(<SpanDetailTable {...propsWithSetTotal} />);
+    expect(setTotalMock).toHaveBeenCalled();
+  });
+
+  it('handles empty payloadData', () => {
+    const propsWithEmptyData = {
+      ...defaultProps,
+      payloadData: '',
+    };
+
+    render(<SpanDetailTable {...propsWithEmptyData} />);
+    expect(screen.getByTestId('mockDataGrid')).toBeInTheDocument();
+  });
+
   it('renders table with data', async () => {
     render(<SpanDetailTable {...defaultProps} />);
 
@@ -173,6 +224,196 @@ describe('SpanDetailTable', () => {
 
     const serviceCell = screen.getByTestId('cell-serviceName');
     expect(serviceCell).toHaveTextContent('service-1');
+  });
+
+  it('handles sorting with sortingColumns', () => {
+    const propsWithSorting = {
+      ...defaultProps,
+      payloadData: JSON.stringify({
+        hits: {
+          hits: [
+            {
+              _source: {
+                spanId: 'span-1',
+                serviceName: 'service-a',
+                name: 'operation-1',
+                durationInNanos: 2000000000,
+                'status.code': 0,
+              },
+            },
+            {
+              _source: {
+                spanId: 'span-2',
+                serviceName: 'service-b',
+                name: 'operation-2',
+                durationInNanos: 1000000000,
+                'status.code': 0,
+              },
+            },
+          ],
+        },
+      }),
+    };
+
+    render(<SpanDetailTable {...propsWithSorting} />);
+    expect(screen.getByTestId('mockDataGrid')).toBeInTheDocument();
+  });
+
+  it('handles error in useEffect parsing', () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const propsWithBadData = {
+      ...defaultProps,
+      payloadData: '{"hits": {"hits": [{"_source": null}]}}',
+    };
+
+    render(<SpanDetailTable {...propsWithBadData} />);
+    expect(screen.getByTestId('mockDataGrid')).toBeInTheDocument();
+
+    consoleSpy.mockRestore();
+  });
+});
+
+describe('RenderSpanCellValue function coverage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('covers all renderSpanCellValue switch cases', () => {
+    const testData = {
+      hits: {
+        hits: [
+          {
+            _source: {
+              spanId: 'test-span',
+              serviceName: 'test-service',
+              name: 'test-operation',
+              durationInNanos: 1500000000,
+              'status.code': 2, // Error status
+              startTime: '2023-01-01T12:00:00.000Z',
+              endTime: '2023-01-01T12:00:01.500Z',
+              parentSpanId: 'parent-span',
+              traceId: 'trace-123',
+              traceGroup: 'test-group',
+            },
+          },
+        ],
+      },
+    };
+
+    const props = {
+      hiddenColumns: [],
+      openFlyout: jest.fn(),
+      dataSourceMDSId: 'test-source',
+      payloadData: JSON.stringify(testData),
+      filters: [],
+    };
+
+    render(<SpanDetailTable {...props} />);
+
+    expect(RenderCustomDataGrid).toHaveBeenCalled();
+
+    const mockCall = (RenderCustomDataGrid as jest.Mock).mock.calls[0][0];
+    const renderCellValue = mockCall.renderCellValue;
+
+    const statusResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'status.code',
+      disableInteractions: false,
+    });
+    expect(statusResult).toBeDefined();
+
+    const spanIdResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'spanId',
+      disableInteractions: false,
+    });
+    expect(spanIdResult).toBeDefined();
+
+    const spanIdDisabledResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'spanId',
+      disableInteractions: true,
+    });
+    expect(spanIdDisabledResult).toBeDefined();
+
+    const durationResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'durationInNanos',
+      disableInteractions: false,
+    });
+    expect(durationResult).toBeDefined();
+
+    const startTimeResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'startTime',
+      disableInteractions: false,
+    });
+    expect(startTimeResult).toBeDefined();
+
+    const endTimeResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'endTime',
+      disableInteractions: false,
+    });
+    expect(endTimeResult).toBeDefined();
+
+    const defaultResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'serviceName',
+      disableInteractions: false,
+    });
+    expect(defaultResult).toBeDefined();
+
+    const missingItemResult = renderCellValue({
+      rowIndex: 999,
+      columnId: 'serviceName',
+      disableInteractions: false,
+    });
+    expect(missingItemResult).toBe('-');
+  });
+
+  it('covers event handler functions', () => {
+    const props = {
+      hiddenColumns: [],
+      openFlyout: jest.fn(),
+      dataSourceMDSId: 'test-source',
+      payloadData: JSON.stringify({
+        hits: {
+          hits: [
+            {
+              _source: {
+                spanId: 'span-1',
+                serviceName: 'service-1',
+                name: 'operation-1',
+                durationInNanos: 1000000000,
+                'status.code': 0,
+              },
+            },
+          ],
+        },
+      }),
+      filters: [],
+    };
+
+    render(<SpanDetailTable {...props} />);
+
+    const mockCall = (RenderCustomDataGrid as jest.Mock).mock.calls[0][0];
+
+    if (mockCall.sorting && mockCall.sorting.onSort) {
+      mockCall.sorting.onSort([{ id: 'serviceName', direction: 'asc' }]);
+    }
+
+    if (mockCall.pagination) {
+      if (mockCall.pagination.onChangePage) {
+        mockCall.pagination.onChangePage(1);
+      }
+      if (mockCall.pagination.onChangeItemsPerPage) {
+        mockCall.pagination.onChangeItemsPerPage(50);
+      }
+    }
+
+    expect(RenderCustomDataGrid).toHaveBeenCalled();
   });
 });
 
