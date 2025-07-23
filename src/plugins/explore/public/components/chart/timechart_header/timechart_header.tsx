@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import './_toggle_button_group.scss';
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlexGroup,
@@ -38,9 +36,6 @@ import {
   EuiText,
   EuiSelect,
   EuiIconTip,
-  EuiButtonGroup,
-  EuiSplitPanel,
-  EuiIcon,
 } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -89,14 +84,8 @@ export interface TimechartHeaderProps {
    * Toggle the displaying of histogram or results summary
    */
   toggleIdSelected: DiscoverChartToggleId;
-  /**
-   * Change toggle state
-   */
-  onToggleChange: (optionId: DiscoverChartToggleId) => void;
-  /**
-   * is summary component enabled by capability and summary agent
-   */
-  isSummaryAvailable: boolean;
+
+  additionalControl: any;
 }
 
 export function TimechartHeader({
@@ -106,9 +95,8 @@ export function TimechartHeader({
   options,
   onChangeInterval,
   stateInterval,
+  additionalControl,
   toggleIdSelected,
-  onToggleChange,
-  isSummaryAvailable,
 }: TimechartHeaderProps) {
   const [interval, setInterval] = useState(stateInterval);
 
@@ -137,22 +125,6 @@ export function TimechartHeader({
   if (!timeRange || !bucketInterval) {
     return null;
   }
-
-  const toggleButtons = [
-    {
-      id: 'histogram',
-      label: 'Histogram',
-    },
-    {
-      id: 'summary',
-      label: (
-        <>
-          <EuiIcon type="generate" />
-          AI Summary
-        </>
-      ),
-    },
-  ];
 
   return (
     <I18nProvider>
@@ -257,36 +229,7 @@ export function TimechartHeader({
             </EuiFlexItem>
           </>
         )}
-        {isSummaryAvailable && (
-          <EuiFlexItem grow={false}>
-            <EuiSplitPanel.Outer
-              grow={false}
-              direction="row"
-              hasShadow={false}
-              style={{ borderRadius: 2 }}
-            >
-              <EuiSplitPanel.Inner
-                color="subdued"
-                paddingSize="none"
-                style={{ paddingInline: 8, alignContent: 'center' }}
-              >
-                <EuiText style={{ fontWeight: 600 }} size="s">
-                  View as
-                </EuiText>
-              </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner paddingSize="none">
-                <EuiButtonGroup
-                  className="exploreChartToggleButtonGroup"
-                  buttonSize="compressed"
-                  legend="This is a basic group"
-                  options={toggleButtons}
-                  idSelected={toggleIdSelected}
-                  onChange={(id) => onToggleChange(id as DiscoverChartToggleId)}
-                />
-              </EuiSplitPanel.Inner>
-            </EuiSplitPanel.Outer>
-          </EuiFlexItem>
-        )}
+        {additionalControl}
       </EuiFlexGroup>
     </I18nProvider>
   );

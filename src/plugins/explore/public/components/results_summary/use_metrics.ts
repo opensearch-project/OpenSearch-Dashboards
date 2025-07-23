@@ -5,7 +5,7 @@
 
 import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { UsageCollectionSetup } from '../../../../../usage_collection/public';
+import { UsageCollectionSetup } from '../../../../usage_collection/public';
 
 const METRIC_APP = 'query-assist';
 

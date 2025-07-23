@@ -14,7 +14,7 @@ import {
   clearLastExecutedData,
   setSummaryAgentIsAvailable,
 } from '../../slices';
-import { clearQueryStatusMap, setEditorMode } from '../../slices/query_editor/query_editor_slice';
+import { clearQueryStatusMap } from '../../slices/query_editor/query_editor_slice';
 import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 import { executeQueries } from '../query_actions';
 import { getPromptModeIsAvailable } from '../../../get_prompt_mode_is_available';
