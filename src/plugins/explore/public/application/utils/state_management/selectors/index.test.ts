@@ -11,7 +11,6 @@ import {
   selectQueryLanguage,
   selectDataset,
   selectActiveTabId,
-  selectShowDatasetFields,
   selectShowHistogram,
   selectStyleOptions,
   selectChartType,
@@ -39,7 +38,6 @@ describe('selectors/index', () => {
       },
       ui: {
         activeTabId: 'test-tab',
-        showFilterPanel: true,
         showHistogram: false,
         isLoading: false,
       },
@@ -138,27 +136,9 @@ describe('selectors/index', () => {
       expect(result).toBe('test-tab');
     });
 
-    it('should select show dataset fields', () => {
-      const result = selectShowDatasetFields(mockState);
-      expect(result).toBe(true);
-    });
-
     it('should select show histogram', () => {
       const result = selectShowHistogram(mockState);
       expect(result).toBe(false);
-    });
-
-    it('should handle undefined showFilterPanel', () => {
-      const stateWithoutShowFilterPanel = {
-        ...mockState,
-        ui: {
-          ...mockState.ui,
-          showFilterPanel: undefined,
-        },
-      } as any;
-
-      const result = selectShowDatasetFields(stateWithoutShowFilterPanel);
-      expect(result).toBeUndefined();
     });
 
     it('should handle undefined showHistogram', () => {

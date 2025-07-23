@@ -77,7 +77,6 @@ describe('setDatasetActionCreator', () => {
     },
     ui: {
       activeTabId: 'test-tab',
-      showFilterPanel: true,
       showHistogram: true,
     },
     results: {},
@@ -209,7 +208,6 @@ describe('setDatasetActionCreator', () => {
       },
       ui: {
         activeTabId: 'test-tab',
-        showFilterPanel: true,
         showHistogram: true,
       },
       results: {},

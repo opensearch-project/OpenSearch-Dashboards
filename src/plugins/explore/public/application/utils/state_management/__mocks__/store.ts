@@ -53,7 +53,6 @@ export const createMockRootState = (overrides?: Partial<RootState>): RootState =
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     },
     ui: {
-      showFilterPanel: false,
       prompt: '',
     },
     results: {},

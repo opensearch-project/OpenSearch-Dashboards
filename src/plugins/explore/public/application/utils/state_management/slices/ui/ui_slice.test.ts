@@ -3,19 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  uiReducer,
-  setActiveTab,
-  setShowFilterPanel,
-  setUiState,
-  setShowHistogram,
-  UIState,
-} from './ui_slice';
+import { uiReducer, setActiveTab, setUiState, setShowHistogram, UIState } from './ui_slice';
 
 describe('UI Slice', () => {
   const initialState: UIState = {
     activeTabId: '',
-    showFilterPanel: true,
     showHistogram: true,
   };
 
@@ -36,23 +28,6 @@ describe('UI Slice', () => {
       expect(newState.activeTabId).toBe(newTabId);
 
       // Other state properties should remain unchanged
-      expect(newState.showFilterPanel).toBe(initialState.showFilterPanel);
-      expect(newState.showHistogram).toBe(initialState.showHistogram);
-    });
-  });
-
-  describe('setShowFilterPanel', () => {
-    it('should handle setShowFilterPanel action', () => {
-      const newValue = false;
-      const action = setShowFilterPanel(newValue);
-
-      expect(action.type).toBe('ui/setShowFilterPanel');
-      expect(action.payload).toBe(newValue);
-
-      const newState = uiReducer(initialState, action);
-      expect(newState.showFilterPanel).toBe(newValue);
-
-      expect(newState.activeTabId).toBe(initialState.activeTabId);
       expect(newState.showHistogram).toBe(initialState.showHistogram);
     });
   });
@@ -69,7 +44,6 @@ describe('UI Slice', () => {
       expect(newState.showHistogram).toBe(newValue);
 
       expect(newState.activeTabId).toBe(initialState.activeTabId);
-      expect(newState.showFilterPanel).toBe(initialState.showFilterPanel);
     });
   });
 
@@ -77,7 +51,6 @@ describe('UI Slice', () => {
     it('should handle setUiState action', () => {
       const newState: UIState = {
         activeTabId: 'visualizations',
-        showFilterPanel: false,
         showHistogram: false,
       };
       const action = setUiState(newState);
@@ -98,11 +71,7 @@ describe('UI Slice', () => {
       state = uiReducer(state, setActiveTab('visualizations'));
       expect(state.activeTabId).toBe('visualizations');
 
-      // Second action: set show dataset fields
-      state = uiReducer(state, setShowFilterPanel(false));
-      expect(state.showFilterPanel).toBe(false);
-
-      // Third action: set histogram
+      // Second action: set histogram
       state = uiReducer(state, setShowHistogram(true));
       expect(state.showHistogram).toBe(true);
 
@@ -110,7 +79,6 @@ describe('UI Slice', () => {
       expect(state).toEqual({
         ...initialState,
         activeTabId: 'visualizations',
-        showFilterPanel: false,
         showHistogram: true,
       });
     });
