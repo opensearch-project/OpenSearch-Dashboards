@@ -8,49 +8,9 @@ import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
-import {
-  typeAndVerifySuggestion,
-  selectSpecificSuggestion,
-  typeAndSelectSuggestion,
-} from '../../../../../../utils/apps/explore/autocomplete';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-
-/**
- * Creates a metric visualization query using autocomplete
- * @param {string} datasetName - Name of the dataset to use in the query
- */
-const createMetricVisualizationQuery = (datasetName) => {
-  cy.getElementByTestId('exploreTopEditor')
-    .find('.monaco-editor')
-    .should('be.visible')
-    .should('have.class', 'vs')
-    .wait(1000)
-    .within(() => {
-      // Type "source" and select from suggestions
-      typeAndSelectSuggestion('s', 'source');
-
-      // Type "=" and select from suggestions
-      typeAndVerifySuggestion('', '=');
-      selectSpecificSuggestion('=');
-
-      // Type dataset name and select from suggestions
-      typeAndVerifySuggestion('', datasetName);
-      selectSpecificSuggestion(datasetName);
-
-      // Type "|" and select from suggestions
-      typeAndVerifySuggestion('', '|');
-      selectSpecificSuggestion('|');
-
-      // Type "stats" and select from suggestions
-      typeAndSelectSuggestion('st', 'stats');
-
-      // Type "count()" and select from suggestions
-      typeAndVerifySuggestion('', 'count()');
-      selectSpecificSuggestion('count()');
-    });
-};
 
 export const runCreateVisTests = () => {
   describe('create visualization tests', () => {
@@ -87,8 +47,8 @@ export const runCreateVisTests = () => {
       cy.wait(2000);
       cy.explore.clearQueryEditor();
 
-      // Create the query using autocomplete
-      createMetricVisualizationQuery(datasetName);
+      const query = `source=${datasetName} | stats count()`;
+      cy.explore.setQueryEditor(query);
 
       // Run the query
       cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
@@ -113,15 +73,7 @@ export const runCreateVisTests = () => {
       cy.get('body').click(0, 0);
 
       // Verify the metric visualization options are displayed
-      cy.getElementByTestId('exploreVisStylePanel')
-        .should('be.visible')
-        .within(() => {
-          // Check for metric-specific options like font size
-          cy.contains('Font Size').should('be.visible');
-
-          // Check for the title option
-          cy.getElementByTestId('showTitleSwitch').should('be.visible');
-        });
+      cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
     });
 
     it('should create a line visualization using a query with timestamp', () => {

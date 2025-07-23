@@ -3,7 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasetTypes } from './constants';
+import { QueryLanguages } from './constants';
+
+export const RecentQueriesDataTypes = {
+  INDEX_PATTERN: {
+    name: 'INDEX_PATTERN',
+    supportedLanguages: [QueryLanguages.PPL],
+  },
+  INDEXES: {
+    name: 'INDEXES',
+    supportedLanguages: [QueryLanguages.PPL],
+  },
+};
 
 export const BaseQuery = {
   INDEX_PATTERN: {
@@ -62,7 +73,7 @@ export const generateRecentQueriesTestConfiguration = (dataset, datasetType, lan
     'OpenSearch SQL': 'PPL',
   };
   const defaultQuery = language.name === 'PPL' ? '' : ' LIMIT 10';
-  const customDatasetType = DatasetTypes[datasetType].name;
+  const customDatasetType = RecentQueriesDataTypes[datasetType].name;
   return {
     dataset,
     datasetType: customDatasetType,

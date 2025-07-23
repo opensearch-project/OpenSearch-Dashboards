@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasetTypes, INDEX_PATTERN_WITH_TIME_1, INDEX_WITH_TIME_1 } from './constants';
+import { QueryLanguages, INDEX_PATTERN_WITH_TIME_1, INDEX_WITH_TIME_1 } from './constants';
 
 // =======================================
-// Test Configuration Generators and other common utilities
+// Test Configuration Generators
 // =======================================
 
 /**
@@ -18,6 +18,28 @@ export const LanguageConfigs = {
     INDEXES: [QueryLanguages.PPL],
   },
 };
+
+/**
+ * Creates dataset types configuration for autocomplete tests
+ * @param {Object} languageConfig - Language configuration object
+ * @returns {Object} Dataset types configuration
+ */
+const createQueryDatasetTypes = (languageConfig = LanguageConfigs.SQL_PPL) => ({
+  INDEX_PATTERN: {
+    name: 'INDEX_PATTERN',
+    supportedLanguages: languageConfig.INDEX_PATTERN,
+  },
+  INDEXES: {
+    name: 'INDEXES',
+    supportedLanguages: languageConfig.INDEXES,
+  },
+});
+
+export const QueryDatasetTypes = createQueryDatasetTypes();
+
+// =======================================
+// Test Configuration Generators and other common utilities
+// =======================================
 
 /**
  * Generates test configurations for autocomplete tests across different dataset types
@@ -33,9 +55,15 @@ export const generateQueryTestConfigurations = (
   generateTestConfigurationCallback,
   options = {}
 ) => {
-  const { indexPattern = INDEX_PATTERN_WITH_TIME_1, index = INDEX_WITH_TIME_1 } = options;
+  const {
+    indexPattern = INDEX_PATTERN_WITH_TIME_1,
+    index = INDEX_WITH_TIME_1,
+    languageConfig = LanguageConfigs.SQL_PPL,
+  } = options;
 
-  return Object.values(DatasetTypes).flatMap((dataset) =>
+  const datasetTypes = createQueryDatasetTypes(languageConfig);
+
+  return Object.values(datasetTypes).flatMap((dataset) =>
     dataset.supportedLanguages.map((language) => {
       let datasetToUse;
       switch (dataset.name) {
