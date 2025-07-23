@@ -3,12 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@import "../shared";
-
 .exploreResultsSummary {
-  @include exploreQueryPanelButton;
-  @include exploreQueryPanelVerticalSeparator;
-
   &_popover_tooltip {
     display: flex;
     padding-inline-start: $ouiSizeXXS;

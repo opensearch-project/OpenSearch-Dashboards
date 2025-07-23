@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { CoreStart, PluginInitializerContext } from 'opensearch-dashboards/public';
 import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
 import { Storage } from '../../opensearch_dashboards_utils/public';

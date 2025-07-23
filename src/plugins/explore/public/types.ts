@@ -12,7 +12,6 @@ import {
   ToastsStart,
   IUiSettingsClient,
 } from 'opensearch-dashboards/public';
-import { BehaviorSubject } from 'rxjs';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import {
   DataPublicPluginSetup,

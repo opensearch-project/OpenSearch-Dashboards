@@ -16,7 +16,7 @@ export const createlabelLayer = (
   xAxis?: CompleteAxisWithStyle,
   yAxis?: CompleteAxisWithStyle
 ) => {
-  if (!styles.exclusive?.label.show) {
+  if (!styles.exclusive?.label?.show) {
     return null;
   }
   const textEncoding: Encoding<string>['text'] = {

@@ -81,6 +81,7 @@ const createStoreWithQuery = (lastExecutedTranslatedQuery: string = '') => {
         promptToQueryIsLoading: false,
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery,
+        summaryAgentIsAvailable: false,
       },
     },
   });
