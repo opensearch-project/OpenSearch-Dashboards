@@ -100,19 +100,11 @@
 
   &__metric-text {
     font-size: 12px;
-    color: $euiColorMediumShade;
+    color: $euiColorDarkShade;
     margin-bottom: 4px;
 
     &--error {
       color: $euiColorDanger;
-    }
-
-    &--request-rate {
-      color: $euiColorDarkShade;
-    }
-
-    &--duration {
-      color: $euiColorDarkShade;
     }
   }
 }
@@ -122,33 +114,6 @@
   height: 6px;
   position: relative;
   border-radius: 1px;
-
-  &--request-rate {
-    background-color: $euiColorLightShade;
-
-    .metric-bar__fill {
-      background-color: $euiColorVis1;
-      opacity: var(--intensity);
-    }
-  }
-
-  &--error-rate {
-    background-color: $euiColorLightShade;
-
-    .metric-bar__fill {
-      background-color: $euiColorDanger;
-      opacity: var(--intensity);
-    }
-  }
-
-  &--duration {
-    background-color: $euiColorLightShade;
-
-    .metric-bar__fill {
-      background-color: $euiColorVis3;
-      opacity: var(--intensity);
-    }
-  }
 
   &__fill {
     position: absolute;
@@ -216,18 +181,6 @@
     height: 6px;
     width: 100%;
     border-radius: 3px;
-
-    &--request-rate {
-      background: $euiColorVis1;
-    }
-
-    &--error-rate {
-      background: $euiColorDanger;
-    }
-
-    &--duration {
-      background: $euiColorVis3;
-    }
   }
 
   &__legend-labels {

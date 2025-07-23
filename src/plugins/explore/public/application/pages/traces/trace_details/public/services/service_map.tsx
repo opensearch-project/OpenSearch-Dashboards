@@ -210,14 +210,17 @@ const ServiceNode = ({
               {selectedMetrics.includes('requestRate') && (
                 <div
                   title={`Request Rate: ${data.spanCount}`}
-                  className="metric-bar metric-bar--request-rate"
+                  className="metric-bar"
+                  style={{
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                  }}
                 >
                   <div
                     className="metric-bar__fill"
                     style={
                       {
                         '--fill-width': `${requestRateIntensity * 100}%`,
-                        '--intensity': 0.3 + requestRateIntensity * 0.7,
+                        backgroundColor: `rgba(0, 0, 255, ${0.3 + requestRateIntensity * 0.7})`,
                       } as React.CSSProperties
                     }
                   />
@@ -226,14 +229,17 @@ const ServiceNode = ({
               {selectedMetrics.includes('errorRate') && (
                 <div
                   title={`Error Rate: ${(data.errorRate * 100).toFixed(1)}%`}
-                  className="metric-bar metric-bar--error-rate"
+                  className="metric-bar"
+                  style={{
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                  }}
                 >
                   <div
                     className="metric-bar__fill"
                     style={
                       {
                         '--fill-width': `${errorRateIntensity * 100}%`,
-                        '--intensity': 0.3 + errorRateIntensity * 0.7,
+                        backgroundColor: `rgba(255, 0, 0, ${0.3 + errorRateIntensity * 0.7})`,
                       } as React.CSSProperties
                     }
                   />
@@ -242,14 +248,17 @@ const ServiceNode = ({
               {selectedMetrics.includes('duration') && (
                 <div
                   title={`Avg Duration: ${formatLatency(data.avgLatency)}`}
-                  className="metric-bar metric-bar--duration"
+                  className="metric-bar"
+                  style={{
+                    backgroundColor: 'rgba(128, 0, 128, 0.1)',
+                  }}
                 >
                   <div
                     className="metric-bar__fill"
                     style={
                       {
                         '--fill-width': `${durationIntensity * 100}%`,
-                        '--intensity': 0.3 + durationIntensity * 0.7,
+                        backgroundColor: `rgba(128, 0, 128, ${0.3 + durationIntensity * 0.7})`,
                       } as React.CSSProperties
                     }
                   />
@@ -649,7 +658,13 @@ const FlowComponent: React.FC<{
                     defaultMessage: 'Request Rate',
                   })}
                 </div>
-                <div className="metrics-panel__legend-gradient metrics-panel__legend-gradient--request-rate" />
+                <div
+                  className="metrics-panel__legend-gradient"
+                  style={{
+                    background:
+                      'linear-gradient(to right, rgba(0, 0, 255, 0.2), rgba(0, 0, 255, 0.9))',
+                  }}
+                />
                 <div className="metrics-panel__legend-labels">
                   <span>0</span>
                   <span>
@@ -668,7 +683,13 @@ const FlowComponent: React.FC<{
                     defaultMessage: 'Error Rate',
                   })}
                 </div>
-                <div className="metrics-panel__legend-gradient metrics-panel__legend-gradient--error-rate" />
+                <div
+                  className="metrics-panel__legend-gradient"
+                  style={{
+                    background:
+                      'linear-gradient(to right, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.9))',
+                  }}
+                />
                 <div className="metrics-panel__legend-labels">
                   <span>0%</span>
                   <span>
@@ -687,7 +708,13 @@ const FlowComponent: React.FC<{
                     defaultMessage: 'Duration',
                   })}
                 </div>
-                <div className="metrics-panel__legend-gradient metrics-panel__legend-gradient--duration" />
+                <div
+                  className="metrics-panel__legend-gradient"
+                  style={{
+                    background:
+                      'linear-gradient(to right, rgba(128, 0, 128, 0.2), rgba(128, 0, 128, 0.9))',
+                  }}
+                />
                 <div className="metrics-panel__legend-labels">
                   <span>0</span>
                   <span>
