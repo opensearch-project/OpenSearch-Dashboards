@@ -12,49 +12,9 @@
   max-width: 300px;
   height: $euiSizeL;
 
-  &__container {
-    width: 100%;
-    overflow: hidden;
-  }
-
-  &__detailsContainer {
-    width: $euiSizeXL;
-    max-width: $euiSizeXL;
-  }
-
-  div:is([class$="labelWrapper"]) {
-    width: $euiSizeXL;
-    height: $euiSizeL;
-    padding: 0 $euiSizeXS;
-
-    :first-child {
-      word-wrap: normal;
-      word-break: normal;
-      height: $euiSizeL;
-      display: block;
-      line-height: $euiSizeL;
-    }
-  }
-
-  div:is([class$="fieldWrapper"]) {
-    width: 100%;
-    padding: 0;
-    display: flex;
-    flex-direction: row;
-  }
-
-  &__mainContent {
-    flex: 1;
-    min-width: 0;
-    max-width: calc(100% - 32px);
-  }
-
   &__button {
     background-color: $euiColorEmptyShade;
-    width: 100%;
-    height: $euiSizeL;
     min-width: 0;
-    display: flex;
     align-items: center;
     justify-content: flex-start;
     text-align: left;

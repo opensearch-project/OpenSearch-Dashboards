@@ -4,27 +4,30 @@
  */
 
 .datasetDetails {
-  &__button {
-    margin-left: $euiSizeXS;
-    white-space: nowrap;
-    flex-shrink: 0;
-    width: $euiSizeL;
-    height: $euiSizeL;
-
-    &:hover,
-    &:focus {
-      background-color: transparent !important;
-      transform: none !important;
-    }
-  }
-
   &__panel {
-    width: 400px;
+    width: 350px;
     max-width: 90vw;
   }
 
-  &__timeField {
-    font-size: $euiFontSizeXS;
+  &__list {
+    margin-top: 0;
+  }
+
+  &__title {
+    font-weight: $euiFontWeightMedium;
+  }
+
+  &__listTitle {
+    width: 30%;
+    font-weight: $euiFontWeightMedium;
+  }
+
+  &__dataDefinition {
+    cursor: pointer;
+  }
+
+  &__description {
+    font-size: $euiFontSizeXS - 2px;
   }
 
   &__textTruncate {
