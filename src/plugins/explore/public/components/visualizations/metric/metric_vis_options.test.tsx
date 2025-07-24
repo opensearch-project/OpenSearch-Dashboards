@@ -64,7 +64,6 @@ describe('MetricVisStyleControls', () => {
           },
         },
         ui: {
-          showFilterPanel: false,
           activeTabId: '',
           showHistogram: false,
         },

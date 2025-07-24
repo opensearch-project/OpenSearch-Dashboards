@@ -37,11 +37,6 @@ export const selectDataset = createSelector([selectQueryState], (queryState) => 
  */
 export const selectActiveTabId = createSelector([selectUIState], (uiState) => uiState.activeTabId);
 
-export const selectShowDatasetFields = createSelector(
-  [selectUIState],
-  (uiState) => uiState.showFilterPanel
-);
-
 export const selectShowHistogram = createSelector(
   [selectUIState],
   (uiState) => uiState.showHistogram

@@ -107,7 +107,6 @@ describe('DiscoverChart', () => {
       },
       ui: {
         activeTabId: 'logs',
-        showFilterPanel: true,
         showHistogram: true,
       },
       query: {
