@@ -137,6 +137,10 @@ jobs:
           - group: 15Explore
             config: explore
             test_location: source
+
+          - group: 16Explore
+            config: explore
+            test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: '--user 1001 --shm-size=2g'
@@ -148,7 +152,8 @@ jobs:
         matrix.config == 'dashboard' &&
         'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true' ||
         'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false' }}
-      OPENSEARCH_SNAPSHOT_CMD: ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore') &&
+      OPENSEARCH_SNAPSHOT_CMD:
+        ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore') &&
         '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
         matrix.config == 'dashboard' &&
         'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' ||

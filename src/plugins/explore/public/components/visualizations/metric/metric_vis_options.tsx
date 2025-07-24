@@ -101,7 +101,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   })}
                 />
               </EuiFormRow>
-
               <EuiFormRow>
                 <EuiSwitch
                   compressed
