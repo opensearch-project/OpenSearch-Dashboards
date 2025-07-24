@@ -110,6 +110,11 @@ describe('line_vis_config', () => {
           text: '',
         },
       });
+
+      expect(defaults.titleOptions).toMatchObject({
+        show: false,
+        titleName: '',
+      });
     });
 
     it('should have available mappings configured', () => {

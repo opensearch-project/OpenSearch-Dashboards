@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import {
   CategoryAxis,
@@ -412,5 +413,52 @@ describe('LineVisStyleControls', () => {
     expect(screen.getByTestId('numericalColumnsLength')).toHaveTextContent('0');
     expect(screen.getByTestId('categoricalColumnsLength')).toHaveTextContent('0');
     expect(screen.getByTestId('dateColumnsLength')).toHaveTextContent('0');
+  });
+
+  test('updates title show option correctly', async () => {
+    const onStyleChange = jest.fn();
+    render(<LineVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
+
+    // Find the title switch and toggle it
+    const titleSwitch = screen.getByTestId('titleModeSwitch');
+    await userEvent.click(titleSwitch);
+
+    waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+        titleOptions: {
+          ...mockProps.styleOptions.titleOptions,
+          show: true,
+        },
+      });
+    });
+  });
+
+  test('updates title name when text is entered', async () => {
+    // Set show to true to ensure the title field is visible
+    const props = {
+      ...mockProps,
+      styleOptions: {
+        ...mockProps.styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      },
+    };
+
+    const onStyleChange = jest.fn();
+    render(<LineVisStyleControls {...props} onStyleChange={onStyleChange} />);
+
+    const titleInput = screen.getByPlaceholderText('Default title');
+    await userEvent.type(titleInput, 'New Chart Title');
+
+    waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+        titleOptions: {
+          ...props.styleOptions.titleOptions,
+          titleName: 'New Chart Title',
+        },
+      });
+    });
   });
 });

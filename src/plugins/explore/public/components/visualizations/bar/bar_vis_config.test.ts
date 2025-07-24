@@ -85,6 +85,11 @@ describe('bar_vis_config', () => {
         },
         axisRole: AxisRole.X,
       });
+
+      expect(defaultBarChartStyles.titleOptions).toMatchObject({
+        show: false,
+        titleName: '',
+      });
     });
   });
 

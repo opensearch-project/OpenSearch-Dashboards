@@ -161,6 +161,67 @@ describe('to_expression', () => {
       );
       expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(styleOptions);
     });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createSimpleLineChart(
+        transformedData,
+        [numericColumn1],
+        [dateColumn],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createSimpleLineChart(
+        transformedData,
+        [numericColumn1],
+        [dateColumn],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('value1 Over Time');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Simple Line Chart',
+        },
+      };
+
+      const customTitleResult = createSimpleLineChart(
+        transformedData,
+        [numericColumn1],
+        [dateColumn],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Simple Line Chart');
+    });
   });
 
   describe('createLineBarChart', () => {
@@ -204,6 +265,68 @@ describe('to_expression', () => {
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(3);
     });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.Y_SECOND]: numericColumn2,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createLineBarChart(
+        transformedData,
+        [numericColumn1, numericColumn2],
+        [dateColumn],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createLineBarChart(
+        transformedData,
+        [numericColumn1, numericColumn2],
+        [dateColumn],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('value1 (Bar) and value2 (Line) Over Time');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Line-Bar Chart',
+        },
+      };
+
+      const customTitleResult = createLineBarChart(
+        transformedData,
+        [numericColumn1, numericColumn2],
+        [dateColumn],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Line-Bar Chart');
+    });
   });
 
   describe('createMultiLineChart', () => {
@@ -238,6 +361,71 @@ describe('to_expression', () => {
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.COLOR]: categoricalColumn1,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [dateColumn],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [dateColumn],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('value1 Over Time by category1');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Multi-Line Chart',
+        },
+      };
+
+      const customTitleResult = createMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [dateColumn],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Multi-Line Chart');
     });
   });
 
@@ -292,6 +480,72 @@ describe('to_expression', () => {
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
       expect(thresholdUtils.getStrokeDash).toHaveBeenCalled();
     });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.COLOR]: categoricalColumn1,
+        [AxisRole.FACET]: categoricalColumn2,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createFacetedMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1, categoricalColumn2],
+        [dateColumn],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createFacetedMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1, categoricalColumn2],
+        [dateColumn],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('value1 Over Time by category1 (Faceted by category2)');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Faceted Line Chart',
+        },
+      };
+
+      const customTitleResult = createFacetedMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1, categoricalColumn2],
+        [dateColumn],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Faceted Line Chart');
+    });
   });
 
   describe('createCategoryLineChart', () => {
@@ -335,6 +589,70 @@ describe('to_expression', () => {
         styleOptions.thresholdLines,
         styleOptions.tooltipOptions?.mode
       );
+    });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: categoricalColumn1,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createCategoryLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createCategoryLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('value1 by category1');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Category Line Chart',
+        },
+      };
+
+      const customTitleResult = createCategoryLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Category Line Chart');
     });
 
     it('should throw an error when required columns are missing', () => {
