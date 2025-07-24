@@ -11,12 +11,14 @@ import {
   setQueryWithHistory,
   setActiveTab,
   clearLastExecutedData,
+  setSummaryAgentIsAvailable,
 } from '../../slices';
 import { clearQueryStatusMap } from '../../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../query_actions';
 import { getPromptModeIsAvailable } from '../../../get_prompt_mode_is_available';
 import { useClearEditors } from '../../../../hooks';
 import { detectAndSetOptimalTab } from '../detect_optimal_tab';
+import { getSummaryAgentIsAvailable } from '../../../get_summary_agent_is_available';
 
 export const setDatasetActionCreator = (
   services: ExploreServices,
@@ -30,7 +32,7 @@ export const setDatasetActionCreator = (
   } = services;
   const currentQuery = queryString.getQuery();
   const {
-    queryEditor: { promptModeIsAvailable },
+    queryEditor: { promptModeIsAvailable, summaryAgentIsAvailable },
     query,
   } = getState();
 
@@ -53,9 +55,23 @@ export const setDatasetActionCreator = (
 
   dispatch(setQueryWithHistory(updatedQuery));
 
-  const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
-  if (newPromptModeIsAvailable !== promptModeIsAvailable) {
-    dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable));
+  const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
+    getPromptModeIsAvailable(services),
+    getSummaryAgentIsAvailable(services, query.dataset?.dataSource?.id!),
+  ]);
+
+  if (
+    newPromptModeIsAvailable.status === 'fulfilled' &&
+    newPromptModeIsAvailable.value !== promptModeIsAvailable
+  ) {
+    dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable.value));
+  }
+
+  if (
+    newSummaryAgentIsAvailable.status === 'fulfilled' &&
+    newSummaryAgentIsAvailable.value !== summaryAgentIsAvailable
+  ) {
+    dispatch(setSummaryAgentIsAvailable(newSummaryAgentIsAvailable.value));
   }
 
   clearEditors();

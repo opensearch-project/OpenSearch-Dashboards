@@ -5,7 +5,7 @@
 
 import './_histogram.scss';
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
@@ -31,6 +31,13 @@ import {
   executeHistogramQuery,
   defaultPrepareQueryString,
 } from '../../application/utils/state_management/actions/query_actions';
+import { ResultsSummary } from '../results_summary/results_summary';
+import { selectSummaryAgentIsAvailable } from '../../application/utils/state_management/selectors';
+import { usePersistedChartState } from './utils/use_persist_chart_state';
+import { getUsageCollector } from '../../services/usage_collector';
+import { useMetrics } from '../results_summary/use_metrics';
+import { ToggleButtonGroup } from './timechart_header/toggle_button_group';
+import { ActionButtons } from '../results_summary/action_buttons';
 
 interface DiscoverChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
@@ -80,6 +87,32 @@ export const DiscoverChart = ({
     [data, dispatch, services]
   );
 
+  const [summary, setSummary] = useState('');
+  const { toggleIdSelected, updateToggleId } = usePersistedChartState('histogram');
+
+  const assistantEnabled = services.core.application.capabilities?.assistant?.enabled;
+  const isSummaryAgentAvailable = useSelector(selectSummaryAgentIsAvailable);
+  const isSummaryAvailable = isSummaryAgentAvailable && Boolean(assistantEnabled);
+
+  const usageCollection = getUsageCollector();
+  const { reportMetric, reportCountMetric } = useMetrics(usageCollection);
+
+  const buttonGroup = (
+    <>
+      <ActionButtons
+        toggleIdSelected={toggleIdSelected}
+        summary={summary}
+        reportMetric={reportMetric}
+      />
+
+      <ToggleButtonGroup
+        toggleIdSelected={toggleIdSelected}
+        onToggleChange={updateToggleId}
+        isSummaryAvailable={isSummaryAvailable || false}
+      />
+    </>
+  );
+
   const timeChartHeader = (
     <div className="exploreChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
       <TimechartHeader
@@ -89,6 +122,8 @@ export const DiscoverChart = ({
         options={search.aggs.intervalOptions}
         onChangeInterval={onChangeInterval}
         stateInterval={interval || ''}
+        toggleIdSelected={toggleIdSelected}
+        additionalControl={buttonGroup}
       />
     </div>
   );
@@ -125,6 +160,16 @@ export const DiscoverChart = ({
     </EuiFlexGroup>
   );
 
+  // Show histogram if the current toggle is histogram or no summary feature available but toggle
+  // previously selected summary
+  const displayHistogram =
+    chartData &&
+    ((showHistogram && toggleIdSelected === 'histogram') ||
+      (showHistogram && toggleIdSelected === 'summary' && !isSummaryAvailable));
+
+  const displayResultsSummary =
+    chartData && showHistogram && isSummaryAvailable && toggleIdSelected === 'summary';
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -133,7 +178,7 @@ export const DiscoverChart = ({
       data-test-subj="dscChartWrapper"
     >
       {queryEnhancedHistogramHeader}
-      {chartData && showHistogram && (
+      {displayHistogram && (
         <EuiFlexItem grow={false}>
           <section
             aria-label={i18n.translate('explore.discover.histogramOfFoundDocumentsAriaLabel', {
@@ -151,6 +196,13 @@ export const DiscoverChart = ({
             </div>
           </section>
         </EuiFlexItem>
+      )}
+      {displayResultsSummary && (
+        <ResultsSummary
+          summary={summary}
+          setSummary={setSummary}
+          reportCountMetric={reportCountMetric}
+        />
       )}
     </EuiFlexGroup>
   );

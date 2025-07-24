@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { CoreStart, PluginInitializerContext } from 'opensearch-dashboards/public';
 import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
 import { Storage } from '../../opensearch_dashboards_utils/public';
@@ -21,8 +20,7 @@ export function buildServices(
   plugins: ExploreStartDependencies,
   context: PluginInitializerContext,
   tabRegistry: TabRegistryService,
-  visualizationRegistry: VisualizationRegistryService,
-  isSummaryAgentAvailable$: BehaviorSubject<boolean>
+  visualizationRegistry: VisualizationRegistryService
 ): ExploreServices {
   const services: SavedObjectOpenSearchDashboardsServices = {
     savedObjectsClient: core.savedObjects.client,
@@ -87,8 +85,6 @@ export function buildServices(
     visualizationRegistry,
     expressions: plugins.expressions,
 
-    // For result summary
-    isSummaryAgentAvailable$,
     dashboard: plugins.dashboard,
   };
 }

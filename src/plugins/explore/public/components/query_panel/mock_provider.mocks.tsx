@@ -192,6 +192,7 @@ const createMockStore = (
         editorMode,
         promptModeIsAvailable,
         promptToQueryIsLoading: false,
+        summaryAgentIsAvailable: false,
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery,
       },

@@ -29,7 +29,6 @@
  */
 
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { BehaviorSubject } from 'rxjs';
 import { ExplorePluginSetup, ExplorePluginStart } from '../../../types';
 import { chartPluginMock } from '../../../../../charts/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
@@ -58,7 +57,6 @@ const createSetupContract = (): Setup => {
     docViewsLinks: {
       addDocViewLink: jest.fn(),
     },
-    isSummaryAgentAvailable$: new BehaviorSubject(true as boolean),
   };
   return setupContract;
 };
@@ -93,8 +91,7 @@ const createExploreServicesMock = (): ExploreServices =>
     },
     coreMock.createPluginInitializerContext(),
     {} as any, // Mock tabRegistry
-    {} as any, // Mock visualizationRegistry
-    new BehaviorSubject(true as boolean)
+    {} as any // Mock visualizationRegistry
   );
 
 export const discoverPluginMock = {
