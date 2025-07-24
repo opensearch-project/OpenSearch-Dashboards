@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 
 interface SimplePopoverProps extends Partial<EuiPopoverProps> {
   button: React.ReactElement;
+  triggerMode?: 'click' | 'hover';
 }
 
 const loopToGetPath = (element: HTMLElement | ParentNode | null) => {
@@ -23,14 +24,21 @@ const loopToGetPath = (element: HTMLElement | ParentNode | null) => {
 };
 
 export const SimplePopover: React.FC<SimplePopoverProps> = (props) => {
-  const { ...others } = props;
+  const { triggerMode = 'hover', ...others } = props;
   const [popVisible, setPopVisible] = useState(false);
   const popoverRef = useRef(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const buttonProps: Partial<React.HTMLAttributes<HTMLButtonElement>> = {};
-  buttonProps.onMouseEnter = () => {
-    setPopVisible(true);
-  };
+
+  if (triggerMode === 'hover') {
+    buttonProps.onMouseEnter = () => {
+      setPopVisible(true);
+    };
+  } else if (triggerMode === 'click') {
+    buttonProps.onClick = (e) => {
+      setPopVisible((flag) => !flag);
+    };
+  }
 
   const outsideHover = useCallback(
     (e) => {
@@ -45,13 +53,16 @@ export const SimplePopover: React.FC<SimplePopoverProps> = (props) => {
   );
 
   useEffect(() => {
+    if (triggerMode !== 'hover') {
+      return;
+    }
     if (popVisible) {
       window.addEventListener('mousemove', outsideHover);
     }
     return () => {
       window.removeEventListener('mousemove', outsideHover);
     };
-  }, [popVisible, outsideHover]);
+  }, [popVisible, outsideHover, triggerMode]);
 
   return (
     <EuiPopover
@@ -60,7 +71,13 @@ export const SimplePopover: React.FC<SimplePopoverProps> = (props) => {
       panelRef={(ref) => (panelRef.current = ref)}
       button={props.button && cloneElement(props.button, buttonProps)}
       isOpen={popVisible}
-      closePopover={() => {}}
+      closePopover={
+        triggerMode === 'click'
+          ? () => {
+              setPopVisible(false);
+            }
+          : () => {}
+      }
     />
   );
 };

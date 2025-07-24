@@ -14,6 +14,8 @@ import {
   EuiContextMenuItem,
   EuiTitle,
   EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import classNames from 'classnames';
@@ -64,7 +66,7 @@ const createNavItem = ({
   let icon = euiListItem.icon;
 
   if (euiListItem.iconType) {
-    icon = <EuiIcon type={euiListItem.iconType} />;
+    icon = <EuiIcon type={euiListItem.iconType} style={{ width: 20, height: 20 }} />;
   }
 
   return {
@@ -174,15 +176,22 @@ export function NavGroups({
           props.icon
         ) : (
           <SimplePopover
-            anchorPosition="upLeft"
+            anchorPosition="rightUp"
             panelPaddingSize="none"
             button={props.icon || <></>}
             key={navOpen ? undefined : `popover-${appId}`}
+            triggerMode="click"
+            offset={4}
           >
-            <EuiPopoverTitle>
-              <EuiTitle size="s">
-                <span>{navLink.link?.title}</span>
-              </EuiTitle>
+            <EuiPopoverTitle paddingSize="s">
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                {props.icon && <EuiFlexItem grow={false}>{props.icon}</EuiFlexItem>}
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <span>{navLink.link?.title}</span>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiPopoverTitle>
             <EuiContextMenuPanel
               hasFocus={false}

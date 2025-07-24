@@ -34,4 +34,22 @@ describe('<SimplePopover /> spec', () => {
       expect(queryByText('content in popover')).toBeNull();
     });
   });
+
+  it('render the component with click', async () => {
+    const { getByTestId, queryByText } = render(
+      <>
+        <SimplePopover button={<div data-test-subj="test">button</div>} triggerMode="click">
+          content in popover
+        </SimplePopover>
+      </>
+    );
+    await userEvent.click(getByTestId('test'));
+    await waitFor(() => {
+      expect(queryByText('content in popover')).not.toBeNull();
+    });
+    await userEvent.click(getByTestId('test'));
+    await waitFor(() => {
+      expect(queryByText('content in popover')).toBeNull();
+    });
+  });
 });
