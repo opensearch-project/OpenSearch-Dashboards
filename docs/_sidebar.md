@@ -21,6 +21,7 @@
       - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
+    - [Saved_object_references](saved_objects/saved_object_references.md)
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
   - Telemetry
     - [Telemetry](telemetry/telemetry.md)
