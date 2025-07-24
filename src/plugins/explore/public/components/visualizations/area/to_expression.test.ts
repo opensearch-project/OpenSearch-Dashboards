@@ -92,6 +92,10 @@ describe('Area Chart to_expression', () => {
         name: '',
       },
     ],
+    titleOptions: {
+      show: true,
+      titleName: '',
+    },
   };
 
   describe('createSimpleAreaChart', () => {
@@ -126,6 +130,68 @@ describe('Area Chart to_expression', () => {
       // Verify legend configuration
       expect(result).toHaveProperty('legend');
       expect(result.legend).toHaveProperty('orient', 'right');
+    });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createSimpleAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockDateColumns,
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createSimpleAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockDateColumns,
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult).toHaveProperty('title', 'Value Over Time');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Area Chart Title',
+        },
+      };
+
+      const customTitleResult = createSimpleAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockDateColumns,
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult).toHaveProperty('title', 'Custom Area Chart Title');
     });
 
     it('should create a simple area chart with time marker when enabled', () => {
@@ -235,6 +301,72 @@ describe('Area Chart to_expression', () => {
       expect(Array.isArray(mainLayer.encoding.tooltip)).toBe(true);
       expect(mainLayer.encoding.tooltip).toHaveLength(3);
     });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        mockDateColumns,
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        mockDateColumns,
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult).toHaveProperty('title', 'Value Over Time by Category');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Multi-Area Chart',
+        },
+      };
+
+      const customTitleResult = createMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        mockDateColumns,
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult).toHaveProperty('title', 'Custom Multi-Area Chart');
+    });
   });
 
   describe('createFacetedMultiAreaChart', () => {
@@ -279,6 +411,76 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer).toHaveProperty('encoding.x.field', 'date');
       expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
       expect(mainLayer).toHaveProperty('encoding.color.field', 'category');
+    });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+        [AxisRole.FACET]: mockCategoricalColumns[1],
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createFacetedMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createFacetedMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult).toHaveProperty(
+        'title',
+        'Value Over Time by Category (Faceted by Category2)'
+      );
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Faceted Chart',
+        },
+      };
+
+      const customTitleResult = createFacetedMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult).toHaveProperty('title', 'Custom Faceted Chart');
     });
 
     it('should add threshold lines to each facet when enabled', () => {
@@ -361,6 +563,71 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer.encoding.tooltip).toHaveLength(2);
     });
 
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockCategoricalColumns[0],
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createCategoryAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        [],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createCategoryAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        [],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult).toHaveProperty('title', 'Value by Category');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Category Chart',
+        },
+      };
+
+      const customTitleResult = createCategoryAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        [],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult).toHaveProperty('title', 'Custom Category Chart');
+    });
+
     it('should throw an error when required columns are missing', () => {
       expect(() => {
         createCategoryAreaChart(mockTransformedData, [], [], [], mockStyles);
@@ -402,6 +669,72 @@ describe('Area Chart to_expression', () => {
       expect(result.encoding).toHaveProperty('tooltip');
       expect(Array.isArray(result.encoding.tooltip)).toBe(true);
       expect(result.encoding.tooltip).toHaveLength(3);
+    });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[1],
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createStackedAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        [],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createStackedAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        [],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult).toHaveProperty('title', 'Value by Category and Category2');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Stacked Chart',
+        },
+      };
+
+      const customTitleResult = createStackedAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        [],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult).toHaveProperty('title', 'Custom Stacked Chart');
     });
 
     it('should throw an error when required columns are missing', () => {
