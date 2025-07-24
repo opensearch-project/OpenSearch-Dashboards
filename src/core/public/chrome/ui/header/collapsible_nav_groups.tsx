@@ -183,7 +183,7 @@ export function NavGroups({
             triggerMode="click"
             offset={4}
           >
-            <EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s">
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 {props.icon && <EuiFlexItem grow={false}>{props.icon}</EuiFlexItem>}
                 <EuiFlexItem>
