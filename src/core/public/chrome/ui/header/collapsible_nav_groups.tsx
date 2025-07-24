@@ -66,7 +66,7 @@ const createNavItem = ({
   let icon = euiListItem.icon;
 
   if (euiListItem.iconType) {
-    icon = <EuiIcon type={euiListItem.iconType} />;
+    icon = <EuiIcon type={euiListItem.iconType} style={{ width: 20, height: 20 }} />;
   }
 
   return {
