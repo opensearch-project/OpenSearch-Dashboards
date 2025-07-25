@@ -8,4 +8,13 @@ export * from './types';
 export { DataViewsService } from './data_views';
 export type { DataView } from './data_views';
 export * from './errors';
-export { validateDataViewDataSourceReference, getDataViewTitle } from './utils';
+export {
+  validateDataViewDataSourceReference,
+  getDataViewTitle,
+  findByTitle,
+  getDataSourceReference,
+  extractDatasetTypeFromUri,
+  extractDataSourceInfoFromUri,
+  constructDataSourceUri,
+  getDatasetTypeFromReference,
+} from './utils';

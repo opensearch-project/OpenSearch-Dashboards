@@ -17,7 +17,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  DataViewsContract as DatasetsContract,
+  DataViewsContract,
   IndexPatternsContract,
   FilterManager,
   TimefilterContract,
@@ -131,7 +131,7 @@ export interface ExploreServices {
   history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
-  datasets: DatasetsContract;
+  dataViews: DataViewsContract;
   indexPatterns: IndexPatternsContract;
   inspector: InspectorPublicPluginStart;
   inspectorAdapters: {

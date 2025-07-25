@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
-  EuiSmallButtonEmpty,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiTitle,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
   EuiBadge,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSplitPanel,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -28,15 +30,10 @@ export interface DatasetDetailsProps {
 
 export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefault }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
-  const [isOpen, setIsOpen] = useState(false);
   const {
-    dataViews,
     query: { queryString },
   } = services.data;
   const datasetService = queryString.getDatasetService();
-
-  const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-  const closePopover = useCallback(() => setIsOpen(false), []);
 
   const handleDataDefinitionClicked = useCallback(async () => {
     if (!dataset || !dataset.dataSourceRef) {
@@ -63,8 +60,7 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
     return null;
   }
 
-  const datasetType =
-    getTypeFromUri(dataset.dataSourceRef?.name) || dataViews.convertToDataset(dataset).type;
+  const datasetType = getTypeFromUri(dataset.dataSourceRef?.name) || dataset.type;
   const dataSourceName = dataset.dataSourceRef?.name || `default`;
   const datasetTitle = dataset.displayName || dataset.title;
   const datasetDescription = dataset.description || '';
@@ -75,37 +71,28 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
     });
 
   return (
-    <EuiPopover
-      button={
-        <EuiSmallButtonEmpty
-          className="datasetDetails__button"
-          data-test-subj="datasetDetailsButton"
-          color="text"
-          iconType="boxesHorizontal"
-          onClick={togglePopover}
-          aria-label={i18n.translate('data.datasetDetails.buttonAriaLabel', {
-            defaultMessage: 'Dataset details',
-          })}
-        />
-      }
-      isOpen={isOpen}
-      closePopover={closePopover}
-      anchorPosition="downRight"
-      panelPaddingSize="s"
-      panelClassName="datasetDetails__panel"
+    <EuiPanel
+      className="datasetDetails__panel"
+      color="transparent"
+      hasBorder={false}
+      paddingSize="none"
     >
-      <EuiPopoverTitle>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-          <EuiFlexItem>
-            {
-              <EuiTitle size="xxxs">
-                <>{datasetTitle}</>
-              </EuiTitle>
-            }
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+      <EuiSplitPanel.Outer
+        className="datasetDetails__header"
+        direction="row"
+        color="transparent"
+        hasBorder={false}
+        responsive={false}
+        grow={true}
+      >
+        <EuiSplitPanel.Inner paddingSize="none" grow={true}>
+          <EuiTitle size="xxxs" className="datasetDetails__title eui-textTruncate">
+            <>{datasetTitle}</>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        {isDefault && (
+          <EuiSplitPanel.Inner paddingSize="none">
             <EuiBadge
-              color={isDefault ? 'default' : 'hollow'}
               className="datasetDetails__defaultBadge"
               data-test-subj="datasetDetailsDefault"
             >
@@ -113,9 +100,11 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
                 defaultMessage: 'Default',
               })}
             </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverTitle>
+          </EuiSplitPanel.Inner>
+        )}
+      </EuiSplitPanel.Outer>
+
+      <EuiHorizontalRule margin="s" />
 
       <EuiDescriptionList
         compressed
@@ -128,14 +117,14 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
             ? [
                 {
                   title: (
-                    <EuiText size="xs">
+                    <EuiText size="xs" color={'ghost'}>
                       {i18n.translate('data.datasetDetails.descriptionTitle', {
                         defaultMessage: 'Description',
                       })}
                     </EuiText>
                   ),
                   description: (
-                    <EuiText size="xs" color="subdued">
+                    <EuiText size="xs" className="datasetDetails__description">
                       <p>{datasetDescription}</p>
                     </EuiText>
                   ),
@@ -144,40 +133,44 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
             : []),
           {
             title: (
-              <EuiText size="xs">
+              <EuiText size="xs" color={'ghost'}>
                 {i18n.translate('data.datasetDetails.dataDefinitionTitle', {
                   defaultMessage: 'Data definition',
                 })}
               </EuiText>
             ),
             description: (
-              <EuiBadge
-                color="hollow"
-                iconType={
-                  (datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-                    ? 'logoOpenSearch'
-                    : datasetService.getType(datasetType)?.meta.icon.type)!
-                }
-                onClick={handleDataDefinitionClicked}
-                onClickAriaLabel={i18n.translate('data.datasetDetails.dataDefinitionAriaLabel', {
-                  defaultMessage: 'View data definition',
-                })}
+              <EuiButtonEmpty
                 className="datasetDetails__dataDefinition"
                 data-test-subj="datasetDetailsDataDefinition"
+                size="xs"
+                color="text"
+                onClick={handleDataDefinitionClicked}
+                aria-label={i18n.translate('data.datasetDetails.dataDefinitionAriaLabel', {
+                  defaultMessage: 'View data definition',
+                })}
               >
-                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" className="datasetDetails__textTruncate">
-                      {dataSourceName}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiBadge>
+                <EuiIcon
+                  type={
+                    datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+                      ? 'logoOpenSearch'
+                      : datasetService.getType(datasetType || '')?.meta.icon.type || 'database'
+                  }
+                  size="s"
+                  className="datasetDetails__icon"
+                />
+                <EuiText
+                  size="xs"
+                  className="datasetDetails__description datasetDetails__textTruncate"
+                >
+                  {dataSourceName}
+                </EuiText>
+              </EuiButtonEmpty>
             ),
           },
           {
             title: (
-              <EuiText size="xs">
+              <EuiText size="xs" color={'ghost'}>
                 {i18n.translate('data.datasetDetails.timeFieldTitle', {
                   defaultMessage: 'Time field',
                 })}
@@ -186,7 +179,10 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
             description: (
               <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" className="datasetDetails__textTruncate">
+                  <EuiText
+                    size="xs"
+                    className="datasetDetails__description datasetDetails__textTruncate"
+                  >
                     {timeFieldName}
                   </EuiText>
                 </EuiFlexItem>
@@ -219,6 +215,6 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter> */}
-    </EuiPopover>
+    </EuiPanel>
   );
 };

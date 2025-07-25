@@ -51,13 +51,6 @@ export interface IIndexPattern {
   getFormatterForField?: (
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ) => FieldFormat;
-
-  getFieldByName(name: string): IFieldType | undefined;
-  getComputedFields(): any;
-  getScriptedFields(): IFieldType[];
-  getNonScriptedFields(): IFieldType[];
-  addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
-  removeScriptedField(fieldName: string): void;
 }
 
 export interface IndexPatternAttributes {

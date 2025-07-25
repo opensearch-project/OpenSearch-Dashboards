@@ -105,7 +105,7 @@ export {
   ISearchSource,
   OpenSearchQuerySortValue,
   SortDirection,
-  DataViewsContract as DatasetsContract,
+  DataViewsContract,
   IDataView as IDataset,
   DataView as Dataset,
   dataViews as datasets,

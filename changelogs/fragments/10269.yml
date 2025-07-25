@@ -1,0 +1,2 @@
+fix:
+- Move dataset select to query panel widgets ([#10269](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10269))

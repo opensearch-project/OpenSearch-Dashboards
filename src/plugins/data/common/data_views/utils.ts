@@ -85,11 +85,70 @@ export const getDataViewTitle = async (
 };
 
 export const concatDataSourceWithDataView = (dataSourceTitle: string, dataViewTitle: string) => {
-  const DATA_SOURCE_INDEX_PATTERN_DELIMITER = '::';
+  const DATA_SOURCE_DATA_VIEW_DELIMITER = '::';
 
-  return dataSourceTitle.concat(DATA_SOURCE_INDEX_PATTERN_DELIMITER).concat(dataViewTitle);
+  return dataSourceTitle.concat(DATA_SOURCE_DATA_VIEW_DELIMITER).concat(dataViewTitle);
 };
 
 export const getDataSourceReference = (references: DataViewSavedObjectReference[]) => {
   return references.find((ref) => ref.type === 'data-source');
+};
+
+/**
+ * Extracts dataset type from a URI pattern
+ * @param uri - URI in format "type://name" (e.g., "s3://my-bucket", "index-pattern://logs-*")
+ * @returns The dataset type in uppercase or undefined if not found
+ */
+export const extractDatasetTypeFromUri = (uri?: string): string | undefined => {
+  if (!uri || !uri.includes('://')) {
+    return undefined;
+  }
+
+  const [type] = uri.split('://');
+  return type?.toUpperCase();
+};
+
+/**
+ * Extracts data source information from a URI pattern
+ * @param uri - URI in format "type://name/path"
+ * @returns Object containing type and name
+ */
+export const extractDataSourceInfoFromUri = (uri?: string): { type?: string; name?: string } => {
+  if (!uri) return {};
+
+  if (uri.includes('://')) {
+    const parts = uri.split('://');
+    if (parts.length >= 2) {
+      const type = parts[0].toUpperCase();
+      const pathParts = parts[1].split('/');
+      const name = pathParts[0];
+      return { type, name };
+    }
+  }
+
+  return { name: uri };
+};
+
+/**
+ * Constructs a data source URI from type and name
+ * @param type - Dataset type (e.g., "S3", "INDEX_PATTERN")
+ * @param name - Data source name
+ * @returns URI in format "type://name"
+ */
+export const constructDataSourceUri = (type: string, name: string): string => {
+  return `${type.toLowerCase()}://${name}`;
+};
+
+/**
+ * Gets the dataset type from a data source reference
+ * @param dataSourceRef - The data source reference object
+ * @returns The dataset type or undefined
+ */
+export const getDatasetTypeFromReference = (
+  dataSourceRef?: DataViewSavedObjectReference
+): string | undefined => {
+  if (!dataSourceRef?.name) {
+    return undefined;
+  }
+  return extractDatasetTypeFromUri(dataSourceRef.name);
 };

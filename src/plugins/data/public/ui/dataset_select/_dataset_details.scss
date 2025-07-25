@@ -4,21 +4,61 @@
  */
 
 .datasetDetails {
-  &__button {
-    margin-left: $euiSizeXS;
-    white-space: nowrap;
-    flex-shrink: 0;
-    width: $euiSizeXL;
-    height: $euiSizeXL;
-  }
-
   &__panel {
-    width: 400px;
+    width: 100%;
     max-width: 90vw;
   }
 
-  &__timeField {
-    font-size: $euiFontSizeXS;
+  &__header {
+    > * {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: $euiFontWeightSemiBold;
+      width: 100%;
+    }
+
+    > :first-child {
+      text-align: left;
+    }
+
+    > :nth-child(2) {
+      text-align: right;
+    }
+  }
+
+  &__list {
+    margin-top: 0;
+  }
+
+  &__title {
+    > * {
+      font-weight: $euiFontWeightSemiBold;
+    }
+  }
+
+  &__listTitle {
+    width: 100%;
+
+    > * {
+      font-weight: $euiFontWeightSemiBold;
+    }
+  }
+
+  &__dataDefinition {
+    background-color: $euiColorLightestShade;
+    align-items: center;
+    border-radius: $euiBorderRadius;
+  }
+
+  &__icon {
+    margin: $euiSizeXS $euiSizeXS 0 0;
+    height: 100%;
+    flex-shrink: 0;
+  }
+
+  &__description {
+    font-size: $euiFontSizeXS - 2px;
   }
 
   &__textTruncate {
