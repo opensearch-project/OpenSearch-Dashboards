@@ -271,19 +271,31 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
               : undefined;
 
           return (
-            <>
-              <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-              {description && (
-                <>
-                  <br />
-                  <EuiTextColor color="subdued">
-                    <small>
-                      <EuiHighlight search={searchValue}>{description}</EuiHighlight>
-                    </small>
-                  </EuiTextColor>
-                </>
-              )}
-            </>
+            <EuiToolTip
+              display="block"
+              className="datasetSelect__tooltip"
+              position="right"
+              content={
+                <DatasetDetails
+                  dataset={option.key ? datasets.find((d) => d.id === option.key) : undefined}
+                  isDefault={option.key ? option.key === defaultDatasetId : false}
+                />
+              }
+            >
+              <>
+                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+                {description && (
+                  <>
+                    <br />
+                    <EuiTextColor color="subdued">
+                      <small>
+                        <EuiHighlight search={searchValue}>{description}</EuiHighlight>
+                      </small>
+                    </EuiTextColor>
+                  </>
+                )}
+              </>
+            </EuiToolTip>
           );
         }}
         listProps={{
