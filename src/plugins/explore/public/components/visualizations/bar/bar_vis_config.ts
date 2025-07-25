@@ -14,6 +14,7 @@ import {
   VisFieldType,
   AxisRole,
   StandardAxes,
+  TitleOptions,
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 
@@ -37,6 +38,8 @@ export interface BarChartStyleControls {
   standardAxes: StandardAxes[];
 
   switchAxes: boolean;
+
+  titleOptions: TitleOptions;
 }
 
 export const defaultBarChartStyles: BarChartStyleControls = {
@@ -109,6 +112,10 @@ export const defaultBarChartStyles: BarChartStyleControls = {
       axisRole: AxisRole.Y,
     },
   ],
+  titleOptions: {
+    show: false,
+    titleName: '',
+  },
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({

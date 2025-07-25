@@ -52,7 +52,6 @@ const createStoreWithQuery = (lastExecutedTranslatedQuery: string = '') => {
       },
       ui: {
         activeTabId: 'logs',
-        showFilterPanel: true,
         showHistogram: true,
       },
       results: {},

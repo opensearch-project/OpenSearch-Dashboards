@@ -14,6 +14,7 @@ import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
+import { TitleOptionsPanel } from '../style_panel/title/title';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
 
@@ -113,6 +114,17 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
                 if (legendOptions.position !== undefined) {
                   updateStyleOption('legendPosition', legendOptions.position);
                 }
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TitleOptionsPanel
+              titleOptions={styleOptions.titleOptions}
+              onShowTitleChange={(titleOptions) => {
+                updateStyleOption('titleOptions', {
+                  ...styleOptions.titleOptions,
+                  ...titleOptions,
+                });
               }}
             />
           </EuiFlexItem>

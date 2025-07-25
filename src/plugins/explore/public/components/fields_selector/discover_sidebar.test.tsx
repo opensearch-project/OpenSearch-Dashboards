@@ -115,6 +115,13 @@ describe('discover sidebar', function () {
     }
   });
 
+  it('should render the field header', function () {
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    expect(screen.getByText('Fields')).toBeInTheDocument();
+  });
+
   it('should have Selected and Discovered field sections', function () {
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
@@ -148,6 +155,15 @@ describe('discover sidebar', function () {
     fireEvent.click(screen.getByTestId('fieldToggle-bytes'));
 
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
+  });
+
+  it('should call onCollapse when header collapse button is clicked', function () {
+    const props = { ...getCompProps(), onCollapse: jest.fn() };
+    render(<DiscoverSidebar {...props} />);
+
+    const collapseButton = screen.getByTestId('fieldList-collapse-button');
+    fireEvent.click(collapseButton);
+    expect(props.onCollapse).toHaveBeenCalled();
   });
 
   it('should allow adding filters and show multiple field instances', function () {

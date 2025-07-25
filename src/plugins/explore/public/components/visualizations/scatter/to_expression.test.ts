@@ -162,6 +162,70 @@ describe('Scatter Chart to_expression', () => {
       expect(markLayer).toHaveProperty('encoding.y.type', 'quantitative');
     });
 
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.X]: mockNumericalColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[1],
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createTwoMetricScatter(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createTwoMetricScatter(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('X Value with Y Value');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Scatter Chart',
+        },
+      };
+
+      const customTitleResult = createTwoMetricScatter(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Scatter Chart');
+    });
+
     it('should respect tooltip settings', () => {
       const stylesWithHiddenTooltip = {
         ...mockStyles,
@@ -284,6 +348,71 @@ describe('Scatter Chart to_expression', () => {
       expect(markLayer).toHaveProperty('encoding.color.type', 'nominal');
     });
 
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.X]: mockNumericalColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[1],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createTwoMetricOneCateScatter(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createTwoMetricOneCateScatter(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('X Value with Y Value by Category');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Colored Scatter Chart',
+        },
+      };
+
+      const customTitleResult = createTwoMetricOneCateScatter(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Colored Scatter Chart');
+    });
+
     it('should include legend when addLegend is true', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.X]: mockNumericalColumns[0],
@@ -370,6 +499,72 @@ describe('Scatter Chart to_expression', () => {
       expect(markLayer).toHaveProperty('encoding.color.type', 'nominal');
       expect(markLayer).toHaveProperty('encoding.size.field', 'size');
       expect(markLayer).toHaveProperty('encoding.size.type', 'quantitative');
+    });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.X]: mockNumericalColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[1],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+        [AxisRole.SIZE]: mockNumericalColumns[2],
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createThreeMetricOneCateScatter(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createThreeMetricOneCateScatter(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('X Value with Y Value by Category (Size shows Size)');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...mockStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Sized Scatter Chart',
+        },
+      };
+
+      const customTitleResult = createThreeMetricOneCateScatter(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Sized Scatter Chart');
     });
 
     it('should include size legend when addLegend is true', () => {

@@ -67,6 +67,10 @@ describe('createHeatmapeConfig', () => {
     expect(xAxis).toHaveProperty('position', Positions.BOTTOM);
     const yAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.Y);
     expect(yAxis).toHaveProperty('position', Positions.LEFT);
+
+    // Verify title
+    expect(defaults.titleOptions.show).toBe(false);
+    expect(defaults.titleOptions.titleName).toBe('');
   });
   it('should have available mappings configured', () => {
     const config = createHeatmapConfig();

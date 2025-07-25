@@ -13,6 +13,7 @@ import { ThresholdOptions } from '../style_panel/threshold/threshold';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { TitleOptionsPanel } from '../style_panel/title/title';
 
 export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyleControls>;
 
@@ -97,6 +98,18 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
                 if (legendOptions.position !== undefined) {
                   updateStyleOption('legendPosition', legendOptions.position);
                 }
+              }}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <TitleOptionsPanel
+              titleOptions={styleOptions.titleOptions}
+              onShowTitleChange={(titleOptions) => {
+                updateStyleOption('titleOptions', {
+                  ...styleOptions.titleOptions,
+                  ...titleOptions,
+                });
               }}
             />
           </EuiFlexItem>

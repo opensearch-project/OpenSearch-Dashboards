@@ -7,13 +7,11 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface UIState {
   activeTabId: string;
-  showFilterPanel: boolean;
   showHistogram: boolean;
 }
 
 const initialState: UIState = {
   activeTabId: '',
-  showFilterPanel: true,
   showHistogram: true,
 };
 
@@ -27,15 +25,12 @@ const uiSlice = createSlice({
     setActiveTab: (state, action: PayloadAction<string>) => {
       state.activeTabId = action.payload;
     },
-    setShowFilterPanel: (state, action: PayloadAction<boolean>) => {
-      state.showFilterPanel = action.payload;
-    },
     setShowHistogram: (state, action: PayloadAction<boolean>) => {
       state.showHistogram = action.payload;
     },
   },
 });
 
-export const { setActiveTab, setShowFilterPanel, setUiState, setShowHistogram } = uiSlice.actions;
+export const { setActiveTab, setUiState, setShowHistogram } = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
 export const uiInitialState = uiSlice.getInitialState();

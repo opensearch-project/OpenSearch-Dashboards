@@ -77,7 +77,6 @@ describe('redux_persistence', () => {
         },
         ui: {
           activeTabId: '',
-          showFilterPanel: true,
           showHistogram: true,
         },
         results: {},
@@ -170,7 +169,7 @@ describe('redux_persistence', () => {
         dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
       };
       const mockAppState = {
-        ui: { activeTabId: 'logs', showFilterPanel: true, showHistogram: true },
+        ui: { activeTabId: 'logs', showHistogram: true },
         tab: {
           logs: {},
           visualizations: {
@@ -232,7 +231,6 @@ describe('redux_persistence', () => {
 
       expect(result.query).toEqual(mockQueryState);
       expect(result.ui.activeTabId).toBe(''); // Should use preloaded UI state
-      expect(result.ui.showFilterPanel).toBe(true);
     });
 
     it('should handle errors and fallback to preloaded state', async () => {
@@ -263,7 +261,6 @@ describe('redux_persistence', () => {
       expect(result).toBeDefined();
       expect(result.ui).toEqual({
         activeTabId: '',
-        showFilterPanel: true,
         showHistogram: true,
       });
       expect(result.query.language).toBe(EXPLORE_DEFAULT_LANGUAGE);

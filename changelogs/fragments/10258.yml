@@ -1,0 +1,2 @@
+fix:
+- Replace absolute SCSS import with relative path to restore build compatibility ([#10258](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10258))

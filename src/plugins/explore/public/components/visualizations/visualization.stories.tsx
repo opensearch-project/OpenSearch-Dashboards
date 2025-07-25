@@ -111,6 +111,10 @@ const mockStyleOptions: LineChartStyleControls = {
       title: { text: 'Sales' },
     },
   ],
+  titleOptions: {
+    show: false,
+    titleName: '',
+  },
 };
 
 // Mock the line configuration to avoid importing toExpression

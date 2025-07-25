@@ -76,6 +76,10 @@ describe('area_vis_config', () => {
           text: '',
         },
       });
+      expect(defaultAreaChartStyles.titleOptions).toMatchObject({
+        show: false,
+        titleName: '',
+      });
     });
   });
 

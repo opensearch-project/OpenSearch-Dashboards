@@ -18,6 +18,7 @@ import { getDetails } from './lib/get_details';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { groupFields } from './lib/group_fields';
 import { FieldDetails } from './types';
+import { DiscoverFieldHeader } from './discover_field_header';
 
 export interface DiscoverSidebarProps {
   /**
@@ -50,6 +51,10 @@ export interface DiscoverSidebarProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
+   * Callback function when sidebar Collapse
+   */
+  onCollapse?: () => void;
+  /**
    * Currently selected index pattern
    */
   selectedIndexPattern?: IndexPattern;
@@ -57,7 +62,14 @@ export interface DiscoverSidebarProps {
 }
 
 export function DiscoverSidebar(props: DiscoverSidebarProps) {
-  const { columns, fieldCounts, hits, selectedIndexPattern, isEnhancementsEnabledOverride } = props;
+  const {
+    columns,
+    fieldCounts,
+    hits,
+    selectedIndexPattern,
+    isEnhancementsEnabledOverride,
+    onCollapse,
+  } = props;
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const shortDotsEnabled = useMemo(() => {
     const services = getServices();
@@ -105,7 +117,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
   return (
     <I18nProvider>
       <EuiSplitPanel.Outer
-        className="sidebar-list eui-yScroll"
+        className="explore_fieldSelector_list eui-yScroll"
         aria-label={i18n.translate(
           'explore.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
           {
@@ -118,7 +130,14 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
       >
         <EuiSplitPanel.Inner
           grow={false}
-          paddingSize="s"
+          paddingSize="none"
+          className="exploreSideBar_headerContainer"
+        >
+          <DiscoverFieldHeader onCollapse={onCollapse} />
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner
+          grow={false}
+          paddingSize="none"
           className="exploreSideBar_searchContainer"
         >
           <DiscoverFieldSearch
