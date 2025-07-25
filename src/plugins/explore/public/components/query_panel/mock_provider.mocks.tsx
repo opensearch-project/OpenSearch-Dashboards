@@ -194,6 +194,7 @@ const createMockStore = (
         promptToQueryIsLoading: false,
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery,
+        queryExecutionButtonStatus: 'REFRESH',
       },
     },
   });

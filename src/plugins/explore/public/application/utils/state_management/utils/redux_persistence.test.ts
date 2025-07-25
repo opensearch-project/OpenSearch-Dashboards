@@ -116,6 +116,7 @@ describe('redux_persistence', () => {
           editorMode: EditorMode.Query,
           lastExecutedPrompt: '',
           lastExecutedTranslatedQuery: '',
+          queryExecutionButtonStatus: 'REFRESH',
         },
       };
 

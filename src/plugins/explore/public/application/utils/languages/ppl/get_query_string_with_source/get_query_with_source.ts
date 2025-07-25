@@ -24,9 +24,9 @@ export const getQueryWithSource = (query: Query): QueryWithQueryAsString => {
 
   let queryStringWithSource: string;
   if (queryString.trim() === '') {
-    queryStringWithSource = `source=${datasetTitle}`;
+    queryStringWithSource = `source = ${datasetTitle}`;
   } else {
-    queryStringWithSource = `source=${datasetTitle} ${queryString}`;
+    queryStringWithSource = `source = ${datasetTitle} ${queryString}`;
   }
 
   return {

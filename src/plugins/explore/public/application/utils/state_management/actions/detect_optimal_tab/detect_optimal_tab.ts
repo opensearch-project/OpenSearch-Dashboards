@@ -9,6 +9,8 @@ import { setActiveTab } from '../../slices';
 import { ExploreServices } from '../../../../../types';
 import { defaultPrepareQueryString } from '../query_actions';
 import { getVisualizationType } from '../../../../../components/visualizations/utils/use_visualization_types';
+import { getQueryWithSource } from '../../../languages';
+import { Query } from '../../../../../../../data/common';
 
 /**
  * Determine if results can be visualized
@@ -55,7 +57,13 @@ export const detectAndSetOptimalTab = createAsyncThunk<
 
   // Get results for visualization tab
   const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
-  const visualizationTabPrepareQuery = visualizationTab?.prepareQuery || defaultPrepareQueryString;
+  let visualizationTabPrepareQuery = defaultPrepareQueryString;
+  if (visualizationTab?.prepareQuery) {
+    const prepareQuery = visualizationTab.prepareQuery;
+    visualizationTabPrepareQuery = (queryParam: Query): string => {
+      return prepareQuery(getQueryWithSource(queryParam));
+    };
+  }
   const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
 
   const visualizationResults = results[visualizationTabCacheKey];

@@ -61,7 +61,7 @@ const inspectTestSuite = () => {
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.intercept('POST', '**/search/*').as('docTablePostRequest');
-        cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+        cy.getElementByTestId('exploreQueryExecutionButton').click();
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
         docTable.toggleDocTableRow(0);

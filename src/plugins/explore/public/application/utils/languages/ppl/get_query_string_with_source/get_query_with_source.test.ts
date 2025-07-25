@@ -16,7 +16,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=test-dataset',
+      query: 'source = test-dataset',
     });
   });
 
@@ -109,7 +109,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=test-dataset',
+      query: 'source = test-dataset',
     });
   });
 
@@ -122,7 +122,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=test-dataset',
+      query: 'source = test-dataset',
     });
   });
 
@@ -135,7 +135,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=test-dataset | where level="error"',
+      query: 'source = test-dataset | where level="error"',
     });
   });
 
@@ -148,7 +148,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=test-dataset   | where level="error"',
+      query: 'source = test-dataset   | where level="error"',
     });
   });
 

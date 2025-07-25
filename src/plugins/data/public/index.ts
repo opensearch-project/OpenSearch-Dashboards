@@ -560,6 +560,7 @@ export {
   PersistedLog,
   LanguageReference,
   DatasetIndexedViewsService,
+  validateTimeRange,
 } from './query';
 
 export { useSavedQuery } from './ui/search_bar';
