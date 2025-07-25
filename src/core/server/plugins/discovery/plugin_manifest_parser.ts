@@ -285,21 +285,14 @@ function isVersionCompatible(
     return true;
   }
 
-  const coercedActualOpenSearchDashboardsVersion = coerce(actualOpenSearchDashboardsVersion);
-  if (coercedActualOpenSearchDashboardsVersion == null) {
+  const coercedActual = coerce(actualOpenSearchDashboardsVersion);
+  const coercedExpected = coerce(expectedOpenSearchDashboardsVersion);
+
+  if (!coercedActual || !coercedExpected) {
     return false;
   }
 
-  const coercedExpectedOpenSearchDashboardsVersion = coerce(expectedOpenSearchDashboardsVersion);
-  if (coercedExpectedOpenSearchDashboardsVersion == null) {
-    return false;
-  }
-
-  // Compare coerced versions, e.g. `1.2.3` ---> `1.2.3` and `7.0.0-alpha1` ---> `7.0.0`.
-  return (
-    coercedActualOpenSearchDashboardsVersion.compare(coercedExpectedOpenSearchDashboardsVersion) ===
-    0
-  );
+  return coercedActual.major === coercedExpected.major;
 }
 /**
  * Checks whether specified version range is valid.
