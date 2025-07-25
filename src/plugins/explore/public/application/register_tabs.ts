@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IFieldType } from 'src/plugins/data/common';
 import { LogsTab } from '../components/tabs/logs_tab';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { PatternsTab } from '../components/tabs/patterns_tab';
@@ -67,6 +68,8 @@ export const registerBuiltInTabs = (
 
     // Add lifecycle hooks
     onActive: (state?: RootState): void => {
+      // TODO: write detailed message about predicting the field
+
       // set the value for patterns field
       if (!state || !services?.store) return;
 
@@ -82,29 +85,29 @@ export const registerBuiltInTabs = (
       const logsCacheKey = defaultPrepareQueryString(query);
       const logResults = results[logsCacheKey];
 
+      // Get fields
+      const filteredFields = logResults?.fieldSchema?.filter((field: Partial<IFieldType>) => {
+        return field.type === 'string';
+      });
+
       // Get the first hit if available
       const firstHit = logResults?.hits?.hits?.[0];
 
-      if (firstHit && firstHit._source) {
+      if (firstHit && firstHit._source && filteredFields) {
         // Find the field with the longest value
         let longestField = '';
         let maxLength = 0;
 
         Object.entries(firstHit._source).forEach(([field, value]) => {
           // Check if the field exists in options
-          // if (options.some((option) => option.value === field)) {
-          const valueLength =
-            typeof value === 'string'
-              ? value.length
-              : value !== null && typeof value === 'object'
-              ? JSON.stringify(value).length // double check if we really need JSON cast
-              : String(value).length;
+          if (filteredFields.some((option) => option.name === field)) {
+            const valueLength = typeof value === 'string' ? value.length : 0;
 
-          if (valueLength > maxLength) {
-            maxLength = valueLength;
-            longestField = field;
+            if (valueLength > maxLength) {
+              maxLength = valueLength;
+              longestField = field;
+            }
           }
-          // }
         });
 
         if (longestField) {
@@ -113,10 +116,13 @@ export const registerBuiltInTabs = (
       }
     },
 
-    onInactive: () => {
+    onInactive: (state?: RootState): void => {
       // Tab deactivated
       // TODO: maybe implement this to remove the patterns field? this might be needed to not use a field
       //        from a diff index pattern
+
+      if (!state || !services?.store) return;
+      services.store.dispatch(setPatternsField(''));
     },
   });
 
