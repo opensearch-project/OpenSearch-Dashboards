@@ -1,0 +1,38 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.span-detail-panel {
+  &__legend-popover {
+    width: 200px;
+  }
+
+  &__legend-color-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: 1px solid $euiColorEmptyShade;
+  }
+
+  &__table-container {
+    width: auto;
+  }
+
+  &__gantt-container {
+    width: 100%;
+  }
+
+  &__content-container {
+    overflow-y: auto;
+    max-height: 800px;
+    min-height: 150px;
+  }
+}
+
+.center-loading-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}

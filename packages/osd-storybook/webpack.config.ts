@@ -9,6 +9,8 @@ import { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 
+const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
+
 const stats = {
   ...Stats.presetToOptions('minimal'),
   colors: true,
@@ -42,7 +44,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+              presets: [BABEL_PRESET_PATH],
             },
           },
         },
@@ -52,7 +54,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
           use: {
             loader: 'babel-loader',
             options: {
-              presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+              presets: [BABEL_PRESET_PATH],
             },
           },
         },
@@ -63,7 +65,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
           use: {
             loader: 'babel-loader',
             options: {
-              presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+              presets: [BABEL_PRESET_PATH],
             },
           },
         },
@@ -74,7 +76,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+              presets: [BABEL_PRESET_PATH],
               plugins: [
                 require.resolve('@babel/plugin-transform-class-static-block'),
                 require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
@@ -119,6 +121,22 @@ export default function ({ config: storybookConfig }: { config: Configuration })
               },
             },
           ],
+        },
+        {
+          test: /\.m?js$/,
+          include: [/node_modules[\\/]@dagrejs/, /node_modules[\\/]@xyflow/],
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: [BABEL_PRESET_PATH],
+              plugins: [
+                '@babel/plugin-transform-class-properties',
+                '@babel/plugin-transform-class-static-block',
+                '@babel/plugin-transform-private-methods',
+                '@babel/plugin-transform-private-property-in-object',
+              ],
+            },
+          },
         },
       ],
     },
