@@ -23,13 +23,16 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
       // Get UI settings client
       const uiSettingsClient = context.core.uiSettings.client;
 
-      // Try to get values from UI settings, fall back to YAML config values
-      const content = await uiSettingsClient.get('banner:content');
-      const color = await uiSettingsClient.get('banner:color');
-      const iconType = await uiSettingsClient.get('banner:iconType');
-      const isVisible = await uiSettingsClient.get('banner:active');
-      const useMarkdown = await uiSettingsClient.get('banner:useMarkdown');
-      const size = await uiSettingsClient.get('banner:size');
+      // Get all banner settings at once instead of individual calls
+      const settings = await uiSettingsClient.getAll();
+
+      // Extract banner settings from the result
+      const content = settings['banner:content'];
+      const color = settings['banner:color'];
+      const iconType = settings['banner:iconType'];
+      const isVisible = settings['banner:active'];
+      const useMarkdown = settings['banner:useMarkdown'];
+      const size = settings['banner:size'];
 
       // Combine UI settings with base config
       const config: BannerConfig = {

@@ -14,7 +14,7 @@ import ReactDOM from 'react-dom';
 import { renderBanner, unmountBanner } from './render_banner';
 import { GlobalBanner } from './components/global_banner';
 import { BANNER_CONTAINER_ID } from '../common';
-import { HttpStart, IUiSettingsClient } from '../../../core/public';
+import { HttpStart } from '../../../core/public';
 
 // Mock React and ReactDOM
 jest.mock('react', () => ({
@@ -33,20 +33,16 @@ jest.mock('./components/global_banner', () => ({
 
 describe('render_banner', () => {
   let mockHttp: jest.Mocked<HttpStart>;
-  let mockUiSettings: jest.Mocked<IUiSettingsClient>;
   let mockContainer: HTMLElement;
   let originalCreateElement: jest.Mock;
   let originalRender: jest.Mock;
   let originalUnmountComponentAtNode: jest.Mock;
-  let dispatchEventSpy: jest.SpyInstance;
 
   beforeEach(() => {
     // Create minimal mocks with only the methods needed for tests
     mockHttp = ({
       get: jest.fn(),
     } as unknown) as jest.Mocked<HttpStart>;
-
-    mockUiSettings = ({} as unknown) as jest.Mocked<IUiSettingsClient>;
 
     // Create a mock container element
     mockContainer = document.createElement('div');
@@ -58,9 +54,6 @@ describe('render_banner', () => {
     originalRender = ReactDOM.render as jest.Mock;
     originalUnmountComponentAtNode = ReactDOM.unmountComponentAtNode as jest.Mock;
 
-    // Spy on window.dispatchEvent
-    dispatchEventSpy = jest.spyOn(window, 'dispatchEvent');
-
     // Clear all mocks before each test
     jest.clearAllMocks();
   });
@@ -70,19 +63,15 @@ describe('render_banner', () => {
     if (document.body.contains(mockContainer)) {
       document.body.removeChild(mockContainer);
     }
-
-    // Restore spies
-    dispatchEventSpy.mockRestore();
   });
 
   describe('renderBanner', () => {
-    test('renders the GlobalBanner component with http and uiSettings clients', () => {
-      renderBanner(mockHttp, mockUiSettings);
+    test('renders the GlobalBanner component with http client', () => {
+      renderBanner(mockHttp);
 
       // Check that React.createElement was called with the right arguments
       expect(originalCreateElement).toHaveBeenCalledWith(GlobalBanner, {
         http: mockHttp,
-        uiSettings: mockUiSettings,
       });
 
       // Check that ReactDOM.render was called with the result of createElement
@@ -90,29 +79,25 @@ describe('render_banner', () => {
         originalCreateElement.mock.results[0].value,
         mockContainer
       );
-
-      // Check that window.dispatchEvent was called with a resize event
-      expect(dispatchEventSpy).toHaveBeenCalledWith(expect.any(Event));
-      expect(dispatchEventSpy.mock.calls[0][0].type).toBe('resize');
     });
 
-    test('sets a timeout if container is not found', () => {
+    test('uses requestAnimationFrame if container is not found', () => {
       // Remove the container from the DOM
       document.body.removeChild(mockContainer);
 
-      // Spy on setTimeout
-      const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+      // Spy on requestAnimationFrame
+      const requestAnimationFrameSpy = jest.spyOn(window, 'requestAnimationFrame');
 
-      renderBanner(mockHttp, mockUiSettings);
+      renderBanner(mockHttp);
 
       // Check that ReactDOM.render was not called
       expect(originalRender).not.toHaveBeenCalled();
 
-      // Check that setTimeout was called
-      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 50);
+      // Check that requestAnimationFrame was called
+      expect(requestAnimationFrameSpy).toHaveBeenCalledWith(expect.any(Function));
 
       // Clean up
-      setTimeoutSpy.mockRestore();
+      requestAnimationFrameSpy.mockRestore();
     });
   });
 

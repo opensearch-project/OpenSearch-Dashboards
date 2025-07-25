@@ -55,12 +55,7 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
     const bannerSetup = {
       bannerEnabled: () => this.pluginConfig.enabled,
       getConfig: (): BannerConfig => ({
-        content: this.pluginConfig.content,
-        color: this.pluginConfig.color,
-        iconType: this.pluginConfig.iconType,
-        isVisible: this.pluginConfig.isVisible,
-        useMarkdown: this.pluginConfig.useMarkdown,
-        size: this.pluginConfig.size,
+        ...this.pluginConfig,
       }),
     };
 

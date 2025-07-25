@@ -26,6 +26,7 @@ export const getBannerSettings = (): Record<string, UiSettingsParams> => {
       }),
       category: ['banner'],
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     'banner:content': {
       name: i18n.translate('banner.ui_settings.params.contentTitle', {
@@ -51,6 +52,7 @@ export const getBannerSettings = (): Record<string, UiSettingsParams> => {
       }),
       category: ['banner'],
       schema: schema.string(),
+      requiresPageReload: true,
     },
     'banner:color': {
       name: i18n.translate('banner.ui_settings.params.colorTitle', {
@@ -68,6 +70,7 @@ export const getBannerSettings = (): Record<string, UiSettingsParams> => {
         schema.literal('warning'),
         schema.literal('danger'),
       ]),
+      requiresPageReload: true,
     },
     'banner:iconType': {
       name: i18n.translate('banner.ui_settings.params.iconTypeTitle', {
@@ -87,6 +90,7 @@ export const getBannerSettings = (): Record<string, UiSettingsParams> => {
         schema.literal('warning'),
         schema.literal('bell'),
       ]),
+      requiresPageReload: true,
     },
     'banner:useMarkdown': {
       name: i18n.translate('banner.ui_settings.params.useMarkdownTitle', {
@@ -99,6 +103,7 @@ export const getBannerSettings = (): Record<string, UiSettingsParams> => {
       }),
       category: ['banner'],
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
   };
 };

@@ -31,14 +31,14 @@ describe('BannerPlugin', () => {
   });
 
   describe('start', () => {
-    test('calls renderBanner with http client and uiSettings client', async () => {
+    test('calls renderBanner with http client', async () => {
       const coreStart = coreMock.createStart();
       const plugin = new BannerPlugin();
       const start = await plugin.start(coreStart);
 
       expect(start).toEqual({});
       expect(renderBannerMock).toHaveBeenCalledTimes(1);
-      expect(renderBannerMock).toHaveBeenCalledWith(coreStart.http, coreStart.uiSettings);
+      expect(renderBannerMock).toHaveBeenCalledWith(coreStart.http);
     });
   });
 

@@ -12,7 +12,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { Subject } from 'rxjs';
 import { GlobalBanner } from './global_banner';
 import { BannerConfig } from '../../common';
 import { coreMock } from '../../../../core/public/mocks';
@@ -35,21 +34,13 @@ jest.mock('react-markdown', () => ({
 
 describe('GlobalBanner', () => {
   let httpMock: ReturnType<typeof coreMock.createSetup>['http'];
-  let uiSettingsMock: ReturnType<typeof coreMock.createStart>['uiSettings'];
-  let updateSubject: Subject<{ key: string; newValue: any; oldValue: any }>;
   let wrapper: any;
   let mockBannerConfig: BannerConfig;
 
   beforeEach(() => {
     // Create mocks
     const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
     httpMock = coreSetup.http;
-    uiSettingsMock = coreStart.uiSettings;
-
-    // Create a subject for UI settings updates
-    updateSubject = new Subject();
-    uiSettingsMock.getUpdate$ = jest.fn().mockReturnValue(updateSubject);
 
     // Mock the HTTP get response
     mockBannerConfig = {
@@ -74,7 +65,7 @@ describe('GlobalBanner', () => {
 
   test('fetches banner config on mount', async () => {
     await act(async () => {
-      wrapper = mount(<GlobalBanner http={httpMock} uiSettings={uiSettingsMock} />);
+      wrapper = mount(<GlobalBanner http={httpMock} />);
     });
 
     // Check that HTTP get was called with the correct URL
@@ -82,57 +73,11 @@ describe('GlobalBanner', () => {
     expect(httpMock.get).toHaveBeenCalledTimes(1);
   });
 
-  test('subscribes to UI settings changes', async () => {
-    await act(async () => {
-      wrapper = mount(<GlobalBanner http={httpMock} uiSettings={uiSettingsMock} />);
-    });
-
-    // Check that getUpdate$ was called
-    expect(uiSettingsMock.getUpdate$).toHaveBeenCalled();
-
-    // Reset the HTTP get mock to track new calls
-    httpMock.get.mockClear();
-
-    // Simulate a UI settings change for a banner setting
-    await act(async () => {
-      updateSubject.next({
-        key: 'banner:content',
-        newValue: 'Updated Banner Content',
-        oldValue: 'Test Banner Content',
-      });
-    });
-
-    // Check that HTTP get was called again
-    expect(httpMock.get).toHaveBeenCalledWith('/api/_plugins/_banner/content');
-    expect(httpMock.get).toHaveBeenCalledTimes(1);
-  });
-
-  test('does not fetch when non-banner settings change', async () => {
-    await act(async () => {
-      wrapper = mount(<GlobalBanner http={httpMock} uiSettings={uiSettingsMock} />);
-    });
-
-    // Reset the HTTP get mock to track new calls
-    httpMock.get.mockClear();
-
-    // Simulate a UI settings change for a non-banner setting
-    await act(async () => {
-      updateSubject.next({
-        key: 'theme:darkMode',
-        newValue: true,
-        oldValue: false,
-      });
-    });
-
-    // Check that HTTP get was not called again
-    expect(httpMock.get).not.toHaveBeenCalled();
-  });
-
   test('renders loading state initially', async () => {
     // Don't resolve the HTTP get promise yet
     httpMock.get = jest.fn().mockImplementation(() => new Promise(() => {}));
 
-    wrapper = mount(<GlobalBanner http={httpMock} uiSettings={uiSettingsMock} />);
+    wrapper = mount(<GlobalBanner http={httpMock} />);
 
     // Check for loading spinner
     expect(wrapper.find('EuiLoadingSpinner').exists()).toBe(true);
@@ -141,7 +86,7 @@ describe('GlobalBanner', () => {
 
   test('renders banner with content from API', async () => {
     await act(async () => {
-      wrapper = mount(<GlobalBanner http={httpMock} uiSettings={uiSettingsMock} />);
+      wrapper = mount(<GlobalBanner http={httpMock} />);
     });
 
     // Force update to ensure the component re-renders with the new state
@@ -160,7 +105,7 @@ describe('GlobalBanner', () => {
     httpMock.get = jest.fn().mockResolvedValue(mockBannerConfig);
 
     await act(async () => {
-      wrapper = mount(<GlobalBanner http={httpMock} uiSettings={uiSettingsMock} />);
+      wrapper = mount(<GlobalBanner http={httpMock} />);
     });
 
     // Force update to ensure the component re-renders with the new state
@@ -176,7 +121,7 @@ describe('GlobalBanner', () => {
     httpMock.get = jest.fn().mockResolvedValue(mockBannerConfig);
 
     await act(async () => {
-      wrapper = mount(<GlobalBanner http={httpMock} uiSettings={uiSettingsMock} />);
+      wrapper = mount(<GlobalBanner http={httpMock} />);
     });
 
     // Force update to ensure the component re-renders with the new state
@@ -192,7 +137,7 @@ describe('GlobalBanner', () => {
     httpMock.get = jest.fn().mockResolvedValue(mockBannerConfig);
 
     await act(async () => {
-      wrapper = mount(<GlobalBanner http={httpMock} uiSettings={uiSettingsMock} />);
+      wrapper = mount(<GlobalBanner http={httpMock} />);
     });
 
     // Force update to ensure the component re-renders with the new state
@@ -205,7 +150,7 @@ describe('GlobalBanner', () => {
 
   test('hides banner when dismiss button is clicked', async () => {
     await act(async () => {
-      wrapper = mount(<GlobalBanner http={httpMock} uiSettings={uiSettingsMock} />);
+      wrapper = mount(<GlobalBanner http={httpMock} />);
     });
 
     // Force update to ensure the component re-renders with the new state

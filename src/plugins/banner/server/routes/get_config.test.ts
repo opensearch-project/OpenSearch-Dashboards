@@ -10,8 +10,7 @@
  */
 
 import { defineRoutes } from './get_config';
-import { httpServerMock } from '../../../../core/server/mocks';
-import { httpServiceMock } from '../../../../core/server/mocks';
+import { httpServerMock, coreMock, httpServiceMock } from '../../../../core/server/mocks';
 import { BannerPluginSetup } from '../types';
 
 describe('Banner routes', () => {
@@ -38,39 +37,53 @@ describe('Banner routes', () => {
       defineRoutes(mockRouter, mockBannerSetup);
 
       const [[, handler]] = mockRouter.get.mock.calls;
-      // Create a mock context with the required properties
+      // Create a mock context using coreMock
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      // Override the uiSettings client get method
+      mockCoreContext.uiSettings.client.get = jest.fn().mockImplementation((key) => {
+        // Return mock values based on the requested setting
+        switch (key) {
+          case 'banner:content':
+            return 'Test Banner Content';
+          case 'banner:color':
+            return 'primary';
+          case 'banner:iconType':
+            return 'iInCircle';
+          case 'banner:active':
+            return true;
+          case 'banner:useMarkdown':
+            return true;
+          case 'banner:size':
+            return 'm';
+          default:
+            return undefined;
+        }
+      });
+
+      // Mock the getAll method to return all banner settings
+      mockCoreContext.uiSettings.client.getAll = jest.fn().mockReturnValue({
+        'banner:content': 'Test Banner Content',
+        'banner:color': 'primary',
+        'banner:iconType': 'iInCircle',
+        'banner:active': true,
+        'banner:useMarkdown': true,
+        'banner:size': 'm',
+      });
+
+      // Create a mock context with proper types
       const mockContext = {
-        core: {
-          uiSettings: {
-            client: {
-              get: jest.fn().mockImplementation((key) => {
-                // Return mock values based on the requested setting
-                switch (key) {
-                  case 'banner:content':
-                    return 'Test Banner Content';
-                  case 'banner:color':
-                    return 'primary';
-                  case 'banner:iconType':
-                    return 'iInCircle';
-                  case 'banner:active':
-                    return true;
-                  case 'banner:useMarkdown':
-                    return true;
-                  case 'banner:size':
-                    return 'm';
-                  default:
-                    return undefined;
-                }
+        core: mockCoreContext,
+        dataSource: {
+          opensearch: {
+            getClient: jest.fn().mockResolvedValue({}),
+            legacy: {
+              getClient: jest.fn().mockReturnValue({
+                callAPI: jest.fn(),
               }),
             },
           },
         },
-        dataSource: {
-          opensearch: {
-            client: {},
-          },
-        },
-      } as any; // Cast to any to bypass TypeScript checks for the test
+      } as any; // Still need to cast as any for the test
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       const mockResponse = httpServerMock.createResponseFactory();
 
