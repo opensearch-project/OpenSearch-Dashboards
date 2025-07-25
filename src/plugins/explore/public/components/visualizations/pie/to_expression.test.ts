@@ -89,6 +89,70 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('encoding.color.legend.orient', Positions.RIGHT);
     });
 
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.SIZE]: numericColumn,
+        [AxisRole.COLOR]: categoricalColumn,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...defaultStyleOptions,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createPieSpec(
+        transformedData,
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...defaultStyleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createPieSpec(
+        transformedData,
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('value by category');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...defaultStyleOptions,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Pie Chart',
+        },
+      };
+
+      const customTitleResult = createPieSpec(
+        transformedData,
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Pie Chart');
+    });
+
     it('should create a donut chart when donut option is true', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.SIZE]: numericColumn,

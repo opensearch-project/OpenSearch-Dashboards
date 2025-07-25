@@ -38,6 +38,10 @@ describe('bar_vis_config', () => {
             name: '',
           },
         ],
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
       });
 
       // Check axes configuration
@@ -80,6 +84,11 @@ describe('bar_vis_config', () => {
           showLines: false,
         },
         axisRole: AxisRole.X,
+      });
+
+      expect(defaultBarChartStyles.titleOptions).toMatchObject({
+        show: false,
+        titleName: '',
       });
     });
   });

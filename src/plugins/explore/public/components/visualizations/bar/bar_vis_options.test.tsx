@@ -5,11 +5,13 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import configureMockStore from 'redux-mock-store';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 import { defaultBarChartStyles } from './bar_vis_config';
 import { VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
+
 // Mock store setup
 const mockStore = configureMockStore([]);
 const store = mockStore({
@@ -367,5 +369,48 @@ describe('BarVisStyleControls', () => {
     // Test bar border color update
     fireEvent.click(screen.getByTestId('mockUpdateBarBorderColor'));
     expect(onStyleChange).toHaveBeenCalledWith({ barBorderColor: '#FF0000' });
+  });
+
+  test('updates title show option correctly', async () => {
+    render(<BarVisStyleControls {...defaultProps} />);
+
+    // Find the title switch and toggle it
+    const titleSwitch = screen.getByTestId('titleModeSwitch');
+    await userEvent.click(titleSwitch);
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      titleOptions: {
+        ...defaultProps.styleOptions.titleOptions,
+        show: true,
+      },
+    });
+  });
+
+  test('updates title name when text is entered', async () => {
+    // Set show to true to ensure the title field is visible
+    const props = {
+      ...defaultProps,
+      styleOptions: {
+        ...defaultProps.styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      },
+    };
+
+    render(<BarVisStyleControls {...props} />);
+
+    const titleInput = screen.getByPlaceholderText('Default title');
+    await userEvent.type(titleInput, 'New Chart Title');
+
+    waitFor(() => {
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+        titleOptions: {
+          ...props.styleOptions.titleOptions,
+          titleName: 'New Chart Title',
+        },
+      });
+    });
   });
 });

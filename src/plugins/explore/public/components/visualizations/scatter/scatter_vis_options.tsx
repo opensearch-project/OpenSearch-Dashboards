@@ -13,6 +13,7 @@ import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { TitleOptionsPanel } from '../style_panel/title/title';
 
 export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
 
@@ -90,6 +91,17 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
               />
             </EuiFlexItem>
           )}
+          <EuiFlexItem grow={false}>
+            <TitleOptionsPanel
+              titleOptions={styleOptions.titleOptions}
+              onShowTitleChange={(titleOptions) => {
+                updateStyleOption('titleOptions', {
+                  ...styleOptions.titleOptions,
+                  ...titleOptions,
+                });
+              }}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TooltipOptionsPanel
               tooltipOptions={styleOptions.tooltipOptions}

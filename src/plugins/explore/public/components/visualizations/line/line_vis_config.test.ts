@@ -110,6 +110,11 @@ describe('line_vis_config', () => {
           text: '',
         },
       });
+
+      expect(defaults.titleOptions).toMatchObject({
+        show: false,
+        titleName: '',
+      });
     });
 
     it('should have available mappings configured', () => {
@@ -148,6 +153,10 @@ describe('line_vis_config', () => {
           grid: {} as GridOptions,
           categoryAxes: [] as CategoryAxis[],
           valueAxes: [] as ValueAxis[],
+          titleOptions: {
+            show: true,
+            titleName: '',
+          },
         },
         onStyleChange: jest.fn(),
         numericalColumns: [],

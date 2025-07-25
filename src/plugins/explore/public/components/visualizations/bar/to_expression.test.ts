@@ -74,7 +74,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count by Category');
       expect(spec.data.values).toBe(mockData);
       expect(spec.layer).toHaveLength(1);
 
@@ -84,6 +83,70 @@ describe('bar to_expression', () => {
       expect(mainLayer.mark.tooltip).toBe(true);
       expect(mainLayer.encoding.x.field).toBe('category');
       expect(mainLayer.encoding.y.field).toBe('count');
+    });
+
+    test('handles different title display options', () => {
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockCategoricalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('Count by Category');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Bar Chart Title',
+        },
+      };
+
+      const customTitleResult = createBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Bar Chart Title');
     });
 
     test('applies bar styling options', () => {
@@ -221,7 +284,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count by Category and Category2');
       expect(spec.data.values).toBe(mockData);
 
       // Check encoding
@@ -229,6 +291,71 @@ describe('bar to_expression', () => {
       expect(spec.encoding.y.field).toBe('count');
       expect(spec.encoding.y.stack).toBe('zero');
       expect(spec.encoding.color.field).toBe('category2');
+    });
+
+    test('handles different title display options', () => {
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockCategoricalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn2,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createStackedBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createStackedBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('Count by Category and Category2');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Stacked Bar Chart',
+        },
+      };
+
+      const customTitleResult = createStackedBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Stacked Bar Chart');
     });
 
     test('throws error when required columns are missing', () => {
@@ -316,7 +443,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count Over Time');
       expect(spec.data.values).toBe(mockData);
       expect(spec.layer).toHaveLength(1);
 
@@ -328,6 +454,67 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.x.type).toBe('temporal');
       expect(mainLayer.encoding.y.field).toBe('count');
       expect(mainLayer.encoding.y.type).toBe('quantitative');
+    });
+
+    test('handles different title display options', () => {
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('Count Over Time');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Time Bar Chart',
+        },
+      };
+
+      const customTitleResult = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Time Bar Chart');
     });
 
     test('applies bar styling options', () => {
@@ -432,7 +619,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count Over Time by Category');
       expect(spec.data.values).toBe(mockData);
 
       // Check encoding
@@ -441,6 +627,71 @@ describe('bar to_expression', () => {
       expect(spec.encoding.y.field).toBe('count');
       expect(spec.encoding.y.type).toBe('quantitative');
       expect(spec.encoding.color.field).toBe('category');
+    });
+
+    test('handles different title display options', () => {
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createGroupedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [mockDateColumn],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createGroupedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [mockDateColumn],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('Count Over Time by Category');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Grouped Time Bar Chart',
+        },
+      };
+
+      const customTitleResult = createGroupedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [mockDateColumn],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Grouped Time Bar Chart');
     });
 
     test('applies bar styling options', () => {
@@ -579,7 +830,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.title).toBe('Count Over Time by Category (Faceted by Category2)');
       expect(spec.data.values).toBe(mockData);
       expect(spec.facet).toBeDefined();
       expect(spec.facet.field).toBe('category2');
@@ -588,6 +838,72 @@ describe('bar to_expression', () => {
       expect(spec.spec.layer[0].encoding.x.field).toBe('date');
       expect(spec.spec.layer[0].encoding.y.field).toBe('count');
       expect(spec.spec.layer[0].encoding.color.field).toBe('category');
+    });
+
+    test('handles different title display options', () => {
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.FACET]: mockCategoricalColumn2,
+      };
+
+      // Case 1: No title (show = false)
+      const noTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
+      };
+
+      const noTitleResult = createFacetedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [mockDateColumn],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      // Case 2: Default title (show = true, titleName = '')
+      const defaultTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const defaultTitleResult = createFacetedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [mockDateColumn],
+        defaultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(defaultTitleResult.title).toBe('Count Over Time by Category (Faceted by Category2)');
+
+      // Case 3: Custom title (show = true, titleName = 'Custom Title')
+      const customTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Faceted Time Bar Chart',
+        },
+      };
+
+      const customTitleResult = createFacetedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [mockDateColumn],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Faceted Time Bar Chart');
     });
 
     test('applies bar styling options', () => {

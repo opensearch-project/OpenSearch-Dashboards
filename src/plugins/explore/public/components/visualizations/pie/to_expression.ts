@@ -90,6 +90,9 @@ export const createPieSpec = (
       styleOptions.exclusive?.showValues ? valueLayer : null,
     ].filter(Boolean),
     encoding: encodingBase,
+    title: styleOptions.titleOptions?.show
+      ? styleOptions.titleOptions?.titleName || `${numericName} by ${categoryName}`
+      : undefined,
   };
 
   return baseSpec;

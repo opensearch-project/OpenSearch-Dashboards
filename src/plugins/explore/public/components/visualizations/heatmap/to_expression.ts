@@ -84,6 +84,9 @@ export const createHeatmapWithBin = (
     data: { values: transformedData },
     transform: addTransform(styles, colorField),
     layer: [markLayer, createlabelLayer(styles, false, colorField, xAxis, yAxis)].filter(Boolean),
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${colorName} by ${xAxis?.name} and ${yAxis?.name}`
+      : undefined,
   };
   return baseSpec;
 };
@@ -163,6 +166,9 @@ export const createRegularHeatmap = (
     data: { values: transformedData },
     transform: addTransform(styles, colorField),
     layer: [markLayer, createlabelLayer(styles, true, colorField, xAxis, yAxis)].filter(Boolean),
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${colorName} by ${xAxis?.name} and ${yAxis?.name}`
+      : undefined,
   };
 
   return baseSpec;

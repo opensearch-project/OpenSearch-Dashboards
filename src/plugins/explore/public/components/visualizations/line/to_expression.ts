@@ -92,7 +92,9 @@ export const createSimpleLineChart = (
 
   return {
     $schema: VEGASCHEMA,
-    title: `${metricName} Over Time`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} Over Time`
+      : undefined,
     data: { values: transformedData },
     layer: layers,
   };
@@ -232,7 +234,9 @@ export const createLineBarChart = (
 
   return {
     $schema: VEGASCHEMA,
-    title: `${metric1Name} (Bar) and ${metric2Name} (Line) Over Time`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metric1Name} (Bar) and ${metric2Name} (Line) Over Time`
+      : undefined,
     data: { values: transformedData },
     layer: layers,
     resolve: {
@@ -337,7 +341,9 @@ export const createMultiLineChart = (
 
   return {
     $schema: VEGASCHEMA,
-    title: `${metricName} Over Time by ${categoryName}`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} Over Time by ${categoryName}`
+      : undefined,
     data: { values: transformedData },
     layer: layers,
   };
@@ -379,7 +385,10 @@ export const createFacetedMultiLineChart = (
 
   return {
     $schema: VEGASCHEMA,
-    title: `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName ||
+        `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
+      : undefined,
     data: { values: transformedData },
     // Add a max width to the entire visualization and make it scrollable
     width: 'container',
@@ -586,7 +595,9 @@ export const createCategoryLineChart = (
 
   return {
     $schema: VEGASCHEMA,
-    title: `${metricName} by ${categoryName}`,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName}`
+      : undefined,
     data: { values: transformedData },
     layer: layers,
   };

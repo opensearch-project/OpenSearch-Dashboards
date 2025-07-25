@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AreaVisStyleControls } from './area_vis_options';
 import {
@@ -213,6 +213,10 @@ describe('AreaVisStyleControls', () => {
           },
         },
       ],
+      titleOptions: {
+        show: true,
+        titleName: '',
+      },
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {
@@ -515,5 +519,48 @@ describe('AreaVisStyleControls', () => {
     };
 
     expect(() => render(<AreaVisStyleControls {...props} />)).not.toThrow();
+  });
+
+  test('updates title show option correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    // Find the title switch and toggle it
+    const titleSwitch = screen.getByTestId('titleModeSwitch');
+    await userEvent.click(titleSwitch);
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      titleOptions: {
+        ...defaultProps.styleOptions.titleOptions,
+        show: false,
+      },
+    });
+  });
+
+  test('updates title name when text is entered', async () => {
+    // Set show to true to ensure the title field is visible
+    const props = {
+      ...defaultProps,
+      styleOptions: {
+        ...defaultProps.styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      },
+    };
+
+    render(<AreaVisStyleControls {...props} />);
+
+    const titleInput = screen.getByPlaceholderText('Default title');
+    await userEvent.type(titleInput, 'New Chart Title');
+
+    waitFor(() => {
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+        titleOptions: {
+          ...props.styleOptions.titleOptions,
+          titleName: 'New Chart Title',
+        },
+      });
+    });
   });
 });
