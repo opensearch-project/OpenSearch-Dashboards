@@ -29,15 +29,23 @@ export const setDatasetActionCreator = (
     },
   } = services;
   const currentQuery = queryString.getQuery();
+  const fullState = getState();
+
   const {
     queryEditor: { promptModeIsAvailable },
     query,
-  } = getState();
+    ui,
+  } = fullState;
 
   dispatch(setActiveTab(''));
   dispatch(clearResults());
   dispatch(clearQueryStatusMap());
   dispatch(clearLastExecutedData());
+
+  const activeTab = services.tabRegistry.getTab(ui.activeTabId);
+  if (activeTab?.onInactive) {
+    activeTab?.onInactive(fullState);
+  }
 
   await dataViews.ensureDefaultDataView();
   const dataView = query.dataset
