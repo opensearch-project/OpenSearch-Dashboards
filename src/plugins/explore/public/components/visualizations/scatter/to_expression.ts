@@ -57,6 +57,9 @@ export const createTwoMetricScatter = (
     $schema: VEGASCHEMA,
     data: { values: transformedData },
     layer: [markLayer].filter(Boolean),
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name}`
+      : undefined,
   };
   return baseSpec;
 };
@@ -126,6 +129,9 @@ export const createTwoMetricOneCateScatter = (
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: transformedData },
     layer: [markLayer].filter(Boolean),
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name} by ${categoryNames}`
+      : undefined,
   };
   return baseSpec;
 };
@@ -209,6 +215,10 @@ export const createThreeMetricOneCateScatter = (
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: transformedData },
     layer: [markLayer].filter(Boolean),
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName ||
+        `${xAxis?.name} with ${yAxis?.name} by ${categoryNames} (Size shows ${numericalSize?.name})`
+      : undefined,
   };
   return baseSpec;
 };

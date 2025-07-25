@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { PieVisStyleControls, PieVisStyleControlsProps } from './pie_vis_options';
 import { VisFieldType, AxisRole } from '../types';
 import { defaultPieChartStyles } from './pie_vis_config';
@@ -106,5 +107,50 @@ describe('PieVisStyleControls', () => {
     render(<PieVisStyleControls {...mockProps} axisColumnMappings={{}} />);
     expect(screen.queryByText('Legend')).not.toBeInTheDocument();
     expect(screen.queryByTestId('showValuesSwtich')).not.toBeInTheDocument();
+  });
+
+  it('updates title show option correctly', async () => {
+    render(<PieVisStyleControls {...mockProps} />);
+
+    // Find the title switch and toggle it
+    const titleSwitch = screen.getByTestId('titleModeSwitch');
+    await userEvent.click(titleSwitch);
+
+    waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+        titleOptions: {
+          ...mockProps.styleOptions.titleOptions,
+          show: true,
+        },
+      });
+    });
+  });
+
+  it('updates title name when text is entered', async () => {
+    // Set show to true to ensure the title field is visible
+    const props = {
+      ...mockProps,
+      styleOptions: {
+        ...mockProps.styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      },
+    };
+
+    render(<PieVisStyleControls {...props} />);
+
+    const titleInput = screen.getByPlaceholderText('Default title');
+    await userEvent.type(titleInput, 'New Chart Title');
+
+    waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+        titleOptions: {
+          ...props.styleOptions.titleOptions,
+          titleName: 'New Chart Title',
+        },
+      });
+    });
   });
 });

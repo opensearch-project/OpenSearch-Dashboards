@@ -98,6 +98,59 @@ describe('createHeatmapWithBin', () => {
     expect(layer.encoding.color.legend.orient).toBe('right');
   });
 
+  it('should handle different title display options', () => {
+    // Case 1: No title (show = false)
+    const noTitleStyles = {
+      ...baseStyles,
+      titleOptions: {
+        show: false,
+        titleName: '',
+      },
+    };
+
+    const noTitleResult = createHeatmapWithBin(
+      mockData,
+      mockNumericColumns,
+      noTitleStyles,
+      mockAxisMappings
+    );
+    expect(noTitleResult.title).toBeUndefined();
+
+    // Case 2: Default title (show = true, titleName = '')
+    const defaultTitleStyles = {
+      ...baseStyles,
+      titleOptions: {
+        show: true,
+        titleName: '',
+      },
+    };
+
+    const defaultTitleResult = createHeatmapWithBin(
+      mockData,
+      mockNumericColumns,
+      defaultTitleStyles,
+      mockAxisMappings
+    );
+    expect(defaultTitleResult.title).toBe('value2 by value1 and category2');
+
+    // Case 3: Custom title (show = true, titleName = 'Custom Title')
+    const customTitleStyles = {
+      ...baseStyles,
+      titleOptions: {
+        show: true,
+        titleName: 'Custom Binned Heatmap',
+      },
+    };
+
+    const customTitleResult = createHeatmapWithBin(
+      mockData,
+      mockNumericColumns,
+      customTitleStyles,
+      mockAxisMappings
+    );
+    expect(customTitleResult.title).toBe('Custom Binned Heatmap');
+  });
+
   it('should disable binning when useCustomRanges is true', () => {
     const styles = {
       ...baseStyles,
@@ -141,6 +194,59 @@ describe('createRegularHeatmap', () => {
     expect(encoding.x.type).toBe('nominal');
     expect(encoding.y.type).toBe('nominal');
     expect(encoding.color.field).toBe('field-1'); // <-- FIXED
+  });
+
+  it('should handle different title display options', () => {
+    // Case 1: No title (show = false)
+    const noTitleStyles = {
+      ...baseStyles,
+      titleOptions: {
+        show: false,
+        titleName: '',
+      },
+    };
+
+    const noTitleResult = createRegularHeatmap(
+      mockData,
+      mockNumericColumns,
+      noTitleStyles,
+      regularAxisMappings
+    );
+    expect(noTitleResult.title).toBeUndefined();
+
+    // Case 2: Default title (show = true, titleName = '')
+    const defaultTitleStyles = {
+      ...baseStyles,
+      titleOptions: {
+        show: true,
+        titleName: '',
+      },
+    };
+
+    const defaultTitleResult = createRegularHeatmap(
+      mockData,
+      mockNumericColumns,
+      defaultTitleStyles,
+      regularAxisMappings
+    );
+    expect(defaultTitleResult.title).toBe('value1 by category1 and category2');
+
+    // Case 3: Custom title (show = true, titleName = 'Custom Title')
+    const customTitleStyles = {
+      ...baseStyles,
+      titleOptions: {
+        show: true,
+        titleName: 'Custom Regular Heatmap',
+      },
+    };
+
+    const customTitleResult = createRegularHeatmap(
+      mockData,
+      mockNumericColumns,
+      customTitleStyles,
+      regularAxisMappings
+    );
+    expect(customTitleResult.title).toBe('Custom Regular Heatmap');
   });
 
   it('should respect color scale settings', () => {

@@ -15,6 +15,7 @@ import {
   TooltipOptions,
   AxisRole,
   VisFieldType,
+  TitleOptions,
 } from '../types';
 
 // Complete area chart style controls interface
@@ -32,6 +33,8 @@ export interface AreaChartStyleControls {
   // Axes configuration
   categoryAxes: CategoryAxis[];
   valueAxes: ValueAxis[];
+
+  titleOptions: TitleOptions;
 }
 
 const defaultAreaChartStyles: AreaChartStyleControls = {
@@ -100,6 +103,11 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
       },
     },
   ],
+
+  titleOptions: {
+    show: false,
+    titleName: '',
+  },
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

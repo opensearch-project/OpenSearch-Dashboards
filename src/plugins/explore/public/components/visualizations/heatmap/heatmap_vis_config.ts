@@ -16,6 +16,7 @@ import {
   TooltipOptions,
   LabelAggregationType,
   VisFieldType,
+  TitleOptions,
 } from '../types';
 
 export interface HeatmapLabels {
@@ -48,6 +49,8 @@ export interface HeatmapChartStyleControls {
 
   exclusive: ExclusiveHeatmapConfig;
   switchAxes: false;
+
+  titleOptions: TitleOptions;
 }
 
 export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
@@ -118,6 +121,10 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
       axisRole: AxisRole.Y,
     },
   ],
+  titleOptions: {
+    show: false,
+    titleName: '',
+  },
 };
 
 export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
