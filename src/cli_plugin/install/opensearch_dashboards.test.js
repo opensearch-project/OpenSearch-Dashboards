@@ -100,11 +100,11 @@ describe('opensearchDashboards cli', function () {
           );
         });
 
-        it('should throw an error if plugin opensearchDashboardsVersion does not match opensearch-dashboards version', function () {
-          settings.plugins[0].opensearchDashboardsVersion = '1.2.3.4';
+        it('should throw an error if plugin opensearchDashboardsVersion has different major version', function () {
+          settings.plugins[0].opensearchDashboardsVersion = '2.2.3.4';
 
           expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
-            `"Plugin foo [1.2.3] is incompatible with OpenSearch Dashboards [1.0.0]"`
+            `"Plugin foo [2.2.3] is incompatible with OpenSearch Dashboards [1.0.0]. Major version must match."`
           );
         });
 
@@ -124,8 +124,84 @@ describe('opensearchDashboards cli', function () {
           settings.plugins[0].opensearchDashboardsVersion = '2.0.0-foo-bar-version-1.2.3';
 
           expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
-            `"Plugin foo [2.0.0] is incompatible with OpenSearch Dashboards [1.0.0]"`
+            `"Plugin foo [2.0.0] is incompatible with OpenSearch Dashboards [1.0.0]. Major version must match."`
           );
+        });
+
+        it('should not throw an error if plugin opensearchDashboardsVersion has same major version but different minor/patch', function () {
+          settings.plugins[0].opensearchDashboardsVersion = '1.5.9';
+
+          expect(() => assertVersion(settings)).not.toThrow();
+        });
+
+        it('should succeed with same major version but different minor version', function () {
+          const settings = {
+            workingPath: testWorkingPath,
+            tempArchiveFile: tempArchiveFilePath,
+            plugin: 'test-plugin',
+            version: '3.1.0',
+            plugins: [
+              {
+                id: 'foo',
+                opensearchDashboardsVersion: '3.5.2',
+              },
+            ],
+          };
+
+          expect(() => assertVersion(settings)).not.toThrow();
+        });
+
+        it('should succeed with same major version but different patch version', function () {
+          const settings = {
+            workingPath: testWorkingPath,
+            tempArchiveFile: tempArchiveFilePath,
+            plugin: 'test-plugin',
+            version: '3.1.5',
+            plugins: [
+              {
+                id: 'foo',
+                opensearchDashboardsVersion: '3.1.0',
+              },
+            ],
+          };
+
+          expect(() => assertVersion(settings)).not.toThrow();
+        });
+
+        it('should fail with different major versions (higher plugin version)', function () {
+          const settings = {
+            workingPath: testWorkingPath,
+            tempArchiveFile: tempArchiveFilePath,
+            plugin: 'test-plugin',
+            version: '2.1.0',
+            plugins: [
+              {
+                id: 'foo',
+                opensearchDashboardsVersion: '3.0.0',
+              },
+            ],
+          };
+
+          expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
+            `"Plugin foo [3.0.0] is incompatible with OpenSearch Dashboards [2.1.0]. Major version must match."`
+          );
+        });
+
+        it('should handle pre-release versions correctly', function () {
+          const settings = {
+            workingPath: testWorkingPath,
+            tempArchiveFile: tempArchiveFilePath,
+            plugin: 'test-plugin',
+            version: '3.0.0-alpha1',
+            plugins: [
+              {
+                id: 'foo',
+                opensearchDashboardsVersion: '3.1.0-beta2',
+              },
+            ],
+          };
+
+          expect(() => assertVersion(settings)).not.toThrow();
         });
       });
 

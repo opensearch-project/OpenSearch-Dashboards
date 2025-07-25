@@ -31,7 +31,7 @@
 import path from 'path';
 import { statSync } from 'fs';
 
-import { versionSatisfies, cleanVersion } from '../../legacy/utils/version';
+import { cleanVersion } from '../../legacy/utils/version';
 
 export function existingInstall(settings, logger) {
   try {
@@ -55,9 +55,13 @@ export function assertVersion(settings) {
 
   const actual = cleanVersion(settings.plugins[0].opensearchDashboardsVersion);
   const expected = cleanVersion(settings.version);
-  if (!versionSatisfies(actual, expected)) {
+
+  const actualMajor = actual.split('.')[0];
+  const expectedMajor = expected.split('.')[0];
+
+  if (actualMajor !== expectedMajor) {
     throw new Error(
-      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]`
+      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]. Major version must match.`
     );
   }
 }
