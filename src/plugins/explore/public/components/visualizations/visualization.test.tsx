@@ -205,9 +205,7 @@ describe('Visualization', () => {
     };
 
     const { getByText } = render(<Visualization {...props} />);
-    expect(
-      getByText('Select a chart type, and x and y axes fields to get started')
-    ).toBeInTheDocument();
+    expect(getByText('Select a visualization type and fields to get started')).toBeInTheDocument();
   });
 
   it('renders empty prompt when no axis mapping is selected', () => {
@@ -221,8 +219,6 @@ describe('Visualization', () => {
     };
 
     const { getByText } = render(<Visualization {...props} />);
-    expect(
-      getByText('Select a chart type, and x and y axes fields to get started')
-    ).toBeInTheDocument();
+    expect(getByText('Select a visualization type and fields to get started')).toBeInTheDocument();
   });
 });
