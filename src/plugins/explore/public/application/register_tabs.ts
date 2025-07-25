@@ -15,6 +15,54 @@ import { setPatternsField } from './utils/state_management/slices/tab/tab_slice'
 import { RootState } from './utils/state_management/store';
 import { defaultPrepareQueryString } from './utils/state_management/actions/query_actions';
 
+const findDefaultPatternsField = (state?: RootState, services?: ExploreServices) => {
+  // set the value for patterns field
+  if (!state || !services?.store) return;
+
+  // Get the log tab's results from the state
+  const query = state.query;
+  const results = state.results;
+
+  // Get the logs tab to find its cache key
+  const logsTab = services.tabRegistry.getTab('logs');
+  if (!logsTab) return;
+
+  // Get the cache key for logs tab results
+  const logsCacheKey = defaultPrepareQueryString(query);
+  const logResults = results[logsCacheKey];
+
+  // Get fields
+  const filteredFields = logResults?.fieldSchema?.filter((field: Partial<IFieldType>) => {
+    return field.type === 'string';
+  });
+
+  // Get the first hit if available
+  const firstHit = logResults?.hits?.hits?.[0];
+
+  if (firstHit && firstHit._source && filteredFields) {
+    // Find the field with the longest value
+    let longestField = '';
+    let maxLength = 0;
+
+    Object.entries(firstHit._source).forEach(([field, value]) => {
+      // Check if the field exists in options
+      if (filteredFields.some((option) => option.name === field)) {
+        const valueLength = typeof value === 'string' ? value.length : 0;
+
+        if (valueLength > maxLength) {
+          maxLength = valueLength;
+          longestField = field;
+        }
+      }
+    });
+
+    if (longestField) {
+      services.store.dispatch(setPatternsField(longestField));
+      return longestField;
+    }
+  }
+};
+
 /**
  * Registers built-in tabs with the tab registry
  */
@@ -53,15 +101,17 @@ export const registerBuiltInTabs = (
 
     prepareQuery: (query, state) => {
       // Get the selected patterns field from the Redux state
-      const patternsField = state?.tab.patterns.patterns_field;
+      let patternsField = state?.tab.patterns.patterns_field;
 
       const preparedQuery = getQueryWithSource(query);
-      if (!patternsField) return preparedQuery.query;
+      if (!patternsField) {
+        patternsField = findDefaultPatternsField(state, services);
+      }
 
       return typeof preparedQuery.query === 'string' && preparedQuery.query !== ''
         ? preparedQuery.query +
             ` | patterns \`${patternsField}\` method=brain mode=aggregation | sort - pattern_count`
-        : '';
+        : preparedQuery.query;
     },
 
     component: PatternsTab,
@@ -70,50 +120,7 @@ export const registerBuiltInTabs = (
     onActive: (state?: RootState): void => {
       // TODO: write detailed message about predicting the field
 
-      // set the value for patterns field
-      if (!state || !services?.store) return;
-
-      // Get the log tab's results from the state
-      const query = state.query;
-      const results = state.results;
-
-      // Get the logs tab to find its cache key
-      const logsTab = services.tabRegistry.getTab('logs');
-      if (!logsTab) return;
-
-      // Get the cache key for logs tab results
-      const logsCacheKey = defaultPrepareQueryString(query);
-      const logResults = results[logsCacheKey];
-
-      // Get fields
-      const filteredFields = logResults?.fieldSchema?.filter((field: Partial<IFieldType>) => {
-        return field.type === 'string';
-      });
-
-      // Get the first hit if available
-      const firstHit = logResults?.hits?.hits?.[0];
-
-      if (firstHit && firstHit._source && filteredFields) {
-        // Find the field with the longest value
-        let longestField = '';
-        let maxLength = 0;
-
-        Object.entries(firstHit._source).forEach(([field, value]) => {
-          // Check if the field exists in options
-          if (filteredFields.some((option) => option.name === field)) {
-            const valueLength = typeof value === 'string' ? value.length : 0;
-
-            if (valueLength > maxLength) {
-              maxLength = valueLength;
-              longestField = field;
-            }
-          }
-        });
-
-        if (longestField) {
-          services.store.dispatch(setPatternsField(longestField));
-        }
-      }
+      findDefaultPatternsField(state, services);
     },
 
     onInactive: (state?: RootState): void => {
