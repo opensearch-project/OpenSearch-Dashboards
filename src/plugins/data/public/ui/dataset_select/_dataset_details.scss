@@ -46,13 +46,15 @@
   }
 
   &__dataDefinition {
-    cursor: pointer;
-    height: $euiFontSizeXS;
+    background-color: $euiColorLightestShade;
+    align-items: center;
+    border-radius: $euiBorderRadius;
   }
 
   &__icon {
-    margin-right: $euiSizeXS / 2;
-    transform: scale(0.8);
+    margin: $euiSizeXS $euiSizeXS 0 0;
+    height: 100%;
+    flex-shrink: 0;
   }
 
   &__description {

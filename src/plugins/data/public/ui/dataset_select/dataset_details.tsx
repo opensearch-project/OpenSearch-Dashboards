@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiDescriptionList,
   EuiBadge,
-  EuiSmallButton,
+  EuiButtonEmpty,
   EuiHorizontalRule,
   EuiPanel,
   EuiSplitPanel,
@@ -90,17 +90,18 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
             <>{datasetTitle}</>
           </EuiTitle>
         </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner paddingSize="none">
-          <EuiBadge
-            color={isDefault ? 'default' : 'hollow'}
-            className="datasetDetails__defaultBadge"
-            data-test-subj="datasetDetailsDefault"
-          >
-            {i18n.translate('data.datasetDetails.defaultLabel', {
-              defaultMessage: 'Default',
-            })}
-          </EuiBadge>
-        </EuiSplitPanel.Inner>
+        {isDefault && (
+          <EuiSplitPanel.Inner paddingSize="none">
+            <EuiBadge
+              className="datasetDetails__defaultBadge"
+              data-test-subj="datasetDetailsDefault"
+            >
+              {i18n.translate('data.datasetDetails.defaultLabel', {
+                defaultMessage: 'Default',
+              })}
+            </EuiBadge>
+          </EuiSplitPanel.Inner>
+        )}
       </EuiSplitPanel.Outer>
 
       <EuiHorizontalRule margin="s" />
@@ -139,32 +140,32 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
               </EuiText>
             ),
             description: (
-              <EuiSmallButton
-                fill
-                color="ghost"
+              <EuiButtonEmpty
+                className="datasetDetails__dataDefinition"
+                data-test-subj="datasetDetailsDataDefinition"
+                size="xs"
+                color="text"
                 onClick={handleDataDefinitionClicked}
                 aria-label={i18n.translate('data.datasetDetails.dataDefinitionAriaLabel', {
                   defaultMessage: 'View data definition',
                 })}
-                className="datasetDetails__dataDefinition"
-                data-test-subj="datasetDetailsDataDefinition"
               >
+                <EuiIcon
+                  type={
+                    datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+                      ? 'logoOpenSearch'
+                      : datasetService.getType(datasetType || '')?.meta.icon.type || 'database'
+                  }
+                  size="s"
+                  className="datasetDetails__icon"
+                />
                 <EuiText
                   size="xs"
                   className="datasetDetails__description datasetDetails__textTruncate"
                 >
-                  <EuiIcon
-                    type={
-                      datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-                        ? 'logoOpenSearch'
-                        : datasetService.getType(datasetType || '')?.meta.icon.type || 'database'
-                    }
-                    size="s"
-                    className="datasetDetails__icon"
-                  />
                   {dataSourceName}
                 </EuiText>
-              </EuiSmallButton>
+              </EuiButtonEmpty>
             ),
           },
           {
