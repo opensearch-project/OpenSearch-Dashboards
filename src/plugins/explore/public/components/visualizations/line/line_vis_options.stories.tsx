@@ -137,6 +137,10 @@ const defaultStyleOptions: LineChartStyleControls = {
       grid: { showLines: true },
     },
   ],
+  titleOptions: {
+    show: false,
+    titleName: '',
+  },
 };
 
 // Template for the story

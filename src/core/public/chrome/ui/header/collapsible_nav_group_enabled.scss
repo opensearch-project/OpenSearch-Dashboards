@@ -7,8 +7,8 @@ $iconWidth: 16px;
 
 .leftNavIsOpen-true.context-nav-wrapper,
 .leftNavIsOpen-false.context-nav-wrapper {
-  top: var(--global-banner-height);
-  height: calc(100% - var(--global-banner-height));
+  top: var(--global-banner-height, 0);
+  height: calc(100% - var(--global-banner-height, 0));
 }
 
 .context-nav-wrapper {

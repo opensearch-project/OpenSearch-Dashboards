@@ -4,7 +4,8 @@
  */
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import configureMockStore from 'redux-mock-store';
 import { HeatmapVisStyleControls, HeatmapVisStyleControlsProps } from './heatmap_vis_options';
 import { VisColumn, VisFieldType, AxisColumnMappings, AxisRole, Positions } from '../types';
@@ -360,6 +361,57 @@ describe('HeatmapVisStyleControls', () => {
           color: '#FF0000',
         },
       },
+    });
+  });
+
+  test('updates title show option correctly', async () => {
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...mockProps} />
+      </Provider>
+    );
+
+    // Find the title switch and toggle it
+    const titleSwitch = screen.getByTestId('titleModeSwitch');
+    await userEvent.click(titleSwitch);
+
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      titleOptions: {
+        ...mockProps.styleOptions.titleOptions,
+        show: true,
+      },
+    });
+  });
+
+  test('updates title name when text is entered', async () => {
+    // Set show to true to ensure the title field is visible
+    const props = {
+      ...mockProps,
+      styleOptions: {
+        ...mockProps.styleOptions,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      },
+    };
+
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...props} />
+      </Provider>
+    );
+
+    const titleInput = screen.getByPlaceholderText('Default title');
+    await userEvent.type(titleInput, 'New Chart Title');
+
+    waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+        titleOptions: {
+          ...props.styleOptions.titleOptions,
+          titleName: 'New Chart Title',
+        },
+      });
     });
   });
 });
