@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   EuiButton,
-  EuiSmallButtonEmpty,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -15,10 +15,10 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiToolTip,
-  EuiFormRow,
   EuiBadge,
   EuiHighlight,
   EuiTextColor,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -236,24 +236,25 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
             />
           }
         >
-          <EuiSmallButtonEmpty
+          <EuiButtonEmpty
             className="datasetSelect__button"
             data-test-subj="datasetSelectButton"
             iconType="arrowDown"
             iconSide="right"
-            color="text"
+            size="xs"
             textProps={{ className: 'datasetSelect__text' }}
             onClick={togglePopover}
           >
             <EuiIcon type={datasetIcon} size="s" className="datasetSelect__icon" />
-            {datasetTitle}
-          </EuiSmallButtonEmpty>
+            <EuiText size="xs" className="datasetSelect__text">
+              {datasetTitle}
+            </EuiText>
+          </EuiButtonEmpty>
         </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="downLeft"
-      display="block"
       panelPaddingSize="none"
     >
       <EuiSelectable

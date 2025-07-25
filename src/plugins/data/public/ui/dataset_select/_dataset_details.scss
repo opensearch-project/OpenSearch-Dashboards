@@ -5,8 +5,26 @@
 
 .datasetDetails {
   &__panel {
-    width: 350px;
+    width: 100%;
     max-width: 90vw;
+  }
+
+  &__header {
+    > * {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: $euiFontWeightSemiBold;
+      width: 100%;
+    }
+
+    > :first-child {
+      text-align: left;
+    }
+
+    > :nth-child(2) {
+      text-align: right;
+    }
   }
 
   &__list {
@@ -14,16 +32,27 @@
   }
 
   &__title {
-    font-weight: $euiFontWeightMedium;
+    > * {
+      font-weight: $euiFontWeightSemiBold;
+    }
   }
 
   &__listTitle {
-    width: 30%;
-    font-weight: $euiFontWeightMedium;
+    width: 100%;
+
+    > * {
+      font-weight: $euiFontWeightSemiBold;
+    }
   }
 
   &__dataDefinition {
     cursor: pointer;
+    height: $euiFontSizeXS;
+  }
+
+  &__icon {
+    margin-right: $euiSizeXS / 2;
+    transform: scale(0.8);
   }
 
   &__description {

@@ -11,9 +11,11 @@ import {
   EuiFlexItem,
   EuiDescriptionList,
   EuiBadge,
+  EuiSmallButton,
   EuiHorizontalRule,
   EuiPanel,
   EuiSplitPanel,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -75,9 +77,16 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
       hasBorder={false}
       paddingSize="none"
     >
-      <EuiSplitPanel.Outer direction="row" color="transparent" hasBorder={false}>
-        <EuiSplitPanel.Inner paddingSize="none">
-          <EuiTitle size="xxxs" className="datasetDetails__title">
+      <EuiSplitPanel.Outer
+        className="datasetDetails__header"
+        direction="row"
+        color="transparent"
+        hasBorder={false}
+        responsive={false}
+        grow={true}
+      >
+        <EuiSplitPanel.Inner paddingSize="none" grow={true}>
+          <EuiTitle size="xxxs" className="datasetDetails__title eui-textTruncate">
             <>{datasetTitle}</>
           </EuiTitle>
         </EuiSplitPanel.Inner>
@@ -130,31 +139,32 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
               </EuiText>
             ),
             description: (
-              <EuiBadge
-                color="hollow"
-                iconType={
-                  datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-                    ? 'logoOpenSearch'
-                    : datasetService.getType(datasetType || '')?.meta.icon.type || 'database'
-                }
+              <EuiSmallButton
+                fill
+                color="ghost"
                 onClick={handleDataDefinitionClicked}
-                onClickAriaLabel={i18n.translate('data.datasetDetails.dataDefinitionAriaLabel', {
+                aria-label={i18n.translate('data.datasetDetails.dataDefinitionAriaLabel', {
                   defaultMessage: 'View data definition',
                 })}
                 className="datasetDetails__dataDefinition"
                 data-test-subj="datasetDetailsDataDefinition"
               >
-                <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText
-                      size="xs"
-                      className="datasetDetails__description datasetDetails__textTruncate"
-                    >
-                      {dataSourceName}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiBadge>
+                <EuiText
+                  size="xs"
+                  className="datasetDetails__description datasetDetails__textTruncate"
+                >
+                  <EuiIcon
+                    type={
+                      datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+                        ? 'logoOpenSearch'
+                        : datasetService.getType(datasetType || '')?.meta.icon.type || 'database'
+                    }
+                    size="s"
+                    className="datasetDetails__icon"
+                  />
+                  {dataSourceName}
+                </EuiText>
+              </EuiSmallButton>
             ),
           },
           {

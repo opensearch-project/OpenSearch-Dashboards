@@ -4,20 +4,11 @@
  */
 
 .datasetSelect {
-  margin: 0;
-  border: $euiBorderThin;
-  border-color: $euiColorLightestShade;
-  background-color: $euiPageBackgroundColor;
   width: 300px;
   max-width: 300px;
-  height: $euiSizeL;
 
-  &__button {
-    background-color: $euiColorEmptyShade;
-    min-width: 0;
-    align-items: center;
-    justify-content: flex-start;
-    text-align: left;
+  &__tooltip {
+    min-width: 450px;
   }
 
   &__icon {
@@ -31,11 +22,10 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: $euiFontSizeS;
     flex: 1;
     width: 250px;
     min-width: 0;
-    max-width: calc(100% - $euiSizeL);
+    max-width: calc(100% - $euiSizeM);
     height: $euiSizeL;
     line-height: $euiSizeL;
   }
@@ -46,7 +36,7 @@
   }
 
   &__selectable {
-    width: 280px;
+    width: 400px;
     padding: $euiSizeXS;
     overflow-y: auto;
 
@@ -66,10 +56,6 @@
   &__list {
     max-height: 300px;
     overflow-y: auto;
-  }
-
-  &__infoIcon {
-    margin-left: $euiSizeXS;
   }
 
   &__advancedButton {
