@@ -5,6 +5,12 @@ $activeMenuBorderWidth: 3px; // Thick border's width is 2px, use 3px here to ove
 $collapsedLeftNavWidth: 48px;
 $iconWidth: 16px;
 
+.leftNavIsOpen-true.context-nav-wrapper,
+.leftNavIsOpen-false.context-nav-wrapper {
+  top: var(--global-banner-height);
+  height: calc(100% - var(--global-banner-height));
+}
+
 .context-nav-wrapper {
   border: none !important;
   border-top-right-radius: $euiSizeL;

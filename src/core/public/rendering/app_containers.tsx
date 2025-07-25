@@ -37,7 +37,9 @@ import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../overlays';
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
-}> = ({ chromeVisible$, sidecarConfig$, children }) => {
+  useUpdatedHeader?: boolean;
+  injectedMetadata?: any;
+}> = ({ chromeVisible$, sidecarConfig$, useUpdatedHeader, injectedMetadata, children }) => {
   const visible = useObservable(chromeVisible$);
   const sidecarConfig = useObservable(sidecarConfig$, undefined);
 
@@ -45,10 +47,20 @@ export const AppWrapper: React.FunctionComponent<{
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
 
+  // Get the banner plugin configuration
+  const bannerPluginConfig = injectedMetadata
+    ?.getPlugins()
+    ?.find((plugin: { id: string }) => plugin.id === 'banner')?.config;
+  const isBannerEnabled = bannerPluginConfig?.enabled === true;
+
   return (
     <div
       id="app-wrapper"
-      className={classNames('app-wrapper', { 'hidden-chrome': !visible })}
+      className={classNames('app-wrapper', {
+        'hidden-chrome': !visible,
+        'app-wrapper-with-banner': isBannerEnabled,
+        'app-wrapper-with-new': useUpdatedHeader,
+      })}
       style={sidecarPaddingStyle}
     >
       {children}
