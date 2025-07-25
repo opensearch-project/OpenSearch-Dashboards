@@ -48,9 +48,9 @@ export interface HeatmapChartStyleControls {
   standardAxes: StandardAxes[];
 
   exclusive: ExclusiveHeatmapConfig;
-  switchAxes: false;
 
   titleOptions: TitleOptions;
+  switchAxes: boolean;
 }
 
 export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
