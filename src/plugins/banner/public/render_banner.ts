@@ -24,12 +24,9 @@ export const renderBanner = (http: HttpStart): void => {
 
   if (container) {
     ReactDOM.render(React.createElement(GlobalBanner, { http }), container);
-
-    // Trigger resize and reflow for proper height calculation
-    window.dispatchEvent(new Event('resize'));
-    void document.body.offsetHeight;
   } else {
-    setTimeout(() => renderBanner(http), 50);
+    // Use requestAnimationFrame to wait for the next paint cycle
+    requestAnimationFrame(() => renderBanner(http));
   }
 };
 

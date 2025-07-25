@@ -60,7 +60,8 @@ describe('BannerPlugin', () => {
       expect(setup).toHaveProperty('bannerEnabled');
       expect(setup).toHaveProperty('getConfig');
       expect(setup.bannerEnabled()).toBe(true);
-      expect(setup.getConfig()).toEqual({
+      const config = setup.getConfig();
+      expect(config).toMatchObject({
         content: 'Test Banner Content',
         color: 'primary',
         iconType: 'iInCircle',

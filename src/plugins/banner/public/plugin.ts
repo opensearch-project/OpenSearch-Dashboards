@@ -28,7 +28,6 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
   }
 
   public stop() {
-    // Unmount the banner component
     unmountBanner();
   }
 }

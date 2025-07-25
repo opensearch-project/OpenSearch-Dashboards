@@ -9,9 +9,8 @@
  * GitHub history for details.
  */
 
-import React, { Fragment, useEffect, useState, Suspense, useRef } from 'react';
+import React, { Fragment, useEffect, useState, Suspense, useRef, useCallback } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
 import { BannerConfig, HIDDEN_BANNER_HEIGHT, DEFAULT_BANNER_CONFIG } from '../../common';
 import { LinkRenderer } from './link_renderer';
 import { HttpStart } from '../../../../core/public';
@@ -28,28 +27,25 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
   const bannerRef = useRef<HTMLDivElement>(null);
 
   // Fetch banner config from API when component mounts
-  useEffect(() => {
-    const fetchBannerConfig = async () => {
-      try {
-        setIsLoading(true);
-        const response = await http.get<BannerConfig>('/api/_plugins/_banner/content');
-        act(() => {
-          setBannerConfig(response);
-        });
-      } catch (error) {
-        // Hide banner on error
-        setBannerConfig({
-          ...DEFAULT_BANNER_CONFIG,
-        });
-      } finally {
-        act(() => {
-          setIsLoading(false);
-        });
-      }
-    };
-
-    fetchBannerConfig();
+  const fetchBannerConfig = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await http.get<BannerConfig>('/api/_plugins/_banner/content');
+      setBannerConfig(response);
+    } catch (error) {
+      // Hide banner on error
+      setBannerConfig({
+        ...DEFAULT_BANNER_CONFIG,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, [http]);
+
+  // Initial fetch when component mounts
+  useEffect(() => {
+    fetchBannerConfig();
+  }, [http, fetchBannerConfig]);
 
   // Update the CSS variable with the banner's height
   useEffect(() => {

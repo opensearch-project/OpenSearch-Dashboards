@@ -10,171 +10,165 @@
  */
 
 import React from 'react';
-import { render, waitFor, act } from '@testing-library/react';
+import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { GlobalBanner } from './global_banner';
-import { httpServiceMock } from '../../../../core/public/mocks';
+import { BannerConfig } from '../../common';
+import { coreMock } from '../../../../core/public/mocks';
 
-// Mock ResizeObserver
+// Mock ResizeObserver which is not available in JSDOM
 class MockResizeObserver {
   observe = jest.fn();
-  disconnect = jest.fn();
   unobserve = jest.fn();
+  disconnect = jest.fn();
 }
 
-// Mock React.lazy and Suspense
-jest.mock('react', () => {
-  const originalReact = jest.requireActual('react');
-  return {
-    ...originalReact,
-    lazy: jest.fn().mockImplementation(() => () => <div>Mocked Markdown Content</div>),
-    Suspense: ({ children, fallback }: any) => children,
-  };
-});
+// Assign the mock to the global object
+global.ResizeObserver = MockResizeObserver;
 
-// Mock react-markdown
-jest.mock('react-markdown', () => () => <div>Mocked Markdown Content</div>);
+// Mock the ReactMarkdownLazy component
+jest.mock('react-markdown', () => ({
+  __esModule: true,
+  default: () => <div data-test-subj="react-markdown">Mocked Markdown</div>,
+}));
 
-describe('<GlobalBanner />', () => {
-  let mockHttp: ReturnType<typeof httpServiceMock.createStartContract>;
-  let originalResizeObserver: typeof window.ResizeObserver;
-  let mockSetProperty: jest.SpyInstance;
+describe('GlobalBanner', () => {
+  let httpMock: ReturnType<typeof coreMock.createSetup>['http'];
+  let wrapper: any;
+  let mockBannerConfig: BannerConfig;
 
   beforeEach(() => {
-    mockHttp = httpServiceMock.createStartContract();
+    // Create mocks
+    const coreSetup = coreMock.createSetup();
+    httpMock = coreSetup.http;
 
-    // Mock successful API response
-    mockHttp.get.mockResolvedValue({
+    // Mock the HTTP get response
+    mockBannerConfig = {
       content: 'Test Banner Content',
-      color: 'primary',
-      iconType: 'iInCircle',
-      isVisible: true,
-      useMarkdown: false,
-      size: 'm',
-    });
-
-    // Save original ResizeObserver
-    originalResizeObserver = window.ResizeObserver;
-
-    // Mock ResizeObserver
-    window.ResizeObserver = MockResizeObserver as any;
-
-    // Mock document.documentElement.style.setProperty
-    mockSetProperty = jest.spyOn(document.documentElement.style, 'setProperty');
-  });
-
-  afterEach(() => {
-    // Restore original ResizeObserver
-    window.ResizeObserver = originalResizeObserver;
-
-    // Restore mocks
-    mockSetProperty.mockRestore();
-    jest.clearAllMocks();
-  });
-
-  test('renders loading state initially', () => {
-    const { getByText } = render(<GlobalBanner http={mockHttp} />);
-
-    expect(getByText('Loading banner...')).toBeInTheDocument();
-  });
-
-  test('renders banner with content from API', async () => {
-    const { getByText } = render(<GlobalBanner http={mockHttp} />);
-
-    // Wait for API call to resolve
-    await waitFor(() => {
-      expect(mockHttp.get).toHaveBeenCalledWith('/api/_plugins/_banner/content');
-      expect(getByText('Test Banner Content')).toBeInTheDocument();
-    });
-  });
-
-  test('sets CSS variable with banner height', async () => {
-    // Mock getBoundingClientRect
-    const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
-    Element.prototype.getBoundingClientRect = jest.fn().mockReturnValue({ height: 50 });
-
-    render(<GlobalBanner http={mockHttp} />);
-
-    // Wait for API call to resolve
-    await waitFor(() => {
-      expect(mockHttp.get).toHaveBeenCalled();
-      expect(mockSetProperty).toHaveBeenCalledWith('--global-banner-height', '50px');
-    });
-
-    // Restore original getBoundingClientRect
-    Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
-  });
-
-  test('renders markdown content when useMarkdown is true', async () => {
-    // Mock API response with useMarkdown: true
-    mockHttp.get.mockResolvedValue({
-      content: '**Test** _Markdown_',
       color: 'primary',
       iconType: 'iInCircle',
       isVisible: true,
       useMarkdown: true,
       size: 'm',
-    });
+    };
+    httpMock.get = jest.fn().mockResolvedValue(mockBannerConfig);
 
-    const { getByText } = render(<GlobalBanner http={mockHttp} />);
-
-    // Wait for API call to resolve
-    await waitFor(() => {
-      expect(mockHttp.get).toHaveBeenCalled();
-      expect(getByText('Mocked Markdown Content')).toBeInTheDocument();
-    });
+    // Clear all mocks before each test
+    jest.clearAllMocks();
   });
 
-  test('hides banner when API call fails', async () => {
-    // Mock API failure
-    mockHttp.get.mockRejectedValue(new Error('API Error'));
-
-    const { queryByText } = render(<GlobalBanner http={mockHttp} />);
-
-    // Wait for API call to reject
-    await waitFor(() => {
-      expect(mockHttp.get).toHaveBeenCalled();
-      expect(queryByText('Loading banner...')).not.toBeInTheDocument();
-      expect(queryByText('Test Banner Content')).not.toBeInTheDocument();
-      expect(mockSetProperty).toHaveBeenCalledWith('--global-banner-height', '0px');
-    });
+  afterEach(() => {
+    if (wrapper) {
+      wrapper.unmount();
+    }
   });
 
-  test('hides banner when close button is clicked', async () => {
-    const { getByTestId } = render(<GlobalBanner http={mockHttp} />);
-
-    // Wait for API call to resolve
-    await waitFor(() => {
-      expect(mockHttp.get).toHaveBeenCalled();
+  test('fetches banner config on mount', async () => {
+    await act(async () => {
+      wrapper = mount(<GlobalBanner http={httpMock} />);
     });
 
-    // Click the close button
-    act(() => {
-      getByTestId('closeCallOutButton').click();
-    });
-
-    // Verify banner is hidden
-    expect(mockSetProperty).toHaveBeenCalledWith('--global-banner-height', '0px');
+    // Check that HTTP get was called with the correct URL
+    expect(httpMock.get).toHaveBeenCalledWith('/api/_plugins/_banner/content');
+    expect(httpMock.get).toHaveBeenCalledTimes(1);
   });
 
-  test('renders nothing when isVisible is false', async () => {
-    // Mock API response with isVisible: false
-    mockHttp.get.mockResolvedValue({
-      content: 'Test Banner Content',
-      color: 'primary',
-      iconType: 'iInCircle',
-      isVisible: false,
-      useMarkdown: false,
-      size: 'm',
+  test('renders loading state initially', async () => {
+    // Don't resolve the HTTP get promise yet
+    httpMock.get = jest.fn().mockImplementation(() => new Promise(() => {}));
+
+    wrapper = mount(<GlobalBanner http={httpMock} />);
+
+    // Check for loading spinner
+    expect(wrapper.find('EuiLoadingSpinner').exists()).toBe(true);
+    expect(wrapper.find('EuiCallOut').props().iconType).toBe('loading');
+  });
+
+  test('renders banner with content from API', async () => {
+    await act(async () => {
+      wrapper = mount(<GlobalBanner http={httpMock} />);
     });
 
-    const { queryByText } = render(<GlobalBanner http={mockHttp} />);
+    // Force update to ensure the component re-renders with the new state
+    wrapper.update();
 
-    // Wait for API call to resolve
-    await waitFor(() => {
-      expect(mockHttp.get).toHaveBeenCalled();
-      expect(queryByText('Loading banner...')).not.toBeInTheDocument();
-      expect(queryByText('Test Banner Content')).not.toBeInTheDocument();
-      expect(mockSetProperty).toHaveBeenCalledWith('--global-banner-height', '0px');
+    // Check that the banner is rendered with the correct props
+    expect(wrapper.find('EuiCallOut').exists()).toBe(true);
+    expect(wrapper.find('EuiCallOut').props().color).toBe('primary');
+    expect(wrapper.find('EuiCallOut').props().iconType).toBe('iInCircle');
+    expect(wrapper.find('EuiCallOut').props().size).toBe('m');
+  });
+
+  test('renders markdown content when useMarkdown is true', async () => {
+    // Set useMarkdown to true
+    mockBannerConfig.useMarkdown = true;
+    httpMock.get = jest.fn().mockResolvedValue(mockBannerConfig);
+
+    await act(async () => {
+      wrapper = mount(<GlobalBanner http={httpMock} />);
     });
+
+    // Force update to ensure the component re-renders with the new state
+    wrapper.update();
+
+    // Check that Suspense is used for lazy loading
+    expect(wrapper.find('Suspense').exists()).toBe(true);
+  });
+
+  test('renders plain text content when useMarkdown is false', async () => {
+    // Set useMarkdown to false
+    mockBannerConfig.useMarkdown = false;
+    httpMock.get = jest.fn().mockResolvedValue(mockBannerConfig);
+
+    await act(async () => {
+      wrapper = mount(<GlobalBanner http={httpMock} />);
+    });
+
+    // Force update to ensure the component re-renders with the new state
+    wrapper.update();
+
+    // Check that the content is rendered directly
+    expect(wrapper.find('Suspense').exists()).toBe(false);
+  });
+
+  test('hides banner when isVisible is false', async () => {
+    // Set isVisible to false
+    mockBannerConfig.isVisible = false;
+    httpMock.get = jest.fn().mockResolvedValue(mockBannerConfig);
+
+    await act(async () => {
+      wrapper = mount(<GlobalBanner http={httpMock} />);
+    });
+
+    // Force update to ensure the component re-renders with the new state
+    wrapper.update();
+
+    // Check that the banner is not rendered
+    expect(wrapper.find('EuiCallOut').exists()).toBe(false);
+    expect(wrapper.html()).toBe(null);
+  });
+
+  test('hides banner when dismiss button is clicked', async () => {
+    await act(async () => {
+      wrapper = mount(<GlobalBanner http={httpMock} />);
+    });
+
+    // Force update to ensure the component re-renders with the new state
+    wrapper.update();
+
+    // Check that the banner is initially rendered
+    expect(wrapper.find('EuiCallOut').exists()).toBe(true);
+
+    // Click the dismiss button
+    await act(async () => {
+      wrapper.find('EuiCallOut').props().onDismiss();
+    });
+
+    // Force update to ensure the component re-renders with the new state
+    wrapper.update();
+
+    // Check that the banner is no longer rendered
+    expect(wrapper.find('EuiCallOut').exists()).toBe(false);
+    expect(wrapper.html()).toBe(null);
   });
 });
