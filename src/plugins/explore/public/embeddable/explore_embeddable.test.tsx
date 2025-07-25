@@ -108,7 +108,7 @@ describe('ExploreEmbeddable', () => {
         },
       }),
       getDataFrame: jest.fn().mockReturnValue({
-        schema: {},
+        schema: [],
       }),
     };
 

@@ -155,16 +155,9 @@ describe('detect_optimal_tab', () => {
     });
 
     it('should return logs tab when results cannot be visualized', () => {
-      const spy = jest.spyOn(VisualizationRegistry.prototype, 'findBestMatch').mockReturnValue({
-        chartType: { type: 'line', name: 'line', priority: 0, icon: '' },
-        rule: {
-          id: 'rule-id',
-          name: 'rule-name',
-          matches: jest.fn(),
-          matchIndex: [0, 1, 0],
-          chartTypes: [],
-        },
-      });
+      const spy = jest
+        .spyOn(VisualizationRegistry.prototype, 'findBestMatch')
+        .mockReturnValue(null);
 
       const results = {
         hits: { hits: [{ _source: { test: 'value' } }] },
@@ -274,16 +267,9 @@ describe('detect_optimal_tab', () => {
     });
 
     it('should set logs tab when results cannot be visualized', async () => {
-      const spy = jest.spyOn(VisualizationRegistry.prototype, 'findBestMatch').mockReturnValue({
-        chartType: { type: 'line', name: 'line', priority: 0, icon: '' },
-        rule: {
-          id: 'rule-id',
-          name: 'rule-name',
-          matches: jest.fn(),
-          matchIndex: [0, 1, 0],
-          chartTypes: [],
-        },
-      });
+      const spy = jest
+        .spyOn(VisualizationRegistry.prototype, 'findBestMatch')
+        .mockReturnValue(null);
 
       const mockAction = { type: 'setActiveTab', payload: 'logs' };
       mockSetActiveTab.mockReturnValue(mockAction);
