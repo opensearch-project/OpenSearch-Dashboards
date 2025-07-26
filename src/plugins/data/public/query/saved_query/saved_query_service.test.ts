@@ -29,9 +29,16 @@
  */
 
 import { createSavedQueryService } from './saved_query_service';
-import { FilterStateStore } from '../../../common';
+import { FilterStateStore, UI_SETTINGS } from '../../../common';
 import { SavedQueryAttributes } from './types';
 import { applicationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { getUseNewSavedQueriesUI } from '../../services';
+import { setUISettings } from '../../../../vis_augmenter/public';
+
+jest.mock('../../services', () => ({
+  getUseNewSavedQueriesUI: jest.fn(),
+  setUseNewSavedQueriesUI: jest.fn(),
+}));
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -81,6 +88,12 @@ const mockSavedObjectsClient = {
   delete: jest.fn(),
 };
 
+const uiSettings = uiSettingsServiceMock.createStartContract();
+setUISettings(uiSettings);
+uiSettings.get.mockImplementation((key: string) => {
+  return key === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED;
+});
+
 const {
   deleteSavedQuery,
   getSavedQuery,
@@ -93,11 +106,16 @@ const {
   mockSavedObjectsClient,
   {
     application: applicationServiceMock.create(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
+    uiSettings,
   }
 );
 
 describe('saved query service', () => {
+  beforeEach(() => {
+    // Reset mocks before each test
+    jest.clearAllMocks();
+    getUseNewSavedQueriesUI.mockReturnValue(false);
+  });
   afterEach(() => {
     mockSavedObjectsClient.create.mockReset();
     mockSavedObjectsClient.find.mockReset();
@@ -180,6 +198,91 @@ describe('saved query service', () => {
         error = e;
       }
       expect(error).not.toBe(null);
+    });
+    it('should include dataset in the query when query enhancement is enabled and dataset exists', async () => {
+      const savedQueryAttributesWithTemplate: SavedQueryAttributes = {
+        title: 'foo',
+        description: 'bar',
+        query: {
+          language: 'kuery',
+          query: 'response:200',
+          dataset: 'my_dataset',
+        },
+      };
+
+      mockSavedObjectsClient.create.mockReturnValue({
+        id: 'foo',
+        attributes: {
+          ...savedQueryAttributesWithTemplate,
+          query: {
+            ...savedQueryAttributesWithTemplate.query,
+          },
+        },
+      });
+
+      const response = await saveQuery(savedQueryAttributesWithTemplate);
+
+      expect(response).toEqual({
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: 'response:200',
+            dataset: 'my_dataset',
+          },
+        },
+      });
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        'query',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            dataset: 'my_dataset',
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('should include isTemplate in the query object when new saved queries UI is enabled and isTemplate is true', async () => {
+      getUseNewSavedQueriesUI.mockReturnValue(true); // using new saved queries UI
+      const savedQueryAttributesWithTemplate: SavedQueryAttributes = {
+        title: 'foo',
+        description: 'bar',
+        query: {
+          language: 'kuery',
+          query: 'response:200',
+        },
+        isTemplate: true,
+      };
+
+      mockSavedObjectsClient.create.mockReturnValue({
+        id: 'foo',
+        attributes: {
+          ...savedQueryAttributesWithTemplate,
+          isTemplate: true,
+        },
+      });
+
+      const response = await saveQuery(savedQueryAttributesWithTemplate);
+
+      expect(response).toEqual({
+        id: 'foo',
+        attributes: {
+          ...savedQueryAttributesWithTemplate,
+          isTemplate: true,
+        },
+      });
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        'query',
+        expect.objectContaining({
+          isTemplate: true,
+        }),
+        expect.any(Object)
+      );
     });
   });
 

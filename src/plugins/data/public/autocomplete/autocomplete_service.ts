@@ -51,7 +51,7 @@ export class AutocompleteService {
   private getValueSuggestions?: ValueSuggestionsGetFn;
 
   private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
-    if (language && provider && this.autocompleteConfig.querySuggestions.enabled) {
+    if (language && provider && this.autocompleteConfig?.querySuggestions.enabled) {
       this.querySuggestionProviders.set(language, provider);
     }
   };
@@ -69,7 +69,7 @@ export class AutocompleteService {
 
   /** @public **/
   public setup(core: CoreSetup) {
-    this.getValueSuggestions = this.autocompleteConfig.valueSuggestions.enabled
+    this.getValueSuggestions = this.autocompleteConfig?.valueSuggestions.enabled
       ? setupValueSuggestionProvider(core)
       : getEmptyValueSuggestions;
 
