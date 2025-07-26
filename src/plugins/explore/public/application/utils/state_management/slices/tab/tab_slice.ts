@@ -18,6 +18,9 @@ export interface TabState {
     chartType: ChartType | undefined;
     axesMapping?: Partial<Record<AxisRole, string>>;
   };
+  patterns: {
+    patterns_field?: string; // kept as string, patterns tab will check if the field matches one in the schema
+  };
 }
 
 const initialState: TabState = {
@@ -26,6 +29,9 @@ const initialState: TabState = {
     styleOptions: defaultMetricChartStyles,
     chartType: undefined,
     axesMapping: {},
+  },
+  patterns: {
+    patterns_field: undefined,
   },
 };
 
@@ -48,8 +54,17 @@ const tabSlice = createSlice({
     ) => {
       state.visualizations.axesMapping = action.payload;
     },
+    setPatternsField: (state, action: PayloadAction<string>) => {
+      state.patterns.patterns_field = action.payload;
+    },
   },
 });
 
-export const { setTabState, setStyleOptions, setChartType, setAxesMapping } = tabSlice.actions;
+export const {
+  setTabState,
+  setStyleOptions,
+  setChartType,
+  setAxesMapping,
+  setPatternsField,
+} = tabSlice.actions;
 export const tabReducer = tabSlice.reducer;

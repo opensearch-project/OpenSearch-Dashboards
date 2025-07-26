@@ -283,6 +283,9 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
       chartType: undefined,
       axesMapping: {},
     },
+    patterns: {
+      patterns_field: undefined,
+    },
   };
 };
 

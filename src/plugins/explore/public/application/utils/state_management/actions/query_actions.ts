@@ -150,7 +150,7 @@ export const executeQueries = createAsyncThunk<
     if (activeTab?.prepareQuery) {
       const prepareQuery = activeTab.prepareQuery;
       activeTabPrepareQuery = (queryParam: Query): string => {
-        return prepareQuery(getQueryWithSource(queryParam));
+        return prepareQuery(getQueryWithSource(queryParam), state);
       };
     }
     activeTabCacheKey = activeTabPrepareQuery(query);
@@ -163,7 +163,6 @@ export const executeQueries = createAsyncThunk<
     visualizationTabCacheKey !== defaultCacheKey &&
     !results[visualizationTabCacheKey];
   const needsActiveTabQuery =
-    query.query !== '' &&
     activeTabCacheKey !== visualizationTabCacheKey &&
     activeTabCacheKey !== defaultCacheKey &&
     !results[activeTabCacheKey];

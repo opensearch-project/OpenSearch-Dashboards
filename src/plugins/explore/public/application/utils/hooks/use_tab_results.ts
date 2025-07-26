@@ -15,15 +15,21 @@ import { defaultPrepareQueryString } from '../state_management/actions/query_act
  */
 export const useTabResults = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const query = useSelector((state: RootState) => state.query);
-  const activeTabId = useSelector((state: RootState) => state.ui.activeTabId);
-  const results = useSelector((state: RootState) => state.results);
+  // Get the full state to pass to prepareQuery
+  const fullState = useSelector((state: RootState) => state);
+
+  const {
+    query,
+    ui: { activeTabId },
+    results,
+  } = fullState;
 
   const cacheKey = useMemo(() => {
     const activeTab = services.tabRegistry.getTab(activeTabId);
     const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
-    return prepareQuery(query);
-  }, [query, activeTabId, services]);
+
+    return prepareQuery(query, fullState);
+  }, [query, activeTabId, services, fullState]);
 
   return {
     results: cacheKey ? results[cacheKey] : null,

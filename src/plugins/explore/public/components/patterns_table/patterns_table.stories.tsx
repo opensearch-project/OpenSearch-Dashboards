@@ -39,17 +39,17 @@ export const WithEmptyPatterns = Template.bind({});
 WithEmptyPatterns.args = {
   items: [
     {
-      pattern: '',
+      sample: '',
       ratio: 0.15,
       count: 150,
     },
     {
-      pattern: (null as unknown) as string,
+      sample: (null as unknown) as string,
       ratio: 0.1,
       count: 100,
     },
     {
-      pattern: (undefined as unknown) as string,
+      sample: (undefined as unknown) as string,
       ratio: 0.05,
       count: 50,
     },
@@ -61,13 +61,13 @@ export const WithLongLengthPatterns = Template.bind({});
 WithLongLengthPatterns.args = {
   items: [
     {
-      pattern:
+      sample:
         'INFO [main] ' + 'Very long log message that exceeds typical display width. '.repeat(10),
       ratio: 0.35,
       count: 350,
     },
     {
-      pattern:
+      sample:
         'DEBUG [worker-1] ' +
         'This is an extremely verbose debug message with lots of details. '.repeat(10),
       ratio: 0.25,

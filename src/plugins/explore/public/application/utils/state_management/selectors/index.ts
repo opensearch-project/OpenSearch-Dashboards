@@ -57,6 +57,11 @@ export const selectAxesMapping = createSelector(
   (tabState) => tabState.visualizations.axesMapping
 );
 
+export const selectPatternsField = createSelector(
+  [selectTabState],
+  (tabState) => tabState.patterns.patterns_field
+);
+
 export const selectActiveTab = createSelector(
   [selectActiveTabId],
   (activeTabId) => activeTabId // Return just the ID, components will resolve the tab via context
