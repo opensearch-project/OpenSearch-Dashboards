@@ -31,13 +31,13 @@ export const setDatasetActionCreator = (
     },
   } = services;
   const currentQuery = queryString.getQuery();
-  const fullState = getState();
 
+  const state = getState();
   const {
     queryEditor: { promptModeIsAvailable, summaryAgentIsAvailable },
     query,
     ui,
-  } = fullState;
+  } = state;
 
   dispatch(setActiveTab(''));
   dispatch(clearResults());
@@ -46,7 +46,7 @@ export const setDatasetActionCreator = (
 
   const activeTab = services.tabRegistry.getTab(ui.activeTabId);
   if (activeTab?.onInactive) {
-    activeTab?.onInactive(fullState);
+    activeTab?.onInactive(state);
   }
 
   await dataViews.ensureDefaultDataView();

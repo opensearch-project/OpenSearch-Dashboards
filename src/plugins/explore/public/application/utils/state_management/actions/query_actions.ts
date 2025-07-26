@@ -150,7 +150,7 @@ export const executeQueries = createAsyncThunk<
     if (activeTab?.prepareQuery) {
       const prepareQuery = activeTab.prepareQuery;
       activeTabPrepareQuery = (queryParam: Query): string => {
-        return prepareQuery(getQueryWithSource(queryParam), state); // the issue is that it calls state too soon, state is uninitialized
+        return prepareQuery(getQueryWithSource(queryParam), state);
       };
     }
     activeTabCacheKey = activeTabPrepareQuery(query);
@@ -163,7 +163,6 @@ export const executeQueries = createAsyncThunk<
     visualizationTabCacheKey !== defaultCacheKey &&
     !results[visualizationTabCacheKey];
   const needsActiveTabQuery =
-    // query.query !== '' &&
     activeTabCacheKey !== visualizationTabCacheKey &&
     activeTabCacheKey !== defaultCacheKey &&
     !results[activeTabCacheKey];
@@ -357,24 +356,6 @@ const executeQueryBase = async (
       })
     );
 
-    // // Call handleQueryResult callback if available
-    // const activeTabId = getState().ui.activeTabId;
-    // if (activeTabId) {
-    //   const activeTab = services.tabRegistry.getTab(activeTabId);
-    //   if (activeTab?.handleQueryResult) {
-    //     try {
-    //       await activeTab.handleQueryResult(
-    //         rawResultsWithMeta,
-    //         null, // No error in success case
-    //         services,
-    //         getState()
-    //       );
-    //     } catch (callbackError) {
-    //       console.error('Error in query result handler:', callbackError);
-    //     }
-    //   }
-    // }
-
     // Clean up completed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 
@@ -410,24 +391,6 @@ const executeQueryBase = async (
         },
       })
     );
-
-    // // Call handleQueryResult callback for error case if available
-    // const activeTabId = getState().ui.activeTabId;
-    // if (activeTabId) {
-    //   const activeTab = services.tabRegistry.getTab(activeTabId);
-    //   if (activeTab?.handleQueryResult) {
-    //     try {
-    //       await activeTab.handleQueryResult(
-    //         {} as ISearchResult, // Empty results object in error case
-    //         error,
-    //         services,
-    //         getState()
-    //       );
-    //     } catch (callbackError) {
-    //       console.error('Error in query result handler:', callbackError);
-    //     }
-    //   }
-    // }
 
     throw error;
   }
