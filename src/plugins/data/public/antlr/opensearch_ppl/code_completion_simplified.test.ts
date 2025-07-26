@@ -134,7 +134,7 @@ describe('ppl code_completion', () => {
       const result = await getSimpleSuggestions(' ');
       checkSuggestionsContain(result, {
         text: 'source',
-        type: monaco.languages.CompletionItemKind.Keyword,
+        type: monaco.languages.CompletionItemKind.Function,
       });
 
       checkSuggestionsContain(result, {
@@ -153,7 +153,7 @@ describe('ppl code_completion', () => {
 
       checkSuggestionsContain(result, {
         text: '|',
-        type: monaco.languages.CompletionItemKind.Keyword,
+        type: monaco.languages.CompletionItemKind.Operator,
       });
     });
 
@@ -169,7 +169,7 @@ describe('ppl code_completion', () => {
 
       checkSuggestionsContain(result, {
         text: '|',
-        type: monaco.languages.CompletionItemKind.Keyword,
+        type: monaco.languages.CompletionItemKind.Operator,
       });
     });
 
@@ -211,7 +211,7 @@ describe('ppl code_completion', () => {
       Object.keys(PPL_AGGREGATE_FUNCTIONS).forEach((af) => {
         checkSuggestionsContain(result, {
           text: `${af}()`,
-          type: monaco.languages.CompletionItemKind.Function,
+          type: monaco.languages.CompletionItemKind.Module,
         });
       });
     });
@@ -372,7 +372,7 @@ describe('ppl code_completion', () => {
 
       checkSuggestionsContain(results, {
         text: 'span()',
-        type: monaco.languages.CompletionItemKind.Function,
+        type: monaco.languages.CompletionItemKind.Module,
       });
     });
 
@@ -381,22 +381,22 @@ describe('ppl code_completion', () => {
 
       checkSuggestionsContain(results, {
         text: 'match()',
-        type: monaco.languages.CompletionItemKind.Function,
+        type: monaco.languages.CompletionItemKind.Module,
       });
 
       checkSuggestionsContain(results, {
         text: 'match_phrase()',
-        type: monaco.languages.CompletionItemKind.Function,
+        type: monaco.languages.CompletionItemKind.Module,
       });
 
       checkSuggestionsContain(results, {
         text: 'match_phrase_prefix()',
-        type: monaco.languages.CompletionItemKind.Function,
+        type: monaco.languages.CompletionItemKind.Module,
       });
 
       checkSuggestionsContain(results, {
         text: 'match_bool_prefix()',
-        type: monaco.languages.CompletionItemKind.Function,
+        type: monaco.languages.CompletionItemKind.Module,
       });
     });
 
@@ -418,6 +418,16 @@ describe('ppl code_completion', () => {
       checkSuggestionsContain(results1, {
         text: "''",
         type: monaco.languages.CompletionItemKind.Keyword,
+      });
+    });
+
+    it('should suggest aggregate functions with Module completion item kind', async () => {
+      const result = await getSimpleSuggestions('source = test-index | stats ');
+      Object.keys(PPL_AGGREGATE_FUNCTIONS).forEach((af) => {
+        checkSuggestionsContain(result, {
+          text: `${af}()`,
+          type: monaco.languages.CompletionItemKind.Module,
+        });
       });
     });
   });
