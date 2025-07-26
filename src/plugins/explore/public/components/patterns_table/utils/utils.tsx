@@ -3,14 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DELIM_START, MARK_END, MARK_START, STD_DELIM_END, UNIQ_DELIM_END } from './constants';
+
 // Checks if the value is a valid, finite number. Used for patterns table
 export const isValidFiniteNumber = (val: number) => {
   return !isNaN(val) && isFinite(val);
 };
 
-// TODO: clean up the below. move constants, write a clearer description
+/**
+ * Highlights dynamic elements in a log string based on a pattern string.
+ *
+ * This function takes a log string and a pattern string containing delimiters (e.g., <*>) that mark
+ * where dynamic content appears. It identifies the dynamic parts of the log by comparing it with the pattern,
+ * and wraps those dynamic elements with <mark> tags for visual highlighting in the UI.
+ *
+ * The strategy uses a two-pointer approach that traverses both the log and pattern strings simultaneously.
+ * It identifies static text in the pattern, locates that same text in the log using a sliding window, and
+ * marks everything in between as dynamic content. The algorithm handles both standard delimiters (<*>)
+ * and specialized delimiters (e.g., <*IP*>, <*DATETIME*>) to accommodate different types of dynamic content.
+ */
 export const highlightLogUsingPattern = (log: string, pattern: string) => {
-  // need:
+  // start with:
   // two pointers for the sample log string and the pattern string
   // an accumulator: string that we're building w/ <mark>
 
@@ -28,29 +41,27 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
 
   // continue those last few steps until we reach the end.
 
-  // CONSTANT
-  const DELIM_START = '<*';
-  const STD_DELIM_END = '>';
-  const UNIQ_DELIM_END = '*>';
-  const MARK_START = '<mark>';
-  const MARK_END = '</mark>';
-
   let currSampleLogPos = 0;
   let currPatternPos = 0;
 
   let markedPattern = '';
 
   while (currPatternPos < pattern.length) {
-    // now we're on a new cycle, in the pat we have a big static element, in the sample we have dynamic then static
+    // on a new cycle, in the pattern we have a big static element, in the sample we have dynamic then static
     // move down pattern until we reach a new delim, add everything until then to the static
+
+    // below loop checks for the delim start
     const prevPatternPos = currPatternPos;
     for (; currPatternPos < pattern.length; currPatternPos++) {
+      // don't need to worry about currPatternPos + 2 going over pattern length, slice will handle it
       const potentialDelim = pattern.slice(currPatternPos, currPatternPos + 2);
 
       if (potentialDelim === DELIM_START) {
         break;
       }
     }
+
+    // grab the window of chars in the pattern before the delim. this will be a static element
     const preDelimWindow = pattern.slice(prevPatternPos, currPatternPos);
     currPatternPos += 2; // found the delim start, stop right in the middle
 
@@ -63,15 +74,13 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
       );
 
       if (potentialWindowMatch === preDelimWindow) {
-        // if (!patternArr[currSampleLogPos + 2]) {
-        //   throw new Error('the delimiter ends before capping off');
-        // }
         break;
       }
     }
+
     const dynamicElement = log.slice(prevSampleLogPos, currSampleLogPos);
 
-    // move the patternPos up to the end of the delim
+    // below statement moves the patternPos up to the end of the delim
     if (pattern[currPatternPos] === STD_DELIM_END) {
       // standard delimiter, for <*>
       currPatternPos += 1;
@@ -85,6 +94,7 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
       }
       currPatternPos += 2; // move up one for the slice above being true, another to start on next char
     }
+
     // move samplePos up past preDelimWindow
     currSampleLogPos += preDelimWindow.length;
 

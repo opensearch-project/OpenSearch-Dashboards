@@ -123,11 +123,10 @@ export const registerBuiltInTabs = (
       findDefaultPatternsField(state, services);
     },
 
+    // Currently, onInactive is only implemented for the switching of datasets. If this
+    // changes in the future, this might not be the best place to remove the patterns field
     onInactive: (state?: RootState): void => {
       // Tab deactivated
-      // TODO: maybe implement this to remove the patterns field? this might be needed to not use a field
-      //        from a diff index pattern
-
       if (!state || !services?.store) return;
       services.store.dispatch(setPatternsField(''));
     },

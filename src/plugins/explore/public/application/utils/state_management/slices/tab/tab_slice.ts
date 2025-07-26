@@ -19,12 +19,7 @@ export interface TabState {
     axesMapping?: Partial<Record<AxisRole, string>>;
   };
   patterns: {
-    patterns_field?: string; // change the type to be some sort of index field type
-    // lastQueryError?: {
-    //   code: number;
-    //   message: string;
-    //   timestamp: number;
-    // };
+    patterns_field?: string; // kept as string, patterns tab will check if the field matches one in the schema
   };
 }
 
@@ -62,15 +57,6 @@ const tabSlice = createSlice({
     setPatternsField: (state, action: PayloadAction<string>) => {
       state.patterns.patterns_field = action.payload;
     },
-    // setPatternQueryError: (state, action: PayloadAction<{ code: number; message: string }>) => {
-    //   state.patterns.lastQueryError = {
-    //     ...action.payload,
-    //     timestamp: Date.now(),
-    //   };
-    // },
-    // clearPatternQueryError: (state) => {
-    //   state.patterns.lastQueryError = undefined;
-    // },
   },
 });
 
@@ -80,7 +66,5 @@ export const {
   setChartType,
   setAxesMapping,
   setPatternsField,
-  // setPatternQueryError,
-  // clearPatternQueryError,
 } = tabSlice.actions;
 export const tabReducer = tabSlice.reducer;
