@@ -151,7 +151,7 @@ export const VisualizationContainer = () => {
   }, [rows, fieldSchema, visualizationBuilder]);
 
   useEffect(() => {
-    visualizationBuilder.init({});
+    visualizationBuilder.init();
     return () => {
       // reset visualization builder
       visualizationBuilder.reset();

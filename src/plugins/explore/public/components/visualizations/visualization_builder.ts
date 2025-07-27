@@ -58,12 +58,12 @@ export class VisualizationBuilder {
     this.urlStateStorage = urlStateStorage;
   }
 
-  init(initialState: VisState) {
+  init() {
     if (this.isInitialized) {
       return;
     }
 
-    let state = { ...initialState };
+    let state: VisState = {};
 
     // Read state from url
     if (this.urlStateStorage) {
@@ -78,166 +78,85 @@ export class VisualizationBuilder {
       if (state.styleOptions) {
         this.setStyles({ styles: state.styleOptions, type: state.chartType });
       }
-    }
 
-    if (state.axesMapping) {
-      this.setAxesMapping(state.axesMapping);
+      if (state.axesMapping) {
+        this.setAxesMapping(state.axesMapping);
+      }
     }
 
     // Subscribe to visualization state updates and sync the state to url
     this.subscriptions.push(
       this.currentChartType$.subscribe((v) => this.syncToUrl('chartType', v)),
       this.axesMapping$.subscribe((v) => this.syncToUrl('axesMapping', v)),
-      this.styles$.subscribe((v) => this.syncToUrl('styleOptions', v?.styles))
+      this.styles$.subscribe((v) => this.syncToUrl('styleOptions', v?.styles)),
+      this.currentChartType$.subscribe((chartType) => this.onChartTypeChange(chartType)),
+      this.data$.subscribe((data) =>
+        this.onDataChange(data, this.currentChartType$.value, this.axesMapping$.value)
+      )
     );
-
-    const chartTypeSub = this.currentChartType$.subscribe((chartType) => {
-      if (!chartType || !isChartType(chartType)) {
-        return;
-      }
-
-      const visConfig = visualizationRegistry.getVisualizationConfig(chartType);
-      if (!visConfig) {
-        return;
-      }
-
-      // Always reset style after changing chart type
-      const currentStyleConfig = this.styles$.value;
-      if (currentStyleConfig?.type !== chartType) {
-        this.setStyles({ styles: visConfig.ui.style.defaults, type: chartType });
-      }
-
-      const data = this.data$.value;
-      const allColumns = [
-        ...(data?.numericalColumns ?? []),
-        ...(data?.categoricalColumns ?? []),
-        ...(data?.dateColumns ?? []),
-      ];
-
-      // Table chart doesn't have axes mapping
-      if (chartType === 'table') {
-        this.setAxesMapping({});
-        return;
-      }
-
-      const currentRule = findRuleByIndex(this.axesMapping$.value, allColumns);
-      // Try to reuse the current fields(from axes mapping) for the new chart type
-      if (!isEmpty(this.axesMapping$.value) && currentRule) {
-        const isChartTypeInCurrentRule = currentRule.chartTypes.find(
-          (chart) => chart.type === chartType
-        );
-        if (isChartTypeInCurrentRule) {
-          const reusedMapping = visConfig.ui.availableMappings.find((obj) =>
-            isEqual(getColumnMatchFromMapping(obj.mapping), currentRule.matchIndex)
-          )?.mapping[0];
-          if (reusedMapping) {
-            const updatedMapping: Record<string, string> = {};
-            const axesMapping = new Map(Object.entries(this.axesMapping$.value));
-            Object.entries(reusedMapping).forEach(([key, config]) => {
-              const matchingColumn = axesMapping.entries().find(([role, columnName]) => {
-                const column = allColumns.find((col) => col.name === columnName);
-                const found = column?.schema === config.type;
-                if (found) {
-                  axesMapping.delete(role);
-                  return found;
-                }
-              });
-              if (matchingColumn) {
-                updatedMapping[key] = matchingColumn[1];
-              }
-            });
-            this.setAxesMapping(updatedMapping);
-            return;
-          }
-        }
-      }
-      // If cannot use the current fields for the new chart type, try to find and apply the rule for the given chart type
-      const bestMatch = visualizationRegistry.findBestMatch(
-        data?.numericalColumns ?? [],
-        data?.categoricalColumns ?? [],
-        data?.dateColumns ?? [],
-        chartType
-      );
-      if (bestMatch) {
-        const mappingObj = visualizationRegistry.getDefaultAxesMapping(
-          bestMatch.rule,
-          bestMatch.chartType.type,
-          data?.numericalColumns ?? [],
-          data?.categoricalColumns ?? [],
-          data?.dateColumns ?? []
-        );
-        this.setAxesMapping(convertMappingsToStrings(mappingObj));
-        return;
-      }
-
-      // Lastly, for the given chart type, we cannot reuse current axes mapping, also we cannot find a rule to auto create the chart
-      // Reset the axes mapping to empty and let user to choose the fields for the axes mapping
-      this.setAxesMapping({});
-    });
-    this.subscriptions.push(chartTypeSub);
-
-    const dataSub = this.data$.subscribe((data) => {
-      if (!data) {
-        return;
-      }
-
-      const { numericalColumns, categoricalColumns, dateColumns } = data;
-      const columns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
-
-      // Do nothing for table, as any data can render with a table
-      if (this.currentChartType$.value === 'table') {
-        return;
-      }
-
-      // Metric chart cannot be created from multiple data points
-      const invalidMetricData =
-        columns.length > 0 &&
-        columns[0].validValuesCount > 1 &&
-        this.currentChartType$.value === 'metric';
-
-      // Try to create auto-chart based on the received data if:
-      // 1. it has multiple data points, but the current chart type if 'metric'
-      // 2. no current axes mapping
-      // 3. has axes mapping, but the mapping is incompatible with the received data
-      if (
-        invalidMetricData ||
-        isEmpty(this.axesMapping$.value) ||
-        !isValidMapping(this.axesMapping$.value, columns)
-      ) {
-        const isApplied = this.applyBestMatchedRule(
-          numericalColumns,
-          categoricalColumns,
-          dateColumns
-        );
-        // If auto-chart cannot be created, reset vis state so that user will start by selecting a chart type first
-        if (!isApplied) {
-          this.setCurrentChartType(undefined);
-          this.setAxesMapping({});
-          this.setStyles(undefined);
-        }
-        return;
-      }
-
-      // The current axes mappings can be applied to the data,
-      // it will just use the current chart type and axes mapping
-      if (isValidMapping(this.axesMapping$.value, columns)) {
-        return;
-      }
-
-      // All other cases will fallback to reset vis state and let user to choose
-      this.setCurrentChartType(undefined);
-      this.setAxesMapping({});
-      this.setStyles(undefined);
-    });
-    this.subscriptions.push(dataSub);
 
     this.isInitialized = true;
   }
-  /**
-   * Infer a chart type based on the provided data
-   * If a chart can be created automatically, update the chart type and its styles and axes mapping accordingly
-   */
-  applyBestMatchedRule(
+
+  onChartTypeChange(chartType?: ChartType) {
+    if (!chartType || !isChartType(chartType)) {
+      return;
+    }
+
+    const visConfig = visualizationRegistry.getVisualizationConfig(chartType);
+    if (!visConfig) {
+      return;
+    }
+
+    // Always reset style after changing chart type
+    const currentStyleConfig = this.styles$.value;
+    if (currentStyleConfig?.type !== chartType) {
+      this.setStyles({ styles: visConfig.ui.style.defaults, type: chartType });
+    }
+
+    const data = this.data$.value;
+    const allColumns = [
+      ...(data?.numericalColumns ?? []),
+      ...(data?.categoricalColumns ?? []),
+      ...(data?.dateColumns ?? []),
+    ];
+
+    // Table chart doesn't have axes mapping
+    if (chartType === 'table') {
+      this.setAxesMapping({});
+      return;
+    }
+
+    // Reuse current axes mapping for the new chart type if possible
+    const newAxesMapping = this.reuseCurrentAxesMapping(
+      chartType,
+      this.axesMapping$.value,
+      allColumns
+    );
+    if (newAxesMapping) {
+      this.setAxesMapping(newAxesMapping);
+      return;
+    }
+
+    // Auto create visualization for the new chart type based on the rules,
+    // and use the new axes mapping from the matched rule.
+    const autoVis = this.createAutoVis(
+      data?.numericalColumns ?? [],
+      data?.categoricalColumns ?? [],
+      data?.dateColumns ?? [],
+      chartType
+    );
+    if (autoVis) {
+      this.setAxesMapping(autoVis.axesMapping);
+      return;
+    }
+
+    // Lastly, for the given chart type, we cannot reuse current axes mapping, also we cannot find a rule to auto create the chart
+    // Reset the axes mapping to empty and let user to choose the fields for the axes mapping
+    this.setAxesMapping({});
+  }
+
+  createAutoVis(
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[],
@@ -249,23 +168,122 @@ export class VisualizationBuilder {
       dateColumns,
       chartType
     );
-
     if (!bestMatch) {
-      return false;
+      return;
     }
 
-    const mappingObj = visualizationRegistry.getDefaultAxesMapping(
+    const axesColumnMapping = visualizationRegistry.getDefaultAxesMapping(
       bestMatch.rule,
       bestMatch.chartType.type,
       numericalColumns,
       categoricalColumns,
       dateColumns
     );
-    const visConfig = visualizationRegistry.getVisualizationConfig(bestMatch.chartType.type);
-    this.setCurrentChartType(bestMatch.chartType.type as ChartType);
-    this.setAxesMapping(convertMappingsToStrings(mappingObj));
-    this.updateStyles(visConfig?.ui.style.defaults);
-    return true;
+
+    return {
+      chartType: bestMatch.chartType.type as ChartType,
+      axesMapping: convertMappingsToStrings(axesColumnMapping),
+    };
+  }
+
+  /**
+   * For given chartType and data columns, try to reuse the current fields of axes mapping for the new chart type,
+   * and return the axes mapping for the new chart type with the current fields. If fields cannot be reused, return undefined.
+   */
+  reuseCurrentAxesMapping(
+    chartType: ChartType,
+    axesMapping: Record<string, string>,
+    allColumns: VisColumn[]
+  ) {
+    const visConfig = visualizationRegistry.getVisualizationConfig(chartType);
+    if (!visConfig) {
+      return;
+    }
+
+    const currentRule = findRuleByIndex(axesMapping, allColumns);
+    if (!isEmpty(axesMapping) && currentRule) {
+      const isChartTypeInCurrentRule = currentRule.chartTypes.find(
+        (chart) => chart.type === chartType
+      );
+      if (isChartTypeInCurrentRule) {
+        const reusedMapping = visConfig.ui.availableMappings.find((obj) =>
+          isEqual(getColumnMatchFromMapping(obj.mapping), currentRule.matchIndex)
+        )?.mapping[0];
+        if (reusedMapping) {
+          const updatedMapping: Record<string, string> = {};
+          const availableAxesMapping = new Map(Object.entries(axesMapping));
+          Object.entries(reusedMapping).forEach(([key, config]) => {
+            const matchingColumn = availableAxesMapping.entries().find(([role, columnName]) => {
+              const column = allColumns.find((col) => col.name === columnName);
+              const found = column?.schema === config.type;
+              if (found) {
+                availableAxesMapping.delete(role);
+                return found;
+              }
+            });
+            if (matchingColumn) {
+              updatedMapping[key] = matchingColumn[1];
+            }
+          });
+          return updatedMapping;
+        }
+      }
+    }
+  }
+
+  /**
+   * For the given data, we need to check if the current chart type and axes mapping can be applied
+   */
+  onDataChange(data?: VisData, currentChartType?: ChartType, axesMapping?: Record<string, string>) {
+    if (!data) {
+      return;
+    }
+
+    // Do nothing for table, as any data can render with a table
+    if (currentChartType === 'table') {
+      return;
+    }
+
+    const { numericalColumns, categoricalColumns, dateColumns } = data;
+    const columns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
+
+    // Metric chart cannot be created from multiple data points
+    const invalidMetricData =
+      columns.length > 0 && columns[0].validValuesCount > 1 && currentChartType === 'metric';
+
+    // We cannot apply the current chart type and axes mapping if:
+    // 1. The current chart type if 'metric', but it has multiple data points
+    // 2. It has axes mapping, but the mapping is incompatible with the received data
+    // 3. No current axes mapping
+    // For these cases, we will create auto vis based on the rules. If not auto vis can be created,
+    // reset chart type and axes mapping to empty, this will let user to choose.
+    if (invalidMetricData || isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
+      const autoVis = this.createAutoVis(numericalColumns, categoricalColumns, dateColumns);
+      if (autoVis) {
+        const visConfig = visualizationRegistry.getVisualizationConfig(autoVis.chartType);
+        if (visConfig) {
+          this.setCurrentChartType(autoVis.chartType);
+          this.setAxesMapping(autoVis.axesMapping);
+          this.setStyles({ styles: visConfig?.ui.style.defaults, type: autoVis.chartType });
+        }
+      } else {
+        this.setCurrentChartType(undefined);
+        this.setAxesMapping({});
+        this.setStyles(undefined);
+      }
+      return;
+    }
+
+    // The current axes mappings can be applied to the data,
+    // it will just use the current chart type and axes mapping
+    if (isValidMapping(axesMapping ?? {}, columns)) {
+      return;
+    }
+
+    // All other cases will fallback to reset vis state and let user to choose
+    this.setCurrentChartType(undefined);
+    this.setAxesMapping({});
+    this.setStyles(undefined);
   }
 
   handleData<T = unknown>(
