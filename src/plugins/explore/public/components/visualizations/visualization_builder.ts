@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
 import { isEmpty, isEqual } from 'lodash';
+import { debounceTime } from 'rxjs/operators';
+
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
 import {
   convertMappingsToStrings,
@@ -48,6 +50,9 @@ export class VisualizationBuilder {
   styles$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   axesMapping$ = new BehaviorSubject<Record<string, string>>({});
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
+  changes$: Observable<
+    [ChartType | undefined, ChartConfig | undefined, Record<string, string>]
+  > = of([undefined, undefined, {}]);
 
   constructor({ urlStateStorage }: { urlStateStorage?: IOsdUrlStateStorage }) {
     this.urlStateStorage = urlStateStorage;
@@ -108,7 +113,6 @@ export class VisualizationBuilder {
         ...(data?.categoricalColumns ?? []),
         ...(data?.dateColumns ?? []),
       ];
-      const currentRule = findRuleByIndex(this.axesMapping$.value, allColumns);
 
       // Table chart doesn't have axes mapping
       if (chartType === 'table') {
@@ -116,6 +120,7 @@ export class VisualizationBuilder {
         return;
       }
 
+      const currentRule = findRuleByIndex(this.axesMapping$.value, allColumns);
       // Try to reuse the current fields(from axes mapping) for the new chart type
       if (!isEmpty(this.axesMapping$.value) && currentRule) {
         const isChartTypeInCurrentRule = currentRule.chartTypes.find(
@@ -127,13 +132,18 @@ export class VisualizationBuilder {
           )?.mapping[0];
           if (reusedMapping) {
             const updatedMapping: Record<string, string> = {};
+            const axesMapping = new Map(Object.entries(this.axesMapping$.value));
             Object.entries(reusedMapping).forEach(([key, config]) => {
-              const matchingColumn = Object.values(this.axesMapping$.value).find((columnName) => {
+              const matchingColumn = axesMapping.entries().find(([role, columnName]) => {
                 const column = allColumns.find((col) => col.name === columnName);
-                return column?.schema === config.type;
+                const found = column?.schema === config.type;
+                if (found) {
+                  axesMapping.delete(role);
+                  return found;
+                }
               });
               if (matchingColumn) {
-                updatedMapping[key] = matchingColumn;
+                updatedMapping[key] = matchingColumn[1];
               }
             });
             this.setAxesMapping(updatedMapping);
@@ -141,6 +151,28 @@ export class VisualizationBuilder {
           }
         }
       }
+      // If cannot use the current fields for the new chart type, try to find and apply the rule for the given chart type
+      const bestMatch = visualizationRegistry.findBestMatch(
+        data?.numericalColumns ?? [],
+        data?.categoricalColumns ?? [],
+        data?.dateColumns ?? [],
+        chartType
+      );
+      if (bestMatch) {
+        const mappingObj = visualizationRegistry.getDefaultAxesMapping(
+          bestMatch.rule,
+          bestMatch.chartType.type,
+          data?.numericalColumns ?? [],
+          data?.categoricalColumns ?? [],
+          data?.dateColumns ?? []
+        );
+        this.setAxesMapping(convertMappingsToStrings(mappingObj));
+        return;
+      }
+
+      // Lastly, for the given chart type, we cannot reuse current axes mapping, also we cannot find a rule to auto create the chart
+      // Reset the axes mapping to empty and let user to choose the fields for the axes mapping
+      this.setAxesMapping({});
     });
     this.subscriptions.push(chartTypeSub);
 
@@ -208,12 +240,14 @@ export class VisualizationBuilder {
   applyBestMatchedRule(
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
-    dateColumns: VisColumn[]
+    dateColumns: VisColumn[],
+    chartType?: ChartType
   ) {
     const bestMatch = visualizationRegistry.findBestMatch(
       numericalColumns,
       categoricalColumns,
-      dateColumns
+      dateColumns,
+      chartType
     );
 
     if (!bestMatch) {
@@ -298,6 +332,9 @@ export class VisualizationBuilder {
     this.styles$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
     this.axesMapping$ = new BehaviorSubject<Record<string, string>>({});
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
+    this.changes$ = combineLatest([this.currentChartType$, this.styles$, this.axesMapping$]).pipe(
+      debounceTime(500)
+    );
     this.isInitialized = false;
   }
 }
