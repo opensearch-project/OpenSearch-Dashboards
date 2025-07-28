@@ -50,6 +50,7 @@ export class VisualizationBuilder {
   styles$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   axesMapping$ = new BehaviorSubject<Record<string, string>>({});
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
+  // TODO: refactor to subscribe to changes$ from external
   changes$: Observable<
     [ChartType | undefined, ChartConfig | undefined, Record<string, string>]
   > = of([undefined, undefined, {}]);
@@ -114,13 +115,6 @@ export class VisualizationBuilder {
       this.setStyles({ styles: visConfig.ui.style.defaults, type: chartType });
     }
 
-    const data = this.data$.value;
-    const allColumns = [
-      ...(data?.numericalColumns ?? []),
-      ...(data?.categoricalColumns ?? []),
-      ...(data?.dateColumns ?? []),
-    ];
-
     // Table chart doesn't have axes mapping
     if (chartType === 'table') {
       this.setAxesMapping({});
@@ -131,7 +125,7 @@ export class VisualizationBuilder {
     const newAxesMapping = this.reuseCurrentAxesMapping(
       chartType,
       this.axesMapping$.value,
-      allColumns
+      this.data$.value
     );
     if (newAxesMapping) {
       this.setAxesMapping(newAxesMapping);
@@ -140,12 +134,7 @@ export class VisualizationBuilder {
 
     // Auto create visualization for the new chart type based on the rules,
     // and use the new axes mapping from the matched rule.
-    const autoVis = this.createAutoVis(
-      data?.numericalColumns ?? [],
-      data?.categoricalColumns ?? [],
-      data?.dateColumns ?? [],
-      chartType
-    );
+    const autoVis = this.createAutoVis(this.data$.value, chartType);
     if (autoVis) {
       this.setAxesMapping(autoVis.axesMapping);
       return;
@@ -156,12 +145,10 @@ export class VisualizationBuilder {
     this.setAxesMapping({});
   }
 
-  createAutoVis(
-    numericalColumns: VisColumn[],
-    categoricalColumns: VisColumn[],
-    dateColumns: VisColumn[],
-    chartType?: ChartType
-  ) {
+  createAutoVis(data?: VisData, chartType?: ChartType) {
+    const numericalColumns = data?.numericalColumns ?? [];
+    const categoricalColumns = data?.categoricalColumns ?? [];
+    const dateColumns = data?.dateColumns ?? [];
     const bestMatch = visualizationRegistry.findBestMatch(
       numericalColumns,
       categoricalColumns,
@@ -193,8 +180,13 @@ export class VisualizationBuilder {
   reuseCurrentAxesMapping(
     chartType: ChartType,
     axesMapping: Record<string, string>,
-    allColumns: VisColumn[]
+    data: VisData | undefined
   ) {
+    const allColumns = [
+      ...(data?.numericalColumns ?? []),
+      ...(data?.categoricalColumns ?? []),
+      ...(data?.dateColumns ?? []),
+    ];
     const visConfig = visualizationRegistry.getVisualizationConfig(chartType);
     if (!visConfig) {
       return;
@@ -213,14 +205,16 @@ export class VisualizationBuilder {
           const updatedMapping: Record<string, string> = {};
           const availableAxesMapping = new Map(Object.entries(axesMapping));
           Object.entries(reusedMapping).forEach(([key, config]) => {
-            const matchingColumn = availableAxesMapping.entries().find(([role, columnName]) => {
-              const column = allColumns.find((col) => col.name === columnName);
-              const found = column?.schema === config.type;
-              if (found) {
-                availableAxesMapping.delete(role);
-                return found;
+            const matchingColumn = Array.from(availableAxesMapping.entries()).find(
+              ([role, columnName]) => {
+                const column = allColumns.find((col) => col.name === columnName);
+                const found = column?.schema === config.type;
+                if (found) {
+                  availableAxesMapping.delete(role);
+                  return found;
+                }
               }
-            });
+            );
             if (matchingColumn) {
               updatedMapping[key] = matchingColumn[1];
             }
@@ -244,8 +238,7 @@ export class VisualizationBuilder {
       return;
     }
 
-    const { numericalColumns, categoricalColumns, dateColumns } = data;
-    const columns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
+    const columns = [...data.numericalColumns, ...data.categoricalColumns, ...data.dateColumns];
 
     // Metric chart cannot be created from multiple data points
     const invalidMetricData =
@@ -258,7 +251,7 @@ export class VisualizationBuilder {
     // For these cases, we will create auto vis based on the rules. If not auto vis can be created,
     // reset chart type and axes mapping to empty, this will let user to choose.
     if (invalidMetricData || isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
-      const autoVis = this.createAutoVis(numericalColumns, categoricalColumns, dateColumns);
+      const autoVis = this.createAutoVis(data);
       if (autoVis) {
         const visConfig = visualizationRegistry.getVisualizationConfig(autoVis.chartType);
         if (visConfig) {

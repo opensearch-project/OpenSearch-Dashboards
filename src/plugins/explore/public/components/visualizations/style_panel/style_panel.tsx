@@ -4,8 +4,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiPanel } from '@elastic/eui';
 import { useObservable } from 'react-use';
+import { EuiSpacer } from '@elastic/eui';
 
 import { ChartTypeSelector } from '../chart_type_selector';
 import { ChartType, StyleOptions } from '../utils/use_visualization_types';
@@ -19,9 +19,13 @@ import { visualizationRegistry } from '../visualization_registry';
 
 interface StylePanelProps<T> {
   visualizationBuilder: VisualizationBuilder;
+  className?: string;
 }
 
-export const StylePanel = <T extends ChartType>({ visualizationBuilder }: StylePanelProps<T>) => {
+export const StylePanel = <T extends ChartType>({
+  visualizationBuilder,
+  className,
+}: StylePanelProps<T>) => {
   const visualizationData = useObservable(visualizationBuilder.data$);
   const styleOptions = useObservable(visualizationBuilder.styles$);
   const selectedChartType = useObservable(visualizationBuilder.currentChartType$);
@@ -72,12 +76,13 @@ export const StylePanel = <T extends ChartType>({ visualizationBuilder }: StyleP
   );
 
   return (
-    <EuiPanel hasShadow={false} paddingSize="s" className="exploreVisStylePanel">
+    <div className={className}>
       <ChartTypeSelector
         visualizationData={visualizationData}
         onChartTypeChange={onChartTypeChange}
         chartType={selectedChartType}
       />
+      <EuiSpacer size="s" />
       {visConfig?.ui.style.render({
         styleOptions: styleOptions?.styles ?? ({} as any),
         onStyleChange,
@@ -89,6 +94,6 @@ export const StylePanel = <T extends ChartType>({ visualizationBuilder }: StyleP
         axisColumnMappings,
         updateVisualization,
       })}
-    </EuiPanel>
+    </div>
   );
 };

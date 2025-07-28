@@ -4,7 +4,7 @@
  */
 
 import './visualization_container.scss';
-import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -18,7 +18,6 @@ import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { convertStringsToMappings, findRuleByIndex } from './visualization_container_utils';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { getVisualizationBuilder } from './visualization_builder';
-import { StylePanel } from './style_panel/style_panel';
 import { TableVis } from './table/table_vis';
 import { TableChartStyleControls } from './table/table_vis_config';
 
@@ -194,21 +193,15 @@ export const VisualizationContainer = () => {
 
   return (
     <div className="exploreVisContainer">
-      <EuiFlexGroup gutterSize="none" style={{ minHeight: 0, width: '100%' }}>
-        <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            data-test-subj="exploreVisualizationLoader"
-            className="exploreVisPanel"
-          >
-            <div className="exploreVisPanel__inner">{renderVisualization()}</div>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} className="exploreVisStyleFlexItem">
-          <StylePanel visualizationBuilder={visualizationBuilder} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        data-test-subj="exploreVisualizationLoader"
+        className="exploreVisPanel"
+        paddingSize="none"
+      >
+        <div className="exploreVisPanel__inner">{renderVisualization()}</div>
+      </EuiPanel>
     </div>
   );
 };

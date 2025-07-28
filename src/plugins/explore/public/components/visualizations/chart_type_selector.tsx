@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiSpacer,
+  EuiPanel,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
@@ -173,7 +173,7 @@ export const ChartTypeSelector = <T extends ChartType>({
   if (!visualizationData || !Boolean(Object.keys(chartTypeMappedOptions).length)) return null;
 
   return (
-    <>
+    <EuiPanel hasBorder={false} hasShadow={false} color="subdued" paddingSize="s">
       <EuiFormRow
         key="ChartTypeSelector"
         label={i18n.translate('explore.chartTypeSwitcher.title', {
@@ -191,7 +191,6 @@ export const ChartTypeSelector = <T extends ChartType>({
           }}
         />
       </EuiFormRow>
-      <EuiSpacer size="s" />
-    </>
+    </EuiPanel>
   );
 };
