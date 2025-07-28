@@ -47,7 +47,7 @@ export const ResizableVisControlAndTabs = () => {
             <EuiResizablePanel
               id="explore_tabs"
               className="tabsPanel"
-              initialSize={80}
+              initialSize={77.5}
               paddingSize="none"
             >
               <ExploreTabs />
@@ -59,7 +59,7 @@ export const ResizableVisControlAndTabs = () => {
               mode={['custom', { position: 'top' }]}
               id="vis_style_panel"
               className="visStylePanelOuter"
-              initialSize={20}
+              initialSize={22.5}
               minSize="280px"
               paddingSize="none"
             >
