@@ -15,19 +15,22 @@ export function normTimeString(timeString: string): string | null {
     return null;
   }
 
-  const date = new Date(timeString);
+  const dateTimeRegex = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?.*$/;
+  const match = timeString.match(dateTimeRegex);
 
-  if (isNaN(date.getTime())) {
+  if (!match) {
     return null;
   }
 
+  const [, year, month, day, hour, minute, second = '00'] = match;
+
   const pad = (n: number) => String(n).padStart(2, '0');
-  const YYYY = date.getFullYear();
-  const MM = pad(date.getMonth() + 1);
-  const DD = pad(date.getDate());
-  const hh = pad(date.getHours());
-  const mm = pad(date.getMinutes());
-  const ss = pad(date.getSeconds());
+  const YYYY = year;
+  const MM = pad(parseInt(month, 10));
+  const DD = pad(parseInt(day, 10));
+  const hh = pad(parseInt(hour, 10));
+  const mm = pad(parseInt(minute, 10));
+  const ss = pad(parseInt(second, 10));
 
   return `${YYYY}-${MM}-${DD} ${hh}:${mm}:${ss}`;
 }
@@ -180,14 +183,21 @@ export async function getTimestampFieldClusters(
  * @param selectedTimeField - The selected time field
  * @param client - OpenSearch client
  * @param logger - Logger
+ * @param getTimestampFieldClustersFn - Optional function to get timestamp field clusters (for testing)
  * @returns Promise<string[]> Other time fields
  */
 export async function getOtherTimeFields(
   indexName: string,
   selectedTimeField: string,
   client: any,
-  logger: Logger
+  logger: Logger,
+  getTimestampFieldClustersFn?: (
+    indexName: string,
+    client: any,
+    logger: Logger
+  ) => Promise<string[][]>
 ): Promise<string[]> {
-  const allTimeFields = await getTimestampFieldClusters(indexName, client, logger);
+  const getClusters = getTimestampFieldClustersFn || getTimestampFieldClusters;
+  const allTimeFields = await getClusters(indexName, client, logger);
   return allTimeFields.filter((cluster) => !cluster.includes(selectedTimeField)).flat();
 }
