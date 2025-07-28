@@ -13,7 +13,7 @@ import { schema } from '@osd/config-schema';
 import { i18n } from '@osd/i18n';
 import { UiSettingsParams } from 'opensearch-dashboards/server';
 
-export const getBannerSettings = (): Record<string, UiSettingsParams> => {
+export const getDefaultBannerSettings = (): Record<string, UiSettingsParams> => {
   return {
     'banner:active': {
       name: i18n.translate('banner.ui_settings.params.visibleTitle', {
