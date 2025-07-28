@@ -87,9 +87,13 @@ export class VisualizationBuilder {
 
     // Subscribe to visualization state updates and sync the state to url
     this.subscriptions.push(
-      this.currentChartType$.subscribe((v) => this.syncToUrl('chartType', v)),
-      this.axesMapping$.subscribe((v) => this.syncToUrl('axesMapping', v)),
-      this.styles$.subscribe((v) => this.syncToUrl('styleOptions', v?.styles)),
+      combineLatest([
+        this.currentChartType$,
+        this.axesMapping$,
+        this.styles$,
+      ]).subscribe(([chartType, axesMapping, styles]) =>
+        this.syncToUrl({ chartType, axesMapping, styleOptions: styles?.styles })
+      ),
       this.currentChartType$.subscribe((chartType) => this.onChartTypeChange(chartType)),
       this.data$.subscribe((data) =>
         this.onDataChange(data, this.currentChartType$.value, this.axesMapping$.value)
@@ -319,10 +323,9 @@ export class VisualizationBuilder {
     this.axesMapping$.next(mapping);
   }
 
-  syncToUrl<State>(key: string, value: State) {
+  syncToUrl<State>(visState: VisState) {
     if (this.urlStateStorage) {
-      const current = this.urlStateStorage.get<VisState>('_v');
-      this.urlStateStorage.set('_v', { ...current, [key]: value }, { replace: true });
+      this.urlStateStorage.set('_v', visState, { replace: true });
     }
   }
 
