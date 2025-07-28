@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { highlightLogUsingPattern, isValidFiniteNumber } from './utils';
+import { findDefaultPatternsField, highlightLogUsingPattern, isValidFiniteNumber } from './utils';
+import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
+
+jest.mock('../../../application/utils/state_management/slices/tab/tab_slice', () => ({
+  setPatternsField: jest
+    .fn()
+    .mockImplementation((field) => ({ type: 'mock/setPatternsField', payload: field })),
+}));
 
 describe('utils', () => {
   describe('isValidFiniteNumber', () => {
@@ -111,6 +118,148 @@ describe('utils', () => {
       ).toStrictEqual(
         '<mark>223.87.60.27</mark> - - [<mark>2018-07-22T00:39:02.912Z</mark>] "GET <mark>/opensearch/opensearch-1.0.0.deb_1</mark> HTTP/<mark>1.1</mark>" 200 <mark>6219</mark> "-" "Mozilla/<mark>5.0</mark> (<mark>X11</mark>; Linux <mark>x86</mark>_<mark>64</mark>; rv:<mark>6.0a1</mark>) Gecko/<mark>20110421</mark> Firefox/<mark>6.0a1</mark>"'
       );
+    });
+  });
+
+  describe('findDefaultPatternsField', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should return undefined when state is not provided', () => {
+      const result = findDefaultPatternsField(undefined, {} as any);
+      expect(result).toBeUndefined();
+      expect(setPatternsField).not.toHaveBeenCalled();
+    });
+
+    it('should return undefined when services.store is not provided', () => {
+      const state = {} as any;
+      const services = { tabRegistry: {} } as any;
+      const result = findDefaultPatternsField(state, services);
+      expect(result).toBeUndefined();
+      expect(setPatternsField).not.toHaveBeenCalled();
+    });
+
+    it('should return undefined when logs tab is not found', () => {
+      const state = {
+        query: {},
+        results: {},
+      } as any;
+      const services = {
+        store: { dispatch: jest.fn() },
+        tabRegistry: { getTab: jest.fn().mockReturnValue(null) },
+      } as any;
+
+      const result = findDefaultPatternsField(state, services);
+      expect(result).toBeUndefined();
+      expect(setPatternsField).not.toHaveBeenCalled();
+      expect(services.tabRegistry.getTab).toHaveBeenCalledWith('logs');
+    });
+
+    it('should not dispatch or return a field when there are no results', () => {
+      const state = {
+        query: {},
+        results: {},
+      } as any;
+      const services = {
+        store: { dispatch: jest.fn() },
+        tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
+      } as any;
+
+      const result = findDefaultPatternsField(state, services);
+      expect(result).toBeUndefined();
+      expect(setPatternsField).not.toHaveBeenCalled();
+    });
+
+    it('should not dispatch or return a field when there are no hits', () => {
+      const state = {
+        query: {},
+        results: {
+          'default-query': {
+            fieldSchema: [
+              { name: 'field1', type: 'string' },
+              { name: 'field2', type: 'string' },
+            ],
+            hits: { hits: [] },
+          },
+        },
+      } as any;
+      const services = {
+        store: { dispatch: jest.fn() },
+        tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
+      } as any;
+
+      const result = findDefaultPatternsField(state, services);
+      expect(result).toBeUndefined();
+      expect(setPatternsField).not.toHaveBeenCalled();
+    });
+
+    it('should find the field with the longest string value and dispatch action', () => {
+      const state = {
+        query: {},
+        results: {
+          'default-query': {
+            fieldSchema: [
+              { name: 'field1', type: 'string' },
+              { name: 'field2', type: 'string' },
+              { name: 'field3', type: 'number' }, // Should be ignored as it's not a string
+            ],
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    field1: 'short value',
+                    field2: 'this is a longer value that should be selected',
+                    field3: 123, // Should be ignored as it's not a string field
+                    field4: 'ignored because not in fieldSchema',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      } as any;
+      const services = {
+        store: { dispatch: jest.fn() },
+        tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
+      } as any;
+
+      const result = findDefaultPatternsField(state, services);
+      expect(result).toBe('field2');
+      expect(setPatternsField).toHaveBeenCalledWith('field2');
+      expect(services.store.dispatch).toHaveBeenCalled();
+    });
+
+    it('should handle non-string values in _source correctly', () => {
+      const state = {
+        query: {},
+        results: {
+          'default-query': {
+            fieldSchema: [
+              { name: 'field1', type: 'string' },
+              { name: 'field2', type: 'string' },
+            ],
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    field1: 'valid string',
+                    field2: null, // Non-string value
+                  },
+                },
+              ],
+            },
+          },
+        },
+      } as any;
+      const services = {
+        store: { dispatch: jest.fn() },
+        tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
+      } as any;
+
+      const result = findDefaultPatternsField(state, services);
+      expect(result).toBe('field1');
+      expect(setPatternsField).toHaveBeenCalledWith('field1');
     });
   });
 });
