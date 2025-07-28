@@ -357,7 +357,12 @@ export class ExploreEmbeddable
         };
       } else {
         const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
-        const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns); // FIXME when no rule matched
+        const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns);
+        if (!matchedRule) {
+          throw new Error(
+            `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+          );
+        }
         const ruleBasedToExpressionFn = (
           transformedData: Array<Record<string, any>>,
           numericalCols: VisColumn[],

@@ -469,4 +469,22 @@ describe('ExploreEmbeddable', () => {
     embeddable.node = undefined;
     expect(() => embeddable.destroy()).not.toThrow();
   });
+
+  test('fetch throws error when no matchedRule is exist', async () => {
+    const { findRuleByIndex } = await import(
+      '../components/visualizations/visualization_container_utils'
+    );
+    jest.mocked(findRuleByIndex).mockReturnValueOnce(undefined);
+
+    mockSavedExplore.visualization = JSON.stringify({
+      chartType: 'line',
+      axesMapping: { x: 'field1', y: 'field2' },
+    });
+    mockSavedExplore.uiState = JSON.stringify({ activeTab: 'visualization' });
+
+    // @ts-ignore
+    await expect(embeddable.fetch()).rejects.toThrow(
+      'Cannot load saved visualization "Test Explore" with id test-id'
+    );
+  });
 });

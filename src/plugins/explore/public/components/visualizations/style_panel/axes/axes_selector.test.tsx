@@ -325,7 +325,7 @@ describe('AxisSelector', () => {
     allColumnOptions: [
       {
         isGroupLabelOption: true,
-        label: 'Categorical Fields',
+        label: 'Categorical fields',
         options: [
           {
             column: {
@@ -440,7 +440,7 @@ describe('AxisSelector', () => {
       allColumnOptions: [
         {
           isGroupLabelOption: true,
-          label: 'Categorical Fields',
+          label: 'Categorical fields',
           options: [
             {
               column: {
