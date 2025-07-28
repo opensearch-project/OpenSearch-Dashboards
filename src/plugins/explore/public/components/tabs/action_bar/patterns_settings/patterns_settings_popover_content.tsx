@@ -25,7 +25,6 @@ const gatherOptions = (dataset?: DataView) => {
     return [];
   }
 
-  // Get all fields from the dataset
   const fields = dataset.fields.getAll();
 
   // Filter out fields that are not suitable for patterns
@@ -39,7 +38,6 @@ const gatherOptions = (dataset?: DataView) => {
     );
   });
 
-  // Sort fields alphabetically
   return filteredFields
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((field) => ({
@@ -56,7 +54,7 @@ export const PatternsSettingsPopoverContent = ({
   const dispatch = useDispatch();
   const patternsField = useSelector(selectPatternsField);
   const { dataset, isLoading, error } = useDatasetContext();
-  // get log tab results to sample and find longest value fields
+  // Get log tab results to sample and find longest value fields
 
   // Generate options from dataset fields if available
   const options = gatherOptions(dataset);
@@ -83,16 +81,14 @@ export const PatternsSettingsPopoverContent = ({
         dispatch(executeQueries({ services }));
       }
 
-      if (fieldChange) fieldChange(); // run logic from whoever calls the content here
+      if (fieldChange) fieldChange(); // Run logic from whoever calls the content here
     });
   };
 
-  // Show loading indicator if dataset is loading
   if (isLoading) {
     return <EuiLoadingSpinner />;
   }
 
-  // Show error message if there was an error loading the dataset
   if (error) {
     return (
       <EuiCallOut title="Error loading dataset" color="danger" iconType="alert">
