@@ -35,14 +35,6 @@ export interface TabDefinition {
   // Transform query string for cache key generation
   prepareQuery?: (query: Query, state?: RootState) => string;
 
-  // // New callback for handling query results
-  // handleQueryResult?: (
-  //   results: ISearchResult,
-  //   error: Error | null,
-  //   services: ExploreServices,
-  //   state: RootState
-  // ) => Promise<void>;
-
   // Optional results processor for raw results
   resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;
 

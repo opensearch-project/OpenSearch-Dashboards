@@ -19,7 +19,6 @@ export const PatternsSettingsPopoverButton = () => {
         <EuiButtonIcon
           size="s"
           data-test-subj="patternsSettingButton"
-          // disabled={isLoading}
           iconType="gear"
           onClick={openPopover}
         />

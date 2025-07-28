@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IFieldType } from 'src/plugins/data/common';
 import { LogsTab } from '../components/tabs/logs_tab';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { PatternsTab } from '../components/tabs/patterns_tab';
@@ -13,55 +12,7 @@ import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
 import { setPatternsField } from './utils/state_management/slices/tab/tab_slice';
 import { RootState } from './utils/state_management/store';
-import { defaultPrepareQueryString } from './utils/state_management/actions/query_actions';
-
-const findDefaultPatternsField = (state?: RootState, services?: ExploreServices) => {
-  // set the value for patterns field
-  if (!state || !services?.store) return;
-
-  // Get the log tab's results from the state
-  const query = state.query;
-  const results = state.results;
-
-  // Get the logs tab to find its cache key
-  const logsTab = services.tabRegistry.getTab('logs');
-  if (!logsTab) return;
-
-  // Get the cache key for logs tab results
-  const logsCacheKey = defaultPrepareQueryString(query);
-  const logResults = results[logsCacheKey];
-
-  // Get fields
-  const filteredFields = logResults?.fieldSchema?.filter((field: Partial<IFieldType>) => {
-    return field.type === 'string';
-  });
-
-  // Get the first hit if available
-  const firstHit = logResults?.hits?.hits?.[0];
-
-  if (firstHit && firstHit._source && filteredFields) {
-    // Find the field with the longest value
-    let longestField = '';
-    let maxLength = 0;
-
-    Object.entries(firstHit._source).forEach(([field, value]) => {
-      // Check if the field exists in options
-      if (filteredFields.some((option) => option.name === field)) {
-        const valueLength = typeof value === 'string' ? value.length : 0;
-
-        if (valueLength > maxLength) {
-          maxLength = valueLength;
-          longestField = field;
-        }
-      }
-    });
-
-    if (longestField) {
-      services.store.dispatch(setPatternsField(longestField));
-      return longestField;
-    }
-  }
-};
+import { findDefaultPatternsField } from '../components/patterns_table/utils/utils';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -118,13 +69,9 @@ export const registerBuiltInTabs = (
 
     // Add lifecycle hooks
     onActive: (state?: RootState): void => {
-      // TODO: write detailed message about predicting the field
-
       findDefaultPatternsField(state, services);
     },
 
-    // Currently, onInactive is only implemented for the switching of datasets. If this
-    // changes in the future, this might not be the best place to remove the patterns field
     onInactive: (state?: RootState): void => {
       // Tab deactivated
       if (!state || !services?.store) return;

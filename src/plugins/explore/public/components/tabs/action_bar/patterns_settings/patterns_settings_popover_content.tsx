@@ -82,8 +82,6 @@ export const PatternsSettingsPopoverContent = ({
         dispatch(executeQueries({ services }));
       }
 
-      // setValue(newValue);
-
       if (fieldChange) fieldChange(); // run logic from whoever calls the content here
     });
   };
