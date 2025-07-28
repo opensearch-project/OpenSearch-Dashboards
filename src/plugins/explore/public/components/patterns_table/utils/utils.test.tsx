@@ -5,11 +5,17 @@
 
 import { findDefaultPatternsField, highlightLogUsingPattern, isValidFiniteNumber } from './utils';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
+import * as queryActions from '../../../application/utils/state_management/actions/query_actions';
 
 jest.mock('../../../application/utils/state_management/slices/tab/tab_slice', () => ({
   setPatternsField: jest
     .fn()
     .mockImplementation((field) => ({ type: 'mock/setPatternsField', payload: field })),
+}));
+
+// Mock the defaultPrepareQueryString function
+jest.mock('../../../application/utils/state_management/actions/query_actions', () => ({
+  defaultPrepareQueryString: jest.fn().mockReturnValue('default-query'),
 }));
 
 describe('utils', () => {
@@ -142,7 +148,7 @@ describe('utils', () => {
 
     it('should return undefined when logs tab is not found', () => {
       const state = {
-        query: {},
+        query: { language: 'PPL' },
         results: {},
       } as any;
       const services = {
@@ -158,7 +164,7 @@ describe('utils', () => {
 
     it('should not dispatch or return a field when there are no results', () => {
       const state = {
-        query: {},
+        query: { language: 'PPL' },
         results: {},
       } as any;
       const services = {
@@ -169,11 +175,12 @@ describe('utils', () => {
       const result = findDefaultPatternsField(state, services);
       expect(result).toBeUndefined();
       expect(setPatternsField).not.toHaveBeenCalled();
+      expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
     });
 
     it('should not dispatch or return a field when there are no hits', () => {
       const state = {
-        query: {},
+        query: { language: 'PPL' },
         results: {
           'default-query': {
             fieldSchema: [
@@ -192,11 +199,12 @@ describe('utils', () => {
       const result = findDefaultPatternsField(state, services);
       expect(result).toBeUndefined();
       expect(setPatternsField).not.toHaveBeenCalled();
+      expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
     });
 
     it('should find the field with the longest string value and dispatch action', () => {
       const state = {
-        query: {},
+        query: { language: 'PPL' },
         results: {
           'default-query': {
             fieldSchema: [
@@ -228,11 +236,12 @@ describe('utils', () => {
       expect(result).toBe('field2');
       expect(setPatternsField).toHaveBeenCalledWith('field2');
       expect(services.store.dispatch).toHaveBeenCalled();
+      expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
     });
 
     it('should handle non-string values in _source correctly', () => {
       const state = {
-        query: {},
+        query: { language: 'PPL' },
         results: {
           'default-query': {
             fieldSchema: [
@@ -260,6 +269,7 @@ describe('utils', () => {
       const result = findDefaultPatternsField(state, services);
       expect(result).toBe('field1');
       expect(setPatternsField).toHaveBeenCalledWith('field1');
+      expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
     });
   });
 });

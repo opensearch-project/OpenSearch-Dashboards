@@ -14,6 +14,7 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { ExploreServices } from '../../../../types';
 import { selectPatternsField } from '../../../../application/utils/state_management/selectors';
 import { useDatasetContext } from '../../../../application/context/dataset_context/dataset_context';
+import './patterns_settings_popover_content.scss';
 
 export interface PatternsSettingsPopoverContentProps {
   fieldChange?: () => void;
@@ -101,18 +102,18 @@ export const PatternsSettingsPopoverContent = ({
   }
 
   return (
-    <div className="dscDownloadCsvPopoverContent" data-test-subj="dscDownloadCsvPopoverContent">
-      <div className="dscDownloadCsvPopoverContent__titleWrapper">
+    <div className="patternsSettingsPopoverContent" data-test-subj="patternsSettingsPopoverContent">
+      <div className="patternsSettingsPopoverContent__titleWrapper">
         <EuiText data-test-subj="dscDownloadCsvTitle" size="m">
           <strong>
             <FormattedMessage
-              id="explore.discover.downloadCsvTitle"
+              id="explore.discover.patterns.settings.fieldName"
               defaultMessage="Patterns Field"
             />
           </strong>
         </EuiText>
       </div>
-      <div className="dscDownloadCsvPopoverContent__form">
+      <div className="patternsSettingsPopoverContent__form">
         <EuiSelect options={options} value={chosenPatternsField} onChange={handleFieldChange} />
       </div>
     </div>
