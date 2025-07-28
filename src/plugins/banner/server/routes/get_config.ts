@@ -23,7 +23,6 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
       // Get UI settings client
       const uiSettingsClient = context.core.uiSettings.client;
 
-      // Get all banner settings at once instead of individual calls
       const settings = await uiSettingsClient.getAll();
 
       // Extract banner settings from the result
