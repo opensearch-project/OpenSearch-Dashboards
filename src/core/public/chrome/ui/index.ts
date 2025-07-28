@@ -42,3 +42,4 @@ export {
   createRecentNavLink,
 } from './header';
 export { renderNavGroupElement } from './nav_group_element';
+export { LeftBottomActionButton } from './header/left_bottom_action_button';

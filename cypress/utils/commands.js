@@ -51,8 +51,7 @@ Cypress.Commands.add('deleteWorkspace', (workspaceName) => {
 });
 
 Cypress.Commands.add('openWorkspaceDashboard', (workspaceName) => {
-  cy.getElementByTestId('workspace-select-button').should('exist').click();
-  cy.getElementByTestId('workspace-menu-manage-button').should('exist').click();
+  cy.visit(`${Cypress.config().baseUrl}/app/workspace_list`);
   cy.get('.euiBasicTable')
     .find('tr')
     .filter((index, row) => {

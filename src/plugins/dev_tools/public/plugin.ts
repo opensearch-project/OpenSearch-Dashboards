@@ -41,6 +41,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   RightNavigationOrder,
   RightNavigationButton,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
@@ -48,7 +49,7 @@ import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 import './index.scss';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
-import { DevToolsIcon } from './dev_tools_icon';
+import { DevToolsModal } from './dev_tools_modal';
 import { WorkspaceAvailability } from '../../../core/public';
 import { searchForDevTools } from './global_search/search_devtool_command';
 import { Trigger, UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -103,6 +104,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private setupDeps: DevToolsSetupDependencies | undefined;
   private uiActionsStart: UiActionsStart | undefined;
+  private unmountDevToolsModal: (() => void) | undefined;
+  private devToolsMountDom: HTMLDivElement | undefined;
 
   private getSortedDevTools(): readonly DevToolApp[] {
     return sortBy([...this.devTools.values()], 'order');
@@ -172,6 +175,31 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       });
 
       uiActions.registerTrigger(devToolsTrigger);
+
+      Object.values(DEFAULT_NAV_GROUPS).forEach((navGroup) => {
+        if (!navGroup.type) {
+          coreSetup.chrome.navGroup.addNavLinksToGroup(navGroup, [
+            {
+              id: this.id,
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              title: i18n.translate('devTools.icon.nav.title', {
+                defaultMessage: 'Developer tools',
+              }),
+              euiIconType: 'consoleApp',
+              order: 200,
+              onClick: (event) => {
+                event.preventDefault();
+                const firstDevTool = this.devTools.values().next().value;
+                if (firstDevTool) {
+                  this.getUiActionsStart()
+                    .getTrigger(DEVTOOL_TRIGGER_ID)
+                    .exec({ defaultRoute: firstDevTool.id });
+                }
+              },
+            },
+          ]);
+        }
+      });
     }
 
     return {
@@ -192,20 +220,21 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
   public start(core: CoreStart, { uiActions }: DevToolsStartDependencies) {
     this.uiActionsStart = uiActions;
     if (core.chrome.navGroup.getNavGroupEnabled()) {
-      core.chrome.navControls.registerLeftBottom({
-        order: 4,
-        mount: toMountPoint(
-          React.createElement(DevToolsIcon, {
-            core,
-            appId: this.id,
-            devTools: this.getSortedDevTools(),
-            deps: this.setupDeps as DevToolsSetupDependencies,
-            title: this.title,
-          })
-        ),
-      });
+      // Dev tool needs to be mount so that it can listen UI Actions events.
+      this.devToolsMountDom = document.createElement('div');
+      this.devToolsMountDom.dataset.testSubj = 'devToolsModalMountDom';
+      document.body.appendChild(this.devToolsMountDom);
+      this.unmountDevToolsModal = toMountPoint(
+        React.createElement(DevToolsModal, {
+          core,
+          appId: this.id,
+          devTools: this.getSortedDevTools(),
+          deps: this.setupDeps as DevToolsSetupDependencies,
+          title: this.title,
+        })
+      )(this.devToolsMountDom);
     }
-    if (this.getSortedDevTools().length === 0 || core.chrome.navGroup.getNavGroupEnabled()) {
+    if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     } else {
       // Register right navigation for dev tool only when console and futureNavigation are both enabled.
@@ -227,5 +256,10 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     }
   }
 
-  public stop() {}
+  public stop() {
+    this.unmountDevToolsModal?.();
+    this.devToolsMountDom?.remove();
+    this.devToolsMountDom = undefined;
+    this.unmountDevToolsModal = undefined;
+  }
 }

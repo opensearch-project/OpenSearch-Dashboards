@@ -43,7 +43,6 @@ import {
   ContentManagementPluginStart,
   ESSENTIAL_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
-import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import {
@@ -53,7 +52,6 @@ import {
   getUseCaseUrl,
   isAppAccessibleInWorkspace,
 } from './utils';
-import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { WorkspaceListCard } from './components/service_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 import { WorkspaceSelector } from './components/workspace_selector/workspace_selector';
@@ -273,6 +271,7 @@ export class WorkspacePlugin
       chrome: core.chrome,
       getStartServices: core.getStartServices,
       workspaces: core.workspaces,
+      application: core.application,
     });
 
     core.application.registerAppUpdater(this.appUpdater$);
@@ -603,19 +602,6 @@ export class WorkspacePlugin
     if (!core.chrome.navGroup.getNavGroupEnabled()) {
       this.addWorkspaceToBreadcrumbs(core);
     } else {
-      /**
-       * Register workspace dropdown selector on the left navigation bottom
-       */
-      core.chrome.navControls.registerLeftBottom({
-        order: 2,
-        mount: toMountPoint(
-          React.createElement(WorkspaceMenu, {
-            coreStart: core,
-            registeredUseCases$: this.registeredUseCases$,
-          })
-        ),
-      });
-
       // register workspace list in home page
       this.registerWorkspaceListToHome(core, contentManagement);
 
