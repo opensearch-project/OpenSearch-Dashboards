@@ -30,6 +30,7 @@ import { DataSourceItem } from '../data_source_item';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import './data_source_aggregated_view.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
+import { DATA_SOURCE_SELECTOR_FIELDS } from '../../../framework/constants';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -98,13 +99,7 @@ export class DataSourceAggregatedView extends React.Component<
 
   componentDidMount() {
     this._isMounted = true;
-    getDataSourcesWithFields(this.props.savedObjectsClient, [
-      'id',
-      'title',
-      'auth.type',
-      'dataSourceVersion',
-      'installedPlugins',
-    ])
+    getDataSourcesWithFields(this.props.savedObjectsClient, DATA_SOURCE_SELECTOR_FIELDS)
       .then(async (fetchedDataSources) => {
         const allDataSourcesIdToTitleMap = new Map();
 

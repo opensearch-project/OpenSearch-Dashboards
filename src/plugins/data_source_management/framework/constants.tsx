@@ -98,3 +98,16 @@ export const OBS_S3_DATA_SOURCE = 'observability-s3'; // prefix key for generati
 export const S3_DATA_SOURCE_GROUP_DISPLAY_NAME = 'Amazon S3'; // display group name for Amazon-managed-s3 data sources in data selector
 export const S3_DATA_SOURCE_GROUP_SPARK_DISPLAY_NAME = 'Spark'; // display group name for OpenSearch-spark-s3 data sources in data selector
 export const SECURITY_DASHBOARDS_LOGOUT_URL = '/logout';
+
+/**
+ * The fields exposed in the data source selectors. Can be leveraged in custom dataSourceFilter functions when implementing various
+ * data source pickers.
+ */
+export const DATA_SOURCE_SELECTOR_FIELDS = [
+  'id',
+  'title',
+  'endpoint',
+  'auth.type',
+  'dataSourceVersion',
+  'installedPlugins',
+];
