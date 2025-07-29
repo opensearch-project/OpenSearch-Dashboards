@@ -22,7 +22,6 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { DetailedDataset } from './dataset_select';
 import { DEFAULT_DATA } from '../../../common/constants';
 import { IDataPluginServices } from '../../types';
-import { getDatasetType } from '../dataset_utils';
 
 export interface DatasetDetailsProps {
   dataset?: DetailedDataset;
@@ -43,15 +42,6 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
 
     services.application!.navigateToApp('dataSources', { path: `/${dataset.dataSource.id}` });
   }, [dataset, services.application]);
-
-  const [datasetType, setDatasetType] = useState<string>(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
-
-  // Get the dataset type when the dataset changes
-  useEffect(() => {
-    if (!dataset) return;
-    const type = getDatasetType(dataset, datasetService);
-    setDatasetType(type);
-  }, [dataset, datasetService]);
 
   if (!dataset) {
     return null;
@@ -147,9 +137,9 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
               >
                 <EuiIcon
                   type={
-                    datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+                    dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
                       ? 'logoOpenSearch'
-                      : datasetService.getType(datasetType)?.meta?.icon?.type || 'database'
+                      : datasetService.getType(dataset.type)?.meta?.icon?.type || 'database'
                   }
                   size="s"
                   className="datasetDetails__icon"
