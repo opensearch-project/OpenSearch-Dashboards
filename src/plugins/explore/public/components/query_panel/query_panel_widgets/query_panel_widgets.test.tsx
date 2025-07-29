@@ -22,6 +22,10 @@ jest.mock('../../../application/utils/state_management/selectors', () => ({
 }));
 
 // Mock all child components
+jest.mock('./dataset_select', () => ({
+  DatasetSelectWidget: () => <div data-test-subj="dataset-select-widget">Dataset Select</div>,
+}));
+
 jest.mock('./save_query', () => ({
   SaveQueryButton: () => <div data-test-subj="save-query-button">Save Query</div>,
 }));
@@ -85,6 +89,7 @@ describe('QueryPanelWidgets', () => {
     expect(container.querySelector('.exploreQueryPanelWidgets')).toBeInTheDocument();
 
     // Check left section components
+    expect(screen.getByTestId('dataset-select-widget')).toBeInTheDocument();
     expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
     expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
     expect(screen.getByTestId('selected-language')).toBeInTheDocument();

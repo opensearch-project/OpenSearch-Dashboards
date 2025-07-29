@@ -17,7 +17,6 @@ import {
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
 
 import { useEditorRef } from '../../../../application/hooks';
-import { useDatasetContext } from '../../../../application/context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
