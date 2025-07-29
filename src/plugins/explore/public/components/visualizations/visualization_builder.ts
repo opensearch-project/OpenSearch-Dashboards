@@ -5,7 +5,7 @@
 
 import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
 import { isEmpty, isEqual } from 'lodash';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, skip } from 'rxjs/operators';
 
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
 import {
@@ -94,14 +94,16 @@ export class VisualizationBuilder {
       ]).subscribe(([chartType, axesMapping, styles]) =>
         this.syncToUrl({ chartType, axesMapping, styleOptions: styles?.styles })
       ),
-      this.currentChartType$.subscribe((chartType) =>
-        this.onChartTypeChange(
-          this.data$.value,
-          chartType,
-          this.axesMapping$.value,
-          this.styles$.value
-        )
-      ),
+      this.currentChartType$
+        .pipe(skip(1))
+        .subscribe((chartType) =>
+          this.onChartTypeChange(
+            this.data$.value,
+            chartType,
+            this.axesMapping$.value,
+            this.styles$.value
+          )
+        ),
       this.data$.subscribe((data) =>
         this.onDataChange(data, this.currentChartType$.value, this.axesMapping$.value)
       )
