@@ -27,21 +27,44 @@ describe('useEditorText', () => {
     jest.clearAllMocks();
   });
 
-  it('should return editor text from Monaco editor getValue()', () => {
+  it('should return a callback function to get editor text', () => {
+    const { result } = renderHook(() => useEditorText(), { wrapper });
+
+    expect(typeof result.current).toBe('function');
+  });
+
+  it('should return editor text from Monaco editor getValue() when callback is called', () => {
     mockGetValue.mockReturnValue('SELECT * FROM table');
 
     const { result } = renderHook(() => useEditorText(), { wrapper });
+    const getText = result.current;
 
-    expect(result.current).toBe('SELECT * FROM table');
+    expect(getText()).toBe('SELECT * FROM table');
     expect(mockGetValue).toHaveBeenCalledTimes(1);
   });
 
-  it('should return updated text when Monaco editor value changes', () => {
+  it('should return updated text when Monaco editor value changes and callback is called', () => {
     mockGetValue.mockReturnValue('SELECT COUNT(*) FROM table');
 
     const { result } = renderHook(() => useEditorText(), { wrapper });
+    const getText = result.current;
 
-    expect(result.current).toBe('SELECT COUNT(*) FROM table');
+    expect(getText()).toBe('SELECT COUNT(*) FROM table');
     expect(mockGetValue).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return empty string when editor is not available', () => {
+    const mockEditorRefNull: InternalEditorContextValue = {
+      current: null,
+    };
+
+    const wrapperWithNullEditor = ({ children }: { children: React.ReactNode }) => (
+      <EditorContext.Provider value={mockEditorRefNull}>{children}</EditorContext.Provider>
+    );
+
+    const { result } = renderHook(() => useEditorText(), { wrapper: wrapperWithNullEditor });
+    const getText = result.current;
+
+    expect(getText()).toBe('');
   });
 });

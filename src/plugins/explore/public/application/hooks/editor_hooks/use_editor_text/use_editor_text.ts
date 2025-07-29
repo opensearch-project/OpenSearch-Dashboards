@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { EditorContext } from '../../../context';
 
 /**
- * Gives editor text
+ * Gives a callback to get editor text. Callback is used to avoid staleness
  */
 export const useEditorText = () => {
   const editorRef = useContext(EditorContext);
 
-  return editorRef.current?.getValue() || '';
+  return useCallback(() => {
+    return editorRef.current?.getValue() || '';
+  }, [editorRef]);
 };
