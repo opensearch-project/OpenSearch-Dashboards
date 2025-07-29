@@ -333,6 +333,89 @@ export const createQuery = (config, useKeyboard = false) => {
     });
 };
 
+/**
+ * Creates an Invalid query to test error highlighting
+ * @param {Object} config - Query configuration
+ */
+export const createInvalidQuery = (config) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      if (config.language === QueryLanguages.PPL.name) {
+        cy.get('.inputarea').type('source = data_logs_small_time_1 | where stats ', {
+          force: true,
+        });
+      }
+    });
+};
+
+/**
+ * Checks if the editor contains any error by looking for mtk31 class (error marker)
+ */
+export const validateEditorContainsError = () => {
+  cy.get('.monaco-editor', { timeout: 10000 })
+    .should('be.visible')
+    .within(() => {
+      cy.get('.mtk31', { timeout: 5000 }).should('exist');
+    });
+};
+
+/**
+ * Validates Implicit PPL Queries, that don't necessarily start with `source =` part
+ * @param {Object} config - Query configuration
+ */
+export const validateImplicitPPLQuery = (config) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      cy.get('.inputarea').type(' ', { force: true });
+      if (config.language === QueryLanguages.PPL.name) {
+        typeAndSelectSuggestion('c', 'category');
+        selectSuggestion('=');
+      }
+    });
+};
+
+/**
+ * Validates if documentation panel is visible after typing 'sour'
+ * @param {Object} config - Query configuration
+ */
+export const validateDocumentationPanelIsOpen = (config) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      cy.get('.inputarea').type(' ', { force: true });
+      if (config.language === QueryLanguages.PPL.name) {
+        // Type 'sour' to trigger suggestions with documentation
+        cy.get('.inputarea').type('sour', { force: true });
+
+        // Wait for suggestion widget to appear
+        cy.get('.suggest-widget.visible')
+          .should('be.visible')
+          .then(($widget) => {
+            // Check if documentation panel (status bar) is visible
+            const statusBar = $widget.find('.suggest-status-bar');
+            expect(statusBar.length).to.be.greaterThan(0);
+          });
+      }
+    });
+};
+
 // =======================================
 // Monaco Editor Parsing Utilities
 // =======================================
