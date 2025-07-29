@@ -26,7 +26,7 @@ import {
   useOpenSearchDashboards,
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
-import { Dataset, DataView, Query } from '../../../common';
+import { Dataset, DataView, DEFAULT_DATA, Query } from '../../../common';
 import { IDataPluginServices } from '../../types';
 import { DatasetDetails } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
@@ -54,6 +54,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   const isMounted = useRef(true);
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<DetailedDataset[]>([]);
+  const [selectedDataset, setSelectedDataset] = useState<DetailedDataset | undefined>();
   const [defaultDatasetId, setDefaultDatasetId] = useState<string | undefined>();
   const { data, overlays } = services;
   const {
@@ -63,22 +64,54 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   const datasetService = queryString.getDatasetService();
 
   const currentQuery = queryString.getQuery();
-  const queryDataset = currentQuery?.dataset;
+  const currentDataset = currentQuery.dataset;
 
-  const selectedDataset = useMemo(() => {
-    if (!queryDataset) return undefined;
+  useEffect(() => {
+    const updateSelectedDataset = async () => {
+      if (!currentDataset) {
+        setSelectedDataset(undefined);
+        return;
+      }
 
-    const matchingDataset = datasets.find((d) => d.id === queryDataset.id);
-    if (matchingDataset) {
-      return matchingDataset;
-    }
+      const matchingDataset = datasets.find((d) => d.id === currentDataset.id);
+      if (matchingDataset) {
+        setSelectedDataset(matchingDataset);
+        return;
+      }
 
-    return {
-      ...queryDataset,
-      description: queryDataset.description,
-      displayName: queryDataset.displayName,
-    } as DetailedDataset;
-  }, [queryDataset, datasets]);
+      const dataView = await dataViews.get(
+        currentDataset.id,
+        currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+      );
+
+      setSelectedDataset({
+        ...currentDataset,
+        description: dataView.description,
+        displayName: dataView.displayName,
+      } as DetailedDataset);
+    };
+    updateSelectedDataset();
+  }, [currentDataset, dataViews, datasets]);
+
+  // const selectedDataset = useMemo(async () => {
+  //   if (!currentDataset) return undefined;
+
+  //   const matchingDataset = datasets.find((d) => d.id === currentDataset.id);
+  //   if (matchingDataset) {
+  //     return matchingDataset;
+  //   }
+
+  //   const dataView = await dataViews.get(
+  //     currentDataset.id,
+  //     currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+  //   );
+
+  //   return {
+  //     ...currentDataset,
+  //     description: dataView.description,
+  //     displayName: dataView.displayName,
+  //   } as DetailedDataset;
+  // }, [currentDataset, dataViews, datasets]);
 
   const datasetIcon =
     datasetService.getType(selectedDataset?.sourceDatasetRef?.type || selectedDataset?.type || '')
@@ -110,7 +143,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
 
       setDatasets(fetchedDatasets);
 
-      if (!queryDataset && defaultDataView) {
+      if (!currentDataset && defaultDataView) {
         const defaultDataset = await dataViews.convertToDataset(defaultDataView);
         onSelect(defaultDataView);
       }
@@ -120,7 +153,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     return () => {
       isMounted.current = false;
     };
-  }, [datasetService, dataViews]);
+  }, [datasetService, dataViews, currentDataset, onSelect]); // todo original dataset service and dataviews
 
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const closePopover = useCallback(() => setIsOpen(false), []);
