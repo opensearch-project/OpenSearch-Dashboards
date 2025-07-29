@@ -8,7 +8,6 @@ import { render } from '@testing-library/react';
 import { PatternsContainer } from './patterns_container';
 import { mockPatternItems } from './utils/patterns_table.stubs';
 
-// Mock the PatternsTable component
 jest.mock('./patterns_table', () => ({
   PatternsTable: (props: any) => (
     <div
@@ -19,7 +18,6 @@ jest.mock('./patterns_table', () => ({
   ),
 }));
 
-// Mock the useTabResults hook
 jest.mock('../../application/utils/hooks/use_tab_results', () => ({
   useTabResults: jest.fn(() => ({
     results: {
@@ -37,21 +35,22 @@ jest.mock('../../application/utils/hooks/use_tab_results', () => ({
   })),
 }));
 
-// Mock the redux hooks
+jest.mock('../tabs/action_bar/patterns_settings/patterns_settings_popover_content', () => ({
+  PatternsSettingsPopoverContent: () => <div data-test-subj="mocked-patterns-settings" />,
+}));
+
 jest.mock('react-redux', () => ({
   useSelector: jest.fn((selector) => {
-    // Mock state for query
-    if (selector.toString().includes('state.query')) {
+    if (selector.toString().includes('selectQuery')) {
       return { query: 'test query', language: 'PPL' };
     }
-    // Mock state for results
-    if (selector.toString().includes('state.results')) {
+    if (selector.toString().includes('selectResults')) {
       return {
-        'test query': {
+        'default-query': {
           hits: {
             hits: mockPatternItems.map((item) => ({
               _source: {
-                // Use string literals instead of constants to avoid Jest errors
+                // using string literals instead of constants to avoid jest errors
                 sample_logs: [item.sample],
                 pattern_count: item.count,
                 patterns_field: 'test pattern',
@@ -62,20 +61,28 @@ jest.mock('react-redux', () => ({
         },
       };
     }
-    // Mock state for UI
     if (selector.toString().includes('state.ui.activeTabId')) {
       return 'patterns';
     }
-    return null;
+    return {};
   }),
+  useDispatch: jest.fn(() => jest.fn()),
   connect: jest.fn(() => (Component: React.ComponentType<any>) => Component),
+}));
+
+jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
+  defaultPrepareQueryString: jest.fn().mockReturnValue('default-query'),
+}));
+
+jest.mock('./utils/utils', () => ({
+  highlightLogUsingPattern: jest.fn((log) => `<mark>${log}</mark>`),
+  isValidFiniteNumber: jest.fn((val) => !isNaN(val) && isFinite(val)),
 }));
 
 describe('PatternsContainer', () => {
   it('renders without crashing', () => {
     const { getByTestId } = render(<PatternsContainer />);
 
-    // Check if PatternsTable is rendered
     const patternsTable = getByTestId('mocked-patterns-table');
     expect(patternsTable).toBeInTheDocument();
   });

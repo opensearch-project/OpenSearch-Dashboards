@@ -11,16 +11,12 @@ import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
 import { setPatternsField } from './utils/state_management/slices/tab/tab_slice';
-import { RootState } from './utils/state_management/store';
 import { findDefaultPatternsField } from '../components/patterns_table/utils/utils';
 
 /**
  * Registers built-in tabs with the tab registry
  */
-export const registerBuiltInTabs = (
-  tabRegistry: TabRegistryService,
-  services?: ExploreServices
-) => {
+export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: ExploreServices) => {
   // Register Logs Tab
   const logsTabDefinition = {
     id: 'logs',
@@ -50,16 +46,18 @@ export const registerBuiltInTabs = (
     order: 15,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
-    prepareQuery: (query, state) => {
+    prepareQuery: (query) => {
+      const state = services.store.getState();
+
       // Get the selected patterns field from the Redux state
-      let patternsField = state?.tab.patterns.patterns_field;
+      let patternsField = state.tab?.patterns?.patterns_field;
 
       const preparedQuery = getQueryWithSource(query);
       if (!patternsField) {
-        patternsField = findDefaultPatternsField(state, services);
+        patternsField = findDefaultPatternsField(services);
       }
 
-      return typeof preparedQuery.query === 'string' && preparedQuery.query !== ''
+      return preparedQuery.query !== ''
         ? preparedQuery.query +
             ` | patterns \`${patternsField}\` method=brain mode=aggregation | sort - pattern_count`
         : preparedQuery.query;
@@ -68,13 +66,11 @@ export const registerBuiltInTabs = (
     component: PatternsTab,
 
     // Add lifecycle hooks
-    onActive: (state?: RootState): void => {
-      findDefaultPatternsField(state, services);
+    onActive: (): void => {
+      findDefaultPatternsField(services);
     },
 
-    onInactive: (state?: RootState): void => {
-      // Tab deactivated
-      if (!state || !services?.store) return;
+    onInactive: (): void => {
       services.store.dispatch(setPatternsField(''));
     },
   });

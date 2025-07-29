@@ -18,6 +18,9 @@ jest.mock('../../../application/utils/state_management/actions/query_actions', (
   defaultPrepareQueryString: jest.fn().mockReturnValue('default-query'),
 }));
 
+// Mock for store.getState()
+const mockGetState = jest.fn();
+
 describe('utils', () => {
   describe('isValidFiniteNumber', () => {
     // Test valid numbers
@@ -130,18 +133,27 @@ describe('utils', () => {
   describe('findDefaultPatternsField', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      mockGetState.mockReset();
     });
 
     it('should return undefined when state is not provided', () => {
-      const result = findDefaultPatternsField(undefined, {} as any);
+      mockGetState.mockReturnValue(undefined);
+      const services = {
+        store: {
+          getState: mockGetState,
+          dispatch: jest.fn(),
+        },
+      } as any;
+      const result = findDefaultPatternsField(services);
       expect(result).toBeUndefined();
       expect(setPatternsField).not.toHaveBeenCalled();
     });
 
     it('should return undefined when services.store is not provided', () => {
-      const state = {} as any;
-      const services = { tabRegistry: {} } as any;
-      const result = findDefaultPatternsField(state, services);
+      const services = {
+        tabRegistry: { getTab: jest.fn() },
+      } as any;
+      const result = findDefaultPatternsField(services);
       expect(result).toBeUndefined();
       expect(setPatternsField).not.toHaveBeenCalled();
     });
@@ -151,12 +163,13 @@ describe('utils', () => {
         query: { language: 'PPL' },
         results: {},
       } as any;
+      mockGetState.mockReturnValue(state);
       const services = {
-        store: { dispatch: jest.fn() },
+        store: { dispatch: jest.fn(), getState: mockGetState },
         tabRegistry: { getTab: jest.fn().mockReturnValue(null) },
       } as any;
 
-      const result = findDefaultPatternsField(state, services);
+      const result = findDefaultPatternsField(services);
       expect(result).toBeUndefined();
       expect(setPatternsField).not.toHaveBeenCalled();
       expect(services.tabRegistry.getTab).toHaveBeenCalledWith('logs');
@@ -167,12 +180,13 @@ describe('utils', () => {
         query: { language: 'PPL' },
         results: {},
       } as any;
+      mockGetState.mockReturnValue(state);
       const services = {
-        store: { dispatch: jest.fn() },
+        store: { dispatch: jest.fn(), getState: mockGetState },
         tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
       } as any;
 
-      const result = findDefaultPatternsField(state, services);
+      const result = findDefaultPatternsField(services);
       expect(result).toBeUndefined();
       expect(setPatternsField).not.toHaveBeenCalled();
       expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
@@ -191,12 +205,13 @@ describe('utils', () => {
           },
         },
       } as any;
+      mockGetState.mockReturnValue(state);
       const services = {
-        store: { dispatch: jest.fn() },
+        store: { dispatch: jest.fn(), getState: mockGetState },
         tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
       } as any;
 
-      const result = findDefaultPatternsField(state, services);
+      const result = findDefaultPatternsField(services);
       expect(result).toBeUndefined();
       expect(setPatternsField).not.toHaveBeenCalled();
       expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
@@ -227,12 +242,13 @@ describe('utils', () => {
           },
         },
       } as any;
+      mockGetState.mockReturnValue(state);
       const services = {
-        store: { dispatch: jest.fn() },
+        store: { dispatch: jest.fn(), getState: mockGetState },
         tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
       } as any;
 
-      const result = findDefaultPatternsField(state, services);
+      const result = findDefaultPatternsField(services);
       expect(result).toBe('field2');
       expect(setPatternsField).toHaveBeenCalledWith('field2');
       expect(services.store.dispatch).toHaveBeenCalled();
@@ -261,12 +277,13 @@ describe('utils', () => {
           },
         },
       } as any;
+      mockGetState.mockReturnValue(state);
       const services = {
-        store: { dispatch: jest.fn() },
+        store: { dispatch: jest.fn(), getState: mockGetState },
         tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
       } as any;
 
-      const result = findDefaultPatternsField(state, services);
+      const result = findDefaultPatternsField(services);
       expect(result).toBe('field1');
       expect(setPatternsField).toHaveBeenCalledWith('field1');
       expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);

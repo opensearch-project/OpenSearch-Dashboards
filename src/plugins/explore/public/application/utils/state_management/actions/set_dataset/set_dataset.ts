@@ -31,23 +31,15 @@ export const setDatasetActionCreator = (
     },
   } = services;
   const currentQuery = queryString.getQuery();
-
-  const state = getState();
   const {
     queryEditor: { promptModeIsAvailable, summaryAgentIsAvailable },
     query,
-    ui,
-  } = state;
+  } = getState();
 
   dispatch(setActiveTab(''));
   dispatch(clearResults());
   dispatch(clearQueryStatusMap());
   dispatch(clearLastExecutedData());
-
-  const activeTab = services.tabRegistry.getTab(ui.activeTabId);
-  if (activeTab?.onInactive) {
-    activeTab?.onInactive(state);
-  }
 
   await dataViews.ensureDefaultDataView();
   const dataView = query.dataset

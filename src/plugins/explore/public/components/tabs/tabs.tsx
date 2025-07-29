@@ -30,7 +30,6 @@ export const ExploreTabs = () => {
   const registryTabs = services.tabRegistry.getAllTabs();
   const results = useSelector((state: RootState) => state.results);
   const query = useSelector((state: RootState) => state.query);
-  const fullState = useSelector((state: RootState) => state);
   const activeTabId = useSelector(selectActiveTab);
 
   const onTabsClick = useCallback(
@@ -40,11 +39,12 @@ export const ExploreTabs = () => {
       const activeTab = services.tabRegistry.getTab(selectedTab.id);
 
       if (activeTab?.onActive) {
-        activeTab?.onActive(fullState);
+        activeTab?.onActive();
       }
+      // TODO: put onInactive here? i mean the tabs are technically changing here as well
 
       const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
-      const newTabCacheKey = prepareQuery(query, fullState);
+      const newTabCacheKey = prepareQuery(query);
 
       const needsExecution = !results[newTabCacheKey];
 
@@ -58,7 +58,7 @@ export const ExploreTabs = () => {
         );
       }
     },
-    [query, results, dispatch, services, fullState]
+    [query, results, dispatch, services]
   );
 
   const tabs: EuiTabbedContentTab[] = registryTabs.map((registryTab) => {

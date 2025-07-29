@@ -6,7 +6,6 @@
 import { IFieldType } from 'src/plugins/data/common';
 import { DELIM_START, MARK_END, MARK_START, STD_DELIM_END, UNIQ_DELIM_END } from './constants';
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
-import { RootState } from '../../../application/utils/state_management/store';
 import { ExploreServices } from '../../../types';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
 
@@ -125,9 +124,17 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
  * This function identifies the field most suitable for pattern analysis by comparing the length
  * of string values in the first hit.
  */
-export const findDefaultPatternsField = (state?: RootState, services?: ExploreServices) => {
+export const findDefaultPatternsField = (services: ExploreServices) => {
+  if (!services.store || !services.store.getState) {
+    return;
+  }
+
   // set the value for patterns field
-  if (!state || !services?.store) return;
+  const state = services.store.getState();
+
+  if (!state) {
+    return;
+  }
 
   // Get the log tab's results from the state
   const query = state.query;
