@@ -120,7 +120,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$, isNavOpen }:
 
   if (!isNavOpen && currentWorkspace) {
     button = (
-      <EuiFlexGroup justifyContent="center">
+      <EuiFlexGroup alignItems="center" direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiToolTip content={currentWorkspace.name}>
             <EuiButtonEmpty onClick={onButtonClick} flush="both">
