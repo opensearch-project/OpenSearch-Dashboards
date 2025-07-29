@@ -362,6 +362,10 @@ export class VisualizationBuilder {
     );
     this.isInitialized = false;
   }
+
+  clearUrl() {
+    this.syncToUrl({ axesMapping: {}, styleOptions: undefined, chartType: undefined });
+  }
 }
 
 let visualizationBuilder: VisualizationBuilder;
