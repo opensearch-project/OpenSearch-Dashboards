@@ -166,6 +166,9 @@ export class CodeEditor extends React.Component<Props, {}> {
         editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
       });
     }
+    // Show the documentation panel by default
+    const suggestController = editor.getContribution('editor.contrib.suggestController') as any;
+    suggestController.widget.value._setDetailsVisible(true);
   };
 
   render() {

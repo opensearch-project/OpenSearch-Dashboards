@@ -51,7 +51,7 @@ export const selectSpecificSuggestion = (suggestionText) => {
       cy.get('.monaco-list-row.focused').then(() => {
         cy.get('.monaco-list-row').then(($rows) => {
           const exactMatch = $rows.filter((_, row) => {
-            return Cypress.$(row).attr('aria-label') === suggestionText;
+            return Cypress.$(row).text().includes(suggestionText);
           });
 
           if (exactMatch.length > 0) {
