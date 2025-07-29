@@ -16,6 +16,7 @@ import {
   selectIsPromptEditorMode,
   selectLastExecutedPrompt,
   selectLastExecutedTranslatedQuery,
+  selectSummaryAgentIsAvailable,
 } from './query_editor';
 import { RootState } from '../../store';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
@@ -32,6 +33,7 @@ describe('query_editor selectors', () => {
       },
       editorMode: EditorMode.Query,
       promptModeIsAvailable: false,
+      summaryAgentIsAvailable: false,
       promptToQueryIsLoading: false,
       lastExecutedPrompt: '',
       lastExecutedTranslatedQuery: '',
@@ -282,6 +284,28 @@ describe('query_editor selectors', () => {
       });
 
       const result = selectPromptToQueryIsLoading(state);
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('selectSummaryAgentIsAvailable', () => {
+    it('should return true when summaryAgentIsAvailable is true', () => {
+      const state = createMockState({
+        summaryAgentIsAvailable: true,
+      });
+
+      const result = selectSummaryAgentIsAvailable(state);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when summaryAgentIsAvailable is false', () => {
+      const state = createMockState({
+        summaryAgentIsAvailable: false,
+      });
+
+      const result = selectSummaryAgentIsAvailable(state);
 
       expect(result).toBe(false);
     });
