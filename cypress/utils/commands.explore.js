@@ -382,11 +382,7 @@ cy.explore.add(
 
 cy.explore.add(
   'setIndexAsDataset',
-  (index, dataSourceName, language, timeFieldName="timestamp", finalAction = 'submit') => {
-    cy.log('index', index);
-    cy.log('dataSourceName', dataSourceName);
-    cy.log('language', language);
-    cy.log('timeFieldName', timeFieldName);
+  (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
     cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
@@ -399,12 +395,10 @@ cy.explore.add(
       cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
     }
 
-
     cy.getElementByTestId('advancedSelectorTimeFieldSelect')
-        .should('be.visible')
-        .select(timeFieldName);
+      .should('be.visible')
+      .select(timeFieldName);
   
-
     if (finalAction === 'submit') {
       cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
 
