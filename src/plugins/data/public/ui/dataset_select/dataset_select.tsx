@@ -312,7 +312,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                             await datasetService.cacheDataset(query.dataset, services, false);
                             const dataView = await data.dataViews.get(
                               query.dataset.id,
-                              query.dataset.type !== 'INDEX_PATTERN'
+                              query.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
                             );
 
                             if (dataView) {

@@ -6,7 +6,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { IBucketDateHistogramAggConfig, Query, DataView } from 'src/plugins/data/common';
+import {
+  IBucketDateHistogramAggConfig,
+  Query,
+  DataView,
+  DEFAULT_DATA,
+} from 'src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -276,7 +281,10 @@ const executeQueryBase = async (
 
     await services.data.dataViews.ensureDefaultDataView();
     const dataView = query.dataset
-      ? await services.data.dataViews.get(query.dataset.id, query.dataset.type !== 'INDEX_PATTERN')
+      ? await services.data.dataViews.get(
+          query.dataset.id,
+          query.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+        )
       : await services.data.dataViews.getDefault();
     if (!dataView) {
       throw new Error('Dataset not found for query execution');

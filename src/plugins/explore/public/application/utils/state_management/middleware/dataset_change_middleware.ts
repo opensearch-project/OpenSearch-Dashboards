@@ -5,6 +5,7 @@
 
 import { Middleware } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
+import { DEFAULT_DATA } from 'src/plugins/data/common';
 import { RootState } from '../store';
 import { ExploreServices } from '../../../../types';
 import {
@@ -58,7 +59,7 @@ export const createDatasetChangeMiddleware = (
 
         if (currentDataset) {
           try {
-            if (datasetService && currentDataset.type !== 'INDEX_PATTERN') {
+            if (datasetService && currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
               await datasetService.cacheDataset(
                 currentDataset,
                 {
