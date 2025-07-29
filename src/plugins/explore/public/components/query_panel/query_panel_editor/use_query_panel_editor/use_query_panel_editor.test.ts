@@ -27,13 +27,7 @@ jest.mock(
 );
 
 jest.mock('../../../../application/hooks', () => ({
-  useClearEditors: jest.fn(),
-  useEditorFocus: jest.fn(),
   useEditorRef: jest.fn(),
-  useEditorText: jest.fn(),
-  useSetEditorText: jest.fn(),
-  useChangeQueryEditor: jest.fn(),
-  useSetEditorTextWithQuery: jest.fn(),
 }));
 
 jest.mock('../../../../application/context');
@@ -44,6 +38,7 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectIsPromptEditorMode: jest.fn((state) => state.isPromptEditorMode),
   selectPromptModeIsAvailable: jest.fn((state) => state.promptModeIsAvailable),
   selectQueryLanguage: jest.fn((state) => state.queryLanguage),
+  selectQueryString: jest.fn((state) => state.queryString),
 }));
 jest.mock('../../../../application/utils/state_management/types', () => ({
   EditorMode: {
@@ -97,13 +92,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useSelector, useDispatch } from 'react-redux';
 import { monaco } from '@osd/monaco';
 import { useQueryPanelEditor } from './use_query_panel_editor';
-import {
-  useClearEditors,
-  useEditorFocus,
-  useEditorRef,
-  useEditorText,
-  useSetEditorText,
-} from '../../../../application/hooks';
+import { useEditorRef } from '../../../../application/hooks';
 import { useDatasetContext } from '../../../../application/context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
@@ -119,11 +108,7 @@ import {
 
 const mockUseSelector = jest.mocked(useSelector);
 const mockUseDispatch = jest.mocked(useDispatch);
-const mockUseClearEditors = jest.mocked(useClearEditors);
-const mockUseEditorFocus = jest.mocked(useEditorFocus);
 const mockUseEditorRef = jest.mocked(useEditorRef);
-const mockUseEditorText = jest.mocked(useEditorText);
-const mockUseSetEditorText = jest.mocked(useSetEditorText);
 const mockUseDatasetContext = jest.mocked(useDatasetContext);
 const mockUseOpenSearchDashboards = jest.mocked(useOpenSearchDashboards);
 const mockGetEffectiveLanguageForAutoComplete = jest.mocked(getEffectiveLanguageForAutoComplete);
@@ -131,9 +116,6 @@ const mockUsePromptIsTyping = jest.mocked(usePromptIsTyping);
 
 describe('useQueryPanelEditor', () => {
   let mockDispatch: jest.Mock;
-  let mockClearEditors: jest.Mock;
-  let mockSetEditorIsFocused: jest.Mock;
-  let mockSetEditorText: jest.Mock;
   let mockEditor: any;
   let mockServices: any;
   let mockDataset: any;
@@ -142,9 +124,6 @@ describe('useQueryPanelEditor', () => {
 
   beforeEach(() => {
     mockDispatch = jest.fn();
-    mockClearEditors = jest.fn();
-    mockSetEditorIsFocused = jest.fn();
-    mockSetEditorText = jest.fn();
     mockHandleChangeForPromptIsTyping = jest.fn();
     mockEditorRef = { current: null };
 
@@ -196,15 +175,7 @@ describe('useQueryPanelEditor', () => {
 
     // Mock implementations
     mockUseDispatch.mockReturnValue(mockDispatch);
-    mockUseClearEditors.mockReturnValue(mockClearEditors);
-    mockUseEditorFocus.mockReturnValue({
-      editorIsFocused: false,
-      focusOnEditor: jest.fn(),
-      setEditorIsFocused: mockSetEditorIsFocused,
-    });
     mockUseEditorRef.mockReturnValue(mockEditorRef);
-    mockUseEditorText.mockReturnValue('');
-    mockUseSetEditorText.mockReturnValue(mockSetEditorText);
     mockUseDatasetContext.mockReturnValue({
       dataset: mockDataset,
       isLoading: false,
@@ -238,7 +209,8 @@ describe('useQueryPanelEditor', () => {
       if (selectorString.includes('selectPromptModeIsAvailable')) return false;
       if (selectorString.includes('selectQueryLanguage')) return 'PPL';
       if (selectorString.includes('selectIsPromptEditorMode')) return false;
-      return undefined;
+      if (selectorString.includes('selectQueryString')) return '';
+      return '';
     });
 
     // Mock action creators
@@ -281,8 +253,12 @@ describe('useQueryPanelEditor', () => {
   describe('basic hook behavior', () => {
     it('should return query editor options when in query mode', () => {
       mockUseSelector.mockImplementation((selector: any) => {
-        if (selector.toString().includes('selectIsPromptEditorMode')) return false;
-        return false;
+        const selectorString = selector.toString();
+        if (selectorString.includes('selectIsPromptEditorMode')) return false;
+        if (selectorString.includes('selectPromptModeIsAvailable')) return false;
+        if (selectorString.includes('selectQueryLanguage')) return 'PPL';
+        if (selectorString.includes('selectQueryString')) return '';
+        return '';
       });
 
       const { result } = renderHook(() => useQueryPanelEditor());
@@ -294,9 +270,12 @@ describe('useQueryPanelEditor', () => {
   describe('placeholder text', () => {
     it('should return disabled prompt placeholder when prompt mode is not available', () => {
       mockUseSelector.mockImplementation((selector: any) => {
-        if (selector.toString().includes('selectPromptModeIsAvailable')) return false;
-        if (selector.toString().includes('selectIsPromptEditorMode')) return false;
-        return false;
+        const selectorString = selector.toString();
+        if (selectorString.includes('selectPromptModeIsAvailable')) return false;
+        if (selectorString.includes('selectIsPromptEditorMode')) return false;
+        if (selectorString.includes('selectQueryLanguage')) return 'PPL';
+        if (selectorString.includes('selectQueryString')) return '';
+        return '';
       });
 
       const { result } = renderHook(() => useQueryPanelEditor());
@@ -307,54 +286,79 @@ describe('useQueryPanelEditor', () => {
 
   describe('showPlaceholder logic', () => {
     it('should show placeholder when text is empty and editor is focused', () => {
-      mockUseEditorText.mockReturnValue('');
-      mockUseEditorFocus.mockReturnValue({
-        editorIsFocused: true,
-        focusOnEditor: jest.fn(),
-        setEditorIsFocused: mockSetEditorIsFocused,
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Initially text is empty (from selectQueryString) and editor is not focused
+      expect(result.current.showPlaceholder).toBe(false);
+
+      // Simulate editor mount and focus
+      act(() => {
+        result.current.editorDidMount(mockEditor);
       });
 
-      const { result } = renderHook(() => useQueryPanelEditor());
+      // Simulate focus event
+      const focusCallback = mockEditor.onDidFocusEditorText.mock.calls[0][0];
+      act(() => {
+        focusCallback();
+      });
 
       expect(result.current.showPlaceholder).toBe(true);
     });
 
     it('should not show placeholder when text is present', () => {
-      mockUseEditorText.mockReturnValue('some text');
-      mockUseEditorFocus.mockReturnValue({
-        editorIsFocused: true,
-        focusOnEditor: jest.fn(),
-        setEditorIsFocused: mockSetEditorIsFocused,
-      });
-
       const { result } = renderHook(() => useQueryPanelEditor());
 
+      // Initially text is empty (from selectQueryString)
+      expect(result.current.value).toBe('');
+      expect(result.current.showPlaceholder).toBe(false);
+
+      // Add text to local state through onChange
+      act(() => {
+        result.current.onChange('some text');
+      });
+
+      // The text should now be 'some text' from local state
+      expect(result.current.value).toBe('some text');
+
+      // Mount and focus editor
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      const focusCallback = mockEditor.onDidFocusEditorText.mock.calls[0][0];
+      act(() => {
+        focusCallback();
+      });
+
+      // Since text is present, showPlaceholder should be false
       expect(result.current.showPlaceholder).toBe(false);
     });
 
     it('should not show placeholder when editor is not focused', () => {
-      mockUseEditorText.mockReturnValue('');
-      mockUseEditorFocus.mockReturnValue({
-        editorIsFocused: false,
-        focusOnEditor: jest.fn(),
-        setEditorIsFocused: mockSetEditorIsFocused,
-      });
-
       const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Mount editor but don't focus it
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
 
       expect(result.current.showPlaceholder).toBe(false);
     });
   });
 
   describe('onChange handler', () => {
-    it('should call setEditorText with new text', () => {
+    it('should update local text state when onChange is called', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Initial value should be empty (from selector)
+      expect(result.current.value).toBe('');
 
       act(() => {
         result.current.onChange('new text');
       });
 
-      expect(mockSetEditorText).toHaveBeenCalledWith('new text');
+      // Value should be updated in local state
+      expect(result.current.value).toBe('new text');
     });
 
     it('should call handleChangeForPromptIsTyping when in prompt mode', () => {
@@ -370,7 +374,9 @@ describe('useQueryPanelEditor', () => {
         if (selector === selectIsPromptEditorMode) return true;
         if (selector === selectPromptModeIsAvailable) return false;
         if (selector === selectQueryLanguage) return 'PPL';
-        return undefined;
+        const selectorString = selector.toString();
+        if (selectorString.includes('selectQueryString')) return '';
+        return '';
       });
 
       const { result } = renderHook(() => useQueryPanelEditor());
@@ -382,14 +388,18 @@ describe('useQueryPanelEditor', () => {
         result.current.onChange('new text');
       });
 
-      expect(mockSetEditorText).toHaveBeenCalledWith('new text');
+      expect(result.current.value).toBe('new text');
       expect(localMockHandleChangeForPromptIsTyping).toHaveBeenCalledTimes(1);
     });
 
     it('should not call handleChangeForPromptIsTyping when not in prompt mode', () => {
       mockUseSelector.mockImplementation((selector: any) => {
-        if (selector.toString().includes('selectIsPromptEditorMode')) return false;
-        return false;
+        const selectorString = selector.toString();
+        if (selectorString.includes('selectIsPromptEditorMode')) return false;
+        if (selectorString.includes('selectPromptModeIsAvailable')) return false;
+        if (selectorString.includes('selectQueryLanguage')) return 'PPL';
+        if (selectorString.includes('selectQueryString')) return '';
+        return '';
       });
 
       const { result } = renderHook(() => useQueryPanelEditor());
@@ -398,7 +408,7 @@ describe('useQueryPanelEditor', () => {
         result.current.onChange('new text');
       });
 
-      expect(mockSetEditorText).toHaveBeenCalledWith('new text');
+      expect(result.current.value).toBe('new text');
       expect(mockHandleChangeForPromptIsTyping).not.toHaveBeenCalled();
     });
   });
@@ -511,17 +521,32 @@ describe('useQueryPanelEditor', () => {
     });
 
     it('should trigger autosuggestion on focus when in query mode with text', () => {
-      mockUseEditorText.mockReturnValue('SELECT *');
+      // Set up hook with text in local state
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Add text to local state
+      act(() => {
+        result.current.onChange('SELECT *');
+      });
+
       mockUseSelector.mockImplementation((selector: any) => {
-        if (selector.toString().includes('selectIsPromptEditorMode')) return false;
-        return false;
+        const selectorString = selector.toString();
+        if (selectorString.includes('selectIsPromptEditorMode')) return false;
+        if (selectorString.includes('selectPromptModeIsAvailable')) return false;
+        if (selectorString.includes('selectQueryLanguage')) return 'PPL';
+        if (selectorString.includes('selectQueryString')) return '';
+        return '';
       });
 
       const mockOnDidFocusDisposable = { dispose: jest.fn() };
       mockEditor.onDidFocusEditorWidget.mockReturnValue(mockOnDidFocusDisposable);
       mockEditorRef.current = mockEditor;
 
+      // Re-render hook to apply new selector values and trigger useEffect
       renderHook(() => useQueryPanelEditor());
+
+      // Check that focus event was set up
+      expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalled();
 
       // Simulate focus event
       const focusCallback = mockEditor.onDidFocusEditorWidget.mock.calls[0][0];
@@ -537,24 +562,29 @@ describe('useQueryPanelEditor', () => {
     });
 
     it('should not trigger autosuggestion when text is empty', () => {
-      mockUseEditorText.mockReturnValue('');
       mockUseSelector.mockImplementation((selector: any) => {
-        if (selector.toString().includes('selectIsPromptEditorMode')) return false;
+        const selectorString = selector.toString();
+        if (selectorString.includes('selectIsPromptEditorMode')) return false;
+        if (selectorString.includes('selectQueryString')) return '';
         return false;
       });
       mockEditorRef.current = mockEditor;
 
       renderHook(() => useQueryPanelEditor());
 
+      // Should not set up focus event listener when text is empty
       expect(mockEditor.onDidFocusEditorWidget).not.toHaveBeenCalled();
     });
   });
 
   describe('handleRun and handleEscape', () => {
     it('should dispatch onEditorRunActionCreator when handleRun is called', () => {
-      mockUseEditorText.mockReturnValue('test query');
-
       const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Set text in local state
+      act(() => {
+        result.current.onChange('test query');
+      });
 
       // Get handleRun from editorDidMount actions
       act(() => {
@@ -574,8 +604,15 @@ describe('useQueryPanelEditor', () => {
       );
     });
 
-    it('should clear editors and set query mode when handleEscape is called', () => {
+    it('should clear local text and set query mode when handleEscape is called', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Set some text first
+      act(() => {
+        result.current.onChange('some text');
+      });
+
+      expect(result.current.value).toBe('some text');
 
       act(() => {
         result.current.editorDidMount(mockEditor);
@@ -589,7 +626,8 @@ describe('useQueryPanelEditor', () => {
         handleEscapeCall();
       });
 
-      expect(mockClearEditors).toHaveBeenCalled();
+      // Text should be cleared
+      expect(result.current.value).toBe('');
       expect(mockDispatch).toHaveBeenCalledWith(setEditorMode(EditorMode.Query));
     });
   });

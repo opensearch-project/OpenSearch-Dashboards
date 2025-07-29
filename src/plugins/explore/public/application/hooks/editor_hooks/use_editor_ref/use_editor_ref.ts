@@ -10,7 +10,5 @@ import { EditorContext } from '../../../context';
  * Gives the ref of the editor
  */
 export const useEditorRef = () => {
-  const { editorRef } = useContext(EditorContext);
-
-  return editorRef;
+  return useContext(EditorContext);
 };
