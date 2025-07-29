@@ -22,6 +22,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { ThresholdLine, ThresholdLineStyle, ThresholdLines } from '../../types';
 import { StyleAccordion } from '../style_accordion';
+import { useDebouncedValue } from '../../utils/use_debounced_value';
 
 export interface ThresholdOptionsProps {
   thresholdLines: ThresholdLines;
@@ -54,6 +55,12 @@ export const ThresholdOptions = ({
   onThresholdLinesChange,
 }: ThresholdOptionsProps) => {
   const [thresholdStyle, setThresholdStyle] = useState<ThresholdLineStyle>(ThresholdLineStyle.Full);
+
+  const [debouncedThresholds, handleDebouncedThresholdChange] = useDebouncedValue(
+    thresholdLines,
+    (updatedThresholds) => onThresholdLinesChange(updatedThresholds),
+    500
+  );
 
   if (!thresholdLines || !onThresholdLinesChange) {
     return null;
@@ -100,7 +107,7 @@ export const ThresholdOptions = ({
       }
       return threshold;
     });
-    onThresholdLinesChange(updatedThresholds);
+    handleDebouncedThresholdChange(updatedThresholds);
   };
 
   const removeThreshold = (id: string) => {
@@ -110,7 +117,7 @@ export const ThresholdOptions = ({
     onThresholdLinesChange(updatedThresholds);
   };
 
-  const activeThresholds = thresholdLines.filter((threshold) => threshold.show);
+  const activeThresholds = debouncedThresholds.filter((threshold) => threshold.show);
 
   const handleStyleChange = (style: string) => {
     setThresholdStyle(style as ThresholdLineStyle);

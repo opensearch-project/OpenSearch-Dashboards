@@ -25,6 +25,7 @@ export function DiscoverFieldHeader({ onCollapse }: IDiscoverFieldHeaderProps) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
+          aria-label="Collapse fields panel"
           data-test-subj={'fieldList-collapse-button'}
           iconType={'menuLeft'}
           onClick={onCollapse}
