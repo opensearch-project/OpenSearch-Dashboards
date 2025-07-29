@@ -21,7 +21,7 @@ export const onRedirectNoDataView = (
 ) => () => {
   const canManageDataViews = capabilities.management.opensearchDashboards.dataViews;
   const redirectTarget = canManageDataViews
-    ? '/management/opensearch-dashboards/dataViews'
+    ? '/management/opensearch-dashboards/indexPatterns'
     : '/home';
   let timeoutId: NodeJS.Timeout | undefined;
 
@@ -31,10 +31,10 @@ export const onRedirectNoDataView = (
 
   const bannerMessage = i18n.translate('data.dataViews.ensureDefaultDataView.bannerLabel', {
     defaultMessage:
-      'To visualize and explore data in OpenSearch Dashboards, you must create an index pattern to retrieve data from OpenSearch.',
+      'To visualize and explore data in OpenSearch Dashboards, you must create a dataset to retrieve data from the data source.',
   });
 
-  // Avoid being hostile to new users who don't have an index pattern setup yet
+  // Avoid being hostile to new users who don't have a dataset setup yet
   // give them a friendly info message instead of a terse error message
   bannerId = overlays.banners.replace(
     bannerId,
@@ -51,7 +51,7 @@ export const onRedirectNoDataView = (
     navigateToApp('home');
   } else {
     navigateToApp('management', {
-      path: `/opensearch-dashboards/dataViews?bannerMessage=${bannerMessage}`,
+      path: `/opensearch-dashboards/indexPatterns?bannerMessage=${bannerMessage}`,
     });
   }
 
