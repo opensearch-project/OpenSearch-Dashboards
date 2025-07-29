@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiTitle,
   EuiText,
@@ -176,30 +176,6 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
           },
         ]}
       />
-
-      {/* TODO: Add footer back when dataset management is ready */}
-      {/* <EuiPopoverFooter paddingSize="s">
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          responsive={false}
-          className="datasetDetails__footer"
-        >
-          <EuiFlexItem grow={false} className="datasetDetails__footerItem">
-            <EuiButton
-              className="datasetDetails__viewButton"
-              data-test-subj="datasetDetailsViewButton"
-              size="s"
-              isSelected={false}
-              onClick={closePopover}
-            >
-              {i18n.translate('data.datasetDetails.viewDatasetButton', {
-                defaultMessage: 'View dataset',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverFooter> */}
     </EuiPanel>
   );
 };
