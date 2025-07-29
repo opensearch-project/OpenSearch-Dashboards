@@ -5,7 +5,6 @@
 
 import { schema, TypeOf } from '@osd/config-schema';
 
-
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   queryAssist: schema.object({
