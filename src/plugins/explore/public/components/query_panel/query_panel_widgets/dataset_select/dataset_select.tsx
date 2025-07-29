@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { Dataset } from '../../../../../../data/common';
+import { Dataset, DEFAULT_DATA } from '../../../../../../data/common';
 import { ExploreServices } from '../../../../types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
 import { selectQuery } from '../../../../application/utils/state_management/selectors';
@@ -20,8 +20,49 @@ export const DatasetSelectWidget = () => {
     data: {
       ui: { DatasetSelect },
       query: { queryString },
+      dataViews,
     },
   } = services;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const handleDataset = async () => {
+      if (currentQuery.dataset) {
+        const dataView = await dataViews.get(
+          currentQuery.dataset.id,
+          currentQuery.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+        );
+
+        if (!dataView) {
+          await queryString.getDatasetService().cacheDataset(
+            currentQuery.dataset,
+            {
+              uiSettings: services.uiSettings,
+              savedObjects: services.savedObjects,
+              notifications: services.notifications,
+              http: services.http,
+              data: services.data,
+            },
+            false
+          );
+        }
+      }
+    };
+
+    try {
+      handleDataset();
+    } catch (error) {
+      if (isMounted) {
+        const warningMessage = `Error fetching dataset: ${(error as Error).message}`;
+        services.notifications?.toasts.addWarning(warningMessage);
+      }
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentQuery, dataViews, queryString, services]);
 
   const handleDatasetSelect = useCallback(
     async (dataset: Dataset) => {
@@ -32,7 +73,7 @@ export const DatasetSelectWidget = () => {
 
         queryString.setQuery({
           ...initialQuery,
-          query: '', // EMPTY QUERY
+          query: '',
           dataset,
         });
 

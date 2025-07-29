@@ -26,16 +26,12 @@ import {
   useOpenSearchDashboards,
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
-import { Dataset, DataView, DEFAULT_DATA, Query } from '../../../common';
+import { Dataset, DEFAULT_DATA, Query } from '../../../common';
 import { IDataPluginServices } from '../../types';
 import { DatasetDetails } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
 import './_index.scss';
 
-/**
- * DetailedDataset interface for internal component use
- * Extends the Dataset type with additional UI-specific properties
- */
 export interface DetailedDataset extends Dataset {
   description?: string;
   displayName?: string;
@@ -93,67 +89,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     updateSelectedDataset();
   }, [currentDataset, dataViews, datasets]);
 
-  // const selectedDataset = useMemo(async () => {
-  //   if (!currentDataset) return undefined;
-
-  //   const matchingDataset = datasets.find((d) => d.id === currentDataset.id);
-  //   if (matchingDataset) {
-  //     return matchingDataset;
-  //   }
-
-  //   const dataView = await dataViews.get(
-  //     currentDataset.id,
-  //     currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-  //   );
-
-  //   return {
-  //     ...currentDataset,
-  //     description: dataView.description,
-  //     displayName: dataView.displayName,
-  //   } as DetailedDataset;
-  // }, [currentDataset, dataViews, datasets]);
-
   const datasetIcon =
     datasetService.getType(selectedDataset?.sourceDatasetRef?.type || selectedDataset?.type || '')
       ?.meta.icon.type || 'database';
-
-  // useEffect(() => {
-  //   isMounted.current = true;
-  //   const fetchDatasets = async () => {
-  //     if (!isMounted.current) return;
-
-  //     const datasetIds = await dataViews.getIds(true);
-  //     const fetchedDatasets: DetailedDataset[] = [];
-
-  //     for (const id of datasetIds) {
-  //       const dataView = await dataViews.get(id);
-  //       const dataset = await dataViews.convertToDataset(dataView);
-
-  //       fetchedDatasets.push({
-  //         ...dataset,
-  //         description: dataView.description,
-  //         displayName: dataView.displayName,
-  //       });
-  //     }
-
-  //     const defaultDataView = await dataViews.getDefault();
-  //     if (defaultDataView) {
-  //       setDefaultDatasetId(defaultDataView.id);
-  //     }
-
-  //     setDatasets(fetchedDatasets);
-
-  //     if (!currentDataset && defaultDataView) {
-  //       const defaultDataset = await dataViews.convertToDataset(defaultDataView);
-  //       onSelect(defaultDataView);
-  //     }
-  //   };
-
-  //   fetchDatasets();
-  //   return () => {
-  //     isMounted.current = false;
-  //   };
-  // }, [datasetService, dataViews]);
 
   useEffect(() => {
     isMounted.current = true;
