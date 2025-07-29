@@ -116,7 +116,7 @@ describe('VisualizationBuilder', () => {
       expect(setStylesSpy).toHaveBeenCalledWith({ type: 'line', styles: lineStyleDefaults });
     });
 
-    test('reset axes mapping to empty if chart type is table', () => {
+    test('should do nothing if chart type is table', () => {
       const builder = new VisualizationBuilder({});
       jest.spyOn(builder, 'setStyles');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
@@ -131,7 +131,7 @@ describe('VisualizationBuilder', () => {
         // current chart type and styles
         { type: 'heatmap', styles: {} as any }
       );
-      expect(setAxesMappingSpy).toHaveBeenCalledWith({});
+      expect(setAxesMappingSpy).not.toHaveBeenCalled();
     });
 
     test('should update axes mapping by reusing fields of the current axes mapping', () => {

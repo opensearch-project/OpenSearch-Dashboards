@@ -136,7 +136,7 @@ export class VisualizationBuilder {
 
     // Table chart doesn't have axes mapping
     if (chartType === 'table') {
-      this.setAxesMapping({});
+      // this.setAxesMapping({});
       return;
     }
 
