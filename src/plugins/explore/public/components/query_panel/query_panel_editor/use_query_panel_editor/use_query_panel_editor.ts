@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
+import { DEFAULT_DATA } from 'src/plugins/data/common';
 import {
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
@@ -166,7 +167,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         const currentDataset = queryString.getQuery().dataset;
         const currentDataView = await dataViews.get(
           currentDataset?.id!,
-          currentDataset?.type !== 'INDEX_PATTERN'
+          currentDataset?.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
         );
 
         // Use the current Dataset to avoid stale data

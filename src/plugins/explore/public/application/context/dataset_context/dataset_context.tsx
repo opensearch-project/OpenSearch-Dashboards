@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { DataView } from 'src/plugins/data/common';
+import { DataView, DEFAULT_DATA } from 'src/plugins/data/common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';
@@ -57,7 +57,7 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         let dataView = await dataViews.get(
           datasetFromState.id,
-          datasetFromState.type !== 'INDEX_PATTERN'
+          datasetFromState.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
         );
         if (!dataView) {
           await queryString.getDatasetService().cacheDataset(
@@ -74,7 +74,7 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
           dataView = await dataViews.get(
             datasetFromState.id,
-            datasetFromState.type !== 'INDEX_PATTERN'
+            datasetFromState.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
           );
         }
 
