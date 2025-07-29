@@ -431,7 +431,7 @@ export class DataViewsService {
       throw new SavedObjectNotFound(
         savedObjectType,
         id,
-        'management/opensearch-dashboards/dataViews'
+        'management/opensearch-dashboards/indexPatterns'
       );
     }
 

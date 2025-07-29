@@ -41,7 +41,6 @@ export async function findByTitle(
   }
 }
 
-// This is used to validate datasource reference of index pattern
 export const validateDataViewDataSourceReference = (
   dataView: SavedObject<DataViewSavedObjectAttrs>,
   dataSourceId?: string
@@ -50,8 +49,6 @@ export const validateDataViewDataSourceReference = (
   if (dataSourceId) {
     return references.some((ref) => ref.id === dataSourceId && ref.type === 'data-source');
   } else {
-    // No datasource id passed as input meaning we are getting index pattern from default cluster,
-    // and it's supposed to be an empty array
     return references.length === 0;
   }
 };
@@ -64,7 +61,6 @@ export const getDataViewTitle = async (
   let dataSourceTitle;
   const dataSourceReference = getDataSourceReference(references);
 
-  // If an index-pattern references datasource, prepend data source name with index pattern name for display purpose
   if (dataSourceReference) {
     const dataSourceId = dataSourceReference.id;
     try {
@@ -74,12 +70,10 @@ export const getDataViewTitle = async (
       } = await getDataSource(dataSourceId);
       dataSourceTitle = error ? dataSourceId : title;
     } catch (e) {
-      // use datasource id as title when failing to fetch datasource
       dataSourceTitle = dataSourceId;
     }
     return concatDataSourceWithDataView(dataSourceTitle, dataViewTitle);
   } else {
-    // if index pattern doesn't reference datasource, return as it is.
     return dataViewTitle;
   }
 };

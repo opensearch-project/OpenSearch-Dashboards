@@ -92,8 +92,8 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const qs = useSelector(selectQueryString);
-  const [editorText, setEditorText] = useState<string>(qs);
+  const userQueryString = useSelector(selectQueryString);
+  const [editorText, setEditorText] = useState<string>(userQueryString);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
   const {
     data: {
