@@ -16,4 +16,4 @@ export const DatasetSelect = (props: DatasetSelectProps) => (
 );
 
 export * from './create_dataset_select';
-export type { DatasetSelectProps } from './dataset_select';
+export type { DatasetSelectProps, DetailedDataset } from './dataset_select';
