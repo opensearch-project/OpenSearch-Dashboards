@@ -5,7 +5,7 @@
 
 import { Middleware } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { DEFAULT_DATA } from 'src/plugins/data/common';
+import { DEFAULT_DATA } from '../../../../../../data/common';
 import { RootState } from '../store';
 import { ExploreServices } from '../../../../types';
 import {

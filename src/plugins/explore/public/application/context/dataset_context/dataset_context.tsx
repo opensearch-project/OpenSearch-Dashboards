@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { DataView, DEFAULT_DATA } from 'src/plugins/data/common';
+import { DataView, DEFAULT_DATA } from '../../../../../data/common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';

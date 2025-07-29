@@ -11,7 +11,7 @@ import {
   Query,
   DataView,
   DEFAULT_DATA,
-} from 'src/plugins/data/common';
+} from '../../../../../../data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -268,7 +268,6 @@ const executeQueryBase = async (
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
 
-    // Reset inspector adapter
     services.inspectorAdapters.requests.reset();
 
     const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
