@@ -26,12 +26,20 @@ import {
   useOpenSearchDashboards,
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
-import { DataView, Query } from '../../../common';
-import { DEFAULT_DATA } from '../../../common/constants';
+import { Dataset, DataView, Query } from '../../../common';
 import { IDataPluginServices } from '../../types';
 import { DatasetDetails } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
 import './_index.scss';
+
+/**
+ * DetailedDataset interface for internal component use
+ * Extends the Dataset type with additional UI-specific properties
+ */
+export interface DetailedDataset extends Dataset {
+  description?: string;
+  displayName?: string;
+}
 
 export interface DatasetSelectProps {
   onSelect: (dataset: DataView) => void;
@@ -44,12 +52,9 @@ export interface DatasetSelectProps {
 const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
-  const initialDatasetSet = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [datasets, setDatasets] = useState<DataView[]>([]);
-  const [selectedDataset, setSelectedDataset] = useState<DataView | undefined>();
+  const [datasets, setDatasets] = useState<DetailedDataset[]>([]);
   const [defaultDatasetId, setDefaultDatasetId] = useState<string | undefined>();
-  const [, setIsLoading] = useState(true);
   const { data, overlays } = services;
   const {
     dataViews,
@@ -57,136 +62,82 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   } = data;
   const datasetService = queryString.getDatasetService();
 
-  const extractDataSourceInfo = useCallback((uri?: string): { type?: string; name?: string } => {
-    if (!uri) return {};
+  const currentQuery = queryString.getQuery();
+  const queryDataset = currentQuery?.dataset;
 
-    if (uri.includes('://')) {
-      const parts = uri.split('://');
-      if (parts.length >= 2) {
-        const type = parts[0].toUpperCase();
-        const pathParts = parts[1].split('/');
-        const name = pathParts[0];
-        return { type, name };
-      }
+  const selectedDataset = useMemo(() => {
+    if (!queryDataset) return undefined;
+
+    const matchingDataset = datasets.find((d) => d.id === queryDataset.id);
+    if (matchingDataset) {
+      return matchingDataset;
     }
 
-    return { name: uri };
-  }, []);
+    return {
+      ...queryDataset,
+      description: queryDataset.description,
+      displayName: queryDataset.displayName,
+    } as DetailedDataset;
+  }, [queryDataset, datasets]);
 
-  const getTypeFromUri = useCallback(
-    (uri?: string): string | undefined => {
-      return extractDataSourceInfo(uri).type;
-    },
-    [extractDataSourceInfo]
-  );
-
-  const fetchDatasets = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const datasetIds = await dataViews.getIds(true);
-      const fetchedDataViews = [];
-
-      for (const id of datasetIds) {
-        try {
-          const dataView = await dataViews.get(id);
-          fetchedDataViews.push(dataView);
-        } catch (e) {
-          throw new Error(
-            i18n.translate('data.datasetSelect.fetchError', {
-              defaultMessage: 'Failed to fetch dataset with ID {id}: {error}',
-              values: {
-                id,
-                error: e.message,
-              },
-            })
-          );
-        }
-      }
-
-      const defaultDataView = await dataViews.getDefault();
-      if (defaultDataView && isMounted.current) {
-        setDefaultDatasetId(defaultDataView.id);
-      }
-
-      if (isMounted.current) {
-        setDatasets(fetchedDataViews);
-        if (!initialDatasetSet.current && fetchedDataViews.length > 0) {
-          // Check if there's already a dataset from query string (URL state)
-          const currentQuery = queryString.getQuery();
-          const existingDataset = currentQuery?.dataset;
-
-          if (existingDataset) {
-            // If there's already a dataset from URL, find it in the fetched datasets
-            const urlDataset = fetchedDataViews.find((d) => d.id === existingDataset.id);
-            if (urlDataset) {
-              setSelectedDataset(urlDataset);
-              // Don't call onSelect during initialization if dataset exists in URL
-            } else {
-              // Fallback to first dataset if URL dataset not found
-              setSelectedDataset(fetchedDataViews[0]);
-              onSelect(fetchedDataViews[0]);
-            }
-          } else {
-            // No dataset in URL, select first one and call onSelect
-            setSelectedDataset(fetchedDataViews[0]);
-            onSelect(fetchedDataViews[0]);
-          }
-          initialDatasetSet.current = true;
-        }
-        setIsLoading(false);
-      }
-    } catch (e) {
-      if (isMounted.current) {
-        setIsLoading(false);
-      }
-    }
-  }, [dataViews, onSelect, queryString]);
+  const datasetIcon =
+    datasetService.getType(selectedDataset?.sourceDatasetRef?.type || selectedDataset?.type || '')
+      ?.meta.icon.type || 'database';
 
   useEffect(() => {
     isMounted.current = true;
+    const fetchDatasets = async () => {
+      if (!isMounted.current) return;
+
+      const datasetIds = await dataViews.getIds(true);
+      const fetchedDatasets: DetailedDataset[] = [];
+
+      for (const id of datasetIds) {
+        const dataView = await dataViews.get(id);
+        const dataset = await dataViews.convertToDataset(dataView);
+
+        fetchedDatasets.push({
+          ...dataset,
+          description: dataView.description,
+          displayName: dataView.displayName,
+        });
+      }
+
+      const defaultDataView = await dataViews.getDefault();
+      if (defaultDataView) {
+        setDefaultDatasetId(defaultDataView.id);
+      }
+
+      setDatasets(fetchedDatasets);
+
+      if (!queryDataset && defaultDataView) {
+        const defaultDataset = await dataViews.convertToDataset(defaultDataView);
+        onSelect(defaultDataView);
+      }
+    };
+
     fetchDatasets();
     return () => {
       isMounted.current = false;
     };
-  }, [fetchDatasets]);
+  }, [datasetService, dataViews]);
 
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const closePopover = useCallback(() => setIsOpen(false), []);
 
-  const handleOptionChange = useCallback(
-    (newOptions: EuiSelectableOption[]) => {
-      const selectedOption = newOptions.find((option) => option.checked === 'on');
-      if (selectedOption) {
-        const dataset = datasets.find((d) => d.id === selectedOption.key);
-        if (dataset) {
-          setSelectedDataset(dataset);
-          closePopover();
-          onSelect(dataset);
-        }
-      }
-    },
-    [datasets, closePopover, onSelect]
-  );
-
-  const buildOptions = useCallback((): EuiSelectableOption[] => {
+  const options = useMemo(() => {
     return datasets.map((dataset) => {
-      const { id, title, displayName, description } = dataset;
+      const { id, title, type, description, displayName } = dataset;
       const isSelected = id === selectedDataset?.id;
       const isDefault = id === defaultDatasetId;
-
-      const datasetType =
-        getTypeFromUri(dataset.dataSourceRef?.name) ||
-        dataset.type ||
-        DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
-      const iconType = datasetService.getType(datasetType)?.meta.icon.type || 'database';
-
+      const iconType = datasetService.getType(type)?.meta?.icon?.type || 'database';
       const label = displayName || title;
 
       return {
         label,
         searchableLabel: description || title,
         key: id,
-        checked: isSelected ? 'on' : undefined,
+        checked: isSelected ? ('on' as const) : undefined,
         prepend: <EuiIcon size="s" type={iconType} />,
         'data-test-subj': `datasetOption-${id}`,
         append: isDefault ? (
@@ -198,14 +149,21 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         ) : undefined,
       };
     });
-  }, [datasets, selectedDataset, defaultDatasetId, getTypeFromUri, datasetService]);
+  }, [datasets, selectedDataset?.id, defaultDatasetId, datasetService]);
 
-  const datasetType =
-    getTypeFromUri(selectedDataset?.dataSourceRef?.name) ||
-    selectedDataset?.type ||
-    DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
-
-  const datasetIcon = datasetService.getType(datasetType)?.meta.icon.type || 'database';
+  const handleOptionChange = useCallback(
+    async (newOptions: EuiSelectableOption[]) => {
+      const selectedOption = newOptions.find((option) => option.checked === 'on');
+      if (selectedOption) {
+        const dataset = datasets.find((d) => d.id === selectedOption.key);
+        if (dataset) {
+          closePopover();
+          onSelect(await dataViews.get(dataset.id));
+        }
+      }
+    },
+    [datasets, closePopover, dataViews, onSelect]
+  );
 
   const datasetTitle = useMemo(() => {
     if (!selectedDataset) {
@@ -260,7 +218,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
       <EuiSelectable
         className="datasetSelect__selectable"
         data-test-subj="datasetSelectSelectable"
-        options={buildOptions()}
+        options={options}
         singleSelection="always"
         searchable={true}
         onChange={handleOptionChange}
@@ -342,23 +300,15 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                         overlay?.close();
                         if (query?.dataset) {
                           try {
-                            const { dataSource, timeFieldName } = query.dataset;
-                            const updatedDataset = {
-                              ...query.dataset,
-                              ...(dataSource && {
-                                dataSourceRef: {
-                                  id: dataSource.id || '',
-                                  name: `${query.dataset.type.toLowerCase()}://${dataSource.title}`,
-                                  type: dataSource.type,
-                                },
-                              }),
-                              type: query.dataset.type,
-                              timeFieldName,
-                            };
+                            await datasetService.cacheDataset(query.dataset, services, false);
+                            const dataView = await data.dataViews.get(
+                              query.dataset.id,
+                              query.dataset.type !== 'INDEX_PATTERN'
+                            );
 
-                            await datasetService.cacheDataset(updatedDataset, services, false);
-                            setSelectedDataset(updatedDataset as DataView);
-                            onSelect(updatedDataset as DataView);
+                            if (dataView) {
+                              onSelect(dataView);
+                            }
                           } catch (error) {
                             services.notifications?.toasts.addError(error, {
                               title: i18n.translate('data.datasetSelect.errorTitle', {

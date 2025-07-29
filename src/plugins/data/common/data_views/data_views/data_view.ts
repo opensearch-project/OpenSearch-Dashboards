@@ -70,14 +70,12 @@ export class DataView extends IndexPattern implements IDataView {
 
     if (dataSourceReference?.id) {
       try {
-        // Fetch actual data source details
         const dataSourceSavedObject = await this.savedObjectsClient.get(
-          'data-source', // Always use 'data-source' for saved object type
+          'data-source',
           dataSourceReference.id
         );
         const attributes = dataSourceSavedObject.attributes as any;
 
-        // Extract dataset type from URI if available
         if (dataSourceReference.name) {
           const extractedType = extractDatasetTypeFromUri(dataSourceReference.name);
           if (extractedType) {

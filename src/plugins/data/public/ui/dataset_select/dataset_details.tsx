@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   EuiTitle,
   EuiText,
@@ -19,12 +19,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataView as Dataset } from '../../../common/data_views';
+import { DetailedDataset } from './dataset_select';
 import { DEFAULT_DATA } from '../../../common/constants';
 import { IDataPluginServices } from '../../types';
+import { getDatasetType } from '../dataset_utils';
 
 export interface DatasetDetailsProps {
-  dataset?: Dataset;
+  dataset?: DetailedDataset;
   isDefault: boolean | false;
 }
 
@@ -36,32 +37,26 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
   const datasetService = queryString.getDatasetService();
 
   const handleDataDefinitionClicked = useCallback(async () => {
-    if (!dataset || !dataset.dataSourceRef) {
+    if (!dataset || !dataset.dataSource) {
       return;
     }
 
-    services.application!.navigateToApp('dataSources', { path: `/${dataset.dataSourceRef.id}` });
+    services.application!.navigateToApp('dataSources', { path: `/${dataset.dataSource.id}` });
   }, [dataset, services.application]);
 
-  const getTypeFromUri = useCallback((uri?: string): string | undefined => {
-    if (!uri) return undefined;
+  const [datasetType, setDatasetType] = useState<string>(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
 
-    if (uri.includes('://')) {
-      const parts = uri.split('://');
-      if (parts.length >= 2) {
-        return parts[0].toUpperCase();
-      }
-    }
-
-    return undefined;
-  }, []);
+  // Get the dataset type when the dataset changes
+  useEffect(() => {
+    if (!dataset) return;
+    const type = getDatasetType(dataset, datasetService);
+    setDatasetType(type);
+  }, [dataset, datasetService]);
 
   if (!dataset) {
     return null;
   }
-
-  const datasetType = getTypeFromUri(dataset.dataSourceRef?.name) || dataset.type;
-  const dataSourceName = dataset.dataSourceRef?.name || `default`;
+  const dataSourceName = dataset.dataSource?.title || `default`;
   const datasetTitle = dataset.displayName || dataset.title;
   const datasetDescription = dataset.description || '';
   const timeFieldName =
@@ -154,7 +149,7 @@ export const DatasetDetails: React.FC<DatasetDetailsProps> = ({ dataset, isDefau
                   type={
                     datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
                       ? 'logoOpenSearch'
-                      : datasetService.getType(datasetType || '')?.meta.icon.type || 'database'
+                      : datasetService.getType(datasetType)?.meta?.icon?.type || 'database'
                   }
                   size="s"
                   className="datasetDetails__icon"
