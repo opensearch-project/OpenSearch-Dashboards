@@ -398,7 +398,6 @@ cy.explore.add(
     cy.getElementByTestId('advancedSelectorTimeFieldSelect')
       .should('be.visible')
       .select(timeFieldName);
-  
     if (finalAction === 'submit') {
       cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
 

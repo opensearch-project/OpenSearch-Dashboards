@@ -127,10 +127,9 @@ const runRecentQueryTests = () => {
             cy.getElementByTestIdLike('row-').each(($row, rowIndex) => {
               let expectedQuery = '';
               if (rowIndex === 1 && stepIndex >= 1) {
-                expectedQuery =
-                  currentBaseQuery + config.alternativeDataset
+                expectedQuery = currentBaseQuery + config.alternativeDataset;
               } else if (rowIndex === 0 && stepIndex >= 1) {
-                expectedQuery = currentBaseQuery + config.dataset
+                expectedQuery = currentBaseQuery + config.dataset;
               } else {
                 expectedQuery =
                   currentBaseQuery + config.dataset + currentWhereStatement + reverseList[rowIndex];
@@ -153,9 +152,9 @@ const runRecentQueryTests = () => {
           testQueries.forEach((query, index) => {
             cy.explore.setQueryEditor(query, {}, true);
             cy.explore.setQueryEditor(query, {}, true);
-          
+
             cy.getElementByTestId('exploreRecentQueriesButton').click({
-                force: true,
+              force: true,
             });
             cy.getElementByTestIdLike('row-').should('have.length', index + 2);
           });
