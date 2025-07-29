@@ -51,7 +51,7 @@ export const selectSpecificSuggestion = (suggestionText) => {
       cy.get('.monaco-list-row.focused').then(() => {
         cy.get('.monaco-list-row').then(($rows) => {
           const exactMatch = $rows.filter((_, row) => {
-            return Cypress.$(row).attr('aria-label') === suggestionText;
+            return Cypress.$(row).text().includes(suggestionText);
           });
 
           if (exactMatch.length > 0) {
@@ -204,7 +204,7 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
 
       if (isVisible) {
         if (useKeyboard) {
-          const highlightedRow = $rows.filter('[aria-selected="true"]').text();
+          const highlightedRow = $rows.filter('.focused').text();
           if (highlightedRow.includes(suggestionText)) {
             return cy.get('.inputarea').trigger('keydown', {
               key: 'Tab',
@@ -217,7 +217,6 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
           return cy.get('.monaco-list-row').contains(suggestionText).click({ force: true });
         }
       }
-
       return cy
         .get('.inputarea')
         .type('{downarrow}', { force: true })
