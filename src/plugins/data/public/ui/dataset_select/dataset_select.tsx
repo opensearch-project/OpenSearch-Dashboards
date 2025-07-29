@@ -42,7 +42,7 @@ export interface DetailedDataset extends Dataset {
 }
 
 export interface DatasetSelectProps {
-  onSelect: (dataset: DataView) => void;
+  onSelect: (dataset: Dataset) => void;
   appName: string;
 }
 
@@ -117,6 +117,44 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     datasetService.getType(selectedDataset?.sourceDatasetRef?.type || selectedDataset?.type || '')
       ?.meta.icon.type || 'database';
 
+  // useEffect(() => {
+  //   isMounted.current = true;
+  //   const fetchDatasets = async () => {
+  //     if (!isMounted.current) return;
+
+  //     const datasetIds = await dataViews.getIds(true);
+  //     const fetchedDatasets: DetailedDataset[] = [];
+
+  //     for (const id of datasetIds) {
+  //       const dataView = await dataViews.get(id);
+  //       const dataset = await dataViews.convertToDataset(dataView);
+
+  //       fetchedDatasets.push({
+  //         ...dataset,
+  //         description: dataView.description,
+  //         displayName: dataView.displayName,
+  //       });
+  //     }
+
+  //     const defaultDataView = await dataViews.getDefault();
+  //     if (defaultDataView) {
+  //       setDefaultDatasetId(defaultDataView.id);
+  //     }
+
+  //     setDatasets(fetchedDatasets);
+
+  //     if (!currentDataset && defaultDataView) {
+  //       const defaultDataset = await dataViews.convertToDataset(defaultDataView);
+  //       onSelect(defaultDataView);
+  //     }
+  //   };
+
+  //   fetchDatasets();
+  //   return () => {
+  //     isMounted.current = false;
+  //   };
+  // }, [datasetService, dataViews]);
+
   useEffect(() => {
     isMounted.current = true;
     const fetchDatasets = async () => {
@@ -145,7 +183,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
 
       if (!currentDataset && defaultDataView) {
         const defaultDataset = await dataViews.convertToDataset(defaultDataView);
-        onSelect(defaultDataView);
+        onSelect(defaultDataset);
       }
     };
 
@@ -153,7 +191,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     return () => {
       isMounted.current = false;
     };
-  }, [datasetService, dataViews, currentDataset, onSelect]); // todo original dataset service and dataviews
+  }, [datasetService, dataViews, currentDataset, onSelect]);
 
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const closePopover = useCallback(() => setIsOpen(false), []);
@@ -191,11 +229,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         const dataset = datasets.find((d) => d.id === selectedOption.key);
         if (dataset) {
           closePopover();
-          onSelect(await dataViews.get(dataset.id));
+          onSelect(dataset);
         }
       }
     },
-    [datasets, closePopover, dataViews, onSelect]
+    [datasets, closePopover, onSelect]
   );
 
   const datasetTitle = useMemo(() => {
@@ -340,7 +378,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                             );
 
                             if (dataView) {
-                              onSelect(dataView);
+                              onSelect(query.dataset);
                             }
                           } catch (error) {
                             services.notifications?.toasts.addError(error, {
