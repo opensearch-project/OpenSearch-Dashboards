@@ -81,65 +81,44 @@ export const runQueryTests = () => {
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
-        it('should show correct documentation link in language reference popover', () => {
+        it('should show correct documentation link pattern in language reference popover', () => {
           cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          // First get the version from help menu
-          cy.get('button[aria-label="Help menu"]').click();
-          cy.get('.chrHeaderHelpMenu__version')
-            .invoke('text')
-            .then((versionText) => {
-              // Close help menu
-              cy.get('button[aria-label="Help menu"]').click();
 
-              // Extract version number and determine docs version
-              const version = versionText.replace('v ', '').trim();
-              let docsVersion;
+          // Open the language reference popover to get the actual URL
+          cy.get('body').then(($body) => {
+            const isPopoverOpen = $body.find('.euiPopover__panel-isOpen').length > 0;
 
-              // FIXME: using version to decide docsVersion is fragile, each time the version bumped, the test needs to updated accordingly
-              if (version === '3.1.0') {
-                docsVersion = 'latest';
-              } else {
-                const [major, minor, patch] = version.split('.');
-                // Validate version numbers
-                if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
-                  throw new Error(`Invalid version format: ${version}`);
-                }
-                if (major === '0') {
-                  throw new Error(`Major version cannot be 0: ${version}`);
-                }
-                if (minor === '0') {
-                  throw new Error(`Minor version cannot be 0: ${version}`);
-                }
-                // Include patch version if it's not 0
-                docsVersion = patch === '0' ? `${major}.${minor}` : `${major}.${minor}.${patch}`;
-              }
+            // If popover is already open, close it first
+            if (isPopoverOpen) {
+              cy.getElementByTestId('exploreSelectedLanguage').click();
+              // Verify it's closed
+              cy.get('.euiPopover__panel-isOpen').should('not.exist');
+            }
 
-              // Now proceed with language reference check
-              cy.get('body').then(($body) => {
-                const isPopoverOpen = $body.find('.euiPopover__panel-isOpen').length > 0;
+            // Now click to open
+            cy.getElementByTestId('exploreSelectedLanguage').click();
 
-                // If popover is already open, close it first
-                if (isPopoverOpen) {
-                  cy.getElementByTestId('exploreSelectedLanguage').click();
-                  // Verify it's closed
-                  cy.get('.euiPopover__panel-isOpen').should('not.exist');
-                }
+            // Verify popover appears with title
+            cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
 
-                // Now click to open
-                cy.getElementByTestId('exploreSelectedLanguage').click();
+            cy.get('.euiPopover__panel-isOpen')
+              .find('a.euiLink.euiLink--primary')
+              .should('have.attr', 'href')
+              .then((href) => {
+                // Verify the URL follows the expected pattern for PPL syntax documentation
+                expect(href).to.match(
+                  /^https:\/\/opensearch\.org\/docs\/(latest|\d+\.\d+)\/search-plugins\/sql\/ppl\/syntax\/$/
+                );
 
-                // Verify popover appears with title
-                cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
-
-                cy.get('.euiPopover__panel-isOpen')
-                  .find('a.euiLink.euiLink--primary')
-                  .should('have.attr', 'href')
-                  .then((href) => {
-                    const expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/ppl/syntax/`;
-                    expect(href).to.equal(expectedHref);
-                  });
+                // Verify the link can be opened (status 200, 301, or 302)
+                cy.request({
+                  url: href,
+                  failOnStatusCode: false,
+                }).then((response) => {
+                  expect(response.status).to.be.oneOf([200]);
+                });
               });
-            });
+          });
         });
       });
     });
