@@ -76,7 +76,7 @@ export const StylePanel = <T extends ChartType>({
   );
 
   return (
-    <div className={className}>
+    <div className={className} data-test-subj="exploreVisStylePanel">
       <ChartTypeSelector
         visualizationData={visualizationData}
         onChartTypeChange={onChartTypeChange}

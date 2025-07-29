@@ -94,16 +94,32 @@ export class VisualizationBuilder {
       ]).subscribe(([chartType, axesMapping, styles]) =>
         this.syncToUrl({ chartType, axesMapping, styleOptions: styles?.styles })
       ),
-      this.currentChartType$.subscribe((chartType) => this.onChartTypeChange(chartType)),
+      this.currentChartType$.subscribe((chartType) =>
+        this.onChartTypeChange(
+          this.data$.value,
+          chartType,
+          this.axesMapping$.value,
+          this.styles$.value
+        )
+      ),
       this.data$.subscribe((data) =>
         this.onDataChange(data, this.currentChartType$.value, this.axesMapping$.value)
       )
     );
 
-    this.isInitialized = true;
+    this.setIsInitialized(true);
   }
 
-  onChartTypeChange(chartType?: ChartType) {
+  setIsInitialized(isInitialized: boolean) {
+    this.isInitialized = isInitialized;
+  }
+
+  onChartTypeChange(
+    data?: VisData,
+    chartType?: ChartType,
+    axesMapping?: Record<string, string>,
+    currentStyleConfig?: ChartConfig
+  ) {
     if (!chartType || !isChartType(chartType)) {
       return;
     }
@@ -114,7 +130,6 @@ export class VisualizationBuilder {
     }
 
     // Always reset style after changing chart type
-    const currentStyleConfig = this.styles$.value;
     if (currentStyleConfig?.type !== chartType) {
       this.setStyles({ styles: visConfig.ui.style.defaults, type: chartType });
     }
@@ -126,11 +141,7 @@ export class VisualizationBuilder {
     }
 
     // Reuse current axes mapping for the new chart type if possible
-    const newAxesMapping = this.reuseCurrentAxesMapping(
-      chartType,
-      this.axesMapping$.value,
-      this.data$.value
-    );
+    const newAxesMapping = this.reuseCurrentAxesMapping(chartType, axesMapping ?? {}, data);
     if (newAxesMapping) {
       this.setAxesMapping(newAxesMapping);
       return;
