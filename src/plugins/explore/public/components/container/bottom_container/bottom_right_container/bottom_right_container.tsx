@@ -16,7 +16,6 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { ExploreServices } from '../../../../types';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
 import { ExploreTabs } from '../../../../components/tabs/tabs';
-import { ResultsSummaryPanel } from '../../../../components/results_summary/results_summary_panel';
 import { DiscoverChartContainer } from '../../../../components/chart/discover_chart_container';
 import { useDatasetContext } from '../../../../application/context';
 import { ErrorPanel } from '../../../error_panel';
@@ -83,7 +82,6 @@ export const BottomRightContainer = () => {
   if (status === QueryExecutionStatus.READY) {
     return (
       <>
-        <ResultsSummaryPanel />
         <DiscoverChartContainer />
         <CanvasPanel>
           <ExploreTabs />

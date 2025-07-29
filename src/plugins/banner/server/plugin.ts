@@ -16,7 +16,7 @@ import { BannerPluginConfigType } from './config';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 import { defineRoutes } from './routes/get_config';
 import { BannerConfig } from '../common';
-import { getBannerSettings } from './ui_settings';
+import { getDefaultBannerSettings } from './ui_settings';
 
 export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart> {
   private readonly config$: Observable<BannerPluginConfigType>;
@@ -30,7 +30,7 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
     this.pluginConfig = await this.config$.pipe(first()).toPromise();
 
     // Get the default UI settings
-    const bannerSettings = getBannerSettings();
+    const bannerSettings = getDefaultBannerSettings();
 
     // Override the default values with values from YAML config
     if (bannerSettings['banner:content']) {

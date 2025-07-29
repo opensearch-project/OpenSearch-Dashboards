@@ -107,6 +107,7 @@ describe('export_actions', () => {
         promptToQueryIsLoading: false,
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery: '',
+        summaryAgentIsAvailable: false,
       },
     };
 
