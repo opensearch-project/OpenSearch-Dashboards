@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { Dataset, DEFAULT_DATA } from '../../../../../../data/common';
+import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../../data/common';
 import { ExploreServices } from '../../../../types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
 import { selectQuery } from '../../../../application/utils/state_management/selectors';
@@ -54,8 +54,9 @@ export const DatasetSelectWidget = () => {
       handleDataset();
     } catch (error) {
       if (isMounted) {
-        const warningMessage = `Error fetching dataset: ${(error as Error).message}`;
-        services.notifications?.toasts.addWarning(warningMessage);
+        services.notifications?.toasts.addWarning(
+          `Error fetching dataset: ${(error as Error).message}`
+        );
       }
     }
 
@@ -73,7 +74,7 @@ export const DatasetSelectWidget = () => {
 
         queryString.setQuery({
           ...initialQuery,
-          query: '',
+          query: EMPTY_QUERY.QUERY,
           dataset,
         });
 

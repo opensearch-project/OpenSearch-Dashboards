@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
-import { DEFAULT_DATA } from 'src/plugins/data/common';
+import { DEFAULT_DATA } from '../../../../../../data/common';
 import {
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
