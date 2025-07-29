@@ -5,7 +5,7 @@
 
 import { Middleware } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { DEFAULT_DATA } from '../../../../../../data/common';
+import { Dataset, DEFAULT_DATA } from '../../../../../../data/common';
 import { RootState } from '../store';
 import { ExploreServices } from '../../../../types';
 import {
@@ -13,15 +13,17 @@ import {
   setPromptModeIsAvailable,
   setActiveTab,
   clearLastExecutedData,
+  setSummaryAgentIsAvailable,
 } from '../slices';
 import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
+import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { detectAndSetOptimalTab } from '../actions/detect_optimal_tab';
 
 /**
  * Middleware to handle dataset changes and trigger necessary side effects
- * Likely this can be removed in favor for the query sync middleware
+ * TODO: followup with if this is necessary, or this can be removed in favor for the query sync middleware
  */
 export const createDatasetChangeMiddleware = (
   services: ExploreServices
@@ -32,52 +34,64 @@ export const createDatasetChangeMiddleware = (
     },
   } = services;
   const datasetService = queryString.getDatasetService();
-
-  let previousDataset: any = null;
+  let currentDataset: Dataset | undefined;
 
   return (store) => (next) => async (action) => {
     const result = next(action);
 
     if (action.type === 'query/setQueryState' || action.type === 'query/setQueryWithHistory') {
-      const state = store.getState();
-      const currentDataset = state.query.dataset;
+      const {
+        queryEditor,
+        query: { dataset },
+      } = store.getState();
 
-      if (!isEqual(previousDataset, currentDataset)) {
-        previousDataset = currentDataset;
+      if (isEqual(currentDataset, dataset)) return result;
 
-        store.dispatch(setActiveTab(''));
-        store.dispatch(clearResults());
-        store.dispatch(clearQueryStatusMap());
-        store.dispatch(clearLastExecutedData());
+      currentDataset = dataset;
 
-        const newPromptModeIsAvailable = await getPromptModeIsAvailable(services);
-        const currentPromptModeIsAvailable = state.queryEditor.promptModeIsAvailable;
+      store.dispatch(setActiveTab(''));
+      store.dispatch(clearResults());
+      store.dispatch(clearQueryStatusMap());
+      store.dispatch(clearLastExecutedData());
 
-        if (newPromptModeIsAvailable !== currentPromptModeIsAvailable) {
-          store.dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable));
-        }
+      const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
+        getPromptModeIsAvailable(services),
+        getSummaryAgentIsAvailable(services, currentDataset?.dataSource?.id || ''),
+      ]);
 
-        if (currentDataset) {
-          try {
-            if (datasetService && currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
-              await datasetService.cacheDataset(
-                currentDataset,
-                {
-                  ...services,
-                  storage: services.storage as any,
-                },
-                false
-              );
-            }
+      if (
+        newPromptModeIsAvailable.status === 'fulfilled' &&
+        newPromptModeIsAvailable.value !== queryEditor.promptModeIsAvailable
+      ) {
+        store.dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable.value));
+      }
 
-            await store.dispatch(executeQueries({ services }) as any);
+      if (
+        newSummaryAgentIsAvailable.status === 'fulfilled' &&
+        newSummaryAgentIsAvailable.value !== queryEditor.summaryAgentIsAvailable
+      ) {
+        store.dispatch(setSummaryAgentIsAvailable(newSummaryAgentIsAvailable.value));
+      }
 
-            store.dispatch(detectAndSetOptimalTab({ services }) as any);
-          } catch (error) {
-            services.notifications?.toasts.addError(error, {
-              title: 'Error loading dataset',
-            });
+      if (currentDataset) {
+        try {
+          if (datasetService && currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+            await datasetService.cacheDataset(
+              currentDataset,
+              {
+                ...services,
+                storage: services.storage as any,
+              },
+              false
+            );
           }
+
+          await store.dispatch(executeQueries({ services }) as any);
+          store.dispatch(detectAndSetOptimalTab({ services }) as any);
+        } catch (error) {
+          services.notifications?.toasts.addError(error, {
+            title: 'Error loading dataset',
+          });
         }
       }
     }
