@@ -170,7 +170,7 @@ export const runCreateVisTests = () => {
       cy.explore.clearQueryEditor();
 
       const datasetName = `${INDEX_WITH_TIME_1}*`;
-      const query = `source=${datasetName} | fields status_code, personal.age, bytes_transferred`;
+      const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
       cy.explore.setQueryEditor(query);
 
       // Run the query

@@ -20,7 +20,7 @@ import {
   createCategoryAreaChart,
 } from './area/to_expression';
 
-import { createHeatmapWithBin, createRegularHeatmap } from './heatmap/to_expression';
+import { createRegularHeatmap } from './heatmap/to_expression';
 import { createPieSpec } from './pie/to_expression';
 import {
   createTwoMetricScatter,
@@ -266,32 +266,6 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           axisColumnMappings
         );
     }
-  },
-};
-
-const threeMetricsRule: VisualizationRule = {
-  id: 'three-metric',
-  name: '3 Metric',
-  description: 'Heatmap with bin for three metric',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 3 && date.length === 0 && categorical.length === 0,
-  chartTypes: [{ ...CHART_METADATA.heatmap, priority: 100 }],
-  matchIndex: [3, 0, 0],
-  toExpression: (
-    transformedData,
-    numericalColumns,
-    categoricalColumns,
-    dateColumns,
-    styleOptions,
-    chartType = 'heatmap',
-    axisColumnMappings
-  ) => {
-    return createHeatmapWithBin(
-      transformedData,
-      numericalColumns,
-      styleOptions,
-      axisColumnMappings
-    );
   },
 };
 
@@ -616,7 +590,6 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   twoMetricOneDateRule,
   oneMetricOneCateOneDateRule,
   oneMetricTwoCateOneDateRule,
-  threeMetricsRule,
   oneMetricTwoCateHighCardRule,
   oneMetricTwoCateLowCardRule,
   oneMetricOneCateRule,
