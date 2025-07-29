@@ -43,7 +43,7 @@ export interface IDataView extends IIndexPattern {
   initializeDataSourceRef?(): Promise<void>;
 
   /**
-   * Converts a DataView to a serializable Dataset object suitable for storage in Redux
+   * Converts a DataView to a serializable Dataset object
    * Maps dataSourceRef and includes only essential properties for backward compatibility
    * @experimental This method is experimental and may change in future versions
    */

@@ -58,7 +58,7 @@ export class DataView extends IndexPattern implements IDataView {
   }
 
   /**
-   * Converts a DataView to a serializable Dataset object suitable for storage in Redux
+   * Converts a DataView to a serializable Dataset object
    * Maps dataSourceRef and includes only essential properties for backward compatibility
    */
   public async toDataset(): Promise<Dataset> {

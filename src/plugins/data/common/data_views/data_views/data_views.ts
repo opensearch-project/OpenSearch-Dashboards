@@ -722,12 +722,10 @@ export class DataViewsService {
    * @param dataView DataView object to convert to Dataset
    */
   async convertToDataset(dataView: DataView): Promise<Dataset> {
-    // Use the DataView's toDataset method if available
     if (dataView.toDataset) {
       return await dataView.toDataset();
     }
 
-    // Fallback for backward compatibility
     return {
       id: dataView.id || '',
       title: dataView.title,
@@ -741,37 +739,6 @@ export class DataViewsService {
         },
       }),
     };
-  }
-
-  /**
-   * Create a DataView from a Dataset object
-   * @experimental This method is experimental and may change in future versions
-   * @param dataset Dataset object to create DataView from
-   */
-  async createFromDataset(dataset: Dataset): Promise<DataView> {
-    const cached = await this.patterns.get(dataset.id, true);
-    if (cached) {
-      return cached as DataView;
-    }
-
-    const spec: DataViewSpec = {
-      id: dataset.id,
-      title: dataset.title,
-      type: dataset.type,
-      timeFieldName: dataset.timeFieldName,
-      dataSourceRef: dataset.dataSource
-        ? {
-            id: dataset.dataSource.id!,
-            name: dataset.dataSource.title,
-            type: dataset.dataSource.type,
-          }
-        : undefined,
-    };
-
-    const dataView = await this.create(spec, false);
-    this.patterns.saveToCache(dataset.id, dataView);
-
-    return dataView;
   }
 }
 
