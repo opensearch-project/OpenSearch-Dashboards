@@ -34,6 +34,7 @@ import { ReactWrapper } from 'enzyme';
 import { TimechartHeader, TimechartHeaderProps } from './timechart_header';
 import { EuiIconTip } from '@elastic/eui';
 import { findTestSubject } from 'test_utils/helpers';
+import { DiscoverChartToggleId } from '../utils/use_persist_chart_state';
 
 describe('timechart header', function () {
   let props: TimechartHeaderProps;
@@ -66,6 +67,8 @@ describe('timechart header', function () {
         description: 'second',
         scale: undefined,
       },
+      toggleIdSelected: 'histogram' as DiscoverChartToggleId,
+      additionalControl: null,
     };
   });
 
@@ -86,6 +89,22 @@ describe('timechart header', function () {
     expect(datetimeRangeText.text()).toBe(
       'May 14, 2020 @ 11:05:13.590 - May 14, 2020 @ 11:20:13.590 per'
     );
+  });
+
+  it('should not render interval selector when toggleIdSelected is not histogram', function () {
+    const updatedProps = {
+      ...props,
+      toggleIdSelected: 'summary' as DiscoverChartToggleId,
+    };
+    component = mountWithIntl(<TimechartHeader {...updatedProps} />);
+    const intervalSelect = findTestSubject(component, 'discoverIntervalSelect');
+    expect(intervalSelect.length).toBe(0);
+  });
+
+  it('should render log count text', function () {
+    component = mountWithIntl(<TimechartHeader {...props} />);
+    const logCountText = findTestSubject(component, 'discoverTimechartHeaderLogCount');
+    expect(logCountText.text()).toBe('Log count');
   });
 
   it('expects to render a dropdown with the interval options', () => {

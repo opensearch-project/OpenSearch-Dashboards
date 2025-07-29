@@ -1,0 +1,10 @@
+.exploreChartToggleButtonGroup {
+  border: none;
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiButtonGroup__buttons {
+    height: 30px !important;
+    background-color: $ouiColorGhost !important;
+    border: none;
+  }
+}

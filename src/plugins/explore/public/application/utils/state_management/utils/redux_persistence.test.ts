@@ -114,6 +114,7 @@ describe('redux_persistence', () => {
           promptModeIsAvailable: false,
           promptToQueryIsLoading: false,
           editorMode: EditorMode.Query,
+          summaryAgentIsAvailable: false,
           lastExecutedPrompt: '',
           lastExecutedTranslatedQuery: '',
         },

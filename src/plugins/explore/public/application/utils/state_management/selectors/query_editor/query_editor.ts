@@ -43,6 +43,11 @@ export const selectPromptToQueryIsLoading = createSelector(
   (state) => state.promptToQueryIsLoading
 );
 
+export const selectSummaryAgentIsAvailable = createSelector(
+  [selectState],
+  (state) => state.summaryAgentIsAvailable
+);
+
 export const selectEditorMode = createSelector([selectState], (state) => state.editorMode);
 
 export const selectIsPromptEditorMode = createSelector([selectEditorMode], (editorMode) => {
