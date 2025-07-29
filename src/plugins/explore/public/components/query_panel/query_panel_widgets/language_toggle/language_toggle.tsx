@@ -31,7 +31,7 @@ export const LanguageToggle = () => {
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const dispatch = useDispatch();
   const editorRef = useEditorRef();
-  const { focusOnEditor } = useEditorFocus();
+  const focusOnEditor = useEditorFocus();
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);

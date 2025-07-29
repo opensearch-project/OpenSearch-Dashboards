@@ -52,11 +52,7 @@ describe('QueryPanelGeneratedQuery', () => {
 
     mockUseDispatch.mockReturnValue(mockDispatch);
     mockUseSetEditorTextWithQuery.mockReturnValue(mockSetEditorTextWithQuery);
-    mockUseEditorFocus.mockReturnValue({
-      focusOnEditor: mockFocusOnEditor,
-      editorIsFocused: false,
-      setEditorIsFocused: jest.fn(),
-    });
+    mockUseEditorFocus.mockReturnValue(mockFocusOnEditor);
 
     mockClearLastExecutedData.mockReturnValue({
       type: 'clearLastExecutedData',
@@ -108,6 +104,7 @@ describe('QueryPanelGeneratedQuery', () => {
         expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith(testQuery);
         expect(mockDispatch).toHaveBeenCalledWith({ type: 'clearLastExecutedData' });
         expect(mockFocusOnEditor).toHaveBeenCalledTimes(1);
+        expect(mockFocusOnEditor).toHaveBeenCalledWith(true);
       });
 
       it('should call functions in correct order', () => {

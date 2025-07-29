@@ -10,7 +10,7 @@ import { EditorContext } from '../../../context';
  * Gives editor text
  */
 export const useEditorText = () => {
-  const { editorText } = useContext(EditorContext);
+  const editorRef = useContext(EditorContext);
 
-  return editorText;
+  return editorRef.current?.getValue() || '';
 };

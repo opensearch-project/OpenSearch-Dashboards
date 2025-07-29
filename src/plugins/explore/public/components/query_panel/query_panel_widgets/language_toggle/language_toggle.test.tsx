@@ -26,7 +26,7 @@ const mockEditorRef = {
 // Mock the hooks
 jest.mock('../../../../application/hooks', () => ({
   useClearEditors: () => mockClearEditors,
-  useEditorFocus: () => ({ focusOnEditor: mockFocusOnEditor }),
+  useEditorFocus: () => mockFocusOnEditor,
   useEditorRef: () => mockEditorRef,
 }));
 

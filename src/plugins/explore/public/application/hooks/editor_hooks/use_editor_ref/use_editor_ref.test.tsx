@@ -13,13 +13,7 @@ describe('useEditorRef', () => {
     current: null as any,
   };
 
-  const mockContextValue: InternalEditorContextValue = {
-    editorRef: mockEditorRef,
-    editorText: 'test text',
-    setEditorText: jest.fn(),
-    editorIsFocused: false,
-    setEditorIsFocused: jest.fn(),
-  };
+  const mockContextValue: InternalEditorContextValue = mockEditorRef;
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <EditorContext.Provider value={mockContextValue}>{children}</EditorContext.Provider>
@@ -43,10 +37,7 @@ describe('useEditorRef', () => {
 
   it('should return ref with actual editor when set', () => {
     const mockEditor = { focus: jest.fn() } as any;
-    const contextWithEditor: InternalEditorContextValue = {
-      ...mockContextValue,
-      editorRef: { current: mockEditor },
-    };
+    const contextWithEditor: InternalEditorContextValue = { current: mockEditor };
 
     const wrapperWithEditor = ({ children }: { children: React.ReactNode }) => (
       <EditorContext.Provider value={contextWithEditor}>{children}</EditorContext.Provider>
