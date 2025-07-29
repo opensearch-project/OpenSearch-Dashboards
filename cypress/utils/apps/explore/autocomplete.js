@@ -204,7 +204,7 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
 
       if (isVisible) {
         if (useKeyboard) {
-          const highlightedRow = $rows.filter('.focused').text();
+          const highlightedRow = $rows.filter('[aria-selected="true"]').text();
           if (highlightedRow.includes(suggestionText)) {
             return cy.get('.inputarea').trigger('keydown', {
               key: 'Tab',
