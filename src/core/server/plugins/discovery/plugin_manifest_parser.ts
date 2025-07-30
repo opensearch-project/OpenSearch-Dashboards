@@ -292,7 +292,7 @@ function isVersionCompatible(
     return false;
   }
 
-  return coercedActual.major === coercedExpected.major;
+  return semver.eq(coercedActual, coercedExpected);
 }
 /**
  * Checks whether specified version range is valid.

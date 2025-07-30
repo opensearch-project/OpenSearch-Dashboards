@@ -30,6 +30,7 @@
 
 import path from 'path';
 import { statSync } from 'fs';
+import semver from 'semver';
 
 import { cleanVersion } from '../../legacy/utils/version';
 
@@ -56,12 +57,39 @@ export function assertVersion(settings) {
   const actual = cleanVersion(settings.plugins[0].opensearchDashboardsVersion);
   const expected = cleanVersion(settings.version);
 
-  const actualMajor = actual.split('.')[0];
-  const expectedMajor = expected.split('.')[0];
+  if (actual === 'opensearchDashboards') {
+    return;
+  }
 
-  if (actualMajor !== expectedMajor) {
+  const actualVersion = semver.parse(actual);
+  const expectedVersion = semver.parse(expected);
+
+  if (!actualVersion || !expectedVersion) {
     throw new Error(
-      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]. Major version must match.`
+      `Invalid version format. Plugin: ${actual}, OpenSearch Dashboards: ${expected}`
     );
+  }
+
+  const mode = settings.singleVersion;
+
+  switch (mode) {
+    case 'strict':
+      if (!semver.eq(actualVersion, expectedVersion)) {
+        throw new Error(
+          `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]. Strict mode requires exact version match.`
+        );
+      }
+      break;
+
+    case 'ignore':
+      if (actualVersion.major !== expectedVersion.major) {
+        console.warn(
+          `WARNING: Plugin ${settings.plugins[0].id} [${actual}] major version differs from OpenSearch Dashboards [${expected}]. Plugin may not function correctly.`
+        );
+      }
+      break;
+
+    default:
+      throw new Error(`Invalid single-version mode: ${mode}. Use 'strict' or 'ignore'.`);
   }
 }

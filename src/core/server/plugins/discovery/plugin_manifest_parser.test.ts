@@ -192,19 +192,6 @@ test('return error when plugin config path is an array that contains non-string 
   });
 });
 
-test('return success when plugin expected OpenSearch Dashboards version has same major version but different minor/patch', async () => {
-  mockReadFilePromise.mockResolvedValue(
-    Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.1', server: true }))
-  );
-
-  await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toMatchObject({
-    id: 'someId',
-    version: '7.0.1',
-    opensearchDashboardsVersion: '7.0.1',
-    server: true,
-  });
-});
-
 test('return error when plugin expected OpenSearch Dashboards version has different major version (8.x vs 7.x)', async () => {
   mockReadFilePromise.mockResolvedValue(
     Buffer.from(JSON.stringify({ id: 'someId', version: '8.0.0' }))
@@ -214,32 +201,6 @@ test('return error when plugin expected OpenSearch Dashboards version has differ
     message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "8.0.0", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
-  });
-});
-
-test('return success when plugin has same major version with higher minor version', async () => {
-  mockReadFilePromise.mockResolvedValue(
-    Buffer.from(JSON.stringify({ id: 'someId', version: '7.5.0', server: true }))
-  );
-
-  await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toMatchObject({
-    id: 'someId',
-    version: '7.5.0',
-    opensearchDashboardsVersion: '7.5.0',
-    server: true,
-  });
-});
-
-test('return success when plugin has same major version with lower minor version', async () => {
-  mockReadFilePromise.mockResolvedValue(
-    Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: true }))
-  );
-
-  await expect(parseManifest(pluginPath, packageInfo, logger)).resolves.toMatchObject({
-    id: 'someId',
-    version: '7.0.0',
-    opensearchDashboardsVersion: '7.0.0',
-    server: true,
   });
 });
 

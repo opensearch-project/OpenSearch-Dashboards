@@ -198,7 +198,7 @@ describe('plugins discovery system', () => {
         `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
           'plugin_b'
         )})`,
-        expect.stringContaining(`invalid-manifest, ${manifestPath('plugin_c')}`),
+        expect.stringContaining(`incompatible-version, ${manifestPath('plugin_c')}`),
       ])
     );
   });
