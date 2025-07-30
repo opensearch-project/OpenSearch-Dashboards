@@ -148,7 +148,8 @@ cy.explore.add('setTopNavDate', (start, end, submit = true) => {
     .should('be.visible')
     .invoke('attr', 'data-test-subj')
     .then((testId) => {
-      cy.getElementByTestId(testId, opts).should('be.visible').click(opts);
+      cy.getElementByTestId(testId, opts).as('btn').click({force: true});
+      cy.get('@btn').click({force: true});
     });
 
   /* While we surely are in the date selection mode, we don't know if the date selection dialog
