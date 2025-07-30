@@ -20,7 +20,7 @@ export const QueryPanelGeneratedQuery = () => {
   const lastExecutedTranslatedQuery = useSelector(selectLastExecutedTranslatedQuery);
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
   const dispatch = useDispatch();
-  const { focusOnEditor } = useEditorFocus();
+  const focusOnEditor = useEditorFocus();
 
   if (!lastExecutedTranslatedQuery) {
     return null;
@@ -29,13 +29,17 @@ export const QueryPanelGeneratedQuery = () => {
   const onEditClick = () => {
     setEditorTextWithQuery(lastExecutedTranslatedQuery);
     dispatch(clearLastExecutedData());
-    focusOnEditor();
+    focusOnEditor(true);
   };
 
   return (
     <div className="exploreQueryPanelGeneratedQuery">
       <EuiIcon type="editorCodeBlock" size="s" />
-      <EuiText className="exploreQueryPanelGeneratedQuery__query" size="s">
+      <EuiText
+        className="exploreQueryPanelGeneratedQuery__query"
+        size="s"
+        data-test-subj="exploreQueryPanelGeneratedQuery"
+      >
         {lastExecutedTranslatedQuery}
       </EuiText>
       <EuiBadge
@@ -44,7 +48,10 @@ export const QueryPanelGeneratedQuery = () => {
         onClickAriaLabel={editQueryText}
         color="hollow"
       >
-        <div className="exploreQueryPanelGeneratedQuery__buttonTextWrapper">
+        <div
+          className="exploreQueryPanelGeneratedQuery__buttonTextWrapper"
+          data-test-subj="exploreQueryPanelGeneratedQueryEditButton"
+        >
           <EuiIcon type="editorCodeBlock" size="s" />
           <EuiText size="xs">{editQueryText}</EuiText>
         </div>

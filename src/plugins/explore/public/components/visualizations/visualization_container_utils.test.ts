@@ -6,13 +6,11 @@
 import {
   convertMappingsToStrings,
   convertStringsToMappings,
-  getAllColumns,
   isValidMapping,
   findRuleByIndex,
   getColumnMatchFromMapping,
 } from './visualization_container_utils';
 import { AxisRole, VisColumn, VisFieldType } from './types';
-import { ChartType, VisualizationTypeResult } from './utils/use_visualization_types';
 
 jest.mock('./rule_repository', () => ({
   ALL_VISUALIZATION_RULES: [
@@ -110,20 +108,6 @@ describe('visualization_container_utils', () => {
       expect(result).toEqual({
         [AxisRole.X]: undefined,
       });
-    });
-  });
-
-  describe('getAllColumns', () => {
-    it('combines all column types', () => {
-      const visualizationData: VisualizationTypeResult<ChartType> = {
-        numericalColumns: [mockColumns[0]],
-        categoricalColumns: [mockColumns[1]],
-        dateColumns: [mockColumns[2]],
-      };
-
-      const result = getAllColumns(visualizationData);
-
-      expect(result).toEqual(mockColumns);
     });
   });
 

@@ -63,7 +63,7 @@ jest.doMock('../../utils', () => ({
 
 jest.doMock('../../../../application/hooks', () => ({
   useSetEditorTextWithQuery: () => mockSetEditorTextWithQuery,
-  useEditorText: () => 'SELECT * FROM logs',
+  useEditorText: () => () => 'SELECT * FROM logs',
 }));
 
 jest.doMock('../../../../application/utils/state_management/actions/query_editor', () => ({

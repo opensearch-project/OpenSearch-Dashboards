@@ -3,24 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext } from 'react';
 import { EditorContext } from '../../../context';
 
 /**
  * Focus related util hook
  */
 export const useEditorFocus = () => {
-  const { editorRef, editorIsFocused, setEditorIsFocused } = useContext(EditorContext);
+  const editorRef = useContext(EditorContext);
 
-  const focusOnEditor = useCallback(() => {
-    setEditorIsFocused(true);
-    // add a delay
-    setTimeout(() => editorRef.current?.focus());
-  }, [editorRef, setEditorIsFocused]);
-
-  return useMemo(() => ({ editorIsFocused, focusOnEditor, setEditorIsFocused }), [
-    editorIsFocused,
-    focusOnEditor,
-    setEditorIsFocused,
-  ]);
+  return useCallback(
+    (selectAll?: boolean) => {
+      // add a delay
+      setTimeout(() => {
+        const model = editorRef.current?.getModel();
+        editorRef.current?.focus();
+        if (selectAll && model) {
+          editorRef.current?.setSelection(model.getFullModelRange());
+        } else if (model) {
+          // Position cursor at the end of the editor
+          const lastLine = model.getLineCount();
+          const lastColumn = model.getLineMaxColumn(lastLine);
+          editorRef.current?.setPosition({ lineNumber: lastLine, column: lastColumn });
+        }
+      });
+    },
+    [editorRef]
+  );
 };

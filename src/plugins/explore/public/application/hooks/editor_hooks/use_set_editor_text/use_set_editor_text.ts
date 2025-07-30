@@ -3,14 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { EditorContext } from '../../../context';
 
 /**
  * setEditorText hook
  */
 export const useSetEditorText = () => {
-  const { setEditorText } = useContext(EditorContext);
+  const editorRef = useContext(EditorContext);
 
-  return setEditorText;
+  return useCallback(
+    (text: string | ((prevText: string) => string)) => {
+      const currentValue = editorRef.current?.getValue() || '';
+      const newValue = typeof text === 'function' ? text(currentValue) : text;
+      editorRef.current?.setValue(newValue);
+    },
+    [editorRef]
+  );
 };

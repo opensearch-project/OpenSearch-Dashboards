@@ -51,7 +51,7 @@ export const selectSpecificSuggestion = (suggestionText) => {
       cy.get('.monaco-list-row.focused').then(() => {
         cy.get('.monaco-list-row').then(($rows) => {
           const exactMatch = $rows.filter((_, row) => {
-            return Cypress.$(row).attr('aria-label') === suggestionText;
+            return Cypress.$(row).text().includes(suggestionText);
           });
 
           if (exactMatch.length > 0) {
@@ -217,7 +217,6 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
           return cy.get('.monaco-list-row').contains(suggestionText).click({ force: true });
         }
       }
-
       return cy
         .get('.inputarea')
         .type('{downarrow}', { force: true })
@@ -330,6 +329,89 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
         selectSuggestion('Configuration', useKeyboard);
+      }
+    });
+};
+
+/**
+ * Creates an Invalid query to test error highlighting
+ * @param {Object} config - Query configuration
+ */
+export const createInvalidQuery = (config) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      if (config.language === QueryLanguages.PPL.name) {
+        cy.get('.inputarea').type('source = data_logs_small_time_1 | where stats ', {
+          force: true,
+        });
+      }
+    });
+};
+
+/**
+ * Checks if the editor contains any error by looking for mtk31 class (error marker)
+ */
+export const validateEditorContainsError = () => {
+  cy.get('.monaco-editor', { timeout: 10000 })
+    .should('be.visible')
+    .within(() => {
+      cy.get('.mtk31', { timeout: 5000 }).should('exist');
+    });
+};
+
+/**
+ * Validates Implicit PPL Queries, that don't necessarily start with `source =` part
+ * @param {Object} config - Query configuration
+ */
+export const validateImplicitPPLQuery = (config) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      cy.get('.inputarea').type(' ', { force: true });
+      if (config.language === QueryLanguages.PPL.name) {
+        typeAndSelectSuggestion('c', 'category');
+        selectSuggestion('=');
+      }
+    });
+};
+
+/**
+ * Validates if documentation panel is visible after typing 'sour'
+ * @param {Object} config - Query configuration
+ */
+export const validateDocumentationPanelIsOpen = (config) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      cy.get('.inputarea').type(' ', { force: true });
+      if (config.language === QueryLanguages.PPL.name) {
+        // Type 'sour' to trigger suggestions with documentation
+        cy.get('.inputarea').type('sour', { force: true });
+
+        // Wait for suggestion widget to appear
+        cy.get('.suggest-widget.visible')
+          .should('be.visible')
+          .then(($widget) => {
+            // Check if documentation panel (status bar) is visible
+            const statusBar = $widget.find('.suggest-status-bar');
+            expect(statusBar.length).to.be.greaterThan(0);
+          });
       }
     });
 };

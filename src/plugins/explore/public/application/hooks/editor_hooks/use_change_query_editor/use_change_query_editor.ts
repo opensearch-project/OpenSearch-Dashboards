@@ -27,7 +27,7 @@ export const useChangeQueryEditor = () => {
   const setEditorText = useSetEditorText();
   const editorMode = useSelector(selectEditorMode);
   const query = useSelector(selectQuery);
-  const { focusOnEditor } = useEditorFocus();
+  const focusOnEditor = useEditorFocus();
 
   const onAddFilter = useCallback(
     (field: string | IndexPatternField | DataViewField, values: string, operation: '+' | '-') => {
