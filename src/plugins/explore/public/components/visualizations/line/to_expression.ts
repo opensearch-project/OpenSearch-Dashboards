@@ -176,6 +176,10 @@ export const createLineBarChart = (
     },
   };
 
+  const barWithThresholdLayer = {
+    layer: [barLayer],
+  };
+
   const lineLayer = {
     mark: buildMarkConfig(styles, 'line'),
     encoding: {
@@ -218,13 +222,13 @@ export const createLineBarChart = (
     },
   };
 
-  layers.push(barLayer, lineLayer);
-
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
-    layers.push(thresholdLayer);
+    barWithThresholdLayer.layer.push(thresholdLayer);
   }
+
+  layers.push(barWithThresholdLayer, lineLayer);
 
   // Add time marker layer if enabled
   const timeMarkerLayer = createTimeMarkerLayer(styles);
