@@ -118,12 +118,10 @@ describe('formatDate', () => {
     // Test with a specific date
     const testDate = new Date('2025-07-01T10:40:03');
     const formattedDate = formatDate(testDate.toISOString());
-    
     // Verify the format is YYYY-MM-DDTHH:MM:SS with T separator
     expect(formattedDate).toBe('2025-07-01T10:40:03');
     expect(formattedDate).toContain('T');
     expect(formattedDate).not.toContain(' ');
-    
     // Verify with another date
     const anotherDate = new Date('2025-06-30T15:30:45');
     const anotherFormatted = formatDate(anotherDate.toISOString());
