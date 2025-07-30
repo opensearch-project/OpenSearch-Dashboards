@@ -15,7 +15,6 @@ import { configSchema, BannerPluginConfigType } from './config';
 
 export const config: PluginConfigDescriptor<BannerPluginConfigType> = {
   exposeToBrowser: {
-    enabled: true,
     content: true,
     color: true,
     iconType: true,

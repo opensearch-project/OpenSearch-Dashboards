@@ -3,53 +3,66 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import React from 'react';
 import { useSetEditorText } from './use_set_editor_text';
 import { EditorContext, InternalEditorContextValue } from '../../../context';
 
 describe('useSetEditorText', () => {
-  const mockSetEditorText = jest.fn();
+  const mockGetValue = jest.fn();
+  const mockSetValue = jest.fn();
 
-  const mockContextValue: InternalEditorContextValue = {
-    editorRef: { current: null },
-    editorText: '',
-    setEditorText: mockSetEditorText,
-    editorIsFocused: false,
-    setEditorIsFocused: jest.fn(),
+  const mockEditor = {
+    getValue: mockGetValue,
+    setValue: mockSetValue,
+  };
+
+  const mockEditorRef: InternalEditorContextValue = {
+    current: mockEditor as any,
   };
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <EditorContext.Provider value={mockContextValue}>{children}</EditorContext.Provider>
+    <EditorContext.Provider value={mockEditorRef}>{children}</EditorContext.Provider>
   );
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetValue.mockReturnValue('');
   });
 
-  it('should return setEditorText function from context', () => {
+  it('should return a function to set editor text', () => {
     const { result } = renderHook(() => useSetEditorText(), { wrapper });
 
-    expect(result.current).toBe(mockSetEditorText);
+    expect(typeof result.current).toBe('function');
   });
 
-  it('should call setEditorText with provided text', () => {
+  it('should call setValue with provided text', () => {
     const { result } = renderHook(() => useSetEditorText(), { wrapper });
 
     const testText = 'SELECT * FROM logs WHERE level = "error"';
-    result.current(testText);
 
-    expect(mockSetEditorText).toHaveBeenCalledWith(testText);
-    expect(mockSetEditorText).toHaveBeenCalledTimes(1);
+    act(() => {
+      result.current(testText);
+    });
+
+    expect(mockSetValue).toHaveBeenCalledWith(testText);
+    expect(mockSetValue).toHaveBeenCalledTimes(1);
   });
 
-  it('should call setEditorText with function when provided', () => {
+  it('should handle function callback by getting current value and setting new value', () => {
+    const currentText = 'SELECT * FROM logs';
+    mockGetValue.mockReturnValue(currentText);
+
     const { result } = renderHook(() => useSetEditorText(), { wrapper });
 
     const textUpdater = (prevText: string) => `${prevText} ORDER BY timestamp`;
-    result.current(textUpdater);
 
-    expect(mockSetEditorText).toHaveBeenCalledWith(textUpdater);
-    expect(mockSetEditorText).toHaveBeenCalledTimes(1);
+    act(() => {
+      result.current(textUpdater);
+    });
+
+    expect(mockGetValue).toHaveBeenCalledTimes(1);
+    expect(mockSetValue).toHaveBeenCalledWith('SELECT * FROM logs ORDER BY timestamp');
+    expect(mockSetValue).toHaveBeenCalledTimes(1);
   });
 });

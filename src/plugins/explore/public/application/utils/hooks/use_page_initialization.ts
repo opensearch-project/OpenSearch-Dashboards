@@ -11,9 +11,6 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import {
   setSavedSearch,
-  setChartType,
-  setStyleOptions,
-  setAxesMapping,
   setQueryState,
   setActiveTab,
   clearResults,
@@ -25,6 +22,7 @@ import { executeQueries } from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
 import { useSetEditorText } from '../../hooks';
 import { EditorMode } from '../state_management/types';
+import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -33,6 +31,7 @@ export const useInitPage = () => {
   const { savedExplore, error } = useSavedExplore(exploreId);
   const setEditorText = useSetEditorText();
   const { chrome, data } = services;
+  const visualizationBuilder = getVisualizationBuilder();
 
   useEffect(() => {
     if (savedExplore && !error) {
@@ -64,9 +63,9 @@ export const useInitPage = () => {
         const uiState = savedExplore.uiState;
         if (visualization) {
           const { chartType, params, axesMapping } = JSON.parse(visualization);
-          dispatch(setChartType(chartType));
-          dispatch(setStyleOptions(params));
-          dispatch(setAxesMapping(axesMapping));
+          visualizationBuilder.setCurrentChartType(chartType);
+          visualizationBuilder.setAxesMapping(axesMapping);
+          visualizationBuilder.setStyles({ type: chartType, styles: params });
         }
         if (uiState) {
           const { activeTab } = JSON.parse(uiState);
@@ -95,7 +94,16 @@ export const useInitPage = () => {
         chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: 'Error' }]);
       }
     }
-  }, [chrome, data.query.queryString, dispatch, error, savedExplore, services, setEditorText]);
+  }, [
+    chrome,
+    data.query.queryString,
+    dispatch,
+    error,
+    savedExplore,
+    services,
+    setEditorText,
+    visualizationBuilder,
+  ]);
 
   const pageContext = { savedExplore };
 

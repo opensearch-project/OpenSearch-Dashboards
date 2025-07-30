@@ -3,6 +3,7 @@ $paddingForNavWrapper: $paddingForNavItem * 2;
 $sizeForSelectedSubMenu: 5px;
 $activeMenuBorderWidth: 3px; // Thick border's width is 2px, use 3px here to override.
 $collapsedLeftNavWidth: 48px;
+$expandedLeftNavWidth: 270px;
 $iconWidth: 16px;
 
 .leftNavIsOpen-true.context-nav-wrapper,
@@ -178,24 +179,10 @@ $iconWidth: 16px;
     -ms-overflow-style: -ms-autohiding-scrollbar;
     border-top: $euiBorderThin;
     border-color: $euiBorderColor;
-
-    &.bottom-container-collapsed {
-      flex-direction: column;
-      align-items: center;
-      gap: $euiSize;
-      padding-top: $euiSizeS;
-      padding-bottom: $euiSizeS;
-
-      > * {
-        justify-content: center;
-      }
-    }
-
-    &.bottom-container-expanded {
-      gap: 16px;
-      padding-top: $euiSizeM;
-      padding-bottom: $euiSizeM;
-    }
+    flex-direction: column;
+    gap: $euiSize;
+    padding-top: $euiSizeS;
+    padding-bottom: $euiSizeS;
   }
 
   .navGroupEnabledNavTopWrapper {

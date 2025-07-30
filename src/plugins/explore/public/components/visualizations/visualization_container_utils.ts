@@ -4,18 +4,10 @@
  */
 
 import { isEqual } from 'lodash';
-import {
-  setAxesMapping,
-  setChartType,
-  setStyleOptions,
-} from '../../application/utils/state_management/slices';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { AxisColumnMappings, VisColumn, VisFieldType } from './types';
-import { ChartType, VisualizationTypeResult } from './utils/use_visualization_types';
 
-export const convertMappingsToStrings = (
-  mappings: AxisColumnMappings
-): Partial<Record<string, string>> =>
+export const convertMappingsToStrings = (mappings: AxisColumnMappings): Record<string, string> =>
   Object.fromEntries(Object.entries(mappings).map(([axis, column]) => [axis, column?.name]));
 
 export const convertStringsToMappings = (
@@ -29,12 +21,6 @@ export const convertStringsToMappings = (
     ])
   );
 
-export const getAllColumns = (visualizationTypeResult: VisualizationTypeResult<ChartType>) => [
-  ...visualizationTypeResult.numericalColumns!,
-  ...visualizationTypeResult.categoricalColumns!,
-  ...visualizationTypeResult.dateColumns!,
-];
-
 export const isValidMapping = (
   selectedAxesMapping: Partial<Record<string, string>>,
   allColumns: VisColumn[]
@@ -42,19 +28,6 @@ export const isValidMapping = (
   Object.values(selectedAxesMapping).every((columnName) =>
     allColumns.some((col) => col.name === columnName)
   );
-
-export const applyDefaultVisualization = (
-  visualizationTypeResult: VisualizationTypeResult<ChartType>,
-  setCurrentRuleId: (id: string | undefined) => void,
-  setVisualizationData: (data: VisualizationTypeResult<ChartType>) => void,
-  dispatch: any
-) => {
-  setCurrentRuleId(visualizationTypeResult.ruleId);
-  setVisualizationData(visualizationTypeResult);
-  dispatch(setChartType(visualizationTypeResult.visualizationType!.type));
-  dispatch(setAxesMapping(convertMappingsToStrings(visualizationTypeResult.axisColumnMappings!)));
-  dispatch(setStyleOptions(visualizationTypeResult.visualizationType!.ui.style.defaults));
-};
 
 export const findRuleByIndex = (
   selectedAxesMapping: Partial<Record<string, string>>,

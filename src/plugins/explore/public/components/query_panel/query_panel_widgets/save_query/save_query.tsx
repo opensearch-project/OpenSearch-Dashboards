@@ -32,7 +32,7 @@ export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { timeFilter } = useTimeFilter();
   const query = useSelector(selectQuery);
-  const userInputText = useEditorText();
+  const getEditorText = useEditorText();
   const savedQueryService = services.data.query.savedQueries;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
@@ -73,7 +73,7 @@ export const SaveQueryButton = () => {
 
       const queryToSave = {
         ...clonedQuery,
-        query: userInputText,
+        query: getEditorText(),
       };
 
       const attributes: any = {

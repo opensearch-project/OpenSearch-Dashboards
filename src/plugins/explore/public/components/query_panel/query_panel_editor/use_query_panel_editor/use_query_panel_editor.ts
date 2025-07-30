@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
@@ -11,16 +11,11 @@ import {
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
   selectQueryLanguage,
+  selectQueryString,
 } from '../../../../application/utils/state_management/selectors';
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
 
-import {
-  useClearEditors,
-  useEditorFocus,
-  useEditorRef,
-  useEditorText,
-  useSetEditorText,
-} from '../../../../application/hooks';
+import { useEditorRef } from '../../../../application/hooks';
 import { useDatasetContext } from '../../../../application/context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
@@ -98,18 +93,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const { dataset } = useDatasetContext();
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const {
-    data: {
-      query: { queryString },
-    },
-  } = services;
-  const text = useEditorText();
-  const { editorIsFocused, setEditorIsFocused } = useEditorFocus();
-  const setEditorText = useSetEditorText();
-  const clearEditors = useClearEditors();
+  const queryString = useSelector(selectQueryString);
+  const [editorText, setEditorText] = useState<string>(queryString);
+  const [editorIsFocused, setEditorIsFocused] = useState(false);
   // The 'onRun' functions in editorDidMount uses the context values when the editor is mounted.
   // Using a ref will ensure it always uses the latest value
-  const editorTextRef = useRef(text);
+  const editorTextRef = useRef(editorText);
   const queryLanguage = useSelector(selectQueryLanguage);
   const dispatch = useDispatch();
   const editorRef = useEditorRef();
@@ -120,8 +109,8 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
 
   // Keep the refs updated with latest context
   useEffect(() => {
-    editorTextRef.current = text;
-  }, [text]);
+    editorTextRef.current = editorText;
+  }, [editorText]);
   useEffect(() => {
     isPromptModeRef.current = isPromptMode;
   }, [isPromptMode]);
@@ -132,7 +121,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
   useEffect(() => {
-    if (isQueryMode && !!text.length) {
+    if (isQueryMode && !!editorText.length) {
       const onDidFocusDisposable = editorRef.current?.onDidFocusEditorWidget(() => {
         editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
       });
@@ -141,7 +130,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         onDidFocusDisposable?.dispose();
       };
     }
-  }, [isQueryMode, editorRef, text]);
+  }, [isQueryMode, editorRef, editorText]);
 
   const setEditorRef = useCallback(
     (editor: IStandaloneCodeEditor) => {
@@ -166,7 +155,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         const effectiveLanguage = getEffectiveLanguageForAutoComplete(queryLanguage, 'explore');
 
         // Get the current dataset from Query Service to avoid stale closure values
-        const currentDataView = queryString?.getQuery().dataset;
+        const currentDataView = services.data.query.queryString.getQuery().dataset;
 
         // Get the current dataset from services to avoid stale closure values
         let currentDataset = dataset;
@@ -234,7 +223,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         return { suggestions: [], incomplete: false };
       }
     },
-    [isPromptModeRef, queryLanguage, queryString, dataset, services]
+    [isPromptModeRef, queryLanguage, dataset, services]
   );
 
   // We need to manually register completion provider if it gets re-created,
@@ -253,9 +242,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   }, [dispatch, services]);
 
   const handleEscape = useCallback(() => {
-    clearEditors();
+    setEditorText('');
     dispatch(setEditorMode(EditorMode.Query));
-  }, [clearEditors, dispatch]);
+  }, [dispatch]);
 
   const editorDidMount = useCallback(
     (editor: IStandaloneCodeEditor) => {
@@ -356,8 +345,8 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     options,
     placeholder,
     promptIsTyping,
-    showPlaceholder: !text.length && editorIsFocused,
+    showPlaceholder: !editorText.length && editorIsFocused,
     useLatestTheme: true,
-    value: text,
+    value: editorText,
   };
 };

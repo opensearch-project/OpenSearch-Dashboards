@@ -57,6 +57,7 @@ export const LineExclusiveVisOptions = ({
         defaultMessage: 'Line',
       })}
       initialIsOpen={true}
+      data-test-subj="lineVisStyleAccordion"
     >
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.basic.linestyle', {

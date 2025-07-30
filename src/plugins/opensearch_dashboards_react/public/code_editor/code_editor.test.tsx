@@ -132,3 +132,28 @@ test('editor mount setup', () => {
   expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
 });
+
+test('suggest controller details visibility is set on editor mount', () => {
+  const mockSuggestController = {
+    widget: {
+      value: {
+        _setDetailsVisible: jest.fn(),
+      },
+    },
+  };
+
+  const mockEditor = {
+    getContribution: jest.fn().mockReturnValue(mockSuggestController),
+    onDidFocusEditorWidget: jest.fn(),
+  } as any;
+
+  const component = shallow(
+    <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />
+  );
+
+  const instance = component.instance() as CodeEditor;
+  instance._editorDidMount(mockEditor, monaco);
+
+  expect(mockEditor.getContribution).toHaveBeenCalledWith('editor.contrib.suggestController');
+  expect(mockSuggestController.widget.value._setDetailsVisible).toHaveBeenCalledWith(true);
+});

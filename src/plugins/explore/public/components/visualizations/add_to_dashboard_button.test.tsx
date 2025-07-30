@@ -10,6 +10,7 @@ import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from '../../helpers/save_explore';
 import { Provider } from 'react-redux';
 import configureMockStore from 'redux-mock-store';
+import * as VB from './visualization_builder';
 
 const mockStore = configureMockStore([]);
 
@@ -103,6 +104,7 @@ const store = mockStore({
 describe('SaveAndAddButtonWithModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(new VB.VisualizationBuilder({}));
   });
 
   it('renders the add button and opens modal on click', async () => {

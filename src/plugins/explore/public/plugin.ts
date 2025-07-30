@@ -67,6 +67,7 @@ import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
+import { setServices } from './services/services';
 
 export class ExplorePlugin
   implements
@@ -79,8 +80,6 @@ export class ExplorePlugin
   // @ts-ignore
   private config: ConfigSchema;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-  // FIXME set to false when integrate with dashboard assistant plugin
-  private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(true);
 
   private stopUrlTracking?: () => void;
   private currentHistory?: ScopedHistory;
@@ -291,8 +290,7 @@ export class ExplorePlugin
           pluginsStart,
           this.initializerContext,
           this.tabRegistry,
-          this.visualizationRegistryService,
-          this.isSummaryAgentAvailable$
+          this.visualizationRegistryService
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -318,6 +316,7 @@ export class ExplorePlugin
         const abortActionId = `${PLUGIN_ID}`;
         const abortAction = createAbortDataQueryAction(abortActionId);
         services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
+        setServices(services);
 
         appMounted();
 
@@ -421,7 +420,6 @@ export class ExplorePlugin
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
       visualizationRegistry: visualizationRegistryService,
-      isSummaryAgentAvailable$: this.isSummaryAgentAvailable$,
     };
   }
 
@@ -444,8 +442,7 @@ export class ExplorePlugin
         plugins,
         this.initializerContext,
         this.tabRegistry,
-        this.visualizationRegistryService,
-        this.isSummaryAgentAvailable$
+        this.visualizationRegistryService
       );
       setLegacyServices({
         ...services,

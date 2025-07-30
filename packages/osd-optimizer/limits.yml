@@ -1,19 +1,20 @@
 pageLoadAssetSize:
   advancedSettings: 27596
   apmOss: 18996
+  banner: 44196
   bfetch: 41874
   charts: 159211
   console: 46235
   contentManagement: 189948
-  core: 1001367
+  core: 1052848
   dashboard: 694542
   data: 3277774
   dataExplorer: 142726
   dataImporter: 22156
   dataSource: 24232
-  dataSourceManagement: 548234
+  dataSourceManagement: 549474
   devTools: 66175
-  discover: 825721
+  discover: 827286
   embeddable: 242671
   explore: 999025
   expressions: 224120

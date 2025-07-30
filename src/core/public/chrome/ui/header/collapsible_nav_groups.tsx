@@ -14,11 +14,13 @@ import {
   EuiContextMenuItem,
   EuiTitle,
   EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { ChromeNavLink } from '../..';
+import { ChromeNavLink, ChromeRegistrationNavLink } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { createEuiListItem } from './nav_link';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
@@ -46,12 +48,14 @@ const createNavItem = ({
   appId,
   navigateToApp,
   basePath,
+  onClick,
 }: {
   link: ChromeNavLink;
   className?: string;
   appId?: string;
   basePath: HttpStart['basePath'];
   navigateToApp: CoreStart['application']['navigateToApp'];
+  onClick?: ChromeRegistrationNavLink['onClick'];
 }): EuiSideNavItemType<{}> => {
   const euiListItem = createEuiListItem({
     link,
@@ -59,12 +63,13 @@ const createNavItem = ({
     dataTestSubj: `collapsibleNavAppLink-${link.id}`,
     navigateToApp,
     basePath,
+    onClick,
   });
 
   let icon = euiListItem.icon;
 
   if (euiListItem.iconType) {
-    icon = <EuiIcon type={euiListItem.iconType} />;
+    icon = <EuiIcon type={euiListItem.iconType} style={{ width: 20, height: 20 }} />;
   }
 
   return {
@@ -104,6 +109,7 @@ export function NavGroups({
         appId,
         navigateToApp,
         basePath,
+        onClick: navLink.link.onClick,
       });
       const isHidden = !navOpen && !result.icon;
       return {
@@ -111,7 +117,7 @@ export function NavGroups({
         name: navOpen ? result.name : '',
         hidden: isHidden,
         icon:
-          !isNavOpen && !isHidden ? (
+          !isNavOpen && !isHidden && result.icon ? (
             <EuiToolTip content={navLink.link.title}>{result.icon}</EuiToolTip>
           ) : (
             result.icon
@@ -174,15 +180,22 @@ export function NavGroups({
           props.icon
         ) : (
           <SimplePopover
-            anchorPosition="upLeft"
+            anchorPosition="rightUp"
             panelPaddingSize="none"
             button={props.icon || <></>}
             key={navOpen ? undefined : `popover-${appId}`}
+            triggerMode="click"
+            offset={4}
           >
-            <EuiPopoverTitle>
-              <EuiTitle size="s">
-                <span>{navLink.link?.title}</span>
-              </EuiTitle>
+            <EuiPopoverTitle paddingSize="s">
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                {props.icon && <EuiFlexItem grow={false}>{props.icon}</EuiFlexItem>}
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <span>{navLink.link?.title}</span>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiPopoverTitle>
             <EuiContextMenuPanel
               hasFocus={false}
