@@ -285,32 +285,14 @@ describe('useQueryPanelEditor', () => {
   });
 
   describe('showPlaceholder logic', () => {
-    it('should show placeholder when text is empty and editor is focused', () => {
+    it('should show placeholder when text is empty', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
-
-      // Initially text is empty (from selectQueryString) and editor is not focused
-      expect(result.current.showPlaceholder).toBe(false);
-
-      // Simulate editor mount and focus
-      act(() => {
-        result.current.editorDidMount(mockEditor);
-      });
-
-      // Simulate focus event
-      const focusCallback = mockEditor.onDidFocusEditorText.mock.calls[0][0];
-      act(() => {
-        focusCallback();
-      });
 
       expect(result.current.showPlaceholder).toBe(true);
     });
 
     it('should not show placeholder when text is present', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
-
-      // Initially text is empty (from selectQueryString)
-      expect(result.current.value).toBe('');
-      expect(result.current.showPlaceholder).toBe(false);
 
       // Add text to local state through onChange
       act(() => {
@@ -320,28 +302,7 @@ describe('useQueryPanelEditor', () => {
       // The text should now be 'some text' from local state
       expect(result.current.value).toBe('some text');
 
-      // Mount and focus editor
-      act(() => {
-        result.current.editorDidMount(mockEditor);
-      });
-
-      const focusCallback = mockEditor.onDidFocusEditorText.mock.calls[0][0];
-      act(() => {
-        focusCallback();
-      });
-
       // Since text is present, showPlaceholder should be false
-      expect(result.current.showPlaceholder).toBe(false);
-    });
-
-    it('should not show placeholder when editor is not focused', () => {
-      const { result } = renderHook(() => useQueryPanelEditor());
-
-      // Mount editor but don't focus it
-      act(() => {
-        result.current.editorDidMount(mockEditor);
-      });
-
       expect(result.current.showPlaceholder).toBe(false);
     });
   });
