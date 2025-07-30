@@ -35,7 +35,11 @@ export const QueryPanelGeneratedQuery = () => {
   return (
     <div className="exploreQueryPanelGeneratedQuery">
       <EuiIcon type="editorCodeBlock" size="s" />
-      <EuiText className="exploreQueryPanelGeneratedQuery__query" size="s">
+      <EuiText
+        className="exploreQueryPanelGeneratedQuery__query"
+        size="s"
+        data-test-subj="exploreQueryPanelGeneratedQuery"
+      >
         {lastExecutedTranslatedQuery}
       </EuiText>
       <EuiBadge
@@ -44,7 +48,10 @@ export const QueryPanelGeneratedQuery = () => {
         onClickAriaLabel={editQueryText}
         color="hollow"
       >
-        <div className="exploreQueryPanelGeneratedQuery__buttonTextWrapper">
+        <div
+          className="exploreQueryPanelGeneratedQuery__buttonTextWrapper"
+          data-test-subj="exploreQueryPanelGeneratedQueryEditButton"
+        >
           <EuiIcon type="editorCodeBlock" size="s" />
           <EuiText size="xs">{editQueryText}</EuiText>
         </div>
