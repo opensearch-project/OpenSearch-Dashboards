@@ -12,6 +12,7 @@
 import { IRouter } from '../../../../core/server';
 import { BannerPluginSetup } from '../types';
 import { BannerConfig } from '../../common';
+import { fetchExternalConfig } from './fetch_external_config';
 
 export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
   router.get(
@@ -22,7 +23,9 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
     async (context, request, response) => {
       // Get UI settings client
       const uiSettingsClient = context.core.uiSettings.client;
+      const pluginConfig = bannerSetup.getConfig();
 
+      // Create a default config from UI settings
       const settings = await uiSettingsClient.getAll();
 
       // Extract banner settings from the result
@@ -34,7 +37,7 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
       const size = settings['banner:size'];
 
       // Combine UI settings with base config
-      const config: BannerConfig = {
+      let config: BannerConfig = {
         content,
         color: color as BannerConfig['color'],
         iconType,
@@ -42,6 +45,31 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
         useMarkdown: Boolean(useMarkdown),
         size: size as BannerConfig['size'],
       };
+
+      // If external link is configured, try to fetch from it
+      if (pluginConfig.externalLink) {
+        try {
+          // Use the plugin logger
+          const externalConfig = await fetchExternalConfig(
+            pluginConfig.externalLink,
+            bannerSetup.logger
+          );
+
+          // If external config was successfully fetched, override the UI settings
+          if (externalConfig) {
+            config = {
+              ...config,
+              ...externalConfig,
+            };
+          } else {
+            bannerSetup.logger.warn(
+              `Failed to load banner config from external URL: ${pluginConfig.externalLink}, using UI settings instead`
+            );
+          }
+        } catch (error) {
+          bannerSetup.logger.error(`Error loading banner config from external URL: ${error}`);
+        }
+      }
 
       return response.ok({
         body: {

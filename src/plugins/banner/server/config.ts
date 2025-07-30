@@ -28,4 +28,5 @@ export const configSchema = schema.object({
   size: schema.oneOf([schema.literal('s'), schema.literal('m')], {
     defaultValue: 'm',
   }),
+  externalLink: schema.maybe(schema.string()),
 });
