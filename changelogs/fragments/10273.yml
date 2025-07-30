@@ -1,0 +1,2 @@
+fix:
+- Updated the version check process to check only major version in between OSD and its plugins ([#10273](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10273))
