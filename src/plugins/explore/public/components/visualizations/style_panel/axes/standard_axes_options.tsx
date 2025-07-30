@@ -94,6 +94,10 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
     }));
   };
 
+  if (!standardAxes) {
+    return null;
+  }
+
   return (
     <StyleAccordion
       id="allAxesSection"

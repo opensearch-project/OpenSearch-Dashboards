@@ -194,6 +194,23 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     [numericalColumns, categoricalColumns, dateColumns]
   );
 
+  const getFieldTypeLabel = (type: VisFieldType) => {
+    switch (type) {
+      case VisFieldType.Categorical:
+        return i18n.translate('explore.stylePanel.fieldType.categorical', {
+          defaultMessage: 'Categorical fields',
+        });
+      case VisFieldType.Date:
+        return i18n.translate('explore.stylePanel.fieldType.date', {
+          defaultMessage: 'Date fields',
+        });
+      default:
+        return i18n.translate('explore.stylePanel.fieldType.numerical', {
+          defaultMessage: 'Numerical fields',
+        });
+    }
+  };
+
   if (availableMappingsFromQuery.length === 0) {
     return null;
   }
@@ -228,7 +245,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     availableTypes.forEach((type) => {
       allColumns.push({
         isGroupLabelOption: true,
-        label: `${type.charAt(0).toUpperCase() + type.slice(1)} Fields`, // FIXME
+        label: getFieldTypeLabel(type),
         options: findColumns(type).map((col) => ({
           column: col,
           label: col.name,
