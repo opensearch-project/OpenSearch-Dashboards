@@ -203,6 +203,125 @@ describe('opensearchDashboards cli', function () {
 
           expect(() => assertVersion(settings)).not.toThrow();
         });
+
+        // Tests for --strict-version flag
+        describe('with strictVersion flag', function () {
+          it('should succeed when major and minor versions match', function () {
+            const settings = {
+              workingPath: testWorkingPath,
+              tempArchiveFile: tempArchiveFilePath,
+              plugin: 'test-plugin',
+              version: '3.1.5',
+              strictVersion: true,
+              plugins: [
+                {
+                  id: 'foo',
+                  opensearchDashboardsVersion: '3.1.0',
+                },
+              ],
+            };
+
+            expect(() => assertVersion(settings)).not.toThrow();
+          });
+
+          it('should fail when major versions match but minor versions differ', function () {
+            const settings = {
+              workingPath: testWorkingPath,
+              tempArchiveFile: tempArchiveFilePath,
+              plugin: 'test-plugin',
+              version: '3.0.0',
+              strictVersion: true,
+              plugins: [
+                {
+                  id: 'foo',
+                  opensearchDashboardsVersion: '3.1.0',
+                },
+              ],
+            };
+
+            expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
+              `"Plugin foo [3.1.0] is incompatible with OpenSearch Dashboards [3.0.0]. Minor version must match when using --strict-version flag."`
+            );
+          });
+
+          it('should fail when major versions match but plugin has lower minor version', function () {
+            const settings = {
+              workingPath: testWorkingPath,
+              tempArchiveFile: tempArchiveFilePath,
+              plugin: 'test-plugin',
+              version: '3.2.0',
+              strictVersion: true,
+              plugins: [
+                {
+                  id: 'foo',
+                  opensearchDashboardsVersion: '3.1.0',
+                },
+              ],
+            };
+
+            expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
+              `"Plugin foo [3.1.0] is incompatible with OpenSearch Dashboards [3.2.0]. Minor version must match when using --strict-version flag."`
+            );
+          });
+
+          it('should still fail when major versions differ even with strict flag', function () {
+            const settings = {
+              workingPath: testWorkingPath,
+              tempArchiveFile: tempArchiveFilePath,
+              plugin: 'test-plugin',
+              version: '2.1.0',
+              strictVersion: true,
+              plugins: [
+                {
+                  id: 'foo',
+                  opensearchDashboardsVersion: '3.1.0',
+                },
+              ],
+            };
+
+            expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
+              `"Plugin foo [3.1.0] is incompatible with OpenSearch Dashboards [2.1.0]. Major version must match."`
+            );
+          });
+
+          it('should handle pre-release versions with strict flag', function () {
+            const settings = {
+              workingPath: testWorkingPath,
+              tempArchiveFile: tempArchiveFilePath,
+              plugin: 'test-plugin',
+              version: '3.1.0-alpha1',
+              strictVersion: true,
+              plugins: [
+                {
+                  id: 'foo',
+                  opensearchDashboardsVersion: '3.1.0-beta2',
+                },
+              ],
+            };
+
+            expect(() => assertVersion(settings)).not.toThrow();
+          });
+
+          it('should fail pre-release versions with different minor versions', function () {
+            const settings = {
+              workingPath: testWorkingPath,
+              tempArchiveFile: tempArchiveFilePath,
+              plugin: 'test-plugin',
+              version: '3.0.0-alpha1',
+              strictVersion: true,
+              plugins: [
+                {
+                  id: 'foo',
+                  opensearchDashboardsVersion: '3.1.0-beta2',
+                },
+              ],
+            };
+
+            expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
+              `"Plugin foo [3.1.0] is incompatible with OpenSearch Dashboards [3.0.0]. Minor version must match when using --strict-version flag."`
+            );
+          });
+        });
       });
 
       describe('existingInstall', function () {
