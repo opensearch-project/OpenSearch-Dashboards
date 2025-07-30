@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/constants';
+import {
+  INDEX_WITH_TIME_1,
+  INDEX_WITH_TIME_2,
+  DATASOURCE_NAME,
+  INDEX_PATTERN_WITH_TIME,
+} from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   generateBaseConfiguration,
@@ -11,10 +16,7 @@ import {
   setDatePickerDatesIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import {
-  DatasetTypes,
-  INDEX_PATTERN_WITH_TIME,
-} from '../../../../../../utils/apps/explore/constants';
+import { DatasetTypes } from '../../../../../../utils/apps/explore/constants';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -23,7 +25,10 @@ const runAiEditorTests = () => {
 
   describe('AI Editor', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
@@ -34,7 +39,10 @@ const runAiEditorTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
     });
 
     beforeEach(() => {
