@@ -84,6 +84,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   };
 
   useEffect(() => {
+    // Make sure to initially focus on first axis field selector if current field selection is empty
     if (isEmpty(currentMapping)) {
       setTimeout(() => {
         if (firstSelectorInput.current) {
