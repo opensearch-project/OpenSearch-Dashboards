@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
+import './custom_datagrid.scss';
 
 export const MAX_DISPLAY_ROWS = 10000;
 
@@ -32,7 +33,7 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
   if (!isFullScreen) return <>{children}</>;
   return (
     <EuiOverlayMask>
-      <div className="full-screen-wrapper">
+      <div className="exploreCustomDataGrid__fullScreenWrapper">
         <EuiButtonIcon
           iconType="cross"
           aria-label={i18n.translate('explore.customDataGrid.ariaLabel.closeFullScreen', {
@@ -40,9 +41,9 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
           })}
           onClick={onClose}
           display="empty"
-          className="full-screen-close-icon"
+          className="exploreCustomDataGrid__fullScreenCloseIcon"
         />
-        <div className="full-screen-content">{children}</div>
+        <div className="exploreCustomDataGrid__fullScreenContent">{children}</div>
       </div>
     </EuiOverlayMask>
   );
@@ -149,7 +150,13 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     <>
       <FullScreenWrapper isFullScreen={isFullScreen} onClose={() => setIsFullScreen(false)}>
         <div
-          className={[isFullScreen ? 'full-wrapper' : 'normal-wrapper'].filter(Boolean).join(' ')}
+          className={[
+            isFullScreen
+              ? 'exploreCustomDataGrid__fullWrapper'
+              : 'exploreCustomDataGrid__normalWrapper',
+          ]
+            .filter(Boolean)
+            .join(' ')}
           style={{
             position: 'relative',
             minHeight: isTableDataLoading && isEmpty ? '100px' : undefined,
@@ -185,7 +192,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
             }}
           />
           {isTableDataLoading && (
-            <div className="grid-loading-overlay">
+            <div className="exploreCustomDataGrid__gridLoadingOverlay">
               <EuiLoadingSpinner data-test-subj="loadingSpinner" size="xl" />
             </div>
           )}

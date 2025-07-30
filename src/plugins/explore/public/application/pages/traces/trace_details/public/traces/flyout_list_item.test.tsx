@@ -116,18 +116,16 @@ describe('FlyoutListItem', () => {
   it('maintains proper styling', () => {
     render(<FlyoutListItem {...defaultProps} />);
 
-    // Find EuiText components
-    const titleText = screen.getByText('Test Title').closest('.euiText');
-    const descriptionText = screen.getByText('Test Description').closest('.euiText');
+    // Find elements with the correct CSS classes
+    const titleText = screen.getByText('Test Title').closest('.exploreFlyoutListItem__titleText');
+    const descriptionText = screen
+      .getByText('Test Description')
+      .closest('.exploreFlyoutListItem__descriptionText');
 
-    // Title should have subdued color and proper styling
-    expect(titleText).toHaveStyle({ wordBreak: 'break-all', wordWrap: 'break-word' });
+    // Title should have proper styling
+    expect(titleText).toHaveClass('exploreFlyoutListItem__titleText');
 
-    // Description should have proper text styling
-    expect(descriptionText).toHaveStyle({
-      wordBreak: 'break-all',
-      wordWrap: 'break-word',
-      whiteSpace: 'pre-line',
-    });
+    // Description should have proper styling
+    expect(descriptionText).toHaveClass('exploreFlyoutListItem__descriptionText');
   });
 });

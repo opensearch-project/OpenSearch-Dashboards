@@ -3,18 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.span-detail-table {
-  &__hierarchy-cell {
+.exploreSpanDetailTable {
+  &__hierarchyCell {
     display: flex;
     align-items: center;
   }
 
-  &__expand-icon {
+  &__expandIcon {
     cursor: pointer;
     margin-right: 5px;
   }
 
-  &__hidden-icon {
+  &__hiddenIcon {
     visibility: hidden;
     margin-right: 5px;
   }

@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.service-map {
+.exploreServiceMap {
   width: 100%;
   height: 100%;
 
-  &__loading-overlay {
+  &__loadingOverlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -25,21 +25,41 @@
   }
 
   &__container {
-    height: 350px;
+    height: calc(100vh - 225px);
     width: 100%;
   }
 
-  &__empty-state {
-    height: 500px;
+  &__emptyState {
+    height: calc(100vh - 225px);
     display: flex;
     align-items: center;
     justify-content: center;
     color: $euiColorMediumShade;
     background-color: $euiColorLightestShade;
   }
+
+  // ReactFlow Controls styling
+  .exploreServiceMapControls {
+    background: $euiColorEmptyShade !important;
+    border: 1px solid $euiColorLightShade !important;
+
+    .react-flow__controls-button {
+      background: $euiColorEmptyShade !important;
+      border: 1px solid $euiColorLightShade !important;
+      color: $euiColorDarkestShade !important;
+
+      &:hover {
+        background: $euiColorLightestShade !important;
+      }
+
+      svg {
+        fill: $euiColorDarkestShade !important;
+      }
+    }
+  }
 }
 
-.service-card {
+.exploreServiceCard {
   padding: 16px 20px;
   border-radius: 8px;
   background: $euiColorEmptyShade;
@@ -83,11 +103,11 @@
     flex-direction: column;
     gap: 4px;
 
-    &--with-details {
+    &--withDetails {
       margin-bottom: 8px;
     }
 
-    &--without-details {
+    &--withoutDetails {
       margin-bottom: 0;
     }
   }
@@ -98,7 +118,7 @@
     margin-top: 8px;
   }
 
-  &__metric-text {
+  &__metricText {
     font-size: 12px;
     color: $euiColorDarkShade;
     margin-bottom: 4px;
@@ -109,7 +129,7 @@
   }
 }
 
-.metric-bar {
+.exploreMetricBar {
   width: 100%;
   height: 6px;
   position: relative;
@@ -125,7 +145,7 @@
   }
 }
 
-.service-focus-panel {
+.exploreServiceFocusPanel {
   position: absolute;
   top: 10px;
   left: 10px;
@@ -145,7 +165,7 @@
   }
 }
 
-.metrics-panel {
+.exploreMetricsPanel {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -163,7 +183,7 @@
     margin-top: 12px;
   }
 
-  &__legend-item {
+  &__legendItem {
     margin-bottom: 8px;
 
     &:last-child {
@@ -171,19 +191,19 @@
     }
   }
 
-  &__legend-title {
+  &__legendTitle {
     font-size: 11px;
     font-weight: bold;
     margin-bottom: 2px;
   }
 
-  &__legend-gradient {
+  &__legendGradient {
     height: 6px;
     width: 100%;
     border-radius: 3px;
   }
 
-  &__legend-labels {
+  &__legendLabels {
     display: flex;
     justify-content: space-between;
     font-size: 10px;
@@ -192,7 +212,7 @@
   }
 }
 
-.service-node-handle {
+.exploreServiceNodeHandle {
   background: $euiColorDarkShade;
   visibility: hidden;
 }

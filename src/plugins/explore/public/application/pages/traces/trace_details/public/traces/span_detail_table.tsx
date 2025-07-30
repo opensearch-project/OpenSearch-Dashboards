@@ -412,7 +412,10 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
         const indentation = `${(item.level || 0) * 20}px`;
         const isExpanded = expandedRows.has(item.spanId);
         return (
-          <div className="span-detail-table__hierarchy-cell" style={{ paddingLeft: indentation }}>
+          <div
+            className="exploreSpanDetailTable__hierarchyCell"
+            style={{ paddingLeft: indentation }}
+          >
             {item.children && item.children.length > 0 ? (
               <EuiIcon
                 type={isExpanded ? 'arrowDown' : 'arrowRight'}
@@ -427,11 +430,11 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
                     return newSet;
                   });
                 }}
-                className="span-detail-table__expand-icon"
+                className="exploreSpanDetailTable__expandIcon"
                 data-test-subj="treeViewExpandArrow"
               />
             ) : (
-              <EuiIcon type="empty" className="span-detail-table__hidden-icon" />
+              <EuiIcon type="empty" className="exploreSpanDetailTable__hiddenIcon" />
             )}
             <span>{value || '-'}</span>
           </div>

@@ -28,7 +28,7 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
     props.description !== '-' ? (
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiText size="s" className="flyout-list-item__description-text">
+          <EuiText size="s" className="exploreFlyoutListItem__descriptionText">
             <b>{props.description}</b>
           </EuiText>
         </EuiFlexItem>
@@ -39,14 +39,14 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
                 aria-label="span-flyout-filter-icon"
                 iconType="filter"
                 onClick={props.addSpanFilter}
-                className="flyout-list-item__filter-button"
+                className="exploreFlyoutListItem__filterButton"
               />
             </EuiToolTip>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : (
-      <EuiText size="s" className="flyout-list-item__description-text">
+      <EuiText size="s" className="exploreFlyoutListItem__descriptionText">
         <b>{props.description}</b>
       </EuiText>
     );
@@ -62,7 +62,7 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
           listItems={[
             {
               title: (
-                <EuiText size="s" color="subdued" className="flyout-list-item__title-text">
+                <EuiText size="s" color="default" className="exploreFlyoutListItem__titleText">
                   {props.title}
                 </EuiText>
               ),

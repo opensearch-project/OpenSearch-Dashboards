@@ -56,7 +56,7 @@ describe('TraceTopNavMenu', () => {
     render(<TraceTopNavMenu {...defaultProps} />);
 
     expect(screen.getByTestId('viewRawDataBtn')).toBeInTheDocument();
-    expect(screen.getByText('View raw data')).toBeInTheDocument();
+    expect(screen.getByText('View raw trace')).toBeInTheDocument();
   });
 
   it('opens the raw data modal when View raw data button is clicked', () => {

@@ -21,41 +21,24 @@ import type { TopNavMenuData } from '../../../../../../../navigation/public';
 export interface TraceTopNavMenuProps {
   payloadData: any[];
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
-  dataSourceMDSId: Array<{ id: string; label: string }>;
-  traceId: string;
 }
 
 export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
   payloadData,
   setMenuMountPoint,
-  dataSourceMDSId,
-  traceId,
 }) => {
   const [isRawModalOpen, setRawModalOpen] = useState(false);
-  // const { services } = useOpenSearchDashboards<DataExplorerServices>();
 
   const menuActions: TopNavMenuData[] = [
     {
       id: 'viewRawData',
       label: i18n.translate('explore.traceDetails.topNav.viewRawData', {
-        defaultMessage: 'View raw data',
+        defaultMessage: 'View raw trace',
       }),
       run: () => setRawModalOpen(true),
       testId: 'viewRawDataBtn',
-    },
-    /* To Do add in log redirection
-    {
-      id: 'viewLogs',
-      label: i18n.translate('explore.traceDetails.topNav.viewAssociatedLogs', {
-        defaultMessage: 'View associated Logs',
-      }),
-      run: () => redirectToLogs(payloadData, dataSourceMDSId, traceId, services),
-      testId: 'viewLogsBtn',
       emphasize: true,
-      iconType: 'discoverApp',
-      iconSide: 'left',
     },
-    */
   ];
 
   return (

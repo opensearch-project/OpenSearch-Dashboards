@@ -35,6 +35,8 @@ import {
   MarkerType,
 } from '@xyflow/react';
 import dagre from '@dagrejs/dagre';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
+import { DataExplorerServices } from '../../../../../../../../data_explorer/public';
 import '@xyflow/react/dist/style.css';
 import './service_map.scss';
 
@@ -91,6 +93,7 @@ const ServiceNode = ({
   openPopoverNodeId,
   setOpenPopoverNodeId,
   isSelected,
+  isDarkMode,
 }: {
   data: ServiceNodeData;
   selectedMetrics: MetricOption[];
@@ -100,6 +103,7 @@ const ServiceNode = ({
   openPopoverNodeId: string | null;
   setOpenPopoverNodeId: (id: string | null) => void;
   isSelected?: boolean;
+  isDarkMode: boolean;
 }) => {
   const serviceColor = data.color;
 
@@ -168,11 +172,11 @@ const ServiceNode = ({
     <EuiPopover
       button={
         <div style={{ position: 'relative' }}>
-          <Handle type="target" position={Position.Left} className="service-node-handle" />
+          <Handle type="target" position={Position.Left} className="exploreServiceNodeHandle" />
           {/* Style for the cards */}
           <div
-            className={`service-card ${
-              isSelected ? 'service-card--selected' : 'service-card--default'
+            className={`exploreServiceCard ${
+              isSelected ? 'exploreServiceCard--selected' : 'exploreServiceCard--default'
             }`}
             style={
               {
@@ -197,26 +201,26 @@ const ServiceNode = ({
             data-test-subj="serviceMapCard"
           >
             {/* Service name */}
-            <div className="service-card__name">{data.label}</div>
+            <div className="exploreServiceCard__name">{data.label}</div>
 
             {/* Metric bars */}
             <div
-              className={`service-card__metrics ${
+              className={`exploreServiceCard__metrics ${
                 showDetails
-                  ? 'service-card__metrics--with-details'
-                  : 'service-card__metrics--without-details'
+                  ? 'exploreServiceCard__metrics--withDetails'
+                  : 'exploreServiceCard__metrics--withoutDetails'
               }`}
             >
               {selectedMetrics.includes('requestRate') && (
                 <div
                   title={`Request Rate: ${data.spanCount}`}
-                  className="metric-bar"
+                  className="exploreMetricBar"
                   style={{
                     backgroundColor: 'rgba(0, 0, 255, 0.1)',
                   }}
                 >
                   <div
-                    className="metric-bar__fill"
+                    className="exploreMetricBar__fill"
                     style={
                       {
                         '--fill-width': `${requestRateIntensity * 100}%`,
@@ -229,13 +233,13 @@ const ServiceNode = ({
               {selectedMetrics.includes('errorRate') && (
                 <div
                   title={`Error Rate: ${(data.errorRate * 100).toFixed(1)}%`}
-                  className="metric-bar"
+                  className="exploreMetricBar"
                   style={{
                     backgroundColor: 'rgba(255, 0, 0, 0.1)',
                   }}
                 >
                   <div
-                    className="metric-bar__fill"
+                    className="exploreMetricBar__fill"
                     style={
                       {
                         '--fill-width': `${errorRateIntensity * 100}%`,
@@ -248,13 +252,13 @@ const ServiceNode = ({
               {selectedMetrics.includes('duration') && (
                 <div
                   title={`Avg Duration: ${formatLatency(data.avgLatency)}`}
-                  className="metric-bar"
+                  className="exploreMetricBar"
                   style={{
                     backgroundColor: 'rgba(128, 0, 128, 0.1)',
                   }}
                 >
                   <div
-                    className="metric-bar__fill"
+                    className="exploreMetricBar__fill"
                     style={
                       {
                         '--fill-width': `${durationIntensity * 100}%`,
@@ -268,17 +272,19 @@ const ServiceNode = ({
 
             {/* Metrics section - only shown when showDetails is true */}
             {showDetails && (
-              <div className="service-card__details">
+              <div className="exploreServiceCard__details">
                 {/* Request rate */}
                 {selectedMetrics.includes('requestRate') && (
-                  <div className="service-card__metric-text">Request rate: {data.spanCount}</div>
+                  <div className="exploreServiceCard__metricText">
+                    Request rate: {data.spanCount}
+                  </div>
                 )}
 
                 {/* Error rate */}
                 {selectedMetrics.includes('errorRate') && (
                   <div
-                    className={`service-card__metric-text ${
-                      data.errorRate > 0 ? 'service-card__metric-text--error' : ''
+                    className={`exploreServiceCard__metricText ${
+                      data.errorRate > 0 ? 'exploreServiceCard__metricText--error' : ''
                     }`}
                   >
                     Error rate: {(data.errorRate * 100).toFixed(1)}%
@@ -287,7 +293,7 @@ const ServiceNode = ({
 
                 {/* Latency metrics */}
                 {selectedMetrics.includes('duration') && (
-                  <div className="service-card__metric-text">
+                  <div className="exploreServiceCard__metricText">
                     Avg duration: {formatLatency(data.avgLatency)}
                   </div>
                 )}
@@ -318,7 +324,8 @@ const nodeTypes = (
   onToggleDetails: () => void,
   openPopoverNodeId: string | null,
   setOpenPopoverNodeId: (id: string | null) => void,
-  selectedSpanService: string | null
+  selectedSpanService: string | null,
+  isDarkMode: boolean
 ) => ({
   serviceNode: (props: { data: ServiceNodeData }) => (
     <ServiceNode
@@ -330,6 +337,7 @@ const nodeTypes = (
       openPopoverNodeId={openPopoverNodeId}
       setOpenPopoverNodeId={setOpenPopoverNodeId}
       isSelected={selectedSpanService === props.data.label}
+      isDarkMode={isDarkMode}
     />
   ),
 });
@@ -413,6 +421,7 @@ const FlowComponent: React.FC<{
   onToggleDetails: () => void;
   isRefocusing: boolean;
   selectedSpanService: string | null;
+  isDarkMode: boolean;
 }> = ({
   initialNodes,
   initialEdges,
@@ -426,6 +435,7 @@ const FlowComponent: React.FC<{
   onToggleDetails,
   isRefocusing,
   selectedSpanService,
+  isDarkMode,
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceNodeType>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
@@ -496,9 +506,9 @@ const FlowComponent: React.FC<{
   }, [fitView, nodes.length]);
 
   return (
-    <div className="service-map">
+    <div className="exploreServiceMap">
       {isLayoutLoading && (
-        <div className="service-map__loading-overlay">
+        <div className="exploreServiceMap__loadingOverlay">
           <EuiLoadingSpinner size="xl" />
         </div>
       )}
@@ -515,14 +525,15 @@ const FlowComponent: React.FC<{
           onToggleDetails,
           openPopoverNodeId,
           setOpenPopoverNodeId,
-          selectedSpanService
+          selectedSpanService,
+          isDarkMode
         )}
         connectionMode={ConnectionMode.Loose}
         fitView={false}
         minZoom={0.1}
         maxZoom={2}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-        style={{ background: '#fafafa' }}
+        style={{ background: isDarkMode ? '#1a1c20' : '#fafafa' }}
         proOptions={{ hideAttribution: true }}
         onPaneClick={() => {
           // Close any open popover when clicking on the background
@@ -532,8 +543,8 @@ const FlowComponent: React.FC<{
         }}
       >
         {/* Service focus panel */}
-        <div className="service-focus-panel">
-          <div className="service-focus-panel__content">
+        <div className="exploreServiceFocusPanel">
+          <div className="exploreServiceFocusPanel__content">
             <EuiComboBox
               placeholder={i18n.translate('explore.serviceMap.placeholder.focusOnService', {
                 defaultMessage: 'Focus on service',
@@ -551,7 +562,7 @@ const FlowComponent: React.FC<{
         </div>
 
         {/* Metrics panel */}
-        <div className="metrics-panel">
+        <div className="exploreMetricsPanel">
           <EuiTitle size="xxs">
             <h4>
               {i18n.translate('explore.serviceMap.title.metrics', {
@@ -650,22 +661,22 @@ const FlowComponent: React.FC<{
           </div>
 
           {/* Gradient legends */}
-          <div className="metrics-panel__legends">
+          <div className="exploreMetricsPanel__legends">
             {selectedMetrics.includes('requestRate') && (
-              <div className="metrics-panel__legend-item">
-                <div className="metrics-panel__legend-title">
+              <div className="exploreMetricsPanel__legendItem">
+                <div className="exploreMetricsPanel__legendTitle">
                   {i18n.translate('explore.serviceMap.legend.requestRate', {
                     defaultMessage: 'Request Rate',
                   })}
                 </div>
                 <div
-                  className="metrics-panel__legend-gradient"
+                  className="exploreMetricsPanel__legendGradient"
                   style={{
                     background:
                       'linear-gradient(to right, rgba(0, 0, 255, 0.2), rgba(0, 0, 255, 0.9))',
                   }}
                 />
-                <div className="metrics-panel__legend-labels">
+                <div className="exploreMetricsPanel__legendLabels">
                   <span>0</span>
                   <span>
                     {initialNodes.length > 0
@@ -677,20 +688,20 @@ const FlowComponent: React.FC<{
             )}
 
             {selectedMetrics.includes('errorRate') && (
-              <div className="metrics-panel__legend-item">
-                <div className="metrics-panel__legend-title">
+              <div className="exploreMetricsPanel__legendItem">
+                <div className="exploreMetricsPanel__legendTitle">
                   {i18n.translate('explore.serviceMap.legend.errorRate', {
                     defaultMessage: 'Error Rate',
                   })}
                 </div>
                 <div
-                  className="metrics-panel__legend-gradient"
+                  className="exploreMetricsPanel__legendGradient"
                   style={{
                     background:
                       'linear-gradient(to right, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.9))',
                   }}
                 />
-                <div className="metrics-panel__legend-labels">
+                <div className="exploreMetricsPanel__legendLabels">
                   <span>0%</span>
                   <span>
                     {initialNodes.length > 0
@@ -702,20 +713,20 @@ const FlowComponent: React.FC<{
             )}
 
             {selectedMetrics.includes('duration') && (
-              <div className="metrics-panel__legend-item">
-                <div className="metrics-panel__legend-title">
+              <div className="exploreMetricsPanel__legendItem">
+                <div className="exploreMetricsPanel__legendTitle">
                   {i18n.translate('explore.serviceMap.legend.duration', {
                     defaultMessage: 'Duration',
                   })}
                 </div>
                 <div
-                  className="metrics-panel__legend-gradient"
+                  className="exploreMetricsPanel__legendGradient"
                   style={{
                     background:
                       'linear-gradient(to right, rgba(128, 0, 128, 0.2), rgba(128, 0, 128, 0.9))',
                   }}
                 />
-                <div className="metrics-panel__legend-labels">
+                <div className="exploreMetricsPanel__legendLabels">
                   <span>0</span>
                   <span>
                     {initialNodes.length > 0
@@ -751,11 +762,7 @@ const FlowComponent: React.FC<{
           showZoom={true}
           showFitView={true}
           showInteractive={true}
-          style={{
-            background: 'white',
-            border: '1px solid #ddd',
-            borderRadius: '6px',
-          }}
+          className="exploreServiceMapControls"
         />
         <Background color="#e8e8e8" gap={20} size={1} />
       </ReactFlow>
@@ -775,6 +782,9 @@ export const ServiceMap: React.FC<ServiceMap> = ({
   selectedSpanId,
   ...panelProps
 }) => {
+  const { services: dashboardServices } = useOpenSearchDashboards<DataExplorerServices>();
+  const isDarkMode = dashboardServices?.uiSettings?.get('theme:darkMode') || false;
+
   const [focusedService, setFocusedService] = useState<string | null>(null);
   const [serviceOptions, setServiceOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedServiceOption, setSelectedServiceOption] = useState<
@@ -1013,7 +1023,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
   if (!hits || hits.length === 0) {
     return (
       <EuiPanel {...panelProps}>
-        <div className="service-map__empty-state">
+        <div className="exploreServiceMap__emptyState">
           {i18n.translate('explore.serviceMap.emptyState.noTraceData', {
             defaultMessage: 'No trace data available',
           })}
@@ -1025,7 +1035,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
   if (initialNodes.length === 0) {
     return (
       <EuiPanel {...panelProps}>
-        <div className="service-map__empty-state">
+        <div className="exploreServiceMap__emptyState">
           {i18n.translate('explore.serviceMap.emptyState.noServicesFound', {
             defaultMessage: 'No services found in trace data',
           })}
@@ -1036,7 +1046,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
 
   return (
     <EuiPanel {...panelProps}>
-      <div className="service-map__container">
+      <div className="exploreServiceMap__container">
         <ReactFlowProvider>
           <FlowComponent
             initialNodes={filteredNodes}
@@ -1051,6 +1061,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
             onToggleDetails={() => setShowDetails(!showDetails)}
             isRefocusing={isRefocusing}
             selectedSpanService={selectedSpanService}
+            isDarkMode={isDarkMode}
           />
         </ReactFlowProvider>
       </div>

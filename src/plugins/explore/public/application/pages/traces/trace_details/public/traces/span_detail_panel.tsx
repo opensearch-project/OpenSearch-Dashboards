@@ -4,19 +4,14 @@
  */
 
 import {
-  EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingChart,
   EuiPanel,
   EuiPopover,
-  EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
@@ -25,8 +20,9 @@ import { ChromeStart } from 'opensearch-dashboards/public';
 import './span_detail_panel.scss';
 import { TracePPLService } from '../../server/ppl_request_trace';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
-import { PanelTitle } from '../utils/helper_functions';
 import { GanttChart } from '../gantt_chart_vega/gantt_chart_vega';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
+import { DataExplorerServices } from '../../../../../../../data_explorer/public';
 
 interface ServiceLegendProps {
   colorMap: Record<string, string>;
@@ -76,7 +72,7 @@ const ServiceLegend: React.FC<ServiceLegendProps> = ({ colorMap, data }) => {
   );
 
   const legendContent = (
-    <div className="span-detail-panel__legend-popover">
+    <div className="exploreSpanDetailPanel__legendPopover">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
@@ -93,7 +89,7 @@ const ServiceLegend: React.FC<ServiceLegendProps> = ({ colorMap, data }) => {
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
                 <div
-                  className="span-detail-panel__legend-color-box"
+                  className="exploreSpanDetailPanel__legendColorBox"
                   style={{
                     backgroundColor: colorMap[service],
                   }}
@@ -174,6 +170,7 @@ export function SpanDetailPanel(props: {
   colorMap?: Record<string, string>;
   onSpanSelect?: (spanId: string) => void;
   selectedSpanId?: string;
+  activeView?: string;
 }) {
   const {
     chrome,
@@ -235,51 +232,12 @@ export function SpanDetailPanel(props: {
     [spanFilters, setSpanFiltersWithStorage]
   );
 
-  const renderFilters = useMemo(() => {
-    return spanFilters.map(({ field, value }) => (
-      <EuiFlexItem grow={false} key={`span-filter-badge-${field}`}>
-        <EuiBadge
-          iconType="cross"
-          iconSide="right"
-          iconOnClick={() => removeSpanFilter(field)}
-          iconOnClickAriaLabel={i18n.translate(
-            'explore.spanDetailPanel.ariaLabel.removeCurrentFilter',
-            {
-              defaultMessage: 'remove current filter',
-            }
-          )}
-        >
-          {`${field}: ${value}`}
-        </EuiBadge>
-      </EuiFlexItem>
-    ));
-  }, [spanFilters, removeSpanFilter]);
-
-  const toggleOptions = [
-    {
-      id: 'timeline',
-      label: i18n.translate('explore.spanDetailPanel.toggle.timeline', {
-        defaultMessage: 'Timeline',
-      }),
-    },
-    {
-      id: 'span_list',
-      label: i18n.translate('explore.spanDetailPanel.toggle.spanList', {
-        defaultMessage: 'Span list',
-      }),
-    },
-    {
-      id: 'hierarchy_span_list',
-      label: i18n.translate('explore.spanDetailPanel.toggle.treeView', {
-        defaultMessage: 'Tree view',
-      }),
-    },
-  ];
-  const [toggleIdSelected, setToggleIdSelected] = useState(toggleOptions[0].id);
+  // Use activeView prop or default to timeline
+  const currentView = props.activeView || 'timeline';
 
   const spanDetailTable = useMemo(
     () => (
-      <div className="span-detail-panel__table-container">
+      <div className="exploreSpanDetailPanel__tableContainer">
         <SpanDetailTable
           hiddenColumns={['traceId', 'traceGroup']}
           openFlyout={(spanId: string) => {
@@ -299,7 +257,7 @@ export function SpanDetailPanel(props: {
 
   const spanDetailTableHierarchy = useMemo(
     () => (
-      <div className="span-detail-panel__table-container">
+      <div className="exploreSpanDetailPanel__tableContainer">
         <SpanDetailTableHierarchy
           hiddenColumns={['traceId', 'traceGroup']}
           openFlyout={(spanId: string) => {
@@ -361,7 +319,7 @@ export function SpanDetailPanel(props: {
 
   const ganttChart = useMemo(
     () => (
-      <div className="span-detail-panel__gantt-container">
+      <div className="exploreSpanDetailPanel__ganttContainer">
         <GanttChart
           data={parsedData}
           colorMap={colorMap || {}}
@@ -382,91 +340,22 @@ export function SpanDetailPanel(props: {
     <>
       <EuiPanel data-test-subj="span-gantt-chart-panel">
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <PanelTitle
-                      title={i18n.translate('explore.spanDetailPanel.title.spans', {
-                        defaultMessage: 'Spans',
-                      })}
-                      totalItems={parsedData.length}
-                    />
-                  </EuiFlexItem>
-                  {errorCount > 0 &&
-                    !spanFilters.some(
-                      (filter) => filter.field === 'status.code' && filter.value === 2
-                    ) && (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'explore.spanDetailPanel.tooltip.clickToApplyFilter',
-                            {
-                              defaultMessage: 'Click to apply filter',
-                            }
-                          )}
-                        >
-                          <EuiButton
-                            onClick={handleErrorFilterClick}
-                            data-test-subj="error-count-button"
-                            size="s"
-                            color="secondary"
-                          >
-                            {i18n.translate('explore.spanDetailPanel.button.filterErrors', {
-                              defaultMessage: 'Filter errors ({errorCount})',
-                              values: { errorCount },
-                            })}
-                          </EuiButton>
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    )}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem />
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <ServiceLegend colorMap={props.colorMap || {}} data={parsedData} />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      isDisabled={props.isGanttChartLoading}
-                      legend={i18n.translate('explore.spanDetailPanel.legend.selectViewOfSpans', {
-                        defaultMessage: 'Select view of spans',
-                      })}
-                      options={toggleOptions}
-                      idSelected={toggleIdSelected}
-                      onChange={(id) => setToggleIdSelected(id)}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
           {props.isGanttChartLoading ? (
-            <div className="center-loading-div">
+            <div className="exploreCenterLoadingDiv">
               <EuiLoadingChart size="l" />
             </div>
           ) : (
             <>
-              {props.spanFilters.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup gutterSize="s" wrap>
-                    {renderFilters}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-
               <EuiHorizontalRule margin="m" />
 
-              <EuiFlexItem className="span-detail-panel__content-container">
-                {toggleIdSelected === 'timeline'
+              <EuiFlexItem className="exploreSpanDetailPanel__contentContainer">
+                {currentView === 'timeline'
                   ? ganttChart
-                  : toggleIdSelected === 'span_list'
+                  : currentView === 'span_list'
                   ? spanDetailTable
-                  : spanDetailTableHierarchy}
+                  : currentView === 'tree_view'
+                  ? spanDetailTableHierarchy
+                  : ganttChart}
               </EuiFlexItem>
             </>
           )}

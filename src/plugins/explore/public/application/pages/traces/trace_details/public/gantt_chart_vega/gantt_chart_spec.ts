@@ -11,7 +11,8 @@ export function createGanttSpec(
   height: number,
   dataLength: number = 0,
   containerWidth: number = 800,
-  selectedSpanId?: string
+  selectedSpanId?: string,
+  isDarkMode: boolean = false
 ): Spec {
   const leftPadding = calculateLeftPadding(containerWidth);
   const effectiveWidth = containerWidth - leftPadding - GANTT_CHART_CONSTANTS.RIGHT_PADDING;
@@ -156,8 +157,12 @@ export function createGanttSpec(
             x: { scale: 'xscale', field: 'startTime' },
             x2: { scale: 'xscale', field: 'endTime' },
             stroke: selectedSpanId
-              ? { signal: `datum.spanId === '${selectedSpanId}' ? '#000000' : 'white'` }
-              : { value: 'white' },
+              ? {
+                  signal: `datum.spanId === '${selectedSpanId}' ? '${
+                    isDarkMode ? '#ffffff' : '#000000'
+                  }' : '${isDarkMode ? '#333333' : '#ffffff'}'`,
+                }
+              : { value: isDarkMode ? '#333333' : '#ffffff' },
             strokeWidth: selectedSpanId
               ? { signal: `datum.spanId === '${selectedSpanId}' ? 3 : 1` }
               : { value: 1 },
@@ -202,7 +207,7 @@ export function createGanttSpec(
             fontSize: { value: 10 },
             fontWeight: { value: 'bold' },
             baseline: { value: 'middle' },
-            fill: { value: '#000' },
+            fill: { value: isDarkMode ? '#ffffff' : '#000000' },
             text: { field: 'serviceName' },
             x: { value: -5 },
             align: { value: 'right' },
@@ -219,7 +224,7 @@ export function createGanttSpec(
             y: { scale: 'yscale', field: 'label', band: 0.7 },
             fontSize: { value: 9 },
             baseline: { value: 'middle' },
-            fill: { value: '#666' },
+            fill: { value: isDarkMode ? '#cccccc' : '#666666' },
             text: { field: 'name' },
             x: { value: -5 },
             align: { value: 'right' },
@@ -267,7 +272,9 @@ export function createGanttSpec(
                 }) +
                 '" : datum.duration + " ms"',
             },
-            fill: { signal: 'datum.hasError ? "#c14125" : "#000"' },
+            fill: {
+              signal: `datum.hasError ? "#c14125" : "${isDarkMode ? '#ffffff' : '#000000'}"`,
+            },
           },
         },
       },

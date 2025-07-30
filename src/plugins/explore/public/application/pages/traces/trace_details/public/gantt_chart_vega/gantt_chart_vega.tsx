@@ -8,6 +8,8 @@ import { View, parse } from 'vega';
 import { createGanttSpec } from './gantt_chart_spec';
 import { convertToVegaGanttData } from './gantt_data_adapter';
 import { GANTT_CHART_CONSTANTS, TOTAL_PADDING } from './gantt_constants';
+import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
+import { DataExplorerServices } from '../../../../../../../../data_explorer/public';
 import './gantt_chart_vega.scss';
 
 interface GanttChartProps {
@@ -25,6 +27,7 @@ export function GanttChart({
   onSpanClick,
   selectedSpanId,
 }: GanttChartProps) {
+  const { services } = useOpenSearchDashboards<DataExplorerServices>();
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<View | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(800);
@@ -106,7 +109,14 @@ export function GanttChart({
 
         const chartHeight = calculateHeight(data.length);
 
-        const spec = createGanttSpec(chartHeight, data.length, containerWidth, selectedSpanId);
+        const isDarkMode = services?.uiSettings?.get('theme:darkMode') || false;
+        const spec = createGanttSpec(
+          chartHeight,
+          data.length,
+          containerWidth,
+          selectedSpanId,
+          isDarkMode
+        );
 
         const runtime = parse(spec);
         const view = new View(runtime).renderer('svg').initialize(containerRef.current);
@@ -136,14 +146,23 @@ export function GanttChart({
         viewRef.current.finalize();
       }
     };
-  }, [data, colorMap, height, onSpanClick, containerWidth, calculateHeight, selectedSpanId]);
+  }, [
+    data,
+    colorMap,
+    height,
+    onSpanClick,
+    containerWidth,
+    calculateHeight,
+    selectedSpanId,
+    services?.uiSettings,
+  ]);
 
   const finalHeight = calculateHeight(data.length);
 
   return (
     <div
       ref={containerRef}
-      className="gantt-chart__container"
+      className="exploreGanttChart__container"
       style={{
         height: `${finalHeight}px`,
         minWidth: `${GANTT_CHART_CONSTANTS.MIN_WIDTH}px`,

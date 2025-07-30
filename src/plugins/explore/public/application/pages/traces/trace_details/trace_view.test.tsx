@@ -83,10 +83,24 @@ jest.mock('./public/traces/span_detail_panel', () => ({
   ),
 }));
 
-jest.mock('./public/traces/span_detail_sidebar', () => ({
-  SpanDetailSidebar: ({ selectedSpan }: any) => (
+jest.mock('./public/traces/span_detail_tabs', () => ({
+  SpanDetailTabs: ({ selectedSpan }: any) => (
     <div data-testid="span-detail-sidebar">
       <div>Span: {selectedSpan?.spanId || 'none'}</div>
+    </div>
+  ),
+}));
+
+jest.mock('./public/traces/trace_detail_tabs', () => ({
+  TraceDetailTabs: ({ activeTab, setActiveTab, transformedHits, errorCount }: any) => (
+    <div data-testid="trace-detail-tabs">
+      <div data-testid="active-tab">{activeTab}</div>
+      <div data-testid="hits-count">{transformedHits?.length || 0}</div>
+      <div data-testid="error-count">{errorCount || 0}</div>
+      <button onClick={() => setActiveTab && setActiveTab('timeline')}>Timeline</button>
+      <button onClick={() => setActiveTab && setActiveTab('span_list')}>Span list</button>
+      <button onClick={() => setActiveTab && setActiveTab('tree_view')}>Tree view</button>
+      <button onClick={() => setActiveTab && setActiveTab('service_map')}>Service map</button>
     </div>
   ),
 }));
@@ -133,6 +147,23 @@ jest.mock('./public/utils/helper_functions', () => ({
   NoMatchMessage: ({ traceId }: any) => (
     <div data-testid="no-match-message">No data for trace: {traceId}</div>
   ),
+  isEmpty: (value: any) => {
+    return (
+      value === undefined ||
+      value === null ||
+      (typeof value === 'object' && Object.keys(value).length === 0) ||
+      (typeof value === 'string' && value.trim().length === 0) ||
+      (Array.isArray(value) && value.length === 0)
+    );
+  },
+  nanoToMilliSec: (nano: number) => {
+    if (typeof nano !== 'number' || isNaN(nano)) return 0;
+    return nano / 1000000;
+  },
+  round: (value: number, precision: number = 0) => {
+    const multiplier = Math.pow(10, precision);
+    return Math.round(value * multiplier) / multiplier;
+  },
 }));
 
 describe('TraceDetails', () => {

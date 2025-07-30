@@ -7,12 +7,6 @@ import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
-interface PanelTitleProps {
-  title: string;
-  totalItems?: number;
-  action?: React.ReactNode;
-}
-
 export function microToMilliSec(micro: number) {
   if (typeof micro !== 'number' || isNaN(micro)) return 0;
   return micro / 1000;
@@ -46,22 +40,6 @@ export function isEmpty(value: any): boolean {
 export function round(value: number, precision: number = 0): number {
   const multiplier = Math.pow(10, precision);
   return Math.round(value * multiplier) / multiplier;
-}
-
-export function PanelTitle({ title, totalItems, action }: PanelTitleProps) {
-  return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <EuiText size="m">
-          <span className="panel-title">{title}</span>
-          {typeof totalItems === 'number' ? (
-            <span className="panel-title-count"> ({totalItems})</span>
-          ) : null}
-        </EuiText>
-      </EuiFlexItem>
-      {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
-    </EuiFlexGroup>
-  );
 }
 
 interface NoMatchMessageProps {
