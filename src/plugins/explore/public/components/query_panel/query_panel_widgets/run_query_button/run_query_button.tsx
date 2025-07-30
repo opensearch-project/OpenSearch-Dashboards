@@ -15,12 +15,12 @@ import { useEditorText } from '../../../../application/hooks';
 
 export const RunQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const editorText = useEditorText();
+  const getEditorText = useEditorText();
   const isLoading = useSelector(selectIsLoading);
   const dispatch = useDispatch();
 
   const handleClick = () => {
-    dispatch(onEditorRunActionCreator(services, editorText));
+    dispatch(onEditorRunActionCreator(services, getEditorText()));
   };
 
   return (

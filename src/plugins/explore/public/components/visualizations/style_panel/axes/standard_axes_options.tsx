@@ -13,18 +13,17 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
-import { StandardAxes, Positions, AxisRole, VisColumn, AxisSupportedStyles } from '../../types';
+import { StandardAxes, Positions, AxisRole, VisColumn } from '../../types';
 import { DebouncedTruncateField, DebouncedText } from '.././utils';
 import { StyleAccordion } from '../../style_panel/style_accordion';
-import { selectStyleOptions } from '../../../../application/utils/state_management/selectors';
 
 interface AllAxesOptionsProps {
   standardAxes: StandardAxes[];
   onStandardAxesChange: (categoryAxes: StandardAxes[]) => void;
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
   disableGrid?: boolean;
+  switchAxes?: boolean;
 }
 
 export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
@@ -32,9 +31,8 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   onStandardAxesChange,
   axisColumnMappings,
   disableGrid = false,
+  switchAxes = false,
 }) => {
-  const styles = useSelector(selectStyleOptions) as AxisSupportedStyles;
-
   const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
     const updatedAxes = [...standardAxes];
     updatedAxes[index] = {
@@ -54,7 +52,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
 
   const getPositionsForAxis = (axis: StandardAxes) => {
     const isY = axis.axisRole === AxisRole.Y;
-    const flipped = !!styles?.switchAxes;
+    const flipped = !!switchAxes;
 
     // if switch axes, only switch label
     // the style switch happens in vege rendering
@@ -96,6 +94,10 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
     }));
   };
 
+  if (!standardAxes) {
+    return null;
+  }
+
   return (
     <StyleAccordion
       id="allAxesSection"
@@ -111,7 +113,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
         return (
           <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
             <EuiText size="s" style={{ fontWeight: 600 }}>
-              {(styles?.switchAxes ? !isYAxis : isYAxis)
+              {(switchAxes ? !isYAxis : isYAxis)
                 ? i18n.translate('explore.vis.standardAxes.yAxis', {
                     defaultMessage: 'Y-Axis',
                   })

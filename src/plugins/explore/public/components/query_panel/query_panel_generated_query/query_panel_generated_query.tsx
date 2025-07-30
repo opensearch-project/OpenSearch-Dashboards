@@ -20,7 +20,7 @@ export const QueryPanelGeneratedQuery = () => {
   const lastExecutedTranslatedQuery = useSelector(selectLastExecutedTranslatedQuery);
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
   const dispatch = useDispatch();
-  const { focusOnEditor } = useEditorFocus();
+  const focusOnEditor = useEditorFocus();
 
   if (!lastExecutedTranslatedQuery) {
     return null;
@@ -29,7 +29,7 @@ export const QueryPanelGeneratedQuery = () => {
   const onEditClick = () => {
     setEditorTextWithQuery(lastExecutedTranslatedQuery);
     dispatch(clearLastExecutedData());
-    focusOnEditor();
+    focusOnEditor(true);
   };
 
   return (

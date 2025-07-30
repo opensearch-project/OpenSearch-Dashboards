@@ -74,7 +74,7 @@ describe('RunQueryButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices } as any);
-    mockUseEditorText.mockReturnValue('SELECT * FROM logs');
+    mockUseEditorText.mockReturnValue(() => 'SELECT * FROM logs');
     mockSelectIsLoading.mockReturnValue(false);
     mockOnEditorRunActionCreator.mockReturnValue({ type: 'MOCK_ACTION' } as any);
   });
@@ -103,7 +103,7 @@ describe('RunQueryButton', () => {
 
   it('calls onEditorRunActionCreator with correct parameters', () => {
     const customEditorText = 'SELECT COUNT(*) FROM users';
-    mockUseEditorText.mockReturnValue(customEditorText);
+    mockUseEditorText.mockReturnValue(() => customEditorText);
 
     renderWithProvider(<RunQueryButton />);
 
@@ -115,7 +115,7 @@ describe('RunQueryButton', () => {
 
   it('uses current editor text when button is clicked', () => {
     const editorText = 'SHOW TABLES';
-    mockUseEditorText.mockReturnValue(editorText);
+    mockUseEditorText.mockReturnValue(() => editorText);
 
     renderWithProvider(<RunQueryButton />);
 

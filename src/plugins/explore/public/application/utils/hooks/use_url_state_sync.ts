@@ -6,10 +6,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
-import {
-  createOsdUrlStateStorage,
-  withNotifyOnErrors,
-} from '../../../../../opensearch_dashboards_utils/public';
 import { ExploreServices } from '../../../types';
 
 /**
@@ -20,14 +16,10 @@ export const useUrlStateSync = (services: ExploreServices) => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    if (!services?.data) return;
+    if (!services?.osdUrlStateStorage) return;
 
     // Create URL state storage
-    const osdUrlStateStorage = createOsdUrlStateStorage({
-      history: services.history(),
-      useHash: services.uiSettings.get('state:storeInSessionStorage', false),
-      ...withNotifyOnErrors(services.toastNotifications),
-    });
+    const osdUrlStateStorage = services.osdUrlStateStorage;
 
     // syncs `_g` portion of url with query services (time, filters, refresh)
     const { stop } = syncQueryStateWithUrl(

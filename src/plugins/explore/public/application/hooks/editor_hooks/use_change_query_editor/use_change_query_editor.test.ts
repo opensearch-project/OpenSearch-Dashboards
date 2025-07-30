@@ -73,7 +73,7 @@ describe('useChangeQueryEditor', () => {
 
     (useDatasetContext as jest.Mock).mockReturnValue({ dataset: mockIndexPattern });
     (useSetEditorText as jest.Mock).mockReturnValue(mockSetEditorText);
-    (useEditorFocus as jest.Mock).mockReturnValue({ focusOnEditor: mockFocusOnEditor });
+    (useEditorFocus as jest.Mock).mockReturnValue(mockFocusOnEditor);
     (useSelector as jest.Mock).mockImplementation((selector) => {
       if (selector === selectEditorMode) return EditorMode.Query;
       if (selector === selectQuery) return { language: 'PPL' };
