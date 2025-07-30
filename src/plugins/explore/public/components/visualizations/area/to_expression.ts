@@ -48,6 +48,7 @@ export const createSimpleAreaChart = (
           {
             title: dateName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
@@ -151,6 +152,7 @@ export const createMultiAreaChart = (
           {
             title: dateName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
@@ -285,6 +287,7 @@ export const createFacetedMultiAreaChart = (
                 {
                   title: dateName,
                   labelAngle: -45,
+                  labelSeparation: 8,
                 },
                 styles,
                 'category',
@@ -427,6 +430,7 @@ export const createCategoryAreaChart = (
           {
             title: categoryName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
@@ -526,6 +530,7 @@ export const createStackedAreaChart = (
           {
             title: categoryName1,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',

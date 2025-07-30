@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiSpacer,
   EuiFormRow,
@@ -12,7 +12,7 @@ import {
   EuiComboBoxOptionOption,
   EuiSwitch,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
@@ -72,6 +72,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   switchAxes,
 }) => {
   const visualizationRegistry = useVisualizationRegistry();
+  const firstSelectorInput = useRef<HTMLInputElement | undefined>(undefined);
 
   // switchAxes only support heatmap scatter and bar
   const showSwitch = chartType === 'heatmap' || chartType === 'bar' || chartType === 'scatter';
@@ -81,6 +82,16 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       onSwitchAxes(!switchAxes);
     }
   };
+
+  useEffect(() => {
+    if (isEmpty(currentMapping)) {
+      setTimeout(() => {
+        if (firstSelectorInput.current) {
+          firstSelectorInput.current.focus();
+        }
+      }, 500);
+    }
+  }, [currentMapping]);
 
   const possibleMapping = useMemo(
     () => visualizationRegistry.getVisualizationConfig(chartType)?.ui.availableMappings!,
@@ -262,7 +273,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
           </EuiFormRow>
         )}
 
-        {Array.from(allAxisRolesFromSelection).map((axisRole) => {
+        {Array.from(allAxisRolesFromSelection).map((axisRole, i) => {
           const currentSelection = currentSelections[axisRole];
           return (
             <AxisSelector
@@ -271,6 +282,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
               selectedColumn={currentSelection?.name || ''}
               allColumnOptions={getAvailableColumnsForAxis(axisRole)}
               switchAxes={switchAxes}
+              inputRef={(input) => (i === 0 ? (firstSelectorInput.current = input) : undefined)}
               onRemove={(role) => {
                 setCurrentSelections((prev) => ({
                   ...prev,
@@ -300,6 +312,8 @@ interface AxesSelectorOptions {
   onRemove: (axisRole: AxisRole) => void;
   onChange: (axisRole: AxisRole, value: string) => void;
   switchAxes?: boolean;
+  autoFocus?: boolean;
+  inputRef?: (instance: HTMLInputElement) => void;
 }
 
 export const AxisSelector: React.FC<AxesSelectorOptions> = ({
@@ -309,6 +323,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
   onRemove,
   onChange,
   switchAxes,
+  inputRef,
 }) => {
   const getLabel = () => {
     if (switchAxes && (axisRole === AxisRole.X || axisRole === AxisRole.Y)) {
@@ -325,6 +340,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
         <EuiFlexItem>
           <EuiComboBox
             compressed
+            inputRef={inputRef}
             selectedOptions={[{ label: selectedColumn }]}
             singleSelection={{ asPlainText: true }}
             options={allColumnOptions}

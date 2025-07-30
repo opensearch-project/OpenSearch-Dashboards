@@ -275,9 +275,15 @@ export class VisualizationBuilder {
           this.setStyles({ styles: visConfig?.ui.style.defaults, type: autoVis.chartType });
         }
       } else {
-        this.setCurrentChartType(undefined);
+        const visConfig = visualizationRegistry.getVisualizationConfig('table');
+        // Default to show a table if no auto vis created
+        this.setCurrentChartType('table');
         this.setAxesMapping({});
-        this.setStyles(undefined);
+        if (visConfig) {
+          this.setStyles({ type: 'table', styles: visConfig?.ui.style.defaults });
+        } else {
+          this.setStyles(undefined);
+        }
       }
       return;
     }
