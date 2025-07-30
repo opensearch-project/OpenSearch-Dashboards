@@ -5,6 +5,7 @@
 
 import '../utils/commands';
 import '../utils/commands.osd';
+import '../utils/commands.api';
 import '../utils/commands.explore';
 import '../utils/apps/commands';
 import '../utils/dashboards/workspace_plugin/commands';
