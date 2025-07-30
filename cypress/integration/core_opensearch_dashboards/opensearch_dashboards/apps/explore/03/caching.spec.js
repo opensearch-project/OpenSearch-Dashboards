@@ -66,7 +66,7 @@ const cachingTestSuite = () => {
       });
 
       cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-      cy.getElementByTestId('datasetSelectAdvancedButton').click();
+      cy.getElementByTestId('datasetSelectAdvancedButton').should('be.visible').click();
       cy.intercept('GET', '**/api/saved_objects/_find?fields*').as('getIndexPatternRequest');
       cy.get(`[title="Index Patterns"]`).click();
 

@@ -56,9 +56,9 @@ const inspectTestSuite = () => {
           isEnhancement: true,
         });
         cy.getElementByTestId('discoverNewButton').click();
+        setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        setDatePickerDatesAndSearchIfRelevant(config.language);
 
         cy.intercept('POST', '**/search/*').as('docTablePostRequest');
         cy.getElementByTestId('queryPanelFooterRunQueryButton').click();

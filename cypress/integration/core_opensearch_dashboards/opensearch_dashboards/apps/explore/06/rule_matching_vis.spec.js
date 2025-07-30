@@ -40,10 +40,11 @@ export const runCreateVisTests = () => {
     });
 
     it('should create a metric visualization using a single metric query', () => {
+      setDatePickerDatesAndSearchIfRelevant('PPL');
+      cy.wait(2000);
       // Setup dataset
       const datasetName = `${INDEX_WITH_TIME_1}*`;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
-      setDatePickerDatesAndSearchIfRelevant('PPL');
       cy.wait(2000);
       cy.explore.clearQueryEditor();
 
