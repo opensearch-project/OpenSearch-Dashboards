@@ -10,8 +10,7 @@ import {
   EuiFlexItem,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiButtonIcon,
+  EuiSwitch,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
@@ -21,12 +20,7 @@ import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
 import { getColumnMatchFromMapping } from '../../visualization_container_utils';
-<<<<<<< HEAD
-=======
-import { selectStyleOptions } from '../../../../application/utils/state_management/selectors';
-import { setStyleOptions } from '../../../../application/utils/state_management/slices';
 import './axes_selector.scss';
->>>>>>> e0e4d777dc (temp 2)
 
 interface VisColumnOption {
   column: VisColumn;
@@ -94,15 +88,12 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     [chartType, visualizationRegistry]
   );
 
-  console.log('possibleMapping', possibleMapping);
   const allPossibleRoleOfPossibleMapping = new Set<AxisRole>();
   possibleMapping.forEach((mapping) => {
     Object.keys(mapping.mapping[0]).forEach((role) =>
       allPossibleRoleOfPossibleMapping.add(role as AxisRole)
     );
   });
-
-  console.log('allPossibleRoleOfPossibleMapping', allPossibleRoleOfPossibleMapping);
 
   const columnsCount = useMemo(
     () => [numericalColumns.length, categoricalColumns.length, dateColumns.length],
@@ -123,15 +114,11 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     [columnsCount, possibleMapping]
   );
 
-  console.log('availableMappingsFromQuery', availableMappingsFromQuery);
-
   // All available axes to be selected are base on current query
   const allAxisRolesFromQuery = new Set<AxisRole>();
   availableMappingsFromQuery.forEach((mapping) => {
     Object.keys(mapping).forEach((role) => allAxisRolesFromQuery.add(role as AxisRole));
   });
-
-  console.log('allAxisRolesFromQuery', allAxisRolesFromQuery);
 
   const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
 
@@ -157,8 +144,6 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       }),
     [availableMappingsFromQuery, currentSelections]
   );
-
-  console.log('availableMappingsFromSelection', availableMappingsFromSelection);
 
   // Only displays axis select component base on current selection
   const allAxisRolesFromSelection = new Set<AxisRole>();
@@ -279,9 +264,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     return allColumns;
   };
 
-  const orderedAxes: AxisRole[] = styles.switchAxes
-    ? [AxisRole.Y, AxisRole.X]
-    : [AxisRole.X, AxisRole.Y];
+  const orderedAxes: AxisRole[] = switchAxes ? [AxisRole.Y, AxisRole.X] : [AxisRole.X, AxisRole.Y];
 
   const otherAxes = Array.from(allPossibleRoleOfPossibleMapping).filter(
     (axis) => axis !== AxisRole.X && axis !== AxisRole.Y
@@ -296,7 +279,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       initialIsOpen={true}
     >
       <>
-        {/* {showSwitch && (
+        {showSwitch && (
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate('explore.vis.axesSwitch.switchAxes', {
@@ -308,7 +291,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
               disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
             />
           </EuiFormRow>
-        )} */}
+        )}
 
         {orderedAxes.map((axisRole, index) => {
           const currentSelection = currentSelections[axisRole];
@@ -321,6 +304,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
                 axisRole={axisRole}
                 selectedColumn={currentSelection?.name || ''}
                 allColumnOptions={getAvailableColumnsForAxis(axisRole)}
+                switchAxes={switchAxes}
                 onRemove={(role) => {
                   setCurrentSelections((prev) => ({
                     ...prev,
@@ -336,19 +320,6 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
                   }));
                 }}
               />
-
-              {index === 0 && (
-                <EuiFlexGroup direction="column">
-                  <EuiFlexItem style={{ alignSelf: 'end' }} className="axis-swap-icon">
-                    <EuiButtonIcon
-                      color="subdued"
-                      iconType="sortable"
-                      onClick={swapAxes}
-                      disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
             </>
           );
         })}
@@ -363,6 +334,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
               axisRole={axisRole}
               selectedColumn={currentSelection?.name || ''}
               allColumnOptions={getAvailableColumnsForAxis(axisRole)}
+              switchAxes={switchAxes}
               onRemove={(role) => {
                 setCurrentSelections((prev) => ({
                   ...prev,
@@ -380,33 +352,6 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
             />
           );
         })}
-
-        {/* {Array.from(allAxisRolesFromSelection).map((axisRole) => {
-          const currentSelection = currentSelections[axisRole];
-          return (
-            <AxisSelector
-              key={axisRole}
-              axisRole={axisRole}
-              selectedColumn={currentSelection?.name || ''}
-              allColumnOptions={getAvailableColumnsForAxis(axisRole)}
-              switchAxes={switchAxes}
-              onRemove={(role) => {
-                setCurrentSelections((prev) => ({
-                  ...prev,
-                  [role]: undefined,
-                }));
-              }}
-              onChange={(role, v) => {
-                const allColumns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
-                const selectedCol = allColumns.find((col) => col.name === v);
-                setCurrentSelections((prev) => ({
-                  ...prev,
-                  [role]: selectedCol,
-                }));
-              }}
-            />
-          );
-        })} */}
       </>
     </StyleAccordion>
   );

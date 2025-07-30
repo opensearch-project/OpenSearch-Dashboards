@@ -33,16 +33,6 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   disableGrid = false,
   switchAxes = false,
 }) => {
-  // const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
-  //   const updatedAxes = [...standardAxes];
-  //   updatedAxes[index] = {
-  //     ...updatedAxes[index],
-  //     ...updates,
-  //   };
-
-  //   onStandardAxesChange(updatedAxes);
-  // };
-
   const updateAxisByRole = (role: AxisRole, updates: Partial<StandardAxes>) => {
     const updatedAxes = standardAxes.map((axis) =>
       axis.axisRole === role ? { ...axis, ...updates } : axis
@@ -105,7 +95,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   if (!standardAxes) {
     return null;
   }
-  const orderedAxes = styles.switchAxes
+  const orderedAxes = switchAxes
     ? [...standardAxes].sort((a, b) => (a.axisRole === AxisRole.Y ? -1 : 1))
     : [...standardAxes].sort((a, b) => (a.axisRole === AxisRole.X ? -1 : 1));
 
