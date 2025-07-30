@@ -4,708 +4,213 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { VisualizationContainer } from './visualization_container';
-import { useSelector } from 'react-redux';
-import { useTabResults } from '../../application/utils/hooks/use_tab_results';
-import { useVisualizationRegistry, getVisualizationType } from './utils/use_visualization_types';
-import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
-import { useSearchContext } from '../query_panel/utils/use_search_context';
-import {
-  isValidMapping,
-  getAllColumns,
-  convertStringsToMappings,
-} from './visualization_container_utils';
-import { ALL_VISUALIZATION_RULES } from './rule_repository';
+import * as VB from './visualization_builder';
+import * as TabResultsHooks from '../../application/utils/hooks/use_tab_results';
+import * as Utils from './visualization_container_utils';
+import { BehaviorSubject } from 'rxjs';
+import { ChartType } from './utils/use_visualization_types';
+import { VisFieldType } from './types';
 
-// Mock all dependencies to avoid import chain issues
+// Mock the StylePanel component to avoid rendering issues
+jest.mock('./style_panel/style_panel', () => ({
+  StylePanel: () => <div data-test-subj="mockStylePanel">Style Panel</div>,
+}));
+
+// Mock the TableVis component
+jest.mock('./table/table_vis', () => ({
+  TableVis: () => <div data-test-subj="mockTableVis">Table Visualization</div>,
+}));
+
+// Mock the hooks and services
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
-  useOpenSearchDashboards: () => ({
+  useOpenSearchDashboards: jest.fn(() => ({
     services: {
-      data: {
-        query: {
-          queryString: { getQuery: () => ({}) },
-          filterManager: { getFilters: () => [] },
-          timefilter: { timefilter: { getTime: () => ({}) } },
-          state$: { subscribe: () => ({ unsubscribe: () => {} }) },
-        },
+      expressions: {
+        ReactExpressionRenderer: jest.fn(({ expression }) => (
+          <div data-test-subj="mockExpressionRenderer">{expression}</div>
+        )),
       },
-      expressions: { ReactExpressionRenderer: () => null },
-      notifications: { toasts: { addInfo: jest.fn() } },
     },
-  }),
-  withOpenSearchDashboards: (component: any) => component,
-}));
-
-jest.mock('react-redux', () => ({
-  useSelector: jest.fn(),
-  useDispatch: () => jest.fn(),
-  connect: () => (component: any) => component,
-}));
-
-jest.mock('../../application/utils/hooks/use_tab_results', () => ({
-  useTabResults: jest.fn(),
-}));
-
-jest.mock('../../application/context/dataset_context/dataset_context', () => ({
-  useDatasetContext: jest.fn(),
-}));
-
-jest.mock('../query_panel/utils/use_search_context', () => ({
-  useSearchContext: jest.fn(),
-}));
-
-// Mock all other imports
-jest.mock('./visualization', () => ({
-  Visualization: (props: any) => <div data-testid="visualization" {...props} />,
-}));
-jest.mock('./add_to_dashboard_button', () => ({ SaveAndAddButtonWithModal: () => null }));
-jest.mock('./visualization_container_utils', () => ({
-  applyDefaultVisualization: jest.fn(),
-  convertMappingsToStrings: jest.fn(() => ({})),
-  convertStringsToMappings: jest.fn(() => ({})),
-  findRuleByIndex: jest.fn(),
-  getAllColumns: jest.fn(() => [
-    { name: 'field1', schema: 'string', uniqueValuesCount: 1 },
-    { name: 'field2', schema: 'number', uniqueValuesCount: 2 },
-  ]),
-  getColumnMatchFromMapping: jest.fn(() => ['field1', 'field2']),
-  isValidMapping: jest.fn(() => false),
-}));
-jest.mock('./rule_repository', () => ({ ALL_VISUALIZATION_RULES: [] }));
-jest.mock('../../application/utils/state_management/slices', () => ({
-  setStyleOptions: jest.fn(),
-  setChartType: jest.fn(),
-  setAxesMapping: jest.fn(),
-}));
-jest.mock('../../application/utils/state_management/selectors', () => ({
-  selectStyleOptions: jest.fn(),
-  selectChartType: jest.fn(),
-  selectAxesMapping: jest.fn(),
-}));
-jest.mock('./utils/use_visualization_types', () => ({
-  useVisualizationRegistry: jest.fn(),
-  getVisualizationType: jest.fn(() => ({
-    ruleId: 'test-rule',
-    visualizationType: { ui: { style: { defaults: {} } } },
-    transformedData: [{ x: 1, y: 2 }],
-    numericalColumns: [],
-    categoricalColumns: [],
-    dateColumns: [],
-    availableChartTypes: [],
-    toExpression: jest.fn(),
-    axisColumnMappings: {},
   })),
 }));
 
+jest.mock('../../application/context/dataset_context/dataset_context', () => ({
+  useDatasetContext: jest.fn(() => ({
+    dataset: { id: 'test-dataset', title: 'Test Dataset' },
+  })),
+}));
+
+jest.mock('../../application/utils/hooks/use_tab_results', () => ({
+  useTabResults: jest.fn(() => ({
+    results: {
+      hits: {
+        hits: [{ _source: { field1: 'value1' } }, { _source: { field1: 'value2' } }],
+      },
+      fieldSchema: [
+        { name: 'field1', type: 'string' },
+        { name: 'count', type: 'number' },
+      ],
+    },
+  })),
+}));
+
+jest.mock('../query_panel/utils/use_search_context', () => ({
+  useSearchContext: jest.fn(() => ({
+    timeRange: { from: 'now-15m', to: 'now' },
+    query: 'source=test',
+  })),
+}));
+
+// Mock the visualization builder
+const mockVisualizationBuilder = {
+  data$: new BehaviorSubject<VB.VisData | undefined>({
+    transformedData: [
+      { field1: 'value1', count: 10 },
+      { field1: 'value2', count: 20 },
+    ],
+    numericalColumns: [
+      {
+        id: 1,
+        name: 'count',
+        schema: VisFieldType.Numerical,
+        column: 'count',
+        validValuesCount: 2,
+        uniqueValuesCount: 2,
+      },
+    ],
+    categoricalColumns: [
+      {
+        id: 2,
+        name: 'field1',
+        schema: VisFieldType.Categorical,
+        column: 'field1',
+        validValuesCount: 2,
+        uniqueValuesCount: 2,
+      },
+    ],
+    dateColumns: [],
+  }),
+  axesMapping$: new BehaviorSubject({}),
+  styles$: new BehaviorSubject({
+    type: 'bar',
+    styles: {
+      legendPosition: 'right',
+      thresholds: [],
+      pageSize: 10,
+    },
+  }),
+  currentChartType$: new BehaviorSubject<ChartType | undefined>(undefined),
+  handleData: jest.fn(),
+  init: jest.fn(),
+  reset: jest.fn(),
+};
+
 describe('VisualizationContainer', () => {
-  const mockUseSelector = useSelector as jest.Mock;
-  const mockUseTabResults = useTabResults as jest.Mock;
-  const mockUseVisualizationRegistry = useVisualizationRegistry as jest.Mock;
-  const mockUseDatasetContext = useDatasetContext as jest.Mock;
-  const mockUseSearchContext = useSearchContext as jest.Mock;
-  const mockDispatch = jest.fn();
-
-  const mockVisualizationRegistry = {
-    getVisualizationConfig: jest.fn(),
-    getRules: jest.fn(() => []),
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSelector.mockReturnValue({});
-    mockUseTabResults.mockReturnValue({ results: { hits: { hits: [] } } });
-    mockUseVisualizationRegistry.mockReturnValue(mockVisualizationRegistry);
-    mockUseDatasetContext.mockReturnValue({ dataset: null });
-    mockUseSearchContext.mockReturnValue({});
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('react-redux').useDispatch = jest.fn(() => mockDispatch);
+    jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(mockVisualizationBuilder as any);
   });
 
-  it('renders null when no visualization data', () => {
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
+  it('renders the visualization container', () => {
+    render(<VisualizationContainer />);
+
+    expect(screen.getByTestId('exploreVisualizationLoader')).toBeInTheDocument();
+    expect(mockVisualizationBuilder.init).toHaveBeenCalled();
+    expect(mockVisualizationBuilder.handleData).toHaveBeenCalled();
   });
 
-  it('renders visualization container with proper structure', () => {
-    mockUseSelector.mockReturnValueOnce({}).mockReturnValueOnce('bar').mockReturnValueOnce({});
+  it('renders empty prompt when no chart type or axes are selected', () => {
+    render(<VisualizationContainer />);
 
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
-
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
+    expect(
+      screen.getByText('Select a chart type, and x and y axes fields to get started')
+    ).toBeInTheDocument();
   });
 
-  it('handles empty results gracefully', () => {
-    mockUseTabResults.mockReturnValue({ results: null });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
+  it('renders table visualization when chart type is table', () => {
+    mockVisualizationBuilder.currentChartType$.next('table');
+
+    render(<VisualizationContainer />);
+
+    // The TableVis component should be rendered
+    expect(screen.getByTestId('mockTableVis')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Select a chart type, and x and y axes fields to get started')
+    ).not.toBeInTheDocument();
   });
 
-  it('handles missing field schema', () => {
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: null,
-      },
-    });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles chart type selection', () => {
-    mockUseSelector.mockReturnValueOnce({}).mockReturnValueOnce('line').mockReturnValueOnce({});
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles style options updates', () => {
-    mockUseSelector
-      .mockReturnValueOnce({ color: 'blue' })
-      .mockReturnValueOnce('bar')
-      .mockReturnValueOnce({});
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles axes mapping state', () => {
-    mockUseSelector
-      .mockReturnValueOnce({})
-      .mockReturnValueOnce('bar')
-      .mockReturnValueOnce({ x: 'field1', y: 'field2' });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles table chart type specifically', () => {
-    mockUseSelector.mockReturnValueOnce({}).mockReturnValueOnce('table').mockReturnValueOnce({});
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles metric chart type with validation', () => {
-    mockUseSelector.mockReturnValueOnce({}).mockReturnValueOnce('metric').mockReturnValueOnce({});
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { count: 100 } }] },
-        fieldSchema: [{ name: 'count', type: 'number' }],
-      },
-    });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles visualization registry interactions', () => {
-    mockUseVisualizationRegistry.mockReturnValue({
-      getVisualizationConfig: jest.fn(() => ({ ui: { style: { defaults: {} } } })),
-      getRules: jest.fn(() => []),
-    });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles dataset context properly', () => {
-    mockUseDatasetContext.mockReturnValue({
-      dataset: { id: 'test-dataset', title: 'Test Dataset' },
-    });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles search context integration', () => {
-    mockUseSearchContext.mockReturnValue({
-      query: 'SELECT * FROM test',
-      filters: [],
-    });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('calls dispatch when component mounts', () => {
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles toast notifications', () => {
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [],
-      },
-    });
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull();
-  });
-
-  it('handles multiple selector calls', () => {
-    mockUseSelector
-      .mockReturnValueOnce({ theme: 'dark' })
-      .mockReturnValueOnce('pie')
-      .mockReturnValueOnce({ x: 'time', y: 'value' });
-    shallow(<VisualizationContainer />);
-    expect(mockUseSelector).toHaveBeenCalledTimes(3);
-  });
-
-  it('renders visualization when data is available', () => {
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: 'test-rule',
-      visualizationType: { ui: { style: { defaults: {} } } },
-      transformedData: [{ x: 1, y: 2 }],
-      numericalColumns: [],
-      categoricalColumns: [],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
-    });
-
-    mockUseSelector
-      .mockReturnValueOnce({ color: 'blue' })
-      .mockReturnValueOnce('bar')
-      .mockReturnValueOnce({ x: 'field1', y: 'field2' });
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1', field2: 10 } }] },
-        fieldSchema: [
-          { name: 'field1', type: 'string' },
-          { name: 'field2', type: 'number' },
-        ],
-      },
-    });
-
-    mockUseDatasetContext.mockReturnValue({ dataset: { id: 'test' } });
-
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.find('.exploreVisContainer')).toHaveLength(0);
-  });
-
-  it('handles rule-matched visualization with existing chart type', () => {
-    const mockRule = { id: 'test-rule', toExpression: jest.fn() };
-    mockVisualizationRegistry.getRules.mockReturnValue([mockRule] as any);
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: { style: { defaults: {} }, availableMappings: [] },
-    });
-
-    mockUseSelector
-      .mockReturnValueOnce({ color: 'red' })
-      .mockReturnValueOnce('line')
-      .mockReturnValueOnce({ x: 'time', y: 'value' });
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { time: '2023-01-01', value: 100 } }] },
-        fieldSchema: [
-          { name: 'time', type: 'date' },
-          { name: 'value', type: 'number' },
-        ],
-      },
-    });
-
-    const wrapper = shallow(<VisualizationContainer />);
-    // Component should render without errors when data is available
-    expect(wrapper.type()).toBeNull(); // Still null due to mocked getVisualizationType
-  });
-
-  it('handles metric chart type with multiple values', () => {
-    (getAllColumns as jest.Mock).mockReturnValue([{ name: 'count', uniqueValuesCount: 2 }]);
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: 'test-rule',
-      visualizationType: { ui: { style: { defaults: {} } } },
-      transformedData: [{ count: 100 }, { count: 200 }],
-      numericalColumns: [{ name: 'count', uniqueValuesCount: 2 }],
-      categoricalColumns: [],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
-    });
-
-    mockUseSelector.mockReturnValueOnce({}).mockReturnValueOnce('metric').mockReturnValueOnce({});
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { count: 100 } }, { _source: { count: 200 } }] },
-        fieldSchema: [{ name: 'count', type: 'number' }],
-      },
-    });
-
-    shallow(<VisualizationContainer />);
-    // Test passes if no error is thrown
-  });
-
-  it('handles table chart type selection', () => {
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: null,
-      visualizationType: null,
-      transformedData: [{ field1: 'value1' }],
-      numericalColumns: [],
-      categoricalColumns: [{ name: 'field1' }],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
-    });
-
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: { style: { defaults: {} } },
-    });
-
-    mockUseSelector.mockReturnValueOnce({}).mockReturnValueOnce('table').mockReturnValueOnce({});
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
-
-    shallow(<VisualizationContainer />);
-    // Test passes if component handles table type without errors
-  });
-
-  it('handles expression generation with valid data', () => {
-    const mockRule = { id: 'test-rule', toExpression: jest.fn() };
-
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: 'test-rule',
-      visualizationType: { ui: { style: { defaults: {} } } },
-      transformedData: [{ x: 1, y: 2 }],
-      numericalColumns: [{ name: 'x' }, { name: 'y' }],
-      categoricalColumns: [],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: { x: { name: 'x' }, y: { name: 'y' } },
-    });
-
-    mockVisualizationRegistry.getRules.mockReturnValue([mockRule] as any);
-
-    mockUseSelector
-      .mockReturnValueOnce({ color: 'blue' })
-      .mockReturnValueOnce('bar')
-      .mockReturnValueOnce({});
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { x: 1, y: 2 } }] },
-        fieldSchema: [
-          { name: 'x', type: 'number' },
-          { name: 'y', type: 'number' },
-        ],
-      },
-    });
-
-    mockUseDatasetContext.mockReturnValue({ dataset: { id: 'test-dataset' } });
-    mockUseSearchContext.mockReturnValue({ query: 'test query' });
-
-    shallow(<VisualizationContainer />);
-    // Test passes if component handles expression generation without errors
-  });
-
-  it('handles style change with timeout', () => {
-    jest.useFakeTimers();
-
-    mockUseSelector
-      .mockReturnValueOnce({ color: 'blue' })
-      .mockReturnValueOnce('bar')
-      .mockReturnValueOnce({});
-
-    const wrapper = shallow(<VisualizationContainer />);
-
-    // Simulate style change
-    const visualization = wrapper.find('Visualization');
-    if (visualization.length > 0) {
-      (visualization.prop('onStyleChange') as any)({ color: 'red' });
-      jest.advanceTimersByTime(100);
-    }
-
-    jest.useRealTimers();
-  });
-
-  it('handles chart type change with mapping reuse', () => {
-    // This test verifies the component can handle chart type changes
-    // The actual logic is complex and requires proper component state
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull(); // Component returns null when no visualization data
-  });
-
-  it('handles invalid mapping scenario', () => {
-    (isValidMapping as jest.Mock).mockReturnValue(false);
-
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull(); // Component handles invalid mappings gracefully
-  });
-
-  it('handles updateVisualization callback', () => {
-    // This test verifies the component structure supports updateVisualization
-    // The callback is passed to child components when they exist
-    const wrapper = shallow(<VisualizationContainer />);
-    expect(wrapper.type()).toBeNull(); // Component returns null when no visualization data
-  });
-
-  it('handles rule matched visualization with existing chart type and valid mapping', () => {
-    // Reset mocks to ensure clean state
-    jest.clearAllMocks();
-
-    (getAllColumns as jest.Mock).mockReturnValue([{ name: 'field1', type: 'string' }]);
-    (isValidMapping as jest.Mock).mockReturnValue(true);
-    (convertStringsToMappings as jest.Mock).mockReturnValue({ x: { name: 'field1' } });
-
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: 'test-rule',
-      visualizationType: { ui: { style: { defaults: { color: 'blue' } } } },
-      transformedData: [{ field1: 'value1' }],
-      numericalColumns: [],
-      categoricalColumns: [{ name: 'field1' }],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
-    });
-
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: { style: { defaults: { color: 'red' } } },
-    });
-
-    // Set up selectors to simulate existing visualization state
-    mockUseSelector
-      .mockReturnValueOnce({ color: 'blue' }) // styleOptions - not empty
-      .mockReturnValueOnce('bar') // selectedChartType - not table
-      .mockReturnValueOnce({ x: 'field1' }); // selectedAxesMapping - not empty
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
-
-    shallow(<VisualizationContainer />);
-    // Test passes if component renders without error when conditions are met
-  });
-
-  it('handles metric chart type with single value', () => {
-    (getAllColumns as jest.Mock).mockReturnValue([{ name: 'count', uniqueValuesCount: 1 }]);
-
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: 'test-rule',
-      visualizationType: { ui: { style: { defaults: {} } } },
-      transformedData: [{ count: 100 }],
-      numericalColumns: [{ name: 'count', uniqueValuesCount: 1 }],
-      categoricalColumns: [],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
-    });
-
-    mockUseSelector.mockReturnValueOnce({}).mockReturnValueOnce('metric').mockReturnValueOnce({});
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { count: 100 } }] },
-        fieldSchema: [{ name: 'count', type: 'number' }],
-      },
-    });
-
-    shallow(<VisualizationContainer />);
-  });
-
-  it('handles chart type change with mapping reuse success', () => {
-    (getAllColumns as jest.Mock).mockReturnValue([{ name: 'field1', type: 'string' }]);
-
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: 'test-rule',
-      visualizationType: { ui: { style: { defaults: {} } } },
-      transformedData: [{ field1: 'value1' }],
-      numericalColumns: [],
-      categoricalColumns: [{ name: 'field1' }],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
-    });
-
-    const mockRule = {
+  it('renders expression visualization when expression is available and axes are mapped', () => {
+    // Mock the visualization_container_utils functions
+    jest.spyOn(Utils, 'findRuleByIndex').mockReturnValue({
       id: 'test-rule',
-      matchIndex: ['categorical'],
-      chartTypes: [{ type: 'pie' }],
-      toExpression: jest.fn(),
-    };
+      name: 'Test Rule',
+      matches: jest.fn(),
+      matchIndex: [1, 1, 0],
+      chartTypes: [{ type: 'bar', name: 'Bar Chart', priority: 1, icon: 'barChart' }],
+      toExpression: jest.fn(() => 'test-expression'),
+    });
 
-    (ALL_VISUALIZATION_RULES as any).length = 0;
-    (ALL_VISUALIZATION_RULES as any).push(mockRule);
-
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: {
-        style: { defaults: {} },
-        availableMappings: [
-          {
-            mapping: [{ x: { type: 'categorical' } }],
-          },
-        ],
+    jest.spyOn(Utils, 'convertStringsToMappings').mockReturnValue({
+      x: {
+        id: 2,
+        name: 'field1',
+        schema: VisFieldType.Categorical,
+        column: 'field1',
+        validValuesCount: 2,
+        uniqueValuesCount: 2,
+      },
+      y: {
+        id: 1,
+        name: 'count',
+        schema: VisFieldType.Numerical,
+        column: 'count',
+        validValuesCount: 2,
+        uniqueValuesCount: 2,
       },
     });
 
-    mockUseSelector
-      .mockReturnValueOnce({})
-      .mockReturnValueOnce('bar')
-      .mockReturnValueOnce({ x: 'field1' });
+    mockVisualizationBuilder.currentChartType$.next('bar');
+    mockVisualizationBuilder.axesMapping$.next({ x: 'field1', y: 'count' });
 
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
+    render(<VisualizationContainer />);
 
-    const wrapper = shallow(<VisualizationContainer />);
-    const visualization = wrapper.find('Visualization');
-    if (visualization.length > 0) {
-      (visualization.prop('onChartTypeChange') as any)('pie');
-    }
+    // The expression renderer should be used
+    expect(screen.getByTestId('mockExpressionRenderer')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Select a chart type, and x and y axes fields to get started')
+    ).not.toBeInTheDocument();
   });
 
-  it('handles no rule matched with table chart type', () => {
-    // Reset mocks to ensure clean state
-    jest.clearAllMocks();
+  it('cleans up on unmount', () => {
+    const { unmount } = render(<VisualizationContainer />);
 
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: null,
-      visualizationType: null,
-      transformedData: [{ field1: 'value1' }],
-      numericalColumns: [],
-      categoricalColumns: [{ name: 'field1' }],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
-    });
+    unmount();
 
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: { style: { defaults: {} } },
-    });
-
-    mockUseSelector
-      .mockReturnValueOnce({})
-      .mockReturnValueOnce('table') // selectedChartType is table
-      .mockReturnValueOnce({});
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
-
-    shallow(<VisualizationContainer />);
-    // Test passes if component renders without error for table chart type
+    expect(mockVisualizationBuilder.reset).toHaveBeenCalled();
   });
 
-  it('handles expression generation with table chart type', () => {
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: 'test-rule',
-      visualizationType: { ui: { style: { defaults: {} } } },
-      transformedData: [{ field1: 'value1' }],
-      numericalColumns: [],
-      categoricalColumns: [{ name: 'field1' }],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
+  it('handles empty results', () => {
+    // Override the mock for this test
+    jest.spyOn(TabResultsHooks, 'useTabResults').mockReturnValueOnce({
+      results: null,
     });
 
-    mockUseSelector
-      .mockReturnValueOnce({ color: 'blue' })
-      .mockReturnValueOnce('table')
-      .mockReturnValueOnce({});
+    render(<VisualizationContainer />);
 
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
-
-    mockUseDatasetContext.mockReturnValue({ dataset: { id: 'test-dataset' } });
-    mockUseSearchContext.mockReturnValue({ query: 'test query' });
-
-    shallow(<VisualizationContainer />);
+    // Should still render without crashing
+    expect(screen.getByTestId('exploreVisualizationLoader')).toBeInTheDocument();
   });
 
-  it('handles expression generation without rule', () => {
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: 'nonexistent-rule',
-      visualizationType: { ui: { style: { defaults: {} } } },
-      transformedData: [{ field1: 'value1' }],
-      numericalColumns: [],
-      categoricalColumns: [{ name: 'field1' }],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
-    });
+  it('handles empty visualization data', () => {
+    // Override the mock for this test
+    // Use undefined to simulate no visualization data
+    mockVisualizationBuilder.data$.next(undefined);
 
-    mockVisualizationRegistry.getRules.mockReturnValue([]);
+    render(<VisualizationContainer />);
 
-    mockUseSelector
-      .mockReturnValueOnce({ color: 'blue' })
-      .mockReturnValueOnce('bar')
-      .mockReturnValueOnce({});
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
-
-    mockUseDatasetContext.mockReturnValue({ dataset: { id: 'test-dataset' } });
-    mockUseSearchContext.mockReturnValue({ query: 'test query' });
-
-    shallow(<VisualizationContainer />);
-  });
-
-  it('handles first loading without selected chart type', () => {
-    (getVisualizationType as jest.Mock).mockReturnValue({
-      ruleId: null,
-      visualizationType: null,
-      transformedData: [{ field1: 'value1' }],
-      numericalColumns: [],
-      categoricalColumns: [{ name: 'field1' }],
-      dateColumns: [],
-      availableChartTypes: [],
-      toExpression: jest.fn(),
-      axisColumnMappings: {},
-    });
-
-    mockUseSelector.mockReturnValueOnce({}).mockReturnValueOnce(null).mockReturnValueOnce({});
-
-    mockUseTabResults.mockReturnValue({
-      results: {
-        hits: { hits: [{ _source: { field1: 'value1' } }] },
-        fieldSchema: [{ name: 'field1', type: 'string' }],
-      },
-    });
-
-    shallow(<VisualizationContainer />);
+    // Should not render anything when visualization data is undefined
+    expect(screen.queryByTestId('exploreVisualizationLoader')).not.toBeInTheDocument();
   });
 });

@@ -82,17 +82,6 @@ describe('redux_persistence', () => {
         results: {},
         tab: {
           logs: {},
-          visualizations: {
-            styleOptions: {
-              showTitle: true,
-              title: '',
-              fontSize: 60,
-              useColor: false,
-              colorSchema: ColorSchemas.BLUES,
-            },
-            chartType: undefined,
-            axesMapping: {},
-          },
         },
         legacy: {
           columns: ['_source'],

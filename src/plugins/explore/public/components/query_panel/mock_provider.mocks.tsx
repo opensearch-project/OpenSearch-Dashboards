@@ -170,11 +170,6 @@ const createMockStore = (
       results: {},
       tab: {
         logs: {},
-        visualizations: {
-          styleOptions: undefined,
-          chartType: 'line',
-          axesMapping: {},
-        },
       },
       legacy: {
         columns: [],

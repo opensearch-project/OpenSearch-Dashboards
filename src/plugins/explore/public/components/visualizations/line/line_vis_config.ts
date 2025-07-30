@@ -123,6 +123,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
       defaults: defaultLineChartStyles,
       render: (props) => React.createElement(LineVisStyleControls, props),
     },
+    // TODO: refactor availableMappings to a flatten array
     availableMappings: [
       {
         mapping: [

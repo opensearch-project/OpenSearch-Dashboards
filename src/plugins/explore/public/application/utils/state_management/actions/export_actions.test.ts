@@ -88,11 +88,6 @@ describe('export_actions', () => {
       },
       tab: {
         logs: {},
-        visualizations: {
-          styleOptions: undefined,
-          chartType: undefined,
-          axesMapping: {},
-        },
       },
       queryEditor: {
         queryStatusMap: {},

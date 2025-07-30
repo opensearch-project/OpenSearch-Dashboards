@@ -17,7 +17,6 @@ import {
 import { Dataset, DataStructure } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
-import { defaultMetricChartStyles } from '../../../../components/visualizations/metric/metric_vis_config';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
@@ -287,11 +286,6 @@ const getPreloadedResultsState = (services: ExploreServices): ResultsState => {
 const getPreloadedTabState = (services: ExploreServices): TabState => {
   return {
     logs: {},
-    visualizations: {
-      styleOptions: defaultMetricChartStyles,
-      chartType: undefined,
-      axesMapping: {},
-    },
   };
 };
 

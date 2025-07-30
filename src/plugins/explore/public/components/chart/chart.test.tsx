@@ -149,17 +149,6 @@ describe('DiscoverChart', () => {
       results: {},
       tab: {
         logs: {},
-        visualizations: {
-          styleOptions: {
-            showTitle: true,
-            title: '',
-            fontSize: 60,
-            useColor: false,
-            colorSchema: 'blues' as any,
-          },
-          chartType: undefined,
-          axesMapping: {},
-        },
       },
     },
   });

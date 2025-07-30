@@ -15,10 +15,10 @@ import { DiscoverNoResults } from '../../../../application/legacy/discover/appli
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
-import { ExploreTabs } from '../../../../components/tabs/tabs';
 import { DiscoverChartContainer } from '../../../../components/chart/discover_chart_container';
 import { useDatasetContext } from '../../../../application/context';
 import { ErrorPanel } from '../../../error_panel';
+import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 
 export const BottomRightContainer = () => {
   const dispatch = useDispatch();
@@ -84,7 +84,7 @@ export const BottomRightContainer = () => {
       <>
         <DiscoverChartContainer />
         <CanvasPanel>
-          <ExploreTabs />
+          <ResizableVisControlAndTabs />
         </CanvasPanel>
       </>
     );

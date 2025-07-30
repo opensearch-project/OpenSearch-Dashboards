@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { ChartTypeSelector } from './chart_type_selector';
 import { VisColumn, VisFieldType } from './types';
-import { ChartType, VisualizationTypeResult } from './utils/use_visualization_types';
+import { VisData } from './visualization_builder';
 
 jest.mock('./rule_repository', () => ({
   ALL_VISUALIZATION_RULES: [
@@ -81,10 +81,11 @@ describe('ChartTypeSelector', () => {
     },
   ];
 
-  const mockVisualizationData: VisualizationTypeResult<ChartType> = {
+  const mockVisualizationData: VisData = {
     numericalColumns: mockNumericalColumns,
     categoricalColumns: mockCategoricalColumns,
     dateColumns: mockDateColumns,
+    transformedData: [],
   };
 
   const mockOnChartTypeChange = jest.fn();
@@ -134,7 +135,15 @@ describe('ChartTypeSelector', () => {
   it('renders with empty visualization data', () => {
     const { container } = render(
       <Provider store={createMockStore()}>
-        <ChartTypeSelector visualizationData={{}} onChartTypeChange={mockOnChartTypeChange} />
+        <ChartTypeSelector
+          visualizationData={{
+            transformedData: [],
+            categoricalColumns: [],
+            numericalColumns: [],
+            dateColumns: [],
+          }}
+          onChartTypeChange={mockOnChartTypeChange}
+        />
       </Provider>
     );
     expect(container.firstChild).not.toBeNull();
@@ -142,10 +151,11 @@ describe('ChartTypeSelector', () => {
   });
 
   it('disables chart types with no valid rules', () => {
-    const dataWithoutColumns: VisualizationTypeResult<ChartType> = {
+    const dataWithoutColumns: VisData = {
       numericalColumns: [],
       categoricalColumns: [],
       dateColumns: [],
+      transformedData: [],
     };
 
     render(
