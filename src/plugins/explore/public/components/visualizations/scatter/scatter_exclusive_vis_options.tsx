@@ -34,7 +34,6 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
     {
       min: 0,
       max: 360,
-      defaultValue: 20,
     }
   );
 
