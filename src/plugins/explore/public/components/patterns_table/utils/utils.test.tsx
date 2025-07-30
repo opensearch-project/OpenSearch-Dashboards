@@ -136,7 +136,7 @@ describe('utils', () => {
       mockGetState.mockReset();
     });
 
-    it('should return undefined when state is not provided', () => {
+    it('should throw error when state is not provided', () => {
       mockGetState.mockReturnValue(undefined);
       const services = {
         store: {
@@ -144,21 +144,19 @@ describe('utils', () => {
           dispatch: jest.fn(),
         },
       } as any;
-      const result = findDefaultPatternsField(services);
-      expect(result).toBeUndefined();
+      expect(() => findDefaultPatternsField(services)).toThrow('State is unexpectedly empty');
       expect(setPatternsField).not.toHaveBeenCalled();
     });
 
-    it('should return undefined when services.store is not provided', () => {
+    it('should throw error when services.store is not provided', () => {
       const services = {
         tabRegistry: { getTab: jest.fn() },
       } as any;
-      const result = findDefaultPatternsField(services);
-      expect(result).toBeUndefined();
+      expect(() => findDefaultPatternsField(services)).toThrow('Store is unexpectedly empty');
       expect(setPatternsField).not.toHaveBeenCalled();
     });
 
-    it('should return undefined when logs tab is not found', () => {
+    it('should throw error when logs tab is not found', () => {
       const state = {
         query: { language: 'PPL' },
         results: {},
@@ -169,13 +167,14 @@ describe('utils', () => {
         tabRegistry: { getTab: jest.fn().mockReturnValue(null) },
       } as any;
 
-      const result = findDefaultPatternsField(services);
-      expect(result).toBeUndefined();
+      expect(() => findDefaultPatternsField(services)).toThrow(
+        'Logs tab is unexpectedly uninitialized'
+      );
       expect(setPatternsField).not.toHaveBeenCalled();
       expect(services.tabRegistry.getTab).toHaveBeenCalledWith('logs');
     });
 
-    it('should not dispatch or return a field when there are no results', () => {
+    it('should throw error when there are no results', () => {
       const state = {
         query: { language: 'PPL' },
         results: {},
@@ -186,13 +185,14 @@ describe('utils', () => {
         tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
       } as any;
 
-      const result = findDefaultPatternsField(services);
-      expect(result).toBeUndefined();
+      expect(() => findDefaultPatternsField(services)).toThrow(
+        'Unexpectedly cannot find a longest default patterns field'
+      );
       expect(setPatternsField).not.toHaveBeenCalled();
       expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
     });
 
-    it('should not dispatch or return a field when there are no hits', () => {
+    it('should throw error when there are no hits', () => {
       const state = {
         query: { language: 'PPL' },
         results: {
@@ -211,8 +211,9 @@ describe('utils', () => {
         tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
       } as any;
 
-      const result = findDefaultPatternsField(services);
-      expect(result).toBeUndefined();
+      expect(() => findDefaultPatternsField(services)).toThrow(
+        'Unexpectedly cannot find a longest default patterns field'
+      );
       expect(setPatternsField).not.toHaveBeenCalled();
       expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
     });

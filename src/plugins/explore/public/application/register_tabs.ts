@@ -10,8 +10,16 @@ import { ExploreServices } from '../types';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
-import { setPatternsField } from './utils/state_management/slices/tab/tab_slice';
-import { findDefaultPatternsField } from '../components/patterns_table/utils/utils';
+import {
+  setPatternsField,
+  setUsingRegexPatterns,
+} from './utils/state_management/slices/tab/tab_slice';
+import {
+  brainPatternQuery,
+  findDefaultPatternsField,
+  regexPatternQuery,
+} from '../components/patterns_table/utils/utils';
+import { executeTabQuery } from './utils/state_management/actions/query_actions';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -50,17 +58,38 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
       const state = services.store.getState();
 
       // Get the selected patterns field from the Redux state
-      let patternsField = state.tab?.patterns?.patterns_field;
+      let patternsField = state.tab.patterns.patternsField;
 
       const preparedQuery = getQueryWithSource(query);
       if (!patternsField) {
         patternsField = findDefaultPatternsField(services);
       }
 
-      return preparedQuery.query !== ''
-        ? preparedQuery.query +
-            ` | patterns \`${patternsField}\` method=brain mode=aggregation | sort - pattern_count`
-        : preparedQuery.query;
+      if (state.tab.patterns.usingRegexPatterns)
+        return regexPatternQuery(preparedQuery.query, patternsField);
+
+      return brainPatternQuery(preparedQuery.query, patternsField);
+    },
+
+    handleQueryResult: async (_, error) => {
+      const state = services.store.getState();
+
+      if (error && error.status && error.status === 400) {
+        // can check further details of err if needed
+        let patternsField = state.tab.patterns.patternsField;
+        if (!patternsField) {
+          patternsField = findDefaultPatternsField(services);
+        }
+        const query = state.query;
+        const preparedQuery = getQueryWithSource(query);
+        services.store.dispatch(setUsingRegexPatterns(true));
+        services.store.dispatch(
+          executeTabQuery({
+            services,
+            cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
+          })
+        );
+      }
     },
 
     component: PatternsTab,

@@ -11,13 +11,18 @@ import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
 import { highlightLogUsingPattern } from './utils/utils';
 import { PatternsSettingsPopoverContent } from '../tabs/action_bar/patterns_settings/patterns_settings_popover_content';
-import { selectQuery, selectResults } from '../../application/utils/state_management/selectors';
+import {
+  selectQuery,
+  selectResults,
+  selectUsingRegexPatterns,
+} from '../../application/utils/state_management/selectors';
 
 export const PatternsContainer = () => {
   const { results: patternResults } = useTabResults();
 
   const querySelector = useSelector(selectQuery);
   const resultsSelector = useSelector(selectResults);
+  const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
 
   try {
     // the default prepare query is the one for logs, so it uses the user's query and generates the log cache key
@@ -48,7 +53,9 @@ export const PatternsContainer = () => {
       ratio: row._source[COUNT_FIELD] / logsTotal,
       count: row._source[COUNT_FIELD],
       // SAMPLE_FIELD needs [0] because the sample will be an array, but we're showing a 'sample' so 0th is fine
-      sample: highlightLogUsingPattern(row._source[SAMPLE_FIELD][0], row._source[PATTERNS_FIELD]),
+      sample: usingRegexPatterns
+        ? row._source[SAMPLE_FIELD][0]
+        : highlightLogUsingPattern(row._source[SAMPLE_FIELD][0], row._source[PATTERNS_FIELD]),
     }));
 
     return <PatternsTable items={items} />;

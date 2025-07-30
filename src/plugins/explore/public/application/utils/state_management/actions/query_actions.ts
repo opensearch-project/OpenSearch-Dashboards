@@ -354,6 +354,17 @@ const executeQueryBase = async (
       })
     );
 
+    const activeTabId = getState().ui.activeTabId;
+    if (activeTabId) {
+      const activeTab = services.tabRegistry.getTab(activeTabId);
+      if (activeTab?.handleQueryResult) {
+        await activeTab.handleQueryResult(
+          rawResultsWithMeta,
+          null // no error
+        );
+      }
+    }
+
     // Clean up completed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 
@@ -369,28 +380,52 @@ const executeQueryBase = async (
 
     const parsedError = JSON.parse(error.body.message);
 
-    dispatch(
-      setIndividualQueryStatus({
-        cacheKey,
-        status: {
-          status: QueryExecutionStatus.ERROR,
-          startTime: queryStartTime,
-          elapsedMs: undefined,
-          error: {
-            error: error.body.error || 'Unknown Error',
-            message: {
-              details: parsedError?.error?.details || 'Unknown Error',
-              reason: parsedError?.error?.reason || 'Unknown Error',
-              type: parsedError?.error?.type,
-            },
-            statusCode: error.body.statusCode,
-            originalErrorMessage: error.body.message,
-          },
-        },
-      })
-    );
+    const activeTabId = getState().ui.activeTabId;
+    if (activeTabId) {
+      const activeTab = services.tabRegistry.getTab(activeTabId);
+      if (activeTab?.handleQueryResult) {
+        await activeTab.handleQueryResult(
+          {} as ISearchResult, // use empty result for error
+          parsedError
+        );
 
-    throw error;
+        // using the active tab's handler, set old cacheKey to uninitialized
+        dispatch(
+          setIndividualQueryStatus({
+            cacheKey,
+            status: {
+              status: QueryExecutionStatus.UNINITIALIZED,
+              startTime: queryStartTime,
+              elapsedMs: undefined,
+              error: undefined,
+            },
+          })
+        );
+      }
+    } else {
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.ERROR,
+            startTime: queryStartTime,
+            elapsedMs: undefined,
+            error: {
+              error: error.body.error || 'Unknown Error',
+              message: {
+                details: parsedError?.error?.details || 'Unknown Error',
+                reason: parsedError?.error?.reason || 'Unknown Error',
+                type: parsedError?.error?.type,
+              },
+              statusCode: error.body.statusCode,
+              originalErrorMessage: error.body.message,
+            },
+          },
+        })
+      );
+
+      throw error;
+    }
   }
 };
 

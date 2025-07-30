@@ -12,6 +12,7 @@ import {
   setActiveTab,
   clearLastExecutedData,
   setSummaryAgentIsAvailable,
+  setUsingRegexPatterns,
 } from '../../slices';
 import { clearQueryStatusMap } from '../../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../query_actions';
@@ -40,6 +41,7 @@ export const setDatasetActionCreator = (
   dispatch(clearResults());
   dispatch(clearQueryStatusMap());
   dispatch(clearLastExecutedData());
+  dispatch(setUsingRegexPatterns(false));
 
   await dataViews.ensureDefaultDataView();
   const dataView = query.dataset

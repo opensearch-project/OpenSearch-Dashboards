@@ -293,7 +293,8 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
       axesMapping: {},
     },
     patterns: {
-      patterns_field: undefined,
+      patternsField: undefined,
+      usingRegexPatterns: false,
     },
   };
 };

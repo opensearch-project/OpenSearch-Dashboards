@@ -59,7 +59,12 @@ export const selectAxesMapping = createSelector(
 
 export const selectPatternsField = createSelector(
   [selectTabState],
-  (tabState) => tabState.patterns.patterns_field
+  (tabState) => tabState.patterns.patternsField
+);
+
+export const selectUsingRegexPatterns = createSelector(
+  [selectTabState],
+  (tabState) => tabState.patterns.usingRegexPatterns
 );
 
 export const selectActiveTab = createSelector(

@@ -4,10 +4,27 @@
  */
 
 import { IFieldType } from 'src/plugins/data/common';
-import { DELIM_START, MARK_END, MARK_START, STD_DELIM_END, UNIQ_DELIM_END } from './constants';
+import {
+  COUNT_FIELD,
+  DELIM_START,
+  MARK_END,
+  MARK_START,
+  PATTERNS_FIELD,
+  SAMPLE_FIELD,
+  STD_DELIM_END,
+  UNIQ_DELIM_END,
+} from './constants';
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { ExploreServices } from '../../../types';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
+
+// Small functions returning the two pattern queries
+export const regexPatternQuery = (queryBase: string, patternsField: string) => {
+  return `${queryBase} | patterns \`${patternsField}\` | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
+};
+export const brainPatternQuery = (queryBase: string, patternsField: string) => {
+  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=aggregation | sort - pattern_count`;
+};
 
 // Checks if the value is a valid, finite number. Used for patterns table
 export const isValidFiniteNumber = (val: number) => {
@@ -124,16 +141,16 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
  * This function identifies the field most suitable for pattern analysis by comparing the length
  * of string values in the first hit.
  */
-export const findDefaultPatternsField = (services: ExploreServices) => {
+export const findDefaultPatternsField = (services: ExploreServices): string => {
   if (!services.store || !services.store.getState) {
-    return;
+    throw new Error('Store is unexpectedly empty');
   }
 
   // set the value for patterns field
   const state = services.store.getState();
 
   if (!state) {
-    return;
+    throw new Error('State is unexpectedly empty');
   }
 
   // Get the log tab's results from the state
@@ -142,7 +159,7 @@ export const findDefaultPatternsField = (services: ExploreServices) => {
 
   // Get the logs tab to find its cache key
   const logsTab = services.tabRegistry.getTab('logs');
-  if (!logsTab) return;
+  if (!logsTab) throw new Error('Logs tab is unexpectedly uninitialized');
 
   // Get the cache key for logs tab results
   const logsCacheKey = defaultPrepareQueryString(query);
@@ -178,4 +195,6 @@ export const findDefaultPatternsField = (services: ExploreServices) => {
       return longestField;
     }
   }
+
+  throw new Error('Unexpectedly cannot find a longest default patterns field');
 };

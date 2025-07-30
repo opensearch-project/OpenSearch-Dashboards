@@ -4,7 +4,7 @@
  */
 
 import { MemoExoticComponent } from 'react';
-import { QueryState } from '../../application/utils/state_management/slices';
+import { ISearchResult, QueryState } from '../../application/utils/state_management/slices';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { Query } from '../../../../data/common';
 
@@ -33,6 +33,9 @@ export interface TabDefinition {
 
   // Transform query string for cache key generation
   prepareQuery?: (query: Query) => string;
+
+  // Handle query results
+  handleQueryResult?: (results: ISearchResult, error: any | null) => Promise<void>;
 
   // Optional results processor for raw results
   resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;

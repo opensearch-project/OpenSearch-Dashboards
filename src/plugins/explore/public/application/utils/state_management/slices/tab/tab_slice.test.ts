@@ -27,7 +27,7 @@ describe('tabSlice reducers', () => {
       },
       axesMapping: {},
     },
-    patterns: { patterns_field: undefined },
+    patterns: { patternsField: undefined, usingRegexPatterns: false },
   };
 
   it('should return the initial state', () => {
@@ -45,7 +45,8 @@ describe('tabSlice reducers', () => {
           axesMapping: {},
         },
         patterns: {
-          patterns_field: 'message',
+          patternsField: 'message',
+          usingRegexPatterns: false,
         },
       };
 
@@ -62,7 +63,8 @@ describe('tabSlice reducers', () => {
           axesMapping: {},
         },
         patterns: {
-          patterns_field: 'message',
+          patternsField: 'message',
+          usingRegexPatterns: false,
         },
       };
 
@@ -173,7 +175,8 @@ describe('tabSlice reducers', () => {
           axesMapping: {},
         },
         patterns: {
-          patterns_field: 'message',
+          patternsField: 'message',
+          usingRegexPatterns: false,
         },
       };
       state = tabReducer(state, setTabState(newTabState));
@@ -209,7 +212,8 @@ describe('tabSlice reducers', () => {
           axesMapping: {},
         },
         patterns: {
-          patterns_field: 'message',
+          patternsField: 'message',
+          usingRegexPatterns: false,
         },
       };
 

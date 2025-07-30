@@ -7,20 +7,8 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import dompurify from 'dompurify';
-import { PatternItem } from '../patterns_table';
-import { isValidFiniteNumber } from './utils';
-
-// used in the patterns table
-export const PATTERNS_FIELD = 'patterns_field';
-export const COUNT_FIELD = 'pattern_count';
-export const SAMPLE_FIELD = 'sample_logs';
-
-// used to highlight sections in the sample log column of table
-export const DELIM_START = '<*';
-export const STD_DELIM_END = '>';
-export const UNIQ_DELIM_END = '*>';
-export const MARK_START = '<mark>';
-export const MARK_END = '</mark>';
+import { PatternItem } from './patterns_table';
+import { isValidFiniteNumber } from './utils/utils';
 
 export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
   {

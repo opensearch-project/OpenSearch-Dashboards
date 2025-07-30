@@ -19,7 +19,8 @@ export interface TabState {
     axesMapping?: Partial<Record<AxisRole, string>>;
   };
   patterns: {
-    patterns_field?: string; // kept as string, patterns tab will check if the field matches one in the schema
+    patternsField?: string; // kept as string, patterns tab will check if the field matches one in the schema
+    usingRegexPatterns: boolean;
   };
 }
 
@@ -31,7 +32,8 @@ const initialState: TabState = {
     axesMapping: {},
   },
   patterns: {
-    patterns_field: undefined,
+    patternsField: undefined,
+    usingRegexPatterns: false,
   },
 };
 
@@ -55,7 +57,10 @@ const tabSlice = createSlice({
       state.visualizations.axesMapping = action.payload;
     },
     setPatternsField: (state, action: PayloadAction<string>) => {
-      state.patterns.patterns_field = action.payload;
+      state.patterns.patternsField = action.payload;
+    },
+    setUsingRegexPatterns: (state, action: PayloadAction<boolean>) => {
+      state.patterns.usingRegexPatterns = action.payload;
     },
   },
 });
@@ -66,5 +71,6 @@ export const {
   setChartType,
   setAxesMapping,
   setPatternsField,
+  setUsingRegexPatterns,
 } = tabSlice.actions;
 export const tabReducer = tabSlice.reducer;
