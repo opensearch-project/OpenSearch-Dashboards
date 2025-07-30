@@ -412,7 +412,9 @@ cy.explore.add(
 );
 
 cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
-  cy.getElementByTestId('datasetSelectButton').click({force: true});
+  cy.getElementByTestId('datasetSelectButton').as('btn').click({force: true});
+  cy.get('@btn').click({force:true})
+
   cy.get(`[title="${indexPattern}"]`).click({force: true});
 
   // verify that it has been selected
