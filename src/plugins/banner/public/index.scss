@@ -50,6 +50,11 @@ $expandedHeaderWidth: $headerWidth * 2;
   }
 }
 
+.headerGlobalNav--withBanner .newTopNavHeader {
+  z-index: 900; // lower than banner
+  position: relative;
+}
+
 .app-wrapper.app-wrapper-with-banner.app-wrapper-with-new {
   position: relative;
   top: var(--global-banner-height);
