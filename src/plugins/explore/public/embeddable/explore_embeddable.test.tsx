@@ -185,6 +185,10 @@ describe('ExploreEmbeddable', () => {
     expect(embeddable.type).toBe(EXPLORE_EMBEDDABLE_TYPE);
   });
 
+  test('should have return inspector adaptors', () => {
+    expect(embeddable.getInspectorAdapters()).not.toBeUndefined();
+  });
+
   test('initializes search props correctly', () => {
     // @ts-ignore - accessing private property for testing
     const searchProps = embeddable.searchProps;
