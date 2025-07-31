@@ -20,6 +20,7 @@ import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
 import { getColumnMatchFromMapping } from '../../visualization_container_utils';
+import './axes_selector.scss';
 
 interface VisColumnOption {
   column: VisColumn;
@@ -86,6 +87,13 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     () => visualizationRegistry.getVisualizationConfig(chartType)?.ui.availableMappings!,
     [chartType, visualizationRegistry]
   );
+
+  const allPossibleRoleOfPossibleMapping = new Set<AxisRole>();
+  possibleMapping.forEach((mapping) => {
+    Object.keys(mapping.mapping[0]).forEach((role) =>
+      allPossibleRoleOfPossibleMapping.add(role as AxisRole)
+    );
+  });
 
   const columnsCount = useMemo(
     () => [numericalColumns.length, categoricalColumns.length, dateColumns.length],
@@ -256,6 +264,12 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     return allColumns;
   };
 
+  const orderedAxes: AxisRole[] = switchAxes ? [AxisRole.Y, AxisRole.X] : [AxisRole.X, AxisRole.Y];
+
+  const otherAxes = Array.from(allPossibleRoleOfPossibleMapping).filter(
+    (axis) => axis !== AxisRole.X && axis !== AxisRole.Y
+  );
+
   return (
     <StyleAccordion
       id="axesSelector"
@@ -279,10 +293,43 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
           </EuiFormRow>
         )}
 
-        {Array.from(allAxisRolesFromSelection).map((axisRole) => {
+        {orderedAxes.map((axisRole, index) => {
           const currentSelection = currentSelections[axisRole];
+          const isDisable = getAvailableColumnsForAxis(axisRole).length === 0;
+          return (
+            <>
+              <AxisSelector
+                isDisable={isDisable}
+                key={axisRole}
+                axisRole={axisRole}
+                selectedColumn={currentSelection?.name || ''}
+                allColumnOptions={getAvailableColumnsForAxis(axisRole)}
+                switchAxes={switchAxes}
+                onRemove={(role) => {
+                  setCurrentSelections((prev) => ({
+                    ...prev,
+                    [role]: undefined,
+                  }));
+                }}
+                onChange={(role, value) => {
+                  const allColumns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
+                  const selectedCol = allColumns.find((col) => col.name === value);
+                  setCurrentSelections((prev) => ({
+                    ...prev,
+                    [role]: selectedCol,
+                  }));
+                }}
+              />
+            </>
+          );
+        })}
+
+        {otherAxes.map((axisRole) => {
+          const currentSelection = currentSelections[axisRole];
+          const isDisable = getAvailableColumnsForAxis(axisRole).length === 0;
           return (
             <AxisSelector
+              isDisable={isDisable}
               key={axisRole}
               axisRole={axisRole}
               selectedColumn={currentSelection?.name || ''}
@@ -294,9 +341,9 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
                   [role]: undefined,
                 }));
               }}
-              onChange={(role, v) => {
+              onChange={(role, value) => {
                 const allColumns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
-                const selectedCol = allColumns.find((col) => col.name === v);
+                const selectedCol = allColumns.find((col) => col.name === value);
                 setCurrentSelections((prev) => ({
                   ...prev,
                   [role]: selectedCol,
@@ -317,6 +364,7 @@ interface AxesSelectorOptions {
   onRemove: (axisRole: AxisRole) => void;
   onChange: (axisRole: AxisRole, value: string) => void;
   switchAxes?: boolean;
+  isDisable: boolean;
 }
 
 export const AxisSelector: React.FC<AxesSelectorOptions> = ({
@@ -326,6 +374,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
   onRemove,
   onChange,
   switchAxes,
+  isDisable = false,
 }) => {
   const getLabel = () => {
     if (switchAxes && (axisRole === AxisRole.X || axisRole === AxisRole.Y)) {
@@ -341,8 +390,11 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
       <EuiFormRow label={getLabel()}>
         <EuiFlexItem>
           <EuiComboBox
+            isDisabled={isDisable}
             compressed
-            selectedOptions={[{ label: selectedColumn }]}
+            selectedOptions={
+              isDisable ? [{ label: 'No options for current query' }] : [{ label: selectedColumn }]
+            }
             singleSelection={{ asPlainText: true }}
             options={allColumnOptions}
             onChange={(value) => {
