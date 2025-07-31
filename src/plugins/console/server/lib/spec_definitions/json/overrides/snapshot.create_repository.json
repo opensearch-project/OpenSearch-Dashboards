@@ -43,7 +43,8 @@
             "base_path": "",
             "concurrent_streams": 5,
             "chunk_size": "10m",
-            "compress": { "__one_of": [true, false] }
+            "compress": { "__one_of": [true, false] },
+            "role_arn": ""
           },
           {
             "__condition": {
