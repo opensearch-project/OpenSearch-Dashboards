@@ -449,4 +449,8 @@ export class ExploreEmbeddable
     this.node = node;
     this.renderComponent(node, this.searchProps);
   }
+
+  public getInspectorAdapters() {
+    return this.inspectorAdaptors;
+  }
 }
