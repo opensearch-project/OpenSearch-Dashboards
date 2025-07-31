@@ -119,11 +119,7 @@ export class WorkspaceUiSettingsClientWrapper {
         const workspaceSettings = workspaceObject?.attributes?.uiSettings || {};
 
         Object.entries(workspaceScopeConfigDefaults).forEach(([key, value]) => {
-          if (!workspaceSettings[key]) {
-            workspaceSettings[key] = value;
-          } else {
-            workspaceSettings[key] = workspaceSettings[key];
-          }
+          workspaceSettings[key] = workspaceSettings[key] || value;
         });
 
         configObject.attributes = workspaceSettings;
