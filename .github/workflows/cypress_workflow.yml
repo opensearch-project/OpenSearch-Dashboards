@@ -205,24 +205,9 @@ jobs:
       - name: Run bootstrap
         run: yarn osd bootstrap
 
-      - name: Cache platform plugins
-        uses: actions/cache@v4
-        with:
-          path: |
-            plugins/.build
-            target/
-          key: ${{ github.run_id }}-platform-plugins-${{ hashFiles('package.json', 'yarn.lock', 'plugins/**/*.json') }}
-
-      # Build plugins with cache usage
       - name: Build plugins
-        run: |
-          if [ -d "plugins/.build" ] && [ "$(ls -A plugins/.build 2>/dev/null)" ]; then
-            echo "Using cached platform plugins"
-          else
-            echo "Building platform plugins"
-            node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
-          fi
-
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+    
       - name: Checkout FT repo
         uses: actions/checkout@v4
         with:
@@ -335,7 +320,6 @@ jobs:
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
-      # Compress and upload artifacts for FT repo
       - name: Compress FT repo artifacts
         if: always() && matrix.test_location == 'ftr'
         run: |
@@ -356,7 +340,6 @@ jobs:
           path: ftr-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
 
-      # Compress and upload artifacts for Dashboards repo
       - name: Compress Dashboards repo artifacts
         if: always() && matrix.test_location == 'source'
         run: |
