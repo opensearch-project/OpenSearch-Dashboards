@@ -23,13 +23,13 @@ jest.mock('../utils/span_data_utils', () => ({
 
 // Mock the individual tab components
 jest.mock('./span_tabs/span_overview_tab', () => ({
-  SpanOverviewTab: ({ selectedSpan, onSwitchToIssuesTab }: any) => (
+  SpanOverviewTab: ({ selectedSpan, onSwitchToErrorsTab }: any) => (
     <div data-testid="span-overview-tab">
       <div>Overview Tab Content</div>
       <div>Span: {selectedSpan?.spanId || 'none'}</div>
-      {onSwitchToIssuesTab && (
-        <button onClick={onSwitchToIssuesTab} data-testid="switch-to-issues">
-          Switch to Issues
+      {onSwitchToErrorsTab && (
+        <button onClick={onSwitchToErrorsTab} data-testid="switch-to-errors">
+          Switch to Errors
         </button>
       )}
     </div>
@@ -107,7 +107,7 @@ describe('SpanDetailTabs', () => {
 
     // Check tabs are present
     expect(screen.getByText('Overview')).toBeInTheDocument();
-    expect(screen.getByText('Issues')).toBeInTheDocument();
+    expect(screen.getByText('Errors')).toBeInTheDocument();
     expect(screen.getByText('Metadata')).toBeInTheDocument();
     expect(screen.getByText('Raw span')).toBeInTheDocument();
 
@@ -170,17 +170,17 @@ describe('SpanDetailTabs', () => {
     expect(screen.queryByText('Back')).not.toBeInTheDocument();
   });
 
-  it('switches to issues tab when issues tab is clicked', () => {
+  it('switches to errors tab when errors tab is clicked', () => {
     render(<SpanDetailTabs {...defaultProps} />);
 
-    // Click on Issues tab
-    const issuesTab = screen.getByRole('tab', { name: 'Issues' });
-    fireEvent.click(issuesTab);
+    // Click on Errors tab
+    const errorsTab = screen.getByRole('tab', { name: 'Errors' });
+    fireEvent.click(errorsTab);
 
-    // Check that issues tab is now selected
-    expect(issuesTab).toHaveAttribute('aria-selected', 'true');
+    // Check that errors tab is now selected
+    expect(errorsTab).toHaveAttribute('aria-selected', 'true');
 
-    // Check that issues tab content is displayed
+    // Check that errors tab content is displayed
     expect(screen.getByText('Issues Tab Content')).toBeInTheDocument();
 
     // Overview tab should no longer be selected
@@ -222,13 +222,13 @@ describe('SpanDetailTabs', () => {
     // Verify overview tab content shows correct span
     expect(screen.getByText('Span: test-span-id')).toBeInTheDocument();
 
-    // Test the onSwitchToIssuesTab callback
-    const switchButton = screen.getByText('Switch to Issues');
+    // Test the onSwitchToErrorsTab callback
+    const switchButton = screen.getByText('Switch to Errors');
     fireEvent.click(switchButton);
 
-    // Should switch to issues tab
-    const issuesTab = screen.getByRole('tab', { name: 'Issues' });
-    expect(issuesTab).toHaveAttribute('aria-selected', 'true');
+    // Should switch to errors tab
+    const errorsTab = screen.getByRole('tab', { name: 'Errors' });
+    expect(errorsTab).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText('Issues Tab Content')).toBeInTheDocument();
   });
 
@@ -264,7 +264,7 @@ describe('SpanDetailTabs', () => {
 
     // All tabs should still be present
     expect(screen.getByText('Overview')).toBeInTheDocument();
-    expect(screen.getByText('Issues')).toBeInTheDocument();
+    expect(screen.getByText('Errors')).toBeInTheDocument();
     expect(screen.getByText('Metadata')).toBeInTheDocument();
     expect(screen.getByText('Raw span')).toBeInTheDocument();
   });
@@ -286,7 +286,7 @@ describe('SpanDetailTabs', () => {
 
     // Should still render all tabs
     expect(screen.getByText('Overview')).toBeInTheDocument();
-    expect(screen.getByText('Issues')).toBeInTheDocument();
+    expect(screen.getByText('Errors')).toBeInTheDocument();
     expect(screen.getByText('Metadata')).toBeInTheDocument();
     expect(screen.getByText('Raw span')).toBeInTheDocument();
 
@@ -320,7 +320,7 @@ describe('SpanDetailTabs', () => {
     const tabs = screen.getAllByRole('tab');
     expect(tabs).toHaveLength(4);
     expect(tabs[0]).toHaveTextContent('Overview');
-    expect(tabs[1]).toHaveTextContent('Issues');
+    expect(tabs[1]).toHaveTextContent('Errors');
     expect(tabs[2]).toHaveTextContent('Metadata');
     expect(tabs[3]).toHaveTextContent('Raw span');
   });
@@ -346,9 +346,9 @@ describe('SpanDetailTabs', () => {
 
     render(<SpanDetailTabs {...propsWithError} />);
 
-    // Should display the issue count badge on the Issues tab
-    const issuesTab = screen.getByRole('tab', { name: /Issues/ });
-    expect(issuesTab).toBeInTheDocument();
+    // Should display the issue count badge on the Errors tab
+    const errorsTab = screen.getByRole('tab', { name: /Errors/ });
+    expect(errorsTab).toBeInTheDocument();
 
     // Check that the badge with count "1" is present
     expect(screen.getByText('1')).toBeInTheDocument();
@@ -367,9 +367,9 @@ describe('SpanDetailTabs', () => {
 
     render(<SpanDetailTabs {...propsWithoutError} />);
 
-    // Should not display any badge on the Issues tab
-    const issuesTab = screen.getByRole('tab', { name: 'Issues' });
-    expect(issuesTab).toBeInTheDocument();
+    // Should not display any badge on the Errors tab
+    const errorsTab = screen.getByRole('tab', { name: 'Errors' });
+    expect(errorsTab).toBeInTheDocument();
 
     // Should not have any badge with count
     expect(screen.queryByText('1')).not.toBeInTheDocument();

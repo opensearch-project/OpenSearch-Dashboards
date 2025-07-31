@@ -49,7 +49,7 @@ jest.mock('../../utils/helper_functions', () => ({
 }));
 
 describe('SpanOverviewTab', () => {
-  const mockOnSwitchToIssuesTab = jest.fn();
+  const mockOnSwitchToErrorsTab = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -58,20 +58,20 @@ describe('SpanOverviewTab', () => {
   describe('when no span is selected', () => {
     it('renders no span selected message when selectedSpan is undefined', () => {
       render(
-        <SpanOverviewTab selectedSpan={undefined} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />
+        <SpanOverviewTab selectedSpan={undefined} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />
       );
 
       expect(screen.getByText('No span selected')).toBeInTheDocument();
     });
 
     it('renders no span selected message when selectedSpan is null', () => {
-      render(<SpanOverviewTab selectedSpan={null} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={null} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('No span selected')).toBeInTheDocument();
     });
 
     it('renders no span selected message when selectedSpan is empty object', () => {
-      render(<SpanOverviewTab selectedSpan={{}} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={{}} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('No span selected')).toBeInTheDocument();
     });
@@ -88,7 +88,7 @@ describe('SpanOverviewTab', () => {
         'status.code': 1,
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       // Check labels
       expect(screen.getByText('Service identifier')).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('SpanOverviewTab', () => {
         'status.code': 1,
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       // Should render dashes for missing values
       const dashElements = screen.getAllByText('-');
@@ -125,7 +125,7 @@ describe('SpanOverviewTab', () => {
         'status.code': 1,
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       // Should render copy buttons
       const copyButtons = screen.getAllByLabelText('Copy to clipboard');
@@ -144,7 +144,7 @@ describe('SpanOverviewTab', () => {
         'status.code': 1,
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('Start time')).toBeInTheDocument();
       expect(screen.getByText('Jan 15 @ 14:30:45.123 (5ms)')).toBeInTheDocument();
@@ -160,7 +160,7 @@ describe('SpanOverviewTab', () => {
         'status.code': 1,
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('Start time')).toBeInTheDocument();
       // Should find a dash in the start time section
@@ -178,16 +178,16 @@ describe('SpanOverviewTab', () => {
         'status.code': 1, // OK status
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('Span status')).toBeInTheDocument();
       expect(screen.getByText('OK')).toBeInTheDocument();
 
-      // Should not show "View issues" link for OK status
-      expect(screen.queryByText('View issues')).not.toBeInTheDocument();
+      // Should not show "View errors" link for OK status
+      expect(screen.queryByText('View errors')).not.toBeInTheDocument();
     });
 
-    it('renders Fault status for error spans with View issues link', () => {
+    it('renders Fault status for error spans with View errors link', () => {
       const span = {
         spanId: 'test-span',
         serviceName: 'test-service',
@@ -197,16 +197,16 @@ describe('SpanOverviewTab', () => {
         'status.code': 2, // Error status
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('Span status')).toBeInTheDocument();
       expect(screen.getByText('Fault')).toBeInTheDocument();
 
-      // Should show "View issues" link for error status
-      expect(screen.getByText('View issues')).toBeInTheDocument();
+      // Should show "View errors" link for error status
+      expect(screen.getByText('View errors')).toBeInTheDocument();
     });
 
-    it('calls onSwitchToIssuesTab when View issues link is clicked', () => {
+    it('calls onSwitchToErrorsTab when View errors link is clicked', () => {
       const span = {
         spanId: 'test-span',
         serviceName: 'test-service',
@@ -216,15 +216,15 @@ describe('SpanOverviewTab', () => {
         'status.code': 2, // Error status
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
-      const viewIssuesLink = screen.getByText('View issues');
-      fireEvent.click(viewIssuesLink);
+      const viewErrorsLink = screen.getByText('View errors');
+      fireEvent.click(viewErrorsLink);
 
-      expect(mockOnSwitchToIssuesTab).toHaveBeenCalledTimes(1);
+      expect(mockOnSwitchToErrorsTab).toHaveBeenCalledTimes(1);
     });
 
-    it('does not render View issues link when onSwitchToIssuesTab is not provided', () => {
+    it('does not render View errors link when onSwitchToErrorsTab is not provided', () => {
       const span = {
         spanId: 'test-span',
         serviceName: 'test-service',
@@ -237,7 +237,7 @@ describe('SpanOverviewTab', () => {
       render(<SpanOverviewTab selectedSpan={span} />);
 
       expect(screen.getByText('Fault')).toBeInTheDocument();
-      expect(screen.queryByText('View issues')).not.toBeInTheDocument();
+      expect(screen.queryByText('View errors')).not.toBeInTheDocument();
     });
   });
 
@@ -257,7 +257,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('Request')).toBeInTheDocument();
       expect(screen.getByText('Request URL')).toBeInTheDocument();
@@ -276,7 +276,7 @@ describe('SpanOverviewTab', () => {
         // No HTTP attributes
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.queryByText('Request')).not.toBeInTheDocument();
     });
@@ -294,7 +294,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       const urlLink = screen.getByText('https://api.example.com/users/123');
       expect(urlLink).toBeInTheDocument();
@@ -322,7 +322,7 @@ describe('SpanOverviewTab', () => {
       render(
         <SpanOverviewTab
           selectedSpan={spanWithMethod}
-          onSwitchToIssuesTab={mockOnSwitchToIssuesTab}
+          onSwitchToErrorsTab={mockOnSwitchToErrorsTab}
         />
       );
 
@@ -347,7 +347,7 @@ describe('SpanOverviewTab', () => {
       render(
         <SpanOverviewTab
           selectedSpan={spanWithoutMethod}
-          onSwitchToIssuesTab={mockOnSwitchToIssuesTab}
+          onSwitchToErrorsTab={mockOnSwitchToErrorsTab}
         />
       );
 
@@ -371,7 +371,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       const badge = screen.getByText('200');
       expect(badge).toBeInTheDocument();
@@ -393,7 +393,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       const badge = screen.getByText('301');
       expect(badge).toBeInTheDocument();
@@ -414,7 +414,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       const badge = screen.getByText('404');
       expect(badge).toBeInTheDocument();
@@ -435,7 +435,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       const badge = screen.getByText('500');
       expect(badge).toBeInTheDocument();
@@ -456,7 +456,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       const badge = screen.getByText('Error');
       expect(badge).toBeInTheDocument();
@@ -477,7 +477,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       const badge = screen.getByText('Success');
       expect(badge).toBeInTheDocument();
@@ -493,7 +493,7 @@ describe('SpanOverviewTab', () => {
       };
 
       render(
-        <SpanOverviewTab selectedSpan={minimalSpan} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />
+        <SpanOverviewTab selectedSpan={minimalSpan} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />
       );
 
       // Should render basic structure without crashing
@@ -512,7 +512,7 @@ describe('SpanOverviewTab', () => {
         'status.code': 1,
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('Jan 15 @ 14:30:45.123 (0ms)')).toBeInTheDocument();
     });
@@ -531,7 +531,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       // Should still render HTTP section
       expect(screen.getByText('Request')).toBeInTheDocument();
@@ -553,7 +553,7 @@ describe('SpanOverviewTab', () => {
         },
       };
 
-      render(<SpanOverviewTab selectedSpan={span} onSwitchToIssuesTab={mockOnSwitchToIssuesTab} />);
+      render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       // Should render HTTP section but without URL section
       expect(screen.getByText('Request')).toBeInTheDocument();

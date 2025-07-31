@@ -23,7 +23,7 @@ import './span_tabs.scss';
 
 export interface SpanOverviewTabProps {
   selectedSpan?: any;
-  onSwitchToIssuesTab?: () => void;
+  onSwitchToErrorsTab?: () => void;
 }
 
 interface OverviewFieldProps {
@@ -73,7 +73,7 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
 
 export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
   selectedSpan,
-  onSwitchToIssuesTab,
+  onSwitchToErrorsTab,
 }) => {
   const getStatusCodeColor = (statusCode: number | undefined): string => {
     if (!statusCode) return 'default';
@@ -185,10 +185,10 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">{hasError ? 'Fault' : 'OK'}</EuiText>
                 </EuiFlexItem>
-                {hasError && onSwitchToIssuesTab && (
+                {hasError && onSwitchToErrorsTab && (
                   <EuiFlexItem grow={false}>
-                    <EuiLink color="primary" onClick={onSwitchToIssuesTab}>
-                      View issues
+                    <EuiLink color="primary" onClick={onSwitchToErrorsTab}>
+                      View errors
                     </EuiLink>
                   </EuiFlexItem>
                 )}

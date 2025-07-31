@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import './span_detail_tabs.scss';
-import { getSpanIssueCount, getSpanAttributeCount } from '../utils/span_data_utils';
+import { getSpanIssueCount } from '../utils/span_data_utils';
 import { SpanOverviewTab } from './span_tabs/span_overview_tab';
 import { SpanIssuesTab } from './span_tabs/span_issues_tab';
 import { SpanMetadataTab } from './span_tabs/span_metadata_tab';
@@ -30,7 +30,7 @@ export interface SpanDetailTabsProps {
   setCurrentSpan?: (spanId: string) => void;
 }
 
-type TabId = 'overview' | 'issues' | 'metadata' | 'raw_span';
+type TabId = 'overview' | 'errors' | 'metadata' | 'raw_span';
 
 interface TabItem {
   id: TabId;
@@ -51,10 +51,6 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     return selectedSpan ? getSpanIssueCount(selectedSpan) : 0;
   }, [selectedSpan]);
 
-  const attributeCount = useMemo(() => {
-    return selectedSpan ? getSpanAttributeCount(selectedSpan) : 0;
-  }, [selectedSpan]);
-
   const tabs = useMemo((): TabItem[] => {
     const tabList: TabItem[] = [
       {
@@ -65,19 +61,19 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
         content: (
           <SpanOverviewTab
             selectedSpan={selectedSpan}
-            onSwitchToIssuesTab={() => setActiveTab('issues')}
+            onSwitchToErrorsTab={() => setActiveTab('errors')}
           />
         ),
       },
     ];
 
     tabList.push({
-      id: 'issues' as TabId,
+      id: 'errors' as TabId,
       name: (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            {i18n.translate('explore.spanDetailTabs.tab.issues', {
-              defaultMessage: 'Issues',
+            {i18n.translate('explore.spanDetailTabs.tab.errors', {
+              defaultMessage: 'Errors',
             })}
           </EuiFlexItem>
           {issueCount > 0 && (
