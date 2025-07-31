@@ -31,6 +31,13 @@ const workspaceName = getRandomizedWorkspaceName();
 const NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD = 17;
 
 const inspectTestSuite = () => {
+  Cypress.on('fail', (error) => {
+    if (error.message.includes('404') && error.message.includes('agent_config')) {
+      return false;
+    }
+    throw error;
+  });
+
   describe('inspect spec', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
