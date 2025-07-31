@@ -20,9 +20,19 @@ jest.mock('./middleware/query_sync_middleware', () => ({
   createQuerySyncMiddleware: jest.fn(() => () => (next: any) => (action: any) => next(action)),
 }));
 
+jest.mock('./middleware/timefilter_sync_middleware', () => ({
+  createTimefilterSyncMiddleware: jest.fn(() => () => (next: any) => (action: any) => next(action)),
+}));
+
 jest.mock('./middleware/overall_status_middleware', () => ({
   createOverallStatusMiddleware: jest.fn(() => () => (next: any) => (action: any) => next(action)),
 }));
+
+// Import the mocked functions to verify they're called
+import { createPersistenceMiddleware } from './middleware/persistence_middleware';
+import { createQuerySyncMiddleware } from './middleware/query_sync_middleware';
+import { createTimefilterSyncMiddleware } from './middleware/timefilter_sync_middleware';
+import { createOverallStatusMiddleware } from './middleware/overall_status_middleware';
 
 describe('store', () => {
   let mockServices: jest.Mocked<ExploreServices>;
@@ -111,6 +121,28 @@ describe('store', () => {
 
       // State should be processed by base reducer
       expect(store.getState().query.query).toBe('SELECT * FROM test');
+    });
+
+    it('should register all middleware when services are provided', () => {
+      const store = configurePreloadedStore(mockPreloadedState, mockServices);
+
+      expect(store).toBeDefined();
+      expect(createPersistenceMiddleware).toHaveBeenCalledWith(mockServices);
+      expect(createQuerySyncMiddleware).toHaveBeenCalledWith(mockServices);
+      expect(createTimefilterSyncMiddleware).toHaveBeenCalledWith(mockServices);
+      expect(createOverallStatusMiddleware).toHaveBeenCalled();
+    });
+
+    it('should not register custom middleware when services are not provided', () => {
+      jest.clearAllMocks();
+
+      const store = configurePreloadedStore(mockPreloadedState);
+
+      expect(store).toBeDefined();
+      expect(createPersistenceMiddleware).not.toHaveBeenCalled();
+      expect(createQuerySyncMiddleware).not.toHaveBeenCalled();
+      expect(createTimefilterSyncMiddleware).not.toHaveBeenCalled();
+      expect(createOverallStatusMiddleware).not.toHaveBeenCalled();
     });
   });
 

@@ -17,6 +17,7 @@ import {
   selectQueryStatus,
 } from '../../application/utils/state_management/selectors';
 import { ResultStatus } from '../../../../data/public';
+import { defaultPreparePplQuery } from '../../application/utils/languages';
 
 const SUMMARY_REQUEST_SAMPLE_SIZE = 10;
 
@@ -40,7 +41,9 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
   );
   const dataSetState = useSelector(selectDataset);
   const queryResults = useSelector(
-    (state: RootState) => state.results[state.query.query as string]?.hits?.hits
+    (state: RootState) =>
+      state.results[state.query.query as string]?.hits?.hits ||
+      state.results[defaultPreparePplQuery(state.query).query]?.hits?.hits // default query results
   );
   const queryStatus = useSelector(selectQueryStatus);
 

@@ -7,6 +7,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
 
+export type QueryExecutionButtonStatus = 'UPDATE' | 'REFRESH' | 'DISABLED';
+
 export interface QueryStatusMap {
   [cacheKey: string]: QueryResultStatus;
 }
@@ -20,6 +22,9 @@ export interface QueryEditorSliceState {
   summaryAgentIsAvailable: boolean;
   lastExecutedPrompt: string;
   lastExecutedTranslatedQuery: string;
+  queryExecutionButtonStatus: QueryExecutionButtonStatus;
+  dateRange?: { from: string; to: string };
+  isQueryEditorDirty: boolean;
 }
 
 const initialState: QueryEditorSliceState = {
@@ -35,6 +40,9 @@ const initialState: QueryEditorSliceState = {
   summaryAgentIsAvailable: false,
   lastExecutedPrompt: '',
   lastExecutedTranslatedQuery: '',
+  queryExecutionButtonStatus: 'REFRESH',
+  dateRange: undefined,
+  isQueryEditorDirty: false,
 };
 
 const queryEditorSlice = createSlice({
@@ -118,6 +126,15 @@ const queryEditorSlice = createSlice({
       state.lastExecutedPrompt = '';
       state.lastExecutedTranslatedQuery = '';
     },
+    setQueryExecutionButtonStatus: (state, action: PayloadAction<QueryExecutionButtonStatus>) => {
+      state.queryExecutionButtonStatus = action.payload;
+    },
+    setDateRange: (state, action: PayloadAction<{ from: string; to: string }>) => {
+      state.dateRange = action.payload;
+    },
+    setIsQueryEditorDirty: (state, action: PayloadAction<boolean>) => {
+      state.isQueryEditorDirty = action.payload;
+    },
   },
 });
 
@@ -138,6 +155,9 @@ export const {
   setPromptToQueryIsLoading,
   clearLastExecutedData,
   setSummaryAgentIsAvailable,
+  setQueryExecutionButtonStatus,
+  setDateRange,
+  setIsQueryEditorDirty,
 } = queryEditorSlice.actions;
 export const queryEditorReducer = queryEditorSlice.reducer;
 export const queryEditorInitialState = initialState;

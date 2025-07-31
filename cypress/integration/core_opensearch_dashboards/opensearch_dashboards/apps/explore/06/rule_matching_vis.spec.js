@@ -42,16 +42,17 @@ export const runCreateVisTests = () => {
     it('should create a metric visualization using a single metric query', () => {
       // Setup dataset
       const datasetName = `${INDEX_WITH_TIME_1}*`;
+      cy.wait(10000);
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
       setDatePickerDatesAndSearchIfRelevant('PPL');
-      cy.wait(2000);
+      cy.wait(10000);
       cy.explore.clearQueryEditor();
 
       const query = `source=${datasetName} | stats count()`;
       cy.explore.setQueryEditor(query);
 
       // Run the query
-      cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
       cy.wait(1000);
 
@@ -84,7 +85,7 @@ export const runCreateVisTests = () => {
       cy.explore.setQueryEditor(query);
 
       // Run the query
-      cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
       cy.wait(1000);
 
@@ -117,7 +118,7 @@ export const runCreateVisTests = () => {
       cy.explore.setQueryEditor(query);
 
       // Run the query
-      cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
       cy.wait(1000);
 
@@ -150,7 +151,7 @@ export const runCreateVisTests = () => {
       cy.explore.setQueryEditor(query);
 
       // Run the query
-      cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
       cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
 
@@ -173,7 +174,7 @@ export const runCreateVisTests = () => {
       cy.explore.setQueryEditor(query);
 
       // Run the query
-      cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
       cy.wait(1000);
 

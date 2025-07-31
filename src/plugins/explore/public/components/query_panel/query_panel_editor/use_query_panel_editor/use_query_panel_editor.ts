@@ -12,6 +12,7 @@ import {
   selectPromptModeIsAvailable,
   selectQueryLanguage,
   selectQueryString,
+  selectIsQueryEditorDirty,
 } from '../../../../application/utils/state_management/selectors';
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
 
@@ -27,6 +28,7 @@ import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { getSpacebarAction } from './spacebar_action';
 import { setEditorMode } from '../../../../application/utils/state_management/slices';
+import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { getEscapeAction } from './escape_action';
 import { usePromptIsTyping } from './use_prompt_is_typing';
@@ -106,6 +108,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const isQueryMode = !isPromptMode;
   const isPromptModeRef = useRef(isPromptMode);
   const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
+  const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -327,11 +330,15 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     (newText: string) => {
       setEditorText(newText);
 
+      if (!isQueryEditorDirty) {
+        dispatch(setIsQueryEditorDirty(true));
+      }
+
       if (isPromptMode) {
         handleChangeForPromptIsTyping();
       }
     },
-    [setEditorText, isPromptMode, handleChangeForPromptIsTyping]
+    [setEditorText, isPromptMode, handleChangeForPromptIsTyping, isQueryEditorDirty, dispatch]
   );
 
   return {
