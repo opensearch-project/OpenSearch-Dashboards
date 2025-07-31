@@ -109,6 +109,9 @@ describe('redux_persistence', () => {
           queryExecutionButtonStatus: 'REFRESH',
           isQueryEditorDirty: false,
         },
+        meta: {
+          isInitialized: false,
+        },
       };
 
       persistReduxState(mockState, mockServices);
@@ -184,6 +187,9 @@ describe('redux_persistence', () => {
           savedSearch: undefined,
           savedQuery: undefined,
           lineCount: undefined,
+        },
+        meta: {
+          isInitialized: false,
         },
       };
 
@@ -270,6 +276,9 @@ describe('redux_persistence', () => {
       });
       expect(result.queryEditor.lastExecutedPrompt).toBe('');
       expect(result.queryEditor.lastExecutedTranslatedQuery).toBe('');
+      expect(result.meta).toEqual({
+        isInitialized: false,
+      });
     });
 
     it('should handle dataset initialization', async () => {
@@ -336,6 +345,126 @@ describe('redux_persistence', () => {
     it('should set correct editor mode from DEFAULT_EDITOR_MODE', async () => {
       const result = await getPreloadedState(mockServices);
       expect(result.queryEditor.editorMode).toBe(EditorMode.Query);
+    });
+
+    it('should initialize meta state with isInitialized false', async () => {
+      const result = await getPreloadedState(mockServices);
+      expect(result.meta).toEqual({
+        isInitialized: false,
+      });
+    });
+  });
+
+  describe('loadReduxState with meta state', () => {
+    it('should use preloaded meta state when not provided in URL', async () => {
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+      };
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: {
+          logs: {},
+          visualizations: {
+            styleOptions: {
+              showTitle: true,
+              title: '',
+              fontSize: 60,
+              useColor: false,
+              colorSchema: ColorSchemas.BLUES,
+            },
+            chartType: undefined,
+            axesMapping: {},
+          },
+        },
+        legacy: {
+          columns: ['_source'],
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+          savedSearch: undefined,
+          savedQuery: undefined,
+          lineCount: undefined,
+        },
+        // Note: meta is intentionally omitted to test fallback
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      const result = await loadReduxState(mockServices);
+
+      expect(result.meta).toEqual({
+        isInitialized: false,
+      });
+    });
+
+    it('should use meta state from URL when provided', async () => {
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+      };
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: {
+          logs: {},
+          visualizations: {
+            styleOptions: {
+              showTitle: true,
+              title: '',
+              fontSize: 60,
+              useColor: false,
+              colorSchema: ColorSchemas.BLUES,
+            },
+            chartType: undefined,
+            axesMapping: {},
+          },
+        },
+        legacy: {
+          columns: ['_source'],
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+          savedSearch: undefined,
+          savedQuery: undefined,
+          lineCount: undefined,
+        },
+        meta: {
+          isInitialized: true, // Different from default
+        },
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      const result = await loadReduxState(mockServices);
+
+      expect(result.meta).toEqual({
+        isInitialized: true,
+      });
+    });
+  });
+
+  describe('getPreloadedMetaState', () => {
+    it('should return meta state with isInitialized false', async () => {
+      const result = await getPreloadedState(mockServices);
+      expect(result.meta).toEqual({
+        isInitialized: false,
+      });
+    });
+
+    it('should always initialize meta state consistently', async () => {
+      // Test multiple calls to ensure consistency
+      const result1 = await getPreloadedState(mockServices);
+      const result2 = await getPreloadedState(mockServices);
+
+      expect(result1.meta).toEqual(result2.meta);
+      expect(result1.meta.isInitialized).toBe(false);
+      expect(result2.meta.isInitialized).toBe(false);
     });
   });
 });

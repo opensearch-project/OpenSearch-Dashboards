@@ -7,7 +7,8 @@ import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
-import { runQueryActionCreator } from '../state_management/actions/query_editor';
+import { executeQueries } from '../state_management/actions/query_actions';
+import { clearQueryStatusMap, clearResults } from '../state_management/slices';
 
 /**
  * Hook to handle auto-refresh subscription only
@@ -23,7 +24,9 @@ export const useTimefilterSubscription = (services: ExploreServices) => {
       .getAutoRefreshFetch$()
       .subscribe(() => {
         if (query.dataset) {
-          dispatch(runQueryActionCreator(services, query.query));
+          dispatch(clearResults());
+          dispatch(clearQueryStatusMap());
+          dispatch(executeQueries({ services }) as unknown);
         }
       });
 
