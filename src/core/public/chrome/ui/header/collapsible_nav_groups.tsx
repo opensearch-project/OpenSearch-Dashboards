@@ -18,7 +18,7 @@ import {
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { ChromeNavLink, ChromeRegistrationNavLink } from '../..';
+import { ChromeNavLink } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { createEuiListItem } from './nav_link';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
@@ -46,14 +46,12 @@ const createNavItem = ({
   appId,
   navigateToApp,
   basePath,
-  onClick,
 }: {
   link: ChromeNavLink;
   className?: string;
   appId?: string;
   basePath: HttpStart['basePath'];
   navigateToApp: CoreStart['application']['navigateToApp'];
-  onClick?: ChromeRegistrationNavLink['onClick'];
 }): EuiSideNavItemType<{}> => {
   const euiListItem = createEuiListItem({
     link,
@@ -61,7 +59,6 @@ const createNavItem = ({
     dataTestSubj: `collapsibleNavAppLink-${link.id}`,
     navigateToApp,
     basePath,
-    onClick,
   });
 
   let icon = euiListItem.icon;
@@ -107,7 +104,6 @@ export function NavGroups({
         appId,
         navigateToApp,
         basePath,
-        onClick: navLink.link.onClick,
       });
       const isHidden = !navOpen && !result.icon;
       return {
@@ -115,7 +111,7 @@ export function NavGroups({
         name: navOpen ? result.name : '',
         hidden: isHidden,
         icon:
-          !isNavOpen && !isHidden && result.icon ? (
+          !isNavOpen && !isHidden ? (
             <EuiToolTip content={navLink.link.title}>{result.icon}</EuiToolTip>
           ) : (
             result.icon
