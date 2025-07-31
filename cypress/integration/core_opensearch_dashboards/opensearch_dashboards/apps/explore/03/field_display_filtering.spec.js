@@ -4,7 +4,6 @@
  */
 
 import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../../utils/apps/constants';
-import * as docTable from '../../../../../../utils/apps/explore/doc_table.js';
 import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../../utils/apps/explore/field_display_filtering.js';
 import { BASE_PATH } from '../../../../../../utils/constants';
 import {
@@ -12,13 +11,15 @@ import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
+import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/autocomplete';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { QueryLanguages } from '../../../../../../utils/apps/explore/constants';
 
 const workspace = getRandomizedWorkspaceName();
 
 const fieldDisplayFilteringTestSuite = () => {
   // TODO: Rewrite field filtering tests since we've changed the feature
-  describe.skip('filter for value spec', () => {
+  describe('filter for value spec', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       cy.createWorkspaceIndexPatterns({
@@ -46,156 +47,80 @@ const fieldDisplayFilteringTestSuite = () => {
     });
 
     generateAllTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {
-      index: INDEX_WITH_TIME_1,
       indexPattern: `${INDEX_WITH_TIME_1}*`,
+      datasetTypes: {
+        INDEX_PATTERN: {
+          name: 'INDEX_PATTERN',
+          supportedLanguages: [QueryLanguages.PPL],
+        },
+      }, // Currently only index patterns support this filtering functionality
     }).forEach((config) => {
-      it(`filter actions in table field for ${config.testName}`, () => {
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+      it(`filter for action in table field for ${config.testName}`, () => {
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
+        cy.wait(2000);
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
-        const shouldText = config.isFilterButtonsEnabled ? 'exist' : 'not.exist';
-        docTable.getDocTableField(0, 0).within(() => {
-          cy.getElementByTestId('addInclusiveFilterButton').should(shouldText);
-          cy.getElementByTestId('removeInclusiveFilterButton').should(shouldText);
-        });
+        cy.getElementByTestId('field-category-showDetails').click();
+        cy.getElementByTestId('plus-category-Network').click();
+
+        verifyMonacoEditorContent("| WHERE `category` = 'Network' ");
       });
 
-      it(`filter actions in expanded table for ${config.testName}`, () => {
-        // Check if the first expanded Doc Table Field's first row's Filter For, Filter Out and Exists Filter buttons are disabled.
-        const verifyFirstExpandedFieldFilterForFilterOutFilterExistsButtons = () => {
-          const shouldText = 'be.enabled';
-          docTable.getExpandedDocTableRow(0, 0).within(() => {
-            cy.getElementByTestId('addInclusiveFilterButton').should(shouldText);
-            cy.getElementByTestId('removeInclusiveFilterButton').should(shouldText);
-            // Temporarily disable filter button test in Explore, untill we add the feature back
-            // cy.getElementByTestId('addExistsFilterButton').should(shouldText);
-          });
-        };
-
-        /**
-         * Check the Filter For or Out buttons in the expandedDocumentRowNumberth field in the expanded Document filters the correct value.
-         * @param {string} filterButton For or Out
-         * @param {number} docTableRowNumber Integer starts from 0 for the first row
-         * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
-         * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
-         * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
-         * @example verifyDocTableFirstExpandedFieldFirstRowFilterForButtonFiltersCorrectField('for', 0, 0, '10,000', '1');
-         */
-        const verifyDocTableFirstExpandedFieldFirstRowFilterForOutButtonFiltersCorrectField = (
-          filterButton,
-          docTableRowNumber,
-          expandedDocumentRowNumber,
-          expectedQueryHitsWithoutFilter,
-          expectedQueryHitsAfterFilterApplied
-        ) => {
-          if (filterButton !== 'for' || filterButton !== 'out') {
-            cy.log('Filter button must be for or or.');
-            return;
-          }
-
-          const filterButtonElement =
-            filterButton === 'for' ? 'addInclusiveFilterButton' : 'removeInclusiveFilterButton';
-          const shouldText = filterButton === 'for' ? 'have.text' : 'not.have.text';
-
-          docTable
-            .getExpandedDocTableRowValue(docTableRowNumber, expandedDocumentRowNumber)
-            .then(($expandedDocumentRowValue) => {
-              const filterFieldText = $expandedDocumentRowValue.text();
-              docTable
-                .getExpandedDocTableRow(docTableRowNumber, expandedDocumentRowNumber)
-                .within(() => {
-                  cy.getElementByTestId(filterButtonElement).click();
-                });
-              // Verify pill text
-              cy.getElementByTestId('globalFilterLabelValue').should('have.text', filterFieldText);
-              cy.getElementByTestId('discoverQueryHits').should(
-                'have.text',
-                expectedQueryHitsAfterFilterApplied
-              ); // checkQueryHitText must be in front of checking first line text to give time for DocTable to update.
-              docTable
-                .getExpandedDocTableRowValue(docTableRowNumber, expandedDocumentRowNumber)
-                .should(shouldText, filterFieldText);
-            });
-          cy.getElementByTestId('globalFilterBar').find('[aria-label="Delete"]').click();
-          cy.getElementByTestId('discoverQueryHits').should(
-            'have.text',
-            expectedQueryHitsWithoutFilter
-          );
-        };
-
-        /**
-         * Check the first expanded Doc Table Field's first row's Exists Filter button filters the correct Field.
-         * @param {number} docTableRowNumber Integer starts from 0 for the first row
-         * @param {number} expandedDocumentRowNumber Integer starts from 0 for the first row
-         * @param {string} expectedQueryHitsWithoutFilter expected number of hits in string after the filter is removed Note you should add commas when necessary e.g. 9,999
-         * @param {string} expectedQueryHitsAfterFilterApplied expected number of hits in string after the filter is applied. Note you should add commas when necessary e.g. 9,999
-         */
-        const verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField = (
-          docTableRowNumber,
-          expandedDocumentRowNumber,
-          expectedQueryHitsWithoutFilter,
-          expectedQueryHitsAfterFilterApplied
-        ) => {
-          docTable
-            .getExpandedDocTableRowFieldName(docTableRowNumber, expandedDocumentRowNumber)
-            .then(($expandedDocumentRowField) => {
-              const filterFieldText = $expandedDocumentRowField.text();
-              docTable
-                .getExpandedDocTableRow(docTableRowNumber, expandedDocumentRowNumber)
-                .within(() => {
-                  cy.getElementByTestId('addExistsFilterButton').click();
-                });
-              // Verify full pill text
-              // globalFilterLabelValue gives the inner element, but we may want all the text in the filter pill
-              cy.getElementByTestId('globalFilterLabelValue', {
-                timeout: 10000,
-              })
-                .parent()
-                .should('have.text', filterFieldText + ': ' + 'exists');
-              cy.getElementByTestId('discoverQueryHits').should(
-                'have.text',
-                expectedQueryHitsAfterFilterApplied
-              );
-            });
-          cy.getElementByTestId('globalFilterBar').find('[aria-label="Delete"]').click();
-          cy.getElementByTestId('discoverQueryHits').should(
-            'have.text',
-            expectedQueryHitsWithoutFilter
-          );
-        };
-
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+      it(`filter out action in table field for ${config.testName}`, () => {
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
+        cy.wait(2000);
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
-        docTable.toggleDocTableRow(0);
-        verifyFirstExpandedFieldFilterForFilterOutFilterExistsButtons();
-        docTable.verifyDocTableFirstExpandedFieldFirstRowToggleColumnButtonHasIntendedBehavior();
 
-        if (config.isFilterButtonsEnabled) {
-          verifyDocTableFirstExpandedFieldFirstRowFilterForOutButtonFiltersCorrectField(
-            'for',
-            0,
-            0,
-            '10,000',
-            '1'
-          );
-          verifyDocTableFirstExpandedFieldFirstRowFilterForOutButtonFiltersCorrectField(
-            'out',
-            0,
-            0,
-            '10,000',
-            '9,999'
-          );
-          verifyDocTableFirstExpandedFieldFirstRowExistsFilterButtonFiltersCorrectField(
-            0,
-            0,
-            '10,000',
-            '10,000'
-          );
-        }
+        cy.getElementByTestId('field-category-showDetails').click();
+        cy.getElementByTestId('minus-category-Network').click();
+
+        verifyMonacoEditorContent("| WHERE `category` != 'Network' ");
+      });
+
+      it(`filter for actions in expanded table for ${config.testName}`, () => {
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        setDatePickerDatesAndSearchIfRelevant(config.language);
+        cy.wait(2000);
+
+        cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+
+        cy.get('tbody tr')
+          .first()
+          .find('[data-test-subj="docTableExpandToggleColumn"] button')
+          .click();
+
+        cy.wait(2000);
+
+        cy.getElementByTestId('tableDocViewRow-category').within(() => {
+          cy.getElementByTestId('addInclusiveFilterButton').click();
+        });
+
+        verifyMonacoEditorContent("| WHERE `category` = 'Network' ");
+      });
+
+      it(`filter out actions in expanded table for ${config.testName}`, () => {
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        setDatePickerDatesAndSearchIfRelevant(config.language);
+        cy.wait(2000);
+
+        cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
+
+        cy.get('tbody tr')
+          .first()
+          .find('[data-test-subj="docTableExpandToggleColumn"] button')
+          .click();
+
+        cy.wait(2000);
+
+        cy.getElementByTestId('tableDocViewRow-category').within(() => {
+          cy.getElementByTestId('removeInclusiveFilterButton').click();
+        });
+
+        verifyMonacoEditorContent("| WHERE `category` != 'Network' ");
       });
     });
   });

@@ -143,7 +143,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       flavorPrefix +
         (savedExplore?.title ||
           i18n.translate('explore.discover.savedSearch.newTitle', {
-            defaultMessage: 'New search',
+            defaultMessage: 'Search',
           }))
     );
   }, [flavorId, savedExplore?.title]);
