@@ -37,13 +37,6 @@ const tabSlice = createSlice({
   },
 });
 
-export const {
-  setTabState,
-  setPatternsField,
-  setUsingRegexPatterns,
-} = tabSlice.actions;
-  },
-});
+export const { setTabState, setPatternsField, setUsingRegexPatterns } = tabSlice.actions;
 
-export const { setTabState } = tabSlice.actions;
 export const tabReducer = tabSlice.reducer;

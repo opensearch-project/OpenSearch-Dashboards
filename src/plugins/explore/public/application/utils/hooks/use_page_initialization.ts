@@ -17,6 +17,7 @@ import {
   clearQueryStatusMap,
   clearLastExecutedData,
   setEditorMode,
+  setUsingRegexPatterns,
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
@@ -84,6 +85,7 @@ export const useInitPage = () => {
         dispatch(setEditorMode(EditorMode.Query));
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
+        dispatch(setUsingRegexPatterns(false));
         dispatch(executeQueries({ services }));
       }
     }

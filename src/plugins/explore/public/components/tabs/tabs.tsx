@@ -38,11 +38,6 @@ export const ExploreTabs = () => {
 
       const activeTab = services.tabRegistry.getTab(selectedTab.id);
 
-      if (activeTab?.onActive) {
-        activeTab?.onActive();
-      }
-      // TODO: put onInactive here? i mean the tabs are technically changing here as well
-
       const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
       const newTabCacheKey = prepareQuery(query);
 
