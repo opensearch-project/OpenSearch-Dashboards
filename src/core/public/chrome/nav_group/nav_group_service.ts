@@ -5,7 +5,6 @@
 
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import {
-  App,
   AppCategory,
   ApplicationStart,
   ChromeNavGroup,
@@ -30,7 +29,7 @@ import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../utils';
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
 /** @public */
-export interface ChromeRegistrationNavLink extends Pick<App, 'euiIconType' | 'icon'> {
+export interface ChromeRegistrationNavLink {
   id: string;
   title?: string;
   category?: AppCategory;

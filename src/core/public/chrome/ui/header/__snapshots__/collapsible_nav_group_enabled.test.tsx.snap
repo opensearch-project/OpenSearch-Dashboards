@@ -24,43 +24,47 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
         class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
       />
       <div
-        class="euiPanel euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"
       >
-        <nav
-          class="euiSideNav leftNavSideNavWrapper euiSideNav-isOpenMobile"
+        <div
+          class="euiFlexItem"
         >
-          <div
-            class="euiSideNav__content"
-            id="euiSideNavContent_generated-id"
+          <nav
+            class="euiSideNav euiSideNav-isOpenMobile"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--root nav-link-item nav-link-item-active-false "
+              class="euiSideNav__content"
+              id="euiSideNavContent_generated-id"
             >
-              <button
-                aria-label="link-in-all"
-                class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                data-test-subj="collapsibleNavAppLink-link-in-all"
-                type="button"
+              <div
+                class="euiSideNavItem euiSideNavItem--root nav-link-item "
               >
-                <span
-                  class="euiSideNavItemButton__content"
+                <button
+                  aria-label="link-in-all"
+                  class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                  data-test-subj="collapsibleNavAppLink-link-in-all"
+                  type="button"
                 >
                   <span
-                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                    title="link-in-all"
+                    class="euiSideNavItemButton__content"
                   >
-                    <div
-                      class="euiText euiText--medium"
+                    <span
+                      class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                      title="link-in-all"
                     >
-                      link-in-all
-                    </div>
+                      <div
+                        class="euiText euiText--medium"
+                      >
+                        link-in-all
+                      </div>
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+              </div>
             </div>
-          </div>
-        </nav>
+          </nav>
+        </div>
       </div>
       <div
         class="bottom-container eui-xScroll bottom-container-expanded"
@@ -81,31 +85,11 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
       class="eui-fullHeight left-navigation-wrapper"
     >
       <div
-        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder"
-        style="flex-grow: 0;"
-      >
-        <button
-          data-test-subj="back"
-        >
-          go back
-        </button>
-      </div>
-      <div
-        class="searchBarIcon"
+        class="searchBarIcon euiHeaderSectionItemButton"
       />
       <div
-        class="euiPanel euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
-        style="padding-top: 0px;"
-      >
-        <nav
-          class="euiSideNav leftNavSideNavWrapper euiSideNav-isOpenMobile"
-        >
-          <div
-            class="euiSideNav__content"
-            id="euiSideNavContent_generated-id"
-          />
-        </nav>
-      </div>
+        class="flex-1-container"
+      />
       <div
         class="bottom-container bottom-container-collapsed"
       />
@@ -138,43 +122,47 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
         class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
       />
       <div
-        class="euiPanel euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"
       >
-        <nav
-          class="euiSideNav leftNavSideNavWrapper euiSideNav-isOpenMobile"
+        <div
+          class="euiFlexItem"
         >
-          <div
-            class="euiSideNav__content"
-            id="euiSideNavContent_generated-id"
+          <nav
+            class="euiSideNav euiSideNav-isOpenMobile"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--root nav-link-item nav-link-item-active-false "
+              class="euiSideNav__content"
+              id="euiSideNavContent_generated-id"
             >
-              <button
-                aria-label="link-in-all"
-                class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                data-test-subj="collapsibleNavAppLink-link-in-all"
-                type="button"
+              <div
+                class="euiSideNavItem euiSideNavItem--root nav-link-item "
               >
-                <span
-                  class="euiSideNavItemButton__content"
+                <button
+                  aria-label="link-in-all"
+                  class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                  data-test-subj="collapsibleNavAppLink-link-in-all"
+                  type="button"
                 >
                   <span
-                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                    title="link-in-all"
+                    class="euiSideNavItemButton__content"
                   >
-                    <div
-                      class="euiText euiText--medium"
+                    <span
+                      class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                      title="link-in-all"
                     >
-                      link-in-all
-                    </div>
+                      <div
+                        class="euiText euiText--medium"
+                      >
+                        link-in-all
+                      </div>
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+              </div>
             </div>
-          </div>
-        </nav>
+          </nav>
+        </div>
       </div>
       <div
         class="bottom-container eui-xScroll bottom-container-expanded"

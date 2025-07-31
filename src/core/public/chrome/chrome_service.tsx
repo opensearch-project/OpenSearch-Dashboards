@@ -128,7 +128,7 @@ export interface StartDeps {
   workspaces: WorkspacesStart;
 }
 
-export type CollapsibleNavHeaderRender = (props: { isNavOpen: boolean }) => JSX.Element | null;
+type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {

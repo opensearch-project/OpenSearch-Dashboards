@@ -1,10 +1,3 @@
-$paddingForNavItem: $euiSizeM + $euiSizeS;
-$paddingForNavWrapper: $paddingForNavItem * 2;
-$sizeForSelectedSubMenu: 5px;
-$activeMenuBorderWidth: 3px; // Thick border's width is 2px, use 3px here to override.
-$collapsedLeftNavWidth: 48px;
-$iconWidth: 16px;
-
 .context-nav-wrapper {
   border: none !important;
   border-top-right-radius: $euiSizeL;
@@ -12,95 +5,33 @@ $iconWidth: 16px;
   overflow: hidden;
   box-shadow: 1px 0 0 $euiBorderColor !important;
 
-  .leftNavSideNavWrapper {
-    border-top: $euiBorderThin;
-    border-color: $euiBorderColor;
-    padding-top: $euiSizeS;
-  }
-
-  &.leftNavIsOpen-false {
-    .nav-link-item-btn {
-      margin-left: 0;
-      padding-left: calc(($collapsedLeftNavWidth - $iconWidth) / 2);
-    }
-
-    .nav-link-item-category-item {
-      border-top: $euiBorderThin;
-      border-color: $euiBorderColor;
-      margin-top: $euiSizeS;
-      margin-bottom: $euiSizeS;
-    }
-
-    .leftNavSideNavWrapper {
-      padding-top: $euiSizeS;
-    }
-
-    .navGroupEnabledNavTopWrapper {
-      // menu icon occupies some space and does not occupy document flow,
-      // we need a margin here to leave space.
-      margin-top: 32px;
-      padding: 0;
-    }
-
-    .navGroupEnabledHomeIcon {
-      margin-left: 0;
-    }
-  }
-
-  &.leftNavIsOpen-true {
-    .nav-link-item-btn {
-      margin-bottom: 0;
-      padding: $euiSizeS $paddingForNavItem;
-      width: 100%;
-      margin-left: 0;
-      margin-right: 0;
-
-      &:hover {
-        color: $euiColorPrimary;
-      }
-    }
-  }
-
   .nav-link-item {
-    padding-top: 0;
-    padding-bottom: 0;
+    padding: $euiSizeS;
     border-radius: $euiSizeS;
     box-shadow: none;
     margin-bottom: 0;
     margin-top: 0;
-  }
 
-  .nav-link-item-btn {
-    padding-top: $euiSizeS;
-    padding-bottom: $euiSizeS;
-    width: 100%;
-    margin: 0;
-
-    &:hover {
-      color: $euiColorPrimary;
+    .nav-link-item-btn {
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
     }
   }
 
   .nav-link-parent-item {
     padding-top: 0;
     padding-bottom: 0;
-    background-color: $euiSideNavBackgroundColor;
+    margin-bottom: $euiSizeS;
 
     > .nav-link-item-btn {
-      // padding: $euiSizeS $paddingForNavItem;
-      width: 100%;
-      padding-right: $paddingForNavItem;
+      padding: $euiSizeS;
+      margin-bottom: $euiSizeXS;
     }
 
     // Hide the expand / collapse button as we will use + / -
     svg {
       display: none;
-    }
-
-    .leftNavMenuIcon {
-      > svg {
-        display: inline-block;
-      }
     }
 
     // Show the customized icon
@@ -110,15 +41,11 @@ $iconWidth: 16px;
   }
 
   .nav-link-item-category-button {
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: $paddingForNavItem;
-    padding-right: $paddingForNavItem;
-    width: 100%;
+    margin-bottom: $euiSizeXS;
 
     // Use a smaller vertical padding so that category title looks more grouped to the items
     .nav-link-item {
-      padding: $euiSizeXS 0;
+      padding: $euiSizeXS $euiSizeS;
     }
   }
 
@@ -136,7 +63,6 @@ $iconWidth: 16px;
 
   .nav-nested-item {
     padding: $euiSizeS 0;
-    margin-left: $euiSizeS * 2;
 
     &::after,
     .nav-link-item-btn::after {
@@ -146,14 +72,6 @@ $iconWidth: 16px;
     // The height is used to comply with the extra padding
     &:last-of-type::after {
       height: 20px;
-    }
-
-    .nav-link-item-btn {
-      padding-top: 0;
-      padding-bottom: 0;
-      padding-left: $euiSizeM;
-      margin-left: 0;
-      margin-right: 0;
     }
   }
 
@@ -170,8 +88,6 @@ $iconWidth: 16px;
     padding: 0 $euiSize;
     display: flex;
     -ms-overflow-style: -ms-autohiding-scrollbar;
-    border-top: $euiBorderThin;
-    border-color: $euiBorderColor;
 
     &.bottom-container-collapsed {
       flex-direction: column;
@@ -189,15 +105,18 @@ $iconWidth: 16px;
       gap: 16px;
       padding-top: $euiSizeM;
       padding-bottom: $euiSizeM;
+      border-top: $euiBorderThin;
+      border-color: $euiColorMediumShade;
     }
   }
 
   .navGroupEnabledNavTopWrapper {
     padding: 0 $euiSizeS;
-  }
+    padding-left: $euiSizeS;
 
-  .navGroupEnabledHomeIcon {
-    margin-left: $euiSizeS;
+    .navGroupEnabledHomeIcon {
+      margin-left: $euiSizeS;
+    }
   }
 
   .searchBar-wrapper {
@@ -217,57 +136,7 @@ $iconWidth: 16px;
 
   .searchBarIcon {
     position: relative;
+    top: $ouiHeaderChildSize;
     left: 0;
-    text-align: center;
-    margin-bottom: $euiSizeS;
-  }
-
-  .nav-link-item-active-true,
-  .nav-link-parent-item-active-true {
-    background: none;
-    border-radius: 0;
-    color: $euiColorPrimary;
-
-    &:not(.nav-nested-item) {
-      > .nav-link-item-btn {
-        position: relative;
-
-        &::before {
-          content: "";
-          display: block;
-          position: absolute;
-          left: 0;
-          background-color: $euiColorPrimary;
-          width: $activeMenuBorderWidth;
-          height: 100%;
-          top: 0;
-        }
-      }
-    }
-
-    .leftNavMenuIcon {
-      color: $euiColorPrimary;
-    }
-  }
-
-  .nav-link-item-active-true {
-    &.nav-nested-item {
-      &::before {
-        content: "";
-        display: block;
-        position: absolute;
-        height: $sizeForSelectedSubMenu;
-        width: $sizeForSelectedSubMenu;
-        top: 50%;
-        margin-left: -0.5 * $sizeForSelectedSubMenu;
-        margin-top: -0.5 * $sizeForSelectedSubMenu;
-        z-index: 100;
-        background-color: $euiColorPrimary;
-      }
-    }
-
-    .nav-link-item-btn::after {
-      display: none;
-    }
   }
 }
