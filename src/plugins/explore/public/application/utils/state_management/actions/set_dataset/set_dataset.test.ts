@@ -245,6 +245,9 @@ describe('setDatasetActionCreator', () => {
         sort: [],
         interval: 'auto',
       },
+      meta: {
+        isInitialized: false,
+      },
     };
     mockGetState.mockReturnValue(stateWithPromptMode);
     (getPromptModeIsAvailable as jest.MockedFunction<any>).mockResolvedValue(false);
@@ -262,6 +265,9 @@ describe('setDatasetActionCreator', () => {
       query: {
         ...mockRootState.query,
         dataset: { id: 'existing-dataset', title: 'existing-dataset', type: 'INDEX_PATTERN' },
+      },
+      meta: {
+        isInitialized: false,
       },
     };
     mockGetState.mockReturnValue(stateWithDataset);
