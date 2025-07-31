@@ -17,8 +17,8 @@ import {
 import { Dataset, DataStructure } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
-import { defaultMetricChartStyles } from '../../../../components/visualizations/metric/metric_vis_config';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
+import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
 
 /**
@@ -245,8 +245,15 @@ const getPreloadedQueryEditorState = async (
   queryState?: QueryState
 ): Promise<QueryEditorSliceState> => {
   let promptModeIsAvailable = false;
+  let summaryAgentIsAvailable = false;
   if (queryState?.dataset) {
-    promptModeIsAvailable = await getPromptModeIsAvailable(services);
+    const results = await Promise.allSettled([
+      getPromptModeIsAvailable(services),
+      getSummaryAgentIsAvailable(services, queryState.dataset.dataSource?.id ?? ''),
+    ]);
+
+    promptModeIsAvailable = results[0].status === 'fulfilled' ? Boolean(results[0].value) : false;
+    summaryAgentIsAvailable = results[1].status === 'fulfilled' ? Boolean(results[1].value) : false;
   }
 
   return {
@@ -261,7 +268,10 @@ const getPreloadedQueryEditorState = async (
     promptToQueryIsLoading: false,
     editorMode: DEFAULT_EDITOR_MODE,
     lastExecutedTranslatedQuery: '',
+    summaryAgentIsAvailable,
     lastExecutedPrompt: '',
+    queryExecutionButtonStatus: 'REFRESH',
+    isQueryEditorDirty: false,
   };
 };
 
@@ -278,11 +288,6 @@ const getPreloadedResultsState = (services: ExploreServices): ResultsState => {
 const getPreloadedTabState = (services: ExploreServices): TabState => {
   return {
     logs: {},
-    visualizations: {
-      styleOptions: defaultMetricChartStyles,
-      chartType: undefined,
-      axesMapping: {},
-    },
   };
 };
 

@@ -25,9 +25,9 @@ import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 import {
   PPL_AGGREGATE_FUNCTIONS,
-  PPL_FUNCTIONAL_KEYWORDS,
   PPL_SUGGESTION_IMPORTANCE,
   SUPPORTED_NON_LITERAL_KEYWORDS,
+  KEYWORD_ITEM_KIND_MAP,
 } from './constants';
 import { Documentation } from './ppl_documentation';
 
@@ -108,7 +108,8 @@ export const getDefaultSuggestions = async ({
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: SuggestionItemDetailsTags.Keyword,
           // sortText is the only option to sort suggestions, compares strings
-          sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
+          sortText:
+            PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
         }))
       );
     }
@@ -180,11 +181,11 @@ export const getSimplifiedPPLSuggestions = async ({
       finalSuggestions.push(
         ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
           text: `${af}()`,
-          type: monaco.languages.CompletionItemKind.Function,
+          type: monaco.languages.CompletionItemKind.Module,
           insertText: prop?.optionalParam ? `${af}() $0` : `${af}($0)`,
           insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+          sortText: '67',
           detail: SuggestionItemDetailsTags.AggregateFunction,
-          sortText: PPL_SUGGESTION_IMPORTANCE.get(prop.id) ?? '97' + af.toLowerCase(), // '99' used to devalue every other suggestion
         }))
       );
     }
@@ -212,19 +213,32 @@ export const getSimplifiedPPLSuggestions = async ({
       const literalKeywords = suggestions.suggestKeywords.filter((sk) => sk.value);
       finalSuggestions.push(
         ...literalKeywords.map((sk) => {
-          if (PPL_FUNCTIONAL_KEYWORDS.has(sk.id)) {
-            const functionalKeywordDetails = PPL_FUNCTIONAL_KEYWORDS.get(sk.id);
+          const keywordDetails = PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
+          if (keywordDetails && keywordDetails.isFunction) {
             const functionName = sk.value.toLowerCase();
-
             return {
               text: `${functionName}()`,
-              type: monaco.languages.CompletionItemKind.Function,
-              insertText: functionalKeywordDetails?.optionalParam
+              type:
+                KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
+                monaco.languages.CompletionItemKind.Function,
+              insertText: keywordDetails?.optionalParam
                 ? `${functionName}() $0`
                 : `${functionName}($0)`,
               insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
-              detail: SuggestionItemDetailsTags.Function,
-              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '97' + sk.value.toLowerCase(), // '99' used to devalue every other suggestion
+              detail: keywordDetails.type,
+              sortText: keywordDetails.importance,
+              documentation: Documentation[sk.value.toUpperCase()] ?? '',
+            };
+          } else if (keywordDetails && !keywordDetails.isFunction) {
+            return {
+              text: sk.value.toLowerCase(),
+              type:
+                KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
+                monaco.languages.CompletionItemKind.Keyword,
+              insertText: `${sk.value.toLowerCase()} `,
+              detail: keywordDetails.type,
+              sortText: keywordDetails.importance,
+              documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           } else {
             return {
@@ -233,8 +247,9 @@ export const getSimplifiedPPLSuggestions = async ({
               type: monaco.languages.CompletionItemKind.Keyword,
               detail: SuggestionItemDetailsTags.Keyword,
               // sortText is the only option to sort suggestions, compares strings
-              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? '98' + sk.value.toLowerCase(), // '99' used to devalue every other suggestion
-              documentation: Documentation[sk.value.toUpperCase()],
+              sortText:
+                PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value.toLowerCase(), // '98' used to devalue every other suggestion
+              documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           }
         })

@@ -12,9 +12,6 @@ import {
   selectDataset,
   selectActiveTabId,
   selectShowHistogram,
-  selectStyleOptions,
-  selectChartType,
-  selectAxesMapping,
   selectActiveTab,
   selectResults,
   selectColumns,
@@ -152,43 +149,6 @@ describe('selectors/index', () => {
 
       const result = selectShowHistogram(stateWithoutShowHistogram);
       expect(result).toBeUndefined();
-    });
-  });
-
-  describe('tab visualization selectors', () => {
-    it('should select style options', () => {
-      const result = selectStyleOptions(mockState);
-      expect(result).toEqual({
-        color: 'blue',
-        size: 'medium',
-      });
-    });
-
-    it('should select chart type', () => {
-      const result = selectChartType(mockState);
-      expect(result).toBe('bar');
-    });
-
-    it('should select axes mapping', () => {
-      const result = selectAxesMapping(mockState);
-      expect(result).toEqual({
-        x: 'field1',
-        y: 'field2',
-      });
-    });
-
-    it('should handle undefined visualizations', () => {
-      const stateWithoutVisualizations = {
-        ...mockState,
-        tab: {
-          ...mockState.tab,
-          visualizations: undefined,
-        },
-      } as any;
-
-      expect(() => selectStyleOptions(stateWithoutVisualizations)).toThrow();
-      expect(() => selectChartType(stateWithoutVisualizations)).toThrow();
-      expect(() => selectAxesMapping(stateWithoutVisualizations)).toThrow();
     });
   });
 

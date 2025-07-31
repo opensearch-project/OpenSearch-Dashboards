@@ -233,14 +233,9 @@ export function CollapsibleNavGroupEnabled({
           className={classNames({
             'bottom-container': true,
             'eui-xScroll': isNavOpen,
-            'bottom-container-collapsed': !isNavOpen,
-            'bottom-container-expanded': isNavOpen,
           })}
         >
-          <HeaderNavControls
-            navControls$={observables.navControlsLeftBottom$}
-            className={classNames({ 'nav-controls-padding': isNavOpen })}
-          />
+          <HeaderNavControls navControls$={observables.navControlsLeftBottom$} />
         </div>
       </div>
     </EuiFlyout>

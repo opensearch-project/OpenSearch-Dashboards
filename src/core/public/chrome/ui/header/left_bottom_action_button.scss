@@ -1,0 +1,27 @@
+@import "./collapsible_nav_group_enabled";
+
+$leftBottomActionButtonIconWidth: 24px;
+$actionMenuHeight: 24px;
+
+.leftBottomActionButtonIconItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $leftBottomActionButtonIconWidth;
+}
+
+.leftBottomActionButtonTitleItem {
+  width: $expandedLeftNavWidth - $paddingForNavWrapper - $leftBottomActionButtonIconWidth * 2;
+  text-align: left;
+  margin-left: $euiSizeS;
+}
+
+.leftBottomActionButtonContent {
+  display: flex;
+  align-items: center;
+  line-height: $actionMenuHeight;
+}
+
+.leftBottomActionButton {
+  height: auto;
+}

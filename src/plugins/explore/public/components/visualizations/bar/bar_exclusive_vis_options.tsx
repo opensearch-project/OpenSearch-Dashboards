@@ -198,6 +198,7 @@ export const BarExclusiveVisOptions = ({
                   color={barBorderColor}
                   onChange={(color) => onBarBorderColorChange(color)}
                   data-test-subj="barBorderColorPicker"
+                  compressed
                 />
               </EuiFormRow>
             </EuiFlexItem>

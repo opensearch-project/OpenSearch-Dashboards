@@ -31,7 +31,7 @@ export const LanguageToggle = () => {
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const dispatch = useDispatch();
   const editorRef = useEditorRef();
-  const { focusOnEditor } = useEditorFocus();
+  const focusOnEditor = useEditorFocus();
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -56,6 +56,7 @@ export const LanguageToggle = () => {
         key="PPL"
         onClick={() => onItemClick(EditorMode.Query)}
         disabled={!isPromptMode}
+        data-test-subj="queryPanelFooterLanguageToggle-PPL"
       >
         PPL
       </EuiContextMenuItem>,
@@ -67,6 +68,7 @@ export const LanguageToggle = () => {
           key="ai"
           onClick={() => onItemClick(EditorMode.Prompt)}
           disabled={isPromptMode}
+          data-test-subj="queryPanelFooterLanguageToggle-AI"
         >
           {promptOptionText}
         </EuiContextMenuItem>

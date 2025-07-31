@@ -20,6 +20,10 @@ import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { ExploreServices } from '../../types';
 
+// Mock the usage collector
+jest.mock('../../services/usage_collector', () => ({
+  getUsageCollector: () => ({}),
+}));
 // Mock the query actions
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
   executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
@@ -82,9 +86,18 @@ describe('DiscoverChart', () => {
     },
   } as unknown) as DataPublicPluginStart;
 
-  const mockServices = {
+  const mockServices = ({
     uiSettings: mockConfig,
-  } as ExploreServices;
+    core: {
+      application: {
+        capabilities: {
+          assistant: {
+            enabled: false,
+          },
+        },
+      },
+    },
+  } as unknown) as ExploreServices;
 
   const mockStore = configureStore({
     reducer: {
@@ -131,21 +144,13 @@ describe('DiscoverChart', () => {
         lastExecutedPrompt: '',
         promptToQueryIsLoading: false,
         lastExecutedTranslatedQuery: '',
+        summaryAgentIsAvailable: false,
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
       },
       results: {},
       tab: {
         logs: {},
-        visualizations: {
-          styleOptions: {
-            showTitle: true,
-            title: '',
-            fontSize: 60,
-            useColor: false,
-            colorSchema: 'blues' as any,
-          },
-          chartType: undefined,
-          axesMapping: {},
-        },
       },
     },
   });
@@ -170,7 +175,8 @@ describe('DiscoverChart', () => {
   });
 
   it('renders the chart component with header', () => {
-    renderComponent();
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
+    renderComponent({ chartData });
 
     expect(screen.getByTestId('dscChartWrapper')).toBeInTheDocument();
     expect(screen.getByTestId('dscChartChartheader')).toBeInTheDocument();
@@ -196,7 +202,7 @@ describe('DiscoverChart', () => {
     expect(screen.queryByTestId('mockDiscoverHistogram')).not.toBeInTheDocument();
   });
 
-  it('does not render histogram when chartData is not provided', () => {
+  it('does not render anything when chartData is not provided', () => {
     renderComponent({ showHistogram: true });
 
     expect(screen.queryByTestId('dscTimechart')).not.toBeInTheDocument();
@@ -205,7 +211,8 @@ describe('DiscoverChart', () => {
   });
 
   it('renders toggle button with correct icon when histogram is shown', () => {
-    renderComponent();
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
+    renderComponent({ chartData });
 
     const toggleButton = screen.getByTestId('histogramCollapseBtn');
     expect(toggleButton).toBeInTheDocument();
@@ -213,7 +220,8 @@ describe('DiscoverChart', () => {
   });
 
   it('renders toggle button with correct icon when histogram is hidden', () => {
-    renderComponent({ showHistogram: false });
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
+    renderComponent({ chartData, showHistogram: false });
 
     const toggleButton = screen.getByTestId('histogramCollapseBtn');
     expect(toggleButton).toBeInTheDocument();
@@ -221,8 +229,9 @@ describe('DiscoverChart', () => {
   });
 
   it('calls dispatch when toggle button is clicked', () => {
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
     const dispatchSpy = jest.spyOn(mockStore, 'dispatch');
-    renderComponent();
+    renderComponent({ chartData });
 
     const toggleButton = screen.getByTestId('histogramCollapseBtn');
     fireEvent.click(toggleButton);
@@ -234,8 +243,9 @@ describe('DiscoverChart', () => {
   });
 
   it('calls onChangeInterval when interval is changed', () => {
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
     const dispatchSpy = jest.spyOn(mockStore, 'dispatch');
-    renderComponent();
+    renderComponent({ chartData });
 
     const changeIntervalButton = screen.getByText('Change Interval');
     fireEvent.click(changeIntervalButton);
@@ -260,15 +270,17 @@ describe('DiscoverChart', () => {
   });
 
   it('should use correct time range format', () => {
-    renderComponent();
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
+    renderComponent({ chartData });
 
     // Verify that getTime is called to get the time range
     expect(mockData.query.timefilter.timefilter.getTime).toHaveBeenCalled();
   });
 
   it('should dispatch multiple actions when interval changes', () => {
+    const chartData = { xAxisOrderedValues: [], yAxisLabel: 'Count' };
     const dispatchSpy = jest.spyOn(mockStore, 'dispatch');
-    renderComponent();
+    renderComponent({ chartData });
 
     const changeIntervalButton = screen.getByText('Change Interval');
     fireEvent.click(changeIntervalButton);

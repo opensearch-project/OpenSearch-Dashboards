@@ -2,188 +2,102 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiIconTip,
-  EuiSmallButtonIcon,
-  EuiCopy,
-  EuiSmallButtonEmpty,
-  EuiAccordion,
-  EuiPanel,
-  EuiIcon,
-} from '@elastic/eui';
-import React from 'react';
+
+import React, { useState, useCallback, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
-import assistantMark from '../../assets/sparkle_mark.svg';
+import { isEmpty } from 'lodash';
 
-export enum FeedbackStatus {
-  NONE = 'none',
-  THUMB_UP = 'thumbup',
-  THUMB_DOWN = 'thumbdown',
-}
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../types';
+import { ResultsSummaryContent } from './results_summary_content';
+import { RootState } from '../../application/utils/state_management/store';
+import {
+  selectDataset,
+  selectQueryStatus,
+} from '../../application/utils/state_management/selectors';
+import { ResultStatus } from '../../../../data/public';
 
-type AccordionState = 'closed' | 'open';
+const SUMMARY_REQUEST_SAMPLE_SIZE = 10;
 
 interface ResultsSummaryProps {
-  accordionState: AccordionState;
-  onClickAccordion: (isOpen: boolean) => void;
-  actionButtonVisible: boolean;
-  feedback: FeedbackStatus;
-  afterFeedbackTip: string;
-  onFeedback: (satisfied: boolean) => void;
   summary: string;
-  canGenerateSummary: boolean;
-  loading: boolean;
-  onGenerateSummary: () => void;
-  brandingLabel?: string;
-  sampleSize: number;
-  getPanelMessage: () => React.ReactNode;
+  setSummary: React.Dispatch<React.SetStateAction<string>>;
+  reportCountMetric: (metric: string, count: number) => void;
 }
 
 export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
-  accordionState,
-  onClickAccordion,
-  actionButtonVisible,
-  feedback,
-  afterFeedbackTip,
-  onFeedback,
   summary,
-  canGenerateSummary,
-  loading,
-  onGenerateSummary,
-  brandingLabel,
-  sampleSize,
-  getPanelMessage,
+  setSummary,
+  reportCountMetric,
 }) => {
-  const infoIconTooltip = i18n.translate('explore.resultsSummary.summary.sampletip', {
-    defaultMessage: 'Summary based on first {sampleSize} records',
-    values: { sampleSize },
-  });
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  const { http } = services;
 
-  return (
-    <EuiPanel
-      className="exploreResultsSummary"
-      data-test-subj="exploreResultsSummary"
-      hasBorder={true}
-      borderRadius="none"
-      paddingSize="none"
-    >
-      <EuiAccordion
-        id="exploreResultsSummarySummaryAccordion"
-        className="exploreResultsSummary exploreResultsSummary_accordion"
-        buttonClassName="exploreResultsSummary_accordion_button"
-        forceState={accordionState}
-        onToggle={onClickAccordion}
-        extraAction={
-          accordionState === 'open' && (
-            <EuiFlexGroup
-              justifyContent="spaceBetween"
-              data-test-subj="exploreResultsSummary_accordion_actions"
-              className="exploreResultsSummary_accordion_actions"
-            >
-              <EuiFlexItem>
-                {actionButtonVisible && (
-                  <EuiFlexGroup gutterSize="none" alignItems="center">
-                    <EuiText size="xs">
-                      {i18n.translate('explore.resultsSummary.summary.responseText', {
-                        defaultMessage: 'Was this helpful?',
-                      })}
-                    </EuiText>
-                    {feedback !== FeedbackStatus.THUMB_DOWN && (
-                      <EuiSmallButtonIcon
-                        aria-label="feedback thumbs up"
-                        color={feedback === FeedbackStatus.THUMB_UP ? 'primary' : 'text'}
-                        iconType="thumbsUp"
-                        title={
-                          !feedback
-                            ? i18n.translate('explore.resultsSummary.summary.goodResponse', {
-                                defaultMessage: `Good response`,
-                              })
-                            : afterFeedbackTip
-                        }
-                        onClick={() => onFeedback(true)}
-                        data-test-subj="exploreResultsSummary_summary_buttons_thumbup"
-                      />
-                    )}
-                    {feedback !== FeedbackStatus.THUMB_UP && (
-                      <EuiSmallButtonIcon
-                        aria-label="feedback thumbs down"
-                        color={feedback === FeedbackStatus.THUMB_DOWN ? 'primary' : 'text'}
-                        title={
-                          !feedback
-                            ? i18n.translate('explore.resultsSummary.summary.badResponse', {
-                                defaultMessage: `Bad response`,
-                              })
-                            : afterFeedbackTip
-                        }
-                        iconType="thumbsDown"
-                        onClick={() => onFeedback(false)}
-                        data-test-subj="exploreResultsSummary_summary_buttons_thumbdown"
-                      />
-                    )}
-                    <div className="exploreResultsSummary_divider" />
-                    <EuiCopy textToCopy={summary ?? ''}>
-                      {(copy) => (
-                        <EuiSmallButtonIcon
-                          aria-label="Copy to clipboard"
-                          title={i18n.translate('explore.resultsSummary.summary.copy', {
-                            defaultMessage: `Copy to clipboard`,
-                          })}
-                          onClick={copy}
-                          color="text"
-                          iconType="copy"
-                          data-test-subj="resultsSummary_summary_buttons_copy"
-                        />
-                      )}
-                    </EuiCopy>
-                  </EuiFlexGroup>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSmallButtonEmpty
-                  isDisabled={!canGenerateSummary}
-                  isLoading={loading}
-                  onClick={onGenerateSummary}
-                  data-test-subj="exploreResultsSummary_summary_buttons_generate"
-                >
-                  {i18n.translate('explore.resultsSummary.summary.generateSummary', {
-                    defaultMessage: 'Generate summary',
-                  })}
-                </EuiSmallButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )
-        }
-        buttonContent={
-          <EuiFlexGroup
-            gutterSize="none"
-            alignItems="center"
-            data-test-subj="exploreResultsSummary_accordion_button"
-          >
-            <EuiIcon type={assistantMark} />
-            <EuiText size="s">
-              <strong>
-                {`${brandingLabel ?? ''} `}
-                {i18n.translate('explore.resultsSummary.summary.panelTitle', {
-                  defaultMessage: 'Results summary',
-                })}
-              </strong>
-            </EuiText>
-            <EuiIconTip
-              type="iInCircle"
-              anchorClassName="exploreResultsSummary_accordion_tooltip"
-              content={infoIconTooltip}
-              aria-label={infoIconTooltip}
-            />
-          </EuiFlexGroup>
-        }
-      >
-        <EuiPanel color="transparent" hasBorder={false} paddingSize="s">
-          {getPanelMessage()}
-        </EuiPanel>
-      </EuiAccordion>
-    </EuiPanel>
+  const queryState = useSelector((state: RootState) => state.query);
+  const lastExecutedPrompt = useSelector(
+    (state: RootState) => state.queryEditor.lastExecutedPrompt
   );
+  const dataSetState = useSelector(selectDataset);
+  const queryResults = useSelector(
+    (state: RootState) => state.results[state.query.query as string]?.hits?.hits
+  );
+  const queryStatus = useSelector(selectQueryStatus);
+
+  const [loading, setLoading] = useState(false); // track loading state
+
+  const fetchSummary = useCallback(
+    async ({ question, query, queryRes }: { question: string; query: string; queryRes: any }) => {
+      if (isEmpty(queryRes) && !isEmpty(summary) && queryStatus.status !== ResultStatus.READY) {
+        return;
+      }
+
+      setLoading(true);
+
+      const successMetric = 'generated';
+      try {
+        const actualSampleSize = Math.min(SUMMARY_REQUEST_SAMPLE_SIZE, queryRes?.length);
+        const dataString = JSON.stringify(queryRes?.slice(0, actualSampleSize));
+        const payload = `'${dataString}'`;
+        // TODO: OSD core should not rely on plugin APIs, refactor this once this RFC is
+        // implemented #9859
+        const response = await http.post('/api/assistant/data2summary', {
+          body: JSON.stringify({
+            sample_data: payload,
+            sample_count: actualSampleSize,
+            total_count: queryRes?.length,
+            question,
+            ppl: query,
+          }),
+          query: {
+            dataSourceId: dataSetState?.dataSource?.id,
+          },
+        });
+        setSummary(response);
+        reportCountMetric(successMetric, 1);
+      } catch (error) {
+        reportCountMetric(successMetric, 0);
+        setSummary(
+          i18n.translate('explore.resultsSummary.summary.errorPrompt', {
+            defaultMessage: 'I am unable to respond to this query. Try another question.',
+          })
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [http, reportCountMetric, dataSetState?.dataSource?.id, summary, queryStatus, setSummary]
+  );
+
+  useEffect(() => {
+    if (isEmpty(summary) && !isEmpty(queryResults)) {
+      fetchSummary({
+        question: lastExecutedPrompt,
+        query: queryState.query,
+        queryRes: queryResults,
+      });
+    }
+  }, [queryResults, queryState.query, lastExecutedPrompt, fetchSummary, summary]);
+
+  return <ResultsSummaryContent summary={summary} loading={loading} />;
 };

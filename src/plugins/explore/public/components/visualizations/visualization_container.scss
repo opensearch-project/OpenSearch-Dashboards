@@ -9,6 +9,7 @@
 .exploreVisPanel {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .exploreVisPanel__inner {

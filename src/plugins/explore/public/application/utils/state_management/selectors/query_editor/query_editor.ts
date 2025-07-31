@@ -43,6 +43,11 @@ export const selectPromptToQueryIsLoading = createSelector(
   (state) => state.promptToQueryIsLoading
 );
 
+export const selectSummaryAgentIsAvailable = createSelector(
+  [selectState],
+  (state) => state.summaryAgentIsAvailable
+);
+
 export const selectEditorMode = createSelector([selectState], (state) => state.editorMode);
 
 export const selectIsPromptEditorMode = createSelector([selectEditorMode], (editorMode) => {
@@ -57,4 +62,16 @@ export const selectLastExecutedPrompt = createSelector(
 export const selectLastExecutedTranslatedQuery = createSelector(
   [selectState],
   (state) => state.lastExecutedTranslatedQuery
+);
+
+export const selectDateRange = createSelector([selectState], (state) => state.dateRange);
+
+export const selectQueryExecutionButtonStatus = createSelector(
+  [selectState],
+  (state) => state.queryExecutionButtonStatus
+);
+
+export const selectIsQueryEditorDirty = createSelector(
+  [selectState],
+  (state) => state.isQueryEditorDirty
 );

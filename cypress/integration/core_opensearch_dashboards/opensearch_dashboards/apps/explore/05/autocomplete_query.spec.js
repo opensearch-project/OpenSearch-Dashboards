@@ -56,7 +56,7 @@ export const runAutocompleteTests = () => {
             createOtherQueryUsingAutocomplete(config);
 
             // Run the query
-            cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+            cy.getElementByTestId('exploreQueryExecutionButton').click();
             cy.osd.waitForLoader(true);
             cy.wait(1000);
             // Validate results meet our conditions

@@ -22,6 +22,10 @@ import {
   setLastExecutedPrompt,
   setLastExecutedTranslatedQuery,
   clearLastExecutedData,
+  setSummaryAgentIsAvailable,
+  setQueryExecutionButtonStatus,
+  setDateRange,
+  setIsQueryEditorDirty,
 } from './query_editor_slice';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
 import { DEFAULT_EDITOR_MODE } from '../../constants';
@@ -33,13 +37,16 @@ describe('QueryEditor Slice', () => {
       status: QueryExecutionStatus.UNINITIALIZED,
       elapsedMs: undefined,
       startTime: undefined,
-      error: undefined,
     },
     editorMode: DEFAULT_EDITOR_MODE,
     promptModeIsAvailable: false,
     promptToQueryIsLoading: false,
+    summaryAgentIsAvailable: false,
     lastExecutedPrompt: '',
     lastExecutedTranslatedQuery: '',
+    queryExecutionButtonStatus: 'REFRESH',
+    dateRange: undefined,
+    isQueryEditorDirty: false,
   };
 
   it('should return the initial state', () => {
@@ -71,8 +78,12 @@ describe('QueryEditor Slice', () => {
         editorMode: EditorMode.Query,
         promptModeIsAvailable: true,
         promptToQueryIsLoading: false,
+        summaryAgentIsAvailable: true,
         lastExecutedPrompt: 'test prompt',
         lastExecutedTranslatedQuery: 'test translated query',
+        queryExecutionButtonStatus: 'DISABLED',
+        dateRange: undefined,
+        isQueryEditorDirty: true,
       };
 
       const action = setQueryEditorState(newState);
@@ -553,6 +564,125 @@ describe('QueryEditor Slice', () => {
       expect(action.type).toBe('queryEditor/clearLastExecutedData');
       expect(result.lastExecutedPrompt).toBe('');
       expect(result.lastExecutedTranslatedQuery).toBe('');
+    });
+  });
+
+  describe('setSummaryAgentIsAvailable', () => {
+    it('should handle setSummaryAgentIsAvailable action', () => {
+      const action = setSummaryAgentIsAvailable(true);
+
+      expect(action.type).toBe('queryEditor/setSummaryAgentIsAvailable');
+      expect(action.payload).toBe(true);
+
+      const newState = queryEditorReducer(initialState, action);
+      expect(newState.summaryAgentIsAvailable).toBe(true);
+      expect(newState.overallQueryStatus).toEqual(initialState.overallQueryStatus);
+      expect(newState.editorMode).toBe(initialState.editorMode);
+      expect(newState.promptModeIsAvailable).toBe(initialState.promptModeIsAvailable);
+    });
+
+    describe('setQueryExecutionButtonStatus', () => {
+      it('should handle setQueryExecutionButtonStatus action', () => {
+        const action = setQueryExecutionButtonStatus('DISABLED');
+
+        expect(action.type).toBe('queryEditor/setQueryExecutionButtonStatus');
+        expect(action.payload).toBe('DISABLED');
+
+        const newState = queryEditorReducer(initialState, action);
+        expect(newState.queryExecutionButtonStatus).toBe('DISABLED');
+        expect(newState.overallQueryStatus).toEqual(initialState.overallQueryStatus);
+        expect(newState.editorMode).toBe(initialState.editorMode);
+        expect(newState.promptModeIsAvailable).toBe(initialState.promptModeIsAvailable);
+      });
+
+      it('should preserve other state properties', () => {
+        const existingState: QueryEditorSliceState = {
+          ...initialState,
+          overallQueryStatus: {
+            status: QueryExecutionStatus.READY,
+            elapsedMs: 250,
+            startTime: Date.now(),
+            error: undefined,
+          },
+          editorMode: EditorMode.Query,
+          promptModeIsAvailable: true,
+          summaryAgentIsAvailable: false,
+          lastExecutedPrompt: 'some prompt',
+        };
+
+        const result = queryEditorReducer(existingState, setSummaryAgentIsAvailable(true));
+
+        expect(result.summaryAgentIsAvailable).toBe(true);
+        expect(result.overallQueryStatus).toEqual(existingState.overallQueryStatus);
+        expect(result.editorMode).toBe(EditorMode.Query);
+        expect(result.promptModeIsAvailable).toBe(true);
+        expect(result.lastExecutedPrompt).toBe('some prompt');
+      });
+
+      it('should set query execution button status to UPDATE', () => {
+        const existingState: QueryEditorSliceState = {
+          ...initialState,
+          queryExecutionButtonStatus: 'DISABLED',
+        };
+
+        const action = setQueryExecutionButtonStatus('UPDATE');
+        const result = queryEditorReducer(existingState, action);
+
+        expect(result.queryExecutionButtonStatus).toBe('UPDATE');
+      });
+    });
+
+    describe('setDateRange', () => {
+      it('should handle setDateRange action', () => {
+        const dateRange = { from: 'now-15m', to: 'now' };
+        const action = setDateRange(dateRange);
+
+        expect(action.type).toBe('queryEditor/setDateRange');
+        expect(action.payload).toEqual(dateRange);
+
+        const newState = queryEditorReducer(initialState, action);
+        expect(newState.dateRange).toEqual(dateRange);
+        expect(newState.overallQueryStatus).toEqual(initialState.overallQueryStatus);
+        expect(newState.editorMode).toBe(initialState.editorMode);
+        expect(newState.queryExecutionButtonStatus).toBe(initialState.queryExecutionButtonStatus);
+      });
+
+      it('should update existing dateRange', () => {
+        const existingState: QueryEditorSliceState = {
+          ...initialState,
+          dateRange: { from: 'now-30m', to: 'now' },
+        };
+
+        const newDateRange = { from: 'now-1h', to: 'now' };
+        const action = setDateRange(newDateRange);
+        const result = queryEditorReducer(existingState, action);
+
+        expect(result.dateRange).toEqual(newDateRange);
+      });
+    });
+
+    describe('setIsQueryEditorDirty', () => {
+      it('should handle setIsQueryEditorDirty action', () => {
+        const action = setIsQueryEditorDirty(true);
+
+        expect(action.type).toBe('queryEditor/setIsQueryEditorDirty');
+        expect(action.payload).toBe(true);
+
+        const newState = queryEditorReducer(initialState, action);
+        expect(newState.isQueryEditorDirty).toBe(true);
+      });
+
+      it('should set isQueryEditorDirty to false', () => {
+        const existingState: QueryEditorSliceState = {
+          ...initialState,
+          isQueryEditorDirty: true,
+        };
+
+        const action = setIsQueryEditorDirty(false);
+        const result = queryEditorReducer(existingState, action);
+
+        expect(result.isQueryEditorDirty).toBe(false);
+      });
     });
   });
 });

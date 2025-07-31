@@ -265,6 +265,11 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                     </EuiFlexItem>
                     <EuiFlexItem className="globalDatePicker">
                       <div ref={datePickerRef} />
+                      {!showDatePicker && props.customSubmitButton && (
+                        <div className="osdTopNavCustomSubmitButton">
+                          {props.customSubmitButton}
+                        </div>
+                      )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </MountPointPortal>
