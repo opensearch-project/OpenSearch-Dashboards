@@ -7,7 +7,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
-import { DataView } from '../../../../data/common';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -24,9 +23,7 @@ import {
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
 import { SavedExplore } from '../../saved_explore';
-import { setQueryState } from '../../application/utils/state_management/slices';
 import { setDateRange } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
-import { setDatasetActionCreator } from '../../application/utils/state_management/actions/set_dataset';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { QueryExecutionButton } from './query_execution_button';
@@ -68,7 +65,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   });
 
   const { dataset } = useDatasetContext();
-  const [datasets, setDatasets] = useState<DataView[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
 
   useEffect(() => {
@@ -127,23 +123,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   ]);
 
   useEffect(() => {
-    let isMounted = true;
-    const initializeDataset = async () => {
-      await data.dataViews.ensureDefaultDataView();
-      const defaultDataset = await data.dataViews.getDefault();
-      if (!isMounted) return;
-
-      setDatasets(defaultDataset ? [defaultDataset] : undefined);
-    };
-
-    initializeDataset();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [data.dataViews, data.query]);
-
-  useEffect(() => {
     // capitalize first letter
     const flavorPrefix = flavorId ? `${flavorId[0].toUpperCase()}${flavorId.slice(1)}/ ` : '';
     setScreenTitle(
@@ -158,25 +137,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const showDatePicker = useMemo(() => {
     return dataset?.isTimeBased() ?? false;
   }, [dataset]);
-
-  const handleDatasetSelect = useCallback(
-    async (view: DataView) => {
-      if (!view) return;
-
-      const currentQuery = queryString.getQuery();
-
-      const newDataset = data.dataViews.convertToDataset(view);
-      dispatch(
-        setQueryState({
-          ...currentQuery,
-          query: queryString.getInitialQueryByDataset(newDataset).query,
-          dataset: newDataset,
-        })
-      );
-      dispatch(setDatasetActionCreator(services, clearEditors));
-    },
-    [queryString, data.dataViews, dispatch, services, clearEditors]
-  );
 
   // Custom onChange handler to track date range changes in Redux (mirrors SearchBar behavior)
   const handleQueryChange = useCallback(
@@ -212,13 +172,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
       showSaveQuery={false}
-      showDatasetSelect={true}
-      datasetSelectProps={{
-        onSelect: handleDatasetSelect,
-      }}
       useDefaultBehaviors={false}
       setMenuMountPoint={setHeaderActionMenu}
-      indexPatterns={dataset ? [dataset] : datasets}
+      indexPatterns={dataset ? [dataset] : undefined}
       savedQueryId={undefined}
       onSavedQueryIdChange={() => {}}
       onQuerySubmit={handleQuerySubmit}

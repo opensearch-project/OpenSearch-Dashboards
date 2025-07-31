@@ -16,6 +16,10 @@ jest.mock('./middleware/persistence_middleware', () => ({
   createPersistenceMiddleware: jest.fn(() => () => (next: any) => (action: any) => next(action)),
 }));
 
+jest.mock('./middleware/dataset_change_middleware', () => ({
+  createDatasetChangeMiddleware: jest.fn(() => () => (next: any) => (action: any) => next(action)),
+}));
+
 jest.mock('./middleware/query_sync_middleware', () => ({
   createQuerySyncMiddleware: jest.fn(() => () => (next: any) => (action: any) => next(action)),
 }));

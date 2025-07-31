@@ -98,12 +98,6 @@ const mockIndexPattern: IIndexPattern = {
       return fields.some(predicate);
     },
   } as any,
-  getFieldByName: (name: string) => undefined,
-  getComputedFields: () => ({}),
-  getScriptedFields: () => [],
-  getNonScriptedFields: () => [],
-  addScriptedField: async () => {},
-  removeScriptedField: () => {},
 };
 
 describe('convertFiltersToClause', () => {

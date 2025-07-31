@@ -42,7 +42,7 @@ export function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
-    datasets: plugins.data.dataViews,
+    dataViews: plugins.data.dataViews,
     indexPatterns: plugins.data.indexPatterns,
     getSavedExploreById: async (id?: string) => {
       return savedObjectService.get(id);
