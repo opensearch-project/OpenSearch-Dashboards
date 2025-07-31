@@ -192,32 +192,20 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
     <EuiPopover
       className="datasetSelect"
       button={
-        <EuiToolTip
-          display="block"
-          className="datasetSelect__tooltip"
-          position="right"
-          content={
-            <DatasetDetails
-              dataset={selectedDataset}
-              isDefault={selectedDataset?.id === defaultDatasetId}
-            />
-          }
+        <EuiButtonEmpty
+          className="datasetSelect__button"
+          data-test-subj="datasetSelectButton"
+          iconType="arrowDown"
+          iconSide="right"
+          size="xs"
+          textProps={{ className: 'datasetSelect__text' }}
+          onClick={togglePopover}
         >
-          <EuiButtonEmpty
-            className="datasetSelect__button"
-            data-test-subj="datasetSelectButton"
-            iconType="arrowDown"
-            iconSide="right"
-            size="xs"
-            textProps={{ className: 'datasetSelect__text' }}
-            onClick={togglePopover}
-          >
-            <EuiIcon type={datasetIcon} size="s" className="datasetSelect__icon" />
-            <EuiText size="xs" className="datasetSelect__text">
-              {datasetTitle}
-            </EuiText>
-          </EuiButtonEmpty>
-        </EuiToolTip>
+          <EuiIcon type={datasetIcon} size="s" className="datasetSelect__icon" />
+          <EuiText size="xs" className="datasetSelect__text">
+            {datasetTitle}
+          </EuiText>
+        </EuiButtonEmpty>
       }
       isOpen={isOpen}
       closePopover={closePopover}
