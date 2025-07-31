@@ -13,13 +13,6 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 const workspaceName = getRandomizedWorkspaceName();
 
 export const runCreateVisTests = () => {
-  Cypress.on('fail', (error) => {
-    if (error.message.includes('404') && error.message.includes('agent_config')) {
-      return false;
-    }
-    throw error;
-  });
-
   describe('create visualization tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);

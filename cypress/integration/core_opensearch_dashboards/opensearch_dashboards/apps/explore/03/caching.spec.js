@@ -15,13 +15,6 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 const workspaceName = getRandomizedWorkspaceName();
 
 const cachingTestSuite = () => {
-  Cypress.on('fail', (error) => {
-    if (error.message.includes('404') && error.message.includes('agent_config')) {
-      return false;
-    }
-    throw error;
-  });
-
   describe('caching spec', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
