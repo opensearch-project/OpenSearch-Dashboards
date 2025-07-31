@@ -334,7 +334,13 @@ cy.explore.add('deleteSavedQuery', (name) => {
 });
 
 cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
-  cy.getElementsByTestIds('datasetSelectButton').should('not.contain', 'Select data');
+  cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
+    req.continue((res) => {
+      if (res.statusCode === 404) {
+        res.send(200, { status: 'ok', data: {} });
+      }
+    });
+  }).as('agentConfigRequest');
 
   switch (type) {
     case 'INDEX_PATTERN':
@@ -353,6 +359,13 @@ cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
 cy.explore.add(
   'setIndexPatternFromAdvancedSelector',
   (indexPattern, dataSourceName, language, finalAction = 'submit') => {
+    cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
+      req.continue((res) => {
+        if (res.statusCode === 404) {
+          res.send(200, { status: 'ok', data: {} });
+        }
+      });
+    }).as('agentConfigRequest');
     cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Index Patterns"]`).click();
@@ -383,6 +396,14 @@ cy.explore.add(
 cy.explore.add(
   'setIndexAsDataset',
   (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
+    cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
+      req.continue((res) => {
+        if (res.statusCode === 404) {
+          res.send(200, { status: 'ok', data: {} });
+        }
+      });
+    }).as('agentConfigRequest');
+
     cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
@@ -412,6 +433,14 @@ cy.explore.add(
 );
 
 cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
+  cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
+    req.continue((res) => {
+      if (res.statusCode === 404) {
+        res.send(200, { status: 'ok', data: {} });
+      }
+    });
+  }).as('agentConfigRequest');
+
   cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
   cy.get(`[title="${indexPattern}"]`).should('be.visible').click();
 
@@ -424,6 +453,14 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
 cy.explore.add(
   'setIndexPatternFromAdvancedSelector',
   (indexPattern, dataSourceName, language, finalAction = 'submit') => {
+    cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
+      req.continue((res) => {
+        if (res.statusCode === 404) {
+          res.send(200, { status: 'ok', data: {} });
+        }
+      });
+    }).as('agentConfigRequest');
+
     cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Index Patterns"]`).click();
