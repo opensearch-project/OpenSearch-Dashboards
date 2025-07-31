@@ -30,7 +30,7 @@ import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../utils';
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
 /** @public */
-export interface ChromeRegistrationNavLink {
+export interface ChromeRegistrationNavLink extends Pick<App, 'euiIconType' | 'icon'> {
   id: string;
   title?: string;
   category?: AppCategory;
@@ -48,18 +48,6 @@ export interface ChromeRegistrationNavLink {
    * use addNavLinksToGroup to keep the interfaces consistent.
    */
   showInAllNavGroup?: boolean;
-
-  /**
-   * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
-   */
-  euiIconType?: App['euiIconType'];
-
-  /**
-   * A URL to an image file used as an icon. Used as a fallback
-   * if `euiIconType` is not provided.
-   */
-  icon?: App['icon'];
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {
