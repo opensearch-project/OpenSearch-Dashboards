@@ -41,7 +41,7 @@ export interface TabDefinition {
    *
    * @returns A custom QueryExecutionStatus as well as an error, or undefined if standard behavior is desired
    */
-  handleQueryError?: (error: any | null) => { status: QueryExecutionStatus; error: any } | void;
+  handleQueryError?: (error: any, cacheKey: string) => boolean;
 
   // UI Components
   component: (() => React.JSX.Element | null) | MemoExoticComponent<() => React.JSX.Element>;

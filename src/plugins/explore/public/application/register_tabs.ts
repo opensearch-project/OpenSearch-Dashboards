@@ -19,6 +19,7 @@ import {
 import { executeTabQuery } from './utils/state_management/actions/query_actions';
 import { QueryExecutionStatus } from './utils/state_management/types';
 import { BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX } from '../components/patterns_table/utils/constants';
+import { setIndividualQueryStatus } from './utils/state_management/slices';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -70,7 +71,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
       return brainPatternQuery(preparedQuery.query, patternsField);
     },
 
-    handleQueryError: (error) => {
+    handleQueryError: (error, cacheKey) => {
       const state = services.store.getState();
 
       /**
@@ -79,9 +80,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
        * to switch over to a patterns query which works on older versions of the querying engine.
        * A redux state is set to inform the UI that this older query is being utilized
        * Finally, the query is retriggered.
-       * The return value sets the status of the old cache key using BRAIN over to UNINITIALIZED,
-       * in order to make sure that the error returned by the BRAIN query is not erroring out the
-       * entire page.
+       * The return value being true will prevent the standard error from dispatching, keeping the page clear
        */
       if (
         error &&
@@ -105,10 +104,23 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
           })
         );
 
-        return { status: QueryExecutionStatus.UNINITIALIZED, error: undefined };
+        // set the old cacheKey to uninitialized to finalize loading, our new tab query has new cacheKey
+        services.store.dispatch(
+          setIndividualQueryStatus({
+            cacheKey,
+            status: {
+              status: QueryExecutionStatus.UNINITIALIZED,
+              startTime: undefined,
+              elapsedMs: undefined,
+              error: undefined,
+            },
+          })
+        );
+
+        return true;
       }
 
-      return;
+      return false;
     },
 
     component: PatternsTab,

@@ -218,13 +218,14 @@ const executeQueryBase = async (
     cacheKey: string;
     includeHistogram: boolean;
     interval?: string;
+    avoidDispatchingError?: (error: any, cacheKey: string) => boolean;
   },
   thunkAPI: {
     getState: () => RootState;
     dispatch: any;
   }
 ) => {
-  const { services, cacheKey, includeHistogram, interval } = params;
+  const { services, cacheKey, includeHistogram, interval, avoidDispatchingError } = params;
   const { getState, dispatch } = thunkAPI;
 
   if (!services) {
@@ -369,28 +370,12 @@ const executeQueryBase = async (
 
     const parsedError = JSON.parse(error.body.message);
 
-    let activeTabCustomQueryError;
-    const activeTabId = getState().ui.activeTabId;
-    if (activeTabId) {
-      const activeTab = services.tabRegistry.getTab(activeTabId);
-      if (activeTab?.handleQueryError) {
-        activeTabCustomQueryError = activeTab.handleQueryError(parsedError);
-      }
-    }
-
-    if (activeTabCustomQueryError) {
-      dispatch(
-        setIndividualQueryStatus({
-          cacheKey,
-          status: {
-            status: activeTabCustomQueryError.status,
-            startTime: queryStartTime,
-            elapsedMs: undefined,
-            error: activeTabCustomQueryError.error,
-          },
-        })
-      );
-    } else {
+    // if there is no avoidDispatchingError function, dispatch Error.
+    // if there is that function, and it returns false, dispatch Error
+    if (
+      !avoidDispatchingError ||
+      (avoidDispatchingError && !avoidDispatchingError(parsedError, cacheKey))
+    ) {
       dispatch(
         setIndividualQueryStatus({
           cacheKey,
@@ -504,14 +489,33 @@ export const executeTabQuery = createAsyncThunk<
   },
   { state: RootState }
 >('query/executeTabQuery', async (params, thunkAPI) => {
-  return executeQueryBase(
+  const { services } = params;
+  const { getState } = thunkAPI;
+
+  /**
+   * below activeTabCustomQueryErrorHandler logic to be removed when datasets
+   * contain information about query engine versions
+   */
+  let activeTabCustomQueryErrorHandler;
+  const activeTabId = getState().ui.activeTabId;
+  if (activeTabId) {
+    const activeTab = services.tabRegistry.getTab(activeTabId);
+    if (activeTab?.handleQueryError) {
+      activeTabCustomQueryErrorHandler = activeTab.handleQueryError;
+    }
+  }
+
+  const queryBaseResult = executeQueryBase(
     {
       ...params,
       includeHistogram: false, // Tab-specific flag
       interval: undefined, // Tabs don't need intervals
+      avoidDispatchingError: activeTabCustomQueryErrorHandler,
     },
     thunkAPI
   );
+
+  return queryBaseResult;
 });
 
 /**
