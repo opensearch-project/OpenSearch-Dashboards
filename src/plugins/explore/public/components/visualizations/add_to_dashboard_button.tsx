@@ -8,6 +8,7 @@ import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject } from 'src/core/public';
+import { useObservable } from 'react-use';
 import {
   toMountPoint,
   useOpenSearchDashboards,
@@ -15,7 +16,7 @@ import {
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
-import { selectUIState, selectTabState } from '../../application/utils/state_management/selectors';
+import { selectUIState } from '../../application/utils/state_management/selectors';
 import {
   DataView as Dataset,
   IndexPattern,
@@ -28,6 +29,7 @@ import { useCurrentExploreId } from '../../application/utils/hooks/use_current_e
 import { useFlavorId } from '../../../public/helpers/use_flavor_id';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { ExploreServices } from '../../types';
+import { getVisualizationBuilder } from './visualization_builder';
 
 interface DashboardAttributes {
   title?: string;
@@ -47,6 +49,9 @@ export interface OnSaveProps {
 export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern | Dataset }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { core, dashboard, savedObjects, toastNotifications, uiSettings, history, data } = services;
+  const visualizationBuilder = getVisualizationBuilder();
+  const axesMappings = useObservable(visualizationBuilder.axesMapping$);
+  const chartConfig = useObservable(visualizationBuilder.styles$);
 
   const searchContext = useSearchContext();
 
@@ -68,8 +73,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   const uiState = useSelector(selectUIState);
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
-  const tabState = useSelector(selectTabState);
-
   const savedExploreIdFromUrl = useCurrentExploreId();
   const flavorId = useFlavorId();
 
@@ -88,7 +91,11 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
       savedExplore,
       flavorId ?? 'logs',
       tabDefinition!,
-      tabState,
+      {
+        chartType: chartConfig?.type,
+        axesMapping: axesMappings,
+        styleOptions: chartConfig?.styles,
+      },
       dataset
     );
 

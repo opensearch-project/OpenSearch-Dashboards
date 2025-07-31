@@ -205,11 +205,13 @@ describe('useQueryPanelEditor', () => {
 
     // Default selector values
     mockUseSelector.mockImplementation((selector) => {
+      if (!selector) return '';
       const selectorString = selector.toString();
       if (selectorString.includes('selectPromptModeIsAvailable')) return false;
       if (selectorString.includes('selectQueryLanguage')) return 'PPL';
       if (selectorString.includes('selectIsPromptEditorMode')) return false;
       if (selectorString.includes('selectQueryString')) return '';
+      if (selectorString.includes('selectIsQueryEditorDirty')) return false;
       return '';
     });
 
@@ -253,11 +255,13 @@ describe('useQueryPanelEditor', () => {
   describe('basic hook behavior', () => {
     it('should return query editor options when in query mode', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectPromptModeIsAvailable')) return false;
         if (selectorString.includes('selectQueryLanguage')) return 'PPL';
         if (selectorString.includes('selectQueryString')) return '';
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
         return '';
       });
 
@@ -270,11 +274,13 @@ describe('useQueryPanelEditor', () => {
   describe('placeholder text', () => {
     it('should return disabled prompt placeholder when prompt mode is not available', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectPromptModeIsAvailable')) return false;
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectQueryLanguage')) return 'PPL';
         if (selectorString.includes('selectQueryString')) return '';
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
         return '';
       });
 
@@ -285,32 +291,14 @@ describe('useQueryPanelEditor', () => {
   });
 
   describe('showPlaceholder logic', () => {
-    it('should show placeholder when text is empty and editor is focused', () => {
+    it('should show placeholder when text is empty', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
-
-      // Initially text is empty (from selectQueryString) and editor is not focused
-      expect(result.current.showPlaceholder).toBe(false);
-
-      // Simulate editor mount and focus
-      act(() => {
-        result.current.editorDidMount(mockEditor);
-      });
-
-      // Simulate focus event
-      const focusCallback = mockEditor.onDidFocusEditorText.mock.calls[0][0];
-      act(() => {
-        focusCallback();
-      });
 
       expect(result.current.showPlaceholder).toBe(true);
     });
 
     it('should not show placeholder when text is present', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
-
-      // Initially text is empty (from selectQueryString)
-      expect(result.current.value).toBe('');
-      expect(result.current.showPlaceholder).toBe(false);
 
       // Add text to local state through onChange
       act(() => {
@@ -320,28 +308,7 @@ describe('useQueryPanelEditor', () => {
       // The text should now be 'some text' from local state
       expect(result.current.value).toBe('some text');
 
-      // Mount and focus editor
-      act(() => {
-        result.current.editorDidMount(mockEditor);
-      });
-
-      const focusCallback = mockEditor.onDidFocusEditorText.mock.calls[0][0];
-      act(() => {
-        focusCallback();
-      });
-
       // Since text is present, showPlaceholder should be false
-      expect(result.current.showPlaceholder).toBe(false);
-    });
-
-    it('should not show placeholder when editor is not focused', () => {
-      const { result } = renderHook(() => useQueryPanelEditor());
-
-      // Mount editor but don't focus it
-      act(() => {
-        result.current.editorDidMount(mockEditor);
-      });
-
       expect(result.current.showPlaceholder).toBe(false);
     });
   });
@@ -374,8 +341,10 @@ describe('useQueryPanelEditor', () => {
         if (selector === selectIsPromptEditorMode) return true;
         if (selector === selectPromptModeIsAvailable) return false;
         if (selector === selectQueryLanguage) return 'PPL';
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectQueryString')) return '';
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
         return '';
       });
 
@@ -394,11 +363,13 @@ describe('useQueryPanelEditor', () => {
 
     it('should not call handleChangeForPromptIsTyping when not in prompt mode', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectPromptModeIsAvailable')) return false;
         if (selectorString.includes('selectQueryLanguage')) return 'PPL';
         if (selectorString.includes('selectQueryString')) return '';
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
         return '';
       });
 

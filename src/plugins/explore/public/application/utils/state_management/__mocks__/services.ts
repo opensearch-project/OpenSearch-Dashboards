@@ -22,6 +22,7 @@ export const createMockExploreServices = (
         timefilter: {
           timefilter: {
             getTime: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
+            setTime: jest.fn(),
           },
         },
       },

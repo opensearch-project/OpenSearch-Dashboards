@@ -6,9 +6,13 @@
 import { i18n } from '@osd/i18n';
 import { DataView as Dataset, IndexPattern } from 'src/plugins/data/common';
 import { InvalidJSONProperty } from '../../../opensearch_dashboards_utils/public';
-import { LegacyState, TabState } from '../application/utils/state_management/slices';
+import { LegacyState } from '../application/utils/state_management/slices';
 import { SavedExplore, SavedExploreAttributes } from '../types/saved_explore_types';
 import { TabDefinition } from '../services/tab_registry/tab_registry_service';
+import {
+  ChartType,
+  StyleOptions,
+} from '../components/visualizations/utils/use_visualization_types';
 
 export interface ExploreState {
   legacy: LegacyState;
@@ -16,11 +20,17 @@ export interface ExploreState {
   query: Record<string, unknown>; // Query state for filters, time range, etc.
 }
 
+interface VisState {
+  chartType?: ChartType;
+  styleOptions?: StyleOptions;
+  axesMapping?: Record<string, string>;
+}
+
 export const saveStateToSavedObject = (
   obj: SavedExplore,
   flavorId: string,
   tabDefinition: TabDefinition,
-  tabState?: TabState,
+  visState?: VisState,
   dataset?: IndexPattern | Dataset
 ): SavedExplore => {
   // Serialize the state into the saved object
@@ -29,9 +39,9 @@ export const saveStateToSavedObject = (
     // TODO: Add title to saved object
     // Visualization has an independent title?
     title: '',
-    chartType: tabState?.visualizations?.chartType ?? 'line',
-    params: tabState?.visualizations?.styleOptions ?? {},
-    axesMapping: tabState?.visualizations?.axesMapping,
+    chartType: visState?.chartType ?? 'line',
+    params: visState?.styleOptions ?? {},
+    axesMapping: visState?.axesMapping,
   });
   obj.uiState = JSON.stringify({
     activeTab: tabDefinition.id,

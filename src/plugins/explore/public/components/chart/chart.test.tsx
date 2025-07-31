@@ -145,21 +145,12 @@ describe('DiscoverChart', () => {
         promptToQueryIsLoading: false,
         lastExecutedTranslatedQuery: '',
         summaryAgentIsAvailable: false,
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
       },
       results: {},
       tab: {
         logs: {},
-        visualizations: {
-          styleOptions: {
-            showTitle: true,
-            title: '',
-            fontSize: 60,
-            useColor: false,
-            colorSchema: 'blues' as any,
-          },
-          chartType: undefined,
-          axesMapping: {},
-        },
       },
     },
   });

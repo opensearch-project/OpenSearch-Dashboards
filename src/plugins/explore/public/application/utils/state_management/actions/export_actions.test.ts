@@ -88,11 +88,6 @@ describe('export_actions', () => {
       },
       tab: {
         logs: {},
-        visualizations: {
-          styleOptions: undefined,
-          chartType: undefined,
-          axesMapping: {},
-        },
       },
       queryEditor: {
         queryStatusMap: {},
@@ -108,6 +103,8 @@ describe('export_actions', () => {
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery: '',
         summaryAgentIsAvailable: false,
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
       },
     };
 

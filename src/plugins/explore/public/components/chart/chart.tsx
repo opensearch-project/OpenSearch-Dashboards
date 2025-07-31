@@ -24,6 +24,7 @@ import {
   clearQueryStatusMap,
   clearQueryStatusMapByKey,
   setShowHistogram,
+  setDateRange,
 } from '../../application/utils/state_management/slices';
 import { RootState } from '../../application/utils/state_management/store';
 import {
@@ -75,16 +76,17 @@ export const DiscoverChart = ({
   };
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
-      data.query.timefilter.timefilter.setTime({
-        from: moment(ranges.from).toISOString(),
-        to: moment(ranges.to).toISOString(),
-        mode: 'absolute',
-      });
+      dispatch(
+        setDateRange({
+          from: moment(ranges.from).toISOString(),
+          to: moment(ranges.to).toISOString(),
+        })
+      );
       dispatch(clearResults());
       dispatch(clearQueryStatusMap());
       dispatch(executeQueries({ services }));
     },
-    [data, dispatch, services]
+    [dispatch, services]
   );
 
   const [summary, setSummary] = useState('');

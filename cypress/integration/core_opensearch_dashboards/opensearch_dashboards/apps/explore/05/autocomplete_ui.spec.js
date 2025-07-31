@@ -15,6 +15,10 @@ import {
   showSuggestionAndHint,
   hideWidgets,
   createQuery,
+  createInvalidQuery,
+  validateEditorContainsError,
+  validateImplicitPPLQuery,
+  validateDocumentationPanelIsOpen,
 } from '../../../../../../utils/apps/explore/autocomplete';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
@@ -85,7 +89,7 @@ export const runAutocompleteTests = () => {
             createQuery(config, false); // use mouse
 
             // Run with mouse click
-            cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+            cy.getElementByTestId('exploreQueryExecutionButton').click();
 
             cy.osd.waitForLoader(true);
             cy.wait(1000);
@@ -104,11 +108,51 @@ export const runAutocompleteTests = () => {
             // SQL and PPL should use cy.get('.inputarea').type('{cmd+enter}')
             // But it is not working in Remote CI
             // TODO: investigate and fix
-            cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+            cy.getElementByTestId('exploreQueryExecutionButton').click();
 
             cy.osd.waitForLoader(true);
             cy.wait(2000);
             validateQueryResults('unique_category', 'Configuration');
+          });
+
+          it('should validate that error markers are shown for invalide query', () => {
+            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            setDatePickerDatesAndSearchIfRelevant(config.language);
+            cy.wait(2000);
+            cy.explore.clearQueryEditor();
+
+            createInvalidQuery(config); // use keyboard
+
+            validateEditorContainsError();
+          });
+
+          it('should validate that error markers are shown for invalid query', () => {
+            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            setDatePickerDatesAndSearchIfRelevant(config.language);
+            cy.wait(2000);
+            cy.explore.clearQueryEditor();
+
+            createInvalidQuery(config);
+
+            validateEditorContainsError();
+          });
+
+          it('should support implicit ppl queries that dont start with source=', () => {
+            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            setDatePickerDatesAndSearchIfRelevant(config.language);
+            cy.wait(2000);
+            cy.explore.clearQueryEditor();
+
+            validateImplicitPPLQuery(config);
+          });
+
+          it('should show open documentation panel by default', () => {
+            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            setDatePickerDatesAndSearchIfRelevant(config.language);
+            cy.wait(2000);
+            cy.explore.clearQueryEditor();
+
+            validateDocumentationPanelIsOpen(config);
           });
         });
       }

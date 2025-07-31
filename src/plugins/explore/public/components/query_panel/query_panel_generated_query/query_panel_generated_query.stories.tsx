@@ -57,11 +57,6 @@ const createStoreWithQuery = (lastExecutedTranslatedQuery: string = '') => {
       results: {},
       tab: {
         logs: {},
-        visualizations: {
-          styleOptions: undefined,
-          chartType: 'line',
-          axesMapping: {},
-        },
       },
       legacy: {
         columns: [],
@@ -82,6 +77,8 @@ const createStoreWithQuery = (lastExecutedTranslatedQuery: string = '') => {
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery,
         summaryAgentIsAvailable: false,
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
       },
     },
   });

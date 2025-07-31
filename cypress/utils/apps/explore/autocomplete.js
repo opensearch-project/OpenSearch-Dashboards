@@ -333,6 +333,89 @@ export const createQuery = (config, useKeyboard = false) => {
     });
 };
 
+/**
+ * Creates an Invalid query to test error highlighting
+ * @param {Object} config - Query configuration
+ */
+export const createInvalidQuery = (config) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      if (config.language === QueryLanguages.PPL.name) {
+        cy.get('.inputarea').type('source = data_logs_small_time_1 | where stats ', {
+          force: true,
+        });
+      }
+    });
+};
+
+/**
+ * Checks if the editor contains any error by looking for mtk31 class (error marker)
+ */
+export const validateEditorContainsError = () => {
+  cy.get('.monaco-editor', { timeout: 10000 })
+    .should('be.visible')
+    .within(() => {
+      cy.get('.mtk31', { timeout: 5000 }).should('exist');
+    });
+};
+
+/**
+ * Validates Implicit PPL Queries, that don't necessarily start with `source =` part
+ * @param {Object} config - Query configuration
+ */
+export const validateImplicitPPLQuery = (config) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      cy.get('.inputarea').type(' ', { force: true });
+      if (config.language === QueryLanguages.PPL.name) {
+        typeAndSelectSuggestion('c', 'category');
+        selectSuggestion('=');
+      }
+    });
+};
+
+/**
+ * Validates if documentation panel is visible after typing 'sour'
+ * @param {Object} config - Query configuration
+ */
+export const validateDocumentationPanelIsOpen = (config) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      cy.get('.inputarea').type(' ', { force: true });
+      if (config.language === QueryLanguages.PPL.name) {
+        // Type 'sour' to trigger suggestions with documentation
+        cy.get('.inputarea').type('sour', { force: true });
+
+        // Wait for suggestion widget to appear
+        cy.get('.suggest-widget.visible')
+          .should('be.visible')
+          .then(($widget) => {
+            // Check if documentation panel (status bar) is visible
+            const statusBar = $widget.find('.suggest-status-bar');
+            expect(statusBar.length).to.be.greaterThan(0);
+          });
+      }
+    });
+};
+
 // =======================================
 // Monaco Editor Parsing Utilities
 // =======================================
@@ -342,30 +425,33 @@ export const createQuery = (config, useKeyboard = false) => {
  * The Monaco editor renders spaces using various Unicode whitespace characters and middle dot characters
  * This function handles all possible whitespace representations that might appear in the editor
  * @param {string} queryString - The query string to verify
- * @param {string} editorType - The editor type selector (e.g., 'osdQueryEditor__multiLine' or 'osdQueryEditor__singleLine')
  */
-export const verifyMonacoEditorContent = (queryString, editorType) => {
+export const verifyMonacoEditorContent = (queryString) => {
   if (!queryString) return;
+  // Check the editor content against our pattern - try multiple approaches
+  cy.getElementByTestId('exploreQueryPanelEditor')
+    .should('be.visible')
+    .then(($editor) => {
+      // Try different selectors to get the text content
+      let text = '';
 
-  // Escape special regex characters in the query string
-  const escapedQueryString = queryString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const viewLine = $editor.find('.view-line').first();
+      if (viewLine.length > 0) {
+        text = viewLine.text();
+      }
 
-  // This comprehensive pattern handles all possible whitespace representations that might appear in the editor
-  // including regular spaces, non-breaking spaces, middle dots, and other special characters used for spacing
-  const pattern = new RegExp(
-    escapedQueryString.replace(
-      /\s+/g,
-      '[\\s\\u00A0\\u00B7\\u2022\\u2023\\u25E6\\u2043\\u2219\\u22C5\\u30FB\\u00B7.·]+'
-    )
-  );
+      // Sanitize the text by normalizing whitespace characters
+      const sanitizeText = (str) => {
+        return str
+          .replace(/[\s\u00A0\u00B7\u2022\u2023\u25E6\u2043\u2219\u22C5\u30FB\u00B7.·]+/g, ' ')
+          .trim();
+      };
 
-  // Check the editor content against our pattern
-  cy.getElementByTestId(editorType)
-    .find('.view-line')
-    .first()
-    .invoke('text')
-    .then((text) => {
-      expect(pattern.test(text)).to.be.true;
+      const sanitizedText = sanitizeText(text);
+      const sanitizedQuery = sanitizeText(queryString);
+
+      expect(text).to.not.be.empty;
+      expect(sanitizedText).to.include(sanitizedQuery);
     });
 };
 

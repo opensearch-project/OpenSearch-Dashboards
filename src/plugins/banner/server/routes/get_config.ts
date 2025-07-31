@@ -11,6 +11,7 @@
 
 import { IRouter } from '../../../../core/server';
 import { BannerPluginSetup } from '../types';
+import { BannerConfig } from '../../common';
 
 export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
   router.get(
@@ -19,7 +20,28 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
       validate: false,
     },
     async (context, request, response) => {
-      const config = bannerSetup.getConfig();
+      // Get UI settings client
+      const uiSettingsClient = context.core.uiSettings.client;
+
+      const settings = await uiSettingsClient.getAll();
+
+      // Extract banner settings from the result
+      const content = settings['banner:content'];
+      const color = settings['banner:color'];
+      const iconType = settings['banner:iconType'];
+      const isVisible = settings['banner:active'];
+      const useMarkdown = settings['banner:useMarkdown'];
+      const size = settings['banner:size'];
+
+      // Combine UI settings with base config
+      const config: BannerConfig = {
+        content,
+        color: color as BannerConfig['color'],
+        iconType,
+        isVisible: Boolean(isVisible),
+        useMarkdown: Boolean(useMarkdown),
+        size: size as BannerConfig['size'],
+      };
 
       return response.ok({
         body: {

@@ -35,7 +35,6 @@ import { SAMPLE_SIZE_SETTING } from '../../common/legacy/discover';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRenderError } from '../../../expressions/public';
-import { getVisualizationType } from '../components/visualizations/utils/use_visualization_types';
 import { VisColumn } from '../components/visualizations/types';
 import { toExpression } from '../components/visualizations/utils/to_expression';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
@@ -51,6 +50,7 @@ import {
   convertStringsToMappings,
   findRuleByIndex,
 } from '../components/visualizations/visualization_container_utils';
+import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 
 export interface SearchProps {
   description?: string;
@@ -334,7 +334,7 @@ export class ExploreEmbeddable
     });
     const rows = resp.hits.hits;
     const fieldSchema = searchSource.getDataFrame()?.schema;
-    const visualizationData = getVisualizationType(rows, fieldSchema);
+    const visualizationData = normalizeResultRows(rows, fieldSchema ?? []);
 
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
@@ -357,7 +357,12 @@ export class ExploreEmbeddable
         };
       } else {
         const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
-        const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns); // FIXME when no rule matched
+        const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns);
+        if (!matchedRule) {
+          throw new Error(
+            `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+          );
+        }
         const ruleBasedToExpressionFn = (
           transformedData: Array<Record<string, any>>,
           numericalCols: VisColumn[],

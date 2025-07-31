@@ -170,11 +170,6 @@ const createMockStore = (
       results: {},
       tab: {
         logs: {},
-        visualizations: {
-          styleOptions: undefined,
-          chartType: 'line',
-          axesMapping: {},
-        },
       },
       legacy: {
         columns: [],
@@ -195,6 +190,8 @@ const createMockStore = (
         summaryAgentIsAvailable: false,
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery,
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
       },
     },
   });

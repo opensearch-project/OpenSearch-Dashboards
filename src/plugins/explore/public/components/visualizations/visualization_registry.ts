@@ -22,6 +22,7 @@ import {
 import { createBarConfig } from './bar/bar_vis_config';
 import { getColumnMatchFromMapping } from './visualization_container_utils';
 import { createTableConfig } from './table/table_vis_config';
+import { ChartType } from './utils/use_visualization_types';
 
 /**
  * Registry for visualization rules and configurations.
@@ -139,7 +140,8 @@ export class VisualizationRegistry {
   public findBestMatch(
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
-    dateColumns: VisColumn[]
+    dateColumns: VisColumn[],
+    chartType?: ChartType
   ): { rule: VisualizationRule; chartType: ChartTypeMapping } | null {
     let bestMatch: { rule: VisualizationRule; chartType: ChartTypeMapping } | null = null;
     let highestPriority = -1;
@@ -150,9 +152,11 @@ export class VisualizationRegistry {
         // This is a placeholder for future functionality
 
         // Get the highest priority chart type from this rule
-        const topChartType = rule.chartTypes[0];
+        const topChartType = chartType
+          ? rule.chartTypes.find((t) => t.type === chartType)
+          : rule.chartTypes[0];
 
-        if (topChartType.priority > highestPriority) {
+        if (topChartType && topChartType.priority > highestPriority) {
           highestPriority = topChartType.priority;
           bestMatch = { rule, chartType: topChartType };
         }
