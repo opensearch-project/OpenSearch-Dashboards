@@ -13,6 +13,7 @@ import {
   clearLastExecutedData,
   setSummaryAgentIsAvailable,
   setUsingRegexPatterns,
+  setPatternsField,
 } from '../../slices';
 import { clearQueryStatusMap } from '../../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../query_actions';
@@ -41,6 +42,7 @@ export const setDatasetActionCreator = (
   dispatch(clearResults());
   dispatch(clearQueryStatusMap());
   dispatch(clearLastExecutedData());
+  dispatch(setPatternsField(''));
   dispatch(setUsingRegexPatterns(false));
 
   await dataViews.ensureDefaultDataView();

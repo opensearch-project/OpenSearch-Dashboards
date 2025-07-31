@@ -4,7 +4,7 @@
  */
 
 import { MemoExoticComponent } from 'react';
-import { ISearchResult, QueryState } from '../../application/utils/state_management/slices';
+import { QueryState } from '../../application/utils/state_management/slices';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { Query } from '../../../../data/common';
 
@@ -34,18 +34,17 @@ export interface TabDefinition {
   // Transform query string for cache key generation
   prepareQuery?: (query: Query) => string;
 
-  // Handle query results
-  handleQueryResult?: (results: ISearchResult, error: any | null) => Promise<void>;
-
-  // Optional results processor for raw results
-  resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;
+  /**
+   * @experimental Callback for errors from query
+   * Used for handling patterns queries which fail on older versions.
+   * Will be removed when a method of finding dataset query engine version is implemented
+   *
+   * @returns A custom QueryExecutionStatus as well as an error, or undefined if standard behavior is desired
+   */
+  handleQueryError?: (error: any | null) => { status: QueryExecutionStatus; error: any } | void;
 
   // UI Components
   component: (() => React.JSX.Element | null) | MemoExoticComponent<() => React.JSX.Element>;
-
-  // Optional lifecycle hooks
-  onActive?: () => void;
-  onInactive?: () => void;
 }
 
 /**

@@ -19,6 +19,7 @@ export const PatternsSettingsPopoverButton = () => {
         <EuiButtonIcon
           size="s"
           data-test-subj="patternsSettingButton"
+          aria-labelledby="patternsSettingsButton"
           iconType="gear"
           onClick={openPopover}
         />

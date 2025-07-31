@@ -10,16 +10,15 @@ import { ExploreServices } from '../types';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
-import {
-  setPatternsField,
-  setUsingRegexPatterns,
-} from './utils/state_management/slices/tab/tab_slice';
+import { setUsingRegexPatterns } from './utils/state_management/slices/tab/tab_slice';
 import {
   brainPatternQuery,
   findDefaultPatternsField,
   regexPatternQuery,
 } from '../components/patterns_table/utils/utils';
 import { executeTabQuery } from './utils/state_management/actions/query_actions';
+import { QueryExecutionStatus } from './utils/state_management/types';
+import { BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX } from '../components/patterns_table/utils/constants';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -71,10 +70,26 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
       return brainPatternQuery(preparedQuery.query, patternsField);
     },
 
-    handleQueryResult: async (_, error) => {
+    handleQueryError: (error) => {
       const state = services.store.getState();
 
-      if (error && error.status && error.status === 400) {
+      /**
+       * The below conditional is checking for the error returned when attempting to use a BRAIN
+       * query on an older version of the querying engine. If this error appears, an attempt is made
+       * to switch over to a patterns query which works on older versions of the querying engine.
+       * A redux state is set to inform the UI that this older query is being utilized
+       * Finally, the query is retriggered.
+       * The return value sets the status of the old cache key using BRAIN over to UNINITIALIZED,
+       * in order to make sure that the error returned by the BRAIN query is not erroring out the
+       * entire page.
+       */
+      if (
+        error &&
+        error.status &&
+        error.status === 400 &&
+        error.error.details &&
+        error.error.details.startsWith(BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX)
+      ) {
         // can check further details of err if needed
         let patternsField = state.tab.patterns.patternsField;
         if (!patternsField) {
@@ -89,19 +104,14 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
             cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
           })
         );
+
+        return { status: QueryExecutionStatus.UNINITIALIZED, error: undefined };
       }
+
+      return;
     },
 
     component: PatternsTab,
-
-    // Add lifecycle hooks
-    onActive: (): void => {
-      findDefaultPatternsField(services);
-    },
-
-    onInactive: (): void => {
-      services.store.dispatch(setPatternsField(''));
-    },
   });
 
   // Register Visualizations Tab
@@ -120,14 +130,6 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
     },
 
     component: VisTab,
-
-    // Add lifecycle hooks
-    onActive: () => {
-      // Tab activated
-    },
-    onInactive: () => {
-      // Tab deactivated
-    },
   });
 };
 

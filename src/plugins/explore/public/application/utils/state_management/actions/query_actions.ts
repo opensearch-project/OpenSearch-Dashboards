@@ -354,17 +354,6 @@ const executeQueryBase = async (
       })
     );
 
-    const activeTabId = getState().ui.activeTabId;
-    if (activeTabId) {
-      const activeTab = services.tabRegistry.getTab(activeTabId);
-      if (activeTab?.handleQueryResult) {
-        await activeTab.handleQueryResult(
-          rawResultsWithMeta,
-          null // no error
-        );
-      }
-    }
-
     // Clean up completed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 
@@ -380,28 +369,27 @@ const executeQueryBase = async (
 
     const parsedError = JSON.parse(error.body.message);
 
+    let activeTabCustomQueryError;
     const activeTabId = getState().ui.activeTabId;
     if (activeTabId) {
       const activeTab = services.tabRegistry.getTab(activeTabId);
-      if (activeTab?.handleQueryResult) {
-        await activeTab.handleQueryResult(
-          {} as ISearchResult, // use empty result for error
-          parsedError
-        );
-
-        // using the active tab's handler, set old cacheKey to uninitialized
-        dispatch(
-          setIndividualQueryStatus({
-            cacheKey,
-            status: {
-              status: QueryExecutionStatus.UNINITIALIZED,
-              startTime: queryStartTime,
-              elapsedMs: undefined,
-              error: undefined,
-            },
-          })
-        );
+      if (activeTab?.handleQueryError) {
+        activeTabCustomQueryError = activeTab.handleQueryError(parsedError);
       }
+    }
+
+    if (activeTabCustomQueryError) {
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: activeTabCustomQueryError.status,
+            startTime: queryStartTime,
+            elapsedMs: undefined,
+            error: activeTabCustomQueryError.error,
+          },
+        })
+      );
     } else {
       dispatch(
         setIndividualQueryStatus({
@@ -423,9 +411,9 @@ const executeQueryBase = async (
           },
         })
       );
-
-      throw error;
     }
+
+    throw error;
   }
 };
 
