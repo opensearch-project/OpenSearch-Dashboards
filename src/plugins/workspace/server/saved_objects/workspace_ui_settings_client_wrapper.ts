@@ -104,17 +104,26 @@ export class WorkspaceUiSettingsClientWrapper {
 
         const UISettingsClient = this.getUISettingsClient(workspaceTypeEnabledClient);
         const registeredConfigs = UISettingsClient.getRegistered();
-        const workspaceScopeKeys = Object.entries(registeredConfigs)
+
+        const workspaceScopeConfigDefaults = Object.entries(registeredConfigs)
           .filter(([, config]) =>
             Array<UiSettingScope>()
               .concat(config.scope || [])
               .includes(UiSettingScope.WORKSPACE)
           )
-          .map(([key]) => key);
+          .reduce((acc, [key, config]) => {
+            acc[key] = config.value;
+            return acc;
+          }, {} as Record<string, any>);
 
         const workspaceSettings = workspaceObject?.attributes?.uiSettings || {};
-        workspaceScopeKeys.forEach((key) => {
-          workspaceSettings[key] = workspaceSettings[key];
+
+        Object.entries(workspaceScopeConfigDefaults).forEach(([key, value]) => {
+          if (!workspaceSettings[key]) {
+            workspaceSettings[key] = value;
+          } else {
+            workspaceSettings[key] = workspaceSettings[key];
+          }
         });
 
         configObject.attributes = workspaceSettings;
