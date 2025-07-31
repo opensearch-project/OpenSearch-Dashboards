@@ -282,8 +282,7 @@ exports[`<NavGroups /> should render correctly when nav collapse 1`] = `
                 class="euiSideNavItemButton__content"
               >
                 <div
-                  class="euiPopover euiPopover--anchorRightUp euiSideNavItemButton__icon"
-                  offset="4"
+                  class="euiPopover euiPopover--anchorUpLeft euiSideNavItemButton__icon"
                 >
                   <div
                     class="euiPopover__anchor"
