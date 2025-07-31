@@ -7,7 +7,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
-import { DataView } from '../../../../data/common';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -66,7 +65,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   });
 
   const { dataset } = useDatasetContext();
-  const [datasets, setDatasets] = useState<DataView[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
 
   useEffect(() => {
@@ -125,23 +123,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   ]);
 
   useEffect(() => {
-    let isMounted = true;
-    const initializeDataset = async () => {
-      await data.dataViews.ensureDefaultDataView();
-      const defaultDataset = await data.dataViews.getDefault();
-      if (!isMounted) return;
-
-      setDatasets(defaultDataset ? [defaultDataset] : undefined);
-    };
-
-    initializeDataset();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [data.dataViews, data.query]);
-
-  useEffect(() => {
     // capitalize first letter
     const flavorPrefix = flavorId ? `${flavorId[0].toUpperCase()}${flavorId.slice(1)}/ ` : '';
     setScreenTitle(
@@ -193,7 +174,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showSaveQuery={false}
       useDefaultBehaviors={false}
       setMenuMountPoint={setHeaderActionMenu}
-      indexPatterns={dataset ? [dataset] : datasets}
+      indexPatterns={dataset ? [dataset] : undefined}
       savedQueryId={undefined}
       onSavedQueryIdChange={() => {}}
       onQuerySubmit={handleQuerySubmit}
