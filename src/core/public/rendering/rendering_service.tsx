@@ -42,6 +42,7 @@ export interface StartDeps {
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
+  injectedMetadata?: any;
 }
 
 /**
@@ -53,7 +54,7 @@ export interface StartDeps {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, overlays, targetDomElement }: StartDeps) {
+  start({ application, chrome, overlays, targetDomElement, injectedMetadata }: StartDeps) {
     const chromeUi = chrome.getHeaderComponent();
     const appUi = application.getComponent();
     const bannerUi = overlays.banners.getComponent();
@@ -66,6 +67,8 @@ export class RenderingService {
           <AppWrapper
             chromeVisible$={chrome.getIsVisible$()}
             sidecarConfig$={overlays.sidecar.getSidecarConfig$()}
+            useUpdatedHeader={(chrome as any).useUpdatedHeader}
+            injectedMetadata={injectedMetadata}
           >
             <div className="app-wrapper-panel">
               <div id="globalBannerList">{bannerUi}</div>

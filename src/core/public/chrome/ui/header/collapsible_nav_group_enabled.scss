@@ -6,6 +6,13 @@ $collapsedLeftNavWidth: 48px;
 $expandedLeftNavWidth: 270px;
 $iconWidth: 16px;
 
+.leftNavIsOpen-true.context-nav-wrapper,
+.leftNavIsOpen-false.context-nav-wrapper {
+  top: var(--global-banner-height, 0);
+  height: calc(100% - var(--global-banner-height, 0));
+  z-index: 800;
+}
+
 .context-nav-wrapper {
   border: none !important;
   border-top-right-radius: $euiSizeL;
