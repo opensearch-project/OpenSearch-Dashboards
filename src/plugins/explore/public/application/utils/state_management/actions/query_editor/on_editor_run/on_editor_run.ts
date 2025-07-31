@@ -17,8 +17,10 @@ export const onEditorRunActionCreator = (services: ExploreServices, editorText: 
   getState: () => RootState
 ) => {
   const {
-    queryEditor: { editorMode, promptModeIsAvailable },
+    queryEditor: { editorMode, promptModeIsAvailable, queryExecutionButtonStatus },
   } = getState();
+
+  if (queryExecutionButtonStatus === 'DISABLED') return;
 
   dispatch(clearLastExecutedData());
 

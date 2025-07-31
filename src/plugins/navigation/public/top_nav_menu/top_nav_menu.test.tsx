@@ -327,4 +327,60 @@ describe('TopNavMenu', () => {
       });
     });
   });
+
+  describe('customSubmitButton', () => {
+    it('should render customSubmitButton when showDatePicker is false', () => {
+      const customButton = <button data-test-subj="custom-submit-button">Custom Submit</button>;
+      const component = shallowWithIntl(
+        <TopNavMenu
+          appName={'test'}
+          config={menuItems}
+          showSearchBar={true}
+          showDatePicker={false}
+          customSubmitButton={customButton}
+          data={dataShim as any}
+          groupActions={true}
+          setMenuMountPoint={jest.fn()}
+        />
+      );
+
+      expect(component.find('.osdTopNavCustomSubmitButton').length).toBe(1);
+      expect(component.find('[data-test-subj="custom-submit-button"]').length).toBe(1);
+    });
+
+    it('should not render customSubmitButton when showDatePicker is true', () => {
+      const customButton = <button data-test-subj="custom-submit-button">Custom Submit</button>;
+      const component = shallowWithIntl(
+        <TopNavMenu
+          appName={'test'}
+          config={menuItems}
+          showSearchBar={true}
+          showDatePicker={TopNavMenuItemRenderType.IN_PORTAL}
+          customSubmitButton={customButton}
+          data={dataShim as any}
+          groupActions={true}
+          setMenuMountPoint={jest.fn()}
+        />
+      );
+
+      expect(component.find('.osdTopNavCustomSubmitButton').length).toBe(0);
+      expect(component.find('[data-test-subj="custom-submit-button"]').length).toBe(0);
+    });
+
+    it('should not render customSubmitButton when customSubmitButton is not provided', () => {
+      const component = shallowWithIntl(
+        <TopNavMenu
+          appName={'test'}
+          config={menuItems}
+          showSearchBar={true}
+          showDatePicker={false}
+          data={dataShim as any}
+          groupActions={true}
+          setMenuMountPoint={jest.fn()}
+        />
+      );
+
+      expect(component.find('.osdTopNavCustomSubmitButton').length).toBe(0);
+    });
+  });
 });

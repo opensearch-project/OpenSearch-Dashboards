@@ -77,6 +77,8 @@ const createStoreWithQuery = (lastExecutedTranslatedQuery: string = '') => {
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery,
         summaryAgentIsAvailable: false,
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
       },
     },
   });

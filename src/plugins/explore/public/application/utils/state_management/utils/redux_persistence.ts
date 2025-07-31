@@ -270,6 +270,8 @@ const getPreloadedQueryEditorState = async (
     lastExecutedTranslatedQuery: '',
     summaryAgentIsAvailable,
     lastExecutedPrompt: '',
+    queryExecutionButtonStatus: 'REFRESH',
+    isQueryEditorDirty: false,
   };
 };
 

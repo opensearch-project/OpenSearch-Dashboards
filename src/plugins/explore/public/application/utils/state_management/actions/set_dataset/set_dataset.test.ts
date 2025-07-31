@@ -77,6 +77,8 @@ describe('setDatasetActionCreator', () => {
       promptToQueryIsLoading: false,
       lastExecutedPrompt: '',
       lastExecutedTranslatedQuery: '',
+      queryExecutionButtonStatus: 'REFRESH' as const,
+      isQueryEditorDirty: false,
     },
     query: {
       query: 'SELECT * FROM test',
@@ -217,6 +219,8 @@ describe('setDatasetActionCreator', () => {
         promptToQueryIsLoading: false,
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery: '',
+        queryExecutionButtonStatus: 'REFRESH' as const,
+        isQueryEditorDirty: false,
       },
       query: {
         query: 'SELECT * FROM test',

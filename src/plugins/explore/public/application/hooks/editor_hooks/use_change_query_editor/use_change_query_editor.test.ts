@@ -10,7 +10,12 @@ import { DataViewField as DatasetField, opensearchFilters } from '../../../../..
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { useDatasetContext } from '../../../context';
 import { useSelector } from '../../../legacy/discover/application/utils/state_management';
-import { selectEditorMode, selectQuery } from '../../../utils/state_management/selectors';
+import { useDispatch } from 'react-redux';
+import {
+  selectEditorMode,
+  selectQuery,
+  selectIsQueryEditorDirty,
+} from '../../../utils/state_management/selectors';
 import { EditorMode } from '../../../utils/state_management/types';
 import { useChangeQueryEditor } from './use_change_query_editor';
 
@@ -25,11 +30,23 @@ jest.mock('../../../legacy/discover/application/utils/state_management', () => (
 jest.mock('../../../utils/state_management/selectors', () => ({
   selectEditorMode: jest.fn(),
   selectQuery: jest.fn(),
+  selectIsQueryEditorDirty: jest.fn(),
+}));
+
+jest.mock('react-redux', () => ({
+  useDispatch: jest.fn(),
 }));
 
 jest.mock('../../../../../../data/public', () => ({
   opensearchFilters: {
     generateFilters: jest.fn(),
+  },
+  ResultStatus: {
+    UNINITIALIZED: 'uninitialized',
+    LOADING: 'loading',
+    READY: 'ready',
+    NO_RESULTS: 'none',
+    ERROR: 'error',
   },
 }));
 
@@ -74,9 +91,11 @@ describe('useChangeQueryEditor', () => {
     (useDatasetContext as jest.Mock).mockReturnValue({ dataset: mockIndexPattern });
     (useSetEditorText as jest.Mock).mockReturnValue(mockSetEditorText);
     (useEditorFocus as jest.Mock).mockReturnValue(mockFocusOnEditor);
+    (useDispatch as jest.Mock).mockReturnValue(jest.fn());
     (useSelector as jest.Mock).mockImplementation((selector) => {
       if (selector === selectEditorMode) return EditorMode.Query;
       if (selector === selectQuery) return { language: 'PPL' };
+      if (selector === selectIsQueryEditorDirty) return false;
       return undefined;
     });
 
