@@ -263,7 +263,6 @@ const executeQueryBase = async (
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
 
-    // Reset inspector adapter
     services.inspectorAdapters.requests.reset();
 
     const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {

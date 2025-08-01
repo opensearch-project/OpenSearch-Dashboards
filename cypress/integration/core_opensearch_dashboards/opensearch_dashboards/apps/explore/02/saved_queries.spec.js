@@ -100,8 +100,7 @@ const deleteSavedQuery = (saveAsNewQueryName) => {
 };
 
 const runSavedQueriesUITests = () => {
-  // TODO: Unskip this test. It was flaky
-  describe.skip('saved queries UI', () => {
+  describe('saved queries UI', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,

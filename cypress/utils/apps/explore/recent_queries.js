@@ -45,12 +45,6 @@ export const TestQueries = [
   'event_sequence_number > 10000000',
 ];
 
-/* // TODO
-export const QueryRegex = {
-  PPL: /.*?(source .*? 8000)(?:.*)/s,
-  'OpenSearch SQL': /.*?(SELECT .*? 8000)(?:.*)/s,
-};*/
-
 /**
  * The configurations needed for recent queries tests
  * @typedef {Object} RecentQueriesFilteringTestConfig
@@ -59,26 +53,13 @@ export const QueryRegex = {
  * @property {QueryEnhancementLanguage} language - the name of query language as it appears in the dashboard app
  * @property {string} testName - the phrase to add to the test case's title
  */
-
-/**
- * Returns the SavedSearchTestConfig for the provided dataset, datasetType, and language
- * @param {string} dataset - the dataset name
- * @param {QueryEnhancementDataset} datasetType - the type of the dataset
- * @param {QueryEnhancementLanguageData} language - the relevant data for the query language to use
- * @returns {RecentQueriesFilteringTestConfig}
- */
 export const generateRecentQueriesTestConfiguration = (dataset, datasetType, language) => {
-  const oppositeLang = {
-    PPL: 'OpenSearch SQL',
-    'OpenSearch SQL': 'PPL',
-  };
-  const defaultQuery = language.name === 'PPL' ? '' : ' LIMIT 10';
+  const defaultQuery = '';
   const customDatasetType = RecentQueriesDataTypes[datasetType].name;
   return {
     dataset,
     datasetType: customDatasetType,
     language,
-    oppositeLang: oppositeLang[language.name],
     alternativeDataset: '.opensearch-sap-log-types-config',
     defaultQuery: defaultQuery,
     testName: `dataset: ${datasetType} and language: ${language.name}`,

@@ -21,11 +21,11 @@ import { monaco } from '@osd/monaco';
 import _ from 'lodash';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import DatasetSelect from './dataset_select';
-import { DataView as Dataset } from '../../../common/data_views';
+import { DataView, Dataset } from '../../../common';
 import { IDataPluginServices } from '../../types';
 
 const mockDatasets = [
-  // Basic Dataset example
+  // Basic DataView example
   ({
     id: '6c57d0bc-7b82-4e38-983c-b9a8c1ea7d5f',
     title: 'prod_logs-*',
@@ -192,9 +192,9 @@ const mockDatasets = [
       },
     },
     getFormatterForField: () => ({}),
-  } as unknown) as Dataset,
+  } as unknown) as DataView,
 
-  // Dataset with no display name
+  // DataView with no display name
   ({
     id: '8f4b9c1d-3e5a-4f2b-9d6c-7a8b2e1c3d4f',
     title: 'metrics-*',
@@ -359,9 +359,9 @@ const mockDatasets = [
       },
     },
     getFormatterForField: () => ({}),
-  } as unknown) as Dataset,
+  } as unknown) as DataView,
 
-  // Dataset with very long display name
+  // DataView with very long display name
   ({
     id: '5e6f7a8b-9c0d-4e5f-8a9b-1c2d3e4f5a6b',
     title: 's3://my-bucket/data/*',
@@ -545,7 +545,7 @@ const mockDatasets = [
       },
     },
     getFormatterForField: () => ({}),
-  } as unknown) as Dataset,
+  } as unknown) as DataView,
 
   // OpenSearch Indices example
   ({
@@ -750,7 +750,7 @@ const mockDatasets = [
       },
     },
     getFormatterForField: () => ({}),
-  } as unknown) as Dataset,
+  } as unknown) as DataView,
 
   // OpenSearch Traces example
   ({
@@ -1010,7 +1010,7 @@ const mockDatasets = [
       },
     },
     getFormatterForField: () => ({}),
-  } as unknown) as Dataset,
+  } as unknown) as DataView,
 
   // S3 Tables example
   ({
@@ -1270,7 +1270,7 @@ const mockDatasets = [
       },
     },
     getFormatterForField: () => ({}),
-  } as unknown) as Dataset,
+  } as unknown) as DataView,
 
   // CloudWatch Logs example
   ({
@@ -1438,7 +1438,7 @@ const mockDatasets = [
       },
     },
     getFormatterForField: () => ({}),
-  } as unknown) as Dataset,
+  } as unknown) as DataView,
 
   // Prometheus Metrics example
   ({
@@ -1634,9 +1634,9 @@ const mockDatasets = [
       },
     },
     getFormatterForField: () => ({}),
-  } as unknown) as Dataset,
+  } as unknown) as DataView,
 
-  // Virtual Dataset example
+  // Virtual DataView example
   ({
     id: '8a20a579-1e5b-4d19-bdce-0eac99f5cfbe::prod-cluster-1::logs',
     title: 'prod-cluster-1',
@@ -1739,7 +1739,7 @@ const mockDatasets = [
       },
     },
     getFormatterForField: () => ({}),
-  } as unknown) as Dataset,
+  } as unknown) as DataView,
 ];
 
 const editorOptions: monaco.editor.IEditorConstructionOptions = {
@@ -1752,19 +1752,19 @@ const editorOptions: monaco.editor.IEditorConstructionOptions = {
   automaticLayout: true,
 };
 
-const createMockDatasetsService = (datasets: Dataset[] = [], shouldError: boolean = false) => ({
+const createMockDatasetsService = (datasets: DataView[] = [], shouldError: boolean = false) => ({
   getIds: async (includeHidden?: boolean) => {
     if (shouldError) throw new Error('Failed to fetch dataset IDs');
     return datasets.map((d) => d.id || '');
   },
   get: async (id: string) => {
-    if (shouldError) throw new Error(`Dataset ${id} not found`);
+    if (shouldError) throw new Error(`DataView ${id} not found`);
     return datasets.find((d) => d.id === id);
   },
   getDefault: async () => {
     return datasets.length > 0 ? datasets[0] : undefined;
   },
-  saveToCache: (id: string, dataset: Dataset) => {},
+  saveToCache: (id: string, dataset: DataView) => {},
   create: async (spec: any, temporary?: boolean) => {
     return datasets.find((d) => d.id === spec.id);
   },
@@ -1923,7 +1923,7 @@ const createMockQueryService = () => {
   };
 };
 
-const createMockServices = (datasets: Dataset[] = [], error: boolean = false) =>
+const createMockServices = (datasets: DataView[] = [], error: boolean = false) =>
   (({
     appName: 'opensearch-dashboards',
     uiSettings: {
@@ -1959,17 +1959,17 @@ const DatasetSelectWithDetails = ({
   selectedDataset,
 }: {
   services: IDataPluginServices;
-  selectedDataset?: Dataset;
+  selectedDataset?: DataView;
 }) => {
   const [currentDataset, setCurrentDataset] = useState(selectedDataset);
   const [selectedTabId, setSelectedTabId] = useState('json');
 
   const handleSelect = (dataset: Dataset) => {
-    setCurrentDataset(dataset);
+    setCurrentDataset(dataset as DataView);
     action('dataset-selected')(dataset);
   };
 
-  const formatForDisplay = (dataset: Dataset) => {
+  const formatForDisplay = (dataset: DataView) => {
     if (!dataset) return '';
 
     const datasetWithFields = {
