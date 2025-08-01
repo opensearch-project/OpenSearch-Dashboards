@@ -62,6 +62,13 @@ const runRecentQueryTests = () => {
       .forEach((config) => {
         it(`check max queries for ${config.testName}`, () => {
           cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.intercept('POST', '**/api/enhancements/search/ppl*', (req) => {
+            req.continue((res) => {
+              if (res.statusCode === 400) {
+                res.send(200, { status: 'ok', data: {} });
+              }
+            });
+          }).as('pplQueryRequest');
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const currentLang = BaseQuery[config.datasetType][config.language.name];
           const currentBaseQuery = currentLang.query;
