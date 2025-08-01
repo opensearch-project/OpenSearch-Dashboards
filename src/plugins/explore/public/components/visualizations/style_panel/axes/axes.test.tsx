@@ -457,6 +457,44 @@ describe('AxesOptions', () => {
     expect(titleInput).toHaveValue('count');
   });
 
+  it('uses default value axis title for second axis when title text is empty', () => {
+    const propsWithEmptyTitle = {
+      ...defaultProps,
+      valueAxes: [
+        mockValueAxes[0],
+        {
+          id: 'ValueAxis-2',
+          name: 'RightAxis-1',
+          type: 'value' as const,
+          position: Positions.RIGHT as Positions.RIGHT,
+          show: true,
+          labels: {
+            show: true,
+            rotate: 0,
+            filter: false,
+            truncate: 100,
+          },
+          grid: {
+            showLines: true,
+          },
+          title: {
+            text: '',
+          },
+        } as ValueAxis,
+      ],
+      axisColumnMappings: {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      },
+    };
+
+    render(<AxesOptions {...propsWithEmptyTitle} />);
+
+    // Check that the title input for the second axis has the default value (from the second numerical column)
+    const titleInput = screen.getAllByRole('textbox')[2];
+    expect(titleInput).toHaveValue('price');
+  });
+
   it('handles Rule 2 scenario with incomplete value axes', () => {
     // Test the useEffect that ensures we have exactly 2 value axes for Rule 2
     const newRule2Props = {
