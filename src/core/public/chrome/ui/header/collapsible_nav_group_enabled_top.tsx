@@ -19,15 +19,14 @@ import { InternalApplicationStart } from 'src/core/public/application';
 import { createEuiListItem } from './nav_link';
 import { NavGroupItemInMap } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
-import { CollapsibleNavHeaderRender } from '../../chrome_service';
 export interface CollapsibleNavTopProps {
-  collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   homeLink?: ChromeNavLink;
   currentNavGroup?: NavGroupItemInMap;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   logos: Logos;
   onClickShrink?: () => void;
-  isNavOpen: boolean;
+  shouldShrinkNavigation: boolean;
 }
 
 export const CollapsibleNavTop = ({
@@ -36,7 +35,7 @@ export const CollapsibleNavTop = ({
   navigateToApp,
   logos,
   onClickShrink,
-  isNavOpen,
+  shouldShrinkNavigation,
   homeLink,
 }: CollapsibleNavTopProps) => {
   const homeIcon = logos.Mark.url;
@@ -74,57 +73,46 @@ export const CollapsibleNavTop = ({
     >
       {/* The spacer here is used for align with the page header */}
       <EuiSpacer size="xs" />
-      <EuiFlexGroup
-        responsive={false}
-        justifyContent="spaceBetween"
-        gutterSize={isNavOpen ? undefined : 'none'}
-        direction={isNavOpen ? undefined : 'column'}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            flush="both"
-            {...homeLinkProps}
-            onClick={onIconClick}
-            className="navGroupEnabledHomeIcon"
-          >
-            <EuiIcon
-              type={homeIcon}
-              size={isNavOpen ? 'xl' : 'l'}
-              data-test-subj={`collapsibleNavIcon-${homeIcon}`}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {isNavOpen ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                onClick={onClickShrink}
-                iconType="menuLeft"
-                color="subdued"
-                display="empty"
-                aria-label="shrink-button"
-                data-test-subj="collapsibleNavShrinkButton"
-                size="xs"
+      <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+        {!shouldShrinkNavigation ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              flush="both"
+              {...homeLinkProps}
+              onClick={onIconClick}
+              className="navGroupEnabledHomeIcon"
+            >
+              <EuiIcon
+                type={homeIcon}
+                size="xl"
+                data-test-subj={`collapsibleNavIcon-${homeIcon}`}
               />
-            </EuiFlexItem>
-          </>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            onClick={onClickShrink}
+            iconType={shouldShrinkNavigation ? 'menu' : 'menuLeft'}
+            color="subdued"
+            display="empty"
+            aria-label="shrink-button"
+            data-test-subj="collapsibleNavShrinkButton"
+            size="xs"
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
       {
         // Nav groups with type are system(global) nav group and we should show title for those nav groups
         (currentNavGroup?.type || collapsibleNavHeaderRender) && (
           <>
-            <EuiSpacer size={isNavOpen ? undefined : 'xs'} />
+            <EuiSpacer />
             {currentNavGroup?.type ? (
-              isNavOpen ? (
-                <EuiText size="s">
-                  <h3>{currentNavGroup.title}</h3>
-                </EuiText>
-              ) : null
+              <EuiText size="s">
+                <h3>{currentNavGroup.title}</h3>
+              </EuiText>
             ) : (
-              collapsibleNavHeaderRender?.({
-                isNavOpen,
-              })
+              collapsibleNavHeaderRender?.()
             )}
           </>
         )

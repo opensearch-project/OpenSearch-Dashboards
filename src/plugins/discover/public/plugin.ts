@@ -269,7 +269,7 @@ export class DiscoverPlugin
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-      euiIconType: core.chrome.navGroup.getNavGroupEnabled() ? 'discoverApp' : 'inputOutput',
+      euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       mount: async (params: AppMountParameters) => {
