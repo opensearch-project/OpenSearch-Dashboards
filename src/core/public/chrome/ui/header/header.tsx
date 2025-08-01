@@ -46,7 +46,7 @@ import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
 import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { InjectedMetadataStart } from '../../../injected_metadata';
 import { LoadingIndicator } from '../';
 import {
@@ -131,6 +131,7 @@ export interface HeaderProps {
   useUpdatedHeader?: boolean;
   globalSearchCommands?: GlobalSearchCommand[];
   injectedMetadata?: InjectedMetadataStart;
+  globalBanner$?: Observable<import('../../chrome_service').ChromeGlobalBanner | undefined>;
 }
 
 const hasValue = (value: any) => {
@@ -166,6 +167,7 @@ export function Header({
   const [isNavOpenState, setIsNavOpenState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
+  const globalBanner = useObservable(observables.globalBanner$ || of(undefined), undefined);
 
   const currentLeftControls = useObservableValue(application.currentLeftControls$);
   const navControlsLeft = useObservable(observables.navControlsLeft$);
@@ -214,14 +216,8 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
 
-  // Get the banner plugin configuration
-  const bannerPluginConfig = injectedMetadata
-    ?.getPlugins()
-    ?.find((plugin: { id: string }) => plugin.id === 'banner')?.config;
-  const isBannerEnabled = bannerPluginConfig?.enabled === true;
-
   const className = classnames('hide-for-sharing', 'headerGlobalNav', {
-    'headerGlobalNav--withBanner': isBannerEnabled,
+    'headerGlobalNav--withBanner': !!globalBanner,
   });
   const { useExpandedHeader = true } = branding;
   const useApplicationHeader = headerVariant === HeaderVariant.APPLICATION;
@@ -669,7 +665,7 @@ export function Header({
 
   return (
     <>
-      {isBannerEnabled && !useUpdatedHeader && <div id="pluginGlobalBanner" />}
+      {globalBanner && <div className="globalBanner">{globalBanner.component}</div>}
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}

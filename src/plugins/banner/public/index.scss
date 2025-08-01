@@ -20,7 +20,7 @@ $expandedHeaderWidth: $headerWidth * 2;
 /**
  * 2. Banner container - Ensures minimum height matches the variable
  */
-#pluginGlobalBanner {
+.globalBanner {
   position: fixed;
   top: 0;
   left: 0;
