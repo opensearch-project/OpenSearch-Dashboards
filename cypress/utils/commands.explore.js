@@ -494,7 +494,8 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) =
   setDatePickerDatesAndSearchIfRelevant('PPL');
   cy.wait(2000);
   cy.explore.setQueryEditor(query);
-  cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+  // Run the query
+  cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
   cy.wait(1000);
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');

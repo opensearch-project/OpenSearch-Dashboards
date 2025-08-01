@@ -31,7 +31,7 @@ export const runAddLogToDashboardTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.osd.navigateToWorkSpaceHomePage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/logs',
         isEnhancement: true,
@@ -43,7 +43,7 @@ export const runAddLogToDashboardTests = () => {
       cy.osd.waitForLoader(true);
     });
     afterEach(() => {
-      cy.osd.navigateToWorkSpaceHomePage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/logs',
         isEnhancement: true,

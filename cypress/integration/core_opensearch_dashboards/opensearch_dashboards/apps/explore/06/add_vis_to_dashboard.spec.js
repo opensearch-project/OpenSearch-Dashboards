@@ -13,14 +13,16 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 const workspaceName = getRandomizedWorkspaceName();
 
 const createMetricVisualization = () => {
+  cy.explore.clearQueryEditor();
   const datasetName = `${INDEX_WITH_TIME_1}*`;
   const query = `source=${datasetName} | stats count()`;
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
   setDatePickerDatesAndSearchIfRelevant('PPL');
   cy.wait(2000);
-  cy.explore.clearQueryEditor();
+
   cy.explore.setQueryEditor(query);
-  cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+  // Run the query
+  cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
   cy.wait(1000);
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
@@ -49,7 +51,7 @@ export const runAddVisToDashboardTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.osd.navigateToWorkSpaceHomePage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/logs',
         isEnhancement: true,
@@ -62,7 +64,7 @@ export const runAddVisToDashboardTests = () => {
     });
 
     afterEach(() => {
-      cy.osd.navigateToWorkSpaceHomePage({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/logs',
         isEnhancement: true,
