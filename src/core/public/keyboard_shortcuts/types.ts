@@ -29,7 +29,7 @@ export interface KeyboardShortcutsStart {
   /**
    * Get all registered shortcuts
    */
-  //getAllShortcuts(): ShortcutDefinition[];
+  // getAllShortcuts(): ShortcutDefinition[];
 
   /**
    * Get all currently registered shortcuts for help modal
@@ -48,7 +48,6 @@ export interface KeyboardShortcutsStart {
    */
   showHelpModal(): void;
 
-
   /**
    * Unregister a shortcut
    * @param id - Shortcut ID to remove
@@ -56,12 +55,10 @@ export interface KeyboardShortcutsStart {
   unregister(id: string): void;
 }
 
-
-
 export interface ShortcutDefinition {
-  /** 
+  /**
    * Unique identifier for the shortcut within the plugin (e.g., 'search', 'save')
-   * 
+   *
    * The final ID will be constructed as: id + "." + pluginId
    * Example: 'search.discover', 'save.dashboard'
    */
@@ -72,32 +69,29 @@ export interface ShortcutDefinition {
   name: string;
   /** Category for grouping (e.g., 'navigation', 'editing') */
   category: string;
-  /** 
+  /**
    * Key combination string (e.g., 'ctrl+s', 'g+d', 'shift+?', 'escape')
-   * 
+   *
    * Supported formats:
    * - Modifier + key: 'ctrl+s', 'shift+?', 'alt+f'
    * - Multiple modifiers: 'ctrl+shift+z', 'ctrl+alt+d'
    * - Sequences: 'g+d', 'g+h' (two-key sequences)
-   * 
+   *
    * Cross-platform: 'ctrl' automatically maps to 'cmd' on macOS
    */
   keys: string;
-  
+
   /** Function to execute when shortcut is triggered */
   execute: ShortcutHandler;
   /** Optional condition function that determines if shortcut is active */
   condition?: ConditionFunction;
-
 }
-
 
 export type ShortcutHandler = (event: KeyboardEvent) => void | Promise<void>;
 export type ConditionFunction = () => boolean;
 
-
-/** 
- * @internal 
+/**
+ * @internal
  * Dependencies required by the keyboard shortcuts service during the start lifecycle phase.
  * These services are injected by the core system to provide necessary functionality.
  */

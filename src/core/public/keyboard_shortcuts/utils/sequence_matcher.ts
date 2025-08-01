@@ -29,7 +29,7 @@ export class SequenceMatcher {
     shortcuts: Map<string, ShortcutDefinition>
   ): ShortcutDefinition | null {
     const key = event.key.toLowerCase();
-    
+
     // Don't process special keys for sequences, but allow modifier keys
     // since sequences like 'g+shift' should work
     if (this.isSpecialKey(key)) {
@@ -62,7 +62,7 @@ export class SequenceMatcher {
     if (this.firstKey === null) {
       // First key in sequence
       this.firstKey = key;
-      
+
       // Set timer to clear sequence if no second key comes
       this.sequenceTimer = setTimeout(() => {
         this.clearSequence();
@@ -71,14 +71,14 @@ export class SequenceMatcher {
       // Second key - check for exact match
       this.secondKey = key;
       const sequenceKey = `${this.firstKey}+${this.secondKey}`;
-      
+
       if (this.hasSequence(sequenceKey, shortcuts)) {
         // Exact match found - will be processed by caller
         return;
       } else {
         // No sequence match - reset and handle second key intelligently
         this.clearSequence();
-        
+
         // Smart recovery: check what to do with the second key
         if (this.couldStartSequence(key, shortcuts)) {
           // Key could start a new sequence
@@ -124,19 +124,19 @@ export class SequenceMatcher {
     if (!keyString.includes('+')) {
       return 'single';
     }
-    
-    const parts = keyString.split('+').filter(part => part.length > 0);
-    
+
+    const parts = keyString.split('+').filter((part) => part.length > 0);
+
     // Check if it's a modifier combination
     if (this.isModifierCombo(keyString)) {
       return 'modifier';
     }
-    
+
     // Check if it's a valid two-key sequence
     if (parts.length === 2 && this.isValidTwoKeySequence(parts)) {
       return 'sequence';
     }
-    
+
     // Everything else is treated as single key (VS Code approach - no validation)
     return 'single';
   }
@@ -146,17 +146,17 @@ export class SequenceMatcher {
    */
   private isModifierCombo(keyString: string): boolean {
     const modifiers = ['ctrl', 'cmd', 'shift', 'alt', 'meta'];
-    const parts = keyString.split('+').filter(part => part.length > 0);
-    
+    const parts = keyString.split('+').filter((part) => part.length > 0);
+
     if (parts.length < 2) return false; // Need at least modifier + key
-    
+
     // Check if any part except the last is a modifier
     for (let i = 0; i < parts.length - 1; i++) {
       if (modifiers.includes(parts[i].toLowerCase())) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -165,7 +165,7 @@ export class SequenceMatcher {
    */
   private isValidTwoKeySequence(parts: string[]): boolean {
     if (parts.length !== 2) return false;
-    
+
     // Check if first part is a reserved sequence prefix
     const SEQUENCE_PREFIXES = ['g']; // Must match the main service
     const [prefix] = parts;
@@ -194,8 +194,10 @@ export class SequenceMatcher {
     }
 
     // Match first and second keys
-    return this.firstKey === targetSequence[0].toLowerCase() && 
-           this.secondKey === targetSequence[1].toLowerCase();
+    return (
+      this.firstKey === targetSequence[0].toLowerCase() &&
+      this.secondKey === targetSequence[1].toLowerCase()
+    );
   }
 
   /**
@@ -222,9 +224,19 @@ export class SequenceMatcher {
    */
   private isSpecialKey(key: string): boolean {
     return [
-      'escape', 'enter', 'tab', 'backspace', 'delete',
-      'arrowup', 'arrowdown', 'arrowleft', 'arrowright',
-      'home', 'end', 'pageup', 'pagedown'
+      'escape',
+      'enter',
+      'tab',
+      'backspace',
+      'delete',
+      'arrowup',
+      'arrowdown',
+      'arrowleft',
+      'arrowright',
+      'home',
+      'end',
+      'pageup',
+      'pagedown',
     ].includes(key);
   }
 

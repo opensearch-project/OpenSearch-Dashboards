@@ -34,7 +34,5 @@ export const findMatchingShortcuts = (
   shortcuts: Map<string, ShortcutDefinition>
 ): ShortcutDefinition[] => {
   const eventKey = eventToKeyString(event);
-  return Array.from(shortcuts.values()).filter(
-    shortcut => shortcut.keys === eventKey
-  );
+  return Array.from(shortcuts.values()).filter((shortcut) => shortcut.keys === eventKey);
 };
