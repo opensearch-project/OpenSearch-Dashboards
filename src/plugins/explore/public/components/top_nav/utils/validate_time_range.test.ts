@@ -23,7 +23,7 @@ describe('validateTimeRangeWithOrder', () => {
     it('should return false for invalid time ranges where from > to (assumes valid format)', () => {
       expect(
         validateTimeRangeOrder({
-          from: '2025-07-31T21:15:21.002Z',
+          from: '2030-07-31T21:15:21.002Z',
           to: 'now',
         })
       ).toBe(false);
@@ -57,7 +57,7 @@ describe('validateTimeRangeWithOrder', () => {
     it('should return false for invalid time ranges (valid format but invalid logic)', () => {
       expect(
         validateTimeRangeWithOrder({
-          from: '2025-07-31T21:15:21.002Z',
+          from: '2030-07-31T21:15:21.002Z',
           to: 'now',
         })
       ).toBe(false);
@@ -86,7 +86,7 @@ describe('validateTimeRangeWithOrder', () => {
     it('should return true for invalid time ranges (from > to)', () => {
       expect(
         isTimeRangeInvalid({
-          from: '2025-07-31T21:15:21.002Z',
+          from: '2030-07-31T21:15:21.002Z',
           to: 'now',
         })
       ).toBe(true);
