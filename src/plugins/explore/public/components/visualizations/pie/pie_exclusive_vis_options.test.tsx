@@ -76,4 +76,22 @@ describe('PieExclusiveVisOptions', () => {
     expect(screen.getByTestId('showValuesSwtich')).toBeInTheDocument();
     expect(screen.getByTestId('showLabelsSwitch')).toBeInTheDocument();
   });
+
+  it('should render truncate when turn on show labels', () => {
+    const props = {
+      ...defaultProps,
+      styles: { donut: false, showValues: false, showLabels: true, truncate: 100 },
+    };
+    render(<PieExclusiveVisOptions {...props} />);
+    expect(screen.getByText('Truncate after')).toBeInTheDocument();
+  });
+
+  it('should not render truncate when turn off show labels', () => {
+    const props = {
+      ...defaultProps,
+      styles: { donut: false, showValues: false, showLabels: false, truncate: 100 },
+    };
+    render(<PieExclusiveVisOptions {...props} />);
+    expect(screen.queryByText('Truncate after')).not.toBeInTheDocument();
+  });
 });
