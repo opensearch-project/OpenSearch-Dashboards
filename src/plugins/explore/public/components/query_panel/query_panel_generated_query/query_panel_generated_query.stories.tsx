@@ -57,6 +57,10 @@ const createStoreWithQuery = (lastExecutedTranslatedQuery: string = '') => {
       results: {},
       tab: {
         logs: {},
+        patterns: {
+          patternsField: undefined,
+          usingRegexPatterns: false,
+        },
       },
       legacy: {
         columns: [],
