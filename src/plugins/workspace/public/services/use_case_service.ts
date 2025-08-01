@@ -20,7 +20,6 @@ import {
   WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_USE_CASES,
   WORKSPACE_COLLABORATORS_APP_ID,
-  WORKSPACE_PARENT_NAV_ID,
 } from '../../common/constants';
 import {
   convertNavGroupToWorkspaceUseCase,
@@ -33,7 +32,6 @@ export interface UseCaseServiceSetupDeps {
   chrome: CoreSetup['chrome'];
   workspaces: WorkspacesSetup;
   getStartServices: CoreSetup['getStartServices'];
-  application: CoreSetup['application'];
 }
 
 export class UseCaseService {
@@ -46,17 +44,6 @@ export class UseCaseService {
    * @param currentWorkspace
    */
   private async registerManageWorkspaceCategory(setupDeps: UseCaseServiceSetupDeps) {
-    // register a empty workspace parent app to the nav group
-    setupDeps.application.register({
-      id: WORKSPACE_PARENT_NAV_ID,
-      title: i18n.translate('workspace.settings.workspace', {
-        defaultMessage: 'Workspace',
-      }),
-      category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-      async mount() {
-        return () => {};
-      },
-    });
     const [coreStart] = await setupDeps.getStartServices();
     const isPermissionEnabled = coreStart?.application?.capabilities.workspaces.permissionEnabled;
 
@@ -84,18 +71,12 @@ export class UseCaseService {
         if (navGroupInfo) {
           setupDeps.chrome.navGroup.addNavLinksToGroup(navGroupInfo, [
             {
-              id: WORKSPACE_PARENT_NAV_ID,
-              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-              order: 100,
-            },
-            {
               id: WORKSPACE_DETAIL_APP_ID,
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 100,
               title: i18n.translate('workspace.settings.workspaceDetails', {
                 defaultMessage: 'Workspace details',
               }),
-              parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
             },
             ...(isPermissionEnabled
               ? [
@@ -106,7 +87,6 @@ export class UseCaseService {
                     title: i18n.translate('workspace.settings.workspaceCollaborators', {
                       defaultMessage: 'Collaborators',
                     }),
-                    parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
                   },
                 ]
               : []),
@@ -114,19 +94,16 @@ export class UseCaseService {
               id: 'dataSources',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 300,
-              parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
             },
             {
               id: 'indexPatterns',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 400,
-              parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
             },
             {
               id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 500,
-              parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
             },
             {
               id: 'import_sample_data',
@@ -135,19 +112,17 @@ export class UseCaseService {
               title: i18n.translate('workspace.left.sampleData.label', {
                 defaultMessage: 'Sample data',
               }),
-              parentNavLinkId: WORKSPACE_PARENT_NAV_ID,
             },
           ]);
         }
       });
   }
 
-  setup({ chrome, workspaces, getStartServices, application }: UseCaseServiceSetupDeps) {
+  setup({ chrome, workspaces, getStartServices }: UseCaseServiceSetupDeps) {
     this.registerManageWorkspaceCategory({
       chrome,
       workspaces,
       getStartServices,
-      application,
     });
   }
 
