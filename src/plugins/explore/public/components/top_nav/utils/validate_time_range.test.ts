@@ -24,7 +24,7 @@ describe('validateTimeRangeWithOrder', () => {
       expect(
         validateTimeRangeOrder({
           from: '2025-07-31T21:15:21.002Z',
-          to: 'now',
+          to: '2025-07-01T21:15:21.002Z',
         })
       ).toBe(false);
     });
@@ -58,7 +58,7 @@ describe('validateTimeRangeWithOrder', () => {
       expect(
         validateTimeRangeWithOrder({
           from: '2025-07-31T21:15:21.002Z',
-          to: 'now',
+          to: '2025-07-01T21:15:21.002Z',
         })
       ).toBe(false);
     });
@@ -87,7 +87,7 @@ describe('validateTimeRangeWithOrder', () => {
       expect(
         isTimeRangeInvalid({
           from: '2025-07-31T21:15:21.002Z',
-          to: 'now',
+          to: '2025-07-01T21:15:21.002Z',
         })
       ).toBe(true);
     });

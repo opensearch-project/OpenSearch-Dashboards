@@ -397,21 +397,12 @@ export const createFacetedMultiLineChart = (
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
       : undefined,
     data: { values: transformedData },
-    // Add a max width to the entire visualization and make it scrollable
-    width: 'container',
-    autosize: {
-      type: 'fit-x',
-      contains: 'padding',
-    },
     facet: {
       field: category2Field,
       type: 'nominal',
-      columns: 2,
       header: { title: category2Name },
     },
     spec: {
-      width: 250, // Reduced from 300 to fit better
-      height: 200,
       layer: [
         {
           mark: facetMarkConfig,

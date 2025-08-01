@@ -396,11 +396,8 @@ describe('Area Chart to_expression', () => {
 
       // Verify facet configuration
       expect(result.facet).toHaveProperty('field', 'category2');
-      expect(result.facet).toHaveProperty('columns', 2);
 
       // Verify spec configuration
-      expect(result.spec).toHaveProperty('width', 250);
-      expect(result.spec).toHaveProperty('height', 200);
       expect(result.spec).toHaveProperty('layer');
       expect(Array.isArray(result.spec.layer)).toBe(true);
 
