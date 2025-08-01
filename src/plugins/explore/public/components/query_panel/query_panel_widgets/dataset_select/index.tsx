@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './set_dataset';
+export { DatasetSelectWidget } from './dataset_select';

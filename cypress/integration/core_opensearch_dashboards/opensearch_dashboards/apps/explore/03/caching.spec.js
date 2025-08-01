@@ -65,22 +65,15 @@ const cachingTestSuite = () => {
         isEnhancement: true,
       });
 
-      cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-      cy.getElementByTestId('datasetSelectAdvancedButton').click();
-      cy.intercept('GET', '**/api/saved_objects/_find?fields*').as('getIndexPatternRequest');
-      cy.get(`[title="Index Patterns"]`).click();
-
-      cy.wait('@getIndexPatternRequest').then((interceptedResponse) => {
-        let containsIndexPattern = false;
-
-        for (const savedObject of interceptedResponse.response.body.saved_objects) {
-          if (savedObject.attributes.title === alternativeIndexPattern) {
-            containsIndexPattern = true;
-          }
-        }
-
-        cy.wrap(containsIndexPattern).should('be.true');
+      cy.get('body').then(() => {
+        cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
       });
+
+      cy.getElementByTestId('datasetSelectSelectable')
+        .should('be.visible')
+        .within(() => {
+          cy.get(`[title="${alternativeIndexPattern}"]`).should('exist');
+        });
     });
   });
 };
