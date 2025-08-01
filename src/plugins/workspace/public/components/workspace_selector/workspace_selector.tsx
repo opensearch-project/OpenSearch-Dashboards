@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiToolTip,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
@@ -42,10 +41,9 @@ const getValidWorkspaceColor = (color?: string) =>
 interface Props {
   coreStart: CoreStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
-  isNavOpen: boolean;
 }
 
-export const WorkspaceSelector = ({ coreStart, registeredUseCases$, isNavOpen }: Props) => {
+export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const availableUseCases = useObservable(registeredUseCases$, []);
@@ -67,7 +65,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$, isNavOpen }:
     setPopover(false);
   };
 
-  let button = currentWorkspace ? (
+  const button = currentWorkspace ? (
     <div className="workspaceSelectorPopoverButtonContainer" data-label="Workspace">
       <EuiPanel
         className="workspaceSelectorPopoverButton"
@@ -117,25 +115,6 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$, isNavOpen }:
   ) : (
     <EuiButton onClick={onButtonClick}>Select a Workspace</EuiButton>
   );
-
-  if (!isNavOpen && currentWorkspace) {
-    button = (
-      <EuiFlexGroup alignItems="center" direction="column" gutterSize="none">
-        <EuiFlexItem>
-          <EuiToolTip content={currentWorkspace.name}>
-            <EuiButtonEmpty onClick={onButtonClick} flush="both">
-              <EuiIcon
-                size="l"
-                data-test-subj="workspaceSelectorIcon"
-                type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
-                color={getValidWorkspaceColor(currentWorkspace.color)}
-              />
-            </EuiButtonEmpty>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
 
   return (
     <EuiPopover

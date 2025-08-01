@@ -81,7 +81,6 @@ import {
   LinkItemType,
   getSortedNavLinks,
   SearchCommandKeyTypes,
-  LeftBottomActionButton,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -403,7 +402,6 @@ export {
   LinkItemType,
   getSortedNavLinks,
   SearchCommandKeyTypes,
-  LeftBottomActionButton,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';

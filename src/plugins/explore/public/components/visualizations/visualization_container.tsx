@@ -4,7 +4,7 @@
  */
 
 import './visualization_container.scss';
-import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -20,6 +20,7 @@ import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { getVisualizationBuilder } from './visualization_builder';
 import { TableVis } from './table/table_vis';
 import { TableChartStyleControls } from './table/table_vis_config';
+import { VisualizationEmptyState } from './visualization_empty_state';
 
 export interface UpdateVisualizationProps {
   rule?: Partial<VisualizationRule>;
@@ -182,13 +183,7 @@ export const VisualizationContainer = () => {
         />
       );
     }
-    return (
-      <EuiEmptyPrompt
-        iconType="visualizeApp"
-        title={<h2>Select a chart type, and x and y axes fields to get started</h2>}
-        body={<p>Try writing an aggregated query like this one:</p>}
-      />
-    );
+    return <VisualizationEmptyState />;
   };
 
   return (

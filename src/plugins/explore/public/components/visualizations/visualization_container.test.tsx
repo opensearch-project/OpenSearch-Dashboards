@@ -125,7 +125,7 @@ describe('VisualizationContainer', () => {
     render(<VisualizationContainer />);
 
     expect(
-      screen.getByText('Select a chart type, and x and y axes fields to get started')
+      screen.getByText('Select a visualization type and fields to get started')
     ).toBeInTheDocument();
   });
 
@@ -137,7 +137,7 @@ describe('VisualizationContainer', () => {
     // The TableVis component should be rendered
     expect(screen.getByTestId('mockTableVis')).toBeInTheDocument();
     expect(
-      screen.queryByText('Select a chart type, and x and y axes fields to get started')
+      screen.queryByText('Select a visualization type and fields to get started')
     ).not.toBeInTheDocument();
   });
 
