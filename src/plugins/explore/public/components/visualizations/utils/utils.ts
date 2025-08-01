@@ -23,6 +23,7 @@ export const applyAxisStyling = (axesStyle?: CompleteAxisWithStyle, disableGrid?
     grid: gridEnabled,
     gridColor: '#E0E0E0',
     gridOpacity: 0.5,
+    labelSeparation: 8,
   };
 
   // Apply position

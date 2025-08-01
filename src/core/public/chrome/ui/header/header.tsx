@@ -71,7 +71,6 @@ import {
   ChromeBranding,
   ChromeBreadcrumbEnricher,
   ChromeHelpExtension,
-  CollapsibleNavHeaderRender,
 } from '../../chrome_service';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { OnIsLockedUpdate } from './';
@@ -97,7 +96,7 @@ export interface HeaderProps {
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
-  collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;

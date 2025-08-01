@@ -72,6 +72,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
   const [isCreateWorkspacePopoverOpen, setIsCreateWorkspacePopoverOpen] = useState(false);
   const mountUserAccountRef = useRef<HTMLDivElement>(null);
   const mountSettingRef = useRef<HTMLDivElement>(null);
+  const mountDevToolsRef = useRef<HTMLDivElement>(null);
 
   const leftBottom$Ref = useRef(chrome.navControls.getLeftBottom$());
   const leftBottomNavItems = useObservable(leftBottom$Ref.current);
@@ -79,10 +80,14 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
   useEffect(() => {
     // TODO: We will refactor ChromeNavControl in the future and obtain mount through ID.
     const settingMount = leftBottomNavItems?.find((item) => item.order === 3)?.mount;
+    const devToolsMount = leftBottomNavItems?.find((item) => item.order === 4)?.mount;
     const userAccountMount = leftBottomNavItems?.find((item) => item.order === 10000)?.mount;
 
     if (settingMount && mountSettingRef.current) {
       settingMount(mountSettingRef.current);
+    }
+    if (devToolsMount && mountDevToolsRef.current) {
+      devToolsMount(mountDevToolsRef.current);
     }
     if (userAccountMount && mountUserAccountRef.current) {
       userAccountMount(mountUserAccountRef.current);
@@ -256,6 +261,8 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
 
         <div className="workspace-initial__fixed-left-bottom-icon">
           <div ref={mountSettingRef} />
+          <EuiSpacer size="s" />
+          <div ref={mountDevToolsRef} />
           <EuiSpacer size="s" />
           <div ref={mountUserAccountRef} />
         </div>

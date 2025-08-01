@@ -44,8 +44,6 @@ export const ChartTypeSelector = <T extends ChartType>({
 }: ChartTypeSelectorProps<T>) => {
   // Indicates no rule is matched and the user should manually generate the visualization
   const shouldManuallyGenerate = useRef(!Boolean(chartType));
-
-  // Local state for chart type, initialized from Redux
   const [currChartTypeId, setCurrChartTypeId] = useState(chartType);
 
   useEffect(() => {

@@ -52,7 +52,6 @@ import { OnIsLockedUpdate } from './';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import { getIsCategoryOpen, setIsCategoryOpen } from '../../utils';
-import { CollapsibleNavHeaderRender } from '../../chrome_service';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -77,7 +76,7 @@ function getOrderedCategories(
 interface Props {
   appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
-  collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   id: string;
   isLocked: boolean;
   isNavOpen: boolean;
@@ -142,7 +141,7 @@ export function CollapsibleNav({
       onClose={closeNav}
       outsideClickCloses={false}
     >
-      {collapsibleNavHeaderRender && collapsibleNavHeaderRender({ isNavOpen })}
+      {collapsibleNavHeaderRender && collapsibleNavHeaderRender()}
       {customNavLink && (
         <Fragment>
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
