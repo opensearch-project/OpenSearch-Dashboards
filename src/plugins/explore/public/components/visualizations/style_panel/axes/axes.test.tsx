@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { AxesOptions } from './axes';
-import { CategoryAxis, ValueAxis, VisColumn, VisFieldType, Positions } from '../../types';
+import { CategoryAxis, ValueAxis, VisColumn, VisFieldType, Positions, AxisRole } from '../../types';
 
 // Mock the debounced value hooks
 jest.mock('../../utils/use_debounced_value', () => {
@@ -123,6 +123,7 @@ describe('AxesOptions', () => {
     numericalColumns: mockNumericalColumns,
     categoricalColumns: mockCategoricalColumns,
     dateColumns: mockDateColumns,
+    axisColumnMappings: {},
   };
 
   const rule2Props = {
@@ -423,6 +424,9 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumns[0],
+      },
     };
 
     render(<AxesOptions {...propsWithEmptyTitle} />);
@@ -441,6 +445,9 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {
+        [AxisRole.Y]: mockNumericalColumns[0],
+      },
     };
 
     render(<AxesOptions {...propsWithEmptyTitle} />);
@@ -623,6 +630,7 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {},
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
@@ -642,6 +650,7 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {},
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
