@@ -133,7 +133,7 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
   manageWorkspace: {
     id: 'manageWorkspace',
     label: i18n.translate('core.ui.manageWorkspaceNav.label', {
-      defaultMessage: 'Manage',
+      defaultMessage: 'Manage workspace',
     }),
     order: 9000,
   },

@@ -5,7 +5,6 @@
 
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import {
-  App,
   AppCategory,
   ApplicationStart,
   ChromeNavGroup,
@@ -48,28 +47,6 @@ export interface ChromeRegistrationNavLink {
    * use addNavLinksToGroup to keep the interfaces consistent.
    */
   showInAllNavGroup?: boolean;
-
-  /**
-   * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
-   */
-  euiIconType?: App['euiIconType'];
-
-  /**
-   * A URL to an image file used as an icon. Used as a fallback
-   * if `euiIconType` is not provided.
-   */
-  icon?: App['icon'];
-
-  /**
-   * Additional onClick handler for the nav link.
-   * This will be called when the nav link is clicked, before the default navigation behavior.
-   * If this handler returns a promise, the default navigation will be delayed until the promise resolves.
-   * This can be used to perform additional actions before navigating, such as logging or analytics.
-   * If the handler returns void, the default navigation will proceed immediately.
-   * You can use event.preventDefault() to prevent the default navigation behavior.
-   */
-  onClick?: (event: React.MouseEvent) => void;
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {

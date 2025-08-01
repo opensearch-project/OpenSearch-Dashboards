@@ -87,13 +87,11 @@ export class VisualizationBuilder {
 
     // Subscribe to visualization state updates and sync the state to url
     this.subscriptions.push(
-      combineLatest([
-        this.currentChartType$,
-        this.axesMapping$,
-        this.styles$,
-      ]).subscribe(([chartType, axesMapping, styles]) =>
-        this.syncToUrl({ chartType, axesMapping, styleOptions: styles?.styles })
-      ),
+      combineLatest([this.currentChartType$, this.axesMapping$, this.styles$])
+        .pipe(debounceTime(500))
+        .subscribe(([chartType, axesMapping, styles]) =>
+          this.syncToUrl({ chartType, axesMapping, styleOptions: styles?.styles })
+        ),
       this.currentChartType$
         .pipe(skip(1))
         .subscribe((chartType) =>
@@ -262,7 +260,7 @@ export class VisualizationBuilder {
       columns.length > 0 && columns[0].validValuesCount > 1 && currentChartType === 'metric';
 
     // We cannot apply the current chart type and axes mapping if:
-    // 1. The current chart type if 'metric', but it has multiple data points
+    // 1. The current chart type is 'metric', but it has multiple data points
     // 2. It has axes mapping, but the mapping is incompatible with the received data
     // 3. No current axes mapping
     // For these cases, we will create auto vis based on the rules. If not auto vis can be created,
@@ -277,9 +275,15 @@ export class VisualizationBuilder {
           this.setStyles({ styles: visConfig?.ui.style.defaults, type: autoVis.chartType });
         }
       } else {
-        this.setCurrentChartType(undefined);
+        const visConfig = visualizationRegistry.getVisualizationConfig('table');
+        // Default to show a table if no auto vis created
+        this.setCurrentChartType('table');
         this.setAxesMapping({});
-        this.setStyles(undefined);
+        if (visConfig) {
+          this.setStyles({ type: 'table', styles: visConfig?.ui.style.defaults });
+        } else {
+          this.setStyles(undefined);
+        }
       }
       return;
     }
