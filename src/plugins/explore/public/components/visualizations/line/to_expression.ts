@@ -47,6 +47,7 @@ export const createSimpleLineChart = (
           {
             title: dateName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
@@ -137,6 +138,7 @@ export const createLineBarChart = (
           {
             title: dateName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
@@ -284,6 +286,7 @@ export const createMultiLineChart = (
           {
             title: dateName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
@@ -416,6 +419,7 @@ export const createFacetedMultiLineChart = (
                 {
                   title: dateName,
                   labelAngle: -45,
+                  labelSeparation: 8,
                 },
                 styles,
                 'category',
@@ -556,6 +560,7 @@ export const createCategoryLineChart = (
           {
             title: categoryName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
