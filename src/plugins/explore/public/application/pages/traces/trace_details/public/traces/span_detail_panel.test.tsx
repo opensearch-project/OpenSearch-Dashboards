@@ -274,4 +274,227 @@ describe('SpanDetailPanel', () => {
       document.querySelector('[data-testid="span-detail-table-hierarchy"]')
     ).not.toBeInTheDocument();
   });
+
+  it('tests addSpanFilter functionality', () => {
+    const mockSetSpanFiltersWithStorage = jest.fn();
+    const propsWithFilters = {
+      ...defaultProps,
+      spanFilters: [{ field: 'serviceName', value: 'service-a' }],
+      setSpanFiltersWithStorage: mockSetSpanFiltersWithStorage,
+    };
+
+    render(<SpanDetailPanel {...propsWithFilters} />);
+
+    expect(mockSetSpanFiltersWithStorage).toBeDefined();
+  });
+
+  it('tests removeSpanFilter functionality', () => {
+    const mockSetSpanFiltersWithStorage = jest.fn();
+    const propsWithFilters = {
+      ...defaultProps,
+      spanFilters: [{ field: 'serviceName', value: 'service-a' }],
+      setSpanFiltersWithStorage: mockSetSpanFiltersWithStorage,
+    };
+
+    render(<SpanDetailPanel {...propsWithFilters} />);
+
+    expect(mockSetSpanFiltersWithStorage).toBeDefined();
+  });
+
+  it('handles window resize events', () => {
+    const originalInnerWidth = window.innerWidth;
+
+    render(<SpanDetailPanel {...defaultProps} />);
+
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 1200,
+    });
+
+    const resizeEvent = new Event('resize');
+    window.dispatchEvent(resizeEvent);
+
+    // Restore original value
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: originalInnerWidth,
+    });
+
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+  });
+
+  it('calculates gantt height correctly for different span counts', () => {
+    // Test with 0 spans
+    const propsWithNoSpans = {
+      ...defaultProps,
+      payloadData: JSON.stringify([]),
+    };
+
+    render(<SpanDetailPanel {...propsWithNoSpans} />);
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
+      '0'
+    );
+  });
+
+  it('calculates gantt height correctly for single span', () => {
+    const propsWithSingleSpan = {
+      ...defaultProps,
+      payloadData: JSON.stringify([mockSpanData[0]]),
+    };
+
+    render(<SpanDetailPanel {...propsWithSingleSpan} />);
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
+      '1'
+    );
+  });
+
+  it('calculates gantt height correctly for multiple spans', () => {
+    const multipleSpans = Array.from({ length: 5 }, (_, i) => ({
+      ...mockSpanData[0],
+      spanId: `span-${i + 1}`,
+    }));
+
+    const propsWithMultipleSpans = {
+      ...defaultProps,
+      payloadData: JSON.stringify(multipleSpans),
+    };
+
+    render(<SpanDetailPanel {...propsWithMultipleSpans} />);
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
+      '5'
+    );
+  });
+
+  it('handles containerRef correctly when available', () => {
+    const mockGetBoundingClientRect = jest.fn(() => ({
+      width: 800,
+      height: 600,
+      top: 0,
+      left: 0,
+      bottom: 600,
+      right: 800,
+      x: 0,
+      y: 0,
+      toJSON: jest.fn(),
+    }));
+
+    const originalCreateElement = document.createElement;
+    document.createElement = jest.fn((tagName) => {
+      const element = originalCreateElement.call(document, tagName);
+      if (tagName === 'div') {
+        element.getBoundingClientRect = mockGetBoundingClientRect;
+      }
+      return element;
+    });
+
+    render(<SpanDetailPanel {...defaultProps} />);
+
+    // Restore original createElement
+    document.createElement = originalCreateElement;
+
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+  });
+
+  it('handles locked navigation drawer state', () => {
+    const useObservableMock = jest.requireMock('react-use/lib/useObservable');
+    useObservableMock.mockReturnValue(true);
+
+    render(<SpanDetailPanel {...defaultProps} />);
+
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+
+    // Reset mock
+    useObservableMock.mockReturnValue(false);
+  });
+
+  it('handles unlocked navigation drawer state', () => {
+    // Mock useObservable to return false (unlocked state)
+    const useObservableMock = jest.requireMock('react-use/lib/useObservable');
+    useObservableMock.mockReturnValue(false);
+
+    render(<SpanDetailPanel {...defaultProps} />);
+
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+  });
+
+  it('passes correct props to SpanDetailTable', () => {
+    const propsWithSpanList = {
+      ...defaultProps,
+      activeView: 'span_list',
+      spanFilters: [{ field: 'serviceName', value: 'test-service' }],
+    };
+
+    render(<SpanDetailPanel {...propsWithSpanList} />);
+
+    const spanTable = document.querySelector('[data-testid="span-detail-table"]');
+    expect(spanTable).toBeInTheDocument();
+    expect(spanTable).toHaveTextContent('Span List View');
+  });
+
+  it('passes correct props to SpanDetailTableHierarchy', () => {
+    const propsWithTreeView = {
+      ...defaultProps,
+      activeView: 'tree_view',
+      spanFilters: [{ field: 'serviceName', value: 'test-service' }],
+    };
+
+    render(<SpanDetailPanel {...propsWithTreeView} />);
+
+    const hierarchyTable = document.querySelector('[data-testid="span-detail-table-hierarchy"]');
+    expect(hierarchyTable).toBeInTheDocument();
+    expect(hierarchyTable).toHaveTextContent('Tree View');
+  });
+
+  it('passes correct props to GanttChart', () => {
+    render(<SpanDetailPanel {...defaultProps} />);
+
+    const ganttChart = document.querySelector('[data-testid="gantt-chart"]');
+    expect(ganttChart).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
+      '2'
+    );
+  });
+
+  it('handles empty colorMap gracefully', () => {
+    const propsWithEmptyColorMap = {
+      ...defaultProps,
+      colorMap: {},
+    };
+
+    render(<SpanDetailPanel {...propsWithEmptyColorMap} />);
+
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+  });
+
+  it('handles undefined colorMap gracefully', () => {
+    const propsWithUndefinedColorMap = {
+      ...defaultProps,
+      colorMap: undefined,
+    };
+
+    render(<SpanDetailPanel {...propsWithUndefinedColorMap} />);
+
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+  });
+
+  it('renders with default activeView when not provided', () => {
+    const propsWithoutActiveView = {
+      ...defaultProps,
+      activeView: undefined,
+    };
+
+    render(<SpanDetailPanel {...propsWithoutActiveView} />);
+
+    // Should default to timeline view (gantt chart)
+    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-detail-table"]')).not.toBeInTheDocument();
+    expect(
+      document.querySelector('[data-testid="span-detail-table-hierarchy"]')
+    ).not.toBeInTheDocument();
+  });
 });

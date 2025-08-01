@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
+import { SpanDetailTable, SpanDetailTableHierarchy, parseHits } from './span_detail_table';
 import { RenderCustomDataGrid } from '../utils/custom_datagrid';
 
 jest.mock('../utils/helper_functions', () => ({
@@ -417,6 +417,305 @@ describe('RenderSpanCellValue function coverage', () => {
   });
 });
 
+describe('parseHits function coverage', () => {
+  it('handles array format data', () => {
+    const arrayData = [
+      {
+        spanId: 'span-1',
+        serviceName: 'service-1',
+        name: 'operation-1',
+        durationInNanos: 1000000000,
+        'status.code': 0,
+      },
+    ];
+
+    const result = parseHits(JSON.stringify(arrayData));
+    expect(result).toEqual(arrayData);
+    expect(result.length).toBe(1);
+    expect(result[0].spanId).toBe('span-1');
+  });
+
+  it('handles error in parseHits', () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const result = parseHits('invalid json');
+
+    expect(result).toEqual([]);
+    expect(consoleSpy).toHaveBeenCalledWith('Error processing payloadData:', expect.any(Error));
+
+    consoleSpy.mockRestore();
+  });
+
+  it('handles empty string input', () => {
+    const result = parseHits('');
+    expect(result).toEqual([]);
+  });
+
+  it('handles null input gracefully', () => {
+    const result = parseHits('null');
+    expect(result).toEqual([]);
+  });
+});
+
+describe('renderSpanCellValue function coverage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('covers null item check', () => {
+    const testData = {
+      hits: {
+        hits: [
+          {
+            _source: {
+              spanId: 'test-span',
+              serviceName: 'test-service',
+              name: 'test-operation',
+              durationInNanos: 1500000000,
+              'status.code': 0,
+              startTime: '2023-01-01T12:00:00.000Z',
+              endTime: '2023-01-01T12:00:01.500Z',
+            },
+          },
+        ],
+      },
+    };
+
+    const props = {
+      hiddenColumns: [],
+      openFlyout: jest.fn(),
+      dataSourceMDSId: 'test-source',
+      payloadData: JSON.stringify(testData),
+      filters: [],
+    };
+
+    render(<SpanDetailTable {...props} />);
+
+    expect(RenderCustomDataGrid).toHaveBeenCalled();
+
+    const mockCall = (RenderCustomDataGrid as jest.Mock).mock.calls[0][0];
+    const renderCellValue = mockCall.renderCellValue;
+
+    const nullItemResult = renderCellValue({
+      rowIndex: 999, // Out of bounds index
+      columnId: 'serviceName',
+      disableInteractions: false,
+    });
+    expect(nullItemResult).toBe('-');
+  });
+
+  it('covers error status case', () => {
+    const testData = {
+      hits: {
+        hits: [
+          {
+            _source: {
+              spanId: 'error-span',
+              serviceName: 'error-service',
+              name: 'error-operation',
+              durationInNanos: 1000000000,
+              'status.code': 2, // Error status
+              startTime: '2023-01-01T12:00:00.000Z',
+              endTime: '2023-01-01T12:00:01.000Z',
+            },
+          },
+        ],
+      },
+    };
+
+    const props = {
+      hiddenColumns: [],
+      openFlyout: jest.fn(),
+      dataSourceMDSId: 'test-source',
+      payloadData: JSON.stringify(testData),
+      filters: [],
+    };
+
+    render(<SpanDetailTable {...props} />);
+
+    const mockCall = (RenderCustomDataGrid as jest.Mock).mock.calls[0][0];
+    const renderCellValue = mockCall.renderCellValue;
+
+    const errorStatusResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'status.code',
+      disableInteractions: false,
+    });
+    expect(errorStatusResult).toBeDefined();
+  });
+
+  it('covers spanId with disabled interactions', () => {
+    const testData = {
+      hits: {
+        hits: [
+          {
+            _source: {
+              spanId: 'test-span-id',
+              serviceName: 'test-service',
+              name: 'test-operation',
+              durationInNanos: 1000000000,
+              'status.code': 0,
+            },
+          },
+        ],
+      },
+    };
+
+    const props = {
+      hiddenColumns: [],
+      openFlyout: jest.fn(),
+      dataSourceMDSId: 'test-source',
+      payloadData: JSON.stringify(testData),
+      filters: [],
+    };
+
+    render(<SpanDetailTable {...props} />);
+
+    const mockCall = (RenderCustomDataGrid as jest.Mock).mock.calls[0][0];
+    const renderCellValue = mockCall.renderCellValue;
+
+    const spanIdDisabledResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'spanId',
+      disableInteractions: true,
+    });
+    expect(spanIdDisabledResult).toBeDefined();
+
+    const spanIdEnabledResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'spanId',
+      disableInteractions: false,
+    });
+    expect(spanIdEnabledResult).toBeDefined();
+  });
+
+  it('covers all switch cases', () => {
+    const testData = {
+      hits: {
+        hits: [
+          {
+            _source: {
+              spanId: 'test-span',
+              serviceName: 'test-service',
+              name: 'test-operation',
+              durationInNanos: 1500000000,
+              'status.code': 0,
+              startTime: '2023-01-01T12:00:00.000Z',
+              endTime: '2023-01-01T12:00:01.500Z',
+              parentSpanId: 'parent-span',
+              traceId: 'trace-123',
+              traceGroup: 'test-group',
+            },
+          },
+        ],
+      },
+    };
+
+    const props = {
+      hiddenColumns: [],
+      openFlyout: jest.fn(),
+      dataSourceMDSId: 'test-source',
+      payloadData: JSON.stringify(testData),
+      filters: [],
+    };
+
+    render(<SpanDetailTable {...props} />);
+
+    const mockCall = (RenderCustomDataGrid as jest.Mock).mock.calls[0][0];
+    const renderCellValue = mockCall.renderCellValue;
+
+    const durationResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'durationInNanos',
+      disableInteractions: false,
+    });
+    expect(durationResult).toBeDefined();
+
+    const startTimeResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'startTime',
+      disableInteractions: false,
+    });
+    expect(startTimeResult).toBeDefined();
+
+    const endTimeResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'endTime',
+      disableInteractions: false,
+    });
+    expect(endTimeResult).toBeDefined();
+
+    const defaultResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'serviceName',
+      disableInteractions: false,
+    });
+    expect(defaultResult).toBeDefined();
+
+    const defaultMissingResult = renderCellValue({
+      rowIndex: 0,
+      columnId: 'nonExistentField',
+      disableInteractions: false,
+    });
+    expect(defaultMissingResult).toBe('-');
+  });
+});
+
+describe('SpanDetailTable error handling', () => {
+  it('covers error in useEffect parsing', () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Create props that will cause an error during processing
+    const propsWithBadData = {
+      hiddenColumns: [],
+      openFlyout: jest.fn(),
+      dataSourceMDSId: 'test-source',
+      payloadData: '{"hits": {"hits": [{"_source": {"spanId": null}}]}}',
+      filters: [{ field: 'invalidField', value: 'test' }], // This might cause issues during filtering
+    };
+
+    render(<SpanDetailTable {...propsWithBadData} />);
+
+    // The component should still render without crashing
+    expect(screen.getByTestId('mockDataGrid')).toBeInTheDocument();
+
+    consoleSpy.mockRestore();
+  });
+
+  it('handles malformed JSON in payloadData', () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const propsWithMalformedJson = {
+      hiddenColumns: [],
+      openFlyout: jest.fn(),
+      dataSourceMDSId: 'test-source',
+      payloadData: '{"hits": {"hits": [{"_source": {malformed json}',
+      filters: [],
+    };
+
+    render(<SpanDetailTable {...propsWithMalformedJson} />);
+
+    expect(screen.getByTestId('mockDataGrid')).toBeInTheDocument();
+    expect(consoleSpy).toHaveBeenCalledWith('Error processing payloadData:', expect.any(Error));
+
+    consoleSpy.mockRestore();
+  });
+
+  it('handles undefined payloadData gracefully', () => {
+    const propsWithUndefinedData = {
+      hiddenColumns: [],
+      openFlyout: jest.fn(),
+      dataSourceMDSId: 'test-source',
+      payloadData: undefined as any,
+      filters: [],
+    };
+
+    render(<SpanDetailTable {...propsWithUndefinedData} />);
+
+    expect(screen.getByTestId('mockDataGrid')).toBeInTheDocument();
+  });
+});
+
 describe('SpanDetailTableHierarchy', () => {
   const defaultProps = {
     hiddenColumns: [],
@@ -514,5 +813,20 @@ describe('SpanDetailTableHierarchy', () => {
     const serviceCell = screen.getByTestId('cell-serviceName-hierarchy');
     expect(serviceCell).toHaveTextContent('service-1');
     expect(serviceCell).not.toHaveTextContent('service-2');
+  });
+
+  it('handles error in hierarchy parsing', () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const propsWithBadHierarchyData = {
+      ...defaultProps,
+      payloadData: '{"hits": {"hits": [{"_source": null}]}}',
+    };
+
+    render(<SpanDetailTableHierarchy {...propsWithBadHierarchyData} />);
+
+    expect(screen.getByTestId('mockDataGrid')).toBeInTheDocument();
+
+    consoleSpy.mockRestore();
   });
 });

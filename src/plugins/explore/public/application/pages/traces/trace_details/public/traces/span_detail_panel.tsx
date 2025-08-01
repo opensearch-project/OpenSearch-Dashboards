@@ -4,121 +4,19 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingChart,
   EuiPanel,
-  EuiPopover,
-  EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { i18n } from '@osd/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { ChromeStart } from 'opensearch-dashboards/public';
 import './span_detail_panel.scss';
 import { TracePPLService } from '../../server/ppl_request_trace';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { GanttChart } from '../gantt_chart_vega/gantt_chart_vega';
-import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';
-import { DataExplorerServices } from '../../../../../../../data_explorer/public';
-
-interface ServiceLegendProps {
-  colorMap: Record<string, string>;
-  data: Span[];
-}
-
-const ServiceLegend: React.FC<ServiceLegendProps> = ({ colorMap, data }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  // Extract services in the order they appear in the data
-  const servicesInOrder = useMemo(() => {
-    const serviceSet = new Set<string>();
-    // Add services in the order they appear in the data
-    data.forEach((span: Span) => {
-      const serviceName = span.serviceName;
-      if (serviceName && colorMap[serviceName]) {
-        serviceSet.add(serviceName);
-      }
-    });
-    return Array.from(serviceSet);
-  }, [data, colorMap]);
-
-  if (servicesInOrder.length === 0) {
-    return null;
-  }
-
-  const togglePopover = () => {
-    setIsPopoverOpen(!isPopoverOpen);
-  };
-
-  const closePopover = () => {
-    setIsPopoverOpen(false);
-  };
-
-  const legendButton = (
-    <EuiButtonEmpty
-      size="s"
-      onClick={togglePopover}
-      iconType="inspect"
-      data-test-subj="service-legend-toggle"
-      isSelected={isPopoverOpen}
-    >
-      {i18n.translate('explore.spanDetailPanel.button.serviceLegend', {
-        defaultMessage: 'Service legend',
-      })}
-    </EuiButtonEmpty>
-  );
-
-  const legendContent = (
-    <div className="exploreSpanDetailPanel__legendPopover">
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <strong>
-              {i18n.translate('explore.spanDetailPanel.title.serviceLegend', {
-                defaultMessage: 'Service legend',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-
-        {servicesInOrder.map((service) => (
-          <EuiFlexItem grow={false} key={`service-legend-${service}`}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <div
-                  className="exploreSpanDetailPanel__legendColorBox"
-                  style={{
-                    backgroundColor: colorMap[service],
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <span>{service}</span>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </div>
-  );
-
-  return (
-    <EuiPopover
-      button={legendButton}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="s"
-      anchorPosition="downRight"
-    >
-      {legendContent}
-    </EuiPopover>
-  );
-};
 
 export interface Span {
   traceId: string;
@@ -284,14 +182,6 @@ export function SpanDetailPanel(props: {
       return [];
     }
   }, [payloadData]);
-
-  const errorCount = useMemo(() => {
-    return parsedData.filter((span: Span) => span.status?.code === 2).length;
-  }, [parsedData]);
-
-  const handleErrorFilterClick = useCallback(() => {
-    addSpanFilter('status.code', 2);
-  }, [addSpanFilter]);
 
   // Calculate dynamic height based on number of spans
   const calculateGanttHeight = (spanCount: number): number => {
