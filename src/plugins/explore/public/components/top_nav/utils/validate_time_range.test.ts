@@ -10,11 +10,15 @@ import {
 } from './validate_time_range';
 
 describe('validateTimeRangeWithOrder', () => {
+  const getPastDate = () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
+  const getFutureDate = () => new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 1 day in future
+  const getCurrentDate = () => new Date().toISOString();
+
   describe('validateTimeRangeOrder', () => {
     it('should return true for valid time ranges where from < to (assumes valid format)', () => {
       expect(
         validateTimeRangeOrder({
-          from: '2025-07-01T21:15:21.002Z',
+          from: getPastDate(),
           to: 'now',
         })
       ).toBe(true);
@@ -23,17 +27,18 @@ describe('validateTimeRangeWithOrder', () => {
     it('should return false for invalid time ranges where from > to (assumes valid format)', () => {
       expect(
         validateTimeRangeOrder({
-          from: '2030-07-31T21:15:21.002Z',
+          from: getFutureDate(),
           to: 'now',
         })
       ).toBe(false);
     });
 
     it('should return true for equal from and to dates (assumes valid format)', () => {
+      const currentDate = getCurrentDate();
       expect(
         validateTimeRangeOrder({
-          from: '2025-07-22T12:00:00.000Z',
-          to: '2025-07-22T12:00:00.000Z',
+          from: currentDate,
+          to: currentDate,
         })
       ).toBe(true);
     });
@@ -48,7 +53,7 @@ describe('validateTimeRangeWithOrder', () => {
     it('should return true for valid time ranges (both format and logic)', () => {
       expect(
         validateTimeRangeWithOrder({
-          from: '2025-07-01T21:15:21.002Z',
+          from: getPastDate(),
           to: 'now',
         })
       ).toBe(true);
@@ -57,7 +62,7 @@ describe('validateTimeRangeWithOrder', () => {
     it('should return false for invalid time ranges (valid format but invalid logic)', () => {
       expect(
         validateTimeRangeWithOrder({
-          from: '2030-07-31T21:15:21.002Z',
+          from: getFutureDate(),
           to: 'now',
         })
       ).toBe(false);
@@ -77,7 +82,7 @@ describe('validateTimeRangeWithOrder', () => {
     it('should return false for valid time ranges', () => {
       expect(
         isTimeRangeInvalid({
-          from: '2025-07-01T21:15:21.002Z',
+          from: getPastDate(),
           to: 'now',
         })
       ).toBe(false);
@@ -86,7 +91,7 @@ describe('validateTimeRangeWithOrder', () => {
     it('should return true for invalid time ranges (from > to)', () => {
       expect(
         isTimeRangeInvalid({
-          from: '2030-07-31T21:15:21.002Z',
+          from: getFutureDate(),
           to: 'now',
         })
       ).toBe(true);
