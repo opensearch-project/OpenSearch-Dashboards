@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { PointShape } from '../types';
 
@@ -75,37 +75,42 @@ describe('ScatterExclusiveVisOptions', () => {
     expect(rangeInput).toHaveValue(0);
   });
 
-  it('calls onChange when angle is changed', () => {
+  it('calls onChange when angle is changed', async () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
     const rangeInput = screen.getByRole('spinbutton');
 
     fireEvent.change(rangeInput, { target: { value: '90' } });
     fireEvent.blur(rangeInput);
-
-    expect(defaultProps.onChange).toHaveBeenCalledWith({
-      ...defaultProps.styles,
-      angle: 90,
+    await waitFor(() => {
+      expect(defaultProps.onChange).toHaveBeenCalledWith({
+        ...defaultProps.styles,
+        angle: 90,
+      });
     });
   });
 
-  it('handles angle range limits correctly', () => {
+  it('handles angle range limits correctly', async () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
     const rangeInput = screen.getByRole('spinbutton');
 
     // Test a non-default value first
     fireEvent.change(rangeInput, { target: { value: '180' } });
     fireEvent.blur(rangeInput);
-    expect(defaultProps.onChange).toHaveBeenCalledWith({
-      ...defaultProps.styles,
-      angle: 180,
+    await waitFor(() => {
+      expect(defaultProps.onChange).toHaveBeenCalledWith({
+        ...defaultProps.styles,
+        angle: 180,
+      });
     });
 
     // Test maximum value
     fireEvent.change(rangeInput, { target: { value: '360' } });
     fireEvent.blur(rangeInput);
-    expect(defaultProps.onChange).toHaveBeenCalledWith({
-      ...defaultProps.styles,
-      angle: 360,
+    await waitFor(() => {
+      expect(defaultProps.onChange).toHaveBeenCalledWith({
+        ...defaultProps.styles,
+        angle: 360,
+      });
     });
   });
 

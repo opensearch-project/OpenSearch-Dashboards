@@ -58,11 +58,14 @@ const loadSavedQuery = (config) => {
   // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
   cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
-  setDatePickerDatesAndSearchIfRelevant(
-    config.language,
-    'Aug 29, 2020 @ 00:00:00.000',
-    'Aug 30, 2020 @ 00:00:00.000'
-  );
+  // TODO: Change line 68 back the following lines once saved query could load time filter correctly
+  // setDatePickerDatesAndSearchIfRelevant(
+  //   config.language,
+  //   'Aug 29, 2020 @ 00:00:00.000',
+  //   'Aug 30, 2020 @ 00:00:00.000'
+  // );
+
+  setDatePickerDatesAndSearchIfRelevant(config.language);
 
   cy.explore.loadSavedQuery(`${workspaceName}-${config.saveName}`);
   // wait for saved queries to load.
