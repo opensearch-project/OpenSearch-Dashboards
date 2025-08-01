@@ -3,11 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { schema } from '@osd/config-schema';
-import { IRouter } from 'opensearch-dashboards/server';
+import { schema, TypeOf } from '@osd/config-schema';
+import { IRouter, OpenSearchDashboardsRequest } from 'opensearch-dashboards/server';
 import { BASE_API } from '../../../common';
 import { resourceManagerService } from '../../connections/resource_manager_service';
 import { coerceStatusCode } from '..';
+
+const body = schema.object({
+  connection: schema.object({
+    id: schema.string(),
+    type: schema.string(),
+  }),
+  resource: schema.object({
+    name: schema.maybe(schema.string()),
+    type: schema.string(),
+  }),
+  content: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+});
+
+export type ResourcesRequest<Content = Record<string, unknown>> = OpenSearchDashboardsRequest<
+  unknown,
+  unknown,
+  Omit<TypeOf<typeof body>, 'content'> & {
+    content?: Content;
+  }
+>;
 
 /**
  * Defines routes for resource APIs.
@@ -21,17 +41,7 @@ export function registerResourceRoutes(router: IRouter) {
     {
       path: `${BASE_API}/resources`,
       validate: {
-        body: schema.object({
-          connection: schema.object({
-            id: schema.string(),
-            type: schema.string(),
-          }),
-          resource: schema.object({
-            name: schema.maybe(schema.string()),
-            type: schema.string(),
-          }),
-          content: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-        }),
+        body,
       },
     },
     async (context, request, response) => {
@@ -46,7 +56,7 @@ export function registerResourceRoutes(router: IRouter) {
       } catch (error) {
         const errorObj = error as any;
         return response.customError({
-          body: 'Unable to get resources',
+          body: 'Unable to get resources: ' + errorObj.message ?? '',
           ...errorObj,
           statusCode: coerceStatusCode(errorObj.statusCode),
         });
