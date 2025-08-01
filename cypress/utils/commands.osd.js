@@ -233,9 +233,10 @@ cy.osd.add(
   //navigate to workspace specific pages
   'navigateToWorkSpaceSpecificPage',
   (opts) => {
-    const { workspaceName, page, isEnhancement = false } = opts;
+    const { page, isEnhancement = false } = opts;
     // Navigating to the WorkSpace Home Page
-    cy.osd.navigateToWorkSpaceHomePage(workspaceName);
+    // TODO validate if it is safe enough to delete this line
+    //cy.osd.navigateToWorkSpaceHomePage(workspaceName);
 
     // Check for toggleNavButton and handle accordingly
     // If collapsibleNavShrinkButton is shown which means toggleNavButton is already clicked, try clicking the app link directly
