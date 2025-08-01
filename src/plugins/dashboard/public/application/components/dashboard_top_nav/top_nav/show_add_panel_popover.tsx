@@ -62,6 +62,7 @@ const PanelPopover = ({
         <EuiContextMenu size="s" initialPanelId="mainMenu" panels={panels.value} />
         <EuiSpacer size="s" />
         <EuiButton
+          data-test-subj="dashboardAddPanelFromLibrary"
           fullWidth
           size="s"
           onClick={() => {

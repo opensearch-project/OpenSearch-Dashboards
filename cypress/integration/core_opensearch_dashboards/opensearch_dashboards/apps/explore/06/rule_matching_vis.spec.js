@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/apps/explore/constants';
 import {
-  getRandomizedWorkspaceName,
-  setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/explore/shared';
+  INDEX_WITH_TIME_1,
+  DATASOURCE_NAME,
+  END_TIME,
+  START_TIME,
+} from '../../../../../../utils/apps/explore/constants';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
@@ -44,12 +46,12 @@ export const runCreateVisTests = () => {
       const datasetName = `${INDEX_WITH_TIME_1}*`;
       cy.wait(10000);
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
-      setDatePickerDatesAndSearchIfRelevant('PPL');
       cy.wait(10000);
       cy.explore.clearQueryEditor();
 
       const query = `source=${datasetName} | stats count()`;
-      cy.explore.setQueryEditor(query);
+      cy.explore.setQueryEditor(query, { submit: false });
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
@@ -84,11 +86,13 @@ export const runCreateVisTests = () => {
 
     it('should create a line visualization using a query with timestamp', () => {
       cy.explore.clearQueryEditor();
-      setDatePickerDatesAndSearchIfRelevant('PPL');
 
       const datasetName = `${INDEX_WITH_TIME_1}*`;
+      cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
+
       const query = `source=${datasetName} | stats count() by event_time`;
-      cy.explore.setQueryEditor(query);
+      cy.explore.setQueryEditor(query, { submit: false });
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
@@ -124,11 +128,13 @@ export const runCreateVisTests = () => {
 
     it('should create a bar visualization using a query with one metric and one category', () => {
       cy.explore.clearQueryEditor();
-      setDatePickerDatesAndSearchIfRelevant('PPL');
 
       const datasetName = `${INDEX_WITH_TIME_1}*`;
+      cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
+
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.setQueryEditor(query);
+      cy.explore.setQueryEditor(query, { submit: false });
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
@@ -164,11 +170,13 @@ export const runCreateVisTests = () => {
 
     it('should create a scatter plot visualization using a query with two metrics and one category', () => {
       cy.explore.clearQueryEditor();
-      setDatePickerDatesAndSearchIfRelevant('PPL');
 
       const datasetName = `${INDEX_WITH_TIME_1}*`;
+      cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
+
       const query = `source=${datasetName} | fields bytes_transferred, status_code`;
-      cy.explore.setQueryEditor(query);
+      cy.explore.setQueryEditor(query, { submit: false });
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
@@ -194,11 +202,13 @@ export const runCreateVisTests = () => {
 
     it('should create a heatmap visualization using a query with one metric and two categories', () => {
       cy.explore.clearQueryEditor();
-      setDatePickerDatesAndSearchIfRelevant('PPL');
 
       const datasetName = `${INDEX_WITH_TIME_1}*`;
-      const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
-      cy.explore.setQueryEditor(query);
+      cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
+
+      const query = `source=${datasetName} | fields status_code, personal.age, bytes_transferred`;
+      cy.explore.setQueryEditor(query, { submit: false });
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
@@ -240,9 +250,8 @@ export const runCreateVisTests = () => {
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
       const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp, category`;
-      cy.explore.setQueryEditor(query);
-
-      setDatePickerDatesAndSearchIfRelevant('PPL');
+      cy.explore.setQueryEditor(query, { submit: false });
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
@@ -276,9 +285,8 @@ export const runCreateVisTests = () => {
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
       const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp, category, unique_category`;
-      cy.explore.setQueryEditor(query);
-
-      setDatePickerDatesAndSearchIfRelevant('PPL');
+      cy.explore.setQueryEditor(query, { submit: false });
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
