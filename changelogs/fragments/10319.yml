@@ -1,0 +1,2 @@
+test:
+- Fix validate time range test ([#10319](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10319))
