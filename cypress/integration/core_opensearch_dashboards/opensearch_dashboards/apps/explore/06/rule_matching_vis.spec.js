@@ -198,6 +198,44 @@ export const runCreateVisTests = () => {
       // Verify the heatmap visualization options are displayed
       cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
     });
+
+    it('should create a line and bar visualization using a query with one metric and two categories', () => {
+      // Setup dataset
+      cy.explore.clearQueryEditor();
+      const datasetName = `${INDEX_WITH_TIME_1}*`;
+
+      const query = `source=${datasetName} | stats AVG(\`bytes_transferred\`) as avg_bytes, MAX(\`bytes_transferred\`) as max_bytes by span(\`timestamp\`, 1d) | head 10`;
+      cy.explore.setQueryEditor(query);
+
+      // Run the query
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
+      cy.osd.waitForLoader(true);
+      cy.wait(1000);
+
+      // Verify visualization is created
+      cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
+
+      // Verify the metric viz is displayed in the chart type selector
+      cy.getElementByTestId('exploreVisStylePanel')
+        .should('be.visible')
+        .within(() => {
+          // Try finding the EuiSuperSelect button directly
+          cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+        });
+      cy.get('[role="option"][aria-selected="true"]')
+        .should('be.visible')
+        .and('contain.text', 'Line');
+
+      // Verify a line bar chart has been created
+      cy.contains('Y-Axis (2nd)');
+
+      // Close dropdown
+      cy.get('body').click(0, 0);
+
+      // Verify the visualization are displayed
+      cy.get('.visualization').should('be.visible');
+      cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
+    });
   });
 };
 
