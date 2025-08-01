@@ -46,7 +46,10 @@ describe('tabSlice reducers', () => {
 
   describe('state immutability', () => {
     it('should maintain proper state structure', () => {
-      const state = tabReducer(initialState, setTabState({ logs: { someProperty: 'value' } }));
+      const state = tabReducer(
+        initialState,
+        setTabState({ logs: { someProperty: 'value' }, patterns: { usingRegexPatterns: false } })
+      );
 
       // Ensure the state structure is maintained
       expect(state).toHaveProperty('logs');
@@ -54,7 +57,10 @@ describe('tabSlice reducers', () => {
 
     it('should not mutate the original state', () => {
       const originalState = { ...initialState };
-      tabReducer(initialState, setTabState({ logs: { someProperty: 'value' } }));
+      tabReducer(
+        initialState,
+        setTabState({ logs: { someProperty: 'value' }, patterns: { usingRegexPatterns: false } })
+      );
 
       // Original state should remain unchanged
       expect(initialState).toEqual(originalState);

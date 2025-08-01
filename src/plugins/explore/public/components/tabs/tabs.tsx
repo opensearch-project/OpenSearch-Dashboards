@@ -37,7 +37,6 @@ export const ExploreTabs = () => {
       dispatch(setActiveTab(selectedTab.id));
 
       const activeTab = services.tabRegistry.getTab(selectedTab.id);
-
       const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
       const newTabCacheKey = prepareQuery(query);
 
