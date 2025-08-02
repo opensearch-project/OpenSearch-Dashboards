@@ -62,6 +62,7 @@ export function installCommand(program) {
       'length of time before failing; 0 for never fail',
       parseMilliseconds
     )
+    .option('--strict-version', 'require exact minor version match between plugin and OpenSearch Dashboards')
     .description(
       'install a plugin',
       `Common examples:
