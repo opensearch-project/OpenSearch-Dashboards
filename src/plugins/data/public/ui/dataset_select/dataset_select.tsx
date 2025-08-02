@@ -206,20 +206,18 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, suppor
     {
       id: 1,
       title: (
-        <div className="datasetSelect__tooltip">
-          <DatasetDetailsHeader
-            dataset={selectedDataset}
-            isDefault={selectedDataset?.id === defaultDatasetId}
-          />
-        </div>
+        <DatasetDetailsHeader
+          className="datasetSelect__contextMenu"
+          dataset={selectedDataset}
+          isDefault={selectedDataset?.id === defaultDatasetId}
+        />
       ),
       content: (
-        <div className="datasetSelect__tooltip">
-          <DatasetDetailsBody
-            dataset={selectedDataset}
-            isDefault={selectedDataset?.id === defaultDatasetId}
-          />
-        </div>
+        <DatasetDetailsBody
+          className="datasetSelect__contextMenu"
+          dataset={selectedDataset}
+          isDefault={selectedDataset?.id === defaultDatasetId}
+        />
       ),
     },
   ];

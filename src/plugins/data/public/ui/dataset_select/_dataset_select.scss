@@ -35,6 +35,14 @@
     width: 400px;
     padding: $euiSizeXS;
     overflow-y: auto;
+
+    button:is([class*="euiContextMenuPanelTitle"]) {
+      padding: $euiSizeXS;
+    }
+
+    span:is([class*="datasetDetails__defaultBadge"]) {
+      transform: translateX(-100%) translateX($euiSizeXS * 2);
+    }
   }
 
   &__selectable {
