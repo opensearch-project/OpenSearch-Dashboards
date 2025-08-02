@@ -248,9 +248,9 @@ describe('to_expression', () => {
       expect(result.layer).toHaveLength(2); // Bar layer + line layer (no threshold or time marker in this test)
 
       // Verify the bar layer
-      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.layer[0]).toHaveProperty('encoding.color.datum', 'value1');
+      expect(result.layer[0].layer[0]).toHaveProperty('encoding.x.field', 'field-0');
+      expect(result.layer[0].layer[0]).toHaveProperty('encoding.y.field', 'field-1');
+      expect(result.layer[0].layer[0]).toHaveProperty('encoding.color.datum', 'value1');
 
       // Verify the line layer
       expect(result.layer[1]).toHaveProperty('encoding.x.field', 'field-0');

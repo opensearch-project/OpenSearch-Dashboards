@@ -6,10 +6,20 @@
 import { configurePreloadedStore, getPreloadedStore, RootState } from './store';
 import { ExploreServices } from '../../../types';
 import { loadReduxState } from './utils/redux_persistence';
+import { normalizeStateForComparison } from './utils/state_comparison';
 
 // Mock dependencies
 jest.mock('./utils/redux_persistence', () => ({
   loadReduxState: jest.fn(),
+}));
+
+jest.mock('./utils/state_comparison', () => ({
+  normalizeStateForComparison: jest.fn((state) => ({
+    query: state.query,
+    ui: state.ui,
+    tab: state.tab,
+    legacy: state.legacy,
+  })),
 }));
 
 jest.mock('./middleware/persistence_middleware', () => ({
@@ -41,8 +51,15 @@ import { createOverallStatusMiddleware } from './middleware/overall_status_middl
 describe('store', () => {
   let mockServices: jest.Mocked<ExploreServices>;
   let mockPreloadedState: RootState;
+  let mockHistoryListen: jest.Mock;
+  let mockOsdUrlStateStorageGet: jest.Mock;
+  let mockOsdUrlStateStorageSet: jest.Mock;
 
   beforeEach(() => {
+    mockHistoryListen = jest.fn();
+    mockOsdUrlStateStorageGet = jest.fn();
+    mockOsdUrlStateStorageSet = jest.fn();
+
     mockServices = {
       data: {
         query: {
@@ -50,6 +67,13 @@ describe('store', () => {
             getQuery: jest.fn(),
           },
         },
+      },
+      scopedHistory: {
+        listen: mockHistoryListen,
+      },
+      osdUrlStateStorage: {
+        get: mockOsdUrlStateStorageGet,
+        set: mockOsdUrlStateStorageSet,
       },
     } as any;
 
@@ -60,22 +84,46 @@ describe('store', () => {
         dataset: undefined,
       },
       ui: {
-        isLoading: false,
+        activeTabId: '',
+        showHistogram: true,
       },
-      results: {
-        data: null,
-        error: null,
-      },
+      results: {},
       tab: {
-        activeTab: '',
-        tabs: [],
+        logs: {},
+        visualizations: {
+          styleOptions: {},
+          chartType: undefined,
+          axesMapping: {},
+        },
       },
       legacy: {
-        isLegacyMode: false,
+        savedSearch: undefined,
+        columns: ['_source'],
+        sort: [],
+        isDirty: false,
+        savedQuery: undefined,
+        lineCount: undefined,
+        interval: 'auto',
       },
       queryEditor: {
-        editorMode: 'single-query',
+        queryStatusMap: {},
+        overallQueryStatus: {
+          status: 'UNINITIALIZED',
+          elapsedMs: undefined,
+          startTime: undefined,
+          error: undefined,
+        },
         promptModeIsAvailable: false,
+        promptToQueryIsLoading: false,
+        editorMode: 'single-query',
+        lastExecutedTranslatedQuery: '',
+        summaryAgentIsAvailable: false,
+        lastExecutedPrompt: '',
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
+      },
+      meta: {
+        isInitialized: false,
       },
     } as any;
 
@@ -179,6 +227,184 @@ describe('store', () => {
       // Reset state
       result.reset();
       expect(result.store.getState()).toEqual(initialState);
+    });
+
+    it('should set up history listener for URL state synchronization', async () => {
+      (loadReduxState as jest.MockedFunction<any>).mockResolvedValue(mockPreloadedState);
+
+      await getPreloadedStore(mockServices);
+
+      expect(mockHistoryListen).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    it('should handle POP history actions and sync URL state to Redux', async () => {
+      (loadReduxState as jest.MockedFunction<any>).mockResolvedValue(mockPreloadedState);
+
+      const modifiedState = {
+        ...mockPreloadedState,
+        query: { ...mockPreloadedState.query, query: 'SELECT * FROM test' },
+      };
+
+      // Mock the second call to loadReduxState (for URL state sync)
+      (loadReduxState as jest.MockedFunction<any>)
+        .mockResolvedValueOnce(mockPreloadedState) // Initial load
+        .mockResolvedValueOnce(modifiedState); // URL state sync
+
+      mockOsdUrlStateStorageGet.mockReturnValue({ time: { from: 'now-15m', to: 'now' } });
+
+      // Wait for getPreloadedStore to complete
+      await getPreloadedStore(mockServices);
+
+      // Get the history listener callback
+      const historyCallback = mockHistoryListen.mock.calls[0][0];
+
+      // Simulate a POP action (back/forward button)
+      await historyCallback({ pathname: '/test' }, 'POP');
+
+      // Verify loadReduxState was called again for URL sync
+      expect(loadReduxState).toHaveBeenCalledTimes(2);
+    });
+
+    it('should ignore REPLACE and PUSH history actions', async () => {
+      (loadReduxState as jest.MockedFunction<any>).mockResolvedValue(mockPreloadedState);
+
+      // Wait for getPreloadedStore to complete
+      await getPreloadedStore(mockServices);
+
+      // Get the history listener callback
+      const historyCallback = mockHistoryListen.mock.calls[0][0];
+
+      // Simulate REPLACE and PUSH actions
+      await historyCallback({ pathname: '/test' }, 'REPLACE');
+      await historyCallback({ pathname: '/test' }, 'PUSH');
+
+      // Verify loadReduxState was only called once (initial load)
+      expect(loadReduxState).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle date range changes from URL global state', async () => {
+      (loadReduxState as jest.MockedFunction<any>).mockResolvedValue(mockPreloadedState);
+
+      const newTimeRange = { from: 'now-1h', to: 'now' };
+      mockOsdUrlStateStorageGet.mockReturnValue({ time: newTimeRange });
+
+      const { store } = await getPreloadedStore(mockServices);
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      // Get the history listener callback
+      const historyCallback = mockHistoryListen.mock.calls[0][0];
+
+      // Simulate a POP action with different time range
+      await historyCallback({ pathname: '/test' }, 'POP');
+
+      // Verify setDateRange was dispatched
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setDateRange',
+          payload: newTimeRange,
+        })
+      );
+    });
+
+    it('should conditionally dispatch hydrateState only when app state changes', async () => {
+      (loadReduxState as jest.MockedFunction<any>).mockResolvedValue(mockPreloadedState);
+
+      // Mock normalized states to be equal (no app state change)
+      (normalizeStateForComparison as jest.MockedFunction<any>).mockReturnValue({
+        query: mockPreloadedState.query,
+        ui: mockPreloadedState.ui,
+        tab: mockPreloadedState.tab,
+        legacy: mockPreloadedState.legacy,
+      });
+
+      const result = await getPreloadedStore(mockServices);
+      const dispatchSpy = jest.spyOn(result.store, 'dispatch');
+
+      // Get the history listener callback
+      const historyCallback = mockHistoryListen.mock.calls[0][0];
+
+      // Simulate a POP action with no app state change
+      await historyCallback({ pathname: '/test' }, 'POP');
+
+      // Verify hydrateState was NOT dispatched since app state didn't change
+      expect(dispatchSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'app/hydrateState',
+        })
+      );
+    });
+
+    it('should handle errors in history listener gracefully', async () => {
+      (loadReduxState as jest.MockedFunction<any>).mockResolvedValue(mockPreloadedState);
+
+      // Mock loadReduxState to throw error on second call
+      (loadReduxState as jest.MockedFunction<any>)
+        .mockResolvedValueOnce(mockPreloadedState) // Initial load
+        .mockRejectedValueOnce(new Error('URL sync failed')); // URL state sync error
+
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      // Wait for getPreloadedStore to complete
+      await getPreloadedStore(mockServices);
+
+      // Get the history listener callback
+      const historyCallback = mockHistoryListen.mock.calls[0][0];
+
+      // Simulate a POP action that causes an error
+      await historyCallback({ pathname: '/test' }, 'POP');
+
+      // Verify error was logged
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to sync URL state to Redux:',
+        expect.any(Error)
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle initial store creation errors gracefully', async () => {
+      // Mock loadReduxState to throw error on initial call
+      (loadReduxState as jest.MockedFunction<any>).mockRejectedValue(
+        new Error('Initial load failed')
+      );
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await getPreloadedStore(mockServices);
+
+      // Should still return a valid store object
+      expect(result.store).toBeDefined();
+      expect(result.unsubscribe).toBeDefined();
+      expect(result.reset).toBeDefined();
+      expect(typeof result.unsubscribe).toBe('function');
+      expect(typeof result.reset).toBe('function');
+
+      // Verify error was logged
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to initialize preloaded store:',
+        expect.any(Error)
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should provide no-op unsubscribe when history listener setup fails', async () => {
+      // Mock loadReduxState to throw error on initial call
+      (loadReduxState as jest.MockedFunction<any>).mockRejectedValue(
+        new Error('Initial load failed')
+      );
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await getPreloadedStore(mockServices);
+
+      // Unsubscribe should be a no-op function that doesn't throw
+      expect(() => result.unsubscribe()).not.toThrow();
+
+      // History listener should not have been called since store creation failed
+      expect(mockHistoryListen).not.toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
     });
   });
 });

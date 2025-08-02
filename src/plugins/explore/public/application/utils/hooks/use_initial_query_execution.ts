@@ -3,21 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import { executeQueries } from '../state_management/actions/query_actions';
-import { clearResults, clearQueryStatusMap } from '../state_management/slices';
+import { clearResults, clearQueryStatusMap, setIsInitialized } from '../state_management/slices';
 import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
+import { selectActiveTabId } from '../state_management/selectors';
 
 /**
  * Hook to handle initial query execution on page load
  */
 export const useInitialQueryExecution = (services: ExploreServices) => {
   const dispatch = useDispatch();
+  const { isInitialized } = useSelector((state: RootState) => state.meta);
   const queryState = useSelector((state: RootState) => state.query);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const activeTabId = useSelector(selectActiveTabId);
 
   const shouldSearchOnPageLoad = useMemo(() => {
     return services?.uiSettings?.get('discover:searchOnPageLoad', true) ?? true;
@@ -35,13 +37,15 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
         dispatch(clearQueryStatusMap());
 
         await dispatch(executeQueries({ services }));
-        dispatch(detectAndSetOptimalTab({ services }));
-        setIsInitialized(true);
+        if (!activeTabId) {
+          dispatch(detectAndSetOptimalTab({ services }));
+        }
+        dispatch(setIsInitialized(true));
       }
     };
 
     initializePage();
-  }, [isInitialized, queryState, shouldSearchOnPageLoad, dispatch, services]);
+  }, [isInitialized, queryState, activeTabId, shouldSearchOnPageLoad, dispatch, services]);
 
   return { isInitialized };
 };

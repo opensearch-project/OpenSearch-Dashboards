@@ -15,6 +15,7 @@ import { DataView as Dataset } from '../../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 import { SaveAndAddButtonWithModal } from '../../../visualizations/add_to_dashboard_button';
 import { selectActiveTabId } from '../../../../application/utils/state_management/selectors';
+import { PatternsSettingsPopoverButton } from '../patterns_settings/patterns_settings_popover_button';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
@@ -37,6 +38,7 @@ export const DiscoverResultsActionBar = ({
 }: DiscoverResultsActionBarProps) => {
   const currentTab = useSelector(selectActiveTabId);
   const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
+  const showTabSpecificSettings = currentTab === 'explore_patterns_tab';
 
   return (
     <EuiFlexGroup
@@ -82,6 +84,12 @@ export const DiscoverResultsActionBar = ({
               >
                 <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
               </EuiFlexItem>
+
+              {showTabSpecificSettings && (
+                <EuiFlexItem grow={false}>
+                  <PatternsSettingsPopoverButton />
+                </EuiFlexItem>
+              )}
 
               {shouldShowAddToDashboardButton && (
                 <EuiFlexItem grow={false}>

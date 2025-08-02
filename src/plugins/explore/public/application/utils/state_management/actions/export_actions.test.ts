@@ -88,6 +88,10 @@ describe('export_actions', () => {
       },
       tab: {
         logs: {},
+        patterns: {
+          patternsField: undefined,
+          usingRegexPatterns: false,
+        },
       },
       queryEditor: {
         queryStatusMap: {},
@@ -105,6 +109,9 @@ describe('export_actions', () => {
         summaryAgentIsAvailable: false,
         queryExecutionButtonStatus: 'REFRESH',
         isQueryEditorDirty: false,
+      },
+      meta: {
+        isInitialized: false,
       },
     };
 

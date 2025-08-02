@@ -112,6 +112,6 @@ describe('Resource Routes', () => {
       .post(`${BASE_API}/resources`)
       .send({ ...REQUEST_BODY })
       .expect(503);
-    expect(result.body.message).toEqual('Unable to get resources');
+    expect(result.body.message).toEqual('Unable to get resources: failed');
   });
 });
