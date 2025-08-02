@@ -106,6 +106,9 @@ describe('export_actions', () => {
         queryExecutionButtonStatus: 'REFRESH',
         isQueryEditorDirty: false,
       },
+      meta: {
+        isInitialized: false,
+      },
     };
 
     mockDispatch = jest.fn();
