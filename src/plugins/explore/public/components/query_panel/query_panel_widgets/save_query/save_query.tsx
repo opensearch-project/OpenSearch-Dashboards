@@ -17,7 +17,11 @@ import {
   selectQuery,
   selectIsPromptEditorMode,
 } from '../../../../application/utils/state_management/selectors';
-import { clearResults, setSavedQuery } from '../../../../application/utils/state_management/slices';
+import {
+  clearResults,
+  setDateRange,
+  setSavedQuery,
+} from '../../../../application/utils/state_management/slices';
 import { ExploreServices } from '../../../../types';
 import { setQueryState } from '../../../../application/utils/state_management/slices';
 import { loadQueryActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
@@ -134,10 +138,12 @@ export const SaveQueryButton = () => {
       );
 
       if (savedQuery.attributes.timefilter && timeFilter) {
-        timeFilter.setTime({
-          from: savedQuery.attributes.timefilter.from,
-          to: savedQuery.attributes.timefilter.to,
-        });
+        dispatch(
+          setDateRange({
+            from: savedQuery.attributes.timefilter.from,
+            to: savedQuery.attributes.timefilter.to,
+          })
+        );
         if (typeof timeFilter.setRefreshInterval === 'function') {
           timeFilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
