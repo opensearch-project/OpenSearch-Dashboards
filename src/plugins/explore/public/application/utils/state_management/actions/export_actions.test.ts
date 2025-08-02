@@ -88,6 +88,10 @@ describe('export_actions', () => {
       },
       tab: {
         logs: {},
+        patterns: {
+          patternsField: undefined,
+          usingRegexPatterns: false,
+        },
       },
       queryEditor: {
         queryStatusMap: {},

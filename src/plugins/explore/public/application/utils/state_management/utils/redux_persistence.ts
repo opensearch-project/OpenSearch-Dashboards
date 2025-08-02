@@ -292,6 +292,10 @@ const getPreloadedResultsState = (services: ExploreServices): ResultsState => {
 const getPreloadedTabState = (services: ExploreServices): TabState => {
   return {
     logs: {},
+    patterns: {
+      patternsField: undefined,
+      usingRegexPatterns: false,
+    },
   };
 };
 

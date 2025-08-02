@@ -193,7 +193,16 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         },
       },
       tabRegistry: {
-        getTab: jest.fn(),
+        getTab: jest.fn().mockImplementation((tabId) => {
+          if (tabId === 'test-tab') {
+            return {
+              id: 'test-tab',
+              name: 'Test Tab',
+              handleQueryError: jest.fn().mockReturnValue(false),
+            };
+          }
+          return null;
+        }),
       },
       getRequestInspectorStats: jest.fn().mockReturnValue({}),
     } as any;
@@ -704,6 +713,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           dataset: { id: 'test', type: 'INDEX_PATTERN' },
         },
         legacy: { interval: '1h' },
+        ui: { activeTabId: 'test-tab' },
       });
 
       const mockIndexPatterns = dataPublicModule.indexPatterns as any;
@@ -828,6 +838,9 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           query: 'source=logs',
           language: 'PPL',
           dataset: { id: 'test', type: 'INDEX_PATTERN' },
+        },
+        ui: {
+          activeTabId: 'test-tab',
         },
       });
 
@@ -1144,6 +1157,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           dataset: { id: 'test', type: 'INDEX_PATTERN' },
         },
         legacy: { interval: '1h' },
+        ui: { activeTabId: 'test-tab' },
       });
       const mockDispatch = jest.fn();
 
