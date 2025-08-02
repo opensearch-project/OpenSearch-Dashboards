@@ -7,6 +7,8 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,6 +21,7 @@ import {
   EuiHighlight,
   EuiTextColor,
   EuiText,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -28,7 +31,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA, Query } from '../../../common';
 import { IDataPluginServices } from '../../types';
-import { DatasetDetails } from './dataset_details';
+import { DatasetDetails, DatasetDetailsBody, DatasetDetailsHeader } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
 import './_index.scss';
 
@@ -189,6 +192,38 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, suppor
     return selectedDataset.title;
   }, [selectedDataset]);
 
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      items: [
+        {
+          name: datasetTitle,
+          panel: 1,
+          icon: <EuiIcon type={datasetIcon} size="s" />,
+        },
+      ],
+    },
+    {
+      id: 1,
+      title: (
+        <div className="datasetSelect__tooltip">
+          <DatasetDetailsHeader
+            dataset={selectedDataset}
+            isDefault={selectedDataset?.id === defaultDatasetId}
+          />
+        </div>
+      ),
+      content: (
+        <div className="datasetSelect__tooltip">
+          <DatasetDetailsBody
+            dataset={selectedDataset}
+            isDefault={selectedDataset?.id === defaultDatasetId}
+          />
+        </div>
+      ),
+    },
+  ];
+
   return (
     <EuiPopover
       className="datasetSelect"
@@ -213,6 +248,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, suppor
       anchorPosition="downLeft"
       panelPaddingSize="none"
     >
+      <EuiPopoverTitle paddingSize="none">
+        <EuiContextMenu className="datasetSelect__contextMenu" initialPanelId={0} panels={panels} />
+      </EuiPopoverTitle>
+
       <EuiSelectable
         className="datasetSelect__selectable"
         data-test-subj="datasetSelectSelectable"
