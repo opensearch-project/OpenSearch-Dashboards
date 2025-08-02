@@ -1,0 +1,2 @@
+fix:
+- ValidationError in ui setting ([#10309](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10309))

@@ -60,6 +60,10 @@ describe('QueryExecutionButton', () => {
         results: {},
         tab: {
           logs: {},
+          patterns: {
+            patternsField: undefined,
+            usingRegexPatterns: false,
+          },
         },
         legacy: {
           columns: ['_source'],

@@ -91,6 +91,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const finalTabState = appState?.tab || getPreloadedTabState(services);
     const finalLegacyState = appState?.legacy || getPreloadedLegacyState(services);
     const finalQueryEditorState = await getPreloadedQueryEditorState(services, finalQueryState);
+    const finalMetaState = appState?.meta || getPreloadedMetaState(services);
 
     return {
       query: finalQueryState,
@@ -99,6 +100,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       tab: finalTabState,
       legacy: finalLegacyState,
       queryEditor: finalQueryEditorState,
+      meta: finalMetaState,
     };
   } catch (err) {
     return await getPreloadedState(services); // Fallback to full preload
@@ -115,14 +117,16 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
   const tabState = getPreloadedTabState(services);
   const legacyState = getPreloadedLegacyState(services);
   const queryEditorState = await getPreloadedQueryEditorState(services, queryState);
+  const metaState = getPreloadedMetaState(services);
 
   return {
-    query: queryState, // Contains dataset, query, and language
+    query: queryState,
     ui: uiState,
     results: resultsState,
     tab: tabState,
     legacy: legacyState,
     queryEditor: queryEditorState,
+    meta: metaState,
   };
 };
 
@@ -288,6 +292,10 @@ const getPreloadedResultsState = (services: ExploreServices): ResultsState => {
 const getPreloadedTabState = (services: ExploreServices): TabState => {
   return {
     logs: {},
+    patterns: {
+      patternsField: undefined,
+      usingRegexPatterns: false,
+    },
   };
 };
 
@@ -310,5 +318,14 @@ const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
 
     // Fields specific to explore (not in data_explorer + discover)
     interval: 'auto',
+  };
+};
+
+/**
+ * Get preloaded meta state
+ */
+const getPreloadedMetaState = (services: ExploreServices) => {
+  return {
+    isInitialized: false,
   };
 };
