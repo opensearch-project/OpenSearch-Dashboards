@@ -19,7 +19,6 @@ import {
   verifyShareUrl,
   openShareMenuWithRetry,
 } from '../../../../../../utils/apps/explore/shared_links';
-import { setSort } from '../../../../../../utils/apps/explore/table';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
@@ -80,10 +79,11 @@ export const runSharedLinksTests = () => {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
-      describe.skip(`${config.testName}`, () => {
+      describe(`${config.testName}`, () => {
         const queryString = getQueryString(config);
 
-        it(`should handle shared document links correctly for ${config.testName}`, () => {
+        // We do not have share single document or surrounding documents links for PPL in explore
+        it.skip(`should handle shared document links correctly for ${config.testName}`, () => {
           // Setup
           cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -141,17 +141,9 @@ export const runSharedLinksTests = () => {
           // Set query
           cy.explore.setQueryEditor(queryString, { parseSpecialCharSequences: false });
 
-          // Set filter for DQL/Lucene
-          if (config.hasDocLinks) {
-            cy.submitFilterFromDropDown(testData.filter[0], 'is', testData.filter[1], true);
-          }
-
           // Add fields from side panel
-          testData.fields.forEach((field, i) => {
+          testData.fields.forEach((field) => {
             selectFieldFromSidebar(field);
-            if (config.hasDocLinks) {
-              setSort(field, testData.sort[i]);
-            }
           });
 
           // Test snapshot url
@@ -187,18 +179,18 @@ export const runSharedLinksTests = () => {
           openShareMenuWithRetry();
           cy.getElementByTestId('exportAsSavedObject').find('input').should('not.be.disabled');
           cy.getElementByTestId('exportAsSavedObject').click();
-          // Get saved search ID
+          // Get saved explore ID
           cy.url().then((url) => {
             const viewMatch = url.match(/\/view\/([^?#]+)/);
-            const savedSearchId = viewMatch ? viewMatch[1] : '';
+            const savedExploreId = viewMatch ? viewMatch[1] : '';
 
             // Verify ID exists and is properly formatted
-            expect(savedSearchId).to.not.be.empty;
+            expect(savedExploreId).to.not.be.empty;
 
             cy.getElementByTestId('copyShareUrlButton')
               .invoke('attr', 'data-share-url')
               .then((shareUrl) => {
-                expect(shareUrl).to.include(`/view/${savedSearchId}`);
+                expect(shareUrl).to.include(`/view/${savedExploreId}`);
               });
           });
         });
