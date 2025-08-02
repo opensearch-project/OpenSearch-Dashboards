@@ -1,0 +1,2 @@
+test:
+- Add cypress tests for discover visualization ([#10315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10315))
