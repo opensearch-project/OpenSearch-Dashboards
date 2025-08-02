@@ -113,6 +113,7 @@ export const LineExclusiveVisOptions = ({
           options={lineModeOptions.map((option) => ({
             id: option.value,
             label: option.text,
+            'data-test-subj': `lineMode-${option.value}`,
           }))}
           idSelected={lineMode}
           onChange={onLineModeChange}
