@@ -31,6 +31,12 @@
     align-self: center;
   }
 
+  &__contextMenu {
+    width: 400px;
+    padding: $euiSizeXS;
+    overflow-y: auto;
+  }
+
   &__selectable {
     width: 400px;
     padding: $euiSizeXS;

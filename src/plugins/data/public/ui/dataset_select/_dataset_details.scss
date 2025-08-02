@@ -10,6 +10,8 @@
   }
 
   &__header {
+    width: 100%;
+
     > * {
       white-space: nowrap;
       overflow: hidden;
@@ -42,6 +44,12 @@
 
     > * {
       font-weight: $euiFontWeightSemiBold;
+    }
+  }
+
+  &__panel &__listTitle {
+    > * {
+      color: $euiColorEmptyShade;
     }
   }
 
