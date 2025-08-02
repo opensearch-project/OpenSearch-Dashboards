@@ -26,9 +26,14 @@ import { IDataPluginServices } from '../../types';
 export interface DatasetDetailsProps {
   dataset?: DetailedDataset;
   isDefault: boolean | false;
+  className?: string;
 }
 
-export const DatasetDetailsHeader: FC<DatasetDetailsProps> = ({ dataset, isDefault }) => {
+export const DatasetDetailsHeader: FC<DatasetDetailsProps> = ({
+  dataset,
+  isDefault,
+  className = '',
+}) => {
   if (!dataset) {
     return null;
   }
@@ -37,7 +42,7 @@ export const DatasetDetailsHeader: FC<DatasetDetailsProps> = ({ dataset, isDefau
 
   return (
     <EuiSplitPanel.Outer
-      className="datasetDetails__header"
+      className={`datasetDetails__header ${className}`}
       direction="row"
       color="transparent"
       hasBorder={false}
@@ -62,7 +67,7 @@ export const DatasetDetailsHeader: FC<DatasetDetailsProps> = ({ dataset, isDefau
   );
 };
 
-export const DatasetDetailsBody: FC<DatasetDetailsProps> = ({ dataset }) => {
+export const DatasetDetailsBody: FC<DatasetDetailsProps> = ({ dataset, className = '' }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const {
     query: { queryString },
@@ -92,7 +97,7 @@ export const DatasetDetailsBody: FC<DatasetDetailsProps> = ({ dataset }) => {
   return (
     <EuiDescriptionList
       compressed
-      className="datasetDetails__list"
+      className={`datasetDetails__list ${className}`}
       titleProps={{
         className: 'datasetDetails__listTitle',
       }}
@@ -185,7 +190,7 @@ export const DatasetDetails: FC<DatasetDetailsProps> = (props) => {
 
   return (
     <EuiPanel
-      className="datasetDetails__panel"
+      className={`datasetDetails__panel ${props.className ?? ''}`}
       color="transparent"
       hasBorder={false}
       paddingSize="none"
