@@ -198,4 +198,16 @@ describe('MetricVisStyleControls', () => {
 
     expect(titleInput).toBeInTheDocument();
   });
+
+  it('uses empty string as default title when no title and no value axis mapping is set', () => {
+    const propsWithEmptyTitle = {
+      ...mockProps,
+      styleOptions: { ...defaultMetricChartStyles, showTitle: true, title: '' },
+      axisColumnMappings: { value: undefined },
+    };
+    render(<MetricVisStyleControls {...propsWithEmptyTitle} />);
+    const titleInput = screen.getByPlaceholderText('Title');
+
+    expect(titleInput).toHaveValue('');
+  });
 });

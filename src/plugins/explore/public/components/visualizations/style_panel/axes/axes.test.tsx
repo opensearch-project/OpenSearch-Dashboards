@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { AxesOptions } from './axes';
-import { CategoryAxis, ValueAxis, VisColumn, VisFieldType, Positions } from '../../types';
+import { CategoryAxis, ValueAxis, VisColumn, VisFieldType, Positions, AxisRole } from '../../types';
 
 // Mock the debounced value hooks
 jest.mock('../../utils/use_debounced_value', () => {
@@ -123,6 +123,7 @@ describe('AxesOptions', () => {
     numericalColumns: mockNumericalColumns,
     categoricalColumns: mockCategoricalColumns,
     dateColumns: mockDateColumns,
+    axisColumnMappings: {},
   };
 
   const rule2Props = {
@@ -423,6 +424,9 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumns[0],
+      },
     };
 
     render(<AxesOptions {...propsWithEmptyTitle} />);
@@ -441,6 +445,9 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {
+        [AxisRole.Y]: mockNumericalColumns[0],
+      },
     };
 
     render(<AxesOptions {...propsWithEmptyTitle} />);
@@ -448,6 +455,44 @@ describe('AxesOptions', () => {
     // Check that the title input has the default value (from the first numerical column)
     const titleInput = screen.getAllByRole('textbox')[1];
     expect(titleInput).toHaveValue('count');
+  });
+
+  it('uses default value axis title for second axis when title text is empty', () => {
+    const propsWithEmptyTitle = {
+      ...defaultProps,
+      valueAxes: [
+        mockValueAxes[0],
+        {
+          id: 'ValueAxis-2',
+          name: 'RightAxis-1',
+          type: 'value' as const,
+          position: Positions.RIGHT as Positions.RIGHT,
+          show: true,
+          labels: {
+            show: true,
+            rotate: 0,
+            filter: false,
+            truncate: 100,
+          },
+          grid: {
+            showLines: true,
+          },
+          title: {
+            text: '',
+          },
+        } as ValueAxis,
+      ],
+      axisColumnMappings: {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      },
+    };
+
+    render(<AxesOptions {...propsWithEmptyTitle} />);
+
+    // Check that the title input for the second axis has the default value (from the second numerical column)
+    const titleInput = screen.getAllByRole('textbox')[2];
+    expect(titleInput).toHaveValue('price');
   });
 
   it('handles Rule 2 scenario with incomplete value axes', () => {
@@ -623,6 +668,7 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {},
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
@@ -642,6 +688,7 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {},
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
