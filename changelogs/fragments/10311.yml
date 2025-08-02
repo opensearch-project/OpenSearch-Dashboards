@@ -1,0 +1,2 @@
+fix:
+- Disable "Show legend" when color unset ([#10311](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10311))
