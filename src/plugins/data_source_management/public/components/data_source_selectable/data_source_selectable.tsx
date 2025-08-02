@@ -40,6 +40,7 @@ import './data_source_selectable.scss';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import './data_source_selectable.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
+import { DATA_SOURCE_SELECTOR_FIELDS } from '../../../framework/constants';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -182,13 +183,10 @@ export class DataSourceSelectable extends React.Component<
     this._isMounted = true;
 
     try {
-      const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
-        'id',
-        'title',
-        'auth.type',
-        'dataSourceVersion',
-        'installedPlugins',
-      ]);
+      const fetchedDataSources = await getDataSourcesWithFields(
+        this.props.savedObjectsClient,
+        DATA_SOURCE_SELECTOR_FIELDS
+      );
 
       const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
         fetchedDataSources,

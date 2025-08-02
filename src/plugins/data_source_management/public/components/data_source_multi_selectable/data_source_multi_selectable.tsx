@@ -22,6 +22,7 @@ import {
 } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
+import { DATA_SOURCE_SELECTOR_FIELDS } from '../../../framework/constants';
 
 export interface DataSourceMultiSeletableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -80,13 +81,10 @@ export class DataSourceMultiSelectable extends React.Component<
       // for data source selectable, get default data source from cache
       const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
       let selectedOptions: SelectedDataSourceOption[] = [];
-      const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
-        'id',
-        'title',
-        'auth.type',
-        'dataSourceVersion',
-        'installedPlugins',
-      ]);
+      const fetchedDataSources = await getDataSourcesWithFields(
+        this.props.savedObjectsClient,
+        DATA_SOURCE_SELECTOR_FIELDS
+      );
 
       if (fetchedDataSources?.length) {
         selectedOptions = fetchedDataSources.map((dataSource) => ({

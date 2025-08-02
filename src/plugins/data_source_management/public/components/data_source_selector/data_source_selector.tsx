@@ -20,6 +20,7 @@ import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selector.scss';
 import { DataSourceOption } from '../data_source_menu/types';
+import { DATA_SOURCE_SELECTOR_FIELDS } from '../../../framework/constants';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSourcesManagement.localCluster', {
@@ -142,13 +143,10 @@ export class DataSourceSelector extends React.Component<
     this._isMounted = true;
     try {
       // 1. Fetch
-      const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
-        'id',
-        'title',
-        'auth.type',
-        'dataSourceVersion',
-        'installedPlugins',
-      ]);
+      const fetchedDataSources = await getDataSourcesWithFields(
+        this.props.savedObjectsClient,
+        DATA_SOURCE_SELECTOR_FIELDS
+      );
 
       // 2. Process
       const dataSourceOptions = getFilteredDataSources(
