@@ -64,8 +64,15 @@ function parseTypeScriptErrors(output) {
   output.split('\n').forEach((line) => {
     const match = line.match(/(.+)\((\d+),(\d+)\):\s+error\s+(TS\d+):\s+(.+)/);
     if (match) {
+      const filePath = match[1];
+
+      // Skip errors from node_modules
+      if (filePath.includes('node_modules')) {
+        return;
+      }
+
       errors.push({
-        file: match[1],
+        file: filePath,
         line: parseInt(match[2]),
         column: parseInt(match[3]),
         code: match[4],
