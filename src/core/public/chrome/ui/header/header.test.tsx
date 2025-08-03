@@ -295,10 +295,15 @@ describe('Header', () => {
       const props = {
         ...mockProps(),
         injectedMetadata,
+        // Add a mock globalBanner$ observable to simulate a banner being present
+        globalBanner$: new BehaviorSubject({
+          component: 'test-banner',
+        }),
       };
 
       const component = mountWithIntl(<Header {...props} />);
-      expect(component.find('#pluginGlobalBanner').exists()).toBeTruthy();
+      // Check that the header has the correct class
+      expect(component.find('.headerGlobalNav--withBanner').exists()).toBeTruthy();
     });
 
     it('does not render banner container when banner plugin is disabled', () => {

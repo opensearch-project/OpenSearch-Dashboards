@@ -429,7 +429,6 @@ export class ChromeService {
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
           globalSearchCommands={globalSearch.getAllSearchCommands()}
-          injectedMetadata={injectedMetadata}
           globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
         />
       ),

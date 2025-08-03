@@ -47,7 +47,6 @@ import classnames from 'classnames';
 import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, of } from 'rxjs';
-import { InjectedMetadataStart } from '../../../injected_metadata';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -71,6 +70,7 @@ import {
   ChromeBranding,
   ChromeBreadcrumbEnricher,
   ChromeHelpExtension,
+  ChromeGlobalBanner,
 } from '../../chrome_service';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { OnIsLockedUpdate } from './';
@@ -130,8 +130,7 @@ export interface HeaderProps {
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
   globalSearchCommands?: GlobalSearchCommand[];
-  injectedMetadata?: InjectedMetadataStart;
-  globalBanner$?: Observable<import('../../chrome_service').ChromeGlobalBanner | undefined>;
+  globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
 }
 
 const hasValue = (value: any) => {
@@ -158,7 +157,6 @@ export function Header({
   setCurrentNavGroup,
   useUpdatedHeader,
   globalSearchCommands,
-  injectedMetadata,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -665,7 +663,9 @@ export function Header({
 
   return (
     <>
-      {globalBanner && <div className="globalBanner">{globalBanner.component}</div>}
+      {globalBanner && !useUpdatedHeader && (
+        <div className="globalBanner">{globalBanner.component}</div>
+      )}
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}
