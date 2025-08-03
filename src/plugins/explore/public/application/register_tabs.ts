@@ -10,11 +10,21 @@ import { ExploreServices } from '../types';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
+import { setUsingRegexPatterns } from './utils/state_management/slices/tab/tab_slice';
+import {
+  brainPatternQuery,
+  findDefaultPatternsField,
+  regexPatternQuery,
+} from '../components/patterns_table/utils/utils';
+import { executeTabQuery } from './utils/state_management/actions/query_actions';
+import { QueryExecutionStatus } from './utils/state_management/types';
+import { BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX } from '../components/patterns_table/utils/constants';
+import { setIndividualQueryStatus } from './utils/state_management/slices';
 
 /**
  * Registers built-in tabs with the tab registry
  */
-export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
+export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: ExploreServices) => {
   // Register Logs Tab
   const logsTabDefinition = {
     id: 'logs',
@@ -45,18 +55,75 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
     prepareQuery: (query) => {
-      return typeof query.query === 'string' ? query.query : '';
+      const state = services.store.getState();
+
+      // Get the selected patterns field from the Redux state
+      let patternsField = state.tab.patterns.patternsField;
+
+      const preparedQuery = getQueryWithSource(query);
+      if (!patternsField) {
+        patternsField = findDefaultPatternsField(services);
+      }
+
+      if (state.tab.patterns.usingRegexPatterns)
+        return regexPatternQuery(preparedQuery.query, patternsField);
+
+      return brainPatternQuery(preparedQuery.query, patternsField);
+    },
+
+    handleQueryError: (error, cacheKey) => {
+      const state = services.store.getState();
+
+      /**
+       * The below conditional is checking for the error returned when attempting to use a BRAIN
+       * query on an older version of the querying engine. If this error appears, an attempt is made
+       * to switch over to a patterns query which works on older versions of the querying engine.
+       * A redux state is set to inform the UI that this older query is being utilized
+       * Finally, the query is retriggered.
+       * The return value being true will prevent the standard error from dispatching, keeping the page clear
+       */
+      if (
+        error &&
+        error.status &&
+        error.status === 400 &&
+        error.error.details &&
+        error.error.details.startsWith(BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX)
+      ) {
+        // can check further details of err if needed
+        let patternsField = state.tab.patterns.patternsField;
+        if (!patternsField) {
+          patternsField = findDefaultPatternsField(services);
+        }
+        const query = state.query;
+        const preparedQuery = getQueryWithSource(query);
+        services.store.dispatch(setUsingRegexPatterns(true));
+        services.store.dispatch(
+          executeTabQuery({
+            services,
+            cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
+          })
+        );
+
+        // set the old cacheKey to uninitialized to finalize loading, our new tab query has new cacheKey
+        services.store.dispatch(
+          setIndividualQueryStatus({
+            cacheKey,
+            status: {
+              status: QueryExecutionStatus.UNINITIALIZED,
+              startTime: undefined,
+              elapsedMs: undefined,
+              error: undefined,
+            },
+          })
+        );
+
+        return true;
+      }
+
+      return false;
     },
 
     component: PatternsTab,
-
-    // Add lifecycle hooks
-    onActive: () => {
-      // Tab activated
-    },
-    onInactive: () => {
-      // Tab deactivated
-    },
   });
 
   // Register Visualizations Tab
@@ -75,14 +142,6 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     },
 
     component: VisTab,
-
-    // Add lifecycle hooks
-    onActive: () => {
-      // Tab activated
-    },
-    onInactive: () => {
-      // Tab deactivated
-    },
   });
 };
 
@@ -92,7 +151,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
  */
 export const registerTabs = (services: ExploreServices) => {
   // Register built-in tabs
-  registerBuiltInTabs(services.tabRegistry);
+  registerBuiltInTabs(services.tabRegistry, services);
 
   // Register plugin-provided tabs
   // This would be called by plugins that want to add tabs

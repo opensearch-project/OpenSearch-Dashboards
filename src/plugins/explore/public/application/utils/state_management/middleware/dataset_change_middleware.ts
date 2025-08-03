@@ -14,6 +14,8 @@ import {
   setActiveTab,
   clearLastExecutedData,
   setSummaryAgentIsAvailable,
+  setPatternsField,
+  setUsingRegexPatterns,
 } from '../slices';
 import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
@@ -53,6 +55,8 @@ export const createDatasetChangeMiddleware = (
       store.dispatch(clearResults());
       store.dispatch(clearQueryStatusMap());
       store.dispatch(clearLastExecutedData());
+      store.dispatch(setPatternsField(''));
+      store.dispatch(setUsingRegexPatterns(false));
 
       const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
         getPromptModeIsAvailable(services),

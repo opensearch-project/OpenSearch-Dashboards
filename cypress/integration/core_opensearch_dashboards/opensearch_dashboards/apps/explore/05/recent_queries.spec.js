@@ -95,13 +95,6 @@ const runRecentQueryTests = () => {
                   "I don't want to use the time filter"
                 );
                 cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-                cy.wrap(null).then(() => {
-                  // force Cypress to run this method in order
-                  // shift twice since we added two default query to the recent query list due to change dataset twice
-                  // default query for config.dataset and default query for config.alternativeDataset
-                  reverseList.unshift(config.defaultQuery);
-                  reverseList.unshift(config.defaultQuery);
-                });
                 cy.getElementByTestId('exploreRecentQueriesButton').click({
                   force: true,
                 });
@@ -122,18 +115,11 @@ const runRecentQueryTests = () => {
               },
             },
           ];
-          steps.forEach(({ action }, stepIndex) => {
+          steps.forEach(({ action }) => {
             action();
             cy.getElementByTestIdLike('row-').each(($row, rowIndex) => {
-              let expectedQuery = '';
-              if (rowIndex === 1 && stepIndex >= 1) {
-                expectedQuery = currentBaseQuery + config.alternativeDataset;
-              } else if (rowIndex === 0 && stepIndex >= 1) {
-                expectedQuery = currentBaseQuery + config.dataset;
-              } else {
-                expectedQuery =
-                  currentBaseQuery + config.dataset + currentWhereStatement + reverseList[rowIndex];
-              }
+              const expectedQuery =
+                currentBaseQuery + config.dataset + currentWhereStatement + reverseList[rowIndex];
               expect($row.text()).to.contain(expectedQuery);
             });
           });

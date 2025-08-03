@@ -235,6 +235,7 @@ cy.osd.add(
   (opts) => {
     const { workspaceName, page, isEnhancement = false } = opts;
     // Navigating to the WorkSpace Home Page
+    // TODO validate if it is safe enough to delete this line
     cy.osd.navigateToWorkSpaceHomePage(workspaceName);
 
     // Check for toggleNavButton and handle accordingly
