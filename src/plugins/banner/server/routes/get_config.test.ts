@@ -10,7 +10,12 @@
  */
 
 import { defineRoutes } from './get_config';
-import { httpServerMock, coreMock, httpServiceMock } from '../../../../core/server/mocks';
+import {
+  httpServerMock,
+  coreMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from '../../../../core/server/mocks';
 import { BannerPluginSetup } from '../types';
 
 describe('Banner routes', () => {
@@ -29,6 +34,7 @@ describe('Banner routes', () => {
         useMarkdown: true,
         size: 'm',
       }),
+      logger: loggingSystemMock.createLogger(),
     };
   });
 

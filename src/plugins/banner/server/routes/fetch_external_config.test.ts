@@ -12,8 +12,6 @@
 import { fetchExternalConfig } from './fetch_external_config';
 import http from 'http';
 import https from 'https';
-import { URL } from 'url';
-import { BannerConfig } from '../../common';
 
 // Mock http and https modules
 jest.mock('http');
