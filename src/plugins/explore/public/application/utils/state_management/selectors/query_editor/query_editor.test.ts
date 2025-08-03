@@ -17,6 +17,9 @@ import {
   selectLastExecutedPrompt,
   selectLastExecutedTranslatedQuery,
   selectSummaryAgentIsAvailable,
+  selectDateRange,
+  selectQueryExecutionButtonStatus,
+  selectIsQueryEditorDirty,
 } from './query_editor';
 import { RootState } from '../../store';
 import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types';
@@ -37,14 +40,19 @@ describe('query_editor selectors', () => {
       promptToQueryIsLoading: false,
       lastExecutedPrompt: '',
       lastExecutedTranslatedQuery: '',
+      queryExecutionButtonStatus: 'REFRESH',
+      dateRange: undefined,
+      isQueryEditorDirty: false,
       ...queryEditorState,
     },
-    // Add other required state slices as minimal mocks
     ui: {} as any,
     results: {} as any,
     tab: {} as any,
     legacy: {} as any,
     query: {} as any,
+    meta: {
+      isInitialized: false,
+    },
   });
 
   describe('selectQueryStatusMap', () => {
@@ -391,6 +399,92 @@ describe('query_editor selectors', () => {
       const result = selectLastExecutedTranslatedQuery(state);
 
       expect(result).toBe('');
+    });
+  });
+
+  describe('selectDateRange', () => {
+    it('should return the dateRange from queryEditor state', () => {
+      const testDateRange = { from: '2023-01-01T00:00:00Z', to: '2023-01-02T00:00:00Z' };
+      const state = createMockState({
+        dateRange: testDateRange,
+      });
+
+      const result = selectDateRange(state);
+
+      expect(result).toEqual(testDateRange);
+    });
+
+    it('should return undefined when dateRange is not set', () => {
+      const state = createMockState({
+        dateRange: undefined,
+      });
+
+      const result = selectDateRange(state);
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('selectQueryExecutionButtonStatus', () => {
+    it('should return the queryExecutionButtonStatus from queryEditor state', () => {
+      const state = createMockState({
+        queryExecutionButtonStatus: 'UPDATE',
+      });
+
+      const result = selectQueryExecutionButtonStatus(state);
+
+      expect(result).toBe('UPDATE');
+    });
+
+    it('should return different button statuses correctly', () => {
+      const testStatuses = ['UPDATE', 'REFRESH', 'DISABLED'] as const;
+
+      testStatuses.forEach((status) => {
+        const state = createMockState({
+          queryExecutionButtonStatus: status,
+        });
+
+        const result = selectQueryExecutionButtonStatus(state);
+        expect(result).toBe(status);
+      });
+    });
+
+    it('should return default REFRESH status', () => {
+      const state = createMockState({});
+
+      const result = selectQueryExecutionButtonStatus(state);
+
+      expect(result).toBe('REFRESH');
+    });
+  });
+
+  describe('selectIsDirty', () => {
+    it('should return true when isDirty is true', () => {
+      const state = createMockState({
+        isQueryEditorDirty: true,
+      });
+
+      const result = selectIsQueryEditorDirty(state);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when isDirty is false', () => {
+      const state = createMockState({
+        isQueryEditorDirty: false,
+      });
+
+      const result = selectIsQueryEditorDirty(state);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return default false value', () => {
+      const state = createMockState({});
+
+      const result = selectIsQueryEditorDirty(state);
+
+      expect(result).toBe(false);
     });
   });
 });

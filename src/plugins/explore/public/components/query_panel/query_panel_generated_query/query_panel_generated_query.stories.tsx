@@ -57,6 +57,10 @@ const createStoreWithQuery = (lastExecutedTranslatedQuery: string = '') => {
       results: {},
       tab: {
         logs: {},
+        patterns: {
+          patternsField: undefined,
+          usingRegexPatterns: false,
+        },
       },
       legacy: {
         columns: [],
@@ -77,6 +81,8 @@ const createStoreWithQuery = (lastExecutedTranslatedQuery: string = '') => {
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery,
         summaryAgentIsAvailable: false,
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
       },
     },
   });

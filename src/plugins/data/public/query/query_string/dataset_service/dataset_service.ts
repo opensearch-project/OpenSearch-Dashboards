@@ -146,7 +146,6 @@ export class DatasetService {
         } else {
           const temporaryDataView = await services.data?.dataViews.create(spec, true);
 
-          // Load schema asynchronously if it's an async index pattern
           if (asyncType && temporaryDataView) {
             type!
               .fetchFields(dataset, services)

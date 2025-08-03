@@ -89,7 +89,7 @@ export const runAutocompleteTests = () => {
             createQuery(config, false); // use mouse
 
             // Run with mouse click
-            cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+            cy.getElementByTestId('exploreQueryExecutionButton').click();
 
             cy.osd.waitForLoader(true);
             cy.wait(1000);
@@ -108,7 +108,7 @@ export const runAutocompleteTests = () => {
             // SQL and PPL should use cy.get('.inputarea').type('{cmd+enter}')
             // But it is not working in Remote CI
             // TODO: investigate and fix
-            cy.getElementByTestId('queryPanelFooterRunQueryButton').click();
+            cy.getElementByTestId('exploreQueryExecutionButton').click();
 
             cy.osd.waitForLoader(true);
             cy.wait(2000);

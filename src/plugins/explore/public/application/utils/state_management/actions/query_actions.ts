@@ -159,11 +159,8 @@ export const executeQueries = createAsyncThunk<
   // Check what needs execution
   const needsDefaultQuery = !results[defaultCacheKey];
   const needsVisualizationTabQuery =
-    query.query !== '' &&
-    visualizationTabCacheKey !== defaultCacheKey &&
-    !results[visualizationTabCacheKey];
+    visualizationTabCacheKey !== defaultCacheKey && !results[visualizationTabCacheKey];
   const needsActiveTabQuery =
-    query.query !== '' &&
     activeTabCacheKey !== visualizationTabCacheKey &&
     activeTabCacheKey !== defaultCacheKey &&
     !results[activeTabCacheKey];
@@ -221,13 +218,14 @@ const executeQueryBase = async (
     cacheKey: string;
     includeHistogram: boolean;
     interval?: string;
+    avoidDispatchingError?: (error: any, cacheKey: string) => boolean;
   },
   thunkAPI: {
     getState: () => RootState;
     dispatch: any;
   }
 ) => {
-  const { services, cacheKey, includeHistogram, interval } = params;
+  const { services, cacheKey, includeHistogram, interval, avoidDispatchingError } = params;
   const { getState, dispatch } = thunkAPI;
 
   if (!services) {
@@ -263,7 +261,6 @@ const executeQueryBase = async (
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
 
-    // Reset inspector adapter
     services.inspectorAdapters.requests.reset();
 
     const title = i18n.translate('explore.discover.inspectorRequestDataTitle', {
@@ -372,26 +369,33 @@ const executeQueryBase = async (
 
     const parsedError = JSON.parse(error.body.message);
 
-    dispatch(
-      setIndividualQueryStatus({
-        cacheKey,
-        status: {
-          status: QueryExecutionStatus.ERROR,
-          startTime: queryStartTime,
-          elapsedMs: undefined,
-          error: {
-            error: error.body.error || 'Unknown Error',
-            message: {
-              details: parsedError?.error?.details || 'Unknown Error',
-              reason: parsedError?.error?.reason || 'Unknown Error',
-              type: parsedError?.error?.type,
+    // if there is no avoidDispatchingError function, dispatch Error.
+    // if there is that function, and it returns false, dispatch Error
+    if (
+      !avoidDispatchingError ||
+      (avoidDispatchingError && !avoidDispatchingError(parsedError, cacheKey))
+    ) {
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.ERROR,
+            startTime: queryStartTime,
+            elapsedMs: undefined,
+            error: {
+              error: error.body.error || 'Unknown Error',
+              message: {
+                details: parsedError?.error?.details || 'Unknown Error',
+                reason: parsedError?.error?.reason || 'Unknown Error',
+                type: parsedError?.error?.type,
+              },
+              statusCode: error.body.statusCode,
+              originalErrorMessage: error.body.message,
             },
-            statusCode: error.body.statusCode,
-            originalErrorMessage: error.body.message,
           },
-        },
-      })
-    );
+        })
+      );
+    }
 
     throw error;
   }
@@ -484,14 +488,33 @@ export const executeTabQuery = createAsyncThunk<
   },
   { state: RootState }
 >('query/executeTabQuery', async (params, thunkAPI) => {
-  return executeQueryBase(
+  const { services } = params;
+  const { getState } = thunkAPI;
+
+  /**
+   * below activeTabCustomQueryErrorHandler logic to be removed when datasets
+   * contain information about query engine versions
+   */
+  let activeTabCustomQueryErrorHandler;
+  const activeTabId = getState().ui.activeTabId;
+  if (activeTabId) {
+    const activeTab = services.tabRegistry.getTab(activeTabId);
+    if (activeTab?.handleQueryError) {
+      activeTabCustomQueryErrorHandler = activeTab.handleQueryError;
+    }
+  }
+
+  const queryBaseResult = executeQueryBase(
     {
       ...params,
       includeHistogram: false, // Tab-specific flag
       interval: undefined, // Tabs don't need intervals
+      avoidDispatchingError: activeTabCustomQueryErrorHandler,
     },
     thunkAPI
   );
+
+  return queryBaseResult;
 });
 
 /**

@@ -42,6 +42,16 @@ export const selectShowHistogram = createSelector(
   (uiState) => uiState.showHistogram
 );
 
+export const selectPatternsField = createSelector(
+  [selectTabState],
+  (tabState) => tabState.patterns.patternsField
+);
+
+export const selectUsingRegexPatterns = createSelector(
+  [selectTabState],
+  (tabState) => tabState.patterns.usingRegexPatterns
+);
+
 export const selectActiveTab = createSelector(
   [selectActiveTabId],
   (activeTabId) => activeTabId // Return just the ID, components will resolve the tab via context

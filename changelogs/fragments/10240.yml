@@ -1,2 +1,0 @@
-fix:
-- [Left navigation] fix: type to allow euiIconType / icon to be undefined ([#10240](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10240))

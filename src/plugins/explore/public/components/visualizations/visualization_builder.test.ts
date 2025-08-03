@@ -362,10 +362,10 @@ describe('VisualizationBuilder', () => {
       }
     });
 
-    test('should reset vis state if no auto vis can be created when chart type or axes mapping can no longer be applied to the data', () => {
+    test('should show a table if no auto vis can be created when chart type or axes mapping can no longer be applied to the data', () => {
       const builder = new VisualizationBuilder({});
-      const setStylesSpy = jest.spyOn(builder, 'setStyles');
-      const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
+      jest.spyOn(builder, 'setStyles');
+      jest.spyOn(builder, 'setAxesMapping');
       const setCurrentChartTypeSpy = jest.spyOn(builder, 'setCurrentChartType');
       // Mock auto vis cannot be created
       jest.spyOn(builder, 'createAutoVis').mockReturnValue(undefined);
@@ -384,9 +384,7 @@ describe('VisualizationBuilder', () => {
         // Mapping won't work with the data
         { x: 'name-date-0', y: 'name-numerical-0' }
       );
-      expect(setStylesSpy).toHaveBeenCalledWith(undefined);
-      expect(setAxesMappingSpy).toHaveBeenCalledWith({});
-      expect(setCurrentChartTypeSpy).toHaveBeenCalledWith(undefined);
+      expect(setCurrentChartTypeSpy).toHaveBeenCalledWith('table');
     });
 
     test('should do nothing if the axes mapping can be used on the data', () => {

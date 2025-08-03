@@ -128,7 +128,7 @@ export interface StartDeps {
   workspaces: WorkspacesStart;
 }
 
-export type CollapsibleNavHeaderRender = (props: { isNavOpen: boolean }) => JSX.Element | null;
+type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {
@@ -315,8 +315,6 @@ export class ChromeService {
                 opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
                 surveyLink={injectedMetadata.getSurvey()}
                 useUpdatedAppearance
-                isNavDrawerLocked$={getIsNavDrawerLocked$}
-                isChromeVisible$={this.isVisible$}
               />
             </I18nProvider>,
             element

@@ -373,7 +373,7 @@ export class DashboardPlugin
       title: 'Dashboards',
       order: 2500,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-      euiIconType: core.chrome.navGroup.getNavGroupEnabled() ? 'dashboard' : 'inputOutput',
+      euiIconType: 'inputOutput',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,

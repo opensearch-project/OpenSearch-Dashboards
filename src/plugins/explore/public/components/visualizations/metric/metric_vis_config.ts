@@ -23,6 +23,8 @@ export const defaultMetricChartStyles: MetricChartStyleControls = {
   fontSize: 60,
   useColor: false,
   colorSchema: ColorSchemas.BLUES,
+  // add default range for metric
+  customRanges: [{ min: 0, max: 100 }],
 };
 
 export const createMetricConfig = (): VisualizationType<'metric'> => ({

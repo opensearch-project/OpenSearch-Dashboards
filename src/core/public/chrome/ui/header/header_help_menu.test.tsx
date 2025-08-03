@@ -40,15 +40,4 @@ describe('Header help menu', () => {
 
     expect(component).toMatchSnapshot();
   });
-
-  it('render menu with new experience', () => {
-    const props = {
-      ...mockProps(),
-      surveyLink: '',
-    };
-    const component = mountWithIntl(<HeaderHelpMenu {...props} useUpdatedAppearance />);
-    component.find('button').simulate('click');
-
-    expect(component).toMatchSnapshot();
-  });
 });

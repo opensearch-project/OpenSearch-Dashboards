@@ -80,8 +80,29 @@ const mockServices = {
           fields: [],
         }),
     },
+    dataViews: {
+      get: () =>
+        Promise.resolve({
+          id: 'mock-index-pattern',
+          title: 'mock-logs-*',
+          timeFieldName: '@timestamp',
+          fields: [],
+        }),
+    },
+    ui: {
+      DatasetSelect: () => <div>Mock Dataset Select</div>,
+    },
   },
   indexPatterns: {
+    get: () =>
+      Promise.resolve({
+        id: 'mock-index-pattern',
+        title: 'mock-logs-*',
+        timeFieldName: '@timestamp',
+        fields: [],
+      }),
+  },
+  dataViews: {
     get: () =>
       Promise.resolve({
         id: 'mock-index-pattern',
@@ -170,6 +191,10 @@ const createMockStore = (
       results: {},
       tab: {
         logs: {},
+        patterns: {
+          patternsField: undefined,
+          usingRegexPatterns: false,
+        },
       },
       legacy: {
         columns: [],
@@ -190,6 +215,8 @@ const createMockStore = (
         summaryAgentIsAvailable: false,
         lastExecutedPrompt: '',
         lastExecutedTranslatedQuery,
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
       },
     },
   });

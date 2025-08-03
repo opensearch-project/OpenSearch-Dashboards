@@ -19,11 +19,5 @@ export function getFromSavedObject(
     id: savedObject.id,
     fields,
     title: savedObject.attributes.title,
-    getFieldByName: (name: string) => fields.find((field: any) => field.name === name),
-    getComputedFields: () => ({}),
-    getScriptedFields: () => fields.filter((field: any) => field.scripted),
-    getNonScriptedFields: () => fields.filter((field: any) => !field.scripted),
-    addScriptedField: async () => {},
-    removeScriptedField: () => {},
   };
 }

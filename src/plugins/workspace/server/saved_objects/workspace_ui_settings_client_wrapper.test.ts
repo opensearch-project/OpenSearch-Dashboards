@@ -28,6 +28,7 @@ jest.mock('../../../../core/server/utils');
 
 const WORKSPACE_SCOPE_SETTING_WITHOUT_VALUE_ID = 'workspace_scope_setting_without_value';
 const GLOBAL_SCOPE_SETTING_ID = 'global_scope_setting';
+const DEFAULT_VALUE = 'default_value';
 
 describe('WorkspaceUiSettingsClientWrapper', () => {
   const createWrappedClient = () => {
@@ -53,6 +54,10 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
         scope: UiSettingScope.WORKSPACE,
       },
       [GLOBAL_SCOPE_SETTING_ID]: {},
+      [DEFAULT_VALUE]: {
+        scope: UiSettingScope.WORKSPACE,
+        value: 'default',
+      },
     });
 
     clientMock.get.mockImplementation(async (type, id) => {
@@ -128,7 +133,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
     });
   });
 
-  it('should return workspace settings and override global config attribute if trying to get workspace level settings in a workspace', async () => {
+  it('should return workspace settings and use default value if key value is undefined to get workspace level settings in a workspace', async () => {
     // Currently in a workspace
     jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ requestWorkspaceId: 'workspace-id' });
 
@@ -146,6 +151,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
         [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: 'default-ds-workspace',
         [DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID]: undefined,
         [WORKSPACE_SCOPE_SETTING_WITHOUT_VALUE_ID]: undefined,
+        [DEFAULT_VALUE]: 'default',
       },
     });
   });

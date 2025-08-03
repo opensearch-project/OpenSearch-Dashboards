@@ -10,6 +10,7 @@ import { ScatterChartStyleControls } from './scatter_vis_config';
 import { PointShape } from '../types';
 import { getPointShapes } from '../utils/collections';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 
 interface ScatterVisOptionsProps {
   styles: ScatterChartStyleControls['exclusive'];
@@ -26,6 +27,15 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
       [key]: value,
     });
   };
+
+  const [pointAngle, handlePointAngle] = useDebouncedNumericValue(
+    styles.angle,
+    (val) => onChange({ ...styles, angle: val }),
+    {
+      min: 0,
+      max: 360,
+    }
+  );
 
   const pointShapes = getPointShapes();
   return (
@@ -52,6 +62,7 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
 
       <EuiFormRow>
         <EuiSwitch
+          data-test-subj="pointFilledSwitch"
           compressed
           label={i18n.translate('explore.vis.scatter.filled', {
             defaultMessage: 'Filled',
@@ -70,8 +81,8 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
           compressed
           min={0}
           max={360}
-          value={styles.angle}
-          onChange={(e) => updateStyle('angle', Number(e.currentTarget.value))}
+          value={pointAngle}
+          onChange={(e) => handlePointAngle(e.currentTarget.value)}
           showInput
         />
       </EuiFormRow>
