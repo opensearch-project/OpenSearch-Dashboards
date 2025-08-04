@@ -1,2 +1,2 @@
 feat:
-- Support dynamic banner config via external JSON endpoint with local fallback ([#10324](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10324))
+- Refactor Banner Extensibility Model via Chrome Service ([#10324](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10324))
