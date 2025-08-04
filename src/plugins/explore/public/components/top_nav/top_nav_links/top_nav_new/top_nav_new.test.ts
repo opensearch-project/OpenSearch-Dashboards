@@ -25,17 +25,44 @@ describe('newTopNavData', () => {
 });
 
 describe('getNewButtonRun', () => {
-  it('should dispatch resetExploreStateActionCreator', () => {
+  it('should dispatch resetExploreStateActionCreator and navigate to clean URL', () => {
     const visBuilder = new VB.VisualizationBuilder({});
     const clearUrlSpy = jest.spyOn(visBuilder, 'clearUrl');
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(visBuilder);
 
     const dispatch = jest.fn();
-    const services = ({ store: { dispatch } } as unknown) as ExploreServices;
+    const mockPush = jest.fn();
+    const services = ({
+      store: { dispatch },
+      scopedHistory: { push: mockPush },
+    } as unknown) as ExploreServices;
     const clearEditors = jest.fn();
 
     const run = getNewButtonRun(services, clearEditors);
     run({} as HTMLElement);
+
+    expect(resetExploreStateActionCreator).toHaveBeenCalledWith(services, clearEditors);
+    expect(dispatch).toHaveBeenCalledWith('RESET_ACTION');
+    expect(clearUrlSpy).toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith('/');
+  });
+
+  it('should handle missing scopedHistory gracefully', () => {
+    const visBuilder = new VB.VisualizationBuilder({});
+    const clearUrlSpy = jest.spyOn(visBuilder, 'clearUrl');
+    jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(visBuilder);
+
+    const dispatch = jest.fn();
+    const services = ({
+      store: { dispatch },
+      scopedHistory: undefined,
+    } as unknown) as ExploreServices;
+    const clearEditors = jest.fn();
+
+    const run = getNewButtonRun(services, clearEditors);
+
+    // Should not throw when scopedHistory is undefined
+    expect(() => run({} as HTMLElement)).not.toThrow();
 
     expect(resetExploreStateActionCreator).toHaveBeenCalledWith(services, clearEditors);
     expect(dispatch).toHaveBeenCalledWith('RESET_ACTION');
