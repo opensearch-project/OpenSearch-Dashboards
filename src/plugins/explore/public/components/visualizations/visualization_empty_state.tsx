@@ -19,6 +19,7 @@ import {
 export const VisualizationEmptyState = () => {
   const sampleQueries = [
     {
+      key: 'faults',
       label: i18n.translate('explore.visualize.emptyState.sampleQuery.faults', {
         defaultMessage: 'Top services with faults',
       }),
@@ -29,6 +30,7 @@ export const VisualizationEmptyState = () => {
 | DISPLAY count,service`,
     },
     {
+      key: 'slow',
       label: i18n.translate('explore.visualize.emptyState.sampleQuery.slowOps', {
         defaultMessage: 'Top slow operations',
       }),
@@ -38,6 +40,7 @@ export const VisualizationEmptyState = () => {
 | DISPLAY p99,attributes.aws.local.operation`,
     },
     {
+      key: 'db',
       label: i18n.translate('explore.visualize.emptyState.sampleQuery.slowDb', {
         defaultMessage: 'Top slow database statements',
       }),
@@ -61,7 +64,7 @@ export const VisualizationEmptyState = () => {
           <EuiSpacer size="xs" />
           {sampleQueries.map((info) => {
             return (
-              <>
+              <Fragment key={info.key}>
                 <EuiSpacer size="xs" />
                 <EuiText textAlign="left" size="s">
                   {info.label}
@@ -70,7 +73,7 @@ export const VisualizationEmptyState = () => {
                 <EuiCodeBlock fontSize="s" paddingSize="s" isCopyable>
                   {info.code}
                 </EuiCodeBlock>
-              </>
+              </Fragment>
             );
           })}
           <EuiSpacer size="s" />

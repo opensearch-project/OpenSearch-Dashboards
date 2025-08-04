@@ -1,0 +1,3 @@
+test:
+- Fixed linting error of new discover state of tab slice ([#10328](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10328))
+- Update caniuse version ([#10328](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10328))
