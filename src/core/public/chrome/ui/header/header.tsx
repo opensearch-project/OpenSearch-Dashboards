@@ -669,7 +669,7 @@ export function Header({
 
   return (
     <>
-      {isBannerEnabled && !useUpdatedHeader && <div id="pluginGlobalBanner" />}
+      {isBannerEnabled && <div id="pluginGlobalBanner" />}
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}
