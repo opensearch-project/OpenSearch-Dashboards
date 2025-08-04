@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isPPLSearchQuery, throwFacetError } from './utils';
+import { formatDate, isPPLSearchQuery, throwFacetError } from './utils';
 import { Query } from 'src/plugins/data/common';
 
 describe('throwFacetError', () => {
@@ -110,6 +110,24 @@ describe('throwFacetError', () => {
       expect(err.name).toBeUndefined();
       expect(err.status).toBeUndefined();
     }
+  });
+});
+
+describe('formatDate', () => {
+  it('should format date with ISO format using T separator', () => {
+    // Test with a specific date
+    const testDate = new Date('2025-07-01T10:40:03');
+    const formattedDate = formatDate(testDate.toISOString());
+    // Verify the format is YYYY-MM-DDTHH:MM:SS with T separator
+    expect(formattedDate).toBe('2025-07-01T10:40:03');
+    expect(formattedDate).toContain('T');
+    expect(formattedDate).not.toContain(' ');
+    // Verify with another date
+    const anotherDate = new Date('2025-06-30T15:30:45');
+    const anotherFormatted = formatDate(anotherDate.toISOString());
+    expect(anotherFormatted).toBe('2025-06-30T15:30:45');
+    expect(anotherFormatted).toContain('T');
+    expect(anotherFormatted).not.toContain(' ');
   });
 });
 
