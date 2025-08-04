@@ -20,12 +20,12 @@ import {
   generateComponentId,
   getDataSourceSelection,
   getDefaultDataSourceId,
+  getWorkspaces,
 } from '../utils';
 import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selector.scss';
 import { DataSourceOption } from '../data_source_menu/types';
-import { getWorkspaces } from '../utils';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSourcesManagement.localCluster', {

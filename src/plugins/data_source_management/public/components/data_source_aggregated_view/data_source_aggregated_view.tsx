@@ -141,7 +141,6 @@ export class DataSourceAggregatedView extends React.Component<
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
-          // for data source aggregated view, get default data source from cache
           defaultDataSource:
             (await getDefaultDataSourceId(this.props.uiSettings, this.props.scope)) ?? null,
           showEmptyState: allDataSourcesIdToTitleMap.size === 0,
@@ -211,7 +210,6 @@ export class DataSourceAggregatedView extends React.Component<
     const numSelectedItems = selectedItems.length;
 
     const titleComponent = (
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceDropDownHeader
         totalDataSourceCount={this.state.allDataSourcesIdToTitleMap.size}
         activeDataSourceCount={

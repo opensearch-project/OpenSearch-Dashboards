@@ -53,7 +53,6 @@ describe('DataSourceSelectable', () => {
 
   it('should render normally when local cluster is not hidden', () => {
     component = shallow(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -75,7 +74,6 @@ describe('DataSourceSelectable', () => {
 
   it('should render normally when local cluster is hidden', () => {
     component = shallow(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -97,7 +95,6 @@ describe('DataSourceSelectable', () => {
 
   it('should filter options if configured', async () => {
     component = shallow(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -118,7 +115,6 @@ describe('DataSourceSelectable', () => {
   it('should show popover with button click', async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -144,7 +140,6 @@ describe('DataSourceSelectable', () => {
     const onSelectedDataSource = jest.fn();
     spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
     const container = mount(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -217,7 +212,6 @@ describe('DataSourceSelectable', () => {
   it(`should display selectedOption[0]'s label when available`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -239,7 +233,6 @@ describe('DataSourceSelectable', () => {
   it(`should display selectedOption[0]'s id when label is not available`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -289,11 +282,8 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
-<<<<<<< HEAD
-        // @ts-expect-error TS2741 TODO(ts-error): fixme
-=======
         scope={UiSettingScope.WORKSPACE}
->>>>>>> 568386cb65 (fix type error)
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         selectedOption={[{}]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -365,7 +355,6 @@ describe('DataSourceSelectable', () => {
   it(`should render the selected option when selectedOption[0]'s id is found`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = mount(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -414,7 +403,6 @@ describe('DataSourceSelectable', () => {
     const onSelectedDataSource = jest.fn();
     spyOn(utils, 'getDefaultDataSource').and.returnValue(undefined);
     const container = mount(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -498,7 +486,6 @@ describe('DataSourceSelectable', () => {
       client.find = findFunc;
       const onSelectedDataSource = jest.fn();
       render(
-        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <DataSourceSelectable
           savedObjectsClient={client}
           notifications={toasts}
@@ -531,7 +518,6 @@ describe('DataSourceSelectable', () => {
     jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelectionMock);
     jest.spyOn(utils, 'generateComponentId').mockReturnValue(componentId);
     mount(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}

@@ -239,8 +239,9 @@ export class DataSourceManagementPlugin
       dataSourceSelection: this.dataSourceSelection,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource!),
-        getDataSourceMenu: <T>(): React.ComponentType<DataSourceMenuProps<T>> =>
-          createDataSourceMenu<T>(),
+        getDataSourceMenu: <T>(): React.ComponentType<
+          Omit<DataSourceMenuProps<T>, 'uiSettings' | 'hideLocalCluster' | 'application' | 'scope'>
+        > => createDataSourceMenu<T>(),
       },
       getDefaultDataSourceId,
       getDefaultDataSourceId$,
