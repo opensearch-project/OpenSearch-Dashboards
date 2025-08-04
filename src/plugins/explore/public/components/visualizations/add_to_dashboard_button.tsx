@@ -187,7 +187,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
             color: 'success',
             iconType: 'check',
             text: toMountPoint(toastContent),
-            'data-test-subj': 'addToNewDashboardSuccessToast',
+            'data-test-subj': 'addToExistingDashboardSuccessToast',
           });
         }
 
@@ -210,7 +210,11 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
 
   return (
     <>
-      <EuiButtonEmpty size="s" onClick={() => setShowAddToDashboardModal(true)}>
+      <EuiButtonEmpty
+        size="s"
+        onClick={() => setShowAddToDashboardModal(true)}
+        data-test-subj="addToDashboardButton"
+      >
         {i18n.translate('explore.addtoDashboardButton.name', {
           defaultMessage: 'Add to dashboard',
         })}
