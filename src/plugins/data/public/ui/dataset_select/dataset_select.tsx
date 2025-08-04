@@ -22,6 +22,7 @@ import {
   EuiTextColor,
   EuiText,
   EuiPopoverTitle,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -196,7 +197,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
       id: 0,
       items: [
         {
-          name: datasetTitle,
+          name: (
+            <EuiTitle className="datasetSelect__contextMenu_title eui-textTruncate">
+              <>{datasetTitle}</>
+            </EuiTitle>
+          ),
           panel: 1,
           icon: <EuiIcon type={datasetIcon} size="s" />,
         },
