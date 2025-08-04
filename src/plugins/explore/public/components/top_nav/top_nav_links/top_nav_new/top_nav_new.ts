@@ -29,4 +29,8 @@ export const getNewButtonRun = (
   const visBuilder = getVisualizationBuilder();
   visBuilder.clearUrl();
   services.store.dispatch(resetExploreStateActionCreator(services, clearEditors));
+
+  if (services.scopedHistory) {
+    services.scopedHistory.push('/');
+  }
 };
