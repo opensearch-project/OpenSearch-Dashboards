@@ -62,7 +62,7 @@ describe('DataSourceView', () => {
         />
       );
     });
-    // @ts-expect-error TS2532 TODO(ts-error): fixme
+
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
@@ -85,7 +85,7 @@ describe('DataSourceView', () => {
         />
       );
     });
-    // @ts-expect-error TS2532 TODO(ts-error): fixme
+
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
@@ -110,7 +110,7 @@ describe('DataSourceView', () => {
         />
       );
     });
-    // @ts-expect-error TS2532 TODO(ts-error): fixme
+
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
@@ -134,7 +134,6 @@ describe('DataSourceView', () => {
       );
     });
 
-    // @ts-expect-error TS2532 TODO(ts-error): fixme
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
@@ -159,7 +158,6 @@ describe('DataSourceView', () => {
       );
     });
 
-    // @ts-expect-error TS2532 TODO(ts-error): fixme
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
     expect(toasts.add).toBeCalledTimes(1);
@@ -204,7 +202,6 @@ describe('DataSourceView', () => {
       );
     });
 
-    // @ts-expect-error TS2532 TODO(ts-error): fixme
     wrapper.update();
     expect(onSelectedDataSource).toBeCalledWith([]);
   });

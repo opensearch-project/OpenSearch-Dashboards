@@ -129,13 +129,19 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
   function renderLayout(): ReactElement | null {
     switch (componentType) {
       case DataSourceComponentType.DataSourceAggregatedView:
-        return renderDataSourceAggregatedView(componentConfig as DataSourceAggregatedViewConfig);
+        return renderDataSourceAggregatedView(
+          (componentConfig as unknown) as DataSourceAggregatedViewConfig
+        );
       case DataSourceComponentType.DataSourceSelectable:
-        return renderDataSourceSelectable(componentConfig as DataSourceSelectableConfig);
+        return renderDataSourceSelectable(
+          (componentConfig as unknown) as DataSourceSelectableConfig
+        );
       case DataSourceComponentType.DataSourceView:
-        return renderDataSourceView(componentConfig as DataSourceViewConfig);
+        return renderDataSourceView((componentConfig as unknown) as DataSourceViewConfig);
       case DataSourceComponentType.DataSourceMultiSelectable:
-        return renderDataSourceMultiSelectable(componentConfig as DataSourceMultiSelectableConfig);
+        return renderDataSourceMultiSelectable(
+          (componentConfig as unknown) as DataSourceMultiSelectableConfig
+        );
       default:
         return null;
     }

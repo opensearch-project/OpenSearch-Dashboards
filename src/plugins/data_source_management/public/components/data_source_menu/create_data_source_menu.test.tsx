@@ -60,7 +60,6 @@ describe('create data source menu', () => {
 
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
 
-    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
@@ -94,7 +93,6 @@ describe('create data source menu', () => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     await act(async () => {
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       component = render(<TestComponent {...props} />);
     });
 
@@ -112,7 +110,7 @@ describe('when setMenuMountPoint is provided', () => {
   let portalTarget: HTMLElement;
   let mountPoint: MountPoint;
   let setMountPoint: jest.Mock<(mountPoint: MountPoint<HTMLElement>) => void>;
-  let dom: ReactWrapper;
+  let dom: ReactWrapper<{}, {}, React.Component> | undefined;
 
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
@@ -169,7 +167,6 @@ describe('when setMenuMountPoint is provided', () => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
-    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const component = render(<TestComponent {...props} />);
     act(() => {
       mountPoint(portalTarget);

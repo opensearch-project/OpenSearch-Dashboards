@@ -336,7 +336,6 @@ describe('DataSourceSelectable', () => {
   it(`should display a warning when selectedOption is an empty array`, async () => {
     const onSelectedDataSource = jest.fn();
     render(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
