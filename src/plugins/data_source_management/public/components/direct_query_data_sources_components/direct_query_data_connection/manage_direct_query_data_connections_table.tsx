@@ -124,9 +124,6 @@ export const ManageDirectQueryDataConnectionsTable = ({
       notifications.toasts.addWarning(error.message);
     }
   }, [uiSettings, currentWorkspace, notifications.toasts]);
-  useEffectOnce(() => {
-    loadDefaultDataSourceId();
-  });
 
   useEffectOnce(() => {
     loadDefaultDataSourceId();

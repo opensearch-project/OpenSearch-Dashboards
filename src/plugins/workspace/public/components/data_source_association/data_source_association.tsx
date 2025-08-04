@@ -27,6 +27,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
 } from '../../../../data_source/common';
 import { UiSettingScope } from '../../../../../core/public';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../../../data_source_management/common';
 
 interface Props {
   excludedDataSourceIds: string[];
@@ -78,7 +79,11 @@ export const DataSourceAssociation = ({
             failedCount = res.result.filter((r) => !!r.error).length;
             if (!defaultDataSourceId && uiSettings) {
               // If a default data source is not already set, automatically set the first selected data source as default.
-              await uiSettings.set('defaultDataSource', objects[0].id, UiSettingScope.WORKSPACE);
+              await uiSettings.set(
+                DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+                objects[0].id,
+                UiSettingScope.WORKSPACE
+              );
             }
           } else {
             // If failed to workspaceClient.associate, all data sources association is failed
