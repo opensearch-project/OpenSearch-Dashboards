@@ -25,7 +25,7 @@ $expandedHeaderWidth: $headerWidth * 2;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 999;
+  z-index: $ouiZHeader - 1; // lower than flyouts
   width: 100%;
   min-height: var(--global-banner-height);
 }
@@ -51,7 +51,7 @@ $expandedHeaderWidth: $headerWidth * 2;
 }
 
 .headerGlobalNav--withBanner .newTopNavHeader {
-  z-index: 900; // lower than banner
+  z-index: $ouiZHeader - 2; // lower than banner
   position: relative;
 }
 
