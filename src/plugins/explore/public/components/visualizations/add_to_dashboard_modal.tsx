@@ -128,7 +128,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
     <EuiModal style={{ minWidth: 400 }} onClose={onCancel}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h2>
+          <h2 data-test-subj="addToDashboardModalTitle">
             {i18n.translate('explore.addtoDashboardModal.title', {
               defaultMessage: 'Save and Add to Dashboard',
             })}
@@ -145,6 +145,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           <EuiFlexItem grow={false}>
             <EuiRadio
               id="saveToExistingDashboard"
+              data-test-subj="saveToExistingDashboardRadio"
               label={i18n.translate('explore.addtoDashboardModal.saveToExisting', {
                 defaultMessage: 'Save to existing dashboard',
               })}
@@ -155,6 +156,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           <EuiFlexItem grow={false}>
             <EuiRadio
               id="saveToNewDashboard"
+              data-test-subj="saveToNewDashboardRadio"
               label={i18n.translate('explore.addToNewDashboardModal.saveToNew', {
                 defaultMessage: 'Save to new dashboard',
               })}
@@ -171,6 +173,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
                 })}
               >
                 <EuiSelect
+                  data-test-subj="selectExistingDashboard"
                   compressed={true}
                   fullWidth={true}
                   options={existingDashboard.map((dashboard) => {
@@ -224,7 +227,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiSmallButtonEmpty onClick={onCancel}>
+        <EuiSmallButtonEmpty onClick={onCancel} data-test-subj="saveToDashboardCancelButton">
           {i18n.translate('explore.addtoDashboardModal.cancelButton', {
             defaultMessage: 'Cancel',
           })}
@@ -236,6 +239,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           fill={true}
           disabled={!enableButton}
           isLoading={isLoading}
+          data-test-subj="saveToDashboardConfirmButton"
         >
           {i18n.translate('explore.addtoDashboardModal.addButton', {
             defaultMessage: 'Add',

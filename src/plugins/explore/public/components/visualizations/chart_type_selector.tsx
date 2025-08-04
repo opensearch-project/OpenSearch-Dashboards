@@ -181,7 +181,7 @@ export const ChartTypeSelector = <T extends ChartType>({
         <EuiSuperSelect
           id="chartType"
           compressed
-          valueOfSelected={currChartTypeId}
+          valueOfSelected={currChartTypeId || ''}
           placeholder="Select a visualization type"
           options={selectOptions}
           onChange={(value) => {

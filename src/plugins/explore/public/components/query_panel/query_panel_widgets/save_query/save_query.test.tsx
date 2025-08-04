@@ -91,61 +91,82 @@ jest.doMock('../../../../application/utils/state_management/slices', () => ({
   clearResults: jest.fn(() => ({ type: 'results/clearResults' })),
   setSavedQuery: jest.fn(() => ({ type: 'legacy/setSavedQuery' })),
   setQueryState: jest.fn(() => ({ type: 'query/setQueryState' })),
+  setDateRange: jest.fn(() => ({ type: 'query/setDateRange' })),
 }));
 
 // Mock SavedQueryManagementComponent
-jest.doMock('../../../../../../data/public', () => ({
-  SavedQueryManagementComponent: ({
-    onLoad,
-    onClearSavedQuery,
-    saveQuery,
-    loadedSavedQuery,
-    saveQueryIsDisabled,
-  }: any) => (
-    <div data-test-subj="saved-query-management">
-      <button
-        data-test-subj="mock-save-button"
-        onClick={() =>
-          saveQuery({
-            title: 'Test Query',
-            description: 'Test Description',
-            shouldIncludeTimeFilter: true,
-          })
-        }
-        disabled={saveQueryIsDisabled}
-      >
-        Save Query
-      </button>
-      <button
-        data-test-subj="mock-load-button"
-        onClick={() =>
-          onLoad({
-            id: 'test-query-id',
-            attributes: {
-              query: { query: 'SELECT * FROM test', language: 'SQL' },
-              timefilter: {
-                from: 'now-1h',
-                to: 'now',
-                refreshInterval: { pause: false, value: 5000 },
+jest.doMock('../../../../../../data/public', () => {
+  const MockSavedQueryManagementComponent = (props: any) => {
+    const { onLoad, onClearSavedQuery, saveQuery, loadedSavedQuery, saveQueryIsDisabled } = props;
+    return (
+      <div data-test-subj="saved-query-management">
+        <button
+          data-test-subj="mock-save-button"
+          onClick={() =>
+            saveQuery(
+              {
+                title: 'Test Query',
+                description: 'Test Description',
+                shouldIncludeTimeFilter: true,
               },
-            },
-          })
-        }
-      >
-        Load Query
-      </button>
-      <button data-test-subj="mock-clear-button" onClick={onClearSavedQuery}>
-        Clear Query
-      </button>
-      {loadedSavedQuery && (
-        <div data-test-subj="loaded-query-info">
-          Loaded: {loadedSavedQuery.attributes?.query?.query}
-        </div>
-      )}
-      {saveQueryIsDisabled && <div data-test-subj="save-disabled-indicator">Save Disabled</div>}
-    </div>
-  ),
-}));
+              false
+            )
+          }
+          disabled={saveQueryIsDisabled}
+        >
+          Save Query
+        </button>
+        <button
+          data-test-subj="mock-save-as-new-button"
+          onClick={() =>
+            saveQuery(
+              {
+                title: 'Test Query New',
+                description: 'Test Description New',
+                shouldIncludeTimeFilter: true,
+              },
+              true
+            )
+          }
+          disabled={saveQueryIsDisabled}
+        >
+          Save As New Query
+        </button>
+        <button
+          data-test-subj="mock-load-button"
+          onClick={() =>
+            onLoad({
+              id: 'test-query-id',
+              attributes: {
+                query: { query: 'SELECT * FROM test', language: 'SQL' },
+                timefilter: {
+                  from: 'now-1h',
+                  to: 'now',
+                  refreshInterval: { pause: false, value: 5000 },
+                },
+              },
+            })
+          }
+        >
+          Load Query
+        </button>
+        <button data-test-subj="mock-clear-button" onClick={onClearSavedQuery}>
+          Clear Query
+        </button>
+        {loadedSavedQuery && (
+          <div data-test-subj="loaded-query-info">
+            Loaded: {loadedSavedQuery.attributes?.query?.query}
+          </div>
+        )}
+        {saveQueryIsDisabled && <div data-test-subj="save-disabled-indicator">Save Disabled</div>}
+      </div>
+    );
+  };
+
+  return {
+    SavedQueryManagementComponent: MockSavedQueryManagementComponent,
+  };
+});
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { SaveQueryButton } = require('./save_query');
@@ -154,7 +175,7 @@ const createMockStore = (initialState = {}) => {
   return configureStore({
     reducer: {
       query: (state = {}) => state,
-      legacy: (state = {}) => state,
+      legacy: (state = {}) => ({ savedQuery: undefined, ...state }),
       queryEditor: (state = {}) => state,
     },
     preloadedState: {
@@ -277,6 +298,7 @@ describe('SaveQueryButton', () => {
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({ type: 'legacy/setSavedQuery' });
       expect(mockDispatch).toHaveBeenCalledWith({ type: 'query/setQueryState' });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'query/setDateRange' });
       expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -294,10 +316,6 @@ describe('SaveQueryButton', () => {
         mockSetEditorTextWithQuery,
         'SELECT * FROM test'
       );
-      expect(mockTimeFilter.setTime).toHaveBeenCalledWith({
-        from: 'now-1h',
-        to: 'now',
-      });
       expect(mockTimeFilter.setRefreshInterval).toHaveBeenCalledWith({
         pause: false,
         value: 5000,
@@ -343,6 +361,32 @@ describe('SaveQueryButton', () => {
     });
   });
 
+  it('displays loaded saved query information when currentSavedQuery exists', async () => {
+    mockSavedQueryService.getSavedQuery.mockResolvedValue({
+      id: 'test-query-id',
+      attributes: {
+        query: { query: 'SELECT * FROM test_table', language: 'SQL' },
+        timefilter: { from: 'now-1h', to: 'now', refreshInterval: { pause: false, value: 5000 } },
+      },
+    });
+
+    renderWithStore({
+      legacy: {
+        savedQuery: 'test-query-id',
+      },
+    });
+
+    const button = screen.getByTestId('queryPanelFooterSaveQueryButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loaded-query-info')).toBeInTheDocument();
+      expect(screen.getByTestId('loaded-query-info')).toHaveTextContent(
+        'Loaded: SELECT * FROM test_table'
+      );
+    });
+  });
+
   it('calls saveQuery service when save is triggered', async () => {
     renderWithStore();
 
@@ -354,6 +398,62 @@ describe('SaveQueryButton', () => {
 
     await waitFor(() => {
       expect(mockSavedQueryService.saveQuery).toHaveBeenCalled();
+    });
+  });
+
+  it('calls saveQuery with overwrite:true when updating existing saved query', async () => {
+    renderWithStore({
+      legacy: {
+        savedQuery: 'existing-query-id',
+      },
+    });
+
+    const button = screen.getByTestId('queryPanelFooterSaveQueryButton');
+    fireEvent.click(button);
+
+    const saveButton = screen.getByTestId('mock-save-button');
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockSavedQueryService.saveQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Test Query',
+          description: 'Test Description',
+          query: expect.objectContaining({
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+          }),
+        }),
+        { overwrite: true }
+      );
+    });
+  });
+
+  it('calls saveQuery with overwrite:false when saving as new query', async () => {
+    renderWithStore({
+      legacy: {
+        savedQuery: 'existing-query-id',
+      },
+    });
+
+    const button = screen.getByTestId('queryPanelFooterSaveQueryButton');
+    fireEvent.click(button);
+
+    const saveAsNewButton = screen.getByTestId('mock-save-as-new-button');
+    fireEvent.click(saveAsNewButton);
+
+    await waitFor(() => {
+      expect(mockSavedQueryService.saveQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Test Query New',
+          description: 'Test Description New',
+          query: expect.objectContaining({
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+          }),
+        }),
+        { overwrite: false }
+      );
     });
   });
 
