@@ -27,7 +27,11 @@ import { TraceTopNavMenu } from './public/top_nav_buttons';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { TracePPLService } from './server/ppl_request_trace';
 import { MountPoint } from '../../../../../../../core/public';
-import { transformPPLDataToTraceHits } from './public/traces/ppl_to_trace_hits';
+import {
+  transformPPLDataToTraceHits,
+  TraceHit,
+  PPLResponse,
+} from './public/traces/ppl_to_trace_hits';
 import { DataExplorerServices } from '../../../../../../data_explorer/public';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
@@ -36,6 +40,11 @@ import { NoMatchMessage } from './public/utils/helper_functions';
 import { createTraceAppState } from './state/trace_app_state';
 import { SpanDetailTabs } from './public/traces/span_detail_tabs';
 import { TraceDetailTabs } from './public/traces/trace_detail_tabs';
+
+export interface SpanFilter {
+  field: string;
+  value: string | number | boolean;
+}
 
 export interface TraceDetailsProps {
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
@@ -74,12 +83,12 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
     };
   }, [stateContainer]);
 
-  const [transformedHits, setTransformedHits] = useState<any[]>([]);
-  const [spanFilters, setSpanFilters] = useState<any[]>([]);
-  const [pplQueryData, setPplQueryData] = useState<any>(null);
+  const [transformedHits, setTransformedHits] = useState<TraceHit[]>([]);
+  const [spanFilters, setSpanFilters] = useState<SpanFilter[]>([]);
+  const [pplQueryData, setPplQueryData] = useState<PPLResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState<boolean>(false);
-  const [unfilteredHits, setUnfilteredHits] = useState<any[]>([]);
+  const [unfilteredHits, setUnfilteredHits] = useState<TraceHit[]>([]);
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>('timeline');
@@ -102,7 +111,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
     }
   }, [unfilteredHits]);
 
-  const setSpanFiltersWithStorage = (newFilters: any[]) => {
+  const setSpanFiltersWithStorage = (newFilters: SpanFilter[]) => {
     setSpanFilters(newFilters);
   };
 
@@ -122,7 +131,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
   }, [chrome, traceId]);
 
   useEffect(() => {
-    const fetchData = async (filters: any[] = []) => {
+    const fetchData = async (filters: SpanFilter[] = []) => {
       if (!pplService || !traceId || !dataSourceId) return;
 
       // Only show full loading spinner on initial load
@@ -175,7 +184,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
   }, [stopStateSync]);
 
   // Find selected span, with fallback to root span logic
-  const selectedSpan = useMemo(() => {
+  const selectedSpan = useMemo((): TraceHit | undefined => {
     if (transformedHits.length === 0) return undefined;
 
     // If we have a specific spanId, try to find it first
@@ -189,12 +198,12 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
     if (spanWithoutParent) return spanWithoutParent;
 
     // If no span without parent, find the earliest span by start time
-    return transformedHits.reduce((earliest, current) => {
+    return transformedHits.reduce((earliest: TraceHit | undefined, current: TraceHit) => {
       if (!earliest) return current;
       const earliestTime = new Date(earliest.startTime || 0).getTime();
       const currentTime = new Date(current.startTime || 0).getTime();
       return currentTime < earliestTime ? current : earliest;
-    }, null);
+    }, undefined);
   }, [spanId, transformedHits]);
 
   // Update URL state when fallback span selection occurs
@@ -217,14 +226,14 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
 
   // Calculate error count
   const errorCount = useMemo(() => {
-    return transformedHits.filter((span: any) => span.status?.code === 2).length;
+    return transformedHits.filter((span: TraceHit) => span.status?.code === 2).length;
   }, [transformedHits]);
 
   // Extract services in the order they appear in the data
   const servicesInOrder = useMemo(() => {
     if (!colorMap) return [];
     const serviceSet = new Set<string>();
-    transformedHits.forEach((span: any) => {
+    transformedHits.forEach((span: TraceHit) => {
       const serviceName = span.serviceName;
       if (serviceName && colorMap[serviceName]) {
         serviceSet.add(serviceName);
@@ -245,7 +254,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
   };
 
   // Function to remove a specific filter
-  const removeFilter = (filterToRemove: any) => {
+  const removeFilter = (filterToRemove: SpanFilter) => {
     const newFilters = spanFilters.filter(
       (filter) => !(filter.field === filterToRemove.field && filter.value === filterToRemove.value)
     );
@@ -258,7 +267,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
   };
 
   // Function to format filter display text
-  const getFilterDisplayText = (filter: any) => {
+  const getFilterDisplayText = (filter: SpanFilter) => {
     if (filter.field === 'status.code' && filter.value === 2) {
       return 'Error';
     }
@@ -422,7 +431,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
                       <EuiPanel paddingSize="s" className="exploreTraceView__sidebarPanel">
                         <SpanDetailTabs
                           selectedSpan={selectedSpan}
-                          addSpanFilter={(field: string, value: any) => {
+                          addSpanFilter={(field: string, value: string | number | boolean) => {
                             const newFilters = [...spanFilters];
                             const index = newFilters.findIndex(
                               ({ field: filterField }) => field === filterField

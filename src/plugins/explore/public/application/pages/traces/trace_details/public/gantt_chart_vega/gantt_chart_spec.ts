@@ -122,7 +122,11 @@ export function createGanttSpec(
             cursor: { value: 'pointer' },
             tooltip: {
               signal:
-                "datum.hasError ? {'⚠️ Error': '" +
+                "datum.hasError ? {'⚠️ " +
+                i18n.translate('explore.ganttChart.tooltip.error', {
+                  defaultMessage: 'Error',
+                }) +
+                "': '" +
                 i18n.translate('explore.ganttChart.tooltip.clickForDetails', {
                   defaultMessage: 'click for details',
                 }) +
