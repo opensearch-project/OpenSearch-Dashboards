@@ -10,12 +10,12 @@ import { HeatmapChartStyleControls } from './heatmap_vis_config';
 jest.mock('./heatmap_chart_utils', () => ({
   enhanceStyle: jest.fn(),
   addTransform: jest.fn(() => []),
-  createlabelLayer: jest.fn(() => null),
+  createLabelLayer: jest.fn(() => null),
 }));
 
 jest.mock('../utils/utils', () => ({
   applyAxisStyling: jest.fn(() => ({ title: 'mockAxis' })),
-  getSwappedAxisRole: jest.fn((styles, mappings) => [mappings.x, mappings.y]),
+  getSwappedAxisRole: jest.fn((styles, mappings) => ({ xAxis: mappings.x, yAxis: mappings.y })),
   getSchemaByAxis: jest.fn((axis) => (axis?.schema === 'Numerical' ? 'quantitative' : 'nominal')),
 }));
 
