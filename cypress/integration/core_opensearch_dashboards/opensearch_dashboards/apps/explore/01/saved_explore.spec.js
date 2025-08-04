@@ -21,14 +21,14 @@ import {
   updateSavedSearchAndSaveAndVerify,
   generateSavedTestConfiguration,
   updateSavedSearchAndNotSaveAndVerify,
+  postRequestSaveExplore
 } from '../../../../../../utils/apps/explore/saved';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
 const runSavedExploreTests = () => {
-  // TODO currently saved search isn't working in explore, enable this when it is fixed
-  describe.skip('saved explore', () => {
+  describe('saved explore', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,
@@ -58,7 +58,7 @@ const runSavedExploreTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
         setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -100,7 +100,7 @@ const runSavedExploreTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
         // using a POST request to create a saved explore to load
@@ -123,7 +123,7 @@ const runSavedExploreTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
         // using a POST request to create a saved explore to load
@@ -146,7 +146,7 @@ const runSavedExploreTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
         // using a POST request to create a saved explore to load
