@@ -73,6 +73,7 @@ describe('State Comparison Utilities', () => {
     it('should remove undefined properties from tab state', () => {
       const tabState: TabState = {
         logs: {},
+        patterns: { usingRegexPatterns: false },
       };
 
       const tabStateWithUndefined = {
@@ -85,6 +86,7 @@ describe('State Comparison Utilities', () => {
 
       expect(normalized).toEqual({
         logs: {},
+        patterns: { usingRegexPatterns: false },
       });
       expect(normalized).not.toHaveProperty('undefinedProp');
     });
