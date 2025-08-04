@@ -175,7 +175,9 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
             <>
               <DebouncedAxisTitle
                 value={getCategoryAxisDisplayTitle(axis)}
-                placeholder="Axis name"
+                placeholder={i18n.translate('explore.vis.metric.axisName', {
+                  defaultMessage: 'Axis name',
+                })}
                 onChange={(text) =>
                   updateCategoryAxis(index, {
                     title: { ...axis.title, text },
@@ -336,7 +338,9 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   <>
                     <DebouncedAxisTitle
                       value={getValueAxisDisplayTitle(axis, index)}
-                      placeholder="Axis name"
+                      placeholder={i18n.translate('explore.vis.metric.axisName', {
+                        defaultMessage: 'Axis name',
+                      })}
                       onChange={(text) =>
                         updateValueAxis(index, {
                           title: { ...axis.title, text },
@@ -489,7 +493,9 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   <>
                     <DebouncedAxisTitle
                       value={getValueAxisDisplayTitle(axis, index)}
-                      placeholder="Axis name"
+                      placeholder={i18n.translate('explore.vis.metric.axisName', {
+                        defaultMessage: 'Axis name',
+                      })}
                       onChange={(text) =>
                         updateValueAxis(index, {
                           title: { ...axis.title, text },
