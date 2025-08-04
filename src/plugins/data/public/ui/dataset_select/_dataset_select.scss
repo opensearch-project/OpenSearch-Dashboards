@@ -36,6 +36,10 @@
     padding: $euiSizeXS;
     overflow-y: auto;
 
+    button:is([class*="euiContextMenuItem"]) {
+      font-weight: $euiFontWeightSemiBold;
+    }
+
     button:is([class*="euiContextMenuPanelTitle"]) {
       padding: $euiSizeXS;
     }
