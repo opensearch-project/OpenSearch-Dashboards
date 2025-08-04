@@ -113,7 +113,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
 
   const loadDefaultDataSourceId = useCallback(async () => {
     try {
-      const scope = !!currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
+      const scope = workspaces.currentWorkspace$ ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
       const id = await uiSettings.getUserProvidedWithScope<string | null>(
         DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
         scope
@@ -123,7 +123,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
     } catch (error) {
       notifications.toasts.addWarning(error.message);
     }
-  }, [uiSettings, currentWorkspace, notifications.toasts]);
+  }, [uiSettings, workspaces.currentWorkspace$, notifications.toasts]);
 
   useEffectOnce(() => {
     loadDefaultDataSourceId();
@@ -236,7 +236,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
     fetchAllData();
   }, [http, savedObjects, notifications, featureFlagStatus]);
 
-  const handleOnDataSourceUpdated = useCallback(async () => {
+  const handleDataSourceUpdated = useCallback(async () => {
     await fetchDataSources();
     await loadDefaultDataSourceId();
   }, [fetchDataSources, loadDefaultDataSourceId]);
@@ -543,7 +543,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
       renderComponent: (
         <DataSourceAssociation
           excludedDataSourceIds={data.map((ds) => ds.id)}
-          onComplete={handleOnDataSourceUpdated}
+          onComplete={handleDataSourceUpdated}
           defaultDataSourceId={defaultDataSourceId}
         />
       ),

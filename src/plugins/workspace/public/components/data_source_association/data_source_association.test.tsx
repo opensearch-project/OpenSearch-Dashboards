@@ -216,12 +216,12 @@ describe('<DataSourceAssociation />', () => {
       // id1 failed to associate with error
       result: [{ id: 'id1', error: new Error() }, { id: 'id2' }],
     });
-    servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
+    servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>(({
       associate: associateMock,
       copy: jest.fn(),
       dissociate: jest.fn(),
       ui: jest.fn(),
-    });
+    } as unknown) as IWorkspaceClient);
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
     spyOn(servicesMock.uiSettings, 'set').and.returnValue(true);
 

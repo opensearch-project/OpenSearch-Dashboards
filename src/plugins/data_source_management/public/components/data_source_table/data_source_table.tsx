@@ -93,7 +93,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   const loadDefaultDataSourceId = useCallback(async () => {
     try {
-      const scope = currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
+      const scope = workspaces.currentWorkspace$ ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
       const id = await uiSettings.getUserProvidedWithScope<string | null>(
         DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
         scope
@@ -103,7 +103,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     } catch (error) {
       notifications.toasts.addWarning(error.message);
     }
-  }, [uiSettings, currentWorkspace, notifications.toasts]);
+  }, [uiSettings, workspaces.currentWorkspace$, notifications.toasts]);
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -177,7 +177,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     }
   }, [handleDisplayToastMessage, http, notifications, savedObjects.client]);
 
-  const handleOnDataSourceUpdated = useCallback(async () => {
+  const handleDataSourceUpdated = useCallback(async () => {
     await fetchDataSources();
     await loadDefaultDataSourceId();
   }, [fetchDataSources, loadDefaultDataSourceId]);
@@ -187,8 +187,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       renderComponent: (
         <DataSourceAssociation
           excludedDataSourceIds={dataSources.map((ds) => ds.id)}
-          onComplete={handleOnDataSourceUpdated}
-          // defaultDataSourceId={defaultDataSourceId}
+          onComplete={handleDataSourceUpdated}
+          defaultDataSourceId={defaultDataSourceId}
         />
       ),
     } as TopNavControlComponentData,

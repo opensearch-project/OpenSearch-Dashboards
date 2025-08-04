@@ -27,7 +27,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
 } from '../../../../data_source/common';
 import { UiSettingScope } from '../../../../../core/public';
-import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../../../data_source_management/common';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../../../data_source_management/public';
 
 interface Props {
   excludedDataSourceIds: string[];
