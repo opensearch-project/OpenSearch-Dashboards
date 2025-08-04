@@ -123,7 +123,11 @@ describe('AxesOptions', () => {
     numericalColumns: mockNumericalColumns,
     categoricalColumns: mockCategoricalColumns,
     dateColumns: mockDateColumns,
-    axisColumnMappings: {},
+    axisColumnMappings: {
+      [AxisRole.X]: mockCategoricalColumns[0],
+      [AxisRole.Y]: mockNumericalColumns[0],
+      [AxisRole.Y_SECOND]: undefined,
+    },
   };
 
   const rule2Props = {
@@ -187,6 +191,11 @@ describe('AxesOptions', () => {
         },
       },
     ] as ValueAxis[],
+    axisColumnMappings: {
+      [AxisRole.X]: mockDateColumns[0],
+      [AxisRole.Y]: mockNumericalColumns[0],
+      [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+    },
   };
 
   beforeEach(() => {
@@ -540,6 +549,11 @@ describe('AxesOptions', () => {
           },
         },
       ] as ValueAxis[],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      },
     };
 
     render(<AxesOptions {...newRule2Props} />);
@@ -621,6 +635,11 @@ describe('AxesOptions', () => {
           },
         },
       ] as ValueAxis[],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      },
     };
 
     render(<AxesOptions {...newRule2Props} />);
@@ -649,6 +668,11 @@ describe('AxesOptions', () => {
       numericalColumns: [],
       categoricalColumns: [],
       dateColumns: [],
+      axisColumnMappings: {
+        [AxisRole.X]: undefined,
+        [AxisRole.Y]: undefined,
+        [AxisRole.Y_SECOND]: undefined,
+      },
     };
 
     // @ts-ignore - Testing with null props
@@ -668,7 +692,11 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
-      axisColumnMappings: {},
+      axisColumnMappings: {
+        [AxisRole.X]: undefined,
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: undefined,
+      },
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
@@ -688,7 +716,11 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
-      axisColumnMappings: {},
+      axisColumnMappings: {
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.Y]: undefined,
+        [AxisRole.Y_SECOND]: undefined,
+      },
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
@@ -722,6 +754,11 @@ describe('AxesOptions', () => {
           },
         } as CategoryAxis,
       ],
+      axisColumnMappings: {
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: undefined,
+      },
     };
 
     render(<AxesOptions {...propsWithMultipleAxes} />);
@@ -760,6 +797,11 @@ describe('AxesOptions', () => {
           },
         } as ValueAxis,
       ],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      },
     };
 
     render(<AxesOptions {...propsWithMultipleAxes} />);
@@ -868,7 +910,17 @@ describe('AxesOptions', () => {
       },
     ];
 
-    render(<AxesOptions {...defaultProps} categoryAxes={mockCategoryAxesWithVerticalRotation} />);
+    render(
+      <AxesOptions
+        {...defaultProps}
+        categoryAxes={mockCategoryAxesWithVerticalRotation}
+        axisColumnMappings={{
+          [AxisRole.X]: mockCategoricalColumns[0],
+          [AxisRole.Y]: mockNumericalColumns[0],
+          [AxisRole.Y_SECOND]: undefined,
+        }}
+      />
+    );
 
     const select = screen.getByTestId('xLinesAlignment');
     expect(select).toHaveValue('vertical');
@@ -885,7 +937,17 @@ describe('AxesOptions', () => {
       },
     ];
 
-    render(<AxesOptions {...defaultProps} valueAxes={mockValueAxesWithVerticalRotation} />);
+    render(
+      <AxesOptions
+        {...defaultProps}
+        valueAxes={mockValueAxesWithVerticalRotation}
+        axisColumnMappings={{
+          [AxisRole.X]: mockCategoricalColumns[0],
+          [AxisRole.Y]: mockNumericalColumns[0],
+          [AxisRole.Y_SECOND]: undefined,
+        }}
+      />
+    );
 
     const select = screen.getByTestId('singleyLinesAlignment');
     expect(select).toHaveValue('vertical');
