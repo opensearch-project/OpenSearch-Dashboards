@@ -608,6 +608,34 @@ export class DashboardPlugin
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
     }
 
+    // Register dashboard navigation shortcuts
+    if (core.keyboardShortcuts) {
+      core.keyboardShortcuts.register([
+        {
+          id: 'nav.dashboard',
+          name: 'Go to Dashboard',
+          pluginId: 'dashboard',
+          category: 'navigation',
+          keys: 'shift+b',
+          execute: () => {
+            // Only enable shortcut when workspace is selected
+            const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+            const isInitialized = core.workspaces.initialized$.getValue();
+
+            if (!isInitialized || !currentWorkspace) {
+              // eslint-disable-next-line no-console
+              console.log('Dashboard shortcut disabled: no workspace selected');
+              return;
+            }
+
+            // eslint-disable-next-line no-console
+            console.log('Pressed shift+d - Navigating to Dashboard!');
+            core.application.navigateToApp('dashboards');
+          },
+        },
+      ]);
+    }
+
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns,

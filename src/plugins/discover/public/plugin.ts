@@ -418,6 +418,34 @@ export class DiscoverPlugin
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
     setUiActions(plugins.uiActions);
 
+    // Register discover navigation shortcuts
+    if (core.keyboardShortcuts) {
+      core.keyboardShortcuts.register([
+        {
+          id: 'nav.discover',
+          name: 'Go to Discover',
+          pluginId: 'discover',
+          category: 'navigation',
+          keys: 'shift+d',
+          execute: () => {
+            // Only enable shortcut when workspace is selected
+            const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+            const isInitialized = core.workspaces.initialized$.getValue();
+
+            if (!isInitialized || !currentWorkspace) {
+              // eslint-disable-next-line no-console
+              console.log('Discover shortcut disabled: no workspace selected');
+              return;
+            }
+
+            // eslint-disable-next-line no-console
+            console.log('Pressed shift+d - Navigating to Discover!');
+            core.application.navigateToApp('discover');
+          },
+        },
+      ]);
+    }
+
     this.initializeServices = () => {
       if (this.servicesInitialized) {
         return { core, plugins };
