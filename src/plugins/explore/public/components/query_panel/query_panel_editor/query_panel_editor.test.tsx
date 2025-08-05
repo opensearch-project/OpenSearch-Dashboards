@@ -22,14 +22,6 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   withOpenSearchDashboards: jest.fn((component: any) => component),
 }));
 
-jest.mock('@elastic/eui', () => ({
-  EuiIcon: ({ type, size, className }: any) => (
-    <div data-test-subj="eui-icon" data-type={type} data-size={size} className={className}>
-      EuiIcon Mock
-    </div>
-  ),
-}));
-
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useSelector: (selector: any) => selector(),
@@ -207,32 +199,6 @@ describe('QueryPanelEditor', () => {
     const codeEditor = screen.getByTestId('code-editor');
     expect(codeEditor).toHaveAttribute('value', 'SELECT COUNT(*) FROM users');
     expect(codeEditor).toHaveAttribute('languageId', 'ppl');
-  });
-
-  it('renders prompt icon when in prompt mode', () => {
-    mockUseQueryPanelEditor.mockReturnValue({
-      ...mockUseQueryPanelEditorReturn,
-      isPromptMode: true,
-    });
-
-    renderWithProvider(<QueryPanelEditor />);
-
-    const promptIcon = screen.getByTestId('eui-icon');
-    expect(promptIcon).toBeInTheDocument();
-    expect(promptIcon).toHaveAttribute('data-type', 'generate');
-    expect(promptIcon).toHaveAttribute('data-size', 'm');
-    expect(promptIcon).toHaveClass('exploreQueryPanelEditor__promptIcon');
-  });
-
-  it('does not render prompt icon when not in prompt mode', () => {
-    mockUseQueryPanelEditor.mockReturnValue({
-      ...mockUseQueryPanelEditorReturn,
-      isPromptMode: false,
-    });
-
-    renderWithProvider(<QueryPanelEditor />);
-
-    expect(screen.queryByTestId('eui-icon')).not.toBeInTheDocument();
   });
 
   describe('onEditorClick', () => {

@@ -89,18 +89,18 @@ const runAiEditorTests = () => {
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesIfRelevant(config.language.name);
 
-        cy.getElementByTestId('exploreSelectedLanguage').contains('PPL');
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').contains('PPL');
 
         // Test via keyboard clicks
         cy.explore.setQueryEditor(' ');
-        cy.getElementByTestId('exploreSelectedLanguage').contains('Ask AI');
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').contains('AI');
         cy.explore.setQueryEditor('{esc}');
-        cy.getElementByTestId('exploreSelectedLanguage').contains('PPL');
-        cy.getElementByTestId('queryPanelFooterLanguageToggle').click();
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').contains('PPL');
 
         // Test via toggle
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').click();
         cy.getElementByTestId('queryPanelFooterLanguageToggle-AI').click();
-        cy.getElementByTestId('exploreSelectedLanguage').contains('Ask AI');
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').contains('AI');
       });
 
       // filtering only works for indexed fields
