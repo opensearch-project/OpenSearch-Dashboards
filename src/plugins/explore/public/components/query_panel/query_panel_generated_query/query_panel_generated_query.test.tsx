@@ -91,14 +91,14 @@ describe('QueryPanelGeneratedQuery', () => {
       render(<QueryPanelGeneratedQuery />);
 
       expect(screen.getByText(testQuery)).toBeInTheDocument();
-      expect(screen.getByText('Edit query')).toBeInTheDocument();
+      expect(screen.getByText('Replace query')).toBeInTheDocument();
     });
 
     describe('onEditClick functionality', () => {
       it('should call all required functions when edit button is clicked', () => {
         render(<QueryPanelGeneratedQuery />);
 
-        const editButton = screen.getByTestId('exploreQueryPanelGeneratedQuery_editQuery');
+        const editButton = screen.getByTestId('exploreQueryPanelGeneratedQueryEditButton');
         fireEvent.click(editButton);
 
         expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith(testQuery);
@@ -110,7 +110,7 @@ describe('QueryPanelGeneratedQuery', () => {
       it('should call functions in correct order', () => {
         render(<QueryPanelGeneratedQuery />);
 
-        const editButton = screen.getByTestId('exploreQueryPanelGeneratedQuery_editQuery');
+        const editButton = screen.getByTestId('exploreQueryPanelGeneratedQueryEditButton');
         fireEvent.click(editButton);
 
         // Verify all functions were called
