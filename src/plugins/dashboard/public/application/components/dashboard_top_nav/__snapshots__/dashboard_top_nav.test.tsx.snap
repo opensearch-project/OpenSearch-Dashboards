@@ -256,6 +256,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -1408,6 +1409,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -2560,6 +2562,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -3712,6 +3715,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -4864,6 +4868,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -6016,6 +6021,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],

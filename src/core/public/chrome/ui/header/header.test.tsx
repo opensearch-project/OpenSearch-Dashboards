@@ -346,7 +346,7 @@ describe('Header', () => {
       expect(component.find('#pluginGlobalBanner').exists()).toBeFalsy();
     });
 
-    it('does not render banner container when useUpdatedHeader is true', () => {
+    it('renders banner container when useUpdatedHeader is true', () => {
       const injectedMetadata = ({
         getPlugins: jest.fn().mockReturnValue([
           {
@@ -365,7 +365,7 @@ describe('Header', () => {
       };
 
       const component = mountWithIntl(<Header {...props} />);
-      expect(component.find('#pluginGlobalBanner').exists()).toBeFalsy();
+      expect(component.find('#pluginGlobalBanner').exists()).toBeTruthy();
     });
   });
 });

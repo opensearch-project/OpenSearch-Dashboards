@@ -10,6 +10,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
+  UiSettingScope,
 } from 'opensearch-dashboards/public';
 import {
   getApplication,
@@ -36,6 +37,7 @@ interface DataSourceAggregatedViewProps {
   notifications: ToastsStart;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  scope: UiSettingScope;
   activeDataSourceIds?: string[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources: boolean;
@@ -139,8 +141,8 @@ export class DataSourceAggregatedView extends React.Component<
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
-          // for data source aggregated view, get default data source from cache
-          defaultDataSource: (await getDefaultDataSourceId(this.props.uiSettings)) ?? null,
+          defaultDataSource:
+            (await getDefaultDataSourceId(this.props.uiSettings, this.props.scope)) ?? null,
           showEmptyState: allDataSourcesIdToTitleMap.size === 0,
         });
       })
@@ -208,7 +210,6 @@ export class DataSourceAggregatedView extends React.Component<
     const numSelectedItems = selectedItems.length;
 
     const titleComponent = (
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceDropDownHeader
         totalDataSourceCount={this.state.allDataSourcesIdToTitleMap.size}
         activeDataSourceCount={

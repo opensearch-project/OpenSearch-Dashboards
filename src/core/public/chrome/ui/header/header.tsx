@@ -663,7 +663,7 @@ export function Header({
 
   return (
     <>
-      {globalBanner && !useUpdatedHeader && (
+      {globalBanner && (
         <div className="globalBanner">{globalBanner.component}</div>
       )}
       <header className={className} data-test-subj="headerGlobalNav">
