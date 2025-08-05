@@ -206,7 +206,7 @@ export const runCreateVisTests = () => {
       const datasetName = `${INDEX_WITH_TIME_1}*`;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
-      const query = `source=${datasetName} | fields status_code, personal.age, bytes_transferred`;
+      const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
       cy.explore.setQueryEditor(query, { submit: false });
       cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
