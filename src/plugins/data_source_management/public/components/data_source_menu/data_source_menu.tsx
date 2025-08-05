@@ -4,6 +4,7 @@
  */
 
 import React, { ReactElement } from 'react';
+import { UiSettingScope } from 'opensearch-dashboards/public';
 import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';
 import { DataSourceMultiSelectable } from '../data_source_multi_selectable';
@@ -16,6 +17,7 @@ import {
   DataSourceViewConfig,
 } from './types';
 import { DataSourceSelectable } from '../data_source_selectable';
+import { getWorkspaces } from '../utils';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
   const {
@@ -25,8 +27,15 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     hideLocalCluster,
     application,
     onManageDataSource,
-    scope,
   } = props;
+
+  const workspaces = getWorkspaces();
+
+  const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+
+  const scope: UiSettingScope = !!currentWorkspaceId
+    ? UiSettingScope.WORKSPACE
+    : UiSettingScope.GLOBAL;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
     const {
