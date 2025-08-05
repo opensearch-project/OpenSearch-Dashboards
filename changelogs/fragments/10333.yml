@@ -1,0 +1,2 @@
+fix:
+- Fix PPL query millisecond precision in date filtering ([#10333](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10333))

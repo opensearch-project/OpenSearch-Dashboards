@@ -1,0 +1,23 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Issues Tab Styles
+.exploreSpanTabs__issuesContainer {
+  min-height: auto;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.exploreSpanTabs__codeBlock {
+  min-height: auto;
+  max-height: none;
+  word-break: break-word;
+}
+
+// Overview Tab Styles
+.exploreSpanTabs__urlLink {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}

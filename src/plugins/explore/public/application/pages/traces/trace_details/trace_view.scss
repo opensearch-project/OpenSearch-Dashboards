@@ -1,0 +1,39 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreTraceView {
+  &__loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+  }
+
+  &__resizableContainer {
+    height: calc(100vh - 150px);
+  }
+
+  &__mainPanel {
+    height: 100%;
+  }
+
+  &__sidebarPanel {
+    height: 100%;
+  }
+
+  &__tabsContainer {
+    padding: 8px 16px;
+  }
+
+  &__filtersContainer {
+    padding: 0 16px;
+  }
+
+  &__serviceLegendColorIndicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+  }
+}

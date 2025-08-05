@@ -13,9 +13,9 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 const workspaceName = getRandomizedWorkspaceName();
 
 const runQuery = () => {
+  cy.explore.clearQueryEditor();
   const datasetName = `${INDEX_WITH_TIME_1}*`;
   const query = `source=${datasetName}`;
-  cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
   setDatePickerDatesAndSearchIfRelevant('PPL');
   cy.wait(2000);
   cy.explore.setQueryEditor(query);
@@ -46,7 +46,6 @@ export const runAddLogToDashboardTests = () => {
     beforeEach(() => {
       cy.getElementByTestId('discoverNewButton').click();
       cy.osd.waitForLoader(true);
-      runQuery();
     });
     afterEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
@@ -61,6 +60,7 @@ export const runAddLogToDashboardTests = () => {
     });
 
     it('should render add to dashboard model when clicking add to dashboard button', () => {
+      runQuery();
       // verify add to dashboard button is displayed
       cy.getElementByTestId('addToDashboardButton').should('be.visible');
       cy.getElementByTestId('addToDashboardButton').click();
@@ -71,6 +71,7 @@ export const runAddLogToDashboardTests = () => {
     });
 
     it('should be able to add a log table to a new dashboard', () => {
+      runQuery();
       cy.getElementByTestId('addToDashboardButton').should('be.visible').click();
       cy.getElementByTestId('saveToNewDashboardRadio').should('be.visible').click();
 
@@ -105,6 +106,7 @@ export const runAddLogToDashboardTests = () => {
     });
 
     it('should be able to add a log table to an existing dashboard', () => {
+      runQuery();
       cy.getElementByTestId('addToDashboardButton').should('be.visible').click();
       cy.getElementByTestId('saveToExistingDashboardRadio').should('be.visible').click();
 
