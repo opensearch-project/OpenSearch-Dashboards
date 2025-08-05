@@ -31,7 +31,7 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiToolTip, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
@@ -45,7 +45,10 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 
-import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import {
+  DataSourceManagementPluginSetup,
+  DataSourceOption,
+} from 'src/plugins/data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
@@ -93,7 +96,7 @@ function DevToolsWrapper({
     []
   );
 
-  const onChange = async (e: Array<EuiComboBoxOptionOption<any>>) => {
+  const onChange = async (e: Array<DataSourceOption<any>>) => {
     const dataSourceId = e[0] ? e[0].id : undefined;
     await remount(mountedTool.current!.mountpoint, dataSourceId);
   };

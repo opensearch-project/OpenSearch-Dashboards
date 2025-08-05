@@ -113,7 +113,6 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
       },
     };
 
-    // @ts-expect-error TS2741 TODO(ts-error): fixme
     return <DataSourceMenuView {...dataSourceViewProps} componentType={'DataSourceView'} />;
   }, [featureFlagStatus, dataSourceMDSId, setHeaderActionMenu, savedObjects.client, notifications]);
 
