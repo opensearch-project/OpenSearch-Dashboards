@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DATASOURCE_NAME, INDEX_WITH_TIME_1, START_TIME } from '../../../../../../utils/constants';
+import {
+  DATASOURCE_NAME,
+  INDEX_WITH_TIME_1,
+  START_TIME,
+  END_TIME,
+} from '../../../../../../utils/constants';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
