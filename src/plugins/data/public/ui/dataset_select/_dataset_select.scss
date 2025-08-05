@@ -4,30 +4,26 @@
  */
 
 .datasetSelect {
-  width: 300px;
-  max-width: 300px;
-
   &__tooltip {
     min-width: 400px;
   }
 
-  &__icon {
-    margin-right: $euiSizeXS;
-    flex-shrink: 0;
+  &__textWrapper {
+    align-items: center;
+    margin-inline-end: $euiSizeXS;
+    gap: $euiSizeXS;
   }
 
   &__text {
     text-align: left;
-    align-items: center;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: $euiFontWeightBold;
     flex: 1;
-    width: 250px;
-    min-width: 0;
-    max-width: calc(100% - $euiSizeM);
+    max-width: 275px;
+    text-overflow: ellipsis;
     height: $euiSizeL;
     line-height: $euiSizeL;
+    overflow: hidden;
   }
 
   &__checkbox {
