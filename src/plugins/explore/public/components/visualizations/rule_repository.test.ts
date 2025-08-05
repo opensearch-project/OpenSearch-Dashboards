@@ -11,7 +11,7 @@ import {
   createMultiLineChart,
   createFacetedMultiLineChart,
 } from './line/to_expression';
-import { createHeatmapWithBin, createRegularHeatmap } from './heatmap/to_expression';
+import { createRegularHeatmap } from './heatmap/to_expression';
 import { createPieSpec } from './pie/to_expression';
 import {
   createTwoMetricScatter,
@@ -285,53 +285,6 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions,
-        undefined
-      );
-    });
-  });
-
-  describe('threeMetricsRule', () => {
-    // Find the rule by ID
-    const rule = ALL_VISUALIZATION_RULES.find((r) => r.id === 'three-metric');
-
-    it('should exist', () => {
-      expect(rule).toBeDefined();
-    });
-
-    it('should match 3 metrics, 0 categories, and 0 dates', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(3, 0, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
-    });
-
-    it('should not match other combinations', () => {
-      // 2 metrics, 0 categories, 0 dates
-      const test1 = createTestColumns(2, 0, 0);
-      expect(
-        rule?.matches(test1.numericalColumns, test1.categoricalColumns, test1.dateColumns)
-      ).toBe(false);
-
-      // 3 metrics, 1 category, 0 dates
-      const test2 = createTestColumns(3, 1, 0);
-      expect(
-        rule?.matches(test2.numericalColumns, test2.categoricalColumns, test2.dateColumns)
-      ).toBe(false);
-    });
-
-    it('should create a heatmap with bin expression', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(3, 0, 0);
-      const expression = rule?.toExpression?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions
-      );
-
-      expect(expression).toBe('heatmap-with-bin-expression');
-      expect(createHeatmapWithBin).toHaveBeenCalledWith(
-        transformedData,
-        numericalColumns,
         styleOptions,
         undefined
       );
