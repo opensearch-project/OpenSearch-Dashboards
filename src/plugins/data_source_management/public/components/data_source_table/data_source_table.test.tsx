@@ -190,6 +190,36 @@ describe('DataSourceTable', () => {
         expect(component.find(confirmModalIdentifier).exists()).toBe(false);
       });
     });
+
+    it('should get workspace-scope default data source if currently in a workspace', async () => {
+      mockedContext.workspaces.currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>({
+        id: 'workspace-id',
+        name: 'workspace name',
+      });
+
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+      expect(uiSettings.getUserProvidedWithScope).toHaveBeenCalledWith(
+        'defaultDataSource',
+        UiSettingScope.WORKSPACE
+      );
+    });
   });
 
   describe('should not manage datasources when canManageDataSource is false', () => {
@@ -534,6 +564,38 @@ describe('DataSourceTable', () => {
 
       // validate that we are now able to see the remote clusters
       expect(component.text()).toContain('connectionAlias1');
+    });
+  });
+
+  describe('should get default datasources failed', () => {
+    beforeEach(async () => {
+      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(
+        Promise.reject(new Error('Failed to get default data source'))
+      );
+      await act(async () => {
+        component = await mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+    });
+    test('should show warning when fail to get default data source', async () => {
+      await waitFor(() => {
+        expect(mockedContext.notifications.toasts.addWarning).toHaveBeenCalled();
+      });
     });
   });
 });
