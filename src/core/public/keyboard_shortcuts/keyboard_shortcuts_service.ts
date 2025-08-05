@@ -46,7 +46,7 @@ export class KeyboardShortcutsService {
     shortcuts.forEach((shortcut) => {
       // Construct full ID: shortcut.id + "." + shortcut.pluginId
       const fullId = `${shortcut.id}.${shortcut.pluginId}`;
-      
+
       // Basic storage - no validation in Phase 1
       this.shortcuts.set(shortcut.keys.toLowerCase(), shortcut);
       registeredIds.push(fullId);
