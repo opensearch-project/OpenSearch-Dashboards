@@ -1,0 +1,2 @@
+fix:
+- Fix cypress test for add log table to dashboard ([#10330](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10330))
