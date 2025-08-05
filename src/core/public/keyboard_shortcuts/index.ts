@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-// Index File Setup - Service exports
+// Phase 1.8 Index File Setup - Service exports
 
 export { KeyboardShortcutsService } from './keyboard_shortcuts_service';
 export type {
