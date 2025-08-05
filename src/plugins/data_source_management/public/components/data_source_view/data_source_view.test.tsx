@@ -37,7 +37,7 @@ describe('DataSourceView', () => {
         selectedOption={[{ id: 'test1', label: 'test1' }]}
         hideLocalCluster={false}
         onSelectedDataSources={jest.fn()}
-        scope={UiSettingScope.WORKSPACE}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -58,7 +58,7 @@ describe('DataSourceView', () => {
           selectedOption={[{ id: '' }]}
           hideLocalCluster={true}
           onSelectedDataSources={onSelectedDataSources}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
@@ -81,7 +81,7 @@ describe('DataSourceView', () => {
           dataSourceFilter={(ds) => {
             return false;
           }}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
@@ -106,7 +106,7 @@ describe('DataSourceView', () => {
           dataSourceFilter={(ds) => {
             return true;
           }}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
@@ -129,7 +129,7 @@ describe('DataSourceView', () => {
           notifications={toasts}
           hideLocalCluster={false}
           onSelectedDataSources={jest.fn()}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
@@ -153,7 +153,7 @@ describe('DataSourceView', () => {
           notifications={toasts}
           hideLocalCluster={false}
           onSelectedDataSources={jest.fn()}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
@@ -176,7 +176,7 @@ describe('DataSourceView', () => {
         onSelectedDataSources={onSelectedDataSource}
         hideLocalCluster={false}
         fullWidth={false}
-        scope={UiSettingScope.WORKSPACE}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     const button = await container.findByTestId('dataSourceViewButton');
@@ -197,7 +197,7 @@ describe('DataSourceView', () => {
           fullWidth={false}
           selectedOption={[{ id: '' }]}
           dataSourceFilter={(ds) => false}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });

@@ -133,7 +133,7 @@ describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSourc
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
 
@@ -253,7 +253,7 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
           uiSettings={uiSettings}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
       await nextTick();
@@ -367,7 +367,7 @@ describe('DataSourceAggregatedView empty state test with local cluster hiding', 
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
 
@@ -439,7 +439,7 @@ describe('DataSourceAggregatedView empty state test due to filter out with local
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
       const noCompatibleDataSourcesMessage =
@@ -529,7 +529,7 @@ describe('DataSourceAggregatedView error state test no matter hide local cluster
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
 
@@ -593,7 +593,7 @@ describe('DataSourceAggregatedView warning messages', () => {
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={(_) => false}
           uiSettings={uiSettings}
-          scope={UiSettingScope.WORKSPACE}
+          scope={UiSettingScope.GLOBAL}
         />
       );
       await nextTick();
@@ -636,7 +636,7 @@ describe('DataSourceAggregatedView: dataSourceSelection)', () => {
         displayAllCompatibleDataSources={false}
         activeDataSourceIds={activeDataSourceIds}
         uiSettings={uiSettings}
-        scope={UiSettingScope.WORKSPACE}
+        scope={UiSettingScope.GLOBAL}
       />
     );
 
