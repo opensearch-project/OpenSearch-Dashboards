@@ -210,7 +210,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                       >
                         <EuiSelect
                           compressed
-                          value={
+                          defaultValue={
                             axis.labels.rotate === 0
                               ? 'horizontal'
                               : axis.labels.rotate === -90

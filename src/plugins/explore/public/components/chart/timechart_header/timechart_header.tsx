@@ -181,7 +181,7 @@ export function TimechartHeader({
                       label: display,
                     };
                   })}
-                value={interval}
+                defaultValue={interval}
                 onChange={handleIntervalChange}
                 prepend={
                   <EuiText
