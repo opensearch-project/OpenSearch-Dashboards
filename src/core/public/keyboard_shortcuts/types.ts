@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-// Core Type Definitions
+// Phase 1.1 Core Type Definitions
 
 export interface KeyboardShortcutsSetup {
   register(shortcuts: ShortcutDefinition[]): string[];
