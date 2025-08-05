@@ -9,12 +9,12 @@
  * GitHub history for details.
  */
 
-export {
+// Index File Setup - Service exports
+
+export { KeyboardShortcutsService } from './keyboard_shortcuts_service';
+export type {
   KeyboardShortcutsSetup,
   KeyboardShortcutsStart,
   ShortcutDefinition,
   ShortcutHandler,
-  ConditionFunction,
 } from './types';
-
-export { KeyboardShortcutsService } from './keyboard_shortcuts_service';

@@ -426,7 +426,6 @@ export {
   KeyboardShortcutsStart,
   ShortcutDefinition,
   ShortcutHandler,
-  ConditionFunction,
 } from './keyboard_shortcuts';
 
 export { debounce } from './utils';

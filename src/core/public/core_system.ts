@@ -243,11 +243,7 @@ export class CoreSystem {
         overlays,
         workspaces,
       });
-      const keyboardShortcuts = this.keyboardShortcuts.start({
-        application,
-        chrome,
-        overlays,
-      });
+      const keyboardShortcuts = this.keyboardShortcuts.start();
 
       this.coreApp.start({ application, http, notifications, uiSettings });
 
