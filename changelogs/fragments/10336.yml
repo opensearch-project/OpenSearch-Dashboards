@@ -1,0 +1,2 @@
+fix:
+- [Explore] Fix query execution button issue when use using date picker quick selections ([#10336](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10336))
