@@ -198,10 +198,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
           iconType="arrowDown"
           iconSide="right"
           size="xs"
-          textProps={{ className: 'datasetSelect__text' }}
+          textProps={{ className: 'datasetSelect__textWrapper' }}
           onClick={togglePopover}
         >
-          <EuiIcon type={datasetIcon} size="s" className="datasetSelect__icon" />
+          <EuiIcon type={datasetIcon} size="s" />
           <EuiText size="xs" className="datasetSelect__text">
             {datasetTitle}
           </EuiText>
