@@ -30,8 +30,5 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
     return {};
   }
 
-  public stop() {
-    // The banner will be automatically removed when the plugin is stopped
-    // because the component will be unmounted
-  }
+  public stop() {}
 }

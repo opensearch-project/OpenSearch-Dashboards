@@ -1834,11 +1834,6 @@ exports[`Header handles visibility and lock changes 1`] = `
       "put": [MockFunction],
     }
   }
-  injectedMetadata={
-    Object {
-      "getPlugins": [MockFunction],
-    }
-  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -9148,11 +9143,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
       "put": [MockFunction],
     }
   }
-  injectedMetadata={
-    Object {
-      "getPlugins": [MockFunction],
-    }
-  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -13043,11 +13033,6 @@ exports[`Header renders condensed header 1`] = `
       "patch": [MockFunction],
       "post": [MockFunction],
       "put": [MockFunction],
-    }
-  }
-  injectedMetadata={
-    Object {
-      "getPlugins": [MockFunction],
     }
   }
   intl={
@@ -18627,11 +18612,6 @@ exports[`Header renders page header with application title 1`] = `
       "put": [MockFunction],
     }
   }
-  injectedMetadata={
-    Object {
-      "getPlugins": [MockFunction],
-    }
-  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -23099,11 +23079,6 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
       "patch": [MockFunction],
       "post": [MockFunction],
       "put": [MockFunction],
-    }
-  }
-  injectedMetadata={
-    Object {
-      "getPlugins": [MockFunction],
     }
   }
   intl={

@@ -47,14 +47,4 @@ describe('BannerPlugin', () => {
       expect(setGlobalBannerMock.mock.calls[0][0]).toHaveProperty('component');
     });
   });
-
-  describe('stop', () => {
-    test('banner is automatically unmounted when plugin stops', () => {
-      const plugin = new BannerPlugin();
-      plugin.stop();
-
-      // No explicit assertion needed as the banner is automatically unmounted
-      // when the plugin is stopped, as noted in the implementation comment
-    });
-  });
 });
