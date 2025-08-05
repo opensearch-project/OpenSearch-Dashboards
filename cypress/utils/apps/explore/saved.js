@@ -481,8 +481,14 @@ export const updateSavedSearchAndSaveAndVerify = (
       : [INDEX_PATTERN_WITH_TIME, DatasetTypes.INDEX_PATTERN.name];
   const newConfig = generateSavedTestConfiguration(newDataset, newDatasetType, QueryLanguages.PPL);
 
-  cy.explore.setDataset(newConfig.dataset, datasourceName, newConfig.datasetType);
-  setDatePickerDatesAndSearchIfRelevant(newConfig.language);
+  if(newDatasetType === 'INDEX_PATTERN') {
+    cy.explore.setIndexPatternAsDataset(newConfig.dataset);
+  }
+  else{
+    cy.explore.setIndexAsDataset(newConfig.dataset, datasourceName, QueryLanguages.PPL.name);
+  }
+
+  setDatePickerDatesAndSearchIfRelevant(QueryLanguages.PPL);
   setSearchConfigurations({
     ...newConfig,
     // only select field if previous config did not select it, because otherwise it is already selected
@@ -491,6 +497,12 @@ export const updateSavedSearchAndSaveAndVerify = (
   const saveNameToUse = saveAsNew ? newConfig.saveName : config.saveName;
   cy.saveSearch(saveNameToUse, saveAsNew);
 
+  cy.osd.navigateToWorkSpaceSpecificPage({
+      workspaceName,
+      page: 'explore',
+      isEnhancement: true,
+  });
+
   // Load updated saved search and verify
   cy.getElementByTestId('discoverNewButton').click();
   // wait for the new tab to load
@@ -498,11 +510,11 @@ export const updateSavedSearchAndSaveAndVerify = (
 
   cy.loadSaveSearch(saveNameToUse);
 
-  setDatePickerDatesAndSearchIfRelevant(newConfig.language);
+  setDatePickerDatesAndSearchIfRelevant(QueryLanguages.PPL);
   verifyDiscoverPageState(newConfig);
 };
 
-export const updateSavedSearchAndNotSaveAndVerify = (config, datasourceName) => {
+export const updateSavedSearchAndNotSaveAndVerify = (config, datasourceName, workspaceName) => {
   cy.loadSaveSearch(config.saveName);
 
   // Change the dataset type to use
@@ -512,8 +524,38 @@ export const updateSavedSearchAndNotSaveAndVerify = (config, datasourceName) => 
       : [INDEX_PATTERN_WITH_TIME, DatasetTypes.INDEX_PATTERN.name];
   const newConfig = generateSavedTestConfiguration(newDataset, newDatasetType, QueryLanguages.PPL);
 
-  cy.explore.setDataset(newConfig.dataset, datasourceName, newConfig.datasetType);
-  setDatePickerDatesAndSearchIfRelevant(newConfig.language);
+  if(newDatasetType === 'INDEX_PATTERN') {
+    //cy.explore.setDataset(newConfig.dataset, datasourceName, newConfig.datasetType);
+    cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
+      req.continue((res) => {
+        if (res.statusCode === 404) {
+          res.send(200, { status: 'ok', data: {} });
+        }
+      });
+    }).as('agentConfigRequest');
+
+    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+    cy.get(`[title="Index Patterns"]`).click();
+    cy.get(`[title="${datasourceName}::${INDEX_PATTERN_WITH_TIME}"]`).should('be.visible').click({ force: true });
+    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
+
+  
+    cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(QueryLanguages.PPL.name);
+
+    cy.wait(3000);
+    cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
+
+    // verify that it has been selected
+    cy.getElementByTestId('datasetSelectButton').should('contain.text', `${INDEX_PATTERN_WITH_TIME}`);
+   
+    cy.wait(3000);
+  }
+  else{
+    cy.explore.setIndexAsDataset(newConfig.dataset, datasourceName, QueryLanguages.PPL.name);
+  }
+
+  setDatePickerDatesAndSearchIfRelevant(QueryLanguages.PPL);
   setSearchConfigurations({
     ...newConfig,
     // only select field if previous config did not select it, because otherwise it is already selected
@@ -529,12 +571,20 @@ export const updateSavedSearchAndNotSaveAndVerify = (config, datasourceName) => 
       //cy.get('h1').contains('New search').should('be.visible'); // TODO: uncomment this once the new search bug is resolved; currently it will show the previous saved explore name
       cy.visit(url);
     });
-  verifyDiscoverPageState(...newConfig, {queryString:''});
+
+  cy.wait(2000); // wait for the page to load
+  verifyDiscoverPageState(newConfig);
+
+  cy.osd.navigateToWorkSpaceSpecificPage({
+      workspaceName,
+      page: 'explore',
+      isEnhancement: true,
+  });
 
   // Verify the original save is unchanged
   cy.loadSaveSearch(config.saveName);
 
-  setDatePickerDatesAndSearchIfRelevant(config.language);
+  setDatePickerDatesAndSearchIfRelevant(QueryLanguages.PPL);
   verifyDiscoverPageState(config);
 };
 
