@@ -1,0 +1,69 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.explore_fieldSelector_list {
+  gap: $euiSizeS;
+
+  .exploreSideBar_searchContainer {
+    .toggleFieldFilterButton {
+      border: none;
+      background-color: $euiFormInputGroupLabelBackground;
+    }
+
+    .exploreSideBar_searchInput {
+      box-shadow: none;
+      border: $euiBorderThin;
+      background-color: $euiFormBackgroundColor;
+    }
+  }
+
+  .exploreSideBar_fieldListContainer {
+    border-top: $euiBorderThin;
+  }
+
+  .deSidebar_dataSource {
+    padding-bottom: 0;
+  }
+
+  .datasetSelector__button {
+    border-radius: $euiFormControlCompressedBorderRadius;
+    border-color: $euiFormBorderColor;
+    background-color: $euiFormBackgroundColor;
+
+    /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+    & > .euiButtonContent {
+      justify-content: space-between;
+
+      /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+      .euiIcon {
+        fill: $euiTextSubduedColor;
+      }
+    }
+  }
+}
+
+.exploreSideBar_fieldGroup {
+  width: 100%;
+
+  /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+  .euiButtonEmpty__content {
+    font-size: $euiFontSizeXS;
+    font-weight: $euiFontWeightSemiBold;
+    justify-content: flex-start;
+    padding-left: $euiSizeM + 2px;
+  }
+}
+
+.exploreSideBar__item {
+  // match fieldGroup condense indent(icon size + text margin)
+  padding-left: $euiSizeM + 2px + $euiSizeM + $euiSizeS;
+  padding-right: $euiSizeS;
+  border-radius: $euiSizeXS;
+
+  &:focus,
+  &:hover {
+    background-color: $euiColorLightestShade;
+  }
+}

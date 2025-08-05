@@ -40,6 +40,7 @@ import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
 import { WorkspaceObject } from 'src/core/public/workspace';
 import { HeaderVariant } from '../../constants';
 import { Header } from './header';
+import { InjectedMetadataStart } from '../../../injected_metadata';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -48,6 +49,9 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 function mockProps() {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
   const application = applicationServiceMock.createInternalStartContract();
+  const injectedMetadata = ({
+    getPlugins: jest.fn().mockReturnValue([]),
+  } as unknown) as InjectedMetadataStart;
 
   return {
     http,
@@ -92,6 +96,7 @@ function mockProps() {
     workspaceList$: new BehaviorSubject([]),
     currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
     useUpdatedHeader: false,
+    injectedMetadata,
   };
 }
 
@@ -272,5 +277,90 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     component.find(EuiHeaderSectionItemButton).first().simulate('click');
     expect(props.onIsLockedUpdate).toBeCalledWith(true);
+  });
+
+  describe('banner plugin integration', () => {
+    it('renders banner container when banner plugin is enabled', () => {
+      const injectedMetadata = ({
+        getPlugins: jest.fn().mockReturnValue([
+          {
+            id: 'banner',
+            config: {
+              enabled: true,
+            },
+          },
+        ]),
+      } as unknown) as InjectedMetadataStart;
+
+      const props = {
+        ...mockProps(),
+        injectedMetadata,
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('#pluginGlobalBanner').exists()).toBeTruthy();
+    });
+
+    it('does not render banner container when banner plugin is disabled', () => {
+      const injectedMetadata = ({
+        getPlugins: jest.fn().mockReturnValue([
+          {
+            id: 'banner',
+            config: {
+              enabled: false,
+            },
+          },
+        ]),
+      } as unknown) as InjectedMetadataStart;
+
+      const props = {
+        ...mockProps(),
+        injectedMetadata,
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('#pluginGlobalBanner').exists()).toBeFalsy();
+    });
+
+    it('does not render banner container when banner plugin is not configured', () => {
+      const injectedMetadata = ({
+        getPlugins: jest.fn().mockReturnValue([
+          {
+            id: 'other-plugin',
+            config: {},
+          },
+        ]),
+      } as unknown) as InjectedMetadataStart;
+
+      const props = {
+        ...mockProps(),
+        injectedMetadata,
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('#pluginGlobalBanner').exists()).toBeFalsy();
+    });
+
+    it('renders banner container when useUpdatedHeader is true', () => {
+      const injectedMetadata = ({
+        getPlugins: jest.fn().mockReturnValue([
+          {
+            id: 'banner',
+            config: {
+              enabled: true,
+            },
+          },
+        ]),
+      } as unknown) as InjectedMetadataStart;
+
+      const props = {
+        ...mockProps(),
+        injectedMetadata,
+        useUpdatedHeader: true,
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('#pluginGlobalBanner').exists()).toBeTruthy();
+    });
   });
 });

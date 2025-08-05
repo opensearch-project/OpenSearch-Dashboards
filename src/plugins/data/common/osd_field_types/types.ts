@@ -45,7 +45,9 @@ export enum OPENSEARCH_FIELD_TYPES {
 
   STRING = 'string',
   TEXT = 'text',
+  MATCH_ONLY_TEXT = 'match_only_text',
   KEYWORD = 'keyword',
+  WILDCARD = 'wildcard',
 
   BOOLEAN = 'boolean',
   OBJECT = 'object',
@@ -61,6 +63,7 @@ export enum OPENSEARCH_FIELD_TYPES {
   SCALED_FLOAT = 'scaled_float',
   DOUBLE = 'double',
   INTEGER = 'integer',
+  INT = 'int',
   LONG = 'long',
   SHORT = 'short',
   UNSIGNED_LONG = 'unsigned_long',
@@ -92,4 +95,26 @@ export enum OSD_FIELD_TYPES {
   OBJECT = 'object',
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
+}
+
+// Types from opensearch-project/sql/docs/user/ppl/general/datatypes.rst
+/** @public **/
+export enum PPL_FIELD_TYPES {
+  BOOLEAN = 'boolean',
+  TINYINT = 'tinyint',
+  SMALLINT = 'smallint',
+  INT = 'int',
+  BIGINT = 'bigint',
+  FLOAT = 'float',
+  DOUBLE = 'double',
+  STRING = 'string',
+  TIMESTAMP = 'timestamp',
+  DATE = 'date',
+  TIME = 'time',
+  INTERVAL = 'interval',
+  IP = 'ip',
+  GEO_POINT = 'geo_point',
+  BINARY = 'binary',
+  STRUCT = 'struct',
+  ARRAY = 'array',
 }

@@ -1,0 +1,81 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.datasetSelect {
+  width: 300px;
+  max-width: 300px;
+
+  &__tooltip {
+    min-width: 400px;
+  }
+
+  &__icon {
+    margin-right: $euiSizeXS;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    text-align: left;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    width: 250px;
+    min-width: 0;
+    max-width: calc(100% - $euiSizeM);
+    height: $euiSizeL;
+    line-height: $euiSizeL;
+  }
+
+  &__checkbox {
+    flex: 1;
+    align-self: center;
+  }
+
+  &__selectable {
+    width: 400px;
+    padding: $euiSizeXS;
+    overflow-y: auto;
+
+    span:is([class*="euiSelectableListItem__text"]) {
+      :first-child {
+        font-size: $euiFontSizeS;
+      }
+    }
+  }
+
+  &__searchContainer {
+    padding: $euiSizeXS;
+    border-bottom: $euiBorderThin;
+    font-size: $euiFontSizeS;
+  }
+
+  &__list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  &__advancedButton {
+    width: 100%;
+    font-size: $euiFontSizeXS;
+  }
+
+  &__footer {
+    padding: $euiSizeXS;
+  }
+
+  &__footerItem {
+    width: 100%;
+  }
+
+  &__advancedModal {
+    width: 1200px;
+    height: 800px;
+
+    // euiOverlayMask pushes the modal up due to having padding-bottom: 10vh
+    max-height: calc(90vh - $euiSizeL);
+  }
+}

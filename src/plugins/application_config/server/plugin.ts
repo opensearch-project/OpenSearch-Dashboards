@@ -31,6 +31,7 @@ export class ApplicationConfigPlugin
   private readonly logger: Logger;
   private readonly config$: Observable<SharedGlobalConfig>;
 
+  // @ts-expect-error TS2564 TODO(ts-error): fixme
   private configurationClient: ConfigurationClient;
   private configurationIndexName: string;
   private clusterClient: IClusterClient;
@@ -41,6 +42,7 @@ export class ApplicationConfigPlugin
     this.logger = initializerContext.logger.get();
     this.config$ = initializerContext.config.legacy.globalConfig$;
     this.configurationIndexName = '';
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     this.clusterClient = null;
 
     this.cache = new LRUCache({
@@ -67,6 +69,7 @@ export class ApplicationConfigPlugin
     }
 
     const openSearchConfigurationClient = new OpenSearchConfigurationClient(
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       this.clusterClient.asScoped(request),
       this.configurationIndexName,
       this.logger,

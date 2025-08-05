@@ -46,9 +46,6 @@
 # Set the value to true to disable the welcome screen
 #home.disableWelcomeScreen: false
 
-# Set the value to true to disable the new theme introduction modal
-#home.disableNewThemeModal: false
-
 # Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
 # This settings should be used for large clusters or for clusters with ingest heavy nodes.
 # It allows Dashboards to only healthcheck using the local OpenSearch node rather than fan out requests across all nodes.
@@ -382,3 +379,9 @@
 
 # Set the value to true to enable the new UI for savedQueries in Discover
 # data.savedQueriesNewUI.enabled: true
+
+# Set the value to true to enable the banner plugin
+# banner.enabled: true
+
+# Set the content of the banner
+# banner.content: "This is an important announcement for all users. [Learn more](https://opensearch.org) about OpenSearch."

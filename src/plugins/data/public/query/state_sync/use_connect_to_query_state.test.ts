@@ -42,10 +42,15 @@ describe('use_connect_storage_to_query_state', () => {
   let osdUrlStateStorage: IOsdUrlStateStorage;
   let indexPatternsMock: IndexPatternsService;
   let history: History;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let gF1: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let gF2: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let aF1: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let aF2: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let q1: Query;
   let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 

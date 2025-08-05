@@ -13,6 +13,7 @@ describe('application config string utils', () => {
 
     const input = 'abc';
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const validatedInput = validate(input, logger);
 
     expect(validatedInput).toBe(input);
@@ -26,6 +27,7 @@ describe('application config string utils', () => {
 
     const input = ' abc ';
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const validatedInput = validate(input, logger);
 
     expect(validatedInput).toBe('abc');
@@ -38,6 +40,7 @@ describe('application config string utils', () => {
     };
 
     expect(() => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       validate('   ', logger);
     }).toThrowError('Input cannot be empty!');
   });

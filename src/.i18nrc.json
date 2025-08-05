@@ -2,6 +2,7 @@
   "paths": {
     "advancedSettings": "plugins/advanced_settings",
     "apmOss": "plugins/apm_oss",
+    "banner": "plugins/banner",
     "charts": "plugins/charts",
     "common.ui": "legacy/ui",
     "console": "plugins/console",
@@ -14,7 +15,9 @@
     "dataSourcesManagement": "plugins/data_source_management",
     "devTools": "plugins/dev_tools",
     "discover": "plugins/discover",
+    "explore": "plugins/explore",
     "embeddableApi": "plugins/embeddable",
+    "explore": "plugins/explore",
     "expressions": "plugins/expressions",
     "home": "plugins/home",
     "indexPatternManagement": "plugins/index_pattern_management",

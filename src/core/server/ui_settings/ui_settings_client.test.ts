@@ -38,7 +38,12 @@ import { SavedObjectsClient } from '../saved_objects';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
 import { UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
-import { CURRENT_USER_PLACEHOLDER } from './utils';
+import {
+  CURRENT_USER_PLACEHOLDER,
+  CURRENT_WORKSPACE_PLACEHOLDER,
+  DASHBOARD_ADMIN_SETTINGS_ID,
+} from './utils';
+import { UiSettingScope } from './types';
 
 const logger = loggingSystemMock.create().get();
 
@@ -106,23 +111,64 @@ describe('ui settings', () => {
       });
     });
 
-    it('updates several values in one operation includes user level settings', async () => {
+    it('updates several values in one operation includes user and workspace level settings', async () => {
       const value = chance.word();
-      const defaults = { key: { value, scope: 'user' } };
+      const defaults = { user: { value, scope: 'user' }, workspace: { value, scope: 'workspace' } };
       const { uiSettings, savedObjectsClient } = setup({ defaults });
-      await uiSettings.setMany({ one: 'value', another: 'val', key: 'value' });
+      await uiSettings.setMany({ one: 'value', user: 'val', workspace: 'value' });
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(3);
       expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
         one: 'value',
-        another: 'val',
       });
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         TYPE,
         `${CURRENT_USER_PLACEHOLDER}_${ID}`,
         {
-          key: 'value',
+          user: 'val',
         }
+      );
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`,
+        {
+          workspace: 'value',
+        }
+      );
+    });
+
+    it('shall give deprecation warnings when trying to update multi-scope settings without passing a scope', async () => {
+      const value = chance.word();
+      const defaults = {
+        user: { value, scope: 'user' },
+        workspace: { value, scope: ['workspace', 'user'] },
+        globalAndWorkspace: { value, scope: ['workspace', 'global'] },
+      };
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      await expect(
+        uiSettings.setMany({
+          one: 'value',
+          user: 'val',
+          workspace: 'value',
+          globalAndWorkspace: 'value',
+        })
+      ).resolves.not.toThrow();
+
+      expect(savedObjectsClient.update).toBeCalledWith('config', ID, {
+        globalAndWorkspace: 'value',
+        one: 'value',
+      });
+      expect(savedObjectsClient.update).toBeCalledWith('config', `<current_workspace>_${ID}`, {
+        workspace: 'value',
+      });
+
+      expect(logger.warn).toBeCalledWith(
+        'Deprecation warning: The setting "workspace" has multiple scopes. Please specify a scope when updating it.'
+      );
+
+      expect(logger.warn).toBeCalledWith(
+        'Deprecation warning: The setting "globalAndWorkspace" has multiple scopes. Please specify a scope when updating it.'
       );
     });
 
@@ -374,26 +420,136 @@ describe('ui settings', () => {
   });
 
   describe('#getUserProvided()', () => {
-    it('pulls user configuration from OpenSearch', async () => {
+    it('pulls user and workspace configuration from OpenSearch', async () => {
       const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.getUserProvided();
 
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
         `${CURRENT_USER_PLACEHOLDER}_${ID}`
       );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
+      );
     });
 
-    it('returns user configuration', async () => {
-      const opensearchDocSource = { user: 'customized' };
-      const { uiSettings } = setup({ opensearchDocSource });
+    it('returns user configuration if specify request user scope', async () => {
+      const opensearchDocSource = {};
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'my personal user value',
+            },
+          } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'default1',
+              bar: 'global value',
+            },
+          } as any);
+        }
+      });
+      const result = await uiSettings.getUserProvided(UiSettingScope.USER);
+      expect(result).toStrictEqual({
+        bar: {
+          userValue: 'my personal user value',
+        },
+      });
+    });
+
+    it('returns workspace scope configuration if specify request workspace scope ', async () => {
+      const opensearchDocSource = {};
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'my personal user value',
+            },
+          } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              key: 'my personal workspace value',
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'default1',
+              bar: 'global value',
+            },
+          } as any);
+        }
+      });
+      const result = await uiSettings.getUserProvided(UiSettingScope.WORKSPACE);
+      expect(result).toStrictEqual({
+        key: {
+          userValue: 'my personal workspace value',
+        },
+      });
+    });
+
+    it('merges workspace, user, global configuration if no specific scope is defined', async () => {
+      const opensearchDocSource = {};
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'my personal user value',
+            },
+          } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              foo: 'my personal workspace value',
+            },
+          } as any);
+        } else if (id === DASHBOARD_ADMIN_SETTINGS_ID) {
+          return Promise.resolve({
+            attributes: {
+              admin: 'admin ui setting',
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'default1',
+              bar: 'global value',
+              other: 'global value',
+            },
+          } as any);
+        }
+      });
+
       const result = await uiSettings.getUserProvided();
 
       expect(result).toStrictEqual({
-        user: {
-          userValue: 'customized',
+        foo: {
+          userValue: 'my personal workspace value',
+        },
+        bar: {
+          userValue: 'my personal user value',
+        },
+        other: {
+          userValue: 'global value',
+        },
+        admin: {
+          userValue: 'admin ui setting',
         },
       });
     });
@@ -438,6 +594,12 @@ describe('ui settings', () => {
           Array [
             "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
         ]
       `);
     });
@@ -449,11 +611,12 @@ describe('ui settings', () => {
         .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
         .mockResolvedValueOnce({ attributes: {} })
         .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
+        .mockResolvedValueOnce({ attributes: {} })
+        .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
         .mockResolvedValueOnce({ attributes: {} });
 
       expect(await uiSettings.getUserProvided()).toStrictEqual({});
-
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(5);
 
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
@@ -548,11 +711,15 @@ describe('ui settings', () => {
       const opensearchDocSource = {};
       const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
       await uiSettings.getAll();
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
         `${CURRENT_USER_PLACEHOLDER}_${ID}`
+      );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
       );
     });
 
@@ -583,6 +750,12 @@ describe('ui settings', () => {
 
       expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
           Array [
             "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],
@@ -658,6 +831,16 @@ describe('ui settings', () => {
               bar: 'my personal value',
             },
           } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
+        } else if (id === DASHBOARD_ADMIN_SETTINGS_ID) {
+          return Promise.resolve({
+            attributes: {
+              admin: 'admin ui setting',
+            },
+          } as any);
         } else {
           return Promise.resolve({
             attributes: {
@@ -671,6 +854,96 @@ describe('ui settings', () => {
       expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'default1',
         bar: 'my personal value',
+        admin: 'admin ui setting',
+      });
+    });
+
+    // verify workspace level settings override global
+    it(`workspace values will override global settings`, async () => {
+      const defaults = {
+        foo: {
+          value: 'default',
+        },
+        bar: {
+          value: 'default',
+          scope: 'workspace',
+        },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'workspace value',
+            },
+          } as any);
+        } else if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'default1',
+              bar: 'workspace value',
+            },
+          } as any);
+        }
+      });
+
+      expect(await uiSettings.getAll()).toStrictEqual({
+        foo: 'default1',
+        bar: 'workspace value',
+      });
+    });
+
+    it(`should merge workspace value and global setting and user setting following scope priority`, async () => {
+      const defaults = {
+        foo: {
+          value: 'default',
+          scope: 'workspace',
+        },
+        bar: {
+          value: 'default',
+          scope: 'workspace',
+        },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              bar: 'workspace-bar',
+            },
+          } as any);
+        } else if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: { foo: 'user-foo' },
+          } as any);
+        } else if (id === DASHBOARD_ADMIN_SETTINGS_ID) {
+          return Promise.resolve({
+            attributes: {
+              admin: 'admin ui setting',
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              foo: 'global-foo',
+              bar: 'global-bar',
+            },
+          } as any);
+        }
+      });
+
+      expect(await uiSettings.getAll()).toStrictEqual({
+        foo: 'user-foo',
+        bar: 'workspace-bar',
+        admin: 'admin ui setting',
       });
     });
   });
@@ -700,11 +973,15 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
       await uiSettings.get('any');
 
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
         `${CURRENT_USER_PLACEHOLDER}_${ID}`
+      );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
       );
     });
 
@@ -797,6 +1074,12 @@ describe('ui settings', () => {
 
       expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
         Array [
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
+          Array [
+            "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
+          ],
           Array [
             "Ignore invalid UiSettings value. ValidationError: [validation [id]]: expected value of type [number] but got [string].",
           ],

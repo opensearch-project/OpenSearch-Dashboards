@@ -110,6 +110,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
           />
         );
       } else {
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         throw new Error(`Unhandled control type ${control!.type}`);
       }
 

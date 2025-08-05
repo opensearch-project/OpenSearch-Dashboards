@@ -58,6 +58,7 @@ describe('resolveImportErrors', () => {
   };
 
   test('works with empty import failures', async () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await resolveImportErrors({
       http: httpMock,
       getConflictResolutions,
@@ -74,6 +75,7 @@ describe('resolveImportErrors', () => {
   });
 
   test(`doesn't retry if only unknown failures are passed in`, async () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await resolveImportErrors({
       http: httpMock,
       getConflictResolutions,
@@ -128,6 +130,7 @@ describe('resolveImportErrors', () => {
       'a:2': { retry: true, options: { overwrite: true, destinationId: 'x' } },
       'a:3': { retry: false },
     });
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await resolveImportErrors({
       http: httpMock,
       getConflictResolutions,
@@ -186,6 +189,7 @@ describe('resolveImportErrors', () => {
 
   test(`doesn't resolve missing references if newIndexPatternId isn't defined`, async () => {
     getConflictResolutions.mockResolvedValueOnce({});
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await resolveImportErrors({
       http: httpMock,
       getConflictResolutions,
@@ -235,6 +239,7 @@ describe('resolveImportErrors', () => {
     getConflictResolutions.mockResolvedValueOnce({
       'a:1': { retry: true, options: { overwrite: true } },
     });
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await resolveImportErrors({
       http: httpMock,
       getConflictResolutions,

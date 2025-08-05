@@ -376,6 +376,7 @@ export class ChromeService {
       logos,
       navGroup,
       globalSearch,
+      useUpdatedHeader: this.useUpdatedHeader,
 
       getHeaderComponent: () => (
         <Header
@@ -420,6 +421,7 @@ export class ChromeService {
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
           globalSearchCommands={globalSearch.getAllSearchCommands()}
+          injectedMetadata={injectedMetadata}
         />
       ),
 
@@ -669,4 +671,10 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getHeaderComponent(): JSX.Element;
+
+  /**
+   * Whether to use the updated header UI
+   * @internal
+   */
+  useUpdatedHeader: boolean;
 }

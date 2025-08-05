@@ -34,7 +34,7 @@ import MonacoEditor from 'react-monaco-editor';
 
 import { monaco } from '@osd/monaco';
 
-import { LIGHT_THEME, DARK_THEME } from './editor_theme';
+import { LIGHT_THEME, DARK_THEME, DEFAULT_DARK_THEME, DEAFULT_LIGHT_THEME } from './editor_theme';
 
 import './editor.scss';
 
@@ -113,6 +113,11 @@ export interface Props {
    * Whether the suggestion widget/window will be triggered upon clicking into the editor
    */
   triggerSuggestOnFocus?: boolean;
+
+  /**
+   * Should the editor use latest theme variations for dark and light theme. By default it is false and editor uses default themes
+   */
+  useLatestTheme?: boolean;
 }
 
 export class CodeEditor extends React.Component<Props, {}> {
@@ -133,7 +138,16 @@ export class CodeEditor extends React.Component<Props, {}> {
     }
 
     // Register the theme
-    monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
+    monaco.editor.defineTheme(
+      'euiColors',
+      this.props.useLatestTheme
+        ? this.props.useDarkTheme
+          ? DARK_THEME
+          : LIGHT_THEME
+        : this.props.useDarkTheme
+        ? DEFAULT_DARK_THEME
+        : DEAFULT_LIGHT_THEME
+    );
   };
 
   _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
@@ -152,6 +166,9 @@ export class CodeEditor extends React.Component<Props, {}> {
         editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
       });
     }
+    // Show the documentation panel by default
+    const suggestController = editor.getContribution('editor.contrib.suggestController') as any;
+    suggestController.widget.value._setDetailsVisible(true);
   };
 
   render() {

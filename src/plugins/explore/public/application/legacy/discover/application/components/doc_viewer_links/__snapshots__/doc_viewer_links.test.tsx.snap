@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dont Render <DocViewerLink/> if generateCb.hide 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+  justifyContent="flexEnd"
+/>
+`;
+
+exports[`Render <DocViewerLink/> with 2 different links 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+  justifyContent="flexEnd"
+>
+  <EuiFlexItem
+    grow={false}
+    key="0"
+  >
+    <EuiLink
+      data-test-subj="docTableRowAction-0"
+      href="aaa"
+      style={
+        Object {
+          "fontWeight": "normal",
+        }
+      }
+      target="_blank"
+    >
+      generateCb link
+    </EuiLink>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+    key="1"
+  >
+    <EuiLink
+      data-test-subj="docTableRowAction-1"
+      href="bbb"
+      style={
+        Object {
+          "fontWeight": "normal",
+        }
+      }
+      target="_blank"
+    >
+      href link
+    </EuiLink>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

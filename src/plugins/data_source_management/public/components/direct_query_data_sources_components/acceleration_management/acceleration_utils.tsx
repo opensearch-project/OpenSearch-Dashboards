@@ -6,6 +6,7 @@
 import { EuiHealth, EuiSmallButton } from '@elastic/eui';
 import React from 'react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DATA_SOURCE_TYPES } from '../../../../framework/constants';
 import { CachedAcceleration, RenderAccelerationFlyoutParams } from '../../../../framework/types';
 import {

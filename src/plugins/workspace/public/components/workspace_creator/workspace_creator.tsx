@@ -23,7 +23,6 @@ import {
   convertPermissionSettingsToPermissions,
   WorkspacePermissionSetting,
 } from '../workspace_form';
-import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
@@ -35,6 +34,7 @@ import { DataSourceConnectionType } from '../../../common/types';
 import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
+import { getUseCaseFeatureConfig } from '../../../../../core/public';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -163,7 +163,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               );
             }, 1000);
           }
-          return;
+          return { result: true, success: true };
         } else {
           throw new Error(result?.error ? result?.error : 'create workspace failed');
         }
@@ -230,6 +230,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               isSubmitting={isFormSubmitting}
               goToCollaborators={goToCollaborators}
               onGoToCollaboratorsChange={setGoToCollaborators}
+              onAppLeave={() => {}}
             />
           )}
         </EuiPageContent>

@@ -168,7 +168,7 @@ export class DataSourceSelector extends React.Component<
         return;
       }
 
-      const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
+      const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
       // 5.1 Empty default option, [], just want to show placeholder
       if (this.props.defaultOption?.length === 0) {
         this.setState({
@@ -233,6 +233,7 @@ export class DataSourceSelector extends React.Component<
         singleSelection={{ asPlainText: true }}
         options={options as EuiComboBoxOptionOption[]}
         selectedOptions={this.state.selectedOption as EuiComboBoxOptionOption[]}
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onChange={(e) => this.onChange(e)}
         prepend={
           this.props.removePrepend
@@ -245,9 +246,11 @@ export class DataSourceSelector extends React.Component<
         isDisabled={this.props.disabled}
         fullWidth={this.props.fullWidth || false}
         data-test-subj={'dataSourceSelectorComboBox'}
+        // @ts-expect-error TS2749 TODO(ts-error): fixme
         renderOption={(option: EuiComboBoxOptionOption<DataSourceItem>) => (
           <DataSourceItem
             className={'dataSourceSelector'}
+            // @ts-expect-error TS2740 TODO(ts-error): fixme
             option={option}
             defaultDataSource={this.state.defaultDataSource}
           />

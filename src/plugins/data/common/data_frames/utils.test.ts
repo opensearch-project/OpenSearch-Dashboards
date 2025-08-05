@@ -59,6 +59,7 @@ describe('convertResult', () => {
         fields: [],
         size: 0,
         name: 'test-index',
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         values: [],
       },
       type: DATA_FRAME_TYPES.DEFAULT,
@@ -179,6 +180,7 @@ describe('convertResult', () => {
     );
 
     // Mock IndexPattern with fields property using IIndexPatternFieldList
+    // @ts-expect-error TS2740 TODO(ts-error): fixme
     const mockIndexPattern: IndexPattern = {
       fields: mockFields,
       title: 'test-index',
@@ -241,6 +243,55 @@ describe('convertResult', () => {
     const result = convertResult({ response });
     expect(result.aggregations?.timestamp_histogram.buckets).toHaveLength(2);
     expect(result.aggregations?.timestamp_histogram.buckets[0].doc_count).toBe(10);
+  });
+
+  it('should convert date strings to UTC timestamps when no timezone info is present', () => {
+    const response: IDataFrameResponse = {
+      took: 100,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      body: {
+        fields: [],
+        size: 0,
+        name: 'test-index',
+        aggs: {
+          timestamp_histogram: [
+            { key: '2025-02-13 00:51:50', value: 10 }, // No timezone info
+            { key: '2025-02-13T01:51:50Z', value: 20 }, // UTC timezone
+            { key: '2025-02-13T02:51:50+05:00', value: 30 }, // Timezone offset
+          ],
+        },
+        meta: {
+          date_histogram: true,
+        },
+      },
+      type: DATA_FRAME_TYPES.DEFAULT,
+    };
+
+    const result = convertResult({ response });
+    const buckets = result.aggregations?.timestamp_histogram.buckets;
+
+    // First bucket: no timezone info, should be treated as UTC
+    expect(buckets[0].key).toBe(new Date('2025-02-13 00:51:50Z').getTime());
+    expect(buckets[0].key_as_string).toBe('2025-02-13 00:51:50');
+
+    // Second bucket: already has Z timezone, should use as-is
+    expect(buckets[1].key).toBe(new Date('2025-02-13T01:51:50Z').getTime());
+    expect(buckets[1].key_as_string).toBe('2025-02-13T01:51:50Z');
+
+    // Third bucket: has timezone offset, should use as-is
+    expect(buckets[2].key).toBe(new Date('2025-02-13T02:51:50+05:00').getTime());
+    expect(buckets[2].key_as_string).toBe('2025-02-13T02:51:50+05:00');
   });
 
   it('should handle error response', () => {

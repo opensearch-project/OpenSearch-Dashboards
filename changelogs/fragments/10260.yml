@@ -1,0 +1,2 @@
+fix:
+- Do not append `source = *` when query starts with `show *` ([#10260](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10260))

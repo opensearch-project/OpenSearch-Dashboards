@@ -23,6 +23,7 @@ import { HttpStart } from 'opensearch-dashboards/public';
 import { Color } from './utils';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { CONSOLE_PROXY, INTEGRATIONS_BASE } from '../../../../framework/utils/shared';
 import { IntegrationConfig, ParsedIntegrationAsset, Result } from '../../../../framework/types';
 import { SQLService } from '../../../../framework/requests/sql';
@@ -90,6 +91,7 @@ const runQuery = async (
       } else if (poll.status.toLowerCase().startsWith('fail')) {
         return {
           ok: false,
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           error: new Error(poll.error ?? 'No error information provided', { cause: poll }),
         };
       }

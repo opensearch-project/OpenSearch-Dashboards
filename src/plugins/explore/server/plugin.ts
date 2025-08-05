@@ -10,28 +10,39 @@ import {
   Plugin,
   Logger,
 } from '../../../core/server';
+import { capabilitiesProvider } from './capabilities_provider';
+import { exploreSavedObjectType } from './saved_objects';
 
 import { ExplorePluginSetup, ExplorePluginStart } from './types';
-import { defineRoutes } from './routes';
 
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
   private readonly logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  // @ts-ignore
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup) {
     this.logger.debug('explore: Setup');
-    const router = core.http.createRouter();
 
-    defineRoutes(router);
+    core.capabilities.registerProvider(capabilitiesProvider);
+    core.capabilities.registerSwitcher(async (request, capabilites) => {
+      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
+        discover: {
+          createShortUrl: false,
+          save: false,
+          saveQuery: false,
+        },
+      });
+    });
+    // core.uiSettings.register(uiSettings);
+    core.savedObjects.registerType(exploreSavedObjectType);
 
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('explore: Started');
     return {};
   }
 

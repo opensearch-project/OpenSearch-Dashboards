@@ -78,6 +78,7 @@ export const copyYarnLock = async (repoRoot: string, buildRoot: string) => {
   const writeStream = createWriteStream(join(buildRoot, 'yarn.lock'));
   const writeLine = (line: string) =>
     new Promise((resolve) => {
+      // @ts-expect-error TS2794 TODO(ts-error): fixme
       if (writeStream.write(line + '\n')) return resolve();
       writeStream.once('drain', resolve);
     });

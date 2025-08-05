@@ -83,6 +83,7 @@ run(
 
       await Promise.all([
         proc.then(() => log.debug(` - ${cmd} exited with 0`)),
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         Rx.merge(getLine$(proc.stdout), getLine$(proc.stderr))
           .pipe(tap((line) => log.debug(line)))
           .toPromise(),

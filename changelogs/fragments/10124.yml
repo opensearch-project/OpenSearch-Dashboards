@@ -1,0 +1,2 @@
+chore:
+- Split page components into smaller container components ([#10124](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10124))

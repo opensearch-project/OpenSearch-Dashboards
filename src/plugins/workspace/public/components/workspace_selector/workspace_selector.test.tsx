@@ -35,7 +35,7 @@ describe('<WorkspaceSelector />', () => {
       navigateToApp,
     };
 
-    const mockCurrentWorkspace = [{ id: 'workspace-1', name: 'workspace 1' }];
+    const mockCurrentWorkspace = { id: 'workspace-3', name: 'workspace 3' };
     coreStartMock.workspaces.currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(
       mockCurrentWorkspace
     );
@@ -48,6 +48,7 @@ describe('<WorkspaceSelector />', () => {
   const WorkspaceSelectorCreatorComponent = () => {
     return (
       <I18nProvider>
+        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceSelector coreStart={coreStartMock} registeredUseCases$={registeredUseCases$} />
       </I18nProvider>
     );

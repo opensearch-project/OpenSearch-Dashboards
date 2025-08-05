@@ -4,6 +4,7 @@
  */
 
 import { configure, mount, shallow } from 'enzyme';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
@@ -21,6 +22,7 @@ describe('Integration Setup Inputs', () => {
 
   it('Renders the index form as expected', async () => {
     const wrapper = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <SetupIntegrationFormInputs
         config={TEST_INTEGRATION_SETUP_INPUTS}
         updateConfig={() => {}}
@@ -36,6 +38,7 @@ describe('Integration Setup Inputs', () => {
 
   it('Renders the S3 connector form as expected', async () => {
     const wrapper = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <SetupIntegrationFormInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -51,6 +54,7 @@ describe('Integration Setup Inputs', () => {
 
   it('Renders the S3 connector form without workflows', async () => {
     const wrapper = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <SetupIntegrationFormInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -80,6 +84,7 @@ describe('Integration Setup Inputs', () => {
 
   it('Renders the connection inputs', async () => {
     const wrapper = mount(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <IntegrationConnectionInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -94,6 +99,7 @@ describe('Integration Setup Inputs', () => {
 
   it('Renders the connection inputs with a locked connection type', async () => {
     const wrapper = mount(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <IntegrationConnectionInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}

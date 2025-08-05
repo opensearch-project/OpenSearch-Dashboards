@@ -34,6 +34,7 @@ import { OpenSearchClient } from 'src/core/server';
 let cachedLicense: OpenSearchLicense | undefined;
 
 async function fetchLicense(opensearchClient: OpenSearchClient, local: boolean) {
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const { body } = await opensearchClient.license.get({
     local,
     // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.

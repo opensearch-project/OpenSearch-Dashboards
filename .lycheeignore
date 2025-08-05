@@ -1,6 +1,11 @@
 # Copyright OpenSearch Contributors
 # SPDX-License-Identifier: Apache-2.0
 
+node_modules/
+dist/
+build/
+.git/
+
 # Local or predefined end points
 localhost
 //opensearch
@@ -95,3 +100,5 @@ helpmenow.com
 http://dev.w3.org/
 https://qntm.org/cmd
 http://fakenews.co/
+http://blond-winner.biz/
+https://www.iso.org/*

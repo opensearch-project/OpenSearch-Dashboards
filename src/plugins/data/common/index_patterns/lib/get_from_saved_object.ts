@@ -39,9 +39,10 @@ export function getFromSavedObject(
     return;
   }
 
+  const fields = JSON.parse(savedObject.attributes.fields!);
   return {
     id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields!),
+    fields,
     title: savedObject.attributes.title,
   };
 }

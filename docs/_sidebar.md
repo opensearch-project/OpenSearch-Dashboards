@@ -13,6 +13,8 @@
   - [Openapi](openapi/README.md)
   - Plugins
     - data
+      - datasets
+        - [Data_views](plugins/data/datasets/data_views.md)
       - [Query editor enhancements](plugins/data/query-editor-enhancements.md)
     - discover
       - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
@@ -29,6 +31,7 @@
       - [I18n](../src/dev/i18n/README.md)
     - plugins
       - [Application_config](../src/plugins/application_config/README.md)
+      - [Banner](../src/plugins/banner/README.md)
       - [Bfetch](../src/plugins/bfetch/README.md)
       - [Charts](../src/plugins/charts/README.md)
       - console
@@ -102,6 +105,7 @@
     - [Multiple_data_source_examples](../examples/multiple_data_source_examples/README.md)
     - [Routing_example](../examples/routing_example/README.md)
     - [Search_examples](../examples/search_examples/README.md)
+    - [State_management_example](../examples/state_management_example/README.md)
     - [Ui_action_examples](../examples/ui_action_examples/README.md)
     - [Ui_actions_explorer](../examples/ui_actions_explorer/README.md)
     - [Url_generators_examples](../examples/url_generators_examples/README.md)
@@ -193,6 +197,7 @@
     - [Opensearch dashboards.release notes 3.0.0 alpha1](../release-notes/opensearch-dashboards.release-notes-3.0.0-alpha1.md)
     - [Opensearch dashboards.release notes 3.0.0 beta1](../release-notes/opensearch-dashboards.release-notes-3.0.0-beta1.md)
     - [Opensearch dashboards.release notes 3.0.0](../release-notes/opensearch-dashboards.release-notes-3.0.0.md)
+    - [Opensearch dashboards.release notes 3.1.0](../release-notes/opensearch-dashboards.release-notes-3.1.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
@@ -209,3 +214,4 @@
   - [TESTING](../TESTING.md)
   - [TRIAGING](../TRIAGING.md)
   - [TYPESCRIPT](../TYPESCRIPT.md)
+  - [Testing_strategy](../testing_strategy.md)

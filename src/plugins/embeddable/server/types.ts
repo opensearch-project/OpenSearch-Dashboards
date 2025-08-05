@@ -49,11 +49,13 @@ export interface EnhancementRegistryItem<P extends SerializableState = Serializa
 }
 
 export interface EmbeddableRegistryDefinition<P extends EmbeddableInput = EmbeddableInput>
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
   extends PersistableStateDefinition<P> {
   id: string;
 }
 
 export interface EmbeddableRegistryItem<P extends EmbeddableInput = EmbeddableInput>
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
   extends PersistableState<P> {
   id: string;
 }

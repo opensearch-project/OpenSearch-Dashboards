@@ -12,6 +12,7 @@ const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
 
 describe('Description', () => {
   it('render normally', () => {
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     const component = mount(<Description docLinks={mockContext.docLinks} />);
     expect(component).toMatchSnapshot();
   });

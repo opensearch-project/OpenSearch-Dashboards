@@ -110,13 +110,17 @@ export { CoreContext, CoreSystem } from './core_system';
 export {
   DEFAULT_APP_CATEGORIES,
   WORKSPACE_TYPE,
+  WORKSPACE_USE_CASE_PREFIX,
   cleanWorkspaceId,
+  isNavGroupInFeatureConfigs,
+  getUseCaseFeatureConfig,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
   SEARCH_USE_CASE_ID,
   ESSENTIAL_USE_CASE_ID,
   OBSERVABILITY_USE_CASE_ID,
   SECURITY_ANALYTICS_USE_CASE_ID,
+  ENABLE_AI_FEATURES,
 } from '../utils';
 export {
   AppCategory,

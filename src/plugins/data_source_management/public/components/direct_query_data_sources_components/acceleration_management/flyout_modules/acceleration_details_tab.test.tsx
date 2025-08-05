@@ -92,6 +92,7 @@ describe('AccelerationDetailsTab', () => {
   test('displays the correct status', () => {
     const wrapper = shallowComponent();
     const statusNode = wrapper.find('DetailComponent[title="Status"]');
+    // @ts-expect-error TS2571 TODO(ts-error): fixme
     expect(statusNode.prop('description').props.status).toBe('active');
   });
 
@@ -124,7 +125,9 @@ describe('AccelerationDetailsTab', () => {
     const wrapper = shallowComponent();
     const dataSourceNode = wrapper.find('DetailComponent[title="Data source connection"]');
     const linkNode = dataSourceNode.prop('description');
+    // @ts-expect-error TS2571 TODO(ts-error): fixme
     expect(linkNode.props.children).toBe('test_data_source');
+    // @ts-expect-error TS2571 TODO(ts-error): fixme
     linkNode.props.onClick();
     expect(mockApplication.navigateToApp).toHaveBeenCalledWith('management', {
       path: `/opensearch-dashboards/dataSources/manage/test_data_source?dataSourceMDSId=mds_id`,
