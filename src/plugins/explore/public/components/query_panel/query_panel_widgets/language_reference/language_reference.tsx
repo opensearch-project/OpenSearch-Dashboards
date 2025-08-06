@@ -36,7 +36,6 @@ export const LanguageReference = () => {
       id="languageReferencePopover"
       button={
         <EuiButtonIcon
-          aria-label="Language reference"
           size="xs"
           className="exploreLanguageReference"
           data-test-subj="exploreLanguageReference"
