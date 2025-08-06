@@ -106,7 +106,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
           {shouldShowLegend && (
             <EuiFlexItem grow={false}>
               <LegendOptionsPanel
-                shouldShowLegend={shouldShowLegend}
                 legendOptions={{
                   show: styleOptions.addLegend,
                   position: styleOptions.legendPosition,
