@@ -1,0 +1,2 @@
+refactor:
+- Change generated query UI ([#10337](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10337))

@@ -3,4 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './selected_language';
+.exploreLanguageReference {
+  &__popoverBody {
+    width: 350px;
+  }
+}
