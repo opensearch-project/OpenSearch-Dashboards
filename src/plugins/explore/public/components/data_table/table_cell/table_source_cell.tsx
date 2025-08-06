@@ -28,7 +28,7 @@ export const TableSourceCell = ({ idxPattern, row, isShortDots }: ITableSourceCe
   const keys = isShortDots ? rawKeys.map((k) => shortenDottedString(k)) : rawKeys;
 
   return (
-    <EuiDescriptionList type="inline" compressed className="source">
+    <EuiDescriptionList type="inline" compressed className="source exploreTableSourceCell">
       {keys.map((key, index) => (
         <Fragment key={key}>
           <EuiDescriptionListTitle

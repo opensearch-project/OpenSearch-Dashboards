@@ -4,11 +4,11 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { Dataset } from '../../../../../../../data/common';
 
 export interface PPLQueryParams {
   traceId: string;
-  dataSourceId: string;
-  indexPattern?: string;
+  dataset: Dataset;
   limit?: number;
 }
 
@@ -21,15 +21,10 @@ export interface PPLQueryRequest {
         language: string;
         format: string;
         dataset: {
-          dataSource: {
-            id: string;
-            title: string;
-            type: string;
-          };
           id: string;
           title: string;
           type: string;
-          isRemoteDataset: boolean;
+          timeFieldName?: string;
         };
       };
     };
@@ -37,32 +32,23 @@ export interface PPLQueryRequest {
 }
 
 // Build a PPL dataset object for queries
-export const buildPPLDataset = (dataSourceId: string, indexPattern: string) => ({
-  dataSource: {
-    id: dataSourceId,
-    title: `datasource-${dataSourceId}`,
-    type: 'DATA_SOURCE',
-  },
-  id: `${dataSourceId}::${indexPattern}`,
-  title: indexPattern,
-  type: 'INDEXES', // TODO change too index_pattern
-  isRemoteDataset: false,
+export const buildPPLDataset = (dataset: Dataset) => ({
+  id: dataset.id,
+  title: dataset.title,
+  type: dataset.type,
+  timeFieldName: dataset.timeFieldName,
 });
 
-// Build a complete PPL query request object
-export const buildPPLQueryRequest = (
-  dataSourceId: string,
-  indexPattern: string,
-  pplQuery: string
-): PPLQueryRequest => ({
+// Build a complete PPL query request object using dataset
+export const buildPPLQueryRequest = (dataset: Dataset, pplQuery: string): PPLQueryRequest => ({
   params: {
-    index: `${dataSourceId}::${indexPattern}`,
+    index: dataset.title, // Use the dataset title as the index
     body: {
       query: {
         query: pplQuery,
         language: 'PPL',
         format: 'jdbc',
-        dataset: buildPPLDataset(dataSourceId, indexPattern),
+        dataset: buildPPLDataset(dataset),
       },
     },
   },
@@ -109,14 +95,14 @@ export class PPLService {
     this.dataService = dataService;
   }
 
-  // Generic method to execute any PPL query
-  async executeQuery(dataSourceId: string, indexPattern: string, pplQuery: string): Promise<any> {
-    if (!dataSourceId || !indexPattern || !pplQuery) {
+  // Generic method to execute any PPL query using dataset
+  async executeQuery(dataset: Dataset, pplQuery: string): Promise<any> {
+    if (!dataset || !pplQuery) {
       throw new Error('Missing required parameters for PPL query execution');
     }
 
     try {
-      const request = buildPPLQueryRequest(dataSourceId, indexPattern, pplQuery);
+      const request = buildPPLQueryRequest(dataset, pplQuery);
       return await executePPLQuery(this.dataService, request);
     } catch (error) {
       // eslint-disable-next-line no-console

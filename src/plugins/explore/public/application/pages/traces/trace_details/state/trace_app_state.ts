@@ -8,11 +8,11 @@ import {
   syncState,
   IOsdUrlStateStorage,
 } from '../../../../../../../opensearch_dashboards_utils/public';
+import { Dataset } from '../../../../../../../data/common';
 
 export interface TraceAppState {
   traceId: string;
-  dataSourceId: string;
-  indexPattern: string;
+  dataset: Dataset;
   spanId?: string;
 }
 
@@ -36,13 +36,9 @@ export const createTraceAppState = ({
       ...state,
       traceId,
     }),
-    setDataSourceId: (state: TraceAppState) => (dataSourceId: string) => ({
+    setDataset: (state: TraceAppState) => (dataset: Dataset) => ({
       ...state,
-      dataSourceId,
-    }),
-    setIndexPattern: (state: TraceAppState) => (indexPattern: string) => ({
-      ...state,
-      indexPattern,
+      dataset,
     }),
     setSpanId: (state: TraceAppState) => (spanId?: string) => ({
       ...state,
