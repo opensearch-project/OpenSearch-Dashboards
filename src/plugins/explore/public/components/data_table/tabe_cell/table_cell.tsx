@@ -118,9 +118,12 @@ export const TableCellUI = ({
         </EuiLink>
       </EuiToolTip>
     ) : (
-      <span className="exploreDocTableCell__dataField" data-test-subj="osdDocTableCellDataField">
-        {sanitizedCellValue.replace(/<[^>]*>/g, '').trim()}
-      </span>
+      <span
+        className="exploreDocTableCell__dataField"
+        data-test-subj="osdDocTableCellDataField"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
+      />
     );
 
   const content = (
