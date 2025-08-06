@@ -49,7 +49,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     },
     data,
     uiSettings,
-    history,
+    scopedHistory,
   } = services;
 
   const uiState = useNewStateSelector(selectUIState);
@@ -85,9 +85,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const osdUrlStateStorage = useMemo(() => {
     return createOsdUrlStateStorage({
       useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: history(),
+      history: scopedHistory,
     });
-  }, [uiSettings, history]);
+  }, [uiSettings, scopedHistory]);
 
   const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
     data.query,
