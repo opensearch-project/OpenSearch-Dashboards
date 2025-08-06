@@ -25,6 +25,9 @@ export const GANTT_CHART_CONSTANTS = {
 
   EMPTY_STATE_HEIGHT: 150,
   SINGLE_SPAN_HEIGHT: 120,
+
+  // Default fallback width for span detail panel when container width cannot be determined
+  DEFAULT_AVAILABLE_WIDTH: 800,
 } as const;
 
 export const TOTAL_PADDING =

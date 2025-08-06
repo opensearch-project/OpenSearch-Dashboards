@@ -18,6 +18,7 @@ interface GanttChartProps {
   height: number;
   onSpanClick?: (spanId: string) => void;
   selectedSpanId?: string;
+  isEmbedded?: boolean;
 }
 
 export function GanttChart({
@@ -26,6 +27,7 @@ export function GanttChart({
   height,
   onSpanClick,
   selectedSpanId,
+  isEmbedded,
 }: GanttChartProps) {
   const { services } = useOpenSearchDashboards<DataExplorerServices>();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,12 +52,18 @@ export function GanttChart({
 
       const proposedHeight = height > 0 ? Math.max(height, finalHeight) : finalHeight;
 
+      // In embedded mode, don't apply maximum height constraint - let it grow to show all spans
+      if (isEmbedded) {
+        return Math.max(GANTT_CHART_CONSTANTS.MIN_HEIGHT, proposedHeight);
+      }
+
+      // In non-embedded mode, apply the maximum height constraint
       return Math.max(
         GANTT_CHART_CONSTANTS.MIN_HEIGHT,
         Math.min(GANTT_CHART_CONSTANTS.MAX_HEIGHT, proposedHeight)
       );
     },
-    [height]
+    [height, isEmbedded]
   );
 
   // Update container width when component mounts, window resizes, or container resizes
@@ -71,9 +79,15 @@ export function GanttChart({
       }
     };
 
+    // Set initial width
     updateWidth();
 
-    // Listen for window resize
+    // Skip resize listeners in embedded mode to prevent rapid resizing
+    if (isEmbedded) {
+      return;
+    }
+
+    // Add resize listeners
     window.addEventListener('resize', updateWidth);
 
     // Set up ResizeObserver to detect container size changes
@@ -94,7 +108,7 @@ export function GanttChart({
         resizeObserver.disconnect();
       }
     };
-  }, [containerWidth]);
+  }, [containerWidth, isEmbedded]);
 
   useEffect(() => {
     const initializeView = async () => {
@@ -123,9 +137,9 @@ export function GanttChart({
 
         await view.data('spans', vegaData.values).run();
 
-        // Add click handler
+        // Add click handler mousedown needed or code block breaks it
         if (onSpanClick) {
-          view.addEventListener('click', (event, item) => {
+          view.addEventListener('mousedown', (event, item) => {
             if (item && item.datum && item.datum.spanId) {
               onSpanClick(item.datum.spanId);
             }

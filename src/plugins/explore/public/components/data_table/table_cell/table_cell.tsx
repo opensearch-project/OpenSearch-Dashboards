@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DocViewFilterFn } from '../../../types/doc_views_types';
+import { useDatasetContext } from '../../../application/context';
+import { isOnTracesPage, isSpanIdColumn, SpanIdLink } from './trace_utils/trace_utils';
 
 export interface ITableCellProps {
   columnId: string;
@@ -16,6 +18,7 @@ export interface ITableCellProps {
   onFilter?: DocViewFilterFn;
   fieldMapping?: any;
   sanitizedCellValue: string;
+  rowData?: any;
 }
 
 export const TableCellUI = ({
@@ -24,15 +27,25 @@ export const TableCellUI = ({
   onFilter,
   fieldMapping,
   sanitizedCellValue,
+  rowData,
 }: ITableCellProps) => {
-  const content = (
-    <>
+  const { dataset } = useDatasetContext();
+
+  const dataFieldContent =
+    isSpanIdColumn(columnId) && isOnTracesPage() ? (
+      <SpanIdLink sanitizedCellValue={sanitizedCellValue} rowData={rowData} dataset={dataset} />
+    ) : (
       <span
         className="exploreDocTableCell__dataField"
         data-test-subj="osdDocTableCellDataField"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
       />
+    );
+
+  const content = (
+    <>
+      {dataFieldContent}
       <span className="exploreDocTableCell__filter" data-test-subj="osdDocTableCellFilter">
         <EuiToolTip
           content={i18n.translate('explore.filterForValue', {
