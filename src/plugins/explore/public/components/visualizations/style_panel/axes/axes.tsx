@@ -84,14 +84,25 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     if (axis.title?.text && axis.title.text.trim() !== '') {
       return axis.title.text;
     }
-    return axisColumnMappings[AxisRole.X]?.name || 'Category';
+    return (
+      axisColumnMappings[AxisRole.X]?.name ||
+      i18n.translate('explore.vis.gridOptions.categoryFallbackName', {
+        defaultMessage: 'Category',
+      })
+    );
   };
   const getValueAxisDisplayTitle = (axis: ValueAxis, index: number) => {
     if (axis.title?.text && axis.title.text.trim() !== '') {
       return axis.title.text;
     }
     const axisRole = index === 0 ? AxisRole.Y : AxisRole.Y_SECOND;
-    return axisColumnMappings[axisRole]?.name || `Metric ${index + 1}`;
+    return (
+      axisColumnMappings[axisRole]?.name ||
+      i18n.translate('explore.vis.gridOptions.metricFallbackName', {
+        defaultMessage: 'Metric {index}',
+        values: { index: index + 1 },
+      })
+    );
   };
 
   // Determine if we're in Rule 2 scenario (2 metrics, 1 date, 0 categories)
