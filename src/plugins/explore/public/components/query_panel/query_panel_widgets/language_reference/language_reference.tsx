@@ -4,19 +4,23 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import classNames from 'classnames';
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { selectQueryLanguage } from '../../../../application/utils/state_management/selectors';
 import { PplReference } from './ppl_reference';
 import './language_reference.scss';
+
+export const LANGUAGE_REFERENCE_HANDLED_LANGUAGES = ['PPL'];
 
 export const getLanguageReference = (language: string) => {
   switch (language) {
     case 'PPL':
       return <PplReference />;
     default:
-      throw new Error(`LanguageReference encountered an unhandled language: ${language}`);
+      return null;
   }
 };
 
@@ -24,6 +28,7 @@ export const LanguageReference = () => {
   const language = useSelector(selectQueryLanguage);
   const storageKey = `hasSeenInfoBox_${language}`;
   const [popoverIsOpen, setPopoverIsOpen] = useState(localStorage.getItem(storageKey) !== 'true');
+  const languageIsHandled = LANGUAGE_REFERENCE_HANDLED_LANGUAGES.includes(language);
 
   useEffect(() => {
     if (popoverIsOpen) {
@@ -35,13 +40,35 @@ export const LanguageReference = () => {
     <EuiPopover
       id="languageReferencePopover"
       button={
-        <EuiButtonIcon
-          size="xs"
-          className="exploreLanguageReference"
-          data-test-subj="exploreLanguageReference"
-          iconType="iInCircle"
-          onClick={() => setPopoverIsOpen((value) => !value)}
-        />
+        <EuiToolTip
+          position="left"
+          content={
+            languageIsHandled
+              ? i18n.translate('explore.queryPanel.languageReference.handledTooltip', {
+                  defaultMessage: 'Language reference for {language}',
+                  values: {
+                    language,
+                  },
+                })
+              : i18n.translate('explore.queryPanel.languageReference.unhandledTooltip', {
+                  defaultMessage: 'Language reference unavailable for {language}',
+                  values: {
+                    language,
+                  },
+                })
+          }
+        >
+          <EuiButtonIcon
+            size="xs"
+            className={classNames('exploreLanguageReference', {
+              ['exploreLanguageReference--disabled']: !languageIsHandled,
+            })}
+            data-test-subj="exploreLanguageReference"
+            disabled={!languageIsHandled}
+            iconType="iInCircle"
+            onClick={() => setPopoverIsOpen((value) => !value)}
+          />
+        </EuiToolTip>
       }
       isOpen={popoverIsOpen}
       closePopover={() => setPopoverIsOpen(false)}
