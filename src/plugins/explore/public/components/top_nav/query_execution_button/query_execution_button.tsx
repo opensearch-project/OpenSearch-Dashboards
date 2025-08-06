@@ -78,6 +78,7 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({ onCl
         values: { buttonText },
       })}
       compressed={true}
+      color="primary"
     >
       {buttonText}
     </EuiSuperUpdateButton>
