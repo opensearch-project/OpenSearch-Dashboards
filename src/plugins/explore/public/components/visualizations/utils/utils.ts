@@ -225,3 +225,46 @@ export const getSchemaByAxis = (
       return 'unknown';
   }
 };
+
+export const timeUnitToFormat: { [key: string]: string } = {
+  year: '%Y',
+  quarter: '%Y Q%q',
+  month: '%b %Y',
+  week: '%b %d, %Y',
+  day: '%b %d, %Y',
+  hour: '%b %d, %Y %H:%M',
+  minute: '%b %d, %Y %H:%M',
+  second: '%b %d, %Y %H:%M:%S',
+};
+
+export const inferTimeUnitFromTimestamps = (
+  data: Array<Record<string, any>>,
+  field: string
+): string => {
+  const timestamps = data
+    .map((row) => new Date(row[field]).getTime())
+    .filter((t) => !isNaN(t))
+    .sort((a, b) => a - b);
+
+  if (timestamps.length < 2) {
+    return 'second';
+  }
+
+  let minDiff = Number.MAX_SAFE_INTEGER;
+  for (let i = 1; i < timestamps.length; i++) {
+    const diff = timestamps[i] - timestamps[i - 1];
+    if (diff > 0 && diff < minDiff) {
+      minDiff = diff;
+    }
+  }
+
+  const seconds = minDiff / 1000;
+
+  if (seconds < 60) return 'second';
+  if (seconds < 3600) return 'minute';
+  if (seconds < 86400) return 'hour';
+  if (seconds < 604800) return 'day';
+  if (seconds < 2678400) return 'week';
+  if (seconds < 31536000) return 'month';
+  return 'year';
+};

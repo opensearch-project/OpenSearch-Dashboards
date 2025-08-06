@@ -12,6 +12,7 @@ import {
   ValueAxisPosition,
 } from './line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
+import { inferTimeUnitFromTimestamps, timeUnitToFormat } from '../utils/utils';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -36,6 +37,12 @@ export const createSimpleLineChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
+
+  const getTooltipFormat = (axis: typeof xAxisColumn, fallback: string): string => {
+    return dateField
+      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, dateField)] ?? fallback
+      : fallback;
+  };
 
   const mainLayer = {
     mark: buildMarkConfig(styles, 'line'),
@@ -70,7 +77,12 @@ export const createSimpleLineChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(xAxisColumn, '%b %d, %Y %H:%M:%S'),
+          },
           { field: metricField, type: 'quantitative', title: metricName },
         ],
       }),
@@ -128,6 +140,12 @@ export const createLineBarChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const layers: any[] = [];
 
+  const getTooltipFormat = (axis: typeof xAxisMapping, fallback: string): string => {
+    return dateField
+      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, dateField)] ?? fallback
+      : fallback;
+  };
+
   const barLayer = {
     mark: buildMarkConfig(styles, 'bar'),
     encoding: {
@@ -171,7 +189,12 @@ export const createLineBarChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(xAxisMapping, '%b %d, %Y %H:%M:%S'),
+          },
           { field: metric1Field, type: 'quantitative', title: metric1Name },
         ],
       }),
@@ -217,7 +240,12 @@ export const createLineBarChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(xAxisMapping, '%b %d, %Y %H:%M:%S'),
+          },
           { field: metric2Field, type: 'quantitative', title: metric2Name },
         ],
       }),
@@ -280,6 +308,12 @@ export const createMultiLineChart = (
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
 
+  const getTooltipFormat = (axis: typeof xAxisColumn, fallback: string): string => {
+    return dateField
+      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, dateField)] ?? fallback
+      : fallback;
+  };
+
   const mainLayer = {
     mark: buildMarkConfig(styles, 'line'),
     encoding: {
@@ -324,7 +358,12 @@ export const createMultiLineChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(xAxisColumn, '%b %d, %Y %H:%M:%S'),
+          },
           { field: metricField, type: 'quantitative', title: metricName },
           { field: categoryField, type: 'nominal', title: categoryName },
         ],
@@ -390,6 +429,12 @@ export const createFacetedMultiLineChart = (
   // Create a mark config for the faceted spec
   const facetMarkConfig = buildMarkConfig(styles, 'line');
 
+  const getTooltipFormat = (axis: typeof xAxisMapping, fallback: string): string => {
+    return dateField
+      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, dateField)] ?? fallback
+      : fallback;
+  };
+
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -448,7 +493,12 @@ export const createFacetedMultiLineChart = (
             },
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [
-                { field: dateField, type: 'temporal', title: dateName },
+                {
+                  field: dateField,
+                  type: 'temporal',
+                  title: dateName,
+                  format: getTooltipFormat(xAxisMapping, '%b %d, %Y %H:%M:%S'),
+                },
                 { field: metricField, type: 'quantitative', title: metricName },
                 { field: category1Field, type: 'nominal', title: category1Name },
               ],

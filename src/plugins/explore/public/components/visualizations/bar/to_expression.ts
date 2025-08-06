@@ -6,7 +6,13 @@
 import { AxisColumnMappings, AxisRole, VEGASCHEMA, VisColumn, VisFieldType } from '../types';
 import { BarChartStyleControls } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold/utils';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import {
+  applyAxisStyling,
+  getSwappedAxisRole,
+  getSchemaByAxis,
+  inferTimeUnitFromTimestamps,
+  timeUnitToFormat,
+} from '../utils/utils';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: Partial<BarChartStyleControls>) => {
@@ -149,6 +155,12 @@ export const createTimeBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
+  const getTooltipFormat = (axis: typeof xAxis | typeof yAxis, fallback: string): string => {
+    return axis?.column
+      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, axis.column)] ?? fallback
+      : fallback;
+  };
+
   const mainLayer = {
     mark: barMark,
     encoding: {
@@ -168,11 +180,17 @@ export const createTimeBarChart = (
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
             title: xAxis?.styles?.title?.text || xAxis?.name,
+            ...(getSchemaByAxis(xAxis) === 'temporal' && {
+              format: getTooltipFormat(xAxis, '%b %d, %Y %H:%M:%S'),
+            }),
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
             title: yAxis?.styles?.title?.text || yAxis?.name,
+            ...(getSchemaByAxis(yAxis) === 'temporal' && {
+              format: getTooltipFormat(yAxis, '%b %d, %Y %H:%M:%S'),
+            }),
           },
         ],
       }),
@@ -255,6 +273,12 @@ export const createGroupedTimeBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
+  const getTooltipFormat = (axis: typeof xAxis | typeof yAxis, fallback: string): string => {
+    return axis?.column
+      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, axis.column)] ?? fallback
+      : fallback;
+  };
+
   const spec: any = {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -289,12 +313,18 @@ export const createGroupedTimeBarChart = (
           field: xAxis?.column,
           type: getSchemaByAxis(xAxis),
           title: xAxis?.styles?.title?.text || xAxis?.name,
+          ...(getSchemaByAxis(xAxis) === 'temporal' && {
+            format: getTooltipFormat(xAxis, '%b %d, %Y %H:%M:%S'),
+          }),
         },
         { field: categoryField, type: getSchemaByAxis(colorColumn), title: categoryName },
         {
           field: yAxis?.column,
           type: getSchemaByAxis(yAxis),
           title: yAxis?.styles?.title?.text || yAxis?.name,
+          ...(getSchemaByAxis(yAxis) === 'temporal' && {
+            format: getTooltipFormat(yAxis, '%b %d, %Y %H:%M:%S'),
+          }),
         },
       ],
     },
@@ -374,6 +404,12 @@ export const createFacetedTimeBarChart = (
     barEncodingDefault
   );
 
+  const getTooltipFormat = (axis: typeof xAxis | typeof yAxis, fallback: string): string => {
+    return axis?.column
+      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, axis.column)] ?? fallback
+      : fallback;
+  };
+
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -413,8 +449,22 @@ export const createFacetedTimeBarChart = (
             },
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [
-                { field: metricField, type: getSchemaByAxis(yAxis), title: metricName },
-                { field: dateField, type: getSchemaByAxis(xAxis), title: dateName },
+                {
+                  field: metricField,
+                  type: getSchemaByAxis(yAxis),
+                  title: metricName,
+                  ...(getSchemaByAxis(yAxis) === 'temporal' && {
+                    format: getTooltipFormat(yAxis, '%b %d, %Y %H:%M:%S'),
+                  }),
+                },
+                {
+                  field: dateField,
+                  type: getSchemaByAxis(xAxis),
+                  title: dateName,
+                  ...(getSchemaByAxis(xAxis) === 'temporal' && {
+                    format: getTooltipFormat(xAxis, '%b %d, %Y %H:%M:%S'),
+                  }),
+                },
                 { field: category1Field, type: 'nominal', title: category1Name },
               ],
             }),
