@@ -13,7 +13,7 @@ interface DataSourceOptionItemProps {
   totalDataSourceCount: number;
   activeDataSourceCount?: number;
   application?: ApplicationStart;
-  onManageDataSource: () => void;
+  onManageDataSource?: () => void;
 }
 
 export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
@@ -38,7 +38,9 @@ export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
         <EuiFlexItem grow={false}>
           <EuiLink
             onClick={() => {
-              onManageDataSource();
+              if (onManageDataSource) {
+                onManageDataSource();
+              }
               application?.navigateToApp('management', {
                 path: `opensearch-dashboards/${DSM_APP_ID}`,
               });

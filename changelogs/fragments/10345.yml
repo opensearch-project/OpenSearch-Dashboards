@@ -1,0 +1,2 @@
+fix:
+- Fix: Discover plugin shows empty page instead of no-index-patterns UI when no index patterns ([#10345](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10345))

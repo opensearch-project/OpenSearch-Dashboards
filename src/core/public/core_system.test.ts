@@ -310,6 +310,7 @@ describe('#start()', () => {
       chrome: expect.any(Object),
       overlays: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
+      injectedMetadata: expect.any(Object),
     });
   });
 
