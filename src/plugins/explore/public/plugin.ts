@@ -115,6 +115,20 @@ export class ExplorePlugin
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
+      title: i18n.translate('explore.docViews.timeline.title', {
+        defaultMessage: 'Timeline',
+      }),
+      order: 5,
+      component: TraceDetailsView,
+      shouldShow: (hit) => {
+        // Only show the Timeline tab when on the traces flavor
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+        return currentPath.includes('/explore/traces') || currentHash.includes('/explore/traces');
+      },
+    });
+
+    this.docViewsRegistry.addDocView({
       title: i18n.translate('explore.discover.docViews.table.tableTitle', {
         defaultMessage: 'Table',
       }),
@@ -128,20 +142,6 @@ export class ExplorePlugin
       }),
       order: 20,
       component: JsonCodeBlock,
-    });
-
-    this.docViewsRegistry.addDocView({
-      title: i18n.translate('explore.docViews.timeline.title', {
-        defaultMessage: 'Timeline',
-      }),
-      order: 30,
-      component: TraceDetailsView,
-      shouldShow: (hit) => {
-        // Only show the Timeline tab when on the traces flavor
-        const currentPath = window.location.pathname;
-        const currentHash = window.location.hash;
-        return currentPath.includes('/explore/traces') || currentHash.includes('/explore/traces');
-      },
     });
     this.docViewsLinksRegistry = new DocViewsLinksRegistry();
     setDocViewsLinksRegistry(this.docViewsLinksRegistry);
