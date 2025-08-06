@@ -151,7 +151,11 @@ export const ChartTypeSelector = <T extends ChartType>({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s" color={option.disabled ? 'subdued' : 'default'}>
+            <EuiText
+              data-test-subj={`exploreChartTypeSelector-${option.value}`}
+              size="s"
+              color={option.disabled ? 'subdued' : 'default'}
+            >
               {option.inputDisplay}
             </EuiText>
           </EuiFlexItem>
@@ -180,6 +184,7 @@ export const ChartTypeSelector = <T extends ChartType>({
       >
         <EuiSuperSelect
           id="chartType"
+          data-test-subj="exploreChartTypeSelector"
           compressed
           valueOfSelected={currChartTypeId || ''}
           placeholder="Select a visualization type"
