@@ -14,6 +14,7 @@ import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
+import { AxisRole } from '../types';
 
 export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyleControls>;
 
@@ -35,6 +36,9 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   ) => {
     onStyleChange({ [key]: value });
   };
+
+  // Determine if the legend should be shown based on the registration of a COLOR field
+  const shouldShowLegend = !!axisColumnMappings?.[AxisRole.COLOR];
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -74,23 +78,27 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <LegendOptionsPanel
-              shouldShowLegend={true}
-              legendOptions={{
-                show: styleOptions.addLegend,
-                position: styleOptions.legendPosition,
-              }}
-              onLegendOptionsChange={(legendOptions) => {
-                if (legendOptions.show !== undefined) {
-                  updateStyleOption('addLegend', legendOptions.show);
-                }
-                if (legendOptions.position !== undefined) {
-                  updateStyleOption('legendPosition', legendOptions.position);
-                }
-              }}
-            />
-          </EuiFlexItem>
+
+          {shouldShowLegend && (
+            <EuiFlexItem grow={false}>
+              <LegendOptionsPanel
+                shouldShowLegend={shouldShowLegend}
+                legendOptions={{
+                  show: styleOptions.addLegend,
+                  position: styleOptions.legendPosition,
+                }}
+                onLegendOptionsChange={(legendOptions) => {
+                  if (legendOptions.show !== undefined) {
+                    updateStyleOption('addLegend', legendOptions.show);
+                  }
+                  if (legendOptions.position !== undefined) {
+                    updateStyleOption('legendPosition', legendOptions.position);
+                  }
+                }}
+              />
+            </EuiFlexItem>
+          )}
+
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
               titleOptions={styleOptions.titleOptions}

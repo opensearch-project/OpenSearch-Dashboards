@@ -160,17 +160,150 @@ describe('LanguageReference', () => {
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith('hasSeenInfoBox_PPL', 'true');
     });
   });
+
+  describe('Disabled State for Unsupported Languages', () => {
+    it('should disable button for unsupported language', () => {
+      mockLocalStorage.getItem.mockReturnValue('true');
+
+      const initialState = {
+        query: {
+          language: 'SQL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.Query,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<LanguageReference />, initialState);
+
+      const button = screen.getByTestId('exploreLanguageReference');
+      expect(button).toBeDisabled();
+    });
+
+    it('should not open popover for unsupported language even when clicked', () => {
+      mockLocalStorage.getItem.mockReturnValue('true');
+
+      const initialState = {
+        query: {
+          language: 'SQL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.Query,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<LanguageReference />, initialState);
+
+      const button = screen.getByTestId('exploreLanguageReference');
+
+      // Try to click disabled button
+      fireEvent.click(button);
+
+      // Popover should not open
+      expect(screen.queryByText('Syntax options')).not.toBeInTheDocument();
+    });
+
+    it('should have disabled CSS class for unsupported language', () => {
+      mockLocalStorage.getItem.mockReturnValue('true');
+
+      const initialState = {
+        query: {
+          language: 'SQL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.Query,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<LanguageReference />, initialState);
+
+      const button = screen.getByTestId('exploreLanguageReference');
+      expect(button).toHaveClass('exploreLanguageReference--disabled');
+    });
+
+    it('should not have disabled CSS class for supported language', () => {
+      mockLocalStorage.getItem.mockReturnValue('true');
+
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.Query,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<LanguageReference />, initialState);
+
+      const button = screen.getByTestId('exploreLanguageReference');
+      expect(button).not.toHaveClass('exploreLanguageReference--disabled');
+      expect(button).not.toBeDisabled();
+    });
+  });
+
+  describe('Tooltip Behavior', () => {
+    it('should show correct tooltip for supported language', async () => {
+      mockLocalStorage.getItem.mockReturnValue('true');
+
+      const initialState = {
+        query: {
+          language: 'PPL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.Query,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<LanguageReference />, initialState);
+
+      const button = screen.getByTestId('exploreLanguageReference');
+
+      // Hover to trigger tooltip
+      fireEvent.mouseEnter(button);
+
+      // Check tooltip content for supported language
+      expect(await screen.findByText('Language reference for PPL')).toBeInTheDocument();
+    });
+
+    it('should show correct tooltip for unsupported language', async () => {
+      mockLocalStorage.getItem.mockReturnValue('true');
+
+      const initialState = {
+        query: {
+          language: 'SQL',
+        },
+        queryEditor: {
+          editorMode: EditorMode.Query,
+          promptModeIsAvailable: false,
+        },
+      };
+
+      renderWithProviders(<LanguageReference />, initialState);
+
+      const button = screen.getByTestId('exploreLanguageReference');
+
+      // Hover to trigger tooltip
+      fireEvent.mouseEnter(button);
+
+      // Check tooltip content for unsupported language
+      expect(await screen.findByText('Language reference unavailable for SQL')).toBeInTheDocument();
+    });
+  });
 });
 
 describe('getLanguageReference', () => {
   it('should return PplReference component for PPL language', () => {
     const result = getLanguageReference('PPL');
-    expect(result.type.name).toBe('PplReference');
+    expect(result?.type.name).toBe('PplReference');
   });
 
-  it('should throw error for unsupported language', () => {
-    expect(() => {
-      getLanguageReference('UNSUPPORTED_LANGUAGE');
-    }).toThrow('LanguageReference encountered an unhandled language: UNSUPPORTED_LANGUAGE');
+  it('should return null for unsupported language', () => {
+    const result = getLanguageReference('UNSUPPORTED_LANGUAGE');
+    expect(result).toBeNull();
   });
 });

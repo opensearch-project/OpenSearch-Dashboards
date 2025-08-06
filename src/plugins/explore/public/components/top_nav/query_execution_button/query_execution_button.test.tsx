@@ -233,7 +233,7 @@ describe('QueryExecutionButton', () => {
     const button = screen.getByTestId('exploreQueryExecutionButton');
     // Verify the button shows "Update" text when needsUpdate is true
     expect(screen.getByText('Update')).toBeInTheDocument();
-    // Verify the button has the success color (green) when needsUpdate is true
-    expect(button).toHaveClass('euiButton--success');
+    // Verify the button has the primary color (blue) for consistent theming
+    expect(button).toHaveClass('euiButton--primary');
   });
 });
