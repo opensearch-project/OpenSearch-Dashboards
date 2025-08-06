@@ -14,7 +14,6 @@ import {
   SpanIdLink,
 } from './trace_utils';
 
-// Mock window.location and window.open
 const mockLocation = {
   pathname: '',
   hash: '',

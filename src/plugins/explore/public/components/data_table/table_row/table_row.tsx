@@ -14,8 +14,8 @@ import { i18n } from '@osd/i18n';
 import dompurify from 'dompurify';
 import React, { useCallback, useState } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
-import { TableSourceCell } from '../tabe_cell/table_source_cell';
-import { TableCell } from '../tabe_cell/table_cell';
+import { TableSourceCell } from '../table_cell/table_source_cell';
+import { TableCell } from '../table_cell/table_cell';
 import {
   DocViewFilterFn,
   DocViewsRegistry,
