@@ -2,13 +2,31 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-@import "../shared";
 
 // This is for the animation colors
 /* stylelint-disable  @osd/stylelint/no_restricted_values */
 
 .exploreQueryPanelEditor {
-  @include exploreEditor;
+  border: 1px solid $ouiBorderColor;
+  border-radius: $ouiBorderRadius;
+  cursor: text;
+  padding: $ouiSizeS $ouiSizeXS;
+  position: relative;
+
+  &--focused {
+    border-bottom-width: 2px;
+    border-bottom-color: $ouiColorPrimary;
+    margin-bottom: -1px; // prevent layout shifting due to increase in border width;
+  }
+
+  &__placeholder {
+    position: absolute;
+    left: 29px; // hard-code to match where the text is in editor
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: $ouiFontSizeXS;
+    color: $ouiColorDisabledText;
+  }
 
   &--promptMode {
     padding-left: 27px; // hard-coding to match the start position of query mode. There must be a better way

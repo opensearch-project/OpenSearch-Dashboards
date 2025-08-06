@@ -14,19 +14,34 @@
   padding-left: $ouiSizeXS;
   padding-top: $ouiSizeS;
   padding-bottom: $ouiSizeXXS;
+  position: relative;
 
   &__queryWrapper {
     display: flex;
-    align-items: center;
   }
 
   &__query {
+    @include ouiYScroll;
+
     color: $ouiColorDisabledText;
     // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
     font-family: $ouiCodeFontFamily;
     line-height: normal;
     padding-left: 12px; // make it aligned with query editor
-    max-height: calc($ouiSize * 3);
-    overflow-y: auto;
+    padding-top: 3px;
+    padding-right: 94px; // make edit button appear
+    max-height: calc($ouiSize * 4);
+    word-break: break-all;
+  }
+
+  // This is to not have it centered when query is multi-lined
+  &__icon {
+    margin-top: 7px;
+  }
+
+  &__editButton {
+    position: absolute;
+    right: 0;
+    top: $ouiSizeS;
   }
 }
