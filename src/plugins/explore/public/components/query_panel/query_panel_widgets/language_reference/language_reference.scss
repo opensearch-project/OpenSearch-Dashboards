@@ -4,6 +4,10 @@
  */
 
 .exploreLanguageReference {
+  &--disabled {
+    color: $ouiColorDisabledText;
+  }
+
   &__popoverBody {
     width: 350px;
   }
