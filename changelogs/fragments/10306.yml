@@ -1,2 +1,0 @@
-fix:
-- Add one default range for metric + fix threshold in line-bar chart ([#10306](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10306))

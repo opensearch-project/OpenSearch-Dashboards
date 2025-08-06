@@ -1,2 +1,0 @@
-test:
-- Add Test to validate PPL query not starting with source ([#10310](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10310))

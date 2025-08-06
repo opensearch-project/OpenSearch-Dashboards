@@ -1,2 +1,0 @@
-fix:
-- Fix chart expand reset after query run ([#10072](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10072))
