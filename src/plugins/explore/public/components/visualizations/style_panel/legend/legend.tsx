@@ -83,6 +83,7 @@ export const LegendOptionsPanel = ({
             })}
           >
             <EuiSelect
+              key={legendOptions.position}
               compressed
               options={legendPositionOptions}
               defaultValue={legendOptions.position}

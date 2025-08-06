@@ -74,6 +74,7 @@ export const HeatmapExclusiveVisOptions = ({
         })}
       >
         <EuiSelect
+          key={styles.colorSchema}
           compressed
           options={colorSchemas}
           defaultValue={styles.colorSchema}
@@ -286,8 +287,9 @@ export const HeatmapLabelVisOptions = ({
               })}
             >
               <EuiSelect
+                key={styles.type}
                 compressed
-                value={styles.type}
+                defaultValue={styles.type}
                 onChange={(e) => updateLabelOption('type', e.target.value as LabelAggregationType)}
                 options={labelType}
               />

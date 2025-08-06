@@ -119,6 +119,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                     })}
                   >
                     <EuiSelect
+                      key={styleOptions.colorSchema}
                       compressed
                       options={colorSchemas}
                       defaultValue={styleOptions.colorSchema}
