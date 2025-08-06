@@ -11,8 +11,12 @@ import {
 
 export interface TraceAppState {
   traceId: string;
-  dataSourceId: string;
-  indexPattern: string;
+  dataset: {
+    id: string;
+    title: string;
+    type: string;
+    timeFieldName?: string;
+  };
   spanId?: string;
 }
 
@@ -36,13 +40,14 @@ export const createTraceAppState = ({
       ...state,
       traceId,
     }),
-    setDataSourceId: (state: TraceAppState) => (dataSourceId: string) => ({
+    setDataset: (state: TraceAppState) => (dataset: {
+      id: string;
+      title: string;
+      type: string;
+      timeFieldName?: string;
+    }) => ({
       ...state,
-      dataSourceId,
-    }),
-    setIndexPattern: (state: TraceAppState) => (indexPattern: string) => ({
-      ...state,
-      indexPattern,
+      dataset,
     }),
     setSpanId: (state: TraceAppState) => (spanId?: string) => ({
       ...state,

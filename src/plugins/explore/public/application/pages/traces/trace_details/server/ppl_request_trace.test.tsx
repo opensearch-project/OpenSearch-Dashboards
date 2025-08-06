@@ -25,6 +25,13 @@ describe('ppl_request_trace', () => {
 
   let tracePPLService: TracePPLService;
 
+  const createMockDataset = () => ({
+    id: 'test-dataset-id',
+    title: 'test-index',
+    type: 'INDEX_PATTERN',
+    timeFieldName: 'endTime',
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     tracePPLService = new TracePPLService(mockDataService);
@@ -35,8 +42,7 @@ describe('ppl_request_trace', () => {
   describe('fetchTraceSpans', () => {
     const defaultParams: PPLQueryParamsWithFilters = {
       traceId: 'test-trace-id',
-      dataSourceId: 'test-source',
-      indexPattern: 'test-index',
+      dataset: createMockDataset(),
     };
 
     it('throws error when missing required parameters', async () => {
@@ -44,10 +50,7 @@ describe('ppl_request_trace', () => {
         tracePPLService.fetchTraceSpans({ ...defaultParams, traceId: '' })
       ).rejects.toThrow('Missing required parameters');
       await expect(
-        tracePPLService.fetchTraceSpans({ ...defaultParams, dataSourceId: '' })
-      ).rejects.toThrow('Missing required parameters');
-      await expect(
-        tracePPLService.fetchTraceSpans({ ...defaultParams, indexPattern: '' })
+        tracePPLService.fetchTraceSpans({ ...defaultParams, dataset: null as any })
       ).rejects.toThrow('Missing required parameters');
     });
 
@@ -55,8 +58,11 @@ describe('ppl_request_trace', () => {
       await tracePPLService.fetchTraceSpans(defaultParams);
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | head 100'
       );
     });
@@ -68,8 +74,11 @@ describe('ppl_request_trace', () => {
       });
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | head 100'
       );
     });
@@ -84,8 +93,11 @@ describe('ppl_request_trace', () => {
       });
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | where status = "error" | head 100'
       );
     });
@@ -101,8 +113,11 @@ describe('ppl_request_trace', () => {
       });
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | where serviceName = "test\\"service" | where count = 123 | where active = true | head 100'
       );
     });
@@ -114,8 +129,11 @@ describe('ppl_request_trace', () => {
       });
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | head 50'
       );
     });
@@ -132,8 +150,7 @@ describe('ppl_request_trace', () => {
     const defaultParams: PPLSpanQueryParams = {
       traceId: 'test-trace-id',
       spanId: 'test-span-id',
-      dataSourceId: 'test-source',
-      indexPattern: 'test-index',
+      dataset: createMockDataset(),
     };
 
     it('throws error when missing required parameters', async () => {
@@ -144,10 +161,7 @@ describe('ppl_request_trace', () => {
         tracePPLService.fetchSpanDetails({ ...defaultParams, spanId: '' })
       ).rejects.toThrow('Missing required parameters');
       await expect(
-        tracePPLService.fetchSpanDetails({ ...defaultParams, dataSourceId: '' })
-      ).rejects.toThrow('Missing required parameters');
-      await expect(
-        tracePPLService.fetchSpanDetails({ ...defaultParams, indexPattern: '' })
+        tracePPLService.fetchSpanDetails({ ...defaultParams, dataset: null as any })
       ).rejects.toThrow('Missing required parameters');
     });
 
@@ -155,8 +169,12 @@ describe('ppl_request_trace', () => {
       await tracePPLService.fetchSpanDetails(defaultParams);
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         'source = test-index | where traceId = "test-trace-id" | where spanId = "test-span-id" | head 100'
       );
     });
@@ -168,8 +186,12 @@ describe('ppl_request_trace', () => {
       });
 
       expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         'source = test-index | where traceId = "test-trace-id" | where spanId = "test-span-id" | head 50'
       );
     });

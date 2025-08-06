@@ -48,9 +48,13 @@ export interface SpanFilter {
 
 export interface TraceDetailsProps {
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
+  isEmbedded?: boolean;
 }
 
-export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint }) => {
+export const TraceDetails: React.FC<TraceDetailsProps> = ({
+  setMenuMountPoint,
+  isEmbedded = false,
+}) => {
   const {
     services: { chrome, data, osdUrlStateStorage },
   } = useOpenSearchDashboards<DataExplorerServices>();
@@ -60,8 +64,12 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
     return createTraceAppState({
       stateDefaults: {
         traceId: '',
-        dataSourceId: '',
-        indexPattern: 'otel-v1-apm-span-*',
+        dataset: {
+          id: 'default-dataset-id',
+          title: 'otel-v1-apm-span-*',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         spanId: undefined,
       },
       osdUrlStateStorage: osdUrlStateStorage!,
@@ -70,7 +78,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
 
   // Get current state values and subscribe to changes
   const [appState, setAppState] = useState(() => stateContainer.get());
-  const { traceId, dataSourceId, indexPattern, spanId } = appState;
+  const { traceId, dataset, spanId } = appState;
 
   // Subscribe to state changes
   useEffect(() => {
@@ -132,7 +140,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
 
   useEffect(() => {
     const fetchData = async (filters: SpanFilter[] = []) => {
-      if (!pplService || !traceId || !dataSourceId) return;
+      if (!pplService || !traceId || !dataset) return;
 
       // Only show full loading spinner on initial load
       if (transformedHits.length === 0) {
@@ -145,8 +153,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
       try {
         const response = await pplService.fetchTraceSpans({
           traceId,
-          dataSourceId,
-          indexPattern,
+          dataset,
           limit: 100,
           filters,
         });
@@ -160,10 +167,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
       }
     };
 
-    if (traceId && dataSourceId && pplService) {
+    if (traceId && dataset && pplService) {
       fetchData(spanFilters);
     }
-  }, [traceId, dataSourceId, pplService, spanFilters, indexPattern, transformedHits.length]);
+  }, [traceId, dataset, pplService, spanFilters, transformedHits.length]);
 
   useEffect(() => {
     if (!pplQueryData) return;
@@ -275,24 +282,47 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
   };
 
   // Set up ResizeObserver to detect when the main panel size changes
+  // Only enable this in non-embedded mode to avoid crashes in embedded contexts
   useEffect(() => {
-    if (!mainPanelRef.current) return;
+    if (!mainPanelRef.current || isEmbedded) return;
 
+    let resizeTimeout: NodeJS.Timeout;
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        // Debounce the resize to avoid too many re-renders
-        setTimeout(() => {
-          forceVisualizationResize();
-        }, 100);
+        const { width, height } = entry.contentRect;
+
+        // Only trigger resize if there's a significant size change (more than 10px)
+        // This prevents minor mouse-induced resizes
+        if (
+          Math.abs(width - (entry.target as any)._lastWidth || 0) > 10 ||
+          Math.abs(height - (entry.target as any)._lastHeight || 0) > 10
+        ) {
+          // Store the last dimensions
+          (entry.target as any)._lastWidth = width;
+          (entry.target as any)._lastHeight = height;
+
+          // Clear existing timeout
+          if (resizeTimeout) {
+            clearTimeout(resizeTimeout);
+          }
+
+          // Debounce the resize to avoid too many re-renders
+          resizeTimeout = setTimeout(() => {
+            forceVisualizationResize();
+          }, 200);
+        }
       }
     });
 
     resizeObserver.observe(mainPanelRef.current);
 
     return () => {
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
       resizeObserver.disconnect();
     };
-  }, [forceVisualizationResize]);
+  }, [forceVisualizationResize, isEmbedded]);
 
   return (
     <>
@@ -407,14 +437,9 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({ setMenuMountPoint })
                               key={`span-panel-${visualizationKey}`}
                               chrome={chrome}
                               spanFilters={spanFilters}
-                              setSpanFiltersWithStorage={setSpanFiltersWithStorage}
                               payloadData={JSON.stringify(transformedHits)}
                               isGanttChartLoading={isBackgroundLoading}
-                              dataSourceMDSId={dataSourceId}
-                              dataSourceMDSLabel={undefined}
-                              traceId={traceId}
-                              pplService={pplService}
-                              indexPattern={indexPattern}
+                              dataSourceMDSId={dataset.id}
                               colorMap={colorMap}
                               onSpanSelect={handleSpanSelect}
                               selectedSpanId={spanId}

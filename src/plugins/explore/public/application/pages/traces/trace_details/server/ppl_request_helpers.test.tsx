@@ -13,41 +13,54 @@ import {
 } from './ppl_request_helpers';
 
 describe('ppl_request_helpers', () => {
+  const createMockDataset = () => ({
+    id: 'test-dataset-id',
+    title: 'test-index',
+    type: 'INDEX_PATTERN',
+    timeFieldName: 'endTime',
+  });
+
   describe('buildPPLDataset', () => {
     it('builds dataset object with correct structure', () => {
-      const result = buildPPLDataset('test-source', 'test-index');
+      const dataset = createMockDataset();
+      const result = buildPPLDataset(dataset);
       expect(result).toEqual({
-        dataSource: {
-          id: 'test-source',
-          title: 'datasource-test-source',
-          type: 'DATA_SOURCE',
-        },
-        id: 'test-source::test-index',
+        id: 'test-dataset-id',
         title: 'test-index',
-        type: 'INDEXES',
-        isRemoteDataset: false,
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
       });
     });
 
-    it('handles special characters in dataSourceId and indexPattern', () => {
-      const result = buildPPLDataset('source:1', 'index*pattern');
-      expect(result.id).toBe('source:1::index*pattern');
-      expect(result.dataSource.title).toBe('datasource-source:1');
+    it('handles dataset without timeFieldName', () => {
+      const dataset = {
+        id: 'test-dataset-id',
+        title: 'test-index',
+        type: 'INDEX_PATTERN',
+      };
+      const result = buildPPLDataset(dataset);
+      expect(result).toEqual({
+        id: 'test-dataset-id',
+        title: 'test-index',
+        type: 'INDEX_PATTERN',
+        timeFieldName: undefined,
+      });
     });
   });
 
   describe('buildPPLQueryRequest', () => {
     it('builds query request with correct structure', () => {
-      const result = buildPPLQueryRequest('test-source', 'test-index', 'source = test');
+      const dataset = createMockDataset();
+      const result = buildPPLQueryRequest(dataset, 'source = test-index');
       expect(result).toEqual({
         params: {
-          index: 'test-source::test-index',
+          index: 'test-index',
           body: {
             query: {
-              query: 'source = test',
+              query: 'source = test-index',
               language: 'PPL',
               format: 'jdbc',
-              dataset: buildPPLDataset('test-source', 'test-index'),
+              dataset: buildPPLDataset(dataset),
             },
           },
         },
@@ -55,10 +68,9 @@ describe('ppl_request_helpers', () => {
     });
 
     it('integrates dataset correctly', () => {
-      const result = buildPPLQueryRequest('test-source', 'test-index', 'source = test');
-      expect(result.params.body.query.dataset).toEqual(
-        buildPPLDataset('test-source', 'test-index')
-      );
+      const dataset = createMockDataset();
+      const result = buildPPLQueryRequest(dataset, 'source = test-index');
+      expect(result.params.body.query.dataset).toEqual(buildPPLDataset(dataset));
     });
   });
 
@@ -74,7 +86,7 @@ describe('ppl_request_helpers', () => {
       },
     } as unknown) as DataPublicPluginStart;
 
-    const mockRequest = buildPPLQueryRequest('test-source', 'test-index', 'source = test');
+    const mockRequest = buildPPLQueryRequest(createMockDataset(), 'source = test-index');
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -172,24 +184,20 @@ describe('ppl_request_helpers', () => {
     });
 
     it('executes query with valid parameters', async () => {
-      await pplService.executeQuery('test-source', 'test-index', 'source = test');
+      const dataset = createMockDataset();
+      await pplService.executeQuery(dataset, 'source = test-index');
       expect(mockDataService.search.search).toHaveBeenCalled();
     });
 
-    it('throws error with missing dataSourceId', async () => {
-      await expect(pplService.executeQuery('', 'test-index', 'source = test')).rejects.toThrow(
-        'Missing required parameters'
-      );
-    });
-
-    it('throws error with missing indexPattern', async () => {
-      await expect(pplService.executeQuery('test-source', '', 'source = test')).rejects.toThrow(
+    it('throws error with missing dataset', async () => {
+      await expect(pplService.executeQuery(null as any, 'source = test-index')).rejects.toThrow(
         'Missing required parameters'
       );
     });
 
     it('throws error with missing query', async () => {
-      await expect(pplService.executeQuery('test-source', 'test-index', '')).rejects.toThrow(
+      const dataset = createMockDataset();
+      await expect(pplService.executeQuery(dataset, '')).rejects.toThrow(
         'Missing required parameters'
       );
     });
@@ -200,9 +208,8 @@ describe('ppl_request_helpers', () => {
         toPromise: () => Promise.reject(error),
       });
 
-      await expect(
-        pplService.executeQuery('test-source', 'test-index', 'source = test')
-      ).rejects.toThrow(error);
+      const dataset = createMockDataset();
+      await expect(pplService.executeQuery(dataset, 'source = test-index')).rejects.toThrow(error);
     });
   });
 });

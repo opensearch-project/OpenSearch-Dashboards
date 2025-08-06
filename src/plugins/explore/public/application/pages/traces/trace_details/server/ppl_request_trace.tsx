@@ -12,8 +12,12 @@ export interface PPLQueryParamsWithFilters extends PPLQueryParams {
 export interface PPLSpanQueryParams {
   traceId: string;
   spanId: string;
-  dataSourceId: string;
-  indexPattern: string;
+  dataset: {
+    id: string;
+    title: string;
+    type: string;
+    timeFieldName?: string;
+  };
   limit?: number;
 }
 
@@ -24,12 +28,12 @@ export class TracePPLService extends PPLService {
   }
 
   private buildPPLQueryWithFilters(
-    indexPattern: string,
+    datasetTitle: string,
     traceId: string,
     limit: number,
     filters: Array<{ field: string; value: any }> = []
   ): string {
-    let query = `source = ${indexPattern} | where traceId = "${traceId}"`;
+    let query = `source = ${datasetTitle} | where traceId = "${traceId}"`;
 
     filters.forEach((filter) => {
       const escapedValue = escapePPLValue(filter.value);
@@ -42,18 +46,25 @@ export class TracePPLService extends PPLService {
 
   // Execute a PPL query to fetch trace spans by trace ID with additional filters
   async fetchTraceSpans(params: PPLQueryParamsWithFilters): Promise<any> {
-    const { traceId, dataSourceId, indexPattern, limit = 100, filters = [] } = params;
+    const { traceId, dataset, limit = 100, filters = [] } = params;
 
-    if (!traceId || !dataSourceId || !indexPattern) {
-      throw new Error('Missing required parameters: traceId, dataSourceId, and indexPattern');
+    if (!traceId || !dataset) {
+      throw new Error('Missing required parameters: traceId and dataset');
     }
 
     try {
-      // Build the PPL query with filters using the passed indexPattern
-      const pplQuery = this.buildPPLQueryWithFilters(indexPattern, traceId, limit, filters);
+      // Build the PPL query with filters using the dataset title
+      const pplQuery = this.buildPPLQueryWithFilters(dataset.title, traceId, limit, filters);
 
-      // Execute using the base class method
-      return await this.executeQuery(dataSourceId, indexPattern, pplQuery);
+      const datasetWithoutTime = {
+        id: dataset.id,
+        title: dataset.title,
+        type: dataset.type,
+        // Omit timeFieldName to prevent automatic time filtering
+      };
+
+      // Execute using the base class method with the modified dataset
+      return await this.executeQuery(datasetWithoutTime, pplQuery);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('PPL Query with Filters Error:', error);
@@ -63,20 +74,18 @@ export class TracePPLService extends PPLService {
 
   // Execute a PPL query to fetch a specific span by trace ID and span ID
   async fetchSpanDetails(params: PPLSpanQueryParams): Promise<any> {
-    const { traceId, spanId, dataSourceId, indexPattern, limit = 100 } = params;
+    const { traceId, spanId, dataset, limit = 100 } = params;
 
-    if (!traceId || !spanId || !dataSourceId || !indexPattern) {
-      throw new Error(
-        'Missing required parameters: traceId, spanId, dataSourceId, and indexPattern'
-      );
+    if (!traceId || !spanId || !dataset) {
+      throw new Error('Missing required parameters: traceId, spanId, and dataset');
     }
 
     try {
-      // Construct the PPL query to filter by trace ID and span ID using the passed indexPattern
-      const pplQuery = `source = ${indexPattern} | where traceId = "${traceId}" | where spanId = "${spanId}" | head ${limit}`;
+      // Construct the PPL query to filter by trace ID and span ID using the dataset title
+      const pplQuery = `source = ${dataset.title} | where traceId = "${traceId}" | where spanId = "${spanId}" | head ${limit}`;
 
       // Execute using the base class method
-      return await this.executeQuery(dataSourceId, indexPattern, pplQuery);
+      return await this.executeQuery(dataset, pplQuery);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('PPL Span Query Error:', error);

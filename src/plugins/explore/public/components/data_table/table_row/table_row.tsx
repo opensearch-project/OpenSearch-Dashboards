@@ -141,6 +141,7 @@ export const TableRowUI = ({
             isTimeField={dataset.timeFieldName === colName}
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
+            rowData={row}
           />
         );
       })}

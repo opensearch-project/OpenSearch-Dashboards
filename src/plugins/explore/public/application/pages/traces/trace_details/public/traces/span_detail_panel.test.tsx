@@ -80,7 +80,6 @@ describe('SpanDetailPanel', () => {
   const defaultProps = {
     chrome: mockChrome,
     spanFilters: [],
-    setSpanFiltersWithStorage: jest.fn(),
     payloadData: JSON.stringify(mockSpanData),
     isGanttChartLoading: false,
     dataSourceMDSId: 'test-datasource',

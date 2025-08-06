@@ -14,40 +14,8 @@ import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import { ChromeStart } from 'opensearch-dashboards/public';
 import './span_detail_panel.scss';
-import { TracePPLService } from '../../server/ppl_request_trace';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { GanttChart } from '../gantt_chart_vega/gantt_chart_vega';
-
-export interface Span {
-  traceId: string;
-  spanId: string;
-  traceState: string;
-  parentSpanId: string;
-  name: string;
-  kind: string;
-  startTime: string;
-  endTime: string;
-  durationInNanos: number;
-  serviceName: string;
-  events: any[];
-  links: any[];
-  droppedAttributesCount: number;
-  droppedEventsCount: number;
-  droppedLinksCount: number;
-  traceGroup: string;
-  traceGroupFields: {
-    endTime: string;
-    durationInNanos: number;
-    statusCode: number;
-  };
-  status: {
-    code: number;
-  };
-  instrumentationLibrary: {
-    name: string;
-    version: string;
-  };
-}
 
 export interface TraceFilter {
   field: string;
@@ -57,35 +25,27 @@ export interface TraceFilter {
 export function SpanDetailPanel(props: {
   chrome: ChromeStart;
   spanFilters: TraceFilter[];
-  setSpanFiltersWithStorage: (newFilters: TraceFilter[]) => void;
   payloadData: string;
   isGanttChartLoading?: boolean;
   dataSourceMDSId: string;
-  dataSourceMDSLabel: string | undefined;
-  traceId?: string;
-  pplService?: TracePPLService;
-  indexPattern?: string;
   colorMap?: Record<string, string>;
   onSpanSelect?: (spanId: string) => void;
   selectedSpanId?: string;
   activeView?: string;
+  isEmbedded?: boolean;
 }) {
-  const {
-    chrome,
-    spanFilters,
-    setSpanFiltersWithStorage,
-    payloadData,
-    onSpanSelect,
-    dataSourceMDSId,
-    colorMap,
-  } = props;
+  const { chrome, spanFilters, payloadData, onSpanSelect, dataSourceMDSId, colorMap } = props;
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [availableWidth, setAvailableWidth] = useState<number>(window.innerWidth);
-  const isLocked = useObservable(chrome.getIsNavDrawerLocked$());
+  const [availableWidth, setAvailableWidth] = useState<number>(800); // Default width
+
+  // Always call useObservable, but use a default value for embedded mode
+  const navDrawerLocked = useObservable(chrome.getIsNavDrawerLocked$()) || false;
+  const isLocked = props.isEmbedded ? false : navDrawerLocked;
 
   const updateAvailableWidth = useCallback(() => {
     if (containerRef.current) {
-      setAvailableWidth(containerRef.current.getBoundingClientRect().width);
+      const containerWidth = containerRef.current.getBoundingClientRect().width;
+      setAvailableWidth(containerWidth > 0 ? containerWidth : 800);
     } else {
       // Account for the resizable container taking ~70% of the page
       const pageWidth = window.innerWidth;
@@ -96,39 +56,23 @@ export function SpanDetailPanel(props: {
   }, [isLocked]);
 
   useEffect(() => {
+    if (props.isEmbedded) {
+      // In embedded mode, set width once based on container size and don't listen to resize events
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.getBoundingClientRect().width;
+        setAvailableWidth(containerWidth > 0 ? containerWidth : 800);
+      }
+      return; // No cleanup needed, no listeners added
+    }
+
+    // Add resize listeners
     window.addEventListener('resize', updateAvailableWidth);
     updateAvailableWidth();
 
     return () => {
       window.removeEventListener('resize', updateAvailableWidth);
     };
-  }, [updateAvailableWidth]);
-
-  const addSpanFilter = useCallback(
-    (field: string, value: any) => {
-      const newFilters = [...spanFilters];
-      const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
-      if (index === -1) {
-        newFilters.push({ field, value });
-      } else {
-        newFilters.splice(index, 1, { field, value });
-      }
-      setSpanFiltersWithStorage(newFilters);
-    },
-    [spanFilters, setSpanFiltersWithStorage]
-  );
-
-  const removeSpanFilter = useCallback(
-    (field: string) => {
-      const newFilters = [...spanFilters];
-      const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
-      if (index !== -1) {
-        newFilters.splice(index, 1);
-        setSpanFiltersWithStorage(newFilters);
-      }
-    },
-    [spanFilters, setSpanFiltersWithStorage]
-  );
+  }, [updateAvailableWidth, props.isEmbedded]);
 
   // Use activeView prop or default to timeline
   const currentView = props.activeView || 'timeline';
@@ -137,7 +81,7 @@ export function SpanDetailPanel(props: {
     () => (
       <div className="exploreSpanDetailPanel__tableContainer">
         <SpanDetailTable
-          hiddenColumns={['traceId', 'traceGroup']}
+          hiddenColumns={['traceId', 'traceGroup', 'parentSpanId', 'startTime', 'endTime']}
           openFlyout={(spanId: string) => {
             if (onSpanSelect) {
               onSpanSelect(spanId);
@@ -157,7 +101,7 @@ export function SpanDetailPanel(props: {
     () => (
       <div className="exploreSpanDetailPanel__tableContainer">
         <SpanDetailTableHierarchy
-          hiddenColumns={['traceId', 'traceGroup']}
+          hiddenColumns={['traceId', 'traceGroup', 'startTime', 'endTime']}
           openFlyout={(spanId: string) => {
             if (onSpanSelect) {
               onSpanSelect(spanId);
@@ -183,51 +127,79 @@ export function SpanDetailPanel(props: {
     }
   }, [payloadData]);
 
-  // Calculate dynamic height based on number of spans
-  const calculateGanttHeight = (spanCount: number): number => {
-    const rowHeight = 35;
-    const baseHeight = 100;
+  const ganttChart = useMemo(() => {
+    // Calculate dynamic height based on number of spans
+    const calculateGanttHeight = (spanCount: number): number => {
+      const rowHeight = 35;
+      const baseHeight = 100;
 
-    if (spanCount === 0) {
-      return 150;
+      if (spanCount === 0) {
+        return 150;
+      }
+
+      if (spanCount === 1) {
+        return 120;
+      }
+
+      if (spanCount <= 3) {
+        return Math.max(150, spanCount * rowHeight + baseHeight);
+      }
+
+      const calculatedHeight = spanCount * rowHeight + baseHeight;
+      const minHeight = 200;
+
+      // In embedded mode, don't limit the maximum height - let it grow to show all spans
+      if (props.isEmbedded) {
+        return Math.max(minHeight, calculatedHeight);
+      }
+
+      // In non-embedded mode, apply the maximum height constraint
+      const maxHeight = 600;
+      return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
+    };
+
+    const chart = (
+      <GanttChart
+        data={parsedData}
+        colorMap={colorMap || {}}
+        height={calculateGanttHeight(parsedData.length)}
+        onSpanClick={(spanId) => {
+          if (onSpanSelect) {
+            onSpanSelect(spanId);
+          }
+        }}
+        selectedSpanId={props.selectedSpanId}
+        isEmbedded={props.isEmbedded}
+      />
+    );
+
+    // In embedded mode, return chart directly without extra container
+    if (props.isEmbedded) {
+      return chart;
     }
 
-    if (spanCount === 1) {
-      return 120;
-    }
+    // In non-embedded mode, wrap in container
+    return <div className="exploreSpanDetailPanel__ganttContainer">{chart}</div>;
+  }, [parsedData, colorMap, onSpanSelect, props.selectedSpanId, props.isEmbedded]);
 
-    if (spanCount <= 3) {
-      return Math.max(150, spanCount * rowHeight + baseHeight);
-    }
-
-    const calculatedHeight = spanCount * rowHeight + baseHeight;
-    const minHeight = 200;
-    const maxHeight = 600;
-
-    return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
-  };
-
-  const ganttChart = useMemo(
-    () => (
-      <div className="exploreSpanDetailPanel__ganttContainer">
-        <GanttChart
-          data={parsedData}
-          colorMap={colorMap || {}}
-          height={calculateGanttHeight(parsedData.length)}
-          onSpanClick={(spanId) => {
-            if (onSpanSelect) {
-              onSpanSelect(spanId);
-            }
-          }}
-          selectedSpanId={props.selectedSpanId}
-        />
+  // In embedded mode, render with minimal containers and let GanttChart determine its own height
+  if (props.isEmbedded) {
+    return (
+      <div ref={containerRef}>
+        {props.isGanttChartLoading ? (
+          <div className="exploreCenterLoadingDiv">
+            <EuiLoadingChart size="l" />
+          </div>
+        ) : (
+          ganttChart
+        )}
       </div>
-    ),
-    [parsedData, colorMap, onSpanSelect, props.selectedSpanId]
-  );
+    );
+  }
 
+  // In non-embedded mode, render with full container structure
   return (
-    <>
+    <div ref={containerRef}>
       <EuiPanel data-test-subj="span-gantt-chart-panel">
         <EuiFlexGroup direction="column" gutterSize="m">
           {props.isGanttChartLoading ? (
@@ -251,6 +223,6 @@ export function SpanDetailPanel(props: {
           )}
         </EuiFlexGroup>
       </EuiPanel>
-    </>
+    </div>
   );
 }

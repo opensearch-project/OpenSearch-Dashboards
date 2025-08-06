@@ -19,6 +19,13 @@ jest.mock('../../../../../../../opensearch_dashboards_utils/public', () => ({
 describe('TraceAppState', () => {
   let mockOsdUrlStateStorage: any;
 
+  const createMockDataset = () => ({
+    id: 'test-dataset-id',
+    title: 'test-index-*',
+    type: 'INDEX_PATTERN',
+    timeFieldName: 'endTime',
+  });
+
   beforeEach(() => {
     mockOsdUrlStateStorage = {
       set: jest.fn(),
@@ -36,8 +43,7 @@ describe('TraceAppState', () => {
       transitions: {
         setSpanId: jest.fn(),
         setTraceId: jest.fn(),
-        setDataSourceId: jest.fn(),
-        setIndexPattern: jest.fn(),
+        setDataset: jest.fn(),
         updateState: jest.fn(),
       },
     };
@@ -71,11 +77,8 @@ describe('TraceAppState', () => {
     mockStateContainer.transitions.setTraceId.mockImplementation((traceId: string) => {
       currentState = { ...currentState, traceId };
     });
-    mockStateContainer.transitions.setDataSourceId.mockImplementation((dataSourceId: string) => {
-      currentState = { ...currentState, dataSourceId };
-    });
-    mockStateContainer.transitions.setIndexPattern.mockImplementation((indexPattern: string) => {
-      currentState = { ...currentState, indexPattern };
+    mockStateContainer.transitions.setDataset.mockImplementation((dataset: any) => {
+      currentState = { ...currentState, dataset };
     });
   });
 
@@ -87,8 +90,7 @@ describe('TraceAppState', () => {
     it('creates state container with default values', () => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -104,8 +106,12 @@ describe('TraceAppState', () => {
     it('creates state container with custom initial state', () => {
       const stateDefaults = {
         traceId: 'custom-trace-id',
-        dataSourceId: 'custom-datasource',
-        indexPattern: 'custom-index-*',
+        dataset: {
+          id: 'custom-dataset-id',
+          title: 'custom-index-*',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         spanId: 'custom-span-id',
       };
 
@@ -116,16 +122,15 @@ describe('TraceAppState', () => {
 
       const state = stateContainer.get();
       expect(state.traceId).toBe('custom-trace-id');
-      expect(state.dataSourceId).toBe('custom-datasource');
-      expect(state.indexPattern).toBe('custom-index-*');
+      expect(state.dataset.id).toBe('custom-dataset-id');
+      expect(state.dataset.title).toBe('custom-index-*');
       expect(state.spanId).toBe('custom-span-id');
     });
 
     it('provides state transitions', () => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -137,15 +142,13 @@ describe('TraceAppState', () => {
       expect(stateContainer.transitions).toBeDefined();
       expect(typeof stateContainer.transitions.setSpanId).toBe('function');
       expect(typeof stateContainer.transitions.setTraceId).toBe('function');
-      expect(typeof stateContainer.transitions.setDataSourceId).toBe('function');
-      expect(typeof stateContainer.transitions.setIndexPattern).toBe('function');
+      expect(typeof stateContainer.transitions.setDataset).toBe('function');
     });
 
     it('returns stopStateSync function', () => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -164,8 +167,7 @@ describe('TraceAppState', () => {
     beforeEach(() => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -198,29 +200,35 @@ describe('TraceAppState', () => {
       expect(state.traceId).toBe('new-trace-id');
     });
 
-    it('setDataSourceId updates data source ID', () => {
-      stateContainer.transitions.setDataSourceId('new-datasource');
+    it('setDataset updates dataset', () => {
+      const newDataset = {
+        id: 'new-dataset-id',
+        title: 'new-index-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
+      };
+      stateContainer.transitions.setDataset(newDataset);
 
       const state = stateContainer.get();
-      expect(state.dataSourceId).toBe('new-datasource');
-    });
-
-    it('setIndexPattern updates index pattern', () => {
-      stateContainer.transitions.setIndexPattern('new-index-*');
-
-      const state = stateContainer.get();
-      expect(state.indexPattern).toBe('new-index-*');
+      expect(state.dataset).toEqual(newDataset);
     });
 
     it('multiple transitions work correctly', () => {
+      const newDataset = {
+        id: 'new-dataset-id',
+        title: 'new-index-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
+      };
+
       stateContainer.transitions.setSpanId('span-1');
       stateContainer.transitions.setTraceId('trace-1');
-      stateContainer.transitions.setDataSourceId('datasource-1');
+      stateContainer.transitions.setDataset(newDataset);
 
       const state = stateContainer.get();
       expect(state.spanId).toBe('span-1');
       expect(state.traceId).toBe('trace-1');
-      expect(state.dataSourceId).toBe('datasource-1');
+      expect(state.dataset).toEqual(newDataset);
     });
   });
 
@@ -228,8 +236,7 @@ describe('TraceAppState', () => {
     it('syncs state changes to URL', () => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -247,8 +254,12 @@ describe('TraceAppState', () => {
     it('handles URL state restoration', () => {
       const existingState = {
         traceId: 'url-trace-id',
-        dataSourceId: 'url-datasource',
-        indexPattern: 'url-index-*',
+        dataset: {
+          id: 'url-dataset-id',
+          title: 'url-index-*',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         spanId: 'url-span-id',
       };
 
@@ -256,8 +267,7 @@ describe('TraceAppState', () => {
 
       const stateDefaults = {
         traceId: 'default-trace-id',
-        dataSourceId: 'default-datasource',
-        indexPattern: 'default-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -275,8 +285,7 @@ describe('TraceAppState', () => {
     it('stopStateSync stops URL synchronization', () => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -295,8 +304,7 @@ describe('TraceAppState', () => {
     beforeEach(() => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -310,8 +318,7 @@ describe('TraceAppState', () => {
         transitions: {
           setSpanId: jest.fn(),
           setTraceId: jest.fn(),
-          setDataSourceId: jest.fn(),
-          setIndexPattern: jest.fn(),
+          setDataset: jest.fn(),
           updateState: jest.fn(),
         },
       };
@@ -347,8 +354,7 @@ describe('TraceAppState', () => {
       const state = stateContainer.get();
       expect(state.traceId).toBe('updated-trace-id');
       expect(state.spanId).toBe('updated-span-id');
-      expect(state.dataSourceId).toBe('test-datasource'); // Should remain unchanged
-      expect(state.indexPattern).toBe('test-index-*'); // Should remain unchanged
+      expect(state.dataset).toEqual(createMockDataset()); // Should remain unchanged
     });
 
     it('updateState handles empty object', () => {
@@ -367,8 +373,7 @@ describe('TraceAppState', () => {
 
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -385,8 +390,12 @@ describe('TraceAppState', () => {
     it('does not set initial state to URL when existing state found', () => {
       const existingState = {
         traceId: 'existing-trace-id',
-        dataSourceId: 'existing-datasource',
-        indexPattern: 'existing-index-*',
+        dataset: {
+          id: 'existing-dataset-id',
+          title: 'existing-index-*',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         spanId: 'existing-span-id',
       };
 
@@ -394,8 +403,7 @@ describe('TraceAppState', () => {
 
       const stateDefaults = {
         traceId: 'default-trace-id',
-        dataSourceId: 'default-datasource',
-        indexPattern: 'default-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -420,8 +428,7 @@ describe('TraceAppState', () => {
 
       const stateDefaults = {
         traceId: 'default-trace-id',
-        dataSourceId: 'default-datasource',
-        indexPattern: 'default-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -433,8 +440,7 @@ describe('TraceAppState', () => {
       expect(createStateContainer).toHaveBeenCalledWith(
         {
           traceId: 'url-trace-id', // From URL
-          dataSourceId: 'default-datasource', // From defaults
-          indexPattern: 'default-index-*', // From defaults
+          dataset: createMockDataset(), // From defaults
           spanId: 'url-span-id', // From URL
         },
         expect.any(Object)
@@ -446,8 +452,7 @@ describe('TraceAppState', () => {
     it('handles null state in custom set function', () => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -460,8 +465,7 @@ describe('TraceAppState', () => {
         transitions: {
           setSpanId: jest.fn(),
           setTraceId: jest.fn(),
-          setDataSourceId: jest.fn(),
-          setIndexPattern: jest.fn(),
+          setDataset: jest.fn(),
           updateState: jest.fn(),
         },
       };
@@ -494,86 +498,11 @@ describe('TraceAppState', () => {
     });
   });
 
-  describe('state transitions implementation', () => {
-    it('setTraceId transition returns correct state', () => {
-      const stateDefaults = {
-        traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
-        spanId: undefined,
-      };
-
-      // Test the actual transition function implementation
-      const transitions = {
-        setTraceId: (state: any) => (traceId: string) => ({
-          ...state,
-          traceId,
-        }),
-        setDataSourceId: (state: any) => (dataSourceId: string) => ({
-          ...state,
-          dataSourceId,
-        }),
-        setIndexPattern: (state: any) => (indexPattern: string) => ({
-          ...state,
-          indexPattern,
-        }),
-        setSpanId: (state: any) => (spanId?: string) => ({
-          ...state,
-          spanId,
-        }),
-        updateState: (state: any) => (newState: any) => ({
-          ...state,
-          ...newState,
-        }),
-      };
-
-      // Test setTraceId
-      const setTraceIdResult = transitions.setTraceId(stateDefaults)('new-trace-id');
-      expect(setTraceIdResult).toEqual({
-        ...stateDefaults,
-        traceId: 'new-trace-id',
-      });
-
-      // Test setDataSourceId
-      const setDataSourceIdResult = transitions.setDataSourceId(stateDefaults)('new-datasource');
-      expect(setDataSourceIdResult).toEqual({
-        ...stateDefaults,
-        dataSourceId: 'new-datasource',
-      });
-
-      // Test setIndexPattern
-      const setIndexPatternResult = transitions.setIndexPattern(stateDefaults)('new-index-*');
-      expect(setIndexPatternResult).toEqual({
-        ...stateDefaults,
-        indexPattern: 'new-index-*',
-      });
-
-      // Test setSpanId
-      const setSpanIdResult = transitions.setSpanId(stateDefaults)('new-span-id');
-      expect(setSpanIdResult).toEqual({
-        ...stateDefaults,
-        spanId: 'new-span-id',
-      });
-
-      // Test updateState
-      const updateStateResult = transitions.updateState(stateDefaults)({
-        traceId: 'updated-trace-id',
-        spanId: 'updated-span-id',
-      });
-      expect(updateStateResult).toEqual({
-        ...stateDefaults,
-        traceId: 'updated-trace-id',
-        spanId: 'updated-span-id',
-      });
-    });
-  });
-
   describe('actual transition function coverage', () => {
     it('tests the actual transition functions passed to createStateContainer', () => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -601,22 +530,17 @@ describe('TraceAppState', () => {
         traceId: 'new-trace-id',
       });
 
-      // Test setDataSourceId transition function
-      const setDataSourceIdResult = capturedTransitions.setDataSourceId(stateDefaults)(
-        'new-datasource'
-      );
-      expect(setDataSourceIdResult).toEqual({
+      // Test setDataset transition function
+      const newDataset = {
+        id: 'new-dataset-id',
+        title: 'new-index-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
+      };
+      const setDatasetResult = capturedTransitions.setDataset(stateDefaults)(newDataset);
+      expect(setDatasetResult).toEqual({
         ...stateDefaults,
-        dataSourceId: 'new-datasource',
-      });
-
-      // Test setIndexPattern transition function
-      const setIndexPatternResult = capturedTransitions.setIndexPattern(stateDefaults)(
-        'new-index-*'
-      );
-      expect(setIndexPatternResult).toEqual({
-        ...stateDefaults,
-        indexPattern: 'new-index-*',
+        dataset: newDataset,
       });
 
       // Test setSpanId transition function with string
@@ -648,8 +572,7 @@ describe('TraceAppState', () => {
     it('tests the custom set function in syncState', () => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -689,8 +612,7 @@ describe('TraceAppState', () => {
     it('handles undefined spanId correctly', () => {
       const stateDefaults = {
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: createMockDataset(),
         spanId: undefined,
       };
 
@@ -710,8 +632,12 @@ describe('TraceAppState', () => {
     it('handles empty string values', () => {
       const stateDefaults = {
         traceId: '',
-        dataSourceId: '',
-        indexPattern: '',
+        dataset: {
+          id: '',
+          title: '',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         spanId: undefined,
       };
 
@@ -722,8 +648,8 @@ describe('TraceAppState', () => {
 
       const state = stateContainer.get();
       expect(state.traceId).toBe('');
-      expect(state.dataSourceId).toBe('');
-      expect(state.indexPattern).toBe('');
+      expect(state.dataset.id).toBe('');
+      expect(state.dataset.title).toBe('');
     });
   });
 });
