@@ -47,7 +47,7 @@ import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
 import OsdServer from '../../legacy/server/osd_server';
 
-export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
+export type HttpMethod = 'delete' | 'get' | 'head' | 'patch' | 'post' | 'put';
 
 const DEFAULTS_SETTINGS = {
   server: {

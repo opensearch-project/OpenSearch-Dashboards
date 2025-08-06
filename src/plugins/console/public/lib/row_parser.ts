@@ -66,19 +66,29 @@ export default class RowParser {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start
 
-    if (line.indexOf('}', line.length - 1) >= 0) {
+    // If the current line ends with a closing brace/bracket, decide if the request/doc ends here.
+    const endsWithCloseBrace = line.endsWith('}');
+    const endsWithCloseBracket = line.endsWith(']');
+    if (endsWithCloseBrace || endsWithCloseBracket) {
       // check for a multi doc request (must start a new json doc immediately after this one end.
       lineNumber++;
       if (lineNumber < linesCount + 1) {
         line = (this.editor.getLineValue(lineNumber) || '').trim();
-        if (line.indexOf('{') === 0) {
+        if (line.startsWith('{')) {
           // next line is another doc in a multi doc
           // eslint-disable-next-line no-bitwise
           return MODE.MULTI_DOC_CUR_DOC_END | MODE.IN_REQUEST;
         }
+        // If next line starts with ']' we are still inside an array body,
+        // don't end the request yet — the real end is the line with ']'.
+        if (endsWithCloseBrace && line.startsWith(']')) {
+          return MODE.IN_REQUEST;
+        }
       }
+      // End the request when the current line ends with a closing bracket,
+      // or when it's a lone '}' not followed by another JSON doc.
       // eslint-disable-next-line no-bitwise
-      return MODE.REQUEST_END | MODE.MULTI_DOC_CUR_DOC_END; // end of request
+      return MODE.REQUEST_END | MODE.MULTI_DOC_CUR_DOC_END;
     }
 
     // check for single line requests
@@ -88,7 +98,9 @@ export default class RowParser {
       return MODE.REQUEST_START | MODE.REQUEST_END;
     }
     line = (this.editor.getLineValue(lineNumber) || '').trim();
-    if (line.indexOf('{') !== 0) {
+    // if the next line doesn't begin a JSON body (object or array),
+    // it means the current line is a complete request line (no body)
+    if (!(line.startsWith('{') || line.startsWith('['))) {
       // next line is another request
       // eslint-disable-next-line no-bitwise
       return MODE.REQUEST_START | MODE.REQUEST_END;

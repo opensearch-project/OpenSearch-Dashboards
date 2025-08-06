@@ -70,7 +70,7 @@ export interface ReqOptions {
   description?: string;
   path: string;
   query?: Record<string, any>;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: 'GET' | 'PATCH' | 'POST' | 'PUT' | 'DELETE';
   body?: any;
   retries?: number;
 }
