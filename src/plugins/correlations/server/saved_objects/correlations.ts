@@ -42,6 +42,9 @@ export const correlationsSavedObjectType: SavedObjectsType = {
       correlationType: {
         type: 'keyword',
       },
+      version: {
+        type: 'keyword',
+      },
       entities: {
         type: 'object',
         enabled: false,

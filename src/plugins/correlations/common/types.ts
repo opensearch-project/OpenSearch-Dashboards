@@ -13,8 +13,9 @@ import { SavedObjectAttributes, SavedObjectReference } from 'opensearch-dashboar
 
 export interface CorrelationSavedObjectAttributes extends SavedObjectAttributes {
   title: string;
-  description?: string;
+  description: string;
   correlationType: string;
+  version: string;
   entities: any[];
 }
 
