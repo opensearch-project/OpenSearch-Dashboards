@@ -28,7 +28,9 @@ export const formatDate = (dateString: string) => {
     ':' +
     ('0' + date.getMinutes()).slice(-2) +
     ':' +
-    ('0' + date.getSeconds()).slice(-2)
+    ('0' + date.getSeconds()).slice(-2) +
+    '.' +
+    ('00' + date.getMilliseconds()).slice(-3)
   );
 };
 

@@ -4,16 +4,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import { EuiIcon } from '@elastic/eui';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 import { useQueryPanelEditor } from './use_query_panel_editor';
 import './query_panel_editor.scss';
-
-const promptIconLabel = i18n.translate('explore.queryPanel.queryPanelEditor.promptIcon', {
-  defaultMessage: 'Ask AI about your data.',
-});
 
 export const QueryPanelEditor = () => {
   const {
@@ -38,14 +32,6 @@ export const QueryPanelEditor = () => {
       data-test-subj="exploreQueryPanelEditor"
       onClick={onEditorClick}
     >
-      {isPromptMode ? (
-        <EuiIcon
-          type="generate"
-          size="m"
-          className="exploreQueryPanelEditor__promptIcon"
-          aria-label={promptIconLabel}
-        />
-      ) : null}
       <CodeEditor {...editorProps} />
       {showPlaceholder ? (
         <div className={`exploreQueryPanelEditor__placeholder`}>{placeholder}</div>

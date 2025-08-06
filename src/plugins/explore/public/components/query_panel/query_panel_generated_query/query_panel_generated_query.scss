@@ -8,20 +8,25 @@
   @include exploreQueryPanelVerticalSeparator;
   @include exploreQueryPanelButton;
 
-  align-items: center;
   color: $ouiTextSubduedColor;
   display: flex;
-  gap: $ouiSizeS;
+  justify-content: space-between;
   padding-left: $ouiSizeXS;
   padding-top: $ouiSizeS;
   padding-bottom: $ouiSizeXXS;
+
+  &__queryWrapper {
+    display: flex;
+    align-items: center;
+  }
 
   &__query {
     color: $ouiColorDisabledText;
     // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
     font-family: $ouiCodeFontFamily;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: normal;
+    padding-left: 12px; // make it aligned with query editor
+    max-height: calc($ouiSize * 3);
+    overflow-y: auto;
   }
 }

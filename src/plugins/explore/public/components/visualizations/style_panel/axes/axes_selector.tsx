@@ -357,6 +357,7 @@ export const AxisSelector: React.FC<AxesSelectorOptions> = ({
       <EuiFormRow label={getLabel()}>
         <EuiFlexItem>
           <EuiComboBox
+            data-test-subj={`field-${axisRole}`}
             compressed
             inputRef={inputRef}
             selectedOptions={[{ label: selectedColumn }]}

@@ -343,7 +343,6 @@ export const DataImporterPluginApp = ({
                 savedObjects: savedObjects.client,
                 notifications,
                 onSelectedDataSources: onDataSourceSelect,
-                onManageDataSource: () => {},
               }}
               onManageDataSource={() => {}}
             />

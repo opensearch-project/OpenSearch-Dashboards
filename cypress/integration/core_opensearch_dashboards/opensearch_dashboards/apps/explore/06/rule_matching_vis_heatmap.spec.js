@@ -35,11 +35,11 @@ export const runCreateVisTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
     it('should create a heatmap visualization using a query with one metric and two categories', () => {
-      const query = `source=${datasetName} | fields status_code, personal.age, bytes_transferred`;
+      const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
       cy.explore.createVisualizationWithQuery(query, 'Heatmap', datasetName);
     });
     it('should change axes style of heatmap chart and reflect immediatly to the heatmap visualization', () => {
-      const query = `source=${datasetName} | fields status_code, personal.age, bytes_transferred`;
+      const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
       cy.explore.createVisualizationWithQuery(query, 'Heatmap', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
@@ -55,7 +55,7 @@ export const runCreateVisTests = () => {
       });
     });
     it('should turn off legend of heatmap chart and reflect immediatly to the heatmap visualization', () => {
-      const query = `source=${datasetName} | fields status_code, personal.age, bytes_transferred`;
+      const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
       cy.explore.createVisualizationWithQuery(query, 'Heatmap', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
@@ -71,7 +71,7 @@ export const runCreateVisTests = () => {
       });
     });
     it('should update style of heatmap chart and reflect immediatly to the heatmap visualization', () => {
-      const query = `source=${datasetName} | fields status_code, personal.age, bytes_transferred`;
+      const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
       cy.explore.createVisualizationWithQuery(query, 'Heatmap', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')

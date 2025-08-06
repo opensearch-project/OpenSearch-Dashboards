@@ -83,10 +83,10 @@ export const runDisplayTests = () => {
         );
 
         // testing the language information popup button
-        cy.getElementByTestId('exploreSelectedLanguage').click();
+        cy.getElementByTestId('exploreLanguageReference').click();
         cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
         cy.get('.euiPanel').contains(getLanguageReferenceTestText(config.language));
-        cy.getElementByTestId('exploreSelectedLanguage').click();
+        cy.getElementByTestId('exploreLanguageReference').click();
 
         // testing the saved queries management button
         cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();

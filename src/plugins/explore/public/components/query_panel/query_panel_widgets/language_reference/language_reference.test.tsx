@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { IntlProvider } from 'react-intl';
-import { SelectedLanguage, getLanguageReference } from './selected_language';
+import { LanguageReference, getLanguageReference } from './language_reference';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { configureStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../application/utils/state_management/store';
@@ -72,113 +72,10 @@ const renderWithProviders = (component: React.ReactElement, initialState = {}) =
   );
 };
 
-describe('SelectedLanguage', () => {
+describe('LanguageReference', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLocalStorage.getItem.mockReturnValue(null);
-  });
-
-  describe('Component Rendering', () => {
-    it('should render with PPL language and query editor mode', () => {
-      const initialState = {
-        query: {
-          language: 'PPL',
-        },
-        queryEditor: {
-          editorMode: EditorMode.Query,
-          promptModeIsAvailable: false,
-        },
-      };
-
-      renderWithProviders(<SelectedLanguage />, initialState);
-
-      expect(screen.getByTestId('exploreSelectedLanguage')).toBeInTheDocument();
-      expect(screen.getByText('PPL')).toBeInTheDocument();
-    });
-
-    it('should render with Ask AI text when prompt mode is available and selected', () => {
-      const initialState = {
-        query: {
-          language: 'PPL',
-        },
-        queryEditor: {
-          editorMode: EditorMode.Prompt,
-          promptModeIsAvailable: true,
-        },
-      };
-
-      renderWithProviders(<SelectedLanguage />, initialState);
-
-      expect(screen.getByText('Ask AI')).toBeInTheDocument();
-    });
-
-    it('should render language text when query mode is selected', () => {
-      const initialState = {
-        query: {
-          language: 'PPL',
-        },
-        queryEditor: {
-          editorMode: EditorMode.Query,
-          promptModeIsAvailable: true,
-        },
-      };
-
-      renderWithProviders(<SelectedLanguage />, initialState);
-
-      expect(screen.getByText('PPL')).toBeInTheDocument();
-    });
-
-    it('should render the button component', () => {
-      const initialState = {
-        query: {
-          language: 'PPL',
-        },
-        queryEditor: {
-          editorMode: EditorMode.Query,
-          promptModeIsAvailable: false,
-        },
-      };
-
-      renderWithProviders(<SelectedLanguage />, initialState);
-
-      expect(screen.getByTestId('exploreSelectedLanguage')).toBeInTheDocument();
-    });
-  });
-
-  describe('Button State', () => {
-    it('should enable button when not in prompt mode', () => {
-      const initialState = {
-        query: {
-          language: 'PPL',
-        },
-        queryEditor: {
-          editorMode: EditorMode.Query,
-          promptModeIsAvailable: false,
-        },
-      };
-
-      renderWithProviders(<SelectedLanguage />, initialState);
-
-      const button = screen.getByTestId('exploreSelectedLanguage');
-      expect(button).not.toBeDisabled();
-    });
-
-    it('should disable button in prompt mode', () => {
-      const initialState = {
-        query: {
-          language: 'PPL',
-        },
-        queryEditor: {
-          editorMode: EditorMode.Prompt,
-          promptModeIsAvailable: true,
-        },
-      };
-
-      renderWithProviders(<SelectedLanguage />, initialState);
-
-      const button = screen.getByTestId('exploreSelectedLanguage');
-      expect(button).toBeDisabled();
-    });
   });
 
   describe('Popover Behavior', () => {
@@ -195,7 +92,7 @@ describe('SelectedLanguage', () => {
         },
       };
 
-      renderWithProviders(<SelectedLanguage />, initialState);
+      renderWithProviders(<LanguageReference />, initialState);
 
       expect(screen.getByText('Syntax options')).toBeInTheDocument();
       expect(screen.getByTestId('ppl-reference')).toBeInTheDocument();
@@ -214,7 +111,7 @@ describe('SelectedLanguage', () => {
         },
       };
 
-      renderWithProviders(<SelectedLanguage />, initialState);
+      renderWithProviders(<LanguageReference />, initialState);
 
       expect(screen.queryByText('Syntax options')).not.toBeInTheDocument();
     });
@@ -232,9 +129,9 @@ describe('SelectedLanguage', () => {
         },
       };
 
-      renderWithProviders(<SelectedLanguage />, initialState);
+      renderWithProviders(<LanguageReference />, initialState);
 
-      const button = screen.getByTestId('exploreSelectedLanguage');
+      const button = screen.getByTestId('exploreLanguageReference');
 
       // Initially closed
       expect(screen.queryByText('Syntax options')).not.toBeInTheDocument();
@@ -258,47 +155,9 @@ describe('SelectedLanguage', () => {
         },
       };
 
-      renderWithProviders(<SelectedLanguage />, initialState);
+      renderWithProviders(<LanguageReference />, initialState);
 
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith('hasSeenInfoBox_PPL', 'true');
-    });
-  });
-
-  describe('Text Content Based on Editor Mode', () => {
-    const testCases = [
-      {
-        editorMode: EditorMode.Query,
-        promptModeIsAvailable: true,
-        expected: 'PPL',
-      },
-      {
-        editorMode: EditorMode.Query,
-        promptModeIsAvailable: false,
-        expected: 'PPL',
-      },
-      {
-        editorMode: EditorMode.Prompt,
-        promptModeIsAvailable: true,
-        expected: 'Ask AI',
-      },
-    ];
-
-    testCases.forEach(({ editorMode, promptModeIsAvailable, expected }) => {
-      it(`should display "${expected}" for ${editorMode} mode with promptModeIsAvailable=${promptModeIsAvailable}`, () => {
-        const initialState = {
-          query: {
-            language: 'PPL',
-          },
-          queryEditor: {
-            editorMode,
-            promptModeIsAvailable,
-          },
-        };
-
-        renderWithProviders(<SelectedLanguage />, initialState);
-
-        expect(screen.getByText(expected)).toBeInTheDocument();
-      });
     });
   });
 });
