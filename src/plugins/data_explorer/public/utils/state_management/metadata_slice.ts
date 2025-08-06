@@ -26,9 +26,18 @@ export const getPreloadedState = async ({
       .getStateTransfer(scopedHistory)
       .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
   const isQueryEnhancementEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
-  const defaultIndexPattern = isQueryEnhancementEnabled
-    ? undefined
-    : await data.indexPatterns.getDefault();
+
+  let defaultIndexPattern;
+  if (!isQueryEnhancementEnabled) {
+    try {
+      defaultIndexPattern = await data.indexPatterns.getDefault();
+    } catch (error) {
+      defaultIndexPattern = undefined;
+    }
+  } else {
+    defaultIndexPattern = undefined;
+  }
+
   const preloadedState: MetadataState = {
     ...initialState,
     originatingApp,
