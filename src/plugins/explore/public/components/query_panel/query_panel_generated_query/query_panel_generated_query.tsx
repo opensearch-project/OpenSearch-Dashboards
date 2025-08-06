@@ -6,14 +6,14 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
-import { EuiBadge, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
 import { selectLastExecutedTranslatedQuery } from '../../../application/utils/state_management/selectors';
 import { useEditorFocus, useSetEditorTextWithQuery } from '../../../application/hooks';
 import { clearLastExecutedData } from '../../../application/utils/state_management/slices';
 import './query_panel_generated_query.scss';
 
 const editQueryText = i18n.translate('explore.queryPanel.queryPanelGeneratedQuery.editQuery', {
-  defaultMessage: 'Edit query',
+  defaultMessage: 'Replace query',
 });
 
 export const QueryPanelGeneratedQuery = () => {
@@ -34,28 +34,26 @@ export const QueryPanelGeneratedQuery = () => {
 
   return (
     <div className="exploreQueryPanelGeneratedQuery">
-      <EuiIcon type="editorCodeBlock" size="s" />
-      <EuiText
-        className="exploreQueryPanelGeneratedQuery__query"
-        size="s"
-        data-test-subj="exploreQueryPanelGeneratedQuery"
-      >
-        {lastExecutedTranslatedQuery}
-      </EuiText>
-      <EuiBadge
-        data-test-subj="exploreQueryPanelGeneratedQuery_editQuery"
-        onClick={onEditClick}
-        onClickAriaLabel={editQueryText}
-        color="hollow"
-      >
-        <div
-          className="exploreQueryPanelGeneratedQuery__buttonTextWrapper"
-          data-test-subj="exploreQueryPanelGeneratedQueryEditButton"
+      <div className="exploreQueryPanelGeneratedQuery__queryWrapper">
+        <EuiIcon type="editorCodeBlock" size="s" />
+        <EuiText
+          className="exploreQueryPanelGeneratedQuery__query"
+          size="s"
+          data-test-subj="exploreQueryPanelGeneratedQuery"
         >
-          <EuiIcon type="editorCodeBlock" size="s" />
+          {lastExecutedTranslatedQuery}
+        </EuiText>
+      </div>
+      <EuiButtonEmpty
+        data-test-subj="exploreQueryPanelGeneratedQueryEditButton"
+        onClick={onEditClick}
+        size="xs"
+      >
+        <div className="exploreQueryPanelGeneratedQuery__buttonTextWrapper">
+          <EuiIcon type="sortUp" size="s" />
           <EuiText size="xs">{editQueryText}</EuiText>
         </div>
-      </EuiBadge>
+      </EuiButtonEmpty>
     </div>
   );
 };
