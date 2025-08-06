@@ -168,7 +168,8 @@ describe('DataSourceTable', () => {
     });
 
     it('should delete datasources & fail', async () => {
-      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.resolve({}));
+      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.reject({}));
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -567,7 +568,7 @@ describe('DataSourceTable', () => {
     });
   });
 
-  describe('should get default datasources failed', () => {
+  describe('uiSettings APIs throw failure', () => {
     beforeEach(async () => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
       spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(

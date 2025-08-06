@@ -26,25 +26,16 @@ import {
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
   DATA_SOURCE_SAVED_OBJECT_TYPE,
 } from '../../../../data_source/common';
-import { UiSettingScope } from '../../../../../core/public';
-import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../../../data_source_management/public';
 
 interface Props {
   excludedDataSourceIds: string[];
   onComplete?: () => void;
   onError?: () => void;
-  defaultDataSourceId?: string | null;
 }
 
-export const DataSourceAssociation = ({
-  excludedDataSourceIds,
-  onComplete,
-  onError,
-  defaultDataSourceId,
-}: Props) => {
+export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onError }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const associationModalRef = useRef<OverlayRef>();
-
   const {
     chrome,
     savedObjects,
@@ -52,7 +43,6 @@ export const DataSourceAssociation = ({
     notifications,
     overlays,
     workspaces,
-    uiSettings,
   } = useOpenSearchDashboards().services;
   const workspaceClient = useObservable(workspaces?.client$ ?? of(null));
   const currentWorkspaceId = useObservable(workspaces?.currentWorkspaceId$ ?? of(null));
@@ -77,14 +67,6 @@ export const DataSourceAssociation = ({
 
           if (res.success) {
             failedCount = res.result.filter((r) => !!r.error).length;
-            if (!defaultDataSourceId && uiSettings) {
-              // If a default data source is not already set, automatically set the first selected data source as default.
-              await uiSettings.set(
-                DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
-                objects[0].id,
-                UiSettingScope.WORKSPACE
-              );
-            }
           } else {
             // If failed to workspaceClient.associate, all data sources association is failed
             failedCount = objects.length;
@@ -123,15 +105,7 @@ export const DataSourceAssociation = ({
         }
       }
     },
-    [
-      workspaceClient,
-      currentWorkspaceId,
-      notifications,
-      onComplete,
-      onError,
-      defaultDataSourceId,
-      uiSettings,
-    ]
+    [workspaceClient, currentWorkspaceId, notifications, onComplete, onError]
   );
 
   const showAssociationModal = useCallback(

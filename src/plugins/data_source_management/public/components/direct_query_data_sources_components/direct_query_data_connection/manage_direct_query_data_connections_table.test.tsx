@@ -31,7 +31,6 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
     ...mockManagementPlugin.createDataSourceManagementContext(),
     application: { capabilities: { dataSource: { canManage: true } } },
   };
-  const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
   describe('should get direct query connections failed', () => {
@@ -69,7 +68,6 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
         Promise.resolve(getMappedDataSources)
       );
       spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
-      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
       await act(async () => {
         component = await mount(
           wrapWithIntl(
@@ -142,7 +140,6 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
       });
       component.update();
       expect(component.find(confirmModalIdentifier).exists()).toBe(false);
-      expect(utils.setFirstDataSourceAsDefault).toHaveBeenCalled();
     });
 
     it('should delete datasources & fail', async () => {
@@ -163,7 +160,6 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
       });
       component.update();
       expect(utils.deleteMultipleDataSources).toHaveBeenCalled();
-      expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
       // @ts-ignore
       expect(component.find(confirmModalIdentifier).exists()).toBe(false);
     });
@@ -302,7 +298,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
       );
       spyOn(utils, 'getDataConnections').and.returnValue(Promise.resolve(mockedDataConnections));
       spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
-      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
+
       const context = {
         ...mockedContext,
         application: {

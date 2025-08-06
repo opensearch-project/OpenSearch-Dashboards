@@ -170,7 +170,6 @@ interface DataSourceAssociationProps {
   excludedDataSourceIds: string[];
   onComplete?: () => void;
   onError?: () => void;
-  defaultDataSourceId?: string | null;
 }
 
 export interface WorkspaceUI {
