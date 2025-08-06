@@ -5,7 +5,7 @@
 
 import './tabs.scss';
 import React, { useCallback } from 'react';
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiErrorBoundary, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveTab } from '../../application/utils/state_management/slices';
 import { clearQueryStatusMapByKey } from '../../application/utils/state_management/slices';
@@ -59,7 +59,11 @@ export const ExploreTabs = () => {
     return {
       id: registryTab.id,
       name: registryTab.label,
-      content: <registryTab.component />,
+      content: (
+        <EuiErrorBoundary>
+          <registryTab.component />
+        </EuiErrorBoundary>
+      ),
     };
   });
 

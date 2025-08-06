@@ -341,7 +341,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     isFocused: editorIsFocused,
     isPromptMode,
     languageConfiguration,
-    languageId: queryLanguage,
+    languageId: isPromptMode ? 'plaintext' : queryLanguage, // plaintext is preregistered language in monaco
     onChange,
     onEditorClick,
     options,
