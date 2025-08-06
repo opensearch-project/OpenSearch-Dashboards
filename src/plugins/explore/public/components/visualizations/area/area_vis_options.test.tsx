@@ -54,6 +54,12 @@ jest.mock('../style_panel/legend/legend', () => ({
       >
         Change Position
       </button>
+      <button
+        data-test-subj="change-both"
+        onClick={() => onLegendOptionsChange({ show: !legendOptions.show, position: 'top' })}
+      >
+        Change Both
+      </button>
     </div>
   )),
 }));
@@ -154,6 +160,24 @@ jest.mock('../style_panel/axes/axes', () => ({
   )),
 }));
 
+jest.mock('../style_panel/title/title', () => ({
+  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
+    <div data-test-subj="title-panel">
+      <button
+        data-test-subj="titleModeSwitch"
+        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
+      >
+        Toggle Title
+      </button>
+      <input
+        data-test-subj="titleInput"
+        placeholder="Default title"
+        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
+      />
+    </div>
+  )),
+}));
+
 describe('AreaVisStyleControls', () => {
   const defaultProps = {
     styleOptions: {
@@ -236,6 +260,14 @@ describe('AreaVisStyleControls', () => {
         validValuesCount: 100,
         uniqueValuesCount: 50,
       },
+      [AxisRole.COLOR]: {
+        id: 3,
+        name: 'Category',
+        schema: VisFieldType.Categorical,
+        column: 'category',
+        validValuesCount: 10,
+        uniqueValuesCount: 5,
+      },
     },
     updateVisualization: jest.fn(),
   };
@@ -251,117 +283,66 @@ describe('AreaVisStyleControls', () => {
     expect(screen.getByTestId('threshold-panel')).toBeInTheDocument();
     expect(screen.getByTestId('tooltip-panel')).toBeInTheDocument();
     expect(screen.getByTestId('axes-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('title-panel')).toBeInTheDocument();
   });
 
-  test('shows legend when notShowLegend is false', () => {
-    render(<AreaVisStyleControls {...defaultProps} />);
-
-    const legendPanel = screen.getByTestId('legend-panel');
-    expect(legendPanel).toHaveAttribute('data-show-legend', 'true');
-  });
-
-  test('hides legend when specific column combinations exist (numerical=1, categorical=0, date=1)', () => {
+  test('shows legend when COLOR mapping is present', () => {
     const props = {
       ...defaultProps,
-      numericalColumns: [
-        {
-          id: 1,
-          name: 'num1',
-          schema: VisFieldType.Numerical,
-          column: 'col1',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
-      ],
-      dateColumns: [
-        {
-          id: 2,
-          name: 'date1',
-          schema: VisFieldType.Date,
-          column: 'col2',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
-      ],
-      categoricalColumns: [],
-    };
-
-    render(<AreaVisStyleControls {...props} />);
-
-    const legendPanel = screen.getByTestId('legend-panel');
-    expect(legendPanel).toHaveAttribute('data-show-legend', 'false');
-  });
-
-  test('hides legend when specific column combinations exist (numerical=1, categorical=1, date=0)', () => {
-    const props = {
-      ...defaultProps,
-      numericalColumns: [
-        {
-          id: 1,
-          name: 'num1',
-          schema: VisFieldType.Numerical,
-          column: 'col1',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
-      ],
-      categoricalColumns: [
-        {
-          id: 2,
-          name: 'cat1',
-          schema: VisFieldType.Categorical,
-          column: 'col2',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
-      ],
-      dateColumns: [],
-    };
-
-    render(<AreaVisStyleControls {...props} />);
-
-    const legendPanel = screen.getByTestId('legend-panel');
-    expect(legendPanel).toHaveAttribute('data-show-legend', 'false');
-  });
-
-  test('shows legend for other column combinations', () => {
-    const props = {
-      ...defaultProps,
-      numericalColumns: [
-        {
-          id: 1,
-          name: 'num1',
-          schema: VisFieldType.Numerical,
-          column: 'col1',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
-        {
-          id: 2,
-          name: 'num2',
-          schema: VisFieldType.Numerical,
-          column: 'col2',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
-      ],
-      categoricalColumns: [
-        {
+      axisColumnMappings: {
+        ...defaultProps.axisColumnMappings,
+        [AxisRole.COLOR]: {
           id: 3,
-          name: 'cat1',
+          name: 'Category',
           schema: VisFieldType.Categorical,
-          column: 'col3',
+          column: 'category',
           validValuesCount: 10,
           uniqueValuesCount: 5,
         },
-      ],
-      dateColumns: [],
+      },
     };
 
     render(<AreaVisStyleControls {...props} />);
 
     const legendPanel = screen.getByTestId('legend-panel');
     expect(legendPanel).toHaveAttribute('data-show-legend', 'true');
+  });
+
+  test('shows legend when FACET mapping is present', () => {
+    const props = {
+      ...defaultProps,
+      axisColumnMappings: {
+        ...defaultProps.axisColumnMappings,
+        [AxisRole.FACET]: {
+          id: 4,
+          name: 'Facet',
+          schema: VisFieldType.Categorical,
+          column: 'facet',
+          validValuesCount: 10,
+          uniqueValuesCount: 5,
+        },
+      },
+    };
+
+    render(<AreaVisStyleControls {...props} />);
+
+    const legendPanel = screen.getByTestId('legend-panel');
+    expect(legendPanel).toHaveAttribute('data-show-legend', 'true');
+  });
+
+  test('hides legend when no COLOR or FACET mappings are present', () => {
+    const props = {
+      ...defaultProps,
+      axisColumnMappings: {
+        [AxisRole.X]: defaultProps.axisColumnMappings[AxisRole.X],
+        [AxisRole.Y]: defaultProps.axisColumnMappings[AxisRole.Y],
+      },
+    };
+
+    render(<AreaVisStyleControls {...props} />);
+
+    const legendPanel = screen.queryByTestId('legend-panel');
+    expect(legendPanel).not.toBeInTheDocument();
   });
 
   test('updates legend show option correctly', async () => {
@@ -378,6 +359,15 @@ describe('AreaVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('change-position'));
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: Positions.BOTTOM });
+  });
+
+  test('updates both legend show and position correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('change-both'));
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: Positions.TOP });
   });
 
   test('updates threshold lines correctly', async () => {
@@ -479,6 +469,7 @@ describe('AreaVisStyleControls', () => {
     expect(screen.queryByTestId('threshold-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('tooltip-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('axes-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('title-panel')).not.toBeInTheDocument();
   });
 
   test('handles empty arrays for columns', () => {
@@ -510,7 +501,6 @@ describe('AreaVisStyleControls', () => {
   });
 
   test('handles missing optional props', () => {
-    // Create a new props object without the optional props
     const props = {
       ...defaultProps,
       availableChartTypes: undefined,
@@ -524,9 +514,7 @@ describe('AreaVisStyleControls', () => {
   test('updates title show option correctly', async () => {
     render(<AreaVisStyleControls {...defaultProps} />);
 
-    // Find the title switch and toggle it
-    const titleSwitch = screen.getByTestId('titleModeSwitch');
-    await userEvent.click(titleSwitch);
+    await userEvent.click(screen.getByTestId('titleModeSwitch'));
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
       titleOptions: {
@@ -537,7 +525,6 @@ describe('AreaVisStyleControls', () => {
   });
 
   test('updates title name when text is entered', async () => {
-    // Set show to true to ensure the title field is visible
     const props = {
       ...defaultProps,
       styleOptions: {
@@ -551,10 +538,10 @@ describe('AreaVisStyleControls', () => {
 
     render(<AreaVisStyleControls {...props} />);
 
-    const titleInput = screen.getByPlaceholderText('Default title');
+    const titleInput = screen.getByTestId('titleInput');
     await userEvent.type(titleInput, 'New Chart Title');
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
         titleOptions: {
           ...props.styleOptions.titleOptions,

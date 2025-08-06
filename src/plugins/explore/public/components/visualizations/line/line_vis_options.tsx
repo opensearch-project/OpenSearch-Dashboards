@@ -15,6 +15,7 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
+import { AxisRole } from '../types';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
 
@@ -34,12 +35,12 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  const notShowLegend =
-    (numericalColumns.length === 1 &&
-      categoricalColumns.length === 0 &&
-      dateColumns.length === 1) ||
-    (numericalColumns.length === 1 && categoricalColumns.length === 1 && dateColumns.length === 0);
+  // Determine if the legend should be shown based on the selected mappings
+  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
+  const hasFacetMapping = !!axisColumnMappings?.[AxisRole.FACET];
+  const hasYSecondMapping = !!axisColumnMappings?.[AxisRole.Y_SECOND];
 
+  const shouldShowLegend = hasColorMapping || hasFacetMapping || hasYSecondMapping;
   const shouldShowTimeMarker = dateColumns.length !== 0;
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -100,23 +101,25 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <LegendOptionsPanel
-              shouldShowLegend={!notShowLegend}
-              legendOptions={{
-                show: styleOptions.addLegend,
-                position: styleOptions.legendPosition,
-              }}
-              onLegendOptionsChange={(legendOptions) => {
-                if (legendOptions.show !== undefined) {
-                  updateStyleOption('addLegend', legendOptions.show);
-                }
-                if (legendOptions.position !== undefined) {
-                  updateStyleOption('legendPosition', legendOptions.position);
-                }
-              }}
-            />
-          </EuiFlexItem>
+          {shouldShowLegend && (
+            <EuiFlexItem grow={false}>
+              <LegendOptionsPanel
+                shouldShowLegend={shouldShowLegend}
+                legendOptions={{
+                  show: styleOptions.addLegend,
+                  position: styleOptions.legendPosition,
+                }}
+                onLegendOptionsChange={(legendOptions) => {
+                  if (legendOptions.show !== undefined) {
+                    updateStyleOption('addLegend', legendOptions.show);
+                  }
+                  if (legendOptions.position !== undefined) {
+                    updateStyleOption('legendPosition', legendOptions.position);
+                  }
+                }}
+              />
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
