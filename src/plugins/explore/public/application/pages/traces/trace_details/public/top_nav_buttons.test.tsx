@@ -39,7 +39,6 @@ describe('TraceTopNavMenu', () => {
         endTime: '2023-01-01T00:00:01.000Z',
       },
     ],
-    dataSourceMDSId: [{ id: 'test-source', label: 'Test Source' }],
     traceId: 'test-trace-id',
   };
 

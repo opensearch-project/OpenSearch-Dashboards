@@ -82,9 +82,6 @@ describe('SpanDetailPanel', () => {
     spanFilters: [],
     payloadData: JSON.stringify(mockSpanData),
     isGanttChartLoading: false,
-    dataSourceMDSId: 'test-datasource',
-    dataSourceMDSLabel: 'Test DataSource',
-    traceId: 'trace-1',
     colorMap: {
       'service-a': '#FF0000',
       'service-b': '#00FF00',
@@ -272,32 +269,6 @@ describe('SpanDetailPanel', () => {
     expect(
       document.querySelector('[data-testid="span-detail-table-hierarchy"]')
     ).not.toBeInTheDocument();
-  });
-
-  it('tests addSpanFilter functionality', () => {
-    const mockSetSpanFiltersWithStorage = jest.fn();
-    const propsWithFilters = {
-      ...defaultProps,
-      spanFilters: [{ field: 'serviceName', value: 'service-a' }],
-      setSpanFiltersWithStorage: mockSetSpanFiltersWithStorage,
-    };
-
-    render(<SpanDetailPanel {...propsWithFilters} />);
-
-    expect(mockSetSpanFiltersWithStorage).toBeDefined();
-  });
-
-  it('tests removeSpanFilter functionality', () => {
-    const mockSetSpanFiltersWithStorage = jest.fn();
-    const propsWithFilters = {
-      ...defaultProps,
-      spanFilters: [{ field: 'serviceName', value: 'service-a' }],
-      setSpanFiltersWithStorage: mockSetSpanFiltersWithStorage,
-    };
-
-    render(<SpanDetailPanel {...propsWithFilters} />);
-
-    expect(mockSetSpanFiltersWithStorage).toBeDefined();
   });
 
   it('handles window resize events', () => {

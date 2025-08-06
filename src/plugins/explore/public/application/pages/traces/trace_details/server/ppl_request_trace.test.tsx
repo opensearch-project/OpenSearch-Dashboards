@@ -4,6 +4,7 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { Dataset } from '../../../../../../../data/common';
 import {
   TracePPLService,
   PPLQueryParamsWithFilters,
@@ -25,7 +26,7 @@ describe('ppl_request_trace', () => {
 
   let tracePPLService: TracePPLService;
 
-  const createMockDataset = () => ({
+  const createMockDataset = (): Dataset => ({
     id: 'test-dataset-id',
     title: 'test-index',
     type: 'INDEX_PATTERN',

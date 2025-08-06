@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { Dataset } from '../../../../../../../data/common';
 import { PPLService, PPLQueryParams, escapePPLValue } from './ppl_request_helpers';
 
 export interface PPLQueryParamsWithFilters extends PPLQueryParams {
@@ -12,12 +13,7 @@ export interface PPLQueryParamsWithFilters extends PPLQueryParams {
 export interface PPLSpanQueryParams {
   traceId: string;
   spanId: string;
-  dataset: {
-    id: string;
-    title: string;
-    type: string;
-    timeFieldName?: string;
-  };
+  dataset: Dataset;
   limit?: number;
 }
 
@@ -28,12 +24,12 @@ export class TracePPLService extends PPLService {
   }
 
   private buildPPLQueryWithFilters(
-    datasetTitle: string,
+    dataset: Dataset,
     traceId: string,
     limit: number,
     filters: Array<{ field: string; value: any }> = []
   ): string {
-    let query = `source = ${datasetTitle} | where traceId = "${traceId}"`;
+    let query = `source = ${dataset.title} | where traceId = "${traceId}"`;
 
     filters.forEach((filter) => {
       const escapedValue = escapePPLValue(filter.value);
@@ -53,8 +49,8 @@ export class TracePPLService extends PPLService {
     }
 
     try {
-      // Build the PPL query with filters using the dataset title
-      const pplQuery = this.buildPPLQueryWithFilters(dataset.title, traceId, limit, filters);
+      // Build the PPL query with filters using the dataset
+      const pplQuery = this.buildPPLQueryWithFilters(dataset, traceId, limit, filters);
 
       const datasetWithoutTime = {
         id: dataset.id,

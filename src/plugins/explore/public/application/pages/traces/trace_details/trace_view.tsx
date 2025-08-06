@@ -439,7 +439,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                               spanFilters={spanFilters}
                               payloadData={JSON.stringify(transformedHits)}
                               isGanttChartLoading={isBackgroundLoading}
-                              dataSourceMDSId={dataset.id}
                               colorMap={colorMap}
                               onSpanSelect={handleSpanSelect}
                               selectedSpanId={spanId}

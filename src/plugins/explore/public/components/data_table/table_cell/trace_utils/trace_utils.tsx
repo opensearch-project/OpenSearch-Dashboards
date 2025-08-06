@@ -6,6 +6,8 @@
 import React from 'react';
 import { EuiToolTip, EuiLink, EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { TRACE_ID_FIELD_PATHS } from '../../../../utils/trace_field_constants';
+import './trace_utils.scss';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -21,16 +23,7 @@ export const isSpanIdColumn = (columnId: string): boolean => {
 export const extractTraceIdFromRowData = (rowData: any): string => {
   if (!rowData) return '';
 
-  const possibleTraceIdFields = [
-    'traceId',
-    'trace_id',
-    'traceID',
-    '_source.traceId',
-    '_source.trace_id',
-    '_source.traceID',
-  ];
-
-  for (const field of possibleTraceIdFields) {
+  for (const field of TRACE_ID_FIELD_PATHS) {
     const value = field.includes('.')
       ? field.split('.').reduce((obj, key) => obj?.[key], rowData)
       : rowData[field];
@@ -100,7 +93,7 @@ export const SpanIdLink: React.FC<SpanIdLinkProps> = ({ sanitizedCellValue, rowD
       <EuiLink
         onClick={handleSpanIdClick}
         data-test-subj="spanIdLink"
-        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+        className="exploreSpanIdLink"
       >
         {sanitizedCellValue.replace(/<[^>]*>/g, '').trim()}
         <EuiIcon type="popout" size="s" />

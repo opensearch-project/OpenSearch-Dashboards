@@ -9,6 +9,7 @@ import {
   createStateContainer,
   syncState,
 } from '../../../../../../../opensearch_dashboards_utils/public';
+import { Dataset } from '../../../../../../../data/common';
 
 jest.mock('../../../../../../../opensearch_dashboards_utils/public', () => ({
   createOsdUrlStateStorage: jest.fn(),
@@ -19,7 +20,7 @@ jest.mock('../../../../../../../opensearch_dashboards_utils/public', () => ({
 describe('TraceAppState', () => {
   let mockOsdUrlStateStorage: any;
 
-  const createMockDataset = () => ({
+  const createMockDataset = (): Dataset => ({
     id: 'test-dataset-id',
     title: 'test-index-*',
     type: 'INDEX_PATTERN',

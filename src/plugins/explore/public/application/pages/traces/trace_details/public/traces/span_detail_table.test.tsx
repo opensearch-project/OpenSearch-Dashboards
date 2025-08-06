@@ -81,7 +81,6 @@ describe('SpanDetailTable', () => {
   const defaultProps = {
     hiddenColumns: [],
     openFlyout: jest.fn(),
-    dataSourceMDSId: 'test-source',
     payloadData: JSON.stringify({
       hits: {
         hits: [
@@ -304,7 +303,6 @@ describe('RenderSpanCellValue function coverage', () => {
     const props = {
       hiddenColumns: [],
       openFlyout: jest.fn(),
-      dataSourceMDSId: 'test-source',
       payloadData: JSON.stringify(testData),
       filters: [],
     };
@@ -377,7 +375,6 @@ describe('RenderSpanCellValue function coverage', () => {
     const props = {
       hiddenColumns: [],
       openFlyout: jest.fn(),
-      dataSourceMDSId: 'test-source',
       payloadData: JSON.stringify({
         hits: {
           hits: [
@@ -484,7 +481,6 @@ describe('renderSpanCellValue function coverage', () => {
     const props = {
       hiddenColumns: [],
       openFlyout: jest.fn(),
-      dataSourceMDSId: 'test-source',
       payloadData: JSON.stringify(testData),
       filters: [],
     };
@@ -526,7 +522,6 @@ describe('renderSpanCellValue function coverage', () => {
     const props = {
       hiddenColumns: [],
       openFlyout: jest.fn(),
-      dataSourceMDSId: 'test-source',
       payloadData: JSON.stringify(testData),
       filters: [],
     };
@@ -564,7 +559,6 @@ describe('renderSpanCellValue function coverage', () => {
     const props = {
       hiddenColumns: [],
       openFlyout: jest.fn(),
-      dataSourceMDSId: 'test-source',
       payloadData: JSON.stringify(testData),
       filters: [],
     };
@@ -614,7 +608,6 @@ describe('renderSpanCellValue function coverage', () => {
     const props = {
       hiddenColumns: [],
       openFlyout: jest.fn(),
-      dataSourceMDSId: 'test-source',
       payloadData: JSON.stringify(testData),
       filters: [],
     };
@@ -669,7 +662,6 @@ describe('SpanDetailTable error handling', () => {
     const propsWithBadData = {
       hiddenColumns: [],
       openFlyout: jest.fn(),
-      dataSourceMDSId: 'test-source',
       payloadData: '{"hits": {"hits": [{"_source": {"spanId": null}}]}}',
       filters: [{ field: 'invalidField', value: 'test' }], // This might cause issues during filtering
     };
@@ -688,7 +680,6 @@ describe('SpanDetailTable error handling', () => {
     const propsWithMalformedJson = {
       hiddenColumns: [],
       openFlyout: jest.fn(),
-      dataSourceMDSId: 'test-source',
       payloadData: '{"hits": {"hits": [{"_source": {malformed json}',
       filters: [],
     };
@@ -705,7 +696,6 @@ describe('SpanDetailTable error handling', () => {
     const propsWithUndefinedData = {
       hiddenColumns: [],
       openFlyout: jest.fn(),
-      dataSourceMDSId: 'test-source',
       payloadData: undefined as any,
       filters: [],
     };
@@ -720,7 +710,6 @@ describe('SpanDetailTableHierarchy', () => {
   const defaultProps = {
     hiddenColumns: [],
     openFlyout: jest.fn(),
-    dataSourceMDSId: 'test-source',
     payloadData: JSON.stringify({
       hits: {
         hits: [

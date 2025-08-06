@@ -7,6 +7,7 @@ import './trace_details_view.scss';
 import React, { useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { TRACE_ID_FIELD_PATHS, SPAN_ID_FIELD_PATHS } from '../../../utils/trace_field_constants';
 import { SpanDetailPanel } from '../../../application/pages/traces/trace_details/public/traces/span_detail_panel';
 import { DocViewRenderProps } from '../../../types/doc_views_types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -20,20 +21,7 @@ import {
 import { generateColorMap } from '../../../application/pages/traces/trace_details/public/traces/generate_color_map';
 
 const extractTraceIdFromHit = (hit: any): string | null => {
-  // Try different possible field paths for trace ID
-  const possiblePaths = [
-    'traceId',
-    'trace_id',
-    'traceID',
-    '_source.traceId',
-    '_source.trace_id',
-    '_source.traceID',
-    'fields.traceId',
-    'fields.trace_id',
-    'fields.traceID',
-  ];
-
-  for (const path of possiblePaths) {
+  for (const path of TRACE_ID_FIELD_PATHS) {
     const value = getNestedValue(hit, path);
     if (value && typeof value === 'string') {
       return value;
@@ -44,20 +32,7 @@ const extractTraceIdFromHit = (hit: any): string | null => {
 };
 
 const extractSpanIdFromHit = (hit: any): string | null => {
-  // Try different possible field paths for span ID
-  const possiblePaths = [
-    'spanId',
-    'span_id',
-    'spanID',
-    '_source.spanId',
-    '_source.span_id',
-    '_source.spanID',
-    'fields.spanId',
-    'fields.span_id',
-    'fields.spanID',
-  ];
-
-  for (const path of possiblePaths) {
+  for (const path of SPAN_ID_FIELD_PATHS) {
     const value = getNestedValue(hit, path);
     if (value && typeof value === 'string') {
       return value;
@@ -71,35 +46,6 @@ const getNestedValue = (obj: any, path: string): any => {
   return path.split('.').reduce((current, key) => {
     return current && current[key] !== undefined ? current[key] : null;
   }, obj);
-};
-
-const extractIndexPattern = (indexPattern: any, dataset: any): string => {
-  // First try to get from dataset context (from the page's index pattern)
-  if (dataset?.title) {
-    return dataset.title;
-  }
-
-  // Second try to get from URL parameters
-  try {
-    const hash = window.location.hash;
-    const urlParams = new URLSearchParams(hash.split('?')[1]);
-    const qParam = urlParams.get('_q');
-    if (qParam) {
-      const decodedQ = decodeURIComponent(qParam);
-
-      // Look for dataset title in the URL parameters
-      const titleMatch = decodedQ.match(/title:'([^']+)'/);
-      if (titleMatch) {
-        return titleMatch[1];
-      }
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn('Failed to extract index pattern from URL:', error);
-  }
-
-  // Fallback to default pattern
-  return 'otel-v1-apm-span-*';
 };
 
 const isOnTracesFlavor = (): boolean => {
@@ -118,13 +64,10 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
     services: { data, chrome },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
-  // Get dataset context to access the current index pattern
   const { dataset } = useDatasetContext();
 
-  // Check if we're on traces flavor
   const isOnTraces = isOnTracesFlavor();
 
-  // Extract trace information from the hit
   const traceInfo = useMemo(() => {
     if (!isOnTraces) {
       return null;
@@ -137,24 +80,24 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
     }
 
     const spanId = extractSpanIdFromHit(hit);
-    const indexPatternTitle = extractIndexPattern(indexPattern, dataset);
+
+    const queryDataset = data?.query?.queryString?.getQuery()?.dataset;
+    const currentDataset = queryDataset || dataset;
 
     return {
       traceId,
       spanId,
       dataset: {
-        id: dataset?.id || 'default-dataset-id',
-        title: indexPatternTitle,
-        type: dataset?.type || 'INDEX_PATTERN',
-        timeFieldName: dataset?.timeFieldName,
+        id: currentDataset?.id || 'default-dataset-id',
+        title: currentDataset?.title || 'otel-v1-apm-span-*',
+        type: currentDataset?.type || 'INDEX_PATTERN',
+        timeFieldName: currentDataset?.timeFieldName,
       },
     };
-  }, [hit, indexPattern, dataset, isOnTraces]);
+  }, [hit, dataset, isOnTraces, data]);
 
-  // Create PPL service instance
   const pplService = useMemo(() => (data ? new TracePPLService(data) : undefined), [data]);
 
-  // Generate dynamic color map based on hits
   const colorMap = useMemo(() => {
     try {
       if (transformedHits.length > 0) {
@@ -242,7 +185,11 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
     <div className="exploreTraceDetailsView">
       {isLoading ? (
         <div className="exploreTraceDetailsView__loadingContainer">
-          <EuiText>Loading trace timeline...</EuiText>
+          <EuiText>
+            {i18n.translate('explore.docViews.traceDetails.loading', {
+              defaultMessage: 'Loading trace gantt chart...',
+            })}
+          </EuiText>
         </div>
       ) : transformedHits.length > 0 ? (
         <SpanDetailPanel
@@ -250,7 +197,6 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
           spanFilters={[]}
           payloadData={JSON.stringify(transformedHits)}
           isGanttChartLoading={false}
-          dataSourceMDSId={dataset?.id || ''}
           colorMap={colorMap}
           onSpanSelect={undefined}
           selectedSpanId={traceInfo.spanId || undefined}
@@ -259,7 +205,11 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
         />
       ) : (
         <div className="exploreTraceDetailsView__emptyState">
-          <EuiText color="subdued">No trace data available</EuiText>
+          <EuiText color="subdued">
+            {i18n.translate('explore.docViews.traceDetails.noData', {
+              defaultMessage: 'No trace data available',
+            })}
+          </EuiText>
         </div>
       )}
     </div>

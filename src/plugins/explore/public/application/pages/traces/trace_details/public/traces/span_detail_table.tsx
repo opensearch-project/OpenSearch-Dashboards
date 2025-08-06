@@ -40,7 +40,6 @@ interface SpanDetailTableProps {
   openFlyout: (spanId: string) => void;
   DSL?: any;
   setTotal?: (total: number) => void;
-  dataSourceMDSId: string;
   availableWidth?: number;
   payloadData: string;
   filters: Array<{
@@ -332,7 +331,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     } finally {
       setIsSpansTableDataLoading(false);
     }
-  }, [props.payloadData, props.DSL, props.dataSourceMDSId, props.filters]);
+  }, [props.payloadData, props.DSL, props.filters]);
 
   type SpanMap = Record<string, Span>;
 

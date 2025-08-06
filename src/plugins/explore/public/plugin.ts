@@ -115,7 +115,7 @@ export class ExplorePlugin
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
-      title: i18n.translate('explore.docViews.timeline.title', {
+      title: i18n.translate('explore.docViews.trace.timeline.title', {
         defaultMessage: 'Timeline',
       }),
       order: 5,

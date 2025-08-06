@@ -4,15 +4,11 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { Dataset } from '../../../../../../../data/common';
 
 export interface PPLQueryParams {
   traceId: string;
-  dataset: {
-    id: string;
-    title: string;
-    type: string;
-    timeFieldName?: string;
-  };
+  dataset: Dataset;
   limit?: number;
 }
 
@@ -36,12 +32,7 @@ export interface PPLQueryRequest {
 }
 
 // Build a PPL dataset object for queries
-export const buildPPLDataset = (dataset: {
-  id: string;
-  title: string;
-  type: string;
-  timeFieldName?: string;
-}) => ({
+export const buildPPLDataset = (dataset: Dataset) => ({
   id: dataset.id,
   title: dataset.title,
   type: dataset.type,
@@ -49,15 +40,7 @@ export const buildPPLDataset = (dataset: {
 });
 
 // Build a complete PPL query request object using dataset
-export const buildPPLQueryRequest = (
-  dataset: {
-    id: string;
-    title: string;
-    type: string;
-    timeFieldName?: string;
-  },
-  pplQuery: string
-): PPLQueryRequest => ({
+export const buildPPLQueryRequest = (dataset: Dataset, pplQuery: string): PPLQueryRequest => ({
   params: {
     index: dataset.title, // Use the dataset title as the index
     body: {
@@ -113,15 +96,7 @@ export class PPLService {
   }
 
   // Generic method to execute any PPL query using dataset
-  async executeQuery(
-    dataset: {
-      id: string;
-      title: string;
-      type: string;
-      timeFieldName?: string;
-    },
-    pplQuery: string
-  ): Promise<any> {
+  async executeQuery(dataset: Dataset, pplQuery: string): Promise<any> {
     if (!dataset || !pplQuery) {
       throw new Error('Missing required parameters for PPL query execution');
     }

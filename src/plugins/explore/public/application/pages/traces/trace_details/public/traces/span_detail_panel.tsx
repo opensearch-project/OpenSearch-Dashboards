@@ -16,6 +16,7 @@ import { ChromeStart } from 'opensearch-dashboards/public';
 import './span_detail_panel.scss';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { GanttChart } from '../gantt_chart_vega/gantt_chart_vega';
+import { GANTT_CHART_CONSTANTS } from '../gantt_chart_vega/gantt_constants';
 
 export interface TraceFilter {
   field: string;
@@ -27,16 +28,18 @@ export function SpanDetailPanel(props: {
   spanFilters: TraceFilter[];
   payloadData: string;
   isGanttChartLoading?: boolean;
-  dataSourceMDSId: string;
   colorMap?: Record<string, string>;
   onSpanSelect?: (spanId: string) => void;
   selectedSpanId?: string;
   activeView?: string;
   isEmbedded?: boolean;
 }) {
-  const { chrome, spanFilters, payloadData, onSpanSelect, dataSourceMDSId, colorMap } = props;
+  const { chrome, spanFilters, payloadData, onSpanSelect, colorMap } = props;
+
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [availableWidth, setAvailableWidth] = useState<number>(800); // Default width
+  const [availableWidth, setAvailableWidth] = useState<number>(
+    GANTT_CHART_CONSTANTS.DEFAULT_AVAILABLE_WIDTH
+  );
 
   // Always call useObservable, but use a default value for embedded mode
   const navDrawerLocked = useObservable(chrome.getIsNavDrawerLocked$()) || false;
@@ -45,7 +48,9 @@ export function SpanDetailPanel(props: {
   const updateAvailableWidth = useCallback(() => {
     if (containerRef.current) {
       const containerWidth = containerRef.current.getBoundingClientRect().width;
-      setAvailableWidth(containerWidth > 0 ? containerWidth : 800);
+      setAvailableWidth(
+        containerWidth > 0 ? containerWidth : GANTT_CHART_CONSTANTS.DEFAULT_AVAILABLE_WIDTH
+      );
     } else {
       // Account for the resizable container taking ~70% of the page
       const pageWidth = window.innerWidth;
@@ -60,12 +65,13 @@ export function SpanDetailPanel(props: {
       // In embedded mode, set width once based on container size and don't listen to resize events
       if (containerRef.current) {
         const containerWidth = containerRef.current.getBoundingClientRect().width;
-        setAvailableWidth(containerWidth > 0 ? containerWidth : 800);
+        setAvailableWidth(
+          containerWidth > 0 ? containerWidth : GANTT_CHART_CONSTANTS.DEFAULT_AVAILABLE_WIDTH
+        );
       }
-      return; // No cleanup needed, no listeners added
+      return;
     }
 
-    // Add resize listeners
     window.addEventListener('resize', updateAvailableWidth);
     updateAvailableWidth();
 
@@ -74,7 +80,6 @@ export function SpanDetailPanel(props: {
     };
   }, [updateAvailableWidth, props.isEmbedded]);
 
-  // Use activeView prop or default to timeline
   const currentView = props.activeView || 'timeline';
 
   const spanDetailTable = useMemo(
@@ -87,14 +92,13 @@ export function SpanDetailPanel(props: {
               onSpanSelect(spanId);
             }
           }}
-          dataSourceMDSId={dataSourceMDSId}
           availableWidth={availableWidth}
           payloadData={payloadData}
           filters={spanFilters}
         />
       </div>
     ),
-    [onSpanSelect, payloadData, spanFilters, availableWidth, dataSourceMDSId]
+    [onSpanSelect, payloadData, spanFilters, availableWidth]
   );
 
   const spanDetailTableHierarchy = useMemo(
@@ -107,14 +111,13 @@ export function SpanDetailPanel(props: {
               onSpanSelect(spanId);
             }
           }}
-          dataSourceMDSId={dataSourceMDSId}
           availableWidth={availableWidth}
           payloadData={payloadData}
           filters={spanFilters}
         />
       </div>
     ),
-    [onSpanSelect, payloadData, spanFilters, availableWidth, dataSourceMDSId]
+    [onSpanSelect, payloadData, spanFilters, availableWidth]
   );
 
   const parsedData = useMemo(() => {
