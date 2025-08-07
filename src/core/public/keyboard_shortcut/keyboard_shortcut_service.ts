@@ -16,7 +16,7 @@ import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from
  * @experimental
  */
 export class KeyboardShortcutService {
-  private shortcuts = new Map<string, ShortcutDefinition>();
+  private shortcuts = new Map<string, ShortcutDefinition[]>();
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -55,15 +55,23 @@ export class KeyboardShortcutService {
 
   private register(shortcuts: ShortcutDefinition[]): void {
     shortcuts.forEach((shortcut) => {
-      this.shortcuts.set(this.normalizeKeyboardShortcutString(shortcut.keys), shortcut);
+      const key = this.normalizeKeyboardShortcutString(shortcut.keys);
+      const existingShortcuts = this.shortcuts.get(key) || [];
+      existingShortcuts.push(shortcut);
+      this.shortcuts.set(key, existingShortcuts);
     });
   }
 
   private unregister(fullId: string): void {
-    for (const [key, shortcut] of this.shortcuts.entries()) {
-      if (this.getNamespacedIdForKeyboardShortcut(shortcut) === fullId) {
+    for (const [key, shortcuts] of this.shortcuts.entries()) {
+      const filteredShortcuts = shortcuts.filter(
+        (shortcut) => this.getNamespacedIdForKeyboardShortcut(shortcut) !== fullId
+      );
+
+      if (filteredShortcuts.length === 0) {
         this.shortcuts.delete(key);
-        return;
+      } else if (filteredShortcuts.length !== shortcuts.length) {
+        this.shortcuts.set(key, filteredShortcuts);
       }
     }
   }
@@ -90,20 +98,24 @@ export class KeyboardShortcutService {
     }
 
     const eventKeyString = this.getEventKeyString(event);
-    const shortcut = this.shortcuts.get(eventKeyString);
+    const shortcuts = this.shortcuts.get(eventKeyString);
 
-    if (shortcut) {
+    if (shortcuts && shortcuts.length > 0) {
       event.preventDefault();
 
-      try {
-        shortcut.execute();
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `Error executing keyboard shortcut ${this.getNamespacedIdForKeyboardShortcut(shortcut)}:`,
-          error
-        );
-      }
+      shortcuts.forEach((shortcut) => {
+        try {
+          shortcut.execute();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `Error executing keyboard shortcut ${this.getNamespacedIdForKeyboardShortcut(
+              shortcut
+            )}:`,
+            error
+          );
+        }
+      });
     }
   };
 
