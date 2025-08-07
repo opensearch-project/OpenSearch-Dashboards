@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisualizationBuilder } from './visualization_builder';
+import { VisualizationBuilder, resetVisualizationBuilder } from './visualization_builder';
 import { visualizationRegistry } from './visualization_registry';
 import { VisColumn, VisFieldType } from './types';
 
@@ -508,5 +508,16 @@ describe('VisualizationBuilder', () => {
     expect(builder.styles$.value).toBe(undefined);
     expect(builder.axesMapping$.value).toEqual({});
     expect(builder.currentChartType$.value).toBe(undefined);
+  });
+
+  describe('resetVisualizationBuilder', () => {
+    test('should not throw error when called', () => {
+      // Should not throw error regardless of singleton state
+      expect(() => resetVisualizationBuilder()).not.toThrow();
+
+      // Should be safe to call multiple times
+      expect(() => resetVisualizationBuilder()).not.toThrow();
+      expect(() => resetVisualizationBuilder()).not.toThrow();
+    });
   });
 });
