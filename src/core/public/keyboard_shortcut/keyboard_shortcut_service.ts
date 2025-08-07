@@ -99,7 +99,10 @@ export class KeyboardShortcutService {
         shortcut.execute();
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(`Error executing keyboard shortcut ${shortcut.id}:`, error);
+        console.error(
+          `Error executing keyboard shortcut ${this.getNamespacedIdForKeyboardShortcut(shortcut)}:`,
+          error
+        );
       }
     }
   };
