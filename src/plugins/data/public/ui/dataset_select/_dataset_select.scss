@@ -34,14 +34,28 @@
   &__contextMenu {
     width: 400px;
     padding: $euiSizeXS;
-    overflow-y: auto;
+    overflow-y: hidden;
+
+    &__title {
+      width: 100%;
+    }
 
     button:is([class*="euiContextMenuItem"]) {
-      font-weight: $euiFontWeightSemiBold;
+      padding: $euiSizeXS;
+
+      &:focus {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
     }
 
     button:is([class*="euiContextMenuPanelTitle"]) {
       padding: $euiSizeXS;
+
+      &:focus {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
     }
 
     span:is([class*="datasetDetails__defaultBadge"]) {
@@ -53,12 +67,6 @@
     width: 400px;
     padding: $euiSizeXS;
     overflow-y: auto;
-
-    span:is([class*="euiSelectableListItem__text"]) {
-      :first-child {
-        font-size: $euiFontSizeS;
-      }
-    }
   }
 
   &__searchContainer {

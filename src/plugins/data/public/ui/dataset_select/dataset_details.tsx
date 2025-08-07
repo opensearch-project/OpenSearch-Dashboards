@@ -50,12 +50,12 @@ export const DatasetDetailsHeader: FC<DatasetDetailsProps> = ({
       grow={true}
     >
       <EuiSplitPanel.Inner paddingSize="none" grow={true}>
-        <EuiTitle size="xxxs" className="datasetDetails__title eui-textTruncate">
+        <EuiTitle size="xxxs" className="datasetDetails__title">
           <>{datasetTitle}</>
         </EuiTitle>
       </EuiSplitPanel.Inner>
       {isDefault && (
-        <EuiSplitPanel.Inner paddingSize="none">
+        <EuiSplitPanel.Inner paddingSize="none" grow={true}>
           <EuiBadge className="datasetDetails__defaultBadge" data-test-subj="datasetDetailsDefault">
             {i18n.translate('data.datasetDetails.defaultLabel', {
               defaultMessage: 'Default',
@@ -166,16 +166,9 @@ export const DatasetDetailsBody: FC<DatasetDetailsProps> = ({ dataset, className
             </EuiText>
           ),
           description: (
-            <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  size="xs"
-                  className="datasetDetails__description datasetDetails__textTruncate"
-                >
-                  {timeFieldName}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiText size="xs" className="datasetDetails__description datasetDetails__textTruncate">
+              {timeFieldName}
+            </EuiText>
           ),
         },
       ]}
