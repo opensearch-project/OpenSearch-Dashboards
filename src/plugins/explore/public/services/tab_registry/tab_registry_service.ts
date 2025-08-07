@@ -75,4 +75,11 @@ export class TabRegistryService {
       return (a.order || 100) - (b.order || 100);
     });
   }
+
+  /*
+   * This is needed when switching between different flavors
+   */
+  public clearTabs(): void {
+    this.tabs.clear();
+  }
 }

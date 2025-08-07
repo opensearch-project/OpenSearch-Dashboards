@@ -319,7 +319,7 @@ export class ExplorePlugin
         services.scopedHistory = this.currentHistory;
 
         // Register tabs with the tab registry
-        registerTabs(services);
+        registerTabs(services, flavor);
 
         // Instantiate the store
         const { store, unsubscribe: unsubscribeStore, reset: resetStore } = await getPreloadedStore(
@@ -384,13 +384,14 @@ export class ExplorePlugin
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
-      // uncomment when traces and metrics are ready for launch
-      /* {
+      {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
+      // uncomment when metrics is ready for launch
+      /*
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         category: undefined,

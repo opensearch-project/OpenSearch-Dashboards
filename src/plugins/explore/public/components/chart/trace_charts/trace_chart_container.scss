@@ -1,0 +1,82 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreTraceCharts {
+  display: block;
+  padding: $euiSizeM;
+
+  .exploreTraceChart {
+    background: $euiColorEmptyShade;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+    padding: $euiSizeM;
+    margin-bottom: $euiSizeM;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .exploreTraceChart__content {
+      min-height: 200px;
+
+      .exploreHistogram {
+        height: 200px;
+      }
+    }
+
+    .exploreTraceChart__title {
+      margin: 0 0 $euiSizeS 0;
+      font-weight: $euiFontWeightSemiBold;
+      color: $euiTextColor;
+    }
+  }
+
+  .exploreTraceChart--error {
+    .exploreTraceChart__content {
+      .vis-color {
+        fill: $euiColorDanger;
+        stroke: $euiColorDanger;
+      }
+    }
+  }
+
+  .exploreTraceChart--latency {
+    .exploreTraceChart__content {
+      .vis-color {
+        fill: $euiColorWarning;
+        stroke: $euiColorWarning;
+      }
+    }
+  }
+
+  .exploreTraceChart--throughput {
+    .exploreTraceChart__content {
+      .vis-color {
+        fill: $euiColorSuccess;
+        stroke: $euiColorSuccess;
+      }
+    }
+  }
+}
+
+// Responsive design
+@include euiBreakpoint("xs", "s") {
+  .exploreTraceCharts {
+    padding: $euiSizeS;
+
+    .exploreTraceChart {
+      padding: $euiSizeS;
+      margin-bottom: $euiSizeS;
+
+      .exploreTraceChart__content {
+        min-height: 150px;
+
+        .exploreHistogram {
+          height: 150px;
+        }
+      }
+    }
+  }
+}
