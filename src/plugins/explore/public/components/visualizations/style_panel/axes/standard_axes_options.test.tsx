@@ -288,6 +288,35 @@ describe('AllAxesOptions', () => {
     );
   });
 
+  it('updates label rotation to horizontal', () => {
+    const modifiedAxes = [
+      {
+        ...mockStandardAxes[0],
+        labels: { ...mockStandardAxes[0].labels, rotate: -45 },
+      },
+      mockStandardAxes[1],
+    ];
+
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} standardAxes={modifiedAxes} />
+      </Provider>
+    );
+
+    // Find the alignment select and change it to horizontal
+    const alignmentSelect = screen.getAllByRole('combobox')[0];
+    fireEvent.change(alignmentSelect, { target: { value: 'horizontal' } });
+
+    // Check that onStandardAxesChange was called with the updated rotation
+    expect(defaultProps.onStandardAxesChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          labels: expect.objectContaining({ rotate: 0 }),
+        }),
+      ])
+    );
+  });
+
   it('updates truncate value', async () => {
     render(
       <Provider store={store}>
