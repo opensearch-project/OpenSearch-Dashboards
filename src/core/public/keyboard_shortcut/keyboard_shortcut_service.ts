@@ -53,16 +53,10 @@ export class KeyboardShortcutService {
     }${event.metaKey ? 'cmd+' : ''}${this.normalizeKeyboardShortcutString(event.key)}`;
   };
 
-  private register(shortcuts: ShortcutDefinition[]): string[] {
-    const registeredIds: string[] = [];
-
+  private register(shortcuts: ShortcutDefinition[]): void {
     shortcuts.forEach((shortcut) => {
-      const fullId = this.getNamespacedIdForKeyboardShortcut(shortcut);
       this.shortcuts.set(this.normalizeKeyboardShortcutString(shortcut.keys), shortcut);
-      registeredIds.push(fullId);
     });
-
-    return registeredIds;
   }
 
   private unregister(fullId: string): void {
@@ -74,23 +68,24 @@ export class KeyboardShortcutService {
     }
   }
 
-  private isTextInputActive(target: EventTarget | null): boolean {
-    if (!target || !(target as HTMLElement).tagName) return false;
+  private isHTMLElement(target: EventTarget | null): target is HTMLElement {
+    return target !== null && 'tagName' in target;
+  }
 
-    const element = target as HTMLElement;
-    const tagName = this.normalizeKeyboardShortcutString(element.tagName);
+  private shouldIgnoreKeyboardEventForTarget(target: EventTarget | null): boolean {
+    if (!this.isHTMLElement(target)) return false;
 
-    if (tagName === 'input' || tagName === 'textarea') {
+    const tagName = target.tagName;
+
+    if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
       return true;
     }
-
-    if (element.contentEditable === 'true') return true;
 
     return false;
   }
 
   private handleKeyboardEvent = (event: KeyboardEvent): void => {
-    if (this.isTextInputActive(event.target)) {
+    if (this.shouldIgnoreKeyboardEventForTarget(event.target)) {
       return;
     }
 
@@ -99,10 +94,9 @@ export class KeyboardShortcutService {
 
     if (shortcut) {
       event.preventDefault();
-      event.stopPropagation();
 
       try {
-        shortcut.execute(event);
+        shortcut.execute();
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(`Error executing keyboard shortcut ${shortcut.id}:`, error);

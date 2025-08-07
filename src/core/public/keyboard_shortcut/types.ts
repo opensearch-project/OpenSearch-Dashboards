@@ -10,11 +10,11 @@
  */
 
 export interface KeyboardShortcutSetup {
-  register(shortcuts: ShortcutDefinition[]): string[];
+  register(shortcuts: ShortcutDefinition[]): void;
 }
 
 export interface KeyboardShortcutStart {
-  register(shortcuts: ShortcutDefinition[]): string[];
+  register(shortcuts: ShortcutDefinition[]): void;
   unregister(id: string): void;
 }
 
@@ -56,8 +56,7 @@ export interface ShortcutDefinition {
 
   /**
    * Function to execute when the shortcut is triggered
-   * Receives the original KeyboardEvent for context
    * Can be async for operations that require API calls
    */
-  execute: (event: KeyboardEvent) => void | Promise<void>;
+  execute: () => void | Promise<void>;
 }
