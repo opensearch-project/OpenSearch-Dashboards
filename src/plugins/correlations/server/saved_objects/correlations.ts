@@ -20,15 +20,7 @@ export const correlationsSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.correlationType || `Correlation ${obj.id}`;
-    },
-    getInAppUrl(obj) {
-      return {
-        path: `/app/management/opensearch-dashboards/objects/correlations/${encodeURIComponent(
-          obj.id
-        )}`,
-        uiCapabilitiesPath: 'management.opensearchDashboards.objects',
-      };
+      return obj.attributes.correlationType;
     },
   },
   mappings: {
