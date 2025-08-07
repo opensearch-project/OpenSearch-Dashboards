@@ -120,9 +120,6 @@ describe('FacetValue', () => {
     const countElement = container.querySelector('.exploreSidebarFacetValue__count');
     expect(countElement).toBeInTheDocument();
 
-    const buttonsContainer = container.querySelector('.exploreSidebarFacetValue__buttons');
-    expect(buttonsContainer).toBeInTheDocument();
-
     const actionButton = container.querySelector('.exploreSidebarFacetValue__actionButton');
     expect(actionButton).toBeInTheDocument();
   });

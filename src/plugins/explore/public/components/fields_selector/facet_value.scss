@@ -8,19 +8,11 @@
     display: block;
   }
 
-  &__buttons {
-    display: none;
-  }
-
-  // On hover or focus-within, hide count and show buttons
+  // On hover or focus-within, hide count
   &:hover,
   &:focus-within {
     .exploreSidebarFacetValue__count {
       display: none;
-    }
-
-    .exploreSidebarFacetValue__buttons {
-      display: block;
     }
   }
 
