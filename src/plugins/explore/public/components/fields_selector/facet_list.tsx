@@ -37,7 +37,7 @@ export const FacetList = ({
         iconType={expanded ? 'arrowDown' : 'arrowRight'}
         onClick={() => setExpanded(!expanded)}
         size="xs"
-        className="exploreSideBarFieldGroup"
+        className="exploreSideBar_fieldGroup"
         data-test-subj="exploreSideBarFieldGroupButton"
         aria-label={title}
         isLoading={!!selectedIndexPattern.fieldsLoading}
