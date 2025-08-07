@@ -11,6 +11,7 @@
 
 import { SavedObjectsType } from '../../../../core/server';
 
+// @experimental This API is experimental and might change in future releases.
 export const correlationsSavedObjectType: SavedObjectsType = {
   name: 'correlations',
   hidden: false,
@@ -20,7 +21,7 @@ export const correlationsSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.correlationType;
+      return `Correlation ${obj.id} - ${obj.attributes.correlationType}`;
     },
   },
   mappings: {
