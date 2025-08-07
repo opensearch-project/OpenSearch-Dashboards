@@ -49,7 +49,7 @@ export const Configurator = ({
   const languages = supportedLanguages.filter(
     (langId) =>
       !services.appName ||
-      languageService.getLanguage(langId)?.editorSupportedAppNames?.includes(services.appName)
+      languageService.getLanguage(langId)?.supportedAppNames?.includes(services.appName)
   );
   const [shouldSelectIndexedView, setShouldSelectIndexedView] = useState(false);
 
