@@ -72,6 +72,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               numericalColumns={numericalColumns}
               categoricalColumns={categoricalColumns}
               dateColumns={dateColumns}
+              axisColumnMappings={axisColumnMappings}
             />
           </EuiFlexItem>
 

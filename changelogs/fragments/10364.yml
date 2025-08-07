@@ -1,0 +1,2 @@
+test:
+- Cypress tests for new discover saved search ([#10364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10364))
