@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import { SavedObjectsType } from 'opensearch-dashboards/server';
+import { SavedObjectsType } from '../../../../core/server';
 
 export const correlationsSavedObjectType: SavedObjectsType = {
   name: 'correlations',
@@ -25,15 +25,6 @@ export const correlationsSavedObjectType: SavedObjectsType = {
   },
   mappings: {
     properties: {
-      title: {
-        type: 'text',
-      },
-      description: {
-        type: 'text',
-      },
-      correlationType: {
-        type: 'keyword',
-      },
       version: {
         type: 'keyword',
       },
