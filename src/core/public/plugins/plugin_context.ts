@@ -123,7 +123,7 @@ export function createPluginSetupContext<
     },
     getStartServices: () => plugin.startDependencies,
     workspaces: deps.workspaces,
-    keyboardShortcuts: deps.keyboardShortcuts,
+    keyboardShortcut: deps.keyboardShortcut,
   };
 }
 
@@ -178,6 +178,6 @@ export function createPluginStartContext<
     },
     fatalErrors: deps.fatalErrors,
     workspaces: deps.workspaces,
-    keyboardShortcuts: deps.keyboardShortcuts,
+    keyboardShortcut: deps.keyboardShortcut,
   };
 }

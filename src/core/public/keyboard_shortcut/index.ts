@@ -9,12 +9,5 @@
  * GitHub history for details.
  */
 
-// Phase 1.8 Index File Setup - Service exports
-
-export { KeyboardShortcutsService } from './keyboard_shortcuts_service';
-export type {
-  KeyboardShortcutsSetup,
-  KeyboardShortcutsStart,
-  ShortcutDefinition,
-  ShortcutHandler,
-} from './types';
+export { KeyboardShortcutService } from './keyboard_shortcut_service';
+export type { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from './types';

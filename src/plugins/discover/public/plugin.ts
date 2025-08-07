@@ -418,9 +418,8 @@ export class DiscoverPlugin
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
     setUiActions(plugins.uiActions);
 
-    // Register discover navigation shortcuts
-    if (core.keyboardShortcuts) {
-      core.keyboardShortcuts.register([
+    if (core.keyboardShortcut) {
+      core.keyboardShortcut.register([
         {
           id: 'nav.discover',
           name: 'Go to Discover',

@@ -55,7 +55,7 @@ import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { UiSettingsService } from './ui_settings';
 import { WorkspacesService } from './workspace';
-import { KeyboardShortcutsService } from './keyboard_shortcuts';
+import { KeyboardShortcutService } from './keyboard_shortcut';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -109,7 +109,7 @@ export class CoreSystem {
   private readonly context: ContextService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreApp;
-  private readonly keyboardShortcuts: KeyboardShortcutsService;
+  private readonly keyboardShortcut: KeyboardShortcutService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
@@ -149,7 +149,7 @@ export class CoreSystem {
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
-    this.keyboardShortcuts = new KeyboardShortcutsService();
+    this.keyboardShortcut = new KeyboardShortcutService();
   }
 
   public async setup() {
@@ -175,7 +175,7 @@ export class CoreSystem {
       const application = this.application.setup({ context, http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
       const chrome = this.chrome.setup({ uiSettings });
-      const keyboardShortcuts = this.keyboardShortcuts.setup();
+      const keyboardShortcut = this.keyboardShortcut.setup();
 
       const core: InternalCoreSetup = {
         application,
@@ -187,7 +187,7 @@ export class CoreSystem {
         notifications,
         uiSettings,
         workspaces,
-        keyboardShortcuts,
+        keyboardShortcut,
       };
 
       // Services that do not expose contracts at setup
@@ -243,7 +243,7 @@ export class CoreSystem {
         overlays,
         workspaces,
       });
-      const keyboardShortcuts = this.keyboardShortcuts.start();
+      const keyboardShortcut = this.keyboardShortcut.start();
 
       this.coreApp.start({ application, http, notifications, uiSettings });
 
@@ -274,7 +274,7 @@ export class CoreSystem {
         uiSettings,
         fatalErrors,
         workspaces,
-        keyboardShortcuts,
+        keyboardShortcut,
       };
 
       await this.plugins.start(core);
@@ -327,7 +327,7 @@ export class CoreSystem {
     this.i18n.stop();
     this.application.stop();
     this.workspaces.stop();
-    this.keyboardShortcuts.stop();
+    this.keyboardShortcut.stop();
     this.rootDomElement.textContent = '';
   }
 }

@@ -298,33 +298,6 @@ export class VisualizePlugin
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);
 
-    // Register visualization navigation shortcuts
-    if (core.keyboardShortcuts) {
-      core.keyboardShortcuts.register([
-        {
-          id: 'nav.visualizations',
-          name: 'Go to Visualizations',
-          pluginId: 'visualizations',
-          category: 'navigation',
-          keys: 'shift+v',
-          execute: () => {
-            // Only enable shortcut when workspace is selected
-            const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
-            const isInitialized = core.workspaces.initialized$.getValue();
-
-            if (!isInitialized || !currentWorkspace) {
-              // eslint-disable-next-line no-console
-              console.log('Visualizations shortcut disabled: no workspace selected');
-              return;
-            }
-
-            // eslint-disable-next-line no-console
-            console.log('Pressed shift+g - Navigating to visualization!');
-            core.application.navigateToApp('visualize');
-          },
-        },
-      ]);
-    }
     if (plugins.share) {
       setShareService(plugins.share);
     }
