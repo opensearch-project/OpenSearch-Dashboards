@@ -33,7 +33,7 @@ export async function saveSavedExplore({
   openAfterSave: boolean;
   newCopyOnSave?: boolean;
 }): Promise<SaveResult | undefined> {
-  const { toastNotifications, chrome, history, store } = services;
+  const { toastNotifications, chrome, store } = services;
 
   const currentTitle = savedExplore.title;
   savedExplore.title = newTitle;
@@ -77,7 +77,7 @@ export async function saveSavedExplore({
       });
 
       if (id !== originalId) {
-        history().push(`/view/${encodeURIComponent(id)}`);
+        services.scopedHistory?.push(`#/view/${encodeURIComponent(id)}`);
       } else {
         // Update browser title and breadcrumbs
         chrome.docTitle.change(newTitle);

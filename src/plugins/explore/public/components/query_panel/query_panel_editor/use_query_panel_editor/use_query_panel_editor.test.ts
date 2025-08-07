@@ -104,6 +104,8 @@ import {
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
   selectQueryLanguage,
+  selectQueryString,
+  selectIsQueryEditorDirty,
 } from '../../../../application/utils/state_management/selectors';
 
 const mockUseSelector = jest.mocked(useSelector);
@@ -624,6 +626,40 @@ describe('useQueryPanelEditor', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
 
       expect(result.current.promptIsTyping).toBe(false);
+    });
+  });
+
+  describe('PPL language switching', () => {
+    it('should return PPL languageId when in query mode', () => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsPromptEditorMode) return false;
+        if (selector === selectQueryLanguage) return 'PPL';
+        if (selector === selectPromptModeIsAvailable) return true;
+        if (selector === selectQueryString) return '';
+        if (selector === selectIsQueryEditorDirty) return false;
+        return '';
+      });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      expect(result.current.languageId).toBe('PPL');
+      expect(result.current.isPromptMode).toBe(false);
+    });
+
+    it('should return plaintext languageId when in AI/prompt mode', () => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsPromptEditorMode) return true;
+        if (selector === selectQueryLanguage) return 'PPL';
+        if (selector === selectPromptModeIsAvailable) return true;
+        if (selector === selectQueryString) return '';
+        if (selector === selectIsQueryEditorDirty) return false;
+        return '';
+      });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      expect(result.current.languageId).toBe('plaintext');
+      expect(result.current.isPromptMode).toBe(true);
     });
   });
 });

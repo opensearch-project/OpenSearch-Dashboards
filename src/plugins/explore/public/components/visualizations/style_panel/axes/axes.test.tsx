@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { AxesOptions } from './axes';
-import { CategoryAxis, ValueAxis, VisColumn, VisFieldType, Positions } from '../../types';
+import { CategoryAxis, ValueAxis, VisColumn, VisFieldType, Positions, AxisRole } from '../../types';
 
 // Mock the debounced value hooks
 jest.mock('../../utils/use_debounced_value', () => {
@@ -123,6 +123,11 @@ describe('AxesOptions', () => {
     numericalColumns: mockNumericalColumns,
     categoricalColumns: mockCategoricalColumns,
     dateColumns: mockDateColumns,
+    axisColumnMappings: {
+      [AxisRole.X]: mockCategoricalColumns[0],
+      [AxisRole.Y]: mockNumericalColumns[0],
+      [AxisRole.Y_SECOND]: undefined,
+    },
   };
 
   const rule2Props = {
@@ -186,6 +191,11 @@ describe('AxesOptions', () => {
         },
       },
     ] as ValueAxis[],
+    axisColumnMappings: {
+      [AxisRole.X]: mockDateColumns[0],
+      [AxisRole.Y]: mockNumericalColumns[0],
+      [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+    },
   };
 
   beforeEach(() => {
@@ -423,6 +433,9 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumns[0],
+      },
     };
 
     render(<AxesOptions {...propsWithEmptyTitle} />);
@@ -441,6 +454,9 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {
+        [AxisRole.Y]: mockNumericalColumns[0],
+      },
     };
 
     render(<AxesOptions {...propsWithEmptyTitle} />);
@@ -448,6 +464,44 @@ describe('AxesOptions', () => {
     // Check that the title input has the default value (from the first numerical column)
     const titleInput = screen.getAllByRole('textbox')[1];
     expect(titleInput).toHaveValue('count');
+  });
+
+  it('uses default value axis title for second axis when title text is empty', () => {
+    const propsWithEmptyTitle = {
+      ...defaultProps,
+      valueAxes: [
+        mockValueAxes[0],
+        {
+          id: 'ValueAxis-2',
+          name: 'RightAxis-1',
+          type: 'value' as const,
+          position: Positions.RIGHT as Positions.RIGHT,
+          show: true,
+          labels: {
+            show: true,
+            rotate: 0,
+            filter: false,
+            truncate: 100,
+          },
+          grid: {
+            showLines: true,
+          },
+          title: {
+            text: '',
+          },
+        } as ValueAxis,
+      ],
+      axisColumnMappings: {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      },
+    };
+
+    render(<AxesOptions {...propsWithEmptyTitle} />);
+
+    // Check that the title input for the second axis has the default value (from the second numerical column)
+    const titleInput = screen.getAllByRole('textbox')[2];
+    expect(titleInput).toHaveValue('price');
   });
 
   it('handles Rule 2 scenario with incomplete value axes', () => {
@@ -495,6 +549,11 @@ describe('AxesOptions', () => {
           },
         },
       ] as ValueAxis[],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      },
     };
 
     render(<AxesOptions {...newRule2Props} />);
@@ -576,6 +635,11 @@ describe('AxesOptions', () => {
           },
         },
       ] as ValueAxis[],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      },
     };
 
     render(<AxesOptions {...newRule2Props} />);
@@ -604,6 +668,11 @@ describe('AxesOptions', () => {
       numericalColumns: [],
       categoricalColumns: [],
       dateColumns: [],
+      axisColumnMappings: {
+        [AxisRole.X]: undefined,
+        [AxisRole.Y]: undefined,
+        [AxisRole.Y_SECOND]: undefined,
+      },
     };
 
     // @ts-ignore - Testing with null props
@@ -623,6 +692,11 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {
+        [AxisRole.X]: undefined,
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: undefined,
+      },
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
@@ -642,6 +716,11 @@ describe('AxesOptions', () => {
           title: { text: '' },
         },
       ],
+      axisColumnMappings: {
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.Y]: undefined,
+        [AxisRole.Y_SECOND]: undefined,
+      },
     };
 
     render(<AxesOptions {...propsWithNoColumns} />);
@@ -675,6 +754,11 @@ describe('AxesOptions', () => {
           },
         } as CategoryAxis,
       ],
+      axisColumnMappings: {
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: undefined,
+      },
     };
 
     render(<AxesOptions {...propsWithMultipleAxes} />);
@@ -713,6 +797,11 @@ describe('AxesOptions', () => {
           },
         } as ValueAxis,
       ],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      },
     };
 
     render(<AxesOptions {...propsWithMultipleAxes} />);
@@ -821,7 +910,17 @@ describe('AxesOptions', () => {
       },
     ];
 
-    render(<AxesOptions {...defaultProps} categoryAxes={mockCategoryAxesWithVerticalRotation} />);
+    render(
+      <AxesOptions
+        {...defaultProps}
+        categoryAxes={mockCategoryAxesWithVerticalRotation}
+        axisColumnMappings={{
+          [AxisRole.X]: mockCategoricalColumns[0],
+          [AxisRole.Y]: mockNumericalColumns[0],
+          [AxisRole.Y_SECOND]: undefined,
+        }}
+      />
+    );
 
     const select = screen.getByTestId('xLinesAlignment');
     expect(select).toHaveValue('vertical');
@@ -838,7 +937,17 @@ describe('AxesOptions', () => {
       },
     ];
 
-    render(<AxesOptions {...defaultProps} valueAxes={mockValueAxesWithVerticalRotation} />);
+    render(
+      <AxesOptions
+        {...defaultProps}
+        valueAxes={mockValueAxesWithVerticalRotation}
+        axisColumnMappings={{
+          [AxisRole.X]: mockCategoricalColumns[0],
+          [AxisRole.Y]: mockNumericalColumns[0],
+          [AxisRole.Y_SECOND]: undefined,
+        }}
+      />
+    );
 
     const select = screen.getByTestId('singleyLinesAlignment');
     expect(select).toHaveValue('vertical');

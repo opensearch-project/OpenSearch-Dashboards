@@ -13,10 +13,6 @@ import {
   generateBaseConfiguration,
   generateAllTestConfigurations,
 } from '../../../../../../utils/apps/explore/shared';
-import {
-  generateQueryTestConfigurations,
-  LanguageConfigs,
-} from '../../../../../../utils/apps/explore/queries';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
@@ -46,36 +42,6 @@ export const runQueryTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    generateQueryTestConfigurations(generateBaseConfiguration, {
-      languageConfig: LanguageConfigs.SQL_PPL,
-    }).forEach((config) => {
-      describe(`${config.testName}`, () => {
-        // TODO: This is no longer relevant in explore, but should we test the auto-resize capability?
-        it.skip('should handle query editor expand/collapse state correctly', () => {
-          // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-
-          // First check the default expanded state
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
-          // Verify expanded state
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('not.exist');
-
-          // Verify expanded state persists
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('not.exist');
-
-          // Collapse and verify
-          cy.getElementByTestId('osdQueryEditorLanguageToggle').click(); // collapse
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('not.exist');
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
-
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('not.exist');
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
-        });
-      });
-    });
-
     generateAllTestConfigurations(generateBaseConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
@@ -90,13 +56,13 @@ export const runQueryTests = () => {
 
             // If popover is already open, close it first
             if (isPopoverOpen) {
-              cy.getElementByTestId('exploreSelectedLanguage').click();
+              cy.getElementByTestId('exploreLanguageReference').click();
               // Verify it's closed
               cy.get('.euiPopover__panel-isOpen').should('not.exist');
             }
 
             // Now click to open
-            cy.getElementByTestId('exploreSelectedLanguage').click();
+            cy.getElementByTestId('exploreLanguageReference').click();
 
             // Verify popover appears with title
             cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
