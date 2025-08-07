@@ -10,6 +10,8 @@ import {
   swapAxes,
   getSwappedAxes,
   getSwappedAxisRole,
+  getSchemaByAxis,
+  inferTimeUnitFromTimestamps,
 } from './utils';
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
 
@@ -218,5 +220,89 @@ describe('getSwappedAxisRole', () => {
 
     expect(result[0]?.schema).toBe(VisFieldType.Numerical);
     expect(result[1]?.schema).toBe(VisFieldType.Categorical);
+  });
+});
+
+describe('getSchemaByAxis', () => {
+  const baseAxis = {
+    id: 1,
+    name: 'Test Axis',
+    column: 'test',
+    validValuesCount: 10,
+    uniqueValuesCount: 10,
+  };
+
+  it('returns quantitative for Numerical schema', () => {
+    const axis = { ...baseAxis, schema: VisFieldType.Numerical };
+    expect(getSchemaByAxis(axis)).toBe('quantitative');
+  });
+
+  it('returns nominal for Categorical schema', () => {
+    const axis = { ...baseAxis, schema: VisFieldType.Categorical };
+    expect(getSchemaByAxis(axis)).toBe('nominal');
+  });
+
+  it('returns temporal for Date schema', () => {
+    const axis = { ...baseAxis, schema: VisFieldType.Date };
+    expect(getSchemaByAxis(axis)).toBe('temporal');
+  });
+
+  it('returns unknown for undefined or invalid schema', () => {
+    expect(getSchemaByAxis(undefined)).toBe('unknown');
+    const axis = { ...baseAxis, schema: 'invalid' as any };
+    expect(getSchemaByAxis(axis)).toBe('unknown');
+  });
+});
+
+describe('inferTimeUnitFromTimestamps', () => {
+  const field = 'timestamp';
+
+  it('returns second for less than 2 timestamps', () => {
+    const data = [{ timestamp: '2023-01-01' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('second');
+  });
+
+  it('returns second for differences less than 60 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:00:30' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('second');
+  });
+
+  it('returns minute for differences less than 3600 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:01:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('minute');
+  });
+
+  it('returns hour for differences less than 86400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T01:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('hour');
+  });
+
+  it('returns day for differences less than 604800 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-02T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('day');
+  });
+
+  it('returns week for differences less than 2678400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-08T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('week');
+  });
+
+  it('returns month for differences less than 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-02-01T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('month');
+  });
+
+  it('returns year for differences greater than or equal to 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2024-01-01T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('year');
+  });
+
+  it('handles invalid timestamps by filtering them out', () => {
+    const data = [
+      { timestamp: 'invalid' },
+      { timestamp: '2023-01-01T00:00:00' },
+      { timestamp: '2023-01-01T00:00:30' },
+    ];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('second');
   });
 });

@@ -598,6 +598,22 @@ describe('bar to_expression', () => {
         createTimeBarChart(mockData, [mockNumericalColumn], [], defaultBarChartStyles);
       }).toThrow('Time bar chart requires at least one numerical column and one date column');
     });
+
+    test('falls back to default tooltip format when dateField is missing', () => {
+      const fallbackMapping = {
+        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+      const result = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        defaultBarChartStyles,
+        fallbackMapping
+      );
+      const tooltip = result.layer[0].encoding.tooltip;
+      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+    });
   });
 
   describe('createGroupedTimeBarChart', () => {
@@ -807,6 +823,27 @@ describe('bar to_expression', () => {
       }).toThrow(
         'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
       );
+    });
+
+    test('falls back to default tooltip format when dateField is missing', () => {
+      const fallbackMapping = {
+        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+      };
+      const result = createGroupedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [mockDateColumn],
+        defaultBarChartStyles,
+        fallbackMapping
+      );
+      const tooltip = result.encoding.tooltip;
+      expect(tooltip[0].field).toBeUndefined();
+      expect(tooltip[1].field).toBe('category');
+      expect(tooltip[2].field).toBe('count');
+      expect(tooltip[2].format).toBeUndefined();
     });
   });
 
@@ -1021,6 +1058,25 @@ describe('bar to_expression', () => {
       }).toThrow(
         'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
       );
+    });
+
+    test('falls back to default tooltip format when dateField is missing', () => {
+      const fallbackMapping = {
+        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.FACET]: mockCategoricalColumn2,
+      };
+      const result = createFacetedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [mockDateColumn],
+        defaultBarChartStyles,
+        fallbackMapping
+      );
+      const tooltip = result.spec.layer[0].encoding.tooltip;
+      expect(tooltip[1].format).toBe('%b %d, %Y %H:%M:%S');
     });
   });
 });
