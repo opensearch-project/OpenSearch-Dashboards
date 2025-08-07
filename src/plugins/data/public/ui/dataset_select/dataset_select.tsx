@@ -58,7 +58,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
   const [datasets, setDatasets] = useState<DetailedDataset[]>([]);
   const [selectedDataset, setSelectedDataset] = useState<DetailedDataset | undefined>();
   const [defaultDatasetId, setDefaultDatasetId] = useState<string | undefined>();
-  const [currentPanelId, setCurrentPanelId] = useState(0);
   const { data, overlays } = services;
   const {
     dataViews,
@@ -143,7 +142,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
 
   const closePopover = useCallback(() => {
     setIsOpen(false);
-    setCurrentPanelId(0);
   }, []);
 
   const options = useMemo(() => {
@@ -232,20 +230,101 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
           ),
           panel: 1,
           icon: <EuiIcon type={datasetIcon} size="s" />,
-          onClick: () => setCurrentPanelId(1),
+        },
+        {
+          name: (
+            <EuiSelectable
+              className="datasetSelect__selectable"
+              data-test-subj="datasetSelectSelectable"
+              options={options}
+              singleSelection="always"
+              searchable={true}
+              onChange={handleOptionChange}
+              renderOption={(option, searchValue) => {
+                // Searchable label is prepended with the label (title/display name) for better searching, this will strip it out.
+                const description =
+                  option.searchableLabel && option.searchableLabel !== option.label
+                    ? option.searchableLabel.slice(option.label.length)
+                    : undefined;
+
+                return (
+                  <EuiToolTip
+                    display="block"
+                    className="datasetSelect__tooltip"
+                    position="right"
+                    content={
+                      <DatasetDetails
+                        dataset={option.key ? datasets.find((d) => d.id === option.key) : undefined}
+                        isDefault={option.key ? option.key === defaultDatasetId : false}
+                      />
+                    }
+                  >
+                    <EuiDescriptionList
+                      compressed
+                      className="datasetSelect__optionList"
+                      titleProps={{
+                        className: 'datasetSelect__optionTitle',
+                      }}
+                      listItems={
+                        description
+                          ? [
+                              {
+                                title: (
+                                  <EuiText size="s">
+                                    <small>
+                                      <EuiHighlight search={searchValue}>
+                                        {option.label}
+                                      </EuiHighlight>
+                                    </small>
+                                  </EuiText>
+                                ),
+                                description: (
+                                  <EuiText size="xs" color="subdued">
+                                    <small>
+                                      <EuiHighlight search={searchValue}>
+                                        {description}
+                                      </EuiHighlight>
+                                    </small>
+                                  </EuiText>
+                                ),
+                              },
+                            ]
+                          : []
+                      }
+                    />
+                  </EuiToolTip>
+                );
+              }}
+              listProps={{
+                showIcons: false,
+                rowHeight: 50,
+              }}
+              searchProps={{
+                placeholder: i18n.translate('data.datasetSelect.searchPlaceholder', {
+                  defaultMessage: 'Search',
+                }),
+                compressed: true,
+              }}
+            >
+              {(list, search) => (
+                <>
+                  <div className="datasetSelect__searchContainer">{search}</div>
+                  {list}
+                </>
+              )}
+            </EuiSelectable>
+          ),
         },
       ],
     },
     {
       id: 1,
       title: (
-        <div onClick={() => setCurrentPanelId(0)} onKeyDown={() => {}}>
-          <DatasetDetailsHeader
-            className="datasetSelect__contextMenu"
-            dataset={selectedDataset}
-            isDefault={selectedDataset?.id === defaultDatasetId}
-          />
-        </div>
+        <DatasetDetailsHeader
+          className="datasetSelect__contextMenu"
+          dataset={selectedDataset}
+          isDefault={selectedDataset?.id === defaultDatasetId}
+        />
       ),
       content: (
         <DatasetDetailsBody
@@ -285,149 +364,68 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
         <EuiContextMenu className="datasetSelect__contextMenu" initialPanelId={0} panels={panels} />
       </EuiPopoverTitle>
 
-      {currentPanelId === 0 && (
-        <EuiSelectable
-          className="datasetSelect__selectable"
-          data-test-subj="datasetSelectSelectable"
-          options={options}
-          singleSelection="always"
-          searchable={true}
-          onChange={handleOptionChange}
-          renderOption={(option, searchValue) => {
-            // Searchable label is prepended with the label (title/display name) for better searching, this will strip it out.
-            const description =
-              option.searchableLabel && option.searchableLabel !== option.label
-                ? option.searchableLabel.slice(option.label.length)
-                : undefined;
-
-            return (
-              <EuiToolTip
-                display="block"
-                className="datasetSelect__tooltip"
-                position="right"
-                content={
-                  <DatasetDetails
-                    dataset={option.key ? datasets.find((d) => d.id === option.key) : undefined}
-                    isDefault={option.key ? option.key === defaultDatasetId : false}
-                  />
-                }
-              >
-                <EuiDescriptionList
-                  compressed
-                  className="datasetSelect__optionList"
-                  titleProps={{
-                    className: 'datasetSelect__optionTitle',
-                  }}
-                  listItems={
-                    description
-                      ? [
-                          {
-                            title: (
-                              <EuiText size="s">
-                                <small>
-                                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-                                </small>
-                              </EuiText>
-                            ),
-                            description: (
-                              <EuiText size="xs" color="subdued">
-                                <small>
-                                  <EuiHighlight search={searchValue}>{description}</EuiHighlight>
-                                </small>
-                              </EuiText>
-                            ),
-                          },
-                        ]
-                      : []
-                  }
-                />
-              </EuiToolTip>
-            );
-          }}
-          listProps={{
-            showIcons: false,
-            rowHeight: 50,
-          }}
-          searchProps={{
-            placeholder: i18n.translate('data.datasetSelect.searchPlaceholder', {
-              defaultMessage: 'Search',
-            }),
-            compressed: true,
-          }}
+      <EuiPopoverFooter paddingSize="none">
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+          gutterSize="none"
+          className="datasetSelect__footer"
         >
-          {(list, search) => (
-            <>
-              <div className="datasetSelect__searchContainer">{search}</div>
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-      )}
+          <EuiFlexItem grow={false} className="datasetSelect__footerItem">
+            <EuiButton
+              className="datasetSelect__advancedButton"
+              data-test-subj="datasetSelectAdvancedButton"
+              iconType="gear"
+              iconSide="right"
+              size="s"
+              isSelected={false}
+              onClick={() => {
+                closePopover();
+                const overlay = overlays?.openModal(
+                  toMountPoint(
+                    <AdvancedSelector
+                      services={services}
+                      onSelect={async (query: Partial<Query>) => {
+                        overlay?.close();
+                        if (query?.dataset) {
+                          try {
+                            await datasetService.cacheDataset(query.dataset, services, false);
+                            const dataView = await data.dataViews.get(
+                              query.dataset.id,
+                              query.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+                            );
 
-      {currentPanelId === 0 && (
-        <EuiPopoverFooter paddingSize="none">
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            alignItems="center"
-            responsive={false}
-            gutterSize="none"
-            className="datasetSelect__footer"
-          >
-            <EuiFlexItem grow={false} className="datasetSelect__footerItem">
-              <EuiButton
-                className="datasetSelect__advancedButton"
-                data-test-subj="datasetSelectAdvancedButton"
-                iconType="gear"
-                iconSide="right"
-                size="s"
-                isSelected={false}
-                onClick={() => {
-                  closePopover();
-                  const overlay = overlays?.openModal(
-                    toMountPoint(
-                      <AdvancedSelector
-                        services={services}
-                        onSelect={async (query: Partial<Query>) => {
-                          overlay?.close();
-                          if (query?.dataset) {
-                            try {
-                              await datasetService.cacheDataset(query.dataset, services, false);
-                              const dataView = await data.dataViews.get(
-                                query.dataset.id,
-                                query.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-                              );
-
-                              if (dataView) {
-                                onSelect(query.dataset);
-                              }
-                            } catch (error) {
-                              services.notifications?.toasts.addError(error, {
-                                title: i18n.translate('data.datasetSelect.errorTitle', {
-                                  defaultMessage: 'Error selecting dataset',
-                                }),
-                              });
+                            if (dataView) {
+                              onSelect(query.dataset);
                             }
+                          } catch (error) {
+                            services.notifications?.toasts.addError(error, {
+                              title: i18n.translate('data.datasetSelect.errorTitle', {
+                                defaultMessage: 'Error selecting dataset',
+                              }),
+                            });
                           }
-                        }}
-                        onCancel={() => overlay?.close()}
-                      />
-                    ),
-                    {
-                      maxWidth: false,
-                      className: 'datasetSelect__advancedModal',
-                    }
-                  );
-                }}
-              >
-                <FormattedMessage
-                  id="data.datasetSelect.advancedButton"
-                  defaultMessage="View all available data"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
-      )}
+                        }
+                      }}
+                      onCancel={() => overlay?.close()}
+                    />
+                  ),
+                  {
+                    maxWidth: false,
+                    className: 'datasetSelect__advancedModal',
+                  }
+                );
+              }}
+            >
+              <FormattedMessage
+                id="data.datasetSelect.advancedButton"
+                defaultMessage="View all available data"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
