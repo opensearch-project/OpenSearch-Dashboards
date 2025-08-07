@@ -79,36 +79,47 @@ export const FacetValue = ({ field, bucket, onAddFilter, useShortDots }: FacetVa
         <EuiText size="xs">{displayValue}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="exploreSidebarFacetValue__actionButtons">
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate('explore.discover.fieldChooser.discoverField.filterForTooltip', {
-            defaultMessage: 'Filter for value',
-          })}
-        >
-          <EuiButtonIcon
-            iconType="magnifyWithPlus"
-            onClick={() => onAddFilter(field, bucket.value, '+')}
-            size="xs"
-            data-test-subj={`fieldToggle-${bucket.display}`}
-            aria-label={filterForLabelAria}
-            className="exploreSidebarFacetValue__actionButton"
-          />
-        </EuiToolTip>
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate('explore.discover.fieldChooser.discoverField.filterOutTooltip', {
-            defaultMessage: 'Filter out value',
-          })}
-        >
-          <EuiButtonIcon
-            iconType="magnifyWithMinus"
-            onClick={() => onAddFilter(field, bucket.value, '-')}
-            size="xs"
-            data-test-subj={`fieldToggle-${bucket.display}`}
-            aria-label={filterOutLabelAria}
-            className="exploreSidebarFacetValue__actionButton"
-          />
-        </EuiToolTip>
+        <EuiText size="xs" className="exploreSidebarFacetValue__count">
+          {bucket.count}
+        </EuiText>
+        <div className="exploreSidebarFacetValue__buttons">
+          <EuiToolTip
+            delay="long"
+            content={i18n.translate(
+              'explore.discover.fieldChooser.discoverField.filterForTooltip',
+              {
+                defaultMessage: 'Filter for value',
+              }
+            )}
+          >
+            <EuiButtonIcon
+              iconType="magnifyWithPlus"
+              onClick={() => onAddFilter(field, bucket.value, '+')}
+              size="xs"
+              data-test-subj={`fieldToggle-${bucket.display}`}
+              aria-label={filterForLabelAria}
+              className="exploreSidebarFacetValue__actionButton"
+            />
+          </EuiToolTip>
+          <EuiToolTip
+            delay="long"
+            content={i18n.translate(
+              'explore.discover.fieldChooser.discoverField.filterOutTooltip',
+              {
+                defaultMessage: 'Filter out value',
+              }
+            )}
+          >
+            <EuiButtonIcon
+              iconType="magnifyWithMinus"
+              onClick={() => onAddFilter(field, bucket.value, '-')}
+              size="xs"
+              data-test-subj={`fieldToggle-${bucket.display}`}
+              aria-label={filterOutLabelAria}
+              className="exploreSidebarFacetValue__actionButton"
+            />
+          </EuiToolTip>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

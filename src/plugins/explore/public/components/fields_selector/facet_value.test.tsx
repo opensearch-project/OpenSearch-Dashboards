@@ -99,6 +99,15 @@ describe('FacetValue', () => {
     expect(screen.getByTestId('field-very.long.field.name.here')).toBeInTheDocument();
   });
 
+  it('renders bucket count', () => {
+    render(<FacetValue {...mockProps} />);
+
+    expect(screen.getByText('10')).toBeInTheDocument();
+
+    const countElement = screen.getByText('10');
+    expect(countElement).toHaveClass('exploreSidebarFacetValue__count');
+  });
+
   it('has correct CSS classes', () => {
     render(<FacetValue {...mockProps} />);
 
@@ -107,6 +116,12 @@ describe('FacetValue', () => {
 
     const actionButtons = container.querySelector('.exploreSidebarFacetValue__actionButtons');
     expect(actionButtons).toBeInTheDocument();
+
+    const countElement = container.querySelector('.exploreSidebarFacetValue__count');
+    expect(countElement).toBeInTheDocument();
+
+    const buttonsContainer = container.querySelector('.exploreSidebarFacetValue__buttons');
+    expect(buttonsContainer).toBeInTheDocument();
 
     const actionButton = container.querySelector('.exploreSidebarFacetValue__actionButton');
     expect(actionButton).toBeInTheDocument();

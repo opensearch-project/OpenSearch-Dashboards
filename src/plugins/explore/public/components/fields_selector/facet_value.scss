@@ -3,6 +3,27 @@
     flex-direction: row;
   }
 
+  // Show count by default, hide buttons
+  &__count {
+    display: block;
+  }
+
+  &__buttons {
+    display: none;
+  }
+
+  // On hover or focus-within, hide count and show buttons
+  &:hover,
+  &:focus-within {
+    .exploreSidebarFacetValue__count {
+      display: none;
+    }
+
+    .exploreSidebarFacetValue__buttons {
+      display: block;
+    }
+  }
+
   &__actionButton {
     opacity: 0;
     transition: opacity $euiAnimSpeedFast;

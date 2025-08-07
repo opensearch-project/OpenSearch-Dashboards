@@ -185,7 +185,7 @@ describe('group_fields', function () {
         displayName: 'Service Name',
       },
       {
-        name: 'span.attributes.http@status_code',
+        name: 'attributes.http.status_code',
         type: 'number',
         esTypes: ['long'],
         count: 1,
@@ -222,7 +222,7 @@ describe('group_fields', function () {
     const columns: string[] = [];
     const fieldCounts = {
       'serviceName\u200b': 1,
-      'span.attributes.http@status_code': 1,
+      'attributes.http.status_code': 1,
       'status.code': 1,
       regularField: 1,
     };
@@ -234,7 +234,7 @@ describe('group_fields', function () {
 
     expect(actual.facetedFields).toHaveLength(3);
     expect(actual.facetedFields.map((f) => f.name)).toContain('serviceName\u200b');
-    expect(actual.facetedFields.map((f) => f.name)).toContain('span.attributes.http@status_code');
+    expect(actual.facetedFields.map((f) => f.name)).toContain('attributes.http.status_code');
     expect(actual.facetedFields.map((f) => f.name)).toContain('status.code');
     expect(actual.queryFields.map((f) => f.name)).toContain('regularField');
   });

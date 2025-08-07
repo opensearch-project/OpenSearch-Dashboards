@@ -32,7 +32,7 @@ import { IndexPatternField } from '../../../../../data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 // TODO: Use data set defined faceted field
-const FACET_FIELDS = ['serviceName', 'span.attributes.http@status_code', 'status.code'] as const;
+const FACET_FIELDS = ['serviceName', 'attributes.http.status_code', 'status.code'] as const;
 
 function isFacetedField(fieldName: string): fieldName is typeof FACET_FIELDS[number] {
   // Remove invisiable char
