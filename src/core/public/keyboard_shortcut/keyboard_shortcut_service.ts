@@ -67,11 +67,12 @@ export class KeyboardShortcutService {
       const filteredShortcuts = shortcuts.filter(
         (shortcut) => this.getNamespacedIdForKeyboardShortcut(shortcut) !== fullId
       );
-
-      if (filteredShortcuts.length === 0) {
-        this.shortcuts.delete(key);
-      } else if (filteredShortcuts.length !== shortcuts.length) {
-        this.shortcuts.set(key, filteredShortcuts);
+      if (filteredShortcuts.length !== shortcuts.length) {
+        if (filteredShortcuts.length === 0) {
+          this.shortcuts.delete(key);
+        } else {
+          this.shortcuts.set(key, filteredShortcuts);
+        }
       }
     }
   }
