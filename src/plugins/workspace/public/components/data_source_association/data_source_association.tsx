@@ -36,7 +36,6 @@ interface Props {
 export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onError }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const associationModalRef = useRef<OverlayRef>();
-
   const {
     chrome,
     savedObjects,

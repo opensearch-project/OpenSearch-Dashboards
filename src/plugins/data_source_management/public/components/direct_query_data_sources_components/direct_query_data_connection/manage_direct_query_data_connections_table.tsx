@@ -20,14 +20,13 @@ import {
   EuiButtonEmpty,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { TopNavControlComponentData } from 'src/plugins/navigation/public';
-import { UiSettingScope } from '../../../../../../core/public';
 import {
   DataSourceConnectionType,
   DataSourceManagementContext,
@@ -39,14 +38,13 @@ import {
   fetchDataSourceConnections,
   getDataSources,
   deleteMultipleDataSources,
-  setFirstDataSourceAsDefault,
   getHideLocalCluster,
   getDataConnections,
 } from '../../utils';
 import { LoadingMask } from '../../loading_mask';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../../../constants';
-import { DatasourceTypeToDisplayName, DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../constants';
+import { DatasourceTypeToDisplayName } from '../../constants';
 import {
   DataConnectionType,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
@@ -75,10 +73,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const DataSourceAssociation = workspaceClient?.ui().DataSourceAssociation;
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
-  const defaultDataSourceIdRef = useRef(
-    uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)
-  );
-  const defaultDataSourceId = useObservable(defaultDataSourceIdRef.current);
+
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
   const canAssociateDataSource =
@@ -111,31 +106,6 @@ export const ManageDirectQueryDataConnectionsTable = ({
     selectable: (item: DataSourceTableItem) => {
       return item.id !== LOCAL_CLUSTER;
     },
-  };
-
-  const setDefaultDataSource = async () => {
-    try {
-      for (const dataSource of selectedDataSources) {
-        if (defaultDataSourceId === dataSource.id) {
-          await setFirstDataSourceAsDefault(
-            savedObjects.client,
-            uiSettings,
-            true,
-            currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
-          );
-          break;
-        }
-      }
-    } catch (e) {
-      notifications.toasts.addDanger(
-        i18n.translate('dataSourcesManagement.directQueryTable.setDefaultDataSourceFailMsg', {
-          defaultMessage:
-            'No default data source has been set. Please select a new default data source.',
-        })
-      );
-    } finally {
-      setIsDeleting(false);
-    }
   };
 
   const fetchDataSources = useCallback(() => {
@@ -230,9 +200,6 @@ export const ManageDirectQueryDataConnectionsTable = ({
         // Fetch data sources
         fetchDataSources();
         setIsModalVisible(false);
-        // Check if default data source is deleted or not.
-        // if yes, then set the first existing datasource as default datasource.
-        setDefaultDataSource();
       })
       .catch(() => {
         notifications.toasts.addDanger(
@@ -271,26 +238,10 @@ export const ManageDirectQueryDataConnectionsTable = ({
           await workspaceClient.dissociate(payload, currentWorkspace.id);
           await fetchDataSources();
           setSelectedDataSources([]);
-          if (payload.some((p) => p.id === defaultDataSourceId)) {
-            setFirstDataSourceAsDefault(
-              savedObjects.client,
-              uiSettings,
-              true,
-              currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
-            );
-          }
         }
       }
     },
-    [
-      currentWorkspace,
-      defaultDataSourceId,
-      fetchDataSources,
-      overlays,
-      savedObjects.client,
-      uiSettings,
-      workspaceClient,
-    ]
+    [currentWorkspace, fetchDataSources, overlays, workspaceClient]
   );
 
   /* render delete modal*/
@@ -402,6 +353,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
     isPluginInstalled('plugin:observabilityDashboards', notifications, http).then(
       setObservabilityDashboardsExists
     );
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchDataSources]);
 
@@ -550,27 +502,6 @@ export const ManageDirectQueryDataConnectionsTable = ({
         onDissociate(item);
       },
       'data-test-subj': 'dataSourcesManagement-dataSourceTable-dissociateButton',
-    });
-  }
-
-  // Add set as default action when data source list page opened within a workspace
-  if (currentWorkspace) {
-    actionColumn.actions.push({
-      render: (item) => {
-        return (
-          <EuiButtonIcon
-            isDisabled={defaultDataSourceId === item.id}
-            aria-label="Set as default data source"
-            title={i18n.translate('dataSourcesManagement.dataSourcesTable.setAsDefault.label', {
-              defaultMessage: 'Set as default',
-            })}
-            iconType="flag"
-            onClick={async () => {
-              await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, item.id);
-            }}
-          />
-        );
-      },
     });
   }
 
