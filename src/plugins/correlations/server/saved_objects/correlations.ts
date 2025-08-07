@@ -25,6 +25,9 @@ export const correlationsSavedObjectType: SavedObjectsType = {
   },
   mappings: {
     properties: {
+      correlationType: {
+        type: 'keyword',
+      },
       version: {
         type: 'keyword',
       },
