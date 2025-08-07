@@ -12,20 +12,14 @@
   &__header {
     width: 100%;
 
-    > * {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-weight: $euiFontWeightSemiBold;
-      width: 100%;
-    }
-
     > :first-child {
       text-align: left;
+      width: 100%;
     }
 
     > :nth-child(2) {
       text-align: right;
+      width: 100%;
     }
   }
 
