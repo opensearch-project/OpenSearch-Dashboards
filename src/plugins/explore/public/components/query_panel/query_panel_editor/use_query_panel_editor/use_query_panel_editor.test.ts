@@ -700,7 +700,7 @@ describe('useQueryPanelEditor', () => {
 
       // Call the completion provider directly
       await act(async () => {
-        await result.current.provideCompletionItems(
+        await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
           {},
@@ -742,7 +742,7 @@ describe('useQueryPanelEditor', () => {
 
       // Call the completion provider directly
       await act(async () => {
-        await result.current.provideCompletionItems(
+        await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
           {},

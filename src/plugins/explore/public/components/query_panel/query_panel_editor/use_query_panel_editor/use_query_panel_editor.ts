@@ -85,12 +85,7 @@ export interface UseQueryPanelEditorReturnType {
   options: IEditorConstructionOptions;
   placeholder: string;
   promptIsTyping: boolean;
-  provideCompletionItems: (
-    model: monaco.editor.ITextModel,
-    position: monaco.Position,
-    context: monaco.languages.CompletionContext,
-    token: monaco.CancellationToken
-  ) => Promise<monaco.languages.CompletionList>;
+  suggestionProvider: monaco.languages.CompletionItemProvider;
   showPlaceholder: boolean;
   useLatestTheme: true;
   value: string;
@@ -231,26 +226,15 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         return { suggestions: [], incomplete: false };
       }
     },
-    [, queryLanguage, queryString, dataViews, services]
+    [isPromptModeRef, queryLanguage, queryString, dataViews, services]
   );
 
-  // Register completion providers for both languages
-  useEffect(() => {
-    const disposables: monaco.IDisposable[] = [];
-    const languagesToRegister = new Set([queryLanguage, 'AI']);
-
-    languagesToRegister.forEach((language) => {
-      const triggerChars = language === 'AI' ? [] : TRIGGER_CHARACTERS;
-      disposables.push(
-        monaco.languages.registerCompletionItemProvider(language, {
-          triggerCharacters: triggerChars,
-          provideCompletionItems,
-        })
-      );
-    });
-
-    return () => disposables.forEach((d) => d.dispose());
-  }, [provideCompletionItems, queryLanguage]);
+  const suggestionProvider = useMemo(() => {
+    return {
+      triggerCharacters: isPromptMode ? [] : TRIGGER_CHARACTERS,
+      provideCompletionItems,
+    };
+  }, [isPromptMode, provideCompletionItems]);
 
   const handleRun = useCallback(() => {
     dispatch(onEditorRunActionCreator(services, editorTextRef.current));
@@ -364,7 +348,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     options,
     placeholder,
     promptIsTyping,
-    provideCompletionItems,
+    suggestionProvider,
     showPlaceholder: !editorText.length,
     useLatestTheme: true,
     value: editorText,
