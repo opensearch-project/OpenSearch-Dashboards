@@ -21,7 +21,7 @@ export const correlationsSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
-      return `Correlation ${obj.id} - ${obj.attributes.correlationType}`;
+      return `Correlation ${obj.id}`;
     },
   },
   mappings: {
