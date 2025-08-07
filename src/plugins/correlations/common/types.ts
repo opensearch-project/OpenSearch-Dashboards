@@ -11,7 +11,6 @@
 
 import { SavedObject, SavedObjectAttributes } from '../../../core/public';
 
-
 export interface CorrelationSavedObjectAttributes extends SavedObjectAttributes {
   correlationType: string;
 
