@@ -9,21 +9,16 @@
  * GitHub history for details.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from 'opensearch-dashboards/server';
+import { SavedObject, SavedObjectAttributes } from '../../../core/public';
+
 
 export interface CorrelationSavedObjectAttributes extends SavedObjectAttributes {
-  title: string;
-  description: string;
   correlationType: string;
+
   version: string;
   entities: any[];
 }
 
-export interface CorrelationSavedObject {
-  id: string;
+export interface CorrelationSavedObject extends SavedObject<CorrelationSavedObjectAttributes> {
   type: 'correlations';
-  migrationVersion: string;
-  updatedAt: string;
-  attributes: CorrelationSavedObjectAttributes;
-  references: SavedObjectReference[];
 }
