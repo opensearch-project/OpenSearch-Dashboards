@@ -7,6 +7,12 @@
   &__panel {
     width: 100%;
     max-width: 90vw;
+
+    [class*="datasetDetails__headerTitle"] {
+      > * {
+        color: $euiColorEmptyShade;
+      }
+    }
   }
 
   &__header {
@@ -23,25 +29,11 @@
     }
   }
 
-  &__list {
-    margin-top: 0;
+  &__itemList {
+    padding: $euiSizeS;
   }
 
-  &__title {
-    > * {
-      font-weight: $euiFontWeightSemiBold;
-    }
-  }
-
-  &__listTitle {
-    width: 100%;
-
-    > * {
-      font-weight: $euiFontWeightSemiBold;
-    }
-  }
-
-  &__panel &__listTitle {
+  &__panel &__itemTitle {
     > * {
       color: $euiColorEmptyShade;
     }
@@ -51,42 +43,11 @@
     background-color: $euiColorLightestShade;
     align-items: center;
     border-radius: $euiBorderRadius;
-  }
 
-  &__icon {
-    margin: $euiSizeXS $euiSizeXS 0 0;
-    height: 100%;
-    flex-shrink: 0;
-  }
-
-  &__description {
-    font-size: $euiFontSizeXS - 2px;
-  }
-
-  &__textTruncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__noWrap {
-    flex-wrap: nowrap;
-  }
-
-  &__minWidth {
-    min-width: 0;
-  }
-
-  &__footer {
-    padding: 0;
-  }
-
-  &__footerItem {
-    width: 100%;
-  }
-
-  &__viewButton {
-    width: 100%;
-    font-size: $euiFontSizeXS;
+    &__icon {
+      margin: $euiSizeXS $euiSizeXS 0 0;
+      height: 100%;
+      flex-shrink: 0;
+    }
   }
 }

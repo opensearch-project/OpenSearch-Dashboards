@@ -20,10 +20,8 @@ import {
   EuiToolTip,
   EuiBadge,
   EuiHighlight,
-  EuiTextColor,
   EuiText,
   EuiPopoverTitle,
-  EuiTitle,
   EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -262,10 +260,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, suppor
                   >
                     <EuiDescriptionList
                       compressed
-                      className="datasetSelect__optionList"
-                      titleProps={{
-                        className: 'datasetSelect__optionTitle',
-                      }}
                       listItems={
                         description
                           ? [
