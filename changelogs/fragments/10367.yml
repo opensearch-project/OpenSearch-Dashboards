@@ -1,0 +1,2 @@
+fix:
+- Disable language selector when choosing dataset ([#10367](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10367))
