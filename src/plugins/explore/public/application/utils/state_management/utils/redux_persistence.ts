@@ -302,7 +302,7 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
 /**
  * Get preloaded legacy state (vis_builder approach - defaults only, no saved object loading)
  */
-const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
+export const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
   // Only return defaults - NO saved object loading (like vis_builder)
   const defaultColumns = services.uiSettings?.get('defaultColumns') || ['_source'];
 
