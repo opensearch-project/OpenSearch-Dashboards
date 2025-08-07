@@ -61,14 +61,52 @@ export default class RowParser {
     if (mode !== 'start' && mode !== 'start-sql') {
       return MODE.IN_REQUEST;
     }
+
     let line = (this.editor.getLineValue(lineNumber) || '').trim();
     if (!line || line[0] === '#') {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start
 
+    // ------------------------------------------------------------------
+    // A line that *starts* with "[" is the first line of a request body
+    // (e.g. PATCH with a JSON-Patch array), **not** the start of a new
+    // request.  Mark it simply as “inside a request”.
+    // ------------------------------------------------------------------
+    if (line[0] === '[') {
+      return MODE.IN_REQUEST;
+    }
+
+    /* -----------------------------------------------------------
+     * PATCH bodies are a JSON array.  While we are *inside* that
+     * array (between the opening “[” and its matching “]”) we must
+     * never consider a line starting with “{” or ending with “}”
+     * to open / close a new doc.
+     * --------------------------------------------------------- */
+    const insideJsonArray = (() => {
+      let i = lineNumber;
+      let openBrackets = 0;
+      while (i >= 1) {
+        const l = (this.editor.getLineValue(i) || '').trim();
+        if (l.startsWith(']')) {
+          if (openBrackets === 0) return false;
+          openBrackets--;
+        }
+        if (l.endsWith('[')) {
+          openBrackets++;
+        }
+        if (openBrackets > 0 && i < lineNumber) return true;
+        i--;
+      }
+      return false;
+    })();
+
+    if (insideJsonArray) {
+      return MODE.IN_REQUEST;
+    }
+
     // If the current line ends with a closing brace/bracket, decide if the request/doc ends here.
     const endsWithCloseBrace = line.endsWith('}');
-    const endsWithCloseBracket = line.endsWith(']');
+    const endsWithCloseBracket = /\]\s*$/.test(line);
     if (endsWithCloseBrace || endsWithCloseBracket) {
       // check for a multi doc request (must start a new json doc immediately after this one end.
       lineNumber++;
