@@ -267,6 +267,7 @@ export const Configurator = ({
                 setLanguage(e.target.value);
                 setDataset({ ...dataset, language: e.target.value });
               }}
+              disabled={services.appName === 'explore'}
               data-test-subj="advancedSelectorLanguageSelect"
             />
           </EuiFormRow>

@@ -378,10 +378,6 @@ cy.explore.add(
       .click({ force: true });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
 
-    if (language) {
-      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
-    }
-
     if (finalAction === 'submit') {
       cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
 
@@ -413,10 +409,6 @@ cy.explore.add(
     // this element is sometimes dataSourceName masked by another element
     cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
-
-    if (language) {
-      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
-    }
 
     cy.getElementByTestId('advancedSelectorTimeFieldSelect')
       .should('be.visible')
@@ -471,10 +463,6 @@ cy.explore.add(
       .should('be.visible')
       .click({ force: true });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
-
-    if (language) {
-      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
-    }
 
     if (finalAction === 'submit') {
       cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
