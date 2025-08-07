@@ -71,6 +71,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               numericalColumns={numericalColumns}
               categoricalColumns={categoricalColumns}
               dateColumns={dateColumns}
+              axisColumnMappings={axisColumnMappings}
             />
           </EuiFlexItem>
 

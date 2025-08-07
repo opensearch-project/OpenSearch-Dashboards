@@ -15,7 +15,7 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { CategoryAxis, VisColumn, ValueAxis, Positions } from '../../types';
+import { CategoryAxis, VisColumn, ValueAxis, Positions, AxisRole } from '../../types';
 import { useDebouncedValue } from '../../utils/use_debounced_value';
 import { StyleAccordion } from '../style_accordion';
 import { DebouncedTruncateField } from '.././utils';
@@ -28,27 +28,8 @@ interface AxesOptionsProps {
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
   dateColumns: VisColumn[];
+  axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
 }
-
-const getDefaultCategoryAxisTitle = (
-  dateColumns?: VisColumn[],
-  categoricalColumns?: VisColumn[]
-) => {
-  if (dateColumns?.length) {
-    return dateColumns[0].name;
-  }
-  if (categoricalColumns?.length) {
-    return categoricalColumns[0].name;
-  }
-  return 'Category';
-};
-
-const getDefaultValueAxisTitle = (numericalColumns?: VisColumn[], index: number = 0) => {
-  if (numericalColumns && numericalColumns.length > index) {
-    return numericalColumns[index].name;
-  }
-  return `Metric ${index + 1}`;
-};
 
 // Component for a single axis title input with debouncing
 const DebouncedAxisTitle: React.FC<{
@@ -79,6 +60,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
   numericalColumns,
   categoricalColumns,
   dateColumns,
+  axisColumnMappings,
 }) => {
   const updateCategoryAxis = (index: number, updates: Partial<CategoryAxis>) => {
     const updatedAxes = [...categoryAxes];
@@ -102,14 +84,25 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     if (axis.title?.text && axis.title.text.trim() !== '') {
       return axis.title.text;
     }
-    return getDefaultCategoryAxisTitle(dateColumns, categoricalColumns);
+    return (
+      axisColumnMappings[AxisRole.X]?.name ||
+      i18n.translate('explore.vis.gridOptions.categoryFallbackName', {
+        defaultMessage: 'Category',
+      })
+    );
   };
-
   const getValueAxisDisplayTitle = (axis: ValueAxis, index: number) => {
     if (axis.title?.text && axis.title.text.trim() !== '') {
       return axis.title.text;
     }
-    return getDefaultValueAxisTitle(numericalColumns, index);
+    const axisRole = index === 0 ? AxisRole.Y : AxisRole.Y_SECOND;
+    return (
+      axisColumnMappings[axisRole]?.name ||
+      i18n.translate('explore.vis.gridOptions.metricFallbackName', {
+        defaultMessage: 'Metric {index}',
+        values: { index: index + 1 },
+      })
+    );
   };
 
   // Determine if we're in Rule 2 scenario (2 metrics, 1 date, 0 categories)
@@ -193,7 +186,9 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
             <>
               <DebouncedAxisTitle
                 value={getCategoryAxisDisplayTitle(axis)}
-                placeholder={getDefaultCategoryAxisTitle(dateColumns, categoricalColumns)}
+                placeholder={i18n.translate('explore.vis.metric.axisName', {
+                  defaultMessage: 'Axis name',
+                })}
                 onChange={(text) =>
                   updateCategoryAxis(index, {
                     title: { ...axis.title, text },
@@ -354,7 +349,9 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   <>
                     <DebouncedAxisTitle
                       value={getValueAxisDisplayTitle(axis, index)}
-                      placeholder={getDefaultValueAxisTitle(numericalColumns, index)}
+                      placeholder={i18n.translate('explore.vis.metric.axisName', {
+                        defaultMessage: 'Axis name',
+                      })}
                       onChange={(text) =>
                         updateValueAxis(index, {
                           title: { ...axis.title, text },
@@ -507,7 +504,9 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   <>
                     <DebouncedAxisTitle
                       value={getValueAxisDisplayTitle(axis, index)}
-                      placeholder={getDefaultValueAxisTitle(numericalColumns, index)}
+                      placeholder={i18n.translate('explore.vis.metric.axisName', {
+                        defaultMessage: 'Axis name',
+                      })}
                       onChange={(text) =>
                         updateValueAxis(index, {
                           title: { ...axis.title, text },
