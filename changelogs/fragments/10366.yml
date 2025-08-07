@@ -1,0 +1,2 @@
+fix:
+- Reset legacy state when switching dataset ([#10366](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10366))
