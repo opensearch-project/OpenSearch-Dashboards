@@ -45,7 +45,12 @@ export const Configurator = ({
   const languageService = queryService.queryString.getLanguageService();
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
-  const languages = type?.supportedLanguages(baseDataset) || [];
+  const supportedLanguages = type?.supportedLanguages(baseDataset) || [];
+  const languages = supportedLanguages.filter(
+    (langId) =>
+      !services.appName ||
+      languageService.getLanguage(langId)?.editorSupportedAppNames?.includes(services.appName)
+  );
   const [shouldSelectIndexedView, setShouldSelectIndexedView] = useState(false);
 
   const [language, setLanguage] = useState<string>(() => {
