@@ -21,14 +21,14 @@ import {
   updateSavedSearchAndSaveAndVerify,
   generateSavedTestConfiguration,
   updateSavedSearchAndNotSaveAndVerify,
+  postRequestSaveExplore
 } from '../../../../../../utils/apps/explore/saved';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
 const runSavedExploreTests = () => {
-  // TODO currently saved search isn't working in explore, enable this when it is fixed
-  describe.skip('saved explore', () => {
+  describe('saved explore', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,
@@ -58,7 +58,7 @@ const runSavedExploreTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
         setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -100,16 +100,22 @@ const runSavedExploreTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
-        // using a POST request to create a saved explore to load
-        postRequestSaveExplore(config);
+        setDatePickerDatesAndSearchIfRelevant(config.language);
 
         // TODO: Figure out why we have to wait here sometimes. The query gets reset while typing without this wait
         cy.wait(2000);
 
-        updateSavedSearchAndNotSaveAndVerify(config, DATASOURCE_NAME);
+        setSearchConfigurations(config);
+        verifyDiscoverPageState(config);
+        cy.saveSearch(config.saveName);
+
+        // TODO: Figure out why we have to wait here sometimes. The query gets reset while typing without this wait
+        cy.wait(2000);
+
+        updateSavedSearchAndNotSaveAndVerify(config, DATASOURCE_NAME, workspaceName);
 
         cy.get('@WORKSPACE_ID').then((workspaceId) => {
           cy.osd.deleteSavedObjectsByType(workspaceId, 'explore');
@@ -123,17 +129,22 @@ const runSavedExploreTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
-        // using a POST request to create a saved explore to load
-        postRequestSaveExplore(config);
+        setDatePickerDatesAndSearchIfRelevant(config.language);
 
         // TODO: Figure out why we have to wait here sometimes. The query gets reset while typing without this wait
         cy.wait(2000);
 
-        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
+        setSearchConfigurations(config);
+        verifyDiscoverPageState(config);
+        cy.saveSearch(config.saveName);
 
+        // TODO: Figure out why we have to wait here sometimes. The query gets reset while typing without this wait
+        cy.wait(2000);
+
+        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false, workspaceName);
         cy.get('@WORKSPACE_ID').then((workspaceId) => {
           cy.osd.deleteSavedObjectsByType(workspaceId, 'explore');
         });
@@ -146,7 +157,7 @@ const runSavedExploreTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
         // using a POST request to create a saved explore to load
