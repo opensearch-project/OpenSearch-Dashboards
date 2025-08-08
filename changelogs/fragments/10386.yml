@@ -1,0 +1,2 @@
+feat:
+- Adds a correlation plugin which creates a saved object for the related traces and logs ([#10386](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10386))
