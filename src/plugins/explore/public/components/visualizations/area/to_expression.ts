@@ -7,7 +7,7 @@ import { AreaChartStyleControls } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
-import { inferTimeUnitFromTimestamps, timeUnitToFormat } from '../utils/utils';
+import { getTooltipFormat } from '../utils/utils';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -32,12 +32,6 @@ export const createSimpleAreaChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
-
-  const getTooltipFormat = (axis: typeof xAxisColumn, fallback: string): string => {
-    return dateField
-      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, dateField)] ?? fallback
-      : fallback;
-  };
 
   const mainLayer = {
     mark: {
@@ -81,7 +75,7 @@ export const createSimpleAreaChart = (
             field: dateField,
             type: 'temporal',
             title: dateName,
-            format: getTooltipFormat(xAxisColumn, '%b %d, %Y %H:%M:%S'),
+            format: getTooltipFormat(transformedData, dateField),
           },
           { field: metricField, type: 'quantitative', title: metricName },
         ],
@@ -148,12 +142,6 @@ export const createMultiAreaChart = (
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
 
-  const getTooltipFormat = (axis: typeof xAxisColumn, fallback: string): string => {
-    return dateField
-      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, dateField)] ?? fallback
-      : fallback;
-  };
-
   const mainLayer = {
     mark: {
       ...buildMarkConfig(styles, 'line'),
@@ -207,7 +195,7 @@ export const createMultiAreaChart = (
             field: dateField,
             type: 'temporal',
             title: dateName,
-            format: getTooltipFormat(xAxisColumn, '%b %d, %Y %H:%M:%S'),
+            format: getTooltipFormat(transformedData, dateField),
           },
           { field: categoryField, type: 'nominal', title: categoryName },
           { field: metricField, type: 'quantitative', title: metricName },
@@ -270,12 +258,6 @@ export const createFacetedMultiAreaChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
-
-  const getTooltipFormat = (axis: typeof xAxisMapping, fallback: string): string => {
-    return dateField
-      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, dateField)] ?? fallback
-      : fallback;
-  };
 
   return {
     $schema: VEGASCHEMA,
@@ -344,7 +326,7 @@ export const createFacetedMultiAreaChart = (
                   field: dateField,
                   type: 'temporal',
                   title: dateName,
-                  format: getTooltipFormat(xAxisMapping, '%b %d, %Y %H:%M:%S'),
+                  format: getTooltipFormat(transformedData, dateField),
                 },
                 { field: category1Field, type: 'nominal', title: category1Name },
                 { field: metricField, type: 'quantitative', title: metricName },

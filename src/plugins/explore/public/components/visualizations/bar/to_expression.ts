@@ -10,8 +10,7 @@ import {
   applyAxisStyling,
   getSwappedAxisRole,
   getSchemaByAxis,
-  inferTimeUnitFromTimestamps,
-  timeUnitToFormat,
+  getTooltipFormat,
 } from '../utils/utils';
 
 // Only set size and binSpacing in manual mode
@@ -155,12 +154,6 @@ export const createTimeBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
-  const getTooltipFormat = (axis: typeof xAxis | typeof yAxis, fallback: string): string => {
-    return axis?.column
-      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, axis.column)] ?? fallback
-      : fallback;
-  };
-
   const mainLayer = {
     mark: barMark,
     encoding: {
@@ -181,7 +174,7 @@ export const createTimeBarChart = (
             type: getSchemaByAxis(xAxis),
             title: xAxis?.styles?.title?.text || xAxis?.name,
             ...(getSchemaByAxis(xAxis) === 'temporal' && {
-              format: getTooltipFormat(xAxis, '%b %d, %Y %H:%M:%S'),
+              format: getTooltipFormat(transformedData, xAxis?.column),
             }),
           },
           {
@@ -189,7 +182,7 @@ export const createTimeBarChart = (
             type: getSchemaByAxis(yAxis),
             title: yAxis?.styles?.title?.text || yAxis?.name,
             ...(getSchemaByAxis(yAxis) === 'temporal' && {
-              format: getTooltipFormat(yAxis, '%b %d, %Y %H:%M:%S'),
+              format: getTooltipFormat(transformedData, yAxis?.column),
             }),
           },
         ],
@@ -273,12 +266,6 @@ export const createGroupedTimeBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
-  const getTooltipFormat = (axis: typeof xAxis | typeof yAxis, fallback: string): string => {
-    return axis?.column
-      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, axis.column)] ?? fallback
-      : fallback;
-  };
-
   const spec: any = {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -314,7 +301,7 @@ export const createGroupedTimeBarChart = (
           type: getSchemaByAxis(xAxis),
           title: xAxis?.styles?.title?.text || xAxis?.name,
           ...(getSchemaByAxis(xAxis) === 'temporal' && {
-            format: getTooltipFormat(xAxis, '%b %d, %Y %H:%M:%S'),
+            format: getTooltipFormat(transformedData, xAxis?.column),
           }),
         },
         { field: categoryField, type: getSchemaByAxis(colorColumn), title: categoryName },
@@ -323,7 +310,7 @@ export const createGroupedTimeBarChart = (
           type: getSchemaByAxis(yAxis),
           title: yAxis?.styles?.title?.text || yAxis?.name,
           ...(getSchemaByAxis(yAxis) === 'temporal' && {
-            format: getTooltipFormat(yAxis, '%b %d, %Y %H:%M:%S'),
+            format: getTooltipFormat(transformedData, yAxis?.column),
           }),
         },
       ],
@@ -404,12 +391,6 @@ export const createFacetedTimeBarChart = (
     barEncodingDefault
   );
 
-  const getTooltipFormat = (axis: typeof xAxis | typeof yAxis, fallback: string): string => {
-    return axis?.column
-      ? timeUnitToFormat[inferTimeUnitFromTimestamps(transformedData, axis.column)] ?? fallback
-      : fallback;
-  };
-
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -454,7 +435,7 @@ export const createFacetedTimeBarChart = (
                   type: getSchemaByAxis(yAxis),
                   title: metricName,
                   ...(getSchemaByAxis(yAxis) === 'temporal' && {
-                    format: getTooltipFormat(yAxis, '%b %d, %Y %H:%M:%S'),
+                    format: getTooltipFormat(transformedData, yAxis?.column),
                   }),
                 },
                 {
@@ -462,7 +443,7 @@ export const createFacetedTimeBarChart = (
                   type: getSchemaByAxis(xAxis),
                   title: dateName,
                   ...(getSchemaByAxis(xAxis) === 'temporal' && {
-                    format: getTooltipFormat(xAxis, '%b %d, %Y %H:%M:%S'),
+                    format: getTooltipFormat(transformedData, xAxis?.column),
                   }),
                 },
                 { field: category1Field, type: 'nominal', title: category1Name },

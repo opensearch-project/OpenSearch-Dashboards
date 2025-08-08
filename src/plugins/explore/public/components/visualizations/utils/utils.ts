@@ -237,17 +237,27 @@ export const timeUnitToFormat: { [key: string]: string } = {
   second: '%b %d, %Y %H:%M:%S',
 };
 
+/**
+ * Infers the time unit from timestamps in the data.
+ * @param data The transformed data array
+ * @param field The field name for the temporal axis
+ * @returns The inferred time unit or null if insufficient valid timestamps
+ */
 export const inferTimeUnitFromTimestamps = (
   data: Array<Record<string, any>>,
   field: string
-): string => {
+): string | null => {
+  if (!data || data.length === 0 || !field) {
+    return null;
+  }
+
   const timestamps = data
     .map((row) => new Date(row[field]).getTime())
     .filter((t) => !isNaN(t))
     .sort((a, b) => a - b);
 
   if (timestamps.length < 2) {
-    return 'second';
+    return null;
   }
 
   let minDiff = Number.MAX_SAFE_INTEGER;
@@ -267,4 +277,20 @@ export const inferTimeUnitFromTimestamps = (
   if (seconds < 2678400) return 'week';
   if (seconds < 31536000) return 'month';
   return 'year';
+};
+
+/**
+ * Determines the tooltip format for a temporal axis based on the inferred time unit.
+ * @param data The transformed data array
+ * @param field The field name for the temporal axis
+ * @param fallback The fallback format string (default: '%b %d, %Y %H:%M:%S')
+ * @returns The format string for the tooltip
+ */
+export const getTooltipFormat = (
+  data: Array<Record<string, any>>,
+  field: string | undefined, // Updated to accept string | undefined
+  fallback = '%b %d, %Y %H:%M:%S'
+): string => {
+  const timeUnit = inferTimeUnitFromTimestamps(data, field || ''); // Use empty string if field is undefined
+  return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
 };
