@@ -80,8 +80,8 @@ describe('prompt code_completion', () => {
       position,
       language: 'AI', // For prompt mode
       baseLanguage,
-      selectionStart: 0,
-      selectionEnd: 0,
+      selectionStart: query.length,
+      selectionEnd: query.length,
       services: mockServices,
       datasetType: 'INDEX_PATTERN',
     });

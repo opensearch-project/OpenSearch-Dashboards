@@ -24,7 +24,7 @@ import { KEYWORD_ITEM_KIND_MAP, PPL_SUGGESTION_IMPORTANCE } from '../opensearch_
 import { SuggestionItemDetailsTags } from '../shared/constants';
 
 const extractField = (input: string): string | null => {
-  const match = input.match(/\b([\w.]+)\s*(=|is|equals)\s*$/i);
+  const match = input.match(/\b([\w.]+)\s+(=|is|equals)\s*$/i);
   if (match) {
     return match[1]; // captured field name
   }
