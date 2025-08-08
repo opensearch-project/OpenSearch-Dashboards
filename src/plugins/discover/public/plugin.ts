@@ -417,6 +417,7 @@ export class DiscoverPlugin
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
     setUiActions(plugins.uiActions);
+
     this.initializeServices = () => {
       if (this.servicesInitialized) {
         return { core, plugins };

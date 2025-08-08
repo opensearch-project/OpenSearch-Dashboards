@@ -297,7 +297,6 @@ export class VisualizePlugin
     setApplication(core.application);
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);
-
     if (plugins.share) {
       setShareService(plugins.share);
     }
