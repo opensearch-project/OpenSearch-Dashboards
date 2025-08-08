@@ -60,14 +60,9 @@ describe('runQueryActionCreator', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetState.mockReturnValue({
-      queryEditor: {
-        queryExecutionButtonStatus: 'UPDATE',
-      },
-    });
   });
 
-  it('dispatches setQueryStringWithHistory, clearResults, clearQueryStatusMap, executeQueries, setActiveTab, detectAndSetOptimalTab, and setQueryExecutionButtonStatus when query is provided and status is UPDATE', async () => {
+  it('dispatches setQueryStringWithHistory, clearResults, clearQueryStatusMap, executeQueries, setActiveTab, detectAndSetOptimalTab, and setQueryExecutionButtonStatus when query is provided', async () => {
     await runQueryActionCreator(mockServices, query)(mockDispatch, mockGetState);
 
     expect(setQueryStringWithHistory).toHaveBeenCalledWith(query);
@@ -109,7 +104,7 @@ describe('runQueryActionCreator', () => {
     });
   });
 
-  it('dispatches clearResults, clearQueryStatusMap, setIsQueryEditorDirty, executeQueries, setActiveTab, detectAndSetOptimalTab, and setQueryExecutionButtonStatus when no query is provided and status is UPDATE', async () => {
+  it('dispatches clearResults, clearQueryStatusMap, setIsQueryEditorDirty, executeQueries, setActiveTab, detectAndSetOptimalTab, and setQueryExecutionButtonStatus when no query is provided', async () => {
     await runQueryActionCreator(mockServices)(mockDispatch, mockGetState);
 
     expect(setQueryStringWithHistory).not.toHaveBeenCalled();
@@ -147,7 +142,7 @@ describe('runQueryActionCreator', () => {
     });
   });
 
-  it('dispatches clearResults, clearQueryStatusMap, setIsQueryEditorDirty, executeQueries, setActiveTab, detectAndSetOptimalTab, and setQueryExecutionButtonStatus when query is undefined and status is UPDATE', async () => {
+  it('dispatches clearResults, clearQueryStatusMap, setIsQueryEditorDirty, executeQueries, setActiveTab, detectAndSetOptimalTab, and setQueryExecutionButtonStatus when query is undefined', async () => {
     await runQueryActionCreator(mockServices, undefined)(mockDispatch, mockGetState);
 
     expect(setQueryStringWithHistory).not.toHaveBeenCalled();
@@ -185,7 +180,7 @@ describe('runQueryActionCreator', () => {
     });
   });
 
-  it('dispatches setQueryStringWithHistory, clearResults, clearQueryStatusMap, setIsQueryEditorDirty, executeQueries, setActiveTab, detectAndSetOptimalTab, and setQueryExecutionButtonStatus when query is an empty string and status is UPDATE', async () => {
+  it('dispatches setQueryStringWithHistory, clearResults, clearQueryStatusMap, setIsQueryEditorDirty, executeQueries, setActiveTab, detectAndSetOptimalTab, and setQueryExecutionButtonStatus when query is an empty string', async () => {
     const emptyQuery = '';
     await runQueryActionCreator(mockServices, emptyQuery)(mockDispatch, mockGetState);
 
@@ -200,76 +195,6 @@ describe('runQueryActionCreator', () => {
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
       type: 'setQueryStringWithHistory',
       payload: emptyQuery,
-    });
-    expect(mockDispatch).toHaveBeenNthCalledWith(2, { type: 'clearResults' });
-    expect(mockDispatch).toHaveBeenNthCalledWith(3, {
-      type: 'queryEditor/clearQueryStatusMap',
-      payload: undefined,
-    });
-    expect(mockDispatch).toHaveBeenNthCalledWith(4, {
-      type: 'queryEditor/setIsQueryEditorDirty',
-      payload: false,
-    });
-    expect(mockDispatch).toHaveBeenNthCalledWith(5, {
-      type: 'executeQueries',
-      payload: { services: mockServices },
-    });
-    expect(mockDispatch).toHaveBeenNthCalledWith(6, {
-      type: 'setActiveTab',
-      payload: '',
-    });
-    expect(mockDispatch).toHaveBeenNthCalledWith(7, {
-      type: 'detectAndSetOptimalTab',
-      payload: { services: mockServices },
-    });
-    expect(mockDispatch).toHaveBeenNthCalledWith(8, {
-      type: 'queryEditor/setQueryExecutionButtonStatus',
-      payload: 'REFRESH',
-    });
-  });
-
-  it('does not dispatch anything when queryExecutionButtonStatus is REFRESH (prevents double execution)', async () => {
-    mockGetState.mockReturnValue({
-      queryEditor: {
-        queryExecutionButtonStatus: 'REFRESH',
-      },
-    });
-
-    await runQueryActionCreator(mockServices, query)(mockDispatch, mockGetState);
-
-    // Should not dispatch anything when status is REFRESH
-    expect(setQueryStringWithHistory).not.toHaveBeenCalled();
-    expect(clearResults).not.toHaveBeenCalled();
-    expect(clearQueryStatusMap).not.toHaveBeenCalled();
-    expect(executeQueries).not.toHaveBeenCalled();
-    expect(setActiveTab).not.toHaveBeenCalled();
-    expect(detectAndSetOptimalTab).not.toHaveBeenCalled();
-    expect(setQueryExecutionButtonStatus).not.toHaveBeenCalled();
-
-    expect(mockDispatch).toHaveBeenCalledTimes(0);
-  });
-
-  it('dispatches all actions including setActiveTab, detectAndSetOptimalTab, and setQueryExecutionButtonStatus when queryExecutionButtonStatus is DISABLED', async () => {
-    mockGetState.mockReturnValue({
-      queryEditor: {
-        queryExecutionButtonStatus: 'DISABLED',
-      },
-    });
-
-    await runQueryActionCreator(mockServices, query)(mockDispatch, mockGetState);
-
-    expect(setQueryStringWithHistory).toHaveBeenCalledWith(query);
-    expect(clearResults).toHaveBeenCalled();
-    expect(clearQueryStatusMap).toHaveBeenCalled();
-    expect(executeQueries).toHaveBeenCalledWith({ services: mockServices });
-    expect(setActiveTab).toHaveBeenCalledWith('');
-    expect(detectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
-    expect(setQueryExecutionButtonStatus).toHaveBeenCalledWith('REFRESH');
-
-    expect(mockDispatch).toHaveBeenCalledTimes(8);
-    expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-      type: 'setQueryStringWithHistory',
-      payload: query,
     });
     expect(mockDispatch).toHaveBeenNthCalledWith(2, { type: 'clearResults' });
     expect(mockDispatch).toHaveBeenNthCalledWith(3, {
