@@ -87,6 +87,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
 import { GlobalSearchCommand } from '../../global_search';
+import { HeaderBanner } from './header_banner';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -663,7 +664,7 @@ export function Header({
 
   return (
     <>
-      {globalBanner && <div className="globalBanner">{globalBanner.component}</div>}
+      <HeaderBanner globalBanner={globalBanner} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}
