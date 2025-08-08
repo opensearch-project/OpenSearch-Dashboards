@@ -37,11 +37,7 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
     },
     availableMappings: [
       {
-        mapping: [
-          {
-            [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
+        [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
       },
     ],
   },

@@ -36,14 +36,11 @@ export interface ChartStyleControlMap {
   bar: BarChartStyleControls;
   area: AreaChartStyleControls;
   table: TableChartStyleControls;
-  // NOTE: Log table does not have style controls.
-  // log is one of chart types?
-  // logs: {};
 }
 
 export type StyleOptions = ChartStyleControlMap[ChartType];
 
-export type AllChartStyleControls =
+type AllChartStyleControls =
   | LineChartStyleControls
   | PieChartStyleControls
   | BarChartStyleControls
@@ -65,9 +62,7 @@ export interface StyleControlsProps<T extends AllChartStyleControls> {
   updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
-export interface ChartTypePossibleMapping {
-  mapping: Array<Partial<Record<AxisRole, { type: VisFieldType; index: number }>>>;
-}
+type ChartTypePossibleMapping = Partial<Record<AxisRole, { type: VisFieldType; index: number }>>;
 
 export interface VisualizationType<T extends ChartType> {
   readonly name: string;

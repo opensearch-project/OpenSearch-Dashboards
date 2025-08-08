@@ -49,7 +49,7 @@ export const findRuleByIndex = (
 };
 
 export const getColumnMatchFromMapping = (
-  mapping: Array<Record<string, { type: VisFieldType; index: number }>>
+  mapping: Record<string, { type: VisFieldType; index: number }>
 ): number[] => {
   const counts = {
     [VisFieldType.Numerical]: 0,
@@ -57,7 +57,7 @@ export const getColumnMatchFromMapping = (
     [VisFieldType.Date]: 0,
     [VisFieldType.Unknown]: 0,
   };
-  Object.values(mapping[0]).forEach(({ type }) => {
+  Object.values(mapping).forEach(({ type }) => {
     if (type in counts) counts[type]++;
   });
   return [

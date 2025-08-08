@@ -118,12 +118,8 @@ describe('AxesSelectPanel', () => {
       ui: {
         availableMappings: [
           {
-            mapping: [
-              {
-                [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-              },
-            ],
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
           },
         ],
       },
@@ -213,12 +209,8 @@ describe('AxesSelectPanel', () => {
       ui: {
         availableMappings: [
           {
-            mapping: [
-              {
-                [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-              },
-            ],
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
           },
         ],
       },
@@ -241,12 +233,8 @@ describe('AxesSelectPanel', () => {
       ui: {
         availableMappings: [
           {
-            mapping: [
-              {
-                [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-              },
-            ],
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
           },
         ],
       },
@@ -277,13 +265,9 @@ describe('AxesSelectPanel', () => {
       ui: {
         availableMappings: [
           {
-            mapping: [
-              {
-                [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-                [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-              },
-            ],
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
           },
         ],
       },

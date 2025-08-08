@@ -160,12 +160,10 @@ describe('visualization_container_utils', () => {
 
   describe('getColumnMatchFromMapping', () => {
     it('counts column types from mapping', () => {
-      const mapping = [
-        {
-          [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-          [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-        },
-      ];
+      const mapping = {
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+      };
 
       const result = getColumnMatchFromMapping(mapping);
 
@@ -173,13 +171,11 @@ describe('visualization_container_utils', () => {
     });
 
     it('handles multiple columns of same type', () => {
-      const mapping = [
-        {
-          [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-          [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
-          [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-        },
-      ];
+      const mapping = {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+      };
 
       const result = getColumnMatchFromMapping(mapping);
 

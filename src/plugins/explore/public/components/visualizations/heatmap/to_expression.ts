@@ -6,7 +6,7 @@
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
-import { createlabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
+import { createLabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
 
 export const createHeatmapWithBin = (
   transformedData: Array<Record<string, any>>,
@@ -14,7 +14,7 @@ export const createHeatmapWithBin = (
   styles: Partial<HeatmapChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ) => {
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const colorFieldColumn = axisColumnMappings?.color as any;
   const colorField = colorFieldColumn?.column;
@@ -32,13 +32,13 @@ export const createHeatmapWithBin = (
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
         bin: true,
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
         bin: true,
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, yAxisStyle),
       },
       color: {
         field: colorField,
@@ -64,12 +64,12 @@ export const createHeatmapWithBin = (
           {
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
-            title: xAxis?.styles?.title?.text || xAxis?.name,
+            title: xAxisStyle?.title?.text || xAxis?.name,
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
-            title: yAxis?.styles?.title?.text || yAxis?.name,
+            title: yAxisStyle?.title?.text || yAxis?.name,
           },
           { field: colorField, type: 'quantitative', title: colorName },
         ],
@@ -83,7 +83,7 @@ export const createHeatmapWithBin = (
     $schema: VEGASCHEMA,
     data: { values: transformedData },
     transform: addTransform(styles, colorField),
-    layer: [markLayer, createlabelLayer(styles, false, colorField, xAxis, yAxis)].filter(Boolean),
+    layer: [markLayer, createLabelLayer(styles, false, colorField, xAxis, yAxis)].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${colorName} by ${xAxis?.name} and ${yAxis?.name}`
       : undefined,
@@ -97,7 +97,7 @@ export const createRegularHeatmap = (
   styles: Partial<HeatmapChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ) => {
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const colorFieldColumn = axisColumnMappings?.color!;
   const colorField = colorFieldColumn?.column;
@@ -114,13 +114,13 @@ export const createRegularHeatmap = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, true),
+        axis: applyAxisStyling(xAxis, xAxisStyle, true),
         // for regular heatmap, both x and y refer to categorical fields, we shall disable grid line for this case
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, true),
+        axis: applyAxisStyling(yAxis, yAxisStyle, true),
       },
       color: {
         field: colorField,
@@ -146,12 +146,12 @@ export const createRegularHeatmap = (
           {
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
-            title: xAxis?.styles?.title?.text || xAxis?.name,
+            title: xAxisStyle?.title?.text || xAxis?.name,
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
-            title: yAxis?.styles?.title?.text || yAxis?.name,
+            title: yAxisStyle?.title?.text || yAxis?.name,
           },
           { field: colorField, type: 'quantitative', title: colorName },
         ],
@@ -165,7 +165,7 @@ export const createRegularHeatmap = (
     $schema: VEGASCHEMA,
     data: { values: transformedData },
     transform: addTransform(styles, colorField),
-    layer: [markLayer, createlabelLayer(styles, true, colorField, xAxis, yAxis)].filter(Boolean),
+    layer: [markLayer, createLabelLayer(styles, true, colorField, xAxis, yAxis)].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${colorName} by ${xAxis?.name} and ${yAxis?.name}`
       : undefined,

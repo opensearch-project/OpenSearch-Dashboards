@@ -137,13 +137,9 @@ export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
     },
     availableMappings: [
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Categorical, index: 1 },
-            [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 1 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 0 },
       },
     ],
   },

@@ -11,12 +11,15 @@ import {
   VisFieldType,
   VisColumn,
   AxisColumnMappings,
-  CompleteAxisWithStyle,
   AxisSupportedStyles,
 } from '../types';
 
-export const applyAxisStyling = (axesStyle?: CompleteAxisWithStyle, disableGrid?: boolean): any => {
-  const gridEnabled = disableGrid ? false : axesStyle?.styles?.grid.showLines ?? true;
+export const applyAxisStyling = (
+  axis?: VisColumn,
+  axisStyle?: StandardAxes,
+  disableGrid?: boolean
+): any => {
+  const gridEnabled = disableGrid ? false : axisStyle?.grid.showLines ?? true;
 
   const fullAxisConfig: any = {
     // Grid settings
@@ -28,13 +31,13 @@ export const applyAxisStyling = (axesStyle?: CompleteAxisWithStyle, disableGrid?
 
   // Apply position
 
-  fullAxisConfig.orient = axesStyle?.styles?.position;
+  fullAxisConfig.orient = axisStyle?.position;
 
   // Apply title settings
-  fullAxisConfig.title = axesStyle?.styles?.title.text || axesStyle?.name;
+  fullAxisConfig.title = axisStyle?.title.text || axis?.name;
 
   // Apply axis visibility
-  if (!axesStyle?.styles?.show) {
+  if (!axisStyle?.show) {
     fullAxisConfig.title = null;
     fullAxisConfig.labels = false;
     fullAxisConfig.ticks = false;
@@ -43,22 +46,19 @@ export const applyAxisStyling = (axesStyle?: CompleteAxisWithStyle, disableGrid?
   }
 
   // Apply label settings
-  if (axesStyle.styles?.labels) {
-    if (!axesStyle.styles?.labels.show) {
+  if (axisStyle?.labels) {
+    if (!axisStyle?.labels.show) {
       fullAxisConfig.labels = false;
     } else {
       fullAxisConfig.labels = true;
       // Apply label rotation/alignment
-      if (axesStyle.styles?.labels.rotate !== undefined) {
-        fullAxisConfig.labelAngle = axesStyle.styles?.labels.rotate;
+      if (axisStyle?.labels.rotate !== undefined) {
+        fullAxisConfig.labelAngle = axisStyle?.labels.rotate;
       }
 
       // Apply label truncation
-      if (
-        axesStyle.styles?.labels.truncate !== undefined &&
-        axesStyle.styles?.labels.truncate > 0
-      ) {
-        fullAxisConfig.labelLimit = axesStyle.styles?.labels.truncate;
+      if (axisStyle?.labels.truncate !== undefined && axisStyle?.labels.truncate > 0) {
+        fullAxisConfig.labelLimit = axisStyle?.labels.truncate;
       }
 
       // Apply label filtering (this controls overlapping labels)
@@ -151,68 +151,45 @@ const positionSwapMap: Record<Positions, Positions> = {
 
 const swapPosition = (pos: Positions): Positions => positionSwapMap[pos] ?? pos;
 
-export function getSwappedAxes(
-  xAxis: CompleteAxisWithStyle,
-  yAxis: CompleteAxisWithStyle,
-  switchAxes: boolean
-): [CompleteAxisWithStyle, CompleteAxisWithStyle] {
-  if (!switchAxes) {
-    return [xAxis, yAxis];
-  }
-
-  // Swap the positions, update the position field
-  // merge styles with axis mapping
-  const swappedXAxis = {
-    ...xAxis,
-    styles: {
-      ...xAxis.styles,
-      position: swapPosition(xAxis.styles.position),
-    },
-  };
-
-  const swappedYAxis = {
-    ...yAxis,
-    styles: {
-      ...yAxis.styles,
-      position: swapPosition(yAxis.styles.position),
-    },
-  };
-
-  // Swap X and Y axis data
-  // TODO it's not safe to create a new type, refactor to return  return [xAxis, xMapping, yAxis, yMapping]
-  return [swappedYAxis, swappedXAxis];
-}
-
 export const getSwappedAxisRole = (
   styles: Partial<AxisSupportedStyles>,
   axisColumnMappings?: AxisColumnMappings
-): [CompleteAxisWithStyle | undefined, CompleteAxisWithStyle | undefined] => {
-  const xColumn = axisColumnMappings?.x;
-  const yColumn = axisColumnMappings?.y;
+): {
+  xAxis?: VisColumn;
+  yAxis?: VisColumn;
+  xAxisStyle?: StandardAxes;
+  yAxisStyle?: StandardAxes;
+} => {
+  const xAxis = axisColumnMappings?.x;
+  const yAxis = axisColumnMappings?.y;
 
-  const xAxis = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
-  const yAxis = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
+  const xAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
+  const yAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
 
-  if (!xAxis || !yAxis) {
-    return [undefined, undefined];
+  if (!styles?.switchAxes) {
+    return { xAxis, xAxisStyle, yAxis, yAxisStyle };
   }
 
-  const xAxisWithMapping: CompleteAxisWithStyle = {
-    ...xColumn,
-    styles: xAxis,
+  return {
+    xAxis: yAxis,
+    xAxisStyle: yAxisStyle
+      ? {
+          ...yAxisStyle,
+          ...(yAxisStyle?.position ? { position: swapPosition(yAxisStyle.position) } : undefined),
+        }
+      : undefined,
+    yAxis: xAxis,
+    yAxisStyle: xAxisStyle
+      ? {
+          ...xAxisStyle,
+          ...(xAxisStyle?.position ? { position: swapPosition(xAxisStyle.position) } : undefined),
+        }
+      : undefined,
   };
-
-  const yAxisWithMapping: CompleteAxisWithStyle = {
-    ...yColumn,
-    styles: yAxis,
-  };
-
-  // Swap axes and their positions based on switchAxes flag
-  return getSwappedAxes(xAxisWithMapping, yAxisWithMapping, styles?.switchAxes ?? false);
 };
 
 export const getSchemaByAxis = (
-  axis?: CompleteAxisWithStyle | VisColumn
+  axis?: VisColumn
 ): 'quantitative' | 'nominal' | 'temporal' | 'unknown' => {
   switch (axis?.schema) {
     case VisFieldType.Numerical:

@@ -121,8 +121,8 @@ describe('line_vis_config', () => {
       const config = createLineConfig();
 
       expect(config.ui.availableMappings).toHaveLength(5);
-      expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty('x');
-      expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty('y');
+      expect(config.ui.availableMappings[0]).toHaveProperty('x');
+      expect(config.ui.availableMappings[0]).toHaveProperty('y');
     });
 
     it('should render the LineVisStyleControls component with the provided props', () => {
