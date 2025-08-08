@@ -29,17 +29,18 @@
  */
 
 import React, { useMemo } from 'react';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../overlays';
+import { ChromeGlobalBanner } from '../chrome/chrome_service';
 
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
   useUpdatedHeader?: boolean;
-  injectedMetadata?: any;
-}> = ({ chromeVisible$, sidecarConfig$, useUpdatedHeader, injectedMetadata, children }) => {
+  globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
+}> = ({ chromeVisible$, sidecarConfig$, useUpdatedHeader, globalBanner$, children }) => {
   const visible = useObservable(chromeVisible$);
   const sidecarConfig = useObservable(sidecarConfig$, undefined);
 
@@ -47,11 +48,9 @@ export const AppWrapper: React.FunctionComponent<{
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
 
-  // Get the banner plugin configuration
-  const bannerPluginConfig = injectedMetadata
-    ?.getPlugins()
-    ?.find((plugin: { id: string }) => plugin.id === 'banner')?.config;
-  const isBannerEnabled = bannerPluginConfig?.enabled === true;
+  // Check if banner is enabled based on globalBanner$ observable
+  const globalBanner = useObservable(globalBanner$ || of(undefined), undefined);
+  const isBannerEnabled = !!globalBanner;
 
   return (
     <div
