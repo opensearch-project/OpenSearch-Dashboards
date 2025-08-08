@@ -109,6 +109,14 @@ export interface ChromeHelpExtension {
   content?: (element: HTMLDivElement) => () => void;
 }
 
+/** @public */
+export interface ChromeGlobalBanner {
+  /**
+   * React component to render as the global banner
+   */
+  component: React.ReactNode;
+}
+
 interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
@@ -148,6 +156,7 @@ export class ChromeService {
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
   private navGroupStart?: ChromeNavGroupServiceStartContract;
   private applicationStart?: InternalApplicationStart;
+  private globalBanner$ = new BehaviorSubject<ChromeGlobalBanner | undefined>(undefined);
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -421,7 +430,7 @@ export class ChromeService {
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
           globalSearchCommands={globalSearch.getAllSearchCommands()}
-          injectedMetadata={injectedMetadata}
+          globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
         />
       ),
 
@@ -485,6 +494,12 @@ export class ChromeService {
 
       setCustomNavLink: (customNavLink?: ChromeNavLink) => {
         customNavLink$.next(customNavLink);
+      },
+
+      getGlobalBanner$: () => this.globalBanner$.pipe(takeUntil(this.stop$)),
+
+      setGlobalBanner: (banner?: ChromeGlobalBanner) => {
+        this.globalBanner$.next(banner);
       },
     };
   }
@@ -662,6 +677,16 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
+
+  /**
+   * Get an observable of the current global banner
+   */
+  getGlobalBanner$(): Observable<ChromeGlobalBanner | undefined>;
+
+  /**
+   * Set or unset the global banner component
+   */
+  setGlobalBanner(banner?: ChromeGlobalBanner): void;
 }
 
 /** @internal */
