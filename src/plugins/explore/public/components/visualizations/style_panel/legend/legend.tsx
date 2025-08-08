@@ -17,15 +17,13 @@ export interface LegendOptions {
 export interface LegendOptionsProps {
   legendOptions: LegendOptions;
   onLegendOptionsChange: (legendOptions: Partial<LegendOptions>) => void;
-  shouldShowLegend?: boolean;
 }
 
 export const LegendOptionsPanel = ({
   legendOptions,
   onLegendOptionsChange,
-  shouldShowLegend = true,
 }: LegendOptionsProps) => {
-  if (!shouldShowLegend || !legendOptions || !onLegendOptionsChange) {
+  if (!legendOptions || !onLegendOptionsChange) {
     return null;
   }
 

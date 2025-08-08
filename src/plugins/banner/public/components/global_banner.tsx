@@ -21,17 +21,39 @@ interface GlobalBannerProps {
   http: HttpStart;
 }
 
+// Key for storing banner hidden state in sessionStorage
+const BANNER_HIDDEN_KEY = 'bannerHidden';
+
 export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
   const [bannerConfig, setBannerConfig] = useState<BannerConfig | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const bannerRef = useRef<HTMLDivElement>(null);
+
+  // Check if banner is hidden in sessionStorage
+  const isBannerHidden = useCallback(() => {
+    try {
+      return sessionStorage.getItem(BANNER_HIDDEN_KEY) === 'true';
+    } catch (e) {
+      // If sessionStorage is not available, return false
+      return false;
+    }
+  }, []);
 
   // Fetch banner config from API when component mounts
   const fetchBannerConfig = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await http.get<BannerConfig>('/api/_plugins/_banner/content');
-      setBannerConfig(response);
+
+      // Apply cached hidden state if applicable
+      if (isBannerHidden()) {
+        setBannerConfig({
+          ...response,
+          isVisible: false,
+        });
+      } else {
+        setBannerConfig(response);
+      }
     } catch (error) {
       // Hide banner on error
       setBannerConfig({
@@ -40,7 +62,7 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [http]);
+  }, [http, isBannerHidden]);
 
   // Initial fetch when component mounts
   useEffect(() => {
@@ -88,9 +110,17 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
   }, [bannerConfig]);
 
   // Hide banner when close button is clicked
-  const hideBanner = () => {
+  const hideBanner = useCallback(() => {
+    // Update the state - this ensures the banner is hidden in the current session
     setBannerConfig((prevConfig) => (prevConfig ? { ...prevConfig, isVisible: false } : null));
-  };
+
+    // Store the hidden state in sessionStorage
+    try {
+      sessionStorage.setItem(BANNER_HIDDEN_KEY, 'true');
+    } catch (e) {
+      // Intentionally empty - state is already updated above so banner will still be hidden
+    }
+  }, []);
 
   if (isLoading) {
     return (

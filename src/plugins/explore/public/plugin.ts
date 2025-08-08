@@ -30,6 +30,7 @@ import {
 } from '../../opensearch_dashboards_utils/public';
 import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/config';
+import { resetVisualizationBuilder } from './components/visualizations/visualization_builder';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -341,7 +342,7 @@ export class ExplorePlugin
         return () => {
           abortAllActiveQueries();
           services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
-
+          resetVisualizationBuilder();
           appUnMounted();
           unmount();
           unsubscribeStore();

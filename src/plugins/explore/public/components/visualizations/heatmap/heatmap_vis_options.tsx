@@ -82,7 +82,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
           {shouldShowLegend && (
             <EuiFlexItem grow={false}>
               <LegendOptionsPanel
-                shouldShowLegend={shouldShowLegend}
                 legendOptions={{
                   show: styleOptions.addLegend,
                   position: styleOptions.legendPosition,
