@@ -1,0 +1,2 @@
+fix:
+- [Explore] Allow REFRESH to keep recommendation tab ([#10377](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10377))
