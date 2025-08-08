@@ -1,0 +1,2 @@
+feat:
+- Allow apps to configure available types in the dataset explorer ([#10379](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10379))

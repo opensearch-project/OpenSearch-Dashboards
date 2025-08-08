@@ -40,12 +40,13 @@ export interface DetailedDataset extends Dataset {
 export interface DatasetSelectProps {
   onSelect: (dataset: Dataset) => void;
   appName: string;
+  supportedTypes?: string[];
 }
 
 /**
  * @experimental This component is experimental and may change in future versions
  */
-const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
+const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, supportedTypes }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -316,6 +317,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName }) => {
                         }
                       }}
                       onCancel={() => overlay?.close()}
+                      supportedTypes={supportedTypes}
                     />
                   ),
                   {
