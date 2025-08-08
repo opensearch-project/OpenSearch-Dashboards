@@ -18,6 +18,8 @@ import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
 import { CanvasPanel } from '../panel/canvas_panel';
 import { Chart } from './utils';
+import { TraceChartContainer } from './trace_charts/trace_chart_container';
+import { isTraceFlavor } from '../../utils/trace_helpers';
 
 export const DiscoverChartContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -42,6 +44,11 @@ export const DiscoverChartContainer = () => {
     return dataset ? dataset.isTimeBased() : false;
   }, [dataset]);
 
+  // Detect if we're in trace flavor
+  const isTraceFlavorActive = useMemo(() => {
+    return isTraceFlavor();
+  }, []);
+
   // Process raw results to get chart data
   const processedResults = useMemo(() => {
     if (!rawResults || !dataset) {
@@ -62,6 +69,18 @@ export const DiscoverChartContainer = () => {
     return null;
   }
 
+  // For trace flavor, render the trace-specific three-chart container
+  if (isTraceFlavorActive) {
+    return (
+      <CanvasPanel className="explore-chart-panel">
+        <div className="dscCanvas__chart">
+          <TraceChartContainer />
+        </div>
+      </CanvasPanel>
+    );
+  }
+
+  // For other flavors, render the standard discover chart
   return (
     <CanvasPanel className="explore-chart-panel">
       <div className="dscCanvas__chart">

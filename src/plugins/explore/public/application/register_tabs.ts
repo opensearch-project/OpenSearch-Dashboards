@@ -4,10 +4,11 @@
  */
 
 import { LogsTab } from '../components/tabs/logs_tab';
+import { SpansTab } from '../components/tabs/spans_tab';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { PatternsTab } from '../components/tabs/patterns_tab';
 import { ExploreServices } from '../types';
-import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
+import { EXPLORE_DEFAULT_LANGUAGE, ExploreFlavor } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
 import { setUsingRegexPatterns } from './utils/state_management/slices/tab/tab_slice';
@@ -21,46 +22,56 @@ import { QueryExecutionStatus } from './utils/state_management/types';
 import { BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX } from '../components/patterns_table/utils/constants';
 import { setIndividualQueryStatus } from './utils/state_management/slices';
 
+interface TabConfig {
+  id: string;
+  label: string;
+  order: number;
+  component: any;
+  supportedLanguages: string[];
+  // Empty array means all flavors)
+  includeFlavors?: ExploreFlavor[];
+  excludeFlavors?: ExploreFlavor[];
+  prepareQuery?: (query: any, services: ExploreServices) => string;
+  handleQueryError?: (error: any, cacheKey: string, services: ExploreServices) => boolean;
+}
+
 /**
- * Registers built-in tabs with the tab registry
+ * Tab configurations for different flavors
  */
-export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: ExploreServices) => {
-  // Register Logs Tab
-  const logsTabDefinition = {
+const TAB_CONFIGURATIONS: TabConfig[] = [
+  // Logs Tab - shown for all flavors except traces
+  {
     id: 'logs',
     label: 'Logs',
-    flavor: [],
     order: 10,
-    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
-
     component: LogsTab,
+    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+    excludeFlavors: [ExploreFlavor.Traces],
+  },
 
-    // Add lifecycle hooks
-    onActive: () => {
-      // Tab activated
-    },
-    onInactive: () => {
-      // Tab deactivated
-    },
-  };
+  // Spans Tab - only shown for traces flavor
+  {
+    id: 'spans',
+    label: 'Spans',
+    order: 10,
+    component: SpansTab,
+    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+    includeFlavors: [ExploreFlavor.Traces],
+  },
 
-  tabRegistry.registerTab(logsTabDefinition);
-
-  // Register Patterns Tab
-  tabRegistry.registerTab({
+  // Patterns Tab - shown for all flavors except traces
+  {
     id: 'explore_patterns_tab',
     label: 'Patterns',
-    flavor: [],
     order: 15,
+    component: PatternsTab,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
-
-    prepareQuery: (query) => {
+    excludeFlavors: [ExploreFlavor.Traces],
+    prepareQuery: (query, services) => {
       const state = services.store.getState();
-
-      // Get the selected patterns field from the Redux state
       let patternsField = state.tab.patterns.patternsField;
-
       const preparedQuery = getQueryWithSource(query);
+
       if (!patternsField) {
         patternsField = findDefaultPatternsField(services);
       }
@@ -70,18 +81,9 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
 
       return brainPatternQuery(preparedQuery.query, patternsField);
     },
-
-    handleQueryError: (error, cacheKey) => {
+    handleQueryError: (error, cacheKey, services) => {
       const state = services.store.getState();
 
-      /**
-       * The below conditional is checking for the error returned when attempting to use a BRAIN
-       * query on an older version of the querying engine. If this error appears, an attempt is made
-       * to switch over to a patterns query which works on older versions of the querying engine.
-       * A redux state is set to inform the UI that this older query is being utilized
-       * Finally, the query is retriggered.
-       * The return value being true will prevent the standard error from dispatching, keeping the page clear
-       */
       if (
         error &&
         error.status &&
@@ -89,7 +91,6 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
         error.error.details &&
         error.error.details.startsWith(BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX)
       ) {
-        // can check further details of err if needed
         let patternsField = state.tab.patterns.patternsField;
         if (!patternsField) {
           patternsField = findDefaultPatternsField(services);
@@ -104,7 +105,6 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
           })
         );
 
-        // set the old cacheKey to uninitialized to finalize loading, our new tab query has new cacheKey
         services.store.dispatch(
           setIndividualQueryStatus({
             cacheKey,
@@ -122,41 +122,123 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
 
       return false;
     },
+  },
 
-    component: PatternsTab,
-  });
-
-  // Register Visualizations Tab
-  tabRegistry.registerTab({
+  // Visualization Tab - shown for all flavors
+  {
     id: 'explore_visualization_tab',
     label: 'Visualization',
-    flavor: [],
     order: 20,
+    component: VisTab,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
-
-    // No query transformation for visualizations tab
-    // Visualization tab owner will implement their own prepareQuery
     prepareQuery: (query) => {
       const preparedQuery = getQueryWithSource(query);
       return preparedQuery.query;
     },
+  },
+];
 
-    component: VisTab,
-  });
+/**
+ * Check if a tab should be shown for the given flavor
+ */
+const shouldShowTab = (tabConfig: TabConfig, flavor?: ExploreFlavor): boolean => {
+  // If includeFlavors is specified, only show for those flavors
+  if (tabConfig.includeFlavors && tabConfig.includeFlavors.length > 0) {
+    return flavor ? tabConfig.includeFlavors.includes(flavor) : false;
+  }
+
+  // If excludeFlavors is specified, hide for those flavors
+  if (tabConfig.excludeFlavors && tabConfig.excludeFlavors.length > 0) {
+    return flavor ? !tabConfig.excludeFlavors.includes(flavor) : true;
+  }
+
+  // Default: show for all flavors
+  return true;
+};
+
+/**
+ * Registers built-in tabs with the tab registry
+ */
+export const registerBuiltInTabs = (
+  tabRegistry: TabRegistryService,
+  services: ExploreServices,
+  flavor?: ExploreFlavor
+) => {
+  TAB_CONFIGURATIONS.filter((tabConfig) => shouldShowTab(tabConfig, flavor)).forEach(
+    (tabConfig) => {
+      const tabDefinition: any = {
+        id: tabConfig.id,
+        label: tabConfig.label,
+        flavor: [],
+        order: tabConfig.order,
+        supportedLanguages: tabConfig.supportedLanguages,
+        component: tabConfig.component,
+      };
+
+      // Add custom query preparation if provided
+      if (tabConfig.prepareQuery) {
+        tabDefinition.prepareQuery = (query: any) => tabConfig.prepareQuery!(query, services);
+      }
+
+      // Add custom error handling if provided
+      if (tabConfig.handleQueryError) {
+        tabDefinition.handleQueryError = (error: any, cacheKey: string) =>
+          tabConfig.handleQueryError!(error, cacheKey, services);
+      }
+
+      tabRegistry.registerTab(tabDefinition);
+    }
+  );
 };
 
 /**
  * Register tabs in the application
  * This is the main entry point for tab registration
  */
-export const registerTabs = (services: ExploreServices) => {
-  // Register built-in tabs
-  registerBuiltInTabs(services.tabRegistry, services);
+export const registerTabs = (services: ExploreServices, flavor?: ExploreFlavor) => {
+  // If no flavor is provided, try to detect it from the URL as fallback
+  if (!flavor) {
+    const path = window.location.pathname;
+    if (path.includes(`/${ExploreFlavor.Logs}`)) {
+      flavor = ExploreFlavor.Logs;
+    } else if (path.includes(`/${ExploreFlavor.Traces}`)) {
+      flavor = ExploreFlavor.Traces;
+    } else if (path.includes(`/${ExploreFlavor.Metrics}`)) {
+      flavor = ExploreFlavor.Metrics;
+    }
+  }
+
+  // Clear existing tabs before registering new ones
+  // This ensures tabs are properly updated when navigating between flavors
+  services.tabRegistry.clearTabs();
+
+  // Register built-in tabs with the appropriate flavor
+  registerBuiltInTabs(services.tabRegistry, services, flavor);
 
   // Register plugin-provided tabs
   // This would be called by plugins that want to add tabs
   const pluginTabs = (services as any).plugins?.explore?.getTabs?.() || [];
 
+  pluginTabs.forEach(
+    (tabDefinition: import('../services/tab_registry/tab_registry_service').TabDefinition) => {
+      services.tabRegistry.registerTab(tabDefinition);
+    }
+  );
+};
+
+/**
+ * Re-register tabs when flavor changes
+ * This should be called when navigating between different flavors
+ */
+export const reRegisterTabsForFlavor = (services: ExploreServices, flavor: ExploreFlavor) => {
+  // Clear existing tabs
+  services.tabRegistry.clearTabs();
+
+  // Register built-in tabs with the new flavor
+  registerBuiltInTabs(services.tabRegistry, services, flavor);
+
+  // Register plugin-provided tabs
+  const pluginTabs = (services as any).plugins?.explore?.getTabs?.() || [];
   pluginTabs.forEach(
     (tabDefinition: import('../services/tab_registry/tab_registry_service').TabDefinition) => {
       services.tabRegistry.registerTab(tabDefinition);
