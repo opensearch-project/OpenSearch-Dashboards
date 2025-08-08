@@ -1,0 +1,2 @@
+fix:
+- Fix vega data url with signal not working ([#10339](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10339))
