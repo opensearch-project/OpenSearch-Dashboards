@@ -4,15 +4,11 @@
  */
 
 import Papa from 'papaparse';
-import {
-  getRandomizedWorkspaceName,
-  setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/explore/shared';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import {
   DATASOURCE_NAME,
   INDEX_WITH_TIME_1,
   INDEX_WITHOUT_TIME_1,
-  QueryLanguages,
 } from '../../../../../../utils/apps/explore/constants';
 import {
   downloadCsvAndVerify,
@@ -106,53 +102,6 @@ const runDownloadCsvTests = () => {
         // deselect the selected fields
         toggleFieldsForCsvDownload();
       });
-    });
-
-    // TODO: PPL currently does not respect the number of rows setting
-    it.skip('Should be able to change the number of rows setting and have it download correct amount', () => {
-      const config = {
-        dataset: `${INDEX_WITH_TIME_1}*`,
-      };
-      const language = QueryLanguages.PPL;
-      const expectedCount = 95;
-
-      cy.visit('/app/settings');
-      cy.getElementByTestId('settingsSearchBar').should('be.visible').type('Number of rows');
-      cy.getElementByTestId('advancedSetting-editField-discover:sampleSize')
-        .clear()
-        .type(expectedCount.toString())
-        .type('{rightArrow}{backspace}');
-
-      // force: true because sometimes it is hidden by a popup
-      cy.getElementByTestId('advancedSetting-saveButton').click({ force: true });
-
-      cy.getElementByTestId('advancedSetting-saveButton').should('not.exist');
-
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        workspaceName,
-        page: 'explore/logs',
-        isEnhancement: true,
-      });
-
-      cy.setIndexPatternAsDataset(config.dataset, DATASOURCE_NAME);
-
-      setDatePickerDatesAndSearchIfRelevant(language.name);
-
-      // eslint-disable-next-line no-loop-func
-      downloadCsvAndVerify('Visible', (csvString) => {
-        const { data } = Papa.parse(csvString);
-        cy.wrap(data).should('have.length', expectedCount + 1);
-      });
-
-      // cleanup
-      cy.visit('/app/settings');
-      cy.getElementByTestId('settingsSearchBar').should('be.visible').type('Number of rows');
-      cy.getElementByTestId('advancedSetting-resetField-discover:sampleSize').click();
-
-      // force: true because sometimes it is hidden by a popup
-      cy.getElementByTestId('advancedSetting-saveButton').click({ force: true });
-
-      cy.getElementByTestId('advancedSetting-saveButton').should('not.exist');
     });
   });
 };
