@@ -245,7 +245,7 @@ export const timeUnitToFormat: { [key: string]: string } = {
  */
 export const inferTimeUnitFromTimestamps = (
   data: Array<Record<string, any>>,
-  field: string
+  field: string | undefined
 ): string | null => {
   if (!data || data.length === 0 || !field) {
     return null;
@@ -288,9 +288,9 @@ export const inferTimeUnitFromTimestamps = (
  */
 export const getTooltipFormat = (
   data: Array<Record<string, any>>,
-  field: string | undefined, // Updated to accept string | undefined
+  field: string | undefined,
   fallback = '%b %d, %Y %H:%M:%S'
 ): string => {
-  const timeUnit = inferTimeUnitFromTimestamps(data, field || ''); // Use empty string if field is undefined
+  const timeUnit = inferTimeUnitFromTimestamps(data, field);
   return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
 };
