@@ -186,9 +186,10 @@ export function DiscoverFieldSearch({
   ) => {
     return (
       <EuiSelect
+        key={selectValue}
         id={`${id}-select`}
         options={selectOptions}
-        value={selectValue}
+        defaultValue={selectValue}
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
           handleValueChange(id, e.target.value)
         }

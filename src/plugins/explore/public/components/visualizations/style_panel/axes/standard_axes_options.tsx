@@ -94,6 +94,10 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
     }));
   };
 
+  const getLabelAlignment = (rotate: number): string => {
+    return rotate === 0 ? 'horizontal' : rotate === -90 ? 'vertical' : 'angled';
+  };
+
   if (!standardAxes) {
     return null;
   }
@@ -209,14 +213,9 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                         })}
                       >
                         <EuiSelect
+                          key={getLabelAlignment(axis.labels.rotate)}
                           compressed
-                          value={
-                            axis.labels.rotate === 0
-                              ? 'horizontal'
-                              : axis.labels.rotate === -90
-                              ? 'vertical'
-                              : 'angled'
-                          }
+                          defaultValue={getLabelAlignment(axis.labels.rotate)}
                           onChange={(e) => {
                             let rotationValue = 0;
                             if (e.target.value === 'vertical') rotationValue = -90;

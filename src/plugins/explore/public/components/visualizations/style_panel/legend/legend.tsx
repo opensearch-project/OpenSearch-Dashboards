@@ -81,9 +81,10 @@ export const LegendOptionsPanel = ({
             })}
           >
             <EuiSelect
+              key={legendOptions.position}
               compressed
               options={legendPositionOptions}
-              value={legendOptions.position}
+              defaultValue={legendOptions.position}
               onChange={(e) => onLegendOptionsChange({ position: e.target.value as Positions })}
               data-test-subj="legendPositionSelect"
             />

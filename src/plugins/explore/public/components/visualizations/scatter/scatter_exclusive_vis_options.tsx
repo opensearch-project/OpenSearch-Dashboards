@@ -53,9 +53,10 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
         })}
       >
         <EuiSelect
+          key={styles.pointShape}
           compressed
           options={pointShapes}
-          value={styles.pointShape}
+          defaultValue={styles.pointShape}
           onChange={(e) => updateStyle('pointShape', e.target.value as PointShape)}
         />
       </EuiFormRow>
