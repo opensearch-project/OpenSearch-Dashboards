@@ -10,12 +10,12 @@
  */
 
 export interface KeyboardShortcutSetup {
-  register(shortcuts: ShortcutDefinition[]): void;
+  register(shortcut: ShortcutDefinition): void;
 }
 
 export interface KeyboardShortcutStart {
-  register(shortcuts: ShortcutDefinition[]): void;
-  unregister(id: string): void;
+  register(shortcut: ShortcutDefinition): void;
+  unregister(shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>): void;
 }
 
 /**

@@ -16,11 +16,12 @@ import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from
  * @experimental
  */
 export class KeyboardShortcutService {
-  private shortcuts = new Map<string, ShortcutDefinition[]>();
+  private shortcutsMapByKey = new Map<string, ShortcutDefinition[]>();
+  private namespacedIdToKeyLookup = new Map<string, string>();
 
   public setup(): KeyboardShortcutSetup {
     return {
-      register: (shortcuts) => this.register(shortcuts),
+      register: (shortcut) => this.register(shortcut),
     };
   }
 
@@ -28,51 +29,81 @@ export class KeyboardShortcutService {
     this.startEventListener();
 
     return {
-      register: (shortcuts) => this.register(shortcuts),
-      unregister: (id) => this.unregister(id),
+      register: (shortcut) => this.register(shortcut),
+      unregister: (shortcut) => this.unregister(shortcut),
     };
   }
 
   public stop() {
     this.stopEventListener();
-    this.shortcuts.clear();
+    this.shortcutsMapByKey.clear();
+    this.namespacedIdToKeyLookup.clear();
   }
 
-  private normalizeKeyboardShortcutString = (str: string): string => str.toLowerCase();
+  private getNormalizedKey = (str: string): string => str.toLowerCase();
 
-  private getNamespacedIdForKeyboardShortcut = (
-    shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>
-  ) =>
-    `${this.normalizeKeyboardShortcutString(shortcut.id)}.${this.normalizeKeyboardShortcutString(
-      shortcut.pluginId
-    )}`;
+  private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
+    `${shortcut.id.toLowerCase()}.${shortcut.pluginId.toLowerCase()}`;
 
   private getEventKeyString = (event: KeyboardEvent): string => {
-    return `${event.ctrlKey ? 'ctrl+' : ''}${event.altKey ? 'alt+' : ''}${
-      event.shiftKey ? 'shift+' : ''
-    }${event.metaKey ? 'cmd+' : ''}${this.normalizeKeyboardShortcutString(event.key)}`;
+    let key = '';
+
+    if (event.ctrlKey) {
+      key += 'ctrl+';
+    }
+
+    if (event.altKey) {
+      key += 'alt+';
+    }
+
+    if (event.shiftKey) {
+      key += 'shift+';
+    }
+
+    if (event.metaKey) {
+      key += 'cmd+';
+    }
+
+    key += this.getNormalizedKey(event.key);
+
+    return key;
   };
 
-  private register(shortcuts: ShortcutDefinition[]): void {
-    shortcuts.forEach((shortcut) => {
-      const key = this.normalizeKeyboardShortcutString(shortcut.keys);
-      const existingShortcuts = this.shortcuts.get(key) || [];
-      existingShortcuts.push(shortcut);
-      this.shortcuts.set(key, existingShortcuts);
-    });
+  private register(shortcut: ShortcutDefinition): void {
+    const key = this.getNormalizedKey(shortcut.keys);
+    const namespacedId = this.getNamespacedId(shortcut);
+
+    const existingShortcuts = this.shortcutsMapByKey.get(key) || [];
+    this.shortcutsMapByKey.set(key, [...existingShortcuts, shortcut]);
+
+    this.namespacedIdToKeyLookup.set(namespacedId, key);
   }
 
-  private unregister(fullId: string): void {
-    for (const [key, shortcuts] of this.shortcuts.entries()) {
-      const filteredShortcuts = shortcuts.filter(
-        (shortcut) => this.getNamespacedIdForKeyboardShortcut(shortcut) !== fullId
-      );
-      if (filteredShortcuts.length !== shortcuts.length) {
-        if (filteredShortcuts.length === 0) {
-          this.shortcuts.delete(key);
-        } else {
-          this.shortcuts.set(key, filteredShortcuts);
-        }
+  private unregister(shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>): void {
+    const namespacedId = this.getNamespacedId(shortcut);
+
+    const key = this.namespacedIdToKeyLookup.get(namespacedId);
+    if (!key) {
+      return;
+    }
+
+    this.namespacedIdToKeyLookup.delete(namespacedId);
+
+    const shortcuts = this.shortcutsMapByKey.get(key);
+    if (!shortcuts) {
+      return;
+    }
+
+    const filteredShortcuts = shortcuts.filter(
+      (existingShortcut: ShortcutDefinition) =>
+        this.getNamespacedId(existingShortcut) !== namespacedId
+    );
+
+    if (filteredShortcuts.length !== shortcuts.length) {
+      if (!filteredShortcuts.length) {
+        this.shortcutsMapByKey.delete(key);
+      } else {
+        this.shortcutsMapByKey.set(key, filteredShortcuts);
       }
     }
   }
@@ -99,24 +130,22 @@ export class KeyboardShortcutService {
     }
 
     const eventKeyString = this.getEventKeyString(event);
-    const shortcuts = this.shortcuts.get(eventKeyString);
+    const shortcuts = this.shortcutsMapByKey.get(eventKeyString);
 
-    if (shortcuts && shortcuts.length > 0) {
+    if (shortcuts?.length) {
+      // Prevent browser-specific keybindings if they conflict with our shortcuts
       event.preventDefault();
 
-      shortcuts.forEach((shortcut) => {
-        try {
-          shortcut.execute();
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(
-            `Error executing keyboard shortcut ${this.getNamespacedIdForKeyboardShortcut(
-              shortcut
-            )}:`,
-            error
-          );
-        }
-      });
+      const shortcut = shortcuts[shortcuts.length - 1];
+      try {
+        shortcut.execute();
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `Error executing keyboard shortcut ${this.getNamespacedId(shortcut)}:`,
+          error
+        );
+      }
     }
   };
 
