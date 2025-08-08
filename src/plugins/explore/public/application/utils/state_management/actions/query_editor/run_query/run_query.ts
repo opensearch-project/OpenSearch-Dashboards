@@ -25,6 +25,10 @@ export const runQueryActionCreator = (services: ExploreServices, query?: string)
   dispatch: AppDispatch,
   getState: () => RootState
 ) => {
+  const {
+    queryEditor: { queryExecutionButtonStatus },
+  } = getState();
+
   if (typeof query === 'string') {
     dispatch(setQueryStringWithHistory(query));
   }
@@ -34,7 +38,9 @@ export const runQueryActionCreator = (services: ExploreServices, query?: string)
 
   await dispatch(executeQueries({ services }));
 
-  dispatch(setActiveTab(''));
-  await dispatch(detectAndSetOptimalTab({ services }));
-  dispatch(setQueryExecutionButtonStatus('REFRESH'));
+  if (queryExecutionButtonStatus === 'UPDATE') {
+    dispatch(setActiveTab(''));
+    await dispatch(detectAndSetOptimalTab({ services }));
+    dispatch(setQueryExecutionButtonStatus('REFRESH'));
+  }
 };
