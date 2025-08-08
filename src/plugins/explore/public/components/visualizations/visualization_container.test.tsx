@@ -8,7 +8,6 @@ import { render, screen } from '@testing-library/react';
 import { VisualizationContainer } from './visualization_container';
 import * as VB from './visualization_builder';
 import * as TabResultsHooks from '../../application/utils/hooks/use_tab_results';
-import * as Utils from './visualization_container_utils';
 import { BehaviorSubject } from 'rxjs';
 import { ChartType } from './utils/use_visualization_types';
 import { VisFieldType } from './types';
@@ -93,13 +92,17 @@ const mockVisualizationBuilder = {
     dateColumns: [],
   }),
   axesMapping$: new BehaviorSubject({}),
-  styles$: new BehaviorSubject({
+  visConfig$: new BehaviorSubject({
     type: 'bar',
     styles: {
       legendPosition: 'right',
       thresholds: [],
       pageSize: 10,
     },
+  }),
+  vegaSpec$: new BehaviorSubject({
+    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    title: 'Test Chart',
   }),
   currentChartType$: new BehaviorSubject<ChartType | undefined>(undefined),
   handleData: jest.fn(),
@@ -130,7 +133,14 @@ describe('VisualizationContainer', () => {
   });
 
   it('renders table visualization when chart type is table', () => {
-    mockVisualizationBuilder.currentChartType$.next('table');
+    mockVisualizationBuilder.visConfig$.next({
+      type: 'table',
+      styles: {
+        legendPosition: 'right',
+        thresholds: [],
+        pageSize: 10,
+      },
+    });
 
     render(<VisualizationContainer />);
 
@@ -142,37 +152,15 @@ describe('VisualizationContainer', () => {
   });
 
   it('renders expression visualization when expression is available and axes are mapped', () => {
-    // Mock the visualization_container_utils functions
-    jest.spyOn(Utils, 'findRuleByIndex').mockReturnValue({
-      id: 'test-rule',
-      name: 'Test Rule',
-      matches: jest.fn(),
-      matchIndex: [1, 1, 0],
-      chartTypes: [{ type: 'bar', name: 'Bar Chart', priority: 1, icon: 'barChart' }],
-      toSpec: jest.fn(() => 'test-expression'),
-    });
-
-    jest.spyOn(Utils, 'convertStringsToMappings').mockReturnValue({
-      x: {
-        id: 2,
-        name: 'field1',
-        schema: VisFieldType.Categorical,
-        column: 'field1',
-        validValuesCount: 2,
-        uniqueValuesCount: 2,
-      },
-      y: {
-        id: 1,
-        name: 'count',
-        schema: VisFieldType.Numerical,
-        column: 'count',
-        validValuesCount: 2,
-        uniqueValuesCount: 2,
-      },
-    });
-
-    mockVisualizationBuilder.currentChartType$.next('bar');
     mockVisualizationBuilder.axesMapping$.next({ x: 'field1', y: 'count' });
+    mockVisualizationBuilder.visConfig$.next({
+      type: 'bar',
+      styles: {
+        legendPosition: 'right',
+        thresholds: [],
+        pageSize: 10,
+      },
+    });
 
     render(<VisualizationContainer />);
 

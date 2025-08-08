@@ -59,7 +59,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   } = services;
   const visualizationBuilder = getVisualizationBuilder();
   const axesMappings = useObservable(visualizationBuilder.axesMapping$);
-  const chartConfig = useObservable(visualizationBuilder.styles$);
+  const chartConfig = useObservable(visualizationBuilder.visConfig$);
 
   const searchContext = useSearchContext();
 

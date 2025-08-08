@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisualizationBuilder, resetVisualizationBuilder } from './visualization_builder';
+import { VisualizationBuilder } from './visualization_builder';
 import { visualizationRegistry } from './visualization_registry';
 import { VisColumn, VisFieldType } from './types';
 
@@ -51,23 +51,23 @@ describe('VisualizationBuilder', () => {
         flush: jest.fn(),
         change$: jest.fn(),
       };
-      const builder = new VisualizationBuilder({ urlStateStorage: urlStateStorageMock });
+      const builder = new VisualizationBuilder({ getUrlStateStorage: () => urlStateStorageMock });
       const setCurrentChartTypeSpy = jest.spyOn(builder, 'setCurrentChartType');
-      const setStylesSpy = jest.spyOn(builder, 'setStyles');
+      const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
 
       builder.init();
 
       expect(setCurrentChartTypeSpy).toHaveBeenCalledWith('line');
       expect(setAxesMappingSpy).toHaveBeenCalledWith({ x: 'field0', y: 'field1' });
-      expect(setStylesSpy).toHaveBeenCalledWith({ styles: { addLegend: true }, type: 'line' });
+      expect(setVisConfigSpy).toHaveBeenCalledWith({ styles: { addLegend: true }, type: 'line' });
     });
   });
 
   describe('onChartTypeChange()', () => {
     test('should do nothing if chart type is invalid', () => {
       const builder = new VisualizationBuilder({});
-      const setStylesSpy = jest.spyOn(builder, 'setStyles');
+      const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
       builder.onChartTypeChange(
         { numericalColumns: [], categoricalColumns: [], dateColumns: [], transformedData: [] },
@@ -75,7 +75,7 @@ describe('VisualizationBuilder', () => {
         'invalid-chart-type' as any,
         {}
       );
-      expect(setStylesSpy).not.toHaveBeenCalled();
+      expect(setVisConfigSpy).not.toHaveBeenCalled();
       expect(setAxesMappingSpy).not.toHaveBeenCalled();
     });
 
@@ -84,21 +84,21 @@ describe('VisualizationBuilder', () => {
         .spyOn(visualizationRegistry, 'getVisualizationConfig')
         .mockReturnValue(undefined);
       const builder = new VisualizationBuilder({});
-      const setStylesSpy = jest.spyOn(builder, 'setStyles');
+      const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
       builder.onChartTypeChange(
         { numericalColumns: [], categoricalColumns: [], dateColumns: [], transformedData: [] },
         'line',
         {}
       );
-      expect(setStylesSpy).not.toHaveBeenCalled();
+      expect(setVisConfigSpy).not.toHaveBeenCalled();
       expect(setAxesMappingSpy).not.toHaveBeenCalled();
       getVisualizationConfigSpy.mockRestore();
     });
 
     test('should reset styles to defaults if chart type changed', () => {
       const builder = new VisualizationBuilder({});
-      const setStylesSpy = jest.spyOn(builder, 'setStyles');
+      const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'setAxesMapping');
       jest.spyOn(builder, 'reuseCurrentAxesMapping');
       jest.spyOn(builder, 'createAutoVis');
@@ -113,12 +113,12 @@ describe('VisualizationBuilder', () => {
       );
       const lineStyleDefaults = visualizationRegistry.getVisualizationConfig('line')?.ui.style
         .defaults;
-      expect(setStylesSpy).toHaveBeenCalledWith({ type: 'line', styles: lineStyleDefaults });
+      expect(setVisConfigSpy).toHaveBeenCalledWith({ type: 'line', styles: lineStyleDefaults });
     });
 
     test('should do nothing if chart type is table', () => {
       const builder = new VisualizationBuilder({});
-      jest.spyOn(builder, 'setStyles');
+      jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
       jest.spyOn(builder, 'reuseCurrentAxesMapping');
       jest.spyOn(builder, 'createAutoVis');
@@ -136,7 +136,7 @@ describe('VisualizationBuilder', () => {
 
     test('should update axes mapping by reusing fields of the current axes mapping', () => {
       const builder = new VisualizationBuilder({});
-      jest.spyOn(builder, 'setStyles');
+      jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
       jest.spyOn(builder, 'reuseCurrentAxesMapping').mockReturnValue({ x: 'field0', y: 'field1' });
       jest.spyOn(builder, 'createAutoVis');
@@ -154,7 +154,7 @@ describe('VisualizationBuilder', () => {
 
     test('should update axes mapping based on the auto create chart', () => {
       const builder = new VisualizationBuilder({});
-      jest.spyOn(builder, 'setStyles');
+      jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
       jest.spyOn(builder, 'reuseCurrentAxesMapping');
       // mock auto visualization created
@@ -175,7 +175,7 @@ describe('VisualizationBuilder', () => {
 
     test('should fallback to reset axes mapping to empty ', () => {
       const builder = new VisualizationBuilder({});
-      jest.spyOn(builder, 'setStyles');
+      jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
       jest.spyOn(builder, 'reuseCurrentAxesMapping');
       // mock auto visualization created
@@ -260,21 +260,21 @@ describe('VisualizationBuilder', () => {
   describe('onDataChange()', () => {
     test('should do nothing if no data', () => {
       const builder = new VisualizationBuilder({});
-      const setStylesSpy = jest.spyOn(builder, 'setStyles');
+      const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
       const setCurrentChartTypeSpy = jest.spyOn(builder, 'setCurrentChartType');
       jest.spyOn(builder, 'createAutoVis');
 
       // data is undefined
       builder.onDataChange(undefined);
-      expect(setStylesSpy).not.toHaveBeenCalled();
+      expect(setVisConfigSpy).not.toHaveBeenCalled();
       expect(setAxesMappingSpy).not.toHaveBeenCalled();
       expect(setCurrentChartTypeSpy).not.toHaveBeenCalled();
     });
 
     test('should do nothing if chart type is `table`', () => {
       const builder = new VisualizationBuilder({});
-      const setStylesSpy = jest.spyOn(builder, 'setStyles');
+      const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
       const setCurrentChartTypeSpy = jest.spyOn(builder, 'setCurrentChartType');
       jest.spyOn(builder, 'createAutoVis');
@@ -289,7 +289,7 @@ describe('VisualizationBuilder', () => {
         },
         'table'
       );
-      expect(setStylesSpy).not.toHaveBeenCalled();
+      expect(setVisConfigSpy).not.toHaveBeenCalled();
       expect(setAxesMappingSpy).not.toHaveBeenCalled();
       expect(setCurrentChartTypeSpy).not.toHaveBeenCalled();
     });
@@ -297,7 +297,7 @@ describe('VisualizationBuilder', () => {
     test('should create auto vis if chart type or axes mapping can no longer be applied to the data', () => {
       {
         const builder = new VisualizationBuilder({});
-        const setStylesSpy = jest.spyOn(builder, 'setStyles');
+        const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
         const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
         const setCurrentChartTypeSpy = jest.spyOn(builder, 'setCurrentChartType');
         jest.spyOn(builder, 'createAutoVis').mockReturnValue({
@@ -318,7 +318,7 @@ describe('VisualizationBuilder', () => {
           },
           'metric'
         );
-        expect(setStylesSpy).toHaveBeenCalledWith(
+        expect(setVisConfigSpy).toHaveBeenCalledWith(
           expect.objectContaining({ type: 'scatter', styles: expect.anything() })
         );
         expect(setAxesMappingSpy).toHaveBeenCalledWith({
@@ -329,7 +329,7 @@ describe('VisualizationBuilder', () => {
       }
       {
         const builder = new VisualizationBuilder({});
-        const setStylesSpy = jest.spyOn(builder, 'setStyles');
+        const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
         const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
         const setCurrentChartTypeSpy = jest.spyOn(builder, 'setCurrentChartType');
         jest.spyOn(builder, 'createAutoVis').mockReturnValue({
@@ -351,7 +351,7 @@ describe('VisualizationBuilder', () => {
           // Mapping won't work with the data
           { x: 'name-date-0', y: 'name-numerical-0' }
         );
-        expect(setStylesSpy).toHaveBeenCalledWith(
+        expect(setVisConfigSpy).toHaveBeenCalledWith(
           expect.objectContaining({ type: 'scatter', styles: expect.anything() })
         );
         expect(setAxesMappingSpy).toHaveBeenCalledWith({
@@ -364,7 +364,7 @@ describe('VisualizationBuilder', () => {
 
     test('should show a table if no auto vis can be created when chart type or axes mapping can no longer be applied to the data', () => {
       const builder = new VisualizationBuilder({});
-      jest.spyOn(builder, 'setStyles');
+      jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'setAxesMapping');
       const setCurrentChartTypeSpy = jest.spyOn(builder, 'setCurrentChartType');
       // Mock auto vis cannot be created
@@ -389,7 +389,7 @@ describe('VisualizationBuilder', () => {
 
     test('should do nothing if the axes mapping can be used on the data', () => {
       const builder = new VisualizationBuilder({});
-      const setStylesSpy = jest.spyOn(builder, 'setStyles');
+      const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       const setAxesMappingSpy = jest.spyOn(builder, 'setAxesMapping');
       const setCurrentChartTypeSpy = jest.spyOn(builder, 'setCurrentChartType');
       jest.spyOn(builder, 'createAutoVis');
@@ -405,7 +405,7 @@ describe('VisualizationBuilder', () => {
         // Mapping can be applied to the data
         { x: 'name-date-0', y: 'name-numerical-0' }
       );
-      expect(setStylesSpy).not.toHaveBeenCalled();
+      expect(setVisConfigSpy).not.toHaveBeenCalled();
       expect(setAxesMappingSpy).not.toHaveBeenCalled();
       expect(setCurrentChartTypeSpy).not.toHaveBeenCalled();
     });
@@ -453,19 +453,19 @@ describe('VisualizationBuilder', () => {
 
   test('should set styles', () => {
     const builder = new VisualizationBuilder({});
-    expect(builder.styles$.value).toBe(undefined);
-    builder.setStyles({ type: 'line', styles: { addLegend: true } as any });
-    expect(builder.styles$.value).toEqual({ type: 'line', styles: { addLegend: true } as any });
+    expect(builder.visConfig$.value).toBe(undefined);
+    builder.setVisConfig({ type: 'line', styles: { addLegend: true } as any });
+    expect(builder.visConfig$.value).toEqual({ type: 'line', styles: { addLegend: true } as any });
   });
 
   test('should update styles', () => {
     const builder = new VisualizationBuilder({});
-    expect(builder.styles$.value).toBe(undefined);
-    builder.setStyles({ type: 'line', styles: { addLegend: true } as any });
-    expect(builder.styles$.value).toEqual({ type: 'line', styles: { addLegend: true } });
+    expect(builder.visConfig$.value).toBe(undefined);
+    builder.setVisConfig({ type: 'line', styles: { addLegend: true } as any });
+    expect(builder.visConfig$.value).toEqual({ type: 'line', styles: { addLegend: true } });
 
     builder.updateStyles({ addLegend: false, title: 'title' });
-    expect(builder.styles$.value).toEqual({
+    expect(builder.visConfig$.value).toEqual({
       type: 'line',
       styles: { addLegend: false, title: 'title' },
     });
@@ -489,7 +489,7 @@ describe('VisualizationBuilder', () => {
     const builder = new VisualizationBuilder({});
     builder.setCurrentChartType('bar');
     builder.setAxesMapping({ x: 'name', y: 'age' });
-    builder.setStyles({ type: 'bar', styles: { addLegend: true } as any });
+    builder.setVisConfig({ type: 'bar', styles: { addLegend: true } as any });
     builder.handleData(
       [{ _id: '_id', _index: '_index', _score: 10, _source: { age: 10, name: 'name' } }],
       [
@@ -498,26 +498,15 @@ describe('VisualizationBuilder', () => {
       ]
     );
     expect(builder.data$.value).not.toBe(undefined);
-    expect(builder.styles$.value).not.toBe(undefined);
+    expect(builder.visConfig$.value).not.toBe(undefined);
     expect(builder.axesMapping$.value).not.toEqual({});
     expect(builder.currentChartType$).not.toBe(undefined);
 
     builder.reset();
 
     expect(builder.data$.value).toBe(undefined);
-    expect(builder.styles$.value).toBe(undefined);
+    expect(builder.visConfig$.value).toBe(undefined);
     expect(builder.axesMapping$.value).toEqual({});
     expect(builder.currentChartType$.value).toBe(undefined);
-  });
-
-  describe('resetVisualizationBuilder', () => {
-    test('should not throw error when called', () => {
-      // Should not throw error regardless of singleton state
-      expect(() => resetVisualizationBuilder()).not.toThrow();
-
-      // Should be safe to call multiple times
-      expect(() => resetVisualizationBuilder()).not.toThrow();
-      expect(() => resetVisualizationBuilder()).not.toThrow();
-    });
   });
 });

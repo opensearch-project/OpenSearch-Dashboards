@@ -27,8 +27,7 @@ export const StylePanel = <T extends ChartType>({
   className,
 }: StylePanelProps<T>) => {
   const visualizationData = useObservable(visualizationBuilder.data$);
-  const styleOptions = useObservable(visualizationBuilder.styles$);
-  const selectedChartType = useObservable(visualizationBuilder.currentChartType$);
+  const chartConfig = useObservable(visualizationBuilder.visConfig$);
   const axesMapping = useObservable(visualizationBuilder.axesMapping$);
 
   const onStyleChange = useCallback(
@@ -67,8 +66,8 @@ export const StylePanel = <T extends ChartType>({
     return null;
   }
 
-  const visConfig = selectedChartType
-    ? visualizationRegistry.getVisualizationConfig(selectedChartType)
+  const visConfig = chartConfig?.type
+    ? visualizationRegistry.getVisualizationConfig(chartConfig?.type)
     : null;
 
   const bestMatch = visualizationRegistry.findBestMatch(
@@ -82,17 +81,17 @@ export const StylePanel = <T extends ChartType>({
       <ChartTypeSelector
         visualizationData={visualizationData}
         onChartTypeChange={onChartTypeChange}
-        chartType={selectedChartType}
+        chartType={chartConfig?.type}
       />
       <EuiSpacer size="s" />
       {visConfig?.ui.style.render({
-        styleOptions: styleOptions?.styles ?? ({} as any),
+        styleOptions: chartConfig?.styles ?? ({} as any),
         onStyleChange,
         numericalColumns: visualizationData.numericalColumns,
         categoricalColumns: visualizationData.categoricalColumns,
         dateColumns: visualizationData.dateColumns,
         availableChartTypes: bestMatch?.rule.chartTypes,
-        selectedChartType: styleOptions?.type,
+        selectedChartType: chartConfig?.type,
         axisColumnMappings,
         updateVisualization,
       })}

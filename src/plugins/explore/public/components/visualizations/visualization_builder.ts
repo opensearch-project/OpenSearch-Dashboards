@@ -5,11 +5,12 @@
 
 import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
 import { isEmpty, isEqual } from 'lodash';
-import { debounceTime, skip } from 'rxjs/operators';
+import { debounceTime, skip, map } from 'rxjs/operators';
 
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
 import {
   convertMappingsToStrings,
+  convertStringsToMappings,
   findRuleByIndex,
   getColumnMatchFromMapping,
   isValidMapping,
@@ -40,14 +41,16 @@ interface ChartConfig {
   styles: StyleOptions;
 }
 
+type GetUrlStateStorage = () => IOsdUrlStateStorage | undefined;
+
 export class VisualizationBuilder {
   private isInitialized = false;
-  private urlStateStorage?: IOsdUrlStateStorage;
+  private getUrlStateStorage: GetUrlStateStorage = () => undefined;
   private subscriptions = Array<Subscription>();
 
-  // TODO: we also store chart type in styles$, consider to refactor this to get rid of one of them
+  // TODO: get rid of currentChartType$, chart type is maintained in visConfig$
   currentChartType$ = new BehaviorSubject<ChartType | undefined>(undefined);
-  styles$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
+  visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   axesMapping$ = new BehaviorSubject<Record<string, string>>({});
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   // TODO: refactor to subscribe to changes$ from external
@@ -55,8 +58,39 @@ export class VisualizationBuilder {
     [ChartType | undefined, ChartConfig | undefined, Record<string, string>]
   > = of([undefined, undefined, {}]);
 
-  constructor({ urlStateStorage }: { urlStateStorage?: IOsdUrlStateStorage }) {
-    this.urlStateStorage = urlStateStorage;
+  constructor({ getUrlStateStorage }: { getUrlStateStorage?: GetUrlStateStorage }) {
+    if (getUrlStateStorage) {
+      this.getUrlStateStorage = getUrlStateStorage;
+    }
+  }
+
+  public get vegaSpec$() {
+    return combineLatest([this.data$, this.visConfig$, this.axesMapping$]).pipe(
+      map(([data, visConfig, axesMapping]) => {
+        if (!data) {
+          return;
+        }
+        const columns = [
+          ...(data.numericalColumns ?? []),
+          ...(data.categoricalColumns ?? []),
+          ...(data.dateColumns ?? []),
+        ];
+        const rule = findRuleByIndex(axesMapping ?? {}, columns);
+        if (!rule || !rule.toSpec) {
+          return;
+        }
+        const axisColumnMappings = convertStringsToMappings(axesMapping ?? {}, columns);
+        return rule.toSpec(
+          data.transformedData,
+          data.numericalColumns,
+          data.categoricalColumns,
+          data.dateColumns,
+          visConfig?.styles,
+          visConfig?.type,
+          axisColumnMappings
+        );
+      })
+    );
   }
 
   init() {
@@ -67,8 +101,9 @@ export class VisualizationBuilder {
     let state: VisState = {};
 
     // Read state from url
-    if (this.urlStateStorage) {
-      const urlState = this.urlStateStorage.get<VisState>('_v');
+    const urlStateStorage = this.getUrlStateStorage();
+    if (urlStateStorage) {
+      const urlState = urlStateStorage.get<VisState>('_v');
       state = { ...state, ...urlState };
     }
 
@@ -77,7 +112,7 @@ export class VisualizationBuilder {
       this.setCurrentChartType(state.chartType);
 
       if (state.styleOptions) {
-        this.setStyles({ styles: state.styleOptions, type: state.chartType });
+        this.setVisConfig({ styles: state.styleOptions, type: state.chartType });
       }
 
       if (state.axesMapping) {
@@ -87,10 +122,10 @@ export class VisualizationBuilder {
 
     // Subscribe to visualization state updates and sync the state to url
     this.subscriptions.push(
-      combineLatest([this.currentChartType$, this.axesMapping$, this.styles$])
+      combineLatest([this.currentChartType$, this.axesMapping$, this.visConfig$])
         .pipe(debounceTime(500))
-        .subscribe(([chartType, axesMapping, styles]) =>
-          this.syncToUrl({ chartType, axesMapping, styleOptions: styles?.styles })
+        .subscribe(([chartType, axesMapping, visConfig]) =>
+          this.syncToUrl({ chartType, axesMapping, styleOptions: visConfig?.styles })
         ),
       this.currentChartType$
         .pipe(skip(1))
@@ -99,7 +134,7 @@ export class VisualizationBuilder {
             this.data$.value,
             chartType,
             this.axesMapping$.value,
-            this.styles$.value
+            this.visConfig$.value
           )
         ),
       this.data$.subscribe((data) =>
@@ -131,7 +166,7 @@ export class VisualizationBuilder {
 
     // Always reset style after changing chart type
     if (currentStyleConfig?.type !== chartType) {
-      this.setStyles({ styles: visConfig.ui.style.defaults, type: chartType });
+      this.setVisConfig({ styles: visConfig.ui.style.defaults, type: chartType });
     }
 
     // Table chart doesn't have axes mapping
@@ -271,7 +306,7 @@ export class VisualizationBuilder {
         if (visConfig) {
           this.setCurrentChartType(autoVis.chartType);
           this.setAxesMapping(autoVis.axesMapping);
-          this.setStyles({ styles: visConfig?.ui.style.defaults, type: autoVis.chartType });
+          this.setVisConfig({ styles: visConfig?.ui.style.defaults, type: autoVis.chartType });
         }
       } else {
         const visConfig = visualizationRegistry.getVisualizationConfig('table');
@@ -279,9 +314,9 @@ export class VisualizationBuilder {
         this.setCurrentChartType('table');
         this.setAxesMapping({});
         if (visConfig) {
-          this.setStyles({ type: 'table', styles: visConfig?.ui.style.defaults });
+          this.setVisConfig({ type: 'table', styles: visConfig?.ui.style.defaults });
         } else {
-          this.setStyles(undefined);
+          this.setVisConfig(undefined);
         }
       }
       return;
@@ -296,7 +331,7 @@ export class VisualizationBuilder {
     // All other cases will fallback to reset vis state and let user to choose
     this.setCurrentChartType(undefined);
     this.setAxesMapping({});
-    this.setStyles(undefined);
+    this.setVisConfig(undefined);
   }
 
   handleData<T = unknown>(
@@ -313,20 +348,20 @@ export class VisualizationBuilder {
   }
 
   updateStyles(styles?: Partial<StyleOptions>) {
-    const currentStyles = this.styles$.value;
-    if (!currentStyles) {
+    const currentVisConfig = this.visConfig$.value;
+    if (!currentVisConfig) {
       return;
     }
-    if (currentStyles.styles) {
-      this.styles$.next({
-        type: currentStyles.type,
-        styles: { ...currentStyles.styles, ...styles } as StyleOptions,
+    if (currentVisConfig.styles) {
+      this.visConfig$.next({
+        type: currentVisConfig.type,
+        styles: { ...currentVisConfig.styles, ...styles } as StyleOptions,
       });
     }
   }
 
-  setStyles(styles?: ChartConfig) {
-    this.styles$.next(styles);
+  setVisConfig(config?: ChartConfig) {
+    this.visConfig$.next(config);
   }
 
   setCurrentChartType(chartType?: ChartType) {
@@ -340,8 +375,9 @@ export class VisualizationBuilder {
   }
 
   syncToUrl<State>(visState: VisState) {
-    if (this.urlStateStorage) {
-      this.urlStateStorage.set('_v', visState, { replace: true });
+    const urlStateStorage = this.getUrlStateStorage();
+    if (urlStateStorage) {
+      urlStateStorage.set('_v', visState, { replace: true });
     }
   }
 
@@ -350,7 +386,7 @@ export class VisualizationBuilder {
     this.subscriptions = [];
 
     this.currentChartType$.complete();
-    this.styles$.complete();
+    this.visConfig$.complete();
     this.axesMapping$.complete();
     this.data$.complete();
   }
@@ -359,12 +395,14 @@ export class VisualizationBuilder {
     this.dispose();
 
     this.currentChartType$ = new BehaviorSubject<ChartType | undefined>(undefined);
-    this.styles$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
+    this.visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
     this.axesMapping$ = new BehaviorSubject<Record<string, string>>({});
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
-    this.changes$ = combineLatest([this.currentChartType$, this.styles$, this.axesMapping$]).pipe(
-      debounceTime(500)
-    );
+    this.changes$ = combineLatest([
+      this.currentChartType$,
+      this.visConfig$,
+      this.axesMapping$,
+    ]).pipe(debounceTime(500));
     this.isInitialized = false;
   }
 
@@ -377,17 +415,9 @@ let visualizationBuilder: VisualizationBuilder;
 
 export const getVisualizationBuilder = () => {
   if (!visualizationBuilder) {
-    const services = getServices();
     visualizationBuilder = new VisualizationBuilder({
-      urlStateStorage: services.osdUrlStateStorage,
+      getUrlStateStorage: () => getServices().osdUrlStateStorage,
     });
   }
   return visualizationBuilder;
-};
-
-export const resetVisualizationBuilder = () => {
-  if (visualizationBuilder) {
-    visualizationBuilder.dispose();
-    visualizationBuilder = undefined as any;
-  }
 };
