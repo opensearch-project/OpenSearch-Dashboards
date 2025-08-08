@@ -385,3 +385,10 @@ export const getVisualizationBuilder = () => {
   }
   return visualizationBuilder;
 };
+
+export const resetVisualizationBuilder = () => {
+  if (visualizationBuilder) {
+    visualizationBuilder.dispose();
+    visualizationBuilder = undefined as any;
+  }
+};
