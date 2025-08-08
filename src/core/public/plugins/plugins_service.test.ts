@@ -59,6 +59,7 @@ import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { workspacesServiceMock } from '../workspace/workspaces_service.mock';
+import { keyboardShortcutServiceMock } from '../keyboard_shortcut/keyboard_shortcut_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -111,6 +112,7 @@ describe('PluginsService', () => {
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
       workspaces: workspacesServiceMock.createSetupContract(),
+      keyboardShortcut: keyboardShortcutServiceMock.createSetup(),
     };
     mockSetupContext = {
       ...mockSetupDeps,
@@ -131,6 +133,7 @@ describe('PluginsService', () => {
       savedObjects: savedObjectsServiceMock.createStartContract(),
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
       workspaces: workspacesServiceMock.createStartContract(),
+      keyboardShortcut: keyboardShortcutServiceMock.createStart(),
     };
     mockStartContext = {
       ...mockStartDeps,
