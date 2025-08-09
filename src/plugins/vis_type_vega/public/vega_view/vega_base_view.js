@@ -38,7 +38,7 @@ import { i18n } from '@osd/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { opensearchFilters } from '../../../data/public';
 
-import { getEnableExternalUrls, getData } from '../services';
+import { getEnableExternalUrls, getData, getNotifications } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 vega.scheme('euiPaletteColorBlind', euiPaletteColorBlind());
@@ -86,6 +86,7 @@ export class VegaBaseView {
     this._destroyHandlers = [];
     this._initialized = false;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._notifications = getNotifications();
   }
 
   async init() {
@@ -97,11 +98,11 @@ export class VegaBaseView {
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
       for (const warn of this._parser.warnings) {
-        this._addMessage('warn', warn);
+        this._addMessage('warn', warn.toString());
       }
 
       if (this._parser.error) {
-        this._addMessage('err', this._parser.error);
+        this._addMessage('err', this._parser.error.toString());
         return;
       }
 
@@ -230,14 +231,12 @@ export class VegaBaseView {
   }
 
   _addMessage(type, text) {
-    if (!this._$messages) {
-      this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
+    if (type === 'warn') {
+      this._notifications.toasts.addWarning(text);
     }
-    this._$messages.append(
-      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
-        $(`<pre class="vgaVis__messageCode">`).text(text)
-      )
-    );
+    if (type === 'err') {
+      this._notifications.toasts.addDanger(text);
+    }
   }
 
   resize() {
