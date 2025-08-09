@@ -1,0 +1,2 @@
+test:
+- Fix Autocomplete Tests to accomodate for AI mode ([#10387](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10387))
