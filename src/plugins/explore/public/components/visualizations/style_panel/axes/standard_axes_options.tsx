@@ -33,12 +33,10 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   disableGrid = false,
   switchAxes = false,
 }) => {
-  const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
-    const updatedAxes = [...standardAxes];
-    updatedAxes[index] = {
-      ...updatedAxes[index],
-      ...updates,
-    };
+  const updateAxisByRole = (role: AxisRole, updates: Partial<StandardAxes>) => {
+    const updatedAxes = standardAxes.map((axis) =>
+      axis.axisRole === role ? { ...axis, ...updates } : axis
+    );
 
     onStandardAxesChange(updatedAxes);
   };
@@ -97,6 +95,9 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   if (!standardAxes) {
     return null;
   }
+  const orderedAxes = switchAxes
+    ? [...standardAxes].sort((a, b) => (a.axisRole === AxisRole.Y ? -1 : 1))
+    : [...standardAxes].sort((a, b) => (a.axisRole === AxisRole.X ? -1 : 1));
 
   return (
     <StyleAccordion
@@ -107,7 +108,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
       initialIsOpen={true}
       data-test-subj="standardAxesPanel"
     >
-      {standardAxes.map((axis, index) => {
+      {orderedAxes.map((axis, index) => {
         const isYAxis = axis.axisRole === AxisRole.Y;
 
         return (
@@ -131,7 +132,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                   })}
                   data-test-subj="showAxisSwitch"
                   checked={axis.show}
-                  onChange={(e) => updateAxis(index, { show: e.target.checked })}
+                  onChange={(e) => updateAxisByRole(axis.axisRole, { show: e.target.checked })}
                 />
               </EuiFormRow>
               {axis.show && (
@@ -140,7 +141,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                     value={getTitleByAxisRole(axis)}
                     placeholder="Axis name"
                     onChange={(text) =>
-                      updateAxis(index, {
+                      updateAxisByRole(axis.axisRole, {
                         title: { ...axis.title, text },
                       })
                     }
@@ -155,12 +156,12 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                     })}
                   >
                     <EuiButtonGroup
-                      name={`AxisPosition-${index}`}
+                      name={`AxisPosition-${axis.axisRole}`}
                       legend="Select axis position"
                       options={getPositionsForAxis(axis)}
                       idSelected={axis.position}
                       onChange={(id) =>
-                        updateAxis(index, {
+                        updateAxisByRole(axis.axisRole, {
                           position: id as Positions,
                         })
                       }
@@ -175,7 +176,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                         compressed
                         checked={axis.grid?.showLines ?? false}
                         onChange={(e) =>
-                          updateAxis(index, {
+                          updateAxisByRole(axis.axisRole, {
                             grid: { ...axis.grid, showLines: e.target.checked },
                           })
                         }
@@ -194,7 +195,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                       })}
                       checked={axis.labels.show}
                       onChange={(e) =>
-                        updateAxis(index, {
+                        updateAxisByRole(axis.axisRole, {
                           labels: { ...axis.labels, show: e.target.checked },
                         })
                       }
@@ -222,7 +223,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                             if (e.target.value === 'vertical') rotationValue = -90;
                             else if (e.target.value === 'angled') rotationValue = -45;
 
-                            updateAxis(index, {
+                            updateAxisByRole(axis.axisRole, {
                               labels: {
                                 ...axis.labels,
                                 rotate: rotationValue,
@@ -240,7 +241,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                       <DebouncedTruncateField
                         value={axis.labels.truncate ?? 100}
                         onChange={(truncateValue) => {
-                          updateAxis(index, {
+                          updateAxisByRole(axis.axisRole, {
                             labels: {
                               ...axis.labels,
                               truncate: truncateValue,
