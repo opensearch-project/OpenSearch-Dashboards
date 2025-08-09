@@ -1,68 +1,43 @@
-# `expressions` plugin
+# Expressions Plugin
 
-This plugin provides methods which will parse & execute an _expression pipeline_
-string for you, as well as a series of registries for advanced users who might
-want to incorporate their own functions, types, and renderers into the service
-for use in their own application.
+## Overview
 
-`Expressions` is a simple custom language designed to write a chain of functions that _pipe_ its output to the input of the next function. When two or more such functions are chained together, it is an expressions pipeline. Since it is a custom language, any expression can be represented as a string. Functions can be configured using arguments provided. The final output of the expression pipeline can either be rendered using one of the _renderers_ registered in `expressions` plugin or made to output the result of the final function in the chain.
+The Expressions plugin for OpenSearch Dashboards provides a powerful and flexible way to create, manipulate, and render data using a custom expression language. It allows developers to chain functions together, create custom visualizations, and build interactive data-driven applications.
 
-> It is not necessary to chain functions and a single function can be used in isolation.
+## Table of Contents
 
-Expressions power visualizations in Dashboard.
+1. [Getting Started](docs/getting-started.md)
+2. [Core Concepts](docs/core-concepts.md)
+3. [Expression Functions](docs/expression-functions.md)
+4. [Expression Renderers](docs/expression-renderers.md)
+5. [Execution Contract](docs/execution-contract.md)
+6. [Nested Expressions](docs/nested-expressions.md)
+7. [Debugging](docs/debugging.md)
+8. [Inspector Adapters](docs/inspector-adapters.md)
+9. [Examples](docs/examples.md)
 
-Below is an example of an expression that renders a metric visualization that aggregates the average value for the field `AvgTicketPrice` in the index. It does so by first fetching the opensearch dashboards global context, pipes it into the `opensearchaggs` function that fetches the aggregate data and pipes its result to the `metricVis` function that renders a metric visualization for the data.
+## Features
 
-```
-opensearchDashboards
-| opensearchaggs
-  index='d3d7af60-4c81-11e8-b3d7-01146121b73d'
-  aggConfigs='[{"id":"1","type":"avg","params":{"field":"AvgTicketPrice","customLabel":"Avg. Ticket Price"}}]'
-| metricVis
-  metric={visdimension accessor=0 format='number'}
-```
+- Custom expression language for data manipulation and visualization
+- Chainable functions for complex data transformations
+- Extensible architecture for adding custom functions and renderers
+- Support for nested expressions
+- Built-in debugging tools and inspector adapters
+- Integration with OpenSearch Dashboards' plugin ecosystem
 
-![image](./expressions_example.png)
+## Installation
 
-## Anatomy of an expression
+The Expressions plugin is included by default in OpenSearch Dashboards. No additional installation steps are required.
 
-Consider the example below where the expression performs the following. It takes an input, sleeps for 2000ms and then returns the square of the input as its final output
+## Usage
 
-```
-sleep time=2000 | square
-```
+To use the Expressions plugin in your OpenSearch Dashboards development:
 
-**Note:** The above example expression function is only available with the `--run-examples` flag
+1. Import the necessary modules from the expressions plugin
+2. Register custom functions and renderers (if needed)
+3. Use the expression language to create data pipelines and visualizations
 
-The whole string is an expression. `sleep` and `square` are expression functions registered with the expression plugin. `time=2000` is the argument passed to the `sleep` funciton with the value `2000`. `|` is used to denote pipe between the two functions. Every expression can take an input. In the example above, the input provided will be passed on by the sleep function to the square function.
-
-## Using Expressions
-
-### Execute Expressions
-
-One of the two ways an expressions can be used is to execute an expression to return a value. This can be done using the `expressions.execute` or `expressions.run` command. The primary difference being that the `execute` method returns an `ExecutionContract` that tracks the progress of the execution and can be used to interact with the expression.
-
-```js
-const expression = `sleep time=2000 | square`;
-const execution = expressions.execute(expression, input);
-```
-
-**Note:** The above example expression function is only available with the `--run-examples` flag
-
-### Rendering Expressions
-
-The other way an expression can be used is to render an output using one of the _renderers_ registered in `expressions` plugin. This can be done using a few ways, the easiest of which is to use the `ReactExpressionRenderer` component.
-
-```jsx
-const expressionString = `avatar name="OpenSearch Dashboards" size="xl"`;
-<ReactExpressionRenderer expression={expressionString} />;
-```
-
-**Note:** The above example expression function is only available with the `--run-examples` flag
-
-## Custom expressions
-
-Users can extend the service to incorporate their own functions, types, and renderers. Examples of these can be found in `./examples/expressions_example/common/expression_functions` and can be registered using the `registerFunction`, `registertype` and `registerRenderer` api's from the expression setup contract.
+For detailed usage instructions and examples, please refer to the documentation linked above.
 
 ## Playground
 
@@ -71,3 +46,16 @@ Working with expressions can sometimes be a little tricky. To make this easier w
 ```sh
 yarn start --run-examples
 ```
+
+Then navigate to the "Developer Examples" section in the main menu.
+
+## Integration
+
+The Expressions plugin is tightly integrated with OpenSearch Dashboards and is used extensively in:
+
+- Visualizations
+- Dashboard rendering
+- Data processing pipelines
+- Custom plugin development
+
+It provides a flexible foundation for building complex data processing and visualization workflows within the OpenSearch Dashboards ecosystem.
