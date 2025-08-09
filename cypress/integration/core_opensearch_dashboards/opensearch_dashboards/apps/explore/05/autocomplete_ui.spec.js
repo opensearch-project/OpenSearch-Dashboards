@@ -61,6 +61,8 @@ export const runAutocompleteTests = () => {
 
             const editorType = 'exploreQueryPanelEditor';
 
+            createQuery(config, false); // use mouse
+
             cy.getElementByTestId(editorType)
               .find('.monaco-editor')
               .should('be.visible')
