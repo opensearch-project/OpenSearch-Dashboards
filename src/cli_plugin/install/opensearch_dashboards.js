@@ -30,8 +30,9 @@
 
 import path from 'path';
 import { statSync } from 'fs';
+import semver from 'semver';
 
-import { versionSatisfies, cleanVersion } from '../../legacy/utils/version';
+import { cleanVersion } from '../../legacy/utils/version';
 
 export function existingInstall(settings, logger) {
   try {
@@ -55,9 +56,25 @@ export function assertVersion(settings) {
 
   const actual = cleanVersion(settings.plugins[0].opensearchDashboardsVersion);
   const expected = cleanVersion(settings.version);
-  if (!versionSatisfies(actual, expected)) {
+
+  const actualVersion = semver.parse(actual);
+  const expectedVersion = semver.parse(expected);
+
+  if (!actualVersion || !expectedVersion) {
     throw new Error(
-      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]`
+      `Invalid version format. Plugin: ${actual}, OpenSearch Dashboards: ${expected}`
+    );
+  }
+
+  if (actualVersion.major !== expectedVersion.major) {
+    throw new Error(
+      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]. Major version must match.`
+    );
+  }
+
+  if (settings.strictVersion && actualVersion.minor !== expectedVersion.minor) {
+    throw new Error(
+      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]. Minor version must match when using --strict-version flag.`
     );
   }
 }

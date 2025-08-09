@@ -64,6 +64,7 @@ export function parseMilliseconds(val) {
 
 export function parse(command, options, osdPackage) {
   const settings = {
+    strictVersion: options.strictVersion || false,
     timeout: options.timeout || 0,
     quiet: options.quiet || false,
     silent: options.silent || false,
