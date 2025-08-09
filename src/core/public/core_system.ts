@@ -293,7 +293,6 @@ export class CoreSystem {
         chrome,
         overlays,
         targetDomElement: coreUiTargetDomElement,
-        injectedMetadata,
       });
 
       return {

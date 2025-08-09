@@ -6,7 +6,12 @@
 import { AxisColumnMappings, AxisRole, VEGASCHEMA, VisColumn, VisFieldType } from '../types';
 import { BarChartStyleControls } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold/utils';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import {
+  applyAxisStyling,
+  getSwappedAxisRole,
+  getSchemaByAxis,
+  getTooltipFormat,
+} from '../utils/utils';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: Partial<BarChartStyleControls>) => {
@@ -168,11 +173,17 @@ export const createTimeBarChart = (
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
             title: xAxis?.styles?.title?.text || xAxis?.name,
+            ...(getSchemaByAxis(xAxis) === 'temporal' && {
+              format: getTooltipFormat(transformedData, xAxis?.column),
+            }),
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
             title: yAxis?.styles?.title?.text || yAxis?.name,
+            ...(getSchemaByAxis(yAxis) === 'temporal' && {
+              format: getTooltipFormat(transformedData, yAxis?.column),
+            }),
           },
         ],
       }),
@@ -289,12 +300,18 @@ export const createGroupedTimeBarChart = (
           field: xAxis?.column,
           type: getSchemaByAxis(xAxis),
           title: xAxis?.styles?.title?.text || xAxis?.name,
+          ...(getSchemaByAxis(xAxis) === 'temporal' && {
+            format: getTooltipFormat(transformedData, xAxis?.column),
+          }),
         },
         { field: categoryField, type: getSchemaByAxis(colorColumn), title: categoryName },
         {
           field: yAxis?.column,
           type: getSchemaByAxis(yAxis),
           title: yAxis?.styles?.title?.text || yAxis?.name,
+          ...(getSchemaByAxis(yAxis) === 'temporal' && {
+            format: getTooltipFormat(transformedData, yAxis?.column),
+          }),
         },
       ],
     },
@@ -413,8 +430,22 @@ export const createFacetedTimeBarChart = (
             },
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [
-                { field: metricField, type: getSchemaByAxis(yAxis), title: metricName },
-                { field: dateField, type: getSchemaByAxis(xAxis), title: dateName },
+                {
+                  field: metricField,
+                  type: getSchemaByAxis(yAxis),
+                  title: metricName,
+                  ...(getSchemaByAxis(yAxis) === 'temporal' && {
+                    format: getTooltipFormat(transformedData, yAxis?.column),
+                  }),
+                },
+                {
+                  field: dateField,
+                  type: getSchemaByAxis(xAxis),
+                  title: dateName,
+                  ...(getSchemaByAxis(xAxis) === 'temporal' && {
+                    format: getTooltipFormat(transformedData, xAxis?.column),
+                  }),
+                },
                 { field: category1Field, type: 'nominal', title: category1Name },
               ],
             }),

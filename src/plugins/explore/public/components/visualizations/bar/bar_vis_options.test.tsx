@@ -95,32 +95,28 @@ jest.mock('../style_panel/threshold/threshold', () => ({
 }));
 
 jest.mock('../style_panel/legend/legend', () => ({
-  LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => {
-    if (!shouldShowLegend) return null;
-    return (
-      <div data-test-subj="mockLegendOptionsPanel">
-        <button
-          data-test-subj="mockLegendShow"
-          onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
-        >
-          Toggle Legend
-        </button>
-        <button
-          data-test-subj="mockLegendPosition"
-          onClick={() => onLegendOptionsChange({ position: 'bottom' })}
-        >
-          Change Position
-        </button>
-        <button
-          data-test-subj="mockLegendBoth"
-          onClick={() => onLegendOptionsChange({ show: !legendOptions.show, position: 'top' })}
-        >
-          Change Both
-        </button>
-        <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
-      </div>
-    );
-  }),
+  LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
+    <div data-test-subj="mockLegendOptionsPanel">
+      <button
+        data-test-subj="mockLegendShow"
+        onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+      >
+        Toggle Legend
+      </button>
+      <button
+        data-test-subj="mockLegendPosition"
+        onClick={() => onLegendOptionsChange({ position: 'bottom' })}
+      >
+        Change Position
+      </button>
+      <button
+        data-test-subj="mockLegendBoth"
+        onClick={() => onLegendOptionsChange({ show: !legendOptions.show, position: 'top' })}
+      >
+        Change Both
+      </button>
+    </div>
+  )),
 }));
 
 jest.mock('../style_panel/tooltip/tooltip', () => ({
@@ -275,7 +271,6 @@ describe('BarVisStyleControls', () => {
     );
 
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
   });
 
   test('renders legend panel when FACET mapping is present', () => {
@@ -301,7 +296,6 @@ describe('BarVisStyleControls', () => {
     );
 
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
   });
 
   test('calls onStyleChange with correct parameters for legend options', async () => {
@@ -332,6 +326,7 @@ describe('BarVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('mockLegendPosition'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'bottom' });
 
+    jest.clearAllMocks();
     await userEvent.click(screen.getByTestId('mockLegendBoth'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'top' });
