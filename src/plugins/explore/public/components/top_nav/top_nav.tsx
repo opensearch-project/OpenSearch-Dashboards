@@ -106,6 +106,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         tabState,
         flavorId,
         tabDefinition,
+        activeTabId: uiState.activeTabId,
       },
       clearEditors,
       savedExplore
@@ -120,6 +121,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     flavorId,
     tabDefinition,
     clearEditors,
+    uiState.activeTabId,
   ]);
 
   useEffect(() => {

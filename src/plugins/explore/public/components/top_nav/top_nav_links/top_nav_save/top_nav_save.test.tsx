@@ -54,6 +54,7 @@ const mockSaveStateProps = {
     supportedLanguages: ['PPL'],
     component: {} as any,
   },
+  activeTabId: 'logs',
 };
 
 const mockSavedExplore = ({

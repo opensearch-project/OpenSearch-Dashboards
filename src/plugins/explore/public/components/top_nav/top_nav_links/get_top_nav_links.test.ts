@@ -21,13 +21,23 @@ const indexPattern = {} as any;
 const savedExplore = {} as any;
 const clearEditors = jest.fn();
 
+const mockDataset = {} as any;
+const mockTabState = {} as any;
+const mockTabDefinition = { id: 'logs' } as any;
+
 describe('getTopNavLinks', () => {
   it('returns save, open, new, and share links when all capabilities and services are present', () => {
     const links = getTopNavLinks(
       mockServices(),
       startSyncingQueryStateWithUrl,
       searchContext,
-      indexPattern,
+      {
+        dataset: mockDataset,
+        tabState: mockTabState,
+        flavorId: 'logs',
+        tabDefinition: mockTabDefinition,
+        activeTabId: 'logs',
+      },
       clearEditors,
       savedExplore
     );
@@ -48,7 +58,14 @@ describe('getTopNavLinks', () => {
       services,
       startSyncingQueryStateWithUrl,
       searchContext,
-      indexPattern,
+      {
+        dataset: mockDataset,
+        tabState: mockTabState,
+        flavorId: 'logs',
+        tabDefinition: mockTabDefinition,
+        activeTabId: 'logs',
+      },
+      clearEditors,
       savedExplore
     );
     expect(links).toHaveLength(3);
@@ -63,7 +80,14 @@ describe('getTopNavLinks', () => {
       services,
       startSyncingQueryStateWithUrl,
       searchContext,
-      indexPattern,
+      {
+        dataset: mockDataset,
+        tabState: mockTabState,
+        flavorId: 'logs',
+        tabDefinition: mockTabDefinition,
+        activeTabId: 'logs',
+      },
+      clearEditors,
       savedExplore
     );
     expect(links).toHaveLength(3);
@@ -81,7 +105,14 @@ describe('getTopNavLinks', () => {
       services,
       startSyncingQueryStateWithUrl,
       searchContext,
-      indexPattern,
+      {
+        dataset: mockDataset,
+        tabState: mockTabState,
+        flavorId: 'logs',
+        tabDefinition: mockTabDefinition,
+        activeTabId: 'logs',
+      },
+      clearEditors,
       savedExplore
     );
     expect(links).toHaveLength(2);

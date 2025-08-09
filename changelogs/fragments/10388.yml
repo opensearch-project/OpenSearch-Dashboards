@@ -1,0 +1,2 @@
+fix:
+- [Explore] Preserve active tab when saving and loading explores in dashboards ([#10388](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10388))

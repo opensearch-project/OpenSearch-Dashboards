@@ -45,6 +45,7 @@ export interface SaveStateProps {
   tabState: TabState;
   flavorId: string | null;
   tabDefinition: TabDefinition | undefined;
+  activeTabId: string;
 }
 
 export const getSaveButtonRun = (
@@ -65,12 +66,14 @@ export const getSaveButtonRun = (
     const visualizationBuilder = getVisualizationBuilder();
     const axesMapping = visualizationBuilder.axesMapping$.value;
     const visConfig = visualizationBuilder.styles$.value;
+
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       saveStateProps.flavorId ?? 'logs',
       saveStateProps.tabDefinition!,
       { axesMapping, chartType: visConfig?.type, styleOptions: visConfig?.styles },
-      saveStateProps.dataset
+      saveStateProps.dataset,
+      saveStateProps.activeTabId
     );
     const result = await saveSavedExplore({
       savedExplore: savedExploreWithState,
