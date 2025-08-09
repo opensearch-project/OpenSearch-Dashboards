@@ -310,4 +310,72 @@ describe('AllAxesOptions', () => {
       );
     });
   });
+  it('should update specific axis by role', () => {
+    render(<AllAxesOptions {...defaultProps} />);
+
+    const showAxisSwitch = screen.getAllByTestId('showAxisSwitch')[0];
+    fireEvent.click(showAxisSwitch);
+
+    expect(defaultProps.onStandardAxesChange).toHaveBeenCalledWith([
+      expect.objectContaining({
+        axisRole: AxisRole.X,
+        show: false,
+      }),
+      expect.objectContaining({
+        axisRole: AxisRole.Y,
+        show: true, // Y axis should remain unchanged
+      }),
+    ]);
+  });
+  it('should update only the specified axis properties', () => {
+    render(<AllAxesOptions {...defaultProps} />);
+
+    const positionButton = screen.getByText('Top');
+    fireEvent.click(positionButton);
+
+    expect(defaultProps.onStandardAxesChange).toHaveBeenCalledWith([
+      expect.objectContaining({
+        axisRole: AxisRole.X,
+        position: Positions.TOP,
+        show: true,
+      }),
+      expect.objectContaining({
+        axisRole: AxisRole.Y,
+        position: Positions.LEFT,
+      }),
+    ]);
+  });
+
+  it('should order X axis first when switchAxes is false', () => {
+    render(<AllAxesOptions {...defaultProps} switchAxes={false} />);
+
+    const axisLabels = screen.getAllByText(/^[XY]-Axis$/);
+    expect(axisLabels[0]).toHaveTextContent('X-Axis');
+    expect(axisLabels[1]).toHaveTextContent('Y-Axis');
+  });
+
+  it('should order X axis first when switchAxes is true', () => {
+    render(<AllAxesOptions {...defaultProps} switchAxes={true} />);
+
+    const axisLabels = screen.getAllByText(/^[XY]-Axis$/);
+    expect(axisLabels[0]).toHaveTextContent('X-Axis');
+    expect(axisLabels[1]).toHaveTextContent('Y-Axis');
+  });
+  it('should maintain axis functionality regardless of order', () => {
+    render(<AllAxesOptions {...defaultProps} switchAxes={true} />);
+
+    const showAxisSwitches = screen.getAllByTestId('showAxisSwitch');
+    fireEvent.click(showAxisSwitches[0]);
+
+    expect(defaultProps.onStandardAxesChange).toHaveBeenCalledWith([
+      expect.objectContaining({
+        axisRole: AxisRole.X,
+        show: true, // X axis should remain unchanged
+      }),
+      expect.objectContaining({
+        axisRole: AxisRole.Y,
+        show: false, // Y axis should be updated (first in display order)
+      }),
+    ]);
+  });
 });
