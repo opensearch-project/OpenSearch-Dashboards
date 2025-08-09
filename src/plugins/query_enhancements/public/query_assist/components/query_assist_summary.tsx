@@ -198,6 +198,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
             total_count: queryContext?.queryResults?.length,
             question: queryContext?.question,
             ppl: queryContext?.query,
+            index: selectedDataset.current?.title,
           }),
           query: {
             dataSourceId: selectedDataset.current?.dataSource?.id,
