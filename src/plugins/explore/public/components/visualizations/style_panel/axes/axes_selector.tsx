@@ -290,6 +290,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
             disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
             onClick={swapAxes}
             data-test-subj="switchAxesButton"
+            style={{ marginLeft: '-9px' }}
           >
             {i18n.translate('explore.vis.axesSwitch.switchAxes', {
               defaultMessage: 'Switch axes',
@@ -315,9 +316,9 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
                     [role]: undefined,
                   }));
                 }}
-                onChange={(role, value) => {
+                onChange={(role, v) => {
                   const allColumns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
-                  const selectedCol = allColumns.find((col) => col.name === value);
+                  const selectedCol = allColumns.find((col) => col.name === v);
                   setCurrentSelections((prev) => ({
                     ...prev,
                     [role]: selectedCol,
@@ -343,9 +344,9 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
                   [role]: undefined,
                 }));
               }}
-              onChange={(role, value) => {
+              onChange={(role, v) => {
                 const allColumns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
-                const selectedCol = allColumns.find((col) => col.name === value);
+                const selectedCol = allColumns.find((col) => col.name === v);
                 setCurrentSelections((prev) => ({
                   ...prev,
                   [role]: selectedCol,
