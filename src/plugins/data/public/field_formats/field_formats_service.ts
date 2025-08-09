@@ -38,7 +38,7 @@ export class FieldFormatsService {
   private readonly fieldFormatsRegistry: FieldFormatsRegistry = new FieldFormatsRegistry();
 
   public setup(core: CoreSetup) {
-    core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
+    core.uiSettings?.getUpdate$().subscribe(({ key, newValue }) => {
       if (key === UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP) {
         this.fieldFormatsRegistry.parseDefaultTypeMap(newValue);
       }
