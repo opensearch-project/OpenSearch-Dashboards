@@ -1,0 +1,2 @@
+fix:
+- Update the Insertion Text for Fields in NL Autocomplete ([#10389](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10389))
