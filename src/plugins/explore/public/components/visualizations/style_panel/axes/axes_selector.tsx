@@ -289,6 +289,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
           <EuiButtonEmpty
             disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
             onClick={swapAxes}
+            data-test-subj="switchAxesButton"
           >
             {i18n.translate('explore.vis.axesSwitch.switchAxes', {
               defaultMessage: 'Switch axes',
