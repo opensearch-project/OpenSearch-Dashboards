@@ -10,6 +10,7 @@
  */
 
 import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from './types';
+import { KeyStringParser } from './key_parser';
 
 /**
  * @internal
@@ -18,6 +19,7 @@ import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from
 export class KeyboardShortcutService {
   private shortcutsMapByKey = new Map<string, ShortcutDefinition[]>();
   private namespacedIdToKeyLookup = new Map<string, string>();
+  private keyParser = new KeyStringParser();
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -40,37 +42,17 @@ export class KeyboardShortcutService {
     this.namespacedIdToKeyLookup.clear();
   }
 
-  private getNormalizedKey = (str: string): string => str.toLowerCase();
-
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
     `${shortcut.id.toLowerCase()}.${shortcut.pluginId.toLowerCase()}`;
 
-  private getEventKeyString = (event: KeyboardEvent): string => {
-    let key = '';
-
-    if (event.ctrlKey) {
-      key += 'ctrl+';
-    }
-
-    if (event.altKey) {
-      key += 'alt+';
-    }
-
-    if (event.shiftKey) {
-      key += 'shift+';
-    }
-
-    if (event.metaKey) {
-      key += 'cmd+';
-    }
-
-    key += this.getNormalizedKey(event.key);
-
-    return key;
-  };
-
   private register(shortcut: ShortcutDefinition): void {
-    const key = this.getNormalizedKey(shortcut.keys);
+    if (!this.keyParser.isValidKeyString(shortcut.keys)) {
+      // eslint-disable-next-line no-console
+      console.warn(`Invalid key string for shortcut ${shortcut.id}: ${shortcut.keys}`);
+      return;
+    }
+
+    const key = this.keyParser.normalizeKeyString(shortcut.keys);
     const namespacedId = this.getNamespacedId(shortcut);
 
     const existingShortcuts = this.shortcutsMapByKey.get(key) || [];
@@ -129,7 +111,7 @@ export class KeyboardShortcutService {
       return;
     }
 
-    const eventKeyString = this.getEventKeyString(event);
+    const eventKeyString = this.keyParser.getEventKeyString(event);
     const shortcuts = this.shortcutsMapByKey.get(eventKeyString);
 
     if (shortcuts?.length) {

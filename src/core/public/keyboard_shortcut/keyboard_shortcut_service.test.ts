@@ -149,31 +149,11 @@ describe('KeyboardShortcutService', () => {
   });
 
   describe('Private Method Testing', () => {
-    it('should normalize keys to lowercase', () => {
-      // @ts-expect-error - Testing private method
-      const result = service.getNormalizedKey('CTRL+S');
-      expect(result).toBe('ctrl+s');
-    });
-
     it('should create namespaced ID correctly', () => {
       const shortcut = { id: 'Save', pluginId: 'Editor' };
       // @ts-expect-error - Testing private method
       const result = service.getNamespacedId(shortcut);
       expect(result).toBe('save.editor');
-    });
-
-    it('should build event key string correctly', () => {
-      const mockEvent = {
-        ctrlKey: true,
-        altKey: false,
-        shiftKey: true,
-        metaKey: false,
-        key: 'S',
-      } as KeyboardEvent;
-
-      // @ts-expect-error - Testing private method
-      const result = service.getEventKeyString(mockEvent);
-      expect(result).toBe('ctrl+shift+s');
     });
   });
 
