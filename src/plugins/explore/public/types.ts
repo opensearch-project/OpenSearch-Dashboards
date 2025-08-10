@@ -169,4 +169,6 @@ export interface ExploreServices {
   expressions: ExpressionsStart;
 
   dashboard: DashboardStart;
+
+  supportedTypes?: string[];
 }
