@@ -93,161 +93,161 @@ a.kuiButton:not(.kuiButton-isDisabled):active {   transform: translateY(1px);
 }
 
 .kuiButton--basic {
-  color: #DFE5EF;
-  background-color: #101B25;
+  color: #E6E0DE;
+  background-color: #2A2625;
 }
 .kuiButton--basic:not(a):enabled:focus {
-  color: #DFE5EF;
+  color: #E6E0DE;
 }
-a.kuiButton--basic:not(.kuiButton-isDisabled):focus {   color: #DFE5EF;
+a.kuiButton--basic:not(.kuiButton-isDisabled):focus {   color: #E6E0DE;
 }
 
 .kuiButton--basic:enabled:hover {
-  background-color: #010101 !important; }
-a.kuiButton--basic:not(.kuiButton-isDisabled):hover {   background-color: #010101 !important; }
+  background-color: #0f0d0d !important; }
+a.kuiButton--basic:not(.kuiButton-isDisabled):hover {   background-color: #0f0d0d !important; }
 
 .kuiButton--basic:enabled:active {
-  background-color: #010101 !important; }
-a.kuiButton--basic:not(.kuiButton-isDisabled):active {   background-color: #010101 !important; }
+  background-color: #0f0d0d !important; }
+a.kuiButton--basic:not(.kuiButton-isDisabled):active {   background-color: #0f0d0d !important; }
 
 .kuiButton--primary {
-  color: #FCFEFF;
-  background-color: #159D8D;
+  color: #F2F4F7;
+  background-color: #F2382C;
 }
 .kuiButton--primary:not(a):enabled:focus {
-  color: #FCFEFF;
+  color: #F2F4F7;
 }
-a.kuiButton--primary:not(.kuiButton-isDisabled):focus {   color: #FCFEFF;
+a.kuiButton--primary:not(.kuiButton-isDisabled):focus {   color: #F2F4F7;
 }
 
 .kuiButton--primary:enabled:hover {
-  color: #FCFEFF !important;   background-color: #0f7065;
+  color: #F2F4F7 !important;   background-color: #dd1a0e;
 }
-a.kuiButton--primary:not(.kuiButton-isDisabled):hover {   color: #FCFEFF !important;   background-color: #0f7065;
+a.kuiButton--primary:not(.kuiButton-isDisabled):hover {   color: #F2F4F7 !important;   background-color: #dd1a0e;
 }
 
 .kuiButton--primary:enabled:active {
-  color: #FCFEFF !important;   background-color: #0f7065;
+  color: #F2F4F7 !important;   background-color: #dd1a0e;
 }
-a.kuiButton--primary:not(.kuiButton-isDisabled):active {   color: #FCFEFF !important;   background-color: #0f7065;
+a.kuiButton--primary:not(.kuiButton-isDisabled):active {   color: #F2F4F7 !important;   background-color: #dd1a0e;
 }
 
 .kuiButton--success {
-  color: #FCFEFF;
-  background-color: #7DE2D1;
+  color: #F2F4F7;
+  background-color: #D98B1F;
 }
 .kuiButton--success:not(a):enabled:focus {
-  color: #FCFEFF;
+  color: #F2F4F7;
 }
-a.kuiButton--success:not(.kuiButton-isDisabled):focus {   color: #FCFEFF;
+a.kuiButton--success:not(.kuiButton-isDisabled):focus {   color: #F2F4F7;
 }
 
 .kuiButton--success:enabled:hover {
-  color: #FCFEFF !important;   background-color: #53d9c2;
+  color: #F2F4F7 !important;   background-color: #ac6e19;
 }
-a.kuiButton--success:not(.kuiButton-isDisabled):hover {   color: #FCFEFF !important;   background-color: #53d9c2;
+a.kuiButton--success:not(.kuiButton-isDisabled):hover {   color: #F2F4F7 !important;   background-color: #ac6e19;
 }
 
 .kuiButton--success:enabled:active {
-  color: #FCFEFF !important;   background-color: #53d9c2;
+  color: #F2F4F7 !important;   background-color: #ac6e19;
 }
-a.kuiButton--success:not(.kuiButton-isDisabled):active {   color: #FCFEFF !important;   background-color: #53d9c2;
+a.kuiButton--success:not(.kuiButton-isDisabled):active {   color: #F2F4F7 !important;   background-color: #ac6e19;
 }
 
 .kuiButton--danger {
-  color: #F66;
-  border: solid 1px #F66;
+  color: #B81E24;
+  border: solid 1px #B81E24;
 }
 .kuiButton--danger:not(a):enabled:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #0A121A, 0 0 0 2px #F66;   color: #F66;
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #1B1A19, 0 0 0 2px #B81E24;   color: #B81E24;
 }
-a.kuiButton--danger:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #0A121A, 0 0 0 2px #F66;   color: #F66;
+a.kuiButton--danger:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #1B1A19, 0 0 0 2px #B81E24;   color: #B81E24;
 }
 
 .kuiButton--danger:enabled:hover {
-  color: #ff3333 !important;
-  border: solid 1px #ff3333;
-  background-color: rgba(255, 102, 102, 0.1);
+  color: #8c171b !important;
+  border: solid 1px #8c171b;
+  background-color: rgba(184, 30, 36, 0.1);
 }
-a.kuiButton--danger:not(.kuiButton-isDisabled):hover {   color: #ff3333 !important;
-  border: solid 1px #ff3333;
-  background-color: rgba(255, 102, 102, 0.1);
+a.kuiButton--danger:not(.kuiButton-isDisabled):hover {   color: #8c171b !important;
+  border: solid 1px #8c171b;
+  background-color: rgba(184, 30, 36, 0.1);
 }
 
 .kuiButton--danger:enabled:active {
-  color: #ff3333 !important;
-  border: solid 1px #ff3333;
-  background-color: rgba(255, 102, 102, 0.1);
+  color: #8c171b !important;
+  border: solid 1px #8c171b;
+  background-color: rgba(184, 30, 36, 0.1);
 }
-a.kuiButton--danger:not(.kuiButton-isDisabled):active {   color: #ff3333 !important;
-  border: solid 1px #ff3333;
-  background-color: rgba(255, 102, 102, 0.1);
+a.kuiButton--danger:not(.kuiButton-isDisabled):active {   color: #8c171b !important;
+  border: solid 1px #8c171b;
+  background-color: rgba(184, 30, 36, 0.1);
 }
 
 .kuiButton--warning {
-  color: #FCFEFF;
-  background-color: #FFCE7A;
+  color: #F2F4F7;
+  background-color: #FFB84D;
 }
 .kuiButton--warning:not(a):enabled:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #0A121A, 0 0 0 2px #FFCE7A;   color: #FCFEFF;
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #1B1A19, 0 0 0 2px #FFB84D;   color: #F2F4F7;
 }
-a.kuiButton--warning:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #0A121A, 0 0 0 2px #FFCE7A;   color: #FCFEFF;
+a.kuiButton--warning:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #1B1A19, 0 0 0 2px #FFB84D;   color: #F2F4F7;
 }
 
 .kuiButton--warning:enabled:hover {
-  color: #FCFEFF !important;   background-color: #ffbb47;
+  color: #F2F4F7 !important;   background-color: #ffa41a;
 }
-a.kuiButton--warning:not(.kuiButton-isDisabled):hover {   color: #FCFEFF !important;   background-color: #ffbb47;
+a.kuiButton--warning:not(.kuiButton-isDisabled):hover {   color: #F2F4F7 !important;   background-color: #ffa41a;
 }
 
 .kuiButton--warning:enabled:active {
-  color: #FCFEFF !important;   background-color: #ffbb47;
+  color: #F2F4F7 !important;   background-color: #ffa41a;
 }
-a.kuiButton--warning:not(.kuiButton-isDisabled):active {   color: #FCFEFF !important;   background-color: #ffbb47;
+a.kuiButton--warning:not(.kuiButton-isDisabled):active {   color: #F2F4F7 !important;   background-color: #ffa41a;
 }
 
 .kuiButton--warning:disabled {
-  background-color: #ffe1ad;
+  background-color: #ffcc80;
 }
 a.kuiButton--warning.kuiButton-isDisabled {
-  background-color: #ffe1ad;
+  background-color: #ffcc80;
 }
 
 .kuiButton--hollow {
-  color: #159D8D !important;   background-color: transparent;
+  color: #F2382C !important;   background-color: transparent;
 }
 .kuiButton--hollow:enabled:hover {
-  color: #0f7065 !important;   text-decoration: underline;
+  color: #dd1a0e !important;   text-decoration: underline;
 }
-a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {   color: #0f7065 !important;   text-decoration: underline;
+a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {   color: #dd1a0e !important;   text-decoration: underline;
 }
 
 .kuiButton--hollow:enabled:active {
-  color: #0f7065 !important;   text-decoration: underline;
+  color: #dd1a0e !important;   text-decoration: underline;
 }
-a.kuiButton--hollow:not(.kuiButton-isDisabled):active {   color: #0f7065 !important;   text-decoration: underline;
+a.kuiButton--hollow:not(.kuiButton-isDisabled):active {   color: #dd1a0e !important;   text-decoration: underline;
 }
 
 .kuiButton--secondary {
-  color: #159D8D !important;   border: solid 1px #159D8D;
+  color: #F2382C !important;   border: solid 1px #F2382C;
 }
 .kuiButton--secondary:enabled:hover {
-  color: #0f7065 !important;   border: solid 1px #0f7065;
-  background-color: rgba(21, 157, 141, 0.1);
+  color: #dd1a0e !important;   border: solid 1px #dd1a0e;
+  background-color: rgba(242, 56, 44, 0.1);
   text-decoration: underline;
 }
-a.kuiButton--secondary:not(.kuiButton-isDisabled):hover {   color: #0f7065 !important;   border: solid 1px #0f7065;
-  background-color: rgba(21, 157, 141, 0.1);
+a.kuiButton--secondary:not(.kuiButton-isDisabled):hover {   color: #dd1a0e !important;   border: solid 1px #dd1a0e;
+  background-color: rgba(242, 56, 44, 0.1);
   text-decoration: underline;
 }
 
 .kuiButton--secondary:enabled:active {
-  color: #0f7065 !important;   border: solid 1px #0f7065;
-  background-color: rgba(21, 157, 141, 0.1);
+  color: #dd1a0e !important;   border: solid 1px #dd1a0e;
+  background-color: rgba(242, 56, 44, 0.1);
   text-decoration: underline;
 }
-a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !important;   border: solid 1px #0f7065;
-  background-color: rgba(21, 157, 141, 0.1);
+a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #dd1a0e !important;   border: solid 1px #dd1a0e;
+  background-color: rgba(242, 56, 44, 0.1);
   text-decoration: underline;
 }
 
@@ -297,7 +297,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   border: none;
   line-height: 1;
   font-size: 16px;
-  color: #DFE5EF !important;   cursor: pointer;
+  color: #E6E0DE !important;   cursor: pointer;
   opacity: 0.35;
 }
 .kuiCollapseButton:hover {
@@ -314,8 +314,8 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   top: 50%;   transform: translateY(-50%); }
 
 .kuiCheckBox {
-  appearance: none;   background-color: #0e1721;
-  border: 1px solid rgba(252, 254, 255, 0.1);
+  appearance: none;   background-color: #241c1b;
+  border: 1px solid rgba(242, 244, 247, 0.1);
   border-radius: 4px;
   width: 16px;
   height: 16px;
@@ -328,21 +328,21 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   content: "\f00c";
   font-size: 1em;
   opacity: 0;
-  color: #FCFEFF;
+  color: #F2F4F7;
   transition: opacity 0.1s linear;
 }
 .kuiCheckBox:checked {
-  border-color: #159D8D;
-  background-color: #159D8D;
+  border-color: #F2382C;
+  background-color: #F2382C;
 }
 .kuiCheckBox:checked::before {
   opacity: 1;
 }
 .kuiCheckBox:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #0A121A, 0 0 0 2px #159D8D; }
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #1B1A19, 0 0 0 2px #F2382C; }
 .kuiCheckBox:disabled {
-  background-color: #0d161e !important;
-  border-color: #0d161e !important;
+  background-color: #252120 !important;
+  border-color: #252120 !important;
   cursor: not-allowed !important;
 }
 
@@ -372,7 +372,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   line-height: 1.5;
 }
 .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 
 .kuiSearchInput__icon {
@@ -380,7 +380,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   top: 0.5em;
   left: 0.7em;
   font-size: 1em;
-  color: #5B6875;
+  color: #6A615E;
 }
 
 .kuiSearchInput__input {
@@ -390,18 +390,18 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DFE5EF;
-  background-color: #0e1721;
-  border: 1px solid rgba(252, 254, 255, 0.1);
+  color: #E6E0DE;
+  background-color: #241c1b;
+  border: 1px solid rgba(242, 244, 247, 0.1);
   border-radius: 4px;
   transition: border-color 0.1s linear;
   min-height: 32px;   padding-left: 28px;   width: 100%; }
 .kuiSearchInput__input:invalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 .kuiSearchInput__input:focus {
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 .kuiSearchInput__input:disabled {
   opacity: 0.4;
@@ -423,20 +423,20 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DFE5EF;
-  background-color: #0e1721;
-  border: 1px solid rgba(252, 254, 255, 0.1);
+  color: #E6E0DE;
+  background-color: #241c1b;
+  border: 1px solid rgba(242, 244, 247, 0.1);
   border-radius: 4px;
   transition: border-color 0.1s linear;
   min-height: 32px;   padding-right: 30px;   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');   background-size: 14px;
   background-repeat: no-repeat;
   background-position: calc(100% - 8px); }
 .kuiSelect:invalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 .kuiSelect:focus {
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 .kuiSelect:disabled {
   opacity: 0.4;
@@ -445,12 +445,12 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
 .kuiSelect:-moz-focusring {
   text-shadow: 0 0 0; }
 .kuiSelect.kuiSelect-isInvalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 .kuiSelect:focus {
   box-shadow: none;
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 
 .kuiSelect--small {
@@ -473,7 +473,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DFE5EF;
+  color: #E6E0DE;
   border: 1px solid transparent;   background-color: transparent;
 }
 
@@ -485,18 +485,18 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DFE5EF;
-  background-color: #0e1721;
-  border: 1px solid rgba(252, 254, 255, 0.1);
+  color: #E6E0DE;
+  background-color: #241c1b;
+  border: 1px solid rgba(242, 244, 247, 0.1);
   border-radius: 4px;
   transition: border-color 0.1s linear;
   min-height: 32px; }
 .kuiTextArea:invalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 .kuiTextArea:focus {
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 .kuiTextArea:disabled {
   opacity: 0.4;
@@ -505,10 +505,10 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
 .kuiTextArea:focus {
   box-shadow: none;
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 .kuiTextArea.kuiTextArea-isInvalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 
 .kuiTextArea--nonResizable {
@@ -531,25 +531,25 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DFE5EF;
-  background-color: #0e1721;
-  border: 1px solid rgba(252, 254, 255, 0.1);
+  color: #E6E0DE;
+  background-color: #241c1b;
+  border: 1px solid rgba(242, 244, 247, 0.1);
   border-radius: 4px;
   transition: border-color 0.1s linear;
   min-height: 32px; }
 .kuiTextInput:invalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 .kuiTextInput:focus {
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 .kuiTextInput:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 .kuiTextInput.kuiTextInput-isInvalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 
 .kuiTextInput--small {
@@ -586,27 +586,27 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   display: inline-block;   font: normal normal normal 14px/1 FontAwesome, sans-serif;   font-size: inherit;   text-rendering: auto;   -webkit-font-smoothing: antialiased;   -moz-osx-font-smoothing: grayscale; }
 
 .kuiIcon--info {
-  color: #159D8D;
+  color: #F2382C;
 }
 
 .kuiIcon--success {
-  color: #7DE2D1;
+  color: #D98B1F;
 }
 
 .kuiIcon--warning {
-  color: #FFCE7A;
+  color: #FFB84D;
 }
 
 .kuiIcon--error {
-  color: #F66;
+  color: #B81E24;
 }
 
 .kuiIcon--inactive {
-  color: #293847;
+  color: #3D3836;
 }
 
 .kuiIcon--basic {
-  color: #8D98A3;
+  color: #9E918D;
 }
 
 .kuiInfoPanel {
@@ -616,16 +616,16 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
 }
 
 .kuiInfoPanel--info {
-  border-color: rgba(21, 157, 141, 0.25); }
+  border-color: rgba(242, 56, 44, 0.25); }
 
 .kuiInfoPanel--success {
-  border-color: rgba(125, 226, 209, 0.25); }
+  border-color: rgba(217, 139, 31, 0.25); }
 
 .kuiInfoPanel--warning {
-  border-color: rgba(255, 206, 122, 0.25); }
+  border-color: rgba(255, 184, 77, 0.25); }
 
 .kuiInfoPanel--error {
-  border-color: rgba(255, 102, 102, 0.25); }
+  border-color: rgba(184, 30, 36, 0.25); }
 
 .kuiInfoPanelHeader {
   display: flex;
@@ -656,24 +656,24 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
 }
 
 .kuiLink {
-  color: #159D8D;
+  color: #F2382C;
   text-decoration: none;
   cursor: pointer;   appearance: none;   background-color: transparent;   border: none;   font-size: inherit;   line-height: inherit; }
 .kuiLink:visited, .kuiLink:active {
-  color: #159D8D;
+  color: #F2382C;
 }
 .kuiLink:hover {
-  color: #0f7065;
+  color: #dd1a0e;
   text-decoration: underline;
 }
 
 .kuiLocalBreadcrumbs {
   display: flex;
   align-items: center;
-  padding: 12px 8px;   border-bottom: 1px solid #293847;
+  padding: 12px 8px;   border-bottom: 1px solid #3D3836;
   flex-grow: 1;
   flex-basis: 100%;
-  background-color: #0A121A;
+  background-color: #1B1A19;
 }
 
 .kuiLocalBreadcrumb {
@@ -688,19 +688,19 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   content: "/";
   user-select: none;
   margin-right: 4px;
-  color: #293847;
+  color: #3D3836;
 }
 
 .kuiLocalBreadcrumb__link {
-  color: #159D8D;
+  color: #F2382C;
   text-decoration: none;
-  cursor: pointer;   appearance: none;   background-color: transparent;   border: none;   font-size: inherit;   line-height: inherit;   color: #159D8D;   font-size: 16px;
+  cursor: pointer;   appearance: none;   background-color: transparent;   border: none;   font-size: inherit;   line-height: inherit;   color: #F2382C;   font-size: 16px;
 }
 .kuiLocalBreadcrumb__link:visited, .kuiLocalBreadcrumb__link:active {
-  color: #159D8D;
+  color: #F2382C;
 }
 .kuiLocalBreadcrumb__link:hover {
-  color: #0f7065;
+  color: #dd1a0e;
   text-decoration: underline;
 }
 
@@ -731,21 +731,21 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   background-color: transparent;
   border: none;
   font-size: 14px;
-  color: #DFE5EF;
+  color: #E6E0DE;
   padding: 3px 6px;
   border-radius: 4px;
 }
 .kuiDatePickerNavigationButton:hover, .kuiDatePickerNavigationButton:active {
   cursor: pointer;
-  color: #101B25;
-  background-color: #159D8D;
+  color: #2A2625;
+  background-color: #F2382C;
 }
 .kuiDatePickerNavigationButton:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px transparent, 0 0 0 2px #159D8D;   color: #DFE5EF; }
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px transparent, 0 0 0 2px #F2382C;   color: #E6E0DE; }
 
 .kuiDatePickerHeaderCell {
   padding: 9px 0;
-  color: #DFE5EF;
+  color: #E6E0DE;
   font-size: 14px;
   font-weight: bold;
   text-align: center;
@@ -762,14 +762,14 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   background-color: transparent;
   width: 100%;
   border: 1px solid transparent;
-  color: #DFE5EF;
+  color: #E6E0DE;
   font-size: 14px;
   padding: 8px;
   border-radius: 4px;
   line-height: 1.2;
 }
 .kuiDatePickerRowCellContent:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px transparent, 0 0 0 2px #159D8D;   color: #DFE5EF; }
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px transparent, 0 0 0 2px #F2382C;   color: #E6E0DE; }
 .kuiDatePickerRowCellContent:disabled {
   pointer-events: none;
   opacity: 0.5;
@@ -779,16 +779,16 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   pointer-events: none;
 }
 .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
-  color: #159D8D;
+  color: #F2382C;
 }
 .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
-  background-color: #8D98A3;
-  color: #DFE5EF;
+  background-color: #9E918D;
+  color: #E6E0DE;
 }
 .kuiDatePickerRowCellContent:hover, .kuiDatePickerRowCellContent:active {
   cursor: pointer;
-  color: #101B25;
-  background-color: #159D8D;
+  color: #2A2625;
+  background-color: #F2382C;
 }
 
 .kuiLocalDropdown {
@@ -806,7 +806,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   border: none;
   line-height: 1;
   font-size: 16px;
-  color: #DFE5EF !important;   cursor: pointer;
+  color: #E6E0DE !important;   cursor: pointer;
   opacity: 0.35;
   position: absolute;
   top: 1px;
@@ -835,7 +835,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
 .kuiLocalDropdownTitle {
   margin-top: 0;   margin-bottom: 12px;
   font-size: 18px;
-  color: #DFE5EF;
+  color: #E6E0DE;
 }
 
 .kuiLocalDropdownSection {
@@ -855,7 +855,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
 .kuiLocalDropdownHeader__label {
   font-size: 14px;
   font-weight: 700;
-  margin-bottom: 0;   color: #DFE5EF;
+  margin-bottom: 0;   color: #E6E0DE;
 }
 
 .kuiLocalDropdownHeader__actions {
@@ -863,7 +863,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
 }
 
 .kuiLocalDropdownHeader__action {
-  color: #159D8D;
+  color: #F2382C;
   font-size: 12px;
   text-decoration: none;
   cursor: pointer;
@@ -872,7 +872,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   margin-left: 10px;
 }
 .kuiLocalDropdownHeader__action:hover, .kuiLocalDropdownHeader__action:active {
-  color: #0f7065;
+  color: #dd1a0e;
 }
 
 .kuiLocalDropdownInput {
@@ -881,33 +881,33 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   margin-bottom: 12px;
   padding: 5px 15px;
   font-size: 14px;
-  color: #DFE5EF;
-  background-color: #0e1721;
-  border: 1px solid rgba(252, 254, 255, 0.1);
+  color: #E6E0DE;
+  background-color: #241c1b;
+  border: 1px solid rgba(242, 244, 247, 0.1);
   border-radius: 4px;
 }
 .kuiLocalDropdownInput:focus {
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 
 .kuiLocalDropdownFormNote {
   font-size: 14px;
-  color: #8D98A3;
+  color: #9E918D;
 }
 
 .kuiLocalDropdownWarning {
   margin-bottom: 16px;
   padding: 6px 10px;
   font-size: 14px;
-  color: #DFE5EF;
-  background-color: #0A121A;
-  border-left: solid 2px #F66;
+  color: #E6E0DE;
+  background-color: #1B1A19;
+  border-left: solid 2px #B81E24;
 }
 
 .kuiLocalDropdownHelpText {
   margin-bottom: 16px;
   font-size: 14px;
-  color: #8D98A3;
+  color: #9E918D;
 }
 
 .kuiLocalMenu {
@@ -923,19 +923,19 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   padding: 2px 8px;
   font-size: 16px;
   background-color: transparent;
-  color: #DFE5EF;
+  color: #E6E0DE;
   border: 0;
   cursor: pointer;
   border-bottom: solid 2px transparent;
 }
 .kuiLocalMenuItem:hover, .kuiLocalMenuItem:focus {
-  background-color: rgba(21, 157, 141, 0.15);
+  background-color: rgba(242, 56, 44, 0.15);
   text-decoration: underline;
 }
 .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
-  color: #159D8D;
+  color: #F2382C;
   background-color: transparent;
-  border-color: #159D8D;
+  border-color: #F2382C;
   z-index: 2;
 }
 .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:hover, .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:focus {
@@ -959,10 +959,10 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 69px;   color: #DFE5EF;
-  background-color: #0A121A;
+  min-height: 69px;   color: #E6E0DE;
+  background-color: #1B1A19;
   line-height: 1.5;
-  border-bottom: solid 1px #293847;
+  border-bottom: solid 1px #3D3836;
 }
 
 .kuiLocalNavRow {
@@ -992,22 +992,22 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DFE5EF;
-  background-color: #0e1721;
-  border: 1px solid rgba(252, 254, 255, 0.1);
+  color: #E6E0DE;
+  background-color: #241c1b;
+  border: 1px solid rgba(242, 244, 247, 0.1);
   border-radius: 4px;
   transition: border-color 0.1s linear;
   min-height: 32px;   flex: 1 1 100%;
-  border-color: #FCFEFF;
-  border-color: #293847;
+  border-color: #F2F4F7;
+  border-color: #3D3836;
   border-radius: 4px 0 0 4px;
 }
 .kuiLocalSearchInput:invalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 .kuiLocalSearchInput:focus {
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 .kuiLocalSearchInput:disabled {
   opacity: 0.4;
@@ -1017,7 +1017,7 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   box-shadow: none;
 }
 .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 
 .kuiLocalSearchInput--secondary {
@@ -1044,9 +1044,9 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: #DFE5EF;
-  background-color: #0e1721;
-  border: 1px solid rgba(252, 254, 255, 0.1);
+  color: #E6E0DE;
+  background-color: #241c1b;
+  border: 1px solid rgba(242, 244, 247, 0.1);
   border-radius: 4px;
   transition: border-color 0.1s linear;
   min-height: 32px;   padding-right: 30px;   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');   background-size: 14px;
@@ -1055,11 +1055,11 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   border-radius: 0;
 }
 .kuiLocalSearchSelect:invalid {
-  border-color: #F66;
+  border-color: #B81E24;
 }
 .kuiLocalSearchSelect:focus {
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 .kuiLocalSearchSelect:disabled {
   opacity: 0.4;
@@ -1072,13 +1072,13 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   width: 43px;
   height: 32px;
   font-size: 16px;
-  line-height: 0;   color: #FCFEFF;
-  background-color: #159D8D;
+  line-height: 0;   color: #F2F4F7;
+  background-color: #F2382C;
   border: 0;
   border-radius: 0 4px 4px 0;
 }
 .kuiLocalSearchButton:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #293847, 0 0 0 2px #159D8D; }
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #3D3836, 0 0 0 2px #F2382C; }
 
 .kuiLocalTabs {
   display: flex;
@@ -1089,17 +1089,17 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
 .kuiLocalTab {
   padding: 5px 0 6px;
   font-size: 18px;
-  color: #DFE3E8;
+  color: #E6E0DE;
   border-bottom: 2px solid transparent;
   text-decoration: none;
   cursor: pointer;
   margin-top: 0 !important;   margin-bottom: 0 !important;   }
 .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
-  color: #159D8D;
+  color: #F2382C;
 }
 .kuiLocalTab.kuiLocalTab-isSelected {
-  color: #159D8D;
-  border-bottom-color: #159D8D;
+  color: #F2382C;
+  border-bottom-color: #F2382C;
   cursor: default;
 }
 .kuiLocalTab.kuiLocalTab-isDisabled {
@@ -1115,10 +1115,10 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   padding: 12px 8px;
   font-size: 16px;
   font-weight: bold;
-  border-bottom: 1px solid #293847;
+  border-bottom: 1px solid #3D3836;
   flex-grow: 1;
   flex-basis: 100%;
-  background-color: #0A121A;
+  background-color: #1B1A19;
 }
 .kuiLocalTitle:empty {
   padding: 0;
@@ -1135,13 +1135,13 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
 .kuiPagerText {
   font-size: 16px;
   line-height: 1.5;
-  color: #8D98A3;
+  color: #9E918D;
   white-space: nowrap; }
 
 .kuiPanel {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3), 0 1px 5px -2px rgba(0, 0, 0, 0.3);
-  background-color: #0A121A;
-  border: 1px solid #293847;
+  background-color: #1B1A19;
+  border: 1px solid #3D3836;
   border-radius: 4px;
 }
 
@@ -1179,25 +1179,25 @@ a.kuiButton--secondary:not(.kuiButton-isDisabled):active {   color: #0f7065 !imp
   justify-content: space-between;
   min-height: 30px;   padding: 10px;
   height: 50px;
-  border-bottom: 1px solid #293847;
+  border-bottom: 1px solid #3D3836;
 }
 .kuiPanelHeader .kuiButton:not(a):enabled:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #293847, 0 0 0 2px #159D8D; }
-a.kuiPanelHeader .kuiButton:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #293847, 0 0 0 2px #159D8D; }
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #3D3836, 0 0 0 2px #F2382C; }
+a.kuiPanelHeader .kuiButton:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #3D3836, 0 0 0 2px #F2382C; }
 
 .kuiPanelHeader .kuiButton--danger:not(a):enabled:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #293847, 0 0 0 2px #F66; }
-a.kuiPanelHeader .kuiButton--danger:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #293847, 0 0 0 2px #F66; }
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #3D3836, 0 0 0 2px #B81E24; }
+a.kuiPanelHeader .kuiButton--danger:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #3D3836, 0 0 0 2px #B81E24; }
 
 .kuiPanelHeader .kuiSelect {
-  border-color: #0e1721;
+  border-color: #241c1b;
 }
 .kuiPanelHeader .kuiSelect:not(a):enabled:focus {
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 
 .kuiPanelHeader__title {
@@ -1240,7 +1240,7 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
 
 .kuiEmptyTablePrompt__message {
   font-size: 20px;
-  color: #8D98A3;
+  color: #9E918D;
   line-height: 1.5;
 }
 
@@ -1254,19 +1254,19 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
 }
 
 .kuiStatusText--info {
-  color: #159D8D;
+  color: #F2382C;
 }
 
 .kuiStatusText--success {
-  color: #7DE2D1;
+  color: #D98B1F;
 }
 
 .kuiStatusText--warning {
-  color: #FFCE7A;
+  color: #FFB84D;
 }
 
 .kuiStatusText--error {
-  color: #F66;
+  color: #B81E24;
 }
 
 .kuiStatusText__icon {
@@ -1274,7 +1274,7 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
   width: 1.15em;   max-height: 1.15em; }
 
 .kuiControlledTable {
-  background: #0A121A;
+  background: #1B1A19;
 }
 .kuiControlledTable .kuiTable {
   border-top: none; }
@@ -1285,9 +1285,9 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
 
 .kuiTable {
   width: 100%;
-  border: 1px solid #293847;
+  border: 1px solid #3D3836;
   border-collapse: collapse;
-  background-color: #0A121A;
+  background-color: #1B1A19;
 }
 
 .kuiTable--fluid {
@@ -1301,7 +1301,7 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
   font-weight: 400;
   text-align: left;
   max-width: 20px;   line-height: 1.5;
-  color: #8D98A3;
+  color: #9E918D;
 }
 
 .kuiTableHeaderCell__liner {
@@ -1348,8 +1348,8 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
   font-size: 16px;
   font-weight: 400;
   text-align: left;
-  max-width: 20px;   color: #DFE5EF;
-  border-top: 1px solid #293847;
+  max-width: 20px;   color: #E6E0DE;
+  border-top: 1px solid #3D3836;
   vertical-align: middle;
 }
 
@@ -1368,7 +1368,7 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
 }
 
 .kuiTableRowCell--expanded {
-  border-top-color: #0A121A; }
+  border-top-color: #1B1A19; }
 
 .kuiTableRowCell--alignRight {
   text-align: right;
@@ -1393,21 +1393,21 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
 .kuiTableInfo {
   padding: 30px;
   font-size: 20px;
-  color: #8D98A3;
+  color: #9E918D;
   line-height: 1.5;
 }
 
 .kuiTabs {
   display: flex;
-  border-bottom: 1px solid #293847;
+  border-bottom: 1px solid #3D3836;
 }
 
 .kuiTab {
   appearance: none;   cursor: pointer;
   padding: 10px 30px;
   font-size: 16px;
-  color: #8D98A3;
-  background-color: transparent;   border: 1px solid #293847;
+  color: #9E918D;
+  background-color: transparent;   border: 1px solid #3D3836;
   border-radius: 0;   margin-bottom: -1px; }
 .kuiTab + .kuiTab {
   border-left: none;
@@ -1420,16 +1420,16 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
   outline: none; }
 .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
   z-index: 1;
-  color: #159D8D;
-  border: 1px solid #159D8D !important;
+  color: #F2382C;
+  border: 1px solid #F2382C !important;
 }
 .kuiTab:hover:not(.kuiTab-isSelected) {
-  color: #0f7065;
-  background-color: #101B25;
+  color: #dd1a0e;
+  background-color: #2A2625;
 }
 .kuiTab.kuiTab-isSelected {
   cursor: default;
-  color: #DFE5EF;
+  color: #E6E0DE;
   background-color: transparent;
   border-bottom-color: transparent;
 }
@@ -1441,25 +1441,25 @@ a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
   min-height: 30px;   padding: 10px;
   height: 50px;
   background-color: transparent;
-  border: solid 1px #293847;
+  border: solid 1px #3D3836;
 }
 .kuiToolBar .kuiButton:not(a):enabled:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #293847, 0 0 0 2px #159D8D; }
-a.kuiToolBar .kuiButton:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #293847, 0 0 0 2px #159D8D; }
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #3D3836, 0 0 0 2px #F2382C; }
+a.kuiToolBar .kuiButton:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #3D3836, 0 0 0 2px #F2382C; }
 
 .kuiToolBar .kuiButton--danger:not(a):enabled:focus {
-  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #293847, 0 0 0 2px #F66; }
-a.kuiToolBar .kuiButton--danger:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #293847, 0 0 0 2px #F66; }
+  z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #3D3836, 0 0 0 2px #B81E24; }
+a.kuiToolBar .kuiButton--danger:not(.kuiButton-isDisabled):focus {   z-index: 1;   outline: none !important;   box-shadow: 0 0 0 1px #3D3836, 0 0 0 2px #B81E24; }
 
 .kuiToolBar .kuiSelect {
-  border-color: #0e1721;
+  border-color: #241c1b;
 }
 .kuiToolBar .kuiSelect:not(a):enabled:focus {
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 a.kuiToolBar .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 
 .kuiToolBarSection {
@@ -1491,7 +1491,7 @@ a.kuiToolBar .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
   justify-content: space-between;
   min-height: 30px;   padding: 10px;
   height: 40px;
-  background-color: #0A121A;
+  background-color: #1B1A19;
 }
 
 .kuiToolBarFooterSection {
@@ -1550,22 +1550,22 @@ a.kuiToolBar .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
   width: 100%;
   min-width: 200px;
   padding: 4px 12px 5px 28px;
-  font-family: var(--font-text);   background-color: #0A121A;
-  color: #DFE5EF;
+  font-family: var(--font-text);   background-color: #1B1A19;
+  color: #E6E0DE;
   border-radius: 4px;
   font-size: 1em;
-  border: 1px solid #293847;
+  border: 1px solid #3D3836;
   line-height: normal;   transition: border-color 0.1s linear;
 }
 .kuiToolBarSearchBox__input:focus {
   outline: none;
-  border-color: #159D8D;
+  border-color: #F2382C;
 }
 
 .kuiToolBarText {
   font-size: 16px;
   line-height: 1.5;
-  color: #8D98A3;
+  color: #9E918D;
   white-space: nowrap; }
 
 .kuiTitle {
@@ -1592,7 +1592,7 @@ a.kuiToolBar .kuiSelect:not(.kuiButton-isDisabled):focus {   outline: none;
 }
 
 .kuiSubduedText {
-  color: #8D98A3 !important;
+  color: #9E918D !important;
 }
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {

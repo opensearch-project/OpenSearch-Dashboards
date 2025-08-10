@@ -11,4 +11,7 @@ OpenSearch Dashboards packages these fonts:
 * [Inter UI](https://rsms.me/inter/) fonts were pulled from their site and are at v3.2
 * [Roboto Mono](https://fonts.google.com/specimen/Roboto+Mono) was pulled from the Google Fonts website on January 22, 2019.
 
+* [Lato](https://fonts.google.com/specimen/Lato) fonts were pulled from the Google Fonts website on Augusth 9th, 2025.
+* [Source Code Pro](https://github.com/adobe-fonts/source-code-pro) upright v2.042 and italic v1.062.
+
 Licenses for these can be found in the folders below this root.

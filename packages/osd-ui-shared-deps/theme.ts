@@ -50,6 +50,9 @@ if (themeVersion === 'v7') {
 } else if (themeVersion === 'v9') {
   euiLightVars = require('@elastic/eui/dist/eui_theme_v9_light.json');
   euiDarkVars = require('@elastic/eui/dist/eui_theme_v9_dark.json');
+} else if (themeVersion === 'arancia') {
+  euiLightVars = require('@elastic/eui/dist/eui_theme_arancia_light.json');
+  euiDarkVars = require('@elastic/eui/dist/eui_theme_arancia_dark.json');
 } else {
   euiLightVars = require('@elastic/eui/dist/eui_theme_next_light.json');
   euiDarkVars = require('@elastic/eui/dist/eui_theme_next_dark.json');

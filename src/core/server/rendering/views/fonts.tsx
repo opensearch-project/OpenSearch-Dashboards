@@ -50,6 +50,37 @@ interface FontFace {
 }
 
 export const Fonts: FunctionComponent<Props> = ({ url }) => {
+  // For Arancia theme
+  const lato: FontFace = {
+    family: 'Lato',
+    variants: [
+      {
+        style: 'normal',
+        weight: 400,
+        format: 'truetype',
+        sources: ['Lato', 'Lato-Regular', `${url}/fonts/lato/Lato-Regular.ttf`],
+      },
+      {
+        style: 'italic',
+        weight: 400,
+        format: 'truetype',
+        sources: ['Lato Italic', 'Lato-Italic', `${url}/fonts/lato/Lato-Italic.ttf`],
+      },
+      {
+        style: 'normal',
+        weight: 700,
+        format: 'truetype',
+        sources: ['Lato Bold', 'Lato-Bold', `${url}/fonts/lato/Lato-Bold.ttf`],
+      },
+      {
+        style: 'italic',
+        weight: 700,
+        format: 'truetype',
+        sources: ['Lato Bold Italic', 'Lato-BoldItalic', `${url}/fonts/lato/Lato-BoldItalic.ttf`],
+      },
+    ],
+  };
+
   // For v9 theme
   const rubik: FontFace = {
     family: 'Rubik',
@@ -608,7 +639,7 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
       url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2');
   }
   */
-  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro, rubik]
+  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro, rubik, lato]
     .flatMap(({ family, variants }) =>
       variants.map(({ style, weight, format, sources, unicodeRange }) => {
         const src = sources
