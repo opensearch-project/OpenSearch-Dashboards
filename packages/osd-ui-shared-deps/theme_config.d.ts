@@ -7,7 +7,15 @@
  * Types for valid theme tags (themeVersion + themeMode)
  * Note: used by @osd/optimizer
  */
-export type ThemeTag = 'v7light' | 'v7dark' | 'v8light' | 'v8dark' | 'v9light' | 'v9dark' | 'arancialight' | 'aranciadark';
+export type ThemeTag =
+  | 'v7light'
+  | 'v7dark'
+  | 'v8light'
+  | 'v8dark'
+  | 'v9light'
+  | 'v9dark'
+  | 'arancialight'
+  | 'aranciadark';
 export type ThemeTags = readonly ThemeTag[];
 
 /**
