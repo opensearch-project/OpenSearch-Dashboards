@@ -35,52 +35,6 @@ export class VisualizationRegistry {
     this.rules = [...initialRules];
   }
 
-  /**
-   * Get the matching visualization type based on the columns.
-   * Currently every time this is called, it will browse all rules and find the best match.
-   */
-  getVisualizationType(columns: VisColumn[]) {
-    const numericalColumns = columns.filter((column) => column.schema === VisFieldType.Numerical);
-    const categoricalColumns = columns.filter(
-      (column) => column.schema === VisFieldType.Categorical
-    );
-    const dateColumns = columns.filter((column) => column.schema === VisFieldType.Date);
-
-    const bestMatch = this.findBestMatch(numericalColumns, categoricalColumns, dateColumns);
-
-    if (bestMatch) {
-      const mappingObj = this.getDefaultAxesMapping(
-        bestMatch.rule,
-        bestMatch.chartType.type,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns
-      );
-      return {
-        visualizationType: this.getVisualizationConfig(bestMatch.chartType.type),
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        ruleId: bestMatch.rule.id,
-        availableChartTypes: bestMatch.rule.chartTypes,
-        toExpression: bestMatch.rule.toExpression,
-        axisColumnMappings: mappingObj,
-      };
-    }
-
-    // Render empty state for the user to manually select the columns
-    return {
-      visualizationType: undefined,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      ruleId: undefined,
-      availableChartTypes: [],
-      toExpression: undefined,
-      axisColumnMappings: {},
-    };
-  }
-
   getDefaultAxesMapping(
     rule: VisualizationRule,
     chartTypeName: string,
@@ -102,12 +56,12 @@ export class VisualizationRegistry {
     };
 
     const possibleMapping = this.getVisualizationConfig(chartTypeName)?.ui.availableMappings;
-    const currentlyDisplayedMapping = possibleMapping?.find(({ mapping }) =>
+    const currentlyDisplayedMapping = possibleMapping?.find((mapping) =>
       isEqual(getColumnMatchFromMapping(mapping), rule.matchIndex)
     );
     return currentlyDisplayedMapping
       ? (Object.fromEntries(
-          Object.entries(currentlyDisplayedMapping!.mapping[0]).map(([role, config]) => [
+          Object.entries(currentlyDisplayedMapping).map(([role, config]) => [
             role,
             config && findColumns(config.type)[config.index],
           ])
@@ -187,7 +141,6 @@ export class VisualizationRegistry {
         return createAreaConfig();
       case 'table':
         return createTableConfig();
-      // TODO: Add other chart types' configs here
       default:
         return;
     }

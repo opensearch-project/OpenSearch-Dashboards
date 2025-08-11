@@ -58,6 +58,7 @@ export interface QuerySuggestionGetFnArgs {
   boolFilter?: any;
   position?: monaco.Position;
   services?: IDataPluginServices;
+  baseLanguage?: string; // Used to enrich the Prompt mode Suggestions with Commands from base language
 }
 
 /** @public **/

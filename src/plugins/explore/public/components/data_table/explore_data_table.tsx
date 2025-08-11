@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './explore_data_table.scss';
+
 import React, { useCallback, useMemo, useRef, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
@@ -122,8 +124,7 @@ const ExploreDataTableComponent = () => {
       data-title={savedSearch || ''}
       data-description={savedSearch || ''}
       data-test-subj="discoverTable"
-      className="eui-xScrollWithShadows"
-      style={{ height: '100%' }}
+      className="explore-table-container eui-xScrollWithShadows"
       ref={containerRef}
     >
       <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../../data/common';
@@ -92,5 +92,20 @@ export const DatasetSelectWidget = () => {
     [queryString, dispatch, services]
   );
 
-  return <DatasetSelect onSelect={handleDatasetSelect} appName="explore" />;
+  const supportedTypes = useMemo(() => {
+    return (
+      services.supportedTypes || [
+        DEFAULT_DATA.SET_TYPES.INDEX,
+        DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      ]
+    );
+  }, [services.supportedTypes]);
+
+  return (
+    <DatasetSelect
+      onSelect={handleDatasetSelect}
+      appName="explore"
+      supportedTypes={supportedTypes}
+    />
+  );
 };

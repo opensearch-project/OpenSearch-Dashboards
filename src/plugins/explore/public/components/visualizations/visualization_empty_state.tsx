@@ -23,31 +23,19 @@ export const VisualizationEmptyState = () => {
       label: i18n.translate('explore.visualize.emptyState.sampleQuery.faults', {
         defaultMessage: 'Top services with faults',
       }),
-      code: `FILTER \`attributes.http.response.status_code\` >= 500
-| STATS count(*) as \`count\` by attributes.aws.local.service as service
-| SORT count DESC
-| LIMIT 5
-| DISPLAY count,service`,
+      code: `| where severityNumber >= 17
+| stats count() as count by serviceName
+| sort -count
+| head 10`,
     },
     {
       key: 'slow',
       label: i18n.translate('explore.visualize.emptyState.sampleQuery.slowOps', {
-        defaultMessage: 'Top slow operations',
+        defaultMessage: 'Top slow services',
       }),
-      code: `STATS pct(durationNano, 99) as \`p99\` by attributes.aws.local.operation
-| SORT p99 DESC
-| LIMIT 5
-| DISPLAY p99,attributes.aws.local.operation`,
-    },
-    {
-      key: 'db',
-      label: i18n.translate('explore.visualize.emptyState.sampleQuery.slowDb', {
-        defaultMessage: 'Top slow database statements',
-      }),
-      code: `STATS pct(durationNano, 99) as \`p99\` by attributes.db.statement
-| SORT p99 DESC
-| LIMIT 5
-| DISPLAY p99,attributes.db.statement`,
+      code: `| stats avg(durationInNanos) as duration by \`resource.attributes.service@name\`
+| sort -duration
+| head 10`,
     },
   ];
 
@@ -78,7 +66,10 @@ export const VisualizationEmptyState = () => {
           })}
           <EuiSpacer size="s" />
           <EuiText size="s">
-            <EuiLink href="https://opensearch.org/" target="_blank">
+            <EuiLink
+              href="https://docs.opensearch.org/latest/search-plugins/sql/ppl/syntax/"
+              target="_blank"
+            >
               {refLinkLabel}
             </EuiLink>
           </EuiText>

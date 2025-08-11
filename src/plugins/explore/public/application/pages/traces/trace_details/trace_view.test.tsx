@@ -42,7 +42,8 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: () => ({
-    hash: '#?traceId=test-trace-id&datasourceId=test-datasource&indexPattern=test-index-*',
+    hash:
+      '#?traceId=test-trace-id&dataset={"id":"test-dataset-id","title":"test-index-*","type":"INDEX_PATTERN","timeFieldName":"endTime"}',
   }),
 }));
 
@@ -52,8 +53,12 @@ jest.mock('./state/trace_app_state', () => ({
       get: () => ({
         ...stateDefaults,
         traceId: 'test-trace-id',
-        dataSourceId: 'test-datasource',
-        indexPattern: 'test-index-*',
+        dataset: {
+          id: 'test-dataset-id',
+          title: 'test-index-*',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         spanId: undefined,
       }),
       set: jest.fn(),
@@ -65,8 +70,7 @@ jest.mock('./state/trace_app_state', () => ({
       transitions: {
         setSpanId: jest.fn(),
         setTraceId: jest.fn(),
-        setDataSourceId: jest.fn(),
-        setIndexPattern: jest.fn(),
+        setDataset: jest.fn(),
       },
     },
     stopStateSync: jest.fn(),
@@ -345,8 +349,12 @@ describe('TraceDetails', () => {
       stateContainer: {
         get: () => ({
           traceId: '', // Empty trace ID
-          dataSourceId: 'test-datasource',
-          indexPattern: 'test-index-*',
+          dataset: {
+            id: 'test-dataset-id',
+            title: 'test-index-*',
+            type: 'INDEX_PATTERN',
+            timeFieldName: 'endTime',
+          },
           spanId: undefined,
         }),
         set: jest.fn(),
@@ -356,8 +364,7 @@ describe('TraceDetails', () => {
         transitions: {
           setSpanId: jest.fn(),
           setTraceId: jest.fn(),
-          setDataSourceId: jest.fn(),
-          setIndexPattern: jest.fn(),
+          setDataset: jest.fn(),
         },
       },
       stopStateSync: jest.fn(),
@@ -518,8 +525,12 @@ describe('TraceDetails', () => {
       stateContainer: {
         get: () => ({
           traceId: 'test-trace-id',
-          dataSourceId: 'test-datasource',
-          indexPattern: 'test-index-*',
+          dataset: {
+            id: 'test-dataset-id',
+            title: 'test-index-*',
+            type: 'INDEX_PATTERN',
+            timeFieldName: 'endTime',
+          },
           spanId: 'span-1', // Specific span selected
         }),
         set: jest.fn(),
@@ -529,8 +540,7 @@ describe('TraceDetails', () => {
         transitions: {
           setSpanId: mockSetSpanId,
           setTraceId: jest.fn(),
-          setDataSourceId: jest.fn(),
-          setIndexPattern: jest.fn(),
+          setDataset: jest.fn(),
         },
       },
       stopStateSync: jest.fn(),
@@ -561,8 +571,12 @@ describe('TraceDetails', () => {
       stateContainer: {
         get: () => ({
           traceId: 'test-trace-id',
-          dataSourceId: 'test-datasource',
-          indexPattern: 'test-index-*',
+          dataset: {
+            id: 'test-dataset-id',
+            title: 'test-index-*',
+            type: 'INDEX_PATTERN',
+            timeFieldName: 'endTime',
+          },
           spanId: 'non-existent-span',
         }),
         set: jest.fn(),
@@ -572,8 +586,7 @@ describe('TraceDetails', () => {
         transitions: {
           setSpanId: mockSetSpanId,
           setTraceId: jest.fn(),
-          setDataSourceId: jest.fn(),
-          setIndexPattern: jest.fn(),
+          setDataset: jest.fn(),
         },
       },
       stopStateSync: jest.fn(),
@@ -708,8 +721,12 @@ describe('TraceDetails', () => {
       stateContainer: {
         get: () => ({
           traceId: 'test-trace-id',
-          dataSourceId: 'test-datasource',
-          indexPattern: 'test-index-*',
+          dataset: {
+            id: 'test-dataset-id',
+            title: 'test-index-*',
+            type: 'INDEX_PATTERN',
+            timeFieldName: 'endTime',
+          },
           spanId: undefined,
         }),
         set: jest.fn(),
@@ -722,8 +739,7 @@ describe('TraceDetails', () => {
         transitions: {
           setSpanId: jest.fn(),
           setTraceId: jest.fn(),
-          setDataSourceId: jest.fn(),
-          setIndexPattern: jest.fn(),
+          setDataset: jest.fn(),
         },
       },
       stopStateSync: jest.fn(),
@@ -744,8 +760,12 @@ describe('TraceDetails', () => {
     if (stateSubscriptionCallback) {
       stateSubscriptionCallback({
         traceId: 'new-trace-id',
-        dataSourceId: 'new-datasource',
-        indexPattern: 'new-index-*',
+        dataset: {
+          id: 'new-dataset-id',
+          title: 'new-index-*',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         spanId: 'new-span-id',
       });
     }
@@ -760,8 +780,12 @@ describe('TraceDetails', () => {
       stateContainer: {
         get: () => ({
           traceId: '', // Missing traceId
-          dataSourceId: '', // Missing dataSourceId
-          indexPattern: 'test-index-*',
+          dataset: {
+            id: '',
+            title: 'test-index-*',
+            type: 'INDEX_PATTERN',
+            timeFieldName: 'endTime',
+          },
           spanId: undefined,
         }),
         set: jest.fn(),
@@ -771,8 +795,7 @@ describe('TraceDetails', () => {
         transitions: {
           setSpanId: jest.fn(),
           setTraceId: jest.fn(),
-          setDataSourceId: jest.fn(),
-          setIndexPattern: jest.fn(),
+          setDataset: jest.fn(),
         },
       },
       stopStateSync: jest.fn(),

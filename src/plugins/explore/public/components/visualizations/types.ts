@@ -7,9 +7,6 @@ import { ChartStyleControlMap } from '../visualizations/utils/use_visualization_
 
 type AxisSupportedChartTypes = 'bar' | 'scatter' | 'heatmap';
 export type AxisSupportedStyles = ChartStyleControlMap[AxisSupportedChartTypes];
-export interface CompleteAxisWithStyle extends Partial<VisColumn> {
-  styles: StandardAxes;
-}
 
 export enum Positions {
   RIGHT = 'right',
@@ -40,8 +37,7 @@ export interface VisualizationRule {
   ) => boolean;
   matchIndex: number[];
   chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
-  // TODO: rename it, the name is inappropriate, it doesn't create expression
-  toExpression?: (
+  toSpec?: (
     transformedData: Array<Record<string, any>>,
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],

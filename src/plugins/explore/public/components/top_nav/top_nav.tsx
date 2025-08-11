@@ -49,7 +49,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     },
     data,
     uiSettings,
-    history,
+    scopedHistory,
   } = services;
 
   const uiState = useNewStateSelector(selectUIState);
@@ -85,9 +85,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const osdUrlStateStorage = useMemo(() => {
     return createOsdUrlStateStorage({
       useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: history(),
+      history: scopedHistory,
     });
-  }, [uiSettings, history]);
+  }, [uiSettings, scopedHistory]);
 
   const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
     data.query,
@@ -106,6 +106,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         tabState,
         flavorId,
         tabDefinition,
+        activeTabId: uiState.activeTabId,
       },
       clearEditors,
       savedExplore
@@ -120,6 +121,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     flavorId,
     tabDefinition,
     clearEditors,
+    uiState.activeTabId,
   ]);
 
   useEffect(() => {

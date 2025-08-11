@@ -78,9 +78,9 @@ describe('createHeatmapeConfig', () => {
     expect(config.ui.availableMappings).toBeDefined();
     expect(config.ui.availableMappings).toHaveLength(1);
 
-    expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty(AxisRole.X);
-    expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty(AxisRole.Y);
-    expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty(AxisRole.COLOR);
+    expect(config.ui.availableMappings[0]).toHaveProperty(AxisRole.X);
+    expect(config.ui.availableMappings[0]).toHaveProperty(AxisRole.Y);
+    expect(config.ui.availableMappings[0]).toHaveProperty(AxisRole.COLOR);
   });
 
   it('should render the HeatmapVisStyleControls component with the provided props', () => {

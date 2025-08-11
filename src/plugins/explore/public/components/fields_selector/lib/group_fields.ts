@@ -31,7 +31,17 @@
 import { IndexPatternField } from '../../../../../data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
 
+// TODO: Use data set defined faceted field
+const FACET_FIELDS = ['serviceName', 'attributes.http.status_code', 'status.code'] as const;
+
+function isFacetedField(fieldName: string): fieldName is typeof FACET_FIELDS[number] {
+  // Remove invisiable char
+  const normalizedFieldName = fieldName.replace(/[\u200b-\u200f\uFEFF]/g, '');
+  return (FACET_FIELDS as readonly string[]).includes(normalizedFieldName);
+}
+
 interface GroupedFields {
+  facetedFields: IndexPatternField[];
   selectedFields: IndexPatternField[];
   queryFields: IndexPatternField[];
   discoveredFields: IndexPatternField[];
@@ -47,6 +57,7 @@ export function groupFields(
   fieldFilterState: FieldFilterState
 ): GroupedFields {
   const result: GroupedFields = {
+    facetedFields: [],
     selectedFields: [],
     queryFields: [],
     discoveredFields: [],
@@ -71,6 +82,9 @@ export function groupFields(
   for (const field of fieldsSorted) {
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts) || field.type === '_source') {
       continue;
+    }
+    if (isFacetedField(field.name)) {
+      result.facetedFields.push(field);
     }
     if (columns.includes(field.name)) {
       result.selectedFields.push(field);

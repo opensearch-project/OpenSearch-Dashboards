@@ -10,5 +10,5 @@ export const promptEditorOptions: IEditorConstructionOptions = {
   lineNumbers: 'off', // Disable line numbers for NL
   folding: false, // Disable folding
   fixedOverflowWidgets: true,
-  renderValidationDecorations: 'off',
+  quickSuggestions: false,
 };

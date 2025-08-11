@@ -21,6 +21,7 @@ import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults } from '../state_management/slices';
 import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
 import { MockStore } from '../state_management/__mocks__';
+import * as CurrentExploreIdHook from './use_current_explore_id';
 
 // Mock Redux actions
 jest.mock('../state_management/actions/query_actions', () => ({
@@ -72,6 +73,8 @@ describe('useInitialQueryExecution', () => {
       }
       return action;
     });
+
+    jest.spyOn(CurrentExploreIdHook, 'useCurrentExploreId').mockReturnValue(undefined);
 
     mockServices = {
       uiSettings: {
@@ -215,6 +218,21 @@ describe('useInitialQueryExecution', () => {
       } as any;
 
       const { result } = renderHookWithProvider(servicesWithSearchDisabled);
+
+      expect(mockServices.data.query.queryString.addToQueryHistory).not.toHaveBeenCalled();
+      expect(mockClearResults).not.toHaveBeenCalled();
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(result.current.isInitialized).toBe(false);
+    });
+  });
+
+  describe('when current loading a saved search', () => {
+    beforeEach(() => {
+      jest.spyOn(CurrentExploreIdHook, 'useCurrentExploreId').mockReturnValue('mock-id');
+    });
+
+    it('should not execute query or add to history', () => {
+      const { result } = renderHookWithProvider(mockServices);
 
       expect(mockServices.data.query.queryString.addToQueryHistory).not.toHaveBeenCalled();
       expect(mockClearResults).not.toHaveBeenCalled();

@@ -35,7 +35,11 @@ export const QueryPanelGeneratedQuery = () => {
   return (
     <div className="exploreQueryPanelGeneratedQuery">
       <div className="exploreQueryPanelGeneratedQuery__queryWrapper">
-        <EuiIcon type="editorCodeBlock" size="s" />
+        <EuiIcon
+          type="editorCodeBlock"
+          size="s"
+          className="exploreQueryPanelGeneratedQuery__icon"
+        />
         <EuiText
           className="exploreQueryPanelGeneratedQuery__query"
           size="s"
@@ -45,6 +49,7 @@ export const QueryPanelGeneratedQuery = () => {
         </EuiText>
       </div>
       <EuiButtonEmpty
+        className="exploreQueryPanelGeneratedQuery__editButton"
         data-test-subj="exploreQueryPanelGeneratedQueryEditButton"
         onClick={onEditClick}
         size="xs"

@@ -1,2 +1,0 @@
-test:
-- Add cypress test for default vis on rule matching ([#10263](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10263))

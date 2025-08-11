@@ -123,51 +123,30 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
       defaults: defaultLineChartStyles,
       render: (props) => React.createElement(LineVisStyleControls, props),
     },
-    // TODO: refactor availableMappings to a flatten array
     availableMappings: [
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.Y_SECOND]: { type: VisFieldType.Numerical, index: 1 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y_SECOND]: { type: VisFieldType.Numerical, index: 1 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
       },
     ],
   },

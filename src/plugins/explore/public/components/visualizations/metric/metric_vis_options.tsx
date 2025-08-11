@@ -15,7 +15,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { MetricChartStyleControls } from './metric_vis_config';
-import { RangeValue, ColorSchemas } from '../types';
+import { RangeValue, ColorSchemas, AxisRole } from '../types';
 import { CustomRange } from '../style_panel/custom_ranges';
 import { DebouncedText } from '../style_panel/utils';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
@@ -153,7 +153,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               {styleOptions.showTitle && (
                 <EuiFormRow>
                   <DebouncedText
-                    value={styleOptions.title || numericalColumns[0]?.name || ''}
+                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
                     placeholder={i18n.translate('explore.vis.metric.title', {
                       defaultMessage: 'Title',
                     })}

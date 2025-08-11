@@ -1,3 +1,0 @@
-fix:
-- Url state lost when changing time filter on new discover ([#10281](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10281))
-- Console warning of no title on ButtonIcon component ([#10281](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10281))

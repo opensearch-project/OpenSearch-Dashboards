@@ -72,6 +72,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               numericalColumns={numericalColumns}
               categoricalColumns={categoricalColumns}
               dateColumns={dateColumns}
+              axisColumnMappings={axisColumnMappings}
             />
           </EuiFlexItem>
 
@@ -103,7 +104,6 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
           {shouldShowLegend && (
             <EuiFlexItem grow={false}>
               <LegendOptionsPanel
-                shouldShowLegend={shouldShowLegend}
                 legendOptions={{
                   show: styleOptions.addLegend,
                   position: styleOptions.legendPosition,

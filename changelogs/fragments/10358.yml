@@ -1,0 +1,2 @@
+fix:
+- Infer tooltip date format dynamically ([#10358](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10358))

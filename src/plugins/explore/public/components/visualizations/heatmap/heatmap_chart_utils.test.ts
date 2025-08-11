@@ -3,43 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import {
-  createlabelLayer,
+  createLabelLayer,
   getDataBound,
   addTransform,
   setRange,
   enhanceStyle,
 } from './heatmap_chart_utils';
 import * as utils from './heatmap_chart_utils';
-import {
-  LabelAggregationType,
-  VisFieldType,
-  ColorSchemas,
-  ScaleType,
-  CompleteAxisWithStyle,
-  StandardAxes,
-} from '../types';
+import { LabelAggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
 
 import { defaultHeatmapChartStyles, HeatmapLabels } from './heatmap_vis_config';
 import * as colorUtil from '../utils/utils';
 
-describe('createlabelLayer', () => {
-  const xAxis: CompleteAxisWithStyle = {
+describe('createLabelLayer', () => {
+  const xAxis: VisColumn = {
     id: 2,
     name: 'category',
     schema: VisFieldType.Categorical,
     column: 'category',
     validValuesCount: 1,
     uniqueValuesCount: 1,
-    styles: {} as StandardAxes,
   };
-  const yAxis: CompleteAxisWithStyle = {
+  const yAxis: VisColumn = {
     id: 3,
     name: 'product',
     schema: VisFieldType.Categorical,
     column: 'product',
     validValuesCount: 1,
     uniqueValuesCount: 1,
-    styles: {} as StandardAxes,
   };
 
   const colorField = 'value';
@@ -58,7 +49,7 @@ describe('createlabelLayer', () => {
         },
       },
     };
-    const result = createlabelLayer(styles, true, colorField, xAxis, yAxis);
+    const result = createLabelLayer(styles, true, colorField, xAxis, yAxis);
     expect(result).toBeNull();
   });
 
@@ -77,7 +68,7 @@ describe('createlabelLayer', () => {
       },
     };
 
-    const result = createlabelLayer(baseStyles, true, colorField, xAxis, yAxis);
+    const result = createLabelLayer(baseStyles, true, colorField, xAxis, yAxis);
 
     expect(result).toEqual({
       mark: {
@@ -123,7 +114,7 @@ describe('createlabelLayer', () => {
       },
     };
 
-    const result = createlabelLayer(styles, false, colorField, xAxis, yAxis);
+    const result = createLabelLayer(styles, false, colorField, xAxis, yAxis);
     expect(result?.encoding.text).toHaveProperty('aggregate', LabelAggregationType.SUM);
   });
 
@@ -142,7 +133,7 @@ describe('createlabelLayer', () => {
       },
     };
 
-    const result = createlabelLayer(baseStyles, false, colorField, xAxis, yAxis);
+    const result = createLabelLayer(baseStyles, false, colorField, xAxis, yAxis);
 
     expect(result?.encoding.text).not.toHaveProperty('aggregate');
     expect(result?.encoding.text).toEqual({
