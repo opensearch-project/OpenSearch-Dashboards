@@ -244,7 +244,7 @@ export const showSuggestionAndHint = (maxAttempts = 3) => {
 
   const attemptShow = () => {
     attempts++;
-    cy.get('.inputarea').type(' ', { force: true });
+    cy.get('.inputarea').type('source ', { force: true });
 
     return cy.get('.suggest-widget.visible').then(($widget) => {
       const isVisible = $widget.is(':visible');
@@ -305,12 +305,33 @@ export const hideWidgets = (maxAttempts = 3) => {
 };
 
 /**
+ * Types in a query in Monaco editor
+ * @param {String} query - Query String
+ */
+export const setQueryInMonacoEditor = (query) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      cy.get('.inputarea').type(query, {
+        force: true,
+      });
+    });
+};
+
+/**
  * Creates a query using either mouse or keyboard interactions
  * @param {Object} config - Query configuration
  * @param {boolean} useKeyboard - Whether to use keyboard instead of mouse
  */
 export const createQuery = (config, useKeyboard = false) => {
   const editorType = 'exploreQueryPanelEditor';
+
+  setQueryInMonacoEditor('source'); // Setting base Query to source <space> to avoid being stuck in AI mode with space
 
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
@@ -320,7 +341,6 @@ export const createQuery = (config, useKeyboard = false) => {
     .within(() => {
       cy.get('.inputarea').type(' ', { force: true });
       if (config.language === QueryLanguages.PPL.name) {
-        selectSuggestion('source', useKeyboard);
         selectSuggestion('=', useKeyboard);
         const dataset = getDatasetName('data_logs_small_time_1', config.datasetType);
         selectSuggestion(dataset, useKeyboard);
@@ -372,6 +392,8 @@ export const validateEditorContainsError = () => {
 export const validateImplicitPPLQuery = (config) => {
   const editorType = 'exploreQueryPanelEditor';
 
+  setQueryInMonacoEditor('category = "Application"');
+
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
     .should('be.visible')
@@ -399,11 +421,9 @@ export const validateDocumentationPanelIsOpen = (config) => {
     .should('have.class', 'vs')
     .wait(1000)
     .within(() => {
-      cy.get('.inputarea').type(' ', { force: true });
       if (config.language === QueryLanguages.PPL.name) {
         // Type 'sour' to trigger suggestions with documentation
         cy.get('.inputarea').type('sour', { force: true });
-
         // Wait for suggestion widget to appear
         cy.get('.suggest-widget.visible')
           .should('be.visible')
