@@ -231,7 +231,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
 
   const suggestionProvider = useMemo(() => {
     return {
-      triggerCharacters: isPromptMode ? [] : TRIGGER_CHARACTERS,
+      triggerCharacters: isPromptMode ? ['='] : TRIGGER_CHARACTERS,
       provideCompletionItems,
     };
   }, [isPromptMode, provideCompletionItems]);
