@@ -13,7 +13,6 @@ describe('DataSourceDropDownHeader', () => {
   it('should render correctly with the provided totalDataSourceCount', () => {
     const totalDataSourceCount = 5;
     const wrapper = shallow(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceDropDownHeader totalDataSourceCount={totalDataSourceCount} />
     );
     expect(wrapper).toMatchSnapshot();
@@ -21,7 +20,6 @@ describe('DataSourceDropDownHeader', () => {
 
   it('should render "DATA SOURCES" when totalDataSourceCount is greater than 1', () => {
     const totalDataSourceCount = 5;
-    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const wrapper = mount(<DataSourceDropDownHeader totalDataSourceCount={totalDataSourceCount} />);
     expect(wrapper.text()).toContain('DATA SOURCES');
   });
@@ -30,7 +28,6 @@ describe('DataSourceDropDownHeader', () => {
     'should render "DATA SOURCE" when totalDataSourceCount is %s',
     (totalDataSourceCount) => {
       const wrapper = mount(
-        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <DataSourceDropDownHeader totalDataSourceCount={totalDataSourceCount} />
       );
       expect(wrapper.text()).toContain('DATA SOURCE');
@@ -41,7 +38,6 @@ describe('DataSourceDropDownHeader', () => {
     const totalDataSourceCount = 5;
     const activeDataSourceCount = 2;
     const wrapper = mount(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceDropDownHeader
         totalDataSourceCount={totalDataSourceCount}
         activeDataSourceCount={activeDataSourceCount}

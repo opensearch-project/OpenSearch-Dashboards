@@ -9,7 +9,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { useTimefilterSubscription } from './use_timefilter_subscription';
 import { ExploreServices } from '../../../types';
-import { runQueryActionCreator } from '../state_management/actions/query_editor';
+import { executeQueries } from '../state_management/actions/query_actions';
+import { clearResults, clearQueryStatusMap } from '../state_management/slices';
 import {
   queryInitialState,
   queryReducer,
@@ -21,13 +22,21 @@ import {
 } from '../state_management/slices';
 import { Subject, Subscription } from 'rxjs';
 
-// Mock the runQueryActionCreator
-jest.mock('../state_management/actions/query_editor', () => ({
-  runQueryActionCreator: jest.fn().mockReturnValue({ type: 'RUN_QUERY' }),
+// Mock the query actions
+jest.mock('../state_management/actions/query_actions', () => ({
+  executeQueries: jest.fn().mockReturnValue({ type: 'EXECUTE_QUERIES' }),
 }));
 
-const mockRunQueryActionCreator = runQueryActionCreator as jest.MockedFunction<
-  typeof runQueryActionCreator
+jest.mock('../state_management/slices', () => ({
+  ...jest.requireActual('../state_management/slices'),
+  clearResults: jest.fn().mockReturnValue({ type: 'CLEAR_RESULTS' }),
+  clearQueryStatusMap: jest.fn().mockReturnValue({ type: 'CLEAR_QUERY_STATUS_MAP' }),
+}));
+
+const mockExecuteQueries = executeQueries as jest.MockedFunction<typeof executeQueries>;
+const mockClearResults = clearResults as jest.MockedFunction<typeof clearResults>;
+const mockClearQueryStatusMap = clearQueryStatusMap as jest.MockedFunction<
+  typeof clearQueryStatusMap
 >;
 
 // Mock store state type
@@ -121,9 +130,13 @@ describe('useTimefilterSubscription', () => {
       // Trigger auto refresh
       autoRefreshSubject.next({});
 
-      // Verify query was dispatched
-      expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, 'source=logs');
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'RUN_QUERY' });
+      // Verify actions were dispatched
+      expect(mockClearResults).toHaveBeenCalled();
+      expect(mockClearQueryStatusMap).toHaveBeenCalled();
+      expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'CLEAR_RESULTS' });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'CLEAR_QUERY_STATUS_MAP' });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'EXECUTE_QUERIES' });
     });
 
     it('should handle multiple auto refresh events', () => {
@@ -143,9 +156,11 @@ describe('useTimefilterSubscription', () => {
       autoRefreshSubject.next({});
       autoRefreshSubject.next({});
 
-      // Verify query was dispatched for each event
-      expect(mockRunQueryActionCreator).toHaveBeenCalledTimes(3);
-      expect(mockDispatch).toHaveBeenCalledTimes(3);
+      // Verify actions were dispatched for each event (3 actions per event, 3 events = 9 total)
+      expect(mockClearResults).toHaveBeenCalledTimes(3);
+      expect(mockClearQueryStatusMap).toHaveBeenCalledTimes(3);
+      expect(mockExecuteQueries).toHaveBeenCalledTimes(3);
+      expect(mockDispatch).toHaveBeenCalledTimes(9); // 3 actions × 3 events
     });
   });
 
@@ -246,13 +261,15 @@ describe('useTimefilterSubscription', () => {
       // Trigger auto refresh with initial query
       autoRefreshSubject.next({});
 
-      expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, 'source=logs');
+      expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
 
       // Unmount the first hook
       unmount();
 
       // Clear previous calls
-      mockRunQueryActionCreator.mockClear();
+      mockExecuteQueries.mockClear();
+      mockClearResults.mockClear();
+      mockClearQueryStatusMap.mockClear();
 
       // Create a new hook instance with updated state
       const updatedState = {
@@ -269,7 +286,7 @@ describe('useTimefilterSubscription', () => {
       // Trigger auto refresh with updated query
       autoRefreshSubject.next({});
 
-      expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, 'source=logs | head 20');
+      expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
     });
   });
 });

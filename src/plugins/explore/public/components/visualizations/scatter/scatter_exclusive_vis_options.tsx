@@ -62,6 +62,7 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
 
       <EuiFormRow>
         <EuiSwitch
+          data-test-subj="pointFilledSwitch"
           compressed
           label={i18n.translate('explore.vis.scatter.filled', {
             defaultMessage: 'Filled',

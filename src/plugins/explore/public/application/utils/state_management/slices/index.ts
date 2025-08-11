@@ -9,3 +9,4 @@ export * from './results';
 export * from './tab';
 export * from './ui';
 export * from './query_editor';
+export * from './meta';

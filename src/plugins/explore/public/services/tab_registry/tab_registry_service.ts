@@ -34,15 +34,17 @@ export interface TabDefinition {
   // Transform query string for cache key generation
   prepareQuery?: (query: Query) => string;
 
-  // Optional results processor for raw results
-  resultsProcessor?: (rawResults: any, indexPattern: any, includeHistogram?: boolean) => any;
+  /**
+   * @experimental Callback for errors from query
+   * Used for handling patterns queries which fail on older versions.
+   * Will be removed when a method of finding dataset query engine version is implemented
+   *
+   * @returns A custom QueryExecutionStatus as well as an error, or undefined if standard behavior is desired
+   */
+  handleQueryError?: (error: any, cacheKey: string) => boolean;
 
   // UI Components
   component: (() => React.JSX.Element | null) | MemoExoticComponent<() => React.JSX.Element>;
-
-  // Optional lifecycle hooks
-  onActive?: () => void;
-  onInactive?: () => void;
 }
 
 /**

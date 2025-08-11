@@ -27,8 +27,7 @@ interface ChartTypeSelectorProps<T extends ChartType> {
   onChartTypeChange?: (chartType: ChartType) => void;
 }
 
-// TODO: rename it, this is chart type selector option, not rule
-interface AvailableRuleOption {
+interface AvailableChartTypeOption {
   value: string;
   inputDisplay: React.ReactNode;
   iconType?: string;
@@ -78,11 +77,11 @@ export const ChartTypeSelector = <T extends ChartType>({
           id: rule.id,
           name: rule.name,
           matchIndex: rule.matchIndex,
-          toExpression: rule.toExpression,
+          toSpec: rule.toSpec,
         });
       });
       return acc;
-    }, {} as Record<string, AvailableRuleOption>);
+    }, {} as Record<string, AvailableChartTypeOption>);
   }, []); // Only calculate once
 
   // Process chart types to mark unavailable ones as disabled
@@ -151,7 +150,11 @@ export const ChartTypeSelector = <T extends ChartType>({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s" color={option.disabled ? 'subdued' : 'default'}>
+            <EuiText
+              data-test-subj={`exploreChartTypeSelector-${option.value}`}
+              size="s"
+              color={option.disabled ? 'subdued' : 'default'}
+            >
               {option.inputDisplay}
             </EuiText>
           </EuiFlexItem>
@@ -180,8 +183,9 @@ export const ChartTypeSelector = <T extends ChartType>({
       >
         <EuiSuperSelect
           id="chartType"
+          data-test-subj="exploreChartTypeSelector"
           compressed
-          valueOfSelected={currChartTypeId}
+          valueOfSelected={currChartTypeId || ''}
           placeholder="Select a visualization type"
           options={selectOptions}
           onChange={(value) => {

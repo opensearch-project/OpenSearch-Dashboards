@@ -25,14 +25,6 @@ export const runQueryActionCreator = (services: ExploreServices, query?: string)
   dispatch: AppDispatch,
   getState: () => RootState
 ) => {
-  const {
-    queryEditor: { queryExecutionButtonStatus },
-  } = getState();
-
-  if (queryExecutionButtonStatus === 'REFRESH') {
-    return;
-  }
-
   if (typeof query === 'string') {
     dispatch(setQueryStringWithHistory(query));
   }

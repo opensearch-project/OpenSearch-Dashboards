@@ -30,6 +30,7 @@ import {
 } from '../../opensearch_dashboards_utils/public';
 import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/config';
+import { resetVisualizationBuilder } from './components/visualizations/visualization_builder';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -46,6 +47,7 @@ import { getPreloadedStore } from './application/utils/state_management/store';
 import { buildServices } from './build_services';
 import { DocViewTable } from './components/doc_viewer/doc_viewer_table/table';
 import { JsonCodeBlock } from './components/doc_viewer/json_code_block/json_code_block';
+import { TraceDetailsView } from './components/doc_viewer/trace_details_view/trace_details_view';
 import {
   createQueryEditorExtensionConfig,
   SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY,
@@ -113,6 +115,20 @@ export class ExplorePlugin
 
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
+    this.docViewsRegistry.addDocView({
+      title: i18n.translate('explore.docViews.trace.timeline.title', {
+        defaultMessage: 'Timeline',
+      }),
+      order: 5,
+      component: TraceDetailsView,
+      shouldShow: (hit) => {
+        // Only show the Timeline tab when on the traces flavor
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+        return currentPath.includes('/explore/traces') || currentHash.includes('/explore/traces');
+      },
+    });
+
     this.docViewsRegistry.addDocView({
       title: i18n.translate('explore.discover.docViews.table.tableTitle', {
         defaultMessage: 'Table',
@@ -326,7 +342,7 @@ export class ExplorePlugin
         return () => {
           abortAllActiveQueries();
           services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
-
+          resetVisualizationBuilder();
           appUnMounted();
           unmount();
           unsubscribeStore();

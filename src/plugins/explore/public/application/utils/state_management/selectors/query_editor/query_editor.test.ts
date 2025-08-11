@@ -50,6 +50,9 @@ describe('query_editor selectors', () => {
     tab: {} as any,
     legacy: {} as any,
     query: {} as any,
+    meta: {
+      isInitialized: false,
+    },
   });
 
   describe('selectQueryStatusMap', () => {

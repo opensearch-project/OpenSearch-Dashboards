@@ -149,7 +149,7 @@ describe('VisualizationContainer', () => {
       matches: jest.fn(),
       matchIndex: [1, 1, 0],
       chartTypes: [{ type: 'bar', name: 'Bar Chart', priority: 1, icon: 'barChart' }],
-      toExpression: jest.fn(() => 'test-expression'),
+      toSpec: jest.fn(() => 'test-expression'),
     });
 
     jest.spyOn(Utils, 'convertStringsToMappings').mockReturnValue({

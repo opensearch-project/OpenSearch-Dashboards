@@ -66,6 +66,8 @@ export class RenderingService {
           <AppWrapper
             chromeVisible$={chrome.getIsVisible$()}
             sidecarConfig$={overlays.sidecar.getSidecarConfig$()}
+            useUpdatedHeader={(chrome as any).useUpdatedHeader}
+            globalBanner$={chrome.getGlobalBanner$()}
           >
             <div className="app-wrapper-panel">
               <div id="globalBannerList">{bannerUi}</div>

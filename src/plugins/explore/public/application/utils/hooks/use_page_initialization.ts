@@ -17,6 +17,7 @@ import {
   clearQueryStatusMap,
   clearLastExecutedData,
   setEditorMode,
+  setUsingRegexPatterns,
 } from '../state_management/slices';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
@@ -45,9 +46,11 @@ export const useInitPage = () => {
 
         // Sync query from saved object to data plugin (explore doesn't use filters)
         const searchSourceFields = savedExplore.kibanaSavedObjectMeta;
+        const queryFromUrl = services.osdUrlStateStorage?.get('_q') ?? {};
         if (searchSourceFields?.searchSourceJSON) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
-          const query = searchSource.query;
+          const queryFromSavedSearch = searchSource.query;
+          const query = { ...queryFromSavedSearch, ...queryFromUrl };
           if (query) {
             dispatch(setQueryState(query));
             setEditorText(query.query);
@@ -84,6 +87,7 @@ export const useInitPage = () => {
         dispatch(setEditorMode(EditorMode.Query));
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
+        dispatch(setUsingRegexPatterns(false));
         dispatch(executeQueries({ services }));
       }
     }

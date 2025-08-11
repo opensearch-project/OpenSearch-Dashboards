@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import configureMockStore from 'redux-mock-store';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
@@ -64,6 +64,7 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
       dateColumns,
       currentMapping,
       updateVisualization,
+      onSwitchAxes,
     }) => (
       <div data-test-subj="mockAxesSelectPanel">
         <button
@@ -71,6 +72,9 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
           onClick={() => updateVisualization({ type: 'test' })}
         >
           Update Visualization
+        </button>
+        <button data-test-subj="mockSwitchAxes" onClick={() => onSwitchAxes(true)}>
+          Switch Axes
         </button>
       </div>
     )
@@ -90,33 +94,30 @@ jest.mock('../style_panel/threshold/threshold', () => ({
   )),
 }));
 
-jest.mock('../style_panel/legend/legend', () => {
-  // Import Positions inside the mock to avoid reference error
-  const { Positions: PositionsEnum } = jest.requireActual('../types');
-
-  return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => {
-      if (!shouldShowLegend) return null;
-      return (
-        <div data-test-subj="mockLegendOptionsPanel">
-          <button
-            data-test-subj="mockLegendShow"
-            onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
-          >
-            Toggle Legend
-          </button>
-          <button
-            data-test-subj="mockLegendPosition"
-            onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
-          >
-            Change Position
-          </button>
-          <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
-        </div>
-      );
-    }),
-  };
-});
+jest.mock('../style_panel/legend/legend', () => ({
+  LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
+    <div data-test-subj="mockLegendOptionsPanel">
+      <button
+        data-test-subj="mockLegendShow"
+        onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+      >
+        Toggle Legend
+      </button>
+      <button
+        data-test-subj="mockLegendPosition"
+        onClick={() => onLegendOptionsChange({ position: 'bottom' })}
+      >
+        Change Position
+      </button>
+      <button
+        data-test-subj="mockLegendBoth"
+        onClick={() => onLegendOptionsChange({ show: !legendOptions.show, position: 'top' })}
+      >
+        Change Both
+      </button>
+    </div>
+  )),
+}));
 
 jest.mock('../style_panel/tooltip/tooltip', () => ({
   TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
@@ -191,9 +192,33 @@ jest.mock('./bar_exclusive_vis_options', () => ({
   ),
 }));
 
+jest.mock('../style_panel/title/title', () => ({
+  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
+    <div data-test-subj="mockTitleOptionsPanel">
+      <button
+        data-test-subj="mockTitleModeSwitch"
+        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
+      >
+        Toggle Title
+      </button>
+      <input
+        data-test-subj="mockTitleInput"
+        placeholder="Default title"
+        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
+      />
+    </div>
+  )),
+}));
+
 describe('BarVisStyleControls', () => {
   const defaultProps: BarVisStyleControlsProps = {
-    styleOptions: { ...defaultBarChartStyles },
+    styleOptions: {
+      ...defaultBarChartStyles,
+      titleOptions: {
+        show: true,
+        titleName: '',
+      },
+    },
     onStyleChange: jest.fn(),
     numericalColumns: mockNumericalColumns,
     categoricalColumns: mockCategoricalColumns,
@@ -220,174 +245,183 @@ describe('BarVisStyleControls', () => {
     expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockBarExclusiveVisOptions')).toBeInTheDocument();
+    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
-  test('shows legend when there are multiple metrics', () => {
-    const propsWithMultipleMetrics = {
+  test('renders legend panel when COLOR mapping is present', () => {
+    const propsWithColorMapping = {
       ...defaultProps,
-      numericalColumns: [
-        ...mockNumericalColumns,
-        {
-          id: 2,
-          name: 'Y Value',
-          schema: VisFieldType.Numerical,
-          column: 'y',
-          validValuesCount: 6,
-          uniqueValuesCount: 6,
-        },
-      ],
-    };
-
-    render(
-      <Provider store={store}>
-        <BarVisStyleControls {...propsWithMultipleMetrics} />
-      </Provider>
-    );
-
-    // Check if legend should be shown
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
-  });
-
-  test('shows legend when there are multiple categories', () => {
-    const propsWithMultipleCategories = {
-      ...defaultProps,
-      categoricalColumns: [
-        ...mockCategoricalColumns,
-        {
-          id: 2,
-          name: 'x Value',
+      axisColumnMappings: {
+        ...mockAxisColumnMappings,
+        [AxisRole.COLOR]: {
+          id: 5,
+          name: 'Color Category',
           schema: VisFieldType.Categorical,
-          column: 'x',
-          validValuesCount: 6,
-          uniqueValuesCount: 6,
+          column: 'color',
+          validValuesCount: 10,
+          uniqueValuesCount: 5,
         },
-      ],
+      },
     };
 
-    render(<BarVisStyleControls {...propsWithMultipleCategories} />);
-
-    // Check if legend should be shown
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
-  });
-
-  test('calls onStyleChange with correct parameters for legend options', () => {
-    // For this test, we'll directly test the mock's callback
-    const onLegendOptionsChange = jest.fn();
-    const shouldShowLegend = true;
-    const legendOptions = { show: true };
-
-    // Render the mock directly
-    render(
-      <div>
-        {jest.requireMock('../style_panel/legend/legend').LegendOptionsPanel({
-          shouldShowLegend,
-          legendOptions,
-          onLegendOptionsChange,
-        })}
-      </div>
-    );
-
-    // Test legend show toggle
-    fireEvent.click(screen.getByTestId('mockLegendShow'));
-    expect(onLegendOptionsChange).toHaveBeenCalledWith({ show: !legendOptions.show });
-
-    // Test legend position change
-    fireEvent.click(screen.getByTestId('mockLegendPosition'));
-    expect(onLegendOptionsChange).toHaveBeenCalledWith({ position: 'bottom' });
-  });
-
-  test('calls onStyleChange with correct parameters for threshold options', () => {
-    const onStyleChange = jest.fn();
     render(
       <Provider store={store}>
-        <BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />
+        <BarVisStyleControls {...propsWithColorMapping} />
       </Provider>
     );
 
-    // Test threshold update
-    fireEvent.click(screen.getByTestId('mockUpdateThreshold'));
-    expect(onStyleChange).toHaveBeenCalledWith({
+    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+  });
+
+  test('renders legend panel when FACET mapping is present', () => {
+    const propsWithFacetMapping = {
+      ...defaultProps,
+      axisColumnMappings: {
+        ...mockAxisColumnMappings,
+        [AxisRole.FACET]: {
+          id: 6,
+          name: 'Facet Category',
+          schema: VisFieldType.Categorical,
+          column: 'facet',
+          validValuesCount: 10,
+          uniqueValuesCount: 5,
+        },
+      },
+    };
+
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...propsWithFacetMapping} />
+      </Provider>
+    );
+
+    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+  });
+
+  test('calls onStyleChange with correct parameters for legend options', async () => {
+    const propsWithColorMapping = {
+      ...defaultProps,
+      axisColumnMappings: {
+        ...mockAxisColumnMappings,
+        [AxisRole.COLOR]: {
+          id: 5,
+          name: 'Color Category',
+          schema: VisFieldType.Categorical,
+          column: 'color',
+          validValuesCount: 10,
+          uniqueValuesCount: 5,
+        },
+      },
+    };
+
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...propsWithColorMapping} />
+      </Provider>
+    );
+
+    await userEvent.click(screen.getByTestId('mockLegendShow'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
+
+    await userEvent.click(screen.getByTestId('mockLegendPosition'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'bottom' });
+
+    jest.clearAllMocks();
+    await userEvent.click(screen.getByTestId('mockLegendBoth'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'top' });
+  });
+
+  test('calls onStyleChange with correct parameters for threshold options', async () => {
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} />
+      </Provider>
+    );
+
+    await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
       thresholdLines: [...defaultProps.styleOptions.thresholdLines, { id: '2', show: true }],
     });
   });
 
-  test('calls onStyleChange with correct parameters for tooltip options', () => {
-    const onStyleChange = jest.fn();
+  test('calls onStyleChange with correct parameters for tooltip options', async () => {
     render(
       <Provider store={store}>
-        <BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />
+        <BarVisStyleControls {...defaultProps} />
       </Provider>
     );
 
-    // Test tooltip update
-    fireEvent.click(screen.getByTestId('mockUpdateTooltip'));
-    expect(onStyleChange).toHaveBeenCalledWith({
+    await userEvent.click(screen.getByTestId('mockUpdateTooltip'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
       tooltipOptions: { ...defaultProps.styleOptions.tooltipOptions, mode: 'hidden' },
     });
   });
 
-  it('calls onStyleChange with correct parameters for axes options', () => {
-    const onStyleChange = jest.fn();
-
+  test('calls onStyleChange with correct parameters for axes options', async () => {
     render(
       <Provider store={store}>
-        <BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />
+        <BarVisStyleControls {...defaultProps} />
       </Provider>
     );
 
-    fireEvent.click(screen.getByTestId('changeAxis'));
-
-    expect(onStyleChange).toHaveBeenCalledWith({
+    await userEvent.click(screen.getByTestId('changeAxis'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
       standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
     });
   });
 
-  test('calls onStyleChange with correct parameters for bar exclusive options', () => {
-    const onStyleChange = jest.fn();
+  test('calls onStyleChange with correct parameters for bar exclusive options', async () => {
     render(
       <Provider store={store}>
-        <BarVisStyleControls {...defaultProps} onStyleChange={onStyleChange} />
+        <BarVisStyleControls {...defaultProps} />
       </Provider>
     );
 
-    // Test bar width update
-    fireEvent.click(screen.getByTestId('mockUpdateBarWidth'));
-    expect(onStyleChange).toHaveBeenCalledWith({ barWidth: 0.8 });
+    await userEvent.click(screen.getByTestId('mockUpdateBarWidth'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ barWidth: 0.8 });
 
-    // Test bar padding update
-    fireEvent.click(screen.getByTestId('mockUpdateBarPadding'));
-    expect(onStyleChange).toHaveBeenCalledWith({ barPadding: 0.2 });
+    await userEvent.click(screen.getByTestId('mockUpdateBarPadding'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ barPadding: 0.2 });
 
-    // Test show bar border update
-    fireEvent.click(screen.getByTestId('mockUpdateShowBarBorder'));
-    expect(onStyleChange).toHaveBeenCalledWith({ showBarBorder: true });
+    await userEvent.click(screen.getByTestId('mockUpdateShowBarBorder'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ showBarBorder: true });
 
-    // Test bar border width update
-    fireEvent.click(screen.getByTestId('mockUpdateBarBorderWidth'));
-    expect(onStyleChange).toHaveBeenCalledWith({ barBorderWidth: 2 });
+    await userEvent.click(screen.getByTestId('mockUpdateBarBorderWidth'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ barBorderWidth: 2 });
 
-    // Test bar border color update
-    fireEvent.click(screen.getByTestId('mockUpdateBarBorderColor'));
-    expect(onStyleChange).toHaveBeenCalledWith({ barBorderColor: '#FF0000' });
+    await userEvent.click(screen.getByTestId('mockUpdateBarBorderColor'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ barBorderColor: '#FF0000' });
+  });
+
+  test('calls onStyleChange with correct parameters for switch axes', async () => {
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} />
+      </Provider>
+    );
+
+    await userEvent.click(screen.getByTestId('mockSwitchAxes'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ switchAxes: true });
   });
 
   test('updates title show option correctly', async () => {
-    render(<BarVisStyleControls {...defaultProps} />);
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} />
+      </Provider>
+    );
 
-    // Find the title switch and toggle it
-    const titleSwitch = screen.getByTestId('titleModeSwitch');
-    await userEvent.click(titleSwitch);
-
+    await userEvent.click(screen.getByTestId('mockTitleModeSwitch'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
       titleOptions: {
         ...defaultProps.styleOptions.titleOptions,
-        show: true,
+        show: false,
       },
     });
   });
 
   test('updates title name when text is entered', async () => {
-    // Set show to true to ensure the title field is visible
     const props = {
       ...defaultProps,
       styleOptions: {
@@ -399,12 +433,16 @@ describe('BarVisStyleControls', () => {
       },
     };
 
-    render(<BarVisStyleControls {...props} />);
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...props} />
+      </Provider>
+    );
 
-    const titleInput = screen.getByPlaceholderText('Default title');
+    const titleInput = screen.getByTestId('mockTitleInput');
     await userEvent.type(titleInput, 'New Chart Title');
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
         titleOptions: {
           ...props.styleOptions.titleOptions,

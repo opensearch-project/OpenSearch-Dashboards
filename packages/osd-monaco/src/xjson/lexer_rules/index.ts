@@ -45,4 +45,5 @@ export const registerLexerRules = (m: typeof monaco) => {
   m.languages.register({ id: opensearchsql.ID });
   m.languages.setMonarchTokensProvider(opensearchsql.ID, opensearchsql.lexerRules);
   m.languages.register({ id: 'kuery' });
+  m.languages.register({ id: 'AI' });
 };

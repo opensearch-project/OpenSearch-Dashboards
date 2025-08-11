@@ -14,6 +14,7 @@ import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
+import { AxisRole } from '../types';
 
 export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
 
@@ -35,8 +36,10 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
     onStyleChange({ [key]: value });
   };
 
-  // if it is 2 metrics, then it should not show legend
-  const shouldShowLegend = !(numericalColumns.length === 2 && categoricalColumns.length === 0);
+  // Determine if the legend should be shown based on the registration of a COLOR or FACET field
+  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
+  const hasFacetMapping = !!axisColumnMappings?.[AxisRole.FACET];
+  const shouldShowLegend = hasColorMapping || hasFacetMapping;
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -77,7 +80,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           {shouldShowLegend && (
             <EuiFlexItem grow={false}>
               <LegendOptionsPanel
-                shouldShowLegend={true}
                 legendOptions={{
                   show: styleOptions.addLegend,
                   position: styleOptions.legendPosition,

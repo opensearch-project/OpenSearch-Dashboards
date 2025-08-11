@@ -171,7 +171,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, sqlControls, DefaultInput),
       editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer', 'explore'],
+      supportedAppNames: ['discover', 'data-explorer'],
       hideDatePicker: true,
       sampleQueries: [
         {

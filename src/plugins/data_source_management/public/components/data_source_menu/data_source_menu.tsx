@@ -4,7 +4,7 @@
  */
 
 import React, { ReactElement } from 'react';
-
+import { UiSettingScope } from 'opensearch-dashboards/public';
 import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';
 import { DataSourceMultiSelectable } from '../data_source_multi_selectable';
@@ -17,6 +17,7 @@ import {
   DataSourceViewConfig,
 } from './types';
 import { DataSourceSelectable } from '../data_source_selectable';
+import { getWorkspaces } from '../utils';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
   const {
@@ -27,6 +28,14 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     application,
     onManageDataSource,
   } = props;
+
+  const workspaces = getWorkspaces();
+
+  const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+
+  const scope: UiSettingScope = !!currentWorkspaceId
+    ? UiSettingScope.WORKSPACE
+    : UiSettingScope.GLOBAL;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
     const {
@@ -48,6 +57,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         onSelectedDataSources={onSelectedDataSources}
         uiSettings={uiSettings}
         application={application}
+        scope={scope}
       />
     );
   }
@@ -65,6 +75,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         onSelectedDataSources={onSelectedDataSources!}
         uiSettings={uiSettings}
         application={application}
+        scope={scope}
       />
     );
   }
@@ -92,6 +103,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         fullWidth={fullWidth}
         uiSettings={uiSettings}
         application={application}
+        scope={scope}
       />
     );
   }
@@ -118,6 +130,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         displayAllCompatibleDataSources={displayAllCompatibleDataSources}
         uiSettings={uiSettings}
         application={application}
+        scope={scope}
       />
     );
   }
@@ -125,17 +138,19 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
   function renderLayout(): ReactElement | null {
     switch (componentType) {
       case DataSourceComponentType.DataSourceAggregatedView:
-        // @ts-expect-error TS2352 TODO(ts-error): fixme
-        return renderDataSourceAggregatedView(componentConfig as DataSourceAggregatedViewConfig);
+        return renderDataSourceAggregatedView(
+          (componentConfig as unknown) as DataSourceAggregatedViewConfig
+        );
       case DataSourceComponentType.DataSourceSelectable:
-        // @ts-expect-error TS2352 TODO(ts-error): fixme
-        return renderDataSourceSelectable(componentConfig as DataSourceSelectableConfig);
+        return renderDataSourceSelectable(
+          (componentConfig as unknown) as DataSourceSelectableConfig
+        );
       case DataSourceComponentType.DataSourceView:
-        // @ts-expect-error TS2352 TODO(ts-error): fixme
-        return renderDataSourceView(componentConfig as DataSourceViewConfig);
+        return renderDataSourceView((componentConfig as unknown) as DataSourceViewConfig);
       case DataSourceComponentType.DataSourceMultiSelectable:
-        // @ts-expect-error TS2352 TODO(ts-error): fixme
-        return renderDataSourceMultiSelectable(componentConfig as DataSourceMultiSelectableConfig);
+        return renderDataSourceMultiSelectable(
+          (componentConfig as unknown) as DataSourceMultiSelectableConfig
+        );
       default:
         return null;
     }

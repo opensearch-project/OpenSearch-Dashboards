@@ -40,16 +40,9 @@ const mockSaveStateProps = {
   dataset: undefined,
   tabState: {
     logs: {},
-    visualizations: {
-      styleOptions: {
-        showTitle: true,
-        title: '',
-        fontSize: 60,
-        useColor: false,
-        colorSchema: 'blues' as any,
-      },
-      chartType: undefined,
-      axesMapping: {},
+    patterns: {
+      patternsField: undefined,
+      usingRegexPatterns: false,
     },
   },
   flavorId: 'logs',
@@ -61,6 +54,7 @@ const mockSaveStateProps = {
     supportedLanguages: ['PPL'],
     component: {} as any,
   },
+  activeTabId: 'logs',
 };
 
 const mockSavedExplore = ({

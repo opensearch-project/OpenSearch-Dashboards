@@ -27,7 +27,7 @@ import { setDateRange } from '../../application/utils/state_management/slices/qu
 import { useClearEditors, useEditorRef } from '../../application/hooks';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { QueryExecutionButton } from './query_execution_button';
-import { Query } from '../../../../data/common';
+import { Query, TimeRange } from '../../../../data/common';
 
 export interface TopNavProps {
   savedExplore?: SavedExplore;
@@ -49,7 +49,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     },
     data,
     uiSettings,
-    history,
+    scopedHistory,
   } = services;
 
   const uiState = useNewStateSelector(selectUIState);
@@ -85,9 +85,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const osdUrlStateStorage = useMemo(() => {
     return createOsdUrlStateStorage({
       useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: history(),
+      history: scopedHistory,
     });
-  }, [uiSettings, history]);
+  }, [uiSettings, scopedHistory]);
 
   const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
     data.query,
@@ -106,6 +106,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         tabState,
         flavorId,
         tabDefinition,
+        activeTabId: uiState.activeTabId,
       },
       clearEditors,
       savedExplore
@@ -120,6 +121,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     flavorId,
     tabDefinition,
     clearEditors,
+    uiState.activeTabId,
   ]);
 
   useEffect(() => {
@@ -148,10 +150,17 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     [dispatch]
   );
 
-  const handleQuerySubmit = useCallback(() => {
-    const editorText = editorRef.current?.getValue() || '';
-    dispatch(onEditorRunActionCreator(services, editorText));
-  }, [dispatch, services, editorRef]);
+  const handleQuerySubmit = useCallback(
+    (payload?: { dateRange?: TimeRange; query?: Query }) => {
+      if (payload?.dateRange) {
+        dispatch(setDateRange(payload.dateRange));
+      }
+
+      const editorText = editorRef.current?.getValue() || '';
+      dispatch(onEditorRunActionCreator(services, editorText));
+    },
+    [dispatch, services, editorRef]
+  );
 
   const handleCustomButtonClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

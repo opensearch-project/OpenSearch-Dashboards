@@ -36,6 +36,7 @@ import { createDataSourceMenu } from './components/data_source_menu/create_data_
 import { DataSourceMenuProps } from './components/data_source_menu';
 import {
   setApplication,
+  setWorkspaces,
   setHideLocalCluster,
   setUiSettings,
   setDataSourceSelection,
@@ -86,7 +87,9 @@ export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps> | null;
-    getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
+    getDataSourceMenu: <T>() => React.ComponentType<
+      Omit<DataSourceMenuProps<T>, 'uiSettings' | 'hideLocalCluster' | 'application' | 'scope'>
+    >;
   };
   dataSourceSelection: DataSourceSelectionService;
   getDefaultDataSourceId: typeof getDefaultDataSourceId;
@@ -236,8 +239,9 @@ export class DataSourceManagementPlugin
       dataSourceSelection: this.dataSourceSelection,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource!),
-        getDataSourceMenu: <T>(): React.ComponentType<DataSourceMenuProps<T>> =>
-          createDataSourceMenu<T>(),
+        getDataSourceMenu: <T>(): React.ComponentType<
+          Omit<DataSourceMenuProps<T>, 'uiSettings' | 'hideLocalCluster' | 'application' | 'scope'>
+        > => createDataSourceMenu<T>(),
       },
       getDefaultDataSourceId,
       getDefaultDataSourceId$,
@@ -249,6 +253,7 @@ export class DataSourceManagementPlugin
     this.core = core;
 
     setApplication(core.application);
+    setWorkspaces(core.workspaces);
     core.http.intercept({
       request: catalogRequestIntercept(),
     });

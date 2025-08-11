@@ -13,6 +13,9 @@ import { renderBannerMock, unmountBannerMock } from './plugin.test.mocks';
 import { BannerPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 
+// Mock the chrome.setGlobalBanner method
+const setGlobalBannerMock = jest.fn();
+
 describe('BannerPlugin', () => {
   beforeEach(() => {
     renderBannerMock.mockClear();
@@ -31,23 +34,17 @@ describe('BannerPlugin', () => {
   });
 
   describe('start', () => {
-    test('calls renderBanner with http client', async () => {
+    test('sets global banner in chrome service', async () => {
       const coreStart = coreMock.createStart();
+      // Mock the setGlobalBanner method
+      coreStart.chrome.setGlobalBanner = setGlobalBannerMock;
+
       const plugin = new BannerPlugin();
       const start = await plugin.start(coreStart);
 
       expect(start).toEqual({});
-      expect(renderBannerMock).toHaveBeenCalledTimes(1);
-      expect(renderBannerMock).toHaveBeenCalledWith(coreStart.http);
-    });
-  });
-
-  describe('stop', () => {
-    test('calls unmountBanner', () => {
-      const plugin = new BannerPlugin();
-      plugin.stop();
-
-      expect(unmountBannerMock).toHaveBeenCalledTimes(1);
+      expect(setGlobalBannerMock).toHaveBeenCalledTimes(1);
+      expect(setGlobalBannerMock.mock.calls[0][0]).toHaveProperty('component');
     });
   });
 });
