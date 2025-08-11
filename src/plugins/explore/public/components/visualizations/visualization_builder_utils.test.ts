@@ -9,7 +9,7 @@ import {
   isValidMapping,
   findRuleByIndex,
   getColumnMatchFromMapping,
-} from './visualization_container_utils';
+} from './visualization_builder_utils';
 import { AxisRole, VisColumn, VisFieldType } from './types';
 
 jest.mock('./rule_repository', () => ({

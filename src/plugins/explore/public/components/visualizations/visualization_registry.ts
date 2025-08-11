@@ -20,7 +20,7 @@ import {
   VisualizationRule,
 } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
-import { getColumnMatchFromMapping } from './visualization_container_utils';
+import { getColumnMatchFromMapping } from './visualization_builder_utils';
 import { createTableConfig } from './table/table_vis_config';
 import { ChartType } from './utils/use_visualization_types';
 

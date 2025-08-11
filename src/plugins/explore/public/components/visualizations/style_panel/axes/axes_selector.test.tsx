@@ -43,7 +43,7 @@ jest.mock('../../rule_repository', () => ({
   ],
 }));
 
-jest.mock('../../visualization_container_utils', () => {
+jest.mock('../../visualization_builder_utils', () => {
   // Import the constants directly to avoid referencing out-of-scope variables
   const X = 'x';
   const CATEGORICAL = 'categorical';

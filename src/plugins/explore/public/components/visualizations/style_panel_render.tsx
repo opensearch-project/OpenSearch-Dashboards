@@ -6,49 +6,41 @@
 import React, { useCallback, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
+import { BehaviorSubject } from 'rxjs';
 
-import { ChartTypeSelector } from '../chart_type_selector';
-import { ChartType, StyleOptions } from '../utils/use_visualization_types';
-import { VisualizationBuilder } from '../visualization_builder';
-import { AxisColumnMappings } from '../types';
-import {
-  convertMappingsToStrings,
-  convertStringsToMappings,
-} from '../visualization_container_utils';
-import { visualizationRegistry } from '../visualization_registry';
+import { ChartTypeSelector } from './chart_type_selector';
+import { ChartType, StyleOptions } from './utils/use_visualization_types';
+import { AxisColumnMappings } from './types';
+import { convertMappingsToStrings, convertStringsToMappings } from './visualization_builder_utils';
+import { visualizationRegistry } from './visualization_registry';
+import { ChartConfig, VisData } from './visualization_builder.types';
 
 interface StylePanelProps<T> {
-  visualizationBuilder: VisualizationBuilder;
+  data$: BehaviorSubject<VisData | undefined>;
+  visConfig$: BehaviorSubject<ChartConfig | undefined>;
+  onStyleChange: (changes: Partial<StyleOptions>) => void;
+  onChartTypeChange: (type: ChartType) => void;
+  onAxesMappingChange: (mappings: Record<string, string>) => void;
   className?: string;
 }
 
-export const StylePanel = <T extends ChartType>({
-  visualizationBuilder,
+export const StylePanelRender = <T extends ChartType>({
+  data$,
+  visConfig$,
+  onStyleChange,
+  onChartTypeChange,
+  onAxesMappingChange,
   className,
 }: StylePanelProps<T>) => {
-  const visualizationData = useObservable(visualizationBuilder.data$);
-  const chartConfig = useObservable(visualizationBuilder.visConfig$);
+  const visualizationData = useObservable(data$);
+  const chartConfig = useObservable(visConfig$);
   const axesMapping = chartConfig?.axesMapping;
-
-  const onStyleChange = useCallback(
-    (changes: Partial<StyleOptions>) => {
-      visualizationBuilder.updateStyles(changes);
-    },
-    [visualizationBuilder]
-  );
-
-  const onChartTypeChange = useCallback(
-    (chartType: ChartType) => {
-      visualizationBuilder.setCurrentChartType(chartType);
-    },
-    [visualizationBuilder]
-  );
 
   const updateVisualization = useCallback(
     ({ mappings }: { mappings: AxisColumnMappings }) => {
-      visualizationBuilder.setAxesMapping(convertMappingsToStrings(mappings));
+      onAxesMappingChange(convertMappingsToStrings(mappings));
     },
-    [visualizationBuilder]
+    [onAxesMappingChange]
   );
 
   // TODO: refactor this and expose an observable from visualizationBuilder

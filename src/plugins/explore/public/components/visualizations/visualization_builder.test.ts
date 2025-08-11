@@ -6,6 +6,7 @@
 import { VisualizationBuilder } from './visualization_builder';
 import { visualizationRegistry } from './visualization_registry';
 import { VisColumn, VisFieldType } from './types';
+import { expressionsPluginMock } from '../../../../expressions/public/mocks';
 
 const createMockVisColumns = (
   size: number,
@@ -28,7 +29,9 @@ const createMockVisColumns = (
 describe('VisualizationBuilder', () => {
   describe('init()', () => {
     test('it should init() once', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setIsInitializedSpy = jest.spyOn(builder, 'setIsInitialized');
 
       builder.init();
@@ -51,7 +54,10 @@ describe('VisualizationBuilder', () => {
         flush: jest.fn(),
         change$: jest.fn(),
       };
-      const builder = new VisualizationBuilder({ getUrlStateStorage: () => urlStateStorageMock });
+      const builder = new VisualizationBuilder({
+        getUrlStateStorage: () => urlStateStorageMock,
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
 
       builder.init();
@@ -66,7 +72,9 @@ describe('VisualizationBuilder', () => {
 
   describe('onChartTypeChange()', () => {
     test('should do nothing if chart type is invalid', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       // mock invalid chart type at runtime
       builder.onChartTypeChange('invalid-chart-type' as any);
@@ -78,7 +86,9 @@ describe('VisualizationBuilder', () => {
       const getVisualizationConfigSpy = jest
         .spyOn(visualizationRegistry, 'getVisualizationConfig')
         .mockReturnValue(undefined);
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       builder.onChartTypeChange('line');
       expect(setVisConfigSpy).toHaveBeenCalledWith(undefined);
@@ -86,7 +96,9 @@ describe('VisualizationBuilder', () => {
     });
 
     test('should reset styles to defaults if chart type changed', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'setAxesMapping');
       jest.spyOn(builder, 'reuseCurrentAxesMapping');
@@ -102,7 +114,9 @@ describe('VisualizationBuilder', () => {
     });
 
     test('should set chart type to table with current axes mapping', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'reuseCurrentAxesMapping');
       jest.spyOn(builder, 'createAutoVis');
@@ -125,7 +139,9 @@ describe('VisualizationBuilder', () => {
     });
 
     test('should update axes mapping by reusing fields of the current axes mapping', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'reuseCurrentAxesMapping').mockReturnValue({ x: 'field0', y: 'field1' });
       jest.spyOn(builder, 'createAutoVis');
@@ -147,7 +163,9 @@ describe('VisualizationBuilder', () => {
     });
 
     test('should update axes mapping based on the auto create chart', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'reuseCurrentAxesMapping');
       // mock auto visualization created
@@ -172,7 +190,9 @@ describe('VisualizationBuilder', () => {
     });
 
     test('should fallback to reset axes mapping to empty ', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'reuseCurrentAxesMapping');
       // mock auto visualization created
@@ -200,7 +220,9 @@ describe('VisualizationBuilder', () => {
 
   describe('createAutoVis()', () => {
     test('should return undefined if cannot find matched chart', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       // Empty data
       expect(
         builder.createAutoVis({
@@ -235,7 +257,9 @@ describe('VisualizationBuilder', () => {
 
   describe('reuseCurrentAxesMapping()', () => {
     test('return `undefined` if chart type is invalid', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const axesMapping = builder.reuseCurrentAxesMapping(
         // mock invalid chart type
         'invalid-chart-type' as any,
@@ -246,7 +270,9 @@ describe('VisualizationBuilder', () => {
     });
 
     test('should return new axes mapping', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const axesMapping = builder.reuseCurrentAxesMapping(
         'line',
         { theta: 'name-numerical-0', color: 'name-categorical-0' },
@@ -264,7 +290,9 @@ describe('VisualizationBuilder', () => {
 
   describe('onDataChange()', () => {
     test('should do nothing if no data', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'createAutoVis');
 
@@ -274,7 +302,9 @@ describe('VisualizationBuilder', () => {
     });
 
     test('should do nothing if chart type is `table`', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'createAutoVis');
 
@@ -291,7 +321,9 @@ describe('VisualizationBuilder', () => {
 
     test('should create auto vis if chart type or axes mapping can no longer be applied to the data', () => {
       {
-        const builder = new VisualizationBuilder({});
+        const builder = new VisualizationBuilder({
+          getExpressions: () => expressionsPluginMock.createStartContract(),
+        });
         const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
         jest.spyOn(builder, 'createAutoVis').mockReturnValue({
           chartType: 'scatter',
@@ -322,7 +354,9 @@ describe('VisualizationBuilder', () => {
         );
       }
       {
-        const builder = new VisualizationBuilder({});
+        const builder = new VisualizationBuilder({
+          getExpressions: () => expressionsPluginMock.createStartContract(),
+        });
         const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
         jest.spyOn(builder, 'createAutoVis').mockReturnValue({
           chartType: 'scatter',
@@ -358,7 +392,9 @@ describe('VisualizationBuilder', () => {
     });
 
     test('should show a table if no auto vis can be created when chart type or axes mapping can no longer be applied to the data', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'setAxesMapping');
       // Mock auto vis cannot be created
@@ -382,7 +418,9 @@ describe('VisualizationBuilder', () => {
     });
 
     test('should do nothing if the axes mapping can be used on the data', () => {
-      const builder = new VisualizationBuilder({});
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       jest.spyOn(builder, 'createAutoVis');
 
@@ -403,7 +441,9 @@ describe('VisualizationBuilder', () => {
   });
 
   test('should update with normalized data', () => {
-    const builder = new VisualizationBuilder({});
+    const builder = new VisualizationBuilder({
+      getExpressions: () => expressionsPluginMock.createStartContract(),
+    });
     builder.handleData(
       [{ _id: '_id', _index: '_index', _score: 10, _source: { age: 10, name: 'name' } }],
       [
@@ -443,14 +483,18 @@ describe('VisualizationBuilder', () => {
   });
 
   test('should set styles', () => {
-    const builder = new VisualizationBuilder({});
+    const builder = new VisualizationBuilder({
+      getExpressions: () => expressionsPluginMock.createStartContract(),
+    });
     expect(builder.visConfig$.value).toBe(undefined);
     builder.setVisConfig({ type: 'line', styles: { addLegend: true } as any });
     expect(builder.visConfig$.value).toEqual({ type: 'line', styles: { addLegend: true } as any });
   });
 
   test('should update styles', () => {
-    const builder = new VisualizationBuilder({});
+    const builder = new VisualizationBuilder({
+      getExpressions: () => expressionsPluginMock.createStartContract(),
+    });
     expect(builder.visConfig$.value).toBe(undefined);
     builder.setVisConfig({
       type: 'line',
@@ -472,7 +516,9 @@ describe('VisualizationBuilder', () => {
   });
 
   test('should set axes mapping', () => {
-    const builder = new VisualizationBuilder({});
+    const builder = new VisualizationBuilder({
+      getExpressions: () => expressionsPluginMock.createStartContract(),
+    });
     // initial vis config
     builder.visConfig$.next({ type: 'line' });
     expect(builder.visConfig$.value?.axesMapping).toEqual(undefined);
@@ -481,14 +527,18 @@ describe('VisualizationBuilder', () => {
   });
 
   test('should set chart type', () => {
-    const builder = new VisualizationBuilder({});
+    const builder = new VisualizationBuilder({
+      getExpressions: () => expressionsPluginMock.createStartContract(),
+    });
     expect(builder.visConfig$.value?.type).toBe(undefined);
     builder.setCurrentChartType('heatmap');
     expect(builder.visConfig$.value?.type).toBe('heatmap');
   });
 
   test('should reset vis state', () => {
-    const builder = new VisualizationBuilder({});
+    const builder = new VisualizationBuilder({
+      getExpressions: () => expressionsPluginMock.createStartContract(),
+    });
     builder.setVisConfig({
       type: 'bar',
       styles: { addLegend: true } as any,

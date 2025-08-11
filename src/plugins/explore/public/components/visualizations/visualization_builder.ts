@@ -3,25 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { isEmpty, isEqual } from 'lodash';
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
 import {
   convertMappingsToStrings,
-  convertStringsToMappings,
   findRuleByIndex,
   getColumnMatchFromMapping,
   isValidMapping,
-} from './visualization_container_utils';
+} from './visualization_builder_utils';
 import { getServices } from '../../services/services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
-import { VisColumn } from './types';
 import { normalizeResultRows } from './utils/normalize_result_rows';
+import { ChartConfig, VisData } from './visualization_builder.types';
+import { ExecutionContextSearch } from '../../../../expressions/common/';
+import { VisualizationRender } from './visualization_render';
+import { ExpressionsStart } from '../../../../expressions/public';
+import { StylePanelRender } from './style_panel_render';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -29,62 +33,25 @@ interface VisState {
   axesMapping?: Record<string, string>;
 }
 
-export interface VisData {
-  transformedData: Array<Record<string, any>>;
-  dateColumns: VisColumn[];
-  numericalColumns: VisColumn[];
-  categoricalColumns: VisColumn[];
+interface Options {
+  getUrlStateStorage?: () => IOsdUrlStateStorage | undefined;
+  getExpressions: () => ExpressionsStart;
 }
-
-interface ChartConfig {
-  type: ChartType;
-  styles?: StyleOptions;
-  axesMapping?: Record<string, string>;
-}
-
-type GetUrlStateStorage = () => IOsdUrlStateStorage | undefined;
 
 export class VisualizationBuilder {
   private isInitialized = false;
-  private getUrlStateStorage: GetUrlStateStorage = () => undefined;
+  private getUrlStateStorage: Options['getUrlStateStorage'];
+  private getExpression: Options['getExpressions'];
   private subscriptions = Array<Subscription>();
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
 
-  constructor({ getUrlStateStorage }: { getUrlStateStorage?: GetUrlStateStorage }) {
+  constructor({ getUrlStateStorage, getExpressions }: Options) {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
     }
-  }
-
-  public get vegaSpec$() {
-    return combineLatest([this.data$, this.visConfig$]).pipe(
-      map(([data, visConfig]) => {
-        if (!data) {
-          return;
-        }
-        const columns = [
-          ...(data.numericalColumns ?? []),
-          ...(data.categoricalColumns ?? []),
-          ...(data.dateColumns ?? []),
-        ];
-        const rule = findRuleByIndex(visConfig?.axesMapping ?? {}, columns);
-        if (!rule || !rule.toSpec) {
-          return;
-        }
-        const axisColumnMappings = convertStringsToMappings(visConfig?.axesMapping ?? {}, columns);
-        return rule.toSpec(
-          data.transformedData,
-          data.numericalColumns,
-          data.categoricalColumns,
-          data.dateColumns,
-          visConfig?.styles,
-          visConfig?.type,
-          axisColumnMappings
-        );
-      })
-    );
+    this.getExpression = getExpressions;
   }
 
   init() {
@@ -95,7 +62,7 @@ export class VisualizationBuilder {
     let state: VisState = {};
 
     // Read state from url
-    const urlStateStorage = this.getUrlStateStorage();
+    const urlStateStorage = this.getUrlStateStorage?.();
     if (urlStateStorage) {
       const urlState = urlStateStorage.get<VisState>('_v');
       state = { ...state, ...urlState };
@@ -377,7 +344,7 @@ export class VisualizationBuilder {
   }
 
   syncToUrl<State>(visState: VisState) {
-    const urlStateStorage = this.getUrlStateStorage();
+    const urlStateStorage = this.getUrlStateStorage?.();
     if (urlStateStorage) {
       urlStateStorage.set('_v', visState, { replace: true });
     }
@@ -402,6 +369,31 @@ export class VisualizationBuilder {
   clearUrl() {
     this.syncToUrl({ axesMapping: {}, styleOptions: undefined, chartType: undefined });
   }
+
+  renderVisualization({ searchContext }: { searchContext?: ExecutionContextSearch }) {
+    const ExpressionRenderer = this.getExpression()?.ReactExpressionRenderer;
+    if (!ExpressionRenderer) {
+      return null;
+    }
+
+    return React.createElement(VisualizationRender, {
+      data$: this.data$,
+      visConfig$: this.visConfig$,
+      searchContext,
+      ExpressionRenderer,
+    });
+  }
+
+  renderStylePanel({ className }: { className?: string }) {
+    return React.createElement(StylePanelRender, {
+      className,
+      data$: this.data$,
+      visConfig$: this.visConfig$,
+      onStyleChange: this.updateStyles.bind(this),
+      onAxesMappingChange: this.setAxesMapping.bind(this),
+      onChartTypeChange: this.setCurrentChartType.bind(this),
+    });
+  }
 }
 
 let visualizationBuilder: VisualizationBuilder;
@@ -410,6 +402,7 @@ export const getVisualizationBuilder = () => {
   if (!visualizationBuilder) {
     visualizationBuilder = new VisualizationBuilder({
       getUrlStateStorage: () => getServices().osdUrlStateStorage,
+      getExpressions: () => getServices().expressions,
     });
   }
   return visualizationBuilder;

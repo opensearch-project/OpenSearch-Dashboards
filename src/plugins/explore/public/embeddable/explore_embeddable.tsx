@@ -46,7 +46,7 @@ import { defaultPrepareQueryString } from '../application/utils/state_management
 import {
   convertStringsToMappings,
   findRuleByIndex,
-} from '../components/visualizations/visualization_container_utils';
+} from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 
 export interface SearchProps {
