@@ -9,10 +9,8 @@
  * GitHub history for details.
  */
 
-import https from 'https';
-import http from 'http';
-import { URL } from 'url';
 import { BannerConfig } from '../../common';
+import { validateBannerConfig } from '../validate_banner_config';
 
 /**
  * Fetches banner configuration from an external URL
@@ -24,59 +22,42 @@ export async function fetchExternalConfig(
   url: string,
   logger: { error: (message: string) => void }
 ): Promise<Partial<BannerConfig> | null> {
-  return new Promise((resolve) => {
-    try {
-      const parsedUrl = new URL(url);
-      const requestModule = parsedUrl.protocol === 'https:' ? https : http;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-      const req = requestModule.request(
-        url,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-          },
-          timeout: 5000, // 5 second timeout
-        },
-        (res) => {
-          if (res.statusCode !== 200) {
-            logger.error(`Error fetching banner config: HTTP status ${res.statusCode}`);
-            resolve(null);
-            return;
-          }
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+      signal: controller.signal,
+    });
 
-          let data = '';
-          res.on('data', (chunk) => {
-            data += chunk;
-          });
+    clearTimeout(timeoutId);
 
-          res.on('end', () => {
-            try {
-              const jsonData = JSON.parse(data);
-              resolve(jsonData);
-            } catch (error) {
-              logger.error(`Error parsing banner config JSON: ${error}`);
-              resolve(null);
-            }
-          });
-        }
-      );
-
-      req.on('error', (error) => {
-        logger.error(`Error fetching banner config: ${error.message}`);
-        resolve(null);
-      });
-
-      req.on('timeout', () => {
-        req.destroy();
-        logger.error('Request timeout while fetching banner config');
-        resolve(null);
-      });
-
-      req.end();
-    } catch (error) {
-      logger.error(`Error creating request for banner config: ${error}`);
-      resolve(null);
+    if (!response.ok) {
+      logger.error(`Error fetching banner config: HTTP status ${response.status}`);
+      return null;
     }
-  });
+
+    const jsonData = await response.json();
+
+    // Validate the configuration
+    if (!validateBannerConfig(jsonData, logger)) {
+      logger.error('Banner configuration validation failed, using default settings');
+      return null;
+    }
+
+    return jsonData;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      logger.error('Request timeout while fetching banner config');
+    } else if (error instanceof SyntaxError) {
+      logger.error(`Error parsing banner config JSON: ${error}`);
+    } else {
+      logger.error(`Error fetching banner config: ${error}`);
+    }
+    return null;
+  }
 }
