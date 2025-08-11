@@ -21,13 +21,13 @@ const getQueryMock = jest.fn().mockReturnValue({
 const languageService = {
   getDefaultLanguage: () => ({ id: 'lucene', title: 'Lucene' }),
   getLanguages: () => [
-    { id: 'lucene', title: 'Lucene' },
-    { id: 'kuery', title: 'DQL' },
+    { id: 'lucene', title: 'Lucene', supportedAppNames: ['supportedApp', 'unsupportedApp'] },
+    { id: 'kuery', title: 'DQL', supportedAppNames: ['supportedApp'] },
   ],
   getLanguage: (languageId: string) => {
     const languages = [
-      { id: 'lucene', title: 'Lucene' },
-      { id: 'kuery', title: 'DQL' },
+      { id: 'lucene', title: 'Lucene', supportedAppNames: ['supportedApp', 'unsupportedApp'] },
+      { id: 'kuery', title: 'DQL', supportedAppNames: ['supportedApp'] },
     ];
     return languages.find((lang) => lang.id === languageId);
   },
@@ -319,6 +319,32 @@ describe('Configurator Component', () => {
     });
   });
 
+  it('should default selectedLanguage to the first language if current app does not support it', async () => {
+    mockServices.getQueryService().queryString.getQuery = jest.fn().mockReturnValue({
+      query: '',
+      language: 'kuery',
+      dataset: undefined,
+    });
+
+    render(
+      <IntlProvider locale="en" messages={messages}>
+        <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
+          services={mockServices}
+          baseDataset={mockBaseDataset}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          onPrevious={mockOnPrevious}
+          appId="unsupportedApp"
+        />
+      </IntlProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Lucene')).toBeInTheDocument();
+    });
+  });
+
   it('should display the supported language dropdown correctly', async () => {
     render(
       <IntlProvider locale="en" messages={messages}>
@@ -336,6 +362,32 @@ describe('Configurator Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Lucene')).toBeInTheDocument();
       expect(screen.getByText('DQL')).toBeInTheDocument();
+    });
+  });
+
+  it('should display the supported language dropdown correctly when on supported app', async () => {
+    mockServices.getQueryService().queryString.getQuery = jest.fn().mockReturnValue({
+      query: '',
+      language: 'kuery',
+      dataset: undefined,
+    });
+
+    render(
+      <IntlProvider locale="en" messages={messages}>
+        <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
+          services={mockServices}
+          baseDataset={mockBaseDataset}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          onPrevious={mockOnPrevious}
+          appId="supportedApp"
+        />
+      </IntlProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Lucene')).toBeInTheDocument();
     });
   });
 

@@ -15,7 +15,7 @@ export const createTwoMetricScatter = (
   styles: Partial<ScatterChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const markLayer = {
     mark: {
@@ -29,24 +29,24 @@ export const createTwoMetricScatter = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, yAxisStyle),
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
-            title: xAxis?.styles?.title?.text || xAxis?.name,
+            title: xAxisStyle?.title?.text || xAxis?.name,
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
-            title: yAxis?.styles?.title?.text || yAxis?.name,
+            title: yAxisStyle?.title?.text || yAxis?.name,
           },
         ],
       }),
@@ -75,7 +75,7 @@ export const createTwoMetricOneCateScatter = (
   const colorColumn = axisColumnMappings?.color;
   const categoryFields = axisColumnMappings?.color?.column!;
   const categoryNames = axisColumnMappings?.color?.name!;
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const markLayer = {
     mark: {
       type: 'point',
@@ -88,12 +88,12 @@ export const createTwoMetricOneCateScatter = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, yAxisStyle),
       },
       color: {
         field: categoryFields,
@@ -111,12 +111,12 @@ export const createTwoMetricOneCateScatter = (
           {
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
-            title: xAxis?.styles?.title?.text || xAxis?.name,
+            title: xAxisStyle?.title?.text || xAxis?.name,
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
-            title: yAxis?.styles?.title?.text || yAxis?.name,
+            title: yAxisStyle?.title?.text || yAxis?.name,
           },
           { field: categoryFields, type: 'nominal', title: categoryNames },
         ],
@@ -147,7 +147,7 @@ export const createThreeMetricOneCateScatter = (
   const colorColumn = axisColumnMappings?.color;
   const categoryFields = axisColumnMappings?.color?.column!;
   const categoryNames = axisColumnMappings?.color?.name!;
-  const [xAxis, yAxis] = getSwappedAxisRole(styles, axisColumnMappings);
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const numericalSize = axisColumnMappings?.size;
   const markLayer = {
@@ -162,12 +162,12 @@ export const createThreeMetricOneCateScatter = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis),
+        axis: applyAxisStyling(yAxis, yAxisStyle),
       },
       color: {
         field: categoryFields,
@@ -196,12 +196,12 @@ export const createThreeMetricOneCateScatter = (
           {
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
-            title: xAxis?.styles?.title?.text || xAxis?.name,
+            title: xAxisStyle?.title?.text || xAxis?.name,
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
-            title: yAxis?.styles?.title?.text || yAxis?.name,
+            title: yAxisStyle?.title?.text || yAxis?.name,
           },
           { field: categoryFields, type: 'nominal', title: categoryNames },
           { field: numericalSize?.column, type: 'quantitative', title: numericalSize?.name },

@@ -4,10 +4,12 @@
  */
 
 import { Middleware } from '@reduxjs/toolkit';
+import { AnyAction } from 'redux';
 import { isEqual } from 'lodash';
 import { Dataset, DEFAULT_DATA } from '../../../../../../data/common';
 import { RootState } from '../store';
 import { ExploreServices } from '../../../../types';
+import { EditorMode } from '../types';
 import {
   clearResults,
   setPromptModeIsAvailable,
@@ -16,12 +18,14 @@ import {
   setSummaryAgentIsAvailable,
   setPatternsField,
   setUsingRegexPatterns,
+  setEditorMode,
 } from '../slices';
 import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { detectAndSetOptimalTab } from '../actions/detect_optimal_tab';
+import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
 
 /**
  * Middleware to handle dataset changes and trigger necessary side effects
@@ -57,6 +61,7 @@ export const createDatasetChangeMiddleware = (
       store.dispatch(clearLastExecutedData());
       store.dispatch(setPatternsField(''));
       store.dispatch(setUsingRegexPatterns(false));
+      store.dispatch((resetLegacyStateActionCreator(services) as unknown) as AnyAction);
 
       const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
         getPromptModeIsAvailable(services),
@@ -68,6 +73,14 @@ export const createDatasetChangeMiddleware = (
         newPromptModeIsAvailable.value !== queryEditor.promptModeIsAvailable
       ) {
         store.dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable.value));
+
+        // Switch to Prompt mode when AI becomes available
+        if (newPromptModeIsAvailable.value) {
+          store.dispatch(setEditorMode(EditorMode.Prompt));
+        } else if (queryEditor.editorMode === EditorMode.Prompt) {
+          // Switch to Query mode when AI becomes unavailable and user is in Prompt mode
+          store.dispatch(setEditorMode(EditorMode.Query));
+        }
       }
 
       if (

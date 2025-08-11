@@ -20,6 +20,7 @@ import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
+import { EditorMode } from '../types';
 
 /**
  * Persists Redux state to URL
@@ -270,7 +271,7 @@ const getPreloadedQueryEditorState = async (
     },
     promptModeIsAvailable,
     promptToQueryIsLoading: false,
-    editorMode: DEFAULT_EDITOR_MODE,
+    editorMode: promptModeIsAvailable ? EditorMode.Prompt : DEFAULT_EDITOR_MODE,
     lastExecutedTranslatedQuery: '',
     summaryAgentIsAvailable,
     lastExecutedPrompt: '',
@@ -302,7 +303,7 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
 /**
  * Get preloaded legacy state (vis_builder approach - defaults only, no saved object loading)
  */
-const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
+export const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
   // Only return defaults - NO saved object loading (like vis_builder)
   const defaultColumns = services.uiSettings?.get('defaultColumns') || ['_source'];
 

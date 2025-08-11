@@ -163,7 +163,7 @@ describe('rule_repository', () => {
 
     it('should create a simple line chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 1);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -199,7 +199,7 @@ describe('rule_repository', () => {
 
     it('should create a line bar chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -235,7 +235,7 @@ describe('rule_repository', () => {
 
     it('should create a multi line chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 1);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -269,7 +269,7 @@ describe('rule_repository', () => {
 
     it('should create a faceted multi line chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 1);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -317,7 +317,7 @@ describe('rule_repository', () => {
     it('should create a regular heatmap expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
       categoricalColumns[0].uniqueValuesCount = 10;
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -337,7 +337,7 @@ describe('rule_repository', () => {
     it('should create a stacked bar chart expression when chart type is bar', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
       categoricalColumns[0].uniqueValuesCount = 10;
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -373,7 +373,7 @@ describe('rule_repository', () => {
 
     it('should create a pie chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -394,7 +394,7 @@ describe('rule_repository', () => {
 
     it('should create a bar chart expression when chart type is bar', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -416,7 +416,7 @@ describe('rule_repository', () => {
 
     it('should create a pie chart expression when chart type is pie', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -452,7 +452,7 @@ describe('rule_repository', () => {
 
     it('should create a single metric expression', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -487,7 +487,7 @@ describe('rule_repository', () => {
 
     it('should create a scatter chart expression', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -522,7 +522,7 @@ describe('rule_repository', () => {
 
     it('should create a scatter chart with category expression', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -557,7 +557,7 @@ describe('rule_repository', () => {
 
     it('should create a scatter chart with three metrics and one category expression', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(3, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,

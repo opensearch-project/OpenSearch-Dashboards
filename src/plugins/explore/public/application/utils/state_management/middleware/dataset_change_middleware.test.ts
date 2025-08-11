@@ -12,14 +12,19 @@ import {
   setPromptModeIsAvailable,
   setSummaryAgentIsAvailable,
   clearLastExecutedData,
+  setPatternsField,
+  setUsingRegexPatterns,
+  setEditorMode,
 } from '../slices';
 import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
 import { createMockExploreServices, createMockStore, MockStore } from '../__mocks__';
 import { DEFAULT_DATA } from '../../../../../../data/common';
+import { EditorMode } from '../types';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import * as queryActions from '../actions/query_actions';
 import * as tabActions from '../actions/detect_optimal_tab';
+import * as resetLegacyStateActions from '../actions/reset_legacy_state';
 
 jest.mock('../../get_prompt_mode_is_available', () => ({
   getPromptModeIsAvailable: jest.fn().mockResolvedValue(true),
@@ -37,6 +42,10 @@ jest.mock('../actions/detect_optimal_tab', () => ({
   detectAndSetOptimalTab: jest.fn().mockReturnValue({ type: 'mock/detectOptimalTab' }),
 }));
 
+jest.mock('../actions/reset_legacy_state', () => ({
+  resetLegacyStateActionCreator: jest.fn().mockReturnValue({ type: 'mock/resetLegacyState' }),
+}));
+
 const mockedExecuteQueries = queryActions.executeQueries as jest.MockedFunction<
   typeof queryActions.executeQueries
 >;
@@ -48,6 +57,9 @@ const mockedGetPromptModeIsAvailable = getPromptModeIsAvailable as jest.MockedFu
 >;
 const mockedGetSummaryAgentIsAvailable = getSummaryAgentIsAvailable as jest.MockedFunction<
   typeof getSummaryAgentIsAvailable
+>;
+const mockedResetLegacyStateActionCreator = resetLegacyStateActions.resetLegacyStateActionCreator as jest.MockedFunction<
+  typeof resetLegacyStateActions.resetLegacyStateActionCreator
 >;
 
 describe('createDatasetChangeMiddleware', () => {
@@ -106,7 +118,12 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearQueryStatusMap());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearLastExecutedData());
+    expect(mockStore.dispatch).toHaveBeenCalledWith(setPatternsField(''));
+    expect(mockStore.dispatch).toHaveBeenCalledWith(setUsingRegexPatterns(false));
+    expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/resetLegacyState' });
+    expect(mockedResetLegacyStateActionCreator).toHaveBeenCalledWith(mockServices);
     expect(mockStore.dispatch).toHaveBeenCalledWith(setPromptModeIsAvailable(true));
+    expect(mockStore.dispatch).toHaveBeenCalledWith(setEditorMode(EditorMode.Prompt));
     expect(mockStore.dispatch).toHaveBeenCalledWith(setSummaryAgentIsAvailable(true));
 
     // Verify the executeQueries action was dispatched
@@ -137,6 +154,10 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearQueryStatusMap());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearLastExecutedData());
+    expect(mockStore.dispatch).toHaveBeenCalledWith(setPatternsField(''));
+    expect(mockStore.dispatch).toHaveBeenCalledWith(setUsingRegexPatterns(false));
+    expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/resetLegacyState' });
+    expect(mockedResetLegacyStateActionCreator).toHaveBeenCalledWith(mockServices);
 
     // Verify the executeQueries action was dispatched
     expect(mockedExecuteQueries).toHaveBeenCalledWith({ services: mockServices });

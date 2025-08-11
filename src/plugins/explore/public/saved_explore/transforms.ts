@@ -31,7 +31,8 @@ export const saveStateToSavedObject = (
   flavorId: string,
   tabDefinition: TabDefinition,
   visState?: VisState,
-  dataset?: IndexPattern | Dataset
+  dataset?: IndexPattern | Dataset,
+  activeTabId?: string
 ): SavedExplore => {
   // Serialize the state into the saved object
   obj.type = flavorId;
@@ -43,8 +44,9 @@ export const saveStateToSavedObject = (
     params: visState?.styleOptions ?? {},
     axesMapping: visState?.axesMapping,
   });
+
   obj.uiState = JSON.stringify({
-    activeTab: tabDefinition.id,
+    activeTab: activeTabId || tabDefinition.id,
   });
   obj.searchSourceFields = { index: dataset };
 

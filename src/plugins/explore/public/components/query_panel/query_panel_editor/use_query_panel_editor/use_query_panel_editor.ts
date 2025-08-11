@@ -85,6 +85,7 @@ export interface UseQueryPanelEditorReturnType {
   options: IEditorConstructionOptions;
   placeholder: string;
   promptIsTyping: boolean;
+  suggestionProvider: monaco.languages.CompletionItemProvider;
   showPlaceholder: boolean;
   useLatestTheme: true;
   value: string;
@@ -155,12 +156,15 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       _: monaco.languages.CompletionContext,
       token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> => {
-      if (isPromptModeRef.current || token.isCancellationRequested) {
+      if (token.isCancellationRequested) {
         return { suggestions: [], incomplete: false };
       }
       try {
         // Get the effective language for autocomplete (PPL -> PPL_Simplified for explore app)
-        const effectiveLanguage = getEffectiveLanguageForAutoComplete(queryLanguage, 'explore');
+        const effectiveLanguage = getEffectiveLanguageForAutoComplete(
+          isPromptModeRef.current ? 'AI' : queryLanguage,
+          'explore'
+        );
 
         // Get the current dataset from Query Service to avoid stale closure values
         const currentDataset = queryString.getQuery().dataset;
@@ -175,6 +179,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           selectionStart: model.getOffsetAt(position),
           selectionEnd: model.getOffsetAt(position),
           language: effectiveLanguage,
+          baseLanguage: queryLanguage, // Pass the original language before transformation
           indexPattern: currentDataView,
           datasetType: currentDataset?.type,
           position,
@@ -224,16 +229,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     [isPromptModeRef, queryLanguage, queryString, dataViews, services]
   );
 
-  // We need to manually register completion provider if it gets re-created,
-  // because monaco.languages.onLanguage will not trigger registration
-  // callbacks if the language is the same.
-  useEffect(() => {
-    const disposable = monaco.languages.registerCompletionItemProvider(queryLanguage, {
-      triggerCharacters: TRIGGER_CHARACTERS,
+  const suggestionProvider = useMemo(() => {
+    return {
+      triggerCharacters: isPromptMode ? ['='] : TRIGGER_CHARACTERS,
       provideCompletionItems,
-    });
-    return () => disposable?.dispose();
-  }, [provideCompletionItems, queryLanguage]);
+    };
+  }, [isPromptMode, provideCompletionItems]);
 
   const handleRun = useCallback(() => {
     dispatch(onEditorRunActionCreator(services, editorTextRef.current));
@@ -341,12 +342,13 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     isFocused: editorIsFocused,
     isPromptMode,
     languageConfiguration,
-    languageId: isPromptMode ? 'plaintext' : queryLanguage, // plaintext is preregistered language in monaco
+    languageId: isPromptMode ? 'AI' : queryLanguage,
     onChange,
     onEditorClick,
     options,
     placeholder,
     promptIsTyping,
+    suggestionProvider,
     showPlaceholder: !editorText.length,
     useLatestTheme: true,
     value: editorText,

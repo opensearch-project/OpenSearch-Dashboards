@@ -3673,6 +3673,126 @@ exports[`DataSourceTable should handle datasources with empty description correc
             ],
             Array [
               Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
                 "pathname": "test-no-description",
               },
             ],
@@ -3703,6 +3823,102 @@ exports[`DataSourceTable should handle datasources with empty description correc
             ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
             Object {
               "type": "return",
               "value": undefined,
@@ -4413,6 +4629,14 @@ exports[`DataSourceTable should handle datasources with empty description correc
             "render": [Function],
             "truncateText": true,
           },
+          Object {
+            "actions": Array [
+              Object {
+                "render": [Function],
+              },
+            ],
+            "name": "Action",
+          },
         ]
       }
       isExpandable={true}
@@ -4889,6 +5113,14 @@ exports[`DataSourceTable should handle datasources with empty description correc
                 "name": "Related connections",
                 "render": [Function],
                 "truncateText": true,
+              },
+              Object {
+                "actions": Array [
+                  Object {
+                    "render": [Function],
+                  },
+                ],
+                "name": "Action",
               },
             ]
           }
@@ -5489,6 +5721,50 @@ exports[`DataSourceTable should handle datasources with empty description correc
                             </CellContents>
                           </th>
                         </EuiTableHeaderCell>
+                        <EuiTableHeaderCell
+                          align="right"
+                          key="_actions_h_5"
+                        >
+                          <th
+                            className="euiTableHeaderCell"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent euiTableCellContent--alignRight"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent euiTableCellContent--alignRight"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": "Action",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                      title="Action"
+                                    >
+                                      Action
+                                    </span>
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
+                          </th>
+                        </EuiTableHeaderCell>
                       </tr>
                     </thead>
                   </EuiTableHeader>
@@ -5497,12 +5773,13 @@ exports[`DataSourceTable should handle datasources with empty description correc
                   >
                     <tbody>
                       <EuiTableRow
+                        hasActions={true}
                         isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_test-no-description"
@@ -5762,15 +6039,125 @@ exports[`DataSourceTable should handle datasources with empty description correc
                               </div>
                             </td>
                           </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="right"
+                            hasActions={true}
+                            key="record_actions_test-no-description_5"
+                            showOnHover={true}
+                            textOnly={false}
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--hasActions"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                              >
+                                <ExpandedItemActions
+                                  actionEnabled={[Function]}
+                                  actions={
+                                    Array [
+                                      Object {
+                                        "render": [Function],
+                                      },
+                                    ]
+                                  }
+                                  className="euiTableCellContent__hoverItem"
+                                  item={
+                                    Object {
+                                      "connectionType": 0,
+                                      "description": undefined,
+                                      "id": "test-no-description",
+                                      "relatedConnections": Array [],
+                                      "title": "test-no-description",
+                                      "type": "OpenSearch",
+                                    }
+                                  }
+                                  itemId="test-no-description"
+                                  key=".0"
+                                >
+                                  <CustomItemAction
+                                    action={
+                                      Object {
+                                        "render": [Function],
+                                      }
+                                    }
+                                    className="euiTableCellContent__hoverItem"
+                                    enabled={true}
+                                    index={0}
+                                    item={
+                                      Object {
+                                        "connectionType": 0,
+                                        "description": undefined,
+                                        "id": "test-no-description",
+                                        "relatedConnections": Array [],
+                                        "title": "test-no-description",
+                                        "type": "OpenSearch",
+                                      }
+                                    }
+                                    key="item_action_test-no-description_0"
+                                  >
+                                    <div
+                                      className="euiTableCellContent__hoverItem"
+                                    >
+                                      <EuiButtonIcon
+                                        aria-label="Set as default data source"
+                                        data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"
+                                        iconType="flag"
+                                        isDisabled={false}
+                                        onBlur={[Function]}
+                                        onClick={[Function]}
+                                        onFocus={[Function]}
+                                        title="Set as default"
+                                      >
+                                        <button
+                                          aria-label="Set as default data source"
+                                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                          data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"
+                                          disabled={false}
+                                          onBlur={[Function]}
+                                          onClick={[Function]}
+                                          onFocus={[Function]}
+                                          title="Set as default"
+                                          type="button"
+                                        >
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiButtonIcon__icon"
+                                            color="inherit"
+                                            size="m"
+                                            type="flag"
+                                          >
+                                            <span
+                                              aria-hidden="true"
+                                              className="euiButtonIcon__icon"
+                                              color="inherit"
+                                              data-euiicon-type="flag"
+                                              size="m"
+                                            />
+                                          </EuiIcon>
+                                        </button>
+                                      </EuiButtonIcon>
+                                    </div>
+                                  </CustomItemAction>
+                                </ExpandedItemActions>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
                         </tr>
                       </EuiTableRow>
                       <EuiTableRow
+                        hasActions={true}
                         isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_test-null"
@@ -6030,15 +6417,125 @@ exports[`DataSourceTable should handle datasources with empty description correc
                               </div>
                             </td>
                           </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="right"
+                            hasActions={true}
+                            key="record_actions_test-null_5"
+                            showOnHover={true}
+                            textOnly={false}
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--hasActions"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                              >
+                                <ExpandedItemActions
+                                  actionEnabled={[Function]}
+                                  actions={
+                                    Array [
+                                      Object {
+                                        "render": [Function],
+                                      },
+                                    ]
+                                  }
+                                  className="euiTableCellContent__hoverItem"
+                                  item={
+                                    Object {
+                                      "connectionType": 0,
+                                      "description": null,
+                                      "id": "test-null",
+                                      "relatedConnections": Array [],
+                                      "title": "test-null",
+                                      "type": "OpenSearch",
+                                    }
+                                  }
+                                  itemId="test-null"
+                                  key=".0"
+                                >
+                                  <CustomItemAction
+                                    action={
+                                      Object {
+                                        "render": [Function],
+                                      }
+                                    }
+                                    className="euiTableCellContent__hoverItem"
+                                    enabled={true}
+                                    index={0}
+                                    item={
+                                      Object {
+                                        "connectionType": 0,
+                                        "description": null,
+                                        "id": "test-null",
+                                        "relatedConnections": Array [],
+                                        "title": "test-null",
+                                        "type": "OpenSearch",
+                                      }
+                                    }
+                                    key="item_action_test-null_0"
+                                  >
+                                    <div
+                                      className="euiTableCellContent__hoverItem"
+                                    >
+                                      <EuiButtonIcon
+                                        aria-label="Set as default data source"
+                                        data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"
+                                        iconType="flag"
+                                        isDisabled={false}
+                                        onBlur={[Function]}
+                                        onClick={[Function]}
+                                        onFocus={[Function]}
+                                        title="Set as default"
+                                      >
+                                        <button
+                                          aria-label="Set as default data source"
+                                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                          data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"
+                                          disabled={false}
+                                          onBlur={[Function]}
+                                          onClick={[Function]}
+                                          onFocus={[Function]}
+                                          title="Set as default"
+                                          type="button"
+                                        >
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiButtonIcon__icon"
+                                            color="inherit"
+                                            size="m"
+                                            type="flag"
+                                          >
+                                            <span
+                                              aria-hidden="true"
+                                              className="euiButtonIcon__icon"
+                                              color="inherit"
+                                              data-euiicon-type="flag"
+                                              size="m"
+                                            />
+                                          </EuiIcon>
+                                        </button>
+                                      </EuiButtonIcon>
+                                    </div>
+                                  </CustomItemAction>
+                                </ExpandedItemActions>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
                         </tr>
                       </EuiTableRow>
                       <EuiTableRow
+                        hasActions={true}
                         isExpandable={true}
                         isSelectable={true}
                         isSelected={false}
                       >
                         <tr
-                          className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
+                          className="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions euiTableRow-isExpandable"
                         >
                           <EuiTableRowCellCheckbox
                             key="_selection_column_test-undefined"
@@ -6295,6 +6792,115 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                     —
                                   </div>
                                 </EuiText>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="right"
+                            hasActions={true}
+                            key="record_actions_test-undefined_5"
+                            showOnHover={true}
+                            textOnly={false}
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--hasActions"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                              >
+                                <ExpandedItemActions
+                                  actionEnabled={[Function]}
+                                  actions={
+                                    Array [
+                                      Object {
+                                        "render": [Function],
+                                      },
+                                    ]
+                                  }
+                                  className="euiTableCellContent__hoverItem"
+                                  item={
+                                    Object {
+                                      "connectionType": 0,
+                                      "description": undefined,
+                                      "id": "test-undefined",
+                                      "relatedConnections": Array [],
+                                      "title": "test-undefined",
+                                      "type": "OpenSearch",
+                                    }
+                                  }
+                                  itemId="test-undefined"
+                                  key=".0"
+                                >
+                                  <CustomItemAction
+                                    action={
+                                      Object {
+                                        "render": [Function],
+                                      }
+                                    }
+                                    className="euiTableCellContent__hoverItem"
+                                    enabled={true}
+                                    index={0}
+                                    item={
+                                      Object {
+                                        "connectionType": 0,
+                                        "description": undefined,
+                                        "id": "test-undefined",
+                                        "relatedConnections": Array [],
+                                        "title": "test-undefined",
+                                        "type": "OpenSearch",
+                                      }
+                                    }
+                                    key="item_action_test-undefined_0"
+                                  >
+                                    <div
+                                      className="euiTableCellContent__hoverItem"
+                                    >
+                                      <EuiButtonIcon
+                                        aria-label="Set as default data source"
+                                        data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"
+                                        iconType="flag"
+                                        isDisabled={false}
+                                        onBlur={[Function]}
+                                        onClick={[Function]}
+                                        onFocus={[Function]}
+                                        title="Set as default"
+                                      >
+                                        <button
+                                          aria-label="Set as default data source"
+                                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                          data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"
+                                          disabled={false}
+                                          onBlur={[Function]}
+                                          onClick={[Function]}
+                                          onFocus={[Function]}
+                                          title="Set as default"
+                                          type="button"
+                                        >
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiButtonIcon__icon"
+                                            color="inherit"
+                                            size="m"
+                                            type="flag"
+                                          >
+                                            <span
+                                              aria-hidden="true"
+                                              className="euiButtonIcon__icon"
+                                              color="inherit"
+                                              data-euiicon-type="flag"
+                                              size="m"
+                                            />
+                                          </EuiIcon>
+                                        </button>
+                                      </EuiButtonIcon>
+                                    </div>
+                                  </CustomItemAction>
+                                </ExpandedItemActions>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -7265,8 +7871,152 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
                 "pathname": "test1",
               },
             ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
             Object {
               "type": "return",
               "value": undefined,

@@ -71,6 +71,7 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               numericalColumns={numericalColumns}
               categoricalColumns={categoricalColumns}
               dateColumns={dateColumns}
+              axisColumnMappings={axisColumnMappings}
             />
           </EuiFlexItem>
 
@@ -86,7 +87,6 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
           {shouldShowLegend && (
             <EuiFlexItem grow={false}>
               <LegendOptionsPanel
-                shouldShowLegend={shouldShowLegend}
                 legendOptions={{
                   show: styleOptions.addLegend,
                   position: styleOptions.legendPosition,
