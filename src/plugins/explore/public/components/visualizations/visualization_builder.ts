@@ -136,7 +136,6 @@ export class VisualizationBuilder {
 
     // Table chart doesn't have axes mapping
     if (chartType === 'table') {
-      // this.setAxesMapping({});
       return;
     }
 
@@ -213,9 +212,9 @@ export class VisualizationBuilder {
         (chart) => chart.type === chartType
       );
       if (isChartTypeInCurrentRule) {
-        const reusedMapping = visConfig.ui.availableMappings.find((obj) =>
-          isEqual(getColumnMatchFromMapping(obj.mapping), currentRule.matchIndex)
-        )?.mapping[0];
+        const reusedMapping = visConfig.ui.availableMappings.find((mapping) =>
+          isEqual(getColumnMatchFromMapping(mapping), currentRule.matchIndex)
+        );
         if (reusedMapping) {
           const updatedMapping: Record<string, string> = {};
           const availableAxesMapping = new Map(Object.entries(axesMapping));

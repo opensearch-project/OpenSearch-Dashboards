@@ -370,7 +370,7 @@ export class ExploreEmbeddable
           dateCols: VisColumn[],
           styleOpts: StyleOptions
         ) => {
-          return matchedRule?.toExpression?.(
+          return matchedRule?.toSpec?.(
             transformedData,
             numericalCols,
             categoricalCols,

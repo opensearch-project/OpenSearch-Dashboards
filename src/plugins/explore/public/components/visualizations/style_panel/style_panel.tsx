@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { ChartTypeSelector } from '../chart_type_selector';
 import { ChartType, StyleOptions } from '../utils/use_visualization_types';
 import { VisualizationBuilder } from '../visualization_builder';
-import { AxisColumnMappings, VisualizationRule } from '../types';
+import { AxisColumnMappings } from '../types';
 import {
   convertMappingsToStrings,
   convertStringsToMappings,
@@ -46,13 +46,15 @@ export const StylePanel = <T extends ChartType>({
   );
 
   const updateVisualization = useCallback(
-    ({ rule, mappings }: { rule?: Partial<VisualizationRule>; mappings: AxisColumnMappings }) => {
+    ({ mappings }: { mappings: AxisColumnMappings }) => {
       visualizationBuilder.setAxesMapping(convertMappingsToStrings(mappings));
     },
     [visualizationBuilder]
   );
 
   // TODO: refactor this and expose an observable from visualizationBuilder
+  // Or refactor visConfig?.ui.style.render() function to accept axesMapping
+  // and compute axisColumnMappings internally
   const axisColumnMappings = useMemo(() => {
     return convertStringsToMappings(axesMapping ?? {}, [
       ...(visualizationData?.categoricalColumns ?? []),

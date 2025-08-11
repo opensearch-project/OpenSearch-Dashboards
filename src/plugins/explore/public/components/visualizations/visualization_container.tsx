@@ -10,7 +10,7 @@ import { useObservable } from 'react-use';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 import './visualization_container.scss';
-import { AxisColumnMappings, VisColumn, VisualizationRule } from './types';
+import { AxisColumnMappings, VisColumn } from './types';
 import { toExpression } from './utils/to_expression';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import { ExploreServices } from '../../types';
@@ -23,7 +23,6 @@ import { TableChartStyleControls } from './table/table_vis_config';
 import { VisualizationEmptyState } from './visualization_empty_state';
 
 export interface UpdateVisualizationProps {
-  rule?: Partial<VisualizationRule>;
   mappings: AxisColumnMappings;
 }
 // TODO: add back notifications
@@ -96,7 +95,7 @@ export const VisualizationContainer = () => {
     const rule = findRuleByIndex(axesMappings ?? {}, columns);
     // const rule = visualizationRegistry.getRules().find((r) => r.id === currentRuleId);
 
-    if (!rule || !rule.toExpression) {
+    if (!rule || !rule.toSpec) {
       return null;
     }
     const axisColumnMappings = convertStringsToMappings(axesMappings ?? {}, [
@@ -113,7 +112,7 @@ export const VisualizationContainer = () => {
       dateColumns: VisColumn[],
       styleOpts: any
     ) => {
-      return rule.toExpression!(
+      return rule.toSpec!(
         transformedData,
         numericalColumns,
         categoricalColumns,
