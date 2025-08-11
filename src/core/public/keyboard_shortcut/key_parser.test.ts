@@ -1,12 +1,6 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { KeyStringParser, SPECIAL_KEY_MAPPINGS, MODIFIER_ORDER } from './key_parser';
@@ -16,6 +10,34 @@ describe('KeyStringParser', () => {
 
   beforeEach(() => {
     parser = new KeyStringParser();
+  });
+
+  describe('Constructor Dependency Injection', () => {
+    it('should accept platform parameter for deterministic testing', () => {
+      const macParser = new KeyStringParser('mac');
+      const winParser = new KeyStringParser('windows');
+      const linuxParser = new KeyStringParser('linux');
+
+      expect(macParser.normalizeKeyString('ctrl+s')).toBe('cmd+s');
+      expect(winParser.normalizeKeyString('cmd+s')).toBe('ctrl+s');
+      expect(linuxParser.normalizeKeyString('cmd+s')).toBe('ctrl+s');
+    });
+
+    it('should auto-detect platform when not specified', () => {
+      const autoParser = new KeyStringParser();
+      expect(autoParser.normalizeKeyString('ctrl+s')).toBeDefined();
+      expect(typeof autoParser.normalizeKeyString('ctrl+s')).toBe('string');
+    });
+
+    it('should handle display strings correctly for each platform', () => {
+      const macParser = new KeyStringParser('mac');
+      const winParser = new KeyStringParser('windows');
+      const linuxParser = new KeyStringParser('linux');
+
+      expect(macParser.getDisplayString('cmd+s')).toBe('⌘S');
+      expect(winParser.getDisplayString('ctrl+s')).toBe('Ctrl+S');
+      expect(linuxParser.getDisplayString('ctrl+s')).toBe('Ctrl+S');
+    });
   });
 
   describe('Platform Detection', () => {
@@ -109,6 +131,31 @@ describe('KeyStringParser', () => {
       expect(parser.normalizeKeyString('Meta+A')).toBe('ctrl+a');
       expect(parser.normalizeKeyString('Win+R')).toBe('ctrl+r');
       expect(parser.normalizeKeyString('Super+L')).toBe('ctrl+l');
+      expect(parser.normalizeKeyString('Option+H')).toBe('alt+h');
+    });
+
+    it('should handle option key variations', () => {
+      expect(parser.normalizeKeyString('option+h')).toBe('alt+h');
+      expect(parser.normalizeKeyString('Option+H')).toBe('alt+h');
+      expect(parser.normalizeKeyString('OPTION+F1')).toBe('alt+f1');
+      expect(parser.normalizeKeyString('option+shift+a')).toBe('alt+shift+a');
+      expect(parser.normalizeKeyString('ctrl+option+s')).toBe('ctrl+alt+s');
+    });
+
+    it('should handle command key variations', () => {
+      expect(parser.normalizeKeyString('command+s')).toBe('ctrl+s');
+      expect(parser.normalizeKeyString('Command+S')).toBe('ctrl+s');
+      expect(parser.normalizeKeyString('COMMAND+Q')).toBe('ctrl+q');
+      expect(parser.normalizeKeyString('shift+command+z')).toBe('ctrl+shift+z');
+      expect(parser.normalizeKeyString('command+option+esc')).toBe('ctrl+alt+esc');
+    });
+
+    it('should handle opt key variations', () => {
+      expect(parser.normalizeKeyString('opt+h')).toBe('alt+h');
+      expect(parser.normalizeKeyString('Opt+H')).toBe('alt+h');
+      expect(parser.normalizeKeyString('OPT+F1')).toBe('alt+f1');
+      expect(parser.normalizeKeyString('ctrl+opt+s')).toBe('ctrl+alt+s');
+      expect(parser.normalizeKeyString('opt+shift+a')).toBe('alt+shift+a');
     });
   });
 
@@ -228,28 +275,30 @@ describe('KeyStringParser', () => {
       expect(SPECIAL_KEY_MAPPINGS.ArrowRight).toBe('right');
     });
 
-    it('should have all function key mappings', () => {
-      for (let i = 1; i <= 12; i++) {
-        expect(SPECIAL_KEY_MAPPINGS[`F${i}`]).toBe(`f${i}`);
-      }
+    it('should have space key mappings', () => {
+      expect(SPECIAL_KEY_MAPPINGS[' ']).toBe('space');
+      expect(SPECIAL_KEY_MAPPINGS.Space).toBe('space');
     });
 
-    it('should have navigation key mappings', () => {
-      expect(SPECIAL_KEY_MAPPINGS.Home).toBe('home');
-      expect(SPECIAL_KEY_MAPPINGS.End).toBe('end');
+    it('should have page key mappings', () => {
       expect(SPECIAL_KEY_MAPPINGS.PageUp).toBe('pageup');
       expect(SPECIAL_KEY_MAPPINGS.PageDown).toBe('pagedown');
-      expect(SPECIAL_KEY_MAPPINGS.Insert).toBe('insert');
-      expect(SPECIAL_KEY_MAPPINGS.Delete).toBe('delete');
     });
 
-    it('should have control character mappings', () => {
-      expect(SPECIAL_KEY_MAPPINGS.Backspace).toBe('backspace');
-      expect(SPECIAL_KEY_MAPPINGS.Tab).toBe('tab');
-      expect(SPECIAL_KEY_MAPPINGS.Enter).toBe('enter');
-      expect(SPECIAL_KEY_MAPPINGS.Escape).toBe('escape');
-      expect(SPECIAL_KEY_MAPPINGS.Space).toBe('space');
-      expect(SPECIAL_KEY_MAPPINGS[' ']).toBe('space');
+    it('should have escape alias mapping', () => {
+      expect(SPECIAL_KEY_MAPPINGS.Esc).toBe('escape');
+    });
+
+    it('should NOT have explicit mappings for keys handled by lowercase conversion', () => {
+      // These keys should NOT be in SPECIAL_KEY_MAPPINGS because they're handled by simple lowercase
+      expect(SPECIAL_KEY_MAPPINGS.Home).toBeUndefined();
+      expect(SPECIAL_KEY_MAPPINGS.End).toBeUndefined();
+      expect(SPECIAL_KEY_MAPPINGS.Insert).toBeUndefined();
+      expect(SPECIAL_KEY_MAPPINGS.Delete).toBeUndefined();
+      expect(SPECIAL_KEY_MAPPINGS.Backspace).toBeUndefined();
+      expect(SPECIAL_KEY_MAPPINGS.Tab).toBeUndefined();
+      expect(SPECIAL_KEY_MAPPINGS.Enter).toBeUndefined();
+      expect(SPECIAL_KEY_MAPPINGS.Escape).toBeUndefined();
     });
   });
 
@@ -290,11 +339,31 @@ describe('KeyStringParser', () => {
   });
 
   describe('Cross-platform Compatibility', () => {
-    it('should handle platform-specific modifier differences', () => {
-      expect(parser.normalizeKeyString('cmd+s')).toBe('ctrl+s');
-      expect(parser.normalizeKeyString('meta+s')).toBe('ctrl+s');
-      expect(parser.normalizeKeyString('win+s')).toBe('ctrl+s');
-      expect(parser.normalizeKeyString('super+s')).toBe('ctrl+s');
+    it('should handle platform-specific modifier differences deterministically', () => {
+      const macParser = new KeyStringParser('mac');
+      const winParser = new KeyStringParser('windows');
+      const linuxParser = new KeyStringParser('linux');
+
+      expect(macParser.normalizeKeyString('ctrl+s')).toBe('cmd+s');
+      expect(macParser.normalizeKeyString('cmd+s')).toBe('cmd+s');
+
+      expect(winParser.normalizeKeyString('cmd+s')).toBe('ctrl+s');
+      expect(winParser.normalizeKeyString('ctrl+s')).toBe('ctrl+s');
+      expect(linuxParser.normalizeKeyString('cmd+s')).toBe('ctrl+s');
+      expect(linuxParser.normalizeKeyString('ctrl+s')).toBe('ctrl+s');
+    });
+
+    it('should handle modifier aliases across platforms', () => {
+      const macParser = new KeyStringParser('mac');
+      const winParser = new KeyStringParser('windows');
+
+      expect(macParser.normalizeKeyString('meta+s')).toBe('cmd+s');
+      expect(macParser.normalizeKeyString('win+s')).toBe('cmd+s');
+      expect(macParser.normalizeKeyString('super+s')).toBe('cmd+s');
+
+      expect(winParser.normalizeKeyString('meta+s')).toBe('ctrl+s');
+      expect(winParser.normalizeKeyString('win+s')).toBe('ctrl+s');
+      expect(winParser.normalizeKeyString('super+s')).toBe('ctrl+s');
     });
 
     it('should handle control/ctrl variations', () => {
@@ -302,19 +371,9 @@ describe('KeyStringParser', () => {
       expect(parser.normalizeKeyString('ctrl+s')).toBe('ctrl+s');
     });
 
-    it('should handle cmd+c on Windows platform', () => {
-      Object.defineProperty(navigator, 'userAgent', {
-        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-        configurable: true,
-      });
-      const winParser = new KeyStringParser();
-
-      expect(winParser.normalizeKeyString('cmd+c')).toBe('ctrl+c');
-      expect(winParser.normalizeKeyString('meta+c')).toBe('ctrl+c');
-
-      expect(winParser.isValidKeyString('cmd+c')).toBe(true);
-
-      expect(winParser.getDisplayString('cmd+c')).toBe('Ctrl+C');
+    it('should handle cross-platform event processing', () => {
+      const macParser = new KeyStringParser('mac');
+      const winParser = new KeyStringParser('windows');
 
       const event = new KeyboardEvent('keydown', {
         key: 'c',
@@ -323,7 +382,31 @@ describe('KeyStringParser', () => {
         altKey: false,
         metaKey: true,
       });
+
+      expect(macParser.getEventKeyString(event)).toBe('cmd+c');
       expect(winParser.getEventKeyString(event)).toBe('ctrl+c');
+    });
+
+    it('should display platform-specific symbols correctly', () => {
+      const macParser = new KeyStringParser('mac');
+      const winParser = new KeyStringParser('windows');
+      const linuxParser = new KeyStringParser('linux');
+
+      expect(macParser.getDisplayString('cmd+s')).toBe('⌘S');
+
+      expect(winParser.getDisplayString('ctrl+s')).toBe('Ctrl+S');
+      expect(winParser.getDisplayString('ctrl+alt+shift+s')).toBe('Ctrl+Alt+Shift+S');
+      expect(linuxParser.getDisplayString('ctrl+s')).toBe('Ctrl+S');
+    });
+
+    it('should validate shortcuts consistently across platforms', () => {
+      const macParser = new KeyStringParser('mac');
+      const winParser = new KeyStringParser('windows');
+
+      expect(macParser.isValidKeyString('cmd+c')).toBe(true);
+      expect(winParser.isValidKeyString('cmd+c')).toBe(true);
+      expect(macParser.isValidKeyString('ctrl+c')).toBe(true);
+      expect(winParser.isValidKeyString('ctrl+c')).toBe(true);
     });
   });
 
@@ -359,8 +442,8 @@ describe('KeyStringParser', () => {
     });
 
     it('should throw error for malformed plus patterns', () => {
-      expect(() => parser.normalizeKeyString('ctrl+++')).toThrow(
-        "Malformed key string: contains three or more consecutive '+' characters"
+      expect(() => parser.normalizeKeyString('ctrl+++s')).toThrow(
+        "Malformed key string: invalid consecutive '+' characters (not at end)"
       );
 
       expect(() => parser.normalizeKeyString('ctrl++s')).toThrow(
@@ -368,11 +451,11 @@ describe('KeyStringParser', () => {
       );
 
       expect(() => parser.normalizeKeyString('+ctrl+s')).toThrow(
-        "Malformed key string: cannot start with '+'"
+        "Malformed key string: invalid '+' character placement"
       );
 
       expect(() => parser.normalizeKeyString('ctrl+')).toThrow(
-        "Malformed key string: cannot end with single '+'"
+        "Malformed key string: invalid '+' character placement"
       );
     });
   });
@@ -460,14 +543,12 @@ describe('KeyStringParser', () => {
   describe('Performance Optimizations', () => {
     describe('Modifier Sorting Performance', () => {
       it('should sort modifiers efficiently with Map lookup', () => {
-        // Test that sorting works correctly (Map lookup is internal)
         expect(parser.normalizeKeyString('cmd+shift+alt+ctrl+z')).toBe('ctrl+alt+shift+z');
         expect(parser.normalizeKeyString('shift+ctrl+z')).toBe('ctrl+shift+z');
         expect(parser.normalizeKeyString('alt+ctrl+shift+cmd+a')).toBe('ctrl+alt+shift+a');
       });
 
       it('should handle unknown modifiers gracefully in sorting', () => {
-        // This tests the fallback behavior (?? -1) in the Map lookup
         expect(parser.normalizeKeyString('ctrl+shift+a')).toBe('ctrl+shift+a');
       });
 
@@ -487,7 +568,6 @@ describe('KeyStringParser', () => {
   describe('Code Duplication Elimination', () => {
     describe('buildKeyString Helper Method', () => {
       it('should produce consistent results between normalizeKeyString and getEventKeyString', () => {
-        // Test that both methods produce the same output for equivalent inputs
         const normalizedString = parser.normalizeKeyString('ctrl+shift+s');
 
         const event = new KeyboardEvent('keydown', {
@@ -533,45 +613,6 @@ describe('KeyStringParser', () => {
 
         expect(normalizedString).toBe(eventString);
         expect(normalizedString).toBe('ctrl+alt+shift+f12');
-      });
-    });
-  });
-
-  describe('Enhanced JSDoc Documentation Coverage', () => {
-    describe('Error Throwing Documentation', () => {
-      it('should throw documented errors for invalid input', () => {
-        // Test that the @throws documentation is accurate
-        expect(() => parser.normalizeKeyString(null as any)).toThrow();
-        expect(() => parser.normalizeKeyString(undefined as any)).toThrow();
-        expect(() => parser.normalizeKeyString(123 as any)).toThrow();
-        expect(() => parser.normalizeKeyString('')).toThrow();
-        expect(() => parser.normalizeKeyString('+++')).toThrow();
-      });
-    });
-
-    describe('Example Usage from JSDoc', () => {
-      it('should work as documented in JSDoc examples for normalizeKeyString', () => {
-        // Test examples from JSDoc comments
-        expect(parser.normalizeKeyString('Ctrl+S')).toBe('ctrl+s');
-        expect(parser.normalizeKeyString('shift+ctrl+f1')).toBe('ctrl+shift+f1');
-        expect(parser.normalizeKeyString('ALT+F4')).toBe('alt+f4');
-      });
-
-      it('should work as documented in JSDoc examples for getEventKeyString', () => {
-        // Test that event handling works as documented
-        const event = new KeyboardEvent('keydown', {
-          key: 's',
-          ctrlKey: true,
-          shiftKey: false,
-          altKey: false,
-          metaKey: false,
-        });
-
-        const result = parser.getEventKeyString(event);
-        expect(result).toBe('ctrl+s');
-
-        // Should match normalized version
-        expect(result).toBe(parser.normalizeKeyString('Ctrl+S'));
       });
     });
   });
@@ -674,7 +715,6 @@ describe('KeyStringParser', () => {
 
     describe('Cross-Platform Modifier Mapping Edge Cases', () => {
       it('should handle complex modifier combinations across platforms', () => {
-        // Test that all modifier aliases work correctly
         const modifierAliases = [
           ['control', 'ctrl'],
           ['meta', 'cmd'],

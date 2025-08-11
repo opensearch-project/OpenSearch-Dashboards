@@ -1,12 +1,6 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { KeyboardShortcutService } from './keyboard_shortcut_service';
@@ -151,7 +145,7 @@ describe('KeyboardShortcutService', () => {
   describe('Private Method Testing', () => {
     it('should create namespaced ID correctly', () => {
       const shortcut = { id: 'Save', pluginId: 'Editor' };
-      // @ts-expect-error - Testing private method
+      // @ts-expect-error
       const result = service.getNamespacedId(shortcut);
       expect(result).toBe('save.editor');
     });

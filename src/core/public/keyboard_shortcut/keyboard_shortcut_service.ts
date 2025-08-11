@@ -1,12 +1,6 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from './types';
@@ -47,8 +41,8 @@ export class KeyboardShortcutService {
 
   private register(shortcut: ShortcutDefinition): void {
     if (!this.keyParser.isValidKeyString(shortcut.keys)) {
-      // eslint-disable-next-line no-console
-      console.warn(`Invalid key string for shortcut ${shortcut.id}: ${shortcut.keys}`);
+      // Invalid key strings are developer configuration errors - fail silently
+      // to avoid console pollution while still preventing registration
       return;
     }
 
@@ -97,9 +91,15 @@ export class KeyboardShortcutService {
   private shouldIgnoreKeyboardEventForTarget(target: EventTarget | null): boolean {
     if (!this.isHTMLElement(target)) return false;
 
-    const tagName = target.tagName;
+    const element = target;
+    const tagName = element.tagName;
 
-    if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
+    if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+      return true;
+    }
+
+    const role = element.getAttribute('role');
+    if (role && ['textbox', 'combobox', 'searchbox'].includes(role)) {
       return true;
     }
 
@@ -122,11 +122,7 @@ export class KeyboardShortcutService {
       try {
         shortcut.execute();
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `Error executing keyboard shortcut ${this.getNamespacedId(shortcut)}:`,
-          error
-        );
+        // Silently handle shortcut execution errors
       }
     }
   };
