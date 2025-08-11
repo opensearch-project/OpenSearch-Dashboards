@@ -28,7 +28,7 @@ export const StylePanel = <T extends ChartType>({
 }: StylePanelProps<T>) => {
   const visualizationData = useObservable(visualizationBuilder.data$);
   const chartConfig = useObservable(visualizationBuilder.visConfig$);
-  const axesMapping = useObservable(visualizationBuilder.axesMapping$);
+  const axesMapping = chartConfig?.axesMapping;
 
   const onStyleChange = useCallback(
     (changes: Partial<StyleOptions>) => {

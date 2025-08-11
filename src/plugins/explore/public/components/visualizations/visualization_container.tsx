@@ -54,7 +54,6 @@ export const VisualizationContainer = () => {
 
   const visualizationBuilder = getVisualizationBuilder();
   const visualizationData = useObservable(visualizationBuilder.data$);
-  const axesMappings = useObservable(visualizationBuilder.axesMapping$);
   const visConfig = useObservable(visualizationBuilder.visConfig$);
   const spec = useObservable(visualizationBuilder.vegaSpec$);
 
@@ -102,7 +101,7 @@ export const VisualizationContainer = () => {
     return null;
   }
 
-  const hasSelectionMapping = Object.keys(axesMappings ?? {}).length !== 0;
+  const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   const renderVisualization = () => {
     if (expression && hasSelectionMapping) {
       return (

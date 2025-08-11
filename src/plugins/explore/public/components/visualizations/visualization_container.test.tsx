@@ -91,7 +91,6 @@ const mockVisualizationBuilder = {
     ],
     dateColumns: [],
   }),
-  axesMapping$: new BehaviorSubject({}),
   visConfig$: new BehaviorSubject({
     type: 'bar',
     styles: {
@@ -99,6 +98,7 @@ const mockVisualizationBuilder = {
       thresholds: [],
       pageSize: 10,
     },
+    axesMapping: {},
   }),
   vegaSpec$: new BehaviorSubject({
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
@@ -140,6 +140,7 @@ describe('VisualizationContainer', () => {
         thresholds: [],
         pageSize: 10,
       },
+      axesMapping: {},
     });
 
     render(<VisualizationContainer />);
@@ -152,7 +153,6 @@ describe('VisualizationContainer', () => {
   });
 
   it('renders expression visualization when expression is available and axes are mapped', () => {
-    mockVisualizationBuilder.axesMapping$.next({ x: 'field1', y: 'count' });
     mockVisualizationBuilder.visConfig$.next({
       type: 'bar',
       styles: {
@@ -160,6 +160,7 @@ describe('VisualizationContainer', () => {
         thresholds: [],
         pageSize: 10,
       },
+      axesMapping: { x: 'field1', y: 'count' },
     });
 
     render(<VisualizationContainer />);
