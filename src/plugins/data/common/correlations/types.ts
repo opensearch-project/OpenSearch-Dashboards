@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
+import { SavedObject, SavedObjectAttributes } from '../../../../core/types';
 
 // @experimental This schema is experimental and might change in future releases.
 export interface CorrelationSavedObjectAttributes extends SavedObjectAttributes {
