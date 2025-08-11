@@ -8,7 +8,6 @@ import {
   getAxisByRole,
   generateColorBySchema,
   swapAxes,
-  getSwappedAxes,
   getSwappedAxisRole,
   getSchemaByAxis,
   inferTimeUnitFromTimestamps,
@@ -17,36 +16,37 @@ import {
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
 
 describe('applyAxisStyling', () => {
-  const defaultAxisStyle = {
+  const defaultAxis = {
     id: 1,
     name: 'X Value',
     schema: VisFieldType.Numerical,
     column: 'x',
     validValuesCount: 6,
     uniqueValuesCount: 6,
-    styles: {
-      id: 'Axis-1',
-      position: Positions.LEFT,
+  };
+
+  const defaultAxisStyle = {
+    id: 'Axis-1',
+    position: Positions.LEFT,
+    show: true,
+    style: {},
+    labels: {
       show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 45,
-        filter: false,
-        truncate: 10,
-      },
-      title: {
-        text: 'Custom Title',
-      },
-      grid: {
-        showLines: true,
-      },
-      axisRole: AxisRole.X,
+      rotate: 45,
+      filter: false,
+      truncate: 10,
     },
+    title: {
+      text: 'Custom Title',
+    },
+    grid: {
+      showLines: true,
+    },
+    axisRole: AxisRole.X,
   };
 
   it('returns default config with title and labels when style is provided', () => {
-    const config = applyAxisStyling(defaultAxisStyle);
+    const config = applyAxisStyling(defaultAxis, defaultAxisStyle);
     expect(config.grid).toBe(true);
     expect(config.orient).toBe(Positions.LEFT);
     expect(config.title).toBe('Custom Title');
@@ -56,15 +56,7 @@ describe('applyAxisStyling', () => {
   });
 
   it('disables axis when show is false', () => {
-    const hiddenAxisStyle = {
-      ...defaultAxisStyle,
-      styles: {
-        ...defaultAxisStyle.styles,
-        show: false,
-      },
-    };
-
-    const config = applyAxisStyling(hiddenAxisStyle);
+    const config = applyAxisStyling(defaultAxis, { ...defaultAxisStyle, show: false });
     expect(config.title).toBeNull();
     expect(config.labels).toBe(false);
     expect(config.ticks).toBe(false);
@@ -112,86 +104,15 @@ describe('swapAxes', () => {
   });
 });
 
-describe('getSwappedAxes', () => {
-  const x = {
-    id: 1,
-    name: 'X Value',
-    schema: VisFieldType.Categorical,
-    column: 'x',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
-    styles: {
-      id: 'Axis-1',
-      position: Positions.BOTTOM,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 45,
-        filter: false,
-        truncate: 10,
-      },
-      title: {
-        text: 'Custom Title',
-      },
-      grid: {
-        showLines: true,
-      },
-      axisRole: AxisRole.X,
-    },
-  };
-  const y = {
-    id: 1,
-    name: 'Y Value',
-    schema: VisFieldType.Numerical,
-    column: 'y',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
-    styles: {
-      id: 'Axis-1',
-      position: Positions.LEFT,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 45,
-        filter: false,
-        truncate: 10,
-      },
-      title: {
-        text: 'Custom Title',
-      },
-      grid: {
-        showLines: true,
-      },
-      axisRole: AxisRole.X,
-    },
-  };
-
-  it('returns same axes when switchAxes is false', () => {
-    const [xAxis, yAxis] = getSwappedAxes(x, y, false);
-    expect(xAxis.schema).toBe(VisFieldType.Categorical);
-    expect(yAxis.schema).toBe(VisFieldType.Numerical);
-  });
-
-  it('swaps axes and updates position when switchAxes is true', () => {
-    const [xAxis, yAxis] = getSwappedAxes(x, y, true);
-    expect(xAxis.schema).toBe(VisFieldType.Numerical);
-    expect(yAxis.schema).toBe(VisFieldType.Categorical);
-    expect(xAxis.styles.position).toBe(Positions.BOTTOM);
-    expect(yAxis.styles.position).toBe(Positions.LEFT);
-  });
-});
-
 describe('getSwappedAxisRole', () => {
   it('returns undefined when axes are missing', () => {
-    const [x, y] = getSwappedAxisRole({}, {});
-    expect(x).toBeUndefined();
-    expect(y).toBeUndefined();
+    const { xAxis, yAxis } = getSwappedAxisRole({}, {});
+    expect(xAxis).toBeUndefined();
+    expect(yAxis).toBeUndefined();
   });
 
   it('returns swapped roles if switchAxes is true', () => {
-    const result = getSwappedAxisRole(
+    const { xAxis, yAxis } = getSwappedAxisRole(
       {
         standardAxes: [
           { axisRole: AxisRole.X, position: Positions.BOTTOM } as StandardAxes,
@@ -219,8 +140,8 @@ describe('getSwappedAxisRole', () => {
       }
     );
 
-    expect(result[0]?.schema).toBe(VisFieldType.Numerical);
-    expect(result[1]?.schema).toBe(VisFieldType.Categorical);
+    expect(xAxis?.schema).toBe(VisFieldType.Numerical);
+    expect(yAxis?.schema).toBe(VisFieldType.Categorical);
   });
 });
 

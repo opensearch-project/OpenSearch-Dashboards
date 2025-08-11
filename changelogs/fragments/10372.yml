@@ -1,0 +1,2 @@
+test:
+- Remove skipped tests for explore ([#10372](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10372))
