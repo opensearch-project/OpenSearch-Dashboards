@@ -40,10 +40,19 @@ import { NoMatchMessage } from './public/utils/helper_functions';
 import { createTraceAppState } from './state/trace_app_state';
 import { SpanDetailTabs } from './public/traces/span_detail_tabs';
 import { TraceDetailTabs } from './public/traces/trace_detail_tabs';
+import { CorrelationService } from './public/logs/correlation_service';
+import { LogHit } from './server/ppl_request_logs';
+import { TraceLogsTab } from './public/logs/trace_logs_tab';
+import { Dataset } from '../../../../../../data/common';
 
 export interface SpanFilter {
   field: string;
   value: string | number | boolean;
+}
+
+interface ResizeObserverTarget extends Element {
+  _lastWidth?: number;
+  _lastHeight?: number;
 }
 
 export interface TraceDetailsProps {
@@ -56,7 +65,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   isEmbedded = false,
 }) => {
   const {
-    services: { chrome, data, osdUrlStateStorage },
+    services: { chrome, data, osdUrlStateStorage, savedObjects },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
   // Initialize URL state management
@@ -101,9 +110,18 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>('timeline');
   const [isServiceLegendOpen, setIsServiceLegendOpen] = useState(false);
+  const [logsData, setLogsData] = useState<LogHit[]>([]);
+  const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
+  const [isLogsLoading, setIsLogsLoading] = useState<boolean>(false);
 
   // Create PPL service instance
   const pplService = useMemo(() => (data ? new TracePPLService(data) : undefined), [data]);
+
+  // Create correlation service instance
+  const correlationService = useMemo(
+    () => (savedObjects?.client ? new CorrelationService(savedObjects.client) : undefined),
+    [savedObjects?.client]
+  );
 
   // Generate dynamic color map based on unfiltered hits
   const colorMap = useMemo(() => {
@@ -137,6 +155,26 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       },
     ]);
   }, [chrome, traceId]);
+
+  // Check for correlations and fetch logs data
+  useEffect(() => {
+    if (dataset?.id && correlationService && data && traceId) {
+      setIsLogsLoading(true);
+      correlationService
+        .checkCorrelationsAndFetchLogs(dataset, data, traceId)
+        .then((result) => {
+          setLogDatasets(result.logDatasets);
+          setLogsData(result.logs);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error('Error fetching logs:', error);
+        })
+        .finally(() => {
+          setIsLogsLoading(false);
+        });
+    }
+  }, [dataset, correlationService, data, traceId]);
 
   useEffect(() => {
     const fetchData = async (filters: SpanFilter[] = []) => {
@@ -293,13 +331,14 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
         // Only trigger resize if there's a significant size change (more than 10px)
         // This prevents minor mouse-induced resizes
+        const target = entry.target as ResizeObserverTarget;
         if (
-          Math.abs(width - (entry.target as any)._lastWidth || 0) > 10 ||
-          Math.abs(height - (entry.target as any)._lastHeight || 0) > 10
+          Math.abs(width - (target._lastWidth || 0)) > 10 ||
+          Math.abs(height - (target._lastHeight || 0)) > 10
         ) {
           // Store the last dimensions
-          (entry.target as any)._lastWidth = width;
-          (entry.target as any)._lastHeight = height;
+          target._lastWidth = width;
+          target._lastHeight = height;
 
           // Clear existing timeout
           if (resizeTimeout) {
@@ -352,6 +391,9 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                     servicesInOrder={servicesInOrder}
                     setIsServiceLegendOpen={setIsServiceLegendOpen}
                     isServiceLegendOpen={isServiceLegendOpen}
+                    logDatasets={logDatasets}
+                    logsData={logsData}
+                    isLogsLoading={isLogsLoading}
                   />
                 </EuiPanel>
               </div>
@@ -445,6 +487,16 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                               activeView={activeTab}
                             />
                           )}
+
+                          {activeTab === 'logs' && (
+                            <TraceLogsTab
+                              traceId={traceId}
+                              logDatasets={logDatasets}
+                              logsData={logsData}
+                              isLoading={isLogsLoading}
+                              onSpanClick={handleSpanSelect}
+                            />
+                          )}
                         </div>
                       </EuiPanel>
                     </EuiResizablePanel>
@@ -468,6 +520,9 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             setSpanFiltersWithStorage(newFilters);
                           }}
                           setCurrentSpan={handleSpanSelect}
+                          logDatasets={logDatasets}
+                          logsData={logsData}
+                          isLogsLoading={isLogsLoading}
                         />
                       </EuiPanel>
                     </EuiResizablePanel>
