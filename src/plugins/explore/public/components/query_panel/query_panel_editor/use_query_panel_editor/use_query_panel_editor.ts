@@ -18,6 +18,7 @@ import {
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
 
 import { useEditorRef } from '../../../../application/hooks';
+import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_language_switch';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
@@ -27,11 +28,10 @@ import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { getSpacebarAction } from './spacebar_action';
-import { setEditorMode } from '../../../../application/utils/state_management/slices';
 import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
-import { EditorMode } from '../../../../application/utils/state_management/types';
 import { getEscapeAction } from './escape_action';
 import { usePromptIsTyping } from './use_prompt_is_typing';
+import { EditorMode } from '../../../../application/utils/state_management/types';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
@@ -61,7 +61,7 @@ const promptModePlaceholder = i18n.translate(
   }
 );
 
-const TRIGGER_CHARACTERS = [' '];
+const TRIGGER_CHARACTERS = [' ', '='];
 
 const languageConfiguration: LanguageConfiguration = {
   autoClosingPairs: [
@@ -116,6 +116,8 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
   const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
 
+  const { switchEditorMode } = useLanguageSwitch();
+
   // Keep the refs updated with latest context
   useEffect(() => {
     editorTextRef.current = editorText;
@@ -130,10 +132,14 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
   useEffect(() => {
-    if (isQueryMode && !!editorText.length) {
+    if (isQueryMode) {
       const onDidFocusDisposable = editorRef.current?.onDidFocusEditorWidget(() => {
         editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
       });
+
+      if (!editorText) {
+        editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      }
 
       return () => {
         onDidFocusDisposable?.dispose();
@@ -240,11 +246,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     dispatch(onEditorRunActionCreator(services, editorTextRef.current));
   }, [dispatch, services]);
 
-  const handleEscape = useCallback(() => {
-    setEditorText('');
-    dispatch(setEditorMode(EditorMode.Query));
-  }, [dispatch]);
-
   const editorDidMount = useCallback(
     (editor: IStandaloneCodeEditor) => {
       setEditorRef(editor);
@@ -268,12 +269,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       // Add Space bar key handling to switch to prompt mode
       editor.addAction(
         getSpacebarAction(promptModeIsAvailableRef, isPromptModeRef, editorTextRef, () =>
-          dispatch(setEditorMode(EditorMode.Prompt))
+          switchEditorMode(EditorMode.Prompt)
         )
       );
 
       // Add Escape key handling to switch to query mode
-      editor.addAction(getEscapeAction(isPromptModeRef, handleEscape));
+      editor.addAction(getEscapeAction(isPromptModeRef, () => switchEditorMode(EditorMode.Query)));
 
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
@@ -299,7 +300,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         return editor;
       };
     },
-    [setEditorRef, handleRun, handleEscape, setEditorIsFocused, dispatch]
+    [setEditorRef, handleRun, switchEditorMode, setEditorIsFocused]
   );
 
   const options = useMemo(() => {
