@@ -10,13 +10,13 @@
  */
 
 /**
- * Helper function to validate if a string is a valid URL
- * @param url The string to validate as URL
- * @returns Whether the string is a valid URL
+ * Helper function to validate if a string is a valid URI
+ * @param uri The string to validate as URI
+ * @returns Whether the string is a valid URI
  */
-const isValidUrl = (url: string): boolean => {
+const isValidUri = (uri: string): boolean => {
   try {
-    new URL(url);
+    new URL(uri);
     return true;
   } catch (err) {
     return false;
@@ -117,9 +117,9 @@ export function validateBannerConfig(
         `Invalid banner config: 'externalLink' must be a string, got ${typeof config.externalLink}`
       );
       isValid = false;
-    } else if (!isValidUrl(config.externalLink)) {
+    } else if (!isValidUri(config.externalLink)) {
       logger.error(
-        `Invalid banner config: 'externalLink' must be a valid URL, got '${config.externalLink}'`
+        `Invalid banner config: 'externalLink' must be a valid URI, got '${config.externalLink}'`
       );
       isValid = false;
     }
