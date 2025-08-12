@@ -134,8 +134,7 @@ export class KeyboardShortcutService {
       try {
         shortcut.execute();
       } catch (error) {
-        // Log shortcut execution errors for debugging
-        console.error('Error executing keyboard shortcut', error);
+        // shortcut execution errors
       }
     }
   };
