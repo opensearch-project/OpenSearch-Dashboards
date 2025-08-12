@@ -28,14 +28,14 @@ export const SPECIAL_KEY_MAPPINGS: Record<string, string> = {
   '!': 'exclamation',
   '@': 'at',
   '#': 'hash',
-  '$': 'dollar',
+  $: 'dollar',
   '%': 'percent',
   '^': 'caret',
   '&': 'ampersand',
   '*': 'asterisk',
   '(': 'parenleft',
   ')': 'parenright',
-  "_": 'underscore',
+  _: 'underscore',
   '+': 'plus',
   '{': 'braceleft',
   '}': 'braceright',
@@ -375,7 +375,9 @@ export class KeyStringParser {
   }
 
   private buildKeyString(modifiers: string[], key: string): string {
-    return modifiers.length > 0 ? `${modifiers.join('+')}+${key}` : key;
+    if (modifiers.length === 0) return key;
+    if (!key) return modifiers.join('+');
+    return `${modifiers.join('+')}+${key}`;
   }
 
   private sortModifiers(modifiers: ModifierKey[]): void {
@@ -387,9 +389,8 @@ export class KeyStringParser {
   }
 
   private normalizeKey(key: string): string {
-    
     if (key === ' ') {
-      return 'space'
+      return 'space';
     }
 
     const trimmed = key.trim().toLowerCase();
