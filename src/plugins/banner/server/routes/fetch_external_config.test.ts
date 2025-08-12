@@ -10,12 +10,9 @@
  */
 
 import { fetchExternalConfig } from './fetch_external_config';
-import http from 'http';
-import https from 'https';
 
-// Mock http and https modules
-jest.mock('http');
-jest.mock('https');
+// Mock global fetch
+const originalFetch = global.fetch;
 
 describe('fetchExternalConfig', () => {
   // Create mock objects
@@ -23,56 +20,17 @@ describe('fetchExternalConfig', () => {
     error: jest.fn(),
   };
 
-  // Mock response object with EventEmitter-like behavior
-  const createMockResponse = (statusCode: number) => {
-    const listeners: Record<string, Array<(chunk?: any) => void>> = {
-      data: [],
-      end: [],
-    };
-
+  // Mock response for fetch
+  const createMockResponse = (status: number, jsonData?: any, throwOnJson?: Error) => {
     return {
-      statusCode,
-      on: jest.fn((event: string, callback: (chunk?: any) => void) => {
-        if (!listeners[event]) {
-          listeners[event] = [];
+      ok: status >= 200 && status < 300,
+      status,
+      json: jest.fn().mockImplementation(() => {
+        if (throwOnJson) {
+          return Promise.reject(throwOnJson);
         }
-        listeners[event].push(callback);
-        return this;
+        return Promise.resolve(jsonData);
       }),
-      // Helper methods to trigger events in tests
-      emitData: (chunk: string) => {
-        listeners.data.forEach((callback) => callback(chunk));
-      },
-      emitEnd: () => {
-        listeners.end.forEach((callback) => callback());
-      },
-    };
-  };
-
-  // Mock request object with EventEmitter-like behavior
-  const createMockRequest = () => {
-    const listeners: Record<string, Array<(error?: Error) => void>> = {
-      error: [],
-      timeout: [],
-    };
-
-    return {
-      on: jest.fn((event: string, callback: (error?: Error) => void) => {
-        if (!listeners[event]) {
-          listeners[event] = [];
-        }
-        listeners[event].push(callback);
-        return this;
-      }),
-      end: jest.fn(),
-      destroy: jest.fn(),
-      // Helper methods to trigger events in tests
-      emitError: (error: Error) => {
-        listeners.error.forEach((callback) => callback(error));
-      },
-      emitTimeout: () => {
-        listeners.timeout.forEach((callback) => callback());
-      },
     };
   };
 
@@ -80,47 +38,37 @@ describe('fetchExternalConfig', () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
     mockLogger.error.mockClear();
+    // Reset fetch mock
+    global.fetch = jest.fn();
+  });
+
+  afterAll(() => {
+    // Restore original fetch
+    global.fetch = originalFetch;
   });
 
   test('successfully fetches and parses JSON data from HTTP URL', async () => {
     // Mock data
     const testUrl = 'http://example.com/banner-config';
     const mockData = { content: 'Test Banner', color: 'primary' };
-    const mockJsonString = JSON.stringify(mockData);
+    // Mock fetch response
+    const mockResponse = createMockResponse(200, mockData);
+    (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
-    // Create mock response
-    const mockResponse = createMockResponse(200);
-
-    // Create mock request
-    const mockRequest = createMockRequest();
-
-    // Mock http.request to return our mock request and call the callback with mock response
-    (http.request as jest.Mock).mockImplementation((url, options, callback) => {
-      callback(mockResponse);
-      return mockRequest;
-    });
-
-    // Start the async function call
-    const resultPromise = fetchExternalConfig(testUrl, mockLogger);
-
-    // Simulate response data events
-    mockResponse.emitData(mockJsonString);
-    mockResponse.emitEnd();
-
-    // Wait for the promise to resolve
-    const result = await resultPromise;
+    // Call the function
+    const result = await fetchExternalConfig(testUrl, mockLogger);
 
     // Verify results
-    expect(http.request).toHaveBeenCalledWith(
+    expect(global.fetch).toHaveBeenCalledWith(
       testUrl,
       expect.objectContaining({
         method: 'GET',
-        headers: { Accept: 'application/json' },
-        timeout: 5000,
-      }),
-      expect.any(Function)
+        headers: {
+          Accept: 'application/json',
+        },
+        signal: expect.any(AbortSignal),
+      })
     );
-    expect(mockRequest.end).toHaveBeenCalled();
     expect(result).toEqual(mockData);
     expect(mockLogger.error).not.toHaveBeenCalled();
   });
@@ -129,41 +77,24 @@ describe('fetchExternalConfig', () => {
     // Mock data
     const httpsUrl = 'https://example.com/banner-config';
     const mockData = { content: 'Test Banner', color: 'primary' };
-    const mockJsonString = JSON.stringify(mockData);
+    // Mock fetch response
+    const mockResponse = createMockResponse(200, mockData);
+    (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
-    // Create mock response
-    const mockResponse = createMockResponse(200);
-
-    // Create mock request
-    const mockRequest = createMockRequest();
-
-    // Mock https.request to return our mock request and call the callback with mock response
-    (https.request as jest.Mock).mockImplementation((url, options, callback) => {
-      callback(mockResponse);
-      return mockRequest;
-    });
-
-    // Start the async function call
-    const resultPromise = fetchExternalConfig(httpsUrl, mockLogger);
-
-    // Simulate response data events
-    mockResponse.emitData(mockJsonString);
-    mockResponse.emitEnd();
-
-    // Wait for the promise to resolve
-    const result = await resultPromise;
+    // Call the function
+    const result = await fetchExternalConfig(httpsUrl, mockLogger);
 
     // Verify results
-    expect(https.request).toHaveBeenCalledWith(
+    expect(global.fetch).toHaveBeenCalledWith(
       httpsUrl,
       expect.objectContaining({
         method: 'GET',
-        headers: { Accept: 'application/json' },
-        timeout: 5000,
-      }),
-      expect.any(Function)
+        headers: {
+          Accept: 'application/json',
+        },
+        signal: expect.any(AbortSignal),
+      })
     );
-    expect(mockRequest.end).toHaveBeenCalled();
     expect(result).toEqual(mockData);
     expect(mockLogger.error).not.toHaveBeenCalled();
   });
@@ -172,17 +103,9 @@ describe('fetchExternalConfig', () => {
     // Mock data
     const errorUrl = 'http://example.com/banner-config';
 
-    // Create mock response with non-200 status
+    // Mock fetch response with non-200 status
     const mockResponse = createMockResponse(404);
-
-    // Create mock request
-    const mockRequest = createMockRequest();
-
-    // Mock http.request
-    (http.request as jest.Mock).mockImplementation((url, options, callback) => {
-      callback(mockResponse);
-      return mockRequest;
-    });
+    (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
     // Call the function
     const result = await fetchExternalConfig(errorUrl, mockLogger);
@@ -195,29 +118,14 @@ describe('fetchExternalConfig', () => {
   test('handles JSON parsing error', async () => {
     // Mock data
     const jsonErrorUrl = 'http://example.com/banner-config';
-    const invalidJson = '{ invalid: json }';
+    const syntaxError = new SyntaxError('Unexpected token i in JSON at position 2');
 
-    // Create mock response
-    const mockResponse = createMockResponse(200);
+    // Mock fetch response with JSON parsing error
+    const mockResponse = createMockResponse(200, null, syntaxError);
+    (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
-    // Create mock request
-    const mockRequest = createMockRequest();
-
-    // Mock http.request
-    (http.request as jest.Mock).mockImplementation((url, options, callback) => {
-      callback(mockResponse);
-      return mockRequest;
-    });
-
-    // Start the async function call
-    const resultPromise = fetchExternalConfig(jsonErrorUrl, mockLogger);
-
-    // Simulate response data events with invalid JSON
-    mockResponse.emitData(invalidJson);
-    mockResponse.emitEnd();
-
-    // Wait for the promise to resolve
-    const result = await resultPromise;
+    // Call the function
+    const result = await fetchExternalConfig(jsonErrorUrl, mockLogger);
 
     // Verify results
     expect(result).toBeNull();
@@ -231,66 +139,46 @@ describe('fetchExternalConfig', () => {
     const url = 'http://example.com/banner-config';
     const mockError = new Error('Network error');
 
-    // Create mock request
-    const mockRequest = createMockRequest();
-
-    // Mock http.request
-    (http.request as jest.Mock).mockImplementation(() => {
-      return mockRequest;
-    });
-
-    // Start the async function call
-    const resultPromise = fetchExternalConfig(url, mockLogger);
-
-    // Simulate request error
-    mockRequest.emitError(mockError);
-
-    // Wait for the promise to resolve
-    const result = await resultPromise;
-
-    // Verify results
-    expect(result).toBeNull();
-    expect(mockLogger.error).toHaveBeenCalledWith('Error fetching banner config: Network error');
-  });
-
-  test('handles request timeout', async () => {
-    // Mock data
-    const url = 'http://example.com/banner-config';
-
-    // Create mock request
-    const mockRequest = createMockRequest();
-
-    // Mock http.request
-    (http.request as jest.Mock).mockImplementation(() => {
-      return mockRequest;
-    });
-
-    // Start the async function call
-    const resultPromise = fetchExternalConfig(url, mockLogger);
-
-    // Simulate request timeout
-    mockRequest.emitTimeout();
-
-    // Wait for the promise to resolve
-    const result = await resultPromise;
-
-    // Verify results
-    expect(result).toBeNull();
-    expect(mockRequest.destroy).toHaveBeenCalled();
-    expect(mockLogger.error).toHaveBeenCalledWith('Request timeout while fetching banner config');
-  });
-
-  test('handles URL parsing error', async () => {
-    // Invalid URL
-    const url = 'invalid-url';
+    // Mock fetch to throw an error
+    (global.fetch as jest.Mock).mockRejectedValue(mockError);
 
     // Call the function
     const result = await fetchExternalConfig(url, mockLogger);
 
     // Verify results
     expect(result).toBeNull();
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Error creating request for banner config:')
-    );
+    expect(mockLogger.error).toHaveBeenCalledWith(`Error fetching banner config: ${mockError}`);
+  });
+
+  test('handles request timeout', async () => {
+    // Mock data
+    const url = 'http://example.com/banner-config';
+    const abortError = new DOMException('The operation was aborted', 'AbortError');
+
+    // Mock fetch to throw an AbortError
+    (global.fetch as jest.Mock).mockRejectedValue(abortError);
+
+    // Call the function
+    const result = await fetchExternalConfig(url, mockLogger);
+
+    // Verify results
+    expect(result).toBeNull();
+    expect(mockLogger.error).toHaveBeenCalledWith('Request timeout while fetching banner config');
+  });
+
+  test('handles URL parsing error', async () => {
+    // Invalid URL
+    const url = 'invalid-url';
+    const typeError = new TypeError('Invalid URL');
+
+    // Mock fetch to throw a TypeError for invalid URL
+    (global.fetch as jest.Mock).mockRejectedValue(typeError);
+
+    // Call the function
+    const result = await fetchExternalConfig(url, mockLogger);
+
+    // Verify results
+    expect(result).toBeNull();
+    expect(mockLogger.error).toHaveBeenCalledWith(`Error fetching banner config: ${typeError}`);
   });
 });
