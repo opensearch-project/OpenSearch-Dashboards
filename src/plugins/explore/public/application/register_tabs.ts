@@ -6,19 +6,23 @@
 import { LogsTab } from '../components/tabs/logs_tab';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
-import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
+import { ExploreFlavor, EXPLORE_DEFAULT_LANGUAGE } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
 
 /**
  * Registers built-in tabs with the tab registry
  */
-export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: ExploreServices) => {
+export const registerBuiltInTabs = (
+  tabRegistry: TabRegistryService,
+  services: ExploreServices,
+  registryFlavor: ExploreFlavor
+) => {
   // Register Logs Tab
   const logsTabDefinition = {
     id: 'logs',
-    label: 'Logs',
-    flavor: [],
+    label: registryFlavor === ExploreFlavor.Traces ? 'Spans' : 'Logs',
+    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 10,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
@@ -120,7 +124,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
   tabRegistry.registerTab({
     id: 'explore_visualization_tab',
     label: 'Visualization',
-    flavor: [],
+    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 20,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
@@ -139,9 +143,9 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
  * Register tabs in the application
  * This is the main entry point for tab registration
  */
-export const registerTabs = (services: ExploreServices) => {
+export const registerTabs = (services: ExploreServices, flavor: ExploreFlavor) => {
   // Register built-in tabs
-  registerBuiltInTabs(services.tabRegistry, services);
+  registerBuiltInTabs(services.tabRegistry, services, flavor);
 
   // Register plugin-provided tabs
   // This would be called by plugins that want to add tabs

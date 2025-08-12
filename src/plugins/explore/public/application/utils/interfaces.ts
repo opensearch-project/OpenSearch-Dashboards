@@ -107,6 +107,16 @@ export interface ProcessedSearchResults extends BaseProcessedSearchResults {
 }
 
 /**
+ * Interface for Traces Chart processor processed search results
+ */
+export interface TracesChartProcessedResults extends BaseProcessedSearchResults {
+  requestChartData?: ChartData;
+  errorChartData?: ChartData;
+  latencyChartData?: ChartData;
+  bucketInterval?: BucketInterval;
+}
+
+/**
  * Type for default data processor function
  */
 export type DefaultDataProcessor = (

@@ -83,9 +83,11 @@ export interface TimechartHeaderProps {
   /**
    * Toggle the displaying of histogram or results summary
    */
-  toggleIdSelected: DiscoverChartToggleId;
-
-  additionalControl: any;
+  toggleIdSelected?: DiscoverChartToggleId;
+  /**
+   * Additional control element
+   */
+  additionalControl?: React.JSX.Element;
 }
 
 export function TimechartHeader({
@@ -140,7 +142,7 @@ export function TimechartHeader({
             })}
           </EuiText>
         </EuiFlexItem>
-        {toggleIdSelected === 'histogram' && (
+        {(toggleIdSelected === 'histogram' || additionalControl == null) && (
           <>
             <EuiFlexItem grow={false}>
               <EuiToolTip
@@ -229,7 +231,7 @@ export function TimechartHeader({
             </EuiFlexItem>
           </>
         )}
-        {additionalControl}
+        {additionalControl && additionalControl}
       </EuiFlexGroup>
     </I18nProvider>
   );

@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DiscoverHistogram } from './histogram';
+import { of } from 'rxjs';
 
 // Mock the @elastic/charts components
 jest.mock('@elastic/charts', () => ({
@@ -15,6 +16,7 @@ jest.mock('@elastic/charts', () => ({
   Settings: () => <div data-test-subj="chart-settings" />,
   Axis: () => <div data-test-subj="chart-axis" />,
   HistogramBarSeries: () => <div data-test-subj="histogram-bar-series" />,
+  LineSeries: () => <div data-test-subj="line-series" />,
   LineAnnotation: () => <div data-test-subj="line-annotation" />,
   RectAnnotation: () => <div data-test-subj="rect-annotation" />,
   Position: {
@@ -38,6 +40,7 @@ jest.mock('@elastic/charts', () => ({
 
 describe('DiscoverHistogram', () => {
   const defaultProps = {
+    chartType: 'HistogramBar' as const,
     chartData: {
       xAxisOrderedValues: [1609459200000, 1609462800000],
       xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
@@ -76,6 +79,8 @@ describe('DiscoverHistogram', () => {
           colors: {},
         },
         chartsDefaultBaseTheme: {},
+        chartsTheme$: of({}),
+        chartsBaseTheme$: of({}),
       },
     },
   };
@@ -84,12 +89,26 @@ describe('DiscoverHistogram', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the histogram chart', () => {
+  it('renders the histogram bar chart', () => {
     render(<DiscoverHistogram {...(defaultProps as any)} />);
 
     expect(screen.getByTestId('elastic-chart')).toBeInTheDocument();
     expect(screen.getByTestId('chart-settings')).toBeInTheDocument();
     expect(screen.getByTestId('histogram-bar-series')).toBeInTheDocument();
+    expect(screen.queryByTestId('line-series')).not.toBeInTheDocument();
+  });
+
+  it('renders the line chart', () => {
+    const lineChartProps = {
+      ...defaultProps,
+      chartType: 'Line' as const,
+    };
+    render(<DiscoverHistogram {...(lineChartProps as any)} />);
+
+    expect(screen.getByTestId('elastic-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('chart-settings')).toBeInTheDocument();
+    expect(screen.getByTestId('line-series')).toBeInTheDocument();
+    expect(screen.queryByTestId('histogram-bar-series')).not.toBeInTheDocument();
   });
 
   it('renders without crashing with basic props', () => {

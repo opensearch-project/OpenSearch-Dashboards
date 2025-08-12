@@ -68,7 +68,7 @@ describe('timechart header', function () {
         scale: undefined,
       },
       toggleIdSelected: 'histogram' as DiscoverChartToggleId,
-      additionalControl: null,
+      additionalControl: undefined,
     };
   });
 
@@ -91,14 +91,26 @@ describe('timechart header', function () {
     );
   });
 
-  it('should not render interval selector when toggleIdSelected is not histogram', function () {
+  it('should not render interval selector when toggleIdSelected is not histogram and additionalControl is provided', function () {
     const updatedProps = {
       ...props,
       toggleIdSelected: 'summary' as DiscoverChartToggleId,
+      additionalControl: <div>Additional Control</div>,
     };
     component = mountWithIntl(<TimechartHeader {...updatedProps} />);
     const intervalSelect = findTestSubject(component, 'discoverIntervalSelect');
     expect(intervalSelect.length).toBe(0);
+  });
+
+  it('should render interval selector when toggleIdSelected is not histogram but additionalControl is null', function () {
+    const updatedProps = {
+      ...props,
+      toggleIdSelected: 'summary' as DiscoverChartToggleId,
+      additionalControl: undefined,
+    };
+    component = mountWithIntl(<TimechartHeader {...updatedProps} />);
+    const intervalSelect = findTestSubject(component, 'discoverIntervalSelect');
+    expect(intervalSelect.length).toBe(1);
   });
 
   it('should render log count text', function () {
