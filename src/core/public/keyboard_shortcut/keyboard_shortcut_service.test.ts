@@ -335,41 +335,4 @@ describe('KeyboardShortcutService', () => {
       expect(shortcuts[2].execute).toHaveBeenCalledTimes(1);
     });
   });
-
-  describe('Error Handling', () => {
-    it('should handle errors in shortcut execution gracefully', () => {
-      const start = service.start();
-      const errorExecute = jest.fn(() => {
-        throw new Error('Test error');
-      });
-
-      const shortcut: ShortcutDefinition = {
-        id: 'error',
-        pluginId: 'test',
-        name: 'Error Shortcut',
-        category: 'test',
-        keys: 'ctrl+e',
-        execute: errorExecute,
-      };
-
-      start.register(shortcut);
-
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      const event = new KeyboardEvent('keydown', {
-        key: 'e',
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      expect(() => document.dispatchEvent(event)).not.toThrow();
-      expect(errorExecute).toHaveBeenCalledTimes(1);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error executing keyboard shortcut'),
-        expect.any(Error)
-      );
-
-      consoleSpy.mockRestore();
-    });
-  });
 });

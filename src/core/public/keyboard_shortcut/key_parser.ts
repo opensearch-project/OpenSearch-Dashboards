@@ -4,18 +4,14 @@
  */
 
 export const SPECIAL_KEY_MAPPINGS: Record<string, string> = {
-  ArrowUp: 'up',
-  ArrowDown: 'down',
-  ArrowLeft: 'left',
-  ArrowRight: 'right',
+  arrowup: 'up',
+  arrowdown: 'down',
+  arrowleft: 'left',
+  arrowright: 'right',
 
   ' ': 'space',
-  Space: 'space',
 
-  PageUp: 'pageup',
-  PageDown: 'pagedown',
-
-  Esc: 'escape',
+  esc: 'escape',
 
   ',': 'comma',
   '.': 'period',
@@ -88,7 +84,30 @@ export class KeyStringParser {
     ['opt', 'alt'],
   ]);
 
-  private static readonly VALID_MODIFIERS = new Set(['ctrl', 'alt', 'shift', 'cmd']);
+  private static readonly VALID_MODIFIERS = new Set(MODIFIER_ORDER);
+
+  private static readonly PLATFORM_MODIFIER_MAPPINGS = {
+    mac: {
+      ctrl: 'cmd',
+      control: 'cmd',
+      meta: 'cmd',
+      win: 'cmd',
+      super: 'cmd',
+      command: 'cmd',
+      option: 'alt',
+      opt: 'alt',
+    },
+    other: {
+      cmd: 'ctrl',
+      meta: 'ctrl',
+      command: 'ctrl',
+      win: 'ctrl',
+      super: 'ctrl',
+      control: 'ctrl',
+      option: 'alt',
+      opt: 'alt',
+    },
+  } as const;
 
   private static readonly DISPLAY_MAPPINGS = {
     mac: {
@@ -320,7 +339,7 @@ export class KeyStringParser {
       .filter(({ check }) => check)
       .map(({ key }) => this.applyPlatformMapping(key));
 
-    const key = this.normalizeKey(event.key);
+    const key = this.normalizeKey(event.key.toLowerCase());
 
     return this.buildKeyString(modifiers, key);
   }
@@ -335,19 +354,17 @@ export class KeyStringParser {
     const alias = KeyStringParser.MODIFIER_ALIASES.get(normalized);
     if (alias) return alias;
 
-    return KeyStringParser.VALID_MODIFIERS.has(normalized) ? normalized : null;
+    return KeyStringParser.VALID_MODIFIERS.has(normalized as ModifierKey) ? normalized : null;
   }
 
   private applyPlatformMapping(modifier: string): string {
-    if (this.platform === 'mac' && modifier === 'ctrl') {
-      return 'cmd';
-    }
+    const mappings =
+      this.platform === 'mac'
+        ? KeyStringParser.PLATFORM_MODIFIER_MAPPINGS.mac
+        : KeyStringParser.PLATFORM_MODIFIER_MAPPINGS.other;
 
-    if (this.platform !== 'mac' && modifier === 'cmd') {
-      return 'ctrl';
-    }
-
-    return modifier;
+    const normalized = modifier.toLowerCase();
+    return mappings[normalized as keyof typeof mappings] || normalized;
   }
 
   private buildKeyString(modifiers: string[], key: string): string {
@@ -363,31 +380,22 @@ export class KeyStringParser {
   }
 
   private normalizeKey(key: string): string {
-    const trimmed = key.trim();
+    const trimmed = key.trim().toLowerCase();
 
-    if (trimmed === '') {
+    if (!trimmed) {
       return '';
     }
 
-    if (SPECIAL_KEY_MAPPINGS[trimmed]) {
-      return SPECIAL_KEY_MAPPINGS[trimmed];
+    const specialMapping = SPECIAL_KEY_MAPPINGS[trimmed];
+    if (specialMapping) {
+      return specialMapping;
     }
 
     if (trimmed.length === 1) {
-      return trimmed.toLowerCase();
+      return trimmed;
     }
 
-    const lowerKey = trimmed.toLowerCase();
-
-    if (/^f\d{1,2}$/i.test(trimmed)) {
-      return lowerKey;
-    }
-
-    if (trimmed.startsWith('Numpad')) {
-      return `numpad${trimmed.slice(6).toLowerCase()}`;
-    }
-
-    return lowerKey;
+    return trimmed;
   }
 
   public isValidKeyString(keyString: string): boolean {

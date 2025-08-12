@@ -82,10 +82,14 @@ describe('KeyStringParser', () => {
     });
 
     it('should normalize special keys', () => {
-      expect(parser.normalizeKeyString('Ctrl+ArrowUp')).toBe('ctrl+arrowup');
+      expect(parser.normalizeKeyString('Ctrl+ArrowUp')).toBe('ctrl+up');
+      expect(parser.normalizeKeyString('Ctrl+ArrowDown')).toBe('ctrl+down');
+      expect(parser.normalizeKeyString('Ctrl+ArrowLeft')).toBe('ctrl+left');
+      expect(parser.normalizeKeyString('Ctrl+ArrowRight')).toBe('ctrl+right');
       expect(parser.normalizeKeyString('Alt+F1')).toBe('alt+f1');
       expect(parser.normalizeKeyString('Shift+Enter')).toBe('shift+enter');
       expect(parser.normalizeKeyString('Ctrl+Backspace')).toBe('ctrl+backspace');
+      expect(parser.normalizeKeyString('Esc')).toBe('escape');
     });
 
     it('should handle punctuation keys', () => {
@@ -147,7 +151,7 @@ describe('KeyStringParser', () => {
       expect(parser.normalizeKeyString('Command+S')).toBe('ctrl+s');
       expect(parser.normalizeKeyString('COMMAND+Q')).toBe('ctrl+q');
       expect(parser.normalizeKeyString('shift+command+z')).toBe('ctrl+shift+z');
-      expect(parser.normalizeKeyString('command+option+esc')).toBe('ctrl+alt+esc');
+      expect(parser.normalizeKeyString('command+option+esc')).toBe('ctrl+alt+escape');
     });
 
     it('should handle opt key variations', () => {
@@ -269,24 +273,18 @@ describe('KeyStringParser', () => {
 
   describe('Special Key Mappings', () => {
     it('should have comprehensive arrow key mappings', () => {
-      expect(SPECIAL_KEY_MAPPINGS.ArrowUp).toBe('up');
-      expect(SPECIAL_KEY_MAPPINGS.ArrowDown).toBe('down');
-      expect(SPECIAL_KEY_MAPPINGS.ArrowLeft).toBe('left');
-      expect(SPECIAL_KEY_MAPPINGS.ArrowRight).toBe('right');
+      expect(SPECIAL_KEY_MAPPINGS.arrowup).toBe('up');
+      expect(SPECIAL_KEY_MAPPINGS.arrowdown).toBe('down');
+      expect(SPECIAL_KEY_MAPPINGS.arrowleft).toBe('left');
+      expect(SPECIAL_KEY_MAPPINGS.arrowright).toBe('right');
     });
 
     it('should have space key mappings', () => {
       expect(SPECIAL_KEY_MAPPINGS[' ']).toBe('space');
-      expect(SPECIAL_KEY_MAPPINGS.Space).toBe('space');
-    });
-
-    it('should have page key mappings', () => {
-      expect(SPECIAL_KEY_MAPPINGS.PageUp).toBe('pageup');
-      expect(SPECIAL_KEY_MAPPINGS.PageDown).toBe('pagedown');
     });
 
     it('should have escape alias mapping', () => {
-      expect(SPECIAL_KEY_MAPPINGS.Esc).toBe('escape');
+      expect(SPECIAL_KEY_MAPPINGS.esc).toBe('escape');
     });
   });
 
