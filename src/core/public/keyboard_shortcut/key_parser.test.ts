@@ -161,6 +161,13 @@ describe('KeyStringParser', () => {
       expect(parser.normalizeKeyString('ctrl+opt+s')).toBe('ctrl+alt+s');
       expect(parser.normalizeKeyString('opt+shift+a')).toBe('alt+shift+a');
     });
+
+    it('should normalize uppercase keys to lowercase', () => {
+      expect(parser.normalizeKeyString('CTRL+S')).toBe('ctrl+s');
+      expect(parser.normalizeKeyString('Shift+Alt+F1')).toBe('alt+shift+f1');
+      expect(parser.normalizeKeyString('CMD+SHIFT+A')).toBe('ctrl+shift+a');
+      expect(parser.normalizeKeyString('ALT+ENTER')).toBe('alt+enter');
+    });
   });
 
   describe('Event Key String Generation', () => {

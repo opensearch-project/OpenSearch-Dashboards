@@ -145,47 +145,9 @@ describe('KeyboardShortcutService', () => {
   describe('Private Method Testing', () => {
     it('should create namespaced ID correctly', () => {
       const shortcut = { id: 'Save', pluginId: 'Editor' };
-      // @ts-expect-error - Testing private method
+      // @ts-expect-error
       const result = service.getNamespacedId(shortcut);
       expect(result).toBe('save.editor');
-    });
-  });
-
-  describe('Key Normalization', () => {
-    it('should normalize keys to lowercase', () => {
-      const start = service.start();
-      const shortcut1: ShortcutDefinition = {
-        id: 'save',
-        pluginId: 'editor',
-        name: 'Save Document',
-        category: 'editing',
-        keys: 'CTRL+S',
-        execute: mockExecute,
-      };
-      const shortcut2: ShortcutDefinition = {
-        id: 'save2',
-        pluginId: 'editor',
-        name: 'Save Document 2',
-        category: 'editing',
-        keys: 'ctrl+s',
-        execute: mockExecute2,
-      };
-
-      start.register(shortcut1);
-      start.register(shortcut2);
-
-      const event = new KeyboardEvent('keydown', {
-        key: 'S',
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      jest.spyOn(event, 'preventDefault');
-      document.dispatchEvent(event);
-
-      expect(mockExecute2).toHaveBeenCalledTimes(1);
-      expect(mockExecute).not.toHaveBeenCalled();
-      expect(event.preventDefault).toHaveBeenCalled();
     });
   });
 
