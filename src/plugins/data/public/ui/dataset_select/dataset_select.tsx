@@ -170,7 +170,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, suppor
         key: id,
         checked: isSelected ? ('on' as const) : undefined,
         prepend: <EuiIcon size="s" type={iconType} />,
-        'data-test-subj': `datasetOption-${id}`,
+        'data-test-subj': `datasetSelectOption-${title}`,
         append: isDefault ? (
           <EuiBadge>
             {i18n.translate('data.datasetSelect.defaultLabel', {
