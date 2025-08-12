@@ -28,7 +28,7 @@ const DEFAULT_OPTIONS = {
   },
 };
 
-cy.api.add('createWorkspace', (options = {}) => {
+cy.core.add('createWorkspace', (options = {}) => {
   const { title, description, type } = { ...DEFAULT_OPTIONS.workspace, ...options };
 
   cy.request({
@@ -50,7 +50,7 @@ cy.api.add('createWorkspace', (options = {}) => {
   });
 });
 
-cy.api.add('createDataSource', (options = {}) => {
+cy.core.add('createDataSource', (options = {}) => {
   const { title, url, authType } = { ...DEFAULT_OPTIONS.datasource, ...options };
 
   cy.request({
@@ -73,7 +73,7 @@ cy.api.add('createDataSource', (options = {}) => {
   });
 });
 
-cy.api.add('addDatasourcesToWorkspace', (datasourceIds) => {
+cy.core.add('addDatasourcesToWorkspace', (datasourceIds) => {
   if (!Array.isArray(datasourceIds)) {
     datasourceIds = [datasourceIds];
   }
@@ -95,7 +95,7 @@ cy.api.add('addDatasourcesToWorkspace', (datasourceIds) => {
   });
 });
 
-cy.api.add('createDataset', (options) => {
+cy.core.add('createDataset', (options) => {
   const { index, timeField } = { ...DEFAULT_OPTIONS.dataset, ...options };
 
   cy.get('@WORKSPACE_ID').then((workspaceId) => {
@@ -134,7 +134,7 @@ cy.api.add('createDataset', (options) => {
   });
 });
 
-cy.api.add('buildDatasetQuery', (options = {}) => {
+cy.core.add('buildDatasetQuery', (options = {}) => {
   const {
     index,
     timeFieldName = 'timestamp',
@@ -148,7 +148,7 @@ cy.api.add('buildDatasetQuery', (options = {}) => {
   });
 });
 
-cy.api.add('setupTestResources', (options = {}) => {
+cy.core.add('setupTestResources', (options = {}) => {
   const { index, baseDir = DEFAULT_OPTIONS.fixture.baseDir } = options;
 
   const mappingPath = `cypress/fixtures/${baseDir}/${index}.mapping.json`;
@@ -156,16 +156,16 @@ cy.api.add('setupTestResources', (options = {}) => {
 
   cy.osd.setupTestData(DEFAULT_OPTIONS.datasource.url, [mappingPath], [dataPath]);
 
-  cy.api.createDataSource();
-  cy.api.createWorkspace().then(() => {
+  cy.core.createDataSource();
+  cy.core.createWorkspace().then(() => {
     cy.get('@DATASOURCE_ID').then((datasourceId) => {
-      cy.api.addDatasourcesToWorkspace(datasourceId);
-      cy.api.createDataset({ index });
+      cy.core.addDatasourcesToWorkspace(datasourceId);
+      cy.core.createDataset({ index });
     });
   });
 });
 
-cy.api.add('cleanupTestResources', (options = {}) => {
+cy.core.add('cleanupTestResources', (options = {}) => {
   const { index } = options;
 
   cy.get('@WORKSPACE_ID').then((workspaceId) => {
