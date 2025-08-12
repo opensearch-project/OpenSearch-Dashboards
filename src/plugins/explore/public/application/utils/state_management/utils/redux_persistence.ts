@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { take } from 'rxjs/operators';
 import { RootState } from '../store';
 import { AppState, QueryExecutionStatus } from '../types';
 import { ExploreServices } from '../../../../types';
@@ -16,12 +17,15 @@ import {
 } from '../slices';
 import { Dataset, DataStructure } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
-import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
+import {
+  EXPLORE_DEFAULT_LANGUAGE,
+  ExploreFlavor,
+  DEFAULT_TRACE_COLUMNS_SETTING,
+} from '../../../../../common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
 import { EditorMode } from '../types';
-import { isTraceFlavor } from '../../../../utils/flavor_utils';
 
 /**
  * Persists Redux state to URL
@@ -91,31 +95,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const finalUIState = appState?.ui || getPreloadedUIState(services);
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
     const finalTabState = appState?.tab || getPreloadedTabState(services);
-
-    // Handle legacy state with flavor-aware column override
-    let finalLegacyState: LegacyState;
-    if (appState?.legacy) {
-      if (isTraceFlavor()) {
-        // Override columns with trace-specific defaults
-        const traceColumns = services.uiSettings?.get('explore:defaultTraceColumns') || [
-          'spanId',
-          'status.code',
-          'attributes.http.status_code',
-          'serviceName',
-          'name',
-          'durationInNanos',
-        ];
-        finalLegacyState = {
-          ...appState.legacy,
-          columns: traceColumns,
-        };
-      } else {
-        finalLegacyState = appState.legacy;
-      }
-    } else {
-      finalLegacyState = getPreloadedLegacyState(services);
-    }
-
+    const finalLegacyState = appState?.legacy || (await getPreloadedLegacyState(services));
     const finalQueryEditorState = await getPreloadedQueryEditorState(services, finalQueryState);
     const finalMetaState = appState?.meta || getPreloadedMetaState(services);
 
@@ -141,7 +121,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
   const uiState = getPreloadedUIState(services);
   const resultsState = getPreloadedResultsState(services);
   const tabState = getPreloadedTabState(services);
-  const legacyState = getPreloadedLegacyState(services);
+  const legacyState = await getPreloadedLegacyState(services);
   const queryEditorState = await getPreloadedQueryEditorState(services, queryState);
   const metaState = getPreloadedMetaState(services);
 
@@ -328,12 +308,25 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
 /**
  * Get preloaded legacy state (vis_builder approach - defaults only, no saved object loading)
  */
-export const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
+export const getPreloadedLegacyState = async (services: ExploreServices): Promise<LegacyState> => {
   // Only return defaults - NO saved object loading (like vis_builder)
+  let defaultColumns = services.uiSettings?.get('defaultColumns') || ['_source'];
 
-  // Determine current flavor to decide which default columns setting to use
-  const defaultColumnsSetting = isTraceFlavor() ? 'explore:defaultTraceColumns' : 'defaultColumns';
-  const defaultColumns = services.uiSettings?.get(defaultColumnsSetting) || ['_source'];
+  try {
+    // Check the current app flavor to determine if we should use trace columns
+    const currentAppId = await services.core.application.currentAppId$.pipe(take(1)).toPromise();
+    const flavorFromAppId = currentAppId?.split('/')?.[1];
+
+    if (flavorFromAppId === ExploreFlavor.Traces) {
+      // Use trace-specific default columns if we're in the traces flavor
+      const traceColumns = services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING);
+      if (traceColumns && Array.isArray(traceColumns)) {
+        defaultColumns = traceColumns;
+      }
+    }
+  } catch (error) {
+    // If there's an error getting the app flavor, fall back to regular default columns
+  }
 
   return {
     // Fields that exist in data_explorer + discover

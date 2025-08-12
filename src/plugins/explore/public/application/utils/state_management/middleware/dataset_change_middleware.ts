@@ -26,9 +26,6 @@ import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { detectAndSetOptimalTab } from '../actions/detect_optimal_tab';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
-import { DEFAULT_TRACE_COLUMNS_SETTING, ExploreFlavor } from '../../../../../common';
-import { setColumns } from '../slices';
-import { getCurrentFlavor } from '../../../../utils/flavor_utils';
 
 /**
  * Middleware to handle dataset changes and trigger necessary side effects
@@ -44,7 +41,6 @@ export const createDatasetChangeMiddleware = (
   } = services;
   const datasetService = queryString.getDatasetService();
   let currentDataset: Dataset | undefined;
-  let currentFlavor: ExploreFlavor | undefined;
 
   return (store) => (next) => async (action) => {
     const result = next(action);
@@ -55,15 +51,9 @@ export const createDatasetChangeMiddleware = (
         query: { dataset },
       } = store.getState();
 
-      const newFlavor = getCurrentFlavor();
-      const datasetChanged = !isEqual(currentDataset, dataset);
-      const flavorChanged = currentFlavor !== newFlavor;
-
-      // Only proceed if dataset or flavor changed
-      if (!datasetChanged && !flavorChanged) return result;
+      if (isEqual(currentDataset, dataset)) return result;
 
       currentDataset = dataset;
-      currentFlavor = newFlavor;
 
       store.dispatch(setActiveTab(''));
       store.dispatch(clearResults());
@@ -72,12 +62,6 @@ export const createDatasetChangeMiddleware = (
       store.dispatch(setPatternsField(''));
       store.dispatch(setUsingRegexPatterns(false));
       store.dispatch((resetLegacyStateActionCreator(services) as unknown) as AnyAction);
-
-      // Set flavor-aware default columns
-      const defaultColumnsSetting =
-        newFlavor === ExploreFlavor.Traces ? DEFAULT_TRACE_COLUMNS_SETTING : 'defaultColumns';
-      const defaultColumns = services.uiSettings?.get(defaultColumnsSetting) || ['_source'];
-      store.dispatch(setColumns(defaultColumns));
 
       const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
         getPromptModeIsAvailable(services),

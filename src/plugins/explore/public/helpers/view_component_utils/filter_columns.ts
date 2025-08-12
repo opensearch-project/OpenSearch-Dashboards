@@ -27,9 +27,12 @@ export function filterColumns(
   modifyColumn: boolean,
   fieldCounts?: Record<string, number>
 ) {
+  // Ensure columns is an array to prevent "columns is not iterable" error
+  const safeColumns = Array.isArray(columns) ? columns : [];
+
   // if false, we keep all the chosen columns
   if (!modifyColumn) {
-    return columns.length > 0 ? buildColumns(columns) : ['_source'];
+    return safeColumns.length > 0 ? buildColumns(safeColumns) : ['_source'];
   }
   // if true, we keep columns that exist in the new index pattern
   // const fieldsName = indexPattern?.fields?.getAll?.()?.map((fld) => fld.name) || [];
@@ -38,7 +41,7 @@ export function filterColumns(
     : indexPattern?.fields.getAll() || []
   ).map((fld) => fld.name);
   // combine columns and defaultColumns without duplicates
-  const combinedColumns = [...new Set([...columns, ...defaultColumns])];
+  const combinedColumns = [...new Set([...safeColumns, ...defaultColumns])];
   const filteredColumns = combinedColumns.filter((column) => fieldsName.includes(column));
   const adjustedColumns = buildColumns(filteredColumns);
   // show all columns if query fields are less than 8
