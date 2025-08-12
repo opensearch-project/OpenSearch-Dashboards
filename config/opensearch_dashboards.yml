@@ -379,3 +379,9 @@
 
 # Set the value to true to enable the new UI for savedQueries in Discover
 # data.savedQueriesNewUI.enabled: true
+
+# Set the value to true to enable the banner plugin
+# banner.enabled: true
+
+# Set the content of the banner
+# banner.content: "This is an important announcement for all users. [Learn more](https://opensearch.org) about OpenSearch."

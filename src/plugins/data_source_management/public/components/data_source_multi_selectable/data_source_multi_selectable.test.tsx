@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { SavedObjectsClientContract, UiSettingScope } from 'opensearch-dashboards/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import {
   getDataSourcesWithFieldsResponse,
   mockResponseForSavedObjectsCalls,
   mockManagementPlugin,
 } from '../../mocks';
-import { ShallowWrapper, mount, shallow } from 'enzyme';
+import { ShallowWrapper, mount, shallow, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { DataSourceMultiSelectable } from './data_source_multi_selectable';
 import React from 'react';
@@ -39,7 +39,7 @@ describe('DataSourceMultiSelectable', () => {
   });
 
   it('should render normally with local cluster not hidden', async () => {
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceMultiSelectable
@@ -48,9 +48,11 @@ describe('DataSourceMultiSelectable', () => {
           onSelectedDataSources={jest.fn()}
           hideLocalCluster={false}
           fullWidth={false}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
+
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
@@ -63,7 +65,7 @@ describe('DataSourceMultiSelectable', () => {
   });
 
   it('should render normally with local cluster hidden', async () => {
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceMultiSelectable
@@ -72,9 +74,11 @@ describe('DataSourceMultiSelectable', () => {
           onSelectedDataSources={jest.fn()}
           hideLocalCluster={true}
           fullWidth={false}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
+
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
@@ -101,6 +105,7 @@ describe('DataSourceMultiSelectable', () => {
         onSelectedDataSources={jest.fn()}
         hideLocalCluster={true}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     await nextTick();
@@ -121,6 +126,7 @@ describe('DataSourceMultiSelectable', () => {
         onSelectedDataSources={callbackMock}
         hideLocalCluster={true}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     const button = await container.findByTestId('dataSourceFilterGroupButton');
@@ -136,7 +142,7 @@ describe('DataSourceMultiSelectable', () => {
       .mockResolvedValue('test1');
 
     const onSelectedDataSources = jest.fn();
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceMultiSelectable
@@ -146,21 +152,26 @@ describe('DataSourceMultiSelectable', () => {
           hideLocalCluster={true}
           fullWidth={false}
           uiSettings={uiSettings}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
     wrapper.update();
 
-    expect(getDefaultDataSourceIdMock).toHaveBeenCalledWith(uiSettings);
+    expect(getDefaultDataSourceIdMock).toHaveBeenCalledWith(uiSettings, UiSettingScope.GLOBAL);
 
     const instance = wrapper.instance();
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     expect(instance.state.defaultDataSource).toEqual('test1');
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     expect(instance.state.selectedOptions).toHaveLength(3);
     getDefaultDataSourceIdMock.mockRestore();
   });
 
   it('should return correct state when ui Settings provided and hide cluster is false', async () => {
-    spyOn(uiSettings, 'get').and.returnValue('test1');
+    const getDefaultDataSourceIdMock = jest
+      .spyOn(utils, 'getDefaultDataSourceId')
+      .mockResolvedValue('test1');
     component = shallow(
       <DataSourceMultiSelectable
         savedObjectsClient={client}
@@ -169,10 +180,11 @@ describe('DataSourceMultiSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     await component.instance().componentDidMount!();
-    expect(uiSettings.get).toBeCalledWith('defaultDataSource', null);
+    expect(getDefaultDataSourceIdMock).toHaveBeenCalledWith(uiSettings, UiSettingScope.GLOBAL);
     expect(component.state('defaultDataSource')).toEqual('test1');
     expect(component.state('selectedOptions')).toHaveLength(4);
   });
@@ -187,6 +199,7 @@ describe('DataSourceMultiSelectable', () => {
         hideLocalCluster={true}
         fullWidth={false}
         uiSettings={uiSettings}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     await wrapper.instance().componentDidMount!();
@@ -204,6 +217,7 @@ describe('DataSourceMultiSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     await wrapper.instance().componentDidMount!();
@@ -230,6 +244,7 @@ describe('DataSourceMultiSelectable', () => {
         onSelectedDataSources={jest.fn()}
         hideLocalCluster={true}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
       />
     );
 

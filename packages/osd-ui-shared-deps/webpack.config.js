@@ -181,6 +181,57 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           },
         },
       },
+      // Add special handling for ANTLR-generated JavaScript files in osd-monaco
+      {
+        test: /[\/\\]osd-antlr-grammar[\/\\]target[\/\\].*\.generated[\/\\].*\.js$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+            plugins: [
+              require.resolve('@babel/plugin-transform-class-static-block'),
+              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
+              require.resolve('@babel/plugin-transform-optional-chaining'),
+              require.resolve('@babel/plugin-transform-numeric-separator'),
+            ],
+          },
+        },
+      },
+      // Add special handling for antlr4ng ES module files
+      {
+        test: /[\/\\]node_modules[\/\\]antlr4ng[\/\\].*\.m?js$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+            plugins: [
+              require.resolve('@babel/plugin-transform-class-static-block'),
+              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
+              require.resolve('@babel/plugin-transform-optional-chaining'),
+              require.resolve('@babel/plugin-transform-numeric-separator'),
+            ],
+          },
+        },
+      },
+      // Add special handling for all osd-monaco target JavaScript files
+      {
+        test: /[\/\\]osd-monaco[\/\\]target[\/\\].*\.js$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
+            plugins: [
+              require.resolve('@babel/plugin-transform-class-static-block'),
+              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
+              require.resolve('@babel/plugin-transform-optional-chaining'),
+              require.resolve('@babel/plugin-transform-numeric-separator'),
+            ],
+          },
+        },
+      },
     ],
   },
 

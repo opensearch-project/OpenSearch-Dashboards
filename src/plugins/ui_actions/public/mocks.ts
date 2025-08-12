@@ -50,6 +50,7 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   const startContract: Start = {
     attachAction: jest.fn(),
     unregisterAction: jest.fn(),

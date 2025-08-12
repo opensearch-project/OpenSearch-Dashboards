@@ -21,13 +21,13 @@ const getQueryMock = jest.fn().mockReturnValue({
 const languageService = {
   getDefaultLanguage: () => ({ id: 'lucene', title: 'Lucene' }),
   getLanguages: () => [
-    { id: 'lucene', title: 'Lucene' },
-    { id: 'kuery', title: 'DQL' },
+    { id: 'lucene', title: 'Lucene', supportedAppNames: ['supportedApp', 'unsupportedApp'] },
+    { id: 'kuery', title: 'DQL', supportedAppNames: ['supportedApp'] },
   ],
   getLanguage: (languageId: string) => {
     const languages = [
-      { id: 'lucene', title: 'Lucene' },
-      { id: 'kuery', title: 'DQL' },
+      { id: 'lucene', title: 'Lucene', supportedAppNames: ['supportedApp', 'unsupportedApp'] },
+      { id: 'kuery', title: 'DQL', supportedAppNames: ['supportedApp'] },
     ];
     return languages.find((lang) => lang.id === languageId);
   },
@@ -108,6 +108,7 @@ const mockOnPrevious = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   setQueryService(mockServices.getQueryService());
   setIndexPatterns(mockServices.getIndexPatterns());
 });
@@ -118,6 +119,7 @@ describe('Configurator Component', () => {
       <IntlProvider locale="en" messages={messages}>
         {/* Wrap with IntlProvider */}
         <Configurator
+          // @ts-expect-error TS2740 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -137,6 +139,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -154,6 +157,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -172,6 +176,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -182,9 +187,11 @@ describe('Configurator Component', () => {
     );
     const languageSelect = screen.getByText('Lucene');
     expect(languageSelect).toBeInTheDocument();
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     expect(languageSelect.value).toBe('lucene');
     fireEvent.change(languageSelect, { target: { value: 'kuery' } });
     await waitFor(() => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(languageSelect.value).toBe('kuery');
     });
     expect(mockOnConfirm).not.toHaveBeenCalled();
@@ -194,6 +201,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -215,6 +223,7 @@ describe('Configurator Component', () => {
     const container = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -242,6 +251,7 @@ describe('Configurator Component', () => {
     const container = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -259,9 +269,11 @@ describe('Configurator Component', () => {
     });
     const indexedViewSelector = screen.getByText('view1');
     expect(indexedViewSelector).toBeInTheDocument();
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     expect(indexedViewSelector.value).toBe('view1');
     fireEvent.change(indexedViewSelector, { target: { value: 'view2' } });
     await waitFor(() => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(indexedViewSelector.value).toBe('view2');
     });
     expect(mockOnConfirm).not.toHaveBeenCalled();
@@ -271,6 +283,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -291,6 +304,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -305,10 +319,37 @@ describe('Configurator Component', () => {
     });
   });
 
+  it('should default selectedLanguage to the first language if current app does not support it', async () => {
+    mockServices.getQueryService().queryString.getQuery = jest.fn().mockReturnValue({
+      query: '',
+      language: 'kuery',
+      dataset: undefined,
+    });
+
+    render(
+      <IntlProvider locale="en" messages={messages}>
+        <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
+          services={mockServices}
+          baseDataset={mockBaseDataset}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          onPrevious={mockOnPrevious}
+          appId="unsupportedApp"
+        />
+      </IntlProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Lucene')).toBeInTheDocument();
+    });
+  });
+
   it('should display the supported language dropdown correctly', async () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
@@ -324,6 +365,32 @@ describe('Configurator Component', () => {
     });
   });
 
+  it('should display the supported language dropdown correctly when on supported app', async () => {
+    mockServices.getQueryService().queryString.getQuery = jest.fn().mockReturnValue({
+      query: '',
+      language: 'kuery',
+      dataset: undefined,
+    });
+
+    render(
+      <IntlProvider locale="en" messages={messages}>
+        <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
+          services={mockServices}
+          baseDataset={mockBaseDataset}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          onPrevious={mockOnPrevious}
+          appId="supportedApp"
+        />
+      </IntlProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Lucene')).toBeInTheDocument();
+    });
+  });
+
   it('should disable the confirm button when submit is disabled', async () => {
     const mockDataset = {
       ...mockBaseDataset,
@@ -333,6 +400,7 @@ describe('Configurator Component', () => {
     const { container } = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockDataset}
           onConfirm={mockOnConfirm}
@@ -368,6 +436,7 @@ describe('Configurator Component', () => {
     const { container } = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockDataset}
           onConfirm={mockOnConfirm}
@@ -404,6 +473,7 @@ describe('Configurator Component', () => {
     const { container } = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           services={mockServices}
           baseDataset={mockDataset}
           onConfirm={mockOnConfirm}

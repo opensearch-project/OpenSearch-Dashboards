@@ -273,4 +273,54 @@ describe('Header', () => {
     component.find(EuiHeaderSectionItemButton).first().simulate('click');
     expect(props.onIsLockedUpdate).toBeCalledWith(true);
   });
+
+  describe('banner plugin integration', () => {
+    it('renders banner container when banner is present', () => {
+      const props = {
+        ...mockProps(),
+        globalBanner$: new BehaviorSubject({
+          component: 'test-banner',
+        }),
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      // Check that the header has the correct class
+      expect(component.find('.headerGlobalNav--withBanner').exists()).toBeTruthy();
+    });
+
+    it('does not render banner container when banner is not present', () => {
+      const props = {
+        ...mockProps(),
+        // No banner content
+        globalBanner$: new BehaviorSubject(undefined),
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('.globalBanner').exists()).toBeFalsy();
+    });
+
+    it('does not render banner container when globalBanner$ is not provided', () => {
+      const props = {
+        ...mockProps(),
+        // No globalBanner$ property
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('.globalBanner').exists()).toBeFalsy();
+    });
+
+    it('renders banner container when useUpdatedHeader is true', () => {
+      const props = {
+        ...mockProps(),
+        useUpdatedHeader: true,
+        // Add a mock globalBanner$ observable to simulate a banner being present
+        globalBanner$: new BehaviorSubject({
+          component: 'test-banner',
+        }),
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('.globalBanner').exists()).toBeTruthy();
+    });
+  });
 });

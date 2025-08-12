@@ -104,7 +104,7 @@ interface BaseSavedObjectFinder {
     id: SimpleSavedObject['id'],
     type: SimpleSavedObject['type'],
     name: string,
-    savedObject: SimpleSavedObject
+    savedObject: SimpleSavedObject<FinderAttributes>
   ) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
@@ -167,7 +167,7 @@ class SavedObjectFinderUi extends React.Component<
     // If the current app id is explore, although explore app might not support
     // a language, it still supports all saved searches that are supported by
     // discover by redirecting to discover for backward compatibility.
-    if (currentAppId === 'explore') {
+    if (currentAppId.includes('explore/')) {
       return (
         (supportedInApp ||
           languageService?.getLanguage(languageId)?.supportedAppNames?.includes('discover')) ??
@@ -214,6 +214,7 @@ class SavedObjectFinderUi extends React.Component<
           return result;
         } else if (obj.type === 'search') {
           const sourceObject = JSON.parse(
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             obj.attributes?.kibanaSavedObjectMeta?.searchSourceJSON ?? null
           );
           const languageId = sourceObject?.query?.language;
@@ -226,12 +227,14 @@ class SavedObjectFinderUi extends React.Component<
       })
     );
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     resp.savedObjects = savedObjects.filter((savedObject) => {
       if (!savedObject) {
         return false;
       }
       const metaData = metaDataMap[savedObject.type];
       if (metaData.showSavedObject) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         return metaData.showSavedObject(savedObject);
       } else {
         return true;

@@ -1,0 +1,33 @@
+.exploreSidebarFacetValue {
+  &__actionButtons {
+    flex-direction: row;
+  }
+
+  // Show count by default, hide buttons
+  &__count {
+    display: block;
+  }
+
+  // On hover or focus-within, hide count
+  &:hover,
+  &:focus-within {
+    .exploreSidebarFacetValue__count {
+      display: none;
+    }
+  }
+
+  &__actionButton {
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast;
+
+    @include ouiBreakpoint("xs", "s", "m") {
+      opacity: 1;
+    }
+  }
+
+  &:hover &__actionButton,
+  &:focus &__actionButton,
+  .exploreSidebarField__actionButton:focus {
+    opacity: 1;
+  }
+}

@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const startDirs = [
   {
@@ -27,6 +28,18 @@ const startDirs = [
 
 const sidebarFile = './docs/_sidebar.md'; // Location to save the generated sidebar
 const excludeDirs = ['node_modules', '.git']; // Directories to exclude from the search
+
+const isGitTrackedMarkdownFile = (() => {
+  let tracked;
+  return (filePath) => {
+    if (tracked === undefined) {
+      tracked = new Set(
+        execSync(`git ls-files '*.md'`).toString().trim().split('\n').filter(Boolean)
+      );
+    }
+    return tracked.has(filePath);
+  };
+})();
 
 // Function to recursively find Markdown files and return a nested structure
 function findMarkdownFiles(dir, prefix = '', baseDir = '', recursively = true) {
@@ -61,7 +74,11 @@ function findMarkdownFiles(dir, prefix = '', baseDir = '', recursively = true) {
           results.push({ type: 'directory', name: entry.name, children: nestedResults });
         }
       }
-    } else if (entry.name.endsWith('.md') && entry.name !== '_sidebar.md') {
+    } else if (
+      entry.name.endsWith('.md') &&
+      entry.name !== '_sidebar.md' &&
+      isGitTrackedMarkdownFile(path.join(entry.path, entry.name))
+    ) {
       const docPath = `${prefix}${entry.name}`;
       // Adjust the path based on its base directory ('docs' or 'src')
       const linkPath =

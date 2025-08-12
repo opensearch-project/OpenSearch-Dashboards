@@ -94,6 +94,12 @@ const UiSettingScopeReadOptions = [
     autoCreateOrUpgradeIfMissing: false,
     ignore404Errors: true,
   },
+  {
+    scope: UiSettingScope.DASHBOARD_ADMIN,
+    ignore401Errors: false,
+    autoCreateOrUpgradeIfMissing: false,
+    ignore404Errors: true,
+  },
 ] as ReadOptions[];
 
 export class UiSettingsClient implements IUiSettingsClient {
@@ -107,6 +113,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly userLevelSettingsKeys: string[] = [];
   private readonly workspaceLevelSettingsKeys: string[] = [];
   private readonly globalLevelSettingsKeys: string[] = [];
+  private readonly adminUiSettingsKeys: string[] = [];
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
@@ -183,7 +190,7 @@ export class UiSettingsClient implements IUiSettingsClient {
       await this.write({ changes, scope });
     } else {
       // group changes into different scope
-      const [global, personal, workspace] = this.groupChanges(changes);
+      const [global, personal, workspace, admin] = this.groupChanges(changes);
       if (global && Object.keys(global).length > 0) {
         await this.write({ changes: global });
       }
@@ -192,6 +199,9 @@ export class UiSettingsClient implements IUiSettingsClient {
       }
       if (workspace && Object.keys(workspace).length > 0) {
         await this.write({ changes: workspace, scope: UiSettingScope.WORKSPACE });
+      }
+      if (admin && Object.keys(admin).length > 0) {
+        await this.write({ changes: admin, scope: UiSettingScope.DASHBOARD_ADMIN });
       }
     }
   }
@@ -301,6 +311,12 @@ export class UiSettingsClient implements IUiSettingsClient {
       ) {
         this.globalLevelSettingsKeys.push(key);
       }
+      if (
+        value.scope === UiSettingScope.DASHBOARD_ADMIN ||
+        (Array.isArray(value.scope) && value.scope.includes(UiSettingScope.DASHBOARD_ADMIN))
+      ) {
+        this.adminUiSettingsKeys.push(key);
+      }
     });
   }
 
@@ -310,24 +326,45 @@ export class UiSettingsClient implements IUiSettingsClient {
    * @returns [global, user, workspace]
    */
   private groupChanges(changes: Record<string, any>) {
-    const userChanges = {} as Record<string, any>;
-    const globalChanges = {} as Record<string, any>;
-    const workspaceChanges = {} as Record<string, any>;
+    const groupedChanges: Record<UiSettingScope, any> = {
+      [UiSettingScope.GLOBAL]: {},
+      [UiSettingScope.USER]: {},
+      [UiSettingScope.WORKSPACE]: {},
+      [UiSettingScope.DASHBOARD_ADMIN]: {},
+    };
 
     Object.entries(changes).forEach(([key, val]) => {
       if (Array.isArray(this.defaults[key]?.scope) && (this.defaults[key].scope?.length ?? 0) > 1) {
-        // if this setting has more than one scope, we should not update this setting without specifying scope
-        throw new Error(`Unable to update "${key}", because it has multiple scopes`);
+        const keyScopes = Array<UiSettingScope>().concat(this.defaults[key].scope || []);
+        // If this setting applies to multiple scopes including global
+        // categorize it as global to maintain backward compatibility.
+        if (keyScopes.includes(UiSettingScope.GLOBAL)) {
+          groupedChanges[UiSettingScope.GLOBAL][key] = val;
+        } else {
+          // else we use first scope as fallback
+          groupedChanges[keyScopes[0]][key] = val;
+        }
+
+        this.log.warn(
+          `Deprecation warning: The setting "${key}" has multiple scopes. Please specify a scope when updating it.`
+        );
       } else if (this.userLevelSettingsKeys.includes(key)) {
-        userChanges[key] = val;
+        groupedChanges[UiSettingScope.USER][key] = val;
+      } else if (this.adminUiSettingsKeys.includes(key)) {
+        groupedChanges[UiSettingScope.DASHBOARD_ADMIN][key] = val;
       } else if (this.workspaceLevelSettingsKeys.includes(key)) {
-        workspaceChanges[key] = val;
+        groupedChanges[UiSettingScope.WORKSPACE][key] = val;
       } else {
-        globalChanges[key] = val;
+        groupedChanges[UiSettingScope.GLOBAL][key] = val;
       }
     });
 
-    return [globalChanges, userChanges, workspaceChanges];
+    return [
+      groupedChanges[UiSettingScope.GLOBAL],
+      groupedChanges[UiSettingScope.USER],
+      groupedChanges[UiSettingScope.WORKSPACE],
+      groupedChanges[UiSettingScope.DASHBOARD_ADMIN],
+    ];
   }
 
   private async write({

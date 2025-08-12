@@ -7,7 +7,6 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryResult } from './query_result';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MessageChannel } from 'node:worker_threads';
 
 enum ResultStatus {
   UNINITIALIZED = 'uninitialized',

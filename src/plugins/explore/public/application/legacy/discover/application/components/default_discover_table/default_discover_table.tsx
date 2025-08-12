@@ -14,7 +14,7 @@ import { TableRow } from './table_row';
 import { getServices, IndexPattern } from '../../../opensearch_dashboards_services';
 import { Pagination } from './pagination';
 import { getLegacyDisplayedColumns } from './helper';
-import { SortDirection, SortOrder } from '../../../saved_searches/types';
+import { SortDirection, SortOrder } from '../../../../../../types/saved_explore_types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
@@ -195,6 +195,7 @@ const DefaultDiscoverTableUI = ({
   const indexOfRenderedData = rows?.[0]?._index;
   const timeFromFirstRow =
     typeof indexPattern?.timeFieldName === 'string' &&
+    // @ts-expect-error This is from legacy code, which appears to be working
     rows?.[0]?._source?.[indexPattern.timeFieldName];
 
   useEffect(() => {

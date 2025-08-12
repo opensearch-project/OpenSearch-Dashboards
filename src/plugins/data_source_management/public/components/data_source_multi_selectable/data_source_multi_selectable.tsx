@@ -8,6 +8,7 @@ import {
   ApplicationStart,
   SavedObjectsClientContract,
   ToastsStart,
+  UiSettingScope,
 } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceFilterGroup, SelectedDataSourceOption } from './data_source_filter_group';
@@ -29,6 +30,7 @@ export interface DataSourceMultiSeletableProps {
   onSelectedDataSources: (dataSources: SelectedDataSourceOption[]) => void;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  scope: UiSettingScope;
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
 }
@@ -77,8 +79,8 @@ export class DataSourceMultiSelectable extends React.Component<
   async componentDidMount() {
     this._isMounted = true;
     try {
-      // for data source selectable, get default data source from cache
-      const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
+      const defaultDataSource =
+        (await getDefaultDataSourceId(this.props.uiSettings, this.props.scope)) ?? null;
       let selectedOptions: SelectedDataSourceOption[] = [];
       const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
         'id',
@@ -113,6 +115,7 @@ export class DataSourceMultiSelectable extends React.Component<
           changeState: this.onEmptyState.bind(this, !!fetchedDataSources?.length),
           notifications: this.props.notifications,
           application: this.props.application,
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           callback: this.onSelectedDataSources.bind(this),
           incompatibleDataSourcesExist: !!fetchedDataSources?.length,
         });
@@ -130,6 +133,7 @@ export class DataSourceMultiSelectable extends React.Component<
       handleDataSourceFetchError(
         this.onError.bind(this),
         this.props.notifications,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         this.onSelectedDataSources.bind(this)
       );
     }
@@ -153,6 +157,7 @@ export class DataSourceMultiSelectable extends React.Component<
 
   render() {
     if (this.state.showEmptyState) {
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       return <NoDataSource application={this.props.application} />;
     }
     if (this.state.showError) {

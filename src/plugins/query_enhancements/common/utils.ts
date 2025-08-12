@@ -28,7 +28,9 @@ export const formatDate = (dateString: string) => {
     ':' +
     ('0' + date.getMinutes()).slice(-2) +
     ':' +
-    ('0' + date.getSeconds()).slice(-2)
+    ('0' + date.getSeconds()).slice(-2) +
+    '.' +
+    ('00' + date.getMilliseconds()).slice(-3)
   );
 };
 
@@ -142,7 +144,9 @@ export const buildQueryStatusConfig = (response: any) => {
  * Test if a PPL query is using search command
  * https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.rst
  */
-export const isPPLSearchQuery = (query: Query) => {
+export const isPPLSearchQuery = (
+  query: Query
+): query is Omit<Query, 'query'> & { query: string } => {
   if (query.language !== 'PPL') {
     return false;
   }

@@ -19,6 +19,12 @@ module.exports = defineConfig({
   },
   viewportWidth: 1920,
   viewportHeight: 1080,
+  video: true,
+  videoCompression: 15,
+  trashAssetsBeforeRuns: false,
+  videosFolder: 'cypress/videos',
+  screenshotsFolder: 'cypress/screenshots',
+
   env: {
     ENGINE: {
       name: 'default',
@@ -84,12 +90,6 @@ function setupNodeEvents(
       webpackOptions,
     })
   );
-  // TODO: Define the custom task to read clipboard
-  /* on('task', {
-    readClipboard() {
-      return paste(); // Return the clipboard content
-    },
-  });*/
 
   return config;
 }

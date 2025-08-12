@@ -4,133 +4,102 @@
  */
 
 import {
-  DatasetTypes,
   DATASOURCE_NAME,
-  INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
-  INDEX_WITH_TIME_2,
-  QueryLanguages,
   START_TIME,
+  END_TIME,
 } from '../../../../../../utils/constants';
-import {
-  getRandomizedWorkspaceName,
-  setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
-import {
-  postRequestSaveSearch,
-  generateSavedTestConfiguration,
-  getExpectedHitCount,
-  loadSavedSearchFromDashboards,
-  navigateToDashboardAndOpenSavedSearchPanel,
-} from '../../../../../../utils/apps/query_enhancements/saved';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
 export const runSavedSearchTests = () => {
   describe('saved search in dashboards', () => {
-    // TODO: Currently we cannot convert this into a "before" and "after" due to us grabbing several aliases that are required by postRequestSaveSearch()
-    beforeEach(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
+    const SAVED_SEARCH_NAME = `TEST_${Date.now()}`;
+    let totalHit = 0;
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
+        indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspaceName,
+        page: 'explore/logs',
+        isEnhancement: true,
+      });
+
+      // Create a saved search
+      cy.explore.clearQueryEditor();
+      cy.wait(10000);
+
+      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
+      const query = `source=${datasetName}`;
+      cy.explore.setQueryEditor(query);
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
+
+      // Run the query
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
+      cy.osd.waitForLoader(true);
+      cy.wait(1000);
+      cy.getElementByTestId('discoverTable').should('be.visible');
+      cy.getElementByTestId('discoverQueryHits')
+        .invoke('text')
+        .then((text) => {
+          totalHit = parseInt(text.replaceAll(',', ''));
+        });
+
+      cy.getElementByTestId('discoverSaveButton').click();
+      cy.getElementByTestId('savedObjectTitle')
+        .should('be.visible')
+        .type(SAVED_SEARCH_NAME, { delay: 40, force: true });
+      cy.getElementByTestId('confirmSaveSavedObjectButton').click();
+      cy.getElementByTestId('savedExploreSuccess').should('be.visible');
     });
 
-    afterEach(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    // TODO currently saved search isn't working in explore, enable this when it is fixed
-    it.skip('Load a saved search', () => {
-      const config = generateSavedTestConfiguration(
-        INDEX_PATTERN_WITH_TIME,
-        DatasetTypes.INDEX_PATTERN.name,
-        QueryLanguages.DQL
-      );
-      // using a POST request to create a saved search to load
-      postRequestSaveSearch(config);
+    it('Load a saved search to dashboard correctly', () => {
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspaceName,
+        page: 'dashboards',
+        isEnhancement: true,
+      });
+      // Create a new dashboard
+      cy.getElementByTestId('newItemButton').click();
 
-      loadSavedSearchFromDashboards(config, workspaceName);
+      // Find the saved search
+      cy.getElementByTestId('dashboardAddPanelButton').click();
+      cy.getElementByTestId('dashboardAddPanelFromLibrary').click();
+      cy.getElementByTestId('savedObjectFinderSearchInput').type(SAVED_SEARCH_NAME, {
+        delay: 40,
+        force: true,
+      });
+
+      // Add the saved search to the dashboard
+      cy.getElementByTestId('savedObjectFinderItemList')
+        .find('li')
+        .first()
+        .should('contain.text', SAVED_SEARCH_NAME)
+        .click();
+      cy.get('body').click(0, 0);
 
       // verify that there are results
       cy.getElementByTestId('docTableField').should('be.visible');
+      cy.getElementByTestId('osdDocTablePagination').should('contain.text', `of ${totalHit}`);
 
-      const expectedHitCount = getExpectedHitCount(config.datasetType, config.language);
-      cy.getElementByTestId('osdDocTablePagination').contains(new RegExp(`of ${expectedHitCount}`));
-      // verify that the proper fields are loaded as well as sorting is working as expected
-      config.sampleTableData.forEach(([index, value]) => {
-        cy.getElementByTestId('osdDocTableCellDataField').eq(index).contains(value);
-      });
-    });
-
-    it.skip('Changing the time range updates the saved search elements in dashboards', () => {
-      const config = generateSavedTestConfiguration(
-        INDEX_PATTERN_WITH_TIME,
-        DatasetTypes.INDEX_PATTERN.name,
-        QueryLanguages.DQL
-      );
-      // using a POST request to create a saved search to load
-      postRequestSaveSearch(config);
-
-      loadSavedSearchFromDashboards(config, workspaceName);
-
-      // verify that there are results
-      const expectedHitCount = getExpectedHitCount(config.datasetType, config.language);
-      cy.getElementByTestId('osdDocTablePagination').contains(new RegExp(`of ${expectedHitCount}`));
-
-      // set a date where there should different number of results
-      setDatePickerDatesAndSearchIfRelevant(
-        config.language,
-        START_TIME,
-        'Oct 1, 2022 @ 00:00:00.000'
-      );
-      cy.getElementByTestId('osdDocTablePagination').contains(/of 11/);
-    });
-
-    it.skip('Show valid saved searches', () => {
-      const dqlConfig = generateSavedTestConfiguration(
-        INDEX_PATTERN_WITH_TIME,
-        DatasetTypes.INDEX_PATTERN.name,
-        QueryLanguages.DQL
-      );
-      const luceneConfig = generateSavedTestConfiguration(
-        INDEX_PATTERN_WITH_TIME,
-        DatasetTypes.INDEX_PATTERN.name,
-        QueryLanguages.Lucene
-      );
-      const sqlConfig = generateSavedTestConfiguration(
-        INDEX_PATTERN_WITH_TIME,
-        DatasetTypes.INDEX_PATTERN.name,
-        QueryLanguages.SQL
-      );
-      const pplConfig = generateSavedTestConfiguration(
-        INDEX_PATTERN_WITH_TIME,
-        DatasetTypes.INDEX_PATTERN.name,
-        QueryLanguages.PPL
-      );
-      // using a POST request to create a saved search to load
-      postRequestSaveSearch(dqlConfig);
-      postRequestSaveSearch(luceneConfig);
-      postRequestSaveSearch(sqlConfig);
-      postRequestSaveSearch(pplConfig);
-
-      navigateToDashboardAndOpenSavedSearchPanel(workspaceName);
-      cy.getElementByTestId(`savedObjectTitle${dqlConfig.saveName}`).should('exist');
-      cy.getElementByTestId(`savedObjectTitle${luceneConfig.saveName}`).should('exist');
-      cy.getElementByTestId(`savedObjectTitle${sqlConfig.saveName}`).should('not.exist');
-      cy.getElementByTestId(`savedObjectTitle${pplConfig.saveName}`).should('not.exist');
+      // Changing the time range should update the number of results
+      cy.osd.setTopNavDate(START_TIME, 'Oct 1, 2022 @ 00:00:00.000', false);
+      cy.getElementByTestId('querySubmitButton').click();
+      cy.osd.waitForLoader(true);
+      cy.getElementByTestId('osdDocTablePagination').should('not.contain.text', `of ${totalHit}`);
     });
   });
 };

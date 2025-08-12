@@ -11,14 +11,9 @@ import {
 import {
   getRandomizedWorkspaceName,
   generateBaseConfiguration,
-} from '../../../../../../utils/apps/query_enhancements/shared';
-import {
-  generateQueryTestConfigurations,
-  LanguageConfigs,
-} from '../../../../../../utils/apps/explore/queries';
+  generateAllTestConfigurations,
+} from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -38,7 +33,7 @@ export const runQueryTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -47,143 +42,49 @@ export const runQueryTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    generateQueryTestConfigurations(generateBaseConfiguration, {
-      languageConfig: LanguageConfigs.SQL_PPL,
-    }).forEach((config) => {
-      describe(`${config.testName}`, () => {
-        it('should handle query editor expand/collapse state correctly', () => {
-          // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
-
-          // First check the default expanded state
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
-          // Verify expanded state
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('not.exist');
-
-          // Switch language and verify expanded state persists
-          if (config.language === QueryLanguages.SQL.name) {
-            cy.setQueryLanguage('PPL');
-          } else {
-            cy.setQueryLanguage('OpenSearch SQL');
-          }
-          // Verify expanded state persists
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('not.exist');
-
-          // Switch back to the original language
-          if (config.language === QueryLanguages.SQL.name) {
-            cy.setQueryLanguage('OpenSearch SQL');
-          } else {
-            cy.setQueryLanguage('PPL');
-          }
-
-          // Collapse and verify
-          cy.getElementByTestId('osdQueryEditorLanguageToggle').click(); // collapse
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('not.exist');
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
-
-          // Switch language and verify collapse state persists
-          if (config.language === QueryLanguages.SQL.name) {
-            cy.setQueryLanguage('PPL');
-          } else {
-            cy.setQueryLanguage('OpenSearch SQL');
-          }
-          cy.getElementByTestId('osdQueryEditor__multiLine').should('not.exist');
-          cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
-        });
-      });
-    });
-
-    generateAllExploreTestConfigurations(generateBaseConfiguration, {
+    generateAllTestConfigurations(generateBaseConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
-        it('should show correct documentation link in language reference popover', () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
-          // First get the version from help menu
-          cy.get('button[aria-label="Help menu"]').click();
-          cy.get('.chrHeaderHelpMenu__version')
-            .invoke('text')
-            .then((versionText) => {
-              // Close help menu
-              cy.get('button[aria-label="Help menu"]').click();
+        it('should show correct documentation link pattern in language reference popover', () => {
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
-              // Extract version number and determine docs version
-              const version = versionText.replace('v ', '').trim();
-              let docsVersion;
+          // Open the language reference popover to get the actual URL
+          cy.get('body').then(($body) => {
+            const isPopoverOpen = $body.find('.euiPopover__panel-isOpen').length > 0;
 
-              // FIXME: using version to decide docsVersion is fragile, each time the version bumped, the test needs to updated accordingly
-              if (version === '3.1.0') {
-                docsVersion = 'latest';
-              } else {
-                const [major, minor, patch] = version.split('.');
-                // Validate version numbers
-                if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
-                  throw new Error(`Invalid version format: ${version}`);
-                }
-                if (major === '0') {
-                  throw new Error(`Major version cannot be 0: ${version}`);
-                }
-                if (minor === '0') {
-                  throw new Error(`Minor version cannot be 0: ${version}`);
-                }
-                // Include patch version if it's not 0
-                docsVersion = patch === '0' ? `${major}.${minor}` : `${major}.${minor}.${patch}`;
-              }
+            // If popover is already open, close it first
+            if (isPopoverOpen) {
+              cy.getElementByTestId('exploreLanguageReference').click();
+              // Verify it's closed
+              cy.get('.euiPopover__panel-isOpen').should('not.exist');
+            }
 
-              // Now proceed with language reference check
-              cy.get('body').then(($body) => {
-                const isPopoverOpen = $body.find('.euiPopover__panel-isOpen').length > 0;
+            // Now click to open
+            cy.getElementByTestId('exploreLanguageReference').click();
 
-                // If popover is already open, close it first
-                if (isPopoverOpen) {
-                  cy.getElementByTestId('languageReferenceButton').click();
-                  // Verify it's closed
-                  cy.get('.euiPopover__panel-isOpen').should('not.exist');
-                }
+            // Verify popover appears with title
+            cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
 
-                // Now click to open
-                cy.getElementByTestId('languageReferenceButton').click();
+            cy.get('.euiPopover__panel-isOpen')
+              .find('a.euiLink.euiLink--primary')
+              .should('have.attr', 'href')
+              .then((href) => {
+                // Verify the URL follows the expected pattern for PPL syntax documentation
+                expect(href).to.match(
+                  /^https:\/\/opensearch\.org\/docs\/(latest|\d+\.\d+)\/search-plugins\/sql\/ppl\/syntax\/$/
+                );
 
-                // Verify popover appears with title
-                cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
-
-                // Get current language first
-                cy.getElementByTestId('queryEditorLanguageSelector')
-                  .invoke('text')
-                  .then((language) => {
-                    // Get the link with matching text content and verify href
-                    cy.get('a.euiLink.euiLink--primary')
-                      .should('have.attr', 'href')
-                      .then((href) => {
-                        let expectedHref;
-
-                        switch (language.trim()) {
-                          case 'DQL':
-                            expectedHref = `https://opensearch.org/docs/${docsVersion}/dashboards/dql`;
-                            break;
-                          case 'Lucene':
-                            expectedHref = `https://opensearch.org/docs/${docsVersion}/query-dsl/full-text/query-string/`;
-                            break;
-                          case 'OpenSearch SQL':
-                            expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/sql/basic/`;
-                            break;
-                          case 'PPL':
-                            expectedHref = `https://opensearch.org/docs/${docsVersion}/search-plugins/sql/ppl/syntax/`;
-                            break;
-                          default:
-                            throw new Error(`Unexpected language: ${language}`);
-                        }
-
-                        expect(href).to.equal(expectedHref);
-                      });
-                  });
+                // Verify the link can be opened (status 200, 301, or 302)
+                cy.request({
+                  url: href,
+                  failOnStatusCode: false,
+                }).then((response) => {
+                  expect(response.status).to.be.oneOf([200]);
+                });
               });
-            });
+          });
         });
       });
     });

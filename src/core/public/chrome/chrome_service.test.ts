@@ -222,6 +222,13 @@ describe('start', () => {
       // Don't capture the snapshot because it's 600+ lines long.
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
     });
+
+    it('renders the Header component correctly', async () => {
+      const { chrome } = await start();
+      const headerComponent = shallow(React.createElement(() => chrome.getHeaderComponent()));
+      // Verify that the Header component renders without errors
+      expect(headerComponent).toBeDefined();
+    });
   });
 
   describe('visibility', () => {

@@ -63,6 +63,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       if (next.bucketInterval && next.bucketInterval !== fetchState.bucketInterval)
         shouldUpdateState = true;
       if (next.chartData && next.chartData !== fetchState.chartData) shouldUpdateState = true;
+      if (next.fieldCounts && next.fieldCounts !== fetchState.fieldCounts) shouldUpdateState = true;
       // we still want to show rows from the previous query while current query is loading or the current query results in error
       if (
         next.status !== ResultStatus.LOADING &&
@@ -156,7 +157,11 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
               <>
                 <MemoizedDiscoverChartContainer {...fetchState} />
                 {discoverResultsActionBar}
-                <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+                <MemoizedDiscoverTable
+                  rows={rows}
+                  scrollToTop={scrollToTop}
+                  fetchState={fetchState}
+                />
               </>
             ) : (
               <EuiPanel
@@ -167,7 +172,11 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
               >
                 <MemoizedDiscoverChartContainer {...fetchState} />
                 {discoverResultsActionBar}
-                <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+                <MemoizedDiscoverTable
+                  rows={rows}
+                  scrollToTop={scrollToTop}
+                  fetchState={fetchState}
+                />
               </EuiPanel>
             ))}
         </>

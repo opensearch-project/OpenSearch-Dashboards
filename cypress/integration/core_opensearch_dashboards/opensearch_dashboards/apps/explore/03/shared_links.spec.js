@@ -10,18 +10,16 @@ import {
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
+  generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   setHistogramIntervalIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
-import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
-import { selectFieldFromSidebar } from '../../../../../../utils/apps/query_enhancements/sidebar';
+} from '../../../../../../utils/apps/explore/shared';
+import { selectFieldFromSidebar } from '../../../../../../utils/apps/explore/sidebar';
 import {
   verifyShareUrl,
   openShareMenuWithRetry,
-} from '../../../../../../utils/apps/query_enhancements/shared_links';
-import { setSort } from '../../../../../../utils/apps/query_enhancements/table';
+} from '../../../../../../utils/apps/explore/shared_links';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { generateAllExploreTestConfigurations } from '../../../../../../utils/apps/explore/shared';
 
 const workspaceName = getRandomizedWorkspaceName();
 
@@ -31,7 +29,7 @@ const generateShareUrlsTestConfiguration = (dataset, datasetType, language) => {
     datasetType,
     language: language.name,
     apiLanguage: language.apiName,
-    hasDocLinks: [QueryLanguages.DQL.name, QueryLanguages.Lucene.name].includes(language.name),
+    hasDocLinks: false,
     testName: `${language.name}-${datasetType}`,
     saveName: `${language.name}-${datasetType}`,
   };
@@ -42,15 +40,6 @@ const generateShareUrlsTestConfiguration = (dataset, datasetType, language) => {
 };
 
 const getQueryString = (config) => {
-  if (config.language === QueryLanguages.DQL.name) {
-    return 'bytes_transferred > 9950';
-  }
-  if (config.language === QueryLanguages.Lucene.name) {
-    return 'bytes_transferred: {9950 TO *}';
-  }
-  if (config.language === QueryLanguages.SQL.name) {
-    return `SELECT * FROM ${config.dataset} WHERE bytes_transferred > 9950`;
-  }
   return `source = ${config.dataset} | where bytes_transferred > 9950`;
 };
 
@@ -77,7 +66,7 @@ export const runSharedLinksTests = () => {
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'explore',
+        page: 'explore/logs',
         isEnhancement: true,
       });
     });
@@ -86,84 +75,30 @@ export const runSharedLinksTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
-    generateAllExploreTestConfigurations(generateShareUrlsTestConfiguration, {
+    generateAllTestConfigurations(generateShareUrlsTestConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         const queryString = getQueryString(config);
 
-        it(`should handle shared document links correctly for ${config.testName}`, () => {
-          // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
-          setDatePickerDatesAndSearchIfRelevant(config.language);
-
-          if (config.hasDocLinks) {
-            // Test surrounding documents link
-            cy.get('tbody tr')
-              .first()
-              .find('[data-test-subj="docTableExpandToggleColumn"] button')
-              .click();
-
-            cy.getElementByTestId('docTableRowAction-0')
-              .should('exist')
-              .and('contain.text', 'View surrounding documents')
-              .invoke('removeAttr', 'target')
-              .click();
-            cy.url().should('include', '/context/');
-            cy.go('back');
-
-            // Test single document link
-            cy.get('tbody tr')
-              .first()
-              .find('[data-test-subj="docTableExpandToggleColumn"] button')
-              .click();
-
-            cy.getElementByTestId('docTableRowAction-1')
-              .should('exist')
-              .and('contain.text', 'View single document')
-              .invoke('removeAttr', 'target')
-              .click();
-            cy.url().should('include', '/doc/');
-            cy.go('back');
-          } else {
-            // Verify no document links for SQL/PPL
-            cy.get('tbody tr')
-              .first()
-              .find('[data-test-subj="docTableExpandToggleColumn"] button')
-              .click();
-            cy.getElementByTestId('docTableRowAction-0').should('not.exist');
-            cy.getElementByTestId('docTableRowAction-1').should('not.exist');
-          }
-        });
-
         it(`should persist state in shared links for ${config.testName}`, () => {
           // Set dataset and language
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
+          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
           // Set interval
           setHistogramIntervalIfRelevant(config.language, testData.interval);
 
           // scroll to top
-          cy.getElementByTestId('dscCanvas').scrollTo('top', { ensureScrollable: false });
+          cy.getElementByTestId('discoverTable').scrollTo('top', { ensureScrollable: false });
 
           // Set query
-          cy.setQueryEditor(queryString, { parseSpecialCharSequences: false });
-
-          // Set filter for DQL/Lucene
-          if (config.hasDocLinks) {
-            cy.submitFilterFromDropDown(testData.filter[0], 'is', testData.filter[1], true);
-          }
+          cy.explore.setQueryEditor(queryString, { parseSpecialCharSequences: false });
 
           // Add fields from side panel
-          testData.fields.forEach((field, i) => {
+          testData.fields.forEach((field) => {
             selectFieldFromSidebar(field);
-            if (config.hasDocLinks) {
-              setSort(field, testData.sort[i]);
-            }
           });
 
           // Test snapshot url
@@ -199,18 +134,18 @@ export const runSharedLinksTests = () => {
           openShareMenuWithRetry();
           cy.getElementByTestId('exportAsSavedObject').find('input').should('not.be.disabled');
           cy.getElementByTestId('exportAsSavedObject').click();
-          // Get saved search ID
+          // Get saved explore ID
           cy.url().then((url) => {
             const viewMatch = url.match(/\/view\/([^?#]+)/);
-            const savedSearchId = viewMatch ? viewMatch[1] : '';
+            const savedExploreId = viewMatch ? viewMatch[1] : '';
 
             // Verify ID exists and is properly formatted
-            expect(savedSearchId).to.not.be.empty;
+            expect(savedExploreId).to.not.be.empty;
 
             cy.getElementByTestId('copyShareUrlButton')
               .invoke('attr', 'data-share-url')
               .then((shareUrl) => {
-                expect(shareUrl).to.include(`/view/${savedSearchId}`);
+                expect(shareUrl).to.include(`/view/${savedExploreId}`);
               });
           });
         });

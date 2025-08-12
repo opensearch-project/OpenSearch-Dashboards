@@ -38,6 +38,7 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 const config = new Config(
   true,
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   {
     darwin: false,
     linux: false,

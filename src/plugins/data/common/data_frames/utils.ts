@@ -36,6 +36,7 @@ export const convertResult = ({
   fields?: SearchSourceFields;
   options?: ISearchOptions;
 }): SearchResponse<any> => {
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const body = response.body;
   if (body.hasOwnProperty('error')) {
     return response;
@@ -139,7 +140,13 @@ export const convertResult = ({
         const buckets = value as Array<{ key: string; value: number }>;
         searchResponse.aggregations[id] = {
           buckets: buckets.map((bucket) => {
-            const timestamp = new Date(bucket.key).getTime();
+            // checks if bucket.key already has timezone information (Z, +, or - after position 10 for timezone offset), and if not, appends 'Z' to treat it as UTC before converting to timestamp
+            const timestamp =
+              bucket.key.includes('Z') ||
+              bucket.key.includes('+') ||
+              (bucket.key.includes('-') && bucket.key.lastIndexOf('-') > 10)
+                ? new Date(bucket.key).getTime()
+                : new Date(bucket.key + 'Z').getTime();
             searchResponse.hits.total += bucket.value;
             return {
               key_as_string: bucket.key,

@@ -101,6 +101,7 @@ describe('NewVisModal', () => {
 
   it('should render as expected', () => {
     const wrapper = mountWithIntl(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <NewVisModal
         isOpen={true}
         onClose={() => null}
@@ -116,6 +117,7 @@ describe('NewVisModal', () => {
 
   it('should show a button for regular visualizations', () => {
     const wrapper = mountWithIntl(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <NewVisModal
         isOpen={true}
         onClose={() => null}
@@ -131,6 +133,7 @@ describe('NewVisModal', () => {
 
   it('should sort promoted visualizations first', () => {
     const wrapper = mountWithIntl(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <NewVisModal
         isOpen={true}
         onClose={() => null}
@@ -156,6 +159,7 @@ describe('NewVisModal', () => {
   describe('open editor', () => {
     it('should open the editor for visualizations without search', () => {
       const wrapper = mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <NewVisModal
           isOpen={true}
           onClose={() => null}
@@ -173,6 +177,7 @@ describe('NewVisModal', () => {
 
     it('passes through editor params to the editor URL', () => {
       const wrapper = mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <NewVisModal
           isOpen={true}
           onClose={() => null}
@@ -196,6 +201,7 @@ describe('NewVisModal', () => {
       const navigateToApp = jest.fn();
       const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();
       const wrapper = mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <NewVisModal
           isOpen={true}
           onClose={onClose}
@@ -222,6 +228,7 @@ describe('NewVisModal', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
       const wrapper = mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <NewVisModal
           isOpen={true}
           onClose={onClose}
@@ -243,6 +250,7 @@ describe('NewVisModal', () => {
   describe('filter for visualization types', () => {
     it('should render as expected', () => {
       const wrapper = mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <NewVisModal
           isOpen={true}
           onClose={() => null}
@@ -263,6 +271,7 @@ describe('NewVisModal', () => {
     it('should not show experimental visualizations if visualize:enableLabs is false', () => {
       settingsGet.mockReturnValue(false);
       const wrapper = mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <NewVisModal
           isOpen={true}
           onClose={() => null}
@@ -279,6 +288,7 @@ describe('NewVisModal', () => {
     it('should show experimental visualizations if visualize:enableLabs is true', () => {
       settingsGet.mockReturnValue(true);
       const wrapper = mountWithIntl(
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         <NewVisModal
           isOpen={true}
           onClose={() => null}

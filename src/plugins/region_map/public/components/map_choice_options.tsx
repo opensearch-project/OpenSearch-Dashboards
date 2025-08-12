@@ -69,10 +69,12 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   );
 
   const selectDefaultVectorMap = () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     setValue('layerChosenByUser', DEFAULT_MAP_CHOICE);
   };
 
   const selectCustomVectorMap = () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     setValue('layerChosenByUser', CUSTOM_MAP_CHOICE);
   };
 
@@ -160,6 +162,7 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
             label="Default vector map"
             name="defaultVectorMap"
             value="default"
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             checked={DEFAULT_MAP_CHOICE === stateParams.layerChosenByUser}
             onChange={selectDefaultVectorMap}
           />
@@ -171,6 +174,7 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
             label="Custom vector map"
             name="customVectorMap"
             value="custom"
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             checked={CUSTOM_MAP_CHOICE === stateParams.layerChosenByUser}
             onChange={selectCustomVectorMap}
           />
@@ -178,6 +182,7 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
+      {/* @ts-expect-error TS2339 TODO(ts-error): fixme */}
       {DEFAULT_MAP_CHOICE === stateParams.layerChosenByUser ? (
         <EuiFlexGroup id="defaultMapSelection" direction="column">
           <EuiFlexItem grow={false}>

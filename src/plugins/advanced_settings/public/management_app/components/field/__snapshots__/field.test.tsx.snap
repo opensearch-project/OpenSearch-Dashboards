@@ -134,6 +134,89 @@ exports[`Field for array setting should render as read only with help text if ov
 </EuiDescribedFormGroup>
 `;
 
+exports[`Field for array setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Array test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    default_value
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="array:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Array test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="array:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      aria-label="array test setting"
+      data-test-subj="advancedSetting-editField-array:test:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      value="user, value"
+    />
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
 exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
   className="mgtAdvancedSettings__field"
@@ -538,6 +621,95 @@ exports[`Field for boolean setting should render as read only with help text if 
         <FormattedMessage
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="boolean:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedSwitch
+      aria-label="boolean test setting"
+      checked={false}
+      data-test-subj="advancedSetting-editField-boolean:test:setting"
+      disabled={true}
+      label={
+        <FormattedMessage
+          defaultMessage="Off"
+          id="advancedSettings.field.offLabel"
+          values={Object {}}
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for boolean setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Boolean test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    true
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="boolean:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Boolean test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
       </EuiText>
@@ -984,6 +1156,87 @@ exports[`Field for image setting should render as read only with help text if ov
         <FormattedMessage
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="image:test:setting"
+    labelType="label"
+  >
+    <EuiImage
+      allowFullScreen={true}
+      alt="image:test:setting"
+      aria-label="image test setting"
+      url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+    />
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for image setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Image test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="image:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Image test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
       </EuiText>
@@ -1462,6 +1715,112 @@ exports[`Field for json setting should render as read only with help text if ove
         <FormattedMessage
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="json:test:setting"
+    labelType="label"
+  >
+    <div
+      data-test-subj="advancedSetting-editField-json:test:setting"
+    >
+      <EuiCodeEditor
+        aria-label="json test setting"
+        editorProps={
+          Object {
+            "$blockScrolling": Infinity,
+          }
+        }
+        height="auto"
+        isReadOnly={true}
+        maxLines={30}
+        minLines={6}
+        mode="json"
+        onChange={[Function]}
+        setOptions={
+          Object {
+            "showLineNumbers": false,
+            "tabSize": 2,
+          }
+        }
+        showGutter={false}
+        theme="textmate"
+        value="{\\"hello\\": \\"world\\"}"
+        width="100%"
+      />
+    </div>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for json setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Json test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueTypeJsonText"
+              values={
+                Object {
+                  "value": <EuiCodeBlock
+                    language="json"
+                    paddingSize="s"
+                  >
+                    {}
+                  </EuiCodeBlock>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="json:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Json test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
       </EuiText>
@@ -2083,6 +2442,109 @@ exports[`Field for markdown setting should render as read only with help text if
 </EuiDescribedFormGroup>
 `;
 
+exports[`Field for markdown setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Markdown test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="markdown:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Markdown test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="markdown:test:setting"
+    labelType="label"
+  >
+    <div
+      data-test-subj="advancedSetting-editField-markdown:test:setting"
+    >
+      <EuiCodeEditor
+        aria-label="markdown test setting"
+        editorProps={
+          Object {
+            "$blockScrolling": Infinity,
+          }
+        }
+        height="auto"
+        isReadOnly={true}
+        maxLines={30}
+        minLines={6}
+        mode="markdown"
+        onChange={[Function]}
+        setOptions={
+          Object {
+            "showLineNumbers": false,
+            "tabSize": 2,
+          }
+        }
+        showGutter={false}
+        theme="textmate"
+        value="**bold**"
+        width="100%"
+      />
+    </div>
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
 exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
   className="mgtAdvancedSettings__field"
@@ -2576,6 +3038,89 @@ exports[`Field for number setting should render as read only with help text if o
 </EuiDescribedFormGroup>
 `;
 
+exports[`Field for number setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Number test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    5
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="number:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Number test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="number:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedFieldNumber
+      aria-label="number test setting"
+      data-test-subj="advancedSetting-editField-number:test:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      value={10}
+    />
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
 exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
   className="mgtAdvancedSettings__field"
@@ -2986,6 +3531,105 @@ exports[`Field for select setting should render as read only with help text if o
         <FormattedMessage
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="select:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      aria-label="select test setting"
+      data-test-subj="advancedSetting-editField-select:test:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Apple",
+            "value": "apple",
+          },
+          Object {
+            "text": "Orange",
+            "value": "orange",
+          },
+          Object {
+            "text": "banana",
+            "value": "banana",
+          },
+        ]
+      }
+      value="banana"
+    />
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for select setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Select test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    Orange
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="select:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Select test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
       </EuiText>
@@ -3498,6 +4142,89 @@ exports[`Field for string setting should render as read only with help text if o
 </EuiDescribedFormGroup>
 `;
 
+exports[`Field for string setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for String test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="string:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="string:test:setting"
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      aria-label="string test setting"
+      data-test-subj="advancedSetting-editField-string:test:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      value="foo"
+    />
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
 exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
 <EuiDescribedFormGroup
   className="mgtAdvancedSettings__field"
@@ -3892,6 +4619,89 @@ exports[`Field for stringWithValidation setting should render as read only with 
         <FormattedMessage
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="string:test-validation:setting"
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      aria-label="string test validation setting"
+      data-test-subj="advancedSetting-editField-string:test-validation:setting"
+      disabled={true}
+      fullWidth={true}
+      onChange={[Function]}
+      value="fooUserValue"
+    />
+  </EuiCompressedFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render as read only with help text if permission controlled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for String test validation setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    foo-default
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="string:test-validation:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        String test validation setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiCompressedFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is controlled by dashboard admin only."
+          id="advancedSettings.field.permissionControlledHelpText"
           values={Object {}}
         />
       </EuiText>

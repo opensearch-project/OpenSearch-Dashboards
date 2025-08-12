@@ -31,7 +31,7 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiToolTip, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
@@ -45,7 +45,10 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 
-import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import {
+  DataSourceManagementPluginSetup,
+  DataSourceOption,
+} from 'src/plugins/data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
@@ -93,7 +96,7 @@ function DevToolsWrapper({
     []
   );
 
-  const onChange = async (e: Array<EuiComboBoxOptionOption<any>>) => {
+  const onChange = async (e: Array<DataSourceOption<any>>) => {
     const dataSourceId = e[0] ? e[0].id : undefined;
     await remount(mountedTool.current!.mountpoint, dataSourceId);
   };
@@ -112,6 +115,7 @@ function DevToolsWrapper({
       history: {} as any,
       dataSourceId,
     };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const unmountHandler = await activeDevTool.mount(params);
 
     mountedTool.current = {
@@ -142,6 +146,7 @@ function DevToolsWrapper({
     const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector;
     return (
       <div className="devAppDataSourceSelector">
+        {/* @ts-expect-error TS2604 TODO(ts-error): fixme */}
         <DataSourceSelector
           savedObjectsClient={savedObjects.client}
           notifications={toasts}
@@ -200,6 +205,7 @@ function DevToolsWrapper({
 }
 
 function redirectOnMissingCapabilities(application: ApplicationStart) {
+  // @ts-expect-error TS2532 TODO(ts-error): fixme
   if (!application.capabilities.dev_tools.show) {
     application.navigateToApp('home');
     return true;
@@ -208,6 +214,7 @@ function redirectOnMissingCapabilities(application: ApplicationStart) {
 }
 
 function setBadge(application: ApplicationStart, chrome: ChromeStart) {
+  // @ts-expect-error TS2532 TODO(ts-error): fixme
   if (application.capabilities.dev_tools.save) {
     return;
   }
@@ -326,6 +333,7 @@ export function renderApp(
   setTitle(chrome);
 
   ReactDOM.render(
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     <MainApp
       devTools={devTools}
       dataSourceEnabled={dataSourceEnabled}

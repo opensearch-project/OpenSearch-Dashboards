@@ -39,6 +39,7 @@ describe('EmptyIndexPatternPrompt', () => {
         canSave
         creationOptions={[{ text: 'default', onClick: () => {} }]}
         docLinksIndexPatternIntro={'testUrl'}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         setBreadcrumbs={() => {}}
       />
     );

@@ -16,9 +16,11 @@
     "uiActions",
     "urlForwarding",
     "usageCollection",
-    "visualizations"
+    "visualizations",
+    "expressions",
+    "dashboard"
   ],
-  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils"],
+  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "dashboard"],
   "optionalPlugins": ["home", "share"],
   "configPath": ["explore"]
 }

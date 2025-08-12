@@ -7,10 +7,12 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { AssociatedObjectsTable } from './associated_objects_table';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import renderer from 'react-test-renderer';
 import {
   getRenderAccelerationDetailsFlyout,
   getRenderAssociatedObjectsDetailsFlyout,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   getRenderCreateAccelerationFlyout,
 } from '../../../plugin';
 import * as utils from '../../utils';
@@ -28,6 +30,7 @@ const mockApplication = {
   navigateToApp: jest.fn(),
 };
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const renderComponent = (props) => {
   return render(<AssociatedObjectsTable {...props} />);
 };
@@ -59,6 +62,7 @@ describe('AssociatedObjectsTable', () => {
   };
 
   it('should render correctly and match the snapshot', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const tree = renderer.create(<AssociatedObjectsTable {...props} />).toJSON();
     expect(tree).toMatchSnapshot();
   });
@@ -73,7 +77,9 @@ describe('AssociatedObjectsTable', () => {
   it('should handle clicking on an object name', async () => {
     const renderAccelerationDetailsFlyoutMock = jest.fn();
     const renderAssociatedObjectsDetailsFlyoutMock = jest.fn();
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     getRenderAccelerationDetailsFlyout.mockReturnValue(renderAccelerationDetailsFlyoutMock);
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     getRenderAssociatedObjectsDetailsFlyout.mockReturnValue(
       renderAssociatedObjectsDetailsFlyoutMock
     );

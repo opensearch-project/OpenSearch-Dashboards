@@ -1072,6 +1072,10 @@ Name action functions in the form of a strong verb and passed properties in the 
 <pagerButton onPageNext={action.turnToNextPage} />
 ```
 
+#### Storybook
+
+OpenSearch Dashboards supports creating [Storybook](https://storybook.js.org/) for React components. New UI components should have a corresponding storybook component. See [osd-storybook](/packages/osd-storybook) for details.
+
 ### API endpoints
 
 The following developer guide rules are targeting development of server side API endpoints.

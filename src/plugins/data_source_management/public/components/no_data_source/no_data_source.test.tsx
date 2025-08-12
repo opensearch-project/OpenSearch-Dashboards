@@ -17,6 +17,7 @@ describe('NoDataSource', () => {
 
   it('should render correctly with the provided totalDataSourceCount', () => {
     const wrapper = shallow(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <NoDataSource totalDataSourceCount={totalDataSourceCount} hasIncompatibleDatasource={false} />
     );
     expect(wrapper).toMatchSnapshot();
@@ -26,6 +27,7 @@ describe('NoDataSource', () => {
     const applicationMock = coreMock.createStart().application;
     const container = render(
       <NoDataSource
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         totalDataSourceCount={totalDataSourceCount}
         application={applicationMock}
         hasIncompatibleDatasource={false}
@@ -46,6 +48,7 @@ describe('NoDataSource', () => {
 
     const container = render(
       <NoDataSource
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         totalDataSourceCount={totalDataSourceCount}
         application={applicationMock}
         hasIncompatibleDatasource={false}
@@ -70,6 +73,7 @@ describe('NoDataSource', () => {
     (incompatibleDataSourcesExist) => {
       component = shallow(
         <NoDataSource
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           totalDataSourceCount={0}
           hasIncompatibleDatasource={incompatibleDataSourcesExist}
         />

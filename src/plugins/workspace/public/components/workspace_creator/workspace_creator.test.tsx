@@ -172,6 +172,7 @@ const WorkspaceCreator = ({
 
   return (
     <Provider>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <WorkspaceCreatorComponent {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );
@@ -201,7 +202,7 @@ describe('WorkspaceCreator', () => {
   });
 
   afterAll(() => {
-    window.location = location;
+    window.location = location as Location;
   });
 
   it('should not create workspace when name is empty', async () => {

@@ -29,15 +29,18 @@
  */
 
 import React, { useMemo } from 'react';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../overlays';
+import { ChromeGlobalBanner } from '../chrome/chrome_service';
 
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
-}> = ({ chromeVisible$, sidecarConfig$, children }) => {
+  useUpdatedHeader?: boolean;
+  globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
+}> = ({ chromeVisible$, sidecarConfig$, useUpdatedHeader, globalBanner$, children }) => {
   const visible = useObservable(chromeVisible$);
   const sidecarConfig = useObservable(sidecarConfig$, undefined);
 
@@ -45,10 +48,18 @@ export const AppWrapper: React.FunctionComponent<{
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
 
+  // Check if banner is enabled based on globalBanner$ observable
+  const globalBanner = useObservable(globalBanner$ || of(undefined), undefined);
+  const isBannerEnabled = !!globalBanner;
+
   return (
     <div
       id="app-wrapper"
-      className={classNames('app-wrapper', { 'hidden-chrome': !visible })}
+      className={classNames('app-wrapper', {
+        'hidden-chrome': !visible,
+        'app-wrapper-with-banner': isBannerEnabled,
+        'app-wrapper-with-new': useUpdatedHeader,
+      })}
       style={sidecarPaddingStyle}
     >
       {children}

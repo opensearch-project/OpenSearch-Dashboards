@@ -569,6 +569,9 @@ export const [getApplication, setApplication] = createGetterSetter<ApplicationSt
 export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
   'UiSettings'
 );
+export const [getWorkspaces, setWorkspaces] = createGetterSetter<CoreStart['workspaces']>(
+  'Workspaces'
+);
 
 export interface HideLocalCluster {
   enabled: boolean;

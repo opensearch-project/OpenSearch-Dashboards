@@ -32,9 +32,9 @@ import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
-import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { DocViewRenderFn, DocViewRenderProps } from '../../../../../../types/doc_views_types';
 
-interface Props {
+export interface DocViewerTabProps {
   component?: React.ComponentType<DocViewRenderProps>;
   id: number;
   render?: DocViewRenderFn;
@@ -51,7 +51,7 @@ interface State {
  * Displays an error message when it encounters exceptions, thanks to
  * Error Boundaries.
  */
-export class DocViewerTab extends React.Component<Props, State> {
+export class DocViewerTab extends React.Component<DocViewerTabProps, State> {
   state = {
     hasError: false,
     error: '',
@@ -62,7 +62,7 @@ export class DocViewerTab extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
-  shouldComponentUpdate(nextProps: Props, nextState: State) {
+  shouldComponentUpdate(nextProps: DocViewerTabProps, nextState: State) {
     return (
       nextProps.renderProps.hit._id !== this.props.renderProps.hit._id ||
       nextProps.renderProps.columns !== this.props.renderProps.columns ||

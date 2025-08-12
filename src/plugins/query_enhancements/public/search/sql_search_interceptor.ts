@@ -46,7 +46,11 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       },
     };
 
-    return fetch(context, this.queryService.queryString.getQuery()).pipe(
+    // Use query from request if available, otherwise fall back to queryStringManager
+    const query =
+      request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
+
+    return fetch(context, query).pipe(
       catchError((error) => {
         return throwError(error);
       })

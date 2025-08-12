@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ShallowWrapper, shallow, mount } from 'enzyme';
+import { ShallowWrapper, shallow, mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 import { DataSourceView } from './data_source_view';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { SavedObjectsClientContract, UiSettingScope } from 'opensearch-dashboards/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import { getSingleDataSourceResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
@@ -37,6 +37,7 @@ describe('DataSourceView', () => {
         selectedOption={[{ id: 'test1', label: 'test1' }]}
         hideLocalCluster={false}
         onSelectedDataSources={jest.fn()}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -49,7 +50,7 @@ describe('DataSourceView', () => {
     );
 
     const onSelectedDataSources = jest.fn();
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceView
@@ -57,16 +58,18 @@ describe('DataSourceView', () => {
           selectedOption={[{ id: '' }]}
           hideLocalCluster={true}
           onSelectedDataSources={onSelectedDataSources}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
+
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
     expect(onSelectedDataSources).toBeCalledWith([]);
   });
   it('Should return error when provided datasource has been filtered out', async () => {
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceView
@@ -78,9 +81,11 @@ describe('DataSourceView', () => {
           dataSourceFilter={(ds) => {
             return false;
           }}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
+
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
@@ -89,7 +94,7 @@ describe('DataSourceView', () => {
     spyOn(utils, 'getDataSourceById').and.returnValue(
       Promise.resolve([{ id: 'test1', label: 'test1' }])
     );
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceView
@@ -101,9 +106,11 @@ describe('DataSourceView', () => {
           dataSourceFilter={(ds) => {
             return true;
           }}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
+
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
@@ -112,7 +119,7 @@ describe('DataSourceView', () => {
   });
   it('should call getDataSourceById when only pass id with no label', async () => {
     spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceView
@@ -122,6 +129,7 @@ describe('DataSourceView', () => {
           notifications={toasts}
           hideLocalCluster={false}
           onSelectedDataSources={jest.fn()}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
@@ -135,7 +143,7 @@ describe('DataSourceView', () => {
   it('should call notification warning when there is data source fetch error', async () => {
     spyOn(utils, 'getDataSourceById').and.throwError('Data source is not available');
 
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceView
@@ -145,6 +153,7 @@ describe('DataSourceView', () => {
           notifications={toasts}
           hideLocalCluster={false}
           onSelectedDataSources={jest.fn()}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });
@@ -167,6 +176,7 @@ describe('DataSourceView', () => {
         onSelectedDataSources={onSelectedDataSource}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     const button = await container.findByTestId('dataSourceViewButton');
@@ -176,7 +186,7 @@ describe('DataSourceView', () => {
   it('should render no data source when no data source filtered out and hide local cluster', async () => {
     const onSelectedDataSource = jest.fn();
 
-    let wrapper;
+    let wrapper!: ReactWrapper;
     await act(async () => {
       wrapper = mount(
         <DataSourceView
@@ -187,6 +197,7 @@ describe('DataSourceView', () => {
           fullWidth={false}
           selectedOption={[{ id: '' }]}
           dataSourceFilter={(ds) => false}
+          scope={UiSettingScope.GLOBAL}
         />
       );
     });

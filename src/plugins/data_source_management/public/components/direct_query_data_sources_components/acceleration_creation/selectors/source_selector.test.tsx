@@ -72,6 +72,7 @@ describe('AccelerationDataSourceSelector', () => {
   });
 
   it('renders correctly with default props', async () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper = mount(<AccelerationDataSourceSelector {...defaultProps} />);
     await act(async () => {
       await Promise.resolve();
@@ -86,6 +87,7 @@ describe('AccelerationDataSourceSelector', () => {
       <AccelerationDataSourceSelector
         {...defaultProps}
         dataSourcesPreselected={true}
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         accelerationFormData={{
           ...defaultProps.accelerationFormData,
           database: 'testDB',
@@ -102,6 +104,7 @@ describe('AccelerationDataSourceSelector', () => {
       status: CachedDataSourceStatus.Updated,
       databases: [],
     });
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper = mount(<AccelerationDataSourceSelector {...defaultProps} />);
     await act(async () => {
       await Promise.resolve();
@@ -115,6 +118,7 @@ describe('AccelerationDataSourceSelector', () => {
       status: CachedDataSourceStatus.Updated,
       tables: [],
     });
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper = mount(<AccelerationDataSourceSelector {...defaultProps} />);
     await act(async () => {
       await Promise.resolve();
@@ -129,12 +133,14 @@ describe('AccelerationDataSourceSelector', () => {
 
   it('displays correct help text when loading table fields', () => {
     const wrapper = mount(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <AccelerationDataSourceSelector {...defaultProps} tableFieldsLoading={true} />
     );
     expect(wrapper.find(EuiFormRow).at(1).prop('helpText')).toBe('Loading tables fields');
   });
 
   it('clears table selection when database changes', async () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper = mount(<AccelerationDataSourceSelector {...defaultProps} />);
     await act(async () => {
       await Promise.resolve();

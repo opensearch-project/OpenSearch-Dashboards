@@ -235,6 +235,7 @@ cy.osd.add(
   (opts) => {
     const { workspaceName, page, isEnhancement = false } = opts;
     // Navigating to the WorkSpace Home Page
+    // TODO validate if it is safe enough to delete this line
     cy.osd.navigateToWorkSpaceHomePage(workspaceName);
 
     // Check for toggleNavButton and handle accordingly
@@ -247,10 +248,18 @@ cy.osd.add(
         cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
       }
 
-      cy.getElementByTestId(`collapsibleNavAppLink-${page}`).should('exist').click();
+      cy.getElementByTestId(`collapsibleNavAppLink-${page}`)
+        .should('exist')
+        .scrollIntoView()
+        .click();
     });
 
     cy.osd.waitForLoader(isEnhancement);
+
+    // On a new session, a syntax helper popover appears, which obstructs the typing within the query
+    // editor. Clicking on a random element removes the popover.
+    cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
+    cy.wait(1000);
   }
 );
 
@@ -571,4 +580,9 @@ cy.osd.add('verifyResultsCount', (count) => {
     .scrollIntoView()
     .should('be.visible')
     .should('have.text', count.toLocaleString());
+});
+
+cy.osd.add('verifyResultsError', (error) => {
+  cy.getElementByTestId('queryResultError').click();
+  cy.getElementByTestId('textBreakWord').contains(error);
 });

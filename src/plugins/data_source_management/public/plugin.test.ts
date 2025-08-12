@@ -2,9 +2,16 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { coreMock } from '../../../core/public/mocks';
 import { DataSourceManagementPluginStart } from './plugin';
-import { testDataSourceManagementPlugin, createAuthenticationMethod } from './mocks';
+import {
+  testDataSourceManagementPlugin,
+  createAuthenticationMethod,
+  mockInitializerContext,
+  managementMock,
+  indexPatternManagementMock,
+} from './mocks';
 import {
   DataSourceManagementPlugin,
   DataSourceManagementSetupDependencies,
@@ -16,29 +23,18 @@ import {
   getRenderCreateAccelerationFlyout,
   getRenderAssociatedObjectsDetailsFlyout,
 } from './plugin';
+import { AuthenticationMethodRegistry } from './auth_registry';
 
 describe('#dataSourceManagement', () => {
   let coreSetup: any;
   let coreStart: any;
   let mockDataSourceManagementPluginStart: MockedKeys<DataSourceManagementPluginStart>;
 
-  const managementMock = {
-    sections: {
-      section: {
-        opensearchDashboards: {
-          registerApp: jest.fn(),
-        },
-      },
-    },
-  };
-
-  const indexPatternManagementMock = {
-    columns: {
-      register: jest.fn(),
-    },
-  };
-
   beforeEach(() => {
+    mockDataSourceManagementPluginStart = {
+      getAuthenticationMethodRegistry: jest.fn(() => new AuthenticationMethodRegistry()),
+    };
+
     coreSetup = {
       ...coreMock.createSetup({ pluginStartContract: mockDataSourceManagementPluginStart }),
       management: managementMock,
@@ -61,7 +57,7 @@ describe('#dataSourceManagement', () => {
   });
 
   it('should not register any authentication method if feature flag is disabled', () => {
-    const plugin = new DataSourceManagementPlugin();
+    const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     const setupDeps: DataSourceManagementSetupDependencies = {
       management: coreSetup.management,
       indexPatternManagement: coreSetup.indexPatternManagement,
@@ -73,7 +69,7 @@ describe('#dataSourceManagement', () => {
   });
 
   it('should return setup object with methods when feature flag is enabled', () => {
-    const plugin = new DataSourceManagementPlugin();
+    const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     const setupDeps: DataSourceManagementSetupDependencies = {
       management: coreSetup.management,
       indexPatternManagement: coreSetup.indexPatternManagement,
@@ -94,7 +90,7 @@ describe('#dataSourceManagement', () => {
   });
 
   it('should throw error if registering authentication method after startup', () => {
-    const plugin = new DataSourceManagementPlugin();
+    const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     const setupDeps: DataSourceManagementSetupDependencies = {
       management: coreSetup.management,
       indexPatternManagement: coreSetup.indexPatternManagement,
@@ -114,7 +110,7 @@ describe('#dataSourceManagement', () => {
   });
 
   it('should register application in the management section', () => {
-    const plugin = new DataSourceManagementPlugin();
+    const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     const setupDeps: DataSourceManagementSetupDependencies = {
       management: coreSetup.management,
       indexPatternManagement: coreSetup.indexPatternManagement,
@@ -135,7 +131,7 @@ describe('#dataSourceManagement', () => {
   });
 
   it('should set and get renderAccelerationDetailsFlyout correctly', () => {
-    const plugin = new DataSourceManagementPlugin();
+    const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     plugin.setup(coreSetup, {
       management: managementMock,
       indexPatternManagement: indexPatternManagementMock,
@@ -154,7 +150,7 @@ describe('#dataSourceManagement', () => {
   });
 
   it('should set and get renderCreateAccelerationFlyout correctly', () => {
-    const plugin = new DataSourceManagementPlugin();
+    const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     plugin.setup(coreSetup, {
       management: managementMock,
       indexPatternManagement: indexPatternManagementMock,
@@ -173,7 +169,7 @@ describe('#dataSourceManagement', () => {
   });
 
   it('should set and get renderAssociatedObjectsDetailsFlyout correctly', () => {
-    const plugin = new DataSourceManagementPlugin();
+    const plugin = new DataSourceManagementPlugin(mockInitializerContext);
     plugin.setup(coreSetup, {
       management: managementMock,
       indexPatternManagement: indexPatternManagementMock,

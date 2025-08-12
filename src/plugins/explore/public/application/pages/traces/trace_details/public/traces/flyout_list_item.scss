@@ -1,0 +1,21 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreFlyoutListItem {
+  &__descriptionText {
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-line;
+  }
+
+  &__titleText {
+    word-break: break-all;
+    word-wrap: break-word;
+  }
+
+  &__filterButton {
+    margin: -5px;
+  }
+}

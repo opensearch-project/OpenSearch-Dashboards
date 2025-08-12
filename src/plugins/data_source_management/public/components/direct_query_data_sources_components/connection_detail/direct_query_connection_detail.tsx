@@ -191,6 +191,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
 
         if (featureFlagStatus && dataSourceMDSId !== null) {
           filteredIntegrations = filteredIntegrations.filter((res) => {
+            // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
             return res.references && res.references.some((ref) => ref.id === dataSourceMDSId);
           });
         }
@@ -209,6 +210,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     setShowIntegrationsFlyout(true);
   };
   const integrationsFlyout = showIntegrationsFlyout ? (
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     <InstallIntegrationFlyout
       closeFlyout={() => setShowIntegrationsFlyout(false)}
       datasourceType={datasourceDetails.connector}
@@ -566,6 +568,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             >
               <QueryOrAccelerateData />
             </EuiAccordion>
+            {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
             <EuiTabbedContent tabs={tabs} size="s" />
           </>
         )}

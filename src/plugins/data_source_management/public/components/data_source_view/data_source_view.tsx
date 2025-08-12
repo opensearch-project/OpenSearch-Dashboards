@@ -9,6 +9,7 @@ import {
   SavedObjectsClientContract,
   ToastsStart,
   ApplicationStart,
+  UiSettingScope,
 } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
@@ -30,6 +31,7 @@ interface DataSourceViewProps {
   fullWidth: boolean;
   selectedOption: DataSourceOption[];
   hideLocalCluster: boolean;
+  scope: UiSettingScope;
   application?: ApplicationStart;
   savedObjectsClient?: SavedObjectsClientContract;
   notifications?: ToastsStart;
@@ -71,8 +73,9 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     const selectedOption = this.props.selectedOption;
     const option = selectedOption[0];
     const optionId = option.id;
-    // for data source view, get default data source from cache
-    const defaultDataSource = (await getDefaultDataSourceId(this.props.uiSettings)) ?? null;
+
+    const defaultDataSource =
+      (await getDefaultDataSourceId(this.props.uiSettings, this.props.scope)) ?? null;
     if (optionId === '' && !this.props.hideLocalCluster) {
       this.setState({
         selectedOption: [LocalCluster],
@@ -186,6 +189,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
         <EuiContextMenuPanel className={'dataSourceViewOuiPanel'}>
           <EuiPanel color="subdued" paddingSize="none" borderRadius="none">
             <EuiSelectable
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
               options={options}
               singleSelection={true}
               data-test-subj={'dataSourceView'}

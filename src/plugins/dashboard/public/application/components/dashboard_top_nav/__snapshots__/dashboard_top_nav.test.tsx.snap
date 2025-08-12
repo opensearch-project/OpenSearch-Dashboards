@@ -139,6 +139,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -250,10 +251,12 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -302,6 +305,18 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -327,6 +342,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -434,6 +450,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -967,8 +984,15 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -1109,6 +1133,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -1267,6 +1292,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -1378,10 +1404,12 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -1430,6 +1458,18 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -1455,6 +1495,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -1562,6 +1603,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -2095,8 +2137,15 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -2237,6 +2286,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -2395,6 +2445,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -2506,10 +2557,12 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -2558,6 +2611,18 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -2583,6 +2648,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -2690,6 +2756,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -3223,8 +3290,15 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -3365,6 +3439,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -3523,6 +3598,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -3634,10 +3710,12 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -3686,6 +3764,18 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -3711,6 +3801,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -3818,6 +3909,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -4351,8 +4443,15 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -4493,6 +4592,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -4651,6 +4751,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -4762,10 +4863,12 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -4814,6 +4917,18 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -4839,6 +4954,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -4946,6 +5062,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -5479,8 +5596,15 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -5621,6 +5745,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -5779,6 +5904,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -5890,10 +6016,12 @@ exports[`Dashboard top nav render with all components 1`] = `
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -5942,6 +6070,18 @@ exports[`Dashboard top nav render with all components 1`] = `
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -5967,6 +6107,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -6074,6 +6215,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -6607,8 +6749,15 @@ exports[`Dashboard top nav render with all components 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -6748,6 +6897,7 @@ exports[`Dashboard top nav render with all components 1`] = `
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={true}
             showQueryBar={false}
