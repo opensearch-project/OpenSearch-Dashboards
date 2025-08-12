@@ -10,7 +10,6 @@
  */
 
 import { BannerConfig } from '../../common';
-import { validateBannerConfig } from '../validate_banner_config';
 
 /**
  * Fetches banner configuration from an external URL
@@ -42,13 +41,6 @@ export async function fetchExternalConfig(
     }
 
     const jsonData = await response.json();
-
-    // Validate the configuration
-    if (!validateBannerConfig(jsonData, logger)) {
-      logger.error('Banner configuration validation failed, using default settings');
-      return null;
-    }
-
     return jsonData;
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {

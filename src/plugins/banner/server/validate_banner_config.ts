@@ -10,6 +10,20 @@
  */
 
 /**
+ * Helper function to validate if a string is a valid URL
+ * @param url The string to validate as URL
+ * @returns Whether the string is a valid URL
+ */
+const isValidUrl = (url: string): boolean => {
+  try {
+    new URL(url);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
+/**
  * Validates that the banner configuration meets the required schema
  * @param config The banner configuration to validate
  * @param logger Logger instance for logging errors
@@ -20,6 +34,25 @@ export function validateBannerConfig(
   logger: { error: (message: string) => void }
 ): boolean {
   let isValid = true;
+
+  // Check for unexpected fields
+  const validFields = [
+    'content',
+    'color',
+    'iconType',
+    'isVisible',
+    'useMarkdown',
+    'size',
+    'externalLink',
+  ];
+
+  const configKeys = Object.keys(config);
+  const invalidFields = configKeys.filter((key) => !validFields.includes(key));
+
+  if (invalidFields.length > 0) {
+    logger.error(`Invalid banner config: unexpected fields found: ${invalidFields.join(', ')}`);
+    isValid = false;
+  }
 
   // Check content
   if (config.content !== undefined && typeof config.content !== 'string') {
@@ -78,11 +111,18 @@ export function validateBannerConfig(
   }
 
   // Check externalLink
-  if (config.externalLink !== undefined && typeof config.externalLink !== 'string') {
-    logger.error(
-      `Invalid banner config: 'externalLink' must be a string, got ${typeof config.externalLink}`
-    );
-    isValid = false;
+  if (config.externalLink !== undefined) {
+    if (typeof config.externalLink !== 'string') {
+      logger.error(
+        `Invalid banner config: 'externalLink' must be a string, got ${typeof config.externalLink}`
+      );
+      isValid = false;
+    } else if (!isValidUrl(config.externalLink)) {
+      logger.error(
+        `Invalid banner config: 'externalLink' must be a valid URL, got '${config.externalLink}'`
+      );
+      isValid = false;
+    }
   }
 
   return isValid;

@@ -13,6 +13,7 @@ import { IRouter } from '../../../../core/server';
 import { BannerPluginSetup } from '../types';
 import { BannerConfig } from '../../common';
 import { fetchExternalConfig } from './fetch_external_config';
+import { validateBannerConfig } from '../validate_banner_config';
 
 export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
   router.get(
@@ -55,12 +56,19 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
             bannerSetup.logger
           );
 
-          // If external config was successfully fetched, override the UI settings
+          // If external config was successfully fetched, validate and override the UI settings
           if (externalConfig) {
-            config = {
-              ...config,
-              ...externalConfig,
-            };
+            // Validate the configuration
+            if (!validateBannerConfig(externalConfig, bannerSetup.logger)) {
+              bannerSetup.logger.error(
+                'Banner configuration validation failed, using default settings'
+              );
+            } else {
+              config = {
+                ...config,
+                ...externalConfig,
+              };
+            }
           } else {
             bannerSetup.logger.warn(
               `Failed to load banner config from external URL: ${pluginConfig.externalLink}, using UI settings instead`
