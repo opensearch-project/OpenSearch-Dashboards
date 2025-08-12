@@ -444,6 +444,24 @@ describe('KeyStringParser', () => {
         "Malformed key string: invalid '+' character placement"
       );
     });
+
+    it('should throw error for multiple base keys', () => {
+      expect(() => parser.normalizeKeyString('ctrl+a+b')).toThrow(
+        'Malformed key string: multiple non-modifier keys: "ctrl+a+b"'
+      );
+
+      expect(() => parser.normalizeKeyString('shift+enter+space')).toThrow(
+        'Malformed key string: multiple non-modifier keys: "shift+enter+space"'
+      );
+
+      expect(() => parser.normalizeKeyString('ctrl+up+down')).toThrow(
+        'Malformed key string: multiple non-modifier keys: "ctrl+up+down"'
+      );
+
+      expect(() => parser.normalizeKeyString('cmd+comma+period')).toThrow(
+        'Malformed key string: multiple non-modifier keys: "cmd+comma+period"'
+      );
+    });
   });
 
   describe('Plus Key Support', () => {

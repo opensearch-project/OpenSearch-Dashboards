@@ -276,6 +276,7 @@ export class KeyStringParser {
 
     const modifiers: ModifierKey[] = [];
     let key = '';
+    let sawNonModifier = false;
 
     for (const part of parts) {
       if (this.isModifier(part)) {
@@ -291,7 +292,11 @@ export class KeyStringParser {
       } else if (part.length > 0) {
         const normalizedKey = this.normalizeKey(part);
         if (normalizedKey.length > 0) {
+          if (sawNonModifier) {
+            throw new Error(`Malformed key string: multiple non-modifier keys: "${keyString}"`);
+          }
           key = normalizedKey;
+          sawNonModifier = true;
         }
       }
     }
@@ -382,6 +387,11 @@ export class KeyStringParser {
   }
 
   private normalizeKey(key: string): string {
+    
+    if (key === ' ') {
+      return 'space'
+    }
+
     const trimmed = key.trim().toLowerCase();
 
     if (!trimmed) {
