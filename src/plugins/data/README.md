@@ -134,3 +134,105 @@ In OSS only the final result is returned.
         },
     });
 ```
+
+## Correlations
+
+The correlations service provides functionality for managing relationships between different datasets in OpenSearch Dashboards. Correlations enable users to establish and track connections between various data sources like traces, logs, metrics, and other observability data.
+
+### Correlation Saved Object Type
+
+Correlations are stored as saved objects with the type `correlations`. Each correlation object defines relationships between multiple datasets and includes metadata about how they are connected.
+
+#### Sample Correlation Object
+
+```,json
+{
+  "id": "trace-to-logs-correlation-5678",
+  "type": "correlations",
+  "migrationVersion": "1.0.0",
+  "updatedAt": "2025-07-16T10:15:30.000Z",
+  "attributes": {
+    "type": "APM-Correlation",
+    "entities": [
+      {
+        "tracesDataset": {
+          "id": "references[0].id"
+        }
+      },
+      {
+        "logsDataset": {
+          "id": "references[1].id",
+          "meta": {
+            "logServiceNameField": "service.name",
+            "logSpanIdField": "span_id",
+            "logTraceIdField": "trace_id",
+            "timestamp": "@timestamp"
+          }
+        }
+      },
+      {
+        "pluginDataConnection": {
+          "id": "references[2].id"
+        }
+      }
+    ]
+  },
+  "references": [
+    {
+      "name": "entities[0].index",
+      "type": "index-pattern",
+      "id": "6ff30050-72ec-11f0-b9fd-951b6e375a38"
+    },
+    {
+      "name": "entities[1].index",
+      "type": "index-pattern",
+      "id": "72048c50-731a-11f0-8fdf-87b448b7eb0b"
+    },
+    {
+      "name": "pluginDataConnection",
+      "type": "data-connection",
+      "id": "1234567890"
+    }
+  ]
+}
+```
+
+### Basic Usage
+
+#### Finding Correlations by Dataset
+
+Example to find dataset, can be extended to other CRUD operations via saved object apis
+
+```,ts
+async function findCorrelationsByDataset(
+  savedObjectsClient: SavedObjectsClientContract,
+  datasetId: string,
+  size: number = 10
+) {
+  try {
+    const allCorrelationsResponse = await savedObjectsClient.find({
+      type: 'correlations',
+      fields: ['correlations', 'references'],
+      perPage: size,
+    });
+
+    const filteredCorrelations = allCorrelationsResponse.savedObjects.filter((correlation) => {
+      const correlationAttrs = correlation.attributes as CorrelationAttributes;
+      const hasReference = correlation.references?.some((ref) => ref.id === datasetId);
+      const hasEntityReference = correlationAttrs?.correlations?.entities?.some(
+        (entity: { id: string }) => entity.id === datasetId
+      );
+      
+      return hasReference || hasEntityReference;
+    });
+
+    return {
+      ...allCorrelationsResponse,
+      savedObjects: filteredCorrelations
+    };
+  } catch (error) {
+    console.error('Failed to find correlations:', error);
+    throw error;
+  }
+}
+```
