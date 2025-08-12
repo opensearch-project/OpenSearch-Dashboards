@@ -82,51 +82,6 @@ export const runSharedLinksTests = () => {
       describe(`${config.testName}`, () => {
         const queryString = getQueryString(config);
 
-        // We do not have share single document or surrounding documents links for PPL in explore
-        it.skip(`should handle shared document links correctly for ${config.testName}`, () => {
-          // Setup
-          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          setDatePickerDatesAndSearchIfRelevant(config.language);
-
-          if (config.hasDocLinks) {
-            // Test surrounding documents link
-            cy.get('tbody tr')
-              .first()
-              .find('[data-test-subj="docTableExpandToggleColumn"] button')
-              .click();
-
-            cy.getElementByTestId('docTableRowAction-0')
-              .should('exist')
-              .and('contain.text', 'View surrounding documents')
-              .invoke('removeAttr', 'target')
-              .click();
-            cy.url().should('include', '/context/');
-            cy.go('back');
-
-            // Test single document link
-            cy.get('tbody tr')
-              .first()
-              .find('[data-test-subj="docTableExpandToggleColumn"] button')
-              .click();
-
-            cy.getElementByTestId('docTableRowAction-1')
-              .should('exist')
-              .and('contain.text', 'View single document')
-              .invoke('removeAttr', 'target')
-              .click();
-            cy.url().should('include', '/doc/');
-            cy.go('back');
-          } else {
-            // Verify no document links for SQL/PPL
-            cy.get('tbody tr')
-              .first()
-              .find('[data-test-subj="docTableExpandToggleColumn"] button')
-              .click();
-            cy.getElementByTestId('docTableRowAction-0').should('not.exist');
-            cy.getElementByTestId('docTableRowAction-1').should('not.exist');
-          }
-        });
-
         it(`should persist state in shared links for ${config.testName}`, () => {
           // Set dataset and language
           cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);

@@ -38,6 +38,7 @@ export const DiscoverResultsActionBar = ({
 }: DiscoverResultsActionBarProps) => {
   const currentTab = useSelector(selectActiveTabId);
   const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
+  const shouldShowExportButton = currentTab !== 'explore_patterns_tab';
   const showTabSpecificSettings = currentTab === 'explore_patterns_tab';
 
   return (
@@ -78,12 +79,14 @@ export const DiscoverResultsActionBar = ({
           </EuiFlexItem> */}
           {dataset && rows?.length ? (
             <>
-              <EuiFlexItem
-                grow={false}
-                className="explore-results-action-bar__explore-download-csv-flex-item"
-              >
-                <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
-              </EuiFlexItem>
+              {shouldShowExportButton && (
+                <EuiFlexItem
+                  grow={false}
+                  className="explore-results-action-bar__explore-download-csv-flex-item"
+                >
+                  <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
+                </EuiFlexItem>
+              )}
 
               {showTabSpecificSettings && (
                 <EuiFlexItem grow={false}>
