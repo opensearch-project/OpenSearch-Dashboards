@@ -29,7 +29,7 @@ export const PatternsSettingsPopoverButton = () => {
           onClick={openPopover}
         >
           <FormattedMessage
-            id="explore.discover.patterns.settings.fieldName"
+            id="explore.discover.patterns.settings.fieldSelector"
             defaultMessage="Patterns field: {patternsField}"
             values={{
               patternsField,
