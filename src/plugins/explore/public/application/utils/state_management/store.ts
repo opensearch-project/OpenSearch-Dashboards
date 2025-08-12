@@ -29,6 +29,7 @@ import { createTimefilterSyncMiddleware } from './middleware/timefilter_sync_mid
 import { createPersistenceMiddleware } from './middleware/persistence_middleware';
 import { createOverallStatusMiddleware } from './middleware/overall_status_middleware';
 import { createDatasetChangeMiddleware } from './middleware/dataset_change_middleware';
+import { createFlavorChangeMiddleware } from './middleware/flavor_change_middleware';
 import { ExploreServices } from '../../../types';
 
 const resetState = createAction<RootState>('app/resetState');
@@ -72,6 +73,7 @@ export const configurePreloadedStore = (
             .concat(createQuerySyncMiddleware(services))
             .concat(createTimefilterSyncMiddleware(services))
             .concat(createDatasetChangeMiddleware(services))
+            .concat(createFlavorChangeMiddleware(services))
             .concat(createOverallStatusMiddleware())
         : getDefaultMiddleware(),
   });

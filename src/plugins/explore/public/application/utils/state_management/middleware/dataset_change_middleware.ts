@@ -44,6 +44,7 @@ export const createDatasetChangeMiddleware = (
   } = services;
   const datasetService = queryString.getDatasetService();
   let currentDataset: Dataset | undefined;
+  let currentFlavor: ExploreFlavor | undefined;
 
   return (store) => (next) => async (action) => {
     const result = next(action);
@@ -54,9 +55,15 @@ export const createDatasetChangeMiddleware = (
         query: { dataset },
       } = store.getState();
 
-      if (isEqual(currentDataset, dataset)) return result;
+      const newFlavor = getCurrentFlavor();
+      const datasetChanged = !isEqual(currentDataset, dataset);
+      const flavorChanged = currentFlavor !== newFlavor;
+
+      // Only proceed if dataset or flavor changed
+      if (!datasetChanged && !flavorChanged) return result;
 
       currentDataset = dataset;
+      currentFlavor = newFlavor;
 
       store.dispatch(setActiveTab(''));
       store.dispatch(clearResults());
@@ -67,9 +74,8 @@ export const createDatasetChangeMiddleware = (
       store.dispatch((resetLegacyStateActionCreator(services) as unknown) as AnyAction);
 
       // Set flavor-aware default columns
-      const currentFlavor = getCurrentFlavor();
       const defaultColumnsSetting =
-        currentFlavor === ExploreFlavor.Traces ? DEFAULT_TRACE_COLUMNS_SETTING : 'defaultColumns';
+        newFlavor === ExploreFlavor.Traces ? DEFAULT_TRACE_COLUMNS_SETTING : 'defaultColumns';
       const defaultColumns = services.uiSettings?.get(defaultColumnsSetting) || ['_source'];
       store.dispatch(setColumns(defaultColumns));
 
