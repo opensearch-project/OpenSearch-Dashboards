@@ -188,9 +188,11 @@ export class KeyStringParser {
    *
    */
   public normalizeKeyString(keyString: string): string {
-    const cached = this.keyStringCache.get(keyString);
-    if (cached !== undefined) {
-      return cached;
+    if (this.keyStringCache.has(keyString)) {
+      const value = this.keyStringCache.get(keyString)!;
+      this.keyStringCache.delete(keyString);
+      this.keyStringCache.set(keyString, value);
+      return value;
     }
 
     const result = this.computeNormalizedKeyString(keyString);
