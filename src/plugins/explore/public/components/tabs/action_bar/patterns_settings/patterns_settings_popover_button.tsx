@@ -12,7 +12,7 @@ import { selectPatternsField } from '../../../../application/utils/state_managem
 
 export const PatternsSettingsPopoverButton = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const patternsField = useSelector(selectPatternsField) ?? '';
+  const patternsField = useSelector(selectPatternsField);
 
   const openPopover = () => setIsPopoverOpen(true);
   const closePopover = () => setIsPopoverOpen(false);
@@ -28,19 +28,27 @@ export const PatternsSettingsPopoverButton = () => {
           iconSide="right"
           onClick={openPopover}
         >
-          <FormattedMessage
-            id="explore.discover.patterns.settings.fieldSelector"
-            defaultMessage="Patterns field: {patternsField}"
-            values={{
-              patternsField,
-            }}
-          />
+          {patternsField ? (
+            <FormattedMessage
+              id="explore.discover.patterns.settings.fieldSelector"
+              defaultMessage="Patterns field: {patternsField}"
+              values={{
+                patternsField,
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="explore.discover.patterns.settings.fieldSelectorNoSelection"
+              defaultMessage="Select patterns field"
+            />
+          )}
         </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
       ownFocus={false}
+      anchorPosition="leftUp"
     >
       <PatternsSettingsPopoverContent fieldChange={closePopover} />
     </EuiPopover>
