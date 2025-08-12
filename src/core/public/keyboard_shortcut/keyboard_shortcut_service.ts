@@ -1,15 +1,10 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from './types';
+import { KeyStringParser } from './key_parser';
 
 /**
  * @internal
@@ -18,6 +13,7 @@ import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from
 export class KeyboardShortcutService {
   private shortcutsMapByKey = new Map<string, ShortcutDefinition[]>();
   private namespacedIdToKeyLookup = new Map<string, string>();
+  private keyParser = new KeyStringParser();
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -40,37 +36,15 @@ export class KeyboardShortcutService {
     this.namespacedIdToKeyLookup.clear();
   }
 
-  private getNormalizedKey = (str: string): string => str.toLowerCase();
-
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
     `${shortcut.id.toLowerCase()}.${shortcut.pluginId.toLowerCase()}`;
 
-  private getEventKeyString = (event: KeyboardEvent): string => {
-    let key = '';
-
-    if (event.ctrlKey) {
-      key += 'ctrl+';
-    }
-
-    if (event.altKey) {
-      key += 'alt+';
-    }
-
-    if (event.shiftKey) {
-      key += 'shift+';
-    }
-
-    if (event.metaKey) {
-      key += 'cmd+';
-    }
-
-    key += this.getNormalizedKey(event.key);
-
-    return key;
-  };
-
   private register(shortcut: ShortcutDefinition): void {
-    const key = this.getNormalizedKey(shortcut.keys);
+    if (!this.keyParser.isValidKeyString(shortcut.keys)) {
+      return;
+    }
+
+    const key = this.keyParser.normalizeKeyString(shortcut.keys);
     const namespacedId = this.getNamespacedId(shortcut);
 
     const existingShortcuts = this.shortcutsMapByKey.get(key) || [];
@@ -115,9 +89,15 @@ export class KeyboardShortcutService {
   private shouldIgnoreKeyboardEventForTarget(target: EventTarget | null): boolean {
     if (!this.isHTMLElement(target)) return false;
 
-    const tagName = target.tagName;
+    const element = target;
+    const tagName = element.tagName;
 
-    if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
+    if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+      return true;
+    }
+
+    const role = element.getAttribute('role');
+    if (role && ['textbox', 'combobox', 'searchbox'].includes(role)) {
       return true;
     }
 
@@ -129,7 +109,7 @@ export class KeyboardShortcutService {
       return;
     }
 
-    const eventKeyString = this.getEventKeyString(event);
+    const eventKeyString = this.keyParser.getEventKeyString(event);
     const shortcuts = this.shortcutsMapByKey.get(eventKeyString);
 
     if (shortcuts?.length) {
@@ -140,11 +120,8 @@ export class KeyboardShortcutService {
       try {
         shortcut.execute();
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `Error executing keyboard shortcut ${this.getNamespacedId(shortcut)}:`,
-          error
-        );
+        // Log shortcut execution errors for debugging
+        console.error('Error executing keyboard shortcut', error);
       }
     }
   };

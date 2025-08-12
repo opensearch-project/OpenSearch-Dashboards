@@ -1,0 +1,438 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export const SPECIAL_KEY_MAPPINGS: Record<string, string> = {
+  ArrowUp: 'up',
+  ArrowDown: 'down',
+  ArrowLeft: 'left',
+  ArrowRight: 'right',
+
+  ' ': 'space',
+  Space: 'space',
+
+  PageUp: 'pageup',
+  PageDown: 'pagedown',
+
+  Esc: 'escape',
+
+  ',': 'comma',
+  '.': 'period',
+  '/': 'slash',
+  ';': 'semicolon',
+  "'": 'quote',
+  '[': 'bracketleft',
+  ']': 'bracketright',
+  '\\': 'backslash',
+  '`': 'backquote',
+  '=': 'equal',
+  '-': 'minus',
+
+  '!': 'exclamation',
+  '@': 'at',
+  '#': 'hash',
+  '$': 'dollar',
+  '%': 'percent',
+  '^': 'caret',
+  '&': 'ampersand',
+  '*': 'asterisk',
+  '(': 'parenleft',
+  ')': 'parenright',
+  '_': 'underscore',
+  '+': 'plus',
+  '{': 'braceleft',
+  '}': 'braceright',
+  '|': 'pipe',
+  ':': 'colon',
+  '"': 'doublequote',
+  '<': 'less',
+  '>': 'greater',
+  '?': 'question',
+  '~': 'tilde',
+};
+
+export const MODIFIER_ORDER = ['ctrl', 'alt', 'shift', 'cmd'] as const;
+
+type ModifierKey = typeof MODIFIER_ORDER[number];
+
+export class KeyStringParser {
+  private static readonly MODIFIER_INDEX_MAP = new Map([
+    ['ctrl', 0],
+    ['alt', 1],
+    ['shift', 2],
+    ['cmd', 3],
+  ]);
+
+  private static readonly MODIFIER_KEYS = new Set([
+    'ctrl',
+    'alt',
+    'shift',
+    'cmd',
+    'meta',
+    'win',
+    'super',
+    'control',
+    'option',
+    'command',
+    'opt',
+  ]);
+
+  private static readonly MODIFIER_ALIASES = new Map([
+    ['control', 'ctrl'],
+    ['meta', 'cmd'],
+    ['win', 'cmd'],
+    ['super', 'cmd'],
+    ['option', 'alt'],
+    ['command', 'cmd'],
+    ['opt', 'alt'],
+  ]);
+
+  private static readonly VALID_MODIFIERS = new Set(['ctrl', 'alt', 'shift', 'cmd']);
+
+  private static readonly DISPLAY_MAPPINGS = {
+    mac: {
+      ctrl: '⌃',
+      alt: '⌥',
+      shift: '⇧',
+      cmd: '⌘',
+      enter: '↵',
+      backspace: '⌫',
+      delete: '⌦',
+      tab: '⇥',
+      escape: 'Esc',
+      space: 'Space',
+      up: '↑',
+      down: '↓',
+      left: '←',
+      right: '→',
+      plus: '+',
+    },
+    other: {
+      ctrl: 'Ctrl',
+      alt: 'Alt',
+      shift: 'Shift',
+      cmd: 'Win',
+      enter: '↵',
+      backspace: '⌫',
+      delete: '⌦',
+      tab: '⇥',
+      escape: 'Esc',
+      space: 'Space',
+      up: '↑',
+      down: '↓',
+      left: '←',
+      right: '→',
+      plus: '+',
+    },
+  } as const;
+
+  private static readonly MAX_CACHE_SIZE = 1000;
+  private platform: 'mac' | 'windows' | 'linux';
+  private keyStringCache = new Map<string, string>();
+
+  constructor(platform?: 'mac' | 'windows' | 'linux') {
+    this.platform = platform ?? this.detectPlatform();
+  }
+
+  private detectPlatform(): 'mac' | 'windows' | 'linux' {
+    if (typeof navigator === 'undefined') {
+      return 'linux';
+    }
+
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.includes('mac')) return 'mac';
+    if (userAgent.includes('win')) return 'windows';
+    return 'linux';
+  }
+
+  /**
+   * Normalizes a key string from shortcut definition into consistent format
+   *
+   * Converts various input formats into a standardized, platform-specific key string.
+   * Handles cross-platform modifier mapping (Ctrl ↔ Cmd) and ensures consistent ordering.
+   * Uses caching to improve performance for repeated calls with the same input.
+   *
+   * @param keyString - Raw key combination string (e.g., "Ctrl+Shift+F1", "cmd+s")
+   * @returns Normalized key string with platform-specific modifiers in consistent order
+   * @throws Error when input is invalid, null, undefined, or malformed
+   *
+   * @example
+   *
+   * // On Mac:
+   * parser.normalizeKeyString("Ctrl+S") // → "cmd+s"
+   * parser.normalizeKeyString("shift+ctrl+f1") // → "cmd+shift+f1"
+   *
+   * // On Windows/Linux:
+   * parser.normalizeKeyString("Cmd+S") // → "ctrl+s"
+   * parser.normalizeKeyString("ALT+F4") // → "alt+f4"
+   *
+   */
+  public normalizeKeyString(keyString: string): string {
+    const cached = this.keyStringCache.get(keyString);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    const result = this.computeNormalizedKeyString(keyString);
+
+    if (this.keyStringCache.size >= KeyStringParser.MAX_CACHE_SIZE) {
+      const firstKey = this.keyStringCache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.keyStringCache.delete(firstKey);
+      }
+    }
+
+    this.keyStringCache.set(keyString, result);
+
+    return result;
+  }
+
+  private validateInput(keyString: string): void {
+    if (keyString === null || keyString === undefined) {
+      throw new Error(`Invalid key string input: expected string, got ${keyString}`);
+    }
+
+    if (typeof keyString !== 'string') {
+      throw new Error(`Invalid key string input: expected string, got ${typeof keyString}`);
+    }
+
+    if (keyString.trim() === '') {
+      throw new Error(`Key string cannot be empty or whitespace-only: "${keyString}"`);
+    }
+
+    const trimmed = keyString.trim();
+
+    if (/\+\+(?!$)/.test(trimmed)) {
+      throw new Error(
+        `Malformed key string: invalid consecutive '+' characters (not at end): "${keyString}"`
+      );
+    }
+
+    if (
+      trimmed.startsWith('+') ||
+      (trimmed.endsWith('+') && !trimmed.endsWith('++') && !keyString.endsWith('+ '))
+    ) {
+      throw new Error(`Malformed key string: invalid '+' character placement: "${keyString}"`);
+    }
+  }
+
+  private handlePlusKeySpecialCase(keyString: string): string | null {
+    const trimmed = keyString.trim();
+
+    if (!trimmed.endsWith('++')) {
+      return null;
+    }
+
+    const withoutPlusKey = trimmed.slice(0, -2);
+
+    if (withoutPlusKey.length === 0) {
+      return 'plus';
+    }
+
+    const modifierPart = this.computeNormalizedKeyString(withoutPlusKey);
+    return modifierPart ? `${modifierPart}+plus` : 'plus';
+  }
+
+  private computeNormalizedKeyString(keyString: string): string {
+    this.validateInput(keyString);
+
+    const plusKeyResult = this.handlePlusKeySpecialCase(keyString);
+    if (plusKeyResult !== null) {
+      return plusKeyResult;
+    }
+
+    const parts = keyString
+      .toLowerCase()
+      .split('+')
+      .map((part) => {
+        if (part === ' ') {
+          return 'space';
+        }
+        return part.trim();
+      })
+      .filter((part) => part.length > 0);
+
+    const modifiers: ModifierKey[] = [];
+    let key = '';
+
+    for (const part of parts) {
+      if (this.isModifier(part)) {
+        const normalizedModifier = this.normalizeModifier(part);
+        if (normalizedModifier && !modifiers.includes(normalizedModifier as ModifierKey)) {
+          const platformMappedModifier = this.applyPlatformMapping(
+            normalizedModifier
+          ) as ModifierKey;
+          if (!modifiers.includes(platformMappedModifier)) {
+            modifiers.push(platformMappedModifier);
+          }
+        }
+      } else if (part.length > 0) {
+        const normalizedKey = this.normalizeKey(part);
+        if (normalizedKey.length > 0) {
+          key = normalizedKey;
+        }
+      }
+    }
+
+    this.sortModifiers(modifiers);
+
+    if (modifiers.length > 0 && !key) {
+      return modifiers.join('+');
+    }
+
+    return this.buildKeyString(modifiers, key);
+  }
+
+  /**
+   * Generates a normalized key string from a keyboard event
+   *
+   * Extracts modifier keys and main key from a KeyboardEvent and converts them
+   * into the same normalized format used by normalizeKeyString for comparison.
+   * Applies platform-specific modifier mapping for cross-platform consistency.
+   *
+   * @param event - The keyboard event from user input
+   * @returns Normalized key string matching the format from normalizeKeyString
+   *
+   * @example
+   *
+   * document.addEventListener('keydown', (event) => {
+   *   const keyString = parser.getEventKeyString(event);
+   *   // User presses Cmd+S on Mac → "cmd+s"
+   *   // User presses Ctrl+S on Windows → "ctrl+s"
+   *
+   *   // Compare with config shortcut
+   *   if (keyString === parser.normalizeKeyString("Ctrl+S")) {
+   *     // Execute save action
+   *   }
+   * });
+   *
+   */
+  public getEventKeyString(event: KeyboardEvent): string {
+    const modifierChecks = [
+      { check: event.ctrlKey, key: 'ctrl' },
+      { check: event.altKey, key: 'alt' },
+      { check: event.shiftKey, key: 'shift' },
+      { check: event.metaKey, key: 'cmd' },
+    ];
+
+    const modifiers = modifierChecks
+      .filter(({ check }) => check)
+      .map(({ key }) => this.applyPlatformMapping(key));
+
+    const key = this.normalizeKey(event.key);
+
+    return this.buildKeyString(modifiers, key);
+  }
+
+  private isModifier(key: string): boolean {
+    return KeyStringParser.MODIFIER_KEYS.has(key.toLowerCase());
+  }
+
+  private normalizeModifier(modifier: string): string | null {
+    const normalized = modifier.toLowerCase();
+
+    const alias = KeyStringParser.MODIFIER_ALIASES.get(normalized);
+    if (alias) return alias;
+
+    return KeyStringParser.VALID_MODIFIERS.has(normalized) ? normalized : null;
+  }
+
+  private applyPlatformMapping(modifier: string): string {
+    if (this.platform === 'mac' && modifier === 'ctrl') {
+      return 'cmd';
+    }
+
+    if (this.platform !== 'mac' && modifier === 'cmd') {
+      return 'ctrl';
+    }
+
+    return modifier;
+  }
+
+  private buildKeyString(modifiers: string[], key: string): string {
+    return modifiers.length > 0 ? `${modifiers.join('+')}+${key}` : key;
+  }
+
+  private sortModifiers(modifiers: ModifierKey[]): void {
+    modifiers.sort((a, b) => {
+      const aIndex = KeyStringParser.MODIFIER_INDEX_MAP.get(a) ?? -1;
+      const bIndex = KeyStringParser.MODIFIER_INDEX_MAP.get(b) ?? -1;
+      return aIndex - bIndex;
+    });
+  }
+
+  private normalizeKey(key: string): string {
+    const trimmed = key.trim();
+
+    if (trimmed === '') {
+      return '';
+    }
+
+    if (SPECIAL_KEY_MAPPINGS[trimmed]) {
+      return SPECIAL_KEY_MAPPINGS[trimmed];
+    }
+
+    if (trimmed.length === 1) {
+      return trimmed.toLowerCase();
+    }
+
+    const lowerKey = trimmed.toLowerCase();
+
+    if (/^f\d{1,2}$/i.test(trimmed)) {
+      return lowerKey;
+    }
+
+    if (trimmed.startsWith('Numpad')) {
+      return `numpad${trimmed.slice(6).toLowerCase()}`;
+    }
+
+    return lowerKey;
+  }
+
+  public isValidKeyString(keyString: string): boolean {
+    if (!keyString || typeof keyString !== 'string') {
+      return false;
+    }
+
+    try {
+      const normalized = this.normalizeKeyString(keyString);
+      const parts = normalized.split('+');
+
+      if (parts.length === 0) {
+        return false;
+      }
+
+      const lastPart = parts[parts.length - 1];
+      if (this.isModifier(lastPart)) {
+        return false;
+      }
+
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (!this.isModifier(parts[i])) {
+          return false;
+        }
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  public getDisplayString(keyString: string): string {
+    const normalized = this.normalizeKeyString(keyString);
+    const parts = normalized.split('+');
+    const mappings =
+      this.platform === 'mac'
+        ? KeyStringParser.DISPLAY_MAPPINGS.mac
+        : KeyStringParser.DISPLAY_MAPPINGS.other;
+
+    return parts
+      .map(
+        (part) =>
+          mappings[part as keyof typeof mappings] ?? part.charAt(0).toUpperCase() + part.slice(1)
+      )
+      .join(this.platform === 'mac' ? '' : '+');
+  }
+}
