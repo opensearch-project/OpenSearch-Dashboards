@@ -28,7 +28,7 @@ export const correlationsSavedObjectType: SavedObjectsType = {
       },
       entities: {
         type: 'object',
-        enabled: true,
+        enabled: false,
       },
     },
   },
