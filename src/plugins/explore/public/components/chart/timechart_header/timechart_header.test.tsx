@@ -42,6 +42,7 @@ describe('timechart header', function () {
 
   beforeAll(() => {
     props = {
+      title: 'Log count',
       timeRange: {
         from: 'May 14, 2020 @ 11:05:13.590',
         to: 'May 14, 2020 @ 11:20:13.590',
@@ -113,7 +114,7 @@ describe('timechart header', function () {
     expect(intervalSelect.length).toBe(1);
   });
 
-  it('should render log count text', function () {
+  it('should render title text', function () {
     component = mountWithIntl(<TimechartHeader {...props} />);
     const logCountText = findTestSubject(component, 'discoverTimechartHeaderLogCount');
     expect(logCountText.text()).toBe('Log count');

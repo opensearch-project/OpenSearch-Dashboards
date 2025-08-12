@@ -31,7 +31,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import moment from 'moment-timezone';
 import { unitOfTime } from 'moment';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 import {
@@ -64,6 +64,7 @@ export interface DiscoverHistogramProps {
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   services: ExploreServices;
   showYAxisLabel?: boolean;
+  customChartsTheme?: Record<string, any>;
 }
 
 function findIntervalFromDuration(
@@ -134,6 +135,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
   timefilterUpdateHandler,
   services,
   showYAxisLabel = false,
+  customChartsTheme,
 }) => {
   useEffect(() => {
     const subscription = combineLatest([
@@ -226,8 +228,19 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
 
   const { uiSettings } = services;
   const timeZone = getTimezone(uiSettings);
-  const chartsTheme = services.theme.chartsDefaultTheme;
   const chartsBaseTheme = services.theme.chartsDefaultBaseTheme;
+
+  const chartsTheme = useMemo(() => {
+    const theme = { ...services.theme.chartsDefaultTheme };
+    // These styles override the chartsTheme so that the correct base chart colors are used
+    delete theme.axes?.gridLine?.horizontal?.stroke;
+    delete theme.axes?.gridLine?.vertical?.stroke;
+    delete theme.axes?.axisLine;
+    theme.axes = { ...theme.axes, axisTitle: { fill: euiThemeVars.euiTextColor } };
+    theme.colors = theme.colors ?? {};
+    theme.colors.vizColors = [euiThemeVars.euiColorVis1_behindText];
+    return { ...theme, ...customChartsTheme };
+  }, [services.theme.chartsDefaultTheme, customChartsTheme]);
 
   if (!chartData) {
     return null;
@@ -312,16 +325,6 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
     headerFormatter: renderBarTooltip(xInterval, domainStart, domainEnd),
     type: TooltipType.VerticalCursor,
   };
-
-  // These styles override the chartsTheme so that the correct base chart colors are used
-  delete chartsTheme.axes?.gridLine?.horizontal?.stroke;
-  delete chartsTheme.axes?.gridLine?.vertical?.stroke;
-  delete chartsTheme.axes?.axisLine;
-  chartsTheme.axes!.axisTitle = {
-    fill: euiThemeVars.euiTextColor,
-  };
-  chartsTheme.colors = chartsTheme.colors ?? {};
-  chartsTheme.colors.vizColors = [euiThemeVars.euiColorVis1_behindText];
 
   return (
     <Chart size="100%">

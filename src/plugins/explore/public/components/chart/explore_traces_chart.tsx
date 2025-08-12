@@ -12,6 +12,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { useDispatch, useSelector } from 'react-redux';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { DataPublicPluginStart, search } from '../../../../data/public';
 import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_header';
 import { DiscoverHistogram } from './histogram/histogram';
@@ -89,6 +90,9 @@ export const ExploreTracesChart = ({
   const timeChartHeader = (
     <div className="exploreChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
       <TimechartHeader
+        title={i18n.translate('explore.discover.timechartHeader.traces', {
+          defaultMessage: 'Request, Errors, and Latency',
+        })}
         bucketInterval={bucketInterval}
         dateFormat={config.get('dateFormat')}
         timeRange={timeRange}
@@ -139,80 +143,87 @@ export const ExploreTracesChart = ({
       data-test-subj="dscChartWrapper"
     >
       {queryEnhancedHistogramHeader}
-      <EuiFlexGroup direction="row" gutterSize="none">
-        {requestChartData && (
-          <EuiFlexItem>
-            <section
-              aria-label={i18n.translate('explore.traces.requestChartAriaLabel', {
-                defaultMessage: 'Request count histogram',
-              })}
-              className="exploreTimechart exploreTimechart--request"
-              data-test-subj="exploreTimechart-request"
-            >
-              <div
-                className="exploreHistogram exploreHistogram--request"
-                data-test-subj="exploreChart-request"
+      {showHistogram && (
+        <EuiFlexGroup direction="row" gutterSize="none">
+          {requestChartData && (
+            <EuiFlexItem>
+              <section
+                aria-label={i18n.translate('explore.traces.requestChartAriaLabel', {
+                  defaultMessage: 'Request count histogram',
+                })}
+                className="exploreTimechart exploreTimechart--request"
+                data-test-subj="exploreTimechart-request"
               >
-                <DiscoverHistogram
-                  chartData={requestChartData}
-                  chartType={'HistogramBar'}
-                  timefilterUpdateHandler={timefilterUpdateHandler}
-                  services={services}
-                  showYAxisLabel={true}
-                />
-              </div>
-            </section>
-          </EuiFlexItem>
-        )}
-        {errorChartData && (
-          <EuiFlexItem>
-            <section
-              aria-label={i18n.translate('explore.traces.errorChartAriaLabel', {
-                defaultMessage: 'Error count histogram',
-              })}
-              className="exploreTimechart exploreTimechart--error"
-              data-test-subj="exploreTimechart-error"
-            >
-              <div
-                className="exploreHistogram exploreHistogram--error"
-                data-test-subj="exploreChart-error"
+                <div
+                  className="exploreHistogram exploreHistogram--request"
+                  data-test-subj="exploreChart-request"
+                >
+                  <DiscoverHistogram
+                    chartData={requestChartData}
+                    chartType={'HistogramBar'}
+                    timefilterUpdateHandler={timefilterUpdateHandler}
+                    services={services}
+                    showYAxisLabel={true}
+                  />
+                </div>
+              </section>
+            </EuiFlexItem>
+          )}
+          {errorChartData && (
+            <EuiFlexItem>
+              <section
+                aria-label={i18n.translate('explore.traces.errorChartAriaLabel', {
+                  defaultMessage: 'Error count histogram',
+                })}
+                className="exploreTimechart exploreTimechart--error"
+                data-test-subj="exploreTimechart-error"
               >
-                <DiscoverHistogram
-                  chartData={errorChartData}
-                  chartType={'HistogramBar'}
-                  timefilterUpdateHandler={timefilterUpdateHandler}
-                  services={services}
-                  showYAxisLabel={true}
-                />
-              </div>
-            </section>
-          </EuiFlexItem>
-        )}
-        {latencyChartData && (
-          <EuiFlexItem>
-            <section
-              aria-label={i18n.translate('explore.traces.latencyChartAriaLabel', {
-                defaultMessage: 'Average latency chart',
-              })}
-              className="exploreTimechart exploreTimechart--latency"
-              data-test-subj="exploreTimechart-latency"
-            >
-              <div
-                className="exploreHistogram exploreHistogram--latency"
-                data-test-subj="exploreChart-latency"
+                <div
+                  className="exploreHistogram exploreHistogram--error"
+                  data-test-subj="exploreChart-error"
+                >
+                  <DiscoverHistogram
+                    chartData={errorChartData}
+                    chartType={'HistogramBar'}
+                    timefilterUpdateHandler={timefilterUpdateHandler}
+                    services={services}
+                    showYAxisLabel={true}
+                    customChartsTheme={{
+                      colors: {
+                        vizColors: [euiThemeVars.euiColorDanger],
+                      },
+                    }}
+                  />
+                </div>
+              </section>
+            </EuiFlexItem>
+          )}
+          {latencyChartData && (
+            <EuiFlexItem>
+              <section
+                aria-label={i18n.translate('explore.traces.latencyChartAriaLabel', {
+                  defaultMessage: 'Average latency chart',
+                })}
+                className="exploreTimechart exploreTimechart--latency"
+                data-test-subj="exploreTimechart-latency"
               >
-                <DiscoverHistogram
-                  chartData={latencyChartData}
-                  chartType={'Line'}
-                  timefilterUpdateHandler={timefilterUpdateHandler}
-                  services={services}
-                  showYAxisLabel={true}
-                />
-              </div>
-            </section>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+                <div
+                  className="exploreHistogram exploreHistogram--latency"
+                  data-test-subj="exploreChart-latency"
+                >
+                  <DiscoverHistogram
+                    chartData={latencyChartData}
+                    chartType={'Line'}
+                    timefilterUpdateHandler={timefilterUpdateHandler}
+                    services={services}
+                    showYAxisLabel={true}
+                  />
+                </div>
+              </section>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
     </EuiFlexGroup>
   );
 };

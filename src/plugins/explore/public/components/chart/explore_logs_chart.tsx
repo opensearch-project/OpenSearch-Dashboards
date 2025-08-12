@@ -118,6 +118,9 @@ export const ExploreLogsChart = ({
   const timeChartHeader = (
     <div className="exploreChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
       <TimechartHeader
+        title={i18n.translate('explore.discover.timechartHeader.logCount', {
+          defaultMessage: 'Log count',
+        })}
         bucketInterval={bucketInterval}
         dateFormat={config.get('dateFormat')}
         timeRange={timeRange}
