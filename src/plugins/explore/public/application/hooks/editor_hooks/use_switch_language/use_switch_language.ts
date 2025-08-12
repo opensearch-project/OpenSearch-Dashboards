@@ -9,11 +9,7 @@ import { EditorMode } from '../../../utils/state_management/types';
 import { setEditorMode } from '../../../utils/state_management/slices';
 import { useEditorRef } from '../use_editor_ref';
 
-export interface UseLanguageSwitchReturn {
-  switchEditorMode: (mode: EditorMode) => void;
-}
-
-export const useLanguageSwitch = (): UseLanguageSwitchReturn => {
+export const useSwitchLanguage = (): ((mode: EditorMode) => void) => {
   const dispatch = useDispatch();
   const editorRef = useEditorRef();
 
@@ -29,7 +25,5 @@ export const useLanguageSwitch = (): UseLanguageSwitchReturn => {
     [dispatch, editorRef]
   );
 
-  return {
-    switchEditorMode,
-  };
+  return switchEditorMode;
 };

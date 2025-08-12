@@ -18,7 +18,7 @@ import {
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
 
 import { useEditorRef } from '../../../../application/hooks';
-import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_language_switch';
+import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
@@ -116,7 +116,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
   const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
 
-  const { switchEditorMode } = useLanguageSwitch();
+  const switchEditorMode = useLanguageSwitch();
 
   // Keep the refs updated with latest context
   useEffect(() => {

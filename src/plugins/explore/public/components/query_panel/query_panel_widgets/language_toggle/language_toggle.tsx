@@ -14,8 +14,8 @@ import {
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
-import { useEditorFocus, useEditorRef } from '../../../../application/hooks';
-import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_language_switch';
+import { useEditorFocus } from '../../../../application/hooks';
+import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
 import './language_toggle.scss';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
@@ -27,10 +27,9 @@ export const LanguageToggle = () => {
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const language = useSelector(selectQueryLanguage);
-  const editorRef = useEditorRef();
   const focusOnEditor = useEditorFocus();
 
-  const { switchEditorMode } = useLanguageSwitch();
+  const switchEditorMode = useLanguageSwitch();
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
