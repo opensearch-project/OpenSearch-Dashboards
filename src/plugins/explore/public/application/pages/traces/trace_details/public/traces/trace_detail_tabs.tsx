@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
+import { TraceDetailTab } from '../../constants/trace_detail_tabs';
 
 export interface TraceDetailTabsProps {
   activeTab: string;
@@ -47,13 +48,13 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
 }) => {
   const tabs = [
     {
-      id: 'timeline',
+      id: TraceDetailTab.TIMELINE,
       name: i18n.translate('explore.traceView.tab.timeline', {
         defaultMessage: 'Timeline',
       }),
     },
     {
-      id: 'span_list',
+      id: TraceDetailTab.SPAN_LIST,
       name: (
         <>
           {transformedHits.length > 0 && (
@@ -68,13 +69,13 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
       ),
     },
     {
-      id: 'tree_view',
+      id: TraceDetailTab.TREE_VIEW,
       name: i18n.translate('explore.traceView.tab.treeView', {
         defaultMessage: 'Tree view',
       }),
     },
     {
-      id: 'service_map',
+      id: TraceDetailTab.SERVICE_MAP,
       name: i18n.translate('explore.traceView.tab.serviceMap', {
         defaultMessage: 'Service map',
       }),
@@ -84,7 +85,7 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   // Add logs tab if we have log datasets and logs data
   if (logDatasets.length > 0 && logsData.length > 0) {
     tabs.push({
-      id: 'logs',
+      id: TraceDetailTab.LOGS,
       name: (
         <>
           <EuiBadge color="default">{logsData.length}</EuiBadge>{' '}

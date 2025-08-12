@@ -4,9 +4,13 @@
  */
 
 import { CorrelationService } from './correlation_service';
-import { SavedObjectsClientContract } from '../../../../../../../../../core/public';
+import {
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+} from '../../../../../../../../../core/public';
 import { DataPublicPluginStart } from '../../../../../../../../data/public';
 import { Dataset } from '../../../../../../../../data/common';
+import { SAMPLE_SIZE_SETTING } from '../../../../../../../common';
 import {
   fetchTraceLogsByTraceId,
   transformLogsResponseToHits,
@@ -26,6 +30,7 @@ const mockTransformLogsResponseToHits = transformLogsResponseToHits as jest.Mock
 
 describe('CorrelationService', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockUiSettings: jest.Mocked<IUiSettingsClient>;
   let correlationService: CorrelationService;
   let mockDataService: jest.Mocked<DataPublicPluginStart>;
 
@@ -41,9 +46,16 @@ describe('CorrelationService', () => {
       bulkUpdate: jest.fn(),
     } as any;
 
+    mockUiSettings = {
+      get: jest.fn((key) => {
+        if (key === SAMPLE_SIZE_SETTING) return 500;
+        return undefined;
+      }),
+    } as any;
+
     mockDataService = {} as any;
 
-    correlationService = new CorrelationService(mockSavedObjectsClient);
+    correlationService = new CorrelationService(mockSavedObjectsClient, mockUiSettings);
 
     jest.clearAllMocks();
   });
@@ -329,8 +341,39 @@ describe('CorrelationService', () => {
         },
       ];
 
-      jest.spyOn(correlationService, 'checkCorrelationsForLogs').mockResolvedValue(mockLogDatasets);
+      const mockCorrelations = {
+        savedObjects: [
+          {
+            id: 'correlation-1',
+            type: 'correlations',
+            attributes: {
+              entities: [
+                { tracesDataset: { meta: { correlatedFields: {} } } },
+                { logsDataset: { meta: { correlatedFields: {} } } },
+              ],
+            },
+            references: [
+              { id: 'trace-dataset-id', type: 'index-pattern' },
+              { id: 'log-dataset-id', type: 'index-pattern' },
+            ],
+          } as any,
+        ],
+        total: 1,
+        perPage: 10,
+        page: 1,
+      };
 
+      const mockLogDataset = {
+        id: 'log-dataset-id',
+        type: 'index-pattern',
+        attributes: {
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      };
+
+      mockSavedObjectsClient.find.mockResolvedValue(mockCorrelations as any);
+      mockSavedObjectsClient.get.mockResolvedValue(mockLogDataset as any);
       mockFetchTraceLogsByTraceId.mockResolvedValue(mockLogsResponse);
       mockTransformLogsResponseToHits.mockReturnValue(mockTransformedLogs as any);
 
@@ -346,7 +389,43 @@ describe('CorrelationService', () => {
       expect(mockFetchTraceLogsByTraceId).toHaveBeenCalledWith(mockDataService, {
         traceId,
         dataset: mockLogDatasets[0],
-        limit: 1000,
+        limit: 500,
+      });
+    });
+
+    it('should use UI setting for sample size', async () => {
+      const dataset = { id: 'trace-dataset-id' } as Dataset;
+      const traceId = 'test-trace-id';
+
+      const mockLogDatasets = [
+        {
+          id: 'log-dataset-id',
+          timeFieldName: '@timestamp',
+          title: 'logs-*',
+          type: 'INDEX_PATTERN',
+        },
+      ];
+
+      const mockLogsResponse = { hits: [] };
+      const mockTransformedLogs: any[] = [];
+
+      // Mock UI settings to return a different sample size
+      mockUiSettings.get.mockImplementation((key) => {
+        if (key === SAMPLE_SIZE_SETTING) return 750;
+        return undefined;
+      });
+
+      jest.spyOn(correlationService, 'checkCorrelationsForLogs').mockResolvedValue(mockLogDatasets);
+      mockFetchTraceLogsByTraceId.mockResolvedValue(mockLogsResponse);
+      mockTransformLogsResponseToHits.mockReturnValue(mockTransformedLogs as any);
+
+      await correlationService.checkCorrelationsAndFetchLogs(dataset, mockDataService, traceId);
+
+      expect(mockUiSettings.get).toHaveBeenCalledWith(SAMPLE_SIZE_SETTING);
+      expect(mockFetchTraceLogsByTraceId).toHaveBeenCalledWith(mockDataService, {
+        traceId,
+        dataset: mockLogDatasets[0],
+        limit: 750,
       });
     });
 

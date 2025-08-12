@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../../../core/public';
+import {
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+} from '../../../../../../../../../core/public';
 import { DataPublicPluginStart } from '../../../../../../../../data/public';
 import { Dataset } from '../../../../../../../../data/common';
+import { SAMPLE_SIZE_SETTING } from '../../../../../../../common';
 import {
   fetchTraceLogsByTraceId,
   transformLogsResponseToHits,
@@ -75,7 +79,10 @@ export interface IndexPatternAttributes {
 }
 
 export class CorrelationService {
-  constructor(private savedObjectsClient: SavedObjectsClientContract) {}
+  constructor(
+    private savedObjectsClient: SavedObjectsClientContract,
+    private uiSettings: IUiSettingsClient
+  ) {}
 
   /**
    * Find correlations using saved object client pattern
@@ -196,11 +203,13 @@ export class CorrelationService {
       const logDatasets = await this.checkCorrelationsForLogs(dataset);
 
       if (logDatasets.length > 0) {
+        const sampleSize = this.uiSettings.get(SAMPLE_SIZE_SETTING);
+
         // Fetch logs for the trace using the first log dataset
         const logsResponse = await fetchTraceLogsByTraceId(data, {
           traceId,
           dataset: logDatasets[0], // Use first log dataset
-          limit: 1000,
+          limit: sampleSize,
         });
 
         const logs = transformLogsResponseToHits(logsResponse);

@@ -44,6 +44,7 @@ import { CorrelationService } from './public/logs/correlation_service';
 import { LogHit } from './server/ppl_request_logs';
 import { TraceLogsTab } from './public/logs/trace_logs_tab';
 import { Dataset } from '../../../../../../data/common';
+import { TraceDetailTab } from './constants/trace_detail_tabs';
 
 export interface SpanFilter {
   field: string;
@@ -65,7 +66,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   isEmbedded = false,
 }) => {
   const {
-    services: { chrome, data, osdUrlStateStorage, savedObjects },
+    services: { chrome, data, osdUrlStateStorage, savedObjects, uiSettings },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
   // Initialize URL state management
@@ -108,7 +109,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [unfilteredHits, setUnfilteredHits] = useState<TraceHit[]>([]);
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<string>('timeline');
+  const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
   const [isServiceLegendOpen, setIsServiceLegendOpen] = useState(false);
   const [logsData, setLogsData] = useState<LogHit[]>([]);
   const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
@@ -119,8 +120,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   // Create correlation service instance
   const correlationService = useMemo(
-    () => (savedObjects?.client ? new CorrelationService(savedObjects.client) : undefined),
-    [savedObjects?.client]
+    () =>
+      savedObjects?.client && uiSettings
+        ? new CorrelationService(savedObjects.client, uiSettings)
+        : undefined,
+    [savedObjects?.client, uiSettings]
   );
 
   // Generate dynamic color map based on unfiltered hits
@@ -460,7 +464,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                       <EuiPanel paddingSize="s" className="exploreTraceView__contentPanel">
                         {/* Tab content */}
                         <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
-                          {activeTab === 'service_map' && (
+                          {activeTab === TraceDetailTab.SERVICE_MAP && (
                             <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
                               <ServiceMap
                                 hits={transformedHits}
@@ -472,9 +476,9 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             </div>
                           )}
 
-                          {(activeTab === 'timeline' ||
-                            activeTab === 'span_list' ||
-                            activeTab === 'tree_view') && (
+                          {(activeTab === TraceDetailTab.TIMELINE ||
+                            activeTab === TraceDetailTab.SPAN_LIST ||
+                            activeTab === TraceDetailTab.TREE_VIEW) && (
                             <SpanDetailPanel
                               key={`span-panel-${visualizationKey}`}
                               chrome={chrome}
@@ -488,7 +492,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             />
                           )}
 
-                          {activeTab === 'logs' && (
+                          {activeTab === TraceDetailTab.LOGS && (
                             <TraceLogsTab
                               traceId={traceId}
                               logDatasets={logDatasets}

@@ -8,6 +8,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { LogsDataTable, LogsDataTableProps } from './logs_data_table';
 import { LogHit } from '../../server/ppl_request_logs';
 
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: (key: string, options: { defaultMessage: string }) => options.defaultMessage,
+  },
+}));
+
 describe('LogsDataTable', () => {
   const mockLogs: LogHit[] = [
     {
@@ -70,7 +76,7 @@ describe('LogsDataTable', () => {
     it('should render the logs data table', () => {
       render(<LogsDataTable {...defaultProps} />);
 
-      expect(screen.getByTestId('logs-data-table')).toBeInTheDocument();
+      expect(screen.getByTestId('trace-logs-data-table')).toBeInTheDocument();
     });
 
     it('should display all log entries', () => {
@@ -90,7 +96,7 @@ describe('LogsDataTable', () => {
     it('should handle empty logs array', () => {
       render(<LogsDataTable {...defaultProps} logs={[]} />);
 
-      expect(screen.getByTestId('logs-data-table')).toBeInTheDocument();
+      expect(screen.getByTestId('trace-logs-data-table')).toBeInTheDocument();
       // Table should still render but with no data rows
     });
   });
@@ -309,7 +315,7 @@ describe('LogsDataTable', () => {
       expect(messageHeader).toBeInTheDocument();
 
       // Table should not have sorting functionality in compact mode
-      const table = screen.getByTestId('logs-data-table');
+      const table = screen.getByTestId('trace-logs-data-table');
       expect(table).toBeInTheDocument();
     });
   });
@@ -335,7 +341,7 @@ describe('LogsDataTable', () => {
       render(<LogsDataTable {...defaultProps} logs={manyLogs} />);
 
       // Should show pagination controls - look for pagination elements
-      const table = screen.getByTestId('logs-data-table');
+      const table = screen.getByTestId('trace-logs-data-table');
       expect(table).toBeInTheDocument();
 
       // Check that only 50 items are shown (default page size)

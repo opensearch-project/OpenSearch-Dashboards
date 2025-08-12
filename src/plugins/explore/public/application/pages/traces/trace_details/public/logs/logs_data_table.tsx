@@ -167,7 +167,13 @@ export const LogsDataTable: React.FC<LogsDataTableProps> = ({
   };
 
   if (isLoading) {
-    return <div>Loading logs...</div>;
+    return (
+      <div>
+        {i18n.translate('explore.logsDataTable.loadingLogs', {
+          defaultMessage: 'Loading logs...',
+        })}
+      </div>
+    );
   }
 
   const tableProps = {
@@ -175,7 +181,7 @@ export const LogsDataTable: React.FC<LogsDataTableProps> = ({
     columns,
     loading: isLoading,
     tableLayout: 'auto' as const,
-    'data-test-subj': 'logs-data-table',
+    'data-test-subj': 'trace-logs-data-table',
     ...(compactMode
       ? {}
       : {

@@ -24,6 +24,7 @@ import { SpanMetadataTab } from './span_tabs/span_metadata_tab';
 import { SpanRawSpanTab } from './span_tabs/span_raw_span_tab';
 import { SpanLogsTab } from '../logs/span_logs_tab';
 import { filterLogsBySpanId } from '../logs/url_builder';
+import { SpanDetailTab } from '../../constants/span_detail_tabs';
 
 export interface SpanDetailTabsProps {
   selectedSpan?: any;
@@ -35,7 +36,7 @@ export interface SpanDetailTabsProps {
   isLogsLoading?: boolean;
 }
 
-type TabId = 'overview' | 'errors' | 'metadata' | 'raw_span' | 'logs';
+type TabId = SpanDetailTab;
 
 interface TabItem {
   id: TabId;
@@ -52,7 +53,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   logsData = [],
   isLogsLoading = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [activeTab, setActiveTab] = useState<TabId>(SpanDetailTab.OVERVIEW);
 
   // Calculate counts for badges
   const issueCount = useMemo(() => {
@@ -68,21 +69,21 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   const tabs = useMemo((): TabItem[] => {
     const tabList: TabItem[] = [
       {
-        id: 'overview' as TabId,
+        id: SpanDetailTab.OVERVIEW,
         name: i18n.translate('explore.spanDetailTabs.tab.overview', {
           defaultMessage: 'Overview',
         }),
         content: (
           <SpanOverviewTab
             selectedSpan={selectedSpan}
-            onSwitchToErrorsTab={() => setActiveTab('errors')}
+            onSwitchToErrorsTab={() => setActiveTab(SpanDetailTab.ERRORS)}
           />
         ),
       },
     ];
 
     tabList.push({
-      id: 'errors' as TabId,
+      id: SpanDetailTab.ERRORS,
       name: (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -102,7 +103,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
 
     if (logDatasets.length > 0 && spanLogs.length > 0) {
       tabList.push({
-        id: 'logs' as TabId,
+        id: SpanDetailTab.LOGS,
         name: i18n.translate('explore.spanDetailTabs.tab.logs', {
           defaultMessage: 'Logs',
         }),
@@ -120,14 +121,14 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
 
     tabList.push(
       {
-        id: 'metadata' as TabId,
+        id: SpanDetailTab.METADATA,
         name: i18n.translate('explore.spanDetailTabs.tab.metadata', {
           defaultMessage: 'Metadata',
         }),
         content: <SpanMetadataTab selectedSpan={selectedSpan} addSpanFilter={addSpanFilter} />,
       },
       {
-        id: 'raw_span' as TabId,
+        id: SpanDetailTab.RAW_SPAN,
         name: i18n.translate('explore.spanDetailTabs.tab.rawSpan', {
           defaultMessage: 'Raw span',
         }),
@@ -142,7 +143,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   useEffect(() => {
     const availableTabIds = tabs.map((tab) => tab.id);
     if (!availableTabIds.includes(activeTab)) {
-      setActiveTab('overview');
+      setActiveTab(SpanDetailTab.OVERVIEW);
     }
   }, [tabs, activeTab]);
 
