@@ -234,7 +234,7 @@ export function TimechartHeader({
             </EuiFlexItem>
           </>
         )}
-        {additionalControl && additionalControl}
+        {additionalControl}
       </EuiFlexGroup>
     </I18nProvider>
   );

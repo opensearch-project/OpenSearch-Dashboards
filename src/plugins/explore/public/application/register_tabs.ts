@@ -44,7 +44,7 @@ export const registerBuiltInTabs = (
   // tabRegistry.registerTab({
   //   id: 'explore_patterns_tab',
   //   label: 'Patterns',
-  //   flavor: [],
+  //   flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
   //   order: 15,
   //   supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
   //
