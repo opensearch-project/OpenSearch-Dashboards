@@ -75,11 +75,10 @@ export const DiscoverChartContainer = () => {
     return null;
   }
 
-  if ('chartData' in processedResults && processedResults.chartData == null) {
-    return null;
-  }
-
-  if ('requestChartData' in processedResults && processedResults.requestChartData == null) {
+  if (
+    (processedResults as TracesChartProcessedResults).requestChartData == null &&
+    (processedResults as ProcessedSearchResults).chartData == null
+  ) {
     return null;
   }
 

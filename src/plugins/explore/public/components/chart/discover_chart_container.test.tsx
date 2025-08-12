@@ -199,4 +199,36 @@ describe('DiscoverChartContainer', () => {
     const { container } = renderComponent(true);
     expect(container.firstChild).toBeNull();
   });
+
+  it('returns null when logs flavor has no chart data', () => {
+    // Mock histogramResultsProcessor to return null chartData
+    const { histogramResultsProcessor } = jest.requireMock(
+      '../../application/utils/state_management/actions/query_actions'
+    );
+    histogramResultsProcessor.mockReturnValueOnce({
+      chartData: null,
+      bucketInterval: { scale: false, description: '1h' },
+      hits: { total: 10 },
+    });
+
+    const { container } = renderComponent(true, ExploreFlavor.Logs);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('returns null when traces flavor has no request chart data', () => {
+    // Mock tracesHistogramResultsProcessor to return null requestChartData
+    const { tracesHistogramResultsProcessor } = jest.requireMock(
+      '../../application/utils/state_management/actions/processors/trace_chart_data_processor'
+    );
+    tracesHistogramResultsProcessor.mockReturnValueOnce({
+      requestChartData: null,
+      errorChartData: { values: [], xAxisOrderedValues: [] },
+      latencyChartData: { values: [], xAxisOrderedValues: [] },
+      bucketInterval: { scale: false, description: '1h' },
+      hits: { total: 10 },
+    });
+
+    const { container } = renderComponent(true, ExploreFlavor.Traces);
+    expect(container.firstChild).toBeNull();
+  });
 });
