@@ -312,5 +312,3 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export type { IndexPatternsService } from './index_patterns';
-
-export { correlationsSavedObjectType } from './saved_objects';
