@@ -288,7 +288,6 @@ describe('KeyStringParser', () => {
     it('should have escape alias mapping', () => {
       expect(SPECIAL_KEY_MAPPINGS.Esc).toBe('escape');
     });
-
   });
 
   describe('Modifier Order', () => {
