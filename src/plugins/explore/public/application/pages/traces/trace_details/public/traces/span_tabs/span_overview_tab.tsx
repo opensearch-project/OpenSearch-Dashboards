@@ -50,7 +50,9 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
           <EuiCopy textToCopy={copyValue}>
             {(copy) => (
               <EuiSmallButtonIcon
-                aria-label="Copy to clipboard"
+                aria-label={i18n.translate('explore.spanOverviewTab.copyToClipboard', {
+                  defaultMessage: 'Copy to clipboard',
+                })}
                 onClick={copy}
                 iconType="copyClipboard"
               />
@@ -143,7 +145,9 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
           <OverviewField
-            label="Service identifier"
+            label={i18n.translate('explore.spanOverviewTab.serviceIdentifier', {
+              defaultMessage: 'Service identifier',
+            })}
             value={serviceName || '-'}
             copyable={!!serviceName}
             copyValue={serviceName}
@@ -151,7 +155,9 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <OverviewField
-            label="Span ID"
+            label={i18n.translate('explore.spanOverviewTab.spanId', {
+              defaultMessage: 'Span ID',
+            })}
             value={spanId || '-'}
             copyable={!!spanId}
             copyValue={spanId}
@@ -164,7 +170,9 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
           <OverviewField
-            label="Start time"
+            label={i18n.translate('explore.spanOverviewTab.startTime', {
+              defaultMessage: 'Start time',
+            })}
             value={
               startTime
                 ? `${moment(startTime).format('MMM D')} @ ${moment(startTime).format(
@@ -176,19 +184,31 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <OverviewField
-            label="Span status"
+            label={i18n.translate('explore.spanOverviewTab.spanStatus', {
+              defaultMessage: 'Span status',
+            })}
             value={
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="dot" color={hasError ? 'danger' : 'success'} size="s" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s">{hasError ? 'Fault' : 'OK'}</EuiText>
+                  <EuiText size="s">
+                    {hasError
+                      ? i18n.translate('explore.spanOverviewTab.fault', {
+                          defaultMessage: 'Fault',
+                        })
+                      : i18n.translate('explore.spanOverviewTab.ok', {
+                          defaultMessage: 'OK',
+                        })}
+                  </EuiText>
                 </EuiFlexItem>
                 {hasError && onSwitchToErrorsTab && (
                   <EuiFlexItem grow={false}>
                     <EuiLink color="primary" onClick={onSwitchToErrorsTab}>
-                      View errors
+                      {i18n.translate('explore.spanOverviewTab.viewErrors', {
+                        defaultMessage: 'View errors',
+                      })}
                     </EuiLink>
                   </EuiFlexItem>
                 )}
@@ -204,14 +224,22 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
       {(httpUrl || httpMethod) && (
         <>
           <EuiTitle size="xs">
-            <h3>Request</h3>
+            <h3>
+              {i18n.translate('explore.spanOverviewTab.request', {
+                defaultMessage: 'Request',
+              })}
+            </h3>
           </EuiTitle>
           <EuiSpacer size="m" />
 
           {httpUrl && (
             <>
               <EuiText size="s">
-                <strong>Request URL</strong>
+                <strong>
+                  {i18n.translate('explore.spanOverviewTab.requestUrl', {
+                    defaultMessage: 'Request URL',
+                  })}
+                </strong>
               </EuiText>
               <EuiSpacer size="xs" />
               <EuiFlexGroup gutterSize="xs" alignItems="flexStart">
@@ -219,7 +247,9 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
                   <EuiCopy textToCopy={httpUrl}>
                     {(copy) => (
                       <EuiSmallButtonIcon
-                        aria-label="Copy to clipboard"
+                        aria-label={i18n.translate('explore.spanOverviewTab.copyToClipboard', {
+                          defaultMessage: 'Copy to clipboard',
+                        })}
                         onClick={copy}
                         iconType="copyClipboard"
                       />
@@ -243,18 +273,33 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
 
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
-              <OverviewField label="Request method" value={httpMethod || operation || '-'} />
+              <OverviewField
+                label={i18n.translate('explore.spanOverviewTab.requestMethod', {
+                  defaultMessage: 'Request method',
+                })}
+                value={httpMethod || operation || '-'}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <OverviewField
-                label="Request code"
+                label={i18n.translate('explore.spanOverviewTab.requestCode', {
+                  defaultMessage: 'Request code',
+                })}
                 value={
                   httpStatusCode ? (
                     <EuiBadge color={getStatusCodeColor(httpStatusCode)}>{httpStatusCode}</EuiBadge>
                   ) : hasError ? (
-                    <EuiBadge color="danger">Error</EuiBadge>
+                    <EuiBadge color="danger">
+                      {i18n.translate('explore.spanOverviewTab.error', {
+                        defaultMessage: 'Error',
+                      })}
+                    </EuiBadge>
                   ) : (
-                    <EuiBadge color="success">Success</EuiBadge>
+                    <EuiBadge color="success">
+                      {i18n.translate('explore.spanOverviewTab.success', {
+                        defaultMessage: 'Success',
+                      })}
+                    </EuiBadge>
                   )
                 }
               />
