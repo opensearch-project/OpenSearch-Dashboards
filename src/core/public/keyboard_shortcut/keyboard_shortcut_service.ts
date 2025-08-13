@@ -34,6 +34,7 @@ export class KeyboardShortcutService {
     this.stopEventListener();
     this.shortcutsMapByKey.clear();
     this.namespacedIdToKeyLookup.clear();
+    this.keyParser.clearCache();
   }
 
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
@@ -41,15 +42,30 @@ export class KeyboardShortcutService {
 
   private register(shortcut: ShortcutDefinition): void {
     if (!this.keyParser.isValidKeyString(shortcut.keys)) {
-      return;
+      throw new Error(
+        `Invalid keyboard shortcut key string: "${shortcut.keys}" for shortcut "${shortcut.id}" in plugin "${shortcut.pluginId}"`
+      );
     }
 
     const key = this.keyParser.normalizeKeyString(shortcut.keys);
     const namespacedId = this.getNamespacedId(shortcut);
 
     const existingShortcuts = this.shortcutsMapByKey.get(key) || [];
-    this.shortcutsMapByKey.set(key, [...existingShortcuts, shortcut]);
 
+    if (existingShortcuts.length > 0) {
+      const conflictingShortcuts = existingShortcuts
+        .map((s) => `${s.id} (${s.pluginId})`)
+        .join(', ');
+      // eslint-disable-next-line no-console
+      console.warn(
+        `keyboard shortcut conflict detected for key "${shortcut.keys}". ` +
+          `New shortcut "${shortcut.id}" from plugin "${shortcut.pluginId}" ` +
+          `conflicts with active shortcuts: ${conflictingShortcuts}. ` +
+          `The new shortcut will take precedence when the key is pressed.`
+      );
+    }
+
+    this.shortcutsMapByKey.set(key, [...existingShortcuts, shortcut]);
     this.namespacedIdToKeyLookup.set(namespacedId, key);
   }
 
@@ -92,7 +108,8 @@ export class KeyboardShortcutService {
     const element = target;
     const tagName = element.tagName;
 
-    if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+    const inputTags = ['INPUT', 'TEXTAREA', 'SELECT'];
+    if (inputTags.includes(tagName)) {
       return true;
     }
 
@@ -120,7 +137,11 @@ export class KeyboardShortcutService {
       try {
         shortcut.execute();
       } catch (error) {
-        // shortcut execution errors
+        // eslint-disable-next-line no-console
+        console.error(
+          `Error executing shortcut ${shortcut.id} from plugin ${shortcut.pluginId}:`,
+          error
+        );
       }
     }
   };

@@ -86,7 +86,10 @@ export class KeyStringParser {
 
   private static readonly VALID_MODIFIERS = new Set(MODIFIER_ORDER);
 
-  private static readonly PLATFORM_MODIFIER_MAPPINGS = {
+  private static readonly PLATFORM_MODIFIER_MAPPINGS: {
+    readonly mac: Record<string, string>;
+    readonly other: Record<string, string>;
+  } = {
     mac: {
       ctrl: 'cmd',
       control: 'cmd',
@@ -109,7 +112,10 @@ export class KeyStringParser {
     },
   } as const;
 
-  private static readonly DISPLAY_MAPPINGS = {
+  private static readonly DISPLAY_MAPPINGS: {
+    readonly mac: Record<string, string>;
+    readonly other: Record<string, string>;
+  } = {
     mac: {
       ctrl: '⌃',
       alt: '⌥',
@@ -146,15 +152,10 @@ export class KeyStringParser {
     },
   } as const;
 
-  private static readonly MAX_CACHE_SIZE = 1000;
-  private platform: 'mac' | 'windows' | 'linux';
+  private platform = this.detectPlatform();
   private keyStringCache = new Map<string, string>();
 
-  constructor(platform?: 'mac' | 'windows' | 'linux') {
-    this.platform = platform ?? this.detectPlatform();
-  }
-
-  private detectPlatform(): 'mac' | 'windows' | 'linux' {
+  private detectPlatform() {
     if (typeof navigator === 'undefined') {
       return 'linux';
     }
@@ -197,32 +198,24 @@ export class KeyStringParser {
 
     const result = this.computeNormalizedKeyString(keyString);
 
-    if (this.keyStringCache.size >= KeyStringParser.MAX_CACHE_SIZE) {
-      const firstKey = this.keyStringCache.keys().next().value;
-      if (firstKey !== undefined) {
-        this.keyStringCache.delete(firstKey);
-      }
-    }
-
     this.keyStringCache.set(keyString, result);
 
     return result;
   }
 
   private validateInput(keyString: string): void {
-    if (keyString === null || keyString === undefined) {
-      throw new Error(`Invalid key string input: expected string, got ${keyString}`);
-    }
-
-    if (typeof keyString !== 'string') {
-      throw new Error(`Invalid key string input: expected string, got ${typeof keyString}`);
-    }
-
-    if (keyString.trim() === '') {
+    if (keyString.trim() === '' && keyString !== ' ') {
       throw new Error(`Key string cannot be empty or whitespace-only: "${keyString}"`);
     }
 
     const trimmed = keyString.trim();
+
+    if (trimmed.includes(' ') && !trimmed.includes('+ ') && trimmed !== ' ') {
+      throw new Error(
+        `Chord sequences are not supported. Found space in key string: "${keyString}". ` +
+          `Use '+' to separate simultaneous keys (e.g., "ctrl+shift+s").`
+      );
+    }
 
     if (/\+\+(?!$)/.test(trimmed)) {
       throw new Error(
@@ -275,8 +268,7 @@ export class KeyStringParser {
       .filter((part) => part.length > 0);
 
     const modifiers: ModifierKey[] = [];
-    let key = '';
-    let sawNonModifier = false;
+    const keys: string[] = [];
 
     for (const part of parts) {
       if (this.isModifier(part)) {
@@ -292,22 +284,36 @@ export class KeyStringParser {
       } else if (part.length > 0) {
         const normalizedKey = this.normalizeKey(part);
         if (normalizedKey.length > 0) {
-          if (sawNonModifier) {
-            throw new Error(`Malformed key string: multiple non-modifier keys: "${keyString}"`);
-          }
-          key = normalizedKey;
-          sawNonModifier = true;
+          keys.push(normalizedKey);
         }
       }
     }
 
+    if (keys.length > 2) {
+      throw new Error(`Malformed key string: too many non-modifier keys: "${keyString}"`);
+    }
+
+    if (keys.length > 1 && modifiers.length > 0) {
+      throw new Error(
+        `Malformed key string: multiple non-modifier keys with modifiers: "${keyString}"`
+      );
+    }
+
+    if (keys.length === 0 && modifiers.length === 0) {
+      throw new Error(`Malformed key string: no valid keys found: "${keyString}"`);
+    }
+
     this.sortModifiers(modifiers);
 
-    if (modifiers.length > 0 && !key) {
+    if (modifiers.length > 0 && keys.length === 0) {
       return modifiers.join('+');
     }
 
-    return this.buildKeyString(modifiers, key);
+    if (keys.length === 1) {
+      return this.buildKeyString(modifiers, keys[0]);
+    }
+
+    return keys.join('+');
   }
 
   /**
@@ -412,7 +418,7 @@ export class KeyStringParser {
   }
 
   public isValidKeyString(keyString: string): boolean {
-    if (!keyString || typeof keyString !== 'string') {
+    if (!keyString) {
       return false;
     }
 
@@ -424,18 +430,18 @@ export class KeyStringParser {
         return false;
       }
 
-      const lastPart = parts[parts.length - 1];
-      if (this.isModifier(lastPart)) {
-        return false;
-      }
+      let modifierCount = 0;
+      let keyCount = 0;
 
-      for (let i = 0; i < parts.length - 1; i++) {
-        if (!this.isModifier(parts[i])) {
-          return false;
+      for (const part of parts) {
+        if (this.isModifier(part)) {
+          modifierCount++;
+        } else {
+          keyCount++;
         }
       }
 
-      return true;
+      return keyCount === 1 || (keyCount === 2 && modifierCount === 0);
     } catch {
       return false;
     }
@@ -455,5 +461,9 @@ export class KeyStringParser {
           mappings[part as keyof typeof mappings] ?? part.charAt(0).toUpperCase() + part.slice(1)
       )
       .join(this.platform === 'mac' ? '' : '+');
+  }
+
+  public clearCache(): void {
+    this.keyStringCache.clear();
   }
 }
