@@ -1,3 +1,33 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import {
   EuiHeaderSectionItemButton,
   EuiIcon,
@@ -74,14 +104,13 @@ const demoNotificationEventsData = [
   },
 ];
 
-export type HeaderNotificationAreaProps = {};
-
 export type HeaderNotificationFilters = Partial<
   {
-    [K in keyof NotificationEventProps]: NotificationEventProps[K][] | undefined;
+    [K in keyof NotificationEventProps]: Array<NotificationEventProps[K]>;
   }
 >;
-export function HeaderNotificationArea({}: HeaderNotificationAreaProps) {
+
+export function HeaderNotificationArea() {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [events, setEvents] = useState<NotificationEventProps[]>(demoNotificationEventsData);
   const [filters, setFilters] = useState<HeaderNotificationFilters>({});
@@ -107,7 +136,7 @@ export function HeaderNotificationArea({}: HeaderNotificationAreaProps) {
     </EuiToolTip>
   );
 
-  const onRead = (id: string, isRead: boolean) => {
+  const handleRead = (id: string, isRead: boolean) => {
     const nextState = events.map((event) => {
       return event.id === id ? { ...event, isRead: !isRead } : event;
     });
@@ -123,7 +152,7 @@ export function HeaderNotificationArea({}: HeaderNotificationAreaProps) {
     const { type, isRead } = event;
 
     return [
-      <EuiContextMenuItem key="contextMenuMarkAsRead" onClick={() => onRead(id, isRead)}>
+      <EuiContextMenuItem key="contextMenuMarkAsRead" onClick={() => handleRead(id, isRead)}>
         {isRead ? 'Mark as unread' : 'Mark as read'}
       </EuiContextMenuItem>,
 
@@ -137,25 +166,28 @@ export function HeaderNotificationArea({}: HeaderNotificationAreaProps) {
   };
 
   const notificationEvents = events
-    .filter((event) => {
+    .filter((notification) => {
       // filter logic
-      if (Object.values(filters).every((v) => !v || v.length === 0)) return true;
+      if (Object.values(filters).every((v: any) => !v || v.length === 0)) return true;
 
       return Object.entries(filters).every(([key, allowedValues]) => {
-        if (!allowedValues || allowedValues.length === 0) return true;
+        const allowed = (allowedValues as unknown) as any;
+        if (!allowedValues || allowed.length === 0) return true;
         // @ts-expect-error
-        return allowedValues.includes(event[key]);
+        return allowedValues.includes(notification[key]);
       });
     })
-    .map((event) => {
-      const onClickTitle = event.type === 'News' ? undefined : () => {};
+    .map((notification) => {
+      const onClickTitle = notification.type === 'News' ? undefined : () => {};
 
       const onRead = (
         id: NotificationEventProps['id'],
         isRead: NotificationEventProps['isRead']
       ) => {
-        const nextState = events.map((event) => {
-          return event.id === id ? { ...event, isRead: !isRead } : event;
+        const nextState = events.map((subNotification) => {
+          return subNotification.id === id
+            ? { ...subNotification, isRead: !isRead }
+            : subNotification;
         });
 
         setEvents(nextState);
@@ -163,15 +195,15 @@ export function HeaderNotificationArea({}: HeaderNotificationAreaProps) {
 
       return (
         <HeaderNotificationEvent
-          key={event.id}
-          id={event.id}
-          type={event.type}
-          severity={event.severity}
-          badgeColor={event.badgeColor}
-          time={event.time}
-          title={event.title}
-          isRead={event.isRead}
-          messages={event.messages}
+          key={notification.id}
+          id={notification.id}
+          type={notification.type}
+          severity={notification.severity}
+          badgeColor={notification.badgeColor}
+          time={notification.time}
+          title={notification.title}
+          isRead={notification.isRead}
+          messages={notification.messages}
           onRead={onRead}
           onOpenContextMenu={onOpenContextMenu}
           onClickTitle={onClickTitle}
@@ -180,7 +212,7 @@ export function HeaderNotificationArea({}: HeaderNotificationAreaProps) {
     });
 
   const onClickReadAll = () => {
-    setEvents((events) => events.map((event) => ({ ...event, isRead: true })));
+    setEvents((notifications) => notifications.map((event) => ({ ...event, isRead: true })));
   };
 
   const onClickResetFilters = () => {
