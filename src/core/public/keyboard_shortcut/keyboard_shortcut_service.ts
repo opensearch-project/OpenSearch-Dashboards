@@ -51,9 +51,11 @@ export class KeyboardShortcutService {
     `${shortcut.id.toLowerCase()}.${shortcut.pluginId.toLowerCase()}`;
 
   private register(shortcut: ShortcutDefinition): void {
-    if (!this.keyParser.isValidKeyString(shortcut.keys)) {
+    try {
+      this.keyParser.isValidKeyString(shortcut.keys);
+    } catch (error) {
       throw new Error(
-        `Invalid keyboard shortcut key string: "${shortcut.keys}" for shortcut "${shortcut.id}" in plugin "${shortcut.pluginId}"`
+        `Invalid keyboard shortcut key string: "${shortcut.keys}" for shortcut "${shortcut.id}" in plugin "${shortcut.pluginId}": ${error.message}`
       );
     }
 
