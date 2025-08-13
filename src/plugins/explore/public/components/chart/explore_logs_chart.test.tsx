@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { DiscoverChart } from './chart';
+import { ExploreLogsChart } from './explore_logs_chart';
 import {
   legacyReducer,
   uiReducer,
@@ -169,7 +169,7 @@ describe('DiscoverChart', () => {
   const renderComponent = (props = {}) => {
     return render(
       <Provider store={mockStore}>
-        <DiscoverChart {...defaultProps} {...props} />
+        <ExploreLogsChart {...defaultProps} {...props} />
       </Provider>
     );
   };

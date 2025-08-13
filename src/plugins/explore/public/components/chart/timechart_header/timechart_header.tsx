@@ -50,6 +50,10 @@ export interface TimechartHeaderBucketInterval {
 
 export interface TimechartHeaderProps {
   /**
+   * Header title to be displayed
+   */
+  title: string;
+  /**
    * Format of date to be displayed
    */
   dateFormat?: string;
@@ -83,12 +87,15 @@ export interface TimechartHeaderProps {
   /**
    * Toggle the displaying of histogram or results summary
    */
-  toggleIdSelected: DiscoverChartToggleId;
-
-  additionalControl: any;
+  toggleIdSelected?: DiscoverChartToggleId;
+  /**
+   * Additional control element
+   */
+  additionalControl?: React.JSX.Element;
 }
 
 export function TimechartHeader({
+  title,
   bucketInterval,
   dateFormat,
   timeRange,
@@ -135,12 +142,10 @@ export function TimechartHeader({
             data-test-subj="discoverTimechartHeaderLogCount"
             size="s"
           >
-            {i18n.translate('explore.discover.timechartHeader.logCount', {
-              defaultMessage: 'Log count',
-            })}
+            {title}
           </EuiText>
         </EuiFlexItem>
-        {toggleIdSelected === 'histogram' && (
+        {(toggleIdSelected === 'histogram' || additionalControl == null) && (
           <>
             <EuiFlexItem grow={false}>
               <EuiToolTip
