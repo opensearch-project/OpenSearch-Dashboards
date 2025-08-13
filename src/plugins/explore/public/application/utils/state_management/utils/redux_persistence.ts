@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { take } from 'rxjs/operators';
 import { RootState } from '../store';
 import { AppState, QueryExecutionStatus } from '../types';
 import { ExploreServices } from '../../../../types';
@@ -16,7 +17,11 @@ import {
 } from '../slices';
 import { Dataset, DataStructure } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
-import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
+import {
+  DEFAULT_TRACE_COLUMNS_SETTING,
+  ExploreFlavor,
+  EXPLORE_DEFAULT_LANGUAGE,
+} from '../../../../../common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
@@ -90,7 +95,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const finalUIState = appState?.ui || getPreloadedUIState(services);
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
     const finalTabState = appState?.tab || getPreloadedTabState(services);
-    const finalLegacyState = appState?.legacy || getPreloadedLegacyState(services);
+    const finalLegacyState = appState?.legacy || (await getPreloadedLegacyState(services));
     const finalQueryEditorState = await getPreloadedQueryEditorState(services, finalQueryState);
     const finalMetaState = appState?.meta || getPreloadedMetaState(services);
 
@@ -116,7 +121,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
   const uiState = getPreloadedUIState(services);
   const resultsState = getPreloadedResultsState(services);
   const tabState = getPreloadedTabState(services);
-  const legacyState = getPreloadedLegacyState(services);
+  const legacyState = await getPreloadedLegacyState(services);
   const queryEditorState = await getPreloadedQueryEditorState(services, queryState);
   const metaState = getPreloadedMetaState(services);
 
@@ -303,15 +308,21 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
 /**
  * Get preloaded legacy state (vis_builder approach - defaults only, no saved object loading)
  */
-export const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
+export const getPreloadedLegacyState = async (services: ExploreServices): Promise<LegacyState> => {
   // Only return defaults - NO saved object loading (like vis_builder)
-  const defaultColumns = services.uiSettings?.get('defaultColumns') || ['_source'];
+  const currentAppId = await services.core.application.currentAppId$.pipe(take(1)).toPromise();
+  const flavorFromAppId = currentAppId?.split('/')?.[1];
+
+  const defaultColumns =
+    flavorFromAppId === ExploreFlavor.Traces
+      ? services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING)
+      : services.uiSettings?.get('defaultColumns');
 
   return {
     // Fields that exist in data_explorer + discover
     // TODO: load saved explore by id
     savedSearch: undefined, // Matches discover format - string ID, not object
-    columns: defaultColumns,
+    columns: defaultColumns || ['_source'],
     sort: [],
     isDirty: false,
     savedQuery: undefined,

@@ -1,0 +1,2 @@
+feat:
+- Add experimental default trace columns UI setting for Explore traces tab and apply it. ([#10406](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10406))
