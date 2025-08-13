@@ -6,9 +6,10 @@
 import { getPreloadedState, loadReduxState, persistReduxState } from './redux_persistence';
 import { ExploreServices } from '../../../../types';
 import { RootState } from '../store';
-import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
+import { EXPLORE_DEFAULT_LANGUAGE, DEFAULT_TRACE_COLUMNS_SETTING } from '../../../../../common';
 import { ColorSchemas } from '../../../../components/visualizations/types';
 import { EditorMode, QueryExecutionStatus } from '../types';
+import { of } from 'rxjs';
 
 // Mock the getPromptModeIsAvailable function
 jest.mock('../../get_prompt_mode_is_available', () => ({
@@ -26,7 +27,7 @@ jest.mock('../../../../components/visualizations/metric/metric_vis_config', () =
     title: '',
     fontSize: 60,
     useColor: false,
-    colorSchema: 'blues' as any,
+    colorSchema: 'blues',
   },
 }));
 
@@ -38,6 +39,11 @@ describe('redux_persistence', () => {
       osdUrlStateStorage: {
         set: jest.fn(),
         get: jest.fn(),
+      },
+      core: {
+        application: {
+          currentAppId$: of('explore/logs'),
+        },
       },
       data: {
         query: {
@@ -68,6 +74,7 @@ describe('redux_persistence', () => {
       uiSettings: {
         get: jest.fn((key) => {
           if (key === 'defaultColumns') return ['_source'];
+          if (key === DEFAULT_TRACE_COLUMNS_SETTING) return ['traceID', 'spanID'];
           return undefined;
         }),
       },

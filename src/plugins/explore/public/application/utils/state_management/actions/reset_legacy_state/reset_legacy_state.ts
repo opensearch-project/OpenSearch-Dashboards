@@ -11,10 +11,10 @@ import { AppDispatch } from '../../store';
 /**
  * Action creator for resetting the Legacy state to its preloaded state.
  */
-export const resetLegacyStateActionCreator = (services: ExploreServices) => (
+export const resetLegacyStateActionCreator = (services: ExploreServices) => async (
   dispatch: AppDispatch
 ) => {
-  const state = getPreloadedLegacyState(services);
+  const state = await getPreloadedLegacyState(services);
 
   dispatch(setLegacyState(state));
 };
