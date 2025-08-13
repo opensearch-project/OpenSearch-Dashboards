@@ -66,19 +66,20 @@ You can find the source code accessing `src/core/public/chrome/ui/header`.
 
 The **Header Notification Event (**`header_notification_event.tsx`**)** component provides a flexible notification card, supporting different types, severity levels, badges, timestamps, and clickable titles. Users can mark notifications as read or unread, and a contextual menu allows further interaction with individual events. Its design integrates seamlessly with the existing OUI styling while supporting high-contrast readability and accessibility.
 
-![image.png](image.png)
+<img width="565" height="125" alt="image" src="https://github.com/user-attachments/assets/3b4b3d07-2ebf-4b50-9c87-0b80155cb365" />
 
-![image.png](image%201.png)
+<img width="229" height="100" alt="image 1" src="https://github.com/user-attachments/assets/285b6579-4291-4865-9f2a-fe1003d6e97a" />
+
 
 The **HeaderNotificationArea** **(**`header_notification_area.tsx`**)** component aggregates multiple notification events into a single popover, with filtering options and global actions such as "Mark all as read" or "Reset filters".
 
-![image.png](image%202.png)
+<img width="1058" height="632" alt="image 2" src="https://github.com/user-attachments/assets/98d04336-9bfb-4792-b6c4-4cad1b3ff3c0" />
 
-![image.png](image%203.png)
+<img width="312" height="64" alt="image 3" src="https://github.com/user-attachments/assets/5b26e3c8-2581-4d41-a652-f739b517a979" />
 
 The **HeaderUserArea** **(**`header_user_area.tsx`**)** provides a dedicated user profile menu with avatar, name, email, main navigation actions, and footer actions like switching accounts or logging out. It also allows to navigate internal and external links using the native OpenDashboard Observers.
 
-![image.png](image%204.png)
+<img width="287" height="297" alt="image 4" src="https://github.com/user-attachments/assets/5be1e199-84ee-4d5d-bafd-6fef7064c446" />
 
 # Documentation References
 
