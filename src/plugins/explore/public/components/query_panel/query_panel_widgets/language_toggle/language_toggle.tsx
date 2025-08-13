@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { EuiBetaBadge, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
@@ -14,8 +14,8 @@ import {
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
-import { useEditorFocus, useEditorRef } from '../../../../application/hooks';
-import { setEditorMode } from '../../../../application/utils/state_management/slices';
+import { useEditorFocus } from '../../../../application/hooks';
+import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
 import './language_toggle.scss';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
@@ -27,9 +27,9 @@ export const LanguageToggle = () => {
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const language = useSelector(selectQueryLanguage);
-  const dispatch = useDispatch();
-  const editorRef = useEditorRef();
   const focusOnEditor = useEditorFocus();
+
+  const switchEditorMode = useLanguageSwitch();
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -37,15 +37,10 @@ export const LanguageToggle = () => {
   const onItemClick = useCallback(
     (editorMode: EditorMode) => {
       closePopover();
-      dispatch(setEditorMode(editorMode));
       setTimeout(focusOnEditor);
-      // select all
-      const range = editorRef.current?.getModel()?.getFullModelRange();
-      if (range) {
-        setTimeout(() => editorRef.current?.setSelection(range), 100);
-      }
+      switchEditorMode(editorMode);
     },
-    [closePopover, dispatch, editorRef, focusOnEditor]
+    [closePopover, focusOnEditor, switchEditorMode]
   );
 
   // TODO: expand this once other languages are supported
