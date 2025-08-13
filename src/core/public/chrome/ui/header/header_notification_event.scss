@@ -1,0 +1,95 @@
+.headerNotificationEvent {
+  display: flex;
+  padding: 0;
+  margin: 0;
+  border-bottom: $ouiBorderThin;
+  padding: 12px 0 12px 8px;
+}
+
+.headerNotificationEvent__content {
+  flex: 1;
+
+  >*+* {
+    margin-top: $ouiSizeS;
+    margin-right: $ouiSizeM;
+  }
+}
+
+.headerNotificationEvent__title {
+  @include ouiTitle('xs');
+  margin: 0;
+  padding: 0;
+}
+
+.headerNotificationEvent__message {
+  margin: 0;
+  padding: 0;
+}
+
+.headerNotificationEvent__readButton {
+  margin-right: $euiSizeS;
+}
+
+.headerNotificationEventMeta {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-right: $ouiSizeXS;
+  min-height: $ouiSizeL;
+
+  &--hasContextMenu {
+    padding-right: $ouiSizeL;
+  }
+
+  &__contextMenuWrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  &__section {
+    margin-right: $ouiSizeS;
+
+    &:first-child {
+      display: flex;
+      flex: 1;
+      align-items: center;
+    }
+  }
+
+  &__icon {
+    margin-right: $ouiSizeS;
+  }
+
+  &__badge {
+    max-width: 100%;
+    display: inline-grid;
+  }
+
+  &__time {
+    font-size: $ouiFontSizeXS;
+    color: $ouiTextSubduedColor;
+  }
+}
+
+.headerNotificationEventMeta__contextMenuWrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.headerNotificationEventReadButton {
+  display: flex;
+  align-items: center;
+  height: $ouiSizeL;
+  margin: 0 $ouiSizeXS;
+}
+
+.headerNotificationEventReadButton--isRead svg {
+  fill: transparent;
+  stroke-width: 1px;
+  stroke: $ouiBorderColor;
+}

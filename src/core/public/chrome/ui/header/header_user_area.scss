@@ -1,0 +1,12 @@
+.headerUserArea__header {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  width: 100%;
+  min-height: $ouiSizeXXL;
+  gap: 1rem;
+
+  &__email {
+    color: $euiTextSubduedColor;
+  }
+}
