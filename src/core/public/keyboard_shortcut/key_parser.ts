@@ -52,6 +52,35 @@ export const MODIFIER_ORDER = ['ctrl', 'alt', 'shift', 'cmd'] as const;
 
 type ModifierKey = typeof MODIFIER_ORDER[number];
 
+type PlatformMappingKeys = 'ctrl' | 'control' | 'meta' | 'win' | 'super' | 'command' | 'cmd';
+
+interface PlatformModifierMappings {
+  readonly mac: Record<PlatformMappingKeys, string>;
+  readonly other: Record<PlatformMappingKeys, string>;
+}
+
+type DisplayMappingKeys =
+  | 'ctrl'
+  | 'alt'
+  | 'shift'
+  | 'cmd'
+  | 'enter'
+  | 'backspace'
+  | 'delete'
+  | 'tab'
+  | 'escape'
+  | 'space'
+  | 'up'
+  | 'down'
+  | 'left'
+  | 'right'
+  | 'plus';
+
+interface PlatformDisplayMappings {
+  readonly mac: Record<DisplayMappingKeys, string>;
+  readonly other: Record<DisplayMappingKeys, string>;
+}
+
 export class KeyStringParser {
   private static readonly MODIFIER_INDEX_MAP = new Map([
     ['ctrl', 0],
@@ -86,10 +115,7 @@ export class KeyStringParser {
 
   private static readonly VALID_MODIFIERS = new Set(MODIFIER_ORDER);
 
-  private static readonly PLATFORM_MODIFIER_MAPPINGS: {
-    readonly mac: Record<string, string>;
-    readonly other: Record<string, string>;
-  } = {
+  private static readonly PLATFORM_MODIFIER_MAPPINGS: PlatformModifierMappings = {
     mac: {
       ctrl: 'cmd',
       control: 'cmd',
@@ -97,25 +123,20 @@ export class KeyStringParser {
       win: 'cmd',
       super: 'cmd',
       command: 'cmd',
-      option: 'alt',
-      opt: 'alt',
+      cmd: 'cmd',
     },
     other: {
-      cmd: 'ctrl',
+      ctrl: 'ctrl',
+      control: 'ctrl',
       meta: 'ctrl',
-      command: 'ctrl',
       win: 'ctrl',
       super: 'ctrl',
-      control: 'ctrl',
-      option: 'alt',
-      opt: 'alt',
+      command: 'ctrl',
+      cmd: 'ctrl',
     },
   } as const;
 
-  private static readonly DISPLAY_MAPPINGS: {
-    readonly mac: Record<string, string>;
-    readonly other: Record<string, string>;
-  } = {
+  private static readonly DISPLAY_MAPPINGS: PlatformDisplayMappings = {
     mac: {
       ctrl: '⌃',
       alt: '⌥',
@@ -203,34 +224,6 @@ export class KeyStringParser {
     return result;
   }
 
-  private validateInput(keyString: string): void {
-    if (keyString.trim() === '' && keyString !== ' ') {
-      throw new Error(`Key string cannot be empty or whitespace-only: "${keyString}"`);
-    }
-
-    const trimmed = keyString.trim();
-
-    if (trimmed.includes(' ') && !trimmed.includes('+ ') && trimmed !== ' ') {
-      throw new Error(
-        `Chord sequences are not supported. Found space in key string: "${keyString}". ` +
-          `Use '+' to separate simultaneous keys (e.g., "ctrl+shift+s").`
-      );
-    }
-
-    if (/\+\+(?!$)/.test(trimmed)) {
-      throw new Error(
-        `Malformed key string: invalid consecutive '+' characters (not at end): "${keyString}"`
-      );
-    }
-
-    if (
-      trimmed.startsWith('+') ||
-      (trimmed.endsWith('+') && !trimmed.endsWith('++') && !keyString.endsWith('+ '))
-    ) {
-      throw new Error(`Malformed key string: invalid '+' character placement: "${keyString}"`);
-    }
-  }
-
   private handlePlusKeySpecialCase(keyString: string): string | null {
     const trimmed = keyString.trim();
 
@@ -249,8 +242,6 @@ export class KeyStringParser {
   }
 
   private computeNormalizedKeyString(keyString: string): string {
-    this.validateInput(keyString);
-
     const plusKeyResult = this.handlePlusKeySpecialCase(keyString);
     if (plusKeyResult !== null) {
       return plusKeyResult;
@@ -287,20 +278,6 @@ export class KeyStringParser {
           keys.push(normalizedKey);
         }
       }
-    }
-
-    if (keys.length > 2) {
-      throw new Error(`Malformed key string: too many non-modifier keys: "${keyString}"`);
-    }
-
-    if (keys.length > 1 && modifiers.length > 0) {
-      throw new Error(
-        `Malformed key string: multiple non-modifier keys with modifiers: "${keyString}"`
-      );
-    }
-
-    if (keys.length === 0 && modifiers.length === 0) {
-      throw new Error(`Malformed key string: no valid keys found: "${keyString}"`);
     }
 
     this.sortModifiers(modifiers);
@@ -417,33 +394,94 @@ export class KeyStringParser {
     return trimmed;
   }
 
-  public isValidKeyString(keyString: string): boolean {
-    if (!keyString) {
-      return false;
+  /**
+   * Validates a key string and throws detailed error messages for invalid input
+   *
+   * Performs comprehensive validation including format checking and semantic validation.
+   * Combines the logic from the previous validateInput and isValidKeyString methods.
+   * Throws specific error messages to help developers understand what's wrong with their input.
+   *
+   * @param keyString - Raw key combination string to validate
+   * @throws Error when input is invalid with detailed error message
+   *
+   * @example
+   *
+   * parser.isValidKeyString("ctrl+s"); // succeeds
+   * parser.isValidKeyString("ctrl+"); // throws "Malformed key string: invalid '+' character placement"
+   * parser.isValidKeyString("ctrl a"); // throws "Chord sequences are not supported"
+   *
+   */
+  public isValidKeyString(keyString: string): void {
+    if (keyString === null || keyString === undefined) {
+      throw new Error(`Key string cannot be null or undefined`);
     }
 
-    try {
-      const normalized = this.normalizeKeyString(keyString);
-      const parts = normalized.split('+');
+    if (keyString === '' || (keyString.trim() === '' && keyString !== ' ')) {
+      throw new Error(`Key string cannot be empty or whitespace-only: "${keyString}"`);
+    }
 
-      if (parts.length === 0) {
-        return false;
+    const trimmed = keyString.trim();
+
+    if (trimmed.includes(' ') && !trimmed.includes('+ ') && trimmed !== ' ') {
+      throw new Error(
+        `Chord sequences are not supported. Found space in key string: "${keyString}". ` +
+          `Use '+' to separate simultaneous keys (e.g., "ctrl+shift+s").`
+      );
+    }
+
+    if (/\+\+(?!$)/.test(trimmed)) {
+      throw new Error(
+        `Malformed key string: invalid consecutive '+' characters (not at end): "${keyString}"`
+      );
+    }
+
+    if (
+      trimmed.startsWith('+') ||
+      (trimmed.endsWith('+') && !trimmed.endsWith('++') && !keyString.endsWith('+ '))
+    ) {
+      throw new Error(`Malformed key string: invalid '+' character placement: "${keyString}"`);
+    }
+
+    const normalized = this.normalizeKeyString(keyString);
+    const parts = normalized.split('+');
+
+    if (parts.length === 0) {
+      throw new Error(`Malformed key string: no valid keys found: "${keyString}"`);
+    }
+
+    let modifierCount = 0;
+    let keyCount = 0;
+
+    for (const part of parts) {
+      if (this.isModifier(part)) {
+        modifierCount++;
+      } else {
+        keyCount++;
       }
+    }
 
-      let modifierCount = 0;
-      let keyCount = 0;
+    if (keyCount === 0) {
+      throw new Error(
+        `Malformed key string: only modifier keys found, no action key: "${keyString}"`
+      );
+    }
 
-      for (const part of parts) {
-        if (this.isModifier(part)) {
-          modifierCount++;
-        } else {
-          keyCount++;
-        }
-      }
+    if (keyCount > 2) {
+      throw new Error(
+        `Malformed key string: too many non-modifier keys (${keyCount}): "${keyString}"`
+      );
+    }
 
-      return keyCount === 1 || (keyCount === 2 && modifierCount === 0);
-    } catch {
-      return false;
+    if (keyCount === 2 && modifierCount > 0) {
+      throw new Error(
+        `Malformed key string: two-key sequences cannot have modifiers: "${keyString}"`
+      );
+    }
+
+    if (keyCount > 1 && modifierCount > 0) {
+      throw new Error(
+        `Malformed key string: multiple non-modifier keys with modifiers: "${keyString}"`
+      );
     }
   }
 
