@@ -154,7 +154,12 @@ export const getSimplifiedPPLSuggestions = async ({
       finalSuggestions.push(
         ...formatAvailableFieldsToSuggestions(
           availableFields,
-          (f: string) => (suggestions.suggestFieldsInAggregateFunction ? `${f}` : `${f} `),
+          (f: string) =>
+            suggestions.suggestFieldsInAggregateFunction
+              ? `${f}`
+              : f.includes('.') || f.includes('@')
+              ? `\`${f}\` `
+              : `${f} `,
           (f: string) => {
             return f.startsWith('_') ? `99` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
           }
