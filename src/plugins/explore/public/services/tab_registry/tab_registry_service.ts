@@ -7,6 +7,7 @@ import { MemoExoticComponent } from 'react';
 import { QueryState } from '../../application/utils/state_management/slices';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { Query } from '../../../../data/common';
+import { ExploreFlavor } from '../../../common';
 
 /**
  * Props passed to tab components
@@ -25,7 +26,7 @@ export interface TabComponentProps {
 export interface TabDefinition {
   id: string;
   label: string;
-  flavor: string[];
+  flavor: ExploreFlavor[];
   order?: number;
 
   // Language-aware query handling

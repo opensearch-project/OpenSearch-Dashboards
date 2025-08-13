@@ -40,7 +40,7 @@ import { useMetrics } from '../results_summary/use_metrics';
 import { ToggleButtonGroup } from './timechart_header/toggle_button_group';
 import { ActionButtons } from '../results_summary/action_buttons';
 
-interface DiscoverChartProps {
+interface ExploreLogsChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
   chartData?: Chart;
   config: IUiSettingsClient;
@@ -49,14 +49,14 @@ interface DiscoverChartProps {
   showHistogram: boolean;
 }
 
-export const DiscoverChart = ({
+export const ExploreLogsChart = ({
   bucketInterval,
   chartData,
   config,
   data,
   services,
   showHistogram,
-}: DiscoverChartProps) => {
+}: ExploreLogsChartProps) => {
   const { from, to } = data.query.timefilter.timefilter.getTime();
   const timeRange = useMemo(() => {
     return {
@@ -118,6 +118,9 @@ export const DiscoverChart = ({
   const timeChartHeader = (
     <div className="exploreChart__TimechartHeader" data-test-subj="dscChartTimechartHeader">
       <TimechartHeader
+        title={i18n.translate('explore.discover.timechartHeader.logCount', {
+          defaultMessage: 'Log count',
+        })}
         bucketInterval={bucketInterval}
         dateFormat={config.get('dateFormat')}
         timeRange={timeRange}
@@ -186,12 +189,13 @@ export const DiscoverChart = ({
             aria-label={i18n.translate('explore.discover.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
-            className="dscTimechart"
+            className="exploreTimechart"
             data-test-subj="dscTimechart"
           >
             <div className="exploreHistogram" data-test-subj="discoverChart">
               <DiscoverHistogram
                 chartData={chartData}
+                chartType={'HistogramBar'}
                 timefilterUpdateHandler={timefilterUpdateHandler}
                 services={services}
               />

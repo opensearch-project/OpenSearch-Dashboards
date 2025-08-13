@@ -17,6 +17,7 @@ import { selectActiveTab } from '../../application/utils/state_management/select
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
 import { RootState } from '../../application/utils/state_management/store';
+import { useFlavorId } from '../../helpers/use_flavor_id';
 
 /**
  * Rendering tabs with different views of 1 OpenSearch hit in Discover.
@@ -27,6 +28,7 @@ import { RootState } from '../../application/utils/state_management/store';
 export const ExploreTabs = () => {
   const dispatch = useDispatch();
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const flavorId = useFlavorId();
   const registryTabs = services.tabRegistry.getAllTabs();
   const results = useSelector((state: RootState) => state.results);
   const query = useSelector((state: RootState) => state.query);
@@ -55,17 +57,24 @@ export const ExploreTabs = () => {
     [query, results, dispatch, services]
   );
 
-  const tabs: EuiTabbedContentTab[] = registryTabs.map((registryTab) => {
-    return {
-      id: registryTab.id,
-      name: registryTab.label,
-      content: (
-        <EuiErrorBoundary>
-          <registryTab.component />
-        </EuiErrorBoundary>
-      ),
-    };
-  });
+  if (flavorId == null) {
+    return null;
+  }
+
+  // Display tabs that registered under current flavor
+  const tabs: EuiTabbedContentTab[] = registryTabs
+    .filter((registryTab) => registryTab.flavor.includes(flavorId))
+    .map((registryTab) => {
+      return {
+        id: registryTab.id,
+        name: registryTab.label,
+        content: (
+          <EuiErrorBoundary>
+            <registryTab.component />
+          </EuiErrorBoundary>
+        ),
+      };
+    });
 
   const activeTab =
     tabs.find((tab) => {

@@ -42,6 +42,7 @@ describe('timechart header', function () {
 
   beforeAll(() => {
     props = {
+      title: 'Log count',
       timeRange: {
         from: 'May 14, 2020 @ 11:05:13.590',
         to: 'May 14, 2020 @ 11:20:13.590',
@@ -68,7 +69,7 @@ describe('timechart header', function () {
         scale: undefined,
       },
       toggleIdSelected: 'histogram' as DiscoverChartToggleId,
-      additionalControl: null,
+      additionalControl: undefined,
     };
   });
 
@@ -91,17 +92,29 @@ describe('timechart header', function () {
     );
   });
 
-  it('should not render interval selector when toggleIdSelected is not histogram', function () {
+  it('should not render interval selector when toggleIdSelected is not histogram and additionalControl is provided', function () {
     const updatedProps = {
       ...props,
       toggleIdSelected: 'summary' as DiscoverChartToggleId,
+      additionalControl: <div>Additional Control</div>,
     };
     component = mountWithIntl(<TimechartHeader {...updatedProps} />);
     const intervalSelect = findTestSubject(component, 'discoverIntervalSelect');
     expect(intervalSelect.length).toBe(0);
   });
 
-  it('should render log count text', function () {
+  it('should render interval selector when toggleIdSelected is not histogram but additionalControl is null', function () {
+    const updatedProps = {
+      ...props,
+      toggleIdSelected: 'summary' as DiscoverChartToggleId,
+      additionalControl: undefined,
+    };
+    component = mountWithIntl(<TimechartHeader {...updatedProps} />);
+    const intervalSelect = findTestSubject(component, 'discoverIntervalSelect');
+    expect(intervalSelect.length).toBe(1);
+  });
+
+  it('should render title text', function () {
     component = mountWithIntl(<TimechartHeader {...props} />);
     const logCountText = findTestSubject(component, 'discoverTimechartHeaderLogCount');
     expect(logCountText.text()).toBe('Log count');
