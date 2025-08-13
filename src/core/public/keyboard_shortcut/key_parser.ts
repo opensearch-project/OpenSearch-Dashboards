@@ -290,6 +290,11 @@ export class KeyStringParser {
       return this.buildKeyString(modifiers, keys[0]);
     }
 
+    // For multiple keys, include modifiers in the result so validation can catch invalid combinations
+    if (modifiers.length > 0) {
+      return `${modifiers.join('+')}+${keys.join('+')}`;
+    }
+
     return keys.join('+');
   }
 

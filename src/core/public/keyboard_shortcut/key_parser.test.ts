@@ -365,16 +365,16 @@ describe('KeyStringParser', () => {
 
     it('should throw errors for two-key sequences with modifiers', () => {
       expect(() => parser.isValidKeyString('ctrl+g+d')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "ctrl+g+d"'
+        'Malformed key string: two-key sequences cannot have modifiers: "ctrl+g+d"'
       );
       expect(() => parser.isValidKeyString('shift+a+b')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "shift+a+b"'
+        'Malformed key string: two-key sequences cannot have modifiers: "shift+a+b"'
       );
       expect(() => parser.isValidKeyString('alt+f1+f2')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "alt+f1+f2"'
+        'Malformed key string: two-key sequences cannot have modifiers: "alt+f1+f2"'
       );
       expect(() => parser.isValidKeyString('ctrl+shift+g+d')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "ctrl+shift+g+d"'
+        'Malformed key string: two-key sequences cannot have modifiers: "ctrl+shift+g+d"'
       );
     });
 
@@ -573,19 +573,19 @@ describe('KeyStringParser', () => {
 
     it('should throw error for multiple base keys', () => {
       expect(() => parser.isValidKeyString('ctrl+a+b')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "ctrl+a+b"'
+        'Malformed key string: two-key sequences cannot have modifiers: "ctrl+a+b"'
       );
 
       expect(() => parser.isValidKeyString('shift+enter+space')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "shift+enter+space"'
+        'Malformed key string: two-key sequences cannot have modifiers: "shift+enter+space"'
       );
 
       expect(() => parser.isValidKeyString('ctrl+up+down')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "ctrl+up+down"'
+        'Malformed key string: two-key sequences cannot have modifiers: "ctrl+up+down"'
       );
 
       expect(() => parser.isValidKeyString('cmd+comma+period')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "cmd+comma+period"'
+        'Malformed key string: two-key sequences cannot have modifiers: "cmd+comma+period"'
       );
     });
 
@@ -633,13 +633,6 @@ describe('KeyStringParser', () => {
       expect(parser.normalizeKeyString('f12+shift+ctrl')).toBe('ctrl+shift+f12');
       expect(parser.normalizeKeyString('a+alt+shift+ctrl')).toBe('ctrl+alt+shift+a');
 
-      expect(() => parser.normalizeKeyString('s+ctrl+a')).toThrow(
-        'multiple non-modifier keys with modifiers'
-      );
-      expect(() => parser.normalizeKeyString('f1+s+shift')).toThrow(
-        'multiple non-modifier keys with modifiers'
-      );
-
       expect(parser.normalizeKeyString('ctrl+s+shift')).toBe('ctrl+shift+s');
       expect(parser.normalizeKeyString('s+shift+ctrl')).toBe('ctrl+shift+s');
     });
@@ -654,10 +647,10 @@ describe('KeyStringParser', () => {
       expect(() => parser.isValidKeyString('a+alt+shift+ctrl')).not.toThrow();
 
       expect(() => parser.isValidKeyString('s+ctrl+a')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "s+ctrl+a"'
+        'Malformed key string: two-key sequences cannot have modifiers: "s+ctrl+a"'
       );
       expect(() => parser.isValidKeyString('f1+s+shift')).toThrow(
-        'Malformed key string: multiple non-modifier keys with modifiers: "f1+s+shift"'
+        'Malformed key string: two-key sequences cannot have modifiers: "f1+s+shift"'
       );
 
       expect(() => parser.isValidKeyString('ctrl+shift+alt')).toThrow(
