@@ -19,7 +19,7 @@ import { VisualizationRule } from './types';
 import { ChartType } from './utils/use_visualization_types';
 import { CHART_METADATA } from './constants';
 import { isChartType } from './utils/is_chart_type';
-import { VisData } from './visualization_builder';
+import { VisData } from './visualization_builder.types';
 
 interface ChartTypeSelectorProps<T extends ChartType> {
   visualizationData: VisData;
