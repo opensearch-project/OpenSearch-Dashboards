@@ -60,6 +60,7 @@ module.exports = defineConfig({
     specPattern: 'cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
     testIsolation: false,
     setupNodeEvents,
+    chromeWebSecurity: false,
   },
 });
 
