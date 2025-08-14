@@ -1,0 +1,2 @@
+feat:
+- Add keyboard shortcuts configuration option to opensearch_dashboards.yml ([#10409](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10409))
