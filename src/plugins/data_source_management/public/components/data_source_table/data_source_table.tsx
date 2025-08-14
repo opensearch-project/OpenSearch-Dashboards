@@ -90,8 +90,9 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     Record<string, React.ReactNode>
   >({});
 
-  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>();
+  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>(null);
   const defaultDataSourceIdRef = useRef<string | null>(null);
+  defaultDataSourceIdRef.current = defaultDataSourceId;
 
   const loadDefaultDataSourceId = useCallback(async () => {
     try {
@@ -103,9 +104,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
         scope
       );
-
-      defaultDataSourceIdRef.current = id;
-      // need to set the state to trigger re-render
       setDefaultDataSourceId(id);
     } catch (error) {
       notifications.toasts.addWarning(error.message);
