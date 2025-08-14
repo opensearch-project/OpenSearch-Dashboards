@@ -1,0 +1,8 @@
+{
+  "id": "correlations",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["savedObjects"],
+  "optionalPlugins": []
+}
