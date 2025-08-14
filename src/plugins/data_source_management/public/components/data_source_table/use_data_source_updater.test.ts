@@ -31,7 +31,7 @@ describe('useDataSourceUpdater', () => {
     const { result } = renderHook(() =>
       useDataSourceUpdater({
         fetchDataSources: mockFetchDataSources,
-        defaultDataSourceId: '',
+        defaultDataSourceIdRef: { current: '' },
         uiSettings: mockUiSettings as any,
         loadDefaultDataSourceId: mockLoadDefaultDataSourceId,
         currentWorkspace: null,
@@ -55,7 +55,7 @@ describe('useDataSourceUpdater', () => {
     const { result } = renderHook(() =>
       useDataSourceUpdater({
         fetchDataSources: mockFetchDataSources,
-        defaultDataSourceId: 'existing-ds',
+        defaultDataSourceIdRef: { current: 'existing-ds' },
         uiSettings: mockUiSettings as any,
         loadDefaultDataSourceId: mockLoadDefaultDataSourceId,
         currentWorkspace: null,
@@ -74,7 +74,7 @@ describe('useDataSourceUpdater', () => {
     const { result } = renderHook(() =>
       useDataSourceUpdater({
         fetchDataSources: mockFetchDataSources,
-        defaultDataSourceId: null,
+        defaultDataSourceIdRef: { current: null },
         uiSettings: mockUiSettings as any,
         loadDefaultDataSourceId: mockLoadDefaultDataSourceId,
         currentWorkspace: null,
@@ -94,7 +94,7 @@ describe('useDataSourceUpdater', () => {
     const { result } = renderHook(() =>
       useDataSourceUpdater({
         fetchDataSources: mockFetchDataSources,
-        defaultDataSourceId: null,
+        defaultDataSourceIdRef: { current: null },
         uiSettings: mockUiSettings as any,
         loadDefaultDataSourceId: mockLoadDefaultDataSourceId,
         currentWorkspace: null,
