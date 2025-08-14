@@ -428,6 +428,32 @@ export class DiscoverPlugin
       return { core, plugins };
     };
 
+    // Register dashboard navigation shortcuts
+    if (core.keyboardShortcut) {
+      core.keyboardShortcut.register({
+        id: 'nav.dashboard',
+        name: 'Go to dashboard',
+        pluginId: 'dashboard',
+        category: 'navigation',
+        keys: 'shift+g',
+        execute: () => {
+          // Only enable shortcut when workspace is selected
+          const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+          const isInitialized = core.workspaces.initialized$.getValue();
+          if (!isInitialized || !currentWorkspace) {
+            // eslint-disable-next-line no-console
+            console.log('Dashboard shortcut disabled: no workspace selected');
+            return;
+          }
+          // eslint-disable-next-line no-console
+          console.log('Pressed g+d - Navigating to dashboard!');
+          // eslint-disable-next-line no-console
+          console.log('pressed: g (first) → b (second)');
+          core.application.navigateToApp('dashboards');
+        },
+      });
+    }
+
     this.initializeServices();
 
     return {

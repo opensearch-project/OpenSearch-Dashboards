@@ -258,7 +258,7 @@ export default () =>
       }),
       futureNavigation: Joi.boolean().default(false),
       keyboardShortcuts: Joi.object({
-        enabled: Joi.boolean().default(true),
+        enabled: Joi.boolean().default(false),
       }),
     }).default(),
 

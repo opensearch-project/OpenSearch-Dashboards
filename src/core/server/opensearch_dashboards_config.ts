@@ -101,7 +101,7 @@ export const config = {
     }),
     futureNavigation: schema.boolean({ defaultValue: false }),
     keyboardShortcuts: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
   deprecations,

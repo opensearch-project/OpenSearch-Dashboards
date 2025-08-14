@@ -9,7 +9,12 @@
  * GitHub history for details.
  */
 
-import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from './types';
+import {
+  KeyboardShortcutSetup,
+  KeyboardShortcutStart,
+  KeyboardShortcutConfig,
+  ShortcutDefinition,
+} from './types';
 
 /**
  * @internal
@@ -18,7 +23,7 @@ import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from
 export class KeyboardShortcutService {
   private shortcutsMapByKey = new Map<string, ShortcutDefinition[]>();
   private namespacedIdToKeyLookup = new Map<string, string>();
-  private enabled = true;
+  private config: KeyboardShortcutConfig = { enabled: true };
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -26,10 +31,10 @@ export class KeyboardShortcutService {
     };
   }
 
-  public start(config?: { enabled: boolean }): KeyboardShortcutStart {
-    this.enabled = config?.enabled ?? true;
+  public start(config?: KeyboardShortcutConfig): KeyboardShortcutStart {
+    this.config = { enabled: config?.enabled ?? true };
 
-    if (this.enabled) {
+    if (this.config.enabled) {
       this.startEventListener();
     }
 
@@ -75,8 +80,7 @@ export class KeyboardShortcutService {
   };
 
   private register(shortcut: ShortcutDefinition): void {
-    // If keyboard shortcuts are disabled, don't register new shortcuts
-    if (!this.enabled) {
+    if (!this.config.enabled) {
       return;
     }
 
