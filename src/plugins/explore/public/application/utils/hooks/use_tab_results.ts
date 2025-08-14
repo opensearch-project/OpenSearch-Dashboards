@@ -4,7 +4,6 @@
  */
 
 import { useSelector } from 'react-redux';
-import { useMemo } from 'react';
 import { RootState } from '../state_management/store';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -19,11 +18,9 @@ export const useTabResults = () => {
   const activeTabId = useSelector((state: RootState) => state.ui.activeTabId);
   const results = useSelector((state: RootState) => state.results);
 
-  const cacheKey = useMemo(() => {
-    const activeTab = services.tabRegistry.getTab(activeTabId);
-    const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
-    return prepareQuery(query);
-  }, [query, activeTabId, services]);
+  const activeTab = services.tabRegistry.getTab(activeTabId);
+  const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
+  const cacheKey = prepareQuery(query);
 
   return {
     results: cacheKey ? results[cacheKey] : null,
