@@ -10,7 +10,7 @@ import { WorkspaceObject, IUiSettingsClient, NotificationsStart } from '../../..
 
 interface UseDataSourceUpdaterDeps {
   fetchDataSources: () => Promise<DataSourceTableItem[]>;
-  defaultDataSourceId: string | null | undefined;
+  defaultDataSourceIdRef: React.MutableRefObject<string | null>;
   uiSettings: IUiSettingsClient;
   loadDefaultDataSourceId: () => Promise<void>;
   currentWorkspace: WorkspaceObject | null | undefined;
@@ -19,7 +19,7 @@ interface UseDataSourceUpdaterDeps {
 
 export const useDataSourceUpdater = ({
   fetchDataSources,
-  defaultDataSourceId,
+  defaultDataSourceIdRef,
   uiSettings,
   loadDefaultDataSourceId,
   currentWorkspace,
@@ -28,14 +28,12 @@ export const useDataSourceUpdater = ({
   const handleDataSourceUpdated = useCallback(async () => {
     try {
       const res = await fetchDataSources();
-
-      if (!defaultDataSourceId && res.length > 0) {
+      if (!defaultDataSourceIdRef.current && res.length > 0) {
         await uiSettings.set(
           DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
           res[0].id,
           currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
         );
-
         await loadDefaultDataSourceId();
       }
     } catch (error) {
@@ -43,7 +41,7 @@ export const useDataSourceUpdater = ({
     }
   }, [
     fetchDataSources,
-    defaultDataSourceId,
+    defaultDataSourceIdRef,
     uiSettings,
     loadDefaultDataSourceId,
     currentWorkspace,

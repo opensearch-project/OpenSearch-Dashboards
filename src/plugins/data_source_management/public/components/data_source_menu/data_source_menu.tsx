@@ -27,11 +27,15 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     hideLocalCluster,
     application,
     onManageDataSource,
+    workspaces,
   } = props;
 
-  const workspaces = getWorkspaces();
+  // This is intentionally designed for sample data as it’s the only case where
+  // DataSourceMenu is imported directly (not via createDataSourceMenu) in tutorial_directory.js
+  // Includes a fallback check to ensure the workspace scope is properly consumed.
+  const workspacesToUse = workspaces ? workspaces : getWorkspaces();
 
-  const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+  const currentWorkspaceId = workspacesToUse.currentWorkspaceId$.getValue();
 
   const scope: UiSettingScope = !!currentWorkspaceId
     ? UiSettingScope.WORKSPACE
