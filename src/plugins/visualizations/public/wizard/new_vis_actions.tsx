@@ -107,34 +107,43 @@ export const createNewVisActions = (services: {
       uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
         ...actionConfig,
         execute: async () => {
-          const dialog = overlays.openModal(
-            toMountPoint(
-              <EuiModal onClose={() => dialog.close()} className="visNewVisSearchDialog">
-                <SearchSelection
-                  onSearchSelected={(searchId: string, searchType: string) => {
-                    const params = [`type=${encodeURIComponent(visType.name)}`];
-                    searchId = encodeURIComponent(searchId || '');
+          if (visType.requiresSearch && visType.options.showIndexSelection) {
+            const dialog = overlays.openModal(
+              toMountPoint(
+                <EuiModal onClose={() => dialog.close()} className="visNewVisSearchDialog">
+                  <SearchSelection
+                    onSearchSelected={(searchId: string, searchType: string) => {
+                      const params = [`type=${encodeURIComponent(visType.name)}`];
+                      searchId = encodeURIComponent(searchId || '');
 
-                    if (searchType) {
-                      params.push(
-                        `${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`
-                      );
-                    }
+                      if (searchType) {
+                        params.push(
+                          `${
+                            searchType === 'search' ? 'savedSearchId' : 'indexPattern'
+                          }=${searchId}`
+                        );
+                      }
 
-                    dialog.close();
-                    application.navigateToApp('visualize', {
-                      path: `#/create?${params.join('&')}`,
-                    });
-                  }}
-                  visType={visType}
-                  uiSettings={uiSettings}
-                  savedObjects={savedObjects}
-                  application={application}
-                  data={data}
-                />
-              </EuiModal>
-            )
-          );
+                      dialog.close();
+                      application.navigateToApp('visualize', {
+                        path: `#/create?${params.join('&')}`,
+                      });
+                    }}
+                    visType={visType}
+                    uiSettings={uiSettings}
+                    savedObjects={savedObjects}
+                    application={application}
+                    data={data}
+                  />
+                </EuiModal>
+              )
+            );
+          } else {
+            const params = [`type=${encodeURIComponent(visType.name)}`];
+            application.navigateToApp('visualize', {
+              path: `#/create?${params.join('&')}`,
+            });
+          }
         },
       });
     }
