@@ -352,6 +352,17 @@ describe('fetchColumnValues', () => {
   let mockHttp: HttpSetup;
   let mockUiSettings: IUiSettingsClient;
 
+  const createMockIndexPattern = (fieldType: string) =>
+    (({
+      id: 'test-index',
+      fields: {
+        find: jest.fn().mockReturnValue({
+          type: fieldType,
+          spec: { autoCompleteValues: undefined },
+        } as IndexPatternField),
+      },
+    } as unknown) as IndexPattern);
+
   beforeEach(() => {
     mockHttp = ({
       fetch: jest.fn(),
@@ -377,18 +388,24 @@ describe('fetchColumnValues', () => {
             getQuery: jest.fn().mockReturnValue({ dataset: { dataSource: { id: 'test-id' } } }),
           } as unknown) as QueryStringContract,
         } as unknown) as IQueryStart,
+        indexPatterns: {
+          saveToCache: jest.fn(),
+        } as unknown,
+        dataViews: {
+          saveToCache: jest.fn(),
+        } as unknown,
       } as unknown) as DataPublicPluginStart,
     } as unknown) as IDataPluginServices;
   });
 
   it('should return boolean values for boolean fields', async () => {
+    const mockIndexPattern = createMockIndexPattern('boolean');
+
     const result = await fetchColumnValues(
       'test-table',
       'boolean-column',
       mockServices,
-      {
-        type: 'boolean',
-      } as IndexPatternField,
+      mockIndexPattern,
       'INDEX_PATTERN'
     );
 
@@ -402,13 +419,13 @@ describe('fetchColumnValues', () => {
       }
     });
 
+    const mockIndexPattern = createMockIndexPattern('string');
+
     const result = await fetchColumnValues(
       'test-table',
       'test-column',
       mockServices,
-      {
-        type: 'string',
-      } as IndexPatternField,
+      mockIndexPattern,
       'INDEX_PATTERN'
     );
 
@@ -416,13 +433,13 @@ describe('fetchColumnValues', () => {
   });
 
   it('should return empty array for unsupported field types', async () => {
+    const mockIndexPattern = createMockIndexPattern('number');
+
     const result = await fetchColumnValues(
       'test-table',
       'number-column',
       mockServices,
-      {
-        type: 'number',
-      } as IndexPatternField,
+      mockIndexPattern,
       'INDEX_PATTERN'
     );
 
@@ -442,13 +459,13 @@ describe('fetchColumnValues', () => {
 
     (mockHttp.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
+    const mockIndexPattern = createMockIndexPattern('string');
+
     const result = await fetchColumnValues(
       'test-table',
       'string-column',
       mockServices,
-      {
-        type: 'string',
-      } as IndexPatternField,
+      mockIndexPattern,
       'INDEX_PATTERN'
     );
 
@@ -477,20 +494,25 @@ describe('fetchColumnValues', () => {
         'test-table',
         'string-column',
         mockServices,
-        {
-          type: 'string',
-        } as IndexPatternField,
+        createMockIndexPattern('string'),
         'INDEX_PATTERN'
       )
     ).rejects.toThrow('SQL API Error');
   });
 
   it('should return empty array when field is undefined', async () => {
+    const mockIndexPattern = ({
+      id: 'test-index',
+      fields: {
+        find: jest.fn().mockReturnValue(undefined),
+      },
+    } as unknown) as IndexPattern;
+
     const result = await fetchColumnValues(
       'test-table',
       'string-column',
       mockServices,
-      undefined,
+      mockIndexPattern,
       'INDEX_PATTERN'
     );
 
@@ -510,13 +532,13 @@ describe('fetchColumnValues', () => {
 
     (mockHttp.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
+    const mockIndexPattern = createMockIndexPattern('string');
+
     const result = await fetchColumnValues(
       'test-table',
       'string-column',
       mockServices,
-      {
-        type: 'string',
-      } as IndexPatternField,
+      mockIndexPattern,
       'INDEXES'
     );
 
@@ -524,13 +546,13 @@ describe('fetchColumnValues', () => {
   });
 
   it('should return empty array when datasetType is unsupported', async () => {
+    const mockIndexPattern = createMockIndexPattern('string');
+
     const result = await fetchColumnValues(
       'test-table',
       'string-column',
       mockServices,
-      {
-        type: 'string',
-      } as IndexPatternField,
+      mockIndexPattern,
       'S3'
     );
 

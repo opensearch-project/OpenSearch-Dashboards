@@ -185,6 +185,7 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
+  autoCompleteValues?: string[];
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;

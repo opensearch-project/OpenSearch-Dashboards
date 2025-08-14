@@ -20,6 +20,7 @@ import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
 import { DEFAULT_DATA, IFieldType, UI_SETTINGS } from '../../../common';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
+import { getDataViews } from '../../services';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -104,9 +105,16 @@ export const fetchColumnValues = async (
   table: string,
   column: string,
   services: IDataPluginServices,
-  fieldInOsd: IndexPatternField | undefined,
+  indexPattern: IndexPattern,
   datasetType: string | undefined
 ): Promise<any[]> => {
+  const fieldInOsd = indexPattern.fields.find((f) => f.name === column);
+
+  // Return cached field values
+  if (fieldInOsd?.spec.autoCompleteValues && fieldInOsd?.spec.autoCompleteValues.length > 0) {
+    return fieldInOsd?.spec.autoCompleteValues;
+  }
+
   if (!datasetType || !Object.values(DEFAULT_DATA.SET_TYPES).includes(datasetType)) {
     return [];
   }
@@ -121,7 +129,8 @@ export const fetchColumnValues = async (
   if (
     !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
     !fieldInOsd ||
-    !allowedType.includes(fieldInOsd.type)
+    !allowedType.includes(fieldInOsd.type) ||
+    !indexPattern
   ) {
     return [];
   }
@@ -130,7 +139,7 @@ export const fetchColumnValues = async (
   // get dataset for connecting to the cluster currently engaged
   const dataset = services.data.query.queryString.getQuery().dataset;
 
-  return (
+  const values = (
     await fetchFromAPI(
       services.http,
       JSON.stringify({
@@ -147,6 +156,14 @@ export const fetchColumnValues = async (
       })
     )
   ).body.fields[0].values;
+
+  // Update the field in the passed IndexPattern with cached values
+  fieldInOsd.spec.autoCompleteValues = values;
+
+  // Save the updated IndexPattern to cache
+  getDataViews().saveToCache(indexPattern.id!, indexPattern as any);
+
+  return values;
 };
 
 export const formatValuesToSuggestions = <T extends { toString(): string | null } | null>(
