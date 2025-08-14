@@ -167,6 +167,7 @@ export function TimechartHeader({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiSelect
+                key={interval}
                 className="exploreChart__TimechartHeader__selection"
                 aria-label={i18n.translate(
                   'explore.discover.timechartHeader.timeIntervalSelect.ariaLabel',
@@ -186,7 +187,7 @@ export function TimechartHeader({
                       label: display,
                     };
                   })}
-                value={interval}
+                defaultValue={interval}
                 onChange={handleIntervalChange}
                 prepend={
                   <EuiText
