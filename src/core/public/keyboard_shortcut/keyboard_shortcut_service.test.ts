@@ -150,14 +150,14 @@ describe('KeyboardShortcutService', () => {
 
   describe('Private Method Testing', () => {
     it('should normalize keys to lowercase', () => {
-      // @ts-expect-error - Testing private method
+      // @ts-expect-error
       const result = service.getNormalizedKey('CTRL+S');
       expect(result).toBe('ctrl+s');
     });
 
     it('should create namespaced ID correctly', () => {
       const shortcut = { id: 'Save', pluginId: 'Editor' };
-      // @ts-expect-error - Testing private method
+      // @ts-expect-error
       const result = service.getNamespacedId(shortcut);
       expect(result).toBe('save.editor');
     });
@@ -396,6 +396,107 @@ describe('KeyboardShortcutService', () => {
       );
 
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('Configuration Support', () => {
+    it('should start with keyboard shortcuts enabled by default', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save Document',
+        category: 'editing',
+        keys: 'ctrl+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      document.dispatchEvent(event);
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should start with keyboard shortcuts enabled when explicitly configured', () => {
+      const start = service.start({ enabled: true });
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save Document',
+        category: 'editing',
+        keys: 'ctrl+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      document.dispatchEvent(event);
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not register shortcuts when disabled', () => {
+      const start = service.start({ enabled: false });
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save Document',
+        category: 'editing',
+        keys: 'ctrl+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      document.dispatchEvent(event);
+      expect(mockExecute).not.toHaveBeenCalled();
+    });
+
+    it('should not add event listener when disabled', () => {
+      service.start({ enabled: false });
+      expect(document.addEventListener).not.toHaveBeenCalled();
+    });
+
+    it('should not register shortcuts during setup when service will be disabled', () => {
+      const setup = service.setup();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save Document',
+        category: 'editing',
+        keys: 'ctrl+s',
+        execute: mockExecute,
+      };
+
+      setup.register(shortcut);
+
+      service.start({ enabled: false });
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      document.dispatchEvent(event);
+      expect(mockExecute).not.toHaveBeenCalled();
     });
   });
 });

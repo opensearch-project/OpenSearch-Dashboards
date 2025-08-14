@@ -257,6 +257,9 @@ export default () =>
         users: Joi.array().items(Joi.string()).default([]),
       }),
       futureNavigation: Joi.boolean().default(false),
+      keyboardShortcuts: Joi.object({
+        enabled: Joi.boolean().default(true),
+      }),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,

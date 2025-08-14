@@ -18,6 +18,7 @@ import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from
 export class KeyboardShortcutService {
   private shortcutsMapByKey = new Map<string, ShortcutDefinition[]>();
   private namespacedIdToKeyLookup = new Map<string, string>();
+  private enabled = true;
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -25,8 +26,12 @@ export class KeyboardShortcutService {
     };
   }
 
-  public start(): KeyboardShortcutStart {
-    this.startEventListener();
+  public start(config?: { enabled: boolean }): KeyboardShortcutStart {
+    this.enabled = config?.enabled ?? true;
+
+    if (this.enabled) {
+      this.startEventListener();
+    }
 
     return {
       register: (shortcut) => this.register(shortcut),
@@ -70,6 +75,11 @@ export class KeyboardShortcutService {
   };
 
   private register(shortcut: ShortcutDefinition): void {
+    // If keyboard shortcuts are disabled, don't register new shortcuts
+    if (!this.enabled) {
+      return;
+    }
+
     const key = this.getNormalizedKey(shortcut.keys);
     const namespacedId = this.getNamespacedId(shortcut);
 
