@@ -4,15 +4,46 @@
  */
 
 export const SPECIAL_KEY_MAPPINGS: Record<string, string> = {
+  // Arrow keys
   arrowup: 'up',
   arrowdown: 'down',
   arrowleft: 'left',
   arrowright: 'right',
 
+  // Whitespace and control keys
   ' ': 'space',
+  tab: 'tab',
+  enter: 'enter',
+  return: 'enter',
+  backspace: 'backspace',
+  delete: 'delete',
 
+  // Navigation keys
+  home: 'home',
+  end: 'end',
+  pageup: 'pageup',
+  pagedown: 'pagedown',
+  insert: 'insert',
+
+  // Escape key
   esc: 'escape',
+  escape: 'escape',
 
+  // Function keys
+  f1: 'f1',
+  f2: 'f2',
+  f3: 'f3',
+  f4: 'f4',
+  f5: 'f5',
+  f6: 'f6',
+  f7: 'f7',
+  f8: 'f8',
+  f9: 'f9',
+  f10: 'f10',
+  f11: 'f11',
+  f12: 'f12',
+
+  // Basic punctuation
   ',': 'comma',
   '.': 'period',
   '/': 'slash',
@@ -46,6 +77,24 @@ export const SPECIAL_KEY_MAPPINGS: Record<string, string> = {
   '>': 'greater',
   '?': 'question',
   '~': 'tilde',
+
+  // Numeric keypad keys
+  numpad0: 'numpad0',
+  numpad1: 'numpad1',
+  numpad2: 'numpad2',
+  numpad3: 'numpad3',
+  numpad4: 'numpad4',
+  numpad5: 'numpad5',
+  numpad6: 'numpad6',
+  numpad7: 'numpad7',
+  numpad8: 'numpad8',
+  numpad9: 'numpad9',
+  numpaddecimal: 'numpaddecimal',
+  numpadenter: 'numpadenter',
+  numpadplus: 'numpadplus',
+  numpadminus: 'numpadminus',
+  numpadmultiply: 'numpadmultiply',
+  numpaddivide: 'numpaddivide',
 };
 
 export const MODIFIER_ORDER = ['ctrl', 'alt', 'shift', 'cmd'] as const;
