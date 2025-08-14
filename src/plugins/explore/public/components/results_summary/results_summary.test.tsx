@@ -23,6 +23,15 @@ jest.mock('../../services/usage_collector', () => ({
   getUsageCollector: () => ({}),
 }));
 
+jest.mock('../../application/utils/languages/ppl/default_prepare_ppl_query', () => ({
+  defaultPreparePplQuery: jest.fn((query) => ({
+    ...query,
+    query: query.dataset?.title
+      ? `source=${query.dataset.title} ${query.query}`.trim()
+      : query.query,
+  })),
+}));
+
 const mockServices = {
   core: {
     application: {
@@ -39,8 +48,8 @@ const mockServices = {
 const createMockStore = (overrides = {}) => {
   const defaultState = {
     query: {
-      query: 'source = opensearch_dashboards_sample_data_logs',
-      dataset: { dataSource: { id: 'test-ds' } },
+      query: 'test query',
+      dataset: { title: 'opensearch_dashboards_sample_data_logs', dataSource: { id: 'test-ds' } },
     },
     queryEditor: {
       overallQueryStatus: { status: ResultStatus.READY },
@@ -49,7 +58,12 @@ const createMockStore = (overrides = {}) => {
       summaryAgentIsAvailable: true,
     },
     results: {
-      'source = opensearch_dashboards_sample_data_logs': {
+      'test query': {
+        hits: {
+          hits: [{ _source: { test: 'data' } }],
+        },
+      },
+      'source=opensearch_dashboards_sample_data_logs test query': {
         hits: {
           hits: [{ _source: { test: 'data' } }],
         },
@@ -126,12 +140,77 @@ describe('ResultsSummary', () => {
   it('does not fetch summary when query results are empty', async () => {
     const storeOverrides = {
       results: {
-        'source = opensearch_dashboards_sample_data_logs': {
+        'test query': {
+          hits: {
+            hits: [],
+          },
+        },
+        'source=opensearch_dashboards_sample_data_logs test query': {
           hits: {
             hits: [],
           },
         },
       },
+    };
+    renderWithProviders(<TestResultsSummary />, storeOverrides);
+    await waitFor(() => {
+      expect(mockServices.http.post).not.toHaveBeenCalled();
+    });
+  });
+
+  it('uses query-specific results when available', async () => {
+    const querySpecificData = [{ _source: { specific: 'data' } }];
+    const storeOverrides = {
+      results: {
+        'test query': {
+          hits: {
+            hits: querySpecificData,
+          },
+        },
+      },
+    };
+    mockServices.http.post.mockResolvedValue('Query specific summary');
+    renderWithProviders(<TestResultsSummary />, storeOverrides);
+    await waitFor(() => {
+      expect(mockServices.http.post).toHaveBeenCalledWith(
+        '/api/assistant/data2summary',
+        expect.objectContaining({
+          body: expect.stringContaining('specific'),
+        })
+      );
+    });
+  });
+
+  it('falls back to defaultPreparePplQuery results when original query results not found', async () => {
+    const fallbackData = [{ _source: { fallback: 'data' } }];
+    const storeOverrides = {
+      query: {
+        query: 'nonexistent_query',
+        dataset: { title: 'test_dataset', dataSource: { id: 'test-ds' } },
+      },
+      results: {
+        'source=test_dataset nonexistent_query': {
+          hits: {
+            hits: fallbackData,
+          },
+        },
+      },
+    };
+    mockServices.http.post.mockResolvedValue('Fallback summary');
+    renderWithProviders(<TestResultsSummary />, storeOverrides);
+    await waitFor(() => {
+      expect(mockServices.http.post).toHaveBeenCalledWith(
+        '/api/assistant/data2summary',
+        expect.objectContaining({
+          body: expect.stringContaining('fallback'),
+        })
+      );
+    });
+  });
+
+  it('handles empty results state gracefully', async () => {
+    const storeOverrides = {
+      results: {},
     };
     renderWithProviders(<TestResultsSummary />, storeOverrides);
     await waitFor(() => {

@@ -46,6 +46,7 @@ import { getPreloadedStore } from './application/utils/state_management/store';
 import { buildServices } from './build_services';
 import { DocViewTable } from './components/doc_viewer/doc_viewer_table/table';
 import { JsonCodeBlock } from './components/doc_viewer/json_code_block/json_code_block';
+import { TraceDetailsView } from './components/doc_viewer/trace_details_view/trace_details_view';
 import {
   createQueryEditorExtensionConfig,
   SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY,
@@ -113,6 +114,20 @@ export class ExplorePlugin
 
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
+    this.docViewsRegistry.addDocView({
+      title: i18n.translate('explore.docViews.trace.timeline.title', {
+        defaultMessage: 'Timeline',
+      }),
+      order: 5,
+      component: TraceDetailsView,
+      shouldShow: (hit) => {
+        // Only show the Timeline tab when on the traces flavor
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+        return currentPath.includes('/explore/traces') || currentHash.includes('/explore/traces');
+      },
+    });
+
     this.docViewsRegistry.addDocView({
       title: i18n.translate('explore.discover.docViews.table.tableTitle', {
         defaultMessage: 'Table',
@@ -304,7 +319,7 @@ export class ExplorePlugin
         services.scopedHistory = this.currentHistory;
 
         // Register tabs with the tab registry
-        registerTabs(services);
+        registerTabs(services, flavor);
 
         // Instantiate the store
         const { store, unsubscribe: unsubscribeStore, reset: resetStore } = await getPreloadedStore(
@@ -326,7 +341,6 @@ export class ExplorePlugin
         return () => {
           abortAllActiveQueries();
           services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
-
           appUnMounted();
           unmount();
           unsubscribeStore();
@@ -369,13 +383,14 @@ export class ExplorePlugin
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
-      // uncomment when traces and metrics are ready for launch
-      /* {
+      {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
+      // uncomment when metrics is ready for launch
+      /*
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         category: undefined,

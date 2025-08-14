@@ -2,39 +2,34 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-@import "../shared";
 
 // This is for the animation colors
 /* stylelint-disable  @osd/stylelint/no_restricted_values */
 
 .exploreQueryPanelEditor {
-  @include exploreEditor;
+  border: 1px solid $ouiBorderColor;
+  border-radius: $ouiBorderRadius;
+  cursor: text;
+  padding: $ouiSizeS $ouiSizeXS;
+  position: relative;
+
+  &--focused {
+    border-bottom-width: 2px;
+    border-bottom-color: $ouiColorPrimary;
+    margin-bottom: -1px; // prevent layout shifting due to increase in border width;
+  }
+
+  &__placeholder {
+    position: absolute;
+    left: 29px; // hard-code to match where the text is in editor
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: $ouiFontSizeXS;
+    color: $ouiColorDisabledText;
+  }
 
   &--promptMode {
     padding-left: 27px; // hard-coding to match the start position of query mode. There must be a better way
-
-    // Animated splash background when switching to prompt mode
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background:
-        linear-gradient(
-          90deg,
-          rgba(0, 212, 255, 10%) 0%,
-          rgba(0, 85, 255, 10%) 25%,
-          rgba(108, 0, 255, 10%) 50%,
-          rgba(255, 0, 108, 10%) 75%,
-          rgba(0, 212, 255, 10%) 100%
-        );
-      background-size: 300% 100%;
-      animation: promptModeSplash 1s ease-out forwards;
-      pointer-events: none;
-      z-index: 1;
-    }
 
     &.exploreQueryPanelEditor--focused {
       border-bottom-color: transparent;
@@ -67,20 +62,6 @@
       }
     }
   }
-
-  &--focused {
-    .exploreQueryPanelEditor__promptIcon {
-      animation: aiModeIcon 8s ease-in-out infinite;
-    }
-  }
-
-  &__promptIcon {
-    color: $ouiColorDisabledText;
-    filter: brightness(0.65);
-    position: absolute;
-    left: $ouiSizeXXS;
-    top: 9px; // hard-coding to align it to editor
-  }
 }
 
 @keyframes aiMode {
@@ -90,42 +71,6 @@
   }
 
   50% {
-    background-position: 100% 50%;
-  }
-}
-
-@keyframes aiModeIcon {
-  0%,
-  100% {
-    color: #00d4ff;
-  }
-
-  25% {
-    color: #05f;
-  }
-
-  50% {
-    color: #6c00ff;
-  }
-
-  75% {
-    color: #ff006c;
-  }
-}
-
-@keyframes promptModeSplash {
-  0% {
-    opacity: 0;
-    background-position: 0 50%;
-  }
-
-  20% {
-    opacity: 1;
-    background-position: 50% 50%;
-  }
-
-  100% {
-    opacity: 0;
     background-position: 100% 50%;
   }
 }

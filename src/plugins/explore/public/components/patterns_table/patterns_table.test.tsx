@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PatternsTable, PatternItem } from './patterns_table';
 import { mockPatternItems, generateLargeDataset } from './utils/patterns_table.stubs';
@@ -25,7 +25,7 @@ describe('PatternsTable', () => {
 
       // Check if column headers are rendered
       expect(screen.getAllByText('Event ratio')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Pattern')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Pattern Sample Log')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Event count')[0]).toBeInTheDocument();
     });
 
@@ -86,12 +86,12 @@ describe('PatternsTable', () => {
     it('should handle NaN values correctly', () => {
       const nanItems: PatternItem[] = [
         {
-          pattern: 'ERROR [calculation] Division by zero',
+          sample: 'ERROR [calculation] Division by zero',
           ratio: NaN,
           count: 42,
         },
         {
-          pattern: 'WARN [calculation] Invalid operation',
+          sample: 'WARN [calculation] Invalid operation',
           ratio: 0.15,
           count: NaN,
         },
@@ -107,21 +107,21 @@ describe('PatternsTable', () => {
       const cells = container.querySelectorAll('td');
 
       // First row: NaN ratio should be displayed as '—'
-      expect(within(cells[0]).getByText('—')).toBeInTheDocument();
+      expect(cells[0].textContent).toContain('—');
 
       // Second row: NaN count should be displayed as '—'
-      expect(within(cells[5]).getByText('—')).toBeInTheDocument();
+      expect(cells[5].textContent).toContain('—');
     });
 
     it('should handle Infinity values correctly', () => {
       const infinityItems: PatternItem[] = [
         {
-          pattern: 'ERROR [overflow] Maximum value exceeded',
+          sample: 'ERROR [overflow] Maximum value exceeded',
           ratio: Infinity,
           count: 75,
         },
         {
-          pattern: 'WARN [underflow] Minimum value exceeded',
+          sample: 'WARN [underflow] Minimum value exceeded',
           ratio: 0.08,
           count: Infinity,
         },
@@ -137,26 +137,26 @@ describe('PatternsTable', () => {
       const cells = container.querySelectorAll('td');
 
       // First row: Infinity ratio should be displayed as '—'
-      expect(within(cells[0]).getByText('—')).toBeInTheDocument();
+      expect(cells[0].textContent).toContain('—');
 
       // Second row: Infinity count should be displayed as '—'
-      expect(within(cells[5]).getByText('—')).toBeInTheDocument();
+      expect(cells[5].textContent).toContain('—');
     });
 
     it('should handle empty pattern strings correctly', () => {
       const emptyPatternItems: PatternItem[] = [
         {
-          pattern: '',
+          sample: '',
           ratio: 0.15,
           count: 150,
         },
         {
-          pattern: (null as unknown) as string,
+          sample: (null as unknown) as string,
           ratio: 0.1,
           count: 100,
         },
         {
-          pattern: (undefined as unknown) as string,
+          sample: (undefined as unknown) as string,
           ratio: 0.05,
           count: 50,
         },
@@ -172,19 +172,19 @@ describe('PatternsTable', () => {
       const cells = container.querySelectorAll('td');
 
       // Empty string pattern should be displayed as '—'
-      expect(within(cells[1]).getByText('—')).toBeInTheDocument();
+      expect(cells[1].querySelector('span')?.textContent).toContain('—');
 
       // Null pattern should be displayed as '—'
-      expect(within(cells[4]).getByText('—')).toBeInTheDocument();
+      expect(cells[4].querySelector('span')?.textContent).toContain('—');
 
       // Undefined pattern should be displayed as '—'
-      expect(within(cells[7]).getByText('—')).toBeInTheDocument();
+      expect(cells[7].querySelector('span')?.textContent).toContain('—');
     });
 
     it('should handle extremely long pattern strings correctly', () => {
       const longPatternItems: PatternItem[] = [
         {
-          pattern:
+          sample:
             'INFO [main] ' +
             'Very long log message that exceeds typical display width. '.repeat(10),
           ratio: 0.35,

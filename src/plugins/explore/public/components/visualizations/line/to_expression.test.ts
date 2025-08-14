@@ -222,6 +222,24 @@ describe('to_expression', () => {
       );
       expect(customTitleResult.title).toBe('Custom Simple Line Chart');
     });
+
+    it('should fallback to default tooltip format when dateField is missing', () => {
+      const incompleteAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: { ...dateColumn, column: undefined as any },
+      };
+
+      const result = createSimpleLineChart(
+        transformedData,
+        [numericColumn1],
+        [dateColumn],
+        styleOptions,
+        incompleteAxisColumnMappings
+      );
+
+      const tooltip = result.layer[0].encoding.tooltip;
+      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+    });
   });
 
   describe('createLineBarChart', () => {
@@ -248,9 +266,9 @@ describe('to_expression', () => {
       expect(result.layer).toHaveLength(2); // Bar layer + line layer (no threshold or time marker in this test)
 
       // Verify the bar layer
-      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.layer[0]).toHaveProperty('encoding.color.datum', 'value1');
+      expect(result.layer[0].layer[0]).toHaveProperty('encoding.x.field', 'field-0');
+      expect(result.layer[0].layer[0]).toHaveProperty('encoding.y.field', 'field-1');
+      expect(result.layer[0].layer[0]).toHaveProperty('encoding.color.datum', 'value1');
 
       // Verify the line layer
       expect(result.layer[1]).toHaveProperty('encoding.x.field', 'field-0');
@@ -326,6 +344,28 @@ describe('to_expression', () => {
         mockAxisColumnMappings
       );
       expect(customTitleResult.title).toBe('Custom Line-Bar Chart');
+    });
+
+    it('should fallback to default tooltip format when dateField is missing', () => {
+      const incompleteAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.Y_SECOND]: numericColumn2,
+        [AxisRole.X]: { ...dateColumn, column: undefined as any },
+      };
+
+      const result = createLineBarChart(
+        transformedData,
+        [numericColumn1, numericColumn2],
+        [dateColumn],
+        styleOptions,
+        incompleteAxisColumnMappings
+      );
+
+      const barTooltip = result.layer[0].layer[0].encoding.tooltip;
+      const lineTooltip = result.layer[1].encoding.tooltip;
+
+      expect(barTooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+      expect(lineTooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
     });
   });
 
@@ -426,6 +466,26 @@ describe('to_expression', () => {
         mockAxisColumnMappings
       );
       expect(customTitleResult.title).toBe('Custom Multi-Line Chart');
+    });
+
+    it('should fallback to default tooltip format when dateField is missing', () => {
+      const incompleteAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.COLOR]: categoricalColumn1,
+        [AxisRole.X]: { ...dateColumn, column: undefined as any },
+      };
+
+      const result = createMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [dateColumn],
+        styleOptions,
+        incompleteAxisColumnMappings
+      );
+
+      const tooltip = result.layer[0].encoding.tooltip;
+      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
     });
   });
 
@@ -545,6 +605,27 @@ describe('to_expression', () => {
         mockAxisColumnMappings
       );
       expect(customTitleResult.title).toBe('Custom Faceted Line Chart');
+    });
+
+    it('should fallback to default tooltip format when dateField is missing', () => {
+      const incompleteAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.COLOR]: categoricalColumn1,
+        [AxisRole.FACET]: categoricalColumn2,
+        [AxisRole.X]: { ...dateColumn, column: undefined as any },
+      };
+
+      const result = createFacetedMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1, categoricalColumn2],
+        [dateColumn],
+        styleOptions,
+        incompleteAxisColumnMappings
+      );
+
+      const tooltip = result.spec.layer[0].encoding.tooltip;
+      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
     });
   });
 

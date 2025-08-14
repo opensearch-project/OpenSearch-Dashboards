@@ -16,10 +16,12 @@ import {
   resultsInitialState,
   resultsReducer,
 } from '../state_management/slices';
+import { metaReducer } from '../state_management/slices/meta/meta_slice';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults } from '../state_management/slices';
 import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
 import { MockStore } from '../state_management/__mocks__';
+import * as CurrentExploreIdHook from './use_current_explore_id';
 
 // Mock Redux actions
 jest.mock('../state_management/actions/query_actions', () => ({
@@ -51,6 +53,9 @@ interface MockRootState {
   };
   ui: any;
   results: any;
+  meta: {
+    isInitialized: boolean;
+  };
 }
 
 describe('useInitialQueryExecution', () => {
@@ -68,6 +73,8 @@ describe('useInitialQueryExecution', () => {
       }
       return action;
     });
+
+    jest.spyOn(CurrentExploreIdHook, 'useCurrentExploreId').mockReturnValue(undefined);
 
     mockServices = {
       uiSettings: {
@@ -109,6 +116,7 @@ describe('useInitialQueryExecution', () => {
         query: queryReducer,
         ui: uiReducer,
         results: resultsReducer,
+        meta: metaReducer,
       },
       preloadedState: {
         query: {
@@ -118,6 +126,7 @@ describe('useInitialQueryExecution', () => {
         },
         ui: uiInitialState,
         results: resultsInitialState,
+        meta: { isInitialized: false },
       },
     }) as any;
 
@@ -135,6 +144,7 @@ describe('useInitialQueryExecution', () => {
           query: queryReducer,
           ui: uiReducer,
           results: resultsReducer,
+          meta: metaReducer,
         },
         preloadedState: {
           query: initialState.query || {
@@ -144,6 +154,7 @@ describe('useInitialQueryExecution', () => {
           },
           ui: initialState.ui || uiInitialState,
           results: initialState.results || resultsInitialState,
+          meta: initialState.meta || { isInitialized: false },
         },
       }) as any;
       jest.spyOn(mockStore, 'dispatch').mockImplementation(mockDispatch);
@@ -159,10 +170,12 @@ describe('useInitialQueryExecution', () => {
       let result: any;
 
       await act(async () => {
-        const hookResult = renderHookWithProvider(mockServices);
+        const hookResult = renderHookWithProvider(mockServices, {
+          meta: { isInitialized: false },
+        });
         result = hookResult.result;
         // Wait for async operations to complete
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledWith(
@@ -177,7 +190,7 @@ describe('useInitialQueryExecution', () => {
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
       expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
-      expect(result.current.isInitialized).toBe(true);
+      expect(result.current.isInitialized).toBe(false); // Still false until Redux state updates
     });
 
     it('should only initialize once', () => {
@@ -213,19 +226,31 @@ describe('useInitialQueryExecution', () => {
     });
   });
 
+  describe('when current loading a saved search', () => {
+    beforeEach(() => {
+      jest.spyOn(CurrentExploreIdHook, 'useCurrentExploreId').mockReturnValue('mock-id');
+    });
+
+    it('should not execute query or add to history', () => {
+      const { result } = renderHookWithProvider(mockServices);
+
+      expect(mockServices.data.query.queryString.addToQueryHistory).not.toHaveBeenCalled();
+      expect(mockClearResults).not.toHaveBeenCalled();
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(result.current.isInitialized).toBe(false);
+    });
+  });
+
   describe('when query is whitespace only', () => {
     it('should not add whitespace-only query to history but should execute', async () => {
-      let result: any;
-
       await act(async () => {
-        const hookResult = renderHookWithProvider(mockServices, {
+        renderHookWithProvider(mockServices, {
           query: {
             query: '   ',
             language: 'ppl',
             dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
           },
         });
-        result = hookResult.result;
         // Wait for async operations to complete
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
@@ -237,7 +262,13 @@ describe('useInitialQueryExecution', () => {
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
       expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
-      expect(result.current.isInitialized).toBe(true);
+      // Verify setIsInitialized was dispatched (state update happens asynchronously)
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'meta/setIsInitialized',
+          payload: true,
+        })
+      );
     });
   });
 
@@ -271,11 +302,8 @@ describe('useInitialQueryExecution', () => {
         },
       } as any;
 
-      let result: any;
-
       await act(async () => {
-        const hookResult = renderHookWithProvider(servicesWithoutTimefilter);
-        result = hookResult.result;
+        renderHookWithProvider(servicesWithoutTimefilter);
         // Wait for async operations to complete
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
@@ -289,7 +317,13 @@ describe('useInitialQueryExecution', () => {
       expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({
         services: servicesWithoutTimefilter,
       });
-      expect(result.current.isInitialized).toBe(true);
+      // Verify setIsInitialized was dispatched (state update happens asynchronously)
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'meta/setIsInitialized',
+          payload: true,
+        })
+      );
     });
   });
 
@@ -338,17 +372,14 @@ describe('useInitialQueryExecution', () => {
 
   describe('edge cases', () => {
     it('should handle query with leading/trailing whitespace', async () => {
-      let result: any;
-
       await act(async () => {
-        const hookResult = renderHookWithProvider(mockServices, {
+        renderHookWithProvider(mockServices, {
           query: {
             query: '  source=logs  ',
             language: 'ppl',
             dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
           },
         });
-        result = hookResult.result;
         // Wait for async operations to complete
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
@@ -366,21 +397,24 @@ describe('useInitialQueryExecution', () => {
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalled();
       expect(mockDetectAndSetOptimalTab).toHaveBeenCalled();
-      expect(result.current.isInitialized).toBe(true);
+      // Verify setIsInitialized was dispatched (state update happens asynchronously)
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'meta/setIsInitialized',
+          payload: true,
+        })
+      );
     });
 
     it('should handle mixed whitespace characters', async () => {
-      let result: any;
-
       await act(async () => {
-        const hookResult = renderHookWithProvider(mockServices, {
+        renderHookWithProvider(mockServices, {
           query: {
             query: '\n\t  \r',
             language: 'ppl',
             dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' },
           },
         });
-        result = hookResult.result;
         // Wait for async operations to complete
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
@@ -392,7 +426,13 @@ describe('useInitialQueryExecution', () => {
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalled();
       expect(mockDetectAndSetOptimalTab).toHaveBeenCalled();
-      expect(result.current.isInitialized).toBe(true);
+      // Verify setIsInitialized was dispatched (state update happens asynchronously)
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'meta/setIsInitialized',
+          payload: true,
+        })
+      );
     });
   });
 });

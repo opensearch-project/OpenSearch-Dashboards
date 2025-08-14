@@ -5,14 +5,14 @@
 
 import React, { useState } from 'react';
 import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
-import { patternsTableColumns } from './utils/constants';
+import { patternsTableColumns } from './patterns_table_columns';
 
 export interface PatternsTableProps {
   items: PatternItem[];
 }
 
 export interface PatternItem {
-  pattern: string;
+  sample: string;
   ratio: number;
   count: number;
 }

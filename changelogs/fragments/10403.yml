@@ -1,0 +1,2 @@
+fix:
+- Correlation object to have entities field which is dynamic and not strict ([#10403](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10403))

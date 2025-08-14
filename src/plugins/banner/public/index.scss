@@ -20,12 +20,12 @@ $expandedHeaderWidth: $headerWidth * 2;
 /**
  * 2. Banner container - Ensures minimum height matches the variable
  */
-#pluginGlobalBanner {
+.globalBanner {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1100;
+  z-index: $ouiZHeader - 1; // lower than flyouts
   width: 100%;
   min-height: var(--global-banner-height);
 }
@@ -41,6 +41,23 @@ $expandedHeaderWidth: $headerWidth * 2;
 
 .headerGlobalNav--withBanner .primaryHeader:not(.newTopNavHeader) {
   top: calc(var(--global-banner-height) + $headerWidth);
+}
+
+.headerGlobalNav--withBanner {
+  #globalHeaderBars {
+    position: relative;
+    top: var(--global-banner-height);
+  }
+}
+
+.headerGlobalNav--withBanner .newTopNavHeader {
+  z-index: $ouiZHeader - 2; // lower than banner
+  position: relative;
+}
+
+.app-wrapper.app-wrapper-with-banner.app-wrapper-with-new {
+  position: relative;
+  top: var(--global-banner-height);
 }
 
 /* End of Global Banner Positioning */

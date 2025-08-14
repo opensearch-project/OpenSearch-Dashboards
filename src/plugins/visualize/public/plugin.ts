@@ -158,7 +158,7 @@ export class VisualizePlugin
       id: visualizeAppId,
       title: 'Visualize',
       order: 8000,
-      euiIconType: core.chrome.navGroup.getNavGroupEnabled() ? 'visualizeApp' : 'inputOutput',
+      euiIconType: 'inputOutput',
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
@@ -297,6 +297,7 @@ export class VisualizePlugin
     setApplication(core.application);
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);
+
     if (plugins.share) {
       setShareService(plugins.share);
     }

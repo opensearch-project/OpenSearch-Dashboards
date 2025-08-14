@@ -9,9 +9,10 @@
  * GitHub history for details.
  */
 
+import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { BannerPluginSetup, BannerPluginStart } from './types';
-import { renderBanner, unmountBanner } from './render_banner';
+import { GlobalBanner } from './components/global_banner';
 
 export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart> {
   constructor() {}
@@ -21,14 +22,13 @@ export class BannerPlugin implements Plugin<BannerPluginSetup, BannerPluginStart
   }
 
   public async start(core: CoreStart): Promise<BannerPluginStart> {
-    // Render the banner component and pass the HTTP client
-    renderBanner(core.http);
+    // Set the global banner in the chrome service
+    core.chrome.setGlobalBanner({
+      component: React.createElement(GlobalBanner, { http: core.http }),
+    });
 
     return {};
   }
 
-  public stop() {
-    // Unmount the banner component
-    unmountBanner();
-  }
+  public stop() {}
 }

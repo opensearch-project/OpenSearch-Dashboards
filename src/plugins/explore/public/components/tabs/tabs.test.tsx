@@ -17,6 +17,12 @@ import {
   clearQueryStatusMapByKey,
 } from '../../application/utils/state_management/slices';
 import { executeTabQuery } from '../../application/utils/state_management/actions/query_actions';
+import { useFlavorId } from '../../helpers/use_flavor_id';
+import { ExploreFlavor } from '../../../common';
+
+jest.mock('../../helpers/use_flavor_id', () => ({
+  useFlavorId: jest.fn(() => 'logs'),
+}));
 
 jest.mock('../../application/utils/state_management/slices', () => ({
   ...jest.requireActual('../../application/utils/state_management/slices'),
@@ -44,6 +50,8 @@ const mockClearQueryStatusMapByKey = clearQueryStatusMapByKey as jest.MockedFunc
 >;
 const mockExecuteTabQuery = executeTabQuery as jest.MockedFunction<typeof executeTabQuery>;
 
+const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
+
 describe('ExploreTabsComponent', () => {
   const mockServices = {
     tabRegistry: {
@@ -52,11 +60,13 @@ describe('ExploreTabsComponent', () => {
           id: 'logs',
           label: 'Logs',
           component: () => <div>Logs Content</div>,
+          flavor: [ExploreFlavor.Logs],
         },
         {
           id: 'explore_visualization_tab',
           label: 'Visualization',
           component: () => <div>Visualization Content</div>,
+          flavor: [ExploreFlavor.Logs],
         },
       ]),
       getTab: jest.fn((id: string) => ({
@@ -64,6 +74,7 @@ describe('ExploreTabsComponent', () => {
         label: id === 'logs' ? 'Logs' : 'Visualization',
         component: () => <div>{id} Content</div>,
         prepareQuery: undefined,
+        flavor: [ExploreFlavor.Logs],
       })),
     },
   };
@@ -182,6 +193,22 @@ describe('ExploreTabsComponent', () => {
     );
 
     expect(screen.getByText('Visualization Content')).toBeInTheDocument();
+  });
+
+  it('should return null when flavorId is null', () => {
+    mockUseFlavorId.mockReturnValue(null);
+    const store = createMockStore();
+
+    const { container } = render(
+      <Provider store={store}>
+        <OpenSearchDashboardsContextProvider services={mockServices}>
+          <ExploreTabs />
+        </OpenSearchDashboardsContextProvider>
+      </Provider>
+    );
+
+    expect(container.firstChild).toBeNull();
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs); // Reset for other tests
   });
 
   it('should fallback to logs tab when activeTabId is empty', () => {

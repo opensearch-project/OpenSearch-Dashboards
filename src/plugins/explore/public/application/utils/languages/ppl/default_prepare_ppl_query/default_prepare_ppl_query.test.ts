@@ -16,7 +16,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=test-dataset level="error"',
+      query: 'source = test-dataset level="error"',
     });
   });
 
@@ -42,7 +42,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=test-dataset',
+      query: 'source = test-dataset',
     });
   });
 
@@ -55,7 +55,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=test-dataset',
+      query: 'source = test-dataset',
     });
   });
 
@@ -68,7 +68,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=test-dataset | where level="error"',
+      query: 'source = test-dataset | where level="error"',
     });
   });
 

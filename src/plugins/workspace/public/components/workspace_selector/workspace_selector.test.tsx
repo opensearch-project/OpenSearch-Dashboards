@@ -12,11 +12,10 @@ import { CoreStart, DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../../c
 import { BehaviorSubject } from 'rxjs';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { I18nProvider } from '@osd/i18n/react';
-import { WorkspaceUseCase } from '../../types';
 describe('<WorkspaceSelector />', () => {
   let coreStartMock: CoreStart;
   const navigateToApp = jest.fn();
-  const registeredUseCases$ = new BehaviorSubject<WorkspaceUseCase[]>([
+  const registeredUseCases$ = new BehaviorSubject([
     { ...DEFAULT_NAV_GROUPS.observability, features: [{ id: 'discover', title: 'Discover' }] },
   ]);
 
@@ -46,15 +45,11 @@ describe('<WorkspaceSelector />', () => {
     });
   });
 
-  const WorkspaceSelectorCreatorComponent = (props?: { isNavOpen?: boolean }) => {
-    const { isNavOpen = true } = props || {};
+  const WorkspaceSelectorCreatorComponent = () => {
     return (
       <I18nProvider>
-        <WorkspaceSelector
-          coreStart={coreStartMock}
-          registeredUseCases$={registeredUseCases$}
-          isNavOpen={isNavOpen}
-        />
+        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
+        <WorkspaceSelector coreStart={coreStartMock} registeredUseCases$={registeredUseCases$} />
       </I18nProvider>
     );
   };
@@ -228,10 +223,5 @@ describe('<WorkspaceSelector />', () => {
     fireEvent.click(screen.getByTestId('workspace-selector-button'));
     expect(screen.queryByText(/manage/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/create workspaces/i)).toBeNull();
-  });
-
-  it('should show workspace icon when isNavOpen is false', async () => {
-    const { findByTestId } = render(<WorkspaceSelectorCreatorComponent isNavOpen={false} />);
-    await findByTestId('workspaceSelectorIcon');
   });
 });

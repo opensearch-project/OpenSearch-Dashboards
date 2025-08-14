@@ -9,8 +9,9 @@ import { ChromeNavLink } from '../../nav_links';
 import { ChromeRegistrationNavLink } from '../../nav_group';
 import { httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
-import { CollapsibleNavTop, CollapsibleNavTopProps } from './collapsible_nav_group_enabled_top';
-import { NavGroupType } from '../../../../types/nav_group';
+import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
+import { BehaviorSubject } from 'rxjs';
+import { WorkspaceObject } from 'src/core/public/workspace';
 
 const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
 
@@ -24,12 +25,17 @@ describe('<CollapsibleNavTop />', () => {
     title: '',
     ...navLink,
   });
-  const getMockedProps = (): CollapsibleNavTopProps => {
+  const getMockedProps = () => {
     return {
       homeLink: getMockedNavLink({ id: 'home', title: 'Home', href: '/' }),
       navigateToApp: jest.fn(),
       logos: getLogos({}, mockBasePath.serverBasePath),
-      isNavOpen: true,
+      shouldShrinkNavigation: false,
+      visibleUseCases: [],
+      navGroupsMap: {},
+      navLinks: [],
+      currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
+      setCurrentNavGroup: jest.fn(),
     };
   };
 
@@ -41,60 +47,10 @@ describe('<CollapsibleNavTop />', () => {
     expect(props.navigateToApp).toBeCalledWith('home');
   });
 
-  it('should render home icon when nav collapsed', async () => {
-    const props = getMockedProps();
-    const { findByTestId, getByTestId } = render(
-      <CollapsibleNavTop {...props} isNavOpen={false} />
-    );
-    await findByTestId('collapsibleNavHome');
-    fireEvent.click(getByTestId('collapsibleNavHome'));
-    expect(props.navigateToApp).toBeCalledWith('home');
-  });
-
-  it('should render customized header render', async () => {
-    const props = getMockedProps();
+  it('should render expand icon when collapsed', async () => {
     const { findByTestId } = render(
-      <CollapsibleNavTop
-        {...props}
-        collapsibleNavHeaderRender={() => <div data-test-subj="foo" />}
-      />
+      <CollapsibleNavTop {...getMockedProps()} shouldShrinkNavigation />
     );
-    await findByTestId('foo');
-  });
-
-  it('should render current nav group title if currentNavGroup present and nav open', async () => {
-    const props = getMockedProps();
-    const { findByText } = render(
-      <CollapsibleNavTop
-        {...props}
-        currentNavGroup={{
-          type: NavGroupType.SYSTEM,
-          id: 'foo',
-          title: 'foo',
-          description: 'foo',
-          navLinks: [],
-        }}
-      />
-    );
-    await findByText('foo');
-  });
-
-  it('should not render current nav group title if currentNavGroup present and nav collapsed', async () => {
-    const props = getMockedProps();
-    const { findByTestId, queryByText } = render(
-      <CollapsibleNavTop
-        {...props}
-        currentNavGroup={{
-          type: NavGroupType.SYSTEM,
-          id: 'foo',
-          title: 'foo',
-          description: 'foo',
-          navLinks: [],
-        }}
-        isNavOpen={false}
-      />
-    );
-    await findByTestId('collapsibleNavHome');
-    expect(queryByText('foo')).not.toBeInTheDocument();
+    await findByTestId('collapsibleNavShrinkButton');
   });
 });

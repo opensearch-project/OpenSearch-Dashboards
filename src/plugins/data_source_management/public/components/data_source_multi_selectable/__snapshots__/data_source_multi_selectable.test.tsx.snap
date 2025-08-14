@@ -77,6 +77,7 @@ exports[`DataSourceMultiSelectable should render normally with local cluster hid
       },
     }
   }
+  scope="global"
 >
   <DataSourceFilterGroup
     defaultDataSource={null}
@@ -289,6 +290,7 @@ exports[`DataSourceMultiSelectable should render normally with local cluster not
       },
     }
   }
+  scope="global"
 >
   <DataSourceFilterGroup
     defaultDataSource={null}

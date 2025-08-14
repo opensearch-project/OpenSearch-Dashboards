@@ -12,6 +12,7 @@ import {
   ValueAxisPosition,
 } from './line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
+import { getTooltipFormat } from '../utils/utils';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -47,6 +48,7 @@ export const createSimpleLineChart = (
           {
             title: dateName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
@@ -69,7 +71,12 @@ export const createSimpleLineChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: metricField, type: 'quantitative', title: metricName },
         ],
       }),
@@ -137,6 +144,7 @@ export const createLineBarChart = (
           {
             title: dateName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
@@ -169,11 +177,20 @@ export const createLineBarChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: metric1Field, type: 'quantitative', title: metric1Name },
         ],
       }),
     },
+  };
+
+  const barWithThresholdLayer = {
+    layer: [barLayer],
   };
 
   const lineLayer = {
@@ -211,20 +228,25 @@ export const createLineBarChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: metric2Field, type: 'quantitative', title: metric2Name },
         ],
       }),
     },
   };
 
-  layers.push(barLayer, lineLayer);
-
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
-    layers.push(thresholdLayer);
+    barWithThresholdLayer.layer.push(thresholdLayer);
   }
+
+  layers.push(barWithThresholdLayer, lineLayer);
 
   // Add time marker layer if enabled
   const timeMarkerLayer = createTimeMarkerLayer(styles);
@@ -284,6 +306,7 @@ export const createMultiLineChart = (
           {
             title: dateName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',
@@ -317,7 +340,12 @@ export const createMultiLineChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: metricField, type: 'quantitative', title: metricName },
           { field: categoryField, type: 'nominal', title: categoryName },
         ],
@@ -390,21 +418,12 @@ export const createFacetedMultiLineChart = (
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
       : undefined,
     data: { values: transformedData },
-    // Add a max width to the entire visualization and make it scrollable
-    width: 'container',
-    autosize: {
-      type: 'fit-x',
-      contains: 'padding',
-    },
     facet: {
       field: category2Field,
       type: 'nominal',
-      columns: 2,
       header: { title: category2Name },
     },
     spec: {
-      width: 250, // Reduced from 300 to fit better
-      height: 200,
       layer: [
         {
           mark: facetMarkConfig,
@@ -416,6 +435,7 @@ export const createFacetedMultiLineChart = (
                 {
                   title: dateName,
                   labelAngle: -45,
+                  labelSeparation: 8,
                 },
                 styles,
                 'category',
@@ -449,7 +469,12 @@ export const createFacetedMultiLineChart = (
             },
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [
-                { field: dateField, type: 'temporal', title: dateName },
+                {
+                  field: dateField,
+                  type: 'temporal',
+                  title: dateName,
+                  format: getTooltipFormat(transformedData, dateField),
+                },
                 { field: metricField, type: 'quantitative', title: metricName },
                 { field: category1Field, type: 'nominal', title: category1Name },
               ],
@@ -556,6 +581,7 @@ export const createCategoryLineChart = (
           {
             title: categoryName,
             labelAngle: -45,
+            labelSeparation: 8,
           },
           styles,
           'category',

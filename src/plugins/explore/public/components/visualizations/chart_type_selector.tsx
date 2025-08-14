@@ -19,7 +19,7 @@ import { VisualizationRule } from './types';
 import { ChartType } from './utils/use_visualization_types';
 import { CHART_METADATA } from './constants';
 import { isChartType } from './utils/is_chart_type';
-import { VisData } from './visualization_builder';
+import { VisData } from './visualization_builder.types';
 
 interface ChartTypeSelectorProps<T extends ChartType> {
   visualizationData: VisData;
@@ -27,8 +27,7 @@ interface ChartTypeSelectorProps<T extends ChartType> {
   onChartTypeChange?: (chartType: ChartType) => void;
 }
 
-// TODO: rename it, this is chart type selector option, not rule
-interface AvailableRuleOption {
+interface AvailableChartTypeOption {
   value: string;
   inputDisplay: React.ReactNode;
   iconType?: string;
@@ -44,8 +43,6 @@ export const ChartTypeSelector = <T extends ChartType>({
 }: ChartTypeSelectorProps<T>) => {
   // Indicates no rule is matched and the user should manually generate the visualization
   const shouldManuallyGenerate = useRef(!Boolean(chartType));
-
-  // Local state for chart type, initialized from Redux
   const [currChartTypeId, setCurrChartTypeId] = useState(chartType);
 
   useEffect(() => {
@@ -80,11 +77,11 @@ export const ChartTypeSelector = <T extends ChartType>({
           id: rule.id,
           name: rule.name,
           matchIndex: rule.matchIndex,
-          toExpression: rule.toExpression,
+          toSpec: rule.toSpec,
         });
       });
       return acc;
-    }, {} as Record<string, AvailableRuleOption>);
+    }, {} as Record<string, AvailableChartTypeOption>);
   }, []); // Only calculate once
 
   // Process chart types to mark unavailable ones as disabled
@@ -153,7 +150,11 @@ export const ChartTypeSelector = <T extends ChartType>({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s" color={option.disabled ? 'subdued' : 'default'}>
+            <EuiText
+              data-test-subj={`exploreChartTypeSelector-${option.value}`}
+              size="s"
+              color={option.disabled ? 'subdued' : 'default'}
+            >
               {option.inputDisplay}
             </EuiText>
           </EuiFlexItem>
@@ -182,8 +183,9 @@ export const ChartTypeSelector = <T extends ChartType>({
       >
         <EuiSuperSelect
           id="chartType"
+          data-test-subj="exploreChartTypeSelector"
           compressed
-          valueOfSelected={currChartTypeId}
+          valueOfSelected={currChartTypeId || ''}
           placeholder="Select a visualization type"
           options={selectOptions}
           onChange={(value) => {

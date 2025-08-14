@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import {
@@ -34,30 +34,31 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
     </div>
   )),
 }));
-jest.mock('../style_panel/legend/legend', () => {
-  // Import Positions inside the mock to avoid reference error
-  const { Positions: PositionsEnum } = jest.requireActual('../types');
 
-  return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => (
-      <div data-test-subj="mockLegendOptionsPanel">
-        <button
-          data-test-subj="mockLegendShow"
-          onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
-        >
-          Toggle Legend
-        </button>
-        <button
-          data-test-subj="mockLegendPosition"
-          onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
-        >
-          Change Position
-        </button>
-        <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
-      </div>
-    )),
-  };
-});
+jest.mock('../style_panel/legend/legend', () => ({
+  LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
+    <div data-test-subj="mockLegendOptionsPanel">
+      <button
+        data-test-subj="mockLegendShow"
+        onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+      >
+        Toggle Legend
+      </button>
+      <button
+        data-test-subj="mockLegendPosition"
+        onClick={() => onLegendOptionsChange({ position: 'bottom' })}
+      >
+        Change Position
+      </button>
+      <button
+        data-test-subj="mockLegendBoth"
+        onClick={() => onLegendOptionsChange({ show: !legendOptions.show, position: 'top' })}
+      >
+        Change Both
+      </button>
+    </div>
+  )),
+}));
 
 jest.mock('../style_panel/threshold/threshold', () => ({
   ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
@@ -164,6 +165,24 @@ jest.mock('./line_exclusive_vis_options', () => ({
   },
 }));
 
+jest.mock('../style_panel/title/title', () => ({
+  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
+    <div data-test-subj="mockTitleOptionsPanel">
+      <button
+        data-test-subj="mockTitleModeSwitch"
+        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
+      >
+        Toggle Title
+      </button>
+      <input
+        data-test-subj="mockTitleInput"
+        placeholder="Default title"
+        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
+      />
+    </div>
+  )),
+}));
+
 describe('LineVisStyleControls', () => {
   const defaultThresholdLine = {
     id: '1',
@@ -246,6 +265,7 @@ describe('LineVisStyleControls', () => {
   const mockAxisColumnMappings: AxisColumnMappings = {
     [AxisRole.X]: mockDateColumn,
     [AxisRole.Y]: mockNumericalColumn,
+    [AxisRole.COLOR]: mockCategoricalColumn,
   };
 
   const mockProps: LineVisStyleControlsProps = {
@@ -280,123 +300,143 @@ describe('LineVisStyleControls', () => {
   test('renders with default props', () => {
     render(<LineVisStyleControls {...mockProps} />);
 
-    // Check if all components are rendered
+    expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockLineExclusiveVisOptions')).toBeInTheDocument();
+    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
-  test('hides legend when there is 1 metric and 1 date', () => {
-    const propsWithOneMetricOneDate = {
+  test('hides legend when no COLOR, FACET, or Y_SECOND mappings are present', () => {
+    const propsWithNoLegend = {
       ...mockProps,
-      categoricalColumns: [],
+      axisColumnMappings: {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      },
     };
 
-    render(<LineVisStyleControls {...propsWithOneMetricOneDate} />);
+    render(<LineVisStyleControls {...propsWithNoLegend} />);
 
-    // Check if legend should not be shown
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('false');
+    expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
   });
 
-  test('hides legend when there is 1 metric and 1 category', () => {
-    const propsWithOneMetricOneCategory = {
+  test('renders legend panel when COLOR mapping is present', () => {
+    const propsWithColorMapping = {
       ...mockProps,
-      dateColumns: [],
+      axisColumnMappings: {
+        ...mockAxisColumnMappings,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+      },
     };
 
-    render(<LineVisStyleControls {...propsWithOneMetricOneCategory} />);
+    render(<LineVisStyleControls {...propsWithColorMapping} />);
 
-    // Check if legend should not be shown
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('false');
+    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
   });
 
-  test('shows legend for other column combinations', () => {
-    const propsWithMultipleMetrics = {
+  test('renders legend panel when FACET mapping is present', () => {
+    const propsWithFacetMapping = {
       ...mockProps,
-      numericalColumns: [mockNumericalColumn, { ...mockNumericalColumn, id: 3 }],
+      axisColumnMappings: {
+        ...mockAxisColumnMappings,
+        [AxisRole.FACET]: mockCategoricalColumn,
+      },
     };
 
-    render(<LineVisStyleControls {...propsWithMultipleMetrics} />);
+    render(<LineVisStyleControls {...propsWithFacetMapping} />);
 
-    // Check if legend should be shown
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
+    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
   });
 
-  test('calls onStyleChange with correct parameters for legend options', () => {
-    const onStyleChange = jest.fn();
-    render(<LineVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
+  test('renders legend panel when Y_SECOND mapping is present', () => {
+    const propsWithYSecondMapping = {
+      ...mockProps,
+      axisColumnMappings: {
+        ...mockAxisColumnMappings,
+        [AxisRole.Y_SECOND]: mockNumericalColumn,
+      },
+    };
 
-    // Test legend show toggle
-    fireEvent.click(screen.getByTestId('mockLegendShow'));
-    expect(onStyleChange).toHaveBeenCalledWith({ addLegend: !mockProps.styleOptions.addLegend });
+    render(<LineVisStyleControls {...propsWithYSecondMapping} />);
 
-    // Test legend position change
-    fireEvent.click(screen.getByTestId('mockLegendPosition'));
-    expect(onStyleChange).toHaveBeenCalledWith({ legendPosition: Positions.BOTTOM });
+    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
   });
 
-  test('calls onStyleChange with correct parameters for threshold options', () => {
-    const onStyleChange = jest.fn();
-    render(<LineVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
+  test('calls onStyleChange with correct parameters for legend options', async () => {
+    const propsWithColorMapping = {
+      ...mockProps,
+      axisColumnMappings: {
+        ...mockAxisColumnMappings,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+      },
+    };
 
-    // Test threshold update
-    fireEvent.click(screen.getByTestId('mockUpdateThreshold'));
-    expect(onStyleChange).toHaveBeenCalledWith({
+    render(<LineVisStyleControls {...propsWithColorMapping} />);
+
+    await userEvent.click(screen.getByTestId('mockLegendShow'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
+
+    await userEvent.click(screen.getByTestId('mockLegendPosition'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'bottom' });
+
+    await userEvent.click(screen.getByTestId('mockLegendBoth'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'top' });
+  });
+
+  test('calls onStyleChange with correct parameters for threshold options', async () => {
+    render(<LineVisStyleControls {...mockProps} />);
+
+    await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       thresholdLines: [...mockProps.styleOptions.thresholdLines, { id: '2', show: true }],
     });
   });
 
-  test('calls onStyleChange with correct parameters for tooltip options', () => {
-    const onStyleChange = jest.fn();
-    render(<LineVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
+  test('calls onStyleChange with correct parameters for tooltip options', async () => {
+    render(<LineVisStyleControls {...mockProps} />);
 
-    // Test tooltip update
-    fireEvent.click(screen.getByTestId('mockUpdateTooltip'));
-    expect(onStyleChange).toHaveBeenCalledWith({
+    await userEvent.click(screen.getByTestId('mockUpdateTooltip'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       tooltipOptions: { ...mockProps.styleOptions.tooltipOptions, mode: 'hidden' },
     });
   });
 
-  test('calls onStyleChange with correct parameters for axes options', () => {
-    const onStyleChange = jest.fn();
-    render(<LineVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
+  test('calls onStyleChange with correct parameters for axes options', async () => {
+    render(<LineVisStyleControls {...mockProps} />);
 
-    // Test category axes update
-    fireEvent.click(screen.getByTestId('mockUpdateCategoryAxes'));
-    expect(onStyleChange).toHaveBeenCalledWith({
+    await userEvent.click(screen.getByTestId('mockUpdateCategoryAxes'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       categoryAxes: [...mockProps.styleOptions.categoryAxes, { id: 'new-axis' }],
     });
 
-    // Test value axes update
-    fireEvent.click(screen.getByTestId('mockUpdateValueAxes'));
-    expect(onStyleChange).toHaveBeenCalledWith({
+    await userEvent.click(screen.getByTestId('mockUpdateValueAxes'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       valueAxes: [...mockProps.styleOptions.valueAxes, { id: 'new-axis' }],
     });
   });
 
-  test('calls onStyleChange with correct parameters for line exclusive options', () => {
-    const onStyleChange = jest.fn();
-    render(<LineVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
+  test('calls onStyleChange with correct parameters for line exclusive options', async () => {
+    render(<LineVisStyleControls {...mockProps} />);
 
-    // Test time marker toggle
-    fireEvent.click(screen.getByTestId('mockUpdateAddTimeMarker'));
-    expect(onStyleChange).toHaveBeenCalledWith({
+    await userEvent.click(screen.getByTestId('mockUpdateAddTimeMarker'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       addTimeMarker: !mockProps.styleOptions.addTimeMarker,
     });
 
-    // Test line mode change
-    fireEvent.click(screen.getByTestId('mockUpdateLineMode'));
-    expect(onStyleChange).toHaveBeenCalledWith({ lineMode: 'straight' });
+    await userEvent.click(screen.getByTestId('mockUpdateLineMode'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ lineMode: 'straight' });
 
-    // Test line width change
-    fireEvent.click(screen.getByTestId('mockUpdateLineWidth'));
-    expect(onStyleChange).toHaveBeenCalledWith({ lineWidth: mockProps.styleOptions.lineWidth + 1 });
+    await userEvent.click(screen.getByTestId('mockUpdateLineWidth'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      lineWidth: mockProps.styleOptions.lineWidth + 1,
+    });
 
-    // Test line style change
-    fireEvent.click(screen.getByTestId('mockUpdateLineStyle'));
-    expect(onStyleChange).toHaveBeenCalledWith({ lineStyle: 'line' });
+    await userEvent.click(screen.getByTestId('mockUpdateLineStyle'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ lineStyle: 'line' });
   });
 
   test('handles empty column arrays gracefully', () => {
@@ -409,32 +449,24 @@ describe('LineVisStyleControls', () => {
 
     render(<LineVisStyleControls {...propsWithEmptyColumns} />);
 
-    // Check that the AxesOptions component still renders with empty arrays
     expect(screen.getByTestId('numericalColumnsLength')).toHaveTextContent('0');
     expect(screen.getByTestId('categoricalColumnsLength')).toHaveTextContent('0');
     expect(screen.getByTestId('dateColumnsLength')).toHaveTextContent('0');
   });
 
   test('updates title show option correctly', async () => {
-    const onStyleChange = jest.fn();
-    render(<LineVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
+    render(<LineVisStyleControls {...mockProps} />);
 
-    // Find the title switch and toggle it
-    const titleSwitch = screen.getByTestId('titleModeSwitch');
-    await userEvent.click(titleSwitch);
-
-    waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...mockProps.styleOptions.titleOptions,
-          show: true,
-        },
-      });
+    await userEvent.click(screen.getByTestId('mockTitleModeSwitch'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      titleOptions: {
+        ...mockProps.styleOptions.titleOptions,
+        show: false,
+      },
     });
   });
 
   test('updates title name when text is entered', async () => {
-    // Set show to true to ensure the title field is visible
     const props = {
       ...mockProps,
       styleOptions: {
@@ -446,13 +478,12 @@ describe('LineVisStyleControls', () => {
       },
     };
 
-    const onStyleChange = jest.fn();
-    render(<LineVisStyleControls {...props} onStyleChange={onStyleChange} />);
+    render(<LineVisStyleControls {...props} />);
 
-    const titleInput = screen.getByPlaceholderText('Default title');
+    const titleInput = screen.getByTestId('mockTitleInput');
     await userEvent.type(titleInput, 'New Chart Title');
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(mockProps.onStyleChange).toHaveBeenCalledWith({
         titleOptions: {
           ...props.styleOptions.titleOptions,

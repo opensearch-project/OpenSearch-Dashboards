@@ -41,15 +41,12 @@ import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
-import {
-  ChartType,
-  StyleOptions,
-} from '../components/visualizations/utils/use_visualization_types';
+import { ChartType } from '../components/visualizations/utils/use_visualization_types';
 import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
 import {
   convertStringsToMappings,
   findRuleByIndex,
-} from '../components/visualizations/visualization_container_utils';
+} from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 
 export interface SearchProps {
@@ -358,46 +355,28 @@ export class ExploreEmbeddable
       } else {
         const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
         const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns);
-        if (!matchedRule) {
+        if (!matchedRule || !matchedRule.toSpec) {
           throw new Error(
             `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
           );
         }
-        const ruleBasedToExpressionFn = (
-          transformedData: Array<Record<string, any>>,
-          numericalCols: VisColumn[],
-          categoricalCols: VisColumn[],
-          dateCols: VisColumn[],
-          styleOpts: StyleOptions
-        ) => {
-          return matchedRule?.toExpression?.(
-            transformedData,
-            numericalCols,
-            categoricalCols,
-            dateCols,
-            styleOpts,
-            selectedChartType,
-            axesMapping
-          );
-        };
         const searchContext = {
           query: this.input.query,
           filters: this.input.filters,
           timeRange: this.input.timeRange,
         };
         this.searchProps.searchContext = searchContext;
-        const indexPattern = this.savedExplore.searchSource.getField('index');
         const styleOptions = visualization.params;
-        const exp = toExpression(
-          searchContext,
-          indexPattern!,
-          ruleBasedToExpressionFn,
+        const spec = matchedRule.toSpec(
           visualizationData.transformedData,
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          selectedChartType,
+          axesMapping
         );
+        const exp = toExpression(searchContext, spec);
         this.searchProps.expression = exp;
       }
     }
@@ -453,5 +432,9 @@ export class ExploreEmbeddable
     }
     this.node = node;
     this.renderComponent(node, this.searchProps);
+  }
+
+  public getInspectorAdapters() {
+    return this.inspectorAdaptors;
   }
 }

@@ -458,7 +458,7 @@ describe('fetchColumnValues', () => {
       body: JSON.stringify({
         query: {
           query:
-            'SELECT string-column FROM test-table GROUP BY string-column ORDER BY COUNT(string-column) DESC LIMIT 10',
+            'SELECT `string-column` FROM `test-table` GROUP BY `string-column` ORDER BY COUNT(`string-column`) DESC LIMIT 10',
           language: 'SQL',
           format: 'jdbc',
           dataset: { dataSource: { id: 'test-id' } },

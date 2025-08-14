@@ -8,42 +8,45 @@ import {
   getAxisByRole,
   generateColorBySchema,
   swapAxes,
-  getSwappedAxes,
   getSwappedAxisRole,
+  getSchemaByAxis,
+  inferTimeUnitFromTimestamps,
+  getTooltipFormat,
 } from './utils';
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
 
 describe('applyAxisStyling', () => {
-  const defaultAxisStyle = {
+  const defaultAxis = {
     id: 1,
     name: 'X Value',
     schema: VisFieldType.Numerical,
     column: 'x',
     validValuesCount: 6,
     uniqueValuesCount: 6,
-    styles: {
-      id: 'Axis-1',
-      position: Positions.LEFT,
+  };
+
+  const defaultAxisStyle = {
+    id: 'Axis-1',
+    position: Positions.LEFT,
+    show: true,
+    style: {},
+    labels: {
       show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 45,
-        filter: false,
-        truncate: 10,
-      },
-      title: {
-        text: 'Custom Title',
-      },
-      grid: {
-        showLines: true,
-      },
-      axisRole: AxisRole.X,
+      rotate: 45,
+      filter: false,
+      truncate: 10,
     },
+    title: {
+      text: 'Custom Title',
+    },
+    grid: {
+      showLines: true,
+    },
+    axisRole: AxisRole.X,
   };
 
   it('returns default config with title and labels when style is provided', () => {
-    const config = applyAxisStyling(defaultAxisStyle);
+    const config = applyAxisStyling(defaultAxis, defaultAxisStyle);
     expect(config.grid).toBe(true);
     expect(config.orient).toBe(Positions.LEFT);
     expect(config.title).toBe('Custom Title');
@@ -53,15 +56,7 @@ describe('applyAxisStyling', () => {
   });
 
   it('disables axis when show is false', () => {
-    const hiddenAxisStyle = {
-      ...defaultAxisStyle,
-      styles: {
-        ...defaultAxisStyle.styles,
-        show: false,
-      },
-    };
-
-    const config = applyAxisStyling(hiddenAxisStyle);
+    const config = applyAxisStyling(defaultAxis, { ...defaultAxisStyle, show: false });
     expect(config.title).toBeNull();
     expect(config.labels).toBe(false);
     expect(config.ticks).toBe(false);
@@ -109,86 +104,15 @@ describe('swapAxes', () => {
   });
 });
 
-describe('getSwappedAxes', () => {
-  const x = {
-    id: 1,
-    name: 'X Value',
-    schema: VisFieldType.Categorical,
-    column: 'x',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
-    styles: {
-      id: 'Axis-1',
-      position: Positions.BOTTOM,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 45,
-        filter: false,
-        truncate: 10,
-      },
-      title: {
-        text: 'Custom Title',
-      },
-      grid: {
-        showLines: true,
-      },
-      axisRole: AxisRole.X,
-    },
-  };
-  const y = {
-    id: 1,
-    name: 'Y Value',
-    schema: VisFieldType.Numerical,
-    column: 'y',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
-    styles: {
-      id: 'Axis-1',
-      position: Positions.LEFT,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 45,
-        filter: false,
-        truncate: 10,
-      },
-      title: {
-        text: 'Custom Title',
-      },
-      grid: {
-        showLines: true,
-      },
-      axisRole: AxisRole.X,
-    },
-  };
-
-  it('returns same axes when switchAxes is false', () => {
-    const [xAxis, yAxis] = getSwappedAxes(x, y, false);
-    expect(xAxis.schema).toBe(VisFieldType.Categorical);
-    expect(yAxis.schema).toBe(VisFieldType.Numerical);
-  });
-
-  it('swaps axes and updates position when switchAxes is true', () => {
-    const [xAxis, yAxis] = getSwappedAxes(x, y, true);
-    expect(xAxis.schema).toBe(VisFieldType.Numerical);
-    expect(yAxis.schema).toBe(VisFieldType.Categorical);
-    expect(xAxis.styles.position).toBe(Positions.BOTTOM);
-    expect(yAxis.styles.position).toBe(Positions.LEFT);
-  });
-});
-
 describe('getSwappedAxisRole', () => {
   it('returns undefined when axes are missing', () => {
-    const [x, y] = getSwappedAxisRole({}, {});
-    expect(x).toBeUndefined();
-    expect(y).toBeUndefined();
+    const { xAxis, yAxis } = getSwappedAxisRole({}, {});
+    expect(xAxis).toBeUndefined();
+    expect(yAxis).toBeUndefined();
   });
 
   it('returns swapped roles if switchAxes is true', () => {
-    const result = getSwappedAxisRole(
+    const { xAxis, yAxis } = getSwappedAxisRole(
       {
         standardAxes: [
           { axisRole: AxisRole.X, position: Positions.BOTTOM } as StandardAxes,
@@ -216,7 +140,184 @@ describe('getSwappedAxisRole', () => {
       }
     );
 
-    expect(result[0]?.schema).toBe(VisFieldType.Numerical);
-    expect(result[1]?.schema).toBe(VisFieldType.Categorical);
+    expect(xAxis?.schema).toBe(VisFieldType.Numerical);
+    expect(yAxis?.schema).toBe(VisFieldType.Categorical);
+  });
+});
+
+describe('getSchemaByAxis', () => {
+  const baseAxis = {
+    id: 1,
+    name: 'Test Axis',
+    column: 'test',
+    validValuesCount: 10,
+    uniqueValuesCount: 10,
+  };
+
+  it('returns quantitative for Numerical schema', () => {
+    const axis = { ...baseAxis, schema: VisFieldType.Numerical };
+    expect(getSchemaByAxis(axis)).toBe('quantitative');
+  });
+
+  it('returns nominal for Categorical schema', () => {
+    const axis = { ...baseAxis, schema: VisFieldType.Categorical };
+    expect(getSchemaByAxis(axis)).toBe('nominal');
+  });
+
+  it('returns temporal for Date schema', () => {
+    const axis = { ...baseAxis, schema: VisFieldType.Date };
+    expect(getSchemaByAxis(axis)).toBe('temporal');
+  });
+
+  it('returns unknown for undefined or invalid schema', () => {
+    expect(getSchemaByAxis(undefined)).toBe('unknown');
+    const axis = { ...baseAxis, schema: 'invalid' as any };
+    expect(getSchemaByAxis(axis)).toBe('unknown');
+  });
+});
+
+describe('inferTimeUnitFromTimestamps', () => {
+  const field = 'timestamp';
+
+  it('returns null for undefined data', () => {
+    expect(inferTimeUnitFromTimestamps(undefined as any, field)).toBeNull();
+  });
+
+  it('returns null for empty data array', () => {
+    expect(inferTimeUnitFromTimestamps([], field)).toBeNull();
+  });
+
+  it('returns null for empty field', () => {
+    const data = [{ timestamp: '2023-01-01' }];
+    expect(inferTimeUnitFromTimestamps(data, '')).toBeNull();
+  });
+
+  it('returns null for less than 2 valid timestamps', () => {
+    const data = [{ timestamp: '2023-01-01' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBeNull();
+  });
+
+  it('returns null for all invalid timestamps', () => {
+    const data = [{ timestamp: 'invalid' }, { timestamp: 'invalid' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBeNull();
+  });
+
+  it('returns second for differences less than 60 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:00:30' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('second');
+  });
+
+  it('returns minute for differences less than 3600 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:01:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('minute');
+  });
+
+  it('returns hour for differences less than 86400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T01:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('hour');
+  });
+
+  it('returns day for differences less than 604800 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-02T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('day');
+  });
+
+  it('returns week for differences less than 2678400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-08T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('week');
+  });
+
+  it('returns month for differences less than 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-02-01T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('month');
+  });
+
+  it('returns year for differences greater than or equal to 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2024-01-01T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('year');
+  });
+
+  it('handles invalid timestamps with some valid ones', () => {
+    const data = [
+      { timestamp: 'invalid' },
+      { timestamp: '2023-01-01T00:00:00' },
+      { timestamp: '2023-01-01T00:00:30' },
+    ];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('second');
+  });
+});
+
+describe('getTooltipFormat', () => {
+  const field = 'timestamp';
+  const defaultFallback = '%b %d, %Y %H:%M:%S';
+
+  it('returns fallback format when field is empty', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }];
+    expect(getTooltipFormat(data, '', defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns fallback format when data is undefined', () => {
+    expect(getTooltipFormat(undefined as any, field, defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns fallback format when data is empty', () => {
+    expect(getTooltipFormat([], field, defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns fallback format for less than 2 valid timestamps', () => {
+    const data = [{ timestamp: '2023-01-01' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns fallback format for all invalid timestamps', () => {
+    const data = [{ timestamp: 'invalid' }, { timestamp: 'invalid' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns second format for differences less than 60 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:00:30' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y %H:%M:%S');
+  });
+
+  it('returns minute format for differences less than 3600 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:01:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y %H:%M');
+  });
+
+  it('returns hour format for differences less than 86400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T01:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y %H:%M');
+  });
+
+  it('returns day format for differences less than 604800 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-02T00:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y');
+  });
+
+  it('returns week format for differences less than 2678400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-08T00:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y');
+  });
+
+  it('returns month format for differences less than 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-02-01T00:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %Y');
+  });
+
+  it('returns year format for differences greater than or equal to 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2024-01-01T00:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%Y');
+  });
+
+  it('uses custom fallback format when provided with invalid timestamps', () => {
+    const customFallback = '%Y-%m-%d';
+    const data = [{ timestamp: 'invalid' }, { timestamp: 'invalid' }];
+    expect(getTooltipFormat(data, field, customFallback)).toBe(customFallback);
+  });
+
+  it('uses custom fallback format when only one valid timestamp is provided', () => {
+    const customFallback = '%Y-%m-%d';
+    const data = [{ timestamp: '2023-01-01T00:00:00' }];
+    expect(getTooltipFormat(data, field, customFallback)).toBe(customFallback);
   });
 });

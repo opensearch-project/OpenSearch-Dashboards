@@ -47,7 +47,7 @@ export function existingInstall(settings, logger) {
   }
 }
 
-export function assertVersion(settings) {
+export function assertVersion(settings, logger) {
   if (!settings.plugins[0].opensearchDashboardsVersion) {
     throw new Error(
       `Plugin opensearch_dashboards.json is missing both a version property (required) and a opensearchDashboardsVersion property (optional).`
@@ -83,7 +83,7 @@ export function assertVersion(settings) {
 
     case 'ignore':
       if (actualVersion.major !== expectedVersion.major) {
-        console.warn(
+        logger.log(
           `WARNING: Plugin ${settings.plugins[0].id} [${actual}] major version differs from OpenSearch Dashboards [${expected}]. Plugin may not function correctly.`
         );
       }

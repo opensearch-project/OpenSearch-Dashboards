@@ -22,24 +22,20 @@ jest.mock('../../../application/utils/state_management/selectors', () => ({
 }));
 
 // Mock all child components
+jest.mock('./dataset_select', () => ({
+  DatasetSelectWidget: () => <div data-test-subj="dataset-select-widget">Dataset Select</div>,
+}));
+
 jest.mock('./save_query', () => ({
   SaveQueryButton: () => <div data-test-subj="save-query-button">Save Query</div>,
-}));
-
-jest.mock('./date_time_range_picker', () => ({
-  DateTimeRangePicker: () => <div data-test-subj="date-time-range-picker">Date Time Picker</div>,
-}));
-
-jest.mock('./run_query_button', () => ({
-  RunQueryButton: () => <div data-test-subj="run-query-button">Run Query</div>,
 }));
 
 jest.mock('./recent_queries_button', () => ({
   RecentQueriesButton: () => <div data-test-subj="recent-queries-button">Recent Queries</div>,
 }));
 
-jest.mock('./selected_language', () => ({
-  SelectedLanguage: () => <div data-test-subj="selected-language">Selected Language</div>,
+jest.mock('./language_reference', () => ({
+  LanguageReference: () => <div data-test-subj="language-reference">Language Reference</div>,
 }));
 
 jest.mock('./language_toggle', () => ({
@@ -85,62 +81,13 @@ describe('QueryPanelWidgets', () => {
     expect(container.querySelector('.exploreQueryPanelWidgets')).toBeInTheDocument();
 
     // Check left section components
+    expect(screen.getByTestId('dataset-select-widget')).toBeInTheDocument();
     expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
     expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
-    expect(screen.getByTestId('selected-language')).toBeInTheDocument();
-    expect(screen.getByTestId('language-toggle')).toBeInTheDocument();
     expect(screen.getByTestId('query-panel-error')).toBeInTheDocument();
 
     // Check right section components
-    expect(screen.getByTestId('date-time-range-picker')).toBeInTheDocument();
-    expect(screen.getByTestId('run-query-button')).toBeInTheDocument();
-  });
-
-  it('shows date time picker when dataset has time field', () => {
-    mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: '@timestamp' } as any,
-      isLoading: false,
-      error: null,
-    });
-
-    render(<QueryPanelWidgets />);
-
-    expect(screen.getByTestId('date-time-range-picker')).toBeInTheDocument();
-  });
-
-  it('hides date time picker when dataset has no time field', () => {
-    mockUseDatasetContext.mockReturnValue({
-      dataset: { timeFieldName: undefined } as any,
-      isLoading: false,
-      error: null,
-    });
-
-    render(<QueryPanelWidgets />);
-
-    expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
-  });
-
-  it('hides date time picker when dataset is undefined', () => {
-    mockUseDatasetContext.mockReturnValue({
-      dataset: undefined,
-      isLoading: false,
-      error: null,
-    });
-
-    render(<QueryPanelWidgets />);
-
-    expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
-  });
-
-  it('hides date time picker when dataset is null', () => {
-    mockUseDatasetContext.mockReturnValue({
-      dataset: undefined,
-      isLoading: false,
-      error: null,
-    });
-
-    render(<QueryPanelWidgets />);
-
-    expect(screen.queryByTestId('date-time-range-picker')).not.toBeInTheDocument();
+    expect(screen.getByTestId('language-reference')).toBeInTheDocument();
+    expect(screen.getByTestId('language-toggle')).toBeInTheDocument();
   });
 });

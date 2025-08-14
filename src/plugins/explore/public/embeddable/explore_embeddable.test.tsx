@@ -66,7 +66,7 @@ jest.mock('../components/visualizations/utils/to_expression', () => ({
 }));
 
 // Mock the visualization container utils
-jest.mock('../components/visualizations/visualization_container_utils', () => ({
+jest.mock('../components/visualizations/visualization_builder_utils', () => ({
   convertStringsToMappings: jest.fn().mockReturnValue({}),
   findRuleByIndex: jest.fn().mockReturnValue({
     toExpression: jest.fn(),
@@ -183,6 +183,10 @@ describe('ExploreEmbeddable', () => {
 
   test('has the correct type', () => {
     expect(embeddable.type).toBe(EXPLORE_EMBEDDABLE_TYPE);
+  });
+
+  test('should have return inspector adaptors', () => {
+    expect(embeddable.getInspectorAdapters()).not.toBeUndefined();
   });
 
   test('initializes search props correctly', () => {
@@ -472,7 +476,7 @@ describe('ExploreEmbeddable', () => {
 
   test('fetch throws error when no matchedRule is exist', async () => {
     const { findRuleByIndex } = await import(
-      '../components/visualizations/visualization_container_utils'
+      '../components/visualizations/visualization_builder_utils'
     );
     jest.mocked(findRuleByIndex).mockReturnValueOnce(undefined);
 

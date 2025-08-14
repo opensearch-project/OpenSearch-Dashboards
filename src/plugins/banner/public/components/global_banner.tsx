@@ -9,9 +9,8 @@
  * GitHub history for details.
  */
 
-import React, { Fragment, useEffect, useState, Suspense, useRef } from 'react';
+import React, { Fragment, useEffect, useState, Suspense, useRef, useCallback } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
 import { BannerConfig, HIDDEN_BANNER_HEIGHT, DEFAULT_BANNER_CONFIG } from '../../common';
 import { LinkRenderer } from './link_renderer';
 import { HttpStart } from '../../../../core/public';
@@ -22,34 +21,53 @@ interface GlobalBannerProps {
   http: HttpStart;
 }
 
+// Key for storing banner hidden state in sessionStorage
+const BANNER_HIDDEN_KEY = 'bannerHidden';
+
 export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
   const [bannerConfig, setBannerConfig] = useState<BannerConfig | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const bannerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch banner config from API when component mounts
-  useEffect(() => {
-    const fetchBannerConfig = async () => {
-      try {
-        setIsLoading(true);
-        const response = await http.get<BannerConfig>('/api/_plugins/_banner/content');
-        act(() => {
-          setBannerConfig(response);
-        });
-      } catch (error) {
-        // Hide banner on error
-        setBannerConfig({
-          ...DEFAULT_BANNER_CONFIG,
-        });
-      } finally {
-        act(() => {
-          setIsLoading(false);
-        });
-      }
-    };
+  // Check if banner is hidden in sessionStorage
+  const isBannerHidden = useCallback(() => {
+    try {
+      return sessionStorage.getItem(BANNER_HIDDEN_KEY) === 'true';
+    } catch (e) {
+      // If sessionStorage is not available, return false
+      return false;
+    }
+  }, []);
 
+  // Fetch banner config from API when component mounts
+  const fetchBannerConfig = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await http.get<BannerConfig>('/api/_plugins/_banner/content');
+
+      // Apply cached hidden state if applicable
+      if (isBannerHidden()) {
+        setBannerConfig({
+          ...response,
+          isVisible: false,
+        });
+      } else {
+        setBannerConfig(response);
+      }
+    } catch (error) {
+      // Hide banner on error
+      setBannerConfig({
+        ...DEFAULT_BANNER_CONFIG,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [http, isBannerHidden]);
+
+  // Initial fetch when component mounts
+  useEffect(() => {
     fetchBannerConfig();
-  }, [http]);
+  }, [http, fetchBannerConfig]);
 
   // Update the CSS variable with the banner's height
   useEffect(() => {
@@ -92,9 +110,17 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
   }, [bannerConfig]);
 
   // Hide banner when close button is clicked
-  const hideBanner = () => {
+  const hideBanner = useCallback(() => {
+    // Update the state - this ensures the banner is hidden in the current session
     setBannerConfig((prevConfig) => (prevConfig ? { ...prevConfig, isVisible: false } : null));
-  };
+
+    // Store the hidden state in sessionStorage
+    try {
+      sessionStorage.setItem(BANNER_HIDDEN_KEY, 'true');
+    } catch (e) {
+      // Intentionally empty - state is already updated above so banner will still be hidden
+    }
+  }, []);
 
   if (isLoading) {
     return (

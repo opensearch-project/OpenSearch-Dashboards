@@ -26,6 +26,7 @@ import {
   IndexPatternSpec,
   SourceFilter,
 } from '../index_patterns/types';
+import { Dataset } from '../datasets/types';
 
 /**
  * @experimental DataView functionality is experimental and may change in future versions
@@ -40,6 +41,13 @@ export interface IDataView extends IIndexPattern {
    * @experimental This method is experimental and may change in future versions
    */
   initializeDataSourceRef?(): Promise<void>;
+
+  /**
+   * Converts a DataView to a serializable Dataset object
+   * Maps dataSourceRef and includes only essential properties for backward compatibility
+   * @experimental This method is experimental and may change in future versions
+   */
+  toDataset?(): Promise<Dataset>;
 }
 
 /**

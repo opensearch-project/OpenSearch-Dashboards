@@ -23,6 +23,8 @@ export const defaultMetricChartStyles: MetricChartStyleControls = {
   fontSize: 60,
   useColor: false,
   colorSchema: ColorSchemas.BLUES,
+  // add default range for metric
+  customRanges: [{ min: 0, max: 100 }],
 };
 
 export const createMetricConfig = (): VisualizationType<'metric'> => ({
@@ -35,11 +37,7 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
     },
     availableMappings: [
       {
-        mapping: [
-          {
-            [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
+        [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
       },
     ],
   },

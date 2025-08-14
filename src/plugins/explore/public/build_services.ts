@@ -7,6 +7,7 @@ import { CoreStart, PluginInitializerContext } from 'opensearch-dashboards/publi
 import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
 import { Storage } from '../../opensearch_dashboards_utils/public';
 import { RequestAdapter } from '../../inspector/public';
+import { ConfigSchema } from '../common/config';
 
 import { ExploreStartDependencies, ExploreServices } from './types';
 import { createSavedExploreLoader } from './saved_explore';
@@ -22,6 +23,8 @@ export function buildServices(
   tabRegistry: TabRegistryService,
   visualizationRegistry: VisualizationRegistryService
 ): ExploreServices {
+  const config = context.config.get<ConfigSchema>();
+  const supportedTypes = config.supportedTypes;
   const services: SavedObjectOpenSearchDashboardsServices = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
@@ -42,7 +45,7 @@ export function buildServices(
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
-    datasets: plugins.data.dataViews,
+    dataViews: plugins.data.dataViews,
     indexPatterns: plugins.data.indexPatterns,
     getSavedExploreById: async (id?: string) => {
       return savedObjectService.get(id);
@@ -86,5 +89,8 @@ export function buildServices(
     expressions: plugins.expressions,
 
     dashboard: plugins.dashboard,
+
+    // Add supportedTypes from config
+    supportedTypes,
   };
 }

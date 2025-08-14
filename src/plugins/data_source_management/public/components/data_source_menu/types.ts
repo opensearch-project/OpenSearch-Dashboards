@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { UiSettingScope } from 'opensearch-dashboards/public';
 import {
   MountPoint,
   NotificationsStart,
@@ -40,7 +41,8 @@ export interface DataSourceMenuProps<T = any> {
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-  onManageDataSource: () => void;
+  onManageDataSource?: () => void;
+  scope: UiSettingScope;
 }
 
 export const DataSourceComponentType = {
@@ -82,7 +84,6 @@ export interface DataSourceSelectableConfig extends DataSourceBaseConfig {
   notifications: NotificationsStart;
   activeOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
-  onManageDataSource: () => void;
 }
 
 export interface DataSourceMultiSelectableConfig extends DataSourceBaseConfig {

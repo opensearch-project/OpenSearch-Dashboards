@@ -48,10 +48,17 @@ export interface OnSaveProps {
 
 export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern | Dataset }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { core, dashboard, savedObjects, toastNotifications, uiSettings, history, data } = services;
+  const {
+    core,
+    dashboard,
+    savedObjects,
+    toastNotifications,
+    uiSettings,
+    scopedHistory,
+    data,
+  } = services;
   const visualizationBuilder = getVisualizationBuilder();
-  const axesMappings = useObservable(visualizationBuilder.axesMapping$);
-  const chartConfig = useObservable(visualizationBuilder.styles$);
+  const chartConfig = useObservable(visualizationBuilder.visConfig$);
 
   const searchContext = useSearchContext();
 
@@ -59,9 +66,9 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   const osdUrlStateStorage = useMemo(() => {
     return createOsdUrlStateStorage({
       useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: history(),
+      history: scopedHistory,
     });
-  }, [uiSettings, history]);
+  }, [uiSettings, scopedHistory]);
 
   const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
     data.query,
@@ -93,7 +100,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
       tabDefinition!,
       {
         chartType: chartConfig?.type,
-        axesMapping: axesMappings,
+        axesMapping: chartConfig?.axesMapping,
         styleOptions: chartConfig?.styles,
       },
       dataset
@@ -187,7 +194,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
             color: 'success',
             iconType: 'check',
             text: toMountPoint(toastContent),
-            'data-test-subj': 'addToNewDashboardSuccessToast',
+            'data-test-subj': 'addToExistingDashboardSuccessToast',
           });
         }
 
@@ -210,7 +217,11 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
 
   return (
     <>
-      <EuiButtonEmpty size="s" onClick={() => setShowAddToDashboardModal(true)}>
+      <EuiButtonEmpty
+        size="s"
+        onClick={() => setShowAddToDashboardModal(true)}
+        data-test-subj="addToDashboardButton"
+      >
         {i18n.translate('explore.addtoDashboardButton.name', {
           defaultMessage: 'Add to dashboard',
         })}

@@ -98,12 +98,6 @@ const mockIndexPattern: IIndexPattern = {
       return fields.some(predicate);
     },
   } as any,
-  getFieldByName: (name: string) => undefined,
-  getComputedFields: () => ({}),
-  getScriptedFields: () => [],
-  getNonScriptedFields: () => [],
-  addScriptedField: async () => {},
-  removeScriptedField: () => {},
 };
 
 describe('convertFiltersToClause', () => {
@@ -300,7 +294,7 @@ describe('getTimeFilterCommand', () => {
 
     const result = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange);
     expect(result).toBe(
-      "WHERE `timestamp` >= '2023-01-01 00:00:00' AND `timestamp` <= '2023-01-02 00:00:00'"
+      "WHERE `timestamp` >= '2023-01-01 00:00:00.000' AND `timestamp` <= '2023-01-02 00:00:00.000'"
     );
   });
 });

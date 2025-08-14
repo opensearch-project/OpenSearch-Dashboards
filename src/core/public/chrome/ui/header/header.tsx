@@ -46,8 +46,7 @@ import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
 import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
-import { InjectedMetadataStart } from '../../../injected_metadata';
+import { Observable, of } from 'rxjs';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -71,7 +70,7 @@ import {
   ChromeBranding,
   ChromeBreadcrumbEnricher,
   ChromeHelpExtension,
-  CollapsibleNavHeaderRender,
+  ChromeGlobalBanner,
 } from '../../chrome_service';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { OnIsLockedUpdate } from './';
@@ -88,6 +87,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
 import { GlobalSearchCommand } from '../../global_search';
+import { HeaderBanner } from './header_banner';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -97,7 +97,7 @@ export interface HeaderProps {
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
-  collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
@@ -131,7 +131,7 @@ export interface HeaderProps {
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
   globalSearchCommands?: GlobalSearchCommand[];
-  injectedMetadata?: InjectedMetadataStart;
+  globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
 }
 
 const hasValue = (value: any) => {
@@ -158,7 +158,6 @@ export function Header({
   setCurrentNavGroup,
   useUpdatedHeader,
   globalSearchCommands,
-  injectedMetadata,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -167,6 +166,7 @@ export function Header({
   const [isNavOpenState, setIsNavOpenState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
+  const globalBanner = useObservable(observables.globalBanner$ || of(undefined), undefined);
 
   const currentLeftControls = useObservableValue(application.currentLeftControls$);
   const navControlsLeft = useObservable(observables.navControlsLeft$);
@@ -215,14 +215,8 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
 
-  // Get the banner plugin configuration
-  const bannerPluginConfig = injectedMetadata
-    ?.getPlugins()
-    ?.find((plugin: { id: string }) => plugin.id === 'banner')?.config;
-  const isBannerEnabled = bannerPluginConfig?.enabled === true;
-
   const className = classnames('hide-for-sharing', 'headerGlobalNav', {
-    'headerGlobalNav--withBanner': isBannerEnabled,
+    'headerGlobalNav--withBanner': !!globalBanner,
   });
   const { useExpandedHeader = true } = branding;
   const useApplicationHeader = headerVariant === HeaderVariant.APPLICATION;
@@ -670,7 +664,7 @@ export function Header({
 
   return (
     <>
-      {isBannerEnabled && !useUpdatedHeader && <div id="pluginGlobalBanner" />}
+      <HeaderBanner globalBanner={globalBanner} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}

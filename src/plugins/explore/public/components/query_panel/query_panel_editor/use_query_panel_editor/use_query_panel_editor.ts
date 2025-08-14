@@ -7,16 +7,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
+import { DEFAULT_DATA } from '../../../../../../data/common';
 import {
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
   selectQueryLanguage,
   selectQueryString,
+  selectIsQueryEditorDirty,
 } from '../../../../application/utils/state_management/selectors';
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
 
 import { useEditorRef } from '../../../../application/hooks';
-import { useDatasetContext } from '../../../../application/context';
+import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
@@ -26,10 +28,10 @@ import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { getSpacebarAction } from './spacebar_action';
-import { setEditorMode } from '../../../../application/utils/state_management/slices';
-import { EditorMode } from '../../../../application/utils/state_management/types';
+import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { getEscapeAction } from './escape_action';
 import { usePromptIsTyping } from './use_prompt_is_typing';
+import { EditorMode } from '../../../../application/utils/state_management/types';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
@@ -38,7 +40,7 @@ type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
 const enabledPromptPlaceholder = i18n.translate(
   'explore.queryPanel.queryPanelEditor.enabledPromptPlaceholder',
   {
-    defaultMessage: 'Query with PPL or press `space` for AI',
+    defaultMessage: 'Press `space` to Ask AI with natural language, or search with PPL',
   }
 );
 
@@ -55,11 +57,11 @@ const disabledPromptPlaceholder = i18n.translate(
 const promptModePlaceholder = i18n.translate(
   'explore.queryPanel.queryPanelEditor.promptPlaceholder',
   {
-    defaultMessage: 'Ask AI about your data. `Esc` to return',
+    defaultMessage: 'Ask AI with natural language. `Esc` to clear and search with PPL',
   }
 );
 
-const TRIGGER_CHARACTERS = [' '];
+const TRIGGER_CHARACTERS = [' ', '='];
 
 const languageConfiguration: LanguageConfiguration = {
   autoClosingPairs: [
@@ -83,6 +85,7 @@ export interface UseQueryPanelEditorReturnType {
   options: IEditorConstructionOptions;
   placeholder: string;
   promptIsTyping: boolean;
+  suggestionProvider: monaco.languages.CompletionItemProvider;
   showPlaceholder: boolean;
   useLatestTheme: true;
   value: string;
@@ -90,12 +93,17 @@ export interface UseQueryPanelEditorReturnType {
 
 export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
-  const { dataset } = useDatasetContext();
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const queryString = useSelector(selectQueryString);
-  const [editorText, setEditorText] = useState<string>(queryString);
+  const userQueryString = useSelector(selectQueryString);
+  const [editorText, setEditorText] = useState<string>(userQueryString);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
+  const {
+    data: {
+      dataViews,
+      query: { queryString },
+    },
+  } = services;
   // The 'onRun' functions in editorDidMount uses the context values when the editor is mounted.
   // Using a ref will ensure it always uses the latest value
   const editorTextRef = useRef(editorText);
@@ -106,6 +114,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const isQueryMode = !isPromptMode;
   const isPromptModeRef = useRef(isPromptMode);
   const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
+  const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
+
+  const switchEditorMode = useLanguageSwitch();
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -121,10 +132,14 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
   useEffect(() => {
-    if (isQueryMode && !!editorText.length) {
+    if (isQueryMode) {
       const onDidFocusDisposable = editorRef.current?.onDidFocusEditorWidget(() => {
         editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
       });
+
+      if (!editorText) {
+        editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      }
 
       return () => {
         onDidFocusDisposable?.dispose();
@@ -147,29 +162,22 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       _: monaco.languages.CompletionContext,
       token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> => {
-      if (isPromptModeRef.current || token.isCancellationRequested) {
+      if (token.isCancellationRequested) {
         return { suggestions: [], incomplete: false };
       }
       try {
         // Get the effective language for autocomplete (PPL -> PPL_Simplified for explore app)
-        const effectiveLanguage = getEffectiveLanguageForAutoComplete(queryLanguage, 'explore');
+        const effectiveLanguage = getEffectiveLanguageForAutoComplete(
+          isPromptModeRef.current ? 'AI' : queryLanguage,
+          'explore'
+        );
 
         // Get the current dataset from Query Service to avoid stale closure values
-        const currentDataView = services.data.query.queryString.getQuery().dataset;
-
-        // Get the current dataset from services to avoid stale closure values
-        let currentDataset = dataset;
-        if (currentDataView) {
-          try {
-            currentDataset = await services?.datasets?.get(
-              currentDataView.id,
-              currentDataView.type !== 'INDEX_PATTERN'
-            );
-          } catch (error) {
-            // Fallback to the prop dataset if fetching fails
-            currentDataset = dataset;
-          }
-        }
+        const currentDataset = queryString.getQuery().dataset;
+        const currentDataView = await dataViews.get(
+          currentDataset?.id!,
+          currentDataset?.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+        );
 
         // Use the current Dataset to avoid stale data
         const suggestions = await services?.data?.autocomplete?.getQuerySuggestions({
@@ -177,8 +185,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           selectionStart: model.getOffsetAt(position),
           selectionEnd: model.getOffsetAt(position),
           language: effectiveLanguage,
-          indexPattern: currentDataset as any,
-          datasetType: currentDataView?.type,
+          baseLanguage: queryLanguage, // Pass the original language before transformation
+          indexPattern: currentDataView,
+          datasetType: currentDataset?.type,
           position,
           services: services as any, // ExploreServices storage type incompatible with IDataPluginServices.DataStorage
         });
@@ -223,28 +232,19 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         return { suggestions: [], incomplete: false };
       }
     },
-    [isPromptModeRef, queryLanguage, dataset, services]
+    [isPromptModeRef, queryLanguage, queryString, dataViews, services]
   );
 
-  // We need to manually register completion provider if it gets re-created,
-  // because monaco.languages.onLanguage will not trigger registration
-  // callbacks if the language is the same.
-  useEffect(() => {
-    const disposable = monaco.languages.registerCompletionItemProvider(queryLanguage, {
-      triggerCharacters: TRIGGER_CHARACTERS,
+  const suggestionProvider = useMemo(() => {
+    return {
+      triggerCharacters: isPromptMode ? ['='] : TRIGGER_CHARACTERS,
       provideCompletionItems,
-    });
-    return () => disposable?.dispose();
-  }, [provideCompletionItems, queryLanguage]);
+    };
+  }, [isPromptMode, provideCompletionItems]);
 
   const handleRun = useCallback(() => {
     dispatch(onEditorRunActionCreator(services, editorTextRef.current));
   }, [dispatch, services]);
-
-  const handleEscape = useCallback(() => {
-    setEditorText('');
-    dispatch(setEditorMode(EditorMode.Query));
-  }, [dispatch]);
 
   const editorDidMount = useCallback(
     (editor: IStandaloneCodeEditor) => {
@@ -269,12 +269,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       // Add Space bar key handling to switch to prompt mode
       editor.addAction(
         getSpacebarAction(promptModeIsAvailableRef, isPromptModeRef, editorTextRef, () =>
-          dispatch(setEditorMode(EditorMode.Prompt))
+          switchEditorMode(EditorMode.Prompt)
         )
       );
 
       // Add Escape key handling to switch to query mode
-      editor.addAction(getEscapeAction(isPromptModeRef, handleEscape));
+      editor.addAction(getEscapeAction(isPromptModeRef, () => switchEditorMode(EditorMode.Query)));
 
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
@@ -300,7 +300,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         return editor;
       };
     },
-    [setEditorRef, handleRun, handleEscape, setEditorIsFocused, dispatch]
+    [setEditorRef, handleRun, switchEditorMode, setEditorIsFocused]
   );
 
   const options = useMemo(() => {
@@ -327,11 +327,15 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     (newText: string) => {
       setEditorText(newText);
 
+      if (!isQueryEditorDirty) {
+        dispatch(setIsQueryEditorDirty(true));
+      }
+
       if (isPromptMode) {
         handleChangeForPromptIsTyping();
       }
     },
-    [setEditorText, isPromptMode, handleChangeForPromptIsTyping]
+    [setEditorText, isPromptMode, handleChangeForPromptIsTyping, isQueryEditorDirty, dispatch]
   );
 
   return {
@@ -339,13 +343,14 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     isFocused: editorIsFocused,
     isPromptMode,
     languageConfiguration,
-    languageId: queryLanguage,
+    languageId: isPromptMode ? 'AI' : queryLanguage,
     onChange,
     onEditorClick,
     options,
     placeholder,
     promptIsTyping,
-    showPlaceholder: !editorText.length && editorIsFocused,
+    suggestionProvider,
+    showPlaceholder: !editorText.length,
     useLatestTheme: true,
     value: editorText,
   };

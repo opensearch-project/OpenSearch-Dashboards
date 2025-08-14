@@ -92,7 +92,7 @@ describe('opensearchDashboards cli', function () {
             ],
           };
 
-          expect(() => assertVersion(settings)).not.toThrow();
+          expect(() => assertVersion(settings, logger)).not.toThrow();
         });
 
         it('should throw an error if plugin is missing a opensearch-dashboards version.', function () {
@@ -100,7 +100,7 @@ describe('opensearchDashboards cli', function () {
             ...settings,
             singleVersion: 'strict',
           };
-          expect(() => assertVersion(testSettings)).toThrowErrorMatchingInlineSnapshot(
+          expect(() => assertVersion(testSettings, logger)).toThrowErrorMatchingInlineSnapshot(
             `"Plugin opensearch_dashboards.json is missing both a version property (required) and a opensearchDashboardsVersion property (optional)."`
           );
         });
@@ -112,7 +112,7 @@ describe('opensearchDashboards cli', function () {
             plugins: [{ id: 'foo', opensearchDashboardsVersion: '2.2.3.4' }],
           };
 
-          expect(() => assertVersion(testSettings)).toThrowErrorMatchingInlineSnapshot(
+          expect(() => assertVersion(testSettings, logger)).toThrowErrorMatchingInlineSnapshot(
             `"Plugin foo [2.2.3] is incompatible with OpenSearch Dashboards [1.0.0]. Strict mode requires exact version match."`
           );
         });
@@ -124,7 +124,7 @@ describe('opensearchDashboards cli', function () {
             plugins: [{ id: 'foo', opensearchDashboardsVersion: '1.0.0' }],
           };
 
-          expect(() => assertVersion(testSettings)).not.toThrow();
+          expect(() => assertVersion(testSettings, logger)).not.toThrow();
         });
 
         it('should ignore version info after the dash in checks on valid version', function () {
@@ -134,7 +134,7 @@ describe('opensearchDashboards cli', function () {
             plugins: [{ id: 'foo', opensearchDashboardsVersion: '1.0.0-foo-bar-version-1.2.3' }],
           };
 
-          expect(() => assertVersion(testSettings)).not.toThrow();
+          expect(() => assertVersion(testSettings, logger)).not.toThrow();
         });
 
         it('should ignore version info after the dash in checks on invalid version', function () {
@@ -144,7 +144,7 @@ describe('opensearchDashboards cli', function () {
             plugins: [{ id: 'foo', opensearchDashboardsVersion: '2.0.0-foo-bar-version-1.2.3' }],
           };
 
-          expect(() => assertVersion(testSettings)).toThrowErrorMatchingInlineSnapshot(
+          expect(() => assertVersion(testSettings, logger)).toThrowErrorMatchingInlineSnapshot(
             `"Plugin foo [2.0.0] is incompatible with OpenSearch Dashboards [1.0.0]. Strict mode requires exact version match."`
           );
         });
@@ -164,7 +164,7 @@ describe('opensearchDashboards cli', function () {
             ],
           };
 
-          expect(() => assertVersion(testSettings)).toThrowErrorMatchingInlineSnapshot(
+          expect(() => assertVersion(testSettings, logger)).toThrowErrorMatchingInlineSnapshot(
             `"Plugin foo [3.0.0] is incompatible with OpenSearch Dashboards [2.1.0]. Strict mode requires exact version match."`
           );
         });
@@ -181,7 +181,7 @@ describe('opensearchDashboards cli', function () {
                 singleVersion: 'strict',
                 plugins: [{ id: 'foo', opensearchDashboardsVersion: '3.1.0' }],
               };
-              expect(() => assertVersion(settings)).not.toThrow();
+              expect(() => assertVersion(settings, logger)).not.toThrow();
             });
 
             it('should fail with different minor versions', function () {
@@ -193,7 +193,7 @@ describe('opensearchDashboards cli', function () {
                 singleVersion: 'strict',
                 plugins: [{ id: 'foo', opensearchDashboardsVersion: '3.1.0' }],
               };
-              expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
+              expect(() => assertVersion(settings, logger)).toThrowErrorMatchingInlineSnapshot(
                 `"Plugin foo [3.1.0] is incompatible with OpenSearch Dashboards [3.0.0]. Strict mode requires exact version match."`
               );
             });
@@ -201,7 +201,6 @@ describe('opensearchDashboards cli', function () {
 
           describe('ignore mode', function () {
             it('should succeed with different major versions but show warning', function () {
-              const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
               const settings = {
                 workingPath: testWorkingPath,
                 tempArchiveFile: tempArchiveFilePath,
@@ -210,11 +209,12 @@ describe('opensearchDashboards cli', function () {
                 singleVersion: 'ignore',
                 plugins: [{ id: 'foo', opensearchDashboardsVersion: '3.1.0' }],
               };
-              expect(() => assertVersion(settings)).not.toThrow();
-              expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining('WARNING: Plugin foo [3.1.0] major version differs')
-              );
-              consoleSpy.mockRestore();
+              expect(() => assertVersion(settings, logger)).not.toThrow();
+              expect(
+                logger.log.calledWith(
+                  sinon.match('WARNING: Plugin foo [3.1.0] major version differs')
+                )
+              ).toBe(true);
             });
           });
 
@@ -228,7 +228,7 @@ describe('opensearchDashboards cli', function () {
                 singleVersion: 'strict',
                 plugins: [{ id: 'foo', opensearchDashboardsVersion: 'opensearchDashboards' }],
               };
-              expect(() => assertVersion(settings)).not.toThrow();
+              expect(() => assertVersion(settings, logger)).not.toThrow();
             });
           });
         });
