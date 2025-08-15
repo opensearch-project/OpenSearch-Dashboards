@@ -25,14 +25,14 @@ export const formatUrlWithWorkspaceId = (
   url: string,
   workspaceId: string,
   basePath: IBasePath,
-  urlWithClientBasePath = false
+  urlWithoutClientBasePath = false
 ) => {
   const newUrl = new URL(url, window.location.href);
   /**
    * Patch workspace id into path
    */
   newUrl.pathname = basePath.remove(newUrl.pathname, {
-    withoutClientBasePath: urlWithClientBasePath,
+    withoutClientBasePath: urlWithoutClientBasePath,
   });
 
   if (workspaceId) {
