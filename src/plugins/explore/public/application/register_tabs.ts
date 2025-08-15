@@ -6,7 +6,12 @@
 import { LogsTab } from '../components/tabs/logs_tab';
 import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
-import { ExploreFlavor, EXPLORE_DEFAULT_LANGUAGE } from '../../common';
+import {
+  ExploreFlavor,
+  EXPLORE_DEFAULT_LANGUAGE,
+  EXPLORE_LOGS_TAB_ID,
+  EXPLORE_VISUALIZATION_TAB_ID,
+} from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
 
@@ -20,7 +25,7 @@ export const registerBuiltInTabs = (
 ) => {
   // Register Logs Tab
   const logsTabDefinition = {
-    id: 'logs',
+    id: EXPLORE_LOGS_TAB_ID,
     label: registryFlavor === ExploreFlavor.Traces ? 'Spans' : 'Logs',
     flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 10,
@@ -42,7 +47,7 @@ export const registerBuiltInTabs = (
   // Register Patterns Tab
   // TODO: Disabled for P0.
   // tabRegistry.registerTab({
-  //   id: 'explore_patterns_tab',
+  //   id: EXPLORE_PATTERNS_TAB_ID,
   //   label: 'Patterns',
   //   flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
   //   order: 15,
@@ -122,7 +127,7 @@ export const registerBuiltInTabs = (
 
   // Register Visualizations Tab
   tabRegistry.registerTab({
-    id: 'explore_visualization_tab',
+    id: EXPLORE_VISUALIZATION_TAB_ID,
     label: 'Visualization',
     flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 20,

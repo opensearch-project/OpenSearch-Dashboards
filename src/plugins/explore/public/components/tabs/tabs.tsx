@@ -5,7 +5,7 @@
 
 import './tabs.scss';
 import React, { useCallback } from 'react';
-import { EuiErrorBoundary, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveTab } from '../../application/utils/state_management/slices';
 import { clearQueryStatusMapByKey } from '../../application/utils/state_management/slices';
@@ -18,6 +18,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { ExploreServices } from '../../types';
 import { RootState } from '../../application/utils/state_management/store';
 import { useFlavorId } from '../../helpers/use_flavor_id';
+import { ErrorGuard } from './error_guard/error_guard';
 
 /**
  * Rendering tabs with different views of 1 OpenSearch hit in Discover.
@@ -69,9 +70,9 @@ export const ExploreTabs = () => {
         id: registryTab.id,
         name: registryTab.label,
         content: (
-          <EuiErrorBoundary>
+          <ErrorGuard registryTab={registryTab}>
             <registryTab.component />
-          </EuiErrorBoundary>
+          </ErrorGuard>
         ),
       };
     });
