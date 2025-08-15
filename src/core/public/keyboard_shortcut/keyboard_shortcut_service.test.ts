@@ -171,7 +171,7 @@ describe('KeyboardShortcutService', () => {
         key: 'S',
       } as KeyboardEvent;
 
-      // @ts-expect-error - Testing private method
+      // @ts-expect-error
       const result = service.getEventKeyString(mockEvent);
       expect(result).toBe('ctrl+shift+s');
     });
