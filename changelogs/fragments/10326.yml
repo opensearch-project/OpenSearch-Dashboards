@@ -1,0 +1,2 @@
+feat:
+- Support dynamic banner config via external JSON endpoint with local fallback ([#10326](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10326))
