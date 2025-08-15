@@ -20,6 +20,13 @@ import { HttpSetup } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { UI_SETTINGS } from '../../../common';
 
+// Mock the getDataViews service
+jest.mock('../../services', () => ({
+  getDataViews: jest.fn(() => ({
+    saveToCache: jest.fn(),
+  })),
+}));
+
 describe('fetchData', () => {
   it('should fetch data using the dataSourceRequestHandler', async () => {
     const mockTables = ['table1', 'table2'];
