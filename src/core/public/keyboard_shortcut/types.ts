@@ -9,6 +9,17 @@
  * GitHub history for details.
  */
 
+/**
+ * Configuration for keyboard shortcuts
+ * @public
+ */
+export interface KeyboardShortcutConfig {
+  /**
+   * Whether keyboard shortcuts are enabled
+   */
+  enabled: boolean;
+}
+
 export interface KeyboardShortcutSetup {
   register(shortcut: ShortcutDefinition): void;
 }

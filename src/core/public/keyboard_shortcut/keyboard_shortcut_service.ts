@@ -9,7 +9,12 @@
  * GitHub history for details.
  */
 
-import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from './types';
+import {
+  KeyboardShortcutSetup,
+  KeyboardShortcutStart,
+  KeyboardShortcutConfig,
+  ShortcutDefinition,
+} from './types';
 
 /**
  * @internal
@@ -18,6 +23,7 @@ import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from
 export class KeyboardShortcutService {
   private shortcutsMapByKey = new Map<string, ShortcutDefinition[]>();
   private namespacedIdToKeyLookup = new Map<string, string>();
+  private config: KeyboardShortcutConfig = { enabled: true };
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -25,8 +31,12 @@ export class KeyboardShortcutService {
     };
   }
 
-  public start(): KeyboardShortcutStart {
-    this.startEventListener();
+  public start(config?: KeyboardShortcutConfig): KeyboardShortcutStart {
+    this.config = { enabled: config?.enabled ?? true };
+
+    if (this.config.enabled) {
+      this.startEventListener();
+    }
 
     return {
       register: (shortcut) => this.register(shortcut),
@@ -70,6 +80,10 @@ export class KeyboardShortcutService {
   };
 
   private register(shortcut: ShortcutDefinition): void {
+    if (!this.config.enabled) {
+      return;
+    }
+
     const key = this.getNormalizedKey(shortcut.keys);
     const namespacedId = this.getNamespacedId(shortcut);
 

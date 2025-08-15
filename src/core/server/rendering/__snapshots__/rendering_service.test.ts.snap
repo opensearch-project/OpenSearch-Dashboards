@@ -34,6 +34,9 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
+  "keyboardShortcuts": Object {
+    "enabled": false,
+  },
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -85,6 +88,9 @@ Object {
   },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "keyboardShortcuts": Object {
+    "enabled": false,
   },
   "legacyMetadata": Object {
     "uiSettings": Object {
@@ -138,6 +144,9 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
+  "keyboardShortcuts": Object {
+    "enabled": false,
+  },
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -189,6 +198,9 @@ Object {
   },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "keyboardShortcuts": Object {
+    "enabled": false,
   },
   "legacyMetadata": Object {
     "uiSettings": Object {
@@ -246,6 +258,9 @@ Object {
   "i18n": Object {
     "translationsUrl": "/translations/en.json",
   },
+  "keyboardShortcuts": Object {
+    "enabled": false,
+  },
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -298,6 +313,9 @@ Object {
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
+  "keyboardShortcuts": Object {
+    "enabled": false,
+  },
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
@@ -349,6 +367,9 @@ Object {
   },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "keyboardShortcuts": Object {
+    "enabled": false,
   },
   "legacyMetadata": Object {
     "uiSettings": Object {

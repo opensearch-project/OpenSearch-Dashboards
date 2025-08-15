@@ -168,6 +168,9 @@ export class RenderingService {
               useExpandedHeader: brandingAssignment.useExpandedHeader,
             },
             survey: opensearchDashboardsConfig.survey.url,
+            keyboardShortcuts: {
+              enabled: opensearchDashboardsConfig.keyboardShortcuts.enabled,
+            },
           },
         };
 
