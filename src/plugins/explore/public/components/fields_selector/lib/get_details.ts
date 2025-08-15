@@ -33,7 +33,6 @@ import { i18n } from '@osd/i18n';
 import { getFieldValueCounts } from './field_calculator';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
-import { getServices } from '../../../application/legacy/discover/opensearch_dashboards_services';
 
 export function getDetails(
   field: IndexPatternField,
@@ -68,12 +67,6 @@ export function getDetails(
     for (const bucket of details.buckets) {
       bucket.display = indexPattern.getFormatterForField(field).convert(bucket.value);
     }
-  }
-
-  // Save updated index pattern with topQueryValues to cache
-  if (indexPattern && indexPattern.id) {
-    const services = getServices();
-    services.data.dataViews.saveToCache(indexPattern.id, indexPattern as any);
   }
 
   return details;

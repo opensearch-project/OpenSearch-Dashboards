@@ -24,6 +24,7 @@ import {
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
+import { getFieldValueCounts } from '../../../../components/fields_selector/lib/field_calculator';
 import {
   ChartData,
   DefaultDataProcessor,
@@ -60,6 +61,7 @@ export const defaultPrepareQueryString = (query: Query): string => {
 /**
  * Default results processor for tabs
  * Processes raw hits to calculate field counts and optionally includes histogram data
+ * Also updates topQueryValues for string fields to improve autocomplete performance
  */
 export const defaultResultsProcessor: DefaultDataProcessor = (
   rawResults: ISearchResult,
@@ -73,6 +75,9 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
       }
     }
+
+    // Update topQueryValues for string fields when we have search results
+    updateFieldTopQueryValues(rawResults.hits.hits, dataset);
   }
 
   const result: ProcessedSearchResults = {
@@ -89,6 +94,59 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   }
 
   return result;
+};
+
+/**
+ * Updates topQueryValues for string fields based on search results
+ * This improves autocomplete performance by precomputing field values
+ */
+const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
+  if (!hits.length || !dataset) return;
+
+  // Get string fields that don't already have topQueryValues
+  const stringFields = dataset.fields.filter(
+    (field) =>
+      field.type === 'string' && field.searchable && !field.subType && !field.spec.topQueryValues
+  );
+
+  // Limit to prevent performance issues
+  const fieldUpdates: Array<{ field: any; topValues: string[] }> = [];
+
+  // Gather field values for all fields first
+  stringFields.forEach((field) => {
+    try {
+      const result = getFieldValueCounts({
+        hits,
+        field,
+        indexPattern: dataset as any, // DataView extends IndexPattern
+        count: 5,
+        grouped: false,
+      });
+
+      // Extract top values from the result buckets
+      if (result.buckets && result.buckets.length > 0) {
+        const topValues = result.buckets.map((bucket) => String(bucket.value));
+        fieldUpdates.push({ field, topValues });
+      }
+    } catch (error) {
+      // Silently continue on field processing errors
+    }
+  });
+
+  // Batch update all fields in the IndexPattern
+  if (fieldUpdates.length > 0) {
+    fieldUpdates.forEach(({ field, topValues }) => {
+      // Update both the field parameter and the IndexPattern field
+      field.spec.topQueryValues = topValues;
+      const indexPatternField = dataset.fields.getByName(field.name);
+      if (indexPatternField?.spec) {
+        indexPatternField.spec.topQueryValues = topValues;
+      }
+    });
+
+    // Note: IndexPattern caching will be handled by the query execution flow
+    // The field updates are now in memory and will persist with the dataset
+  }
 };
 
 export const histogramResultsProcessor: HistogramDataProcessor = (

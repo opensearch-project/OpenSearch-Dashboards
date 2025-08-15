@@ -56,11 +56,11 @@ export const getRawSuggestionData$ = (
     })
   );
 
-const fetchFromAPI = async (http: HttpSetup, body: string) => {
+const fetchFromAPI = async (http: HttpSetup, body: string, apiPath = 'sql') => {
   try {
     return await http.fetch({
       method: 'POST',
-      path: '/api/enhancements/search/sql',
+      path: `/api/enhancements/search/${apiPath}`,
       body,
     });
   } catch (err) {
@@ -126,7 +126,7 @@ export const fetchColumnValues = async (
   if (
     fieldInOsd?.spec.topQueryValues &&
     fieldInOsd.spec.topQueryValues.length > 0 &&
-    !allowedType.includes(fieldInOsd.type)
+    allowedType.includes(fieldInOsd.type)
   ) {
     // Fire async API call to update cache in non-blocking manner
     updateFieldValuesAsync(table, column, services, indexPattern, datasetType, fieldInOsd);
@@ -164,23 +164,22 @@ const updateFieldValuesAsync = async (
     }
 
     const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
-    const dataset = services.data.query.queryString.getQuery().dataset;
+    const dataset = await getDataViews().convertToDataset(
+      await getDataViews().get(indexPattern.id!)
+    );
 
     const values = (
       await fetchFromAPI(
         services.http,
         JSON.stringify({
           query: {
-            query: `SELECT ${escapeIdentifier(column)} FROM ${escapeIdentifier(
-              table
-            )} GROUP BY ${escapeIdentifier(column)} ORDER BY COUNT(${escapeIdentifier(
-              column
-            )}) DESC LIMIT ${limit}`,
-            language: 'SQL',
+            query: `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`,
+            language: 'PPL',
             format: 'jdbc',
             dataset,
           },
-        })
+        }),
+        'ppl'
       )
     ).body.fields[0].values;
 
