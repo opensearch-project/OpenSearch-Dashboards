@@ -24,7 +24,7 @@ export const useTabError = (registryTab?: TabDefinition) => {
     const prepareQuery = registryTab.prepareQuery || defaultPrepareQueryString;
     const cacheKey = prepareQuery(query);
 
-    return queryStatusMap[cacheKey].error;
+    return queryStatusMap[cacheKey]?.error;
   }, [query, queryStatusMap, registryTab]);
 
   return error;
