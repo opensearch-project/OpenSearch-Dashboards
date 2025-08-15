@@ -365,7 +365,7 @@ describe('fetchColumnValues', () => {
       fields: {
         find: jest.fn().mockReturnValue({
           type: fieldType,
-          spec: { autoCompleteValues: undefined },
+          spec: { autoCompleteValues: undefined, topQueryValues: undefined },
         } as IndexPatternField),
       },
     } as unknown) as IndexPattern);

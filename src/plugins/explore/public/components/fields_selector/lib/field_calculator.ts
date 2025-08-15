@@ -100,6 +100,11 @@ const getFieldValueCounts = (params: FieldValueCountsParams): FieldValueCounts =
       };
     }
 
+    // Store top values in field's topQueryValues for caching
+    if (counts.length > 0) {
+      field.spec.topQueryValues = counts.map((bucket) => String(bucket.value));
+    }
+
     return {
       total: hits.length,
       exists: hits.length - missing,

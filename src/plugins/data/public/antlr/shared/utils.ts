@@ -31,6 +31,8 @@ export const removePotentialBackticks = (str: string): string => {
   return str.replace(/^`?|\`?$/g, ''); // removes backticks only if they exist at the beginning and end
 };
 
+const allowedType = ['string'];
+
 // Function to get raw suggestion data
 export const getRawSuggestionData$ = (
   queryString: QueryStringContract,
@@ -110,60 +112,89 @@ export const fetchColumnValues = async (
 ): Promise<any[]> => {
   const fieldInOsd = indexPattern.fields.find((f) => f.name === column);
 
-  // Return cached field values
-  if (fieldInOsd?.spec.autoCompleteValues && fieldInOsd?.spec.autoCompleteValues.length > 0) {
-    return fieldInOsd?.spec.autoCompleteValues;
-  }
-
-  if (!datasetType || !Object.values(DEFAULT_DATA.SET_TYPES).includes(datasetType)) {
-    return [];
-  }
-
-  // default to true/false values for type boolean
+  // For Boolean fields directly return the values
   if (fieldInOsd?.type === 'boolean') {
     return ['true', 'false'];
   }
 
-  const allowedType = ['string'];
-  // don't return values if ui settings prevent it or the field type isn't allowed
-  if (
-    !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
-    !fieldInOsd ||
-    !allowedType.includes(fieldInOsd.type) ||
-    !indexPattern
-  ) {
-    return [];
+  // Return cached Autocomplete Results if available
+  if (fieldInOsd?.spec.autoCompleteValues && fieldInOsd?.spec.autoCompleteValues.length > 0) {
+    return fieldInOsd.spec.autoCompleteValues;
   }
-  const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
 
-  // get dataset for connecting to the cluster currently engaged
-  const dataset = services.data.query.queryString.getQuery().dataset;
+  // Return topQueryValues if available and fire async API call to update the cache for subsequent calls
+  if (
+    fieldInOsd?.spec.topQueryValues &&
+    fieldInOsd.spec.topQueryValues.length > 0 &&
+    !allowedType.includes(fieldInOsd.type)
+  ) {
+    // Fire async API call to update cache in non-blocking manner
+    updateFieldValuesAsync(table, column, services, indexPattern, datasetType, fieldInOsd);
+    return fieldInOsd.spec.topQueryValues;
+  }
 
-  const values = (
-    await fetchFromAPI(
-      services.http,
-      JSON.stringify({
-        query: {
-          query: `SELECT ${escapeIdentifier(column)} FROM ${escapeIdentifier(
-            table
-          )} GROUP BY ${escapeIdentifier(column)} ORDER BY COUNT(${escapeIdentifier(
-            column
-          )}) DESC LIMIT ${limit}`,
-          language: 'SQL',
-          format: 'jdbc',
-          dataset,
-        },
-      })
-    )
-  ).body.fields[0].values;
+  // Fire a synchronous query to fetch values
+  await updateFieldValuesAsync(table, column, services, indexPattern, datasetType, fieldInOsd);
 
-  // Update the field in the passed IndexPattern with cached values
-  fieldInOsd.spec.autoCompleteValues = values;
+  // Return the results of synchronous calls
+  return fieldInOsd?.spec?.autoCompleteValues ?? [];
+};
 
-  // Save the updated IndexPattern to cache
-  getDataViews().saveToCache(indexPattern.id!, indexPattern as any);
+// Non-blocking async function to update field values in background
+const updateFieldValuesAsync = async (
+  table: string,
+  column: string,
+  services: IDataPluginServices,
+  indexPattern: IndexPattern,
+  datasetType: string | undefined,
+  fieldInOsd: IndexPatternField | undefined
+): Promise<void> => {
+  try {
+    // Check if conditions allow API call
+    if (!datasetType || !Object.values(DEFAULT_DATA.SET_TYPES).includes(datasetType)) {
+      return;
+    }
+    if (
+      !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
+      !fieldInOsd ||
+      !allowedType.includes(fieldInOsd.type) ||
+      !indexPattern
+    ) {
+      return;
+    }
 
-  return values;
+    const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
+    const dataset = services.data.query.queryString.getQuery().dataset;
+
+    const values = (
+      await fetchFromAPI(
+        services.http,
+        JSON.stringify({
+          query: {
+            query: `SELECT ${escapeIdentifier(column)} FROM ${escapeIdentifier(
+              table
+            )} GROUP BY ${escapeIdentifier(column)} ORDER BY COUNT(${escapeIdentifier(
+              column
+            )}) DESC LIMIT ${limit}`,
+            language: 'SQL',
+            format: 'jdbc',
+            dataset,
+          },
+        })
+      )
+    ).body.fields[0].values;
+
+    if (values) {
+      // Update the field with fresh API values
+      fieldInOsd.spec.autoCompleteValues = values;
+
+      // Save the updated IndexPattern to cache
+      getDataViews().saveToCache(indexPattern.id!, indexPattern as any);
+    }
+  } catch (error) {
+    // Propagate the error instead of silently failing
+    throw error;
+  }
 };
 
 export const formatValuesToSuggestions = <T extends { toString(): string | null } | null>(
