@@ -56,23 +56,22 @@ export function defineRoutes(router: IRouter, bannerSetup: BannerPluginSetup) {
             bannerSetup.logger
           );
 
-          // If external config was successfully fetched, validate and override the UI settings
-          if (externalConfig) {
-            // Validate the configuration
-            if (!validateBannerConfig(externalConfig, bannerSetup.logger)) {
-              bannerSetup.logger.error(
-                'Banner configuration validation failed, using default settings'
-              );
-            } else {
-              config = {
-                ...config,
-                ...externalConfig,
-              };
-            }
-          } else {
+          // Check if external config was successfully fetched
+          if (!externalConfig) {
             bannerSetup.logger.warn(
               `Failed to load banner config from external URL: ${pluginConfig.externalLink}, using UI settings instead`
             );
+          }
+          // Check if the configuration is valid
+          else if (!validateBannerConfig(externalConfig, bannerSetup.logger)) {
+            bannerSetup.logger.error(
+              'Banner configuration validation failed, using default settings'
+            );
+          } else {
+            config = {
+              ...config,
+              ...externalConfig,
+            };
           }
         } catch (error) {
           bannerSetup.logger.error(`Error loading banner config from external URL: ${error}`);
