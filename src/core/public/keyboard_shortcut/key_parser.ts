@@ -104,8 +104,8 @@ type ModifierKey = typeof MODIFIER_ORDER[number];
 type PlatformMappingKeys = 'ctrl' | 'control' | 'meta' | 'win' | 'super' | 'command' | 'cmd';
 
 interface PlatformModifierMappings {
-  readonly mac: Record<PlatformMappingKeys, string>;
-  readonly other: Record<PlatformMappingKeys, string>;
+  readonly mac: Record<PlatformMappingKeys, ModifierKey>;
+  readonly other: Record<PlatformMappingKeys, ModifierKey>;
 }
 
 type DisplayMappingKeys =
@@ -296,32 +296,31 @@ export class KeyStringParser {
       return plusKeyResult;
     }
 
-    const parts = keyString
-      .toLowerCase()
-      .split('+')
-      .map((part) => {
-        if (part === ' ') {
-          return 'space';
-        }
-        return part.trim();
-      })
-      .filter((part) => part.length > 0);
-
+    const rawParts = keyString.toLowerCase().split('+');
     const modifiers: ModifierKey[] = [];
     const keys: string[] = [];
+    const modifierSet = new Set<ModifierKey>();
 
-    for (const part of parts) {
+    for (const rawPart of rawParts) {
+      let part = rawPart.trim();
+
+      if (part === ' ') {
+        part = 'space';
+      }
+
+      if (part.length === 0) continue;
+
       if (this.isModifier(part)) {
         const normalizedModifier = this.normalizeModifier(part);
-        if (normalizedModifier && !modifiers.includes(normalizedModifier as ModifierKey)) {
-          const platformMappedModifier = this.applyPlatformMapping(
-            normalizedModifier
-          ) as ModifierKey;
-          if (!modifiers.includes(platformMappedModifier)) {
+        if (normalizedModifier) {
+          const platformMappedModifier = this.applyPlatformMapping(normalizedModifier);
+
+          if (!modifierSet.has(platformMappedModifier)) {
+            modifierSet.add(platformMappedModifier);
             modifiers.push(platformMappedModifier);
           }
         }
-      } else if (part.length > 0) {
+      } else {
         const normalizedKey = this.normalizeKey(part);
         if (normalizedKey.length > 0) {
           keys.push(normalizedKey);
@@ -329,7 +328,11 @@ export class KeyStringParser {
       }
     }
 
-    this.sortModifiers(modifiers);
+    modifiers.sort((a, b) => {
+      const aIndex = KeyStringParser.MODIFIER_INDEX_MAP.get(a) ?? -1;
+      const bIndex = KeyStringParser.MODIFIER_INDEX_MAP.get(b) ?? -1;
+      return aIndex - bIndex;
+    });
 
     if (modifiers.length > 0 && keys.length === 0) {
       return modifiers.join('+');
@@ -339,7 +342,6 @@ export class KeyStringParser {
       return this.buildKeyString(modifiers, keys[0]);
     }
 
-    // For multiple keys, include modifiers in the result so validation can catch invalid combinations
     if (modifiers.length > 0) {
       return `${modifiers.join('+')}+${keys.join('+')}`;
     }
@@ -401,28 +403,20 @@ export class KeyStringParser {
     return KeyStringParser.VALID_MODIFIERS.has(normalized as ModifierKey) ? normalized : null;
   }
 
-  private applyPlatformMapping(modifier: string): string {
+  private applyPlatformMapping(modifier: string): ModifierKey {
     const mappings =
       this.platform === 'mac'
         ? KeyStringParser.PLATFORM_MODIFIER_MAPPINGS.mac
         : KeyStringParser.PLATFORM_MODIFIER_MAPPINGS.other;
 
-    const normalized = modifier.toLowerCase();
-    return mappings[normalized as keyof typeof mappings] || normalized;
+    const normalized = modifier.toLowerCase() as PlatformMappingKeys;
+    return mappings[normalized] || (normalized as ModifierKey);
   }
 
   private buildKeyString(modifiers: string[], key: string): string {
     if (modifiers.length === 0) return key;
     if (!key) return modifiers.join('+');
     return `${modifiers.join('+')}+${key}`;
-  }
-
-  private sortModifiers(modifiers: ModifierKey[]): void {
-    modifiers.sort((a, b) => {
-      const aIndex = KeyStringParser.MODIFIER_INDEX_MAP.get(a) ?? -1;
-      const bIndex = KeyStringParser.MODIFIER_INDEX_MAP.get(b) ?? -1;
-      return aIndex - bIndex;
-    });
   }
 
   private normalizeKey(key: string): string {
@@ -460,12 +454,12 @@ export class KeyStringParser {
    *
    * @example
    *
-   * parser.isValidKeyString("ctrl+s"); // succeeds
-   * parser.isValidKeyString("ctrl+"); // throws "Malformed key string: invalid '+' character placement"
-   * parser.isValidKeyString("ctrl a"); // throws "Chord sequences are not supported"
+   * parser.validateKeyString("ctrl+s"); // succeeds
+   * parser.validateKeyString("ctrl+"); // throws "Malformed key string: invalid '+' character placement"
+   * parser.validateKeyString("ctrl a"); // throws "Chord sequences are not supported"
    *
    */
-  public isValidKeyString(keyString: string): void {
+  public validateKeyString(keyString: string): void {
     if (keyString === null || keyString === undefined) {
       throw new Error(`Key string cannot be null or undefined`);
     }
@@ -526,17 +520,20 @@ export class KeyStringParser {
       );
     }
 
-    if (keyCount === 2 && modifierCount > 0) {
-      throw new Error(
-        `Malformed key string: two-key sequences cannot have modifiers: "${keyString}"`
-      );
-    }
-
     if (keyCount > 1 && modifierCount > 0) {
+      if (keyCount === 2) {
+        throw new Error(
+          `Malformed key string: two-key sequences cannot have modifiers: "${keyString}"`
+        );
+      }
       throw new Error(
         `Malformed key string: multiple non-modifier keys with modifiers: "${keyString}"`
       );
     }
+  }
+
+  public isValidKeyString(keyString: string): void {
+    return this.validateKeyString(keyString);
   }
 
   public getDisplayString(keyString: string): string {
