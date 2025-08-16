@@ -116,7 +116,10 @@ function createTracesMetricsData(
 
     // Calculate latency (duration)
     const duration =
-      hit._source?.durationInNanos || hit._source?.duration || hit._source?.['duration.nanos'];
+      hit._source?.durationNano ||
+      hit._source?.durationInNanos ||
+      hit._source?.duration ||
+      hit._source?.['duration.nanos'];
 
     if (duration && !isNaN(parseFloat(duration))) {
       const durationMs = parseFloat(duration) / 1000000; // Convert nanos to ms
@@ -213,7 +216,8 @@ export const isErrorSpan = (source: any): boolean => {
   const httpStatusCode =
     source['attributes.http.status_code'] ||
     source.attributes?.['http.status_code'] ||
-    source.attributes?.http?.status_code;
+    source.attributes?.http?.status_code ||
+    source.attributes?.http?.response?.status_code;
   if (httpStatusCode) {
     const statusStr = String(httpStatusCode);
     if (statusStr.startsWith('4') || statusStr.startsWith('5')) {
