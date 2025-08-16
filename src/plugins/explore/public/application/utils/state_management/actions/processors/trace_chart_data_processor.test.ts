@@ -96,8 +96,17 @@ describe('trace_chart_data_processor', () => {
                 'attributes.http.status_code': '500',
               },
             },
+            {
+              _id: 'trace3',
+              _source: {
+                '@timestamp': '2021-01-01T00:30:00Z',
+                traceId: 'trace-789',
+                durationNano: 3000000000, // 3 seconds - testing new field
+                'status.code': '1', // OK status
+              },
+            },
           ],
-          total: 2,
+          total: 3,
         },
       } as any;
 
@@ -169,6 +178,18 @@ describe('trace_chart_data_processor', () => {
           attributes: {
             http: {
               status_code: '500',
+            },
+          },
+        })
+      ).toBe(true);
+
+      expect(
+        isErrorSpan({
+          attributes: {
+            http: {
+              response: {
+                status_code: '502',
+              },
             },
           },
         })
