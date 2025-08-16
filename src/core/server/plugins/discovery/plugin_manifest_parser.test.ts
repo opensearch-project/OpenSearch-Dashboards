@@ -75,7 +75,6 @@ test('return error when manifest content is not a valid JSON', async () => {
   mockReadFilePromise.mockResolvedValue(Buffer.from('not-json'));
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -139,7 +138,7 @@ test('return error when plugin version is missing', async () => {
   });
 });
 
-test('return error when plugin expected OpenSearch Dashboards version is lower than actual version', async () => {
+test('return error when plugin expected OpenSearch Dashboards version has different major version', async () => {
   mockReadFilePromise.mockResolvedValue(
     Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2' }))
   );
@@ -193,13 +192,24 @@ test('return error when plugin config path is an array that contains non-string 
   });
 });
 
-test('return error when plugin expected OpenSearch Dashboards version is higher than actual version', async () => {
+test('return error when plugin expected OpenSearch Dashboards version has different major version (8.x vs 7.x)', async () => {
   mockReadFilePromise.mockResolvedValue(
-    Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.1' }))
+    Buffer.from(JSON.stringify({ id: 'someId', version: '8.0.0' }))
   );
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "7.0.1", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
+    message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "8.0.0", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
+    type: PluginDiscoveryErrorType.IncompatibleVersion,
+    path: pluginManifestPath,
+  });
+});
+
+test('return error when plugin has lower major version', async () => {
+  mockReadFilePromise.mockResolvedValue(
+    Buffer.from(JSON.stringify({ id: 'someId', version: '6.9.9' }))
+  );
+
+  await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
   });

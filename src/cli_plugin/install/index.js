@@ -62,6 +62,17 @@ export function installCommand(program) {
       'length of time before failing; 0 for never fail',
       parseMilliseconds
     )
+    .option(
+      '--single-version <mode>',
+      'set version validation method: "strict", "ignore"',
+      (value) => {
+        if (!['strict', 'ignore'].includes(value)) {
+          throw new Error(`Invalid single-version mode: ${value}. Use 'strict' or 'ignore'.`);
+        }
+        return value;
+      },
+      'strict'
+    )
     .description(
       'install a plugin',
       `Common examples:

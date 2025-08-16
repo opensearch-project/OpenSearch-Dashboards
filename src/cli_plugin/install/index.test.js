@@ -71,7 +71,7 @@ describe('opensearchDashboards cli', function () {
       it('should define the command line options', function () {
         const spy = sinon.spy(program, 'option');
 
-        const options = [/-q/, /-s/, /-c/, /-t/];
+        const options = [/-q/, /-s/, /-c/, /-t/, /--single-version/];
 
         installCommand(program);
 
