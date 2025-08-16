@@ -134,7 +134,6 @@ describe('KeyStringParser', () => {
     it('should handle space key variations', () => {
       expect(parser.normalizeKeyString('Space')).toBe('space');
       expect(parser.normalizeKeyString('Ctrl+Space')).toBe('ctrl+space');
-      expect(parser.normalizeKeyString('Ctrl+ ')).toBe('ctrl+space');
     });
 
     it('should remove duplicate modifiers', () => {
@@ -607,16 +606,32 @@ describe('KeyStringParser', () => {
       );
     });
 
-    it('should allow valid space key combinations', () => {
-      expect(() => parser.isValidKeyString('ctrl+ ')).not.toThrow();
-      expect(() => parser.isValidKeyString('shift+ ')).not.toThrow();
+    it('should reject implicit space key combinations', () => {
+      expect(() => parser.isValidKeyString('ctrl+ ')).toThrow(
+        'only modifier keys found, no action key'
+      );
+      expect(() => parser.isValidKeyString('shift+ ')).toThrow(
+        'only modifier keys found, no action key'
+      );
+      expect(() => parser.isValidKeyString('alt+ ')).toThrow(
+        'only modifier keys found, no action key'
+      );
+    });
+
+    it('should allow explicit space key combinations', () => {
+      expect(() => parser.isValidKeyString('ctrl+space')).not.toThrow();
+      expect(() => parser.isValidKeyString('shift+space')).not.toThrow();
       expect(() => parser.isValidKeyString(' ')).not.toThrow();
-      expect(() => parser.isValidKeyString('alt+ ')).not.toThrow();
+      expect(() => parser.isValidKeyString('alt+space')).not.toThrow();
     });
 
     it('should handle edge cases with spaces correctly', () => {
-      expect(() => parser.isValidKeyString('ctrl+ ')).not.toThrow();
-      expect(() => parser.isValidKeyString('shift+ ')).not.toThrow();
+      expect(() => parser.isValidKeyString('ctrl+ ')).toThrow(
+        'only modifier keys found, no action key'
+      );
+      expect(() => parser.isValidKeyString('shift+ ')).toThrow(
+        'only modifier keys found, no action key'
+      );
 
       expect(() => parser.isValidKeyString('ctrl a')).toThrow('Chord sequences are not supported');
       expect(() => parser.isValidKeyString('shift+s f1')).toThrow(
