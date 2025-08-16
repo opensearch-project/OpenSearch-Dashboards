@@ -1,12 +1,6 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 export interface KeyboardShortcutSetup {
@@ -56,7 +50,6 @@ export interface ShortcutDefinition {
 
   /**
    * Function to execute when the shortcut is triggered
-   * Can be async for operations that require API calls
    */
-  execute: () => void | Promise<void>;
+  execute: () => void;
 }
