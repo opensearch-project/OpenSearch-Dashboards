@@ -48,10 +48,25 @@ export const buildTraceDetailsUrl = (
   const basePathMatch = pathname.match(/^(.*?)\/app/);
   const basePath = basePathMatch ? basePathMatch[1] : '';
 
-  // Construct the URL with both spanId and traceId
-  const urlParams = `dataset:(id:'${dataset?.id || 'default-dataset-id'}',title:'${
+  // Build dataset parameters
+  let datasetParams = `dataset:(id:'${dataset?.id || 'default-dataset-id'}',title:'${
     dataset?.title || 'otel-v1-apm-span-*'
-  }',type:'${dataset?.type || 'INDEX_PATTERN'}'),spanId:'${spanIdValue}'`;
+  }',type:'${dataset?.type || 'INDEX_PATTERN'}'`;
+
+  // Add timeFieldName if present
+  if (dataset?.timeFieldName) {
+    datasetParams += `,timeFieldName:'${dataset.timeFieldName}'`;
+  }
+
+  // Add dataSource if present (external data source)
+  if (dataset?.dataSource) {
+    datasetParams += `,dataSource:(id:'${dataset.dataSource.id}',title:'${dataset.dataSource.title}',type:'${dataset.dataSource.type}')`;
+  }
+
+  datasetParams += ')';
+
+  // Build URL parameters
+  const urlParams = `${datasetParams},spanId:'${spanIdValue}'`;
   const urlParamsWithTrace = traceIdValue ? `${urlParams},traceId:'${traceIdValue}'` : urlParams;
 
   return `${origin}${basePath}/app/explore/traces/traceDetails#/?_a=(${urlParamsWithTrace})`;

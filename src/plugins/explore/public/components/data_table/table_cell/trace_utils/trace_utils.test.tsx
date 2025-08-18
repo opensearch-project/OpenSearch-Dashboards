@@ -290,6 +290,57 @@ describe('trace_utils', () => {
         "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'',traceId:'trace-456')"
       );
     });
+
+    it('should include timeFieldName when present', () => {
+      const dataset = {
+        id: 'test-dataset',
+        title: 'test-title',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
+      };
+      const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
+
+      expect(result).toBe(
+        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN',timeFieldName:'endTime'),spanId:'span-123',traceId:'trace-456')"
+      );
+    });
+
+    it('should include dataSource when present (external data source)', () => {
+      const dataset = {
+        id: 'test-dataset',
+        title: 'test-title',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
+        dataSource: {
+          id: 'external-datasource-id',
+          title: 'external',
+          type: 'OpenSearch',
+        },
+      };
+      const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
+
+      expect(result).toBe(
+        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN',timeFieldName:'endTime',dataSource:(id:'external-datasource-id',title:'external',type:'OpenSearch')),spanId:'span-123',traceId:'trace-456')"
+      );
+    });
+
+    it('should work with external data source without timeFieldName', () => {
+      const dataset = {
+        id: 'test-dataset',
+        title: 'test-title',
+        type: 'INDEX_PATTERN',
+        dataSource: {
+          id: 'external-datasource-id',
+          title: 'external',
+          type: 'OpenSearch',
+        },
+      };
+      const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
+
+      expect(result).toBe(
+        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN',dataSource:(id:'external-datasource-id',title:'external',type:'OpenSearch')),spanId:'span-123',traceId:'trace-456')"
+      );
+    });
   });
 
   describe('handleSpanIdNavigation', () => {

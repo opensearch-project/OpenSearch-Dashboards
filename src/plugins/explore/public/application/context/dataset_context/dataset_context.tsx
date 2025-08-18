@@ -5,19 +5,21 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { DataView, DEFAULT_DATA } from '../../../../../data/common';
+import { DataView, DEFAULT_DATA, Dataset } from '../../../../../data/common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';
 
 interface DatasetContextValue {
   dataset: DataView | undefined;
+  rawDataset: Dataset | undefined;
   isLoading: boolean | null;
   error: string | null;
 }
 
 const DatasetContext = createContext<DatasetContextValue>({
   dataset: undefined,
+  rawDataset: undefined,
   isLoading: false,
   error: null,
 });
@@ -100,10 +102,11 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const contextValue = useMemo<DatasetContextValue>(
     () => ({
       dataset,
+      rawDataset: datasetFromState,
       isLoading,
       error,
     }),
-    [dataset, isLoading, error]
+    [dataset, datasetFromState, isLoading, error]
   );
 
   return <DatasetContext.Provider value={contextValue}>{children}</DatasetContext.Provider>;

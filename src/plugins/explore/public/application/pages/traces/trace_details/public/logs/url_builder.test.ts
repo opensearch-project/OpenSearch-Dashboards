@@ -170,14 +170,14 @@ describe('url_builder', () => {
       const traceData = [
         {
           startTime: '2023-01-01T10:00:00Z',
-          durationInNanos: 60000000, // 60 seconds in nanoseconds
+          durationInNanos: 60000000000, // 60 seconds in nanoseconds (was 60000000 which is 60ms)
         },
       ];
 
       const result = getTimeRangeFromTraceData(traceData);
 
       expect(result.from).toBe('2023-01-01T09:30:00.000Z');
-      expect(result.to).toBe('2023-01-01T10:30:00.000Z'); // Duration is added in microseconds, not seconds
+      expect(result.to).toBe('2023-01-01T10:31:00.000Z'); // start (10:00) + duration (60s) + buffer (30m) = 10:31
     });
 
     it('should handle mixed data formats', () => {

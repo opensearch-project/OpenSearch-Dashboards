@@ -21,6 +21,11 @@ export interface LogDataset {
   timeFieldName: string;
   title: string;
   type: string;
+  dataSource?: {
+    id: string;
+    title: string;
+    type: string;
+  };
 }
 
 export interface CorrelatedFields {
@@ -78,6 +83,11 @@ export interface IndexPatternAttributes {
   type?: string;
 }
 
+export interface DataSourceAttributes {
+  title?: string;
+  dataSourceEngineType?: string;
+}
+
 export class CorrelationService {
   constructor(
     private savedObjectsClient: SavedObjectsClientContract,
@@ -128,6 +138,35 @@ export class CorrelationService {
         title: attributes?.title || 'Unknown Title',
         type: attributes?.type || 'INDEX_PATTERN',
       };
+
+      // Extract datasource information from the log dataset's references if it exists
+      if (indexPattern.references && indexPattern.references.length > 0) {
+        const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
+        if (dataSourceRef) {
+          try {
+            // Fetch the actual data source details
+            const dataSource = await this.savedObjectsClient.get<DataSourceAttributes>(
+              'data-source',
+              dataSourceRef.id
+            );
+            const dataSourceAttrs = dataSource.attributes as DataSourceAttributes;
+            logDataset.dataSource = {
+              id: dataSource.id,
+              title: dataSourceAttrs?.title || dataSourceRef.name || dataSource.id,
+              type: dataSourceAttrs?.dataSourceEngineType || 'OpenSearch',
+            };
+          } catch (dataSourceError) {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to fetch data source details for log dataset:', dataSourceError);
+            // Fallback to reference information if data source fetch fails
+            logDataset.dataSource = {
+              id: dataSourceRef.id,
+              title: dataSourceRef.name || dataSourceRef.id,
+              type: 'OpenSearch', // Default type
+            };
+          }
+        }
+      }
 
       return logDataset;
     } catch (error) {

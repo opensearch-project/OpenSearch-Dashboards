@@ -19,6 +19,7 @@ import {
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { nanoToMilliSec, isEmpty, round } from '../../utils/helper_functions';
+import { extractSpanDuration, extractHttpStatusCode } from '../../utils/span_data_utils';
 import './span_tabs.scss';
 
 export interface SpanOverviewTabProps {
@@ -95,14 +96,14 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
     const spanId = selectedSpan.spanId;
     const serviceName = selectedSpan.serviceName;
     const operation = selectedSpan.name;
-    const duration = selectedSpan.durationInNanos;
+    const duration = extractSpanDuration(selectedSpan);
     const startTime = selectedSpan.startTime;
     const hasError = selectedSpan['status.code'] === 2;
 
     // Extract HTTP-specific attributes
     const httpMethod = selectedSpan.attributes?.['http.method'];
     const httpUrl = selectedSpan.attributes?.['http.url'];
-    const httpStatusCode = selectedSpan.attributes?.['http.status_code'];
+    const httpStatusCode = extractHttpStatusCode(selectedSpan);
 
     return {
       spanId,

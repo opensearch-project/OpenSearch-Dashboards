@@ -64,7 +64,7 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
     services: { data, chrome },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
-  const { dataset } = useDatasetContext();
+  const { dataset, rawDataset } = useDatasetContext();
 
   const isOnTraces = isOnTracesFlavor();
 
@@ -82,7 +82,7 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
     const spanId = extractSpanIdFromHit(hit);
 
     const queryDataset = data?.query?.queryString?.getQuery()?.dataset;
-    const currentDataset = queryDataset || dataset;
+    const currentDataset = queryDataset || rawDataset;
 
     return {
       traceId,
@@ -92,9 +92,11 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
         title: currentDataset?.title || 'otel-v1-apm-span-*',
         type: currentDataset?.type || 'INDEX_PATTERN',
         timeFieldName: currentDataset?.timeFieldName,
+        // Preserve dataSource information for external data sources
+        ...(currentDataset?.dataSource && { dataSource: currentDataset.dataSource }),
       },
     };
-  }, [hit, dataset, isOnTraces, data]);
+  }, [hit, rawDataset, isOnTraces, data]);
 
   const pplService = useMemo(() => (data ? new TracePPLService(data) : undefined), [data]);
 
