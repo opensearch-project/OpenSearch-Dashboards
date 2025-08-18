@@ -338,7 +338,7 @@ export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => 
         }
         return cleanedColumn;
       }),
-      meta: (response as any).meta, // ✅ This line now works
+      meta: (response as any).meta,
     };
 
     return table;
