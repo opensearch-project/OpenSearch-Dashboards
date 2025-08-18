@@ -229,6 +229,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                               },
                             });
                           }}
+                          onMouseUp={(e) => e.stopPropagation()}
                           options={[
                             { value: 'horizontal', text: 'Horizontal' },
                             { value: 'vertical', text: 'Vertical' },

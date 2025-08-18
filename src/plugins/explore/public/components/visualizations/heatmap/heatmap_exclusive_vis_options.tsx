@@ -78,6 +78,7 @@ export const HeatmapExclusiveVisOptions = ({
           options={colorSchemas}
           value={styles.colorSchema}
           onChange={(e) => updateExclusiveOption('colorSchema', e.target.value as ColorSchemas)}
+          onMouseUp={(e) => e.stopPropagation()}
         />
       </EuiFormRow>
 
