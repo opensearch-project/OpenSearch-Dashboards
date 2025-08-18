@@ -385,3 +385,9 @@
 
 # Set the content of the banner
 # banner.content: "This is an important announcement for all users. [Learn more](https://opensearch.org) about OpenSearch."
+
+# Set the external link to fetch banner configuration from
+# If provided, the banner will try to fetch configuration from this URL
+# If the fetch fails, it will fall back to the settings above
+# See the banner plugin README.md for details on the expected JSON structure
+# banner.externalLink: "https://example.com/banner-config.json"

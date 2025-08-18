@@ -21,4 +21,5 @@ export interface BannerConfig {
   isVisible: boolean;
   useMarkdown?: boolean;
   size?: 's' | 'm';
+  externalLink?: string;
 }
