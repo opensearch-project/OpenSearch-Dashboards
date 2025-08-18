@@ -21,12 +21,19 @@ export const cleanWorkspaceId = (path: string) => {
   return path.replace(/^\/w\/([^\/]*)/, '');
 };
 
-export const formatUrlWithWorkspaceId = (url: string, workspaceId: string, basePath: IBasePath) => {
+export const formatUrlWithWorkspaceId = (
+  url: string,
+  workspaceId: string,
+  basePath: IBasePath,
+  urlWithoutClientBasePath = false
+) => {
   const newUrl = new URL(url, window.location.href);
   /**
    * Patch workspace id into path
    */
-  newUrl.pathname = basePath.remove(newUrl.pathname);
+  newUrl.pathname = basePath.remove(newUrl.pathname, {
+    withoutClientBasePath: urlWithoutClientBasePath,
+  });
 
   if (workspaceId) {
     newUrl.pathname = `${WORKSPACE_PATH_PREFIX}/${workspaceId}${newUrl.pathname}`;

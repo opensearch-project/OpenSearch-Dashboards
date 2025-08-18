@@ -19,7 +19,7 @@ import { UpdateVisualizationProps } from '../../visualization_container';
 import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
-import { getColumnMatchFromMapping } from '../../visualization_container_utils';
+import { getColumnMatchFromMapping } from '../../visualization_builder_utils';
 
 interface VisColumnOption {
   column: VisColumn;

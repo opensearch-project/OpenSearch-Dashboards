@@ -19,7 +19,6 @@ import { PanelDirection } from '@elastic/eui/src/components/resizable_container/
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { ExploreTabs } from '../../../tabs/tabs';
 import { selectActiveTab } from '../../../../application/utils/state_management/selectors';
-import { StylePanel } from '../../../visualizations/style_panel/style_panel';
 
 import './resizable_vis_control_and_tabs.scss';
 
@@ -89,10 +88,7 @@ export const ResizableVisControlAndTabs = () => {
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                  <StylePanel
-                    className="visStylePanelBody"
-                    visualizationBuilder={visualizationBuilder}
-                  />
+                  {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
                 </div>
               )}
             </EuiResizablePanel>

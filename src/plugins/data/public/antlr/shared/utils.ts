@@ -135,7 +135,11 @@ export const fetchColumnValues = async (
       services.http,
       JSON.stringify({
         query: {
-          query: `SELECT ${column} FROM ${table} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
+          query: `SELECT ${escapeIdentifier(column)} FROM ${escapeIdentifier(
+            table
+          )} GROUP BY ${escapeIdentifier(column)} ORDER BY COUNT(${escapeIdentifier(
+            column
+          )}) DESC LIMIT ${limit}`,
           language: 'SQL',
           format: 'jdbc',
           dataset,
@@ -400,3 +404,8 @@ export const parseQuery = <
 
   return result;
 };
+
+function escapeIdentifier(name: string) {
+  // Escape backticks inside name by doubling them
+  return '`' + name.replace(/`/g, '``') + '`';
+}
