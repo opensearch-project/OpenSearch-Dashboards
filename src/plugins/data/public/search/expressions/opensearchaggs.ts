@@ -201,6 +201,31 @@ const handleCourierRequest = async ({
 
   (searchSource as any).finalResponse = resp;
 
+  function extractSumOtherDocCount(aggregations) {
+    let results = 0;
+
+    function traverse(obj, path = '') {
+      if (typeof obj !== 'object' || obj === null) {
+        return;
+      }
+
+      // Check if current object has sum_other_doc_count
+      if (obj.hasOwnProperty('sum_other_doc_count')) {
+        results += obj.sum_other_doc_count;
+      }
+
+      // Recursively traverse all properties
+      Object.keys(obj).forEach((key) => {
+        const newPath = path ? `${path}.${key}` : key;
+        traverse(obj[key], newPath);
+      });
+    }
+
+    traverse(aggregations);
+    return results;
+  }
+  const sumOtherDocCounts = extractSumOtherDocCount(resp.aggregations);
+
   const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
   const tabifyParams = {
     metricsAtAllLevels,
@@ -215,6 +240,9 @@ const handleCourierRequest = async ({
     (searchSource as any).finalResponse,
     tabifyParams
   );
+
+  const tr: any = (searchSource as any).tabifiedResponse;
+  tr.meta = { ...(tr.meta || {}), sumOtherDocCount: sumOtherDocCounts };
 
   inspectorAdapters.data.setTabularLoader(
     () =>
@@ -296,7 +324,7 @@ export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => 
       abortSignal: (abortSignal as unknown) as AbortSignal,
     });
 
-    const table: OpenSearchDashboardsDatatable = {
+    const table: OpenSearchDashboardsDatatable & { meta?: any } = {
       type: 'opensearch_dashboards_datatable',
       rows: response.rows,
       columns: response.columns.map((column: any) => {
@@ -310,6 +338,7 @@ export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => 
         }
         return cleanedColumn;
       }),
+      meta: (response as any).meta, // ✅ This line now works
     };
 
     return table;

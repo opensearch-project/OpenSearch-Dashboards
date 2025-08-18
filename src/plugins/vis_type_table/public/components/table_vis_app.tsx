@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { EuiCallOut } from '@elastic/eui';
 import './table_vis_app.scss';
 import React, { useEffect } from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
@@ -23,6 +23,9 @@ interface TableVisAppProps {
   visData: TableVisData;
   visConfig: TableVisConfig;
   handlers: IInterpreterRenderHandlers;
+  meta?: {
+    sumOtherDocCount?: number;
+  };
 }
 
 export const TableVisApp = ({
@@ -30,6 +33,7 @@ export const TableVisApp = ({
   visData: { table, tableGroups, direction },
   visConfig,
   handlers,
+  meta,
 }: TableVisAppProps) => {
   // Rendering is asynchronous, completed by handlers.done()
   useEffect(() => {
@@ -38,6 +42,7 @@ export const TableVisApp = ({
 
   const tableUiState: TableUiState = getTableUIState(handlers.uiState as PersistedState);
   const showNoResult = table ? table.rows.length === 0 : tableGroups?.length === 0;
+  const shouldShowWarning = meta?.sumOtherDocCount && meta.sumOtherDocCount > 0;
 
   return (
     <I18nProvider>
@@ -49,6 +54,12 @@ export const TableVisApp = ({
             direction={direction === 'column' ? 'row' : 'column'}
             alignItems={direction === 'column' ? 'flexStart' : 'stretch'}
           >
+            {shouldShowWarning && (
+              <EuiCallOut title="Warning: Partial results" color="warning" iconType="alert">
+                Some data was omitted due to bucket size limits.
+              </EuiCallOut>
+            )}
+
             {table ? (
               <TableVisComponent
                 table={table}
