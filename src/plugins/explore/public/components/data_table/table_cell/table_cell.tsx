@@ -29,11 +29,11 @@ export const TableCellUI = ({
   sanitizedCellValue,
   rowData,
 }: ITableCellProps) => {
-  const { rawDataset } = useDatasetContext();
+  const { dataset } = useDatasetContext();
 
   const dataFieldContent =
     isSpanIdColumn(columnId) && isOnTracesPage() ? (
-      <SpanIdLink sanitizedCellValue={sanitizedCellValue} rowData={rowData} dataset={rawDataset} />
+      <SpanIdLink sanitizedCellValue={sanitizedCellValue} rowData={rowData} dataset={dataset} />
     ) : (
       <span
         className="exploreDocTableCell__dataField"

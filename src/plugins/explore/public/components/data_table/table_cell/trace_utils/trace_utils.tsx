@@ -48,7 +48,6 @@ export const buildTraceDetailsUrl = (
   const basePathMatch = pathname.match(/^(.*?)\/app/);
   const basePath = basePathMatch ? basePathMatch[1] : '';
 
-  // Build dataset parameters
   let datasetParams = `dataset:(id:'${dataset?.id || 'default-dataset-id'}',title:'${
     dataset?.title || 'otel-v1-apm-span-*'
   }',type:'${dataset?.type || 'INDEX_PATTERN'}'`;
@@ -59,8 +58,12 @@ export const buildTraceDetailsUrl = (
   }
 
   // Add dataSource if present (external data source)
-  if (dataset?.dataSource) {
-    datasetParams += `,dataSource:(id:'${dataset.dataSource.id}',title:'${dataset.dataSource.title}',type:'${dataset.dataSource.type}')`;
+  // Handle both Dataset.dataSource and DataView.dataSourceRef
+  const dataSourceInfo = (dataset as any)?.dataSource || (dataset as any)?.dataSourceRef;
+  if (dataSourceInfo) {
+    datasetParams += `,dataSource:(id:'${dataSourceInfo.id}',title:'${
+      dataSourceInfo.title || dataSourceInfo.name
+    }',type:'${dataSourceInfo.type}')`;
   }
 
   datasetParams += ')';

@@ -64,7 +64,7 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
     services: { data, chrome },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
-  const { dataset, rawDataset } = useDatasetContext();
+  const { dataset } = useDatasetContext();
 
   const isOnTraces = isOnTracesFlavor();
 
@@ -82,7 +82,7 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
     const spanId = extractSpanIdFromHit(hit);
 
     const queryDataset = data?.query?.queryString?.getQuery()?.dataset;
-    const currentDataset = queryDataset || rawDataset;
+    const currentDataset = queryDataset || dataset;
 
     return {
       traceId,
@@ -93,10 +93,15 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
         type: currentDataset?.type || 'INDEX_PATTERN',
         timeFieldName: currentDataset?.timeFieldName,
         // Preserve dataSource information for external data sources
-        ...(currentDataset?.dataSource && { dataSource: currentDataset.dataSource }),
+        ...((currentDataset as any)?.dataSource && {
+          dataSource: (currentDataset as any).dataSource,
+        }),
+        ...((currentDataset as any)?.dataSourceRef && {
+          dataSource: (currentDataset as any).dataSourceRef,
+        }),
       },
     };
-  }, [hit, rawDataset, isOnTraces, data]);
+  }, [hit, dataset, isOnTraces, data]);
 
   const pplService = useMemo(() => (data ? new TracePPLService(data) : undefined), [data]);
 
