@@ -10,11 +10,12 @@ import { useObservable } from 'react-use';
 import { ChartConfig, VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { TableChartStyleControls } from './table/table_vis_config';
-import { convertStringsToMappings, findRuleByIndex } from './visualization_builder_utils';
+import { convertStringsToMappings } from './visualization_builder_utils';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { toExpression } from './utils/to_expression';
 import { ExpressionsStart } from '../../../../expressions/public';
 import { VisualizationEmptyState } from './visualization_empty_state';
+import { visualizationRegistry } from './visualization_registry';
 
 interface Props {
   data$: BehaviorSubject<VisData | undefined>;
@@ -43,7 +44,7 @@ export const VisualizationRender = (props: Props) => {
     if (!visualizationData) {
       return;
     }
-    const rule = findRuleByIndex(visConfig?.axesMapping ?? {}, columns);
+    const rule = visualizationRegistry.findRuleByAxesMapping(visConfig?.axesMapping ?? {}, columns);
     if (!rule || !rule.toSpec) {
       return;
     }

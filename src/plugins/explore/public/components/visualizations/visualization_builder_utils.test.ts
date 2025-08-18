@@ -7,7 +7,6 @@ import {
   convertMappingsToStrings,
   convertStringsToMappings,
   isValidMapping,
-  findRuleByIndex,
   getColumnMatchFromMapping,
 } from './visualization_builder_utils';
 import { AxisRole, VisColumn, VisFieldType } from './types';
@@ -16,11 +15,9 @@ jest.mock('./rule_repository', () => ({
   ALL_VISUALIZATION_RULES: [
     {
       id: 'rule1',
-      matchIndex: [1, 1, 0],
     },
     {
       id: 'rule2',
-      matchIndex: [0, 1, 1],
     },
   ],
 }));
@@ -131,30 +128,6 @@ describe('visualization_container_utils', () => {
       const result = isValidMapping(mapping, mockColumns);
 
       expect(result).toBe(false);
-    });
-  });
-
-  describe('findRuleByIndex', () => {
-    it('finds rule by column type counts', () => {
-      const mapping = {
-        [AxisRole.X]: 'category',
-        [AxisRole.Y]: 'count',
-      };
-
-      const result = findRuleByIndex(mapping, mockColumns);
-
-      expect(result?.id).toBe('rule1');
-    });
-
-    it('returns undefined for no matching rule', () => {
-      const mapping = {
-        [AxisRole.X]: 'count',
-        [AxisRole.Y]: 'count',
-      };
-
-      const result = findRuleByIndex(mapping, mockColumns);
-
-      expect(result).toBeUndefined();
     });
   });
 

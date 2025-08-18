@@ -38,7 +38,6 @@ describe('VisualizationRegistry', () => {
     mockRule = {
       id: 'test-rule',
       name: 'Test Rule',
-      matchIndex: [1, 0, 1],
       matches: jest.fn(),
       chartTypes: [
         { type: 'line', priority: 100, name: 'Line Chart', icon: '' },
@@ -158,7 +157,6 @@ describe('VisualizationRegistry', () => {
         id: 'low-priority-rule',
         name: 'Low Priority Rule',
         matches: jest.fn().mockReturnValue(true),
-        matchIndex: [],
         chartTypes: [{ type: 'bar', priority: 50, name: 'Bar Chart', icon: '' }],
         toExpression: jest.fn(),
       };
@@ -167,7 +165,6 @@ describe('VisualizationRegistry', () => {
         id: 'high-priority-rule',
         name: 'High Priority Rule',
         matches: jest.fn().mockReturnValue(true),
-        matchIndex: [],
         chartTypes: [{ type: 'line', priority: 100, name: 'Line Chart', icon: '' }],
         toExpression: jest.fn(),
       };

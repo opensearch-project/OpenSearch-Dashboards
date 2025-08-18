@@ -46,9 +46,15 @@ const oneMetricOneDateRule: VisualizationRule = {
   id: 'one-metric-one-date',
   name: '1 Metric & 1 Date',
   description: 'Time series visualization for single metric',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 1 && date.length === 1 && categorical.length === 0,
-  matchIndex: [1, 0, 1],
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 1 || date.length < 1) {
+      return 'NOT_MATCH';
+    }
+    if (numerical.length === 1 && date.length === 1 && categorical.length === 0) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
@@ -106,10 +112,16 @@ const twoMetricOneDateRule: VisualizationRule = {
   id: 'two-metric-one-date',
   name: '2 Metric & 1 Date',
   description: 'Time series visualization for double metrics',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 2 && categorical.length === 0 && date.length === 1,
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 2 || date.length < 1) {
+      return 'NOT_MATCH';
+    }
+    if (numerical.length === 2 && categorical.length === 0 && date.length === 1) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [{ ...CHART_METADATA.line, priority: 100 }],
-  matchIndex: [2, 0, 1],
   toSpec: (
     transformedData,
     numericalColumns,
@@ -146,9 +158,15 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
   id: 'one-metric-one-category-one-date',
   name: '1 Metric & 1 Category & 1 Date',
   description: 'Time series visualization with one metric and one category',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 1 && categorical.length === 1 && date.length === 1,
-  matchIndex: [1, 1, 1],
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 1 || categorical.length < 1 || date.length < 1) {
+      return 'NOT_MATCH';
+    }
+    if (numerical.length === 1 && categorical.length === 1 && date.length === 1) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
@@ -210,9 +228,15 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
   id: 'one-metric-two-category-one-date',
   name: '1 Metric & 2 Category & 1 Date',
   description: 'Multiple time series visualizations',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 1 && categorical.length === 2 && date.length === 1,
-  matchIndex: [1, 2, 1],
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 1 || categorical.length < 2 || date.length < 1) {
+      return 'NOT_MATCH';
+    }
+    if (numerical.length === 1 && categorical.length === 2 && date.length === 1) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
@@ -273,14 +297,22 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
   id: 'one-metric-two-category-high-cardinality',
   name: 'one metric and two category',
   description: 'Heatmap for one metric and two category with high cardinality',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 1 &&
-    date.length === 0 &&
-    categorical.length === 2 &&
-    (numerical[0].uniqueValuesCount >= 7 ||
-      categorical[0].uniqueValuesCount >= 7 ||
-      categorical[1].uniqueValuesCount >= 7),
-  matchIndex: [1, 2, 0],
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 1 || categorical.length < 2) {
+      return 'NOT_MATCH';
+    }
+    if (
+      numerical.length === 1 &&
+      date.length === 0 &&
+      categorical.length === 2 &&
+      (numerical[0].uniqueValuesCount >= 7 ||
+        categorical[0].uniqueValuesCount >= 7 ||
+        categorical[1].uniqueValuesCount >= 7)
+    ) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [
     { ...CHART_METADATA.heatmap, priority: 100 },
     { ...CHART_METADATA.bar, priority: 80 },
@@ -336,14 +368,22 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
   id: 'one-metric-two-category-low-cardinality',
   name: 'one metric and two category',
   description: 'Heatmap for one metric and two category with low cardinality',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 1 &&
-    date.length === 0 &&
-    categorical.length === 2 &&
-    numerical[0].uniqueValuesCount < 7 &&
-    categorical[0].uniqueValuesCount < 7 &&
-    categorical[1].uniqueValuesCount < 7,
-  matchIndex: [1, 2, 0],
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 1 || categorical.length < 2) {
+      return 'NOT_MATCH';
+    }
+    if (
+      numerical.length === 1 &&
+      date.length === 0 &&
+      categorical.length === 2 &&
+      numerical[0].uniqueValuesCount < 7 &&
+      categorical[0].uniqueValuesCount < 7 &&
+      categorical[1].uniqueValuesCount < 7
+    ) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [
     { ...CHART_METADATA.bar, priority: 100 },
     { ...CHART_METADATA.heatmap, priority: 80 },
@@ -399,9 +439,15 @@ const oneMetricOneCateRule: VisualizationRule = {
   id: 'one-metric-one-category',
   name: 'one metric and one category',
   description: 'Multiple visualizations for one metric and one category',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 1 && date.length === 0 && categorical.length === 1,
-  matchIndex: [1, 1, 0],
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 1 || categorical.length < 1) {
+      return 'NOT_MATCH';
+    }
+    if (numerical.length === 1 && date.length === 0 && categorical.length === 1) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [
     { ...CHART_METADATA.bar, priority: 100 },
     { ...CHART_METADATA.pie, priority: 80 },
@@ -467,17 +513,25 @@ const oneMetricOneCateRule: VisualizationRule = {
   },
 };
 
-const oneMetricRule: VisualizationRule = {
-  id: 'one-metric',
-  name: 'one metric',
-  description: 'Metric for one metric',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 1 &&
-    date.length === 0 &&
-    categorical.length === 0 &&
-    numerical[0].validValuesCount === 1,
+const singleMetricRule: VisualizationRule = {
+  id: 'single-metric',
+  name: 'single metric',
+  description: 'Metric for single metric',
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 1 || numerical[0].validValuesCount !== 1) {
+      return 'NOT_MATCH';
+    }
+    if (
+      numerical.length === 1 &&
+      date.length === 0 &&
+      categorical.length === 0 &&
+      numerical[0].validValuesCount === 1
+    ) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [{ ...CHART_METADATA.metric, priority: 100 }],
-  matchIndex: [1, 0, 0],
   toSpec: (
     transformedData,
     numericalColumns,
@@ -502,10 +556,16 @@ const twoMetricRule: VisualizationRule = {
   id: 'two-metric',
   name: 'two metric',
   description: 'Scatter for two metric',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 2 && date.length === 0 && categorical.length === 0,
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 2) {
+      return 'NOT_MATCH';
+    }
+    if (numerical.length === 2 && date.length === 0 && categorical.length === 0) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
-  matchIndex: [2, 0, 0],
   toSpec: (
     transformedData,
     numericalColumns,
@@ -530,10 +590,16 @@ const twoMetricOneCateRule: VisualizationRule = {
   id: 'two-metric-one-category',
   name: 'two metric and one category',
   description: 'Scatter for two metric and one category',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 2 && date.length === 0 && categorical.length === 1,
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 2 || categorical.length < 1) {
+      return 'NOT_MATCH';
+    }
+    if (numerical.length === 2 && date.length === 0 && categorical.length === 1) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
-  matchIndex: [2, 1, 0],
   toSpec: (
     transformedData,
     numericalColumns,
@@ -558,10 +624,16 @@ const threeMetricOneCateRule: VisualizationRule = {
   id: 'three-metric-one-category',
   name: 'three metric and one category',
   description: 'Scatter for three metric and one category',
-  matches: (numerical, categorical, date) =>
-    numerical.length === 3 && date.length === 0 && categorical.length === 1,
+  matches: (numerical, categorical, date) => {
+    if (numerical.length < 3 || categorical.length < 1) {
+      return 'NOT_MATCH';
+    }
+    if (numerical.length === 3 && date.length === 0 && categorical.length === 1) {
+      return 'EXACT_MATCH';
+    }
+    return 'OVER_MATCH';
+  },
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
-  matchIndex: [3, 1, 0],
   toSpec: (
     transformedData,
     numericalColumns,
@@ -594,5 +666,5 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   twoMetricRule,
   twoMetricOneCateRule,
   threeMetricOneCateRule,
-  oneMetricRule,
+  singleMetricRule,
 ];

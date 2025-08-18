@@ -11,7 +11,6 @@ import { debounceTime } from 'rxjs/operators';
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
 import {
   convertMappingsToStrings,
-  findRuleByIndex,
   getColumnMatchFromMapping,
   isValidMapping,
 } from './visualization_builder_utils';
@@ -136,7 +135,7 @@ export class VisualizationBuilder {
       currentVisConfig?.axesMapping ?? {},
       this.data$.value
     );
-    if (newAxesMapping) {
+    if (!isEmpty(newAxesMapping)) {
       newVisConfig.axesMapping = newAxesMapping;
       this.setVisConfig(newVisConfig);
       return;
@@ -203,36 +202,20 @@ export class VisualizationBuilder {
       return;
     }
 
-    const currentRule = findRuleByIndex(axesMapping, allColumns);
+    const currentRule = visualizationRegistry.findRuleByAxesMapping(axesMapping, allColumns);
     if (!isEmpty(axesMapping) && currentRule) {
-      const isChartTypeInCurrentRule = currentRule.chartTypes.find(
-        (chart) => chart.type === chartType
+      const columnMapping = visualizationRegistry.getDefaultAxesMapping(
+        currentRule,
+        chartType,
+        data?.numericalColumns ?? [],
+        data?.categoricalColumns ?? [],
+        data?.dateColumns ?? []
       );
-      if (isChartTypeInCurrentRule) {
-        const reusedMapping = visConfig.ui.availableMappings.find((mapping) =>
-          isEqual(getColumnMatchFromMapping(mapping), currentRule.matchIndex)
-        );
-        if (reusedMapping) {
-          const updatedMapping: Record<string, string> = {};
-          const availableAxesMapping = new Map(Object.entries(axesMapping));
-          Object.entries(reusedMapping).forEach(([key, config]) => {
-            const matchingColumn = Array.from(availableAxesMapping.entries()).find(
-              ([role, columnName]) => {
-                const column = allColumns.find((col) => col.name === columnName);
-                const found = column?.schema === config.type;
-                if (found) {
-                  availableAxesMapping.delete(role);
-                  return found;
-                }
-              }
-            );
-            if (matchingColumn) {
-              updatedMapping[key] = matchingColumn[1];
-            }
-          });
-          return updatedMapping;
-        }
-      }
+      const updatedAxesMapping: Record<string, string> = {};
+      Object.entries(columnMapping).forEach(([role, value]) => {
+        updatedAxesMapping[role] = value.name;
+      });
+      return updatedAxesMapping;
     }
   }
 
