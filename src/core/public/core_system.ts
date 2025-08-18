@@ -243,7 +243,9 @@ export class CoreSystem {
         overlays,
         workspaces,
       });
-      const keyboardShortcut = this.keyboardShortcut.start();
+      const keyboardShortcut = this.keyboardShortcut.start({
+        enabled: injectedMetadata.getKeyboardShortcuts().enabled,
+      });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
 

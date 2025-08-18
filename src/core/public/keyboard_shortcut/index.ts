@@ -10,4 +10,9 @@
  */
 
 export { KeyboardShortcutService } from './keyboard_shortcut_service';
-export type { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from './types';
+export type {
+  KeyboardShortcutSetup,
+  KeyboardShortcutStart,
+  KeyboardShortcutConfig,
+  ShortcutDefinition,
+} from './types';
