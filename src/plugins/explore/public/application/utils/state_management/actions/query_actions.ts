@@ -105,8 +105,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
 
   // Get string fields that don't already have topQueryValues
   const stringFields = dataset.fields.filter(
-    (field) =>
-      field.type === 'string' && field.searchable && !field.subType && !field.spec.topQueryValues
+    (field) => field.type === 'string' && !field.subType && !field.spec.topQueryValues
   );
 
   // Limit to prevent performance issues
@@ -156,6 +155,9 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
   interval: string
 ): ProcessedSearchResults => {
   const result = defaultResultsProcessor(rawResults, dataset);
+
+  data.dataViews.saveToCache(dataset.id!, dataset);
+
   const histogramConfigs = dataset.timeFieldName
     ? createHistogramConfigs(dataset, interval, data)
     : undefined;
