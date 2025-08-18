@@ -35,6 +35,7 @@ describe('TableCell', () => {
     // Mock the dataset context
     mockUseDatasetContext.mockReturnValue({
       dataset: mockDataset,
+      rawDataset: mockDataset,
       isLoading: false,
       error: null,
     });
