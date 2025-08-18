@@ -4,7 +4,7 @@
 /.opensearch
 /.chromium
 /package.json.bak
-.claude
+.claude/
 .DS_Store
 .node_binaries
 .native_modules
