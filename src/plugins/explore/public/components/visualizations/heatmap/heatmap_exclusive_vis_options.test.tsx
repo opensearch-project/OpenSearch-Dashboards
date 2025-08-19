@@ -223,6 +223,24 @@ describe('HeatmapExclusiveVisOptions', () => {
       customRanges: [{ from: 0, to: 10, color: '#000000' }],
     });
   });
+
+  it('calls stopPropagation on mouseUp for color schema selector', () => {
+    render(<HeatmapExclusiveVisOptions {...defaultProps} />);
+
+    const colorSchemaSelect = screen.getByRole('combobox');
+    expect(colorSchemaSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    colorSchemaSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
 });
 
 describe('HeatmapLabelVisOptions', () => {
