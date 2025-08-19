@@ -89,7 +89,7 @@ Cypress.Commands.add('setAdvancedSetting', (changes) => {
         'content-type': 'application/json;charset=UTF-8',
         'osd-xsrf': true,
       },
-      body: { changes }, // This is the key change - wrapping in changes object
+      body: { changes },
       failOnStatusCode: false,
     })
     .then((response) => {
@@ -140,10 +140,6 @@ Cypress.Commands.overwrite('visit', (orig, url, options) => {
   }
 });
 
-/**
- * Overwrite request command to support authentication similar to visit.
- * The request function parameters can be url, or (method, url), or (method, url, body).
- */
 Cypress.Commands.overwrite('request', (originalFn, ...args) => {
   const defaults = {};
   if (Cypress.env('SECURITY_ENABLED')) {

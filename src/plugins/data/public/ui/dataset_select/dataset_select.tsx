@@ -222,6 +222,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, suppor
           size="xs"
           textProps={{ className: 'datasetSelect__textWrapper' }}
           onClick={togglePopover}
+          isLoading={isLoading}
         >
           <EuiIcon type={datasetIcon} size="s" />
           <EuiText size="xs" className="datasetSelect__text">

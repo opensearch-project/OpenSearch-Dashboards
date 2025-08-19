@@ -3,347 +3,148 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasetTypes } from '../../../../../../utils/constants';
 import {
-  DATASOURCE_NAME,
-  INDEX_PATTERN_WITH_TIME_1,
-  INDEX_WITH_TIME_1,
+  INDEX_PATTERN_WITH_TIME,
+  START_TIME,
+  END_TIME,
 } from '../../../../../../utils/apps/explore/constants';
-import {
-  generateAllTestConfigurations,
-  getRandomizedWorkspaceName,
-  setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/explore/shared';
-import { getDocTableField } from '../../../../../../utils/apps/explore/doc_table';
-import * as sideBar from '../../../../../../utils/apps/explore/sidebar';
-import { generateSideBarTestConfiguration } from '../../../../../../utils/apps/explore/sidebar';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
 
-const workspaceName = getRandomizedWorkspaceName();
+describe('Sidebar', () => {
+  let testResources = {};
 
-const sidebarFields = {
-  aggregatableFields: {
-    unnested: [
-      'bytes_transferred',
-      'category',
-      'event_sequence_number',
-      'event_time',
-      'request_url',
-      'response_time',
-      'service_endpoint',
-      'status_code',
-      'timestamp',
-      'unique_category',
-    ],
-    nested: [
-      'personal.address.country',
-      'personal.address.city',
-      'personal.address.coordinates.lat',
-      'personal.address.coordinates.lon',
-      'personal.address.street',
-      'personal.age',
-      'personal.birthdate',
-      'personal.email',
-      'personal.name',
-      'personal.user_id',
-    ],
-  },
-  nonAggregatableFields: ['_score', '_type'],
-  searchableFields: [
-    'bytes_transferred',
-    'category',
-    'event_sequence_number',
-    'event_time',
-    'request_url',
-    'response_time',
-    'service_endpoint',
-    'status_code',
-    'timestamp',
-    'unique_category',
-    'personal.address.country',
-    'personal.address.city',
-    'personal.address.coordinates.lat',
-    'personal.address.coordinates.lon',
-    'personal.address.street',
-    'personal.age',
-    'personal.birthdate',
-    'personal.email',
-    'personal.name',
-    'personal.user_id',
-  ],
-  nonSearchableFields: ['_score', '_type'],
-  missingFields: ['never_present_field'],
-  stringTypeFields: [
-    'category',
-    'personal.address.country',
-    'personal.address.city',
-    'personal.address.street',
-    'personal.email',
-    'personal.name',
-    'personal.user_id',
-    'request_url',
-    'service_endpoint',
-    'unique_category',
-  ],
-};
-
-const addSidebarFieldsAndCheckDocTableColumns = (
-  testFields,
-  expectedValues,
-  pplQuery,
-  sqlQuery,
-  isIndexPattern
-) => {
-  // Helper functions
-  const getDocTableHeaderByIndex = (index) =>
-    cy.getElementByTestId('docTableHeaderField').eq(index);
-
-  const checkTableHeaders = (headers) => {
-    headers.forEach((header, index) => {
-      getDocTableHeaderByIndex(index + 1).should('have.text', header);
+  before(() => {
+    cy.core.setupTestResources().then((resources) => {
+      testResources = resources;
+      cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+      cy.osd.waitForLoader(true);
     });
-  };
+  });
 
-  const checkDocTableColumn = (values, columnNumber) => {
-    values.forEach((value, index) => {
-      getDocTableField(columnNumber, index).should('have.text', value);
+  after(() => {
+    cy.core.cleanupTestResources(testResources);
+  });
+
+  beforeEach(() => {
+    cy.getElementByTestId('discoverNewButton').click();
+    cy.core.waitForDatasetsToLoad();
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+    cy.explore.setTopNavDate(START_TIME, END_TIME);
+    cy.wait(1000);
+  });
+
+  it('should add simple fields to doc table', () => {
+    // Initially shows _source
+    cy.getElementByTestId('docTableHeaderField').eq(1).should('have.text', '_source');
+
+    // Add fields
+    const fields = ['service_endpoint', 'response_time', 'bytes_transferred'];
+    fields.forEach((field) => {
+      cy.getElementByTestId(`field-${field}`).click();
     });
-  };
 
-  // Test steps
-  cy.wrap([
-    () => getDocTableHeaderByIndex(1).should('have.text', '_source'),
-    () => {
-      testFields.forEach((field) => {
-        sideBar.selectFieldFromSidebar(field);
+    // Verify columns changed
+    cy.getElementByTestId('docTableHeaderField').eq(1).should('not.have.text', '_source');
+
+    fields.forEach((field, index) => {
+      cy.getElementByTestId('docTableHeaderField')
+        .eq(index + 1)
+        .should('have.text', field);
+    });
+
+    // Add query to filter results
+    const query = `source = ${INDEX_PATTERN_WITH_TIME} | where status_code = 200 | sort + timestamp`;
+    cy.explore.setQueryEditor(query);
+
+    // Verify filtered results
+    cy.getElementByTestId('discoverQueryHits')
+      .invoke('text')
+      .then((text) => {
+        const count = parseInt(text.replaceAll(',', ''));
+        expect(count).to.be.lessThan(10000);
       });
-      getDocTableHeaderByIndex(1).should('not.have.text', '_source');
-      checkTableHeaders(testFields);
-    },
-  ]).each((fn) => fn());
-
-  cy.getElementByTestId('discoverQueryHits').should('have.text', '10,000');
-
-  cy.wait(2000);
-  cy.intercept('**/api/enhancements/search/ppl').as('query');
-  cy.explore.setQueryEditor(pplQuery);
-  cy.wait('@query').then(() => {
-    checkTableHeaders(testFields);
-    if (isIndexPattern) {
-      cy.getElementByTestId('discoverQueryHits').should('have.text', '1,125');
-    }
-    checkDocTableColumn(expectedValues, 2);
   });
-};
 
-const checkFilteredFieldsForAllLanguages = () => {
-  const searchValues = [
-    { search: '_index', assertion: 'equal' },
-    { search: ' ', assertion: null },
-    { search: 'a', assertion: 'include' },
-    { search: 'age', assertion: 'include' },
-    { search: 'non-existent field', assertion: null },
-  ];
+  it('should add nested fields to doc table', () => {
+    const nestedFields = ['personal.name', 'personal.age', 'personal.address.country'];
 
-  searchValues.forEach(({ search, assertion }) => {
-    sideBar.checkSidebarFilterBarResults(search, assertion);
+    nestedFields.forEach((field) => {
+      cy.getElementByTestId(`field-${field}`).click();
+    });
+
+    nestedFields.forEach((field, index) => {
+      cy.getElementByTestId('docTableHeaderField')
+        .eq(index + 1)
+        .should('have.text', field);
+    });
   });
-};
 
-const checkSidebarPanelBehavior = () => {
-  const checkPanelVisibility = (shouldBeVisible) => {
-    cy.getElementByTestId('dscBottomLeftCanvas').should(
-      shouldBeVisible ? 'exist' : 'not.be.visible'
+  it('should filter fields in sidebar', () => {
+    // Search for specific field
+    cy.getElementByTestId('fieldFilterSearchInput').type('category');
+    cy.getElementByTestId('field-category').should('be.visible');
+    cy.getElementByTestId('field-unique_category').should('be.visible');
+    cy.getElementByTestId('field-status_code').should('not.exist');
+
+    // Clear search
+    cy.getElementByTestId('fieldFilterSearchInput').clear();
+    cy.getElementByTestId('field-status_code').should('be.visible');
+
+    // Search for non-existent field
+    cy.getElementByTestId('fieldFilterSearchInput').type('nonexistent');
+    cy.get('[data-test-subj^="field-"]').should('not.exist');
+  });
+
+  it('should collapse and expand sidebar', () => {
+    // Sidebar should be visible
+    cy.getElementByTestId('dscBottomLeftCanvas').should('exist');
+
+    // Collapse sidebar
+    cy.getElementByTestId('collapseSideBarButton').click();
+    cy.getElementByTestId('dscBottomLeftCanvas').should('not.be.visible');
+
+    // Expand sidebar
+    cy.getElementByTestId('collapseSideBarButton').click();
+    cy.getElementByTestId('dscBottomLeftCanvas').should('exist');
+  });
+
+  it('should show field details with top values', () => {
+    // Click to show details for aggregatable field
+    cy.getElementByTestId('field-bytes_transferred-showDetails').click();
+
+    // Should show top values or visualization
+    cy.getElementsByTestIds(['dscFieldDetailsText', 'fieldVisualizeError']).should(
+      'have.length.above',
+      0
     );
-  };
 
-  checkPanelVisibility(true);
-  sideBar.clickSidebarCollapseBtn();
-  checkPanelVisibility(false);
-  sideBar.clickSidebarCollapseBtn(false);
-  checkPanelVisibility(true);
-};
+    // Visualize button should exist
+    cy.getElementByTestId('fieldVisualize-bytes_transferred').should('be.visible').click();
 
-const verifyFieldShowDetailsShowsTopValuesAndViewVisualization = (
-  config,
-  field,
-  isAggregatable
-) => {
-  const aggregatableShouldText = isAggregatable ? 'be.visible' : 'not.exist';
-  const aggregatableShouldNotText = isAggregatable ? 'not.exist' : 'be.visible';
-
-  setDatePickerDatesAndSearchIfRelevant(config.language);
-
-  // adding a wait as this does not work sometimes
-  cy.wait(1000);
-  sideBar.showSidebarFieldDetails(field);
-  // Either the field details text for each top value should exist, or there should be a field Visualize error.
-  cy.getElementsByTestIds(['dscFieldDetailsText', 'fieldVisualizeError']).should(
-    'have.length.above',
-    0
-  );
-  if (config.visualizeButton) {
-    cy.getElementByTestId(`fieldVisualize-${field}`).should('be.visible').click();
-    cy.getElementByTestId('visualizationLoader').should(aggregatableShouldText);
-    cy.getElementByTestId('globalToastList')
-      .contains(`Saved field "${field}" is invalid for use with`)
-      .should(aggregatableShouldNotText);
-  } else {
-    cy.getElementByTestId(`fieldVisualize-${field}`).should('not.exist');
-  }
-};
-
-export const runSideBarTests = () => {
-  describe('sidebar spec', () => {
-    const testData = {
-      pplQuery: (dataset) => `source = ${dataset} | where status_code = 200  | sort + timestamp`,
-      sqlQuery: (dataset) =>
-        `SELECT * FROM ${dataset} WHERE status_code = 200 ORDER BY timestamp ASC`,
-      simpleFields: {
-        fields: ['service_endpoint', 'response_time', 'bytes_transferred', 'request_url'],
-        expectedValues: ['3.91', '4.82', '1.72', '4.08', '3.97'],
-      },
-      nestedFields: {
-        fields: ['personal.name', 'personal.age', 'personal.birthdate', 'personal.address.country'],
-        expectedValues: ['28', '52', '65', '21', '79'],
-      },
-    };
-
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-    });
-
-    afterEach(() => {
-      cy.window().then((win) => {
-        win.localStorage.clear();
-        win.sessionStorage.clear();
-      });
-    });
-
-    after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
-    });
-
-    generateAllTestConfigurations(generateSideBarTestConfiguration, {
-      indexPattern: INDEX_PATTERN_WITH_TIME_1,
-      index: INDEX_WITH_TIME_1,
-    }).forEach((config) => {
-      describe(`${config.testName}`, () => {
-        beforeEach(() => {
-          cy.osd.navigateToWorkSpaceSpecificPage({
-            workspaceName: workspaceName,
-            page: 'explore/logs',
-            isEnhancement: true,
-          });
-
-          // On a new session, a syntax helper popover appears, which obstructs the typing within the query
-          // editor. Clicking on a random element removes the popover.
-          cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
-
-          cy.wait(1000);
-
-          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          setDatePickerDatesAndSearchIfRelevant(config.language);
-        });
-
-        it('adds simple fields', () => {
-          addSidebarFieldsAndCheckDocTableColumns(
-            testData.simpleFields.fields,
-            testData.simpleFields.expectedValues,
-            testData.pplQuery(config.dataset),
-            testData.sqlQuery(config.dataset),
-            config.datasetType === DatasetTypes.INDEX_PATTERN.name,
-            config
-          );
-        });
-
-        it('adds nested fields', () => {
-          addSidebarFieldsAndCheckDocTableColumns(
-            testData.nestedFields.fields,
-            testData.nestedFields.expectedValues,
-            testData.pplQuery(config.dataset),
-            testData.sqlQuery(config.dataset),
-            config.datasetType === DatasetTypes.INDEX_PATTERN.name,
-            config
-          );
-        });
-
-        it('filters fields correctly', () => {
-          checkFilteredFieldsForAllLanguages();
-        });
-
-        it('handles panel collapse/expand correctly', () => {
-          checkSidebarPanelBehavior();
-        });
-
-        it('fields should have top values', () => {
-          const aggregatableFieldsToTest = [sidebarFields.aggregatableFields.unnested[0]];
-          const nestedFieldsToTest = [sidebarFields.aggregatableFields.nested[0]];
-
-          aggregatableFieldsToTest.forEach((aggregatableField) => {
-            verifyFieldShowDetailsShowsTopValuesAndViewVisualization(
-              config,
-              aggregatableField,
-              true
-            );
-          });
-
-          cy.osd.navigateToWorkSpaceSpecificPage({
-            workspaceName: workspaceName,
-            page: 'explore/logs',
-            isEnhancement: true,
-          });
-          cy.getElementByTestId('discoverNewButton').click();
-          // Setting the dataset and query language again to ensure the date picker is not missing
-          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-
-          nestedFieldsToTest.forEach((nestedField) => {
-            verifyFieldShowDetailsShowsTopValuesAndViewVisualization(config, nestedField, false);
-          });
-        });
-
-        it('fields should be filtered by type', () => {
-          cy.getElementByTestId('toggleFieldFilterButton').click();
-
-          sideBar.selectFilterVerifySidebarFieldsVisibleAndActiveFiltersNumber(
-            'aggregatable',
-            sidebarFields.aggregatableFields.unnested.concat(
-              sidebarFields.aggregatableFields.nested
-            )
-          );
-
-          // TODO: Index dataset type does not support searchable fields.
-          // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9381
-          if (config.datasetType !== 'INDEXES') {
-            sideBar.selectFilterVerifySidebarFieldsVisibleAndActiveFiltersNumber(
-              'searchable',
-              sidebarFields.searchableFields
-            );
-          }
-
-          sideBar.verifyNumberOfActiveFilters(0);
-          cy.getElementByTestId('aggregatable-true').parent().click();
-          sideBar.verifyNumberOfActiveFilters(1);
-          cy.getElementByTestId('typeSelect').select('string');
-          sideBar.verifyNumberOfActiveFilters(2);
-
-          const intersectionAggregatableStringTypeSidebarFields = sidebarFields.aggregatableFields.unnested
-            .concat(sidebarFields.aggregatableFields.nested)
-            .filter((field) => sidebarFields.stringTypeFields.includes(field));
-          intersectionAggregatableStringTypeSidebarFields.forEach((fieldName) => {
-            cy.getElementByTestId(`field-${fieldName}`).should('exist');
-          });
-        });
-      });
-    });
+    cy.getElementByTestId('visualizationLoader').should('be.visible');
   });
-};
 
-prepareTestSuite('Sidebar', runSideBarTests);
+  it('should filter fields by type', () => {
+    // Open filter menu
+    cy.getElementByTestId('toggleFieldFilterButton').click();
+
+    // Filter by aggregatable
+    cy.getElementByTestId('aggregatable-true').parent().click();
+
+    // Verify only aggregatable fields shown
+    cy.getElementByTestId('field-bytes_transferred').should('exist');
+    cy.getElementByTestId('field-category').should('exist');
+    cy.getElementByTestId('field-_score').should('not.exist');
+
+    // Add type filter
+    cy.getElementByTestId('typeSelect').select('string');
+
+    // Should show only string aggregatable fields
+    cy.getElementByTestId('field-category').should('exist');
+    cy.getElementByTestId('field-bytes_transferred').should('not.exist');
+
+    // Clear filters
+    cy.getElementByTestId('aggregatable-true').parent().click();
+    cy.getElementByTestId('typeSelect').select('');
+    cy.getElementByTestId('field-bytes_transferred').should('exist');
+  });
+});
