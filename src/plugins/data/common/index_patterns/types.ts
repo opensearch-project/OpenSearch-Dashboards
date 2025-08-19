@@ -185,8 +185,15 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
-  autoCompleteValues?: string[];
-  topQueryValues?: string[];
+
+  /**
+   * @experimental These fields are experimental and are subject to change
+   * TODO: Refactor and move them into DataViewField
+   */
+  suggestions?: {
+    autoCompleteValues?: string[];
+    topAggValues?: string[];
+  };
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;

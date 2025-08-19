@@ -31,8 +31,6 @@ export const removePotentialBackticks = (str: string): string => {
   return str.replace(/^`?|\`?$/g, ''); // removes backticks only if they exist at the beginning and end
 };
 
-const allowedType = ['string'];
-
 // Function to get raw suggestion data
 export const getRawSuggestionData$ = (
   queryString: QueryStringContract,
@@ -56,11 +54,11 @@ export const getRawSuggestionData$ = (
     })
   );
 
-const fetchFromAPI = async (http: HttpSetup, body: string, apiPath = 'sql') => {
+const fetchFromAPI = async (http: HttpSetup, body: string) => {
   try {
     return await http.fetch({
       method: 'POST',
-      path: `/api/enhancements/search/${apiPath}`,
+      path: `/api/enhancements/search/_sql`,
       body,
     });
   } catch (err) {
@@ -110,7 +108,11 @@ export const fetchColumnValues = async (
   indexPattern: IndexPattern,
   datasetType: string | undefined
 ): Promise<any[]> => {
-  const fieldInOsd = indexPattern.fields.find((f) => f.name === column);
+  const fieldInOsd = indexPattern.fields.getByName(column);
+
+  if (!fieldInOsd?.isSuggestionAvailable()) {
+    return [];
+  }
 
   // For Boolean fields directly return the values
   if (fieldInOsd?.type === 'boolean') {
@@ -118,26 +120,28 @@ export const fetchColumnValues = async (
   }
 
   // Return cached Autocomplete Results if available
-  if (fieldInOsd?.spec.autoCompleteValues && fieldInOsd?.spec.autoCompleteValues.length > 0) {
-    return fieldInOsd.spec.autoCompleteValues;
+  if (
+    fieldInOsd?.spec.suggestions?.autoCompleteValues &&
+    fieldInOsd?.spec.suggestions?.autoCompleteValues.length > 0
+  ) {
+    return fieldInOsd.spec.suggestions.autoCompleteValues;
   }
 
   // Return topQueryValues if available and fire async API call to update the cache for subsequent calls
   if (
-    fieldInOsd?.spec.topQueryValues &&
-    fieldInOsd.spec.topQueryValues.length > 0 &&
-    allowedType.includes(fieldInOsd.type)
+    fieldInOsd?.spec.suggestions?.topAggValues &&
+    fieldInOsd?.spec.suggestions?.topAggValues.length > 0
   ) {
     // Fire async API call to update cache in non-blocking manner
     updateFieldValuesAsync(table, column, services, indexPattern, datasetType, fieldInOsd);
-    return fieldInOsd.spec.topQueryValues;
+    return fieldInOsd.spec.suggestions.topAggValues;
   }
 
   // Fire a synchronous query to fetch values
   await updateFieldValuesAsync(table, column, services, indexPattern, datasetType, fieldInOsd);
 
   // Return the results of synchronous calls
-  return fieldInOsd?.spec?.autoCompleteValues ?? [];
+  return fieldInOsd?.spec.suggestions?.autoCompleteValues ?? [];
 };
 
 // Non-blocking async function to update field values in background
@@ -157,35 +161,37 @@ const updateFieldValuesAsync = async (
     if (
       !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
       !fieldInOsd ||
-      !allowedType.includes(fieldInOsd.type) ||
       !indexPattern
     ) {
       return;
     }
 
     const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
-    const dataset = await getDataViews().convertToDataset(
-      await getDataViews().get(indexPattern.id!)
-    );
 
-    const values = (
-      await fetchFromAPI(
-        services.http,
-        JSON.stringify({
-          query: {
-            query: `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`,
-            language: 'PPL',
-            format: 'jdbc',
-            dataset,
-          },
-        }),
-        'ppl'
-      )
-    ).body.fields[0].values;
+    const dataView = await getDataViews().get(indexPattern.id!);
+    const dataset = await getDataViews().convertToDataset(dataView);
+
+    const searchSource = await services.data.search.searchSource.create();
+    searchSource.setFields({
+      index: dataView,
+      query: {
+        query: `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`,
+        language: 'PPL',
+        dataset,
+      },
+    });
+
+    const response = await searchSource.fetch();
+
+    // Extract field values from OpenSearch hits response
+    const values = response.hits.hits.map((hit) => hit._source?.[column]);
 
     if (values) {
       // Update the field with fresh API values
-      fieldInOsd.spec.autoCompleteValues = values;
+      if (!fieldInOsd.spec.suggestions) {
+        fieldInOsd.spec.suggestions = {};
+      }
+      fieldInOsd.spec.suggestions.autoCompleteValues = values;
 
       // Save the updated IndexPattern to cache
       getDataViews().saveToCache(indexPattern.id!, indexPattern as any);

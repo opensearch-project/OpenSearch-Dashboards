@@ -76,7 +76,7 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
       }
     }
 
-    // Update topQueryValues for string fields when we have search results
+    // Update topAggValues for valid fields when we have search results
     updateFieldTopQueryValues(rawResults.hits.hits, dataset);
   }
 
@@ -97,15 +97,16 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
 };
 
 /**
- * Updates topQueryValues for string fields based on search results
- * This improves autocomplete performance by precomputing field values
+ * Updates topAggValues for string fields based on search results
+ * This removes the cold start issue in autocomplete
  */
 const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
   if (!hits.length || !dataset) return;
 
   // Get string fields that don't already have topQueryValues
   const stringFields = dataset.fields.filter(
-    (field) => field.type === 'string' && !field.subType && !field.spec.topQueryValues
+    (field) =>
+      field.isSuggestionAvailable() && !field.subType && !field.spec?.suggestions?.topAggValues
   );
 
   // Limit to prevent performance issues
@@ -135,16 +136,16 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
   // Batch update all fields in the IndexPattern
   if (fieldUpdates.length > 0) {
     fieldUpdates.forEach(({ field, topValues }) => {
-      // Update both the field parameter and the IndexPattern field
-      field.spec.topQueryValues = topValues;
+      // Update the IndexPattern field
       const indexPatternField = dataset.fields.getByName(field.name);
-      if (indexPatternField?.spec) {
-        indexPatternField.spec.topQueryValues = topValues;
+      if (indexPatternField) {
+        const indexPatternFieldWithSuggestions = indexPatternField as any;
+        if (!indexPatternFieldWithSuggestions.spec.suggestions) {
+          indexPatternFieldWithSuggestions.spec.suggestions = {};
+        }
+        indexPatternFieldWithSuggestions.spec.suggestions.topAggValues = topValues;
       }
     });
-
-    // Note: IndexPattern caching will be handled by the query execution flow
-    // The field updates are now in memory and will persist with the dataset
   }
 };
 
@@ -156,7 +157,7 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
 ): ProcessedSearchResults => {
   const result = defaultResultsProcessor(rawResults, dataset);
 
-  data.dataViews.saveToCache(dataset.id!, dataset);
+  data.dataViews.saveToCache(dataset.id!, dataset); // Updating the cache
 
   const histogramConfigs = dataset.timeFieldName
     ? createHistogramConfigs(dataset, interval, data)
