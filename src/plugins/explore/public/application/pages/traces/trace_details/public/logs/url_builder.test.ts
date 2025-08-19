@@ -170,7 +170,7 @@ describe('url_builder', () => {
       const traceData = [
         {
           startTime: '2023-01-01T10:00:00Z',
-          durationInNanos: 60000000000, // 60 seconds in nanoseconds (was 60000000 which is 60ms)
+          durationInNanos: 60_000_000_000, // 60 seconds in nanoseconds
         },
       ];
 
@@ -191,7 +191,7 @@ describe('url_builder', () => {
         },
         {
           startTime: '2023-01-01T09:59:00Z',
-          durationInNanos: 30000000, // 30 seconds
+          durationInNanos: 30_000_000, // 30 seconds
         },
       ];
 

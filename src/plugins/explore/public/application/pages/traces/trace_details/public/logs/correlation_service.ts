@@ -16,18 +16,6 @@ import {
   LogHit,
 } from '../../server/ppl_request_logs';
 
-export interface LogDataset {
-  id: string;
-  timeFieldName: string;
-  title: string;
-  type: string;
-  dataSource?: {
-    id: string;
-    title: string;
-    type: string;
-  };
-}
-
 export interface CorrelatedFields {
   logServiceNameField: string;
   logTraceIdField: string;
@@ -126,13 +114,13 @@ export class CorrelationService {
     }
   }
 
-  async fetchLogDataset(logDatasetId: string): Promise<LogDataset> {
+  async fetchLogDataset(logDatasetId: string): Promise<Dataset> {
     try {
       const indexPattern = await this.savedObjectsClient.get('index-pattern', logDatasetId);
 
       // Format the dataset object using the actual fields from the response
       const attributes = indexPattern.attributes as IndexPatternAttributes;
-      const logDataset: LogDataset = {
+      const logDataset: Dataset = {
         id: indexPattern.id,
         timeFieldName: attributes?.timeFieldName || 'time',
         title: attributes?.title || 'Unknown Title',
@@ -179,13 +167,13 @@ export class CorrelationService {
   /**
    * Check correlations for current dataset and find log references
    */
-  async checkCorrelationsForLogs(dataset: Dataset): Promise<LogDataset[]> {
+  async checkCorrelationsForLogs(dataset: Dataset): Promise<Dataset[]> {
     if (!dataset?.id) return [];
 
     try {
       // Find correlations that reference the current dataset
       const correlationsResponse = await this.findCorrelationsByDataset(dataset.id);
-      const logDatasets: LogDataset[] = [];
+      const logDatasets: Dataset[] = [];
 
       if (correlationsResponse.savedObjects && correlationsResponse.savedObjects.length > 0) {
         for (const correlation of correlationsResponse.savedObjects) {
@@ -233,7 +221,7 @@ export class CorrelationService {
     dataset: Dataset,
     data: DataPublicPluginStart,
     traceId: string
-  ): Promise<{ logDatasets: LogDataset[]; logs: LogHit[] }> {
+  ): Promise<{ logDatasets: Dataset[]; logs: LogHit[] }> {
     if (!dataset?.id || !data || !traceId) {
       return { logDatasets: [], logs: [] };
     }
