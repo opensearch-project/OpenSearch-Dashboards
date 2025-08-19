@@ -92,6 +92,13 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
         title: currentDataset?.title || 'otel-v1-apm-span-*',
         type: currentDataset?.type || 'INDEX_PATTERN',
         timeFieldName: currentDataset?.timeFieldName,
+        // Preserve dataSource information for external data sources
+        ...((currentDataset as any)?.dataSource && {
+          dataSource: (currentDataset as any).dataSource,
+        }),
+        ...((currentDataset as any)?.dataSourceRef && {
+          dataSource: (currentDataset as any).dataSourceRef,
+        }),
       },
     };
   }, [hit, dataset, isOnTraces, data]);

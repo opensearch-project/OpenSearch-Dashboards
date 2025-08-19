@@ -39,6 +39,7 @@ import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dash
 import { DataExplorerServices } from '../../../../../../../../data_explorer/public';
 import '@xyflow/react/dist/style.css';
 import './service_map.scss';
+import { extractSpanDuration } from '../utils/span_data_utils';
 
 interface SpanHit {
   spanId: string;
@@ -819,7 +820,8 @@ export const ServiceMap: React.FC<ServiceMap> = ({
     const serviceLatencies = new Map<string, number[]>();
 
     hits.forEach((h) => {
-      const { spanId, serviceName, durationInNanos } = h;
+      const { spanId, serviceName } = h;
+      const duration = extractSpanDuration(h);
       id2svc.set(spanId, serviceName);
       serviceSpanCounts.set(serviceName, (serviceSpanCounts.get(serviceName) || 0) + 1);
 
@@ -827,7 +829,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
       if (!serviceLatencies.has(serviceName)) {
         serviceLatencies.set(serviceName, []);
       }
-      serviceLatencies.get(serviceName)!.push(durationInNanos || 0);
+      serviceLatencies.get(serviceName)!.push(duration);
     });
 
     const svcSet = new Set<string>();

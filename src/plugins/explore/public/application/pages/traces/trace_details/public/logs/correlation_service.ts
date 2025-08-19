@@ -16,13 +16,6 @@ import {
   LogHit,
 } from '../../server/ppl_request_logs';
 
-export interface LogDataset {
-  id: string;
-  timeFieldName: string;
-  title: string;
-  type: string;
-}
-
 export interface CorrelatedFields {
   logServiceNameField: string;
   logTraceIdField: string;
@@ -78,6 +71,11 @@ export interface IndexPatternAttributes {
   type?: string;
 }
 
+export interface DataSourceAttributes {
+  title?: string;
+  dataSourceEngineType?: string;
+}
+
 export class CorrelationService {
   constructor(
     private savedObjectsClient: SavedObjectsClientContract,
@@ -116,18 +114,47 @@ export class CorrelationService {
     }
   }
 
-  async fetchLogDataset(logDatasetId: string): Promise<LogDataset> {
+  async fetchLogDataset(logDatasetId: string): Promise<Dataset> {
     try {
       const indexPattern = await this.savedObjectsClient.get('index-pattern', logDatasetId);
 
       // Format the dataset object using the actual fields from the response
       const attributes = indexPattern.attributes as IndexPatternAttributes;
-      const logDataset: LogDataset = {
+      const logDataset: Dataset = {
         id: indexPattern.id,
         timeFieldName: attributes?.timeFieldName || 'time',
         title: attributes?.title || 'Unknown Title',
         type: attributes?.type || 'INDEX_PATTERN',
       };
+
+      // Extract datasource information from the log dataset's references if it exists
+      if (indexPattern.references && indexPattern.references.length > 0) {
+        const dataSourceRef = indexPattern.references.find((ref) => ref.type === 'data-source');
+        if (dataSourceRef) {
+          try {
+            // Fetch the actual data source details
+            const dataSource = await this.savedObjectsClient.get<DataSourceAttributes>(
+              'data-source',
+              dataSourceRef.id
+            );
+            const dataSourceAttrs = dataSource.attributes as DataSourceAttributes;
+            logDataset.dataSource = {
+              id: dataSource.id,
+              title: dataSourceAttrs?.title || dataSourceRef.name || dataSource.id,
+              type: dataSourceAttrs?.dataSourceEngineType || 'OpenSearch',
+            };
+          } catch (dataSourceError) {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to fetch data source details for log dataset:', dataSourceError);
+            // Fallback to reference information if data source fetch fails
+            logDataset.dataSource = {
+              id: dataSourceRef.id,
+              title: dataSourceRef.name || dataSourceRef.id,
+              type: 'OpenSearch', // Default type
+            };
+          }
+        }
+      }
 
       return logDataset;
     } catch (error) {
@@ -140,13 +167,13 @@ export class CorrelationService {
   /**
    * Check correlations for current dataset and find log references
    */
-  async checkCorrelationsForLogs(dataset: Dataset): Promise<LogDataset[]> {
+  async checkCorrelationsForLogs(dataset: Dataset): Promise<Dataset[]> {
     if (!dataset?.id) return [];
 
     try {
       // Find correlations that reference the current dataset
       const correlationsResponse = await this.findCorrelationsByDataset(dataset.id);
-      const logDatasets: LogDataset[] = [];
+      const logDatasets: Dataset[] = [];
 
       if (correlationsResponse.savedObjects && correlationsResponse.savedObjects.length > 0) {
         for (const correlation of correlationsResponse.savedObjects) {
@@ -194,7 +221,7 @@ export class CorrelationService {
     dataset: Dataset,
     data: DataPublicPluginStart,
     traceId: string
-  ): Promise<{ logDatasets: LogDataset[]; logs: LogHit[] }> {
+  ): Promise<{ logDatasets: Dataset[]; logs: LogHit[] }> {
     if (!dataset?.id || !data || !traceId) {
       return { logDatasets: [], logs: [] };
     }

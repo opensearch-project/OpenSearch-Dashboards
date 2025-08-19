@@ -42,6 +42,8 @@ export async function fetchTraceLogsByTraceId(
       id: dataset.id,
       title: dataset.title,
       type: dataset.type,
+      // Include dataSource if present to support external data sources
+      ...(dataset.dataSource && { dataSource: dataset.dataSource }),
       // Omit timeFieldName to prevent automatic time filtering
     };
 

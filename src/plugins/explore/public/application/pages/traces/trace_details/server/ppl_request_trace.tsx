@@ -4,7 +4,13 @@
  */
 import { DataPublicPluginStart } from '../../../../../../../data/public';
 import { Dataset } from '../../../../../../../data/common';
-import { PPLService, PPLQueryParams, escapePPLValue } from './ppl_request_helpers';
+import {
+  PPLService,
+  PPLQueryParams,
+  escapePPLValue,
+  buildPPLQueryRequest,
+  executePPLQuery,
+} from './ppl_request_helpers';
 
 export interface PPLQueryParamsWithFilters extends PPLQueryParams {
   filters?: Array<{ field: string; value: any }>;
@@ -56,11 +62,13 @@ export class TracePPLService extends PPLService {
         id: dataset.id,
         title: dataset.title,
         type: dataset.type,
+        // Include dataSource if present to support external data sources
+        ...(dataset.dataSource && { dataSource: dataset.dataSource }),
         // Omit timeFieldName to prevent automatic time filtering
       };
 
-      // Execute using the base class method with the modified dataset
-      return await this.executeQuery(datasetWithoutTime, pplQuery);
+      const queryRequest = buildPPLQueryRequest(datasetWithoutTime, pplQuery);
+      return await executePPLQuery(this.dataService, queryRequest);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('PPL Query with Filters Error:', error);
@@ -80,8 +88,8 @@ export class TracePPLService extends PPLService {
       // Construct the PPL query to filter by trace ID and span ID using the dataset title
       const pplQuery = `source = ${dataset.title} | where traceId = "${traceId}" | where spanId = "${spanId}" | head ${limit}`;
 
-      // Execute using the base class method
-      return await this.executeQuery(dataset, pplQuery);
+      const queryRequest = buildPPLQueryRequest(dataset, pplQuery);
+      return await executePPLQuery(this.dataService, queryRequest);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('PPL Span Query Error:', error);

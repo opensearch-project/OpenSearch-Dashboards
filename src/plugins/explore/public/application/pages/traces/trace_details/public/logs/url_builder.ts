@@ -5,6 +5,7 @@
 
 import moment from 'moment';
 import { Dataset } from '../../../../../../../../data/common';
+import { extractSpanDuration } from '../utils/span_data_utils';
 import { LogHit } from '../../server/ppl_request_logs';
 
 export interface TimeRange {
@@ -37,7 +38,16 @@ export function buildExploreLogsUrl(params: {
   const timeFieldName = logDataset.timeFieldName || 'time';
 
   // Build _q parameter (dataset and query)
-  const qParam = `(dataset:(id:'${logDataset.id}',timeFieldName:${timeFieldName},title:'${logDataset.title}',type:INDEX_PATTERN),language:PPL,query:'${pplQuery}')`;
+  let datasetParam = `(id:'${logDataset.id}',timeFieldName:${timeFieldName},title:'${logDataset.title}',type:${logDataset.type}`;
+
+  // Include dataSource if present for external data sources
+  if (logDataset.dataSource) {
+    datasetParam += `,dataSource:(id:'${logDataset.dataSource.id}',title:'${logDataset.dataSource.title}',type:${logDataset.dataSource.type})`;
+  }
+
+  datasetParam += ')';
+
+  const qParam = `(dataset:${datasetParam},language:PPL,query:'${pplQuery}')`;
 
   // Build _a parameter (app state)
   const aParam = `(legacy:(columns:!(_source),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
@@ -57,22 +67,34 @@ export function getTimeRangeFromTraceData(traceData: any[]): TimeRange {
   let earliestStart: moment.Moment | null = null;
   let latestEnd: moment.Moment | null = null;
 
+  // Unix epoch start (1970-01-01) as minimum valid date
+  const epochStart = moment.utc('1970-01-01T00:00:00.000Z');
+  // Current time + 1 year as maximum reasonable date
+  const maxReasonableDate = moment.utc().add(1, 'year');
+
   traceData.forEach((hit) => {
     const startTime = hit.startTime || hit.timestamp;
     const endTime = hit.endTime || hit.timestamp;
-    const duration = hit.durationInNanos || hit.duration || 0;
+    const duration = extractSpanDuration(hit);
 
     if (startTime) {
       const start = moment.utc(startTime);
 
-      if (!earliestStart || start.isBefore(earliestStart)) {
-        earliestStart = start;
-      }
+      if (start.isValid() && start.isAfter(epochStart) && start.isBefore(maxReasonableDate)) {
+        if (!earliestStart || start.isBefore(earliestStart)) {
+          earliestStart = start;
+        }
 
-      const end = endTime ? moment.utc(endTime) : start.clone().add(duration, 'microseconds');
+        // Convert nanoseconds to milliseconds (duration / 1000000)
+        const end = endTime
+          ? moment.utc(endTime)
+          : start.clone().add(duration / 1000000, 'milliseconds');
 
-      if (!latestEnd || end.isAfter(latestEnd)) {
-        latestEnd = end;
+        if (end.isValid() && end.isAfter(epochStart) && end.isBefore(maxReasonableDate)) {
+          if (!latestEnd || end.isAfter(latestEnd)) {
+            latestEnd = end;
+          }
+        }
       }
     }
   });
