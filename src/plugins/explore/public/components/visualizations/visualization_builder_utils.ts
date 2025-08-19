@@ -49,7 +49,6 @@ export const getColumnsByAxesMapping = (
   return { numericalColumns, categoricalColumns, dateColumns };
 };
 
-// TODO: check if this function is still needed
 export const getColumnMatchFromMapping = (
   mapping: Record<string, { type: VisFieldType; index: number }>
 ): number[] => {

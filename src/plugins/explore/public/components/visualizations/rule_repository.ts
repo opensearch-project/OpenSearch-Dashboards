@@ -53,7 +53,7 @@ const oneMetricOneDateRule: VisualizationRule = {
     if (numerical.length === 1 && date.length === 1 && categorical.length === 0) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [
     { ...CHART_METADATA.line, priority: 100 },
@@ -119,7 +119,7 @@ const twoMetricOneDateRule: VisualizationRule = {
     if (numerical.length === 2 && categorical.length === 0 && date.length === 1) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [{ ...CHART_METADATA.line, priority: 100 }],
   toSpec: (
@@ -165,7 +165,7 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
     if (numerical.length === 1 && categorical.length === 1 && date.length === 1) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [
     { ...CHART_METADATA.line, priority: 100 },
@@ -235,7 +235,7 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
     if (numerical.length === 1 && categorical.length === 2 && date.length === 1) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [
     { ...CHART_METADATA.line, priority: 100 },
@@ -311,7 +311,7 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
     ) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [
     { ...CHART_METADATA.heatmap, priority: 100 },
@@ -382,7 +382,7 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
     ) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [
     { ...CHART_METADATA.bar, priority: 100 },
@@ -446,7 +446,7 @@ const oneMetricOneCateRule: VisualizationRule = {
     if (numerical.length === 1 && date.length === 0 && categorical.length === 1) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [
     { ...CHART_METADATA.bar, priority: 100 },
@@ -513,10 +513,10 @@ const oneMetricOneCateRule: VisualizationRule = {
   },
 };
 
-const singleMetricRule: VisualizationRule = {
-  id: 'single-metric',
-  name: 'single metric',
-  description: 'Metric for single metric',
+const oneMetricRule: VisualizationRule = {
+  id: 'one-metric',
+  name: 'one metric',
+  description: 'Metric for one metric',
   matches: (numerical, categorical, date) => {
     if (numerical.length < 1 || numerical[0].validValuesCount !== 1) {
       return 'NOT_MATCH';
@@ -529,7 +529,7 @@ const singleMetricRule: VisualizationRule = {
     ) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [{ ...CHART_METADATA.metric, priority: 100 }],
   toSpec: (
@@ -563,7 +563,7 @@ const twoMetricRule: VisualizationRule = {
     if (numerical.length === 2 && date.length === 0 && categorical.length === 0) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
   toSpec: (
@@ -597,7 +597,7 @@ const twoMetricOneCateRule: VisualizationRule = {
     if (numerical.length === 2 && date.length === 0 && categorical.length === 1) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
   toSpec: (
@@ -631,7 +631,7 @@ const threeMetricOneCateRule: VisualizationRule = {
     if (numerical.length === 3 && date.length === 0 && categorical.length === 1) {
       return 'EXACT_MATCH';
     }
-    return 'OVER_MATCH';
+    return 'COMPATIBLE_MATCH';
   },
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
   toSpec: (
@@ -666,5 +666,5 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   twoMetricRule,
   twoMetricOneCateRule,
   threeMetricOneCateRule,
-  singleMetricRule,
+  oneMetricRule,
 ];

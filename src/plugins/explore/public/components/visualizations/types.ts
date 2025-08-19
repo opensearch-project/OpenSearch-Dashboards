@@ -40,7 +40,7 @@ export interface VisualizationRule {
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
-  ) => 'NOT_MATCH' | 'EXACT_MATCH' | 'OVER_MATCH';
+  ) => 'NOT_MATCH' | 'EXACT_MATCH' | 'COMPATIBLE_MATCH';
   chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
   // TODO: refactor to access an object of options instead of a list of arguments
   toSpec?: (

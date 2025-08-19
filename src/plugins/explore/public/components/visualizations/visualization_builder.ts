@@ -5,15 +5,11 @@
 
 import React from 'react';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { debounceTime } from 'rxjs/operators';
 
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
-import {
-  convertMappingsToStrings,
-  getColumnMatchFromMapping,
-  isValidMapping,
-} from './visualization_builder_utils';
+import { convertMappingsToStrings, isValidMapping } from './visualization_builder_utils';
 import { getServices } from '../../services/services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';

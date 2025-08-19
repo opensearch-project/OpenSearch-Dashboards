@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEqual } from 'lodash';
 import { createLineConfig } from './line/line_vis_config';
 import { createHeatmapConfig } from './heatmap/heatmap_vis_config';
 import { createScatterConfig } from './scatter/scatter_vis_config';
