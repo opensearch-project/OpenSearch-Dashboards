@@ -285,14 +285,17 @@ function isVersionCompatible(
     return true;
   }
 
-  const coercedActual = coerce(actualOpenSearchDashboardsVersion);
-  const coercedExpected = coerce(expectedOpenSearchDashboardsVersion);
+  const coercedActualOpenSearchDashboardsVersion = coerce(actualOpenSearchDashboardsVersion);
+  const coercedExpectedOpenSearchDashboardsVersion = coerce(expectedOpenSearchDashboardsVersion);
 
-  if (!coercedActual || !coercedExpected) {
+  if (!coercedActualOpenSearchDashboardsVersion || !coercedExpectedOpenSearchDashboardsVersion) {
     return false;
   }
 
-  return semver.eq(coercedActual, coercedExpected);
+  return semver.eq(
+    coercedActualOpenSearchDashboardsVersion,
+    coercedExpectedOpenSearchDashboardsVersion
+  );
 }
 /**
  * Checks whether specified version range is valid.
