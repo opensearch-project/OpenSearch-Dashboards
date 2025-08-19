@@ -6,7 +6,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { IBucketDateHistogramAggConfig, Query, DataView } from 'src/plugins/data/common';
+import {
+  IBucketDateHistogramAggConfig,
+  Query,
+  DataView,
+  IndexPatternField,
+} from 'src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -106,11 +111,11 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
   // Get string fields that don't already have topQueryValues
   const stringFields = dataset.fields.filter(
     (field) =>
-      field.isSuggestionAvailable() && !field.subType && !field.spec?.suggestions?.topAggValues
+      field.isSuggestionAvailable() && !field.subType && !field.spec?.suggestions?.topValues
   );
 
   // Limit to prevent performance issues
-  const fieldUpdates: Array<{ field: any; topValues: string[] }> = [];
+  const fieldUpdates: Array<{ field: IndexPatternField; topValues: string[] }> = [];
 
   // Gather field values for all fields first
   stringFields.forEach((field) => {
@@ -118,7 +123,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
       const result = getFieldValueCounts({
         hits,
         field,
-        indexPattern: dataset as any, // DataView extends IndexPattern
+        indexPattern: dataset, // DataView extends IndexPattern
         count: 5,
         grouped: false,
       });
@@ -139,11 +144,11 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
       // Update the IndexPattern field
       const indexPatternField = dataset.fields.getByName(field.name);
       if (indexPatternField) {
-        const indexPatternFieldWithSuggestions = indexPatternField as any;
+        const indexPatternFieldWithSuggestions = indexPatternField;
         if (!indexPatternFieldWithSuggestions.spec.suggestions) {
           indexPatternFieldWithSuggestions.spec.suggestions = {};
         }
-        indexPatternFieldWithSuggestions.spec.suggestions.topAggValues = topValues;
+        indexPatternFieldWithSuggestions.spec.suggestions.topValues = topValues;
       }
     });
   }

@@ -109,7 +109,8 @@ export const getSuggestions = async ({
                   suggestions.suggestValuesForColumn,
                   services,
                   indexPattern,
-                  datasetType
+                  datasetType,
+                  true
                 ).catch(() => []),
                 (val: any) => (typeof val === 'string' ? `'${val}' ` : `${val} `)
               )

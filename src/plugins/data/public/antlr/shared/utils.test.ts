@@ -24,6 +24,16 @@ import { UI_SETTINGS } from '../../../common';
 jest.mock('../../services', () => ({
   getDataViews: jest.fn(() => ({
     saveToCache: jest.fn(),
+    get: jest.fn().mockResolvedValue({
+      id: 'test-index-pattern',
+      title: 'test-index',
+      timeFieldName: 'timestamp',
+    }),
+    convertToDataset: jest.fn().mockResolvedValue({
+      id: 'test-dataset',
+      title: 'test-index',
+      type: 'INDEX_PATTERN',
+    }),
   })),
 }));
 
@@ -358,17 +368,29 @@ describe('fetchColumnValues', () => {
   let mockServices: IDataPluginServices;
   let mockHttp: HttpSetup;
   let mockUiSettings: IUiSettingsClient;
+  let mockSearchSource: any;
 
-  const createMockIndexPattern = (fieldType: string) =>
-    (({
+  const createMockIndexPattern = (fieldType: string, hasField: boolean = true) => {
+    const mockField = hasField
+      ? (({
+          type: fieldType,
+          isSuggestionAvailable: jest.fn().mockReturnValue(fieldType === 'number' ? false : true),
+          spec: {
+            suggestions: {
+              autoCompleteValues: undefined,
+              topAggValues: undefined,
+            },
+          },
+        } as unknown) as IndexPatternField)
+      : undefined;
+
+    return ({
       id: 'test-index',
       fields: {
-        find: jest.fn().mockReturnValue({
-          type: fieldType,
-          spec: { autoCompleteValues: undefined, topQueryValues: undefined },
-        } as IndexPatternField),
+        getByName: jest.fn().mockReturnValue(mockField),
       },
-    } as unknown) as IndexPattern);
+    } as unknown) as IndexPattern;
+  };
 
   beforeEach(() => {
     mockHttp = ({
@@ -386,6 +408,20 @@ describe('fetchColumnValues', () => {
       }),
     } as unknown) as IUiSettingsClient;
 
+    // Mock SearchSource
+    mockSearchSource = {
+      setFields: jest.fn().mockReturnThis(),
+      fetch: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            { _source: { 'test-column': 'value1' } },
+            { _source: { 'test-column': 'value2' } },
+            { _source: { 'test-column': 'value3' } },
+          ],
+        },
+      }),
+    };
+
     mockServices = ({
       http: mockHttp,
       uiSettings: mockUiSettings,
@@ -395,6 +431,11 @@ describe('fetchColumnValues', () => {
             getQuery: jest.fn().mockReturnValue({ dataset: { dataSource: { id: 'test-id' } } }),
           } as unknown) as QueryStringContract,
         } as unknown) as IQueryStart,
+        search: {
+          searchSource: {
+            create: jest.fn().mockResolvedValue(mockSearchSource),
+          },
+        },
         indexPatterns: {
           saveToCache: jest.fn(),
         } as unknown,
@@ -453,20 +494,59 @@ describe('fetchColumnValues', () => {
     expect(result).toEqual([]);
   });
 
-  it('should fetch and return column values for string fields', async () => {
-    const mockResponse = {
-      body: {
-        fields: [
-          {
-            values: ['value1', 'value2', 'value3'],
-          },
-        ],
-      },
-    };
-
-    (mockHttp.fetch as jest.Mock).mockResolvedValue(mockResponse);
-
+  it('should fetch and return column values using PPL and SearchSource', async () => {
     const mockIndexPattern = createMockIndexPattern('string');
+
+    const result = await fetchColumnValues(
+      'test-table',
+      'test-column',
+      mockServices,
+      mockIndexPattern,
+      'INDEX_PATTERN'
+    );
+
+    // Verify SearchSource was created and configured correctly
+    expect(mockServices.data.search.searchSource.create).toHaveBeenCalled();
+    expect(mockSearchSource.setFields).toHaveBeenCalledWith({
+      index: expect.objectContaining({
+        id: 'test-index-pattern',
+        title: 'test-index',
+        timeFieldName: 'timestamp',
+      }),
+      query: {
+        query: 'source = `test-table` | top 10 `test-column`',
+        language: 'PPL',
+        dataset: expect.objectContaining({
+          id: 'test-dataset',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        }),
+      },
+    });
+
+    // Verify fetch was called
+    expect(mockSearchSource.fetch).toHaveBeenCalled();
+
+    // Verify values were extracted from hits
+    expect(result).toEqual(['value1', 'value2', 'value3']);
+  });
+
+  it('should handle SearchSource fetch errors', async () => {
+    mockSearchSource.fetch.mockRejectedValue(new Error('Search API Error'));
+
+    const result = await fetchColumnValues(
+      'test-table',
+      'string-column',
+      mockServices,
+      createMockIndexPattern('string'),
+      'INDEX_PATTERN'
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  it('should return empty array when field is undefined', async () => {
+    const mockIndexPattern = createMockIndexPattern('string', false);
 
     const result = await fetchColumnValues(
       'test-table',
@@ -476,42 +556,20 @@ describe('fetchColumnValues', () => {
       'INDEX_PATTERN'
     );
 
-    expect(mockHttp.fetch).toHaveBeenCalledWith({
-      method: 'POST',
-      path: '/api/enhancements/search/sql',
-      body: JSON.stringify({
-        query: {
-          query:
-            'SELECT `string-column` FROM `test-table` GROUP BY `string-column` ORDER BY COUNT(`string-column`) DESC LIMIT 10',
-          language: 'SQL',
-          format: 'jdbc',
-          dataset: { dataSource: { id: 'test-id' } },
-        },
-      }),
-    });
-
-    expect(result).toEqual(['value1', 'value2', 'value3']);
+    expect(result).toEqual([]);
   });
 
-  it('should handle API errors', async () => {
-    (mockHttp.fetch as jest.Mock).mockRejectedValue(new Error('SQL API Error'));
+  it('should return empty array when field is not suggestion available', async () => {
+    const mockField = ({
+      type: 'string',
+      isSuggestionAvailable: jest.fn().mockReturnValue(false),
+      spec: { suggestions: {} },
+    } as unknown) as IndexPatternField;
 
-    await expect(
-      fetchColumnValues(
-        'test-table',
-        'string-column',
-        mockServices,
-        createMockIndexPattern('string'),
-        'INDEX_PATTERN'
-      )
-    ).rejects.toThrow('SQL API Error');
-  });
-
-  it('should return empty array when field is undefined', async () => {
     const mockIndexPattern = ({
       id: 'test-index',
       fields: {
-        find: jest.fn().mockReturnValue(undefined),
+        getByName: jest.fn().mockReturnValue(mockField),
       },
     } as unknown) as IndexPattern;
 
@@ -526,43 +584,122 @@ describe('fetchColumnValues', () => {
     expect(result).toEqual([]);
   });
 
-  it('should fetch values when datasetType is INDEXES', async () => {
-    const mockResponse = {
-      body: {
-        fields: [
-          {
-            values: ['value1', 'value2'],
-          },
-        ],
+  it('should use cached autoCompleteValues when available', async () => {
+    const mockField = ({
+      type: 'string',
+      isSuggestionAvailable: jest.fn().mockReturnValue(true),
+      spec: {
+        suggestions: {
+          values: ['cached1', 'cached2'],
+        },
       },
-    };
+    } as unknown) as IndexPatternField;
 
-    (mockHttp.fetch as jest.Mock).mockResolvedValue(mockResponse);
-
-    const mockIndexPattern = createMockIndexPattern('string');
+    const mockIndexPattern = ({
+      id: 'test-index',
+      fields: {
+        getByName: jest.fn().mockReturnValue(mockField),
+      },
+    } as unknown) as IndexPattern;
 
     const result = await fetchColumnValues(
       'test-table',
-      'string-column',
+      'test-column',
       mockServices,
       mockIndexPattern,
-      'INDEXES'
+      'INDEX_PATTERN'
     );
 
-    expect(result).toEqual(['value1', 'value2']);
+    // Should return cached values without making API call
+    expect(mockServices.data.search.searchSource.create).not.toHaveBeenCalled();
+    expect(result).toEqual(['cached1', 'cached2']);
   });
 
-  it('should return empty array when datasetType is unsupported', async () => {
-    const mockIndexPattern = createMockIndexPattern('string');
+  it('should use topAggValues and trigger background update when available', async () => {
+    const mockField = ({
+      type: 'string',
+      isSuggestionAvailable: jest.fn().mockReturnValue(true),
+      spec: {
+        suggestions: {
+          topValues: ['top1', 'top2'],
+        },
+      },
+    } as unknown) as IndexPatternField;
+
+    const mockIndexPattern = ({
+      id: 'test-index',
+      fields: {
+        getByName: jest.fn().mockReturnValue(mockField),
+      },
+    } as unknown) as IndexPattern;
 
     const result = await fetchColumnValues(
       'test-table',
-      'string-column',
+      'test-column',
       mockServices,
       mockIndexPattern,
-      'S3'
+      'INDEX_PATTERN'
     );
 
-    expect(result).toEqual([]);
+    // Should return topAggValues immediately
+    expect(result).toEqual(['top1', 'top2']);
+
+    // Wait for the background async call to complete
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Should also trigger background update
+    expect(mockServices.data.search.searchSource.create).toHaveBeenCalled();
+  });
+
+  it('should properly escape field and table names in PPL query', async () => {
+    const mockIndexPattern = createMockIndexPattern('string');
+
+    await fetchColumnValues(
+      'table-with-dashes',
+      'field-with-dashes',
+      mockServices,
+      mockIndexPattern,
+      'INDEX_PATTERN'
+    );
+
+    expect(mockSearchSource.setFields).toHaveBeenCalledWith({
+      index: expect.any(Object),
+      query: {
+        query: 'source = `table-with-dashes` | top 10 `field-with-dashes`',
+        language: 'PPL',
+        dataset: expect.any(Object),
+      },
+    });
+  });
+
+  it('should update field suggestions after successful fetch', async () => {
+    const mockField = ({
+      type: 'string',
+      isSuggestionAvailable: jest.fn().mockReturnValue(true),
+      spec: {
+        suggestions: {
+          autoCompleteValues: undefined,
+          topAggValues: undefined,
+        },
+      },
+    } as unknown) as IndexPatternField;
+
+    const mockIndexPattern = ({
+      id: 'test-index',
+      fields: {
+        getByName: jest.fn().mockReturnValue(mockField),
+      },
+    } as unknown) as IndexPattern;
+
+    await fetchColumnValues(
+      'test-table',
+      'test-column',
+      mockServices,
+      mockIndexPattern,
+      'INDEX_PATTERN'
+    );
+
+    // Verify that field suggestions were updated
+    expect(mockField.spec.suggestions!.values).toEqual(['value1', 'value2', 'value3']);
   });
 });

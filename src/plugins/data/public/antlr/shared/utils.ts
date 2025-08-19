@@ -101,12 +101,14 @@ export const fetchData = (
   });
 };
 
+// TODO: Pass in a Query Object instead of indexPattern object
 export const fetchColumnValues = async (
   table: string,
   column: string,
   services: IDataPluginServices,
   indexPattern: IndexPattern,
-  datasetType: string | undefined
+  datasetType: string | undefined,
+  skipTimeFilter?: boolean
 ): Promise<any[]> => {
   const fieldInOsd = indexPattern.fields.getByName(column);
 
@@ -120,28 +122,41 @@ export const fetchColumnValues = async (
   }
 
   // Return cached Autocomplete Results if available
-  if (
-    fieldInOsd?.spec.suggestions?.autoCompleteValues &&
-    fieldInOsd?.spec.suggestions?.autoCompleteValues.length > 0
-  ) {
-    return fieldInOsd.spec.suggestions.autoCompleteValues;
+  if (fieldInOsd?.spec.suggestions?.values && fieldInOsd?.spec.suggestions?.values.length > 0) {
+    return fieldInOsd.spec.suggestions.values;
   }
 
   // Return topQueryValues if available and fire async API call to update the cache for subsequent calls
   if (
-    fieldInOsd?.spec.suggestions?.topAggValues &&
-    fieldInOsd?.spec.suggestions?.topAggValues.length > 0
+    fieldInOsd?.spec.suggestions?.topValues &&
+    fieldInOsd?.spec.suggestions?.topValues.length > 0
   ) {
     // Fire async API call to update cache in non-blocking manner
-    updateFieldValuesAsync(table, column, services, indexPattern, datasetType, fieldInOsd);
-    return fieldInOsd.spec.suggestions.topAggValues;
+    updateFieldValuesAsync(
+      table,
+      column,
+      services,
+      indexPattern,
+      datasetType,
+      fieldInOsd,
+      skipTimeFilter
+    );
+    return fieldInOsd.spec.suggestions.topValues;
   }
 
   // Fire a synchronous query to fetch values
-  await updateFieldValuesAsync(table, column, services, indexPattern, datasetType, fieldInOsd);
+  await updateFieldValuesAsync(
+    table,
+    column,
+    services,
+    indexPattern,
+    datasetType,
+    fieldInOsd,
+    skipTimeFilter
+  );
 
   // Return the results of synchronous calls
-  return fieldInOsd?.spec.suggestions?.autoCompleteValues ?? [];
+  return fieldInOsd?.spec.suggestions?.values ?? [];
 };
 
 // Non-blocking async function to update field values in background
@@ -151,7 +166,8 @@ const updateFieldValuesAsync = async (
   services: IDataPluginServices,
   indexPattern: IndexPattern,
   datasetType: string | undefined,
-  fieldInOsd: IndexPatternField | undefined
+  fieldInOsd: IndexPatternField | undefined,
+  skipTimeFilter?: boolean
 ): Promise<void> => {
   try {
     // Check if conditions allow API call
@@ -179,11 +195,12 @@ const updateFieldValuesAsync = async (
         language: 'PPL',
         dataset,
       },
+      skipTimeFilter,
     });
 
     const response = await searchSource.fetch();
 
-    // Extract field values from OpenSearch hits response
+    // Extract field values from response
     const values = response.hits.hits.map((hit) => hit._source?.[column]);
 
     if (values) {
@@ -191,14 +208,13 @@ const updateFieldValuesAsync = async (
       if (!fieldInOsd.spec.suggestions) {
         fieldInOsd.spec.suggestions = {};
       }
-      fieldInOsd.spec.suggestions.autoCompleteValues = values;
+      fieldInOsd.spec.suggestions.values = values;
 
       // Save the updated IndexPattern to cache
       getDataViews().saveToCache(indexPattern.id!, indexPattern as any);
     }
   } catch (error) {
-    // Propagate the error instead of silently failing
-    throw error;
+    // Silently failing here not blocking the user
   }
 };
 

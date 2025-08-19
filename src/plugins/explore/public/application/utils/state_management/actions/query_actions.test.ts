@@ -45,6 +45,7 @@ jest.mock('moment', () => {
 import * as languagesModule from '../../languages';
 import * as chartUtilsModule from '../../../../components/chart/utils';
 import * as dataPublicModule from '../../../../../../data/public';
+import * as fieldCalculatorModule from '../../../../components/fields_selector/lib/field_calculator';
 
 jest.mock('../../languages', () => ({
   defaultPreparePplQuery: jest.fn(),
@@ -86,6 +87,10 @@ jest.mock('../../../../application/legacy/discover/opensearch_dashboards_service
 jest.mock('../slices', () => ({
   setResults: jest.fn(),
   setIndividualQueryStatus: jest.fn(),
+}));
+
+jest.mock('../../../../components/fields_selector/lib/field_calculator', () => ({
+  getFieldValueCounts: jest.fn(),
 }));
 
 // Global mocks
@@ -149,6 +154,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       timeFieldName: '@timestamp',
       flattenHit: jest.fn((hit) => hit._source),
       isTimeBased: jest.fn().mockReturnValue(true),
+      fields: {
+        filter: jest.fn().mockReturnValue([]),
+        getByName: jest.fn().mockReturnValue(undefined),
+      },
     } as any;
 
     mockServices = {
@@ -158,6 +167,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           get: jest.fn().mockResolvedValue(mockDataView),
           getDefault: jest.fn().mockResolvedValue(mockDataView),
           convertToDataset: jest.fn().mockReturnValue(mockDataView),
+          saveToCache: jest.fn(),
         },
         search: {
           searchSource: {
@@ -384,10 +394,71 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(result.fieldCounts).toEqual({});
       expect(result.hits.hits).toHaveLength(0);
     });
+
+    it('should call updateFieldTopQueryValues when processing results with hits', () => {
+      // Mock the getFieldValueCounts function that's used in updateFieldTopQueryValues
+      const mockGetFieldValueCounts = fieldCalculatorModule.getFieldValueCounts as jest.Mock;
+      mockGetFieldValueCounts.mockReturnValue({
+        buckets: [{ value: 'service1' }, { value: 'service2' }, { value: 'service3' }],
+      });
+
+      // Create a mock field that doesn't have topQueryValues yet
+      const mockField = {
+        name: 'servicename',
+        isSuggestionAvailable: jest.fn().mockReturnValue(true),
+        subType: undefined,
+        spec: {
+          suggestions: {} as any,
+        },
+      };
+
+      // Mock dataset with string fields that need updating
+      const mockDatasetWithFields = {
+        ...mockDataView,
+        fields: {
+          filter: jest.fn().mockReturnValue([mockField]),
+          getByName: jest.fn().mockReturnValue(mockField),
+        },
+      } as any;
+
+      const rawResults = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { servicename: 'service1', level: 'info' } },
+            { _id: '2', _source: { servicename: 'service2', level: 'error' } },
+            { _id: '3', _source: { servicename: 'service1', level: 'warn' } },
+          ],
+          total: 3,
+        },
+        elapsedMs: 100,
+      } as any;
+
+      const result = defaultResultsProcessor(rawResults, mockDatasetWithFields);
+
+      // Verify that getFieldValueCounts was called as part of updateFieldTopQueryValues
+      expect(mockGetFieldValueCounts).toHaveBeenCalledWith({
+        hits: rawResults.hits.hits,
+        field: mockField,
+        indexPattern: mockDatasetWithFields,
+        count: 5,
+        grouped: false,
+      });
+
+      // Verify that the field's topValues were updated
+      expect(mockField.spec.suggestions.topValues).toEqual(['service1', 'service2', 'service3']);
+
+      // Verify the result structure
+      expect(result.hits).toBe(rawResults.hits);
+      expect(result.dataset).toBe(mockDatasetWithFields);
+    });
   });
 
   describe('histogramResultsProcessor', () => {
-    const mockData = {} as DataPublicPluginStart;
+    const mockData = {
+      dataViews: {
+        saveToCache: jest.fn(),
+      },
+    } as any;
     const mockCreateHistogramConfigs = chartUtilsModule.createHistogramConfigs as jest.MockedFunction<
       typeof chartUtilsModule.createHistogramConfigs
     >;

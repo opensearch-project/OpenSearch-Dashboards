@@ -191,8 +191,8 @@ export interface FieldSpec {
    * TODO: Refactor and move them into DataViewField
    */
   suggestions?: {
-    autoCompleteValues?: string[];
-    topAggValues?: string[];
+    values?: string[]; // fetched from the dataset
+    topValues?: string[]; // computed from the query result
   };
 }
 
