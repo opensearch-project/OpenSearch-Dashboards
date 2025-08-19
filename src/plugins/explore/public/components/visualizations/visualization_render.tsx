@@ -66,7 +66,7 @@ export const VisualizationRender = (props: Props) => {
   if (visConfig?.type === 'table') {
     return (
       <TableVis
-        pageSize={(visConfig?.styles as TableChartStyleControls).pageSize}
+        styleOptions={visConfig?.styles as TableChartStyleControls}
         rows={visualizationData?.transformedData ?? []}
         columns={columns}
       />

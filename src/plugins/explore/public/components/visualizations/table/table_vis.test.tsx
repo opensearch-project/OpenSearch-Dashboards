@@ -101,7 +101,7 @@ describe('TableVis', () => {
   });
 
   test('renders with custom page size', () => {
-    render(<TableVis rows={mockRows} columns={mockColumns} pageSize={15} />);
+    render(<TableVis rows={mockRows} columns={mockColumns} styleOptions={{ pageSize: 15 }} />);
 
     // Check if custom page size is applied
     expect(screen.getByTestId('mockPageSize').textContent).toBe('15');
