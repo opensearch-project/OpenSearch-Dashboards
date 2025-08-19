@@ -319,68 +319,68 @@ describe('KeyStringParser', () => {
 
   describe('Key String Validation', () => {
     it('should validate correct key strings without throwing', () => {
-      expect(() => parser.isValidKeyString('ctrl+s')).not.toThrow();
-      expect(() => parser.isValidKeyString('shift+f1')).not.toThrow();
-      expect(() => parser.isValidKeyString('ctrl+alt+delete')).not.toThrow();
-      expect(() => parser.isValidKeyString('a')).not.toThrow();
-      expect(() => parser.isValidKeyString('enter')).not.toThrow();
+      expect(() => parser.validateKeyString('ctrl+s')).not.toThrow();
+      expect(() => parser.validateKeyString('shift+f1')).not.toThrow();
+      expect(() => parser.validateKeyString('ctrl+alt+delete')).not.toThrow();
+      expect(() => parser.validateKeyString('a')).not.toThrow();
+      expect(() => parser.validateKeyString('enter')).not.toThrow();
     });
 
     it('should validate two-key sequences without modifiers', () => {
-      expect(() => parser.isValidKeyString('g+d')).not.toThrow();
-      expect(() => parser.isValidKeyString('a+b')).not.toThrow();
-      expect(() => parser.isValidKeyString('f1+f2')).not.toThrow();
-      expect(() => parser.isValidKeyString('enter+space')).not.toThrow();
-      expect(() => parser.isValidKeyString('up+down')).not.toThrow();
+      expect(() => parser.validateKeyString('g+d')).not.toThrow();
+      expect(() => parser.validateKeyString('a+b')).not.toThrow();
+      expect(() => parser.validateKeyString('f1+f2')).not.toThrow();
+      expect(() => parser.validateKeyString('enter+space')).not.toThrow();
+      expect(() => parser.validateKeyString('up+down')).not.toThrow();
     });
 
     it('should throw detailed errors for invalid key strings', () => {
-      expect(() => parser.isValidKeyString('')).toThrow(
+      expect(() => parser.validateKeyString('')).toThrow(
         'Key string cannot be empty or whitespace-only'
       );
-      expect(() => parser.isValidKeyString('ctrl+')).toThrow("invalid '+' character placement");
-      expect(() => parser.isValidKeyString('ctrl')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+')).toThrow("invalid '+' character placement");
+      expect(() => parser.validateKeyString('ctrl')).toThrow(
         'only modifier keys found, no action key'
       );
-      expect(() => parser.isValidKeyString('shift+alt')).toThrow(
+      expect(() => parser.validateKeyString('shift+alt')).toThrow(
         'only modifier keys found, no action key'
       );
-      expect(() => parser.isValidKeyString('ctrl+shift+alt')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+shift+alt')).toThrow(
         'only modifier keys found, no action key'
       );
-      expect(() => parser.isValidKeyString(null as any)).toThrow(
+      expect(() => parser.validateKeyString(null as any)).toThrow(
         'Key string cannot be null or undefined'
       );
-      expect(() => parser.isValidKeyString(undefined as any)).toThrow(
+      expect(() => parser.validateKeyString(undefined as any)).toThrow(
         'Key string cannot be null or undefined'
       );
     });
 
     it('should throw errors for three or more key sequences', () => {
-      expect(() => parser.isValidKeyString('g+d+f')).toThrow('too many non-modifier keys');
-      expect(() => parser.isValidKeyString('a+b+c+d')).toThrow('too many non-modifier keys');
-      expect(() => parser.isValidKeyString('f1+f2+f3')).toThrow('too many non-modifier keys');
+      expect(() => parser.validateKeyString('g+d+f')).toThrow('too many non-modifier keys');
+      expect(() => parser.validateKeyString('a+b+c+d')).toThrow('too many non-modifier keys');
+      expect(() => parser.validateKeyString('f1+f2+f3')).toThrow('too many non-modifier keys');
     });
 
     it('should throw errors for two-key sequences with modifiers', () => {
-      expect(() => parser.isValidKeyString('ctrl+g+d')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+g+d')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "ctrl+g+d"'
       );
-      expect(() => parser.isValidKeyString('shift+a+b')).toThrow(
+      expect(() => parser.validateKeyString('shift+a+b')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "shift+a+b"'
       );
-      expect(() => parser.isValidKeyString('alt+f1+f2')).toThrow(
+      expect(() => parser.validateKeyString('alt+f1+f2')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "alt+f1+f2"'
       );
-      expect(() => parser.isValidKeyString('ctrl+shift+g+d')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+shift+g+d')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "ctrl+shift+g+d"'
       );
     });
 
     it('should handle edge cases in validation', () => {
-      expect(() => parser.isValidKeyString('ctrl+shift+alt+cmd+a')).not.toThrow();
-      expect(() => parser.isValidKeyString('f12')).not.toThrow();
-      expect(() => parser.isValidKeyString('numpad1')).not.toThrow();
+      expect(() => parser.validateKeyString('ctrl+shift+alt+cmd+a')).not.toThrow();
+      expect(() => parser.validateKeyString('f12')).not.toThrow();
+      expect(() => parser.validateKeyString('numpad1')).not.toThrow();
     });
   });
 
@@ -533,112 +533,112 @@ describe('KeyStringParser', () => {
     });
 
     it('should validate shortcuts consistently', () => {
-      expect(() => parser.isValidKeyString('cmd+c')).not.toThrow();
-      expect(() => parser.isValidKeyString('ctrl+c')).not.toThrow();
-      expect(() => parser.isValidKeyString('meta+c')).not.toThrow();
+      expect(() => parser.validateKeyString('cmd+c')).not.toThrow();
+      expect(() => parser.validateKeyString('ctrl+c')).not.toThrow();
+      expect(() => parser.validateKeyString('meta+c')).not.toThrow();
     });
   });
 
   describe('Error Handling and Input Validation', () => {
     it('should throw error for empty string', () => {
-      expect(() => parser.isValidKeyString('')).toThrow(
+      expect(() => parser.validateKeyString('')).toThrow(
         'Key string cannot be empty or whitespace-only'
       );
     });
 
     it('should throw error for whitespace-only string', () => {
-      expect(() => parser.isValidKeyString('   ')).toThrow(
+      expect(() => parser.validateKeyString('   ')).toThrow(
         'Key string cannot be empty or whitespace-only'
       );
     });
 
     it('should throw error for malformed plus patterns', () => {
-      expect(() => parser.isValidKeyString('ctrl+++s')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+++s')).toThrow(
         "Malformed key string: invalid consecutive '+' characters (not at end)"
       );
 
-      expect(() => parser.isValidKeyString('ctrl++s')).toThrow(
+      expect(() => parser.validateKeyString('ctrl++s')).toThrow(
         "Malformed key string: invalid consecutive '+' characters (not at end)"
       );
 
-      expect(() => parser.isValidKeyString('+ctrl+s')).toThrow(
+      expect(() => parser.validateKeyString('+ctrl+s')).toThrow(
         "Malformed key string: invalid '+' character placement"
       );
 
-      expect(() => parser.isValidKeyString('ctrl+')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+')).toThrow(
         "Malformed key string: invalid '+' character placement"
       );
     });
 
     it('should throw error for multiple base keys', () => {
-      expect(() => parser.isValidKeyString('ctrl+a+b')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+a+b')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "ctrl+a+b"'
       );
 
-      expect(() => parser.isValidKeyString('shift+enter+space')).toThrow(
+      expect(() => parser.validateKeyString('shift+enter+space')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "shift+enter+space"'
       );
 
-      expect(() => parser.isValidKeyString('ctrl+up+down')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+up+down')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "ctrl+up+down"'
       );
 
-      expect(() => parser.isValidKeyString('cmd+comma+period')).toThrow(
+      expect(() => parser.validateKeyString('cmd+comma+period')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "cmd+comma+period"'
       );
     });
 
     it('should throw error for chord sequences', () => {
-      expect(() => parser.isValidKeyString('shift+s ctrl')).toThrow(
+      expect(() => parser.validateKeyString('shift+s ctrl')).toThrow(
         'Chord sequences are not supported. Found space in key string: "shift+s ctrl". Use \'+\' to separate simultaneous keys (e.g., "ctrl+shift+s").'
       );
 
-      expect(() => parser.isValidKeyString('ctrl+a meta')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+a meta')).toThrow(
         'Chord sequences are not supported. Found space in key string: "ctrl+a meta". Use \'+\' to separate simultaneous keys (e.g., "ctrl+shift+s").'
       );
 
-      expect(() => parser.isValidKeyString('alt f1')).toThrow(
+      expect(() => parser.validateKeyString('alt f1')).toThrow(
         'Chord sequences are not supported. Found space in key string: "alt f1". Use \'+\' to separate simultaneous keys (e.g., "ctrl+shift+s").'
       );
 
-      expect(() => parser.isValidKeyString('shift+f ctrl+s')).toThrow(
+      expect(() => parser.validateKeyString('shift+f ctrl+s')).toThrow(
         'Chord sequences are not supported. Found space in key string: "shift+f ctrl+s". Use \'+\' to separate simultaneous keys (e.g., "ctrl+shift+s").'
       );
     });
 
     it('should reject implicit space key combinations', () => {
-      expect(() => parser.isValidKeyString('ctrl+ ')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+ ')).toThrow(
         'only modifier keys found, no action key'
       );
-      expect(() => parser.isValidKeyString('shift+ ')).toThrow(
+      expect(() => parser.validateKeyString('shift+ ')).toThrow(
         'only modifier keys found, no action key'
       );
-      expect(() => parser.isValidKeyString('alt+ ')).toThrow(
+      expect(() => parser.validateKeyString('alt+ ')).toThrow(
         'only modifier keys found, no action key'
       );
     });
 
     it('should allow explicit space key combinations', () => {
-      expect(() => parser.isValidKeyString('ctrl+space')).not.toThrow();
-      expect(() => parser.isValidKeyString('shift+space')).not.toThrow();
-      expect(() => parser.isValidKeyString(' ')).not.toThrow();
-      expect(() => parser.isValidKeyString('alt+space')).not.toThrow();
+      expect(() => parser.validateKeyString('ctrl+space')).not.toThrow();
+      expect(() => parser.validateKeyString('shift+space')).not.toThrow();
+      expect(() => parser.validateKeyString(' ')).not.toThrow();
+      expect(() => parser.validateKeyString('alt+space')).not.toThrow();
     });
 
     it('should handle edge cases with spaces correctly', () => {
-      expect(() => parser.isValidKeyString('ctrl+ ')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+ ')).toThrow(
         'only modifier keys found, no action key'
       );
-      expect(() => parser.isValidKeyString('shift+ ')).toThrow(
+      expect(() => parser.validateKeyString('shift+ ')).toThrow(
         'only modifier keys found, no action key'
       );
 
-      expect(() => parser.isValidKeyString('ctrl a')).toThrow('Chord sequences are not supported');
-      expect(() => parser.isValidKeyString('shift+s f1')).toThrow(
+      expect(() => parser.validateKeyString('ctrl a')).toThrow('Chord sequences are not supported');
+      expect(() => parser.validateKeyString('shift+s f1')).toThrow(
         'Chord sequences are not supported'
       );
 
-      expect(() => parser.isValidKeyString(' ')).not.toThrow();
+      expect(() => parser.validateKeyString(' ')).not.toThrow();
     });
 
     it('should handle mixed order key combinations', () => {
@@ -653,22 +653,22 @@ describe('KeyStringParser', () => {
     });
 
     it('should validate mixed order combinations correctly', () => {
-      expect(() => parser.isValidKeyString('s+ctrl')).not.toThrow();
-      expect(() => parser.isValidKeyString('f1+shift')).not.toThrow();
-      expect(() => parser.isValidKeyString('enter+alt+ctrl')).not.toThrow();
-      expect(() => parser.isValidKeyString('space+cmd+shift')).not.toThrow();
+      expect(() => parser.validateKeyString('s+ctrl')).not.toThrow();
+      expect(() => parser.validateKeyString('f1+shift')).not.toThrow();
+      expect(() => parser.validateKeyString('enter+alt+ctrl')).not.toThrow();
+      expect(() => parser.validateKeyString('space+cmd+shift')).not.toThrow();
 
-      expect(() => parser.isValidKeyString('f12+shift+ctrl+alt')).not.toThrow();
-      expect(() => parser.isValidKeyString('a+alt+shift+ctrl')).not.toThrow();
+      expect(() => parser.validateKeyString('f12+shift+ctrl+alt')).not.toThrow();
+      expect(() => parser.validateKeyString('a+alt+shift+ctrl')).not.toThrow();
 
-      expect(() => parser.isValidKeyString('s+ctrl+a')).toThrow(
+      expect(() => parser.validateKeyString('s+ctrl+a')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "s+ctrl+a"'
       );
-      expect(() => parser.isValidKeyString('f1+s+shift')).toThrow(
+      expect(() => parser.validateKeyString('f1+s+shift')).toThrow(
         'Malformed key string: two-key sequences cannot have modifiers: "f1+s+shift"'
       );
 
-      expect(() => parser.isValidKeyString('ctrl+shift+alt')).toThrow(
+      expect(() => parser.validateKeyString('ctrl+shift+alt')).toThrow(
         'only modifier keys found, no action key'
       );
     });
@@ -729,10 +729,10 @@ describe('KeyStringParser', () => {
 
     describe('Plus Key Validation', () => {
       it('should validate plus key combinations as valid', () => {
-        expect(() => parser.isValidKeyString('ctrl++')).not.toThrow();
-        expect(() => parser.isValidKeyString('shift++')).not.toThrow();
-        expect(() => parser.isValidKeyString('alt++')).not.toThrow();
-        expect(() => parser.isValidKeyString('ctrl+shift++')).not.toThrow();
+        expect(() => parser.validateKeyString('ctrl++')).not.toThrow();
+        expect(() => parser.validateKeyString('shift++')).not.toThrow();
+        expect(() => parser.validateKeyString('alt++')).not.toThrow();
+        expect(() => parser.validateKeyString('ctrl+shift++')).not.toThrow();
       });
     });
 
@@ -892,15 +892,15 @@ describe('KeyStringParser', () => {
   describe('Edge Cases and Regression Tests', () => {
     describe('Complex Malformed Patterns', () => {
       it('should handle mixed malformed patterns', () => {
-        expect(() => parser.isValidKeyString('++ctrl++s')).toThrow();
-        expect(() => parser.isValidKeyString('ctrl+++shift')).toThrow();
-        expect(() => parser.isValidKeyString('+ctrl+shift+')).toThrow();
+        expect(() => parser.validateKeyString('++ctrl++s')).toThrow();
+        expect(() => parser.validateKeyString('ctrl+++shift')).toThrow();
+        expect(() => parser.validateKeyString('+ctrl+shift+')).toThrow();
       });
 
       it('should handle whitespace with malformed patterns', () => {
-        expect(() => parser.isValidKeyString(' ++ ')).toThrow();
-        expect(() => parser.isValidKeyString(' ctrl ++ s ')).toThrow();
-        expect(() => parser.isValidKeyString(' + ctrl + s ')).toThrow();
+        expect(() => parser.validateKeyString(' ++ ')).toThrow();
+        expect(() => parser.validateKeyString(' ctrl ++ s ')).toThrow();
+        expect(() => parser.validateKeyString(' + ctrl + s ')).toThrow();
       });
     });
 

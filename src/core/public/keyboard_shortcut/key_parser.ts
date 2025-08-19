@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * These are the allowed keys this service supports outside of alphanumeric values.
+ * The key of this object represents the lowercased value of the `key` and the value is the normalized key name.
+ */
 export const SPECIAL_KEY_MAPPINGS: Record<string, string> = {
   // Arrow keys
   arrowup: 'up',
@@ -530,10 +534,6 @@ export class KeyStringParser {
         `Malformed key string: multiple non-modifier keys with modifiers: "${keyString}"`
       );
     }
-  }
-
-  public isValidKeyString(keyString: string): void {
-    return this.validateKeyString(keyString);
   }
 
   public getDisplayString(keyString: string): string {
