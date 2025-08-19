@@ -26,6 +26,7 @@ describe('Autocomplete Query', () => {
 
   beforeEach(() => {
     cy.getElementByTestId('discoverNewButton').click();
+    cy.osd.waitForLoader(true);
     cy.core.waitForDatasetsToLoad();
     cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
     cy.explore.setTopNavDate(START_TIME, END_TIME);

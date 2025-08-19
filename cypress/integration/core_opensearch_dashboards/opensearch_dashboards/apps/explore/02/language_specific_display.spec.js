@@ -17,17 +17,12 @@ describe('Language Specific Display', () => {
       testResources = resources;
       cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
       cy.osd.waitForLoader(true);
+      cy.core.waitForDatasetsToLoad();
     });
   });
 
   after(() => {
     cy.core.cleanupTestResources(testResources);
-  });
-
-  beforeEach(() => {
-    cy.getElementByTestId('discoverNewButton').click();
-    cy.osd.waitForLoader(true);
-    cy.core.waitForDatasetsToLoad();
   });
 
   it('should display PPL UI components correctly', () => {

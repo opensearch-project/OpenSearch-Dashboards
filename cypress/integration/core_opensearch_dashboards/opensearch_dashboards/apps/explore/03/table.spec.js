@@ -17,19 +17,14 @@ describe('Table', () => {
       testResources = resources;
       cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
       cy.osd.waitForLoader(true);
+      cy.core.waitForDatasetsToLoad();
+      cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+      cy.explore.setTopNavDate(START_TIME, END_TIME);
     });
   });
 
   after(() => {
     cy.core.cleanupTestResources(testResources);
-  });
-
-  beforeEach(() => {
-    cy.getElementByTestId('discoverNewButton').click();
-    cy.core.waitForDatasetsToLoad();
-
-    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
-    cy.explore.setTopNavDate(START_TIME, END_TIME);
   });
 
   it('should expand multiple documents', () => {

@@ -8,6 +8,7 @@ import { DEFAULT_OPTIONS } from '../../../../../../utils/commands.core';
 
 describe('Caching', () => {
   let testResources = {};
+  let newDatasetId;
   const alternativeIndexPattern = 'data*';
 
   before(() => {
@@ -20,13 +21,13 @@ describe('Caching', () => {
   });
 
   after(() => {
+    cy.core.deleteDataset(newDatasetId);
     cy.core.cleanupTestResources(testResources);
   });
 
   it('should refresh index pattern list when new pattern created', () => {
     cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
 
-    // Create new index pattern via API
     cy.core
       .createDataset(testResources.workspaceId, testResources.dataSourceId, {
         dataset: {
@@ -35,11 +36,10 @@ describe('Caching', () => {
         },
       })
       .then((newDatasetId) => {
-        // Navigate back to explore
+        this.newDatasetId = newDatasetId;
         cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
         cy.osd.waitForLoader(true);
-
-        // Open dataset selector
+        cy.core.waitForDatasetsToLoad();
         cy.getElementByTestId('datasetSelectButton').click();
 
         // Verify new pattern appears
@@ -48,9 +48,6 @@ describe('Caching', () => {
           .within(() => {
             cy.get(`[title="${alternativeIndexPattern}"]`).should('exist');
           });
-
-        // Clean up
-        cy.core.deleteDataset(newDatasetId);
       });
   });
 });

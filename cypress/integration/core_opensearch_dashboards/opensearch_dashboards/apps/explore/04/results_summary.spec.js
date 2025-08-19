@@ -99,6 +99,8 @@ describe('Results Summary', () => {
 
     // Refresh and try thumbs down
     cy.reload();
+    cy.osd.waitForLoader(true);
+    cy.core.waitForDatasetsToLoad();
     cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
     cy.explore.setTopNavDate(START_TIME, END_TIME);
     cy.explore.setQueryEditor(' How many logs are there?');

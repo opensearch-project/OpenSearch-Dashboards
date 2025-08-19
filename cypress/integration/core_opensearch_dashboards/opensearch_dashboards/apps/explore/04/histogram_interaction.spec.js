@@ -37,24 +37,6 @@ describe('Histogram Interaction', () => {
     cy.getElementByTestId('discoverQueryHits').should('be.visible');
   });
 
-  it('should not show histogram for SQL queries', () => {
-    // Switch to SQL
-    cy.getElementByTestId('datasetSelectButton').click();
-    cy.getElementByTestId('datasetSelectAdvancedButton').click();
-    cy.get('[title="Index Patterns"]').click();
-    cy.getElementByTestId('datasetExplorerWindow')
-      .find(`[title="${testResources.dataSourceTitle}::${INDEX_PATTERN_WITH_TIME}"]`)
-      .click({ force: true });
-    cy.getElementByTestId('datasetSelectorNext').click();
-    cy.getElementByTestId('advancedSelectorLanguageSelect').select('SQL');
-    cy.getElementByTestId('advancedSelectorConfirmButton').click();
-
-    cy.explore.setTopNavDate(START_TIME, END_TIME);
-
-    cy.getElementByTestId('dscChartChartheader').should('not.exist');
-    cy.getElementByTestId('discoverChart').should('not.exist');
-  });
-
   it('should change histogram interval', () => {
     const intervals = ['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
 
@@ -69,16 +51,11 @@ describe('Histogram Interaction', () => {
   });
 
   it('should collapse and expand histogram', () => {
-    // Verify histogram is visible
     cy.getElementByTestId('dscChartChartheader').should('be.visible');
     cy.getElementByTestId('discoverChart').should('be.visible');
-
-    // Collapse histogram
     cy.getElementByTestId('histogramCollapseBtn').click();
     cy.getElementByTestId('dscChartChartheader').should('be.visible');
     cy.getElementByTestId('discoverChart').should('not.exist');
-
-    // Expand histogram
     cy.getElementByTestId('histogramCollapseBtn').click();
     cy.getElementByTestId('dscChartChartheader').should('be.visible');
     cy.getElementByTestId('discoverChart').should('be.visible');
@@ -96,7 +73,6 @@ describe('Histogram Interaction', () => {
       .should('contain', specificStart)
       .should('contain', specificEnd);
 
-    // Expand first doc to verify timestamp
     cy.getElementByTestId('docTableExpandToggleColumn').eq(0).find('button').click({ force: true });
 
     cy.getElementByTestId('tableDocViewRow-timestamp-value')

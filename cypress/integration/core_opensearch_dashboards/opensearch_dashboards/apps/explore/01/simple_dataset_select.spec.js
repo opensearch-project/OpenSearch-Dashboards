@@ -41,6 +41,7 @@ describe('Dataset Select', () => {
               testResources.noTimeDatasetId = datasetId;
               cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
               cy.osd.waitForLoader(true);
+              cy.core.waitForDatasetsToLoad();
               cy.wait(5000);
             });
         });

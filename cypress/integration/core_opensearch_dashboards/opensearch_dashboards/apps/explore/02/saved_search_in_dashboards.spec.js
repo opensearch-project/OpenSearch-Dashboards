@@ -17,8 +17,6 @@ describe('Saved Search in Dashboards', () => {
   before(() => {
     cy.core.setupTestResources().then((resources) => {
       testResources = resources;
-
-      // Create saved search
       cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
       cy.osd.waitForLoader(true);
       cy.core.waitForDatasetsToLoad();
@@ -50,14 +48,10 @@ describe('Saved Search in Dashboards', () => {
     cy.visit(`/w/${testResources.workspaceId}/app/dashboards`);
     cy.osd.waitForLoader(true);
 
-    // Create new dashboard
     cy.getElementByTestId('newItemButton').click();
-
-    // Add saved search
     cy.getElementByTestId('dashboardAddPanelButton').click();
     cy.getElementByTestId('dashboardAddPanelFromLibrary').click();
     cy.getElementByTestId('savedObjectFinderSearchInput').type(savedSearchName);
-
     cy.getElementByTestId('savedObjectFinderItemList')
       .find('li')
       .first()

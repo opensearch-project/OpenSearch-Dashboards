@@ -32,13 +32,9 @@ describe('Queries UI', () => {
   });
 
   it('should show documentation link in language reference', () => {
-    // Open language reference
     cy.getElementByTestId('exploreLanguageReference').click();
-
-    // Verify popover
     cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
 
-    // Check documentation link
     cy.get('.euiPopover__panel-isOpen')
       .find('a.euiLink.euiLink--primary')
       .should('have.attr', 'href')
@@ -47,7 +43,6 @@ describe('Queries UI', () => {
           /^https:\/\/opensearch\.org\/docs\/(latest|\d+\.\d+)\/search-plugins\/sql\/ppl\/syntax\/$/
         );
 
-        // Verify link is valid
         cy.request({
           url: href,
           failOnStatusCode: false,
@@ -56,7 +51,6 @@ describe('Queries UI', () => {
         });
       });
 
-    // Close popover
     cy.getElementByTestId('exploreLanguageReference').click();
   });
 
@@ -74,8 +68,6 @@ describe('Queries UI', () => {
 
   it('should handle query errors gracefully', () => {
     cy.explore.setTopNavDate(START_TIME, END_TIME);
-
-    // Invalid query
     const invalidQuery = `source = nonexistent_index`;
     cy.explore.setQueryEditor(invalidQuery);
 
@@ -84,14 +76,8 @@ describe('Queries UI', () => {
 
   it('should provide query autocomplete', () => {
     cy.explore.clearQueryEditor();
-
-    // Type to trigger autocomplete
     cy.get('.inputarea').first().type('source');
-
-    // Verify suggestions appear
     cy.get('.monaco-list-row').should('be.visible');
-
-    // Escape to close suggestions
     cy.get('.inputarea').first().type('{esc}');
   });
 });
