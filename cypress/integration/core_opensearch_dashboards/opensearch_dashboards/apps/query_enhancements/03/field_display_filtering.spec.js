@@ -49,7 +49,7 @@ const fieldDisplayFilteringTestSuite = () => {
       indexPattern: `${INDEX_WITH_TIME_1}*`,
     }).forEach((config) => {
       it(`filter actions in table field for ${config.testName}`, () => {
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.coreQe.selectDataset(config.dataset);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
@@ -170,7 +170,7 @@ const fieldDisplayFilteringTestSuite = () => {
           );
         };
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.coreQe.selectDataset(config.dataset);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 

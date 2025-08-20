@@ -47,7 +47,7 @@ export const runBuildVisTests = () => {
         isEnhancement: true,
       });
 
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
 
       // Setup dataset
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
@@ -65,7 +65,7 @@ export const runBuildVisTests = () => {
       cy.explore.clearQueryEditor();
 
       // Input query that returns all the fields
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       const query = `source=${datasetName} | head 5`;
       cy.explore.setQueryEditor(query);
 
@@ -155,7 +155,7 @@ export const runBuildVisTests = () => {
     });
 
     it('should be able to build metric', () => {
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       const query = `source=${datasetName} | head 1`;
       cy.explore.setQueryEditor(query);
 

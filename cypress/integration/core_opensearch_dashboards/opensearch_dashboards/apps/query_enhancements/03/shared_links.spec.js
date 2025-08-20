@@ -95,7 +95,7 @@ export const runSharedLinksTests = () => {
 
         it(`should handle shared document links correctly for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.setDataset(config.dataset);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
@@ -140,7 +140,7 @@ export const runSharedLinksTests = () => {
 
         it(`should persist state in shared links for ${config.testName}`, () => {
           // Set dataset and language
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.setDataset(config.dataset);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 

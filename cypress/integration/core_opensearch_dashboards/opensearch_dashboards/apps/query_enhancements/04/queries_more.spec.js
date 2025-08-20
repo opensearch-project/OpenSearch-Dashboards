@@ -67,7 +67,7 @@ export const runQueryTests = () => {
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         it('should highlight filter and query field', () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const query = `unique_category:Caching`;
@@ -85,7 +85,7 @@ export const runQueryTests = () => {
 
           // Get dataset names based on type
           const noTime = getDatasetName(INDEX_WITHOUT_TIME_1, config.datasetType);
-          cy.setDataset(noTime, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(noTime);
           cy.setQueryLanguage(config.language);
           cy.setQueryEditor(query);
           cy.submitFilterFromDropDown('category', 'is', 'Database', true);

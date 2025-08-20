@@ -43,7 +43,7 @@ export const runCreateVisTests = () => {
 
     it('should create a metric visualization using a single metric query', () => {
       // Setup dataset
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       cy.wait(10000);
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
       cy.wait(10000);
@@ -87,7 +87,7 @@ export const runCreateVisTests = () => {
     it('should create a line visualization using a query with timestamp', () => {
       cy.explore.clearQueryEditor();
 
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
       const query = `source=${datasetName} | stats count() by event_time`;
@@ -129,7 +129,7 @@ export const runCreateVisTests = () => {
     it('should create a bar visualization using a query with one metric and one category', () => {
       cy.explore.clearQueryEditor();
 
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
       const query = `source=${datasetName} | stats count() by category`;
@@ -171,7 +171,7 @@ export const runCreateVisTests = () => {
     it('should create a scatter plot visualization using a query with two metrics and one category', () => {
       cy.explore.clearQueryEditor();
 
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
       const query = `source=${datasetName} | fields bytes_transferred, status_code`;
@@ -203,7 +203,7 @@ export const runCreateVisTests = () => {
     it('should create a heatmap visualization using a query with one metric and two categories', () => {
       cy.explore.clearQueryEditor();
 
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
       const query = `source=${datasetName} | stats avg(bytes_transferred) as avg_bytes_transferred by service_endpoint, category`;
@@ -246,7 +246,7 @@ export const runCreateVisTests = () => {
     it('should create a two lines visualization using a query with one metric, one category and one date', () => {
       cy.explore.clearQueryEditor();
 
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
       const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp, category`;
@@ -281,7 +281,7 @@ export const runCreateVisTests = () => {
     it('should create a facet line visualization using a query with one metric, two categories, one date', () => {
       cy.explore.clearQueryEditor();
 
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
       const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp, category, unique_category`;
@@ -319,7 +319,7 @@ export const runCreateVisTests = () => {
     it('should create a line and bar visualization using a query with one metric and two categories', () => {
       // Setup dataset
       cy.explore.clearQueryEditor();
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
 
       const query = `source=${datasetName} | stats AVG(\`bytes_transferred\`) as avg_bytes, MAX(\`bytes_transferred\`) as max_bytes by span(\`timestamp\`, 1d) | head 10`;
       cy.explore.setQueryEditor(query);

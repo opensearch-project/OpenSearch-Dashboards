@@ -54,8 +54,7 @@ export const runDisplayTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-
+        cy.coreQe.selectDataset(config.dataset);
         cy.setQueryLanguage(config.language);
 
         setDatePickerDatesAndSearchIfRelevant(config.language);

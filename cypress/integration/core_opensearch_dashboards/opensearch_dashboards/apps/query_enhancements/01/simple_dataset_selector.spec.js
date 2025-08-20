@@ -5,146 +5,120 @@
 
 import {
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
   INDEX_PATTERN_WITH_NO_TIME,
   INDEX_WITHOUT_TIME_1,
-  DATASOURCE_NAME,
+  START_TIME,
+  END_TIME,
+  PATHS,
 } from '../../../../../../utils/constants';
-import {
-  getRandomizedWorkspaceName,
-  getDefaultQuery,
-  setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/query_enhancements/shared';
 import { verifyDiscoverPageState } from '../../../../../../utils/apps/query_enhancements/saved';
-import {
-  generateSimpleDatasetSelectorTestConfigurations,
-  validateItemsInSimpleDatasetSelectorDropDown,
-} from '../../../../../../utils/apps/query_enhancements/simple_dataset_selector';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { getDefaultQuery } from '../../../../../../utils/apps/query_enhancements/shared';
+import { DEFAULT_OPTIONS } from '../../../../../../utils/commands.core';
 
-const workspaceName = getRandomizedWorkspaceName();
-const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
+describe('Dataset Selector', () => {
+  let testResources = {};
 
-export const runSimpleDatasetSelectorTests = () => {
-  describe('simple dataset selector selecting an index pattern', () => {
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_NO_TIME.replace('*', ''),
-        timefieldName: '',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-        indexPatternHasTimefield: false,
-      });
-    });
-
-    after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-    });
-
-    generateSimpleDatasetSelectorTestConfigurations([
-      {
-        indexPattern: INDEX_PATTERN_WITH_TIME,
-        time: true,
-      },
-      {
-        indexPattern: INDEX_PATTERN_WITH_NO_TIME,
-        time: false,
-      },
-    ]).forEach((config) => {
-      it(`Select ${
-        config.time ? 'time-based' : 'no-time-based'
-      } Indexpattern when original language was ${
-        config.language
-      } from the simple dataset selector`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'discover',
-          isEnhancement: true,
+  before(() => {
+    cy.core.setupTestResources().then((resources) => {
+      testResources = resources;
+      cy.core
+        .setupTestData(
+          PATHS.ENGINE,
+          `query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.data.ndjson`,
+          INDEX_WITHOUT_TIME_1
+        )
+        .then(() => {
+          const dataset = {
+            ...DEFAULT_OPTIONS.dataset,
+            ...{
+              title: INDEX_PATTERN_WITH_NO_TIME,
+              timeFieldName: undefined,
+            },
+          };
+          cy.core
+            .createDataset(resources.workspaceId, resources.dataSourceId, {
+              dataset,
+            })
+            .then((datasetId) => {
+              testResources.noTimeDatasetId = datasetId;
+              cy.visit(`/w/${testResources.workspaceId}/app/discover#`);
+              cy.osd.waitForLoader(true);
+              cy.wait(5000);
+            });
         });
-
-        // Select the original language
-        cy.setQueryLanguage(config.language);
-
-        // Select the index pattern
-        cy.setIndexPatternAsDataset(config.indexPattern, DATASOURCE_NAME);
-
-        // Verify if the language is unchanged, we get a default query populated, and correct dataset is set
-        verifyDiscoverPageState({
-          dataset: config.indexPattern,
-          queryString: getDefaultQuery(config.indexPattern, config.language),
-          language: config.language,
-          hitCount: null,
-          filters: null,
-          histogram: null,
-          selectFields: null,
-          sampleTableData: null,
-        });
-
-        // Verify the presence of timestamp column
-        // Set the time range
-        if (config.time) {
-          setDatePickerDatesAndSearchIfRelevant(config.language);
-          cy.getElementByTestId('docTableHeaderField').contains('Time');
-        }
-      });
     });
   });
 
-  describe('filtering index pattern in simple dataset selector', () => {
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-
-      for (let i = 1; i <= noIndexPatterns; i++) {
-        cy.createWorkspaceIndexPatterns({
-          workspaceName: workspaceName,
-          indexPattern: INDEX_PATTERN_WITH_TIME.slice(0, i),
-          timefieldName: 'timestamp',
-          dataSource: DATASOURCE_NAME,
-          isEnhancement: true,
-        });
-      }
-    });
-
-    after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-    });
-
-    it('validate filtering index pattern in simple dataset selector', () => {
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        workspaceName,
-        page: 'discover',
-        isEnhancement: true,
-      });
-
-      for (let i = 1; i <= noIndexPatterns; i++) {
-        validateItemsInSimpleDatasetSelectorDropDown(
-          `::${INDEX_PATTERN_WITH_TIME.slice(0, i)}`,
-          noIndexPatterns - i + 1
-        );
-      }
-    });
+  after(() => {
+    cy.core.deleteDataset(testResources.noTimeDatasetId);
+    cy.core.cleanupTestResources(testResources);
   });
-};
 
-prepareTestSuite('Simple Dataset Selector', runSimpleDatasetSelectorTests);
+  it('should select index pattern without timefield', () => {
+    cy.coreQe.selectDataset(INDEX_PATTERN_WITH_NO_TIME);
+    cy.osd.waitForLoader(true);
+    verifyDiscoverPageState({
+      dataset: INDEX_PATTERN_WITH_NO_TIME,
+      queryString: getDefaultQuery(INDEX_PATTERN_WITH_NO_TIME, 'DQL'),
+      language: 'DQL',
+      hitCount: null,
+      filters: null,
+      histogram: null,
+      selectFields: null,
+      sampleTableData: null,
+    });
+
+    // Check for no Time column
+    cy.getElementByTestId('docTableHeaderField').should('not.contain', 'Time');
+  });
+
+  it('should select index pattern with timefield for all supported query languages', () => {
+    cy.coreQe.selectDataset(INDEX_PATTERN_WITH_TIME);
+    cy.osd.waitForLoader(true);
+    verifyDiscoverPageState({
+      dataset: INDEX_PATTERN_WITH_TIME,
+      queryString: getDefaultQuery(INDEX_PATTERN_WITH_TIME, 'DQL'),
+      language: 'DQL',
+      hitCount: null,
+      filters: null,
+      histogram: null,
+      selectFields: null,
+      sampleTableData: null,
+    });
+    cy.osd.setTopNavDate(START_TIME, END_TIME);
+    cy.osd.waitForLoader(true);
+    cy.getElementByTestId('docTableHeaderField').contains('Time');
+  });
+
+  it('should be able to search datasets', () => {
+    cy.getElementByTestId('datasetSelectorButton').click({ force: true });
+    cy.getElementByTestId('datasetSelectorSelectable')
+      .get('[placeholder="Filter options"]')
+      .clear()
+      .type(INDEX_PATTERN_WITH_NO_TIME);
+    cy.getElementByTestId('datasetSelectorSelectable')
+      .should('be.visible')
+      .get('[data-test-subj^="datasetSelectorOption-"]')
+      .contains(INDEX_PATTERN_WITH_NO_TIME)
+      .should('be.visible');
+    cy.getElementByTestId('datasetSelectorSelectable')
+      .should('be.visible')
+      .get('[data-test-subj^="datasetSelectorOption-"]')
+      .contains(INDEX_PATTERN_WITH_TIME)
+      .should('not.exist');
+
+    cy.getElementByTestId('datasetSelectorSelectable')
+      .get('[placeholder="Filter options"]')
+      .clear();
+    cy.getElementByTestId('datasetSelectorSelectable')
+      .should('be.visible')
+      .get('[data-test-subj^="datasetSelectorOption-"]')
+      .contains(INDEX_PATTERN_WITH_NO_TIME)
+      .should('be.visible');
+    cy.getElementByTestId('datasetSelectorSelectable')
+      .should('be.visible')
+      .get('[data-test-subj^="datasetSelectorOption-"]')
+      .contains(INDEX_PATTERN_WITH_TIME)
+      .should('be.visible');
+  });
+});

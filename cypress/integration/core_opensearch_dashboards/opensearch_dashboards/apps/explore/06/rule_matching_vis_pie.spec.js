@@ -8,7 +8,7 @@ import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const datasetName = `${INDEX_WITH_TIME_1}*`;
+const datasetName = INDEX_PATTERN_WITH_TIME;
 
 export const runCreateVisTests = () => {
   describe('create pie visualization tests', () => {

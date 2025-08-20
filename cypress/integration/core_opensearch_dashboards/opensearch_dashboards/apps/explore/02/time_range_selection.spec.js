@@ -36,7 +36,7 @@ describe('Time Range Selection', () => {
 
   it('should select time using absolute time menu', () => {
     cy.explore.setTopNavDate('Nov 29, 2021 @ 00:00:00.000', 'Dec 29, 2023 @ 00:00:00.000');
-    cy.verifyHitCount('10,000');
+    cy.verifyHitCount('5,452');
     cy.getElementByTestId('superDatePickerShowDatesButton')
       .should('contain', 'Nov 29, 2021')
       .should('contain', 'Dec 29, 2023');

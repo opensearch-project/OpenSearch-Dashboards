@@ -5,16 +5,17 @@
 
 import Papa from 'papaparse';
 import {
-  INDEX_WITH_TIME_1,
   INDEX_WITHOUT_TIME_1,
+  INDEX_PATTERN_WITH_NO_TIME,
+  INDEX_PATTERN_WITH_TIME,
   START_TIME,
   END_TIME,
 } from '../../../../../../utils/apps/explore/constants';
 import { DEFAULT_OPTIONS } from '../../../../../../utils/commands.core';
+import { PATHS } from '../../../../../../utils/constants';
 
 describe('Download CSV', () => {
   let testResources = {};
-  let noTimeDatasetId;
 
   before(() => {
     cy.core.setupTestResources().then((resources) => {
@@ -22,7 +23,7 @@ describe('Download CSV', () => {
 
       // Setup index without time
       cy.core.setupTestData(
-        resources.dataSource.endpoint,
+        PATHS.ENGINE,
         `query_enhancements/data_logs_1/${INDEX_WITHOUT_TIME_1}.data.ndjson`,
         INDEX_WITHOUT_TIME_1
       );
@@ -32,12 +33,12 @@ describe('Download CSV', () => {
         .createDataset(resources.workspaceId, resources.dataSourceId, {
           dataset: {
             ...DEFAULT_OPTIONS.dataset,
-            title: `${INDEX_WITHOUT_TIME_1}*`,
+            title: INDEX_PATTERN_WITH_NO_TIME,
             timeFieldName: undefined,
           },
         })
         .then((datasetId) => {
-          noTimeDatasetId = datasetId;
+          testResources.noTimeDatasetId = datasetId;
         });
 
       cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
@@ -47,13 +48,13 @@ describe('Download CSV', () => {
   });
 
   after(() => {
-    cy.core.deleteDataset(noTimeDatasetId);
+    cy.core.deleteDataset(testResources.noTimeDatasetId);
     cy.osd.deleteIndex(INDEX_WITHOUT_TIME_1);
     cy.core.cleanupTestResources(testResources);
   });
 
   it('should download visible rows with time field', () => {
-    cy.core.selectDataset(`${INDEX_WITH_TIME_1}*`);
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
     cy.explore.setTopNavDate(START_TIME, END_TIME);
 
     // Download CSV
@@ -73,7 +74,7 @@ describe('Download CSV', () => {
   });
 
   it('should download visible rows with selected fields', () => {
-    cy.core.selectDataset(`${INDEX_WITH_TIME_1}*`);
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
     cy.explore.setTopNavDate(START_TIME, END_TIME);
 
     // Select specific fields
@@ -98,7 +99,7 @@ describe('Download CSV', () => {
   });
 
   it('should download without time field', () => {
-    cy.core.selectDataset(`${INDEX_WITHOUT_TIME_1}*`);
+    cy.core.selectDataset(INDEX_PATTERN_WITH_NO_TIME);
     cy.wait(2000);
 
     // Download CSV

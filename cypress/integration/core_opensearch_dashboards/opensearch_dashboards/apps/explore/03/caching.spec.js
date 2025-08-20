@@ -8,7 +8,6 @@ import { DEFAULT_OPTIONS } from '../../../../../../utils/commands.core';
 
 describe('Caching', () => {
   let testResources = {};
-  let newDatasetId;
   const alternativeIndexPattern = 'data*';
 
   before(() => {
@@ -21,7 +20,7 @@ describe('Caching', () => {
   });
 
   after(() => {
-    cy.core.deleteDataset(newDatasetId);
+    cy.core.deleteDataset(testResources.newDatasetId);
     cy.core.cleanupTestResources(testResources);
   });
 
@@ -36,7 +35,7 @@ describe('Caching', () => {
         },
       })
       .then((newDatasetId) => {
-        this.newDatasetId = newDatasetId;
+        testResources.newDatasetId = newDatasetId;
         cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
         cy.osd.waitForLoader(true);
         cy.core.waitForDatasetsToLoad();

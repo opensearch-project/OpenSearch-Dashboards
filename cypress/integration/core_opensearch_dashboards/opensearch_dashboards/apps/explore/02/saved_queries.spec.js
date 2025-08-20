@@ -8,6 +8,7 @@ import {
   START_TIME,
   END_TIME,
 } from '../../../../../../utils/apps/explore/constants';
+import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/shared';
 
 describe('Saved Queries', () => {
   let testResources = {};

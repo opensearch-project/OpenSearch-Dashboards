@@ -3,11 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  INDEX_WITH_TIME_1,
-  START_TIME,
-  END_TIME,
-} from '../../../../../../utils/apps/explore/constants';
+import { START_TIME, END_TIME } from '../../../../../../utils/apps/explore/constants';
+import { INDEX_PATTERN_WITH_TIME } from '../../../../../../utils/constants';
 
 describe('Saved Search in Dashboards', () => {
   let testResources = {};
@@ -21,10 +18,10 @@ describe('Saved Search in Dashboards', () => {
       cy.osd.waitForLoader(true);
       cy.core.waitForDatasetsToLoad();
 
-      cy.core.selectDataset(`${INDEX_WITH_TIME_1}*`);
+      cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
       cy.explore.setTopNavDate(START_TIME, END_TIME);
 
-      const query = `source=${INDEX_WITH_TIME_1}*`;
+      const query = `source=${INDEX_PATTERN_WITH_TIME}`;
       cy.explore.setQueryEditor(query);
 
       cy.getElementByTestId('discoverQueryHits')

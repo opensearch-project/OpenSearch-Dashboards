@@ -8,6 +8,7 @@ import {
   START_TIME,
   END_TIME,
 } from '../../../../../../utils/apps/explore/constants';
+import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/shared';
 
 describe('Field Display Filtering', () => {
   let testResources = {};
@@ -39,10 +40,7 @@ describe('Field Display Filtering', () => {
     cy.getElementByTestId('field-category-showDetails').click();
     cy.getElementByTestId('plus-category-Network').click();
 
-    cy.getElementByTestId('exploreQueryPanelEditor').should(
-      'contain.text',
-      "WHERE `category` = 'Network'"
-    );
+    verifyMonacoEditorContent("| WHERE `category` = 'Network' ");
   });
 
   it('should filter out value in table field', () => {
@@ -51,10 +49,7 @@ describe('Field Display Filtering', () => {
     cy.getElementByTestId('field-category-showDetails').click();
     cy.getElementByTestId('minus-category-Network').click();
 
-    cy.getElementByTestId('exploreQueryPanelEditor').should(
-      'contain.text',
-      "WHERE `category` != 'Network'"
-    );
+    verifyMonacoEditorContent("| WHERE `category` != 'Network' ");
   });
 
   it('should filter for value in expanded doc', () => {
@@ -68,10 +63,7 @@ describe('Field Display Filtering', () => {
       cy.getElementByTestId('addInclusiveFilterButton').click();
     });
 
-    cy.getElementByTestId('exploreQueryPanelEditor').should(
-      'contain.text',
-      "WHERE `category` = 'Network'"
-    );
+    verifyMonacoEditorContent("| WHERE `category` = 'Network' ");
   });
 
   it('should filter out value in expanded doc', () => {
@@ -85,9 +77,6 @@ describe('Field Display Filtering', () => {
       cy.getElementByTestId('removeInclusiveFilterButton').click();
     });
 
-    cy.getElementByTestId('exploreQueryPanelEditor').should(
-      'contain.text',
-      "WHERE `category` != 'Network'"
-    );
+    verifyMonacoEditorContent("| WHERE `category` != 'Network' ");
   });
 });

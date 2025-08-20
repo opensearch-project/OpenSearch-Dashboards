@@ -79,7 +79,7 @@ export const runVisTypeSwitchTests = () => {
 
     it('should create a line chart and switch to bar and area chart', () => {
       // Setup dataset
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       cy.wait(10000);
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
       setDatePickerDatesAndSearchIfRelevant('PPL');
@@ -104,7 +104,7 @@ export const runVisTypeSwitchTests = () => {
 
     it('should create a bar chart and switch to line and area chart', () => {
       // Run query and verify bar chart is created
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
+      const datasetName = INDEX_PATTERN_WITH_TIME;
       const query = `source=${datasetName} | stats count() by category | head 10`;
       setupQueryAndRun(query);
       verifyVisualizationCreated();

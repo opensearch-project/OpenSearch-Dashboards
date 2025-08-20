@@ -68,7 +68,7 @@ export const runAdvancedSettingsTests = () => {
           // Get dataset names based on type
           const firstDataset = getDatasetName(INDEX_WITH_TIME_1, config.datasetType);
           const secondDataset = getDatasetName(INDEX_WITH_TIME_2, config.datasetType);
-          cy.setDataset(firstDataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(firstDataset);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
@@ -76,7 +76,7 @@ export const runAdvancedSettingsTests = () => {
           cy.submitFilterFromDropDown('unique_category', 'is', 'Caching', true);
           cy.verifyHitCount(500);
 
-          cy.setDataset(secondDataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(secondDataset);
           cy.getElementByTestId('discoverNoResults').should('exist');
 
           // Turn on courier:ignoreFilterIfFieldNotInIndex
@@ -98,7 +98,7 @@ export const runAdvancedSettingsTests = () => {
             'discover:sampleSize': 500,
           });
           // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 

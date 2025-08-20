@@ -54,7 +54,7 @@ export const runAutocompleteTests = () => {
         describe(`${config.testName}`, () => {
           it('should verify suggestion widget and its hint', () => {
             // Setup
-            cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            cy.coreQe.selectDataset(config.dataset);
             cy.setQueryLanguage(config.language);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.clearQueryEditor();
@@ -84,7 +84,7 @@ export const runAutocompleteTests = () => {
 
           it('should build query using mouse interactions', () => {
             // Setup
-            cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            cy.coreQe.selectDataset(config.dataset);
             cy.setQueryLanguage(config.language);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.clearQueryEditor();
@@ -100,7 +100,7 @@ export const runAutocompleteTests = () => {
           });
 
           it('should build query using keyboard shortcuts', () => {
-            cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+            cy.coreQe.selectDataset(config.dataset);
             cy.setQueryLanguage(config.language);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.clearQueryEditor();
