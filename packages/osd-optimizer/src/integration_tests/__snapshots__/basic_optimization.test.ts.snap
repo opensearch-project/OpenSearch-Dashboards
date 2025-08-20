@@ -2,6 +2,7 @@
 
 exports[`builds expected bundles, saves bundle counts to metadata: OptimizerConfig 1`] = `
 OptimizerConfig {
+  "bundleRefs": Array [],
   "bundles": Array [
     Bundle {
       "banner": undefined,
