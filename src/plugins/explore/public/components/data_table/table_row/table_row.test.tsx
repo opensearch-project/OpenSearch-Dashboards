@@ -8,13 +8,13 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TableRow, TableRowProps } from './table_row';
 
 // Mock the child components
-jest.mock('../tabe_cell/table_source_cell', () => ({
+jest.mock('../table_cell/table_source_cell', () => ({
   TableSourceCell: ({ isShortDots }: { isShortDots: boolean }) => (
     <div data-test-subj="table-source-cell">Source Cell - Short dots: {isShortDots.toString()}</div>
   ),
 }));
 
-jest.mock('../tabe_cell/table_cell', () => ({
+jest.mock('../table_cell/table_cell', () => ({
   TableCell: ({
     columnId,
     sanitizedCellValue,

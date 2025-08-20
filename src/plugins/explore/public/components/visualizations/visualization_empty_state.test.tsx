@@ -30,7 +30,6 @@ describe('VisualizationEmptyState', () => {
     sampleTab.click();
 
     expect(screen.getByText('Top services with faults')).toBeInTheDocument();
-    expect(screen.getByText('Top slow operations')).toBeInTheDocument();
-    expect(screen.getByText('Top slow database statements')).toBeInTheDocument();
+    expect(screen.getByText('Top slow services')).toBeInTheDocument();
   });
 });

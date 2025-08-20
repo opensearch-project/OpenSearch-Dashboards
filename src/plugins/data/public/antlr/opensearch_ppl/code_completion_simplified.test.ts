@@ -20,6 +20,14 @@ describe('ppl code_completion', () => {
       { name: 'field2', type: 'number' },
       { name: 'field3', type: 'boolean' },
       { name: 'field4', type: 'string' },
+      // Fields with dots for backtick testing
+      { name: 'resource.attributes.host', type: 'string' },
+      { name: 'kubernetes.pod.name', type: 'string' },
+      // Fields with @ symbols for backtick testing
+      { name: 'host@name', type: 'string' },
+      { name: 'user@domain', type: 'string' },
+      // Fields with both . and @
+      { name: 'service.name@env', type: 'string' },
     ],
   } as IndexPattern;
 
@@ -429,6 +437,15 @@ describe('ppl code_completion', () => {
           type: monaco.languages.CompletionItemKind.Module,
         });
       });
+    });
+
+    it('should wrap fields with dots and @ symbols in backticks for fields command', async () => {
+      const results = await getSimpleSuggestions('source = test-index | fields ');
+      const resultField1 = results.find((result) => result.text === 'resource.attributes.host');
+      expect(resultField1?.insertText).toBe('`resource.attributes.host` ');
+
+      const resultField2 = results.find((result) => result.text === 'host@name');
+      expect(resultField2?.insertText).toBe('`host@name` ');
     });
   });
 });

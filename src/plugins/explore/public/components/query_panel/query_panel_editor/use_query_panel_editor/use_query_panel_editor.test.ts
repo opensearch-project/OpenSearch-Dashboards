@@ -104,6 +104,8 @@ import {
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
   selectQueryLanguage,
+  selectQueryString,
+  selectIsQueryEditorDirty,
 } from '../../../../application/utils/state_management/selectors';
 
 const mockUseSelector = jest.mocked(useSelector);
@@ -575,7 +577,7 @@ describe('useQueryPanelEditor', () => {
       );
     });
 
-    it('should clear local text and set query mode when handleEscape is called', () => {
+    it('should not clear local text and set query mode when handleEscape is called', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
 
       // Set some text first
@@ -598,7 +600,7 @@ describe('useQueryPanelEditor', () => {
       });
 
       // Text should be cleared
-      expect(result.current.value).toBe('');
+      expect(result.current.value).toBe('some text');
       expect(mockDispatch).toHaveBeenCalledWith(setEditorMode(EditorMode.Query));
     });
   });
@@ -624,6 +626,138 @@ describe('useQueryPanelEditor', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
 
       expect(result.current.promptIsTyping).toBe(false);
+    });
+  });
+
+  describe('PPL language switching', () => {
+    it('should return PPL languageId when in query mode', () => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsPromptEditorMode) return false;
+        if (selector === selectQueryLanguage) return 'PPL';
+        if (selector === selectPromptModeIsAvailable) return true;
+        if (selector === selectQueryString) return '';
+        if (selector === selectIsQueryEditorDirty) return false;
+        return '';
+      });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      expect(result.current.languageId).toBe('PPL');
+      expect(result.current.isPromptMode).toBe(false);
+    });
+
+    it('should return plaintext languageId when in AI/prompt mode', () => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsPromptEditorMode) return true;
+        if (selector === selectQueryLanguage) return 'PPL';
+        if (selector === selectPromptModeIsAvailable) return true;
+        if (selector === selectQueryString) return '';
+        if (selector === selectIsQueryEditorDirty) return false;
+        return '';
+      });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      expect(result.current.languageId).toBe('AI');
+      expect(result.current.isPromptMode).toBe(true);
+    });
+  });
+
+  describe('provideCompletionItems parameter passing', () => {
+    beforeEach(() => {
+      mockServices.data.autocomplete.getQuerySuggestions = jest.fn().mockResolvedValue([
+        {
+          text: 'suggestion',
+          detail: 'test suggestion',
+        },
+      ]);
+      mockServices.data.dataViews = {
+        get: jest.fn().mockResolvedValue({ id: 'test-dataset' }),
+      };
+    });
+
+    it('should call getQuerySuggestions with baseLanguage=PPL and language=AI in AI mode', async () => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsPromptEditorMode) return true;
+        if (selector === selectQueryLanguage) return 'PPL';
+        if (selector === selectPromptModeIsAvailable) return true;
+        if (selector === selectQueryString) return '';
+        if (selector === selectIsQueryEditorDirty) return false;
+        return '';
+      });
+
+      mockGetEffectiveLanguageForAutoComplete.mockReturnValue('AI');
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Mock objects for completion call
+      const mockModel = {
+        getValue: () => 'show me logs',
+        getOffsetAt: () => 10,
+        getWordUntilPosition: () => ({ startColumn: 1, endColumn: 5 }),
+      } as any;
+      const mockPosition = { lineNumber: 1, column: 10 } as any;
+
+      // Call the completion provider directly
+      await act(async () => {
+        await result.current.suggestionProvider.provideCompletionItems(
+          mockModel,
+          mockPosition,
+          {},
+          { isCancellationRequested: false }
+        );
+      });
+
+      // Verify that getQuerySuggestions was called with correct parameters
+      expect(mockServices.data.autocomplete.getQuerySuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          language: 'AI', // effectiveLanguage for AI mode
+          baseLanguage: 'PPL', // original queryLanguage passed as baseLanguage
+          query: 'show me logs',
+        })
+      );
+    });
+
+    it('should call getQuerySuggestions with baseLanguage=PPL and language=PPL_Simplified in PPL mode', async () => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsPromptEditorMode) return false;
+        if (selector === selectQueryLanguage) return 'PPL';
+        if (selector === selectPromptModeIsAvailable) return true;
+        if (selector === selectQueryString) return '';
+        if (selector === selectIsQueryEditorDirty) return false;
+        return '';
+      });
+
+      mockGetEffectiveLanguageForAutoComplete.mockReturnValue('PPL_Simplified');
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Mock objects for completion call
+      const mockModel = {
+        getValue: () => 'search source=logs',
+        getOffsetAt: () => 15,
+        getWordUntilPosition: () => ({ startColumn: 1, endColumn: 7 }),
+      } as any;
+      const mockPosition = { lineNumber: 1, column: 15 } as any;
+
+      // Call the completion provider directly
+      await act(async () => {
+        await result.current.suggestionProvider.provideCompletionItems(
+          mockModel,
+          mockPosition,
+          {},
+          { isCancellationRequested: false }
+        );
+      });
+
+      // Verify that getQuerySuggestions was called with correct parameters
+      expect(mockServices.data.autocomplete.getQuerySuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          language: 'PPL_Simplified', // effectiveLanguage (transformed by getEffectiveLanguageForAutoComplete)
+          baseLanguage: 'PPL', // original queryLanguage passed as baseLanguage
+          query: 'search source=logs',
+        })
+      );
     });
   });
 });

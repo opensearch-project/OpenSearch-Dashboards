@@ -1,2 +1,0 @@
-fix:
-- Correctly update time filter when loading save query ([#10323](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10323))

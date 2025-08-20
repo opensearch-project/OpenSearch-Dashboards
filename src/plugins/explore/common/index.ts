@@ -16,6 +16,7 @@ export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
 export const CONTEXT_STEP_SETTING = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
+export const DEFAULT_TRACE_COLUMNS_SETTING = 'explore:defaultTraceColumns';
 export const EXPLORE_DEFAULT_LANGUAGE = 'PPL';
 
 export enum ExploreFlavor {

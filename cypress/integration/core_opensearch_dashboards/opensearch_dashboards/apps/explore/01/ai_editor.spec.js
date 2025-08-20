@@ -89,18 +89,18 @@ const runAiEditorTests = () => {
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesIfRelevant(config.language.name);
 
-        cy.getElementByTestId('exploreSelectedLanguage').contains('PPL');
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').contains('AI');
 
         // Test via keyboard clicks
-        cy.explore.setQueryEditor(' ');
-        cy.getElementByTestId('exploreSelectedLanguage').contains('Ask AI');
         cy.explore.setQueryEditor('{esc}');
-        cy.getElementByTestId('exploreSelectedLanguage').contains('PPL');
-        cy.getElementByTestId('queryPanelFooterLanguageToggle').click();
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').contains('PPL');
+        cy.explore.setQueryEditor(' ');
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').contains('AI');
 
         // Test via toggle
-        cy.getElementByTestId('queryPanelFooterLanguageToggle-AI').click();
-        cy.getElementByTestId('exploreSelectedLanguage').contains('Ask AI');
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').click();
+        cy.getElementByTestId('queryPanelFooterLanguageToggle-PPL').click();
+        cy.getElementByTestId('queryPanelFooterLanguageToggle').contains('PPL');
       });
 
       // filtering only works for indexed fields
@@ -110,9 +110,10 @@ const runAiEditorTests = () => {
           setDatePickerDatesIfRelevant(config.language.name);
           // fire query so that we have data to add filter on
           cy.explore.updateTopNav({ log: false });
+          cy.explore.setQueryEditor(' give me all errors');
+
           cy.getElementByTestId('exploreTabs').should('exist');
 
-          cy.explore.setQueryEditor(' ');
           cy.getElementByTestId('field-category-showDetails').click({ force: true });
           cy.getElementByTestId('plus-category-Network').click();
           cy.getElementByTestId('exploreQueryPanelEditor').should('contain.text', 'category');

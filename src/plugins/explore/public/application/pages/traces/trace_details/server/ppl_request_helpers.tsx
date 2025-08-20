@@ -4,11 +4,11 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { Dataset } from '../../../../../../../data/common';
 
 export interface PPLQueryParams {
   traceId: string;
-  dataSourceId: string;
-  indexPattern?: string;
+  dataset: Dataset;
   limit?: number;
 }
 
@@ -21,52 +21,70 @@ export interface PPLQueryRequest {
         language: string;
         format: string;
         dataset: {
-          dataSource: {
+          id: string;
+          title: string;
+          type: string;
+          timeFieldName?: string;
+          dataSource?: {
             id: string;
             title: string;
             type: string;
           };
-          id: string;
-          title: string;
-          type: string;
-          isRemoteDataset: boolean;
         };
       };
+      aggConfig?: any; // For external data source aggregations
     };
   };
 }
 
 // Build a PPL dataset object for queries
-export const buildPPLDataset = (dataSourceId: string, indexPattern: string) => ({
-  dataSource: {
-    id: dataSourceId,
-    title: `datasource-${dataSourceId}`,
-    type: 'DATA_SOURCE',
-  },
-  id: `${dataSourceId}::${indexPattern}`,
-  title: indexPattern,
-  type: 'INDEXES', // TODO change too index_pattern
-  isRemoteDataset: false,
-});
+export const buildPPLDataset = (dataset: Dataset) => {
+  const pplDataset: any = {
+    id: dataset.id,
+    title: dataset.title,
+    type: dataset.type,
+    timeFieldName: dataset.timeFieldName,
+  };
 
-// Build a complete PPL query request object
+  // Include dataSource if present (external data source)
+  if (dataset.dataSource) {
+    pplDataset.dataSource = {
+      id: dataset.dataSource.id,
+      title: dataset.dataSource.title,
+      type: dataset.dataSource.type,
+    };
+  }
+
+  return pplDataset;
+};
+
+// Build a complete PPL query request object using dataset
 export const buildPPLQueryRequest = (
-  dataSourceId: string,
-  indexPattern: string,
-  pplQuery: string
-): PPLQueryRequest => ({
-  params: {
-    index: `${dataSourceId}::${indexPattern}`,
-    body: {
-      query: {
-        query: pplQuery,
-        language: 'PPL',
-        format: 'jdbc',
-        dataset: buildPPLDataset(dataSourceId, indexPattern),
+  dataset: Dataset,
+  pplQuery: string,
+  aggConfig?: any
+): PPLQueryRequest => {
+  const request: PPLQueryRequest = {
+    params: {
+      index: dataset.title, // Use the dataset title as the index
+      body: {
+        query: {
+          query: pplQuery,
+          language: 'PPL',
+          format: 'jdbc',
+          dataset: buildPPLDataset(dataset),
+        },
       },
     },
-  },
-});
+  };
+
+  // Add aggConfig if provided (for external data sources)
+  if (aggConfig) {
+    request.params.body.aggConfig = aggConfig;
+  }
+
+  return request;
+};
 
 // Execute a PPL query using the data service
 export const executePPLQuery = async (
@@ -109,14 +127,14 @@ export class PPLService {
     this.dataService = dataService;
   }
 
-  // Generic method to execute any PPL query
-  async executeQuery(dataSourceId: string, indexPattern: string, pplQuery: string): Promise<any> {
-    if (!dataSourceId || !indexPattern || !pplQuery) {
+  // Generic method to execute any PPL query using dataset
+  async executeQuery(dataset: Dataset, pplQuery: string): Promise<any> {
+    if (!dataset || !pplQuery) {
       throw new Error('Missing required parameters for PPL query execution');
     }
 
     try {
-      const request = buildPPLQueryRequest(dataSourceId, indexPattern, pplQuery);
+      const request = buildPPLQueryRequest(dataset, pplQuery);
       return await executePPLQuery(this.dataService, request);
     } catch (error) {
       // eslint-disable-next-line no-console

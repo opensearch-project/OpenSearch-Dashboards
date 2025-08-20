@@ -4,34 +4,32 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiIcon,
-  EuiPopover,
-} from '@elastic/eui';
+import { useSelector } from 'react-redux';
+import { EuiBetaBadge, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import classNames from 'classnames';
 import {
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
+  selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
-import { useEditorFocus, useEditorRef } from '../../../../application/hooks';
-import { setEditorMode } from '../../../../application/utils/state_management/slices';
+import { useEditorFocus } from '../../../../application/hooks';
+import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
+import './language_toggle.scss';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
-  defaultMessage: 'Ask AI',
+  defaultMessage: 'AI',
 });
 
 export const LanguageToggle = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
-  const dispatch = useDispatch();
-  const editorRef = useEditorRef();
+  const language = useSelector(selectQueryLanguage);
   const focusOnEditor = useEditorFocus();
+
+  const switchEditorMode = useLanguageSwitch();
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -39,16 +37,14 @@ export const LanguageToggle = () => {
   const onItemClick = useCallback(
     (editorMode: EditorMode) => {
       closePopover();
-      dispatch(setEditorMode(editorMode));
       setTimeout(focusOnEditor);
-      // select all
-      const range = editorRef.current?.getModel()?.getFullModelRange();
-      if (range) {
-        setTimeout(() => editorRef.current?.setSelection(range));
-      }
+      switchEditorMode(editorMode);
     },
-    [closePopover, dispatch, editorRef, focusOnEditor]
+    [closePopover, focusOnEditor, switchEditorMode]
   );
+
+  // TODO: expand this once other languages are supported
+  const badgeLabel = isPromptMode ? promptOptionText : language;
 
   const items = useMemo(() => {
     const output = [
@@ -79,22 +75,26 @@ export const LanguageToggle = () => {
   }, [isPromptMode, onItemClick, promptModeIsAvailable]);
 
   return (
-    <EuiPopover
-      button={
-        <EuiButtonEmpty
-          onClick={onButtonClick}
-          data-test-subj="queryPanelFooterLanguageToggle"
-          size="xs"
-        >
-          <EuiIcon type="controlsHorizontal" size="s" />
-        </EuiButtonEmpty>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      anchorPosition="downCenter"
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel size="s" items={items} />
-    </EuiPopover>
+    // This div is needed to allow for the gradient styling
+    <div className="exploreLanguageToggle">
+      <EuiPopover
+        button={
+          <EuiBetaBadge
+            onClick={onButtonClick}
+            data-test-subj="queryPanelFooterLanguageToggle"
+            className={classNames('exploreLanguageToggle__button', {
+              ['exploreLanguageToggle__button--aiMode']: isPromptMode,
+            })}
+            label={badgeLabel}
+          />
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        anchorPosition="downCenter"
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel size="s" items={items} />
+      </EuiPopover>
+    </div>
   );
 };

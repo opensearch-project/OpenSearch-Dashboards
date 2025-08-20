@@ -1,2 +1,0 @@
-fix:
-- Fix Extra Spaces being inserted with Aggregate Function In Autocomplete ([#10093](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10093))

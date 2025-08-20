@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SpanDetailPanel } from './span_detail_panel';
+import { TraceDetailTab } from '../../constants/trace_detail_tabs';
 import { ChromeStart } from 'opensearch-dashboards/public';
 
 // Mock the GanttChart component
@@ -80,12 +81,8 @@ describe('SpanDetailPanel', () => {
   const defaultProps = {
     chrome: mockChrome,
     spanFilters: [],
-    setSpanFiltersWithStorage: jest.fn(),
     payloadData: JSON.stringify(mockSpanData),
     isGanttChartLoading: false,
-    dataSourceMDSId: 'test-datasource',
-    dataSourceMDSLabel: 'Test DataSource',
-    traceId: 'trace-1',
     colorMap: {
       'service-a': '#FF0000',
       'service-b': '#00FF00',
@@ -127,7 +124,7 @@ describe('SpanDetailPanel', () => {
   it('renders span list view when activeView is span_list', () => {
     const propsWithSpanList = {
       ...defaultProps,
-      activeView: 'span_list',
+      activeView: TraceDetailTab.SPAN_LIST,
     };
 
     render(<SpanDetailPanel {...propsWithSpanList} />);
@@ -141,7 +138,7 @@ describe('SpanDetailPanel', () => {
   it('renders tree view when activeView is tree_view', () => {
     const propsWithTreeView = {
       ...defaultProps,
-      activeView: 'tree_view',
+      activeView: TraceDetailTab.TREE_VIEW,
     };
 
     render(<SpanDetailPanel {...propsWithTreeView} />);
@@ -168,7 +165,7 @@ describe('SpanDetailPanel', () => {
   it('calls onSpanSelect when span is clicked in span list view', () => {
     const propsWithSpanList = {
       ...defaultProps,
-      activeView: 'span_list',
+      activeView: TraceDetailTab.SPAN_LIST,
     };
 
     render(<SpanDetailPanel {...propsWithSpanList} />);
@@ -182,7 +179,7 @@ describe('SpanDetailPanel', () => {
   it('calls onSpanSelect when span is clicked in tree view', () => {
     const propsWithTreeView = {
       ...defaultProps,
-      activeView: 'tree_view',
+      activeView: TraceDetailTab.TREE_VIEW,
     };
 
     render(<SpanDetailPanel {...propsWithTreeView} />);
@@ -273,32 +270,6 @@ describe('SpanDetailPanel', () => {
     expect(
       document.querySelector('[data-testid="span-detail-table-hierarchy"]')
     ).not.toBeInTheDocument();
-  });
-
-  it('tests addSpanFilter functionality', () => {
-    const mockSetSpanFiltersWithStorage = jest.fn();
-    const propsWithFilters = {
-      ...defaultProps,
-      spanFilters: [{ field: 'serviceName', value: 'service-a' }],
-      setSpanFiltersWithStorage: mockSetSpanFiltersWithStorage,
-    };
-
-    render(<SpanDetailPanel {...propsWithFilters} />);
-
-    expect(mockSetSpanFiltersWithStorage).toBeDefined();
-  });
-
-  it('tests removeSpanFilter functionality', () => {
-    const mockSetSpanFiltersWithStorage = jest.fn();
-    const propsWithFilters = {
-      ...defaultProps,
-      spanFilters: [{ field: 'serviceName', value: 'service-a' }],
-      setSpanFiltersWithStorage: mockSetSpanFiltersWithStorage,
-    };
-
-    render(<SpanDetailPanel {...propsWithFilters} />);
-
-    expect(mockSetSpanFiltersWithStorage).toBeDefined();
   });
 
   it('handles window resize events', () => {
@@ -425,7 +396,7 @@ describe('SpanDetailPanel', () => {
   it('passes correct props to SpanDetailTable', () => {
     const propsWithSpanList = {
       ...defaultProps,
-      activeView: 'span_list',
+      activeView: TraceDetailTab.SPAN_LIST,
       spanFilters: [{ field: 'serviceName', value: 'test-service' }],
     };
 
@@ -439,7 +410,7 @@ describe('SpanDetailPanel', () => {
   it('passes correct props to SpanDetailTableHierarchy', () => {
     const propsWithTreeView = {
       ...defaultProps,
-      activeView: 'tree_view',
+      activeView: TraceDetailTab.TREE_VIEW,
       spanFilters: [{ field: 'serviceName', value: 'test-service' }],
     };
 

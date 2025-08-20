@@ -15,8 +15,8 @@ jest.mock('../../../tabs/tabs', () => ({
   ExploreTabs: () => <div data-test-subj="explore-tabs">Explore Tabs</div>,
 }));
 
-jest.mock('../../../visualizations/style_panel/style_panel', () => ({
-  StylePanel: () => <div data-test-subj="style-panel">Style Panel</div>,
+jest.mock('../../../visualizations/style_panel_render', () => ({
+  StylePanelRender: () => <div data-test-subj="style-panel">Style Panel</div>,
 }));
 
 describe('<ResizableVisControlAndTabs />', () => {
@@ -43,7 +43,7 @@ describe('<ResizableVisControlAndTabs />', () => {
     expect(screen.getByTestId('style-panel')).toBeInTheDocument();
   });
 
-  test('it should NOT display StylePanel if no data even the current active tab is visualization', () => {
+  test('it should NOT display StylePanel if the current active tab is visualization but no data', () => {
     jest.spyOn(ReactRedux, 'useSelector').mockReturnValue('explore_visualization_tab');
     jest.spyOn(ReactUse, 'useObservable').mockReturnValue(undefined);
     render(<ResizableVisControlAndTabs />);

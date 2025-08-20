@@ -54,7 +54,7 @@ const oneMetricOneDateRule: VisualizationRule = {
     { ...CHART_METADATA.area, priority: 80 },
     { ...CHART_METADATA.bar, priority: 60 },
   ],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -110,7 +110,7 @@ const twoMetricOneDateRule: VisualizationRule = {
     numerical.length === 2 && categorical.length === 0 && date.length === 1,
   chartTypes: [{ ...CHART_METADATA.line, priority: 100 }],
   matchIndex: [2, 0, 1],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -154,7 +154,7 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
     { ...CHART_METADATA.area, priority: 80 },
     { ...CHART_METADATA.bar, priority: 60 },
   ],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -218,7 +218,7 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
     { ...CHART_METADATA.area, priority: 80 },
     { ...CHART_METADATA.bar, priority: 60 },
   ],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -286,7 +286,7 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
     { ...CHART_METADATA.bar, priority: 80 },
     { ...CHART_METADATA.area, priority: 60 },
   ],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -349,7 +349,7 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
     { ...CHART_METADATA.heatmap, priority: 80 },
     { ...CHART_METADATA.area, priority: 60 },
   ],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -408,7 +408,7 @@ const oneMetricOneCateRule: VisualizationRule = {
     { ...CHART_METADATA.line, priority: 60 },
     { ...CHART_METADATA.area, priority: 40 },
   ],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -478,7 +478,7 @@ const oneMetricRule: VisualizationRule = {
     numerical[0].validValuesCount === 1,
   chartTypes: [{ ...CHART_METADATA.metric, priority: 100 }],
   matchIndex: [1, 0, 0],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -506,7 +506,7 @@ const twoMetricRule: VisualizationRule = {
     numerical.length === 2 && date.length === 0 && categorical.length === 0,
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
   matchIndex: [2, 0, 0],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -534,7 +534,7 @@ const twoMetricOneCateRule: VisualizationRule = {
     numerical.length === 2 && date.length === 0 && categorical.length === 1,
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
   matchIndex: [2, 1, 0],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -562,7 +562,7 @@ const threeMetricOneCateRule: VisualizationRule = {
     numerical.length === 3 && date.length === 0 && categorical.length === 1,
   chartTypes: [{ ...CHART_METADATA.scatter, priority: 100 }],
   matchIndex: [3, 1, 0],
-  toExpression: (
+  toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
@@ -581,8 +581,6 @@ const threeMetricOneCateRule: VisualizationRule = {
     );
   },
 };
-
-// TODO: add more rules here as needed
 
 // Export all rules
 export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [

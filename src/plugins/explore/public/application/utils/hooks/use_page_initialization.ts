@@ -46,9 +46,11 @@ export const useInitPage = () => {
 
         // Sync query from saved object to data plugin (explore doesn't use filters)
         const searchSourceFields = savedExplore.kibanaSavedObjectMeta;
+        const queryFromUrl = services.osdUrlStateStorage?.get('_q') ?? {};
         if (searchSourceFields?.searchSourceJSON) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
-          const query = searchSource.query;
+          const queryFromSavedSearch = searchSource.query;
+          const query = { ...queryFromSavedSearch, ...queryFromUrl };
           if (query) {
             dispatch(setQueryState(query));
             setEditorText(query.query);
@@ -64,9 +66,7 @@ export const useInitPage = () => {
         const uiState = savedExplore.uiState;
         if (visualization) {
           const { chartType, params, axesMapping } = JSON.parse(visualization);
-          visualizationBuilder.setCurrentChartType(chartType);
-          visualizationBuilder.setAxesMapping(axesMapping);
-          visualizationBuilder.setStyles({ type: chartType, styles: params });
+          visualizationBuilder.setVisConfig({ type: chartType, styles: params, axesMapping });
         }
         if (uiState) {
           const { activeTab } = JSON.parse(uiState);

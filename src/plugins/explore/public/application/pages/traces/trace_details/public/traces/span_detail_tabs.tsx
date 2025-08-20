@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -22,15 +22,21 @@ import { SpanOverviewTab } from './span_tabs/span_overview_tab';
 import { SpanIssuesTab } from './span_tabs/span_issues_tab';
 import { SpanMetadataTab } from './span_tabs/span_metadata_tab';
 import { SpanRawSpanTab } from './span_tabs/span_raw_span_tab';
+import { SpanLogsTab } from '../logs/span_logs_tab';
+import { filterLogsBySpanId } from '../logs/url_builder';
+import { SpanDetailTab } from '../../constants/span_detail_tabs';
 
 export interface SpanDetailTabsProps {
   selectedSpan?: any;
   addSpanFilter: (field: string, value: any) => void;
   serviceName?: string;
   setCurrentSpan?: (spanId: string) => void;
+  logDatasets?: any[];
+  logsData?: any[];
+  isLogsLoading?: boolean;
 }
 
-type TabId = 'overview' | 'errors' | 'metadata' | 'raw_span';
+type TabId = SpanDetailTab;
 
 interface TabItem {
   id: TabId;
@@ -43,32 +49,41 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   addSpanFilter,
   serviceName,
   setCurrentSpan,
+  logDatasets = [],
+  logsData = [],
+  isLogsLoading = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [activeTab, setActiveTab] = useState<TabId>(SpanDetailTab.OVERVIEW);
 
   // Calculate counts for badges
   const issueCount = useMemo(() => {
     return selectedSpan ? getSpanIssueCount(selectedSpan) : 0;
   }, [selectedSpan]);
 
+  // Filter logs for the selected span
+  const spanLogs = useMemo(() => {
+    if (!selectedSpan?.spanId || !logsData.length) return [];
+    return filterLogsBySpanId(logsData, selectedSpan.spanId);
+  }, [logsData, selectedSpan?.spanId]);
+
   const tabs = useMemo((): TabItem[] => {
     const tabList: TabItem[] = [
       {
-        id: 'overview' as TabId,
+        id: SpanDetailTab.OVERVIEW,
         name: i18n.translate('explore.spanDetailTabs.tab.overview', {
           defaultMessage: 'Overview',
         }),
         content: (
           <SpanOverviewTab
             selectedSpan={selectedSpan}
-            onSwitchToErrorsTab={() => setActiveTab('errors')}
+            onSwitchToErrorsTab={() => setActiveTab(SpanDetailTab.ERRORS)}
           />
         ),
       },
     ];
 
     tabList.push({
-      id: 'errors' as TabId,
+      id: SpanDetailTab.ERRORS,
       name: (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -86,16 +101,34 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
       content: <SpanIssuesTab selectedSpan={selectedSpan} />,
     });
 
+    if (logDatasets.length > 0 && spanLogs.length > 0) {
+      tabList.push({
+        id: SpanDetailTab.LOGS,
+        name: i18n.translate('explore.spanDetailTabs.tab.logs', {
+          defaultMessage: 'Logs',
+        }),
+        content: (
+          <SpanLogsTab
+            traceId={selectedSpan?.traceId || ''}
+            spanId={selectedSpan?.spanId}
+            logDatasets={logDatasets}
+            logsData={logsData}
+            isLoading={isLogsLoading}
+          />
+        ),
+      });
+    }
+
     tabList.push(
       {
-        id: 'metadata' as TabId,
+        id: SpanDetailTab.METADATA,
         name: i18n.translate('explore.spanDetailTabs.tab.metadata', {
           defaultMessage: 'Metadata',
         }),
         content: <SpanMetadataTab selectedSpan={selectedSpan} addSpanFilter={addSpanFilter} />,
       },
       {
-        id: 'raw_span' as TabId,
+        id: SpanDetailTab.RAW_SPAN,
         name: i18n.translate('explore.spanDetailTabs.tab.rawSpan', {
           defaultMessage: 'Raw span',
         }),
@@ -104,7 +137,15 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     );
 
     return tabList;
-  }, [selectedSpan, addSpanFilter, issueCount]);
+  }, [selectedSpan, addSpanFilter, issueCount, logDatasets, logsData, spanLogs, isLogsLoading]);
+
+  // Auto-fallback to 'overview' tab when the current active tab is no longer available
+  useEffect(() => {
+    const availableTabIds = tabs.map((tab) => tab.id);
+    if (!availableTabIds.includes(activeTab)) {
+      setActiveTab(SpanDetailTab.OVERVIEW);
+    }
+  }, [tabs, activeTab]);
 
   const activeTabContent = useMemo(() => {
     const tab = tabs.find((t) => t.id === activeTab);

@@ -4,14 +4,26 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { Dataset } from '../../../../../../../data/common';
 import {
   TracePPLService,
   PPLQueryParamsWithFilters,
   PPLSpanQueryParams,
 } from './ppl_request_trace';
+import { buildPPLQueryRequest, executePPLQuery } from './ppl_request_helpers';
+
+jest.mock('./ppl_request_helpers', () => ({
+  ...jest.requireActual('./ppl_request_helpers'),
+  buildPPLQueryRequest: jest.fn(),
+  executePPLQuery: jest.fn(),
+}));
 
 describe('ppl_request_trace', () => {
-  const mockExecuteQuery = jest.fn();
+  const mockBuildPPLQueryRequest = buildPPLQueryRequest as jest.MockedFunction<
+    typeof buildPPLQueryRequest
+  >;
+  const mockExecutePPLQuery = executePPLQuery as jest.MockedFunction<typeof executePPLQuery>;
+
   const mockDataService = ({
     query: {
       queryString: {
@@ -25,18 +37,25 @@ describe('ppl_request_trace', () => {
 
   let tracePPLService: TracePPLService;
 
+  const createMockDataset = (): Dataset => ({
+    id: 'test-dataset-id',
+    title: 'test-index',
+    type: 'INDEX_PATTERN',
+    timeFieldName: 'endTime',
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     tracePPLService = new TracePPLService(mockDataService);
-    // @ts-ignore - accessing private method for testing
-    tracePPLService.executeQuery = mockExecuteQuery;
+
+    mockBuildPPLQueryRequest.mockReturnValue({ query: { query: 'mock-query' } } as any);
+    mockExecutePPLQuery.mockResolvedValue({ hits: [] });
   });
 
   describe('fetchTraceSpans', () => {
     const defaultParams: PPLQueryParamsWithFilters = {
       traceId: 'test-trace-id',
-      dataSourceId: 'test-source',
-      indexPattern: 'test-index',
+      dataset: createMockDataset(),
     };
 
     it('throws error when missing required parameters', async () => {
@@ -44,21 +63,24 @@ describe('ppl_request_trace', () => {
         tracePPLService.fetchTraceSpans({ ...defaultParams, traceId: '' })
       ).rejects.toThrow('Missing required parameters');
       await expect(
-        tracePPLService.fetchTraceSpans({ ...defaultParams, dataSourceId: '' })
-      ).rejects.toThrow('Missing required parameters');
-      await expect(
-        tracePPLService.fetchTraceSpans({ ...defaultParams, indexPattern: '' })
+        tracePPLService.fetchTraceSpans({ ...defaultParams, dataset: null as any })
       ).rejects.toThrow('Missing required parameters');
     });
 
     it('constructs query without filters', async () => {
       await tracePPLService.fetchTraceSpans(defaultParams);
 
-      expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | head 100'
       );
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
+        query: { query: 'mock-query' },
+      });
     });
 
     it('constructs query with single filter', async () => {
@@ -67,11 +89,17 @@ describe('ppl_request_trace', () => {
         filters: [{ field: 'serviceName', value: 'test-service' }],
       });
 
-      expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | head 100'
       );
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
+        query: { query: 'mock-query' },
+      });
     });
 
     it('constructs query with multiple filters', async () => {
@@ -83,11 +111,17 @@ describe('ppl_request_trace', () => {
         ],
       });
 
-      expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | where status = "error" | head 100'
       );
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
+        query: { query: 'mock-query' },
+      });
     });
 
     it('escapes filter values correctly', async () => {
@@ -100,11 +134,17 @@ describe('ppl_request_trace', () => {
         ],
       });
 
-      expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | where serviceName = "test\\"service" | where count = 123 | where active = true | head 100'
       );
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
+        query: { query: 'mock-query' },
+      });
     });
 
     it('uses custom limit', async () => {
@@ -113,16 +153,22 @@ describe('ppl_request_trace', () => {
         limit: 50,
       });
 
-      expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+        },
         'source = test-index | where traceId = "test-trace-id" | head 50'
       );
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
+        query: { query: 'mock-query' },
+      });
     });
 
     it('handles query execution error', async () => {
       const error = new Error('Query failed');
-      mockExecuteQuery.mockRejectedValueOnce(error);
+      mockExecutePPLQuery.mockRejectedValueOnce(error);
 
       await expect(tracePPLService.fetchTraceSpans(defaultParams)).rejects.toThrow(error);
     });
@@ -132,8 +178,7 @@ describe('ppl_request_trace', () => {
     const defaultParams: PPLSpanQueryParams = {
       traceId: 'test-trace-id',
       spanId: 'test-span-id',
-      dataSourceId: 'test-source',
-      indexPattern: 'test-index',
+      dataset: createMockDataset(),
     };
 
     it('throws error when missing required parameters', async () => {
@@ -144,21 +189,25 @@ describe('ppl_request_trace', () => {
         tracePPLService.fetchSpanDetails({ ...defaultParams, spanId: '' })
       ).rejects.toThrow('Missing required parameters');
       await expect(
-        tracePPLService.fetchSpanDetails({ ...defaultParams, dataSourceId: '' })
-      ).rejects.toThrow('Missing required parameters');
-      await expect(
-        tracePPLService.fetchSpanDetails({ ...defaultParams, indexPattern: '' })
+        tracePPLService.fetchSpanDetails({ ...defaultParams, dataset: null as any })
       ).rejects.toThrow('Missing required parameters');
     });
 
     it('constructs span query correctly', async () => {
       await tracePPLService.fetchSpanDetails(defaultParams);
 
-      expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         'source = test-index | where traceId = "test-trace-id" | where spanId = "test-span-id" | head 100'
       );
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
+        query: { query: 'mock-query' },
+      });
     });
 
     it('uses custom limit', async () => {
@@ -167,16 +216,23 @@ describe('ppl_request_trace', () => {
         limit: 50,
       });
 
-      expect(mockExecuteQuery).toHaveBeenCalledWith(
-        'test-source',
-        'test-index',
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'test-dataset-id',
+          title: 'test-index',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
         'source = test-index | where traceId = "test-trace-id" | where spanId = "test-span-id" | head 50'
       );
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
+        query: { query: 'mock-query' },
+      });
     });
 
     it('handles query execution error', async () => {
       const error = new Error('Query failed');
-      mockExecuteQuery.mockRejectedValueOnce(error);
+      mockExecutePPLQuery.mockRejectedValueOnce(error);
 
       await expect(tracePPLService.fetchSpanDetails(defaultParams)).rejects.toThrow(error);
     });

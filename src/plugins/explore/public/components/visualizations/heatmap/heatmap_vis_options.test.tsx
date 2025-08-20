@@ -146,11 +146,9 @@ jest.mock('./heatmap_exclusive_vis_options', () => ({
 }));
 
 jest.mock('../style_panel/legend/legend', () => {
-  // Import Positions inside the mock to avoid reference error
   const { Positions: PositionsEnum } = jest.requireActual('../types');
-
   return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => (
+    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
       <div data-test-subj="mockLegendOptionsPanel">
         <button
           data-test-subj="mockLegendShow"
@@ -164,11 +162,28 @@ jest.mock('../style_panel/legend/legend', () => {
         >
           Change Position
         </button>
-        <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
       </div>
     )),
   };
 });
+
+jest.mock('../style_panel/title/title', () => ({
+  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
+    <div data-test-subj="mockTitleOptionsPanel">
+      <button
+        data-test-subj="titleModeSwitch"
+        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
+      >
+        Toggle Title
+      </button>
+      <input
+        data-test-subj="titleInput"
+        placeholder="Default title"
+        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
+      />
+    </div>
+  )),
+}));
 
 jest.mock('../style_panel/tooltip/tooltip', () => ({
   TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
@@ -235,6 +250,7 @@ describe('HeatmapVisStyleControls', () => {
     expect(screen.getByTestId('heatmapLabelOptions')).toBeInTheDocument();
     expect(screen.getByTestId('heatmapExclusiveOptions')).toBeInTheDocument();
     expect(screen.queryByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
   it('calls onStyleChange with correct parameters for legend options', () => {

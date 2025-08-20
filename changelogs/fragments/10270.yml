@@ -1,2 +1,0 @@
-fix:
-- Apply global banner offset to new UI layout and flyouts ([#10270](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10270))

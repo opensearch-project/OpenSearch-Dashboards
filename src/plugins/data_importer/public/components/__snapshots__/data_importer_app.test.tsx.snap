@@ -59,7 +59,6 @@ exports[`App should render with MDS 1`] = `
                           "remove": [MockFunction],
                         },
                       },
-                      "onManageDataSource": [Function],
                       "onSelectedDataSources": [Function],
                       "savedObjects": Object {
                         "bulkCreate": [MockFunction],

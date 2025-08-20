@@ -8,27 +8,17 @@ import {
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   DATASOURCE_NAME,
-} from '../../../../../../utils/constants';
-import {
-  generateAllTestConfigurations,
-  getRandomizedWorkspaceName,
-  setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/explore/shared';
-import {
-  setSearchConfigurations,
-  verifyDiscoverPageState,
-  verifySavedSearchInAssetsPage,
-  updateSavedSearchAndSaveAndVerify,
-  generateSavedTestConfiguration,
-  updateSavedSearchAndNotSaveAndVerify,
-} from '../../../../../../utils/apps/explore/saved';
+  END_TIME,
+  START_TIME,
+} from '../../../../../../utils/apps/explore/constants';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
 
 const runSavedExploreTests = () => {
-  // TODO currently saved search isn't working in explore, enable this when it is fixed
-  describe.skip('saved explore', () => {
+  describe('saved explore', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
         INDEX_WITH_TIME_1,
@@ -41,6 +31,13 @@ const runSavedExploreTests = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspaceName,
+        page: 'explore/logs',
+        isEnhancement: true,
+      });
+      // ensure dataset is loaded
+      cy.wait(10000);
     });
 
     after(() => {
@@ -50,113 +47,115 @@ const runSavedExploreTests = () => {
       ]);
     });
 
-    generateAllTestConfigurations(generateSavedTestConfiguration).forEach((config) => {
-      it(`create and load for ${config.testName}`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'explore/logs',
-          isEnhancement: true,
-        });
+    beforeEach(() => {
+      cy.getElementByTestId('discoverNewButton').click();
+      cy.osd.waitForLoader(true);
+    });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.osd.grabIdsFromDiscoverPageUrl();
+    it('should create and load a saved search', () => {
+      // Set dataset and time range
+      cy.explore.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, 'INDEX_PATTERN');
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
-        setDatePickerDatesAndSearchIfRelevant(config.language);
+      // Set query input
+      cy.explore.clearQueryEditor();
+      const query = `source=${INDEX_PATTERN_WITH_TIME} | stats count() by category`;
+      cy.explore.setQueryEditor(query, { submit: false });
 
-        // TODO: Figure out why we have to wait here sometimes. The query gets reset while typing without this wait
-        cy.wait(2000);
+      // Run the query
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
+      cy.osd.waitForLoader(true);
+      cy.wait(1000);
 
-        setSearchConfigurations(config);
-        verifyDiscoverPageState(config);
-        cy.saveSearch(config.saveName);
+      // Navigate to logs tab
+      cy.getElementByTestId('exploreTabs').should('be.visible');
+      cy.get('#logs').click();
+      cy.getElementByTestId('docTable').should('be.visible');
 
-        // There is a small chance where if we go to assets page,
-        // the saved search does not appear. So adding this wait
-        cy.wait(2000);
+      // Create a saved search
+      cy.getElementByTestId('discoverSaveButton').click();
+      const savedSearchName = `SAVED_SEARCH_${Date.now()}`;
+      cy.getElementByTestId('savedObjectTitle').type(savedSearchName);
+      cy.getElementByTestId('confirmSaveSavedObjectButton').click();
+      cy.getElementByTestId('savedExploreSuccess').should('be.visible');
 
-        verifySavedSearchInAssetsPage(config, workspaceName);
-
-        // load saved search
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'explore',
-          isEnhancement: true,
-        });
-
-        cy.getElementByTestId('discoverNewButton').click();
-        cy.loadSaveSearch(config.saveName);
-        setDatePickerDatesAndSearchIfRelevant(config.language);
-        verifyDiscoverPageState(config);
-
-        cy.get('@WORKSPACE_ID').then((workspaceId) => {
-          cy.osd.deleteSavedObjectsByType(workspaceId, 'explore');
-        });
+      // Open left nav
+      cy.get('body').then(($body) => {
+        const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
+        if (shrinkButton.length === 0) {
+          cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
+        }
       });
 
-      it(`should successfully update url when update a saved explore for ${config.testName}`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'explore',
-          isEnhancement: true,
-        });
+      // Navigate to assets page
+      cy.getElementByTestId('collapsibleNavAppLink-objects')
+        .should('exist')
+        .scrollIntoView()
+        .click();
+      cy.osd.waitForLoader(true);
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.osd.grabIdsFromDiscoverPageUrl();
+      // Check the saved search can be found
+      cy.getElementByTestId('savedObjectsTable').should('contain.text', savedSearchName);
 
-        // using a POST request to create a saved explore to load
-        postRequestSaveExplore(config);
+      // Open the saved search should have the query loaded
+      cy.contains(savedSearchName).click();
+      cy.osd.waitForLoader(true);
+      cy.wait(10000);
+      cy.contains('h1', savedSearchName).should('be.visible');
+      verifyMonacoEditorContent(query);
 
-        // TODO: Figure out why we have to wait here sometimes. The query gets reset while typing without this wait
-        cy.wait(2000);
+      // Update the saved search with a new query
+      cy.explore.clearQueryEditor();
+      const newQuery = `source=${INDEX_PATTERN_WITH_TIME} | stats count()`;
+      cy.explore.setQueryEditor(newQuery, { submit: false });
 
-        updateSavedSearchAndNotSaveAndVerify(config, DATASOURCE_NAME);
+      // Run the query
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
+      cy.osd.waitForLoader(true);
+      cy.wait(1000);
 
-        cy.get('@WORKSPACE_ID').then((workspaceId) => {
-          cy.osd.deleteSavedObjectsByType(workspaceId, 'explore');
-        });
+      // Navigate to logs tab
+      cy.getElementByTestId('exploreTabs').should('be.visible');
+      cy.get('#logs').click();
+      cy.getElementByTestId('docTable').should('be.visible');
+
+      // Save the updated saved search
+      cy.getElementByTestId('discoverSaveButton').click();
+      const updatedSavedSearchName = `UPDATED_SAVED_SEARCH_${Date.now()}`;
+      cy.getElementByTestId('savedObjectTitle').clear().type(updatedSavedSearchName);
+      cy.getElementByTestId('confirmSaveSavedObjectButton').click();
+      cy.getElementByTestId('savedExploreSuccess').should('be.visible');
+      cy.wait(3000);
+
+      // Save as a new saved search
+      cy.getElementByTestId('discoverSaveButton').click();
+      const newSavedSearchName = `NEW_SAVED_SEARCH_${Date.now()}`;
+      cy.getElementByTestId('saveAsNewCheckbox').click();
+      cy.getElementByTestId('savedObjectTitle').clear().type(newSavedSearchName);
+      cy.getElementByTestId('confirmSaveSavedObjectButton').click();
+      cy.getElementByTestId('savedExploreSuccess').should('be.visible');
+
+      // Open left nav
+      cy.get('body').then(($body) => {
+        const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
+        if (shrinkButton.length === 0) {
+          cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
+        }
       });
 
-      it(`should successfully update a saved explore for ${config.testName}`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'explore',
-          isEnhancement: true,
-        });
+      // Navigate to assets page
+      cy.getElementByTestId('collapsibleNavAppLink-objects')
+        .should('exist')
+        .scrollIntoView()
+        .click();
+      cy.osd.waitForLoader(true);
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.osd.grabIdsFromDiscoverPageUrl();
-
-        // using a POST request to create a saved explore to load
-        postRequestSaveExplore(config);
-
-        // TODO: Figure out why we have to wait here sometimes. The query gets reset while typing without this wait
-        cy.wait(2000);
-
-        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, false);
-
-        cy.get('@WORKSPACE_ID').then((workspaceId) => {
-          cy.osd.deleteSavedObjectsByType(workspaceId, 'explore');
-        });
-      });
-
-      it(`should successfully save a saved explore as a new saved explore for ${config.testName}`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'explore',
-          isEnhancement: true,
-        });
-
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        cy.osd.grabIdsFromDiscoverPageUrl();
-
-        // using a POST request to create a saved explore to load
-        postRequestSaveExplore(config);
-        updateSavedSearchAndSaveAndVerify(config, workspaceName, DATASOURCE_NAME, true);
-
-        cy.get('@WORKSPACE_ID').then((workspaceId) => {
-          cy.osd.deleteSavedObjectsByType(workspaceId, 'explore');
-        });
-      });
+      // Check the old saved search cannot be found because name update
+      cy.getElementByTestId('savedObjectsTable').should('not.contain.text', savedSearchName);
+      // Check the updated saved search can be found
+      cy.getElementByTestId('savedObjectsTable').should('contain.text', updatedSavedSearchName);
+      // Check the new saved search can be found
+      cy.getElementByTestId('savedObjectsTable').should('contain.text', newSavedSearchName);
     });
   });
 };

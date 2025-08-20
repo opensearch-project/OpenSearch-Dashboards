@@ -28,11 +28,7 @@ describe('LegendOptionsPanel', () => {
 
   it('renders correctly', () => {
     render(
-      <LegendOptionsPanel
-        legendOptions={mockLegend}
-        onLegendOptionsChange={mockOnLegendChange}
-        shouldShowLegend={true}
-      />
+      <LegendOptionsPanel legendOptions={mockLegend} onLegendOptionsChange={mockOnLegendChange} />
     );
 
     const legendModeSwitch = screen.getByTestId('legendModeSwitch');
@@ -44,11 +40,7 @@ describe('LegendOptionsPanel', () => {
 
   it('update legend mode correctly', () => {
     render(
-      <LegendOptionsPanel
-        legendOptions={mockLegend}
-        onLegendOptionsChange={mockOnLegendChange}
-        shouldShowLegend={true}
-      />
+      <LegendOptionsPanel legendOptions={mockLegend} onLegendOptionsChange={mockOnLegendChange} />
     );
 
     const legendModeSwitch = screen.getByTestId('legendModeSwitch');
@@ -61,11 +53,7 @@ describe('LegendOptionsPanel', () => {
 
   it('update legend position correctly', () => {
     render(
-      <LegendOptionsPanel
-        legendOptions={mockLegend}
-        onLegendOptionsChange={mockOnLegendChange}
-        shouldShowLegend={true}
-      />
+      <LegendOptionsPanel legendOptions={mockLegend} onLegendOptionsChange={mockOnLegendChange} />
     );
 
     const legendPositionSelect = screen.getByTestId('legendPositionSelect');
@@ -74,5 +62,22 @@ describe('LegendOptionsPanel', () => {
     expect(mockOnLegendChange).toHaveBeenLastCalledWith({
       position: Positions.RIGHT,
     });
+  });
+
+  it('returns null when legendOptions is undefined', () => {
+    const { container } = render(
+      <LegendOptionsPanel
+        legendOptions={undefined as any}
+        onLegendOptionsChange={mockOnLegendChange}
+      />
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('returns null when onLegendOptionsChange is undefined', () => {
+    const { container } = render(
+      <LegendOptionsPanel legendOptions={mockLegend} onLegendOptionsChange={undefined as any} />
+    );
+    expect(container.firstChild).toBeNull();
   });
 });

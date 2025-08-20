@@ -198,6 +198,7 @@
     - [Opensearch dashboards.release notes 3.0.0 beta1](../release-notes/opensearch-dashboards.release-notes-3.0.0-beta1.md)
     - [Opensearch dashboards.release notes 3.0.0](../release-notes/opensearch-dashboards.release-notes-3.0.0.md)
     - [Opensearch dashboards.release notes 3.1.0](../release-notes/opensearch-dashboards.release-notes-3.1.0.md)
+    - [Opensearch dashboards.release notes 3.2.0](../release-notes/opensearch-dashboards.release-notes-3.2.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
