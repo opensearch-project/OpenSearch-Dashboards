@@ -428,9 +428,21 @@ export class KeyStringParser {
   public getEventKeyString(event: KeyboardEvent): string {
     const modifiers: string[] = [];
 
-    if (event.ctrlKey || event.metaKey) {
-      modifiers.push('cmd');
+    // Platform-specific modifier detection
+    const isMac = this.detectDisplayPlatform() === 'mac';
+
+    if (isMac) {
+      // On Mac, only Command key maps to 'cmd'
+      if (event.metaKey) {
+        modifiers.push('cmd');
+      }
+    } else {
+      // On Windows/Linux, only Ctrl key maps to 'cmd'
+      if (event.ctrlKey) {
+        modifiers.push('cmd');
+      }
     }
+
     if (event.altKey) modifiers.push('alt');
     if (event.shiftKey) modifiers.push('shift');
 

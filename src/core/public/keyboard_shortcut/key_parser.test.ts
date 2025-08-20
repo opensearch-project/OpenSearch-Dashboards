@@ -228,17 +228,90 @@ describe('KeyStringParser', () => {
   });
 
   describe('Event Key String Generation with event.code', () => {
-    it('should generate key string from keyboard event using event.code', () => {
-      const event = new KeyboardEvent('keydown', {
-        key: 's',
-        code: 'KeyS',
-        ctrlKey: true,
-        shiftKey: false,
-        altKey: false,
-        metaKey: false,
+    describe('Platform-specific modifier behavior', () => {
+      beforeEach(() => {
+        // Reset any previous userAgent mocks
+        Object.defineProperty(navigator, 'userAgent', {
+          value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          configurable: true,
+        });
       });
 
-      expect(parser.getEventKeyString(event)).toBe('cmd+s');
+      it('should generate key string from keyboard event on Windows/Linux (ctrlKey)', () => {
+        // Mock Windows platform
+        Object.defineProperty(navigator, 'userAgent', {
+          value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          configurable: true,
+        });
+
+        const event = new KeyboardEvent('keydown', {
+          key: 's',
+          code: 'KeyS',
+          ctrlKey: true,
+          shiftKey: false,
+          altKey: false,
+          metaKey: false,
+        });
+
+        expect(parser.getEventKeyString(event)).toBe('cmd+s');
+      });
+
+      it('should generate key string from keyboard event on Mac (metaKey)', () => {
+        // Mock Mac platform
+        Object.defineProperty(navigator, 'userAgent', {
+          value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+          configurable: true,
+        });
+
+        const event = new KeyboardEvent('keydown', {
+          key: 's',
+          code: 'KeyS',
+          ctrlKey: false,
+          shiftKey: false,
+          altKey: false,
+          metaKey: true,
+        });
+
+        expect(parser.getEventKeyString(event)).toBe('cmd+s');
+      });
+
+      it('should ignore ctrlKey on Mac platform', () => {
+        // Mock Mac platform
+        Object.defineProperty(navigator, 'userAgent', {
+          value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+          configurable: true,
+        });
+
+        const event = new KeyboardEvent('keydown', {
+          key: 's',
+          code: 'KeyS',
+          ctrlKey: true,
+          shiftKey: false,
+          altKey: false,
+          metaKey: false,
+        });
+
+        expect(parser.getEventKeyString(event)).toBe('s'); // No cmd modifier
+      });
+
+      it('should ignore metaKey on Windows/Linux platform', () => {
+        // Mock Windows platform
+        Object.defineProperty(navigator, 'userAgent', {
+          value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          configurable: true,
+        });
+
+        const event = new KeyboardEvent('keydown', {
+          key: 's',
+          code: 'KeyS',
+          ctrlKey: false,
+          shiftKey: false,
+          altKey: false,
+          metaKey: true,
+        });
+
+        expect(parser.getEventKeyString(event)).toBe('s'); // No cmd modifier
+      });
     });
 
     it('should handle plus key problem with event.code', () => {
@@ -293,7 +366,13 @@ describe('KeyStringParser', () => {
       expect(parser.getEventKeyString(event)).toBe('cmd+,');
     });
 
-    it('should handle meta key events', () => {
+    it('should handle meta key events on Mac platform', () => {
+      // Mock Mac platform
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+        configurable: true,
+      });
+
       const event = new KeyboardEvent('keydown', {
         key: 'c',
         code: 'KeyC',
@@ -306,8 +385,14 @@ describe('KeyStringParser', () => {
       expect(parser.getEventKeyString(event)).toBe('cmd+c');
     });
 
-    it('should handle both ctrl and meta keys without duplicates', () => {
-      const event = new KeyboardEvent('keydown', {
+    it('should handle both ctrl and meta keys based on platform', () => {
+      // Mock Mac platform - should only use metaKey
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+        configurable: true,
+      });
+
+      const macEvent = new KeyboardEvent('keydown', {
         key: 's',
         code: 'KeyS',
         ctrlKey: true,
@@ -316,7 +401,24 @@ describe('KeyStringParser', () => {
         metaKey: true,
       });
 
-      expect(parser.getEventKeyString(event)).toBe('cmd+s');
+      expect(parser.getEventKeyString(macEvent)).toBe('cmd+s'); // Uses metaKey on Mac
+
+      // Mock Windows platform - should only use ctrlKey
+      Object.defineProperty(navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        configurable: true,
+      });
+
+      const winEvent = new KeyboardEvent('keydown', {
+        key: 's',
+        code: 'KeyS',
+        ctrlKey: true,
+        shiftKey: false,
+        altKey: false,
+        metaKey: true,
+      });
+
+      expect(parser.getEventKeyString(winEvent)).toBe('cmd+s'); // Uses ctrlKey on Windows
     });
 
     it('should return empty string for unmapped codes', () => {
