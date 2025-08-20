@@ -1,0 +1,3 @@
+fix:
+- Max row per page not working after adding table viz to a dashboard ([#10420](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10420))
+- Max row per page can set to value < 1 ([#10420](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10420))

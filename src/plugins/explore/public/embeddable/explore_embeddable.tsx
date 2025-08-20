@@ -41,7 +41,10 @@ import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
-import { ChartType } from '../components/visualizations/utils/use_visualization_types';
+import {
+  ChartType,
+  StyleOptions,
+} from '../components/visualizations/utils/use_visualization_types';
 import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
 import {
   convertStringsToMappings,
@@ -67,6 +70,7 @@ export interface SearchProps {
   };
   chartType?: ChartType;
   activeTab?: string;
+  styleOptions?: StyleOptions;
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -340,6 +344,7 @@ export class ExploreEmbeddable
     const selectedChartType = visualization.chartType ?? 'line';
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
+    this.searchProps.styleOptions = visualization.params;
     if (uiState.activeTab !== 'logs' && visualizationData) {
       const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
       const allColumns = [
