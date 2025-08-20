@@ -152,6 +152,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
         type: 'INDEX_PATTERN',
       }),
       saveToCache: jest.fn(),
+      convertToDataset: jest.fn(),
     } as unknown) as DataViewsContract,
     dataSources: dataSourceServiceMock.createStartContract(),
   };
