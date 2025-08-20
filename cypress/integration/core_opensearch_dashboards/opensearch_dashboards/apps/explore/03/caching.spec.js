@@ -36,17 +36,14 @@ describe('Caching', () => {
       })
       .then((newDatasetId) => {
         testResources.newDatasetId = newDatasetId;
-        cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+        cy.reload();
         cy.osd.waitForLoader(true);
         cy.core.waitForDatasetsToLoad();
-        cy.getElementByTestId('datasetSelectButton').click();
-
-        // Verify new pattern appears
-        cy.getElementByTestId('datasetSelectSelectable')
-          .should('be.visible')
-          .within(() => {
-            cy.get(`[title="${alternativeIndexPattern}"]`).should('exist');
-          });
+        cy.core.selectDataset(alternativeIndexPattern);
+        cy.getElementByTestId('datasetSelectButton').should(
+          'contain.text',
+          `${alternativeIndexPattern}`
+        );
       });
   });
 });

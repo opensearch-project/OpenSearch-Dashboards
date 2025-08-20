@@ -11,6 +11,15 @@ import {
   START_TIME,
   END_TIME,
 } from '../../../../../../utils/apps/explore/constants';
+import {
+  downloadCsvAndVerify,
+  getFirstRowForDownloadWithFields,
+  getFirstRowTimeForSourceDownload,
+  getHeadersForDownloadWithFields,
+  getHeadersForSourceDownload,
+  getVisibleCountForLanguage,
+  toggleFieldsForCsvDownload,
+} from '../../../../../../utils/apps/explore/download_csv';
 import { DEFAULT_OPTIONS } from '../../../../../../utils/commands.core';
 import { PATHS } from '../../../../../../utils/constants';
 
@@ -53,23 +62,16 @@ describe('Download CSV', () => {
     cy.core.cleanupTestResources(testResources);
   });
 
-  it('should download visible rows with time field', () => {
+  it('should download visible rows with default fields', () => {
     cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
     cy.explore.setTopNavDate(START_TIME, END_TIME);
 
-    // Download CSV
-    cy.getElementByTestId('shareTopNavButton').click();
-    cy.getElementByTestId('downloadCsvVisible').click();
-
-    cy.readFile('cypress/downloads/discover.csv').then((csvString) => {
+    // eslint-disable-next-line no-loop-func
+    downloadCsvAndVerify('Visible', (csvString) => {
       const { data } = Papa.parse(csvString);
-
-      // Should have header + visible rows
-      expect(data.length).to.be.greaterThan(1);
-
-      // Check headers include time
-      expect(data[0]).to.include('Time');
-      expect(data[0]).to.include('_source');
+      cy.wrap(data).should('have.length', getVisibleCountForLanguage('PPL', true) + 1);
+      cy.wrap(data[0]).should('deep.equal', getHeadersForSourceDownload(true));
+      cy.wrap(data[1][0]).should('equal', getFirstRowTimeForSourceDownload('PPL'));
     });
   });
 
@@ -77,41 +79,16 @@ describe('Download CSV', () => {
     cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
     cy.explore.setTopNavDate(START_TIME, END_TIME);
 
-    // Select specific fields
-    cy.getElementByTestId('field-category').click();
-    cy.getElementByTestId('field-status_code').click();
-    cy.getElementByTestId('field-bytes_transferred').click();
+    toggleFieldsForCsvDownload();
 
-    // Download CSV
-    cy.getElementByTestId('shareTopNavButton').click();
-    cy.getElementByTestId('downloadCsvVisible').click();
-
-    cy.readFile('cypress/downloads/discover.csv').then((csvString) => {
+    // eslint-disable-next-line no-loop-func
+    downloadCsvAndVerify('Visible', (csvString) => {
       const { data } = Papa.parse(csvString);
-
-      // Check headers match selected fields
-      expect(data[0]).to.include('Time');
-      expect(data[0]).to.include('category');
-      expect(data[0]).to.include('status_code');
-      expect(data[0]).to.include('bytes_transferred');
-      expect(data[0]).to.not.include('_source');
-    });
-  });
-
-  it('should download without time field', () => {
-    cy.core.selectDataset(INDEX_PATTERN_WITH_NO_TIME);
-    cy.wait(2000);
-
-    // Download CSV
-    cy.getElementByTestId('shareTopNavButton').click();
-    cy.getElementByTestId('downloadCsvVisible').click();
-
-    cy.readFile('cypress/downloads/discover.csv').then((csvString) => {
-      const { data } = Papa.parse(csvString);
-
-      // Should not have Time column
-      expect(data[0]).to.not.include('Time');
-      expect(data[0]).to.include('_source');
+      cy.wrap(data).should('have.length', getVisibleCountForLanguage('PPL', true) + 1);
+      cy.wrap(data[0]).should('deep.equal', getHeadersForDownloadWithFields(true));
+      cy.wrap(data[1]).should('deep.equal', getFirstRowForDownloadWithFields('PPL', true));
+      // deselect
+      toggleFieldsForCsvDownload();
     });
   });
 });
