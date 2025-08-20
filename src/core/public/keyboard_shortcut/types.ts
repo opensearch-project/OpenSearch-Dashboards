@@ -54,7 +54,7 @@ export interface ShortcutDefinition {
 
   /**
    * Key combination that triggers the shortcut
-   * Format: 'ctrl+s', 'shift+d', 'alt+enter', etc.
+   * Format: 'cmd+s', 'shift+d', 'alt+enter', etc.
    * Case-insensitive, normalized internally
    */
   keys: string;

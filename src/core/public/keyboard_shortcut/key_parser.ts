@@ -4,114 +4,116 @@
  */
 
 /**
- * These are the allowed keys this service supports outside of alphanumeric values.
- * The key of this object represents the lowercased value of the `key` and the value is the normalized key name.
+ * Comprehensive set of keys supported by the keyboard shortcut service.
  */
-export const SPECIAL_KEY_MAPPINGS: Record<string, string> = {
+export const ALLOWED_KEYS = new Set([
+  // Letters
+  'a',
+  'b',
+  'c',
+  'd',
+  'e',
+  'f',
+  'g',
+  'h',
+  'i',
+  'j',
+  'k',
+  'l',
+  'm',
+  'n',
+  'o',
+  'p',
+  'q',
+  'r',
+  's',
+  't',
+  'u',
+  'v',
+  'w',
+  'x',
+  'y',
+  'z',
+
+  // Numbers
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+
+  // Punctuation
+  ',',
+  '-',
+  '=',
+  '[',
+  ']',
+  ';',
+  "'",
+  '.',
+  '/',
+  '\\',
+  '`',
+
   // Arrow keys
-  arrowup: 'up',
-  arrowdown: 'down',
-  arrowleft: 'left',
-  arrowright: 'right',
+  'left',
+  'up',
+  'right',
+  'down',
 
-  // Whitespace and control keys
-  ' ': 'space',
-  tab: 'tab',
-  enter: 'enter',
-  return: 'enter',
-  backspace: 'backspace',
-  delete: 'delete',
+  // Special keys
+  'tab',
+  'enter',
+  'escape',
+  'space',
+  'backspace',
+  'delete',
+]);
 
-  // Navigation keys
-  home: 'home',
-  end: 'end',
-  pageup: 'pageup',
-  pagedown: 'pagedown',
-  insert: 'insert',
+/**
+ * Allowed prefix keys for two-key sequences.
+ *
+ * usage patterns:
+ * - g+d: Go to Discover
+ * - g+v: Go to Visualizations
+ * - g+b: Go to Dashboard
+ *
+ */
+export const SEQUENCE_PREFIX = new Set(['g']);
 
-  // Escape key
-  esc: 'escape',
-  escape: 'escape',
+/**
+ * Valid modifier combinations in their canonical order.
+ *
+ * Each combination is listed in canonical order to ensure consistent normalization
+ * regardless of the input order (e.g., "shift+cmd+a" becomes "cmd+shift+a").
+ */
 
-  // Function keys
-  f1: 'f1',
-  f2: 'f2',
-  f3: 'f3',
-  f4: 'f4',
-  f5: 'f5',
-  f6: 'f6',
-  f7: 'f7',
-  f8: 'f8',
-  f9: 'f9',
-  f10: 'f10',
-  f11: 'f11',
-  f12: 'f12',
+export const VALID_MODIFIER_COMBINATIONS = [
+  [], // No modifiers - enables single keys and two-key sequences
+  ['shift'],
+  ['alt'],
+  ['cmd'],
+  ['alt', 'shift'],
+  ['cmd', 'shift'],
+  ['cmd', 'alt'],
+  ['cmd', 'alt', 'shift'],
+] as const;
 
-  // Basic punctuation
-  ',': 'comma',
-  '.': 'period',
-  '/': 'slash',
-  ';': 'semicolon',
-  "'": 'quote',
-  '[': 'bracketleft',
-  ']': 'bracketright',
-  '\\': 'backslash',
-  '`': 'backquote',
-  '=': 'equal',
-  '-': 'minus',
+/**
+ * Valid individual modifier keys.
+ */
+export const VALID_MODIFIERS = new Set(['cmd', 'alt', 'shift'] as const);
 
-  '!': 'exclamation',
-  '@': 'at',
-  '#': 'hash',
-  $: 'dollar',
-  '%': 'percent',
-  '^': 'caret',
-  '&': 'ampersand',
-  '*': 'asterisk',
-  '(': 'parenleft',
-  ')': 'parenright',
-  _: 'underscore',
-  '+': 'plus',
-  '{': 'braceleft',
-  '}': 'braceright',
-  '|': 'pipe',
-  ':': 'colon',
-  '"': 'doublequote',
-  '<': 'less',
-  '>': 'greater',
-  '?': 'question',
-  '~': 'tilde',
-
-  // Numeric keypad keys
-  numpad0: 'numpad0',
-  numpad1: 'numpad1',
-  numpad2: 'numpad2',
-  numpad3: 'numpad3',
-  numpad4: 'numpad4',
-  numpad5: 'numpad5',
-  numpad6: 'numpad6',
-  numpad7: 'numpad7',
-  numpad8: 'numpad8',
-  numpad9: 'numpad9',
-  numpaddecimal: 'numpaddecimal',
-  numpadenter: 'numpadenter',
-  numpadplus: 'numpadplus',
-  numpadminus: 'numpadminus',
-  numpadmultiply: 'numpadmultiply',
-  numpaddivide: 'numpaddivide',
-};
-
-export const MODIFIER_ORDER = ['ctrl', 'alt', 'shift', 'cmd'] as const;
-
-type ModifierKey = typeof MODIFIER_ORDER[number];
-
-type PlatformMappingKeys = 'ctrl' | 'control' | 'meta' | 'win' | 'super' | 'command' | 'cmd';
-
-interface PlatformModifierMappings {
-  readonly mac: Record<PlatformMappingKeys, ModifierKey>;
-  readonly other: Record<PlatformMappingKeys, ModifierKey>;
-}
-
+/**
+ * Keys that can be displayed with special symbols or formatting.
+ * Includes both modifier keys and special keys that have platform-specific display representations.
+ * Used to generate user-friendly display strings (e.g., '⌘' for 'cmd' on Mac).
+ */
 type DisplayMappingKeys =
   | 'ctrl'
   | 'alt'
@@ -129,65 +131,91 @@ type DisplayMappingKeys =
   | 'right'
   | 'plus';
 
+/**
+ * Platform-specific display representations for keys.
+ * Maps key names to their visual representation for each platform.
+ *
+ * @example
+ * // Mac: 'cmd' → '⌘', 'shift' → '⇧', 'up' → '↑'
+ * // Windows/Linux: 'cmd' → 'Ctrl', 'shift' → 'Shift', 'up' → '↑'
+ */
 interface PlatformDisplayMappings {
   readonly mac: Record<DisplayMappingKeys, string>;
   readonly other: Record<DisplayMappingKeys, string>;
 }
 
 export class KeyStringParser {
-  private static readonly MODIFIER_INDEX_MAP = new Map([
-    ['ctrl', 0],
-    ['alt', 1],
-    ['shift', 2],
-    ['cmd', 3],
-  ]);
+  /**
+   * Maps KeyboardEvent.code values to normalized key names.
+   */
+  private static readonly CODE_TO_KEY_MAPPING: Record<string, string> = {
+    // Letters
+    KeyA: 'a',
+    KeyB: 'b',
+    KeyC: 'c',
+    KeyD: 'd',
+    KeyE: 'e',
+    KeyF: 'f',
+    KeyG: 'g',
+    KeyH: 'h',
+    KeyI: 'i',
+    KeyJ: 'j',
+    KeyK: 'k',
+    KeyL: 'l',
+    KeyM: 'm',
+    KeyN: 'n',
+    KeyO: 'o',
+    KeyP: 'p',
+    KeyQ: 'q',
+    KeyR: 'r',
+    KeyS: 's',
+    KeyT: 't',
+    KeyU: 'u',
+    KeyV: 'v',
+    KeyW: 'w',
+    KeyX: 'x',
+    KeyY: 'y',
+    KeyZ: 'z',
 
-  private static readonly MODIFIER_KEYS = new Set([
-    'ctrl',
-    'alt',
-    'shift',
-    'cmd',
-    'meta',
-    'win',
-    'super',
-    'control',
-    'option',
-    'command',
-    'opt',
-  ]);
+    // Numbers
+    Digit0: '0',
+    Digit1: '1',
+    Digit2: '2',
+    Digit3: '3',
+    Digit4: '4',
+    Digit5: '5',
+    Digit6: '6',
+    Digit7: '7',
+    Digit8: '8',
+    Digit9: '9',
 
-  private static readonly MODIFIER_ALIASES = new Map([
-    ['control', 'ctrl'],
-    ['meta', 'cmd'],
-    ['win', 'cmd'],
-    ['super', 'cmd'],
-    ['option', 'alt'],
-    ['command', 'cmd'],
-    ['opt', 'alt'],
-  ]);
+    // Punctuation
+    Comma: ',',
+    Period: '.',
+    Slash: '/',
+    Semicolon: ';',
+    Quote: "'",
+    BracketLeft: '[',
+    BracketRight: ']',
+    Backslash: '\\',
+    Backquote: '`',
+    Equal: '=',
+    Minus: '-',
 
-  private static readonly VALID_MODIFIERS = new Set(MODIFIER_ORDER);
+    // Arrow keys
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
 
-  private static readonly PLATFORM_MODIFIER_MAPPINGS: PlatformModifierMappings = {
-    mac: {
-      ctrl: 'cmd',
-      control: 'cmd',
-      meta: 'cmd',
-      win: 'cmd',
-      super: 'cmd',
-      command: 'cmd',
-      cmd: 'cmd',
-    },
-    other: {
-      ctrl: 'ctrl',
-      control: 'ctrl',
-      meta: 'ctrl',
-      win: 'ctrl',
-      super: 'ctrl',
-      command: 'ctrl',
-      cmd: 'ctrl',
-    },
-  } as const;
+    // Special keys
+    Space: 'space',
+    Tab: 'tab',
+    Enter: 'enter',
+    Escape: 'escape',
+    Backspace: 'backspace',
+    Delete: 'delete',
+  };
 
   private static readonly DISPLAY_MAPPINGS: PlatformDisplayMappings = {
     mac: {
@@ -211,7 +239,7 @@ export class KeyStringParser {
       ctrl: 'Ctrl',
       alt: 'Alt',
       shift: 'Shift',
-      cmd: 'Win',
+      cmd: 'Ctrl',
       enter: '↵',
       backspace: '⌫',
       delete: '⌦',
@@ -226,321 +254,265 @@ export class KeyStringParser {
     },
   } as const;
 
-  private platform = this.detectPlatform();
   private keyStringCache = new Map<string, string>();
 
-  private detectPlatform() {
-    if (typeof navigator === 'undefined') {
-      return 'linux';
-    }
-
-    const userAgent = navigator.userAgent.toLowerCase();
-    if (userAgent.includes('mac')) return 'mac';
-    if (userAgent.includes('win')) return 'windows';
-    return 'linux';
-  }
-
   /**
-   * Normalizes a key string from shortcut definition into consistent format
+   * Normalizes a key string from shortcut definition into consistent Mac-style format
    *
-   * Converts various input formats into a standardized, platform-specific key string.
-   * Handles cross-platform modifier mapping (Ctrl ↔ Cmd) and ensures consistent ordering.
-   * Uses caching to improve performance for repeated calls with the same input.
+   * Converts various input formats into a standardized Mac-style key string for consistent
+   * codebase registration. All platforms register shortcuts the same way (Mac-style) but
+   * display them appropriately for each platform. Uses caching for performance.
    *
-   * @param keyString - Raw key combination string (e.g., "Ctrl+Shift+F1", "cmd+s")
-   * @returns Normalized key string with platform-specific modifiers in consistent order
+   * @param keyString - Raw key combination string (e.g., "cmd+s", "alt+shift+a")
+   * @returns Normalized Mac-style key string with cmd-first modifier order
    * @throws Error when input is invalid, null, undefined, or malformed
    *
    * @example
    *
-   * // On Mac:
-   * parser.normalizeKeyString("Ctrl+S") // → "cmd+s"
-   * parser.normalizeKeyString("shift+ctrl+f1") // → "cmd+shift+f1"
+   * // Valid key combinations using supported modifier names:
+   * parser.normalizeKeyString("cmd+s") // → "cmd+s"
+   * parser.normalizeKeyString("alt+h") // → "alt+h"
+   * parser.normalizeKeyString("shift+cmd+a") // → "cmd+shift+a"
+   * parser.normalizeKeyString("cmd+alt+shift+z") // → "cmd+alt+shift+z"
    *
-   * // On Windows/Linux:
-   * parser.normalizeKeyString("Cmd+S") // → "ctrl+s"
-   * parser.normalizeKeyString("ALT+F4") // → "alt+f4"
+   * // Invalid keys are rejected:
+   * parser.normalizeKeyString("f1") // → throws Error
+   * parser.normalizeKeyString("ctrl+s") // → throws Error (use "cmd+s")
+   * parser.normalizeKeyString("cmd++") // → throws Error
    *
    */
   public normalizeKeyString(keyString: string): string {
     if (this.keyStringCache.has(keyString)) {
-      const value = this.keyStringCache.get(keyString)!;
-      this.keyStringCache.delete(keyString);
-      this.keyStringCache.set(keyString, value);
-      return value;
+      return this.keyStringCache.get(keyString)!;
     }
-
     const result = this.computeNormalizedKeyString(keyString);
-
     this.keyStringCache.set(keyString, result);
 
     return result;
   }
 
-  private handlePlusKeySpecialCase(keyString: string): string | null {
-    const trimmed = keyString.trim();
-
-    if (!trimmed.endsWith('++')) {
-      return null;
+  /**
+   * Validates the input key string for basic format and structural issues.
+   * Throws descriptive errors for invalid inputs.
+   */
+  private validateKeyString(keyString: string): void {
+    if (keyString === null || keyString === undefined) {
+      throw new Error(`Key string cannot be null or undefined`);
     }
 
-    const withoutPlusKey = trimmed.slice(0, -2);
-
-    if (withoutPlusKey.length === 0) {
-      return 'plus';
+    if (keyString === '') {
+      throw new Error(`Key string cannot be empty: "${keyString}"`);
     }
 
-    const modifierPart = this.computeNormalizedKeyString(withoutPlusKey);
-    return modifierPart ? `${modifierPart}+plus` : 'plus';
+    if (keyString.trim() === '' && keyString !== 'space') {
+      throw new Error(`Key string cannot be whitespace-only: "${keyString}"`);
+    }
+
+    if (keyString.includes(' ') && keyString !== 'space') {
+      throw new Error(`Extra spaces and chord sequences are not allowed: "${keyString}"`);
+    }
+
+    const normalized = keyString.toLowerCase();
+
+    if (normalized.startsWith('+') || normalized.endsWith('+')) {
+      throw new Error(`Malformed key string: invalid '+' character placement: "${keyString}"`);
+    }
+
+    if (/\+{2,}/.test(normalized)) {
+      throw new Error(`Malformed key string: invalid consecutive '+' characters: "${keyString}"`);
+    }
   }
 
   private computeNormalizedKeyString(keyString: string): string {
-    const plusKeyResult = this.handlePlusKeySpecialCase(keyString);
-    if (plusKeyResult !== null) {
-      return plusKeyResult;
-    }
+    this.validateKeyString(keyString);
 
-    const rawParts = keyString.toLowerCase().split('+');
-    const modifiers: ModifierKey[] = [];
-    const keys: string[] = [];
-    const modifierSet = new Set<ModifierKey>();
+    const normalized = keyString.toLowerCase();
+    const parts = normalized.split('+').filter((part) => part);
 
-    for (const rawPart of rawParts) {
-      let part = rawPart.trim();
-
-      if (part === ' ') {
-        part = 'space';
+    if (parts.length >= 2 && SEQUENCE_PREFIX.has(parts[0])) {
+      for (const part of parts) {
+        if (!ALLOWED_KEYS.has(part)) {
+          throw new Error(
+            `Invalid key: "${part}" in sequence "${keyString}". ` +
+              `Sequences cannot contain modifiers. Allowed keys are: ${this.getKeyCategories()}`
+          );
+        }
       }
 
-      if (part.length === 0) continue;
-
-      if (this.isModifier(part)) {
-        const normalizedModifier = this.normalizeModifier(part);
-        if (normalizedModifier) {
-          const platformMappedModifier = this.applyPlatformMapping(normalizedModifier);
-
-          if (!modifierSet.has(platformMappedModifier)) {
-            modifierSet.add(platformMappedModifier);
-            modifiers.push(platformMappedModifier);
-          }
-        }
+      if (parts.length === 2) {
+        return parts.join('+');
       } else {
-        const normalizedKey = this.normalizeKey(part);
-        if (normalizedKey.length > 0) {
-          keys.push(normalizedKey);
-        }
+        throw new Error(`Invalid sequence: "${keyString}". Sequences must have exactly 2 keys.`);
       }
     }
 
-    modifiers.sort((a, b) => {
-      const aIndex = KeyStringParser.MODIFIER_INDEX_MAP.get(a) ?? -1;
-      const bIndex = KeyStringParser.MODIFIER_INDEX_MAP.get(b) ?? -1;
-      return aIndex - bIndex;
-    });
+    // Not a sequence - process as regular modifier + key combination
+    const modifiers: string[] = [];
+    const actualKeys: string[] = [];
 
-    if (modifiers.length > 0 && keys.length === 0) {
-      return modifiers.join('+');
+    for (const part of parts) {
+      if (VALID_MODIFIERS.has(part as 'cmd' | 'alt' | 'shift')) {
+        if (!modifiers.includes(part)) modifiers.push(part);
+      } else if (ALLOWED_KEYS.has(part)) {
+        actualKeys.push(part);
+      } else {
+        throw new Error(
+          `Invalid key: "${part}" in shortcut "${keyString}". ` +
+            `Allowed keys are: ${this.getKeyCategories()}`
+        );
+      }
     }
 
-    if (keys.length === 1) {
-      return this.buildKeyString(modifiers, keys[0]);
+    const orderedModifiers = this.getCanonicalModifierOrder(modifiers);
+
+    if (actualKeys.length === 1) {
+      return this.buildKeyString(orderedModifiers, actualKeys[0]);
     }
 
-    if (modifiers.length > 0) {
-      return `${modifiers.join('+')}+${keys.join('+')}`;
+    if (actualKeys.length === 2) {
+      throw new Error(
+        `Invalid key combination: "${keyString}". Two-key combinations are only allowed for sequences starting with: ${Array.from(
+          SEQUENCE_PREFIX
+        ).join(', ')}`
+      );
     }
 
-    return keys.join('+');
+    if (actualKeys.length === 0) {
+      throw new Error(
+        `Modifier-only shortcuts are not allowed: "${keyString}". Shortcuts must include at least one non-modifier key.`
+      );
+    }
+
+    throw new Error(`Invalid key combination: too many keys (${actualKeys.length})`);
   }
 
   /**
-   * Generates a normalized key string from a keyboard event
+   * Returns categorized description of allowed keys for error messages.
+   */
+  private getKeyCategories(): string {
+    return [
+      'Letters: a-z',
+      'Numbers: 0-9',
+      "Punctuation: , - = [ ] ; ' . / \\ `",
+      'Arrows: left, up, right, down',
+      'Special: tab, enter, escape, space, backspace, delete',
+    ].join(' | ');
+  }
+
+  /**
+   * Generates a normalized Mac-style key string from a keyboard event
    *
    * Extracts modifier keys and main key from a KeyboardEvent and converts them
-   * into the same normalized format used by normalizeKeyString for comparison.
-   * Applies platform-specific modifier mapping for cross-platform consistency.
+   * into the same Mac-style normalized format used by normalizeKeyString for comparison.
+   * Uses event.code instead of event.key to solve plus key ambiguity.
+   * Always produces Mac-style output regardless of platform for consistent registration matching.
    *
    * @param event - The keyboard event from user input
-   * @returns Normalized key string matching the format from normalizeKeyString
+   * @returns Normalized Mac-style key string matching the format from normalizeKeyString
    *
    * @example
    *
    * document.addEventListener('keydown', (event) => {
    *   const keyString = parser.getEventKeyString(event);
+   *   // All platforms produce Mac-style output:
    *   // User presses Cmd+S on Mac → "cmd+s"
-   *   // User presses Ctrl+S on Windows → "ctrl+s"
+   *   // User presses Ctrl+S on Windows → "cmd+s" (normalized to Mac-style)
    *
-   *   // Compare with config shortcut
+   *   // Compare with config shortcut (both are Mac-style)
    *   if (keyString === parser.normalizeKeyString("Ctrl+S")) {
-   *     // Execute save action
+   *     // Execute save action - both strings are "cmd+s"
    *   }
    * });
    *
    */
   public getEventKeyString(event: KeyboardEvent): string {
-    const modifierChecks = [
-      { check: event.ctrlKey, key: 'ctrl' },
-      { check: event.altKey, key: 'alt' },
-      { check: event.shiftKey, key: 'shift' },
-      { check: event.metaKey, key: 'cmd' },
-    ];
+    const modifiers: string[] = [];
 
-    const modifiers = modifierChecks
-      .filter(({ check }) => check)
-      .map(({ key }) => this.applyPlatformMapping(key));
-
-    const key = this.normalizeKey(event.key.toLowerCase());
-
-    return this.buildKeyString(modifiers, key);
-  }
-
-  private isModifier(key: string): boolean {
-    return KeyStringParser.MODIFIER_KEYS.has(key.toLowerCase());
-  }
-
-  private normalizeModifier(modifier: string): string | null {
-    const normalized = modifier.toLowerCase();
-
-    const alias = KeyStringParser.MODIFIER_ALIASES.get(normalized);
-    if (alias) return alias;
-
-    return KeyStringParser.VALID_MODIFIERS.has(normalized as ModifierKey) ? normalized : null;
-  }
-
-  private applyPlatformMapping(modifier: string): ModifierKey {
-    const mappings =
-      this.platform === 'mac'
-        ? KeyStringParser.PLATFORM_MODIFIER_MAPPINGS.mac
-        : KeyStringParser.PLATFORM_MODIFIER_MAPPINGS.other;
-
-    const normalized = modifier.toLowerCase() as PlatformMappingKeys;
-    return mappings[normalized] || (normalized as ModifierKey);
-  }
-
-  private buildKeyString(modifiers: string[], key: string): string {
-    if (modifiers.length === 0) return key;
-    if (!key) return modifiers.join('+');
-    return `${modifiers.join('+')}+${key}`;
-  }
-
-  private normalizeKey(key: string): string {
-    if (key === ' ') {
-      return 'space';
+    if (event.ctrlKey || event.metaKey) {
+      modifiers.push('cmd');
     }
+    if (event.altKey) modifiers.push('alt');
+    if (event.shiftKey) modifiers.push('shift');
 
-    const trimmed = key.trim().toLowerCase();
+    const key = this.getKeyFromCode(event.code);
+    if (!key) return '';
 
-    if (!trimmed) {
-      return '';
-    }
+    const orderedModifiers = this.getCanonicalModifierOrder(modifiers);
 
-    const specialMapping = SPECIAL_KEY_MAPPINGS[trimmed];
-    if (specialMapping) {
-      return specialMapping;
-    }
-
-    if (trimmed.length === 1) {
-      return trimmed;
-    }
-
-    return trimmed;
+    return this.buildKeyString(orderedModifiers, key);
   }
 
   /**
-   * Validates a key string and throws detailed error messages for invalid input
-   *
-   * Performs comprehensive validation including format checking and semantic validation.
-   * Combines the logic from the previous validateInput and isValidKeyString methods.
-   * Throws specific error messages to help developers understand what's wrong with their input.
-   *
-   * @param keyString - Raw key combination string to validate
-   * @throws Error when input is invalid with detailed error message
-   *
-   * @example
-   *
-   * parser.validateKeyString("ctrl+s"); // succeeds
-   * parser.validateKeyString("ctrl+"); // throws "Malformed key string: invalid '+' character placement"
-   * parser.validateKeyString("ctrl a"); // throws "Chord sequences are not supported"
-   *
+   * Maps KeyboardEvent.code to normalized key name.
+   * Returns null for unmapped or disallowed keys.
    */
-  public validateKeyString(keyString: string): void {
-    if (keyString === null || keyString === undefined) {
-      throw new Error(`Key string cannot be null or undefined`);
-    }
+  private getKeyFromCode(code: string): string | null {
+    const mappedKey = KeyStringParser.CODE_TO_KEY_MAPPING[code];
+    return mappedKey && ALLOWED_KEYS.has(mappedKey) ? mappedKey : null;
+  }
 
-    if (keyString === '' || (keyString.trim() === '' && keyString !== ' ')) {
-      throw new Error(`Key string cannot be empty or whitespace-only: "${keyString}"`);
-    }
+  /**
+   * Finds the canonical modifier combination that matches the given modifiers.
+   * Returns the modifiers in their predefined order.
+   */
+  private getCanonicalModifierOrder(modifiers: string[]): string[] {
+    const modifierSet = new Set(modifiers);
 
-    const trimmed = keyString.trim();
-
-    if (trimmed.includes(' ') && !trimmed.includes('+ ') && trimmed !== ' ') {
-      throw new Error(
-        `Chord sequences are not supported. Found space in key string: "${keyString}". ` +
-          `Use '+' to separate simultaneous keys (e.g., "ctrl+shift+s").`
-      );
-    }
-
-    if (/\+\+(?!$)/.test(trimmed)) {
-      throw new Error(
-        `Malformed key string: invalid consecutive '+' characters (not at end): "${keyString}"`
-      );
-    }
-
-    if (
-      trimmed.startsWith('+') ||
-      (trimmed.endsWith('+') && !trimmed.endsWith('++') && !keyString.endsWith('+ '))
-    ) {
-      throw new Error(`Malformed key string: invalid '+' character placement: "${keyString}"`);
-    }
-
-    const normalized = this.normalizeKeyString(keyString);
-    const parts = normalized.split('+');
-
-    if (parts.length === 0) {
-      throw new Error(`Malformed key string: no valid keys found: "${keyString}"`);
-    }
-
-    let modifierCount = 0;
-    let keyCount = 0;
-
-    for (const part of parts) {
-      if (this.isModifier(part)) {
-        modifierCount++;
-      } else {
-        keyCount++;
+    for (const combination of VALID_MODIFIER_COMBINATIONS) {
+      if (
+        combination.length === modifierSet.size &&
+        combination.every((mod) => modifierSet.has(mod))
+      ) {
+        return [...combination];
       }
     }
+    throw new Error(`Invalid modifier combination: [${modifiers.join(', ')}]`);
+  }
 
-    if (keyCount === 0) {
-      throw new Error(
-        `Malformed key string: only modifier keys found, no action key: "${keyString}"`
-      );
+  /**
+   * Builds a normalized key string from modifiers and keys.
+   * Handles the 3 supported shortcut types with proper formatting.
+   */
+  private buildKeyString(modifiers: string[], keys: string | string[]): string {
+    const keyArray = Array.isArray(keys) ? keys : [keys];
+
+    // Type 1: Single key (no modifiers)
+    if (modifiers.length === 0 && keyArray.length === 1) {
+      return keyArray[0];
     }
 
-    if (keyCount > 2) {
-      throw new Error(
-        `Malformed key string: too many non-modifier keys (${keyCount}): "${keyString}"`
-      );
+    // Type 2: Modifiers + single key
+    if (keyArray.length === 1) {
+      if (modifiers.length === 0) return keyArray[0];
+      const orderedModifiers = this.getCanonicalModifierOrder(modifiers);
+      return `${orderedModifiers.join('+')}+${keyArray[0]}`;
     }
 
-    if (keyCount > 1 && modifierCount > 0) {
-      if (keyCount === 2) {
-        throw new Error(
-          `Malformed key string: two-key sequences cannot have modifiers: "${keyString}"`
-        );
+    // Type 3: Two-key sequences (no modifiers allowed)
+    if (keyArray.length === 2) {
+      if (modifiers.length > 0) {
+        throw new Error('Two-key sequences cannot have modifiers');
       }
-      throw new Error(
-        `Malformed key string: multiple non-modifier keys with modifiers: "${keyString}"`
-      );
+      return keyArray.join('+');
     }
+
+    // Edge case: Only modifiers (for validation purposes)
+    if (keyArray.length === 0 || (keyArray.length === 1 && !keyArray[0])) {
+      const orderedModifiers = this.getCanonicalModifierOrder(modifiers);
+      return orderedModifiers.join('+');
+    }
+
+    // Invalid: Too many keys
+    throw new Error(`Invalid key combination: too many keys (${keyArray.length})`);
   }
 
   public getDisplayString(keyString: string): string {
     const normalized = this.normalizeKeyString(keyString);
     const parts = normalized.split('+');
+
+    const displayPlatform = this.detectDisplayPlatform();
     const mappings =
-      this.platform === 'mac'
+      displayPlatform === 'mac'
         ? KeyStringParser.DISPLAY_MAPPINGS.mac
         : KeyStringParser.DISPLAY_MAPPINGS.other;
 
@@ -549,7 +521,20 @@ export class KeyStringParser {
         (part) =>
           mappings[part as keyof typeof mappings] ?? part.charAt(0).toUpperCase() + part.slice(1)
       )
-      .join(this.platform === 'mac' ? '' : '+');
+      .join(displayPlatform === 'mac' ? '' : '+');
+  }
+
+  /**
+   * Detects platform for display purposes only.
+   * Registration always uses Mac-style, but display should match user's OS.
+   */
+  private detectDisplayPlatform(): 'mac' | 'other' {
+    if (typeof navigator === 'undefined') {
+      return 'other';
+    }
+
+    const userAgent = navigator.userAgent.toLowerCase();
+    return userAgent.includes('mac') ? 'mac' : 'other';
   }
 
   public clearCache(): void {

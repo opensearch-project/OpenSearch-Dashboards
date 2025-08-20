@@ -51,8 +51,9 @@ export class KeyboardShortcutService {
     `${shortcut.id.toLowerCase()}.${shortcut.pluginId.toLowerCase()}`;
 
   private register(shortcut: ShortcutDefinition): void {
+    let key: string;
     try {
-      this.keyParser.validateKeyString(shortcut.keys);
+      key = this.keyParser.normalizeKeyString(shortcut.keys);
     } catch (error) {
       throw new Error(
         `Invalid keyboard shortcut key string: "${shortcut.keys}" for shortcut "${shortcut.id}" in plugin "${shortcut.pluginId}": ${error.message}`
@@ -63,7 +64,6 @@ export class KeyboardShortcutService {
       return;
     }
 
-    const key = this.keyParser.normalizeKeyString(shortcut.keys);
     const namespacedId = this.getNamespacedId(shortcut);
 
     const existingShortcuts = this.shortcutsMapByKey.get(key) || [];

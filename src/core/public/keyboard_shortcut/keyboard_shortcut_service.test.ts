@@ -73,7 +73,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -87,7 +87,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -101,7 +101,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
       const shortcut2: ShortcutDefinition = {
@@ -109,7 +109,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save As',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute2,
       };
 
@@ -128,7 +128,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -169,7 +169,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -184,7 +184,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
       const shortcut2: ShortcutDefinition = {
@@ -192,7 +192,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'fileManager',
         name: 'Quick Save',
         category: 'file',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute2,
       };
 
@@ -201,7 +201,7 @@ describe('KeyboardShortcutService', () => {
 
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'keyboard shortcut conflict detected for key "ctrl+s". ' +
+        'keyboard shortcut conflict detected for key "cmd+s". ' +
           'New shortcut "quickSave" from plugin "fileManager" ' +
           'conflicts with active shortcuts: save (editor). ' +
           'The new shortcut will take precedence when the key is pressed.'
@@ -216,7 +216,7 @@ describe('KeyboardShortcutService', () => {
           pluginId: 'editor',
           name: 'Save',
           category: 'editing',
-          keys: 'ctrl+s',
+          keys: 'cmd+s',
           execute: jest.fn(),
         },
         {
@@ -224,7 +224,7 @@ describe('KeyboardShortcutService', () => {
           pluginId: 'fileManager',
           name: 'Quick Save',
           category: 'file',
-          keys: 'ctrl+s',
+          keys: 'cmd+s',
           execute: jest.fn(),
         },
         {
@@ -232,7 +232,7 @@ describe('KeyboardShortcutService', () => {
           pluginId: 'backup',
           name: 'Auto Save',
           category: 'backup',
-          keys: 'ctrl+s',
+          keys: 'cmd+s',
           execute: jest.fn(),
         },
       ];
@@ -245,7 +245,7 @@ describe('KeyboardShortcutService', () => {
 
       expect(consoleWarnSpy).toHaveBeenNthCalledWith(
         1,
-        'keyboard shortcut conflict detected for key "ctrl+s". ' +
+        'keyboard shortcut conflict detected for key "cmd+s". ' +
           'New shortcut "quickSave" from plugin "fileManager" ' +
           'conflicts with active shortcuts: save (editor). ' +
           'The new shortcut will take precedence when the key is pressed.'
@@ -253,7 +253,7 @@ describe('KeyboardShortcutService', () => {
 
       expect(consoleWarnSpy).toHaveBeenNthCalledWith(
         2,
-        'keyboard shortcut conflict detected for key "ctrl+s". ' +
+        'keyboard shortcut conflict detected for key "cmd+s". ' +
           'New shortcut "autoSave" from plugin "backup" ' +
           'conflicts with active shortcuts: save (editor), quickSave (fileManager). ' +
           'The new shortcut will take precedence when the key is pressed.'
@@ -267,7 +267,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
       const shortcut2: ShortcutDefinition = {
@@ -275,7 +275,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'fileManager',
         name: 'Quick Save',
         category: 'file',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute2,
       };
 
@@ -286,6 +286,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 's',
+        code: 'KeyS',
         ctrlKey: true,
         bubbles: true,
       });
@@ -304,7 +305,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
       const shortcut2: ShortcutDefinition = {
@@ -312,7 +313,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'fileManager',
         name: 'Quick Save',
         category: 'file',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute2,
       };
       const shortcut3: ShortcutDefinition = {
@@ -320,7 +321,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'newPlugin',
         name: 'New Save',
         category: 'file',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: jest.fn(),
       };
 
@@ -343,7 +344,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
       start.register(componentAShortcut);
@@ -353,14 +354,14 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'dashboard',
         name: 'Export',
         category: 'file',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute2,
       };
       start.register(componentBShortcut);
 
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'keyboard shortcut conflict detected for key "ctrl+s". ' +
+        'keyboard shortcut conflict detected for key "cmd+s". ' +
           'New shortcut "export" from plugin "dashboard" ' +
           'conflicts with active shortcuts: save (editor). ' +
           'The new shortcut will take precedence when the key is pressed.'
@@ -370,6 +371,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 's',
+        code: 'KeyS',
         ctrlKey: true,
         bubbles: true,
       });
@@ -418,7 +420,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'test',
         name: 'Failing Shortcut',
         category: 'test',
-        keys: 'ctrl+f',
+        keys: 'cmd+f',
         execute: failingExecute,
       };
 
@@ -426,6 +428,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 'f',
+        code: 'KeyF',
         ctrlKey: true,
         bubbles: true,
       });
@@ -447,7 +450,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -475,7 +478,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -504,7 +507,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -533,7 +536,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -562,7 +565,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -572,6 +575,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 's',
+        code: 'KeyS',
         ctrlKey: true,
         bubbles: true,
       });
@@ -590,7 +594,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -598,6 +602,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 's',
+        code: 'KeyS',
         ctrlKey: true,
         bubbles: true,
       });
@@ -617,7 +622,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -625,6 +630,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 's',
+        code: 'KeyS',
         ctrlKey: true,
         bubbles: true,
       });
@@ -647,7 +653,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -655,6 +661,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 's',
+        code: 'KeyS',
         ctrlKey: true,
         bubbles: true,
       });
@@ -673,7 +680,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
       const shortcut2: ShortcutDefinition = {
@@ -681,7 +688,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save As',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute2,
       };
 
@@ -690,6 +697,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 's',
+        code: 'KeyS',
         ctrlKey: true,
         bubbles: true,
       });
@@ -706,7 +714,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -736,7 +744,7 @@ describe('KeyboardShortcutService', () => {
           pluginId: 'editor',
           name: 'Save',
           category: 'editing',
-          keys: 'ctrl+s',
+          keys: 'cmd+s',
           execute: jest.fn(),
         },
         {
@@ -744,7 +752,7 @@ describe('KeyboardShortcutService', () => {
           pluginId: 'editor',
           name: 'Save As',
           category: 'editing',
-          keys: 'ctrl+shift+s',
+          keys: 'cmd+shift+s',
           execute: jest.fn(),
         },
         {
@@ -762,6 +770,7 @@ describe('KeyboardShortcutService', () => {
       document.dispatchEvent(
         new KeyboardEvent('keydown', {
           key: 's',
+          code: 'KeyS',
           ctrlKey: true,
         })
       );
@@ -770,6 +779,7 @@ describe('KeyboardShortcutService', () => {
       document.dispatchEvent(
         new KeyboardEvent('keydown', {
           key: 's',
+          code: 'KeyS',
           ctrlKey: true,
           shiftKey: true,
         })
@@ -779,6 +789,7 @@ describe('KeyboardShortcutService', () => {
       document.dispatchEvent(
         new KeyboardEvent('keydown', {
           key: 'f',
+          code: 'KeyF',
           altKey: true,
         })
       );
