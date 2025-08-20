@@ -5,7 +5,7 @@
      * Attaches a debugger to an already running OSD instance
      */
     {
-      "name": "Attach Debugger to running Dashboards Server",
+      "name": "Attach debugger to running Dashboards",
       "type": "pwa-node",
       "request": "attach",
       "port": 9229
@@ -14,7 +14,7 @@
      * Starts the OSD instance only
      */
     {
-      "name": "Start Dashboards Server",
+      "name": "Start Dashboards",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "yarn",
@@ -29,10 +29,10 @@
     },
     /**
      * Starts the OpenSearch snapshot server
-     * - Everytime the server is stopped, data will NOT be persisted. Thus, if you need to persist data, you can add a configuration to spin up your OpenSearch cluster of choice
+     * - Everytime this launch configuration runs, it overwrites your previous data. Thus, if you need to persist data, you can add a configuration in your VSCode workspace to run '${workspaceFolder}/.opensearch/{version}/bin/opensearch'
      */
     {
-      "name": "Start OpenSearch Cluster Snapshot",
+      "name": "Start OpenSearch cluster snapshot",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "yarn",
@@ -54,7 +54,7 @@
      */
     {
       "name": "Start Dashboards with OpenSearch Cluster Snapshot",
-      "configurations": ["Start OpenSearch Cluster Snapshot", "Start Dashboards Server"],
+      "configurations": ["Start OpenSearch cluster snapshot", "Start Dashboards"],
       // If either Dashboards or OpenSearch server is stopped, both servers will be stopped (set this to false to stop an individual server without stopping all servers)
       "stopAll": true
     }
