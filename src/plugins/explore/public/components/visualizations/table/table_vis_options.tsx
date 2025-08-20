@@ -53,6 +53,7 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
             value={localPageSize}
             onChange={(e) => handlePageSizeChange(e.target.value)}
             data-test-subj="visTablePageSizeInput"
+            min={1}
           />
         </EuiFormRow>
       </EuiFlexItem>
