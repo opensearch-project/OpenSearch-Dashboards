@@ -47,33 +47,16 @@ describe('getTabAction', () => {
       expect(mockEditor.trigger).toHaveBeenCalledWith('keyboard', 'acceptSelectedSuggestion', {});
     });
 
-    it('should call triggerSuggest after timeout', () => {
+    it('should only call acceptSelectedSuggestion', () => {
       const action = getTabAction();
 
       action.run(mockEditor);
 
-      // Fast-forward time
+      // Fast-forward time to ensure no delayed calls
       jest.advanceTimersByTime(100);
 
-      expect(mockEditor.trigger).toHaveBeenCalledWith(
-        'keyboard',
-        'editor.action.triggerSuggest',
-        {}
-      );
-    });
-
-    it('should call triggers in correct order', () => {
-      const action = getTabAction();
-      const callOrder: string[] = [];
-
-      mockEditor.trigger.mockImplementation((source: string, command: string) => {
-        callOrder.push(command);
-      });
-
-      action.run(mockEditor);
-      jest.advanceTimersByTime(100);
-
-      expect(callOrder).toEqual(['acceptSelectedSuggestion', 'editor.action.triggerSuggest']);
+      expect(mockEditor.trigger).toHaveBeenCalledTimes(1);
+      expect(mockEditor.trigger).toHaveBeenCalledWith('keyboard', 'acceptSelectedSuggestion', {});
     });
   });
 });
