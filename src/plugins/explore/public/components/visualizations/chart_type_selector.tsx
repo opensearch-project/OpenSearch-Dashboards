@@ -50,7 +50,7 @@ export const ChartTypeSelector = <T extends ChartType>({
   }, [chartType]);
 
   // Map columns to add value and text fields for select component
-  const { numericalColumns = [], categoricalColumns = [], dateColumns = [] } = visualizationData;
+  const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
 
   // Get icon type based on chart type
   const getChartIconType = (type: string): string => {
