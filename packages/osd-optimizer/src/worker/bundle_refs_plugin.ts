@@ -41,7 +41,6 @@ export class BundleRefsPlugin {
   private readonly resolvedRequestCache = new Map<string, Promise<string | undefined>>();
   private readonly ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
   private allowedBundleIds = new Set<string>();
-  // private virtualModules: Record<string, string> = {};
 
   constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {}
 

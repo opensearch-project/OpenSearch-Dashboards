@@ -61,7 +61,7 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
 
   const refs: BundleRef[] = [];
 
-  // The core modules
+  // The core module public dirs
   ['public', 'public/utils'].forEach((name) => {
     refs.push({
       bundleId: 'core',
