@@ -44,27 +44,25 @@ export class KeyboardShortcutService {
     this.stopEventListener();
     this.shortcutsMapByKey.clear();
     this.namespacedIdToKeyLookup.clear();
-    this.keyParser.clearCache();
   }
 
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
     `${shortcut.id.toLowerCase()}.${shortcut.pluginId.toLowerCase()}`;
 
   private register(shortcut: ShortcutDefinition): void {
-    let key: string;
-    try {
-      key = this.keyParser.normalizeKeyString(shortcut.keys);
-    } catch (error) {
-      throw new Error(
-        `Invalid keyboard shortcut key string: "${shortcut.keys}" for shortcut "${shortcut.id}" in plugin "${shortcut.pluginId}": ${error.message}`
-      );
-    }
-
     if (!this.config.enabled) {
       return;
     }
 
+    const key = this.keyParser.normalizeKeyString(shortcut.keys);
+
     const namespacedId = this.getNamespacedId(shortcut);
+
+    if (this.namespacedIdToKeyLookup.has(namespacedId)) {
+      throw new Error(
+        `Shortcut "${shortcut.id}" from plugin "${shortcut.pluginId}" is already registered`
+      );
+    }
 
     const existingShortcuts = this.shortcutsMapByKey.get(key) || [];
 
@@ -134,6 +132,11 @@ export class KeyboardShortcutService {
       return true;
     }
 
+    const contentEditable = element.getAttribute('contenteditable');
+    if (contentEditable === 'true' || contentEditable === '') {
+      return true;
+    }
+
     return false;
   }
 
@@ -149,6 +152,8 @@ export class KeyboardShortcutService {
       // Prevent browser-specific keybindings if they conflict with our shortcuts
       event.preventDefault();
 
+      // Execute the last registered shortcut for this key combination
+      // This implements a "last registered wins" policy for conflicting shortcuts
       const shortcut = shortcuts[shortcuts.length - 1];
       try {
         shortcut.execute();

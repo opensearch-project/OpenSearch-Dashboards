@@ -64,3 +64,38 @@ export interface ShortcutDefinition {
    */
   execute: () => void;
 }
+
+/**
+ * Keys that can be displayed with special symbols or formatting.
+ * Includes both modifier keys and special keys that have platform-specific display representations.
+ * Used to generate user-friendly display strings (e.g., '⌘' for 'cmd' on Mac).
+ */
+export type DisplayMappingKeys =
+  | 'ctrl'
+  | 'alt'
+  | 'shift'
+  | 'cmd'
+  | 'enter'
+  | 'backspace'
+  | 'delete'
+  | 'tab'
+  | 'escape'
+  | 'space'
+  | 'up'
+  | 'down'
+  | 'left'
+  | 'right'
+  | 'plus';
+
+/**
+ * Platform-specific display representations for keys.
+ * Maps key names to their visual representation for each platform.
+ *
+ * @example
+ * // Mac: 'cmd' → '⌘', 'shift' → '⇧', 'up' → '↑'
+ * // Windows/Linux: 'cmd' → 'Ctrl', 'shift' → 'Shift', 'up' → '↑'
+ */
+export interface PlatformDisplayMappings {
+  readonly mac: Record<DisplayMappingKeys, string>;
+  readonly other: Record<DisplayMappingKeys, string>;
+}

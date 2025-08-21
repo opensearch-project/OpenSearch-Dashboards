@@ -405,8 +405,23 @@ describe('KeyboardShortcutService', () => {
         execute: mockExecute,
       };
 
+      expect(() => start.register(shortcut)).toThrow('Invalid key combination: "invalid+++key"');
+    });
+
+    it('should throw error for duplicate shortcut registration', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save Document',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
       expect(() => start.register(shortcut)).toThrow(
-        'Invalid keyboard shortcut key string: "invalid+++key" for shortcut "invalid" in plugin "test"'
+        'Shortcut "save" from plugin "editor" is already registered'
       );
     });
 
@@ -584,6 +599,64 @@ describe('KeyboardShortcutService', () => {
       document.dispatchEvent(event);
 
       expect(mockExecute).toHaveBeenCalledTimes(1);
+      document.body.removeChild(div);
+    });
+
+    it('should ignore events from contenteditable elements', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const div = document.createElement('div');
+      div.setAttribute('contenteditable', 'true');
+      document.body.appendChild(div);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: div });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).not.toHaveBeenCalled();
+      document.body.removeChild(div);
+    });
+
+    it('should ignore events from contenteditable elements with empty string value', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const div = document.createElement('div');
+      div.setAttribute('contenteditable', '');
+      document.body.appendChild(div);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: div });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).not.toHaveBeenCalled();
       document.body.removeChild(div);
     });
 
