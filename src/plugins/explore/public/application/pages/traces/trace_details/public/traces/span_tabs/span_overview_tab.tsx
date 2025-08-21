@@ -20,6 +20,7 @@ import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { nanoToMilliSec, isEmpty, round } from '../../utils/helper_functions';
 import { extractSpanDuration, extractHttpStatusCode } from '../../utils/span_data_utils';
+import { isSpanError, resolveServiceNameFromSpan } from '../ppl_resolve_helpers';
 import './span_tabs.scss';
 
 export interface SpanOverviewTabProps {
@@ -94,15 +95,16 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
     }
 
     const spanId = selectedSpan.spanId;
-    const serviceName = selectedSpan.serviceName;
+    const serviceName = resolveServiceNameFromSpan(selectedSpan);
     const operation = selectedSpan.name;
     const duration = extractSpanDuration(selectedSpan);
     const startTime = selectedSpan.startTime;
-    const hasError = selectedSpan['status.code'] === 2;
+    const hasError = isSpanError(selectedSpan);
 
     // Extract HTTP-specific attributes
-    const httpMethod = selectedSpan.attributes?.['http.method'];
-    const httpUrl = selectedSpan.attributes?.['http.url'];
+    const httpMethod =
+      selectedSpan.attributes?.['http.method'] || selectedSpan.attributes?.['http.request.method'];
+    const httpUrl = selectedSpan.attributes?.['http.url'] || selectedSpan.attributes?.['url.full'];
     const httpStatusCode = extractHttpStatusCode(selectedSpan);
 
     return {
@@ -222,7 +224,7 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
       <EuiSpacer size="l" />
 
       {/* Requests & Response Section */}
-      {(httpUrl || httpMethod) && (
+      {(httpUrl || httpMethod || httpStatusCode) && (
         <>
           <EuiTitle size="xs">
             <h3>

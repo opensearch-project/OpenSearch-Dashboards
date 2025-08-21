@@ -70,13 +70,15 @@ export class KeyboardShortcutService {
       const conflictingShortcuts = existingShortcuts
         .map((s) => `${s.id} (${s.pluginId})`)
         .join(', ');
-      // eslint-disable-next-line no-console
-      console.warn(
-        `keyboard shortcut conflict detected for key "${shortcut.keys}". ` +
-          `New shortcut "${shortcut.id}" from plugin "${shortcut.pluginId}" ` +
-          `conflicts with active shortcuts: ${conflictingShortcuts}. ` +
-          `The new shortcut will take precedence when the key is pressed.`
-      );
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `keyboard shortcut conflict detected for key "${shortcut.keys}". ` +
+            `New shortcut "${shortcut.id}" from plugin "${shortcut.pluginId}" ` +
+            `conflicts with active shortcuts: ${conflictingShortcuts}. ` +
+            `The new shortcut will take precedence when the key is pressed.`
+        );
+      }
     }
 
     this.shortcutsMapByKey.set(key, [...existingShortcuts, shortcut]);
