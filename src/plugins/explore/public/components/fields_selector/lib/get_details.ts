@@ -68,5 +68,6 @@ export function getDetails(
       bucket.display = indexPattern.getFormatterForField(field).convert(bucket.value);
     }
   }
+
   return details;
 }

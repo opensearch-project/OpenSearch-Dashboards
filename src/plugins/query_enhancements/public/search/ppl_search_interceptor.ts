@@ -103,7 +103,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     return request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
   }
 
-  private async buildQuery(request: IOpenSearchDashboardsSearchRequest) {
+  private async buildQuery(request: IOpenSearchDashboardsSearchRequest, options?: any) {
     const query = this.getQuery(request);
     // Only append filters if query is running search command (e.g. not describe command)
     if (!isPPLSearchQuery(query)) return query;
@@ -127,9 +127,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const datasetService = this.queryService.queryString.getDatasetService();
     const dataset = query.dataset;
+
+    // Check if skipTimeFilter is set in the search request fields
+    const skipTimeFilter = request.params?.body?.skipTimeFilter;
+
     if (
       dataset &&
       dataset.timeFieldName &&
+      !skipTimeFilter && // Skip time filters if skipTimeFilter is true
       // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {

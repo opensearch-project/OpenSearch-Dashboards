@@ -20,6 +20,7 @@ import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
 import { DEFAULT_DATA, IFieldType, UI_SETTINGS } from '../../../common';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
+import { getDataViews } from '../../services';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -57,7 +58,7 @@ const fetchFromAPI = async (http: HttpSetup, body: string) => {
   try {
     return await http.fetch({
       method: 'POST',
-      path: '/api/enhancements/search/sql',
+      path: `/api/enhancements/search/_sql`,
       body,
     });
   } catch (err) {
@@ -100,53 +101,121 @@ export const fetchData = (
   });
 };
 
+// TODO: Pass in a Query Object instead of indexPattern object
 export const fetchColumnValues = async (
   table: string,
   column: string,
   services: IDataPluginServices,
-  fieldInOsd: IndexPatternField | undefined,
-  datasetType: string | undefined
+  indexPattern: IndexPattern,
+  datasetType: string | undefined,
+  skipTimeFilter?: boolean
 ): Promise<any[]> => {
-  if (!datasetType || !Object.values(DEFAULT_DATA.SET_TYPES).includes(datasetType)) {
+  const fieldInOsd = indexPattern.fields.getByName(column);
+
+  if (!fieldInOsd?.isSuggestionAvailable()) {
     return [];
   }
 
-  // default to true/false values for type boolean
+  // For Boolean fields directly return the values
   if (fieldInOsd?.type === 'boolean') {
     return ['true', 'false'];
   }
 
-  const allowedType = ['string'];
-  // don't return values if ui settings prevent it or the field type isn't allowed
-  if (
-    !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
-    !fieldInOsd ||
-    !allowedType.includes(fieldInOsd.type)
-  ) {
-    return [];
+  // Return cached Autocomplete Results if available
+  if (fieldInOsd?.spec.suggestions?.values && fieldInOsd?.spec.suggestions?.values.length > 0) {
+    return fieldInOsd.spec.suggestions.values;
   }
-  const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
 
-  // get dataset for connecting to the cluster currently engaged
-  const dataset = services.data.query.queryString.getQuery().dataset;
+  // Return topQueryValues if available and fire async API call to update the cache for subsequent calls
+  if (
+    fieldInOsd?.spec.suggestions?.topValues &&
+    fieldInOsd?.spec.suggestions?.topValues.length > 0
+  ) {
+    // Fire async API call to update cache in non-blocking manner
+    updateFieldValuesAsync(
+      table,
+      column,
+      services,
+      indexPattern,
+      datasetType,
+      fieldInOsd,
+      skipTimeFilter
+    );
+    return fieldInOsd.spec.suggestions.topValues;
+  }
 
-  return (
-    await fetchFromAPI(
-      services.http,
-      JSON.stringify({
-        query: {
-          query: `SELECT ${escapeIdentifier(column)} FROM ${escapeIdentifier(
-            table
-          )} GROUP BY ${escapeIdentifier(column)} ORDER BY COUNT(${escapeIdentifier(
-            column
-          )}) DESC LIMIT ${limit}`,
-          language: 'SQL',
-          format: 'jdbc',
-          dataset,
-        },
-      })
-    )
-  ).body.fields[0].values;
+  // Fire a synchronous query to fetch values
+  await updateFieldValuesAsync(
+    table,
+    column,
+    services,
+    indexPattern,
+    datasetType,
+    fieldInOsd,
+    skipTimeFilter
+  );
+
+  // Return the results of synchronous calls
+  return fieldInOsd?.spec.suggestions?.values ?? [];
+};
+
+// Non-blocking async function to update field values in background
+const updateFieldValuesAsync = async (
+  table: string,
+  column: string,
+  services: IDataPluginServices,
+  indexPattern: IndexPattern,
+  datasetType: string | undefined,
+  fieldInOsd: IndexPatternField | undefined,
+  skipTimeFilter?: boolean
+): Promise<void> => {
+  try {
+    // Check if conditions allow API call
+    if (!datasetType || !Object.values(DEFAULT_DATA.SET_TYPES).includes(datasetType)) {
+      return;
+    }
+    if (
+      !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
+      !fieldInOsd ||
+      !indexPattern
+    ) {
+      return;
+    }
+
+    const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
+
+    const dataView = await getDataViews().get(indexPattern.id!);
+    const dataset = await getDataViews().convertToDataset(dataView);
+
+    const searchSource = await services.data.search.searchSource.create();
+    searchSource.setFields({
+      index: dataView,
+      query: {
+        query: `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`,
+        language: 'PPL',
+        dataset,
+      },
+      skipTimeFilter,
+    });
+
+    const response = await searchSource.fetch();
+
+    // Extract field values from response
+    const values = response.hits.hits.map((hit) => hit._source?.[column]);
+
+    if (values) {
+      // Update the field with fresh API values
+      if (!fieldInOsd.spec.suggestions) {
+        fieldInOsd.spec.suggestions = {};
+      }
+      fieldInOsd.spec.suggestions.values = values;
+
+      // Save the updated IndexPattern to cache
+      getDataViews().saveToCache(indexPattern.id!, indexPattern as any);
+    }
+  } catch (error) {
+    // Silently failing here not blocking the user
+  }
 };
 
 export const formatValuesToSuggestions = <T extends { toString(): string | null } | null>(
