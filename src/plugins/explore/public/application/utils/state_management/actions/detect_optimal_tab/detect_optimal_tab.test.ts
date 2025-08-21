@@ -117,7 +117,6 @@ describe('detect_optimal_tab', () => {
           id: 'rule-id',
           name: 'rule-name',
           matches: jest.fn(),
-          matchIndex: [0, 1, 0],
           chartTypes: [],
         },
       });
@@ -140,7 +139,6 @@ describe('detect_optimal_tab', () => {
           id: 'rule-id',
           name: 'rule-name',
           matches: jest.fn(),
-          matchIndex: [0, 1, 0],
           chartTypes: [],
         },
       });
@@ -177,7 +175,6 @@ describe('detect_optimal_tab', () => {
           id: 'rule-id',
           name: 'rule-name',
           matches: jest.fn(),
-          matchIndex: [0, 1, 0],
           chartTypes: [],
         },
       });
@@ -245,7 +242,6 @@ describe('detect_optimal_tab', () => {
           id: 'rule-id',
           name: 'rule-name',
           matches: jest.fn(),
-          matchIndex: [0, 1, 0],
           chartTypes: [],
         },
       });

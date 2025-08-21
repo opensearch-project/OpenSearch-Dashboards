@@ -1,12 +1,6 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 /**
@@ -60,14 +54,48 @@ export interface ShortcutDefinition {
 
   /**
    * Key combination that triggers the shortcut
-   * Format: 'ctrl+s', 'shift+d', 'alt+enter', etc.
+   * Format: 'cmd+s', 'shift+d', 'alt+enter', etc.
    * Case-insensitive, normalized internally
    */
   keys: string;
 
   /**
    * Function to execute when the shortcut is triggered
-   * Can be async for operations that require API calls
    */
-  execute: () => void | Promise<void>;
+  execute: () => void;
+}
+
+/**
+ * Keys that can be displayed with special symbols or formatting.
+ * Includes both modifier keys and special keys that have platform-specific display representations.
+ * Used to generate user-friendly display strings (e.g., '⌘' for 'cmd' on Mac).
+ */
+export type DisplayMappingKeys =
+  | 'ctrl'
+  | 'alt'
+  | 'shift'
+  | 'cmd'
+  | 'enter'
+  | 'backspace'
+  | 'delete'
+  | 'tab'
+  | 'escape'
+  | 'space'
+  | 'up'
+  | 'down'
+  | 'left'
+  | 'right'
+  | 'plus';
+
+/**
+ * Platform-specific display representations for keys.
+ * Maps key names to their visual representation for each platform.
+ *
+ * @example
+ * // Mac: 'cmd' → '⌘', 'shift' → '⇧', 'up' → '↑'
+ * // Windows/Linux: 'cmd' → 'Ctrl', 'shift' → 'Shift', 'up' → '↑'
+ */
+export interface PlatformDisplayMappings {
+  readonly mac: Record<DisplayMappingKeys, string>;
+  readonly other: Record<DisplayMappingKeys, string>;
 }

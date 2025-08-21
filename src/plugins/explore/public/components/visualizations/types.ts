@@ -30,12 +30,17 @@ export interface VisualizationRule {
   id: string; // Unique rule identifier
   name: string;
   description?: string;
+  /**
+   * This function checks if the rule can be matched for the given data,
+   * If `NOT_MATCH`, the charts defined by this rule cannot be created with the data
+   * If `EXACT_MATCH`, the charts defined by this rule can be created automatically with the data
+   * If `OVER_MATCH`, the charts defined by this rule can be created but requires to select less fields
+   */
   matches: (
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
-  ) => boolean;
-  matchIndex: number[];
+  ) => 'NOT_MATCH' | 'EXACT_MATCH' | 'COMPATIBLE_MATCH';
   chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
   // TODO: refactor to access an object of options instead of a list of arguments
   toSpec?: (
