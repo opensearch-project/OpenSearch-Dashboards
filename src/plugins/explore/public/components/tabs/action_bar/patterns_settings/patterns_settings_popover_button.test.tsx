@@ -29,8 +29,7 @@ jest.mock('./patterns_settings_popover_content', () => ({
   )),
 }));
 
-// Test harness component to provide IntlProvider
-const TestHarness = () => {
+const PatternsSettingsPopoverButtonHarness = () => {
   return (
     <IntlProvider locale="en">
       <PatternsSettingsPopoverButton />
@@ -45,7 +44,7 @@ describe('PatternsSettingsPopoverButton', () => {
   });
 
   it('renders the button with correct attributes', () => {
-    render(<TestHarness />);
+    render(<PatternsSettingsPopoverButtonHarness />);
 
     const button = screen.getByTestId('patternsSettingButton');
     expect(button).toBeInTheDocument();
@@ -53,13 +52,13 @@ describe('PatternsSettingsPopoverButton', () => {
   });
 
   it('popover is not opened by default', () => {
-    render(<TestHarness />);
+    render(<PatternsSettingsPopoverButtonHarness />);
 
     expect(screen.queryByTestId('mockPatternsSettingsPopoverContent')).not.toBeInTheDocument();
   });
 
   it('opens popover when button is clicked', () => {
-    render(<TestHarness />);
+    render(<PatternsSettingsPopoverButtonHarness />);
 
     const button = screen.getByTestId('patternsSettingButton');
     fireEvent.click(button);
@@ -70,7 +69,7 @@ describe('PatternsSettingsPopoverButton', () => {
   it('displays the correct text when patternsField is set', () => {
     (useSelector as jest.Mock).mockReturnValue('message');
 
-    render(<TestHarness />);
+    render(<PatternsSettingsPopoverButtonHarness />);
 
     expect(screen.getByText('Patterns field: message')).toBeInTheDocument();
   });
@@ -78,7 +77,7 @@ describe('PatternsSettingsPopoverButton', () => {
   it('displays the default text when patternsField is not set', () => {
     (useSelector as jest.Mock).mockReturnValue(null);
 
-    render(<TestHarness />);
+    render(<PatternsSettingsPopoverButtonHarness />);
 
     expect(screen.getByText('Select patterns field')).toBeInTheDocument();
   });
