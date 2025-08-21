@@ -4,116 +4,204 @@
  */
 
 import {
-  DATASOURCE_NAME,
-  INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITH_TIME_2,
-  DatasetTypes,
-} from '../../../../../../utils/constants';
-
-import {
-  generateAllTestConfigurations,
-  getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   getDefaultQuery,
 } from '../../../../../../utils/apps/query_enhancements/shared';
-
 import { verifyDiscoverPageState } from '../../../../../../utils/apps/query_enhancements/saved';
+import { DEFAULT_OPTIONS } from '../../../../../../utils/commands.core';
 
-import {
-  generateDatasetSelectorTestConfiguration,
-  verifyBaseState,
-  setUpBaseState,
-} from '../../../../../../utils/apps/query_enhancements/dataset_selector';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+describe('Dataset Selector', { scrollBehavior: false }, () => {
+  let testResources = {};
 
-const workspaceName = getRandomizedWorkspaceName();
+  before(() => {
+    cy.core.setupTestResources().then((resources) => {
+      testResources = resources;
+      cy.window().then((win) => {
+        win.localStorage.setItem('hasSeenInfoBox_PPL', true);
+        win.localStorage.setItem('hasSeenInfoBox_SQL', true);
 
-export const runDatasetSelectorTests = () => {
-  describe('dataset selector', { scrollBehavior: false }, () => {
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-    });
-
-    after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-    });
-
-    generateAllTestConfigurations(generateDatasetSelectorTestConfiguration).forEach((config) => {
-      it(`should be able to select and load ${config.testName} dataset-language combination using advanced dataset selector`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'discover',
-          isEnhancement: true,
-        });
-
-        if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.setIndexPatternFromAdvancedSelector(config.dataset, DATASOURCE_NAME, config.language);
-        } else {
-          cy.setIndexAsDataset(config.dataset, DATASOURCE_NAME, config.language);
-        }
-        setDatePickerDatesAndSearchIfRelevant(config.language);
-
-        verifyDiscoverPageState({
-          dataset: config.dataset,
-          queryString: getDefaultQuery(config.dataset, config.language),
-          language: config.language,
-          hitCount: config.hitCount,
-        });
-
-        // verify time field is present in the result
-        cy.getElementByTestId('docTableHeaderField').contains('Time');
-      });
-
-      it(`select the ${config.testName} dataset-language combination and cancelling the workflow restores the original state`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'discover',
-          isEnhancement: true,
-        });
-
-        // Setup the base state
-        setUpBaseState(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME);
-
-        // Verify if the base state is setup properly
-        verifyBaseState(INDEX_PATTERN_WITH_TIME);
-
-        // Try setting the dataset-language combination but click on cancel
-        if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.setIndexPatternFromAdvancedSelector(
-            config.dataset,
-            DATASOURCE_NAME,
-            config.language,
-            'cancel'
-          );
-        } else {
-          cy.setIndexAsDataset(
-            config.dataset,
-            DATASOURCE_NAME,
-            config.language,
-            'timestamp',
-            'cancel'
-          );
-        }
-
-        // Verify if the base state is retained
-        verifyBaseState(INDEX_PATTERN_WITH_TIME);
+        cy.visit(`/w/${testResources.workspaceId}/app/discover#`);
+        cy.osd.waitForLoader(true);
       });
     });
   });
-};
 
-prepareTestSuite('Dataset Selector', runDatasetSelectorTests);
+  after(() => {
+    cy.core.cleanupTestResources(testResources);
+  });
+
+  describe(`Index Patterns`, () => {
+    describe('DQL', () => {
+      const type = 'Index Patterns';
+      const dataSource = DEFAULT_OPTIONS.dataSource.title;
+      const dataset = `${dataSource}::${DEFAULT_OPTIONS.dataset.title}`;
+      const language = 'DQL';
+      const hitCount = '20,000';
+
+      it('select and load with using the advanced dataset selector', () => {
+        cy.coreQe.selectDatasetAdvanced(type, [dataset], language);
+        const queryString = getDefaultQuery(dataset, language);
+        setDatePickerDatesAndSearchIfRelevant(language);
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+
+        cy.getElementByTestId('docTableHeaderField').contains('Time');
+      });
+
+      it('select and cancel using the advanced dataset selector', () => {
+        const queryString = getDefaultQuery(dataset, language);
+        if (queryString !== '') {
+          cy.setQueryEditor(queryString);
+        }
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+        cy.coreQe.selectDatasetAdvanced(type, [dataSource], language, { shouldSubmit: false });
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+      });
+    });
+
+    describe('Lucene', () => {
+      const type = 'Index Patterns';
+      const dataSource = DEFAULT_OPTIONS.dataSource.title;
+      const dataset = `${dataSource}::${DEFAULT_OPTIONS.dataset.title}`;
+      const language = 'Lucene';
+      const hitCount = '20,000';
+
+      it('select and load with using the advanced dataset selector', () => {
+        cy.coreQe.selectDatasetAdvanced(type, [dataset], language);
+        const queryString = getDefaultQuery(dataset, language);
+        setDatePickerDatesAndSearchIfRelevant(language);
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+
+        cy.getElementByTestId('docTableHeaderField').contains('Time');
+      });
+
+      it('select and cancel using the advanced dataset selector', () => {
+        const queryString = getDefaultQuery(dataset, language);
+        if (queryString !== '') {
+          cy.setQueryEditor(queryString);
+        }
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+        cy.coreQe.selectDatasetAdvanced(type, [dataSource], language, { shouldSubmit: false });
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+      });
+    });
+
+    describe('PPL', () => {
+      const type = 'Index Patterns';
+      const dataSource = DEFAULT_OPTIONS.dataSource.title;
+      const dataset = `${dataSource}::${DEFAULT_OPTIONS.dataset.title}`;
+      const language = 'PPL';
+      const hitCount = '20,000';
+
+      it('select and load with using the advanced dataset selector', () => {
+        cy.coreQe.selectDatasetAdvanced(type, [dataset], language);
+        const queryString = getDefaultQuery(dataset, language);
+        setDatePickerDatesAndSearchIfRelevant(language);
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+
+        cy.getElementByTestId('docTableHeaderField').contains('Time');
+      });
+
+      it('select and cancel using the advanced dataset selector', () => {
+        const queryString = getDefaultQuery(dataset, language);
+        if (queryString !== '') {
+          cy.setQueryEditor(queryString);
+        }
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+        cy.coreQe.selectDatasetAdvanced(type, [dataSource], language, { shouldSubmit: false });
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+      });
+    });
+
+    describe('SQL', () => {
+      const type = 'Index Patterns';
+      const dataSource = DEFAULT_OPTIONS.dataSource.title;
+      const dataset = `${dataSource}::${DEFAULT_OPTIONS.dataset.title}`;
+      const language = 'SQL';
+      const hitCount = '20,000';
+
+      it('select and load with using the advanced dataset selector', () => {
+        cy.coreQe.selectDatasetAdvanced(type, [dataset], language);
+        const queryString = getDefaultQuery(dataset, language);
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+      });
+
+      it('select and cancel using the advanced dataset selector', () => {
+        const queryString = getDefaultQuery(dataset, language);
+        if (queryString !== '') {
+          cy.setQueryEditor(queryString);
+        }
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+        cy.coreQe.selectDatasetAdvanced(type, [dataSource], language, { shouldSubmit: false });
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+      });
+    });
+  });
+});
