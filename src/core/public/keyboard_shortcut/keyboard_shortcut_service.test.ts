@@ -405,7 +405,9 @@ describe('KeyboardShortcutService', () => {
         execute: mockExecute,
       };
 
-      expect(() => start.register(shortcut)).toThrow('Invalid key combination: "invalid+++key"');
+      expect(() => start.register(shortcut)).toThrow(
+        'Invalid key combination: "invalid+++key". Please refer to our documentation to see what is valid.'
+      );
     });
 
     it('should throw error for duplicate shortcut registration', () => {
