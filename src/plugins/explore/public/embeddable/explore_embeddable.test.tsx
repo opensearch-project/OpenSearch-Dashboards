@@ -9,6 +9,7 @@ import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { discoverPluginMock } from '../application/legacy/discover/mocks';
+import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 
 // Mock ReactDOM
 jest.mock('react-dom', () => ({
@@ -475,10 +476,7 @@ describe('ExploreEmbeddable', () => {
   });
 
   test('fetch throws error when no matchedRule is exist', async () => {
-    const { findRuleByIndex } = await import(
-      '../components/visualizations/visualization_builder_utils'
-    );
-    jest.mocked(findRuleByIndex).mockReturnValueOnce(undefined);
+    jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce(undefined);
 
     mockSavedExplore.visualization = JSON.stringify({
       chartType: 'line',

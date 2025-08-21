@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEqual } from 'lodash';
-import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { AxisColumnMappings, VisColumn, VisFieldType } from './types';
 
 export const convertMappingsToStrings = (mappings: AxisColumnMappings): Record<string, string> =>
@@ -29,23 +27,26 @@ export const isValidMapping = (
     allColumns.some((col) => col.name === columnName)
   );
 
-export const findRuleByIndex = (
+export const getColumnsByAxesMapping = (
   selectedAxesMapping: Partial<Record<string, string>>,
   allColumns: VisColumn[]
 ) => {
-  const counts = {
-    [VisFieldType.Categorical]: 0,
-    [VisFieldType.Numerical]: 0,
-    [VisFieldType.Date]: 0,
-  };
-  Object.values(selectedAxesMapping).forEach((columnName) => {
-    const column = allColumns.find((col) => col.name === columnName);
-    if (column?.schema! in counts) {
-      counts[column?.schema as keyof typeof counts]++;
+  const numericalColumns: VisColumn[] = [];
+  const categoricalColumns: VisColumn[] = [];
+  const dateColumns: VisColumn[] = [];
+  Object.values(selectedAxesMapping).forEach((fieldName) => {
+    const column = allColumns.find((c) => c.name === fieldName);
+    if (column?.schema === VisFieldType.Numerical) {
+      numericalColumns.push(column);
+    }
+    if (column?.schema === VisFieldType.Categorical) {
+      categoricalColumns.push(column);
+    }
+    if (column?.schema === VisFieldType.Date) {
+      dateColumns.push(column);
     }
   });
-  const index = [counts.numerical, counts.categorical, counts.date];
-  return ALL_VISUALIZATION_RULES.find((rule) => isEqual(rule.matchIndex, index));
+  return { numericalColumns, categoricalColumns, dateColumns };
 };
 
 export const getColumnMatchFromMapping = (
