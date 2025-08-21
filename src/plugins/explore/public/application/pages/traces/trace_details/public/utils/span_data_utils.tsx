@@ -82,6 +82,39 @@ export const getSpanIssueCount = (span: any): number => {
   return extractSpanIssues(span).length;
 };
 
+export const extractSpanDuration = (span: any): number => {
+  if (!span) return 0;
+
+  return (
+    span._source?.durationNano ||
+    span._source?.durationInNanos ||
+    span._source?.duration ||
+    span._source?.['duration.nanos'] ||
+    span.durationNano ||
+    span.durationInNanos ||
+    span.duration ||
+    span['duration.nanos'] ||
+    0
+  );
+};
+
+export const extractHttpStatusCode = (span: any): number | undefined => {
+  if (!span) return undefined;
+
+  const source = span._source || span;
+
+  return (
+    source['attributes.http.status_code'] ||
+    source.attributes?.['http.status_code'] ||
+    source.attributes?.http?.status_code ||
+    source.attributes?.http?.response?.status_code ||
+    source['http.status_code'] ||
+    source.http?.status_code ||
+    source.statusCode ||
+    undefined
+  );
+};
+
 /**
  * Extract overview data from a span
  */
@@ -93,7 +126,7 @@ export const getSpanOverviewData = (span: any): SpanOverviewData | null => {
     parentSpanId: span.parentSpanId,
     serviceName: span.serviceName || '',
     operationName: span.name || '',
-    duration: span.durationInNanos || 0,
+    duration: extractSpanDuration(span),
     startTime: span.startTime || '',
     endTime: span.endTime || '',
     hasError: span['status.code'] === 2 || span.status?.code === 2,

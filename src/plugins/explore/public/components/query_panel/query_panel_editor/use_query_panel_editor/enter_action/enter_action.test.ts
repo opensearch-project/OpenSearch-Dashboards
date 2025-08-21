@@ -69,17 +69,14 @@ describe('getEnterAction', () => {
         expect(mockEditor.trigger).toHaveBeenCalledWith('keyboard', 'acceptSelectedSuggestion', {});
       });
 
-      it('should trigger suggest after timeout', () => {
+      it('should only accept selected suggestion without retriggering', () => {
         const action = getEnterAction(mockHandleRun);
 
         action.run(mockEditor);
         jest.advanceTimersByTime(100);
 
-        expect(mockEditor.trigger).toHaveBeenCalledWith(
-          'keyboard',
-          'editor.action.triggerSuggest',
-          {}
-        );
+        expect(mockEditor.trigger).toHaveBeenCalledTimes(1);
+        expect(mockEditor.trigger).toHaveBeenCalledWith('keyboard', 'acceptSelectedSuggestion', {});
       });
 
       it('should not call handleRun', () => {

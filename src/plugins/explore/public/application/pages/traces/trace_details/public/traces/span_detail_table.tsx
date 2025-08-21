@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './span_detail_table.scss';
 import { RenderCustomDataGrid } from '../utils/custom_datagrid';
 import { nanoToMilliSec, round } from '../utils/helper_functions';
+import { extractSpanDuration } from '../utils/span_data_utils';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../utils/shared_const';
 
 export interface ParsedHit extends Span {
@@ -170,7 +171,7 @@ const renderSpanCellValue = ({
         </EuiLink>
       );
     case 'durationInNanos':
-      return `${round(nanoToMilliSec(Math.max(0, value)), 2)} ms`;
+      return `${round(nanoToMilliSec(Math.max(0, extractSpanDuration(item))), 2)} ms`;
     case 'startTime':
       return moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
     case 'endTime':
