@@ -45,6 +45,7 @@ import { LogHit } from './server/ppl_request_logs';
 import { TraceLogsTab } from './public/logs/trace_logs_tab';
 import { Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
+import { isSpanError } from './public/traces/ppl_resolve_helpers';
 
 export interface SpanFilter {
   field: string;
@@ -275,7 +276,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   // Calculate error count
   const errorCount = useMemo(() => {
-    return transformedHits.filter((span: TraceHit) => span.status?.code === 2).length;
+    return transformedHits.filter((span: TraceHit) => isSpanError(span)).length;
   }, [transformedHits]);
 
   // Extract services in the order they appear in the data
