@@ -1,12 +1,6 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import { KeyboardShortcutService } from './keyboard_shortcut_service';
@@ -79,7 +73,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -93,7 +87,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -107,7 +101,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
       const shortcut2: ShortcutDefinition = {
@@ -115,7 +109,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save As',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute2,
       };
 
@@ -134,7 +128,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -149,69 +143,578 @@ describe('KeyboardShortcutService', () => {
   });
 
   describe('Private Method Testing', () => {
-    it('should normalize keys to lowercase', () => {
-      // @ts-expect-error
-      const result = service.getNormalizedKey('CTRL+S');
-      expect(result).toBe('ctrl+s');
-    });
-
     it('should create namespaced ID correctly', () => {
       const shortcut = { id: 'Save', pluginId: 'Editor' };
       // @ts-expect-error
       const result = service.getNamespacedId(shortcut);
       expect(result).toBe('save.editor');
     });
-
-    it('should build event key string correctly', () => {
-      const mockEvent = {
-        ctrlKey: true,
-        altKey: false,
-        shiftKey: true,
-        metaKey: false,
-        key: 'S',
-      } as KeyboardEvent;
-
-      // @ts-expect-error
-      const result = service.getEventKeyString(mockEvent);
-      expect(result).toBe('ctrl+shift+s');
-    });
   });
 
-  describe('Key Normalization', () => {
-    it('should normalize keys to lowercase', () => {
+  describe('Real-Time Conflict Detection', () => {
+    let consoleWarnSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    });
+
+    afterEach(() => {
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should not warn when registering first shortcut for a key', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save Document',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+    });
+
+    it('should warn immediately when registering conflicting shortcut', () => {
       const start = service.start();
       const shortcut1: ShortcutDefinition = {
         id: 'save',
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'CTRL+S',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
       const shortcut2: ShortcutDefinition = {
-        id: 'save2',
-        pluginId: 'editor',
-        name: 'Save Document 2',
-        category: 'editing',
-        keys: 'ctrl+s',
+        id: 'quickSave',
+        pluginId: 'fileManager',
+        name: 'Quick Save',
+        category: 'file',
+        keys: 'cmd+s',
         execute: mockExecute2,
       };
 
       start.register(shortcut1);
       start.register(shortcut2);
 
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'keyboard shortcut conflict detected for key "cmd+s". ' +
+          'New shortcut "quickSave" from plugin "fileManager" ' +
+          'conflicts with active shortcuts: save (editor). ' +
+          'The new shortcut will take precedence when the key is pressed.'
+      );
+    });
+
+    it('should warn for each new conflicting shortcut', () => {
+      const start = service.start();
+      const shortcuts: ShortcutDefinition[] = [
+        {
+          id: 'save',
+          pluginId: 'editor',
+          name: 'Save',
+          category: 'editing',
+          keys: 'cmd+s',
+          execute: jest.fn(),
+        },
+        {
+          id: 'quickSave',
+          pluginId: 'fileManager',
+          name: 'Quick Save',
+          category: 'file',
+          keys: 'cmd+s',
+          execute: jest.fn(),
+        },
+        {
+          id: 'autoSave',
+          pluginId: 'backup',
+          name: 'Auto Save',
+          category: 'backup',
+          keys: 'cmd+s',
+          execute: jest.fn(),
+        },
+      ];
+
+      start.register(shortcuts[0]);
+      start.register(shortcuts[1]);
+      start.register(shortcuts[2]);
+
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(2);
+
+      expect(consoleWarnSpy).toHaveBeenNthCalledWith(
+        1,
+        'keyboard shortcut conflict detected for key "cmd+s". ' +
+          'New shortcut "quickSave" from plugin "fileManager" ' +
+          'conflicts with active shortcuts: save (editor). ' +
+          'The new shortcut will take precedence when the key is pressed.'
+      );
+
+      expect(consoleWarnSpy).toHaveBeenNthCalledWith(
+        2,
+        'keyboard shortcut conflict detected for key "cmd+s". ' +
+          'New shortcut "autoSave" from plugin "backup" ' +
+          'conflicts with active shortcuts: save (editor), quickSave (fileManager). ' +
+          'The new shortcut will take precedence when the key is pressed.'
+      );
+    });
+
+    it('should execute shortcuts without additional warnings', () => {
+      const start = service.start();
+      const shortcut1: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save Document',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+      const shortcut2: ShortcutDefinition = {
+        id: 'quickSave',
+        pluginId: 'fileManager',
+        name: 'Quick Save',
+        category: 'file',
+        keys: 'cmd+s',
+        execute: mockExecute2,
+      };
+
+      start.register(shortcut1);
+      start.register(shortcut2);
+
+      consoleWarnSpy.mockClear();
+
       const event = new KeyboardEvent('keydown', {
-        key: 'S',
+        key: 's',
+        code: 'KeyS',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      document.dispatchEvent(event);
+
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+
+      expect(mockExecute2).toHaveBeenCalledTimes(1);
+      expect(mockExecute).not.toHaveBeenCalled();
+    });
+
+    it('should not warn after unregistering conflicting shortcuts', () => {
+      const start = service.start();
+      const shortcut1: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+      const shortcut2: ShortcutDefinition = {
+        id: 'quickSave',
+        pluginId: 'fileManager',
+        name: 'Quick Save',
+        category: 'file',
+        keys: 'cmd+s',
+        execute: mockExecute2,
+      };
+      const shortcut3: ShortcutDefinition = {
+        id: 'newSave',
+        pluginId: 'newPlugin',
+        name: 'New Save',
+        category: 'file',
+        keys: 'cmd+s',
+        execute: jest.fn(),
+      };
+
+      start.register(shortcut1);
+      start.register(shortcut2);
+      consoleWarnSpy.mockClear();
+
+      start.unregister({ id: 'save', pluginId: 'editor' });
+      start.unregister({ id: 'quickSave', pluginId: 'fileManager' });
+
+      start.register(shortcut3);
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle same-page component conflicts with immediate warnings', () => {
+      const start = service.start();
+
+      const componentAShortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+      start.register(componentAShortcut);
+
+      const componentBShortcut: ShortcutDefinition = {
+        id: 'export',
+        pluginId: 'dashboard',
+        name: 'Export',
+        category: 'file',
+        keys: 'cmd+s',
+        execute: mockExecute2,
+      };
+      start.register(componentBShortcut);
+
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'keyboard shortcut conflict detected for key "cmd+s". ' +
+          'New shortcut "export" from plugin "dashboard" ' +
+          'conflicts with active shortcuts: save (editor). ' +
+          'The new shortcut will take precedence when the key is pressed.'
+      );
+
+      consoleWarnSpy.mockClear();
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        code: 'KeyS',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      document.dispatchEvent(event);
+
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+      expect(mockExecute2).toHaveBeenCalledTimes(1);
+      expect(mockExecute).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Error Handling', () => {
+    let consoleErrorSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    });
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should throw error for invalid key string during registration', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'invalid',
+        pluginId: 'test',
+        name: 'Invalid Shortcut',
+        category: 'test',
+        keys: 'invalid+++key',
+        execute: mockExecute,
+      };
+
+      expect(() => start.register(shortcut)).toThrow('Invalid key combination: "invalid+++key"');
+    });
+
+    it('should throw error for duplicate shortcut registration', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save Document',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      expect(() => start.register(shortcut)).toThrow(
+        'Shortcut "save" from plugin "editor" is already registered'
+      );
+    });
+
+    it('should log error when shortcut execution fails', () => {
+      const start = service.start();
+      const failingExecute = jest.fn().mockImplementation(() => {
+        throw new Error('Execution failed');
+      });
+      const shortcut: ShortcutDefinition = {
+        id: 'failing',
+        pluginId: 'test',
+        name: 'Failing Shortcut',
+        category: 'test',
+        keys: 'cmd+f',
+        execute: failingExecute,
+      };
+
+      start.register(shortcut);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 'f',
+        code: 'KeyF',
         ctrlKey: true,
         bubbles: true,
       });
 
-      jest.spyOn(event, 'preventDefault');
       document.dispatchEvent(event);
 
-      expect(mockExecute2).toHaveBeenCalledTimes(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error executing shortcut failing from plugin test:',
+        expect.any(Error)
+      );
+    });
+  });
+
+  describe('Element Filtering', () => {
+    it('should ignore events from SELECT elements', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const select = document.createElement('select');
+      document.body.appendChild(select);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: select });
+      document.dispatchEvent(event);
+
       expect(mockExecute).not.toHaveBeenCalled();
-      expect(event.preventDefault).toHaveBeenCalled();
+      document.body.removeChild(select);
+    });
+
+    it('should ignore events from elements with textbox role', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const div = document.createElement('div');
+      div.setAttribute('role', 'textbox');
+      document.body.appendChild(div);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: div });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).not.toHaveBeenCalled();
+      document.body.removeChild(div);
+    });
+
+    it('should ignore events from elements with combobox role', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const div = document.createElement('div');
+      div.setAttribute('role', 'combobox');
+      document.body.appendChild(div);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: div });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).not.toHaveBeenCalled();
+      document.body.removeChild(div);
+    });
+
+    it('should ignore events from elements with searchbox role', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const div = document.createElement('div');
+      div.setAttribute('role', 'searchbox');
+      document.body.appendChild(div);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: div });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).not.toHaveBeenCalled();
+      document.body.removeChild(div);
+    });
+
+    it('should handle events from regular elements', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        code: 'KeyS',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: div });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+      document.body.removeChild(div);
+    });
+
+    it('should ignore events from contenteditable elements', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const div = document.createElement('div');
+      div.setAttribute('contenteditable', 'true');
+      document.body.appendChild(div);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: div });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).not.toHaveBeenCalled();
+      document.body.removeChild(div);
+    });
+
+    it('should ignore events from contenteditable elements with empty string value', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+      const div = document.createElement('div');
+      div.setAttribute('contenteditable', '');
+      document.body.appendChild(div);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: div });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).not.toHaveBeenCalled();
+      document.body.removeChild(div);
+    });
+
+    it('should handle events with non-HTMLElement targets', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        code: 'KeyS',
+        ctrlKey: true,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, 'target', { value: {} });
+      document.dispatchEvent(event);
+
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Service Cleanup', () => {
+    it('should clear all data structures on stop', () => {
+      const start = service.start();
+      const shortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+
+      start.register(shortcut);
+
+      const event = new KeyboardEvent('keydown', {
+        key: 's',
+        code: 'KeyS',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      document.dispatchEvent(event);
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+
+      service.stop();
+
+      mockExecute.mockClear();
+      document.dispatchEvent(event);
+      expect(mockExecute).not.toHaveBeenCalled();
     });
   });
 
@@ -223,7 +726,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -231,6 +734,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 's',
+        code: 'KeyS',
         ctrlKey: true,
         bubbles: true,
       });
@@ -249,7 +753,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
       const shortcut2: ShortcutDefinition = {
@@ -257,7 +761,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save As',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute2,
       };
 
@@ -266,6 +770,7 @@ describe('KeyboardShortcutService', () => {
 
       const event = new KeyboardEvent('keydown', {
         key: 's',
+        code: 'KeyS',
         ctrlKey: true,
         bubbles: true,
       });
@@ -282,7 +787,7 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'editor',
         name: 'Save Document',
         category: 'editing',
-        keys: 'ctrl+s',
+        keys: 'cmd+s',
         execute: mockExecute,
       };
 
@@ -312,7 +817,7 @@ describe('KeyboardShortcutService', () => {
           pluginId: 'editor',
           name: 'Save',
           category: 'editing',
-          keys: 'ctrl+s',
+          keys: 'cmd+s',
           execute: jest.fn(),
         },
         {
@@ -320,7 +825,7 @@ describe('KeyboardShortcutService', () => {
           pluginId: 'editor',
           name: 'Save As',
           category: 'editing',
-          keys: 'ctrl+shift+s',
+          keys: 'cmd+shift+s',
           execute: jest.fn(),
         },
         {
@@ -338,6 +843,7 @@ describe('KeyboardShortcutService', () => {
       document.dispatchEvent(
         new KeyboardEvent('keydown', {
           key: 's',
+          code: 'KeyS',
           ctrlKey: true,
         })
       );
@@ -346,6 +852,7 @@ describe('KeyboardShortcutService', () => {
       document.dispatchEvent(
         new KeyboardEvent('keydown', {
           key: 's',
+          code: 'KeyS',
           ctrlKey: true,
           shiftKey: true,
         })
@@ -355,148 +862,11 @@ describe('KeyboardShortcutService', () => {
       document.dispatchEvent(
         new KeyboardEvent('keydown', {
           key: 'f',
+          code: 'KeyF',
           altKey: true,
         })
       );
       expect(shortcuts[2].execute).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should handle errors in shortcut execution gracefully', () => {
-      const start = service.start();
-      const errorExecute = jest.fn(() => {
-        throw new Error('Test error');
-      });
-
-      const shortcut: ShortcutDefinition = {
-        id: 'error',
-        pluginId: 'test',
-        name: 'Error Shortcut',
-        category: 'test',
-        keys: 'ctrl+e',
-        execute: errorExecute,
-      };
-
-      start.register(shortcut);
-
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      const event = new KeyboardEvent('keydown', {
-        key: 'e',
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      expect(() => document.dispatchEvent(event)).not.toThrow();
-      expect(errorExecute).toHaveBeenCalledTimes(1);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error executing keyboard shortcut'),
-        expect.any(Error)
-      );
-
-      consoleSpy.mockRestore();
-    });
-  });
-
-  describe('Configuration Support', () => {
-    it('should start with keyboard shortcuts enabled by default', () => {
-      const start = service.start();
-      const shortcut: ShortcutDefinition = {
-        id: 'save',
-        pluginId: 'editor',
-        name: 'Save Document',
-        category: 'editing',
-        keys: 'ctrl+s',
-        execute: mockExecute,
-      };
-
-      start.register(shortcut);
-
-      const event = new KeyboardEvent('keydown', {
-        key: 's',
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      document.dispatchEvent(event);
-      expect(mockExecute).toHaveBeenCalledTimes(1);
-    });
-
-    it('should start with keyboard shortcuts enabled when explicitly configured', () => {
-      const start = service.start({ enabled: true });
-      const shortcut: ShortcutDefinition = {
-        id: 'save',
-        pluginId: 'editor',
-        name: 'Save Document',
-        category: 'editing',
-        keys: 'ctrl+s',
-        execute: mockExecute,
-      };
-
-      start.register(shortcut);
-
-      const event = new KeyboardEvent('keydown', {
-        key: 's',
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      document.dispatchEvent(event);
-      expect(mockExecute).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not register shortcuts when disabled', () => {
-      const start = service.start({ enabled: false });
-      const shortcut: ShortcutDefinition = {
-        id: 'save',
-        pluginId: 'editor',
-        name: 'Save Document',
-        category: 'editing',
-        keys: 'ctrl+s',
-        execute: mockExecute,
-      };
-
-      start.register(shortcut);
-
-      const event = new KeyboardEvent('keydown', {
-        key: 's',
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      document.dispatchEvent(event);
-      expect(mockExecute).not.toHaveBeenCalled();
-    });
-
-    it('should not add event listener when disabled', () => {
-      service.start({ enabled: false });
-      expect(document.addEventListener).not.toHaveBeenCalled();
-    });
-
-    it('should not register shortcuts during setup when service will be disabled', () => {
-      const setup = service.setup();
-      const shortcut: ShortcutDefinition = {
-        id: 'save',
-        pluginId: 'editor',
-        name: 'Save Document',
-        category: 'editing',
-        keys: 'ctrl+s',
-        execute: mockExecute,
-      };
-
-      setup.register(shortcut);
-
-      service.start({ enabled: false });
-
-      const event = new KeyboardEvent('keydown', {
-        key: 's',
-        ctrlKey: true,
-        bubbles: true,
-      });
-
-      document.dispatchEvent(event);
-      expect(mockExecute).not.toHaveBeenCalled();
     });
   });
 });
