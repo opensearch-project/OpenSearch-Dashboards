@@ -18,10 +18,6 @@ jest.mock('../state_management/actions/query_actions', () => ({
   defaultPrepareQueryString: jest.fn(),
 }));
 
-jest.mock('../state_management/selectors', () => ({
-  selectQueryStatusMap: jest.fn(),
-}));
-
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 const mockDefaultPrepareQueryString = defaultPrepareQueryString as jest.MockedFunction<
   typeof defaultPrepareQueryString

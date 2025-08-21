@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './error_guard.scss';
+
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiErrorBoundary, EuiFlexGroup, EuiIcon, EuiTitle } from '@elastic/eui';
 import { ErrorCodeBlock } from './error_code_block';
-import './error_panel.scss';
 import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
 import { useTabError } from '../../../application/utils/hooks/use_tab_error';
 
@@ -35,7 +36,7 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
 
   return (
     <EuiErrorBoundary>
-      <EuiFlexGroup direction="column" alignItems="center" className="exploreErrorPanel">
+      <EuiFlexGroup direction="column" alignItems="center" className="exploreErrorGuard">
         <EuiIcon type="alert" size="xl" color="red" />
         <EuiTitle size="l">
           <h1>{error.message.reason || errorDefaultTitle}</h1>
