@@ -5,6 +5,11 @@
 
 import { round } from '../utils/helper_functions';
 import { defaultColors } from '../utils/shared_const';
+import {
+  isSpanError,
+  resolveServiceNameFromSpan,
+  hasNanosecondPrecision,
+} from '../traces/ppl_resolve_helpers';
 
 interface SpanSource {
   traceId: string;
@@ -211,27 +216,50 @@ export function convertToVegaGanttData(
 
   const values: VegaSpan[] = spanTimestamps.map(({ span, startTimeMs, endTimeMs, level }) => {
     const source = getSpanSource(span);
+    const serviceName = resolveServiceNameFromSpan(span) || source.serviceName;
 
     const relativeStartTime = round(startTimeMs - minStartTime, 3);
-    const duration = round(endTimeMs - startTimeMs, 3);
+
+    let duration: number;
+
+    if (startTimeMs === 0 && endTimeMs === 0) {
+      duration = 0;
+    } else {
+      const hasStartNanoPrecision = hasNanosecondPrecision(source.startTime);
+      const hasEndNanoPrecision = hasNanosecondPrecision(source.endTime);
+
+      // If both timestamps have nanosecond precision, use calculated duration
+      if (hasStartNanoPrecision && hasEndNanoPrecision) {
+        duration = round(endTimeMs - startTimeMs, 3);
+      }
+      // If timestamps lack precision, prefer provided duration fields for better accuracy
+      else if (source.durationInNanos > 0) {
+        // Convert nanoseconds to milliseconds for Gantt chart display
+        duration = round(source.durationInNanos / 1000000, 3);
+      }
+      // Fall back to calculated duration from lower-precision timestamps
+      else {
+        duration = round(endTimeMs - startTimeMs, 3);
+      }
+    }
 
     maxEndTime = Math.max(maxEndTime, relativeStartTime + duration);
 
-    if (!serviceColorMap[source.serviceName]) {
-      serviceColorMap[source.serviceName] = defaultColors[colorIndex % defaultColors.length];
+    if (!serviceColorMap[serviceName]) {
+      serviceColorMap[serviceName] = defaultColors[colorIndex % defaultColors.length];
       colorIndex++;
     }
 
     return {
       spanId: source.spanId,
       parentSpanId: source.parentSpanId || '',
-      serviceName: source.serviceName,
+      serviceName,
       name: source.name,
       startTime: relativeStartTime,
       duration,
       level,
-      hasError: source['status.code'] === 2,
-      color: serviceColorMap[source.serviceName],
+      hasError: isSpanError(source),
+      color: serviceColorMap[serviceName],
     };
   });
 
