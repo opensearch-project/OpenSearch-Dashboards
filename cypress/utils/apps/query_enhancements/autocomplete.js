@@ -373,7 +373,7 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('where', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
-        selectSuggestion('Configuration', useKeyboard);
+        selectSuggestion('Development', useKeyboard);
       } else if (config.language === QueryLanguages.SQL.name) {
         selectSuggestion('SELECT', useKeyboard);
         selectSuggestion('*', useKeyboard);
@@ -382,10 +382,10 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('WHERE', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
-        selectSuggestion('Configuration', useKeyboard);
+        selectSuggestion('Development', useKeyboard);
       } else if (config.language === QueryLanguages.DQL.name) {
         selectSuggestion('unique_category', useKeyboard);
-        selectSuggestion('Configuration', useKeyboard);
+        selectSuggestion('Development', useKeyboard);
       }
     });
 };

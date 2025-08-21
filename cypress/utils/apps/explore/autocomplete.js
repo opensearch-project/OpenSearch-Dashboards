@@ -348,7 +348,7 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('where', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
-        selectSuggestion('Configuration', useKeyboard);
+        selectSuggestion('Development', useKeyboard);
       }
     });
 };
