@@ -35,9 +35,7 @@ export class KeyStringParser {
     const lowercasedKeyString = keyString.toLowerCase();
     if (!VALID_KEY_STRING_REGEX.test(lowercasedKeyString)) {
       throw new Error(
-        `Invalid key combination: "${keyString}". ` +
-          `Use supported keys (a-z, 0-9, punctuation, arrows, special keys) with valid modifiers (cmd, alt, shift). ` +
-          `Examples: "cmd+s", "alt+shift+a", "g+d"`
+        `Invalid key combination: "${keyString}". Please refer to our documentation to see what is valid.`
       );
     }
 
