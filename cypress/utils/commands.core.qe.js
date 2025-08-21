@@ -41,6 +41,12 @@ cy.coreQe.add('selectDatasetAdvanced', (type, path, language, options = {}) => {
   cy.getElementByTestId('datasetSelectorNext').should('be.visible').click({ force: true });
   cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
 
+  if (options.timeFieldName) {
+    cy.getElementByTestId('advancedSelectorTimeFieldSelect')
+      .should('be.visible')
+      .select(options.timeFieldName);
+  }
+
   if (shouldSubmit) {
     cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
     return;
@@ -50,4 +56,32 @@ cy.coreQe.add('selectDatasetAdvanced', (type, path, language, options = {}) => {
     .should('be.visible')
     .contains('Cancel')
     .click();
+});
+
+cy.coreQe.add('setQueryEditor', (query, options = {}) => {
+  const { shouldSubmit, shouldEscape } = {
+    ...{ shouldSubmit: true, shouldEscape: false },
+    ...options,
+  };
+
+  Cypress.log({
+    name: 'setQueryEditor',
+    displayName: 'set query',
+    message: query,
+  });
+
+  cy.get('.inputarea').should('be.visible').clear({ force: true });
+
+  cy.get('.inputarea')
+    .should('be.visible')
+    .wait(200)
+    .type(`${query}${shouldEscape ? '{esc}' : ''}`, {
+      delay: 50,
+      force: true,
+      ...options,
+    });
+
+  if (shouldSubmit) {
+    cy.updateTopNav({ log: false });
+  }
 });

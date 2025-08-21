@@ -31,16 +31,17 @@ describe('Dataset Selector', { scrollBehavior: false }, () => {
   });
 
   describe(`Index Patterns`, () => {
+    const type = 'Index Patterns';
+    const dataSource = DEFAULT_OPTIONS.dataSource.title;
+    const datasetTitle = DEFAULT_OPTIONS.dataset.title;
+    const dataset = `${dataSource}::${datasetTitle}`;
     describe('DQL', () => {
-      const type = 'Index Patterns';
-      const dataSource = DEFAULT_OPTIONS.dataSource.title;
-      const dataset = `${dataSource}::${DEFAULT_OPTIONS.dataset.title}`;
       const language = 'DQL';
       const hitCount = '20,000';
 
       it('select and load with using the advanced dataset selector', () => {
         cy.coreQe.selectDatasetAdvanced(type, [dataset], language);
-        const queryString = getDefaultQuery(dataset, language);
+        const queryString = getDefaultQuery(datasetTitle, language);
         setDatePickerDatesAndSearchIfRelevant(language);
 
         verifyDiscoverPageState({
@@ -54,7 +55,7 @@ describe('Dataset Selector', { scrollBehavior: false }, () => {
       });
 
       it('select and cancel using the advanced dataset selector', () => {
-        const queryString = getDefaultQuery(dataset, language);
+        const queryString = getDefaultQuery(datasetTitle, language);
         if (queryString !== '') {
           cy.setQueryEditor(queryString);
         }
@@ -76,15 +77,12 @@ describe('Dataset Selector', { scrollBehavior: false }, () => {
     });
 
     describe('Lucene', () => {
-      const type = 'Index Patterns';
-      const dataSource = DEFAULT_OPTIONS.dataSource.title;
-      const dataset = `${dataSource}::${DEFAULT_OPTIONS.dataset.title}`;
       const language = 'Lucene';
       const hitCount = '20,000';
 
       it('select and load with using the advanced dataset selector', () => {
         cy.coreQe.selectDatasetAdvanced(type, [dataset], language);
-        const queryString = getDefaultQuery(dataset, language);
+        const queryString = getDefaultQuery(datasetTitle, language);
         setDatePickerDatesAndSearchIfRelevant(language);
 
         verifyDiscoverPageState({
@@ -98,7 +96,7 @@ describe('Dataset Selector', { scrollBehavior: false }, () => {
       });
 
       it('select and cancel using the advanced dataset selector', () => {
-        const queryString = getDefaultQuery(dataset, language);
+        const queryString = getDefaultQuery(datasetTitle, language);
         if (queryString !== '') {
           cy.setQueryEditor(queryString);
         }
@@ -120,15 +118,12 @@ describe('Dataset Selector', { scrollBehavior: false }, () => {
     });
 
     describe('PPL', () => {
-      const type = 'Index Patterns';
-      const dataSource = DEFAULT_OPTIONS.dataSource.title;
-      const dataset = `${dataSource}::${DEFAULT_OPTIONS.dataset.title}`;
       const language = 'PPL';
       const hitCount = '20,000';
 
       it('select and load with using the advanced dataset selector', () => {
         cy.coreQe.selectDatasetAdvanced(type, [dataset], language);
-        const queryString = getDefaultQuery(dataset, language);
+        const queryString = getDefaultQuery(datasetTitle, language);
         setDatePickerDatesAndSearchIfRelevant(language);
 
         verifyDiscoverPageState({
@@ -142,7 +137,7 @@ describe('Dataset Selector', { scrollBehavior: false }, () => {
       });
 
       it('select and cancel using the advanced dataset selector', () => {
-        const queryString = getDefaultQuery(dataset, language);
+        const queryString = getDefaultQuery(datasetTitle, language);
         if (queryString !== '') {
           cy.setQueryEditor(queryString);
         }
@@ -164,15 +159,12 @@ describe('Dataset Selector', { scrollBehavior: false }, () => {
     });
 
     describe('SQL', () => {
-      const type = 'Index Patterns';
-      const dataSource = DEFAULT_OPTIONS.dataSource.title;
-      const dataset = `${dataSource}::${DEFAULT_OPTIONS.dataset.title}`;
-      const language = 'SQL';
+      const language = 'OpenSearch SQL';
       const hitCount = '20,000';
 
       it('select and load with using the advanced dataset selector', () => {
         cy.coreQe.selectDatasetAdvanced(type, [dataset], language);
-        const queryString = getDefaultQuery(dataset, language);
+        const queryString = getDefaultQuery(datasetTitle, language);
 
         verifyDiscoverPageState({
           dataset,
@@ -183,7 +175,55 @@ describe('Dataset Selector', { scrollBehavior: false }, () => {
       });
 
       it('select and cancel using the advanced dataset selector', () => {
-        const queryString = getDefaultQuery(dataset, language);
+        const queryString = getDefaultQuery(datasetTitle, language);
+        if (queryString !== '') {
+          cy.coreQe.setQueryEditor(queryString);
+        }
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+        });
+        cy.coreQe.selectDatasetAdvanced(type, [dataSource], language, { shouldSubmit: false });
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+        });
+      });
+    });
+  });
+
+  describe(`Indexes`, () => {
+    const type = 'Indexes';
+    const dataSource = DEFAULT_OPTIONS.dataSource.title;
+    const datasetTitle = DEFAULT_OPTIONS.index;
+    const dataset = `${dataSource}::${datasetTitle}`;
+
+    describe('PPL', () => {
+      const language = 'PPL';
+      const hitCount = '10,000';
+
+      it('select and load with using the advanced dataset selector', () => {
+        cy.coreQe.selectDatasetAdvanced(type, [dataSource, datasetTitle], language, {
+          timeFieldName: 'timestamp',
+        });
+        const queryString = getDefaultQuery(datasetTitle, language);
+        setDatePickerDatesAndSearchIfRelevant(language);
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+
+        cy.getElementByTestId('docTableHeaderField').contains('Time');
+      });
+
+      it('select and cancel using the advanced dataset selector', () => {
+        const queryString = getDefaultQuery(datasetTitle, language);
         if (queryString !== '') {
           cy.setQueryEditor(queryString);
         }
@@ -193,13 +233,55 @@ describe('Dataset Selector', { scrollBehavior: false }, () => {
           language,
           hitCount,
         });
-        cy.coreQe.selectDatasetAdvanced(type, [dataSource], language, { shouldSubmit: false });
+        cy.coreQe.selectDatasetAdvanced(type, [dataSource, datasetTitle], language, {
+          shouldSubmit: false,
+        });
 
         verifyDiscoverPageState({
           dataset,
           queryString,
           language,
           hitCount,
+        });
+      });
+    });
+
+    describe('SQL', () => {
+      const language = 'OpenSearch SQL';
+      const hitCount = '10,000';
+
+      it('select and load with using the advanced dataset selector', () => {
+        cy.coreQe.selectDatasetAdvanced(type, [dataSource, datasetTitle], language, {
+          timeFieldName: 'timestamp',
+        });
+        const queryString = getDefaultQuery(datasetTitle, language);
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+          hitCount,
+        });
+      });
+
+      it('select and cancel using the advanced dataset selector', () => {
+        const queryString = getDefaultQuery(datasetTitle, language);
+        if (queryString !== '') {
+          cy.coreQe.setQueryEditor(queryString);
+        }
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
+        });
+        cy.coreQe.selectDatasetAdvanced(type, [dataSource, datasetTitle], language, {
+          shouldSubmit: false,
+        });
+
+        verifyDiscoverPageState({
+          dataset,
+          queryString,
+          language,
         });
       });
     });
