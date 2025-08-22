@@ -10,6 +10,7 @@ import * as utils from '../utils/utils';
 // Mock the utils module
 jest.mock('../utils/utils', () => ({
   generateColorBySchema: jest.fn().mockReturnValue(['#123456', '#789abc', '#def012']),
+  calculateValue: jest.fn().mockReturnValue(45),
 }));
 
 describe('to_expression', () => {

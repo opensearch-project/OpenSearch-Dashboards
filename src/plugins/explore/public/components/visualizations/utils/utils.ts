@@ -271,3 +271,50 @@ export const getTooltipFormat = (
   const timeUnit = inferTimeUnitFromTimestamps(data, field);
   return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
 };
+
+/**
+ * Calculates a single value from an array of values based on the specified calculation method.
+ * @param values Array of numeric values to calculate from
+ * @param calculationMethod The calculation method to apply ('first', 'last', 'min', 'max', etc.)
+ * @returns The calculated value or undefined if the calculation cannot be performed
+ */
+export const calculateValue = (
+  values: number[],
+  calculationMethod: string = 'last'
+): number | undefined => {
+  if (!values || values.length === 0) {
+    return undefined;
+  }
+
+  switch (calculationMethod) {
+    case 'first':
+      return values[0];
+    case 'last':
+      return values[values.length - 1];
+    case 'min':
+      return Math.min(...values);
+    case 'max':
+      return Math.max(...values);
+    case 'mean':
+      return values.reduce((sum, val) => sum + val, 0) / values.length;
+    case 'median': {
+      const sorted = [...values].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    }
+    case 'variance': {
+      const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+      return values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    }
+    case 'count':
+      return values.length;
+    case 'distinct_count': {
+      const uniqueValues = new Set(values);
+      return uniqueValues.size;
+    }
+    case 'total':
+      return values.reduce((sum, val) => sum + val, 0);
+    default:
+      return values[values.length - 1]; // Default to last value
+  }
+};
