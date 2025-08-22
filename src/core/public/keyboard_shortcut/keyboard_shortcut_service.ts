@@ -10,7 +10,9 @@ import {
   ShortcutDefinition,
 } from './types';
 import { KeyStringParser } from './key_parser';
-import { SequenceMatcher } from './sequence_matcher';
+import { SequenceHandler } from './sequence_handler';
+import { SEQUENCE_PREFIX } from './constants';
+import { isSequenceKeys } from './utils';
 
 /**
  * @internal
@@ -21,7 +23,7 @@ export class KeyboardShortcutService {
   private namespacedIdToKeyLookup = new Map<string, string>();
   private config: KeyboardShortcutConfig = { enabled: true };
   private keyParser = new KeyStringParser();
-  private sequenceMatcher = new SequenceMatcher();
+  private sequenceHandler = new SequenceHandler();
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -46,6 +48,7 @@ export class KeyboardShortcutService {
     this.stopEventListener();
     this.shortcutsMapByKey.clear();
     this.namespacedIdToKeyLookup.clear();
+    this.sequenceHandler = new SequenceHandler();
   }
 
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
@@ -56,9 +59,8 @@ export class KeyboardShortcutService {
       return;
     }
 
-    // Detect if it's a sequence (contains space) and use appropriate parser
-    const key = shortcut.keys.includes(' ')
-      ? this.sequenceMatcher.normalizeKeyString(shortcut.keys)
+    const key = isSequenceKeys(shortcut.keys)
+      ? this.sequenceHandler.normalizeKeyString(shortcut.keys)
       : this.keyParser.normalizeKeyString(shortcut.keys);
 
     const namespacedId = this.getNamespacedId(shortcut);
@@ -106,8 +108,7 @@ export class KeyboardShortcutService {
     }
 
     const filteredShortcuts = shortcuts.filter(
-      (existingShortcut: ShortcutDefinition) =>
-        this.getNamespacedId(existingShortcut) !== namespacedId
+      (existingShortcut) => this.getNamespacedId(existingShortcut) !== namespacedId
     );
 
     if (filteredShortcuts.length !== shortcuts.length) {
@@ -160,6 +161,14 @@ export class KeyboardShortcutService {
     }
   }
 
+  private executeShortcutForKey(event: KeyboardEvent, key: string): void {
+    const shortcuts = this.shortcutsMapByKey.get(key);
+    if (shortcuts?.length) {
+      const shortcut = shortcuts[shortcuts.length - 1];
+      this.executeShortcut(event, shortcut);
+    }
+  }
+
   private handleKeyboardEvent = (event: KeyboardEvent): void => {
     if (this.shouldIgnoreKeyboardEventForTarget(event.target)) {
       return;
@@ -167,21 +176,15 @@ export class KeyboardShortcutService {
 
     const eventKeyString = this.keyParser.getEventKeyString(event);
 
-    // Try sequence matching first
-    const sequenceMatches = this.sequenceMatcher.processKey(eventKeyString, this.shortcutsMapByKey);
-    if (sequenceMatches?.length) {
-      // Execute the last registered shortcut (implements "last registered wins" policy)
-      const shortcut = sequenceMatches[sequenceMatches.length - 1];
-      this.executeShortcut(event, shortcut);
-      return;
-    }
-
-    // Then regular shortcuts
-    const regularShortcuts = this.shortcutsMapByKey.get(eventKeyString);
-    if (regularShortcuts?.length) {
-      // Execute the last registered shortcut (implements "last registered wins" policy)
-      const shortcut = regularShortcuts[regularShortcuts.length - 1];
-      this.executeShortcut(event, shortcut);
+    // Check if sequence handler already has a first key (waiting for second key)
+    if (this.sequenceHandler.isInSequence()) {
+      const sequenceKey = this.sequenceHandler.processSecondKey(eventKeyString);
+      this.executeShortcutForKey(event, sequenceKey);
+    } else if (SEQUENCE_PREFIX.has(eventKeyString)) {
+      this.sequenceHandler.processFirstKey(eventKeyString);
+    } else {
+      // Process as regular shortcut (including modifier keys and single keys)
+      this.executeShortcutForKey(event, eventKeyString);
     }
   };
 

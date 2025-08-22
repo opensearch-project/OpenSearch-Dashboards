@@ -22,3 +22,11 @@ export const VALID_KEY_STRING_REGEX = new RegExp(
 );
 
 export const SINGLE_LETTER_REGEX = /^[a-z]$/;
+
+/**
+ * Detects if a key string represents a sequence (two space-separated keys)
+ * Uses simple heuristic for routing to appropriate parser
+ */
+export const isSequenceKeys = (keys: string): boolean => {
+  return /^\s*\w+\s+\w+\s*$/.test(keys);
+};

@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ShortcutDefinition } from './types';
 import { SEQUENCE_PREFIX } from './constants';
 import { SINGLE_LETTER_REGEX } from './utils';
 
-export class SequenceMatcher {
+export class SequenceHandler {
   private firstKey: string | null = null;
   private sequenceTimer: number | null = null;
 
@@ -53,42 +52,24 @@ export class SequenceMatcher {
     return `${prefix} ${secondKey}`;
   }
 
-  public processKey(
-    key: string,
-    shortcutsMap: Map<string, ShortcutDefinition[]>
-  ): ShortcutDefinition[] | null {
-    if (this.firstKey === null) {
-      this.handleFirstKey(key);
-      return null;
-    } else {
-      return this.handleSecondKey(key, shortcutsMap);
-    }
-  }
-
-  private handleFirstKey(key: string): void {
+  public processFirstKey(key: string): void {
     this.firstKey = key;
     this.startSequenceTimer();
   }
 
-  private handleSecondKey(
-    key: string,
-    shortcutsMap: Map<string, ShortcutDefinition[]>
-  ): ShortcutDefinition[] | null {
+  public processSecondKey(key: string): string {
     this.clearSequenceTimer();
 
     const sequenceKey = `${this.firstKey} ${key}`;
-    const shortcuts = shortcutsMap.get(sequenceKey);
-
     this.resetSequence();
 
-    if (shortcuts?.length) {
-      return shortcuts;
+    // // Only start new sequence if key is a valid sequence prefix
+    if (SEQUENCE_PREFIX.has(key)) {
+      this.firstKey = key;
+      this.startSequenceTimer();
     }
 
-    this.firstKey = key;
-    this.startSequenceTimer();
-
-    return null;
+    return sequenceKey;
   }
 
   private startSequenceTimer(): void {
@@ -109,5 +90,9 @@ export class SequenceMatcher {
   private resetSequence(): void {
     this.firstKey = null;
     this.clearSequenceTimer();
+  }
+
+  public isInSequence(): boolean {
+    return this.firstKey !== null;
   }
 }
