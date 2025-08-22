@@ -8,8 +8,14 @@ import {
   setPromptToQueryIsLoading,
   setLastExecutedPrompt,
   setLastExecutedTranslatedQuery,
+  clearResults,
+  clearQueryStatusMap,
+  setQueryExecutionButtonStatus,
+  setActiveTab,
 } from '../../../../slices';
 import { runQueryActionCreator } from '../../run_query';
+import { executeQueries } from '../../../query_actions';
+import { detectAndSetOptimalTab } from '../../../detect_optimal_tab';
 import { ExploreServices } from '../../../../../../../types';
 import { AppDispatch } from '../../../../store';
 import {
@@ -22,10 +28,22 @@ jest.mock('../../../../slices', () => ({
   setPromptToQueryIsLoading: jest.fn(),
   setLastExecutedPrompt: jest.fn(),
   setLastExecutedTranslatedQuery: jest.fn(),
+  clearResults: jest.fn(),
+  clearQueryStatusMap: jest.fn(),
+  setQueryExecutionButtonStatus: jest.fn(),
+  setActiveTab: jest.fn(),
 }));
 
 jest.mock('../../run_query', () => ({
   runQueryActionCreator: jest.fn(),
+}));
+
+jest.mock('../../../query_actions', () => ({
+  executeQueries: jest.fn(),
+}));
+
+jest.mock('../../../detect_optimal_tab', () => ({
+  detectAndSetOptimalTab: jest.fn(),
 }));
 
 const mockSetPromptToQueryIsLoading = setPromptToQueryIsLoading as jest.MockedFunction<
@@ -39,6 +57,18 @@ const mockSetLastExecutedTranslatedQuery = setLastExecutedTranslatedQuery as jes
 >;
 const mockRunQueryActionCreator = runQueryActionCreator as jest.MockedFunction<
   typeof runQueryActionCreator
+>;
+const mockClearResults = clearResults as jest.MockedFunction<typeof clearResults>;
+const mockClearQueryStatusMap = clearQueryStatusMap as jest.MockedFunction<
+  typeof clearQueryStatusMap
+>;
+const mockSetQueryExecutionButtonStatus = setQueryExecutionButtonStatus as jest.MockedFunction<
+  typeof setQueryExecutionButtonStatus
+>;
+const mockSetActiveTab = setActiveTab as jest.MockedFunction<typeof setActiveTab>;
+const mockExecuteQueries = executeQueries as jest.MockedFunction<typeof executeQueries>;
+const mockDetectAndSetOptimalTab = detectAndSetOptimalTab as jest.MockedFunction<
+  typeof detectAndSetOptimalTab
 >;
 
 describe('callAgentActionCreator', () => {
@@ -76,6 +106,7 @@ describe('callAgentActionCreator', () => {
         toasts: {
           addWarning: jest.fn(),
           addError: jest.fn(),
+          addInfo: jest.fn(),
         },
       },
     } as unknown) as ExploreServices;
@@ -94,6 +125,18 @@ describe('callAgentActionCreator', () => {
       payload: 'test query',
     });
     mockRunQueryActionCreator.mockReturnValue(jest.fn());
+    mockClearResults.mockReturnValue({ type: 'results/clearResults', payload: undefined });
+    mockClearQueryStatusMap.mockReturnValue({
+      type: 'queryEditor/clearQueryStatusMap',
+      payload: undefined,
+    });
+    mockSetQueryExecutionButtonStatus.mockReturnValue({
+      type: 'queryEditor/setQueryExecutionButtonStatus',
+      payload: 'REFRESH',
+    });
+    mockSetActiveTab.mockReturnValue({ type: 'tab/setActiveTab', payload: '' });
+    mockExecuteQueries.mockReturnValue(jest.fn());
+    mockDetectAndSetOptimalTab.mockReturnValue(jest.fn());
   });
 
   describe('successful agent call', () => {
@@ -208,7 +251,7 @@ describe('callAgentActionCreator', () => {
   });
 
   describe('validation errors', () => {
-    it('should show warning when editor text is empty', async () => {
+    it('should show info toast and execute default query when editor text is empty', async () => {
       const thunk = callAgentActionCreator({
         services: mockServices,
         editorText: '',
@@ -216,11 +259,24 @@ describe('callAgentActionCreator', () => {
 
       await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockServices.notifications.toasts.addWarning).toHaveBeenCalledWith({
-        title: 'Missing prompt',
-        text: 'Enter a question to automatically generate a query',
-        id: 'missing-prompt-warning',
+      // Should show info toast instead of warning
+      expect(mockServices.notifications.toasts.addInfo).toHaveBeenCalledWith({
+        title: 'Using default query',
+        text: 'No prompt provided, refreshing data with default query',
+        id: 'missing-prompt-info',
       });
+
+      // Should execute default query flow
+      expect(mockDispatch).toHaveBeenCalledWith(mockClearResults());
+      expect(mockDispatch).toHaveBeenCalledWith(mockClearQueryStatusMap());
+      expect(mockDispatch).toHaveBeenCalledWith(mockExecuteQueries({ services: mockServices }));
+      expect(mockDispatch).toHaveBeenCalledWith(mockSetActiveTab(''));
+      expect(mockDispatch).toHaveBeenCalledWith(
+        mockDetectAndSetOptimalTab({ services: mockServices })
+      );
+      expect(mockDispatch).toHaveBeenCalledWith(mockSetQueryExecutionButtonStatus('REFRESH'));
+
+      // Should NOT call the agent API
       expect(mockServices.http.post).not.toHaveBeenCalled();
     });
 
@@ -487,6 +543,47 @@ describe('callAgentActionCreator', () => {
         'setPromptToQueryIsLoading',
       ]);
       expect(dispatchCallCount).toBe(7);
+    });
+
+    it('should execute default query flow in correct order when text is empty', async () => {
+      const calls: string[] = [];
+      let thunkCallCount = 0;
+
+      mockDispatch.mockImplementation((action: any) => {
+        if (action.type === 'results/clearResults') {
+          calls.push('clearResults');
+        } else if (action.type === 'queryEditor/clearQueryStatusMap') {
+          calls.push('clearQueryStatusMap');
+        } else if (action.type === 'tab/setActiveTab') {
+          calls.push('setActiveTab');
+        } else if (action.type === 'queryEditor/setQueryExecutionButtonStatus') {
+          calls.push('setQueryExecutionButtonStatus');
+        } else if (typeof action === 'function') {
+          // These are the thunks (executeQueries, detectAndSetOptimalTab)
+          thunkCallCount++;
+          if (thunkCallCount === 1) {
+            calls.push('executeQueries');
+          } else if (thunkCallCount === 2) {
+            calls.push('detectAndSetOptimalTab');
+          }
+        }
+      });
+
+      const thunk = callAgentActionCreator({
+        services: mockServices,
+        editorText: '',
+      });
+
+      await thunk(mockDispatch, jest.fn(), undefined);
+
+      expect(calls).toEqual([
+        'clearResults',
+        'clearQueryStatusMap',
+        'executeQueries',
+        'setActiveTab',
+        'detectAndSetOptimalTab',
+        'setQueryExecutionButtonStatus',
+      ]);
     });
   });
 });
