@@ -9,7 +9,6 @@ import { isEqual } from 'lodash';
 import { Dataset, DEFAULT_DATA } from '../../../../../../data/common';
 import { RootState } from '../store';
 import { ExploreServices } from '../../../../types';
-import { EditorMode } from '../types';
 import {
   clearResults,
   setPromptModeIsAvailable,
@@ -18,7 +17,6 @@ import {
   setSummaryAgentIsAvailable,
   setPatternsField,
   setUsingRegexPatterns,
-  setEditorMode,
 } from '../slices';
 import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
@@ -73,14 +71,6 @@ export const createDatasetChangeMiddleware = (
         newPromptModeIsAvailable.value !== queryEditor.promptModeIsAvailable
       ) {
         store.dispatch(setPromptModeIsAvailable(newPromptModeIsAvailable.value));
-
-        // Switch to Prompt mode when AI becomes available
-        if (newPromptModeIsAvailable.value) {
-          store.dispatch(setEditorMode(EditorMode.Prompt));
-        } else if (queryEditor.editorMode === EditorMode.Prompt) {
-          // Switch to Query mode when AI becomes unavailable and user is in Prompt mode
-          store.dispatch(setEditorMode(EditorMode.Query));
-        }
       }
 
       if (
