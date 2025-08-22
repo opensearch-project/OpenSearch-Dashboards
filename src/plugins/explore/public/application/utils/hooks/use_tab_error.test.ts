@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { useTabError } from './use_tab_error';
 import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
 import { defaultPrepareQueryString } from '../state_management/actions/query_actions';
+import { selectQueryStatusMap } from '../state_management/selectors';
 
 // Mock dependencies
 jest.mock('react-redux', () => ({
@@ -18,9 +19,16 @@ jest.mock('../state_management/actions/query_actions', () => ({
   defaultPrepareQueryString: jest.fn(),
 }));
 
+jest.mock('../state_management/selectors', () => ({
+  selectQueryStatusMap: jest.fn(),
+}));
+
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 const mockDefaultPrepareQueryString = defaultPrepareQueryString as jest.MockedFunction<
   typeof defaultPrepareQueryString
+>;
+const mockSelectQueryStatusMap = selectQueryStatusMap as jest.MockedFunction<
+  typeof selectQueryStatusMap
 >;
 
 describe('useTabError', () => {
@@ -51,12 +59,13 @@ describe('useTabError', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDefaultPrepareQueryString.mockReturnValue('default-cache-key');
+    mockSelectQueryStatusMap.mockReturnValue({});
   });
 
   it('returns null when registryTab is undefined', () => {
     mockUseSelector.mockImplementation((selector) => {
-      if (selector.toString().includes('state.query')) return mockQuery;
-      return {}; // queryStatusMap
+      if (selector === selectQueryStatusMap) return {};
+      return mockQuery; // state.query
     });
 
     const { result } = renderHook(() => useTabError(undefined));
@@ -69,10 +78,12 @@ describe('useTabError', () => {
     mockDefaultPrepareQueryString.mockReturnValue(cacheKey);
 
     mockUseSelector.mockImplementation((selector) => {
-      if (selector.toString().includes('state.query')) return mockQuery;
-      return {
-        [cacheKey]: { error: mockError },
-      }; // queryStatusMap
+      if (selector === selectQueryStatusMap) {
+        return {
+          [cacheKey]: { error: mockError },
+        };
+      }
+      return mockQuery; // state.query
     });
 
     const { result } = renderHook(() => useTabError(mockTabDefinition));
@@ -86,10 +97,12 @@ describe('useTabError', () => {
     mockDefaultPrepareQueryString.mockReturnValue(cacheKey);
 
     mockUseSelector.mockImplementation((selector) => {
-      if (selector.toString().includes('state.query')) return mockQuery;
-      return {
-        [cacheKey]: { error: null },
-      }; // queryStatusMap
+      if (selector === selectQueryStatusMap) {
+        return {
+          [cacheKey]: { error: null },
+        };
+      }
+      return mockQuery; // state.query
     });
 
     const { result } = renderHook(() => useTabError(mockTabDefinition));
@@ -105,10 +118,12 @@ describe('useTabError', () => {
     };
 
     mockUseSelector.mockImplementation((selector) => {
-      if (selector.toString().includes('state.query')) return mockQuery;
-      return {
-        'custom-cache-key': { error: mockError },
-      }; // queryStatusMap
+      if (selector === selectQueryStatusMap) {
+        return {
+          'custom-cache-key': { error: mockError },
+        };
+      }
+      return mockQuery; // state.query
     });
 
     const { result } = renderHook(() => useTabError(tabWithCustomQuery));
