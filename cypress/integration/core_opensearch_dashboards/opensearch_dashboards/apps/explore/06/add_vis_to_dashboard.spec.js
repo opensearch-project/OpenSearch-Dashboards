@@ -14,7 +14,7 @@ const workspaceName = getRandomizedWorkspaceName();
 
 const createMetricVisualization = () => {
   cy.explore.clearQueryEditor();
-  const datasetName = `${INDEX_WITH_TIME_1}*`;
+  const datasetName = INDEX_PATTERN_WITH_TIME;
   const query = `source=${datasetName} | stats count()`;
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
   setDatePickerDatesAndSearchIfRelevant('PPL');

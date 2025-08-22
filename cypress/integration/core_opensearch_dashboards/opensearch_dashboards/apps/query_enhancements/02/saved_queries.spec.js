@@ -37,7 +37,7 @@ const createSavedQuery = (config) => {
     isEnhancement: true,
   });
 
-  cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+  cy.coreQe.selectDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
   cy.setQueryLanguage(config.language);
   setDatePickerDatesAndSearchIfRelevant(config.language);
@@ -57,7 +57,7 @@ const loadSavedQuery = (config) => {
 
   cy.getElementByTestId('discoverNewButton').click();
   // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
-  cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+  cy.coreQe.selectDataset(config.dataset);
   cy.setQueryLanguage(config.language);
 
   setDatePickerDatesAndSearchIfRelevant(

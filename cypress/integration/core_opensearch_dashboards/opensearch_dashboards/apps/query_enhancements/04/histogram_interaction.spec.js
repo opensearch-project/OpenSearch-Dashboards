@@ -50,7 +50,7 @@ const runHistogramInteractionTests = () => {
 
     generateAllTestConfigurations(generateHistogramTestConfigurations).forEach((config) => {
       it(`check histogram visibility for ${config.testName}`, () => {
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.coreQe.selectDataset(config.dataset);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
         if (config.isHistogramVisible) {
@@ -84,7 +84,7 @@ const runHistogramInteractionTests = () => {
 
       it(`check the Auto interval value for ${config.testName}`, () => {
         if (!config.isHistogramVisible) return;
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.coreQe.selectDataset(config.dataset);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
         const intervals = ['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
@@ -130,7 +130,7 @@ const runHistogramInteractionTests = () => {
             .find('button')
             .click({ force: true }); // reset state
         };
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.coreQe.selectDataset(config.dataset);
         cy.setQueryLanguage(config.language);
         if (config.isHistogramVisible) {
           // TODO: related bug
@@ -160,7 +160,7 @@ const runHistogramInteractionTests = () => {
 
       it(`check collapse/expand functionality and state persistence for ${config.testName}`, () => {
         if (!config.isHistogramVisible) return;
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.coreQe.selectDataset(config.dataset);
         cy.setQueryLanguage(config.language);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 

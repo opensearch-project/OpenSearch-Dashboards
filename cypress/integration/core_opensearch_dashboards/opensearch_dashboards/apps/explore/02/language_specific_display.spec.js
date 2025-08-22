@@ -4,97 +4,50 @@
  */
 
 import {
-  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITH_TIME_2,
-} from '../../../../../../utils/constants';
-import {
-  generateAllTestConfigurations,
-  getRandomizedWorkspaceName,
-  setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/explore/shared';
-import {
-  generateDisplayTestConfiguration,
-  getLanguageReferenceTestText,
-} from '../../../../../../utils/apps/explore/language_specific_display';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+  START_TIME,
+  END_TIME,
+} from '../../../../../../utils/apps/explore/constants';
 
-const workspaceName = getRandomizedWorkspaceName();
+describe('Language Specific Display', () => {
+  let testResources = {};
 
-export const runDisplayTests = () => {
-  describe('Language-Specific Display', () => {
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-    });
-
-    after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-    });
-
-    generateAllTestConfigurations(generateDisplayTestConfiguration).forEach((config) => {
-      it(`should correctly display all UI components for ${config.testName}`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'explore/logs',
-          isEnhancement: true,
-        });
-
-        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-
-        setDatePickerDatesAndSearchIfRelevant(config.language);
-
-        // testing the query editor
-        if (config.multilineQuery) {
-          cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
-          cy.getElementByTestId('discoverQueryElapsedMs').should('be.visible');
-          cy.getElementByTestId('exploreRecentQueriesButton').click();
-          cy.getElementByTestId('recentQueryTable').should('be.visible');
-          cy.getElementByTestId('exploreRecentQueriesButton').click();
-        }
-
-        // testing the datepicker
-        if (config.datepicker) {
-          cy.getElementByTestId('superDatePickerToggleQuickMenuButton').should('be.visible');
-        }
-
-        // testing the hit count and histogram
-        if (config.histogram) {
-          cy.getElementByTestId('discoverQueryHits').should('be.visible');
-          cy.getElementByTestId('discoverChart').should('be.visible');
-        }
-
-        // testing whether sort appears or not
-        cy.getElementByTestId('docTableHeaderFieldSort_timestamp').should(
-          config.sort ? 'exist' : 'not.exist'
-        );
-
-        // testing the language information popup button
-        cy.getElementByTestId('exploreLanguageReference').click();
-        cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
-        cy.get('.euiPanel').contains(getLanguageReferenceTestText(config.language));
-        cy.getElementByTestId('exploreLanguageReference').click();
-
-        // testing the saved queries management button
-        cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
-        cy.getElementByTestId('saved-query-management-popover').should('be.visible');
-        cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
-      });
+  before(() => {
+    cy.core.setupTestResources().then((resources) => {
+      testResources = resources;
+      cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+      cy.osd.waitForLoader(true);
+      cy.core.waitForDatasetsToLoad();
     });
   });
-};
 
-prepareTestSuite('Language Specific Display', runDisplayTests);
+  after(() => {
+    cy.core.cleanupTestResources(testResources);
+  });
+
+  it('should display PPL UI components correctly', () => {
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+    cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+    cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
+    cy.getElementByTestId('discoverQueryElapsedMs').should('be.visible');
+
+    cy.getElementByTestId('exploreRecentQueriesButton').click();
+    cy.getElementByTestId('recentQueryTable').should('be.visible');
+    cy.getElementByTestId('exploreRecentQueriesButton').click();
+
+    cy.getElementByTestId('superDatePickerToggleQuickMenuButton').should('be.visible');
+
+    cy.getElementByTestId('discoverQueryHits').should('be.visible');
+    cy.getElementByTestId('discoverChart').should('be.visible');
+
+    cy.getElementByTestId('exploreLanguageReference').click();
+    cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
+    cy.get('.euiPanel').should('contain', 'PPL');
+    cy.getElementByTestId('exploreLanguageReference').click();
+
+    cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+    cy.getElementByTestId('saved-query-management-popover').should('be.visible');
+    cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+  });
+});

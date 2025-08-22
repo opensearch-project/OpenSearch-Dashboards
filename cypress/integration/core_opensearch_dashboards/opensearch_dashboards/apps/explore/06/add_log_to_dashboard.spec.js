@@ -14,7 +14,7 @@ const workspaceName = getRandomizedWorkspaceName();
 
 const runQuery = () => {
   cy.explore.clearQueryEditor();
-  const datasetName = `${INDEX_WITH_TIME_1}*`;
+  const datasetName = INDEX_PATTERN_WITH_TIME;
   const query = `source=${datasetName}`;
   setDatePickerDatesAndSearchIfRelevant('PPL');
   cy.wait(2000);

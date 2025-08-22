@@ -56,7 +56,7 @@ export const runTimeRangeSelectionTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.coreQe.selectDataset(config.dataset);
 
         cy.setQueryLanguage(config.language.name);
 
@@ -77,7 +77,7 @@ export const runTimeRangeSelectionTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.coreQe.selectDataset(config.dataset);
 
         cy.setQueryLanguage(config.language.name);
 
@@ -98,7 +98,7 @@ export const runTimeRangeSelectionTests = () => {
           isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.coreQe.selectDataset(config.dataset);
 
         cy.setQueryLanguage(config.language.name);
 

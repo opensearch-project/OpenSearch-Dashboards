@@ -53,7 +53,7 @@ export const runQueryTests = () => {
       describe(`${config.testName}`, () => {
         it('should handle query editor expand/collapse state correctly', () => {
           // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
           cy.setQueryLanguage(config.language);
 
           // First check the default expanded state
@@ -102,7 +102,7 @@ export const runQueryTests = () => {
     }).forEach((config) => {
       describe(`${config.testName}`, () => {
         it('should show correct documentation link pattern in language reference popover', () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
           cy.setQueryLanguage(config.language);
 
           // Check language reference popover

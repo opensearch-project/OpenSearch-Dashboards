@@ -88,7 +88,7 @@ export const runTableTests = () => {
       describe(`${config.testName}`, () => {
         it(`should allow expand multiple documents for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
 
           // If SQL, since we don't set date picker, when switching languages later it won't show any results
           // so setting dates here
@@ -143,7 +143,7 @@ export const runTableTests = () => {
 
         it(`sort for ${config.testName}`, () => {
           // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
           cy.setQueryLanguage(config.language);
           // Add fields
           testFields.forEach((field) => {

@@ -4,91 +4,80 @@
  */
 
 import {
-  INDEX_WITH_TIME_1,
-  INDEX_PATTERN_WITH_TIME_1,
-  DATASOURCE_NAME,
-} from '../../../../../../utils/constants';
-import {
-  getRandomizedWorkspaceName,
-  generateBaseConfiguration,
-  generateAllTestConfigurations,
-} from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+  INDEX_PATTERN_WITH_TIME,
+  START_TIME,
+  END_TIME,
+} from '../../../../../../utils/apps/explore/constants';
 
-const workspaceName = getRandomizedWorkspaceName();
+describe('Queries UI', () => {
+  let testResources = {};
 
-export const runQueryTests = () => {
-  describe('discover autocomplete tests', () => {
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-    });
-
-    beforeEach(() => {
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        workspaceName: workspaceName,
-        page: 'explore/logs',
-        isEnhancement: true,
-      });
-    });
-
-    after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
-    });
-
-    generateAllTestConfigurations(generateBaseConfiguration, {
-      indexPattern: INDEX_PATTERN_WITH_TIME_1,
-      index: INDEX_WITH_TIME_1,
-    }).forEach((config) => {
-      describe(`${config.testName}`, () => {
-        it('should show correct documentation link pattern in language reference popover', () => {
-          cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-
-          // Open the language reference popover to get the actual URL
-          cy.get('body').then(($body) => {
-            const isPopoverOpen = $body.find('.euiPopover__panel-isOpen').length > 0;
-
-            // If popover is already open, close it first
-            if (isPopoverOpen) {
-              cy.getElementByTestId('exploreLanguageReference').click();
-              // Verify it's closed
-              cy.get('.euiPopover__panel-isOpen').should('not.exist');
-            }
-
-            // Now click to open
-            cy.getElementByTestId('exploreLanguageReference').click();
-
-            // Verify popover appears with title
-            cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
-
-            cy.get('.euiPopover__panel-isOpen')
-              .find('a.euiLink.euiLink--primary')
-              .should('have.attr', 'href')
-              .then((href) => {
-                // Verify the URL follows the expected pattern for PPL syntax documentation
-                expect(href).to.match(
-                  /^https:\/\/opensearch\.org\/docs\/(latest|\d+\.\d+)\/search-plugins\/sql\/ppl\/syntax\/$/
-                );
-
-                // Verify the link can be opened (status 200, 301, or 302)
-                cy.request({
-                  url: href,
-                  failOnStatusCode: false,
-                }).then((response) => {
-                  expect(response.status).to.be.oneOf([200]);
-                });
-              });
-          });
-        });
-      });
+  before(() => {
+    cy.core.setupTestResources().then((resources) => {
+      testResources = resources;
+      cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+      cy.osd.waitForLoader(true);
     });
   });
-};
 
-prepareTestSuite('Queries UI', runQueryTests);
+  after(() => {
+    cy.core.cleanupTestResources(testResources);
+  });
+
+  beforeEach(() => {
+    cy.getElementByTestId('discoverNewButton').click();
+    cy.core.waitForDatasetsToLoad();
+
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+  });
+
+  it('should show documentation link in language reference', () => {
+    cy.getElementByTestId('exploreLanguageReference').click();
+    cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
+
+    cy.get('.euiPopover__panel-isOpen')
+      .find('a.euiLink.euiLink--primary')
+      .should('have.attr', 'href')
+      .then((href) => {
+        expect(href).to.match(
+          /^https:\/\/opensearch\.org\/docs\/(latest|\d+\.\d+)\/search-plugins\/sql\/ppl\/syntax\/$/
+        );
+
+        cy.request({
+          url: href,
+          failOnStatusCode: false,
+        }).then((response) => {
+          expect(response.status).to.equal(200);
+        });
+      });
+
+    cy.getElementByTestId('exploreLanguageReference').click();
+  });
+
+  it('should display query execution time', () => {
+    cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+    const query = `source = ${INDEX_PATTERN_WITH_TIME} | where status_code = 200`;
+    cy.explore.setQueryEditor(query);
+
+    cy.getElementByTestId('discoverQueryElapsedMs')
+      .should('be.visible')
+      .invoke('text')
+      .should('match', /\d+ms/);
+  });
+
+  it('should handle query errors gracefully', () => {
+    cy.explore.setTopNavDate(START_TIME, END_TIME);
+    const invalidQuery = `source = nonexistent_index`;
+    cy.explore.setQueryEditor(invalidQuery);
+
+    cy.getElementByTestId('queryResultError').should('be.visible');
+  });
+
+  it('should provide query autocomplete', () => {
+    cy.explore.clearQueryEditor();
+    cy.get('.inputarea').first().type('source');
+    cy.get('.monaco-list-row').should('be.visible');
+    cy.get('.inputarea').first().type('{esc}');
+  });
+});

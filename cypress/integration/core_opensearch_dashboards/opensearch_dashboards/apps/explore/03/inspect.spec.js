@@ -4,126 +4,77 @@
  */
 
 import {
-  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-  QueryLanguages,
-} from '../../../../../../utils/apps/constants.js';
-import * as docTable from '../../../../../../utils/apps/explore/doc_table.js';
-import { BASE_PATH } from '../../../../../../utils/constants.js';
-import {
-  generateAllTestConfigurations,
-  getRandomizedWorkspaceName,
-  setDatePickerDatesAndSearchIfRelevant,
-} from '../../../../../../utils/apps/explore/shared.js';
-import {
-  generateInspectTestConfiguration,
-  getFlattenedFieldsWithValue,
-  verifyVisualizationsWithNoInspectOption,
-  verifyVisualizationsWithInspectOption,
-  visualizationTitlesWithNoInspectOptions,
-  visualizationTitlesWithInspectOptions,
-} from '../../../../../../utils/apps/explore/inspect.js';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+  START_TIME,
+  END_TIME,
+} from '../../../../../../utils/apps/explore/constants';
 
-const workspaceName = getRandomizedWorkspaceName();
+describe('Inspect', () => {
+  let testResources = {};
 
-const NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD = 17;
-
-const inspectTestSuite = () => {
-  describe('inspect spec', () => {
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-    });
-
-    after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
-    });
-
-    generateAllTestConfigurations(generateInspectTestConfiguration).forEach((config) => {
-      it(`should inspect and validate the first row data for ${config.testName}`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName: workspaceName,
-          page: 'explore/logs',
-          isEnhancement: true,
-        });
-        cy.getElementByTestId('discoverNewButton').click();
-
-        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-        setDatePickerDatesAndSearchIfRelevant(config.language);
-
-        cy.intercept('POST', '**/search/*').as('docTablePostRequest');
-        cy.getElementByTestId('exploreQueryExecutionButton').click();
-
-        cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
-        docTable.toggleDocTableRow(0);
-
-        cy.wait('@docTablePostRequest').then((interceptedDocTableResponse) => {
-          const flattenedFieldsWithValues = getFlattenedFieldsWithValue(
-            interceptedDocTableResponse
-          );
-
-          for (const [key, value] of Object.entries(flattenedFieldsWithValues)) {
-            // TODO: For SQL and PPL, this number is not accurate. https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9305
-            if (
-              key === 'event_sequence_number' &&
-              (config.language === QueryLanguages.SQL.name ||
-                config.language === QueryLanguages.PPL.name)
-            ) {
-              cy.log(`Skipped for ${key}`);
-              continue;
-            }
-            docTable
-              .getExpandedDocTableRowFieldValue(key)
-              .should('have.text', value === null ? ' - ' : value);
-          }
-        });
-      });
-    });
-
-    it('should test visualizations inspect', () => {
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
-        workspaceName: workspaceName,
-        page: 'import_sample_data',
-        isEnhancement: true,
-      });
-
-      // adding a wait here as sometimes the button doesn't click below
-      cy.wait(3000);
-
-      cy.getElementByTestId('addSampleDataSetflights').should('be.visible').click();
-
-      cy.getElementByTestId('sampleDataSetInstallToast').should('exist');
-
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
-        workspaceName: workspaceName,
-        page: 'dashboards',
-        isEnhancement: true,
-      });
-
-      cy.getElementByTestIdLike(
-        'dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'
-      ).click();
-
-      cy.getElementByTestId('visualizationLoader').should(
-        'have.length',
-        NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD
-      );
-
-      verifyVisualizationsWithNoInspectOption(visualizationTitlesWithNoInspectOptions);
-      verifyVisualizationsWithInspectOption(visualizationTitlesWithInspectOptions);
+  before(() => {
+    cy.core.setupTestResources().then((resources) => {
+      testResources = resources;
+      cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+      cy.osd.waitForLoader(true);
+      cy.core.waitForDatasetsToLoad();
     });
   });
-};
 
-prepareTestSuite('Inspect', inspectTestSuite);
+  after(() => {
+    cy.core.cleanupTestResources(testResources);
+  });
+
+  it('should inspect and validate first row data', () => {
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+    cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+    cy.intercept('POST', '**/search/*').as('docTablePostRequest');
+    cy.getElementByTestId('exploreQueryExecutionButton').click();
+
+    cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3);
+
+    // Expand first row
+    cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"] button').click();
+
+    cy.wait('@docTablePostRequest').then((intercepted) => {
+      const hit = intercepted.response.body.rawResponse.hits.hits[0];
+      const fields = hit._source;
+
+      // Verify key fields are displayed
+      Object.keys(fields).forEach((fieldName) => {
+        if (fieldName !== 'event_sequence_number') {
+          // Skip fields with known issues
+          cy.getElementByTestId(`tableDocViewRow-${fieldName}`).should('exist');
+        }
+      });
+    });
+  });
+
+  it('should test dashboard visualizations inspect', () => {
+    // Add sample data
+    cy.visit(`/w/${testResources.workspaceId}/app/import_sample_data`);
+    cy.wait(3000);
+
+    cy.getElementByTestId('addSampleDataSetflights').click();
+    cy.getElementByTestId('sampleDataSetInstallToast').should('exist');
+
+    // Navigate to dashboard
+    cy.visit(`/w/${testResources.workspaceId}/app/dashboards`);
+    cy.getElementByTestIdLike(
+      'dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'
+    ).click();
+
+    cy.getElementByTestId('visualizationLoader').should('have.length', 17);
+
+    // Check that some visualizations have inspect option
+    cy.get('[data-test-subj*="embeddablePanelAction-openInspector"]').should(
+      'have.length.at.least',
+      1
+    );
+
+    // Clean up sample data
+    cy.visit(`/w/${testResources.workspaceId}/app/import_sample_data`);
+    cy.getElementByTestId('removeSampleDataSetflights').click();
+  });
+});

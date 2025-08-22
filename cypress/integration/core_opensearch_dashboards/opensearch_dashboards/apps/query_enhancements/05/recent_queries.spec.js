@@ -61,7 +61,7 @@ const runRecentQueryTests = () => {
       .filter(Boolean) // removes undefined values
       .forEach((config) => {
         it(`check max queries for ${config.testName}`, () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const currentLang = BaseQuery[config.datasetType][config.language];
@@ -105,7 +105,7 @@ const runRecentQueryTests = () => {
                   config.language,
                   "I don't want to use the time filter"
                 );
-                cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+                cy.coreQe.selectDataset(config.dataset);
                 cy.wrap(null).then(() => {
                   // force Cypress to run this method in order
                   reverseList.unshift(config.defaultQuery);
@@ -146,8 +146,7 @@ const runRecentQueryTests = () => {
         });
 
         it(`check duplicate query for ${config.testName}`, () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.setQueryLanguage(config.language);
+          cy.coreQe.selectDataset(config.dataset);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           const currentLang = BaseQuery[config.datasetType][config.language];
           const currentBaseQuery = currentLang.query;
@@ -173,7 +172,7 @@ const runRecentQueryTests = () => {
         //console.log(execSync('xclip -selection clipboard -o').toString().trim()); // for Linux
         //Caveat: the commands for reading the system's clipboard is OS-dependent.
         it(`check running and copying recent queries for ${config.testName}`, () => {
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           // Precondition: run some queries first

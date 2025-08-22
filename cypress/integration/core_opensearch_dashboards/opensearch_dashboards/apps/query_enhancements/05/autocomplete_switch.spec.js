@@ -64,7 +64,7 @@ export const runAutocompleteTests = () => {
       describe(`${config.testName}`, () => {
         it('should update default query when switching index patterns and languages', () => {
           // Setup
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
           cy.setQueryLanguage(config.language);
 
           // Get dataset names based on type
@@ -75,7 +75,7 @@ export const runAutocompleteTests = () => {
           cy.getElementByTestId('osdQueryEditor__multiLine').contains(firstDataset);
 
           // Switch to second index pattern
-          cy.setDataset(secondDataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(secondDataset);
 
           // Verify query updated for new index pattern
           cy.getElementByTestId('osdQueryEditor__multiLine').contains(secondDataset);

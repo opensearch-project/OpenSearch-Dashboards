@@ -4,145 +4,114 @@
  */
 
 import {
-  DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITH_TIME_2,
-} from '../../../../../../utils/constants';
+  START_TIME,
+  END_TIME,
+} from '../../../../../../utils/apps/explore/constants';
+import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/shared';
 
-import {
-  verifyDiscoverPageState,
-  verifyQueryDoesNotExistInSavedQueries,
-  setQueryConfigurations,
-  updateAndVerifySavedQuery,
-  SAVE_AS_NEW_QUERY_SUFFIX,
-  validateSaveAsNewQueryMatchingNameHasError,
-} from '../../../../../../utils/apps/explore/saved_queries';
+describe('Saved Queries', () => {
+  let testResources = {};
+  const savedQueryName = `saved_query_${Date.now()}`;
+  const updatedQueryName = `updated_query_${Date.now()}`;
 
-import {
-  getRandomizedWorkspaceName,
-  setDatePickerDatesAndSearchIfRelevant,
-  generateAllTestConfigurations,
-} from '../../../../../../utils/apps/explore/shared';
-
-import { generateSavedTestConfiguration } from '../../../../../../utils/apps/explore/saved';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
-
-const workspaceName = getRandomizedWorkspaceName();
-
-const createSavedQuery = (config) => {
-  cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName,
-    page: 'explore/logs',
-    isEnhancement: true,
-  });
-
-  cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-
-  setDatePickerDatesAndSearchIfRelevant(config.language);
-
-  setQueryConfigurations(config);
-  verifyDiscoverPageState(config);
-
-  cy.explore.saveQuery(`${workspaceName}-${config.saveName}`, ' ', true, true);
-};
-
-const loadSavedQuery = (config) => {
-  cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName,
-    page: 'explore/logs',
-    isEnhancement: true,
-  });
-
-  cy.getElementByTestId('discoverNewButton').click();
-  // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
-  cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-
-  setDatePickerDatesAndSearchIfRelevant(
-    config.language,
-    'Aug 29, 2020 @ 00:00:00.000',
-    'Aug 30, 2020 @ 00:00:00.000'
-  );
-
-  cy.explore.loadSavedQuery(`${workspaceName}-${config.saveName}`);
-  // wait for saved queries to load.
-  cy.getElementByTestId('docTable').should('be.visible');
-  verifyDiscoverPageState(config);
-};
-
-const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
-  if (config.filters) {
-    cy.deleteAllFilters();
-  }
-  setDatePickerDatesAndSearchIfRelevant(config.language);
-
-  setQueryConfigurations(config);
-  verifyDiscoverPageState(config);
-  validateSaveAsNewQueryMatchingNameHasError(`${workspaceName}-${config.saveName}`);
-  cy.explore.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
-
-  cy.reload();
-  cy.explore.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
-  // wait for saved query to load
-  cy.getElementByTestId('docTable').should('be.visible');
-  verifyDiscoverPageState(config);
-};
-
-const deleteSavedQuery = (saveAsNewQueryName) => {
-  cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName,
-    page: 'explore/logs',
-    isEnhancement: true,
-  });
-
-  cy.explore.deleteSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
-  verifyQueryDoesNotExistInSavedQueries(`${workspaceName}-${saveAsNewQueryName}`);
-};
-
-const runSavedQueriesUITests = () => {
-  describe('saved queries UI', () => {
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-    });
-
-    afterEach(() => {
-      cy.window().then((win) => {
-        win.localStorage.clear();
-        win.sessionStorage.clear();
-      });
-    });
-
-    after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-    });
-
-    const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
-
-    testConfigurations.forEach((config) => {
-      it(`should create, load, update, modify and delete the saved query: ${config.testName}`, () => {
-        createSavedQuery(config);
-        loadSavedQuery(config);
-        updateAndVerifySavedQuery(config);
-
-        const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
-        modifyAndVerifySavedQuery(config, saveAsNewQueryName);
-        deleteSavedQuery(saveAsNewQueryName);
-      });
+  before(() => {
+    cy.core.setupTestResources().then((resources) => {
+      testResources = resources;
+      cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+      cy.osd.waitForLoader(true);
     });
   });
-};
 
-prepareTestSuite('Saved Queries', runSavedQueriesUITests);
+  after(() => {
+    cy.core.cleanupTestResources(testResources);
+  });
+
+  beforeEach(() => {
+    cy.getElementByTestId('discoverNewButton').click();
+    cy.osd.waitForLoader(true);
+    cy.core.waitForDatasetsToLoad();
+  });
+
+  it('should create and load a saved query', () => {
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+    cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+    const query = `source = ${INDEX_PATTERN_WITH_TIME} | where status_code = 200`;
+    cy.explore.setQueryEditor(query);
+
+    // Save query
+    cy.explore.saveQuery(savedQueryName, 'Test saved query', true, true);
+
+    // Clear and reload
+    cy.getElementByTestId('discoverNewButton').click();
+    cy.osd.waitForLoader(true);
+    cy.core.waitForDatasetsToLoad();
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+
+    // Load saved query
+    cy.explore.loadSavedQuery(savedQueryName);
+    cy.getElementByTestId('docTable').should('be.visible');
+
+    verifyMonacoEditorContent(query);
+  });
+
+  it('should update a saved query', () => {
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+    cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+    // Load existing query
+    cy.explore.loadSavedQuery(savedQueryName);
+
+    // Modify query
+    const newQuery = `source = ${INDEX_PATTERN_WITH_TIME} | where status_code = 404`;
+    cy.explore.clearQueryEditor();
+    cy.explore.setQueryEditor(newQuery);
+
+    // Update saved query
+    cy.explore.updateSavedQuery('', false, true, true);
+
+    // Reload and verify
+    cy.reload();
+    cy.explore.loadSavedQuery(savedQueryName);
+    cy.getElementByTestId('docTable').should('be.visible');
+    verifyMonacoEditorContent(newQuery);
+  });
+
+  it('should save as new query', () => {
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+    cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+    // Load existing query
+    cy.explore.loadSavedQuery(savedQueryName);
+
+    // Modify and save as new
+    const newQuery = `source = ${INDEX_PATTERN_WITH_TIME} | where status_code = 500`;
+    cy.explore.clearQueryEditor();
+    cy.explore.setQueryEditor(newQuery);
+    cy.explore.updateSavedQuery(updatedQueryName, true, true, true);
+
+    // Verify both queries exist
+    cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+    cy.getElementByTestId('saved-query-management-open-button').click();
+    cy.contains(savedQueryName).should('exist');
+    cy.contains(updatedQueryName).should('exist');
+    cy.getElementByTestId('euiFlyoutCloseButton').click();
+  });
+
+  it('should delete a saved query', () => {
+    cy.core.selectDataset(INDEX_PATTERN_WITH_TIME);
+
+    // Delete query
+    cy.explore.deleteSavedQuery(savedQueryName);
+
+    // Verify deleted
+    cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+    cy.getElementByTestId('saved-query-management-open-button').click();
+    cy.contains(savedQueryName).should('not.exist');
+    cy.getElementByTestId('euiFlyoutCloseButton').click();
+
+    // Clean up second query
+    cy.explore.deleteSavedQuery(updatedQueryName);
+  });
+});

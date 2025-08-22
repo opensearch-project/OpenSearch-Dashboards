@@ -8,7 +8,6 @@ import {
   INDEX_WITH_TIME_1,
 } from '../../../../../../utils/apps/constants.js';
 import { BASE_PATH, DATASOURCE_NAME } from '../../../../../../utils/constants.js';
-import { DatasetTypes } from '../../../../../../utils/apps/query_enhancements/constants.js';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared.js';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
@@ -45,7 +44,7 @@ const cachingTestSuite = () => {
       const alternativeIndexPatternName = 'data';
       const alternativeIndexPattern = alternativeIndexPatternName + '*';
 
-      cy.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, DatasetTypes.INDEX_PATTERN.name);
+      cy.coreQe.selectDataset(INDEX_PATTERN_WITH_TIME);
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
         indexPattern: alternativeIndexPatternName,

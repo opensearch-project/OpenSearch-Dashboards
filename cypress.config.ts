@@ -5,7 +5,6 @@
 
 import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
-// TODO: import { paste } from 'copy-paste';
 
 module.exports = defineConfig({
   experimentalMemoryManagement: true,
@@ -13,10 +12,6 @@ module.exports = defineConfig({
   defaultCommandTimeout: 15000,
   requestTimeout: 60000,
   responseTimeout: 60000,
-  retries: {
-    runMode: 2,
-    openMode: 0,
-  },
   viewportWidth: 1920,
   viewportHeight: 1080,
   video: true,
@@ -54,12 +49,18 @@ module.exports = defineConfig({
     WAIT_MS: 2000,
     DISABLE_LOCAL_CLUSTER: false,
     CYPRESS_RUNTIME_ENV: 'osd',
+    RESOURCES: {
+      WORKSPACE_ID: '',
+      DATA_SOURCE_ID: '',
+      DATASET_ID: '',
+    },
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
     specPattern: 'cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
     testIsolation: false,
     setupNodeEvents,
+    chromeWebSecurity: false,
   },
 });
 

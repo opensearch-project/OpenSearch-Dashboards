@@ -271,7 +271,7 @@ export const runSideBarTests = () => {
             page: 'discover',
             isEnhancement: true,
           });
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
           sideBar.removeAllSelectedFields();
@@ -326,7 +326,7 @@ export const runSideBarTests = () => {
           });
           cy.getElementByTestId('discoverNewButton').click();
           // Setting the dataset and query language again to ensure the date picker is not missing
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.coreQe.selectDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
 
           nestedFieldsToTest.forEach((nestedField) => {
