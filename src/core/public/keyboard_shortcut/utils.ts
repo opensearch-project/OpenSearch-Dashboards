@@ -20,3 +20,5 @@ export const VALID_KEY_STRING_REGEX = new RegExp(
     '|'
   )})?(?:${ALLOWED_KEYS.map(escapeKey).join('|')})$`
 );
+
+export const SINGLE_LETTER_REGEX = /^[a-z]$/;

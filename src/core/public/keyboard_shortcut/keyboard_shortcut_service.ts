@@ -10,6 +10,7 @@ import {
   ShortcutDefinition,
 } from './types';
 import { KeyStringParser } from './key_parser';
+import { SequenceMatcher } from './sequence_matcher';
 
 /**
  * @internal
@@ -20,6 +21,7 @@ export class KeyboardShortcutService {
   private namespacedIdToKeyLookup = new Map<string, string>();
   private config: KeyboardShortcutConfig = { enabled: true };
   private keyParser = new KeyStringParser();
+  private sequenceMatcher = new SequenceMatcher();
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -54,7 +56,10 @@ export class KeyboardShortcutService {
       return;
     }
 
-    const key = this.keyParser.normalizeKeyString(shortcut.keys);
+    // Detect if it's a sequence (contains space) and use appropriate parser
+    const key = shortcut.keys.includes(' ')
+      ? this.sequenceMatcher.normalizeKeyString(shortcut.keys)
+      : this.keyParser.normalizeKeyString(shortcut.keys);
 
     const namespacedId = this.getNamespacedId(shortcut);
 
@@ -142,30 +147,41 @@ export class KeyboardShortcutService {
     return false;
   }
 
+  private executeShortcut(event: KeyboardEvent, shortcut: ShortcutDefinition): void {
+    event.preventDefault();
+    try {
+      shortcut.execute();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `Error executing shortcut ${shortcut.id} from plugin ${shortcut.pluginId}:`,
+        error
+      );
+    }
+  }
+
   private handleKeyboardEvent = (event: KeyboardEvent): void => {
     if (this.shouldIgnoreKeyboardEventForTarget(event.target)) {
       return;
     }
 
     const eventKeyString = this.keyParser.getEventKeyString(event);
-    const shortcuts = this.shortcutsMapByKey.get(eventKeyString);
 
-    if (shortcuts?.length) {
-      // Prevent browser-specific keybindings if they conflict with our shortcuts
-      event.preventDefault();
+    // Try sequence matching first
+    const sequenceMatches = this.sequenceMatcher.processKey(eventKeyString, this.shortcutsMapByKey);
+    if (sequenceMatches?.length) {
+      // Execute the last registered shortcut (implements "last registered wins" policy)
+      const shortcut = sequenceMatches[sequenceMatches.length - 1];
+      this.executeShortcut(event, shortcut);
+      return;
+    }
 
-      // Execute the last registered shortcut for this key combination
-      // This implements a "last registered wins" policy for conflicting shortcuts
-      const shortcut = shortcuts[shortcuts.length - 1];
-      try {
-        shortcut.execute();
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `Error executing shortcut ${shortcut.id} from plugin ${shortcut.pluginId}:`,
-          error
-        );
-      }
+    // Then regular shortcuts
+    const regularShortcuts = this.shortcutsMapByKey.get(eventKeyString);
+    if (regularShortcuts?.length) {
+      // Execute the last registered shortcut (implements "last registered wins" policy)
+      const shortcut = regularShortcuts[regularShortcuts.length - 1];
+      this.executeShortcut(event, shortcut);
     }
   };
 
