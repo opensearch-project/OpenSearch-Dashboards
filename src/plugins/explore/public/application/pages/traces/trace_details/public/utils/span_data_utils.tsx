@@ -4,6 +4,7 @@
  */
 
 import { isEmpty } from './helper_functions';
+import { isSpanError } from '../traces/ppl_resolve_helpers';
 
 export interface SpanIssue {
   type: 'error' | 'event';
@@ -33,7 +34,7 @@ export const extractSpanIssues = (span: any): SpanIssue[] => {
   const issues: SpanIssue[] = [];
 
   // Check for error status
-  if (span['status.code'] === 2 || span.status?.code === 2) {
+  if (isSpanError(span)) {
     issues.push({
       type: 'error',
       message: 'Span has error status',
@@ -106,6 +107,7 @@ export const extractHttpStatusCode = (span: any): number | undefined => {
   return (
     source['attributes.http.status_code'] ||
     source.attributes?.['http.status_code'] ||
+    source.attributes?.['http.response.status_code'] ||
     source.attributes?.http?.status_code ||
     source.attributes?.http?.response?.status_code ||
     source['http.status_code'] ||
@@ -129,7 +131,7 @@ export const getSpanOverviewData = (span: any): SpanOverviewData | null => {
     duration: extractSpanDuration(span),
     startTime: span.startTime || '',
     endTime: span.endTime || '',
-    hasError: span['status.code'] === 2 || span.status?.code === 2,
+    hasError: isSpanError(span),
     statusCode: span['status.code'] || span.status?.code,
   };
 };

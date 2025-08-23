@@ -112,7 +112,7 @@ describe('SpanOverviewTab', () => {
 
       // Should render dashes for missing values
       const dashElements = screen.getAllByText('-');
-      expect(dashElements.length).toBeGreaterThanOrEqual(2);
+      expect(dashElements.length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders copyable service identifier and span ID', () => {

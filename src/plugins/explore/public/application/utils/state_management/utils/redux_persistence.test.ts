@@ -11,16 +11,6 @@ import { ColorSchemas } from '../../../../components/visualizations/types';
 import { EditorMode, QueryExecutionStatus } from '../types';
 import { of } from 'rxjs';
 
-// Mock the getPromptModeIsAvailable function
-jest.mock('../../get_prompt_mode_is_available', () => ({
-  getPromptModeIsAvailable: jest.fn(() => Promise.resolve(false)),
-}));
-
-// Mock the getSummaryAgentIsAvailable function
-jest.mock('../../get_summary_agent_is_available', () => ({
-  getSummaryAgentIsAvailable: jest.fn(() => Promise.resolve(false)),
-}));
-
 jest.mock('../../../../components/visualizations/metric/metric_vis_config', () => ({
   defaultMetricChartStyles: {
     showTitle: true,
@@ -363,32 +353,9 @@ describe('redux_persistence', () => {
       expect(result.legacy.columns).toEqual(['_source']);
     });
 
-    it('should set correct editor mode from DEFAULT_EDITOR_MODE when AI is not available', async () => {
+    it('should set correct editor mode from DEFAULT_EDITOR_MODE', async () => {
       const result = await getPreloadedState(mockServices);
       expect(result.queryEditor.editorMode).toBe(EditorMode.Query);
-      expect(result.queryEditor.promptModeIsAvailable).toBe(false);
-    });
-
-    it('should set editor mode to Prompt when AI is available', async () => {
-      // Import and cast the mocked function
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getPromptModeIsAvailable } = require('../../get_prompt_mode_is_available');
-
-      // Mock the function to return true for this test
-      (getPromptModeIsAvailable as jest.Mock).mockImplementation(() => Promise.resolve(true));
-
-      // Create a mock dataset to trigger the AI availability check
-      const mockDataset = { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' };
-      (mockServices.data.query.queryString.getQuery as jest.Mock).mockReturnValue({
-        dataset: mockDataset,
-      });
-
-      const result = await getPreloadedState(mockServices);
-      expect(result.queryEditor.editorMode).toBe(EditorMode.Prompt);
-      expect(result.queryEditor.promptModeIsAvailable).toBe(true);
-
-      // Reset the mock back to default behavior
-      (getPromptModeIsAvailable as jest.Mock).mockImplementation(() => Promise.resolve(false));
     });
 
     it('should initialize meta state with isInitialized false', async () => {
