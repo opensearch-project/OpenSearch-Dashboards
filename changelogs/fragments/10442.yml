@@ -1,0 +1,2 @@
+security:
+- Fix GHSA-cpq7-6gpm-g9rc by bumping cipher-base,sha.js ([#10442](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10442))
