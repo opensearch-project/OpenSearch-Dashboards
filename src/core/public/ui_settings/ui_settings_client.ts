@@ -310,7 +310,9 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     const oldVal = declared ? this.cache[key].userValue : undefined;
 
     const unchanged = oldVal === newVal;
-    if (unchanged) {
+    // if scope is explicitly provided, we should not check if it is unchanged
+    // as currently cache may stores settings of all scopes
+    if (unchanged && !scope) {
       return true;
     }
 

@@ -17,7 +17,6 @@ import { ExploreServices } from '../../../../types';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
 import { DiscoverChartContainer } from '../../../../components/chart/discover_chart_container';
 import { useDatasetContext } from '../../../../application/context';
-import { ErrorPanel } from '../../../error_panel';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 
 export const BottomRightContainer = () => {
@@ -75,11 +74,8 @@ export const BottomRightContainer = () => {
     );
   }
 
-  if (status === QueryExecutionStatus.ERROR) {
-    return <ErrorPanel />;
-  }
-
-  if (status === QueryExecutionStatus.READY) {
+  // Errors will be handled individually by each tab
+  if (status === QueryExecutionStatus.READY || status === QueryExecutionStatus.ERROR) {
     return (
       <>
         <DiscoverChartContainer />

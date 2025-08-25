@@ -25,7 +25,6 @@ import {
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
-import { EditorMode } from '../types';
 
 /**
  * Persists Redux state to URL
@@ -276,7 +275,7 @@ const getPreloadedQueryEditorState = async (
     },
     promptModeIsAvailable,
     promptToQueryIsLoading: false,
-    editorMode: promptModeIsAvailable ? EditorMode.Prompt : DEFAULT_EDITOR_MODE,
+    editorMode: DEFAULT_EDITOR_MODE,
     lastExecutedTranslatedQuery: '',
     summaryAgentIsAvailable,
     lastExecutedPrompt: '',
