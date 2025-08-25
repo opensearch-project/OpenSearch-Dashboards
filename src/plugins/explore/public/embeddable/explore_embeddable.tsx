@@ -46,11 +46,9 @@ import {
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
 import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
-import {
-  convertStringsToMappings,
-  findRuleByIndex,
-} from '../components/visualizations/visualization_builder_utils';
+import { convertStringsToMappings } from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
+import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 
 export interface SearchProps {
   description?: string;
@@ -359,7 +357,10 @@ export class ExploreEmbeddable
         };
       } else {
         const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
-        const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns);
+        const matchedRule = visualizationRegistry.findRuleByAxesMapping(
+          visualization.axesMapping,
+          allColumns
+        );
         if (!matchedRule || !matchedRule.toSpec) {
           throw new Error(
             `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`

@@ -127,6 +127,8 @@
     "**/@babel/runtime-corejs3": "^7.27.0",
     "**/@babel/traverse": "^7.27.0",
     "**/@cypress/request": "^3.0.0",
+    "**/cipher-base": "^1.0.5",
+    "**/sha.js": "^2.4.12",
     "**/@types/node": "~20.10.5",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",

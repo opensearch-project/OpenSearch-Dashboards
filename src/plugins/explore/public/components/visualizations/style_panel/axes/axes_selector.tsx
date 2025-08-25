@@ -16,7 +16,6 @@ import { isEmpty, isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
-import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
 import { getColumnMatchFromMapping } from '../../visualization_builder_utils';
@@ -171,8 +170,13 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 
     if (found) {
       // Find a vis rule for the current mapping
-      const ruleToUse = ALL_VISUALIZATION_RULES.find((rule) =>
-        isEqual(rule.matchIndex, getColumnMatchFromMapping(found))
+      const ruleToUse = visualizationRegistry.findRuleByAxesMapping(
+        Object.fromEntries(
+          Object.entries(currentSelections)
+            .filter(([, value]) => !!value)
+            .map(([key, value]) => [key, value.name])
+        ),
+        [...numericalColumns, ...categoricalColumns, ...dateColumns]
       );
       // If rule can be found, update visualization with the new axes mapping
       // Limitation: the current implementation will only call updateVisualization() when the select
@@ -185,7 +189,15 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
         updateVisualization({ mappings: updatedAxes });
       }
     }
-  }, [updateVisualization, currentSelections, remainingMappings]);
+  }, [
+    updateVisualization,
+    currentSelections,
+    remainingMappings,
+    visualizationRegistry,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+  ]);
 
   const findColumns = useMemo(
     () => (type: VisFieldType) => {

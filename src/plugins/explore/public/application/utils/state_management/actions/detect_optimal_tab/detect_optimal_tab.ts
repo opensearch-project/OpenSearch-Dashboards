@@ -12,6 +12,8 @@ import { normalizeResultRows } from '../../../../../components/visualizations/ut
 import { visualizationRegistry } from '../../../../../components/visualizations/visualization_registry';
 import { getQueryWithSource } from '../../../languages';
 import { Query } from '../../../../../../../data/common';
+import { QueryExecutionStatus } from '../../types';
+import { EXPLORE_LOGS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../../common';
 
 /**
  * Determine if results can be visualized
@@ -42,14 +44,12 @@ const canResultsBeVisualized = (results: any): boolean => {
  * Otherwise, fallback to logs tab
  */
 const determineOptimalTab = (results: any, services: ExploreServices): string => {
-  const allTabs = services.tabRegistry.getAllTabs();
-  const visualizationTab = allTabs.find((tab) => tab.label === 'Visualization');
   if (canResultsBeVisualized(results)) {
-    return visualizationTab?.id || 'logs';
+    return EXPLORE_VISUALIZATION_TAB_ID || EXPLORE_LOGS_TAB_ID;
   }
   // TODO: Add more logic to determine optimal tab based on results
   // TODO: Check if there is a query with stats but can't visualize it
-  return 'logs';
+  return EXPLORE_LOGS_TAB_ID;
 };
 
 /**
@@ -63,6 +63,7 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   const state = getState();
   const query = state.query;
   const results = state.results;
+  const queryStatusMap = state.queryEditor.queryStatusMap;
 
   // Get results for visualization tab
   const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
@@ -76,6 +77,11 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
 
   const visualizationResults = results[visualizationTabCacheKey];
+  const visualizationQueryStatus = queryStatusMap[visualizationTabCacheKey];
+
+  if (visualizationQueryStatus.status === QueryExecutionStatus.ERROR) {
+    dispatch(setActiveTab(EXPLORE_VISUALIZATION_TAB_ID));
+  }
 
   if (visualizationResults && visualizationResults.hits?.hits?.length > 0) {
     const optimalTab = determineOptimalTab(visualizationResults, services);

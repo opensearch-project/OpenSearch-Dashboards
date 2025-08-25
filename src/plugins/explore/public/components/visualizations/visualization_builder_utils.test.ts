@@ -7,8 +7,8 @@ import {
   convertMappingsToStrings,
   convertStringsToMappings,
   isValidMapping,
-  findRuleByIndex,
   getColumnMatchFromMapping,
+  getColumnsByAxesMapping,
 } from './visualization_builder_utils';
 import { AxisRole, VisColumn, VisFieldType } from './types';
 
@@ -16,11 +16,9 @@ jest.mock('./rule_repository', () => ({
   ALL_VISUALIZATION_RULES: [
     {
       id: 'rule1',
-      matchIndex: [1, 1, 0],
     },
     {
       id: 'rule2',
-      matchIndex: [0, 1, 1],
     },
   ],
 }));
@@ -134,30 +132,6 @@ describe('visualization_container_utils', () => {
     });
   });
 
-  describe('findRuleByIndex', () => {
-    it('finds rule by column type counts', () => {
-      const mapping = {
-        [AxisRole.X]: 'category',
-        [AxisRole.Y]: 'count',
-      };
-
-      const result = findRuleByIndex(mapping, mockColumns);
-
-      expect(result?.id).toBe('rule1');
-    });
-
-    it('returns undefined for no matching rule', () => {
-      const mapping = {
-        [AxisRole.X]: 'count',
-        [AxisRole.Y]: 'count',
-      };
-
-      const result = findRuleByIndex(mapping, mockColumns);
-
-      expect(result).toBeUndefined();
-    });
-  });
-
   describe('getColumnMatchFromMapping', () => {
     it('counts column types from mapping', () => {
       const mapping = {
@@ -180,6 +154,74 @@ describe('visualization_container_utils', () => {
       const result = getColumnMatchFromMapping(mapping);
 
       expect(result).toEqual([2, 1, 0]);
+    });
+  });
+
+  describe('getColumnsByAxesMapping', () => {
+    it('categorizes columns by their schema type', () => {
+      const mapping = {
+        [AxisRole.X]: 'category',
+        [AxisRole.Y]: 'count',
+        [AxisRole.COLOR]: 'timestamp',
+      };
+
+      const result = getColumnsByAxesMapping(mapping, mockColumns);
+
+      expect(result.numericalColumns).toEqual([mockColumns[0]]);
+      expect(result.categoricalColumns).toEqual([mockColumns[1]]);
+      expect(result.dateColumns).toEqual([mockColumns[2]]);
+    });
+
+    it('handles empty mapping', () => {
+      const mapping = {};
+
+      const result = getColumnsByAxesMapping(mapping, mockColumns);
+
+      expect(result.numericalColumns).toEqual([]);
+      expect(result.categoricalColumns).toEqual([]);
+      expect(result.dateColumns).toEqual([]);
+    });
+
+    it('ignores non-existent column names', () => {
+      const mapping = {
+        [AxisRole.X]: 'nonexistent',
+        [AxisRole.Y]: 'count',
+      };
+
+      const result = getColumnsByAxesMapping(mapping, mockColumns);
+
+      expect(result.numericalColumns).toEqual([mockColumns[0]]);
+      expect(result.categoricalColumns).toEqual([]);
+      expect(result.dateColumns).toEqual([]);
+    });
+
+    it('handles multiple columns of the same type', () => {
+      // Add another numerical column to the mock data
+      const extendedColumns = [
+        ...mockColumns,
+        {
+          id: 4,
+          name: 'average',
+          schema: VisFieldType.Numerical,
+          column: 'average',
+          validValuesCount: 100,
+          uniqueValuesCount: 30,
+        },
+      ];
+
+      const mapping = {
+        [AxisRole.X]: 'category',
+        [AxisRole.Y]: 'count',
+        [AxisRole.Y_SECOND]: 'average',
+      };
+
+      const result = getColumnsByAxesMapping(mapping, extendedColumns);
+
+      expect(result.numericalColumns).toHaveLength(2);
+      expect(result.numericalColumns).toContainEqual(extendedColumns[0]); // count
+      expect(result.numericalColumns).toContainEqual(extendedColumns[3]); // average
+      expect(result.categoricalColumns).toEqual([extendedColumns[1]]);
+      expect(result.dateColumns).toEqual([]);
     });
   });
 });

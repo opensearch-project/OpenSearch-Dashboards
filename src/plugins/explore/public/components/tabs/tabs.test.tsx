@@ -44,6 +44,10 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
   defaultPrepareQueryString: jest.fn((query) => `cache-key-${query.query}`),
 }));
 
+jest.mock('./error_guard/error_guard', () => ({
+  ErrorGuard: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 const mockSetActiveTab = setActiveTab as jest.MockedFunction<typeof setActiveTab>;
 const mockClearQueryStatusMapByKey = clearQueryStatusMapByKey as jest.MockedFunction<
   typeof clearQueryStatusMapByKey
