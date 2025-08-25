@@ -6,6 +6,8 @@
 import '../utils/commands';
 import '../utils/commands.osd';
 import '../utils/commands.explore';
+import '../utils/commands.core';
+import '../utils/commands.core.qe';
 import '../utils/apps/commands';
 import '../utils/dashboards/workspace_plugin/commands';
 
