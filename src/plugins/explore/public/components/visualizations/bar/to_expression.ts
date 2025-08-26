@@ -203,10 +203,13 @@ export const createTimeBarChart = (
     layers.push(...thresholdLayer.layer);
   }
 
+  // Determine the numerical axis for the title
+  const numericalAxis = getSchemaByAxis(xAxis) === 'temporal' ? yAxis : xAxis;
+
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName || `${yAxis?.name} Over Time`
+      ? styles.titleOptions?.titleName || `${numericalAxis?.name} Over Time`
       : undefined,
     data: { values: transformedData },
     layer: layers,

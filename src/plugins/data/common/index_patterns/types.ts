@@ -185,6 +185,15 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
+
+  /**
+   * @experimental These fields are experimental and are subject to change
+   * TODO: Refactor and move them into DataViewField
+   */
+  suggestions?: {
+    values?: string[]; // fetched from the dataset
+    topValues?: string[]; // computed from the query result
+  };
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;

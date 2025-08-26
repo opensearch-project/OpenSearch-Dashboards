@@ -58,8 +58,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     data,
   } = services;
   const visualizationBuilder = getVisualizationBuilder();
-  const axesMappings = useObservable(visualizationBuilder.axesMapping$);
-  const chartConfig = useObservable(visualizationBuilder.styles$);
+  const chartConfig = useObservable(visualizationBuilder.visConfig$);
 
   const searchContext = useSearchContext();
 
@@ -101,7 +100,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
       tabDefinition!,
       {
         chartType: chartConfig?.type,
-        axesMapping: axesMappings,
+        axesMapping: chartConfig?.axesMapping,
         styleOptions: chartConfig?.styles,
       },
       dataset

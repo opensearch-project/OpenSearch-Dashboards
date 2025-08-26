@@ -26,120 +26,35 @@ describe('to_expression', () => {
     { 'field-0': '2023-01-02', 'field-1': 200, 'field-2': 'Category B' },
   ];
 
-  const numericalColumns: VisColumn[] = [
-    {
-      id: 1,
-      name: 'value',
-      schema: VisFieldType.Numerical,
-      column: 'field-1',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
-    },
-  ];
-
-  const categoricalColumns: VisColumn[] = [
-    {
-      id: 2,
-      name: 'category',
-      schema: VisFieldType.Categorical,
-      column: 'field-2',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
-    },
-  ];
-
-  const dateColumns: VisColumn[] = [
-    {
-      id: 0,
-      name: 'date',
-      schema: VisFieldType.Date,
-      column: 'field-0',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
-    },
-  ];
-
-  const styleOptions = {
-    addTooltip: true,
-    addLegend: true,
-  };
-
-  const mockIndexPattern = {
-    id: 'test-pattern',
-    title: 'test-pattern',
-  };
-
   const mockSearchContext = {
     timeRange: { from: 'now-7d', to: 'now' },
     filters: [],
     query: { language: 'kuery', query: 'stats' },
   };
 
-  const mockToExpressionFn = jest.fn().mockReturnValue({
+  const mockedSpec = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     title: 'Test Chart',
     data: { values: transformedData },
-  });
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return an empty string if indexPattern is not provided', async () => {
-    const result = await toExpression(
-      mockSearchContext,
-      undefined as any,
-      mockToExpressionFn,
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styleOptions
-    );
-
-    expect(result).toBe('');
-    expect(mockToExpressionFn).not.toHaveBeenCalled();
-  });
-
   it('should return an empty string if searchContext is not provided', async () => {
-    const result = await toExpression(
-      undefined as any,
-      mockIndexPattern as any,
-      mockToExpressionFn,
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styleOptions
-    );
+    const result = toExpression(undefined as any, {});
 
     expect(result).toBe('');
-    expect(mockToExpressionFn).not.toHaveBeenCalled();
+    expect(expressionsPublic.buildExpressionFunction).not.toHaveBeenCalled();
+    expect(expressionsPublic.buildExpression).not.toHaveBeenCalled();
   });
 
   it('should build and return an expression string when all required parameters are provided', async () => {
-    const result = await toExpression(
-      mockSearchContext,
-      mockIndexPattern as any,
-      mockToExpressionFn,
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styleOptions
-    );
+    const result = toExpression(mockSearchContext, mockedSpec);
 
     // Verify the result
     expect(result).toBe('mocked_expression_string');
-
-    // Verify that the toExpressionFn was called with the correct parameters
-    expect(mockToExpressionFn).toHaveBeenCalledWith(
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styleOptions
-    );
 
     // Verify that the expression functions were built correctly
     expect(expressionsPublic.buildExpressionFunction).toHaveBeenCalledTimes(3);
@@ -158,7 +73,7 @@ describe('to_expression', () => {
       }
     );
     expect(expressionsPublic.buildExpressionFunction).toHaveBeenNthCalledWith(3, 'vega', {
-      spec: JSON.stringify(mockToExpressionFn.mock.results[0].value),
+      spec: JSON.stringify(mockedSpec),
     });
 
     // Verify that buildExpression was called with the array of functions
@@ -177,29 +92,9 @@ describe('to_expression', () => {
         type: 'function',
         function: 'vega',
         arguments: {
-          spec: JSON.stringify(mockToExpressionFn.mock.results[0].value),
+          spec: JSON.stringify(mockedSpec),
         },
       },
     ]);
-  });
-
-  it('should handle missing optional parameters gracefully', async () => {
-    const result = await toExpression(
-      mockSearchContext,
-      mockIndexPattern as any,
-      mockToExpressionFn
-    );
-
-    // Verify the result
-    expect(result).toBe('mocked_expression_string');
-
-    // Verify that the toExpressionFn was called with undefined parameters
-    expect(mockToExpressionFn).toHaveBeenCalledWith(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined
-    );
   });
 });

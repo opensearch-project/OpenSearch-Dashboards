@@ -577,7 +577,7 @@ describe('useQueryPanelEditor', () => {
       );
     });
 
-    it('should clear local text and set query mode when handleEscape is called', () => {
+    it('should not clear local text and set query mode when handleEscape is called', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
 
       // Set some text first
@@ -600,7 +600,7 @@ describe('useQueryPanelEditor', () => {
       });
 
       // Text should be cleared
-      expect(result.current.value).toBe('');
+      expect(result.current.value).toBe('some text');
       expect(mockDispatch).toHaveBeenCalledWith(setEditorMode(EditorMode.Query));
     });
   });

@@ -355,9 +355,9 @@ export const PPL_TOKEN_SETS = {
     'BACKTICK',
   ]),
 
-  variable: new Set(['ID', 'CLUSTER', 'TIMESTAMP']),
+  variable: new Set(['ID', 'CLUSTER', 'TIMESTAMP', 'BQUOTA_STRING']),
 
-  string: new Set(['DQUOTA_STRING', 'SQUOTA_STRING', 'BQUOTA_STRING']),
+  string: new Set(['DQUOTA_STRING', 'SQUOTA_STRING']),
 
   number: new Set(['INTEGER_LITERAL', 'DECIMAL_LITERAL']),
 

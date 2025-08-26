@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './error_panel';
+export { CorrelationsService } from './correlations_service';

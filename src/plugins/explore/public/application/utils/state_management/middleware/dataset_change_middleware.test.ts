@@ -14,12 +14,10 @@ import {
   clearLastExecutedData,
   setPatternsField,
   setUsingRegexPatterns,
-  setEditorMode,
 } from '../slices';
 import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
 import { createMockExploreServices, createMockStore, MockStore } from '../__mocks__';
 import { DEFAULT_DATA } from '../../../../../../data/common';
-import { EditorMode } from '../types';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import * as queryActions from '../actions/query_actions';
@@ -123,7 +121,6 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/resetLegacyState' });
     expect(mockedResetLegacyStateActionCreator).toHaveBeenCalledWith(mockServices);
     expect(mockStore.dispatch).toHaveBeenCalledWith(setPromptModeIsAvailable(true));
-    expect(mockStore.dispatch).toHaveBeenCalledWith(setEditorMode(EditorMode.Prompt));
     expect(mockStore.dispatch).toHaveBeenCalledWith(setSummaryAgentIsAvailable(true));
 
     // Verify the executeQueries action was dispatched

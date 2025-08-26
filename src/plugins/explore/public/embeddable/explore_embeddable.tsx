@@ -46,11 +46,9 @@ import {
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
 import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
-import {
-  convertStringsToMappings,
-  findRuleByIndex,
-} from '../components/visualizations/visualization_container_utils';
+import { convertStringsToMappings } from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
+import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 
 export interface SearchProps {
   description?: string;
@@ -70,6 +68,7 @@ export interface SearchProps {
   };
   chartType?: ChartType;
   activeTab?: string;
+  styleOptions?: StyleOptions;
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -343,6 +342,7 @@ export class ExploreEmbeddable
     const selectedChartType = visualization.chartType ?? 'line';
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
+    this.searchProps.styleOptions = visualization.params;
     if (uiState.activeTab !== 'logs' && visualizationData) {
       const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
       const allColumns = [
@@ -357,47 +357,32 @@ export class ExploreEmbeddable
         };
       } else {
         const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
-        const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns);
-        if (!matchedRule) {
+        const matchedRule = visualizationRegistry.findRuleByAxesMapping(
+          visualization.axesMapping,
+          allColumns
+        );
+        if (!matchedRule || !matchedRule.toSpec) {
           throw new Error(
             `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
           );
         }
-        const ruleBasedToExpressionFn = (
-          transformedData: Array<Record<string, any>>,
-          numericalCols: VisColumn[],
-          categoricalCols: VisColumn[],
-          dateCols: VisColumn[],
-          styleOpts: StyleOptions
-        ) => {
-          return matchedRule?.toSpec?.(
-            transformedData,
-            numericalCols,
-            categoricalCols,
-            dateCols,
-            styleOpts,
-            selectedChartType,
-            axesMapping
-          );
-        };
         const searchContext = {
           query: this.input.query,
           filters: this.input.filters,
           timeRange: this.input.timeRange,
         };
         this.searchProps.searchContext = searchContext;
-        const indexPattern = this.savedExplore.searchSource.getField('index');
         const styleOptions = visualization.params;
-        const exp = toExpression(
-          searchContext,
-          indexPattern!,
-          ruleBasedToExpressionFn,
+        const spec = matchedRule.toSpec(
           visualizationData.transformedData,
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions
+          styleOptions,
+          selectedChartType,
+          axesMapping
         );
+        const exp = toExpression(searchContext, spec);
         this.searchProps.expression = exp;
       }
     }

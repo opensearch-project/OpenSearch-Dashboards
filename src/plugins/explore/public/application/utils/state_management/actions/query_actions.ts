@@ -6,7 +6,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { IBucketDateHistogramAggConfig, Query, DataView } from 'src/plugins/data/common';
+import {
+  IBucketDateHistogramAggConfig,
+  Query,
+  DataView,
+  IndexPatternField,
+} from 'src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -24,6 +29,7 @@ import {
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
+import { getFieldValueCounts } from '../../../../components/fields_selector/lib/field_calculator';
 import {
   ChartData,
   DefaultDataProcessor,
@@ -60,6 +66,7 @@ export const defaultPrepareQueryString = (query: Query): string => {
 /**
  * Default results processor for tabs
  * Processes raw hits to calculate field counts and optionally includes histogram data
+ * Also updates topQueryValues for string fields to improve autocomplete performance
  */
 export const defaultResultsProcessor: DefaultDataProcessor = (
   rawResults: ISearchResult,
@@ -73,6 +80,9 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
         fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
       }
     }
+
+    // Update topAggValues for valid fields when we have search results
+    updateFieldTopQueryValues(rawResults.hits.hits, dataset);
   }
 
   const result: ProcessedSearchResults = {
@@ -91,6 +101,59 @@ export const defaultResultsProcessor: DefaultDataProcessor = (
   return result;
 };
 
+/**
+ * Updates topAggValues for string fields based on search results
+ * This removes the cold start issue in autocomplete
+ */
+const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
+  if (!hits.length || !dataset) return;
+
+  // Get string fields that don't already have topQueryValues
+  const stringFields = dataset.fields.filter(
+    (field) =>
+      field.isSuggestionAvailable() && !field.subType && !field.spec?.suggestions?.topValues
+  );
+
+  // Limit to prevent performance issues
+  const fieldUpdates: Array<{ field: IndexPatternField; topValues: string[] }> = [];
+
+  // Gather field values for all fields first
+  stringFields.forEach((field) => {
+    try {
+      const result = getFieldValueCounts({
+        hits,
+        field,
+        indexPattern: dataset, // DataView extends IndexPattern
+        count: 5,
+        grouped: false,
+      });
+
+      // Extract top values from the result buckets
+      if (result.buckets && result.buckets.length > 0) {
+        const topValues = result.buckets.map((bucket) => String(bucket.value));
+        fieldUpdates.push({ field, topValues });
+      }
+    } catch (error) {
+      // Silently continue on field processing errors
+    }
+  });
+
+  // Batch update all fields in the IndexPattern
+  if (fieldUpdates.length > 0) {
+    fieldUpdates.forEach(({ field, topValues }) => {
+      // Update the IndexPattern field
+      const indexPatternField = dataset.fields.getByName(field.name);
+      if (indexPatternField) {
+        const indexPatternFieldWithSuggestions = indexPatternField;
+        if (!indexPatternFieldWithSuggestions.spec.suggestions) {
+          indexPatternFieldWithSuggestions.spec.suggestions = {};
+        }
+        indexPatternFieldWithSuggestions.spec.suggestions.topValues = topValues;
+      }
+    });
+  }
+};
+
 export const histogramResultsProcessor: HistogramDataProcessor = (
   rawResults: ISearchResult,
   dataset: DataView,
@@ -98,6 +161,9 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
   interval: string
 ): ProcessedSearchResults => {
   const result = defaultResultsProcessor(rawResults, dataset);
+
+  data.dataViews.saveToCache(dataset.id!, dataset); // Updating the cache
+
   const histogramConfigs = dataset.timeFieldName
     ? createHistogramConfigs(dataset, interval, data)
     : undefined;
