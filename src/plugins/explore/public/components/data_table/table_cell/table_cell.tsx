@@ -8,7 +8,7 @@ import './table_cell.scss';
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DocViewFilterFn } from '../../../types/doc_views_types';
+import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { useDatasetContext } from '../../../application/context';
 import { isOnTracesPage, isSpanIdColumn, SpanIdLink } from './trace_utils/trace_utils';
 
@@ -18,9 +18,10 @@ export interface ITableCellProps {
   onFilter?: DocViewFilterFn;
   fieldMapping?: any;
   sanitizedCellValue: string;
-  rowData?: any;
+  rowData?: OpenSearchSearchHit<Record<string, unknown>>;
 }
 
+// TODO: Move to a better cell component design that not rely on rowData
 export const TableCellUI = ({
   columnId,
   isTimeField,
@@ -32,7 +33,7 @@ export const TableCellUI = ({
   const { dataset } = useDatasetContext();
 
   const dataFieldContent =
-    isSpanIdColumn(columnId) && isOnTracesPage() ? (
+    isSpanIdColumn(columnId) && isOnTracesPage() && rowData && dataset ? (
       <SpanIdLink sanitizedCellValue={sanitizedCellValue} rowData={rowData} dataset={dataset} />
     ) : (
       <span
