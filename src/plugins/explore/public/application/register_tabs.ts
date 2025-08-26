@@ -4,7 +4,7 @@
  */
 
 import { LogsTab } from '../components/tabs/logs_tab';
-import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
+import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
 import {
   ExploreFlavor,
@@ -24,7 +24,7 @@ export const registerBuiltInTabs = (
   registryFlavor: ExploreFlavor
 ) => {
   // Register Logs Tab
-  const logsTabDefinition = {
+  const logsTabDefinition: TabDefinition = {
     id: EXPLORE_LOGS_TAB_ID,
     label: registryFlavor === ExploreFlavor.Traces ? 'Spans' : 'Logs',
     flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
@@ -32,14 +32,6 @@ export const registerBuiltInTabs = (
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
     component: LogsTab,
-
-    // Add lifecycle hooks
-    onActive: () => {
-      // Tab activated
-    },
-    onInactive: () => {
-      // Tab deactivated
-    },
   };
 
   tabRegistry.registerTab(logsTabDefinition);

@@ -7,7 +7,7 @@ import { ALLOWED_KEYS, VALID_MODIFIER_COMBINATIONS } from './constants';
 
 // This can be removed once Regexp.escape() is available
 export const escapeKey = (key: string) => {
-  return ['.', '[', ']', '.', '/', '\\'].includes(key) ? `\\${key}` : key;
+  return ['.', '[', ']', '/', '\\'].includes(key) ? `\\${key}` : key;
 };
 
 // This can be removed once Regexp.escape() is available
@@ -20,3 +20,5 @@ export const VALID_KEY_STRING_REGEX = new RegExp(
     '|'
   )})?(?:${ALLOWED_KEYS.map(escapeKey).join('|')})$`
 );
+
+export const SINGLE_LETTER_REGEX = /^[a-z]$/;

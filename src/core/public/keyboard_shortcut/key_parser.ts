@@ -4,7 +4,7 @@
  */
 
 import { VALID_KEY_STRING_REGEX } from './utils';
-import { ALLOWED_KEYS, CODE_TO_KEY_MAPPING, DISPLAY_MAPPINGS } from './constants';
+import { ALLOWED_KEYS, CODE_TO_KEY_MAPPING, DISPLAY_MAPPINGS, SEQUENCE_PREFIX } from './constants';
 
 export class KeyStringParser {
   /**
@@ -33,6 +33,11 @@ export class KeyStringParser {
    */
   public normalizeKeyString(keyString: string): string {
     const lowercasedKeyString = keyString.toLowerCase();
+
+    if (SEQUENCE_PREFIX.has(lowercasedKeyString)) {
+      throw new Error(`Cannot register single key "${keyString}" as it's reserved for sequences.`);
+    }
+
     if (!VALID_KEY_STRING_REGEX.test(lowercasedKeyString)) {
       throw new Error(
         `Invalid key combination: "${keyString}". Please refer to our documentation to see what is valid.`

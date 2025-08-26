@@ -9,19 +9,15 @@
  * GitHub history for details.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSmallButtonIcon } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
-import dompurify from 'dompurify';
 import React, { useCallback, useState } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
-import { TableSourceCell } from '../table_cell/table_source_cell';
-import { TableCell } from '../table_cell/table_cell';
 import {
   DocViewFilterFn,
   DocViewsRegistry,
   OpenSearchSearchHit,
 } from '../../../types/doc_views_types';
-import { DocViewer } from '../../doc_viewer/doc_viewer';
+import { ExpandedTableRow } from './expanded_table_row/expanded_table_row';
+import { TableRowContent } from './table_row_content';
 
 export interface TableRowProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -46,171 +42,34 @@ export const TableRowUI = ({
   isShortDots,
   docViewsRegistry,
 }: TableRowProps) => {
-  const flattened = dataset.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
   const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
     setIsExpanded,
   ]);
 
-  const tableRow = (
-    <tr key={row._id} className={row.isAnchor ? 'exploreDocTable__row--highlight' : ''}>
-      <td
-        data-test-subj="docTableExpandToggleColumn"
-        className="exploreDocTableCell__toggleDetails"
-      >
-        <EuiSmallButtonIcon
-          color="text"
-          onClick={handleExpanding}
-          iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-          aria-label={i18n.translate('explore.defaultTable.docTableExpandToggleColumnLabel', {
-            defaultMessage: `Toggle row details`,
-          })}
-          data-test-subj="docTableExpandToggleColumn"
-        />
-      </td>
-      {columns.map((colName) => {
-        const fieldInfo = dataset.fields.getByName(colName);
-        const fieldMapping = flattened[colName];
-
-        if (typeof row === 'undefined') {
-          return (
-            <td
-              key={colName}
-              data-test-subj="docTableField"
-              className="exploreDocTableCell eui-textBreakAll eui-textBreakWord"
-            >
-              <span>-</span>
-            </td>
-          );
-        }
-
-        if (fieldInfo?.type === '_source') {
-          return (
-            <td
-              key={colName}
-              className="exploreDocTableCell eui-textBreakAll eui-textBreakWord exploreDocTableCell__source"
-              data-test-subj="docTableField"
-            >
-              <div className="truncate-by-height">
-                <TableSourceCell idxPattern={dataset} row={row} isShortDots={isShortDots} />
-              </div>
-            </td>
-          );
-        }
-
-        const formattedValue = dataset.formatField(row, colName);
-
-        if (typeof formattedValue === 'undefined') {
-          return (
-            <td
-              key={colName}
-              data-test-subj="docTableField"
-              className="exploreDocTableCell eui-textBreakAll eui-textBreakWord"
-            >
-              <span>-</span>
-            </td>
-          );
-        }
-
-        const sanitizedCellValue = dompurify.sanitize(formattedValue);
-
-        if (fieldInfo?.filterable === false) {
-          return (
-            <td
-              key={colName}
-              data-test-subj="docTableField"
-              className={`exploreDocTableCell ${
-                dataset.timeFieldName === colName
-                  ? 'eui-textNoWrap'
-                  : 'eui-textBreakAll eui-textBreakWord'
-              }`}
-            >
-              <div className="truncate-by-height">
-                {/* eslint-disable-next-line react/no-danger */}
-                <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
-              </div>
-            </td>
-          );
-        }
-
-        return (
-          <TableCell
-            key={colName}
-            columnId={colName}
-            onFilter={onFilter}
-            isTimeField={dataset.timeFieldName === colName}
-            fieldMapping={fieldMapping}
-            sanitizedCellValue={sanitizedCellValue}
-            rowData={row}
-          />
-        );
-      })}
-    </tr>
-  );
-
-  const expandedTableRow = (
-    <tr key={'x' + row._id}>
-      <td
-        className="exploreDocTable__detailsParent"
-        colSpan={columns.length + 1}
-        data-test-subj="osdDocTableDetailsParent"
-      >
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem
-            grow={false}
-            className="exploreDocTable__detailsIconContainer"
-            data-test-subj="osdDocTableDetailsIconContainer"
-          >
-            <EuiIcon type="folderOpen" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <h4
-              className="euiTitle euiTitle--xxsmall"
-              i18n-id="explore.docTable.tableRow.detailHeading"
-              i18n-default-message="Expanded document"
-            >
-              Expanded document
-            </h4>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem>
-            <DocViewer
-              renderProps={{
-                hit: row,
-                columns,
-                indexPattern: dataset,
-                filter: onFilter
-                  ? (mapping, value, mode) => {
-                      onFilter(mapping, value, mode);
-                      onClose?.();
-                    }
-                  : undefined,
-                onAddColumn: onAddColumn
-                  ? (columnName: string) => {
-                      onAddColumn(columnName);
-                      onClose?.();
-                    }
-                  : undefined,
-                onRemoveColumn: onRemoveColumn
-                  ? (columnName: string) => {
-                      onRemoveColumn(columnName);
-                      onClose?.();
-                    }
-                  : undefined,
-              }}
-              docViewsRegistry={docViewsRegistry}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </td>
-    </tr>
-  );
-
   return (
     <>
-      {tableRow}
-      {isExpanded && expandedTableRow}
+      <TableRowContent
+        row={row}
+        columns={columns}
+        dataset={dataset}
+        onFilter={onFilter}
+        isShortDots={isShortDots}
+        isExpanded={isExpanded}
+        onToggleExpand={handleExpanding}
+      />
+      {isExpanded && (
+        <ExpandedTableRow
+          row={row}
+          columns={columns}
+          dataset={dataset}
+          onFilter={onFilter}
+          onRemoveColumn={onRemoveColumn}
+          onAddColumn={onAddColumn}
+          onClose={onClose}
+          docViewsRegistry={docViewsRegistry}
+        />
+      )}
     </>
   );
 };

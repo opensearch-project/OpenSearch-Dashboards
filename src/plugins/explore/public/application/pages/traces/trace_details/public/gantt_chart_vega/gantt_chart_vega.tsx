@@ -93,11 +93,9 @@ export function GanttChart({
     // Set up ResizeObserver to detect container size changes
     let resizeObserver: ResizeObserver | null = null;
     if (containerRef.current && typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          // Debounce the resize to avoid too many updates
-          setTimeout(updateWidth, 100);
-        }
+      resizeObserver = new ResizeObserver(() => {
+        // Debounce the resize to avoid too many updates
+        setTimeout(updateWidth, 100);
       });
       resizeObserver.observe(containerRef.current);
     }
@@ -139,7 +137,7 @@ export function GanttChart({
 
         // Add click handler mousedown needed or code block breaks it
         if (onSpanClick) {
-          view.addEventListener('mousedown', (event, item) => {
+          view.addEventListener('mousedown', (_, item) => {
             if (item && item.datum && item.datum.spanId) {
               onSpanClick(item.datum.spanId);
             }
