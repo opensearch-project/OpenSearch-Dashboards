@@ -31,14 +31,14 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiSmallButtonIcon, EuiText } from '@elastic/eui';
-import { IDataset } from 'src/plugins/data/public';
+import { IDataView } from 'src/plugins/data/public';
 import { useObservable } from 'react-use';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DatasetManagmentContext } from '../../../types';
 import { TopNavControlButtonData, TopNavControlIconData } from '../../../../../navigation/public';
 
 interface IndexHeaderProps {
-  dataset: IDataset;
+  dataset: IDataView;
   defaultIndex?: string;
   setDefault?: () => void;
   refreshFields?: () => void;

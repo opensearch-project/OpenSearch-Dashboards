@@ -1,8 +1,9 @@
-# Create Index Pattern
+# Create Dataset
 
 This is meant to serve as a guide to this area of code.
 
 ## Bye bye regressions
+
 In order to prevent future regressions, there are a few scenarios
 that need to be tested with each change to this area of the code.
 

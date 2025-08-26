@@ -211,17 +211,22 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
     }
   };
 
-  createDataset = async (timeFieldName: string | undefined, indexPatternId: string) => {
+  createDataset = async (
+    timeFieldName: string | undefined,
+    datasetId: string,
+    datasetType: string
+  ) => {
     let emptyPattern: DataView;
     const { history } = this.props;
     const { dataset, dataSourceRef } = this.state;
 
     try {
       emptyPattern = await this.context.services.data.dataViews.createAndSave({
-        id: indexPatternId,
+        id: datasetId,
         title: dataset,
         timeFieldName,
         dataSourceRef,
+        type: datasetType,
         ...this.state.datasetCreationType.getDatasetMappings(),
       });
     } catch (err) {
@@ -238,7 +243,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
         });
 
         if (isConfirmed) {
-          return history.push(`/patterns/${indexPatternId}`);
+          return history.push(`/patterns/${datasetId}`);
         } else {
           return;
         }

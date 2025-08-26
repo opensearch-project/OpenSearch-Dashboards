@@ -38,18 +38,25 @@ import './_index.scss';
 export interface DetailedDataset extends Dataset {
   description?: string;
   displayName?: string;
+  signalType?: string;
 }
 
 export interface DatasetSelectProps {
   onSelect: (dataset: Dataset) => void;
   appName: string;
   supportedTypes?: string[];
+  onFilter?: (dataset: Dataset) => boolean;
 }
 
 /**
  * @experimental This component is experimental and may change in future versions
  */
-const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, supportedTypes }) => {
+const DatasetSelect: React.FC<DatasetSelectProps> = ({
+  onSelect,
+  appName,
+  supportedTypes,
+  onFilter,
+}) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -118,6 +125,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, suppor
             ...dataset,
             description: dataView.description,
             displayName: dataView.displayName,
+            signalType: dataView.type,
           });
         }
 
@@ -152,35 +160,37 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, appName, suppor
   }, []);
 
   const options = useMemo(() => {
-    return datasets.map((dataset) => {
-      const { id, title, type, description, displayName } = dataset;
-      const isSelected = id === selectedDataset?.id;
-      const isDefault = id === defaultDatasetId;
-      const typeConfig = datasetService.getType(type);
-      const iconType = typeConfig?.meta?.icon?.type || 'database';
-      const label = displayName || title;
-      // Prepending the label to the searchable label to allow for better search, render will strip it out
-      const searchableLabel = `${label}${typeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title}${
-        description && description.trim() !== '' ? ` - ${description}` : ''
-      }`.trim();
+    return datasets
+      .filter((dataset) => (onFilter ? onFilter(dataset) : true))
+      .map((dataset) => {
+        const { id, title, type, description, displayName } = dataset;
+        const isSelected = id === selectedDataset?.id;
+        const isDefault = id === defaultDatasetId;
+        const typeConfig = datasetService.getType(type);
+        const iconType = typeConfig?.meta?.icon?.type || 'database';
+        const label = displayName || title;
+        // Prepending the label to the searchable label to allow for better search, render will strip it out
+        const searchableLabel = `${label}${
+          typeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title
+        }${description && description.trim() !== '' ? ` - ${description}` : ''}`.trim();
 
-      return {
-        label,
-        searchableLabel: searchableLabel || title,
-        key: id,
-        checked: isSelected ? ('on' as const) : undefined,
-        prepend: <EuiIcon size="s" type={iconType} />,
-        'data-test-subj': `datasetSelectOption-${title}`,
-        append: isDefault ? (
-          <EuiBadge>
-            {i18n.translate('data.datasetSelect.defaultLabel', {
-              defaultMessage: 'Default',
-            })}
-          </EuiBadge>
-        ) : undefined,
-      };
-    });
-  }, [datasets, selectedDataset?.id, defaultDatasetId, datasetService]);
+        return {
+          label,
+          searchableLabel: searchableLabel || title,
+          key: id,
+          checked: isSelected ? ('on' as const) : undefined,
+          prepend: <EuiIcon size="s" type={iconType} />,
+          'data-test-subj': `datasetSelectOption-${title}`,
+          append: isDefault ? (
+            <EuiBadge>
+              {i18n.translate('data.datasetSelect.defaultLabel', {
+                defaultMessage: 'Default',
+              })}
+            </EuiBadge>
+          ) : undefined,
+        };
+      });
+  }, [datasets, selectedDataset?.id, defaultDatasetId, datasetService, onFilter]);
 
   const handleOptionChange = useCallback(
     async (newOptions: EuiSelectableOption[]) => {
