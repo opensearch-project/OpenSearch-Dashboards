@@ -4,6 +4,7 @@
  */
 
 export { KeyboardShortcutService } from './keyboard_shortcut_service';
+export { useKeyboardShortcuts } from './use_keyboard_shortcut';
 export type {
   KeyboardShortcutSetup,
   KeyboardShortcutStart,
