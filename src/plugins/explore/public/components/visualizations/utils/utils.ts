@@ -43,10 +43,8 @@ export const applyAxisStyling = (
 
   // Apply label settings
   if (axisStyle?.labels) {
-    const showLabels = axisStyle.labels.show ?? true;
-    fullAxisConfig.labels = showLabels;
-
-    if (showLabels) {
+    fullAxisConfig.labels = !!axisStyle.labels.show;
+    if (fullAxisConfig.labels) {
       fullAxisConfig.labelAngle = axisStyle.labels.rotate ?? 0;
       fullAxisConfig.labelLimit = axisStyle.labels.truncate ?? 100;
       fullAxisConfig.labelOverlap = 'greedy';
