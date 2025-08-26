@@ -101,11 +101,21 @@ export const DatasetSelectWidget = () => {
     );
   }, [services.supportedTypes]);
 
+  const onFilter = useMemo(() => {
+    return (detailedDataset: any) => {
+      if (window.location.pathname.includes('/traces')) {
+        return detailedDataset.signalType === 'TRACES';
+      }
+      return true;
+    };
+  }, []);
+
   return (
     <DatasetSelect
       onSelect={handleDatasetSelect}
       appName="explore"
       supportedTypes={supportedTypes}
+      onFilter={onFilter}
     />
   );
 };

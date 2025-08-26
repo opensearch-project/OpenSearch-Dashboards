@@ -53,7 +53,11 @@ import { StepInfo } from '../../types';
 interface StepTimeFieldProps {
   dataset: string;
   goToPreviousStep: () => void;
-  createDataset: (selectedTimeField: string | undefined, datasetId: string) => void;
+  createDataset: (
+    selectedTimeField: string | undefined,
+    datasetId: string,
+    datasetType: string
+  ) => void;
   datasetCreationType: DatasetCreationConfig;
   selectedTimeField?: string;
   dataSourceRef?: DataSourceRef;
@@ -157,6 +161,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     this.setState({ datasetId: e.target.value });
   };
 
+  onChangeDatasetType = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    this.setState({ datasetType: e.target.value });
+  };
+
   toggleAdvancedOptions = () => {
     this.setState((state) => ({
       isAdvancedOptionsVisible: !state.isAdvancedOptionsVisible,
@@ -165,10 +173,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
   createDataset = async () => {
     const { createDataset } = this.props;
-    const { selectedTimeField, datasetId } = this.state;
+    const { selectedTimeField, datasetId, datasetType } = this.state;
     this.setState({ isCreating: true });
     try {
-      await createDataset(selectedTimeField, datasetId);
+      await createDataset(selectedTimeField, datasetId, datasetType);
     } catch (error) {
       if (!this.mounted) return;
       this.setState({
@@ -200,6 +208,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
       isCreating,
       isFetchingTimeFields,
       datasetName,
+      datasetType,
     } = this.state;
 
     if (isCreating) {
@@ -273,8 +282,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
         <AdvancedOptions
           isVisible={isAdvancedOptionsVisible}
           datasetId={datasetId}
+          datasetType={datasetType}
           toggleAdvancedOptions={this.toggleAdvancedOptions}
           onChangeDatasetId={this.onChangeDatasetId}
+          onChangeDatasetType={this.onChangeDatasetType}
         />
         <EuiSpacer size="m" />
         {error}

@@ -51,27 +51,13 @@ export class DataViewsApiClient implements IDataViewsApiClient {
   }
 
   getFieldsForWildcard(options: GetFieldsOptions = {}) {
-    const { pattern, metaFields, type, params, dataSourceId } = options;
-
-    let url;
-    let query;
-
-    if (type) {
-      url = this._getUrl([type, '_fields_for_wildcard']);
-      query = {
-        pattern,
-        meta_fields: metaFields,
-        params: JSON.stringify(params),
-        data_source: dataSourceId,
-      };
-    } else {
-      url = this._getUrl(['_fields_for_wildcard']);
-      query = {
-        pattern,
-        meta_fields: metaFields,
-        data_source: dataSourceId,
-      };
-    }
+    const { pattern, metaFields, dataSourceId } = options;
+    const url = this._getUrl(['_fields_for_wildcard']);
+    const query = {
+      pattern,
+      meta_fields: metaFields,
+      data_source: dataSourceId,
+    };
 
     return this._request(url, query).then((resp: any) => resp.fields);
   }
