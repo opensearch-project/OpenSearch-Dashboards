@@ -23,12 +23,10 @@ const traceTestSuite = () => {
     });
 
     it('should show empty state when no index pattern exists', function () {
-      cy.osd.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToTracesViaLogsUrl({
         workspaceName: workspaceName,
-        page: 'explore/traces',
         isEnhancement: true,
       });
-      cy.osd.waitForLoader(true);
       cy.getElementByTestId('discoverNoIndexPatterns').should('be.visible');
     });
 
@@ -40,19 +38,20 @@ const traceTestSuite = () => {
         isEnhancement: true,
       });
       cy.wait(2000);
+      cy.osd.grabIdsFromDiscoverPageUrl();
       cy.url().should('include', 'import_sample_data');
 
       // Install OTEL sample data if not already present
       cy.get('body').then(($body) => {
         if ($body.find('[data-test-subj="addSampleDataSetotel"]').length > 0) {
           cy.getElementByTestId('addSampleDataSetotel').should('be.visible').click();
-          cy.contains('Sample Observability Logs, Traces, and Metrics installed', {
-            timeout: 30000,
-          }).should('be.visible');
+          // Wait for the Remove button to appear, indicating successful installation
+          cy.getElementByTestId('removeSampleDataSetotel', { timeout: 30000 }).should('be.visible');
         }
       });
 
       // Create index pattern for traces
+      cy.wait(2000);
       cy.log('Creating trace index pattern');
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
@@ -64,18 +63,16 @@ const traceTestSuite = () => {
       });
 
       // Navigate back to traces page
-      cy.osd.navigateToWorkSpaceSpecificPage({
+      cy.osd.navigateToTracesViaLogsUrl({
         workspaceName: workspaceName,
-        page: 'explore/traces',
         isEnhancement: true,
       });
-      cy.osd.waitForLoader(true);
 
       // Click on dataset selector to close Syntax options if blocking time-picker
       cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
 
       // Set time range to capture OTEL sample data - last 2 months
-      cy.explore.setRelativeTopNavDate('2', 'Months ago');
+      cy.explore.setRelativeTopNavDate('12', 'Months ago');
 
       // Verify empty state is no longer visible
       cy.getElementByTestId('discoverNoIndexPatterns').should('not.exist');
