@@ -67,16 +67,24 @@ jest.mock('../../../../application/utils/state_management/actions/query_actions'
   defaultPrepareQueryString: jest.fn(() => 'mock-query-string'),
 }));
 
+// Mock useFlavorId hook
+jest.mock('../../../../helpers/use_flavor_id', () => ({
+  useFlavorId: jest.fn(() => 'logs'),
+}));
+
 // Import components and hooks after mocks
 import { BottomRightContainer } from './bottom_right_container';
 import { QueryExecutionStatus } from '../../../../application/utils/state_management/types';
 import { useDatasetContext } from '../../../../application/context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { useFlavorId } from '../../../../helpers/use_flavor_id';
+import { ExploreFlavor } from '../../../../../common';
 
 const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
   typeof useOpenSearchDashboards
 >;
+const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
 
 describe('BottomRightContainer', () => {
   const createMockStore = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
@@ -121,6 +129,7 @@ describe('BottomRightContainer', () => {
     mockUseOpenSearchDashboards.mockReturnValue({
       services: mockServices,
     } as any);
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs);
   });
 
   const renderComponent = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
@@ -264,5 +273,33 @@ describe('BottomRightContainer', () => {
 
     renderComponent(QueryExecutionStatus.NO_RESULTS);
     expect(screen.getByTestId('no-results')).toBeInTheDocument();
+  });
+
+  it('should not render chart container when flavor is traces', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
+
+    renderComponent(QueryExecutionStatus.READY);
+
+    expect(screen.queryByTestId('chart-container')).not.toBeInTheDocument();
+    expect(screen.getByTestId('explore-tabs-vis-style-panel')).toBeInTheDocument();
+  });
+
+  it('should render chart container when flavor is not traces', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs);
+
+    renderComponent(QueryExecutionStatus.READY);
+
+    expect(screen.getByTestId('chart-container')).toBeInTheDocument();
+    expect(screen.getByTestId('explore-tabs-vis-style-panel')).toBeInTheDocument();
   });
 });
