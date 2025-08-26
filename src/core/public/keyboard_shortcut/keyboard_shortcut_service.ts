@@ -10,6 +10,8 @@ import {
   ShortcutDefinition,
 } from './types';
 import { KeyStringParser } from './key_parser';
+import { SequenceHandler } from './sequence_handler';
+import { SEQUENCE_PREFIX } from './constants';
 
 /**
  * @internal
@@ -20,6 +22,7 @@ export class KeyboardShortcutService {
   private namespacedIdToKeyLookup = new Map<string, string>();
   private config: KeyboardShortcutConfig = { enabled: true };
   private keyParser = new KeyStringParser();
+  private sequenceHandler = new SequenceHandler();
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -44,6 +47,7 @@ export class KeyboardShortcutService {
     this.stopEventListener();
     this.shortcutsMapByKey.clear();
     this.namespacedIdToKeyLookup.clear();
+    this.sequenceHandler = new SequenceHandler();
   }
 
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
@@ -54,8 +58,6 @@ export class KeyboardShortcutService {
       return;
     }
 
-    const key = this.keyParser.normalizeKeyString(shortcut.keys);
-
     const namespacedId = this.getNamespacedId(shortcut);
 
     if (this.namespacedIdToKeyLookup.has(namespacedId)) {
@@ -63,6 +65,10 @@ export class KeyboardShortcutService {
         `Shortcut "${shortcut.id}" from plugin "${shortcut.pluginId}" is already registered`
       );
     }
+
+    const key = shortcut.keys.includes(' ')
+      ? this.sequenceHandler.normalizeKeyString(shortcut.keys)
+      : this.keyParser.normalizeKeyString(shortcut.keys);
 
     const existingShortcuts = this.shortcutsMapByKey.get(key) || [];
 
@@ -101,8 +107,7 @@ export class KeyboardShortcutService {
     }
 
     const filteredShortcuts = shortcuts.filter(
-      (existingShortcut: ShortcutDefinition) =>
-        this.getNamespacedId(existingShortcut) !== namespacedId
+      (existingShortcut) => this.getNamespacedId(existingShortcut) !== namespacedId
     );
 
     if (filteredShortcuts.length !== shortcuts.length) {
@@ -142,30 +147,43 @@ export class KeyboardShortcutService {
     return false;
   }
 
+  private executeShortcut(event: KeyboardEvent, shortcut: ShortcutDefinition): void {
+    event.preventDefault();
+    try {
+      shortcut.execute();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `Error executing shortcut ${shortcut.id} from plugin ${shortcut.pluginId}:`,
+        error
+      );
+    }
+  }
+
+  private executeShortcutForKey(event: KeyboardEvent, key: string): void {
+    const shortcuts = this.shortcutsMapByKey.get(key);
+    if (shortcuts?.length) {
+      const shortcut = shortcuts[shortcuts.length - 1];
+      this.executeShortcut(event, shortcut);
+    }
+  }
+
   private handleKeyboardEvent = (event: KeyboardEvent): void => {
     if (this.shouldIgnoreKeyboardEventForTarget(event.target)) {
       return;
     }
 
     const eventKeyString = this.keyParser.getEventKeyString(event);
-    const shortcuts = this.shortcutsMapByKey.get(eventKeyString);
 
-    if (shortcuts?.length) {
-      // Prevent browser-specific keybindings if they conflict with our shortcuts
-      event.preventDefault();
-
-      // Execute the last registered shortcut for this key combination
-      // This implements a "last registered wins" policy for conflicting shortcuts
-      const shortcut = shortcuts[shortcuts.length - 1];
-      try {
-        shortcut.execute();
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `Error executing shortcut ${shortcut.id} from plugin ${shortcut.pluginId}:`,
-          error
-        );
-      }
+    // Check if sequence handler already has a first key (waiting for second key)
+    if (this.sequenceHandler.isInSequence()) {
+      const sequenceKey = this.sequenceHandler.processSecondKey(eventKeyString);
+      this.executeShortcutForKey(event, sequenceKey);
+    } else if (SEQUENCE_PREFIX.has(eventKeyString)) {
+      this.sequenceHandler.processFirstKey(eventKeyString);
+    } else {
+      // Process as regular shortcut (including modifier keys and single keys)
+      this.executeShortcutForKey(event, eventKeyString);
     }
   };
 
