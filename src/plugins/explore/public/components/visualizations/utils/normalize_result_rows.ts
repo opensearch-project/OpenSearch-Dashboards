@@ -19,6 +19,8 @@ export const normalizeResultRows = <T = unknown>(
       column: `field-${index}`,
       validValuesCount: 0,
       uniqueValuesCount: 0,
+      min: 0,
+      max: 0,
     };
   });
 
@@ -37,10 +39,14 @@ export const normalizeResultRows = <T = unknown>(
     const values = transformedData.map((row) => row[column.column]);
     const validValues = values.filter((v) => v !== null && v !== undefined);
     const uniqueValues = new Set(validValues);
+    const minValues = Math.min(...validValues);
+    const maxValues = Math.max(...validValues);
     return {
       ...column,
       validValuesCount: validValues.length ?? 0,
       uniqueValuesCount: uniqueValues.size ?? 0,
+      min: minValues,
+      max: maxValues,
     };
   });
 

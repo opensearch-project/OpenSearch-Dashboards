@@ -36,6 +36,7 @@ import {
   createFacetedTimeBarChart,
 } from './bar/to_expression';
 import { CHART_METADATA } from './constants';
+import { createGauge } from './gauge/to_expression';
 
 type RuleMatchIndex = [number, number, number];
 
@@ -510,37 +511,47 @@ const oneMetricRule: VisualizationRule = {
   name: 'one metric',
   description: 'Metric for one metric',
   matches: (numerical, categorical, date) => {
-    if (numerical.length < 1 || numerical[0].validValuesCount !== 1) {
+    if (numerical.length !== 1) {
       return 'NOT_MATCH';
     }
-    if (
-      numerical.length === 1 &&
-      date.length === 0 &&
-      categorical.length === 0 &&
-      numerical[0].validValuesCount === 1
-    ) {
+    if (numerical.length === 1 && date.length === 0 && categorical.length === 0) {
       return 'EXACT_MATCH';
     }
     return 'COMPATIBLE_MATCH';
   },
-  chartTypes: [{ ...CHART_METADATA.metric, priority: 100 }],
+  chartTypes: [
+    { ...CHART_METADATA.gauge, priority: 100 },
+    { ...CHART_METADATA.metric, priority: 80 },
+  ],
   toSpec: (
     transformedData,
     numericalColumns,
     categoricalColumns,
     dateColumns,
     styleOptions,
-    chartType = 'metric',
+    chartType = 'gauge',
     axisColumnMappings
   ) => {
-    return createSingleMetric(
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styleOptions,
-      axisColumnMappings
-    );
+    switch (chartType) {
+      case 'gauge':
+        return createGauge(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
+      case 'metric':
+        return createSingleMetric(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
+    }
   },
 };
 

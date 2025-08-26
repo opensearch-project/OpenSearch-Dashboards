@@ -60,6 +60,8 @@ export interface VisColumn {
   column: string;
   validValuesCount: number;
   uniqueValuesCount: number;
+  max: number;
+  min: number;
 }
 
 export enum VisFieldType {
@@ -208,13 +210,16 @@ export interface RangeValue {
   min?: number;
   max?: number;
 }
+export interface ThresholdRangeValue {
+  value: number;
+  color: string;
+}
 
-export enum LabelAggregationType {
+export enum AggregationType {
   SUM = 'sum',
   MEAN = 'mean',
   MAX = 'max',
   MIN = 'min',
-  NONE = 'none',
 }
 
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';

@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { ColorSchemas, ScaleType, Positions, LabelAggregationType, PointShape } from '../types';
+import { ColorSchemas, ScaleType, Positions, AggregationType, PointShape } from '../types';
 
 export const getPositions = () => [
   {
@@ -97,34 +97,28 @@ export const getScaleType = () => [
 
 export const getLabelType = () => [
   {
-    text: i18n.translate('explore.vis.heatmap.labelType.sum', {
+    text: i18n.translate('explore.vis.aggregationType.sum', {
       defaultMessage: 'Sum',
     }),
-    value: LabelAggregationType.SUM,
+    value: AggregationType.SUM,
   },
   {
-    text: i18n.translate('explore.vis.heatmap.labelType.mean', {
+    text: i18n.translate('explore.vis.aggregationType.mean', {
       defaultMessage: 'Mean',
     }),
-    value: LabelAggregationType.MEAN,
+    value: AggregationType.MEAN,
   },
   {
-    text: i18n.translate('explore.vis.heatmap.labelType.max', {
+    text: i18n.translate('explore.vis.aggregationType.max', {
       defaultMessage: 'Max',
     }),
-    value: LabelAggregationType.MAX,
+    value: AggregationType.MAX,
   },
   {
-    text: i18n.translate('explore.vis.heatmap.labelType.min', {
+    text: i18n.translate('explore.vis.aggregationType.min', {
       defaultMessage: 'Min',
     }),
-    value: LabelAggregationType.MIN,
-  },
-  {
-    text: i18n.translate('explore.vis.heatmap.labelType.none', {
-      defaultMessage: 'None',
-    }),
-    value: LabelAggregationType.NONE,
+    value: AggregationType.MIN,
   },
 ];
 

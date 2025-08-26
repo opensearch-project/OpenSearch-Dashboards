@@ -14,7 +14,7 @@ import {
   Positions,
   AxisRole,
   TooltipOptions,
-  LabelAggregationType,
+  AggregationType,
   VisFieldType,
   TitleOptions,
 } from '../types';
@@ -24,7 +24,7 @@ export interface HeatmapLabels {
   rotate: boolean;
   overwriteColor: boolean;
   color: string;
-  type?: LabelAggregationType;
+  type?: AggregationType;
 }
 export interface ExclusiveHeatmapConfig {
   colorSchema: ColorSchemas;
@@ -72,7 +72,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     maxNumberOfColors: 4,
     useCustomRanges: false,
     label: {
-      type: LabelAggregationType.SUM,
+      type: AggregationType.SUM,
       show: false,
       rotate: false,
       overwriteColor: false,

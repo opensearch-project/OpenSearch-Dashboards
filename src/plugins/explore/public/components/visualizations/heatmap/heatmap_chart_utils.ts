@@ -4,7 +4,7 @@
  */
 
 import type { Encoding } from 'vega-lite/build/src/encoding';
-import { LabelAggregationType, ColorSchemas, VisColumn } from '../types';
+import { AggregationType, ColorSchemas, VisColumn } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { generateColorBySchema } from '../utils/utils';
 
@@ -29,7 +29,7 @@ export const createLabelLayer = (
 
   if (
     !isRegular &&
-    styles.exclusive?.label.type !== LabelAggregationType.NONE &&
+    styles.exclusive?.label.type !== AggregationType.NONE &&
     styles.exclusive?.label.type
   ) {
     textEncoding.aggregate = styles.exclusive?.label.type;
