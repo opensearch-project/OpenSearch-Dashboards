@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepDataSource should render normally with hideLocalCluster false 1`] = `
+<Fragment>
+  <EuiPageContent>
+    <Header
+      goToNextStep={[Function]}
+      hideLocalCluster={false}
+      isNextStepDisabled={true}
+      onDataSourceSelected={[Function]}
+      stepInfo={
+        Object {
+          "currentStepNumber": 0,
+          "totalStepNumber": 0,
+        }
+      }
+    />
+  </EuiPageContent>
+</Fragment>
+`;
+
+exports[`StepDataSource should render normally with hideLocalCluster true 1`] = `
+<Fragment>
+  <EuiPageContent>
+    <Header
+      goToNextStep={[Function]}
+      hideLocalCluster={true}
+      isNextStepDisabled={true}
+      onDataSourceSelected={[Function]}
+      stepInfo={
+        Object {
+          "currentStepNumber": 0,
+          "totalStepNumber": 0,
+        }
+      }
+    />
+  </EuiPageContent>
+</Fragment>
+`;
+
+exports[`StepDataSource should render normally with hideLocalCluster undefined 1`] = `
+<Fragment>
+  <EuiPageContent>
+    <Header
+      goToNextStep={[Function]}
+      isNextStepDisabled={true}
+      onDataSourceSelected={[Function]}
+      stepInfo={
+        Object {
+          "currentStepNumber": 0,
+          "totalStepNumber": 0,
+        }
+      }
+    />
+  </EuiPageContent>
+</Fragment>
+`;

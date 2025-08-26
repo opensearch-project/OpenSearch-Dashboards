@@ -1,0 +1,270 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DurationFormatEditor should render human readable output normally 1`] = `
+<Fragment>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Input format"
+        id="datasetManagement.duration.inputFormatLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Seconds",
+            "value": "seconds",
+          },
+        ]
+      }
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Output format"
+        id="datasetManagement.duration.outputFormatLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Human Readable",
+            "value": "humanize",
+          },
+          Object {
+            "text": "Minutes",
+            "value": "asMinutes",
+          },
+        ]
+      }
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": -123,
+          "output": "converted duration for -123",
+        },
+        Object {
+          "input": 1,
+          "output": "converted duration for 1",
+        },
+        Object {
+          "input": 12,
+          "output": "converted duration for 12",
+        },
+        Object {
+          "input": 123,
+          "output": "converted duration for 123",
+        },
+        Object {
+          "input": 658,
+          "output": "converted duration for 658",
+        },
+        Object {
+          "input": 1988,
+          "output": "converted duration for 1988",
+        },
+        Object {
+          "input": 3857,
+          "output": "converted duration for 3857",
+        },
+        Object {
+          "input": 123292,
+          "output": "converted duration for 123292",
+        },
+        Object {
+          "input": 923528271,
+          "output": "converted duration for 923528271",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;
+
+exports[`DurationFormatEditor should render non-human readable output normally 1`] = `
+<Fragment>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Input format"
+        id="datasetManagement.duration.inputFormatLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Seconds",
+            "value": "seconds",
+          },
+        ]
+      }
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Output format"
+        id="datasetManagement.duration.outputFormatLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      isInvalid={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Human Readable",
+            "value": "humanize",
+          },
+          Object {
+            "text": "Minutes",
+            "value": "asMinutes",
+          },
+        ]
+      }
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    error={null}
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Decimal places"
+        id="datasetManagement.duration.decimalPlacesLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldNumber
+      isInvalid={false}
+      max={20}
+      min={0}
+      onChange={[Function]}
+      value={2}
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiCompressedSwitch
+      checked={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Show suffix"
+          id="datasetManagement.duration.showSuffixLabel"
+          values={Object {}}
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiCompressedFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": -123,
+          "output": "converted duration for -123",
+        },
+        Object {
+          "input": 1,
+          "output": "converted duration for 1",
+        },
+        Object {
+          "input": 12,
+          "output": "converted duration for 12",
+        },
+        Object {
+          "input": 123,
+          "output": "converted duration for 123",
+        },
+        Object {
+          "input": 658,
+          "output": "converted duration for 658",
+        },
+        Object {
+          "input": 1988,
+          "output": "converted duration for 1988",
+        },
+        Object {
+          "input": 3857,
+          "output": "converted duration for 3857",
+        },
+        Object {
+          "input": 123292,
+          "output": "converted duration for 123292",
+        },
+        Object {
+          "input": 923528271,
+          "output": "converted duration for 923528271",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;

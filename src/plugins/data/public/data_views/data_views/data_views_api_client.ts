@@ -10,7 +10,7 @@ import {
   IDataViewsApiClient,
 } from '../../../common/data_views/types';
 
-const API_BASE_URL: string = `/api/data_views/`;
+const API_BASE_URL: string = `/api/index_patterns/`;
 
 export class DataViewsApiClient implements IDataViewsApiClient {
   private http: HttpSetup;
