@@ -234,6 +234,7 @@ export interface AxisConfig {
   labelAngle?: number;
   labelLimit?: number;
   labelOverlap?: string;
+  labelFlush?: boolean;
   ticks?: boolean;
   domain?: boolean;
   format?: {
