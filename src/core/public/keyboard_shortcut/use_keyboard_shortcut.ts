@@ -2,109 +2,139 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect } from 'react';
 import { ShortcutDefinition, KeyboardShortcutStart } from './types';
-interface UseKeyboardShortcutsProps {
-  shortcuts: ShortcutDefinition[];
+
+interface UseKeyboardShortcutProps {
+  shortcut: ShortcutDefinition;
   keyboardShortcutService: KeyboardShortcutStart | null;
   dependencies?: React.DependencyList;
 }
+
 /**
- * Hook for registering keyboard shortcuts in functional React components
+ * Hook for registering a single keyboard shortcut in functional React components
  *
- * Provides robust error handling and cleanup logic:
- * - Continues registering other shortcuts even if some fail
- * - Tracks only successfully registered shortcuts for accurate cleanup
- * - Automatic cleanup when component unmounts or dependencies change
+ * This is the recommended approach for registering shortcuts as it:
+ * - Provides clear error isolation (one shortcut failure doesn't affect others)
+ * - Lets programming errors crash immediately (forcing developers to fix issues)
+ * - Eliminates complex loop logic and error handling
+ * - Makes debugging easier with clear error sources
  *
- *
- * @param shortcuts - Array of shortcut definitions to register
+ * @param shortcut - Single shortcut definition to register
  * @param keyboardShortcutService - The keyboard shortcut service from CoreStart
- * @param dependencies - React dependency array for re-registration
- * @returns Object with registered shortcut IDs
+ * @param dependencies - Optional React dependency array. When any dependency changes,
+ *                       the shortcut is re-registered. Use this when shortcut behavior
+ *                       depends on component state/props that can change.
  *
  * @example
  * ```typescript
- * function MyComponent() {
+ * // Example 1: Static shortcut (no dependencies needed)
+ * function HelpComponent() {
  *   const { keyboardShortcut } = useOpenSearchDashboards().services;
  *
- *   // useMemo prevents shortcuts array from being recreated on every render
- *   // Without useMemo, useEffect would re-run constantly, causing shortcuts
- *   // to be unregistered and re-registered on every component render
- *   const shortcuts = useMemo(() => [
- *     {
- *       id: 'save',
+ *   useKeyboardShortcut({
+ *     shortcut: {
+ *       id: 'showHelp',
  *       pluginId: 'myPlugin',
+ *       name: 'Show Help',
+ *       category: 'navigation',
+ *       keys: 'shift+/',
+ *       execute: () => showHelpDialog() // Static function - no state dependencies
+ *     },
+ *     keyboardShortcutService: keyboardShortcut
+ *   });
+ * }
+ *
+ * // Example 2: Dynamic shortcut (dependencies needed)
+ * function EditorComponent({ user }) {
+ *   const [content, setContent] = useState('');
+ *   const [isFocused, setIsFocused] = useState(false);
+ *
+ *   useKeyboardShortcut({
+ *     shortcut: {
+ *       id: 'save',
+ *       pluginId: 'editor',
+ *       name: 'Save Content',
+ *       category: 'editing',
+ *       keys: 'cmd+s',
+ *       execute: () => {
+ *         if (user.canEdit && isFocused) { // Uses component state
+ *           saveContent(content);
+ *         }
+ *       }
+ *     },
+ *     keyboardShortcutService: keyboardShortcut,
+ *     dependencies: [user.canEdit, isFocused, content] // Re-register when these change
+ *   });
+ * }
+ *
+ * // Example 3: Multiple shortcuts (use multiple hooks)
+ * function TextEditor() {
+ *   const { keyboardShortcut } = useOpenSearchDashboards().services;
+ *
+ *   useKeyboardShortcut({
+ *     shortcut: {
+ *       id: 'save',
+ *       pluginId: 'textEditor',
  *       name: 'Save Document',
  *       category: 'editing',
  *       keys: 'cmd+s',
- *       execute: () => handleSave()
- *     }
- *   ], []); // Empty deps = stable reference until component unmounts
- *
- *   const { registeredShortcutIds } = useKeyboardShortcuts({
- *     shortcuts,
+ *       execute: () => save()
+ *     },
  *     keyboardShortcutService: keyboardShortcut
  *   });
  *
- *   return <div>Registered {registeredShortcutIds.length} shortcuts</div>;
+ *   useKeyboardShortcut({
+ *     shortcut: {
+ *       id: 'copy',
+ *       pluginId: 'textEditor',
+ *       name: 'Copy Text',
+ *       category: 'editing',
+ *       keys: 'cmd+c',
+ *       execute: () => copy()
+ *     },
+ *     keyboardShortcutService: keyboardShortcut
+ *   });
+ *
+ *   useKeyboardShortcut({
+ *     shortcut: {
+ *       id: 'paste',
+ *       pluginId: 'textEditor',
+ *       name: 'Paste Text',
+ *       category: 'editing',
+ *       keys: 'cmd+v',
+ *       execute: () => paste()
+ *     },
+ *     keyboardShortcutService: keyboardShortcut
+ *   });
  * }
  * ```
  */
-export function useKeyboardShortcuts({
-  shortcuts,
+export function useKeyboardShortcut({
+  shortcut,
   keyboardShortcutService,
   dependencies = [],
-}: UseKeyboardShortcutsProps) {
-  // useRef is used instead of useState for tracking registered shortcuts because:
-  // We don't want to trigger re-renders when updating the tracking array
-  // The cleanup function needs access to the current value (closure issue with useState)
-  // Better performance - no unnecessary re-renders during registration process
-  // The ref value persists across renders and is mutable without causing re-renders
-  const successfullyRegistered = useRef<ShortcutDefinition[]>([]);
+}: UseKeyboardShortcutProps) {
   useEffect(() => {
     if (!keyboardShortcutService) {
       return;
     }
-    // Clear previous registrations
-    successfullyRegistered.current = [];
-    // Register all shortcuts and track successful ones
-    // continue registering other shortcuts even if some fail
-    shortcuts.forEach((shortcut) => {
+    keyboardShortcutService.register(shortcut);
+
+    // Cleanup function - unregister the shortcut
+    return () => {
       try {
-        keyboardShortcutService.register(shortcut);
-        successfullyRegistered.current.push(shortcut);
+        keyboardShortcutService.unregister({
+          id: shortcut.id,
+          pluginId: shortcut.pluginId,
+        });
       } catch (error) {
         if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console
-          console.error(`Failed to register shortcut ${shortcut.id}:`, error);
+          console.warn(`Failed to unregister shortcut ${shortcut.id}:`, error);
         }
-      }
-    });
-    // Cleanup function - only unregister successfully registered shortcuts
-    return () => {
-      if (keyboardShortcutService && successfullyRegistered.current.length > 0) {
-        successfullyRegistered.current.forEach((shortcut) => {
-          try {
-            keyboardShortcutService.unregister({
-              id: shortcut.id,
-              pluginId: shortcut.pluginId,
-            });
-          } catch (error) {
-            if (process.env.NODE_ENV !== 'production') {
-              // eslint-disable-next-line no-console
-              console.warn(`Failed to unregister shortcut ${shortcut.id}:`, error);
-            }
-          }
-        });
-        successfullyRegistered.current = [];
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keyboardShortcutService, shortcuts, ...(dependencies || [])]);
-  return {
-    registeredShortcutIds: successfullyRegistered.current.map(
-      (shortcut) => `${shortcut.id}.${shortcut.pluginId}`
-    ),
-  };
+  }, [keyboardShortcutService, shortcut, ...(dependencies || [])]);
 }

@@ -425,7 +425,7 @@ export {
   KeyboardShortcutSetup,
   KeyboardShortcutStart,
   ShortcutDefinition,
-  useKeyboardShortcuts,
+  useKeyboardShortcut,
 } from './keyboard_shortcut';
 
 export { debounce } from './utils';
