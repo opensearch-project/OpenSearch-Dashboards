@@ -614,6 +614,36 @@ describe('bar to_expression', () => {
       const tooltip = result.layer[0].encoding.tooltip;
       expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
     });
+
+    test('uses xAxis as numericalAxis when xAxis is not temporal', () => {
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockNumericalColumn,
+        [AxisRole.Y]: mockDateColumn,
+      };
+
+      const customStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const spec = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        customStyles,
+        mockAxisColumnMappings
+      );
+
+      // Check title uses xAxis as numericalAxis
+      expect(spec.title).toBe('Count Over Time');
+      expect(spec.layer[0].encoding.x.field).toBe('count');
+      expect(spec.layer[0].encoding.x.type).toBe('quantitative');
+      expect(spec.layer[0].encoding.y.field).toBe('date');
+      expect(spec.layer[0].encoding.y.type).toBe('temporal');
+    });
   });
 
   describe('createGroupedTimeBarChart', () => {

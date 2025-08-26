@@ -38,7 +38,6 @@ describe('VisualizationRegistry', () => {
     mockRule = {
       id: 'test-rule',
       name: 'Test Rule',
-      matchIndex: [1, 0, 1],
       matches: jest.fn(),
       chartTypes: [
         { type: 'line', priority: 100, name: 'Line Chart', icon: '' },
@@ -90,7 +89,7 @@ describe('VisualizationRegistry', () => {
 
   describe('getVisualizationType', () => {
     it('should return an object with undefined visualizationType if no rule matches', () => {
-      (mockRule.matches as jest.Mock).mockReturnValue(false);
+      (mockRule.matches as jest.Mock).mockReturnValue('NOT_MATCH');
       registry.registerRule(mockRule);
 
       const columns: VisColumn[] = [
@@ -110,7 +109,7 @@ describe('VisualizationRegistry', () => {
     });
 
     it('should return the visualization type if a rule matches', () => {
-      (mockRule.matches as jest.Mock).mockReturnValue(true);
+      (mockRule.matches as jest.Mock).mockReturnValue('EXACT_MATCH');
       registry.registerRule(mockRule);
 
       const columns: VisColumn[] = [
@@ -157,8 +156,7 @@ describe('VisualizationRegistry', () => {
       const lowPriorityRule = {
         id: 'low-priority-rule',
         name: 'Low Priority Rule',
-        matches: jest.fn().mockReturnValue(true),
-        matchIndex: [],
+        matches: jest.fn().mockReturnValue('EXACT_MATCH'),
         chartTypes: [{ type: 'bar', priority: 50, name: 'Bar Chart', icon: '' }],
         toExpression: jest.fn(),
       };
@@ -166,8 +164,7 @@ describe('VisualizationRegistry', () => {
       const highPriorityRule = {
         id: 'high-priority-rule',
         name: 'High Priority Rule',
-        matches: jest.fn().mockReturnValue(true),
-        matchIndex: [],
+        matches: jest.fn().mockReturnValue('EXACT_MATCH'),
         chartTypes: [{ type: 'line', priority: 100, name: 'Line Chart', icon: '' }],
         toExpression: jest.fn(),
       };

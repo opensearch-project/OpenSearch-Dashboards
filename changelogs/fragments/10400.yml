@@ -1,0 +1,2 @@
+fix:
+- It should only show index selector when needed ([#10400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10400))

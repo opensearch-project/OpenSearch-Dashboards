@@ -31,8 +31,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import moment from 'moment-timezone';
 import { unitOfTime } from 'moment';
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 import {
@@ -50,25 +49,22 @@ import {
   ElementClickListener,
   XYChartElementEvent,
   BrushEndListener,
-  Theme,
+  LineSeries,
 } from '@elastic/charts';
 
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
-import { Subscription, combineLatest } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { Chart as IChart } from '../utils/point_series';
 import { ExploreServices } from '../../../types';
 
 export interface DiscoverHistogramProps {
   chartData: IChart;
+  chartType: 'HistogramBar' | 'Line';
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   services: ExploreServices;
-}
-
-interface DiscoverHistogramState {
-  chartsTheme: EuiChartThemeType['theme'];
-  chartsBaseTheme: Theme;
+  showYAxisLabel?: boolean;
+  customChartsTheme?: Record<string, any>;
 }
 
 function findIntervalFromDuration(
@@ -133,226 +129,240 @@ export function findMinInterval(
   }, Number.MAX_SAFE_INTEGER);
 }
 
-export class DiscoverHistogram extends Component<DiscoverHistogramProps, DiscoverHistogramState> {
-  public static propTypes = {
-    chartData: PropTypes.object,
-    timefilterUpdateHandler: PropTypes.func,
-  };
+export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
+  chartData,
+  chartType,
+  timefilterUpdateHandler,
+  services,
+  showYAxisLabel = false,
+  customChartsTheme,
+}) => {
+  useEffect(() => {
+    const subscription = combineLatest([
+      services.theme.chartsTheme$,
+      services.theme.chartsBaseTheme$,
+    ]).subscribe(([chartsTheme, chartsBaseTheme]) => {
+      // Note: State is not needed as we use the services directly
+    });
 
-  private subscription?: Subscription;
-
-  componentDidMount() {
-    this.subscription = combineLatest(
-      this.props.services.theme.chartsTheme$,
-      this.props.services.theme.chartsBaseTheme$
-    ).subscribe(([chartsTheme, chartsBaseTheme]) =>
-      this.setState({ chartsTheme, chartsBaseTheme })
-    );
-  }
-
-  componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
-
-  public onBrushEnd: BrushEndListener = ({ x }) => {
-    if (!x) {
-      return;
-    }
-    const [from, to] = x;
-    this.props.timefilterUpdateHandler({ from, to });
-  };
-
-  public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {
-    const startRange = (elementData as XYChartElementEvent)[0].x;
-
-    const range = {
-      from: startRange,
-      to: startRange + xInterval,
+    return () => {
+      subscription.unsubscribe();
     };
+  }, [services.theme.chartsTheme$, services.theme.chartsBaseTheme$]);
 
-    this.props.timefilterUpdateHandler(range);
-  };
-
-  public formatXValue = (val: string) => {
-    const xAxisFormat = this.props.chartData.xAxisFormat.params!.pattern;
-
-    return moment(val).format(xAxisFormat);
-  };
-
-  public renderBarTooltip = (xInterval: number, domainStart: number, domainEnd: number) => (
-    headerData: TooltipValue
-  ): JSX.Element | string => {
-    const headerDataValue = headerData.value;
-    const formattedValue = this.formatXValue(headerDataValue);
-
-    const partialDataText = i18n.translate(
-      'explore.discover.histogram.partialData.bucketTooltipText',
-      {
-        defaultMessage:
-          'The selected time range does not include this entire bucket, it may contain partial data.',
+  const onBrushEnd: BrushEndListener = useCallback(
+    ({ x }) => {
+      if (!x) {
+        return;
       }
-    );
+      const [from, to] = x;
+      timefilterUpdateHandler({ from, to });
+    },
+    [timefilterUpdateHandler]
+  );
 
-    if (headerDataValue < domainStart || headerDataValue + xInterval > domainEnd) {
-      return (
-        <React.Fragment>
-          <EuiFlexGroup
-            alignItems="center"
-            className="exploreHistogram__header--partial"
-            data-test-subj="dscHistogramHeader"
-            responsive={false}
-            gutterSize="xs"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="iInCircle" />
-            </EuiFlexItem>
-            <EuiFlexItem>{partialDataText}</EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <EuiText size="s">
-            <p>{formattedValue}</p>
-          </EuiText>
-        </React.Fragment>
+  const onElementClick = useCallback(
+    (xInterval: number): ElementClickListener => ([elementData]) => {
+      const startRange = (elementData as XYChartElementEvent)[0].x;
+
+      const range = {
+        from: startRange,
+        to: startRange + xInterval,
+      };
+
+      timefilterUpdateHandler(range);
+    },
+    [timefilterUpdateHandler]
+  );
+
+  const formatXValue = useCallback(
+    (val: string) => {
+      const xAxisFormat = chartData.xAxisFormat.params!.pattern;
+      return moment(val).format(xAxisFormat);
+    },
+    [chartData]
+  );
+
+  const renderBarTooltip = useCallback(
+    (xInterval: number, domainStart: number, domainEnd: number) => (
+      headerData: TooltipValue
+    ): JSX.Element | string => {
+      const headerDataValue = headerData.value;
+      const formattedValue = formatXValue(headerDataValue);
+
+      const partialDataText = i18n.translate(
+        'explore.discover.histogram.partialData.bucketTooltipText',
+        {
+          defaultMessage:
+            'The selected time range does not include this entire bucket, it may contain partial data.',
+        }
       );
-    }
 
-    return formattedValue;
+      if (headerDataValue < domainStart || headerDataValue + xInterval > domainEnd) {
+        return (
+          <React.Fragment>
+            <EuiFlexGroup
+              alignItems="center"
+              className="exploreHistogram__header--partial"
+              data-test-subj="dscHistogramHeader"
+              responsive={false}
+              gutterSize="xs"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="iInCircle" />
+              </EuiFlexItem>
+              <EuiFlexItem>{partialDataText}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiText size="s">
+              <p>{formattedValue}</p>
+            </EuiText>
+          </React.Fragment>
+        );
+      }
+
+      return formattedValue;
+    },
+    [formatXValue]
+  );
+
+  const { uiSettings } = services;
+  const timeZone = getTimezone(uiSettings);
+  const chartsBaseTheme = services.theme.chartsDefaultBaseTheme;
+
+  const chartsTheme = useMemo(() => {
+    const theme = { ...services.theme.chartsDefaultTheme };
+    // These styles override the chartsTheme so that the correct base chart colors are used
+    delete theme.axes?.gridLine?.horizontal?.stroke;
+    delete theme.axes?.gridLine?.vertical?.stroke;
+    delete theme.axes?.axisLine;
+    theme.axes = { ...theme.axes, axisTitle: { fill: euiThemeVars.euiTextColor } };
+    theme.colors = theme.colors ?? {};
+    theme.colors.vizColors = [euiThemeVars.euiColorVis1_behindText];
+    return { ...theme, ...customChartsTheme };
+  }, [services.theme.chartsDefaultTheme, customChartsTheme]);
+
+  if (!chartData) {
+    return null;
+  }
+
+  const data = chartData.values;
+
+  /**
+   * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].
+   * see https://github.com/elastic/kibana/issues/27410
+   * TODO: Once the Discover query has been update, we should change the below to use the new field
+   */
+  const { intervalOpenSearchValue, intervalOpenSearchUnit, interval } = chartData.ordered;
+  const xInterval = interval.asMilliseconds();
+
+  const xValues = chartData.xAxisOrderedValues;
+  const lastXValue = xValues[xValues.length - 1];
+
+  const domain = chartData.ordered;
+  const domainStart = domain.min.valueOf();
+  const domainEnd = domain.max.valueOf();
+
+  const domainMin = data[0]?.x > domainStart ? domainStart : data[0]?.x;
+  const domainMax = domainEnd - xInterval > lastXValue ? domainEnd - xInterval : lastXValue;
+
+  const xDomain = {
+    min: domainMin,
+    max: domainMax,
+    minInterval: findMinInterval(
+      xValues,
+      intervalOpenSearchValue,
+      intervalOpenSearchUnit,
+      timeZone
+    ),
   };
 
-  public render() {
-    const { chartData, services } = this.props;
-    const { uiSettings } = services;
-    const timeZone = getTimezone(uiSettings);
-    const chartsTheme = services.theme.chartsDefaultTheme;
-    const chartsBaseTheme = services.theme.chartsDefaultBaseTheme;
+  // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if
+  // the annotation is within this range; if so, the line annotation uses the domainEnd as its value
+  const now = moment();
+  const isAnnotationAtEdge = moment(domainEnd).add(60000).isAfter(now) && now.isAfter(domainEnd);
+  const lineAnnotationValue = isAnnotationAtEdge ? domainEnd : now;
 
-    if (!chartData) {
-      return null;
-    }
+  const lineAnnotationData = [
+    {
+      dataValue: lineAnnotationValue,
+    },
+  ];
+  const isDarkMode = uiSettings.get('theme:darkMode');
 
-    const data = chartData.values;
+  const lineAnnotationStyle = {
+    line: {
+      strokeWidth: 2,
+      stroke: euiThemeVars.euiColorDanger,
+      opacity: 0.7,
+    },
+  };
 
-    /**
-     * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].
-     * see https://github.com/elastic/kibana/issues/27410
-     * TODO: Once the Discover query has been update, we should change the below to use the new field
-     */
-    const { intervalOpenSearchValue, intervalOpenSearchUnit, interval } = chartData.ordered;
-    const xInterval = interval.asMilliseconds();
-
-    const xValues = chartData.xAxisOrderedValues;
-    const lastXValue = xValues[xValues.length - 1];
-
-    const domain = chartData.ordered;
-    const domainStart = domain.min.valueOf();
-    const domainEnd = domain.max.valueOf();
-
-    const domainMin = data[0]?.x > domainStart ? domainStart : data[0]?.x;
-    const domainMax = domainEnd - xInterval > lastXValue ? domainEnd - xInterval : lastXValue;
-
-    const xDomain = {
-      min: domainMin,
-      max: domainMax,
-      minInterval: findMinInterval(
-        xValues,
-        intervalOpenSearchValue,
-        intervalOpenSearchUnit,
-        timeZone
-      ),
-    };
-
-    // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if
-    // the annotation is within this range; if so, the line annotation uses the domainEnd as its value
-    const now = moment();
-    const isAnnotationAtEdge = moment(domainEnd).add(60000).isAfter(now) && now.isAfter(domainEnd);
-    const lineAnnotationValue = isAnnotationAtEdge ? domainEnd : now;
-
-    const lineAnnotationData = [
-      {
-        dataValue: lineAnnotationValue,
+  const rectAnnotations = [];
+  if (domainStart !== domainMin) {
+    rectAnnotations.push({
+      coordinates: {
+        x1: domainStart,
       },
-    ];
-    const isDarkMode = uiSettings.get('theme:darkMode');
-
-    const lineAnnotationStyle = {
-      line: {
-        strokeWidth: 2,
-        stroke: euiThemeVars.euiColorDanger,
-        opacity: 0.7,
+    });
+  }
+  if (domainEnd !== domainMax) {
+    rectAnnotations.push({
+      coordinates: {
+        x0: domainEnd,
       },
-    };
+    });
+  }
 
-    const rectAnnotations = [];
-    if (domainStart !== domainMin) {
-      rectAnnotations.push({
-        coordinates: {
-          x1: domainStart,
-        },
-      });
-    }
-    if (domainEnd !== domainMax) {
-      rectAnnotations.push({
-        coordinates: {
-          x0: domainEnd,
-        },
-      });
-    }
+  const rectAnnotationStyle = {
+    stroke: isDarkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkShade,
+    strokeWidth: 0,
+    opacity: isDarkMode ? 0.6 : 0.2,
+    fill: isDarkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkShade,
+  };
 
-    const rectAnnotationStyle = {
-      stroke: isDarkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkShade,
-      strokeWidth: 0,
-      opacity: isDarkMode ? 0.6 : 0.2,
-      fill: isDarkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkShade,
-    };
+  const tooltipProps = {
+    headerFormatter: renderBarTooltip(xInterval, domainStart, domainEnd),
+    type: TooltipType.VerticalCursor,
+  };
 
-    const tooltipProps = {
-      headerFormatter: this.renderBarTooltip(xInterval, domainStart, domainEnd),
-      type: TooltipType.VerticalCursor,
-    };
-
-    // These styles override the chartsTheme so that the correct base chart colors are used
-    delete chartsTheme.axes?.gridLine?.horizontal?.stroke;
-    delete chartsTheme.axes?.gridLine?.vertical?.stroke;
-    delete chartsTheme.axes?.axisLine;
-    chartsTheme.axes!.axisTitle = {
-      fill: euiThemeVars.euiTextColor,
-    };
-    chartsTheme.colors = chartsTheme.colors ?? {};
-    chartsTheme.colors.vizColors = [euiThemeVars.euiColorVis1_behindText];
-
-    return (
-      <Chart size="100%">
-        <Settings
-          xDomain={xDomain}
-          onBrushEnd={this.onBrushEnd}
-          onElementClick={this.onElementClick(xInterval)}
-          tooltip={tooltipProps}
-          theme={chartsTheme}
-          baseTheme={chartsBaseTheme}
-        />
-        <Axis id="discover-histogram-left-axis" position={Position.Left} ticks={5} />
-        <Axis
-          id="discover-histogram-bottom-axis"
-          position={Position.Bottom}
-          tickFormat={this.formatXValue}
-          ticks={10}
-        />
-        <LineAnnotation
-          id="line-annotation"
-          domainType={AnnotationDomainType.XDomain}
-          dataValues={lineAnnotationData}
-          hideTooltips={true}
-          style={lineAnnotationStyle}
-        />
-        <RectAnnotation
-          dataValues={rectAnnotations}
-          id="rect-annotation"
-          zIndex={2}
-          style={rectAnnotationStyle}
-          hideTooltips={true}
-        />
+  return (
+    <Chart size="100%">
+      <Settings
+        xDomain={xDomain}
+        onBrushEnd={onBrushEnd}
+        onElementClick={onElementClick(xInterval)}
+        tooltip={tooltipProps}
+        theme={chartsTheme}
+        baseTheme={chartsBaseTheme}
+      />
+      <Axis
+        id="discover-histogram-left-axis"
+        position={Position.Left}
+        ticks={5}
+        title={showYAxisLabel ? chartData.yAxisLabel : undefined}
+      />
+      <Axis
+        id="discover-histogram-bottom-axis"
+        position={Position.Bottom}
+        tickFormat={formatXValue}
+        ticks={10}
+      />
+      <LineAnnotation
+        id="line-annotation"
+        domainType={AnnotationDomainType.XDomain}
+        dataValues={lineAnnotationData}
+        hideTooltips={true}
+        style={lineAnnotationStyle}
+      />
+      <RectAnnotation
+        dataValues={rectAnnotations}
+        id="rect-annotation"
+        zIndex={2}
+        style={rectAnnotationStyle}
+        hideTooltips={true}
+      />
+      {chartType === 'HistogramBar' && (
         <HistogramBarSeries
           id="discover-histogram"
           minBarHeight={2}
@@ -364,7 +374,19 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           timeZone={timeZone}
           name={chartData.yAxisLabel}
         />
-      </Chart>
-    );
-  }
-}
+      )}
+      {chartType === 'Line' && (
+        <LineSeries
+          id="discover-histogram"
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={data}
+          timeZone={timeZone}
+          name={chartData.yAxisLabel}
+        />
+      )}
+    </Chart>
+  );
+};

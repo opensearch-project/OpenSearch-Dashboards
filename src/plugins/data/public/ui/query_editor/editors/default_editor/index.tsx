@@ -50,7 +50,21 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
       }, 100);
     });
 
-    // Return the original editor instance
+    // Overiding the Enter command
+    editor.addCommand(monaco.KeyCode.Enter, () => {
+      // Check if suggestion widget is visible using Monaco's built-in context
+      const contextKeyService = (editor as any)._contextKeyService;
+      const suggestWidgetVisible = contextKeyService?.getContextKeyValue('suggestWidgetVisible');
+
+      if (suggestWidgetVisible) {
+        // Accept the selected suggestion if widget is visible
+        editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
+      } else {
+        // Only trigger newline if suggestion widget is not visible
+        editor.trigger('keyboard', 'type', { text: '\n' });
+      }
+    });
+
     return editor;
   };
   return (

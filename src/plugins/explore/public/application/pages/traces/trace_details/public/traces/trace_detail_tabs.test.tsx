@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TraceDetailTabs } from './trace_detail_tabs';
+import { TraceDetailTab } from '../../constants/trace_detail_tabs';
 
 describe('TraceDetailTabs', () => {
   const mockSetActiveTab = jest.fn();
@@ -13,7 +14,7 @@ describe('TraceDetailTabs', () => {
   const mockSetIsServiceLegendOpen = jest.fn();
 
   const defaultProps = {
-    activeTab: 'timeline',
+    activeTab: TraceDetailTab.TIMELINE,
     setActiveTab: mockSetActiveTab,
     transformedHits: [
       { spanId: 'span-1', serviceName: 'service-a' },
@@ -37,7 +38,8 @@ describe('TraceDetailTabs', () => {
     expect(screen.getByText('Timeline')).toBeInTheDocument();
     expect(screen.getByText('Span list')).toBeInTheDocument();
     expect(screen.getByText('Tree view')).toBeInTheDocument();
-    expect(screen.getByText('Service map')).toBeInTheDocument();
+    // Service map tab is currently disabled
+    expect(screen.queryByText('Service map')).not.toBeInTheDocument();
   });
 
   it('shows span count badge in span list tab', () => {
@@ -49,7 +51,7 @@ describe('TraceDetailTabs', () => {
   });
 
   it('highlights the active tab', () => {
-    render(<TraceDetailTabs {...defaultProps} activeTab="span_list" />);
+    render(<TraceDetailTabs {...defaultProps} activeTab={TraceDetailTab.SPAN_LIST} />);
 
     const spanListTab = screen.getByText('Span list').closest('button');
     expect(spanListTab).toHaveAttribute('aria-selected', 'true');
@@ -61,7 +63,7 @@ describe('TraceDetailTabs', () => {
     const treeViewTab = screen.getByText('Tree view');
     fireEvent.click(treeViewTab);
 
-    expect(mockSetActiveTab).toHaveBeenCalledWith('tree_view');
+    expect(mockSetActiveTab).toHaveBeenCalledWith(TraceDetailTab.TREE_VIEW);
   });
 
   it('shows error filter button when there are errors and no error filter applied', () => {

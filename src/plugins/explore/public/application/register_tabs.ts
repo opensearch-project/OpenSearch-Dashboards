@@ -4,9 +4,14 @@
  */
 
 import { LogsTab } from '../components/tabs/logs_tab';
-import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
+import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
-import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
+import {
+  ExploreFlavor,
+  EXPLORE_DEFAULT_LANGUAGE,
+  EXPLORE_LOGS_TAB_ID,
+  EXPLORE_VISUALIZATION_TAB_ID,
+} from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
 import {
@@ -24,56 +29,52 @@ import { BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX } from '../components/patterns_tabl
 /**
  * Registers built-in tabs with the tab registry
  */
-export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: ExploreServices) => {
+export const registerBuiltInTabs = (
+  tabRegistry: TabRegistryService,
+  services: ExploreServices,
+  registryFlavor: ExploreFlavor
+) => {
   // Register Logs Tab
-  const logsTabDefinition = {
-    id: 'logs',
-    label: 'Logs',
-    flavor: [],
+  const logsTabDefinition: TabDefinition = {
+    id: EXPLORE_LOGS_TAB_ID,
+    label: registryFlavor === ExploreFlavor.Traces ? 'Spans' : 'Logs',
+    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 10,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
     component: LogsTab,
-
-    // Add lifecycle hooks
-    onActive: () => {
-      // Tab activated
-    },
-    onInactive: () => {
-      // Tab deactivated
-    },
   };
 
   tabRegistry.registerTab(logsTabDefinition);
 
   // Register Patterns Tab
   tabRegistry.registerTab({
-    id: 'explore_patterns_tab',
+    id: EXPLORE_PATTERNS_TAB_ID,
     label: 'Patterns',
-    flavor: [],
+    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
     order: 15,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
-
+  
     prepareQuery: (query) => {
       const state = services.store.getState();
-
+  
       // Get the selected patterns field from the Redux state
       let patternsField = state.tab.patterns.patternsField;
-
+  
       const preparedQuery = getQueryWithSource(query);
       if (!patternsField) {
         patternsField = findDefaultPatternsField(services);
       }
-
+  
       if (state.tab.patterns.usingRegexPatterns)
         return regexPatternQuery(preparedQuery.query, patternsField);
-
+  
       return brainPatternQuery(preparedQuery.query, patternsField);
     },
-
+  
     handleQueryError: (error, cacheKey) => {
       const state = services.store.getState();
-
+  
       /**
        * The below conditional is checking for the error returned when attempting to use a BRAIN
        * query on an older version of the querying engine. If this error appears, an attempt is made
@@ -103,7 +104,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
             cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
           })
         );
-
+  
         // set the old cacheKey to uninitialized to finalize loading, our new tab query has new cacheKey
         services.store.dispatch(
           setIndividualQueryStatus({
@@ -116,21 +117,21 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
             },
           })
         );
-
+  
         return true;
       }
-
+  
       return false;
     },
-
+  
     component: PatternsTab,
   });
 
   // Register Visualizations Tab
   tabRegistry.registerTab({
-    id: 'explore_visualization_tab',
+    id: EXPLORE_VISUALIZATION_TAB_ID,
     label: 'Visualization',
-    flavor: [],
+    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 20,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
@@ -149,9 +150,9 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
  * Register tabs in the application
  * This is the main entry point for tab registration
  */
-export const registerTabs = (services: ExploreServices) => {
+export const registerTabs = (services: ExploreServices, flavor: ExploreFlavor) => {
   // Register built-in tabs
-  registerBuiltInTabs(services.tabRegistry, services);
+  registerBuiltInTabs(services.tabRegistry, services, flavor);
 
   // Register plugin-provided tabs
   // This would be called by plugins that want to add tabs

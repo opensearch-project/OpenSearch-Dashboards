@@ -717,8 +717,8 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         this._findObjectDataUrls(elem, onFind, key);
       }
     } else if (_.isPlainObject(obj)) {
-      if (key === 'data' && _.isPlainObject(obj.url)) {
-        // Assume that any  "data": {"url": {...}}  is a request for data
+      if (key === 'data' && _.isPlainObject(obj.url) && _.isEmpty(obj.url.signal)) {
+        // Assume that any  "data": {"url": {...}} without "signal" is a request for data
         if (obj.values !== undefined || obj.source !== undefined) {
           throw new Error(
             i18n.translate(

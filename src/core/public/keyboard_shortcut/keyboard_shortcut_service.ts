@@ -1,15 +1,17 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
-import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from './types';
+import {
+  KeyboardShortcutSetup,
+  KeyboardShortcutStart,
+  KeyboardShortcutConfig,
+  ShortcutDefinition,
+} from './types';
+import { KeyStringParser } from './key_parser';
+import { SequenceHandler } from './sequence_handler';
+import { SEQUENCE_PREFIX } from './constants';
 
 /**
  * @internal
@@ -18,6 +20,9 @@ import { KeyboardShortcutSetup, KeyboardShortcutStart, ShortcutDefinition } from
 export class KeyboardShortcutService {
   private shortcutsMapByKey = new Map<string, ShortcutDefinition[]>();
   private namespacedIdToKeyLookup = new Map<string, string>();
+  private config: KeyboardShortcutConfig = { enabled: true };
+  private keyParser = new KeyStringParser();
+  private sequenceHandler = new SequenceHandler();
 
   public setup(): KeyboardShortcutSetup {
     return {
@@ -25,8 +30,12 @@ export class KeyboardShortcutService {
     };
   }
 
-  public start(): KeyboardShortcutStart {
-    this.startEventListener();
+  public start(config?: KeyboardShortcutConfig): KeyboardShortcutStart {
+    this.config = { enabled: config?.enabled ?? true };
+
+    if (this.config.enabled) {
+      this.startEventListener();
+    }
 
     return {
       register: (shortcut) => this.register(shortcut),
@@ -38,44 +47,47 @@ export class KeyboardShortcutService {
     this.stopEventListener();
     this.shortcutsMapByKey.clear();
     this.namespacedIdToKeyLookup.clear();
+    this.sequenceHandler = new SequenceHandler();
   }
-
-  private getNormalizedKey = (str: string): string => str.toLowerCase();
 
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
     `${shortcut.id.toLowerCase()}.${shortcut.pluginId.toLowerCase()}`;
 
-  private getEventKeyString = (event: KeyboardEvent): string => {
-    let key = '';
-
-    if (event.ctrlKey) {
-      key += 'ctrl+';
-    }
-
-    if (event.altKey) {
-      key += 'alt+';
-    }
-
-    if (event.shiftKey) {
-      key += 'shift+';
-    }
-
-    if (event.metaKey) {
-      key += 'cmd+';
-    }
-
-    key += this.getNormalizedKey(event.key);
-
-    return key;
-  };
-
   private register(shortcut: ShortcutDefinition): void {
-    const key = this.getNormalizedKey(shortcut.keys);
+    if (!this.config.enabled) {
+      return;
+    }
+
     const namespacedId = this.getNamespacedId(shortcut);
 
-    const existingShortcuts = this.shortcutsMapByKey.get(key) || [];
-    this.shortcutsMapByKey.set(key, [...existingShortcuts, shortcut]);
+    if (this.namespacedIdToKeyLookup.has(namespacedId)) {
+      throw new Error(
+        `Shortcut "${shortcut.id}" from plugin "${shortcut.pluginId}" is already registered`
+      );
+    }
 
+    const key = shortcut.keys.includes(' ')
+      ? this.sequenceHandler.normalizeKeyString(shortcut.keys)
+      : this.keyParser.normalizeKeyString(shortcut.keys);
+
+    const existingShortcuts = this.shortcutsMapByKey.get(key) || [];
+
+    if (existingShortcuts.length > 0) {
+      const conflictingShortcuts = existingShortcuts
+        .map((s) => `${s.id} (${s.pluginId})`)
+        .join(', ');
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `keyboard shortcut conflict detected for key "${shortcut.keys}". ` +
+            `New shortcut "${shortcut.id}" from plugin "${shortcut.pluginId}" ` +
+            `conflicts with active shortcuts: ${conflictingShortcuts}. ` +
+            `The new shortcut will take precedence when the key is pressed.`
+        );
+      }
+    }
+
+    this.shortcutsMapByKey.set(key, [...existingShortcuts, shortcut]);
     this.namespacedIdToKeyLookup.set(namespacedId, key);
   }
 
@@ -95,8 +107,7 @@ export class KeyboardShortcutService {
     }
 
     const filteredShortcuts = shortcuts.filter(
-      (existingShortcut: ShortcutDefinition) =>
-        this.getNamespacedId(existingShortcut) !== namespacedId
+      (existingShortcut) => this.getNamespacedId(existingShortcut) !== namespacedId
     );
 
     if (filteredShortcuts.length !== shortcuts.length) {
@@ -115,13 +126,46 @@ export class KeyboardShortcutService {
   private shouldIgnoreKeyboardEventForTarget(target: EventTarget | null): boolean {
     if (!this.isHTMLElement(target)) return false;
 
-    const tagName = target.tagName;
+    const element = target;
+    const tagName = element.tagName;
 
-    if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
+    const inputTags = ['INPUT', 'TEXTAREA', 'SELECT'];
+    if (inputTags.includes(tagName)) {
+      return true;
+    }
+
+    const role = element.getAttribute('role');
+    if (role && ['textbox', 'combobox', 'searchbox'].includes(role)) {
+      return true;
+    }
+
+    const contentEditable = element.getAttribute('contenteditable');
+    if (contentEditable === 'true' || contentEditable === '') {
       return true;
     }
 
     return false;
+  }
+
+  private executeShortcut(event: KeyboardEvent, shortcut: ShortcutDefinition): void {
+    event.preventDefault();
+    try {
+      shortcut.execute();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `Error executing shortcut ${shortcut.id} from plugin ${shortcut.pluginId}:`,
+        error
+      );
+    }
+  }
+
+  private executeShortcutForKey(event: KeyboardEvent, key: string): void {
+    const shortcuts = this.shortcutsMapByKey.get(key);
+    if (shortcuts?.length) {
+      const shortcut = shortcuts[shortcuts.length - 1];
+      this.executeShortcut(event, shortcut);
+    }
   }
 
   private handleKeyboardEvent = (event: KeyboardEvent): void => {
@@ -129,23 +173,17 @@ export class KeyboardShortcutService {
       return;
     }
 
-    const eventKeyString = this.getEventKeyString(event);
-    const shortcuts = this.shortcutsMapByKey.get(eventKeyString);
+    const eventKeyString = this.keyParser.getEventKeyString(event);
 
-    if (shortcuts?.length) {
-      // Prevent browser-specific keybindings if they conflict with our shortcuts
-      event.preventDefault();
-
-      const shortcut = shortcuts[shortcuts.length - 1];
-      try {
-        shortcut.execute();
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `Error executing keyboard shortcut ${this.getNamespacedId(shortcut)}:`,
-          error
-        );
-      }
+    // Check if sequence handler already has a first key (waiting for second key)
+    if (this.sequenceHandler.isInSequence()) {
+      const sequenceKey = this.sequenceHandler.processSecondKey(eventKeyString);
+      this.executeShortcutForKey(event, sequenceKey);
+    } else if (SEQUENCE_PREFIX.has(eventKeyString)) {
+      this.sequenceHandler.processFirstKey(eventKeyString);
+    } else {
+      // Process as regular shortcut (including modifier keys and single keys)
+      this.executeShortcutForKey(event, eventKeyString);
     }
   };
 

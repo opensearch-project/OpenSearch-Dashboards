@@ -1,0 +1,2 @@
+chore:
+- Update error and lantency schema on Traces page ([#10415](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10415))

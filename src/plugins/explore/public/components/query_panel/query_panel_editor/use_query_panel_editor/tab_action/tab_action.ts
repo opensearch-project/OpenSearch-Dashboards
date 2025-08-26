@@ -14,12 +14,7 @@ export const getTabAction = (): IActionDescriptor => ({
   }),
   keybindings: [monaco.KeyCode.Tab],
   run: (ed) => {
-    // First accept the selected suggestion
+    // Accept the selected suggestion without retriggering
     ed.trigger('keyboard', 'acceptSelectedSuggestion', {});
-
-    // Then retrigger suggestions after a short delay
-    setTimeout(() => {
-      ed.trigger('keyboard', 'editor.action.triggerSuggest', {});
-    }, 100);
   },
 });

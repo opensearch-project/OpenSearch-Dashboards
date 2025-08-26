@@ -1,0 +1,2 @@
+chore:
+- Ignore .claude directory from git. ([#10417](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10417))

@@ -62,7 +62,7 @@ export const getDefaultSuggestions = async ({
             indexPattern.title,
             suggestions.suggestValuesForColumn,
             services,
-            indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn),
+            indexPattern,
             datasetType
           ).catch(() => []),
           (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
@@ -154,7 +154,12 @@ export const getSimplifiedPPLSuggestions = async ({
       finalSuggestions.push(
         ...formatAvailableFieldsToSuggestions(
           availableFields,
-          (f: string) => (suggestions.suggestFieldsInAggregateFunction ? `${f}` : `${f} `),
+          (f: string) =>
+            suggestions.suggestFieldsInAggregateFunction
+              ? `${f}`
+              : f.includes('.') || f.includes('@')
+              ? `\`${f}\` `
+              : `${f} `,
           (f: string) => {
             return f.startsWith('_') ? `99` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
           }
@@ -169,7 +174,7 @@ export const getSimplifiedPPLSuggestions = async ({
             indexPattern.title,
             suggestions.suggestValuesForColumn,
             services,
-            indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn),
+            indexPattern,
             datasetType
           ).catch(() => []),
           (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
