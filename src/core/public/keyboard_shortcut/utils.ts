@@ -7,7 +7,7 @@ import { ALLOWED_KEYS, VALID_MODIFIER_COMBINATIONS } from './constants';
 
 // This can be removed once Regexp.escape() is available
 export const escapeKey = (key: string) => {
-  return ['.', '[', ']', '.', '/', '\\'].includes(key) ? `\\${key}` : key;
+  return ['.', '[', ']', '/', '\\'].includes(key) ? `\\${key}` : key;
 };
 
 // This can be removed once Regexp.escape() is available
@@ -22,11 +22,3 @@ export const VALID_KEY_STRING_REGEX = new RegExp(
 );
 
 export const SINGLE_LETTER_REGEX = /^[a-z]$/;
-
-/**
- * Detects if a key string represents a sequence (two space-separated keys)
- * Uses simple heuristic for routing to appropriate parser
- */
-export const isSequenceKeys = (keys: string): boolean => {
-  return /^\s*\w+\s+\w+\s*$/.test(keys);
-};

@@ -12,7 +12,6 @@ import {
 import { KeyStringParser } from './key_parser';
 import { SequenceHandler } from './sequence_handler';
 import { SEQUENCE_PREFIX } from './constants';
-import { isSequenceKeys } from './utils';
 
 /**
  * @internal
@@ -59,10 +58,6 @@ export class KeyboardShortcutService {
       return;
     }
 
-    const key = isSequenceKeys(shortcut.keys)
-      ? this.sequenceHandler.normalizeKeyString(shortcut.keys)
-      : this.keyParser.normalizeKeyString(shortcut.keys);
-
     const namespacedId = this.getNamespacedId(shortcut);
 
     if (this.namespacedIdToKeyLookup.has(namespacedId)) {
@@ -70,6 +65,10 @@ export class KeyboardShortcutService {
         `Shortcut "${shortcut.id}" from plugin "${shortcut.pluginId}" is already registered`
       );
     }
+
+    const key = shortcut.keys.includes(' ')
+      ? this.sequenceHandler.normalizeKeyString(shortcut.keys)
+      : this.keyParser.normalizeKeyString(shortcut.keys);
 
     const existingShortcuts = this.shortcutsMapByKey.get(key) || [];
 

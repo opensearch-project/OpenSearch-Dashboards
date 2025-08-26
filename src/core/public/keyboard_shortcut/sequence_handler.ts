@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SEQUENCE_PREFIX } from './constants';
+import { SEQUENCE_PREFIX, SEQUENCE_TIMEOUT_MS } from './constants';
 import { SINGLE_LETTER_REGEX } from './utils';
 
 export class SequenceHandler {
   private firstKey: string | null = null;
-  private sequenceTimer: number | null = null;
+  private sequenceTimerId: number | null = null;
 
   private readonly timeout: number;
 
-  constructor(timeout: number = 1000) {
+  constructor(timeout: number = SEQUENCE_TIMEOUT_MS) {
     this.timeout = timeout;
   }
 
@@ -25,7 +25,7 @@ export class SequenceHandler {
    */
   public normalizeKeyString(keyString: string): string {
     const normalized = keyString.toLowerCase().trim();
-    const parts = normalized.split(/\s+/).filter((part) => part.length > 0);
+    const parts = normalized.split(' ').filter((part) => !!part.length);
 
     if (parts.length !== 2) {
       throw new Error(
@@ -63,27 +63,21 @@ export class SequenceHandler {
     const sequenceKey = `${this.firstKey} ${key}`;
     this.resetSequence();
 
-    // // Only start new sequence if key is a valid sequence prefix
-    if (SEQUENCE_PREFIX.has(key)) {
-      this.firstKey = key;
-      this.startSequenceTimer();
-    }
-
     return sequenceKey;
   }
 
   private startSequenceTimer(): void {
     this.clearSequenceTimer();
 
-    this.sequenceTimer = window.setTimeout(() => {
+    this.sequenceTimerId = window.setTimeout(() => {
       this.resetSequence();
     }, this.timeout);
   }
 
   private clearSequenceTimer(): void {
-    if (this.sequenceTimer !== null) {
-      window.clearTimeout(this.sequenceTimer);
-      this.sequenceTimer = null;
+    if (this.sequenceTimerId !== null) {
+      window.clearTimeout(this.sequenceTimerId);
+      this.sequenceTimerId = null;
     }
   }
 
