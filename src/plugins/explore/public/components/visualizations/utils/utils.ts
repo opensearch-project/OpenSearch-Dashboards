@@ -42,14 +42,16 @@ export const applyAxisStyling = (
   }
 
   // Apply label settings
-  const showLabels = axisStyle?.labels?.show ?? true;
-  fullAxisConfig.labels = showLabels;
+  if (axisStyle?.labels) {
+    const showLabels = axisStyle.labels.show ?? true;
+    fullAxisConfig.labels = showLabels;
 
-  if (showLabels) {
-    fullAxisConfig.labelAngle = axisStyle?.labels?.rotate ?? fullAxisConfig.labelAngle;
-    fullAxisConfig.labelLimit = axisStyle?.labels?.truncate ?? fullAxisConfig.labelLimit;
-    fullAxisConfig.labelOverlap = 'greedy';
-    fullAxisConfig.labelFlush = false;
+    if (showLabels) {
+      fullAxisConfig.labelAngle = axisStyle.labels.rotate ?? 0;
+      fullAxisConfig.labelLimit = axisStyle.labels.truncate ?? 100;
+      fullAxisConfig.labelOverlap = 'greedy';
+      fullAxisConfig.labelFlush = false;
+    }
   }
 
   if (axis?.schema === VisFieldType.Date) {
