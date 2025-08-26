@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.exploreErrorPanel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.exploreErrorGuard {
   padding-top: $ouiSizeXXL;
   gap: $ouiSizeXL;
 

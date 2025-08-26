@@ -18,8 +18,11 @@ export const traceUiSettings: Record<string, UiSettingsParams> = {
       'spanId',
       'status.code',
       'attributes.http.status_code',
+      'attributes.service.name',
+      'attributes.aws.local.service',
       'serviceName',
       'name',
+      'durationNano',
       'durationInNanos',
     ],
     description: i18n.translate('explore.advancedSettings.defaultTraceColumnsText', {

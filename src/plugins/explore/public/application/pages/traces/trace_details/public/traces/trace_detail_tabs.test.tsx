@@ -38,7 +38,8 @@ describe('TraceDetailTabs', () => {
     expect(screen.getByText('Timeline')).toBeInTheDocument();
     expect(screen.getByText('Span list')).toBeInTheDocument();
     expect(screen.getByText('Tree view')).toBeInTheDocument();
-    expect(screen.getByText('Service map')).toBeInTheDocument();
+    // Service map tab is currently disabled
+    expect(screen.queryByText('Service map')).not.toBeInTheDocument();
   });
 
   it('shows span count badge in span list tab', () => {

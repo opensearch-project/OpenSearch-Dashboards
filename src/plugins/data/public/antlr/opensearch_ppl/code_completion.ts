@@ -62,7 +62,7 @@ export const getDefaultSuggestions = async ({
             indexPattern.title,
             suggestions.suggestValuesForColumn,
             services,
-            indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn),
+            indexPattern,
             datasetType
           ).catch(() => []),
           (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
@@ -174,7 +174,7 @@ export const getSimplifiedPPLSuggestions = async ({
             indexPattern.title,
             suggestions.suggestValuesForColumn,
             services,
-            indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn),
+            indexPattern,
             datasetType
           ).catch(() => []),
           (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
