@@ -64,7 +64,6 @@ const traceTestSuite = () => {
       });
 
       // Navigate back to traces page
-      cy.log('Navigating to traces page');
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/traces',
@@ -72,24 +71,11 @@ const traceTestSuite = () => {
       });
       cy.osd.waitForLoader(true);
 
-      // Set time range to capture OTEL sample data
-      const now = new Date();
-      const currentDate =
-        now.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        }) +
-        ' @ ' +
-        now.toLocaleTimeString('en-US', {
-          hour12: false,
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        }) +
-        '.000';
+      // Click on dataset selector to close Syntax options if blocking time-picker
+      cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
 
-      cy.explore.setTopNavDate('Aug 1, 2025 @ 00:00:00.000', currentDate, true);
+      // Set time range to capture OTEL sample data - last 2 months
+      cy.explore.setRelativeTopNavDate('2', 'Months ago');
 
       // Verify empty state is no longer visible
       cy.getElementByTestId('discoverNoIndexPatterns').should('not.exist');
