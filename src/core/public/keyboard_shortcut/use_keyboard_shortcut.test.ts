@@ -112,8 +112,6 @@ describe('useKeyboardShortcut', () => {
         throw new Error('Registration failed');
       });
 
-      // Errors in useEffect are caught by React's error boundary, not by expect().toThrow()
-      // We verify the error is thrown by checking that register was called and threw
       expect(() => {
         renderHook(() =>
           useKeyboardShortcut({
@@ -121,9 +119,8 @@ describe('useKeyboardShortcut', () => {
             keyboardShortcutService: mockKeyboardShortcutService,
           })
         );
-      }).not.toThrow(); // renderHook itself doesn't throw
+      }).not.toThrow();
 
-      // But we can verify the service method was called and would have thrown
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledWith(mockShortcut);
       expect(mockKeyboardShortcutService.register).toThrow('Registration failed');
     });
