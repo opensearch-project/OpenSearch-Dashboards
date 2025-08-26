@@ -64,7 +64,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               accordionLabel={i18n.translate('explore.stylePanel.tabs.metricValueOptions', {
                 defaultMessage: 'Value options',
               })}
-              initialIsOpen={true}
+              initialIsOpen={false}
             >
               <EuiFormRow
                 label={i18n.translate('explore.vis.metric.calculation', {
@@ -110,7 +110,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               accordionLabel={i18n.translate('explore.stylePanel.tabs.metric', {
                 defaultMessage: 'Metric',
               })}
-              initialIsOpen={true}
+              initialIsOpen={false}
             >
               <EuiFormRow>
                 <EuiSwitch

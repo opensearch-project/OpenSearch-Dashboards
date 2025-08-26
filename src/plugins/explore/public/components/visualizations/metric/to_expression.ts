@@ -68,33 +68,7 @@ export const createSingleMetric = (
     return conditions;
   }
 
-  const markLayer: any = {
-    data: {
-      values: [{ value: calculatedValue }],
-    },
-    transform: [
-      {
-        calculate: "datum.value % 1 === 0 ? datum.value : format(datum.value, '.2f')",
-        as: 'formattedValue',
-      },
-    ],
-    mark: {
-      type: 'text',
-      align: 'center',
-      fontSize: valueFontSize ? valueFontSize : { expr: '8*textSize' },
-      dy: valueFontSize ? -valueFontSize / 2 : { expr: '-3*textSize' },
-      fontWeight: 'bold',
-    },
-    encoding: {
-      text: {
-        field: 'formattedValue',
-        type: 'quantitative',
-      },
-    },
-  };
-
-  const layer = [markLayer];
-
+  const layer = [];
   if (dateField) {
     const sparkLineLayer = {
       data: {
@@ -121,6 +95,32 @@ export const createSingleMetric = (
     };
     layer.push(sparkLineLayer);
   }
+
+  const markLayer: any = {
+    data: {
+      values: [{ value: calculatedValue }],
+    },
+    transform: [
+      {
+        calculate: "datum.value % 1 === 0 ? datum.value : format(datum.value, '.2f')",
+        as: 'formattedValue',
+      },
+    ],
+    mark: {
+      type: 'text',
+      align: 'center',
+      fontSize: valueFontSize ? valueFontSize : { expr: '8*textSize' },
+      dy: valueFontSize ? -valueFontSize / 2 : { expr: '-3*textSize' },
+      fontWeight: 'bold',
+    },
+    encoding: {
+      text: {
+        field: 'formattedValue',
+        type: 'quantitative',
+      },
+    },
+  };
+  layer.push(markLayer);
 
   const titleLayer = {
     data: {
