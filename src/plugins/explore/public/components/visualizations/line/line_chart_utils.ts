@@ -216,6 +216,7 @@ export const applyAxisStyling = (
     axisConfig.grid = categoryAxis?.grid?.showLines ?? false; // Explicitly check grid object
     axisConfig.labels = categoryAxis.labels?.show;
     axisConfig.labelOverlap = 'greedy';
+    axisConfig.labelFlush = false;
 
     // Add time format for date schema
     if (dateColumns?.length && dateColumns[0]?.schema === VisFieldType.Date) {

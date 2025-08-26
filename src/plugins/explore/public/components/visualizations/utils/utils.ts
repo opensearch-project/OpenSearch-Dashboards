@@ -55,6 +55,7 @@ export const applyAxisStyling = (
     fullAxisConfig.labelAngle = axisStyle?.labels?.rotate ?? fullAxisConfig.labelAngle;
     fullAxisConfig.labelLimit = axisStyle?.labels?.truncate ?? fullAxisConfig.labelLimit;
     fullAxisConfig.labelOverlap = 'greedy';
+    fullAxisConfig.labelFlush = false;
   }
 
   if (axis?.schema === VisFieldType.Date) {
