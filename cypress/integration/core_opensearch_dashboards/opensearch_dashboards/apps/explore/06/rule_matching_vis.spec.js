@@ -66,7 +66,7 @@ export const runCreateVisTests = () => {
         .should('be.visible')
         .within(() => {
           // Try finding the EuiSuperSelect button directly
-          cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+          cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
         });
       cy.get('[role="option"][aria-selected="true"]')
         .should('be.visible')
