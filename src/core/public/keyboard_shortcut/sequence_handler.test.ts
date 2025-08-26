@@ -153,12 +153,12 @@ describe('SequenceHandler', () => {
       expect(sequenceHandler.isInSequence()).toBe(false);
     });
 
-    it('should not start new sequence if second key is valid sequence prefix', () => {
+    it('should start new sequence if second key is valid sequence prefix', () => {
       sequenceHandler.processFirstKey('g');
       const result = sequenceHandler.processSecondKey('g');
 
       expect(result).toBe('g g');
-      expect(sequenceHandler.isInSequence()).toBe(false);
+      expect(sequenceHandler.isInSequence()).toBe(true);
     });
 
     it('should reset sequence after processing second key with non-prefix key', () => {
@@ -318,7 +318,7 @@ describe('SequenceHandler', () => {
 
       const result = sequenceHandler.processSecondKey('g');
       expect(result).toBe('g g');
-      expect(sequenceHandler.isInSequence()).toBe(false);
+      expect(sequenceHandler.isInSequence()).toBe(true);
     });
 
     it('should handle sequence interruption by non-prefix key', () => {
@@ -428,7 +428,7 @@ describe('SequenceHandler', () => {
 
       let result = sequenceHandler.processSecondKey('g');
       expect(result).toBe('g g');
-      expect(sequenceHandler.isInSequence()).toBe(false);
+      expect(sequenceHandler.isInSequence()).toBe(true);
 
       // To get "g d", need to explicitly start new sequence
       sequenceHandler.processFirstKey('g');

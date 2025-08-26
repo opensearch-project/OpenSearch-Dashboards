@@ -63,6 +63,12 @@ export class SequenceHandler {
     const sequenceKey = `${this.firstKey} ${key}`;
     this.resetSequence();
 
+    // Only start new sequence if key is a valid sequence prefix
+    if (SEQUENCE_PREFIX.has(key)) {
+      this.firstKey = key;
+      this.startSequenceTimer();
+    }
+
     return sequenceKey;
   }
 
