@@ -204,6 +204,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     // Check if setMenuMountPoint is a meaningful function (not just an empty function)
     const hasValidMountPoint = setMenuMountPoint && setMenuMountPoint.toString() !== '() => {}';
 
+    // eslint-disable-next-line no-console
+    console.log(showSearchBar, 'showSearchBar');
+
     if (hasValidMountPoint) {
       if (groupActions) {
         switch (showSearchBar) {
@@ -255,11 +258,11 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
                   <EuiFlexGroup alignItems="stretch" gutterSize="none">
-                    <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
+                    {/* <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiTitle size="xs">
                         <h1>{screenTitle}</h1>
                       </EuiTitle>
-                    </EuiFlexItem>
+                    </EuiFlexItem> */}
                     <EuiFlexItem grow={false} className="osdTopNavMenu">
                       {renderMenu(menuClassName)}
                     </EuiFlexItem>

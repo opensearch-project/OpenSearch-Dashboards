@@ -647,6 +647,7 @@ export function Header({
         {renderNavToggle()}
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
+          <EuiFlexItem grow={false}>{renderBreadcrumbs(true, false)}</EuiFlexItem>
           {actionMenu}
         </EuiHeaderSection>
         <EuiHeaderSection side="right">
@@ -659,6 +660,8 @@ export function Header({
   );
 
   const renderHeader = () => {
+    // eslint-disable-next-line no-console
+    console.log(useApplicationHeader, 'useApplicationHeader');
     return useApplicationHeader ? renderApplicationHeader() : renderPageHeader();
   };
 
