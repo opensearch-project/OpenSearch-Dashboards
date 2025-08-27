@@ -519,7 +519,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) =
     cy.getElementByTestId('exploreVisStylePanel')
       .should('be.visible')
       .within(() => {
-        cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+        cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
       });
   }
 

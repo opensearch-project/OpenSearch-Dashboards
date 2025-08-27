@@ -110,7 +110,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               accordionLabel={i18n.translate('explore.stylePanel.tabs.metric', {
                 defaultMessage: 'Metric',
               })}
-              initialIsOpen={false}
+              initialIsOpen={true}
             >
               <EuiFormRow>
                 <EuiSwitch
