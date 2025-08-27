@@ -447,5 +447,26 @@ describe('ppl code_completion', () => {
       const resultField2 = results.find((result) => result.text === 'host@name');
       expect(resultField2?.insertText).toBe('`host@name` ');
     });
+
+    it('should suggest fields/values based on context within quotes', async () => {
+      // Suggesting Fields
+      const query = 'source = test-index | where ``';
+      const position = new monaco.Position(1, query.length);
+
+      const results = await getSimpleSuggestions(query, position);
+      const resultField = results.find((result) => result.text === 'resource.attributes.host');
+      expect(resultField?.insertText).toBe('resource.attributes.host');
+
+      const mockedValues = ['value1', 'value2'];
+      jest.spyOn(utils, 'fetchColumnValues').mockResolvedValue(mockedValues);
+
+      // Suggesting Values
+      const query1 = 'source = test-index | where field1 = ""';
+      const position1 = new monaco.Position(1, query1.length);
+      const results1 = await getSimpleSuggestions(query1, position1);
+
+      const resultValue = results1.find((result) => result.text === 'value1');
+      expect(resultValue?.insertText).toBe('value1');
+    });
   });
 });
