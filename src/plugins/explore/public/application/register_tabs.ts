@@ -11,6 +11,7 @@ import {
   EXPLORE_DEFAULT_LANGUAGE,
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
+  EXPLORE_PATTERNS_TAB_ID,
 } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
@@ -54,27 +55,27 @@ export const registerBuiltInTabs = (
     flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
     order: 15,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
-  
+
     prepareQuery: (query) => {
       const state = services.store.getState();
-  
+
       // Get the selected patterns field from the Redux state
       let patternsField = state.tab.patterns.patternsField;
-  
+
       const preparedQuery = getQueryWithSource(query);
       if (!patternsField) {
         patternsField = findDefaultPatternsField(services);
       }
-  
+
       if (state.tab.patterns.usingRegexPatterns)
         return regexPatternQuery(preparedQuery.query, patternsField);
-  
+
       return brainPatternQuery(preparedQuery.query, patternsField);
     },
-  
+
     handleQueryError: (error, cacheKey) => {
       const state = services.store.getState();
-  
+
       /**
        * The below conditional is checking for the error returned when attempting to use a BRAIN
        * query on an older version of the querying engine. If this error appears, an attempt is made
@@ -104,7 +105,7 @@ export const registerBuiltInTabs = (
             cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
           })
         );
-  
+
         // set the old cacheKey to uninitialized to finalize loading, our new tab query has new cacheKey
         services.store.dispatch(
           setIndividualQueryStatus({
@@ -117,13 +118,13 @@ export const registerBuiltInTabs = (
             },
           })
         );
-  
+
         return true;
       }
-  
+
       return false;
     },
-  
+
     component: PatternsTab,
   });
 
