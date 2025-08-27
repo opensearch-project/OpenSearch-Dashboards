@@ -95,7 +95,7 @@ export const DiscoverResultsActionBar = ({
                     grow={false}
                     className="explore-results-action-bar__explore-download-csv-flex-item"
                   >
-                    <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
+                    <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
                   </EuiFlexItem>
                 )}
                 {shouldShowAddToDashboardButton && (
