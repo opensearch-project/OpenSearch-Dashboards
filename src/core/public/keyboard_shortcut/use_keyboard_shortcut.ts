@@ -46,7 +46,7 @@ export function useKeyboardShortcut(
     if (!keyboardShortcutService) {
       if (process.env.NODE_ENV !== 'production') {
         // eslint-disable-next-line no-console
-        console.warn(`keyboardShortcutService is not available. `);
+        console.warn(`keyboardShortcutService is not available.`);
       }
       return;
     }

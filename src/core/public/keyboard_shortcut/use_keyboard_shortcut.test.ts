@@ -159,10 +159,7 @@ describe('useKeyboardShortcut', () => {
 
       renderHook(() => useKeyboardShortcut(mockShortcut, null as any));
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'useKeyboardShortcut: keyboardShortcutService is not available. ' +
-          'Make sure to pass the service from useOpenSearchDashboards().services.keyboardShortcut'
-      );
+      expect(consoleWarnSpy).toHaveBeenCalledWith('keyboardShortcutService is not available.');
 
       process.env.NODE_ENV = originalEnv;
     });
