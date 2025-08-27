@@ -48,7 +48,6 @@ export const PatternsSettingsPopoverButton = () => {
       closePopover={closePopover}
       panelPaddingSize="none"
       ownFocus={false}
-      anchorPosition="leftUp"
     >
       <PatternsSettingsPopoverContent fieldChange={closePopover} />
     </EuiPopover>
