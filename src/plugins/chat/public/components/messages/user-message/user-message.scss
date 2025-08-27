@@ -1,0 +1,12 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.chatUserMessage {
+  background: $euiHeaderDarkBackgroundColor;
+  color: $euiColorLightestShade;
+  margin-left: auto;
+  white-space: pre-wrap;
+  line-height: 1.75;
+  font-size: 1rem;
+}

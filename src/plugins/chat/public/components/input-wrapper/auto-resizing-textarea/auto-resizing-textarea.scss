@@ -1,0 +1,16 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.chatAutoResizingTextarea {
+  overflow: auto;
+  resize: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  box-shadow: none;
+
+  &:focus {
+    background-image: none;
+    box-shadow: none;
+  }
+}

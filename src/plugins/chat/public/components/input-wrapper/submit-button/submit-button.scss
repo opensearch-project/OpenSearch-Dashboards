@@ -1,0 +1,16 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.chatSubmitButton {
+  &:disabled {
+    background-color: $euiColorDisabled;
+    border-color: $euiColorDisabled;
+    cursor: default;
+
+    &:hover {
+      background-color: $euiColorDisabled !important;
+      border-color: $euiColorDisabled !important;
+    }
+  }
+}

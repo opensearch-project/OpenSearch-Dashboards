@@ -1,0 +1,50 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.chatImageRenderer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: $euiFormControlBoxShadow;
+  }
+
+  &__content {
+    margin-top: 8px;
+    padding: 0 16px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  &__error {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    border: $euiBorderThin solid $euiBorderColor;
+  }
+
+  &__errorMessage {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: tintOrShade($euiColorDanger, 90%, 70%);
+    border: 1px solid $euiColorDanger;
+    border-radius: 6px;
+    color: $euiColorDangerText;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &::before {
+      content: "⚠️";
+      font-size: 1rem;
+    }
+  }
+}

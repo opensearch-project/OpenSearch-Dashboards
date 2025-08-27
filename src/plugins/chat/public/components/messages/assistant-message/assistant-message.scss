@@ -1,0 +1,38 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.chatAssistantMessage {
+  background: transparent;
+  margin-right: auto;
+  padding-left: 0;
+  position: relative;
+  max-width: 100%;
+
+  /* Always show controls on mobile */
+  @media (max-width: 768px) {
+    .chatMessageControls {
+      opacity: 1;
+    }
+  }
+
+  &:hover {
+    .chatMessageControls {
+      opacity: 1;
+    }
+  }
+
+  .chatMessageControls {
+    position: absolute;
+    left: 0;
+    display: flex;
+    gap: 1rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    padding: 5px 0 0 0;
+  }
+
+  &+ .chatUserMessage {
+    margin-top: 1.5rem;
+  }
+}
