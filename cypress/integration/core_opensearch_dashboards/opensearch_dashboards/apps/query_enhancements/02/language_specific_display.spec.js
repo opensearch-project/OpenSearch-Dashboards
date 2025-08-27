@@ -144,6 +144,55 @@ export const runDisplayTests = () => {
           cy.get('a').contains('View single document').should('be.visible');
         }
       });
+
+      it(`should handle pressing enter at end of query for ${config.testName}`, () => {
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'discover',
+          isEnhancement: true,
+        });
+
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.setQueryLanguage(config.language);
+        setDatePickerDatesAndSearchIfRelevant(config.language);
+
+        if (config.multilineQuery) {
+          // For multiline editors (SQL, PPL), Enter should create a new line
+          cy.getElementByTestId('osdQueryEditor__multiLine').should('be.visible');
+
+          // Get initial line count
+          cy.getElementByTestId('queryEditorFooterLineCount')
+            .invoke('text')
+            .then((initialText) => {
+              const initialLineCount = parseInt(initialText.trim().match(/(\d+)/)[1]);
+
+              // Click on input area, position cursor at end, and press Enter
+              cy.getElementByTestId('osdQueryEditor__multiLine')
+                .click({ force: true })
+                .type('{end}')
+                .type('{enter}');
+
+              // Verify new line was created (line count should increase)
+              cy.getElementByTestId('queryEditorFooterLineCount')
+                .invoke('text')
+                .should('match', new RegExp(`${initialLineCount + 1}`));
+            });
+        } else {
+          // For single line editors (DQL, Lucene), Enter should execute the query
+          cy.getElementByTestId('osdQueryEditor__singleLine').should('be.visible');
+
+          // Click on input area, position cursor at end, and press Enter
+          cy.getElementByTestId('osdQueryEditor__singleLine')
+            .find('.inputarea')
+            .click({ force: true })
+            .type('{end}')
+            .type('{enter}');
+
+          // Verify query was executed (check for completion message)
+          cy.getElementByTestId('queryResultCompleteMsg').should('be.visible');
+          cy.getElementByTestId('queryResultCompleteMsg').should('contain', 'Completed in');
+        }
+      });
     });
   });
 };
