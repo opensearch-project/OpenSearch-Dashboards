@@ -108,7 +108,6 @@ describe('useKeyboardShortcut', () => {
 
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledTimes(1);
 
-      // Change just the execute function
       const updatedShortcut = { ...mockShortcut, execute: newExecute };
       rerender({ shortcut: updatedShortcut });
 
@@ -125,19 +124,17 @@ describe('useKeyboardShortcut', () => {
 
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledTimes(1);
 
-      // Create new object with same content
       const sameContentShortcut = {
         id: 'test-shortcut',
         pluginId: 'testPlugin',
         name: 'Test Shortcut',
         category: 'test',
         keys: 'cmd+s',
-        execute: mockShortcut.execute, // Same function reference
+        execute: mockShortcut.execute,
       };
 
       rerender({ shortcut: sameContentShortcut });
 
-      // Should not re-register because individual properties are the same
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledTimes(1);
       expect(mockKeyboardShortcutService.unregister).not.toHaveBeenCalled();
     });
@@ -188,12 +185,10 @@ describe('useKeyboardShortcut', () => {
         throw new Error('Registration failed');
       });
 
-      // The error happens in useEffect, so we need to catch it differently
       expect(() => {
         renderHook(() => useKeyboardShortcut(mockShortcut, mockKeyboardShortcutService));
-      }).not.toThrow(); // renderHook itself doesn't throw
+      }).not.toThrow();
 
-      // But the register method should still be called and throw
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledWith(mockShortcut);
       expect(mockKeyboardShortcutService.register).toThrow('Registration failed');
     });
@@ -244,11 +239,9 @@ describe('useKeyboardShortcut', () => {
 
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledTimes(1);
 
-      // Re-render with same shortcut content but different object reference
       const newShortcutObject = { ...mockShortcut };
       rerender({ shortcut: newShortcutObject });
 
-      // Should not re-register because individual properties haven't changed
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledTimes(1);
       expect(mockKeyboardShortcutService.unregister).not.toHaveBeenCalled();
     });
@@ -292,19 +285,17 @@ describe('useKeyboardShortcut', () => {
 
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledTimes(1);
 
-      // Create new shortcut object with same execute function
       const shortcut2 = {
         id: 'test',
         pluginId: 'plugin',
         name: 'Test',
         category: 'test',
         keys: 'cmd+s',
-        execute: stableExecute, // Same function reference
+        execute: stableExecute,
       };
 
       rerender({ shortcut: shortcut2 });
 
-      // Should not re-register because all properties are the same
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledTimes(1);
       expect(mockKeyboardShortcutService.unregister).not.toHaveBeenCalled();
     });
