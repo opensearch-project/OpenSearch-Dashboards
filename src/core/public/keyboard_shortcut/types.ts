@@ -21,6 +21,7 @@ export interface KeyboardShortcutSetup {
 export interface KeyboardShortcutStart {
   register(shortcut: ShortcutDefinition): void;
   unregister(shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>): void;
+  useKeyboardShortcut(shortcut: ShortcutDefinition): void;
 }
 
 /**
