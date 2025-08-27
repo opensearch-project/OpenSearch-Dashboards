@@ -223,11 +223,6 @@ export const createSingleMetric = (
     $schema: VEGASCHEMA,
     params: [{ name: 'textSize', expr: 'min(width, height) / 20' }],
     layer,
-    config: {
-      view: {
-        stroke: null,
-      },
-    },
   };
 
   return baseSpec;

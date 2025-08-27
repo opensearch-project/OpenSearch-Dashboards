@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { darkMode } from '@osd/ui-shared-deps/theme';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionFunctionOpenSearchDashboards,
   IExpressionLoaderParams,
 } from '../../../../../expressions/public';
+import { defaultLightTheme } from '../theme/light';
+import { defaultDarkTheme } from '../theme/dark';
 
 /**
  * Convert the visualization configuration to an expression
@@ -22,6 +25,18 @@ export const toExpression = (
 ) => {
   if (!searchContext) {
     return '';
+  }
+
+  if (darkMode) {
+    spec.config = {
+      ...spec.config,
+      ...defaultDarkTheme,
+    };
+  } else {
+    spec.config = {
+      ...spec.config,
+      ...defaultLightTheme,
+    };
   }
 
   const opensearchDashboards = buildExpressionFunction<ExpressionFunctionOpenSearchDashboards>(

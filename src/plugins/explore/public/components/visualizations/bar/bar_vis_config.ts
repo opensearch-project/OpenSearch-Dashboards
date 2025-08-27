@@ -113,7 +113,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       axisRole: AxisRole.Y,
     },
