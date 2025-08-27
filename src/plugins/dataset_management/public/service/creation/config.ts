@@ -96,10 +96,6 @@ export class DatasetCreationConfig {
     };
   }
 
-  public getDatasetType() {
-    return this.type;
-  }
-
   public getDatasetName() {
     return this.name;
   }

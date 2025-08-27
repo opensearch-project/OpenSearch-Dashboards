@@ -96,6 +96,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         ...currentDataset,
         description: dataView.description,
         displayName: dataView.displayName,
+        signalType: dataView.signalType,
       } as DetailedDataset);
     };
     updateSelectedDataset();
@@ -125,7 +126,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
             ...dataset,
             description: dataView.description,
             displayName: dataView.displayName,
-            signalType: dataView.type,
+            signalType: dataView.signalType,
           });
         }
 
