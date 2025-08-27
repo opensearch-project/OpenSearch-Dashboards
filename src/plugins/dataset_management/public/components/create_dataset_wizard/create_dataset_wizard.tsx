@@ -214,7 +214,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
   createDataset = async (
     timeFieldName: string | undefined,
     datasetId: string,
-    datasetType: string
+    signalType: string | undefined
   ) => {
     let emptyPattern: DataView;
     const { history } = this.props;
@@ -226,7 +226,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
         title: dataset,
         timeFieldName,
         dataSourceRef,
-        type: datasetType,
+        signalType,
         ...this.state.datasetCreationType.getDatasetMappings(),
       });
     } catch (err) {

@@ -175,7 +175,7 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
 
   const typeHeader = i18n.translate('datasetManagement.editDataset.typeHeader', {
     defaultMessage: "Type: '{type}'",
-    values: { type: dataset.type },
+    values: { type: dataset.signalType },
   });
 
   const timeFilterHeader = i18n.translate('datasetManagement.editDataset.timeFilterHeader', {
@@ -244,7 +244,7 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
   const renderBadges = () => {
     if (useUpdatedUX) {
       const components = [
-        ...(Boolean(dataset.type) ? [<EuiBadge color="primary">{typeHeader}</EuiBadge>] : []),
+        ...(Boolean(dataset.signalType) ? [<EuiBadge color="primary">{typeHeader}</EuiBadge>] : []),
         ...(Boolean(dataset.timeFieldName)
           ? [<EuiBadge color="warning">{timeFilterHeader}</EuiBadge>]
           : []),

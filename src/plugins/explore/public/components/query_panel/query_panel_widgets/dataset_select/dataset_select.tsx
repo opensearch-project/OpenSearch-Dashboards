@@ -104,7 +104,7 @@ export const DatasetSelectWidget = () => {
   const onFilter = useMemo(() => {
     return (detailedDataset: any) => {
       if (window.location.pathname.includes('/traces')) {
-        return detailedDataset.signalType === 'TRACES';
+        return detailedDataset.signalType === 'traces';
       }
       return true;
     };
