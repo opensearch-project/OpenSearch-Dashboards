@@ -54,7 +54,7 @@ export const DiscoverResultsActionBar = ({
           alignItems="center"
           direction="row"
           gutterSize="none"
-          justifyContent="flexStart"
+          justifyContent="spaceBetween"
         >
           <EuiFlexItem grow={false}>
             <HitsCounter
@@ -77,30 +77,35 @@ export const DiscoverResultsActionBar = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem> */}
-          {dataset && rows?.length ? (
-            <>
-              {shouldShowExportButton && (
-                <EuiFlexItem
-                  grow={false}
-                  className="explore-results-action-bar__explore-download-csv-flex-item"
-                >
-                  <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
-                </EuiFlexItem>
-              )}
-
-              {showTabSpecificSettings && (
-                <EuiFlexItem grow={false}>
-                  <PatternsSettingsPopoverButton />
-                </EuiFlexItem>
-              )}
-
-              {shouldShowAddToDashboardButton && (
-                <EuiFlexItem grow={false}>
-                  <SaveAndAddButtonWithModal dataset={dataset} />
-                </EuiFlexItem>
-              )}
-            </>
-          ) : null}
+          <EuiFlexItem grow={false}>
+            {dataset && rows?.length ? (
+              <EuiFlexGroup
+                alignItems="center"
+                direction="row"
+                gutterSize="none"
+                justifyContent="flexStart"
+              >
+                {showTabSpecificSettings && (
+                  <EuiFlexItem grow={false}>
+                    <PatternsSettingsPopoverButton />
+                  </EuiFlexItem>
+                )}
+                {shouldShowExportButton && (
+                  <EuiFlexItem
+                    grow={false}
+                    className="explore-results-action-bar__explore-download-csv-flex-item"
+                  >
+                    <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
+                  </EuiFlexItem>
+                )}
+                {shouldShowAddToDashboardButton && (
+                  <EuiFlexItem grow={false}>
+                    <SaveAndAddButtonWithModal dataset={dataset} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            ) : null}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

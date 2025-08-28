@@ -1,0 +1,2 @@
+fix:
+- Functional issues with patterns field selector ([#10394](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10394))
