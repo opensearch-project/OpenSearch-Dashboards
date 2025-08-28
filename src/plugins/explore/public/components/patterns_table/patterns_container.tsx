@@ -56,6 +56,11 @@ export const PatternsContainer = () => {
       sample: usingRegexPatterns
         ? row._source[SAMPLE_FIELD][0]
         : highlightLogUsingPattern(row._source[SAMPLE_FIELD][0], row._source[PATTERNS_FIELD]),
+      flyout: {
+        pattern: row._source[PATTERNS_FIELD],
+        count: row._source[COUNT_FIELD],
+        sample: row._source[SAMPLE_FIELD],
+      },
     }));
 
     return <PatternsTable items={items} />;
