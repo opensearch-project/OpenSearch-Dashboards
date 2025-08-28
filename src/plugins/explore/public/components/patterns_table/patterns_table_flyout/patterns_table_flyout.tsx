@@ -11,9 +11,11 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { usePatternsFlyout } from '../patterns_flyout_context';
 
 export interface PatternsFlyoutRecord {
@@ -30,18 +32,56 @@ export const PatternsTableFlyout = () => {
     <EuiFlyout onClose={closePatternsTableFlyout}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>Inspect pattern</h2>
+          <h2>
+            {i18n.translate('explore.patterns.flyout.headerTitle', {
+              defaultMessage: 'Inspect pattern',
+            })}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiPanel>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiText>
-                <p>pattern: {record?.pattern}</p>
-              </EuiText>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" className="patternsTableFlyout__detailsPanelItem__title">
+                    {i18n.translate('explore.patterns.flyout.patternLabel', {
+                      defaultMessage: 'Pattern',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">{record?.pattern}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    {i18n.translate('explore.patterns.flyout.countLabel', {
+                      defaultMessage: 'Event count',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">{record?.count}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <EuiPanel>
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate('explore.patterns.flyout.eventsPanelTitle', {
+                defaultMessage: 'Events ({count})',
+                values: { count: record?.count },
+              })}
+            </h3>
+          </EuiTitle>
         </EuiPanel>
       </EuiFlyoutBody>
     </EuiFlyout>

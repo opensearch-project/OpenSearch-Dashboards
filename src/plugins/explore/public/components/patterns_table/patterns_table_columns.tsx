@@ -36,7 +36,7 @@ export const patternsTableColumns = (
   {
     field: 'sample',
     name: i18n.translate('explore.patterns.table.column.sampleLog', {
-      defaultMessage: 'Pattern Sample Log',
+      defaultMessage: 'Pattern',
     }),
     render: (sample: string) => {
       const sanitizedSampleLog = dompurify.sanitize(sample);
