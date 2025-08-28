@@ -26,6 +26,23 @@ jest.mock('dompurify', () => ({
   sanitize: jest.fn().mockImplementation((content) => content),
 }));
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    EuiButtonIcon: jest.fn().mockImplementation(({ iconType, onClick, ...rest }) => {
+      return (
+        <button
+          data-test-subj="euiButtonIcon"
+          data-icon-type={iconType}
+          onClick={onClick}
+          {...rest}
+        />
+      );
+    }),
+  };
+});
+
 const mockOpenPatternsTableFlyout = jest.fn();
 
 describe('patternsTableColumns', () => {
@@ -127,6 +144,43 @@ describe('patternsTableColumns', () => {
       expect(countColumn.render?.(NaN)).toBe('—');
       expect(countColumn.render?.(Infinity)).toBe('—');
       expect(countColumn.render?.(-Infinity)).toBe('—');
+    });
+  });
+
+  describe('flyout column', () => {
+    let flyoutColumn: ColumnWithRender<PatternItem>;
+
+    beforeEach(() => {
+      flyoutColumn = columns[0];
+    });
+
+    it('should have the correct width', () => {
+      expect(flyoutColumn.width).toBe('40px');
+    });
+
+    it('should render an EuiButtonIcon with inspect icon', () => {
+      const mockRecord = mockPatternItems[0];
+      const result = flyoutColumn.render?.(mockRecord);
+
+      const { container } = render(<>{result}</>);
+      const buttonElement = container.querySelector('[data-test-subj="euiButtonIcon"]');
+
+      expect(buttonElement).toBeInTheDocument();
+      expect(buttonElement?.getAttribute('data-icon-type')).toBe('inspect');
+    });
+
+    it('should call openPatternsTableFlyout with the record when clicked', () => {
+      const mockRecord = mockPatternItems[0];
+      const result = flyoutColumn.render?.(mockRecord);
+
+      const { container } = render(<>{result}</>);
+      const buttonElement = container.querySelector(
+        '[data-test-subj="euiButtonIcon"]'
+      ) as HTMLButtonElement;
+
+      buttonElement?.click();
+      expect(mockOpenPatternsTableFlyout).toHaveBeenCalledTimes(1);
+      expect(mockOpenPatternsTableFlyout).toHaveBeenCalledWith(mockRecord);
     });
   });
 
