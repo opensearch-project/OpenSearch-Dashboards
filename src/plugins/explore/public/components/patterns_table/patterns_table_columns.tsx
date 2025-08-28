@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import dompurify from 'dompurify';
@@ -11,6 +11,20 @@ import { PatternItem } from './patterns_table';
 import { isValidFiniteNumber } from './utils/utils';
 
 export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
+  {
+    field: 'flyout',
+    width: '40px',
+    render: (record: any) => {
+      return (
+        <EuiButtonIcon
+          iconType={'inspect'}
+          onClick={() => {
+            alert('open flyout');
+          }}
+        />
+      );
+    },
+  },
   {
     field: 'ratio',
     name: i18n.translate('explore.patterns.table.column.eventRatio', {
