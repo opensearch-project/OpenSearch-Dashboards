@@ -4,7 +4,8 @@
  */
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { PatternsFlyoutRecord } from './patterns_table_flyout/patterns_table_flyout';
+import { PatternsFlyoutRecord } from './patterns_table_flyout';
+import { isValidFiniteNumber } from '../utils/utils';
 
 interface PatternsFlyoutContextType {
   isFlyoutOpen: boolean;
@@ -23,11 +24,18 @@ export const PatternsFlyoutProvider: React.FC<{ children: ReactNode }> = ({ chil
 
   const openPatternsTableFlyout = (record?: PatternsFlyoutRecord) => {
     // check the record to make sure that the flyout can be properly opening with the right data
-    // TODO: behavior for checking a record
-    // TODO: behavior on what to do when dealing with bad record
+    if (
+      typeof record?.count !== 'number' ||
+      !isValidFiniteNumber(record.count) ||
+      typeof record?.pattern !== 'string' ||
+      typeof record?.sample?.[0] !== 'string'
+    ) {
+      setPatternsFlyoutData(undefined);
+    } else {
+      setPatternsFlyoutData(record); // update the patterns flyout data with row record
+    }
 
-    // finally, update the patterns flyout data with the record and open the flyout
-    setPatternsFlyoutData(record);
+    // finally, open the flyout
     setIsFlyoutOpen(true);
   };
 

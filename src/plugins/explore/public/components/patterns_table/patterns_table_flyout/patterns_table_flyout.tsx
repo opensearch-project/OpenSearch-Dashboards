@@ -19,7 +19,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { usePatternsFlyout } from '../patterns_flyout_context';
+import { usePatternsFlyout } from './patterns_flyout_context';
 
 export interface PatternsFlyoutRecord {
   pattern: string;
@@ -29,7 +29,6 @@ export interface PatternsFlyoutRecord {
 
 export const PatternsTableFlyout = () => {
   const { patternsFlyoutData: record, closePatternsTableFlyout } = usePatternsFlyout();
-  // TODO: when patternsFlyoutData is undefined, do we then put on a spinner for the loading state?
 
   return (
     <EuiFlyout onClose={closePatternsTableFlyout}>

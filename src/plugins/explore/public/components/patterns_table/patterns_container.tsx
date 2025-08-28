@@ -17,7 +17,10 @@ import {
   selectUsingRegexPatterns,
 } from '../../application/utils/state_management/selectors';
 import { PatternsTableFlyout } from './patterns_table_flyout/patterns_table_flyout';
-import { PatternsFlyoutProvider, usePatternsFlyout } from './patterns_flyout_context';
+import {
+  PatternsFlyoutProvider,
+  usePatternsFlyout,
+} from './patterns_table_flyout/patterns_flyout_context';
 
 const PatternsContainerContent = () => {
   const { isFlyoutOpen } = usePatternsFlyout();
