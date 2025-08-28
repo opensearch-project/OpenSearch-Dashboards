@@ -9,7 +9,7 @@ import React from 'react';
 import dompurify from 'dompurify';
 import { PatternItem } from './patterns_table';
 import { isValidFiniteNumber } from './utils/utils';
-import { PatternsTableFlyout } from './patterns_table_flyout';
+import { PatternsTableFlyout } from './patterns_table_flyout/patterns_table_flyout';
 
 export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
   {
