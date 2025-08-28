@@ -8,7 +8,7 @@ import {
   HeatmapExclusiveVisOptions,
   HeatmapLabelVisOptions,
 } from './heatmap_exclusive_vis_options';
-import { ColorSchemas, ScaleType, LabelAggregationType } from '../types';
+import { ColorSchemas, ScaleType, AggregationType } from '../types';
 
 // Mock the CustomRange component
 jest.mock('../style_panel/custom_ranges', () => {
@@ -45,7 +45,7 @@ describe('HeatmapExclusiveVisOptions', () => {
       maxNumberOfColors: 4,
       useCustomRanges: false,
       label: {
-        type: LabelAggregationType.SUM,
+        type: AggregationType.SUM,
         show: false,
         rotate: false,
         overwriteColor: false,
@@ -229,7 +229,7 @@ describe('HeatmapLabelVisOptions', () => {
   const defaultProps = {
     shouldShowType: true,
     styles: {
-      type: LabelAggregationType.SUM,
+      type: AggregationType.SUM,
       show: false,
       rotate: false,
       overwriteColor: false,
@@ -262,11 +262,11 @@ describe('HeatmapLabelVisOptions', () => {
     });
   });
 
-  it('should show LabelAggregationType when shouldShowType is true', () => {
+  it('should show AggregationType when shouldShowType is true', () => {
     const props = {
       shouldShowType: true,
       styles: {
-        type: LabelAggregationType.SUM,
+        type: AggregationType.SUM,
         show: true,
         rotate: false,
         overwriteColor: false,
@@ -347,17 +347,17 @@ describe('HeatmapLabelVisOptions', () => {
       styles: {
         ...defaultProps.styles,
         show: true,
-        type: LabelAggregationType.SUM,
+        type: AggregationType.SUM,
       },
     };
 
     render(<HeatmapLabelVisOptions {...props} />);
     const typeSelect = screen.getByRole('combobox');
-    fireEvent.change(typeSelect, { target: { value: LabelAggregationType.MEAN } });
+    fireEvent.change(typeSelect, { target: { value: AggregationType.MEAN } });
 
     expect(props.onChange).toHaveBeenCalledWith({
       ...props.styles,
-      type: LabelAggregationType.MEAN,
+      type: AggregationType.MEAN,
     });
   });
 

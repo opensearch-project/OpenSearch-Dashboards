@@ -11,7 +11,7 @@ import {
 } from './heatmap_vis_config';
 import { HeatmapVisStyleControls } from './heatmap_vis_options';
 import {
-  LabelAggregationType,
+  AggregationType,
   Positions,
   ColorSchemas,
   ScaleType,
@@ -58,7 +58,7 @@ describe('createHeatmapeConfig', () => {
       rotate: false,
       overwriteColor: false,
       color: 'black',
-      type: LabelAggregationType.SUM,
+      type: AggregationType.SUM,
     });
 
     // Verify axes
