@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import './patterns_table_flyout.scss';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiBasicTable,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { usePatternsFlyout } from '../patterns_flyout_context';
@@ -21,7 +23,7 @@ import { usePatternsFlyout } from '../patterns_flyout_context';
 export interface PatternsFlyoutRecord {
   pattern: string;
   count: number;
-  sample: string;
+  sample: string[];
 }
 
 export const PatternsTableFlyout = () => {
@@ -59,7 +61,7 @@ export const PatternsTableFlyout = () => {
             <EuiFlexItem>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s">
+                  <EuiText size="s" className="patternsTableFlyout__detailsPanelItem__title">
                     {i18n.translate('explore.patterns.flyout.countLabel', {
                       defaultMessage: 'Event count',
                     })}
@@ -82,6 +84,23 @@ export const PatternsTableFlyout = () => {
               })}
             </h3>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          {record?.sample && record.sample.length > 0 && (
+            <EuiBasicTable
+              items={record.sample.map((event) => ({ event }))}
+              columns={[
+                {
+                  field: 'event',
+                  name: i18n.translate('explore.patterns.flyout.eventsColumnName', {
+                    defaultMessage: 'Event',
+                  }),
+                  sortable: false,
+                  width: '100%',
+                },
+              ]}
+              tableLayout="auto"
+            />
+          )}
         </EuiPanel>
       </EuiFlyoutBody>
     </EuiFlyout>
