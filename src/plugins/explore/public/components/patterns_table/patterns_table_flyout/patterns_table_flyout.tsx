@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -15,34 +14,36 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { usePatternsFlyout } from '../patterns_flyout_context';
 
-export const PatternsTableFlyout = (record: { pattern: string; count: number; sample: string }) => {
-  const [flyoutOpen, setFlyoutOpen] = useState(false);
+export interface PatternsFlyoutRecord {
+  pattern: string;
+  count: number;
+  sample: string;
+}
+
+export const PatternsTableFlyout = () => {
+  const { patternsFlyoutData: record, closePatternsTableFlyout } = usePatternsFlyout();
+  // TODO: when patternsFlyoutData is undefined, do we then put on a spinner for the loading state?
 
   return (
-    <>
-      <EuiButtonIcon iconType={'inspect'} onClick={() => setFlyoutOpen(true)} />
-
-      {flyoutOpen && (
-        <EuiFlyout onClose={() => setFlyoutOpen(false)}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>Inspect pattern</h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiPanel>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiText>
-                    <p>Pattern:</p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      )}
-    </>
+    <EuiFlyout onClose={closePatternsTableFlyout}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>Inspect pattern</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiPanel>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiText>
+                <p>pattern: {record?.pattern}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlyoutBody>
+    </EuiFlyout>
   );
 };

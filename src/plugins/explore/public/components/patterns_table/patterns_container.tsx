@@ -16,8 +16,15 @@ import {
   selectResults,
   selectUsingRegexPatterns,
 } from '../../application/utils/state_management/selectors';
+import { PatternsTableFlyout } from './patterns_table_flyout/patterns_table_flyout';
+import { PatternsFlyoutProvider, usePatternsFlyout } from './patterns_flyout_context';
 
-export const PatternsContainer = () => {
+const PatternsContainerContent = () => {
+  const { isFlyoutOpen } = usePatternsFlyout();
+
+  /**
+   * Fetching the hits from the patterns query, and processing them for the table
+   */
   const { results: patternResults } = useTabResults();
 
   const querySelector = useSelector(selectQuery);
@@ -63,8 +70,21 @@ export const PatternsContainer = () => {
       },
     }));
 
-    return <PatternsTable items={items} />;
+    return (
+      <>
+        {isFlyoutOpen && <PatternsTableFlyout />}
+        <PatternsTable items={items} />
+      </>
+    );
   } catch {
     return <></>;
   }
+};
+
+export const PatternsContainer = () => {
+  return (
+    <PatternsFlyoutProvider>
+      <PatternsContainerContent />
+    </PatternsFlyoutProvider>
+  );
 };
