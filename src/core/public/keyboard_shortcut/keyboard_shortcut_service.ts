@@ -201,17 +201,9 @@ export class KeyboardShortcutService {
   public getAllShortcuts(): ShortcutDefinition[] {
     const allShortcuts: ShortcutDefinition[] = [];
 
-    // Iterate through all shortcuts in the map and collect unique shortcuts
+    // Iterate through all shortcuts in the map and collect all shortcuts
     for (const shortcuts of this.shortcutsMapByKey.values()) {
-      for (const shortcut of shortcuts) {
-        // Only add if not already in the array (avoid duplicates)
-        const exists = allShortcuts.some(
-          (existing) => this.getNamespacedId(existing) === this.getNamespacedId(shortcut)
-        );
-        if (!exists) {
-          allShortcuts.push(shortcut);
-        }
-      }
+      allShortcuts.push(...shortcuts);
     }
 
     return allShortcuts;
