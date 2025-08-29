@@ -4,15 +4,12 @@
  */
 
 .headerRecentItemsButton {
-  .primaryApplicationHeader & {
-    margin-top: $euiSizeXS;
-  }
 
   // Make the spinner the same size as an xs icon button
   &.headerRecentItemsButton--loadingIndicator {
     width: $euiButtonHeightXSmall;
 
-    & > span {
+    &>span {
       padding: 0;
     }
   }

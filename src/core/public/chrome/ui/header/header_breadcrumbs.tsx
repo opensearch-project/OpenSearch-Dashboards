@@ -86,10 +86,6 @@ export function HeaderBreadcrumbs({
   }));
 
   const remainingCrumbs = useUpdatedHeader ? crumbs.slice(0, -1) : crumbs;
-  // eslint-disable-next-line no-console
-  console.log(crumbs, 'crumbs');
-  // eslint-disable-next-line no-console
-  console.log(remainingCrumbs, 'remainingCrumbs');
 
   if (hideTrailingSeparator) {
     return (
@@ -100,6 +96,13 @@ export function HeaderBreadcrumbs({
         data-test-subj="breadcrumbs"
         hideTrailingSeparator
         disableTrailingLink
+        truncate={true}
+        responsive={{
+          xs: 1,
+          s: 1,
+          m: 1,
+          l: 2,
+        }}
       />
     );
   } else {
