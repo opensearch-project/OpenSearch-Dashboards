@@ -73,7 +73,42 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, storage, appName, data } = opensearchDashboards.services;
+  const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'open_date_picker',
+    pluginId: 'data',
+    name: 'Open Date Picker',
+    category: 'Open',
+    keys: 'shift+t',
+    execute: () => {
+      const selectors = [
+        '[data-test-subj="superDatePickerstartDatePopoverButton"]',
+        '[data-test-subj="superDatePickerShowDatesButton"]',
+      ];
+      for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          (element as HTMLElement).click();
+          break;
+        }
+      }
+    },
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'refresh_query',
+    pluginId: 'data',
+    name: 'Refresh Results',
+    category: 'query',
+    keys: 'shift+r',
+    execute: () => {
+      const refreshButton = document.querySelector('[data-test-subj="querySubmitButton"]');
+      if (refreshButton) {
+        (refreshButton as HTMLElement).click();
+      }
+    },
+  });
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
