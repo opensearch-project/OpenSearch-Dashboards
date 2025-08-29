@@ -1,0 +1,3 @@
+feat:
+- Display vega error and warning messages in the toast ([#9543](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9543))
+- Changed the behavior of hideWarnings to default to be true ([#9543](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9543))
