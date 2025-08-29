@@ -303,7 +303,7 @@ export class VisualizePlugin
       core.keyboardShortcut.register({
         id: 'nav.visualization',
         name: 'Go to Visualization',
-        pluginId: 'visualization',
+        pluginId: 'visualize',
         category: 'navigation',
         keys: 'g v',
         execute: () => {

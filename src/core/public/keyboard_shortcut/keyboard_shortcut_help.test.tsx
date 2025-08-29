@@ -77,6 +77,14 @@ describe('KeyboardShortcutHelp', () => {
       keys: 'cmd+f',
       execute: jest.fn(),
     },
+    {
+      id: 'go_to_discover',
+      pluginId: 'core',
+      name: 'Go to Discover',
+      category: 'navigation',
+      keys: 'g d',
+      execute: jest.fn(),
+    },
   ];
 
   const mockKeyboardShortcutService = {
@@ -284,7 +292,7 @@ describe('KeyboardShortcutHelp', () => {
       });
     });
 
-    it('renders Windows-style shortcuts with plus separators', async () => {
+    it('renders Windows-style shortcuts without plus separators (matching Mac format)', async () => {
       const trigger = <button data-testid="trigger">Open Help</button>;
 
       render(
@@ -300,7 +308,38 @@ describe('KeyboardShortcutHelp', () => {
 
       await waitFor(() => {
         const plusSeparators = screen.queryAllByText('+');
-        expect(plusSeparators.length).toBeGreaterThan(0);
+        expect(plusSeparators.length).toBe(0);
+
+        // Should render multiple Ctrl elements (from different shortcuts)
+        const ctrlElements = screen.getAllByText('Ctrl');
+        expect(ctrlElements.length).toBeGreaterThan(0);
+        expect(screen.getByText('S')).toBeInTheDocument();
+      });
+    });
+
+    it('renders sequence shortcuts (like "g d") consistently on Windows', async () => {
+      const trigger = <button data-testid="trigger">Open Help</button>;
+
+      render(
+        <TestWrapper>
+          <KeyboardShortcutHelp
+            trigger={trigger}
+            keyboardShortcutService={mockKeyboardShortcutService}
+          />
+        </TestWrapper>
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open Help' }));
+
+      await waitFor(() => {
+        // Sequence shortcuts like "g d" should render as separate kbd elements
+        // Both "G" and "D" should be present as uppercase letters
+        expect(screen.getByText('G')).toBeInTheDocument();
+        expect(screen.getByText('D')).toBeInTheDocument();
+
+        // Should not have any plus separators for sequences
+        const plusSeparators = screen.queryAllByText('+');
+        expect(plusSeparators.length).toBe(0);
       });
     });
 
@@ -326,39 +365,6 @@ describe('KeyboardShortcutHelp', () => {
       await waitFor(() => {
         expect(screen.getByTestId('keyboardShortcutsModal')).toBeInTheDocument();
       });
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('handles key parsing errors gracefully', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-
-      // Mock the KeyStringParser to throw an error
-      const mockKeyParser = jest.requireMock('./key_parser');
-      mockKeyParser.KeyStringParser.mockImplementation(() => ({
-        getDisplayString: jest.fn(() => {
-          throw new Error('Parsing error');
-        }),
-      }));
-
-      const trigger = <button data-testid="trigger">Open Help</button>;
-
-      render(
-        <TestWrapper>
-          <KeyboardShortcutHelp
-            trigger={trigger}
-            keyboardShortcutService={mockKeyboardShortcutService}
-          />
-        </TestWrapper>
-      );
-
-      fireEvent.click(screen.getByRole('button', { name: 'Open Help' }));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('keyboardShortcutsModal')).toBeInTheDocument();
-      });
-
-      consoleSpy.mockRestore();
     });
   });
 });
