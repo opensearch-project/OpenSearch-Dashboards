@@ -109,6 +109,8 @@ export class VegaView extends VegaBaseView {
     if (this._parser.useHover) view.hover();
 
     await this.setView(view);
-    this.setDebugValues(view, this._parser.spec, this._parser.vlspec);
+    if (this._enableDebug) {
+      this.setDebugValues(view, this._parser.spec, this._parser.vlspec);
+    }
   }
 }

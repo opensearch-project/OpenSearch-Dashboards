@@ -38,7 +38,7 @@ import { i18n } from '@osd/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { opensearchFilters } from '../../../data/public';
 
-import { getEnableExternalUrls, getData } from '../services';
+import { getEnableExternalUrls, getData, getEnableDebug } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 vega.scheme('euiPaletteColorBlind', euiPaletteColorBlind());
@@ -86,6 +86,7 @@ export class VegaBaseView {
     this._destroyHandlers = [];
     this._initialized = false;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._enableDebug = getEnableDebug();
   }
 
   async init() {
