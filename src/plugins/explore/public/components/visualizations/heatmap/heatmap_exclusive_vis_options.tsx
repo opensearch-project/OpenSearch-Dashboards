@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { ColorSchemas, ScaleType, RangeValue, LabelAggregationType } from '../types';
-import { getColorSchemas, getLabelType } from '../utils/collections';
+import { ColorSchemas, ScaleType, RangeValue, AggregationType } from '../types';
+import { getColorSchemas, getAggregationnType } from '../utils/collections';
 import { CustomRange } from '../style_panel/custom_ranges';
 import { useDebouncedNumericValue, useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -229,7 +229,7 @@ export const HeatmapLabelVisOptions = ({
     300
   );
 
-  const labelType = getLabelType();
+  const labelType = getAggregationnType();
   return (
     <>
       <EuiFormRow>
@@ -288,7 +288,7 @@ export const HeatmapLabelVisOptions = ({
               <EuiSelect
                 compressed
                 value={styles.type}
-                onChange={(e) => updateLabelOption('type', e.target.value as LabelAggregationType)}
+                onChange={(e) => updateLabelOption('type', e.target.value as AggregationType)}
                 options={labelType}
               />
             </EuiFormRow>
