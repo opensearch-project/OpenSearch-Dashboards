@@ -218,4 +218,24 @@ export enum LabelAggregationType {
   NONE = 'none',
 }
 
+export interface AxisConfig {
+  grid: boolean;
+  gridColor?: string;
+  gridOpacity?: number;
+  labelSeparation?: number;
+  orient?: Positions;
+  title?: string | null;
+  labels?: boolean;
+  labelAngle?: number;
+  labelLimit?: number;
+  labelOverlap?: string;
+  labelFlush?: boolean;
+  ticks?: boolean;
+  domain?: boolean;
+  format?: {
+    seconds?: string;
+    milliseconds?: string;
+  };
+}
+
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
