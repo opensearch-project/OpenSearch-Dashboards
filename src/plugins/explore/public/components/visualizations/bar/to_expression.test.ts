@@ -9,9 +9,17 @@ import {
   createTimeBarChart,
   createGroupedTimeBarChart,
   createFacetedTimeBarChart,
+  createNumericalHistogramBarChart,
 } from './to_expression';
 import { defaultBarChartStyles, BarChartStyleControls } from './bar_vis_config';
-import { VisColumn, VisFieldType, VEGASCHEMA, AxisRole, ThresholdLineStyle } from '../types';
+import {
+  VisColumn,
+  VisFieldType,
+  VEGASCHEMA,
+  AxisRole,
+  ThresholdLineStyle,
+  AggregationType,
+} from '../types';
 
 describe('bar to_expression', () => {
   // Create mock VisColumn objects
@@ -599,22 +607,6 @@ describe('bar to_expression', () => {
       }).toThrow('Time bar chart requires at least one numerical column and one date column');
     });
 
-    test('falls back to default tooltip format when dateField is missing', () => {
-      const fallbackMapping = {
-        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
-        [AxisRole.Y]: mockNumericalColumn,
-      };
-      const result = createTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockDateColumn],
-        defaultBarChartStyles,
-        fallbackMapping
-      );
-      const tooltip = result.layer[0].encoding.tooltip;
-      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
-    });
-
     test('uses xAxis as numericalAxis when xAxis is not temporal', () => {
       const mockAxisColumnMappings = {
         [AxisRole.X]: mockNumericalColumn,
@@ -1107,6 +1099,77 @@ describe('bar to_expression', () => {
       );
       const tooltip = result.spec.layer[0].encoding.tooltip;
       expect(tooltip[1].format).toBe('%b %d, %Y %H:%M:%S');
+    });
+  });
+
+  describe('createNumericalHistogramBarChart', () => {
+    test('creates a numerical histogram bar chart spec', () => {
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockNumericalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.$schema).toBe(VEGASCHEMA);
+      expect(spec.data.values).toBe(mockData);
+      expect(spec.layer[0].mark.type).toBe('bar');
+      expect(spec.layer[0].encoding.x.field).toBe('count');
+      expect(spec.layer[0].encoding.y.field).toBe('count');
+    });
+
+    test('applies bucket options correctly', () => {
+      const stylesWithBucket = {
+        ...defaultBarChartStyles,
+        bucket: {
+          bucketSize: 50,
+          aggregationType: AggregationType.SUM,
+        },
+      };
+
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockNumericalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn],
+        stylesWithBucket,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
+      expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
+    });
+
+    test('handles custom title options', () => {
+      const customTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: 'Custom Histogram',
+        },
+      };
+
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockNumericalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.title).toBe('Custom Histogram');
     });
   });
 });

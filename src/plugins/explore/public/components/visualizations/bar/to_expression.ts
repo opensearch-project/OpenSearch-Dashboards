@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AxisColumnMappings, AxisRole, VEGASCHEMA, VisColumn, VisFieldType } from '../types';
+import {
+  AxisColumnMappings,
+  AxisRole,
+  VEGASCHEMA,
+  VisColumn,
+  VisFieldType,
+  TimeUnit,
+} from '../types';
 import { BarChartStyleControls } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold/utils';
 import {
@@ -12,6 +19,13 @@ import {
   getSchemaByAxis,
   getTooltipFormat,
 } from '../utils/utils';
+
+import {
+  inferTimeIntervals,
+  buildEncoding,
+  buildTooltipEncoding,
+  adjustBucketBins,
+} from './bar_chart_utils';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: Partial<BarChartStyleControls>) => {
@@ -139,6 +153,13 @@ export const createTimeBarChart = (
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
+  const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
+
+  const interval =
+    styles.bucket?.bucketTimeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeAxis?.column)
+      : styles.bucket?.bucketTimeUnit;
+
   const layers: any[] = [];
 
   // Configure bar mark
@@ -158,32 +179,18 @@ export const createTimeBarChart = (
     mark: barMark,
     encoding: {
       x: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        ...buildEncoding(xAxis, xAxisStyle, interval, styles.bucket?.aggregationType),
       },
       y: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        ...buildEncoding(yAxis, yAxisStyle, interval, styles.bucket?.aggregationType),
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
-            field: xAxis?.column,
-            type: getSchemaByAxis(xAxis),
-            title: xAxisStyle?.title?.text || xAxis?.name,
-            ...(getSchemaByAxis(xAxis) === 'temporal' && {
-              format: getTooltipFormat(transformedData, xAxis?.column),
-            }),
+            ...buildTooltipEncoding(xAxis, xAxisStyle, interval, styles.bucket?.aggregationType),
           },
           {
-            field: yAxis?.column,
-            type: getSchemaByAxis(yAxis),
-            title: yAxisStyle?.title?.text || yAxis?.name,
-            ...(getSchemaByAxis(yAxis) === 'temporal' && {
-              format: getTooltipFormat(transformedData, yAxis?.column),
-            }),
+            ...buildTooltipEncoding(yAxis, yAxisStyle, interval, styles.bucket?.aggregationType),
           },
         ],
       }),
@@ -213,12 +220,6 @@ export const createTimeBarChart = (
       : undefined,
     data: { values: transformedData },
     layer: layers,
-    // Add legend configuration if needed, or explicitly set to null if disabled
-    legend: styles.addLegend
-      ? {
-          orient: styles.legendPosition?.toLowerCase() || 'right',
-        }
-      : null,
   };
 };
 
@@ -557,4 +558,172 @@ export const createStackedBarSpec = (
   }
 
   return spec;
+};
+
+export const createNumericalHistogramBarChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  styles: Partial<BarChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
+): any => {
+  // Check if we have the required columns
+  if (numericalColumns.length < 2) {
+    throw new Error('Histogram bar chart requires at least two numerical column');
+  }
+
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const layers: any[] = [];
+
+  // Configure bar mark
+  const barMark: any = {
+    type: 'bar',
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
+  };
+
+  configureBarSizeAndSpacing(barMark, styles);
+
+  // Add border if enabled
+  if (styles.showBarBorder) {
+    barMark.stroke = styles.barBorderColor || '#000000';
+    barMark.strokeWidth = styles.barBorderWidth || 1;
+  }
+
+  const mainLayer = {
+    mark: barMark,
+    encoding: {
+      x: {
+        field: xAxis?.column,
+        type: getSchemaByAxis(xAxis),
+        bin: adjustBucketBins(styles.bucket, transformedData, xAxis?.column),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
+      },
+      y: {
+        field: yAxis?.column,
+        aggregate: styles.bucket?.aggregationType,
+        type: getSchemaByAxis(yAxis),
+        axis: applyAxisStyling(yAxis, yAxisStyle),
+      },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            bin: adjustBucketBins(styles.bucket, transformedData, xAxis?.column),
+            title: xAxisStyle?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            aggregate: styles.bucket?.aggregationType,
+            title: yAxisStyle?.title?.text || `${yAxis?.name}(${styles.bucket?.aggregationType})`,
+          },
+        ],
+      }),
+    },
+  };
+
+  layers.push(mainLayer);
+
+  const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    barEncodingDefault
+  );
+  if (thresholdLayer) {
+    layers.push(...thresholdLayer.layer);
+  }
+
+  return {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name}`
+      : undefined,
+    data: { values: transformedData },
+    layer: layers,
+  };
+};
+
+export const createSingleBarChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  styles: Partial<BarChartStyleControls>,
+  axisColumnMappings?: AxisColumnMappings
+): any => {
+  // Check if we have the required columns
+  if (numericalColumns.length < 1) {
+    throw new Error('Histogram bar chart requires at least one numerical column');
+  }
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const layers: any[] = [];
+
+  // Configure bar mark
+  const barMark: any = {
+    type: 'bar',
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
+  };
+
+  configureBarSizeAndSpacing(barMark, styles);
+
+  // Add border if enabled
+  if (styles.showBarBorder) {
+    barMark.stroke = styles.barBorderColor || '#000000';
+    barMark.strokeWidth = styles.barBorderWidth || 1;
+  }
+
+  const mainLayer = {
+    mark: barMark,
+    encoding: {
+      x: {
+        field: xAxis?.column,
+        type: getSchemaByAxis(xAxis),
+        bin: adjustBucketBins(styles.bucket, transformedData, xAxis?.column),
+        axis: applyAxisStyling(xAxis, xAxisStyle),
+      },
+      y: {
+        aggregate: styles.bucket?.aggregationType,
+        type: 'quantitative',
+        axis: applyAxisStyling(yAxis, yAxisStyle),
+      },
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          {
+            field: xAxis?.column,
+            type: getSchemaByAxis(xAxis),
+            bin: adjustBucketBins(styles.bucket, transformedData, xAxis?.column),
+            title: xAxisStyle?.title?.text || xAxis?.name,
+          },
+          {
+            type: 'quantitative',
+            aggregate: styles.bucket?.aggregationType,
+            title: yAxisStyle?.title?.text || yAxis?.name,
+          },
+        ],
+      }),
+    },
+  };
+
+  layers.push(mainLayer);
+
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(
+    styles.thresholdLines,
+    styles.tooltipOptions?.mode,
+    'y'
+  );
+  if (thresholdLayer) {
+    layers.push(...thresholdLayer.layer);
+  }
+
+  return {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `Record counts of ${xAxis?.name}`
+      : undefined,
+    data: { values: transformedData },
+    layer: layers,
+  };
 };
