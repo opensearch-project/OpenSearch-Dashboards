@@ -310,4 +310,26 @@ describe('AllAxesOptions', () => {
       );
     });
   });
+
+  it('calls stopPropagation on mouseUp for alignment select', () => {
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
+
+    const alignmentSelect = screen.getAllByRole('combobox')[0];
+    expect(alignmentSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    alignmentSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
 });

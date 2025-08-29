@@ -1,0 +1,2 @@
+fix:
+- Fix EuiSelect Issue in Firefox Browser ([#10340](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10340))
