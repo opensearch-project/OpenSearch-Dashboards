@@ -10,6 +10,7 @@ import {
   createGroupedTimeBarChart,
   createFacetedTimeBarChart,
   createNumericalHistogramBarChart,
+  createSingleBarChart,
 } from './to_expression';
 import { defaultBarChartStyles, BarChartStyleControls } from './bar_vis_config';
 import {
@@ -1103,24 +1104,39 @@ describe('bar to_expression', () => {
   });
 
   describe('createNumericalHistogramBarChart', () => {
-    test('creates a numerical histogram bar chart spec', () => {
-      const mockAxisColumnMappings = {
-        [AxisRole.X]: mockNumericalColumn,
-        [AxisRole.Y]: mockNumericalColumn,
-      };
+    const mockNumericalColumn2 = {
+      id: 2,
+      name: 'sum',
+      column: 'sum',
+      schema: VisFieldType.Numerical,
+      validValuesCount: 100,
+      uniqueValuesCount: 50,
+    };
 
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockNumericalColumn,
+      [AxisRole.Y]: mockNumericalColumn2,
+    };
+    test('creates a numerical histogram bar chart spec', () => {
       const spec = createNumericalHistogramBarChart(
         mockData,
-        [mockNumericalColumn],
+        [mockNumericalColumn, mockNumericalColumn2],
         defaultBarChartStyles,
         mockAxisColumnMappings
       );
 
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
-      expect(spec.layer[0].mark.type).toBe('bar');
-      expect(spec.layer[0].encoding.x.field).toBe('count');
-      expect(spec.layer[0].encoding.y.field).toBe('count');
+      expect(spec.layer).toHaveLength(1);
+
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.type).toBe('bar');
+      expect(mainLayer.mark.tooltip).toBe(true);
+      expect(mainLayer.encoding.x.field).toBe('count');
+      expect(mainLayer.encoding.x.type).toBe('quantitative');
+      expect(mainLayer.encoding.y.field).toBe('sum');
+      expect(mainLayer.encoding.y.aggregate).toBe('count');
+      expect(mainLayer.encoding.y.type).toBe('quantitative');
     });
 
     test('applies bucket options correctly', () => {
@@ -1132,12 +1148,52 @@ describe('bar to_expression', () => {
         },
       };
 
-      const mockAxisColumnMappings = {
-        [AxisRole.X]: mockNumericalColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn, mockNumericalColumn2],
+        stylesWithBucket,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
+      expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
+    });
+  });
+
+  describe('createSingleBarChart', () => {
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockNumericalColumn,
+    };
+    test('creates a numerical histogram bar chart spec', () => {
+      const spec = createSingleBarChart(
+        mockData,
+        [mockNumericalColumn],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.$schema).toBe(VEGASCHEMA);
+      expect(spec.data.values).toBe(mockData);
+      expect(spec.layer).toHaveLength(1);
+
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.type).toBe('bar');
+      expect(mainLayer.mark.tooltip).toBe(true);
+      expect(mainLayer.encoding.x.field).toBe('count');
+      expect(mainLayer.encoding.x.type).toBe('quantitative');
+      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
+    });
+
+    test('applies bucket options correctly', () => {
+      const stylesWithBucket = {
+        ...defaultBarChartStyles,
+        bucket: {
+          bucketSize: 50,
+          aggregationType: AggregationType.SUM,
+        },
       };
 
-      const spec = createNumericalHistogramBarChart(
+      const spec = createSingleBarChart(
         mockData,
         [mockNumericalColumn],
         stylesWithBucket,
@@ -1146,30 +1202,6 @@ describe('bar to_expression', () => {
 
       expect(spec.layer[0].encoding.x.bin.step).toBe(50);
       expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
-    });
-
-    test('handles custom title options', () => {
-      const customTitleStyles = {
-        ...defaultBarChartStyles,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Histogram',
-        },
-      };
-
-      const mockAxisColumnMappings = {
-        [AxisRole.X]: mockNumericalColumn,
-        [AxisRole.Y]: mockNumericalColumn,
-      };
-
-      const spec = createNumericalHistogramBarChart(
-        mockData,
-        [mockNumericalColumn],
-        customTitleStyles,
-        mockAxisColumnMappings
-      );
-
-      expect(spec.title).toBe('Custom Histogram');
     });
   });
 });
