@@ -188,6 +188,7 @@
     ]
   },
   "dependencies": {
+    "@ag-ui/client": "^0.0.36",
     "@aws-crypto/client-node": "^4.2.0",
     "@aws-crypto/sha256-js": "^5.2.0",
     "@aws-sdk/abort-controller": "^3.374.0",

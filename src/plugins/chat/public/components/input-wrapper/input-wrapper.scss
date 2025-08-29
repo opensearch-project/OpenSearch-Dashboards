@@ -1,0 +1,17 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.chatInputWrapper {
+  background-color: #fbfcfd; // TODO: Make this use a variable
+  box-shadow: inset 0 0 0 1px $ouiFormBorderColor;
+  padding: $ouiSizeS $ouiSizeM;
+  min-height: 75px;
+  margin: 0 auto;
+  width: 95%;
+
+  &__controls {
+    display: flex;
+    gap: 3px;
+  }
+}
