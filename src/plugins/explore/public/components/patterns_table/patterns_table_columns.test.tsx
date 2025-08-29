@@ -13,7 +13,7 @@ import { PatternItem } from './patterns_table';
 
 type ColumnWithRender<T> = EuiBasicTableColumn<T> & {
   field?: string;
-  render?: (val: any, item?: T) => React.ReactNode;
+  render?: (val: any, item?: T | undefined) => React.ReactNode;
 };
 
 jest.mock('@osd/i18n', () => ({
@@ -26,28 +26,56 @@ jest.mock('dompurify', () => ({
   sanitize: jest.fn().mockImplementation((content) => content),
 }));
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    EuiButtonIcon: jest.fn().mockImplementation(({ iconType, onClick, ...rest }) => {
+      return (
+        <button
+          data-test-subj="euiButtonIcon"
+          data-icon-type={iconType}
+          onClick={onClick}
+          {...rest}
+        />
+      );
+    }),
+  };
+});
+
+const mockOpenPatternsTableFlyout = jest.fn();
+
 describe('patternsTableColumns', () => {
+  let columns: Array<ColumnWithRender<PatternItem>>;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    columns = patternsTableColumns(mockOpenPatternsTableFlyout) as Array<
+      ColumnWithRender<PatternItem>
+    >;
   });
 
-  it('should have the correct structure with three columns', () => {
-    expect(patternsTableColumns).toHaveLength(3);
+  it('should have the correct structure with four columns', () => {
+    expect(columns).toHaveLength(4);
 
-    const columns = patternsTableColumns as Array<ColumnWithRender<PatternItem>>;
-    expect(columns[0].field).toBe('ratio');
-    expect(columns[1].field).toBe('sample');
-    expect(columns[2].field).toBe('count');
+    expect(columns[0].field).toBe('flyout');
+    expect(columns[1].field).toBe('ratio');
+    expect(columns[2].field).toBe('sample');
+    expect(columns[3].field).toBe('count');
   });
 
   it('should use correct column headers', () => {
-    expect(patternsTableColumns[0].name).toBe('Event ratio');
-    expect(patternsTableColumns[1].name).toBe('Pattern Sample Log');
-    expect(patternsTableColumns[2].name).toBe('Event count');
+    expect(columns[1].name).toBe('Event ratio');
+    expect(columns[2].name).toBe('Pattern');
+    expect(columns[3].name).toBe('Event count');
   });
 
   describe('ratio column', () => {
-    const ratioColumn = patternsTableColumns[0] as ColumnWithRender<PatternItem>;
+    let ratioColumn: ColumnWithRender<PatternItem>;
+
+    beforeEach(() => {
+      ratioColumn = columns[1];
+    });
 
     it('should format valid ratio values as percentages', () => {
       expect(ratioColumn.render?.(0.35)).toBe('35.00%');
@@ -64,7 +92,11 @@ describe('patternsTableColumns', () => {
   });
 
   describe('sample column', () => {
-    const sampleColumn = patternsTableColumns[1] as ColumnWithRender<PatternItem>;
+    let sampleColumn: ColumnWithRender<PatternItem>;
+
+    beforeEach(() => {
+      sampleColumn = columns[2];
+    });
 
     it('should sanitize and render sample values', () => {
       const sampleValue = 'INFO [main] Starting application';
@@ -96,7 +128,11 @@ describe('patternsTableColumns', () => {
   });
 
   describe('count column', () => {
-    const countColumn = patternsTableColumns[2] as ColumnWithRender<PatternItem>;
+    let countColumn: ColumnWithRender<PatternItem>;
+
+    beforeEach(() => {
+      countColumn = columns[3];
+    });
 
     it('should render valid count values directly', () => {
       expect(countColumn.render?.(350)).toBe(350);
@@ -111,19 +147,56 @@ describe('patternsTableColumns', () => {
     });
   });
 
+  describe('flyout column', () => {
+    let flyoutColumn: ColumnWithRender<PatternItem>;
+
+    beforeEach(() => {
+      flyoutColumn = columns[0];
+    });
+
+    it('should have the correct width', () => {
+      expect(flyoutColumn.width).toBe('40px');
+    });
+
+    it('should render an EuiButtonIcon with inspect icon', () => {
+      const mockRecord = mockPatternItems[0];
+      const result = flyoutColumn.render?.(mockRecord);
+
+      const { container } = render(<>{result}</>);
+      const buttonElement = container.querySelector('[data-test-subj="euiButtonIcon"]');
+
+      expect(buttonElement).toBeInTheDocument();
+      expect(buttonElement?.getAttribute('data-icon-type')).toBe('inspect');
+    });
+
+    it('should call openPatternsTableFlyout with the record when clicked', () => {
+      const mockRecord = mockPatternItems[0];
+      const result = flyoutColumn.render?.(mockRecord);
+
+      const { container } = render(<>{result}</>);
+      const buttonElement = container.querySelector(
+        '[data-test-subj="euiButtonIcon"]'
+      ) as HTMLButtonElement;
+
+      buttonElement?.click();
+      expect(mockOpenPatternsTableFlyout).toHaveBeenCalledTimes(1);
+      expect(mockOpenPatternsTableFlyout).toHaveBeenCalledWith(mockRecord);
+    });
+  });
+
   it('should render all columns with mock data correctly', () => {
     const mockItem = mockPatternItems[0];
 
-    const ratioColumn = patternsTableColumns[0] as ColumnWithRender<PatternItem>;
+    const ratioColumn = columns[1];
     const ratioResult = ratioColumn.render?.(mockItem.ratio);
     expect(ratioResult).toBe('35.00%');
 
-    const sampleColumn = patternsTableColumns[1] as ColumnWithRender<PatternItem>;
+    const sampleColumn = columns[2];
     const sampleResult = sampleColumn.render?.(mockItem.sample);
     const { container: sampleContainer } = render(<>{sampleResult}</>);
     expect(sampleContainer.textContent).toBe(mockItem.sample);
 
-    const countColumn = patternsTableColumns[2] as ColumnWithRender<PatternItem>;
+    const countColumn = columns[3];
     const countResult = countColumn.render?.(mockItem.count);
     expect(countResult).toBe(mockItem.count);
   });
