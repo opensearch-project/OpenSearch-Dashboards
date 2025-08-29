@@ -428,6 +428,26 @@ export class DiscoverPlugin
       return { core, plugins };
     };
 
+    // Register discover navigation shortcuts
+    if (core.keyboardShortcut) {
+      core.keyboardShortcut.register({
+        id: 'nav.discover',
+        name: 'Go to Discover',
+        pluginId: 'discover',
+        category: 'navigation',
+        keys: 'g d',
+        execute: () => {
+          // Only enable shortcut when workspace is selected
+          const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+          const isInitialized = core.workspaces.initialized$.getValue();
+          if (!isInitialized || !currentWorkspace) {
+            return;
+          }
+          core.application.navigateToApp('discover/data-explore');
+        },
+      });
+    }
+
     this.initializeServices();
 
     return {

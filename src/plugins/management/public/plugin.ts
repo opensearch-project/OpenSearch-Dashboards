@@ -56,6 +56,7 @@ import {
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SettingsIcon } from './components/settings_icon';
+import { KeyboardShortcutIcon } from './components/keyboard_shortcut_icon';
 import {
   fulfillRegistrationLinksToChromeNavLinks,
   LinkItemType,
@@ -337,6 +338,11 @@ export class ManagementPlugin
             core,
           })
         ),
+      });
+
+      core.chrome.navControls.registerLeftBottom({
+        order: 5,
+        mount: toMountPoint(React.createElement(KeyboardShortcutIcon, { core })),
       });
     }
 
