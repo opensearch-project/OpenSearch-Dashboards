@@ -3,35 +3,44 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_WITH_TIME_1 } from '../../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { DEFAULT_OPTIONS } from '../../../../../../utils/commands.core';
 
-const workspaceName = getRandomizedWorkspaceName();
+describe('No Index Pattern Check', () => {
+  const testResources = {};
 
-const noIndexPatternTestSuite = () => {
-  describe('No Index Pattern Check Test', () => {
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-    });
+  before(() => {
+    const {
+      dataSource: { endpoint },
+      fixture: { dataPath },
+      index,
+    } = DEFAULT_OPTIONS;
+    cy.core.setupTestData(endpoint, dataPath, index).then(() => {
+      cy.core.createDataSource().then((dataSourceId) => {
+        testResources.dataSourceId = dataSourceId;
 
-    after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
-    });
-
-    describe('empty state', () => {
-      it('no index pattern', function () {
-        // Go to the Discover page
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName: workspaceName,
-          page: 'explore/logs',
-          isEnhancement: true,
+        // Create workspace and data source but intentionally don't create index pattern
+        cy.core.createWorkspace().then((workspaceId) => {
+          cy.core.setUiSettings(workspaceId, {
+            defaultWorkspace: workspaceId,
+            defaultDataSource: dataSourceId,
+          });
+          testResources.workspaceId = workspaceId;
+          cy.core.associateDataSourcesToWorkspace(workspaceId, [dataSourceId]);
         });
-        cy.osd.waitForLoader(true);
-        cy.getElementByTestId('discoverNoIndexPatterns').should('be.visible');
       });
     });
   });
-};
 
-prepareTestSuite('a_check', noIndexPatternTestSuite);
+  after(() => {
+    cy.core.cleanupTestResources({
+      workspaceId: testResources.workspaceId,
+      dataSourceId: testResources.dataSourceId,
+    });
+  });
+
+  it('should show no index pattern message', () => {
+    cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+    cy.osd.waitForLoader(true);
+    cy.getElementByTestId('discoverNoIndexPatterns').should('be.visible');
+  });
+});

@@ -232,3 +232,42 @@ export const formatValue = (value) => {
 export const setHistogramIntervalIfRelevant = (language, interval) => {
   cy.getElementByTestId('discoverIntervalSelect').select(interval);
 };
+
+// =======================================
+// Monaco Editor Parsing Utilities
+// =======================================
+
+/**
+ * Verifies the query string in Monaco editor
+ * The Monaco editor renders spaces using various Unicode whitespace characters and middle dot characters
+ * This function handles all possible whitespace representations that might appear in the editor
+ * @param {string} queryString - The query string to verify
+ */
+export const verifyMonacoEditorContent = (queryString) => {
+  if (!queryString) return;
+  // Check the editor content against our pattern - try multiple approaches
+  cy.getElementByTestId('exploreQueryPanelEditor')
+    .should('be.visible')
+    .then(($editor) => {
+      // Try different selectors to get the text content
+      let text = '';
+
+      const viewLine = $editor.find('.view-line').first();
+      if (viewLine.length > 0) {
+        text = viewLine.text();
+      }
+
+      // Sanitize the text by normalizing whitespace characters
+      const sanitizeText = (str) => {
+        return str
+          .replace(/[\s\u00A0\u00B7\u2022\u2023\u25E6\u2043\u2219\u22C5\u30FB\u00B7.·]+/g, ' ')
+          .trim();
+      };
+
+      const sanitizedText = sanitizeText(text);
+      const sanitizedQuery = sanitizeText(queryString);
+
+      expect(text).to.not.be.empty;
+      expect(sanitizedText).to.include(sanitizedQuery);
+    });
+};
