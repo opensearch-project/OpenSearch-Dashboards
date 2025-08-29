@@ -319,7 +319,7 @@ export const Configurator = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
+        <EuiButtonEmpty onClick={onCancel} data-test-subj="advancedSelectorCancelButton">
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.cancel"
             defaultMessage="Cancel"

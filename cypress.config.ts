@@ -5,7 +5,6 @@
 
 import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
-// TODO: import { paste } from 'copy-paste';
 
 module.exports = defineConfig({
   experimentalMemoryManagement: true,
@@ -60,6 +59,7 @@ module.exports = defineConfig({
     specPattern: 'cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
     testIsolation: false,
     setupNodeEvents,
+    chromeWebSecurity: false,
   },
 });
 
