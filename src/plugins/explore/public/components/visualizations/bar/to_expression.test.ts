@@ -295,10 +295,11 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
+      const encoding = spec.layer[0].encoding;
       // Check encoding
-      expect(spec.encoding.x.field).toBe('category');
-      expect(spec.encoding.y.field).toBe('count');
-      expect(spec.encoding.color.field).toBe('category2');
+      expect(encoding.x.field).toBe('category');
+      expect(encoding.y.field).toBe('count');
+      expect(encoding.color.field).toBe('category2');
     });
 
     test('handles different title display options', () => {
@@ -659,12 +660,13 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
+      const encoding = spec.layer[0].encoding;
       // Check encoding
-      expect(spec.encoding.x.field).toBe('date');
-      expect(spec.encoding.x.type).toBe('temporal');
-      expect(spec.encoding.y.field).toBe('count');
-      expect(spec.encoding.y.type).toBe('quantitative');
-      expect(spec.encoding.color.field).toBe('category');
+      expect(encoding.x.field).toBe('date');
+      expect(encoding.x.type).toBe('temporal');
+      expect(encoding.y.field).toBe('count');
+      expect(encoding.y.type).toBe('quantitative');
+      expect(encoding.color.field).toBe('category');
     });
 
     test('handles different title display options', () => {
@@ -758,11 +760,12 @@ describe('bar to_expression', () => {
         mockAxisColumnMappings
       );
 
+      const mark = spec.layer[0].mark;
       // Check bar styling
-      expect(spec.mark.size).toBe(10); // 0.5 * 20
-      expect(spec.mark.binSpacing).toBe(2); // 0.2 * 10
-      expect(spec.mark.stroke).toBe('#FF0000');
-      expect(spec.mark.strokeWidth).toBe(2);
+      expect(mark.size).toBe(10); // 0.5 * 20
+      expect(mark.binSpacing).toBe(2); // 0.2 * 10
+      expect(mark.stroke).toBe('#FF0000');
+      expect(mark.strokeWidth).toBe(2);
     });
 
     test('adds threshold line when enabled', () => {
