@@ -78,7 +78,6 @@ export class TooltipHandler {
     let el = document.getElementById(tooltipId);
     if (!el) {
       el = document.createElement('div');
-      // const el = document.createElement('div');
       el.setAttribute('id', tooltipId);
       [
         'vgaVis__tooltip',
