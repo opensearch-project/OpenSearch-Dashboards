@@ -211,8 +211,8 @@ jest.mock('../style_panel/title/title', () => ({
 }));
 
 jest.mock('./bucket_options.tsx', () => ({
-  BucketVisOptions: jest.fn(({ styles, bucketType, onChange }) => (
-    <div data-test-subj="mockBucketVisOptions">
+  BucketOptionsPanel: jest.fn(({ styles, bucketType, onChange }) => (
+    <div data-test-subj="mockBucketOptionsPanel">
       <span data-test-subj="bucketType">{bucketType}</span>
       {bucketType === 'time' && (
         <button
@@ -287,7 +287,7 @@ describe('BarVisStyleControls', () => {
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockBarExclusiveVisOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('mockBucketVisOptions')).toBeInTheDocument();
+    expect(screen.getByTestId('mockBucketOptionsPanel')).toBeInTheDocument();
   });
 
   test('renders legend panel when COLOR mapping is present', () => {
@@ -516,7 +516,7 @@ describe('BarVisStyleControls', () => {
       </Provider>
     );
 
-    expect(screen.getByTestId('mockBucketVisOptions')).toBeInTheDocument();
+    expect(screen.getByTestId('mockBucketOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('bucketType')).toHaveTextContent('num');
     expect(screen.getByTestId('mockUpdateBucketSize')).toBeInTheDocument();
     expect(screen.getByTestId('mockUpdateBucketCount')).toBeInTheDocument();

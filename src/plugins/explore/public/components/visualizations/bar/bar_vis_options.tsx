@@ -16,7 +16,7 @@ import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
-import { BucketVisOptions } from './bucket_options';
+import { BucketOptionsPanel } from './bucket_options';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
 
@@ -71,7 +71,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
       {hasMappingSelected && (
         <>
           <EuiFlexItem>
-            <BucketVisOptions
+            <BucketOptionsPanel
               styles={styleOptions.bucket}
               bucketType={bucketType}
               onChange={(bucket) => updateStyleOption('bucket', bucket)}

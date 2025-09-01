@@ -5,20 +5,20 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSelect, EuiFieldNumber } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BarChartStyleControls } from './bar_vis_config';
 import { AggregationType, TimeUnit, BucketOptions } from '../types';
-import { getAggregationnType, getTimeUnits } from '../utils/collections';
+import { getAggregationType, getTimeUnits } from '../utils/collections';
 import { useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
-interface BucketVisOptionsProps {
+interface BucketOptionsPanelProps {
   styles: BarChartStyleControls['bucket'];
   bucketType: 'time' | 'num' | 'single';
   onChange: (styles: BarChartStyleControls['bucket']) => void;
 }
 
-export const BucketVisOptions = ({ styles, onChange, bucketType }: BucketVisOptionsProps) => {
+export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptionsPanelProps) => {
   const updateBucketOption = <K extends keyof BucketOptions>(key: K, value: BucketOptions[K]) => {
     onChange({
       ...styles,
@@ -36,8 +36,8 @@ export const BucketVisOptions = ({ styles, onChange, bucketType }: BucketVisOpti
     (val) => updateBucketOption('bucketCount', val)
   );
 
-  const labelType = getAggregationnType();
-  const timeUnits = getTimeUnits();
+  const labelType = useMemo(() => getAggregationType(), []);
+  const timeUnits = useMemo(() => getTimeUnits(), []);
 
   return (
     <StyleAccordion
@@ -68,7 +68,7 @@ export const BucketVisOptions = ({ styles, onChange, bucketType }: BucketVisOpti
       {bucketType === 'time' && (
         <EuiFormRow
           label={i18n.translate('explore.stylePanel.bar.bucket.timeUnit', {
-            defaultMessage: 'Time interval selection',
+            defaultMessage: 'Interval',
           })}
         >
           <EuiSelect

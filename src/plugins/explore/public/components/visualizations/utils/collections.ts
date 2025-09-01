@@ -102,7 +102,7 @@ export const getScaleType = () => [
   },
 ];
 
-export const getAggregationnType = () => [
+export const getAggregationType = () => [
   {
     text: i18n.translate('explore.vis.aggregationn.type.sum', {
       defaultMessage: 'Sum',
