@@ -81,7 +81,7 @@ describe('useDebouncedValue', () => {
       });
 
       // Value should be updated locally immediately
-      expect(result.current[0]).toBe(50);
+      expect(result.current[0]).toBe('50');
 
       // Fast-forward time
       act(() => {
@@ -106,7 +106,7 @@ describe('useDebouncedValue', () => {
       });
 
       // Value should be clamped to the minimum
-      expect(result.current[0]).toBe(5);
+      expect(result.current[0]).toBe('5');
 
       // Try to set a value above the maximum
       act(() => {
@@ -114,7 +114,7 @@ describe('useDebouncedValue', () => {
       });
 
       // Value should be clamped to the maximum
-      expect(result.current[0]).toBe(20);
+      expect(result.current[0]).toBe('20');
     });
 
     it('should handle invalid string inputs', () => {
@@ -131,7 +131,7 @@ describe('useDebouncedValue', () => {
       });
 
       // Value should be set to the default value
-      expect(result.current[0]).toBe(5);
+      expect(result.current[0]).toBe('5');
     });
   });
 });

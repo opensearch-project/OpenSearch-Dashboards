@@ -34,7 +34,8 @@ export const DebouncedTruncateGaugeBaseField: React.FC<{
   value?: number | undefined;
   onChange: (value: number | undefined) => void;
   label: string;
-}> = ({ value, onChange, label }) => {
+  testId: string;
+}> = ({ value, onChange, label, testId }) => {
   const [localValue, handleChange] = useDebouncedValue(value, onChange);
 
   return (
@@ -45,6 +46,7 @@ export const DebouncedTruncateGaugeBaseField: React.FC<{
         value={localValue}
         onChange={(e) => handleChange(e.target.value === '' ? undefined : Number(e.target.value))}
         placeholder="auto"
+        data-test-subj={testId}
       />
     </EuiFormRow>
   );

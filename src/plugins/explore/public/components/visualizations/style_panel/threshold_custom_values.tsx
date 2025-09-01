@@ -39,14 +39,14 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }
   };
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="center"
+      gutterSize="s"
+      data-test-subj={`exploreVisThreshold-${index}`}
+    >
       <EuiFlexItem>
-        <EuiColorPicker
-          color={color}
-          onChange={setDebouncedColor}
-          data-test-subj="exploreVisThresholdColor"
-          compressed
-        />
+        <EuiColorPicker color={color} onChange={setDebouncedColor} compressed />
       </EuiFlexItem>
 
       <EuiFlexItem grow={true}>
@@ -56,6 +56,7 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }
           value={thresholdValue}
           onChange={(e) => setThresholdValue((e.target as HTMLInputElement).value)}
           placeholder="Value"
+          data-test-subj={`exploreVisThresholdValue-${index}`}
         />
       </EuiFlexItem>
 
@@ -66,20 +67,21 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }
           aria-label="Delete"
           color="danger"
           onClick={handleDeleteRange}
+          data-test-subj={`exploreVisThresholdDeleteButton-${index}`}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-export interface GaugeCustomRangeProps {
+export interface ThresholdCustomValuesProps {
   thresholdValues?: ThresholdRangeValue[];
   onThresholdValuesChange: (ranges: ThresholdRangeValue[]) => void;
   baseColor: string;
   onBaseColorChange: (color: string) => void;
 }
 
-export const GaugeCustomRange: React.FC<GaugeCustomRangeProps> = ({
+export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   thresholdValues,
   onThresholdValuesChange,
   baseColor,
@@ -132,14 +134,14 @@ export const GaugeCustomRange: React.FC<GaugeCustomRangeProps> = ({
       </EuiButton>
       <EuiSpacer size="s" />
       {/* dummy placeholder for base range */}
-      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="center"
+        gutterSize="s"
+        data-test-subj="exploreVisThresholdBaseColor"
+      >
         <EuiFlexItem>
-          <EuiColorPicker
-            color={localBaseColor}
-            onChange={setLocalBaseColor}
-            data-test-subj="exploreVisThresholdColor"
-            compressed
-          />
+          <EuiColorPicker color={localBaseColor} onChange={setLocalBaseColor} compressed />
         </EuiFlexItem>
 
         <EuiFlexItem grow={true}>

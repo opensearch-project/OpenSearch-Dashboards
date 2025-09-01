@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { GaugeChartStyleControls } from './gauge_vis_config';
 import { ThresholdRangeValue, AxisRole } from '../types';
-import { GaugeCustomRange } from '../style_panel/gauge_custom_range';
+import { ThresholdCustomValues } from '../style_panel/threshold_custom_values';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
@@ -104,6 +104,7 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
                   })}
                   value={styleOptions.min}
                   onChange={(value) => updateStyleOption('min', value)}
+                  testId={'gaugeMinBase'}
                 />
 
                 <DebouncedTruncateGaugeBaseField
@@ -112,9 +113,10 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
                   })}
                   value={styleOptions.max}
                   onChange={(value) => updateStyleOption('max', value)}
+                  testId={'gaugeMaxBase'}
                 />
 
-                <GaugeCustomRange
+                <ThresholdCustomValues
                   thresholdValues={styleOptions.thresholdValues}
                   onThresholdValuesChange={(ranges: ThresholdRangeValue[]) => {
                     updateStyleOption('thresholdValues', ranges);
