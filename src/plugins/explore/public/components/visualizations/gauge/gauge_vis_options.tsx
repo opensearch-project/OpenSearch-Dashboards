@@ -64,14 +64,14 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
         <>
           <EuiFlexItem>
             <StyleAccordion
-              id="metricValueOptions"
-              accordionLabel={i18n.translate('explore.stylePanel.tabs.metricValueOptions', {
+              id="gaugeValueOptions"
+              accordionLabel={i18n.translate('explore.stylePanel.gaugeValueOptions', {
                 defaultMessage: 'Value options',
               })}
               initialIsOpen={false}
             >
               <EuiFormRow
-                label={i18n.translate('explore.vis.metric.calculation', {
+                label={i18n.translate('explore.vis.gauge.calculation', {
                   defaultMessage: 'Calculation',
                 })}
               >
@@ -84,8 +84,8 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StyleAccordion
-              id="metricSection"
-              accordionLabel={i18n.translate('explore.stylePanel.tabs.gauge', {
+              id="gaugeSection"
+              accordionLabel={i18n.translate('explore.stylePanel.gauge', {
                 defaultMessage: 'Gauge',
               })}
               initialIsOpen={true}

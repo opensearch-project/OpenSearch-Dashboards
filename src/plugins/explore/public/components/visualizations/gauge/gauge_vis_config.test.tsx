@@ -14,7 +14,7 @@ jest.mock('react', () => ({
 }));
 
 describe('createGaugeConfig', () => {
-  it('should create a metric visualization type configuration', () => {
+  it('should create a gauge visualization type configuration', () => {
     const config = createGaugeConfig();
 
     // Verify the basic structure
@@ -35,7 +35,7 @@ describe('createGaugeConfig', () => {
     expect(defaults.valueCalculation).toBe('last');
   });
 
-  it('should render the MetricVisStyleControls component with the provided props', () => {
+  it('should render the GaugeVisStyleControls component with the provided props', () => {
     const config = createGaugeConfig();
     const renderFunction = config.ui.style.render;
     // Mock props

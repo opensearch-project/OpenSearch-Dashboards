@@ -75,7 +75,7 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }
 };
 
 export interface ThresholdCustomValuesProps {
-  thresholdValues?: ThresholdRangeValue[];
+  thresholdValues: ThresholdRangeValue[];
   onThresholdValuesChange: (ranges: ThresholdRangeValue[]) => void;
   baseColor: string;
   onBaseColorChange: (color: string) => void;
