@@ -122,6 +122,7 @@ export const createBarSpec = (
     legend: styles.addLegend
       ? {
           orient: styles.legendPosition?.toLowerCase() || 'right',
+          symbolType: styles.legendShape ?? 'circle',
         }
       : null,
   };
@@ -304,6 +305,7 @@ export const createGroupedTimeBarChart = (
           ? {
               title: categoryName,
               orient: styles.legendPosition?.toLowerCase() || 'right',
+              symbolType: styles.legendShape ?? 'circle',
             }
           : null,
       },
@@ -445,6 +447,7 @@ export const createFacetedTimeBarChart = (
                 ? {
                     title: category1Name,
                     orient: styles.legendPosition?.toLowerCase() || 'right',
+                    symbolType: styles.legendShape ?? 'circle',
                   }
                 : null,
             },
@@ -543,6 +546,7 @@ export const createStackedBarSpec = (
           ? {
               title: categoryName2,
               orient: styles.legendPosition?.toLowerCase() || 'bottom',
+              symbolType: styles.legendShape ?? 'circle',
             }
           : null,
       },

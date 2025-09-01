@@ -25,6 +25,7 @@ export interface BarChartStyleControls {
   // Basic controls
   addLegend: boolean;
   legendPosition: Positions;
+  legendShape?: 'circle' | 'square';
   tooltipOptions: TooltipOptions;
 
   // Bar specific controls
