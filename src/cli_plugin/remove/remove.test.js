@@ -32,7 +32,7 @@ import { join } from 'path';
 import { mkdir, writeFile } from 'fs/promises';
 
 import sinon from 'sinon';
-import glob from 'glob-all';
+import glob from 'glob';
 import del from 'del';
 
 import { Logger } from '../lib/logger';
