@@ -25,6 +25,24 @@ describe('GlobalSearchService', () => {
     expect(start.getAllSearchCommands()[0].type).toEqual('PAGES');
   });
 
+  it('unregisterSearchCommand', async () => {
+    const globalSearchService = new GlobalSearchService();
+    const setup = globalSearchService.setup();
+    const start = globalSearchService.start();
+
+    setup.registerSearchCommand({
+      id: 'test1',
+      type: 'PAGES',
+      run: async (query) => {
+        return [];
+      },
+    });
+
+    start.unregisterSearchCommand('test1');
+
+    expect(start.getAllSearchCommands()).toHaveLength(0);
+  });
+
   it('registerSearchCommand with duplicate id', async () => {
     const globalSearchService = new GlobalSearchService();
     const setup = globalSearchService.setup();

@@ -5,13 +5,14 @@
       // Allows for importing from `opensearch-dashboards` package for the exported types.
       "opensearch-dashboards": ["./opensearch_dashboards"],
       "opensearch-dashboards/public": ["src/core/public"],
+      "opensearch-dashboards/public/*": ["src/core/public/*"],
       "opensearch-dashboards/server": ["src/core/server"],
+      "opensearch-dashboards/server/*": ["src/core/server/*"],
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
-      "test_utils/*": [
-        "src/test_utils/public/*"
-      ],
+      "test_utils/*": ["src/test_utils/public/*"],
       "fixtures/*": ["src/fixtures/*"],
-      "@opensearch-project/opensearch": ["node_modules/@opensearch-project/opensearch/api/new"]
+      "@opensearch-project/opensearch": ["node_modules/@opensearch-project/opensearch/api/new"],
+      "@opensearch-project/opensearch/lib/*": ["node_modules/@opensearch-project/opensearch/lib/*"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -58,7 +59,6 @@
       "react",
       "flot",
       "@testing-library/jest-dom",
-      "resize-observer-polyfill"
     ]
   }
 }

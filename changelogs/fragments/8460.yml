@@ -1,2 +1,0 @@
-fix:
-- Replace segmented button with tabs for OpenSearch connections and Direct query connections ([#8460](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8460))

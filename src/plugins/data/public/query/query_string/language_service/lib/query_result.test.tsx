@@ -6,6 +6,7 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryResult } from './query_result';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -25,6 +26,17 @@ describe('Query Result', () => {
     };
     const component = shallowWithIntl(<QueryResult {...props} />);
     expect(component).toMatchSnapshot();
+  });
+
+  it('should not render if status is uninitialized', () => {
+    const props = {
+      queryStatus: {
+        status: ResultStatus.UNINITIALIZED,
+        startTime: Number.NEGATIVE_INFINITY,
+      },
+    };
+    const component = shallowWithIntl(<QueryResult {...props} />);
+    expect(component.isEmptyRender()).toBe(true);
   });
 
   it('shows ready status with complete message', () => {
@@ -82,8 +94,11 @@ describe('Query Result', () => {
         status: ResultStatus.ERROR,
         body: {
           error: {
-            reason: 'error reason',
-            details: 'error details',
+            message: {
+              reason: 'error reason',
+              details: 'error details',
+              status: 400,
+            },
           },
           statusCode: 400,
         },
@@ -105,5 +120,87 @@ describe('Query Result', () => {
     };
     const component = shallowWithIntl(<QueryResult {...props} />);
     expect(component).toEqual({});
+  });
+
+  it('should render error message correctly with normal search strategy', async () => {
+    const props = {
+      queryStatus: {
+        status: ResultStatus.ERROR,
+        body: {
+          error: {
+            error: 'error',
+            statusCode: 400,
+            message: {
+              error: {
+                reason: 'error reason',
+                details: 'error details',
+                type: 'error type',
+              },
+              status: 400,
+            },
+          },
+        },
+      },
+    };
+
+    render(<QueryResult {...props} />);
+
+    await fireEvent.click(screen.getByText('Error'));
+
+    await waitFor(() => {
+      expect(screen.getByText('error reason')).toBeInTheDocument();
+    });
+  });
+
+  it('should render error message correctly with async search strategy', async () => {
+    const props = {
+      queryStatus: {
+        status: ResultStatus.ERROR,
+        body: {
+          error: {
+            error: 'error',
+            statusCode: 400,
+            message: {
+              error: 'error message',
+              status: 400,
+            },
+          },
+        },
+      },
+    };
+
+    render(<QueryResult {...props} />);
+
+    await fireEvent.click(screen.getByText('Error'));
+
+    await waitFor(() => {
+      expect(screen.getByText('error message')).toBeInTheDocument();
+    });
+  });
+
+  it('should render error message with flexible error format', async () => {
+    const props = {
+      queryStatus: {
+        status: ResultStatus.ERROR,
+        body: {
+          error: {
+            error: 'error',
+            statusCode: 400,
+            message: {
+              reason: 'error message',
+              status: 400,
+            },
+          },
+        },
+      },
+    };
+
+    render(<QueryResult {...props} />);
+
+    await fireEvent.click(screen.getByText('Error'));
+
+    await waitFor(() => {
+      expect(screen.getByText('{"reason":"error message","status":400}')).toBeInTheDocument();
+    });
   });
 });

@@ -122,7 +122,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
           'core.ui_settings.params.dateFormat.scaled.intervalsLinkText',
         values: {
           intervalsLink:
-            '<a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('core.ui_settings.params.dateFormat.scaled.intervalsLinkText', {
               defaultMessage: 'ISO8601 intervals',
             }) +

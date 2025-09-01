@@ -13,6 +13,7 @@ import {
   QueryStatusConfig,
   QueryStatusOptions,
 } from './types';
+import { API } from './constants';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -27,7 +28,9 @@ export const formatDate = (dateString: string) => {
     ':' +
     ('0' + date.getMinutes()).slice(-2) +
     ':' +
-    ('0' + date.getSeconds()).slice(-2)
+    ('0' + date.getSeconds()).slice(-2) +
+    '.' +
+    ('00' + date.getMilliseconds()).slice(-3)
   );
 };
 
@@ -42,8 +45,24 @@ export const removeKeyword = (queryString: string | undefined) => {
   return queryString?.replace(new RegExp('.keyword'), '') ?? '';
 };
 
-export const handleFacetError = (response: any) => {
-  const error = new Error(response.data.body ?? response.data);
+export const throwFacetError = (response: any) => {
+  let errorMessage = response.data.body?.message ?? response.data.body ?? response.data;
+
+  // Check if errorMessage is an object and handle Error objects
+  if (typeof errorMessage === 'object') {
+    if (errorMessage instanceof Error) {
+      // If errorMessage is an instance of Error, extract its message
+      errorMessage = errorMessage.message;
+    } else if (errorMessage.message) {
+      // If errorMessage has a message property, extract that message
+      errorMessage = JSON.stringify(errorMessage.message);
+    } else {
+      // If errorMessage is a plain object, stringify it
+      errorMessage = JSON.stringify(errorMessage);
+    }
+  }
+
+  const error = new Error(errorMessage);
   error.name = response.data.status ?? response.status ?? response.data.statusCode;
   (error as any).status = error.name;
   throw error;
@@ -55,14 +74,36 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
     query: { ...query, format: 'jdbc' },
     aggConfig,
     pollQueryResultsParams: context.body?.pollQueryResultsParams,
+    timeRange: context.body?.timeRange,
   });
+
   return from(
-    http.fetch({
-      method: 'POST',
-      path,
-      body,
-      signal,
-    })
+    http
+      .fetch({
+        method: 'POST',
+        path,
+        body,
+        signal,
+      })
+      .catch(async (error) => {
+        if (error.name === 'AbortError' && context.body?.pollQueryResultsParams?.queryId) {
+          // Cancel job
+          try {
+            await http.fetch({
+              method: 'DELETE',
+              path: API.DATA_SOURCE.ASYNC_JOBS,
+              query: {
+                id: query.dataset?.dataSource?.id,
+                queryId: context.body?.pollQueryResultsParams.queryId,
+              },
+            });
+          } catch (cancelError) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to cancel query:', cancelError);
+          }
+        }
+        throw error;
+      })
   );
 };
 
@@ -97,4 +138,24 @@ export const buildQueryStatusConfig = (response: any) => {
     queryId: response.data.queryId,
     sessionId: response.data.sessionId,
   } as QueryStatusConfig;
+};
+
+/**
+ * Test if a PPL query is using search command
+ * https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.rst
+ */
+export const isPPLSearchQuery = (
+  query: Query
+): query is Omit<Query, 'query'> & { query: string } => {
+  if (query.language !== 'PPL') {
+    return false;
+  }
+
+  if (typeof query.query !== 'string') {
+    return false;
+  }
+
+  const string = query.query.toLowerCase().replace(/\s/g, '');
+
+  return string.startsWith('source=') || string.startsWith('searchsource=');
 };

@@ -34,6 +34,7 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
           const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
           res = await client.callAPI('datasourcemanagement.runDirectQuery', params);
         } else {
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           res = await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('datasourcemanagement.runDirectQuery', params);
@@ -72,6 +73,7 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
             queryId: request.params.queryId,
           });
         } else {
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           res = await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('datasourcemanagement.getJobStatus', {
@@ -102,6 +104,7 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
     },
     async (context, request, response): Promise<any> => {
       try {
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         const res = await context.opensearch_data_source_management.dataSourceManagementClient
           .asScoped(request)
           .callAsCurrentUser('datasourcemanagement.deleteJob', {

@@ -1,0 +1,2 @@
+refactor:
+- Update visualization registry to remove the usage of `matchIndex` ([#10419](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10419))

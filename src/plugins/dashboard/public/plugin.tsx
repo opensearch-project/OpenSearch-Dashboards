@@ -34,6 +34,9 @@ import { filter, map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { isEmpty } from 'lodash';
+import { createHashHistory } from 'history';
 import {
   App,
   AppMountParameters,
@@ -43,11 +46,9 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsClientContract,
+  WorkspaceAvailability,
   ScopedHistory,
-} from 'src/core/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { isEmpty } from 'lodash';
-import { createHashHistory } from 'history';
+} from '../../../../src/core/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -126,6 +127,7 @@ import {
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
 import { DashboardProvider, DashboardServices } from './types';
+import { bootstrap } from './ui_triggers';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -218,6 +220,9 @@ export class DashboardPlugin
     core: CoreSetup<StartDependencies, DashboardStart>,
     { share, uiActions, embeddable, home, urlForwarding, data, usageCollection }: SetupDependencies
   ): DashboardSetup {
+    // bootstrap UI Actions
+    bootstrap(uiActions);
+
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
       DashboardFeatureFlagConfig
     >();
@@ -367,6 +372,7 @@ export class DashboardPlugin
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboards',
       order: 2500,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
@@ -401,6 +407,7 @@ export class DashboardPlugin
         const history = createHashHistory(); // need more research
         const services: DashboardServices = {
           ...coreStart,
+          uiActions: pluginsStart.uiActions,
           pluginInitializerContext: this.initializerContext,
           opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
           history,
@@ -424,6 +431,7 @@ export class DashboardPlugin
           uiSettings: coreStart.uiSettings,
           savedQueryService: dataStart.query.savedQueries,
           embeddable: embeddableStart,
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
           embeddableCapabilities: {
             visualizeCapabilities: coreStart.application.capabilities.visualize,

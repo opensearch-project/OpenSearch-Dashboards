@@ -1,0 +1,2 @@
+feat:
+- Revert "[Explore] Default to AI mode when available instead of PPL" ([#10443](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10443))

@@ -137,6 +137,7 @@ export interface BuildContextMenuParams {
   actions: ActionWithContext[];
   title?: string;
   closeMenu?: () => void;
+  autoWrapItems?: boolean;
 }
 
 /**
@@ -146,6 +147,7 @@ export async function buildContextMenuForActions({
   actions,
   title = defaultTitle,
   closeMenu = () => {},
+  autoWrapItems = true,
 }: BuildContextMenuParams): Promise<EuiContextMenuPanelDescriptor[]> {
   const panels: Record<string, PanelDescriptor> = {
     // This is the first panel which links out to all others via items property
@@ -206,7 +208,7 @@ export async function buildContextMenuForActions({
 
     // Add a context menu item for this action so it shows up on a context menu panel.
     // We add this within the parent group or default to the mainMenu panel.
-    panels[parentGroupId || 'mainMenu'].items!.push({
+    const contextItem = {
       name: action.MenuItem
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
@@ -216,9 +218,17 @@ export async function buildContextMenuForActions({
       href: action.getHref ? await action.getHref(context) : undefined,
       _order: action.order || 0,
       _title: action.getDisplayName(context),
-    });
+    };
+    if (typeof action?.getTooltip === 'function') {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      contextItem.toolTipContent = action.getTooltip(context);
+    }
+    if (typeof action?.isDisabled === 'function') {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      contextItem.disabled = action?.isDisabled(context);
+    }
+    panels[parentGroupId || 'mainMenu'].items!.push(contextItem);
   });
-
   await Promise.all(promises);
 
   // For each panel, sort items by order and title
@@ -233,7 +243,9 @@ export async function buildContextMenuForActions({
 
   // On the mainMenu, before adding in items for other groups, the first 4 items are shown.
   // Any additional items are hidden behind a "more" item
-  wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
+  if (autoWrapItems) {
+    wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
+  }
 
   // This will be used to store items that eventually are placed into the
   // mainMenu panel. Specifying a category allows for placing groups into the
@@ -253,13 +265,16 @@ export async function buildContextMenuForActions({
     // looping through all panels.
     if (panel._category) {
       // Create array to store category items
+      // @ts-expect-error TS7053 TODO(ts-error): fixme
       if (!categories[panel._category]) {
+        // @ts-expect-error TS7053 TODO(ts-error): fixme
         categories[panel._category] = [];
       }
 
       // If multiple items in the panel, store a link to this panel into the category.
       // Otherwise, just store the single item into the category.
       if (panel.items.length > 1) {
+        // @ts-expect-error TS7053 TODO(ts-error): fixme
         categories[panel._category].push({
           order: panel._order,
           items: [
@@ -271,6 +286,7 @@ export async function buildContextMenuForActions({
           ],
         });
       } else {
+        // @ts-expect-error TS7053 TODO(ts-error): fixme
         categories[panel._category].push({
           order: panel._order || 0,
           items: panel.items,
@@ -305,8 +321,10 @@ export async function buildContextMenuForActions({
     // Get the items sorted by group order, allowing for groups within categories
     // to be ordered. A category consists of an order and its items.
     // Higher orders are sorted to the top.
+    // @ts-expect-error TS7053, TS7006 TODO(ts-error): fixme
     const sortedEntries = categories[key].sort((a, b) => b.order - a.order);
     const sortedItems = sortedEntries.reduce(
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
       (items, category) => [...items, ...category.items],
       []
     );

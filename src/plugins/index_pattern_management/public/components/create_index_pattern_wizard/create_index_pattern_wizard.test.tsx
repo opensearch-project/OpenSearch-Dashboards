@@ -40,8 +40,17 @@ jest.mock('./components/step_time_field', () => ({ StepTimeField: 'StepTimeField
 jest.mock('./components/header', () => ({ Header: 'Header' }));
 jest.mock('./components/loading_state', () => ({ LoadingState: 'LoadingState' }));
 jest.mock('./lib/get_indices', () => ({
-  getIndices: () => {
-    return [{ name: 'opensearch-dashboards' }];
+  getIndices: ({ pattern }: { pattern: string }) => {
+    if (pattern === '*') {
+      return [{ name: 'local-index' }];
+    }
+    if (pattern.includes('cluster1')) {
+      return [{ name: 'cluster1:remote-index' }];
+    }
+    if (pattern.includes('cluster2')) {
+      return [{ name: 'cluster2:remote-index' }];
+    }
+    return [];
   },
 }));
 const routeComponentPropsMock = {
@@ -184,7 +193,7 @@ describe('CreateIndexPatternWizard', () => {
   });
 
   test('should render normally when use update UX', () => {
-    mockContext.uiSettings.get = () => true;
+    mockContext.uiSettings.get = jest.fn().mockReturnValue(true);
     const component = createComponentWithContext(
       CreateIndexPatternWizard,
       { ...routeComponentPropsMock },
@@ -192,5 +201,47 @@ describe('CreateIndexPatternWizard', () => {
     );
 
     expect(component).toMatchSnapshot();
+  });
+
+  test('fetches remote indices for each related connection', async () => {
+    const component = createComponentWithContext(
+      CreateIndexPatternWizard,
+      { ...routeComponentPropsMock },
+      mockContext
+    );
+
+    // Setup mock data source with related connections
+    const dataSourceRef = {
+      id: 'test-datasource',
+      title: 'Test DataSource',
+      type: 'datasource',
+      relatedConnections: [{ title: 'cluster1' }, { title: 'cluster2' }],
+    };
+
+    // Set initial state with data source reference
+    component.setState({
+      isInitiallyLoadingIndices: false,
+      dataSourceRef,
+      allIndices: [{ name: 'local-index' }],
+    });
+
+    // Call fetchData manually since we're setting state directly
+    await (component.instance() as CreateIndexPatternWizard).fetchData();
+
+    // Verify the state contains combined indices
+    return new Promise((resolve) => {
+      setImmediate(() => {
+        const state = component.state() as any;
+        expect(state.allIndices).toEqual(
+          expect.arrayContaining([
+            { name: 'local-index' },
+            { name: 'cluster1:remote-index' },
+            { name: 'cluster2:remote-index' },
+          ])
+        );
+        expect(state.allIndices.length).toBe(3);
+        resolve(undefined);
+      });
+    });
   });
 });

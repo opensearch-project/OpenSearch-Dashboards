@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.osdQueryEditor__banner {
+  & > * {
+    margin-bottom: $ouiSizeXS;
+  }
+}
+
 .osdQueryEditor__wrapper {
   display: flex;
 }
@@ -137,7 +143,7 @@
 .osdQueryEditor__header {
   display: flex;
   align-items: center;
-  padding: 0 $euiSizeXS $euiSizeS;
+  padding: 0 $euiSizeXS;
 }
 
 .osdQueryEditor__topBar {
@@ -178,8 +184,12 @@
 }
 
 // TODO: improve how this is styled. Styling just for the DQL editor.
-.osdQueryEditor__body .globalFilterGroup__wrapper {
-  margin-top: -$euiSizeS;
+.osdQueryEditor__body {
+  margin-top: $euiSizeS;
+
+  .globalFilterGroup__wrapper {
+    margin-top: -$euiSizeS;
+  }
 }
 
 .osdQuerEditor__singleLine {
@@ -199,24 +209,23 @@
   }
 }
 
-.suggest-widget {
-  position: relative;
+/* Ensure consistent width for Monaco Editor suggestion widget components */
+.monaco-editor .suggest-widget {
+  /* We don't override the width here to maintain Monaco's default behavior */
 
-  &.visible::after {
-    position: absolute;
-    height: auto;
-    bottom: calc(-1 * ($euiFontSizeXS * 2 + $euiSizeXS) + 1px);
-    left: 0;
+  /* Target the suggestion list to ensure it has the same width as the widget */
+  .monaco-list {
     width: 100%;
-    background-color: $euiColorLightestShade;
-    border: $euiBorderThin;
-    padding: $euiSizeXS;
-    text-align: left;
-    color: $euiColorDarkShade;
-    font-size: $euiFontSizeXS;
-    content: "Tab to insert, ESC to close window";
-    display: block;
   }
+
+  /* Target the list rows to ensure they have the same width */
+  .monaco-list-row {
+    width: 100%;
+  }
+}
+
+.queryEditor__progress {
+  position: relative;
 }
 
 .queryEditor__footer {

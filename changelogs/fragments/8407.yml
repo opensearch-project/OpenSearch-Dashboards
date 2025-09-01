@@ -1,2 +1,0 @@
-fix:
-- Fix duplicate i18n identifiers in visualize plugin ([#8407](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8407))

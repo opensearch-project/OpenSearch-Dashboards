@@ -23,7 +23,6 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../../types';
-
 const formIdentifier = 'EditDataSourceForm';
 const notFoundIdentifier = '[data-test-subj="dataSourceNotFound"]';
 
@@ -77,6 +76,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
 
   describe('should load resources successfully', () => {
     beforeEach(async () => {
+      spyOn(utils, 'getDefaultDataSourceId').and.returnValue(Promise.resolve('test1'));
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
       spyOn(utils, 'getDataSourceById').and.returnValue(
         Promise.resolve(mockDataSourceAttributesWithAuth)
@@ -139,14 +139,27 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       });
       expect(uiSettings.set).toHaveBeenCalled();
     });
-    test('should delete datasource successfully', async () => {
+
+    test('should not set default data source if no permission', async () => {
+      spyOn(uiSettings, 'set').and.returnValue(Promise.resolve(false));
+      await act(async () => {
+        // @ts-ignore
+        const result = await component.find(formIdentifier).first().prop('onSetDefaultDataSource')(
+          mockDataSourceAttributesWithAuth
+        );
+        expect(result).toBe(false);
+      });
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+
+    test('should delete default datasource and set new default data source successfully', async () => {
       spyOn(utils, 'deleteDataSourceById').and.returnValue({});
       spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
-      spyOn(uiSettings, 'get').and.callFake((key) => {
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.callFake((key) => {
         if (key === 'home:useNewHomePage') {
           return false;
         }
-        return 'test1';
+        return Promise.resolve('test1');
       });
       await act(async () => {
         // @ts-ignore

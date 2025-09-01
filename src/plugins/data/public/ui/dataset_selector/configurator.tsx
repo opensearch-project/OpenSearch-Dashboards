@@ -8,20 +8,24 @@ import {
   EuiButtonEmpty,
   EuiFieldText,
   EuiForm,
+  EuiFormLabel,
   EuiFormRow,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSelect,
+  EuiSpacer,
+  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
+import { DatasetIndexedView } from '../../query/query_string/dataset_service';
 
 export const Configurator = ({
   services,
@@ -41,7 +45,21 @@ export const Configurator = ({
   const languageService = queryService.queryString.getLanguageService();
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
-  const languages = type?.supportedLanguages(baseDataset) || [];
+  const supportedLanguages = type?.supportedLanguages(baseDataset) || [];
+  const languages = supportedLanguages.filter(
+    (langId) =>
+      !services.appName ||
+      languageService.getLanguage(langId)?.supportedAppNames?.includes(services.appName)
+  );
+  const [shouldSelectIndexedView, setShouldSelectIndexedView] = useState(false);
+
+  const [language, setLanguage] = useState<string>(() => {
+    const currentLanguage = queryString.getQuery().language;
+    if (languages.includes(currentLanguage)) {
+      return currentLanguage;
+    }
+    return languages[0];
+  });
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
@@ -52,33 +70,53 @@ export const Configurator = ({
       defaultMessage: "I don't want to use the time filter",
     }
   );
-  const [language, setLanguage] = useState<string>(() => {
-    const currentLanguage = queryString.getQuery().language;
-    if (languages.includes(currentLanguage)) {
-      return currentLanguage;
-    }
-    return languages[0];
-  });
+  const indexedViewsService = type?.indexedViewsService;
+  const [selectedIndexedView, setSelectedIndexedView] = useState<string | undefined>();
+  const [indexedViews, setIndexedViews] = useState<DatasetIndexedView[]>([]);
+  const [isLoadingIndexedViews, setIsLoadingIndexedViews] = useState(false);
+  const [timeFieldsLoading, setTimeFieldsLoading] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const getIndexedViews = async () => {
+      if (indexedViewsService) {
+        setIsLoadingIndexedViews(true);
+        const fetchedIndexedViews = await indexedViewsService.getIndexedViews(baseDataset);
+        if (isMounted) {
+          setIsLoadingIndexedViews(false);
+          setIndexedViews(fetchedIndexedViews || []);
+        }
+      }
+    };
+
+    getIndexedViews();
+    return () => {
+      isMounted = false;
+    };
+  }, [indexedViewsService, baseDataset]);
 
   const submitDisabled = useMemo(() => {
     return (
-      timeFieldName === undefined &&
-      !(
-        languageService.getLanguage(language)?.hideDatePicker ||
-        dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-      ) &&
-      timeFields &&
-      timeFields.length > 0
+      timeFieldsLoading ||
+      (timeFieldName === undefined &&
+        !(dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) &&
+        timeFields &&
+        timeFields.length > 0)
     );
-  }, [dataset, language, timeFieldName, timeFields, languageService]);
+  }, [dataset, timeFieldName, timeFields, timeFieldsLoading]);
 
   useEffect(() => {
     const fetchFields = async () => {
-      const datasetFields = await queryString
-        .getDatasetService()
-        .getType(baseDataset.type)
-        ?.fetchFields(baseDataset);
+      const datasetType = queryString.getDatasetService().getType(baseDataset.type);
+      if (!datasetType) {
+        setTimeFields([]);
+        return;
+      }
 
+      setTimeFieldsLoading(true);
+      const datasetFields = await datasetType
+        .fetchFields(baseDataset)
+        .finally(() => setTimeFieldsLoading(false));
       const dateFields = datasetFields?.filter((field) => field.type === 'date');
       setTimeFields(dateFields || []);
     };
@@ -90,6 +128,48 @@ export const Configurator = ({
 
     fetchFields();
   }, [baseDataset, indexPatternsService, queryString, timeFields.length]);
+
+  const updateDatasetForIndexedView = useCallback(async () => {
+    if (!indexedViewsService || !selectedIndexedView) {
+      return dataset;
+    }
+
+    let connectedDataSource;
+    if (dataset.dataSource?.id) {
+      const connectedDataSourceSavedObj: any = await indexedViewsService.getConnectedDataSource(
+        dataset
+      );
+      if (connectedDataSourceSavedObj) {
+        connectedDataSource = {
+          id: connectedDataSourceSavedObj.id,
+          title: connectedDataSourceSavedObj.attributes?.title,
+          type: 'DATA_SOURCE',
+        };
+      }
+    }
+
+    return {
+      ...dataset,
+      id: `${dataset.id}.${selectedIndexedView}`,
+      title: selectedIndexedView,
+      type: DEFAULT_DATA.SET_TYPES.INDEX,
+      sourceDatasetRef: {
+        id: dataset.id,
+        type: dataset.type,
+      },
+      dataSource: connectedDataSource ?? dataset.dataSource,
+    };
+  }, [indexedViewsService, selectedIndexedView, dataset]);
+
+  const shouldRenderDatePickerField = useCallback(() => {
+    const datasetType = queryString.getDatasetService().getType(dataset.type);
+
+    const supportsTimeField = datasetType?.meta?.supportsTimeFilter;
+    if (supportsTimeField !== undefined) {
+      return Boolean(supportsTimeField);
+    }
+    return true;
+  }, [dataset.type, queryString]);
 
   return (
     <>
@@ -112,7 +192,7 @@ export const Configurator = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiForm className="datasetConfigurator">
+        <EuiForm className="datasetConfigurator" data-test-subj="datasetConfigurator">
           <EuiFormRow
             label={i18n.translate(
               'data.explorer.datasetSelector.advancedSelector.configurator.datasetLabel',
@@ -123,6 +203,57 @@ export const Configurator = ({
           >
             <EuiFieldText disabled value={dataset.title} />
           </EuiFormRow>
+          {indexedViewsService && (
+            <>
+              <EuiSpacer />
+              <EuiSwitch
+                compressed
+                checked={shouldSelectIndexedView}
+                label={
+                  <EuiFormLabel>
+                    {i18n.translate(
+                      'data.explorer.datasetSelector.advancedSelector.configurator.showAvailableIndexedViewsLabel',
+                      {
+                        defaultMessage: 'Query indexed view',
+                      }
+                    )}
+                  </EuiFormLabel>
+                }
+                onChange={(e) => setShouldSelectIndexedView(e.target.checked)}
+              />
+              <EuiSpacer size="m" />
+              {shouldSelectIndexedView && (
+                <EuiFormRow
+                  label={i18n.translate(
+                    'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewLabel',
+                    {
+                      defaultMessage: 'Available indexed views',
+                    }
+                  )}
+                  helpText={i18n.translate(
+                    'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewHelpText',
+                    {
+                      defaultMessage: 'Select an indexed view to speed up your query.',
+                    }
+                  )}
+                >
+                  <EuiSelect
+                    isLoading={isLoadingIndexedViews}
+                    options={indexedViews.map(({ name }) => ({
+                      text: name,
+                      value: name,
+                    }))}
+                    value={selectedIndexedView}
+                    onChange={async (e) => {
+                      const value = e.target.value;
+                      setSelectedIndexedView(value);
+                    }}
+                    hasNoInitialSelection
+                  />
+                </EuiFormRow>
+              )}
+            </>
+          )}
           <EuiFormRow
             label={i18n.translate(
               'data.explorer.datasetSelector.advancedSelector.configurator.languageLabel',
@@ -144,7 +275,7 @@ export const Configurator = ({
               data-test-subj="advancedSelectorLanguageSelect"
             />
           </EuiFormRow>
-          {!languageService.getLanguage(language)?.hideDatePicker &&
+          {shouldRenderDatePickerField() &&
             (dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? (
               <EuiFormRow
                 label={i18n.translate(
@@ -202,8 +333,12 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            await queryString.getDatasetService().cacheDataset(dataset, services);
-            onConfirm({ dataset, language });
+            let newDataset = dataset;
+            if (shouldSelectIndexedView && selectedIndexedView) {
+              newDataset = await updateDatasetForIndexedView();
+            }
+            await queryString.getDatasetService().cacheDataset(newDataset, services);
+            onConfirm({ dataset: newDataset, language });
           }}
           fill
           disabled={submitDisabled}

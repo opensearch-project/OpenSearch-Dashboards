@@ -78,28 +78,50 @@ describe('#WorkspaceClient', () => {
 
   it('#create', async () => {
     const { workspaceClient, httpSetupMock } = getWorkspaceClient();
-    httpSetupMock.fetch.mockResolvedValue({
-      success: true,
-      result: {
-        name: 'foo',
-        workspaces: [],
-      },
-    });
-    await workspaceClient.create({
-      name: 'foo',
-    });
+    httpSetupMock.fetch
+      .mockResolvedValueOnce({
+        success: true,
+        result: {
+          name: 'foo',
+          workspaces: [],
+        },
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        result: {
+          workspaces: [],
+        },
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        result: {
+          workspaces: [],
+        },
+      });
+    await workspaceClient.create({ name: 'foo' }, {});
+
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces', {
       method: 'POST',
       body: JSON.stringify({
         attributes: {
           name: 'foo',
         },
+        settings: {},
       }),
     });
+
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
+      }),
+    });
+
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+      method: 'POST',
+      body: JSON.stringify({
+        perPage: 999,
+        permissionModes: ['library_write'],
       }),
     });
   });
@@ -153,39 +175,52 @@ describe('#WorkspaceClient', () => {
   });
 
   it('#update', async () => {
-    const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
-    httpSetupMock.fetch.mockResolvedValue({
-      success: true,
-      result: {
-        workspaces: [
-          {
-            id: 'foo',
-          },
-        ],
-      },
-    });
-    await workspaceClient.update('foo', {
-      name: 'foo',
-    });
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    httpSetupMock.fetch
+      .mockResolvedValueOnce({
+        success: true,
+        result: {
+          name: 'foo',
+          workspaces: [],
+        },
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        result: {
+          workspaces: [],
+        },
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        result: {
+          workspaces: [],
+        },
+      });
+
+    await workspaceClient.update('foo', { name: 'foo' }, {});
+
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/foo', {
       method: 'PUT',
       body: JSON.stringify({
         attributes: {
           name: 'foo',
         },
+        settings: {},
       }),
     });
-    expect(workspaceMock.workspaceList$.getValue()).toEqual([
-      {
-        id: 'foo',
-        owner: true,
-        readonly: false,
-      },
-    ]);
+
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
+      }),
+    });
+
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+      method: 'POST',
+      body: JSON.stringify({
+        perPage: 999,
+        permissionModes: ['library_write'],
       }),
     });
   });
@@ -206,9 +241,7 @@ describe('#WorkspaceClient', () => {
         success: true,
       };
     });
-    await workspaceClient.update('foo', {
-      name: 'foo',
-    });
+    await workspaceClient.update('foo', { name: 'foo' }, {});
     expect(workspaceMock.workspaceList$.getValue()).toEqual([]);
   });
 
@@ -216,14 +249,14 @@ describe('#WorkspaceClient', () => {
     const { workspaceClient, httpSetupMock } = getWorkspaceClient();
     httpSetupMock.fetch.mockResolvedValue({
       success: true,
-      result: {},
+      successCount: 1,
     });
     const body = JSON.stringify({
-      objects: [{ id: 1, type: 'url' }],
+      objects: [{ id: 'url_id', type: 'url' }],
       targetWorkspace: 'workspace-1',
       includeReferencesDeep: false,
     });
-    await workspaceClient.copy([{ id: 1, type: 'url' }], 'workspace-1', false);
+    await workspaceClient.copy([{ id: 'url_id', type: 'url' }], 'workspace-1', false);
     expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_duplicate_saved_objects', {
       body,
       method: 'POST',

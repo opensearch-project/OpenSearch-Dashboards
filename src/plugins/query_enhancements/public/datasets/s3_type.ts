@@ -36,6 +36,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     searchOnLoad: true,
     supportsTimeFilter: false,
     isFieldLoadAsync: true,
+    cacheOptions: true,
   },
 
   toDataset: (path: DataStructure[]): Dataset => {
@@ -122,7 +123,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     return ['SQL', 'PPL'];
   },
 
-  getSampleQueries: (dataset: Dataset, language: string) => {
+  getSampleQueries: (dataset?: Dataset, language?: string) => {
     switch (language) {
       case 'PPL':
         return [
@@ -130,7 +131,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicPPLQuery', {
               defaultMessage: 'Sample query for PPL',
             }),
-            query: `source = ${dataset.title} | head 10`,
+            query: `source = ${dataset?.title}`,
           },
         ];
       case 'SQL':
@@ -139,7 +140,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicSQLQuery', {
               defaultMessage: 'Sample query for SQL',
             }),
-            query: `SELECT * FROM ${dataset.title} LIMIT 10`,
+            query: `SELECT * FROM ${dataset?.title} LIMIT 10`,
           },
         ];
     }
@@ -310,6 +311,9 @@ export function castS3FieldTypeToOSDFieldType(sqlType: S3_FIELD_TYPES): OSD_FIEL
     case S3_FIELD_TYPES.LONG:
     case S3_FIELD_TYPES.FLOAT:
     case S3_FIELD_TYPES.DOUBLE:
+    case S3_FIELD_TYPES.TINYINT:
+    case S3_FIELD_TYPES.SMALLINT:
+    case S3_FIELD_TYPES.BIGINT:
       return OSD_FIELD_TYPES.NUMBER;
     case S3_FIELD_TYPES.KEYWORD:
     case S3_FIELD_TYPES.STRING:

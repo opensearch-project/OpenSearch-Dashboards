@@ -535,6 +535,17 @@ export function getUiSettings(
       }),
       schema: schema.string(),
     },
+    [UI_SETTINGS.DATA_WITH_LONG_NUMERALS]: {
+      name: i18n.translate('data.advancedSettings.data.withLongNumeralsTitle', {
+        defaultMessage: 'Extend Numeric Precision',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.data.withLongNumeralsText', {
+        defaultMessage:
+          "Turn on for precise handling of extremely large numbers. Turn off to optimize performance when high precision for large values isn't required.",
+      }),
+      schema: schema.boolean(),
+    },
     [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
       name: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
         defaultMessage: 'Time filter refresh interval',
@@ -726,6 +737,37 @@ export function getUiSettings(
       category: ['search'],
       requiresPageReload: true,
       schema: schema.boolean(),
+    },
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES]: {
+      name: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesTitle', {
+        defaultMessage: 'Allow for Value Suggestion through the enhancements APIs',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesText', {
+        defaultMessage: `
+          Value Suggestion will be done through a SQL query to the enhancements APIs, sorted by the most frequent options
+          <strong>Experimental</strong>: Requires query enhancements enabled.`,
+      }),
+      category: ['search'],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT]: {
+      name: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesLimitTitle', {
+        defaultMessage: 'Enhancements Value Suggestion Limit',
+      }),
+      value: 200,
+      description: i18n.translate(
+        'data.advancedSettings.query.enhancements.suggestValuesLimitText',
+        {
+          defaultMessage: `
+          The limit on number of values fetched
+          <strong>Experimental</strong>: Requires query enhancements enabled.`,
+        }
+      ),
+      category: ['search'],
+      requiresPageReload: true,
+      schema: schema.number(),
     },
     [UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY]: {
       name: i18n.translate('data.advancedSettings.query.dataFrameHydrationStrategyTitle', {

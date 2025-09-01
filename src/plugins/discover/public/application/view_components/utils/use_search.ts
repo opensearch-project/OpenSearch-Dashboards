@@ -3,37 +3,61 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import uuid from 'uuid';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, filter, pairwise } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
-import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
+import { useEffectOnce } from 'react-use';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { search } from '../../../../../data/public';
+import { search, syncQueryStateWithUrl, UI_SETTINGS } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { TimechartHeaderBucketInterval } from '../../components/chart/timechart_header';
-import { tabifyAggResponse } from '../../../opensearch_dashboards_services';
-import {
-  getDimensions,
-  buildPointSeriesData,
-  createHistogramConfigs,
-  Chart,
-} from '../../components/chart/utils';
-import { SavedSearch } from '../../../saved_searches';
-import { useSelector } from '../../utils/state_management';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
+  tabifyAggResponse,
 } from '../../../opensearch_dashboards_services';
+import {
+  buildPointSeriesData,
+  Chart,
+  createHistogramConfigs,
+  getDimensions,
+} from '../../components/chart/utils';
+import { SavedSearch } from '../../../saved_searches';
+import { useSelector } from '../../utils/state_management';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
-import { syncQueryStateWithUrl } from '../../../../../data/public';
 import { trackQueryMetric } from '../../../ui_metric';
+
+import { ABORT_DATA_QUERY_TRIGGER } from '../../../../../ui_actions/public';
+import {
+  ACTION_ABORT_DATA_QUERY,
+  AbortDataQueryContext,
+  createAbortDataQueryAction,
+} from '../../../../public/actions/abort_data_query_action';
+
+declare module '../../../../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [ABORT_DATA_QUERY_TRIGGER]: AbortDataQueryContext;
+  }
+  export interface ActionContextMapping {
+    [ACTION_ABORT_DATA_QUERY]: AbortDataQueryContext;
+  }
+}
+
+export function safeJSONParse(text: any) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return text;
+  }
+}
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -55,10 +79,19 @@ export interface SearchData {
   queryStatus?: {
     body?: {
       error?: {
-        reason?: string;
-        details: string;
+        error?: string;
+        message?: {
+          error?:
+            | string
+            | {
+                reason?: string;
+                details: string;
+                type?: string;
+              };
+          status?: number;
+        };
+        statusCode?: number;
       };
-      statusCode?: number;
     };
     elapsedMs?: number;
     startTime?: number;
@@ -93,6 +126,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   const skipInitialFetch = useRef(false);
   const {
     data,
+    uiActions,
     filterManager,
     getSavedSearchById,
     core,
@@ -110,28 +144,33 @@ export const useSearch = (services: DiscoverViewServices) => {
     abortController: undefined,
     fieldCounts: {},
   });
+  const fetchForMaxCsvStateRef = useRef<{ abortController: AbortController | undefined }>({
+    abortController: undefined,
+  });
+
+  const actionId = useRef(`ACTION_ABORT_DATA_QUERY_${uuid.v4()}`);
+
   const inspectorAdapters = {
     requests: new RequestAdapter(),
   };
 
-  const getDatasetAutoSearchOnPageLoadPreference = () => {
-    // Checks the searchOnpageLoadPreference for the current dataset if not specifed defaults to true
-    const datasetType = data.query.queryString.getQuery().dataset?.type;
-
-    const datasetService = data.query.queryString.getDatasetService();
-
-    return !datasetType || (datasetService?.getType(datasetType)?.meta?.searchOnLoad ?? true);
-  };
-
   const shouldSearchOnPageLoad = useCallback(() => {
+    // Checks the searchOnpageLoadPreference for the current dataset if not specifed defaults to UI Settings
+    const { queryString } = data.query;
+    const { dataset } = queryString.getQuery();
+    const typeConfig = dataset ? queryString.getDatasetService().getType(dataset.type) : undefined;
+    const datasetPreference =
+      typeConfig?.meta?.searchOnLoad ?? uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING);
+
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
-      services.uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      datasetPreference ||
+      uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch?.id !== undefined ||
       timefilter.getRefreshInterval().pause === false
     );
-  }, [savedSearch, services.uiSettings, timefilter]);
+  }, [data.query, savedSearch, uiSettings, timefilter]);
 
   const startTime = Date.now();
   const data$ = useMemo(
@@ -143,16 +182,66 @@ export const useSearch = (services: DiscoverViewServices) => {
             : ResultStatus.UNINITIALIZED,
         queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad, startTime, skipInitialFetch]
+    // we only want data$ observable to be created once, updates will be done through useEffect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
+
+  // re-initialize data$ when the selected dataset changes
+  useEffectOnce(() => {
+    const subscription = data.query.queryString
+      .getUpdates$()
+      .pipe(
+        pairwise(),
+        filter(([prev, curr]) => prev.dataset?.id !== curr.dataset?.id)
+      )
+      .subscribe(() => {
+        data$.next({
+          status:
+            shouldSearchOnPageLoad() && !skipInitialFetch.current
+              ? ResultStatus.LOADING
+              : ResultStatus.UNINITIALIZED,
+          queryStatus: { startTime },
+          rows: [],
+        });
+      });
+    return () => subscription.unsubscribe();
+  });
+
+  useEffect(() => {
+    const id = actionId.current;
+    uiActions.addTriggerAction(
+      ABORT_DATA_QUERY_TRIGGER,
+      createAbortDataQueryAction([fetchForMaxCsvStateRef, fetchStateRef], id)
+    );
+    return () => {
+      uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, id);
+    };
+  }, [uiActions]);
+
+  useEffect(() => {
+    data$.next({ ...data$.value, queryStatus: { startTime } });
+  }, [data$, startTime]);
+
+  useEffect(() => {
+    data$.next({
+      ...data$.value,
+      status:
+        shouldSearchOnPageLoad() && !skipInitialFetch.current
+          ? ResultStatus.LOADING
+          : ResultStatus.UNINITIALIZED,
+    });
+  }, [data$, shouldSearchOnPageLoad, skipInitialFetch]);
+
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
+    const currentTime = Date.now();
     let dataset = indexPattern;
     if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
-        queryStatus: { startTime },
+        queryStatus: { startTime: currentTime },
       });
       return;
     }
@@ -167,6 +256,9 @@ export const useSearch = (services: DiscoverViewServices) => {
     // Abort any in-progress requests before fetching again
     if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
     fetchStateRef.current.abortController = new AbortController();
+
+    fetchStateRef.current.fieldCounts = {};
+
     const histogramConfigs = dataset.timeFieldName
       ? createHistogramConfigs(dataset, interval || 'auto', data)
       : undefined;
@@ -182,10 +274,7 @@ export const useSearch = (services: DiscoverViewServices) => {
 
     let elapsedMs;
     try {
-      // Only show loading indicator if we are fetching when the rows are empty
-      if (fetchStateRef.current.rows?.length === 0) {
-        data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime } });
-      }
+      data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime: currentTime } });
 
       // Initialize inspect adapter for search source
       inspectorAdapters.requests.reset();
@@ -207,10 +296,18 @@ export const useSearch = (services: DiscoverViewServices) => {
         trackQueryMetric(query);
       }
 
+      const languageConfig = data.query.queryString
+        .getLanguageService()
+        .getLanguage(query!.language);
+
       // Execute the search
       const fetchResp = await searchSource.fetch({
         abortSignal: fetchStateRef.current.abortController.signal,
-        withLongNumeralsSupport: true,
+        withLongNumeralsSupport: await services.uiSettings.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS),
+        ...(languageConfig &&
+          languageConfig.fields?.formatter && {
+            formatter: languageConfig.fields.formatter,
+          }),
       });
 
       inspectorRequest
@@ -273,16 +370,54 @@ export const useSearch = (services: DiscoverViewServices) => {
         data.search.showError(error as Error);
         return;
       }
+      // TODO: Create a unify error response at server side
       let errorBody;
       try {
+        // Normal search strategy failed query, return HttpFetchError
+        /*
+          @type {HttpFetchError}
+          {
+            body: {
+              error: string,
+              statusCode: number,
+              message: JSONstring,
+            },
+            ...
+          }
+        */
         errorBody = JSON.parse(error.body);
       } catch (e) {
         if (error.body) {
           errorBody = error.body;
         } else {
+          // Async search strategy failed query, return Error
+          /*
+            @type {Error}
+            {
+              message: string,
+              stack: string,
+            }
+          */
           errorBody = error;
         }
       }
+
+      // Error message can be sent as encoded JSON string, which requires extra parsing
+      /*
+        errorBody: {
+          error: string,
+          statusCode: number,
+          message: {
+            error: {
+              reason: string;
+              details: string;
+              type: string;
+            };
+            status: number;
+          }
+        }
+      */
+      errorBody.message = safeJSONParse(errorBody.message);
 
       data$.next({
         status: ResultStatus.ERROR,
@@ -303,16 +438,68 @@ export const useSearch = (services: DiscoverViewServices) => {
     services,
     sort,
     savedSearch?.searchSource,
-    startTime,
     data$,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
   ]);
 
+  // This is a modified version of the above fetch that is to be used for CSV Download MAX option.
+  const fetchForMaxCsvOption = useCallback(
+    async (size: number) => {
+      const dataset = indexPattern;
+      if (!dataset) {
+        throw new Error('Dataset not found');
+      }
+
+      if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
+        throw new Error('Invalid time range');
+      }
+
+      // Abort any in-progress requests before fetching again
+      if (fetchForMaxCsvStateRef.current.abortController)
+        fetchForMaxCsvStateRef.current.abortController.abort();
+      fetchForMaxCsvStateRef.current.abortController = new AbortController();
+
+      fetchStateRef.current.fieldCounts = {};
+
+      const searchSource = await updateSearchSource({
+        indexPattern: dataset,
+        services,
+        sort,
+        searchSource: savedSearch?.searchSource,
+        histogramConfigs: undefined,
+        size,
+      });
+
+      const query = searchSource.getField('query');
+      const languageConfig = data.query.queryString
+        .getLanguageService()
+        .getLanguage(query!.language);
+
+      // Execute the search
+      const fetchResp = await searchSource.fetch({
+        abortSignal: fetchForMaxCsvStateRef.current.abortController.signal,
+        withLongNumeralsSupport: await services.uiSettings.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS),
+        ...(languageConfig &&
+          languageConfig.fields?.formatter && {
+            formatter: languageConfig.fields.formatter,
+          }),
+      });
+
+      return fetchResp.hits.hits;
+    },
+    [
+      indexPattern,
+      timefilter,
+      toastNotifications,
+      services,
+      sort,
+      savedSearch?.searchSource,
+      data.query.queryString,
+    ]
+  );
+
   useEffect(() => {
-    if (!getDatasetAutoSearchOnPageLoadPreference()) {
-      skipInitialFetch.current = true;
-    }
     const fetch$ = merge(
       refetch$,
       filterManager.getFetches$(),
@@ -321,11 +508,13 @@ export const useSearch = (services: DiscoverViewServices) => {
       timefilter.getAutoRefreshFetch$(),
       data.query.queryString.getUpdates$()
     ).pipe(debounceTime(100));
+
     const subscription = fetch$.subscribe(() => {
       if (skipInitialFetch.current) {
         skipInitialFetch.current = false; // Reset so future fetches will proceed normally
         return; // Skip the first fetch
       }
+
       (async () => {
         try {
           await fetch();
@@ -343,8 +532,6 @@ export const useSearch = (services: DiscoverViewServices) => {
     return () => {
       subscription.unsubscribe();
     };
-    // disabling the eslint since we are not adding getDatasetAutoSearchOnPageLoadPreference since this changes when dataset changes and these chnages are already part of data.query.queryString
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     data$,
     data.query.queryString,
@@ -358,12 +545,15 @@ export const useSearch = (services: DiscoverViewServices) => {
 
   // Get savedSearch if it exists
   useEffect(() => {
-    (async () => {
+    const loadSavedSearch = async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
+      const dataQuery = data.query.queryString.getQuery();
+      const defaultQuery = data.query.queryString.getDefaultQuery();
+      const isDataQueryDefault = dataQuery.query === defaultQuery.query;
+      const savedSearchQuery = savedSearchInstance.searchSource.getField('query');
 
-      const query =
-        savedSearchInstance.searchSource.getField('query') ||
-        data.query.queryString.getDefaultQuery();
+      // Use eixisting query, if eixisting query match default, use query from saved search
+      const query = isDataQueryDefault ? savedSearchQuery ?? dataQuery : dataQuery;
 
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       if (isEnhancementsEnabled && query.dataset) {
@@ -390,10 +580,11 @@ export const useSearch = (services: DiscoverViewServices) => {
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
 
-      let actualFilters: any[] = [];
+      // merge filters in saved search with exisiting filters in filterManager
+      const actualFilters = cloneDeep(filterManager.getAppFilters());
 
       if (savedQuery) {
-        actualFilters = data.query.filterManager.getFilters();
+        actualFilters.push.apply(actualFilters, data.query.filterManager.getFilters());
       } else if (filters !== undefined) {
         const result = typeof filters === 'function' ? filters() : filters;
         if (result !== undefined) {
@@ -402,7 +593,10 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
 
       filterManager.setAppFilters(actualFilters);
-      data.query.queryString.setQuery(savedQuery ? data.query.queryString.getQuery() : query);
+      data.query.queryString.setQuery(query);
+      // Update local storage after loading saved search
+      data.query.queryString.getLanguageService().setUserQueryLanguage(query.language);
+      data.query.queryString.getInitialQueryByLanguage(query.language);
       setSavedSearch(savedSearchInstance);
 
       if (savedSearchInstance?.id) {
@@ -415,7 +609,9 @@ export const useSearch = (services: DiscoverViewServices) => {
           }
         );
       }
-    })();
+    };
+
+    loadSavedSearch();
     // This effect will only run when getSavedSearchById is called, which is
     // only called when the component is first mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -437,6 +633,8 @@ export const useSearch = (services: DiscoverViewServices) => {
     indexPattern,
     savedSearch,
     inspectorAdapters,
+    fetchForMaxCsvOption,
+    fetchForMaxCsvStateRef,
   };
 };
 

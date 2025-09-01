@@ -34,24 +34,65 @@ import { Query } from '../../../common/query';
 import { ISearchInterceptor } from '../../search';
 import { DataStorage, DEFAULT_DATA } from 'src/plugins/data/common';
 
+// Mock the services module
+jest.mock('../../services', () => ({
+  getApplication: jest.fn().mockReturnValue({
+    currentAppId$: {
+      subscribe: jest.fn((callback) => {
+        callback('test-app-id');
+        return { unsubscribe: jest.fn() };
+      }),
+    },
+  }),
+}));
+
 describe('QueryStringManager', () => {
   let service: QueryStringManager;
   let storage: DataStorage;
   let sessionStorage: DataStorage;
   let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 
+  const advanceTimersByMs = async (ms: number = 100) => {
+    jest.advanceTimersByTime(ms);
+    // Allow any pending promises to resolve
+    await Promise.resolve();
+  };
+
   beforeEach(() => {
+    jest.useFakeTimers();
+    // Reset mocks between tests
+    jest.clearAllMocks();
+
     storage = new DataStorage(window.localStorage, 'opensearchDashboards.');
+    storage.clear();
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
-    mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
+    sessionStorage.clear();
+
+    mockSearchInterceptor = ({
+      search: jest.fn(),
+    } as unknown) as jest.Mocked<ISearchInterceptor>;
+
+    const uiSettings = coreMock.createSetup().uiSettings;
+
+    // Add default UI settings for tests
+    uiSettings.get.mockImplementation((key) => {
+      if (key === 'search:queryLanguage') return 'kuery';
+      if (key === 'query:enhancements:enabled') return true;
+      return undefined;
+    });
 
     service = new QueryStringManager(
       storage,
       sessionStorage,
-      coreMock.createSetup().uiSettings,
+      uiSettings,
       mockSearchInterceptor,
       coreMock.createStart().notifications
     );
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   test('getUpdates$ is a cold emits only after query changes', () => {
@@ -82,7 +123,15 @@ describe('QueryStringManager', () => {
   });
 
   test('clearQuery resets to default query', () => {
-    const newQuery = { query: 'test query', language: 'sql' };
+    const newQuery: Query = {
+      query: 'test query',
+      language: 'SQL',
+      dataset: {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: DEFAULT_DATA.SET_TYPES.INDEX,
+      },
+    };
     service.setQuery(newQuery);
     expect(service.getQuery()).toEqual(newQuery);
 
@@ -90,6 +139,7 @@ describe('QueryStringManager', () => {
     const defaultQuery = service.getQuery();
     expect(defaultQuery).not.toEqual(newQuery);
     expect(defaultQuery.query).toBe('');
+    expect(defaultQuery.dataset).toBe(undefined);
   });
 
   test('formatQuery handles different input types', () => {
@@ -106,24 +156,34 @@ describe('QueryStringManager', () => {
     expect(formattedUndefinedQuery).toEqual(service.getDefaultQuery());
   });
 
-  test('clearQueryHistory clears the query history', () => {
+  test('clearQueryHistory clears the query history', async () => {
     service.addToQueryHistory({ query: 'test query 1', language: 'sql' });
+    await advanceTimersByMs();
     service.addToQueryHistory({ query: 'test query 2', language: 'sql' });
+    await advanceTimersByMs();
     expect(service.getQueryHistory()).toHaveLength(2);
 
     service.clearQueryHistory();
+    await advanceTimersByMs();
     expect(service.getQueryHistory()).toHaveLength(0);
   });
 
-  test('addToQueryHistory adds query to history', () => {
+  test('addToQueryHistory adds query to history', async () => {
     const query: Query = { query: 'test query', language: 'sql' };
     service.addToQueryHistory(query);
+    await advanceTimersByMs();
     const history = service.getQueryHistory();
     expect(history).toHaveLength(1);
     expect(history[0]).toHaveProperty('query', query);
   });
 
   test('getInitialQueryByLanguage returns correct query for language', () => {
+    // Mock language service
+    service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+      title: 'Test Language',
+      getQueryString: jest.fn().mockReturnValue('test query string'),
+    });
+
     const sqlQuery = service.getInitialQueryByLanguage('sql');
     expect(sqlQuery).toHaveProperty('language', 'sql');
 
@@ -132,6 +192,11 @@ describe('QueryStringManager', () => {
   });
 
   test('getInitialQueryByDataset returns correct query for dataset', () => {
+    service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+      title: 'SQL',
+      getQueryString: jest.fn().mockReturnValue('SELECT * FROM TABLE'),
+    });
+
     const dataset = {
       id: 'test-dataset',
       title: 'Test Dataset',
@@ -235,6 +300,23 @@ describe('QueryStringManager', () => {
       expect(updateCount).toBe(1); // Should not increment
     });
 
+    test('will trigger updates when set force to true even new query equals current query', () => {
+      const initialQuery = { query: 'test', language: 'sql' };
+      let updateCount = 0;
+
+      // Subscribe to updates
+      service.getUpdates$().subscribe(() => {
+        updateCount++;
+      });
+
+      service.setQuery(initialQuery);
+      expect(updateCount).toBe(1);
+
+      // Set same query again
+      service.setQuery({ ...initialQuery }, true);
+      expect(updateCount).toBe(2); // Should increment
+    });
+
     test('handles undefined supportedLanguages gracefully', () => {
       service.setQuery({ query: 'test', language: 'sql' });
 
@@ -265,6 +347,11 @@ describe('QueryStringManager', () => {
     };
 
     beforeEach(() => {
+      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+        title: 'kuery',
+        getQueryString: jest.fn().mockReturnValue(''),
+      });
+
       service.setQuery({
         query: 'initial query',
         language: 'kuery',
@@ -308,6 +395,40 @@ describe('QueryStringManager', () => {
       expect(result.language).toBe('ppl');
       expect(result.dataset).toEqual(currentDataset);
       expect(result.query).toBeDefined();
+    });
+
+    test('getInitialQueryByLanguage returns the initial query from the dataset config if present', () => {
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn(),
+        getInitialQueryString: jest.fn().mockImplementation(({ language }) => {
+          switch (language) {
+            case 'sql':
+              return 'default sql dataset query';
+            case 'ppl':
+              return 'default ppl dataset query';
+            default:
+              return '';
+          }
+        }),
+      });
+
+      const sqlQuery = service.getInitialQueryByLanguage('sql');
+      expect(sqlQuery).toHaveProperty('query', 'default sql dataset query');
+
+      const pplQuery = service.getInitialQueryByLanguage('ppl');
+      expect(pplQuery).toHaveProperty('query', 'default ppl dataset query');
+    });
+
+    test('getInitialQueryByLanguage returns the initial query from the language config if dataset does not provide one', () => {
+      service.getDatasetService().getType = jest.fn().mockReturnValue({
+        supportedLanguages: jest.fn(),
+      });
+      service.getLanguageService().getLanguage = jest.fn().mockReturnValue({
+        getQueryString: jest.fn().mockReturnValue('default-language-service-query'),
+      });
+
+      const sqlQuery = service.getInitialQueryByLanguage('sql');
+      expect(sqlQuery).toHaveProperty('query', 'default-language-service-query');
     });
   });
 });

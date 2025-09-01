@@ -139,6 +139,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -146,6 +147,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -214,10 +216,12 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -247,10 +251,12 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -299,6 +305,18 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -324,6 +342,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -410,6 +429,15 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 },
                 "df": Object {
                   "clear": [MockFunction],
+                  "df$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": undefined,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
                   "get": [MockFunction],
                   "set": [MockFunction],
                 },
@@ -422,6 +450,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -795,6 +824,10 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -912,6 +945,26 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "getPerPage": [Function],
               },
             },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
+            },
             "toastNotifications": Object {
               "add": [MockFunction],
               "addDanger": [MockFunction],
@@ -931,8 +984,15 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -949,6 +1009,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
+              "getUserProvidedWithScope": [MockFunction],
               "isCustom": [MockFunction],
               "isDeclared": [MockFunction],
               "isDefault": [MockFunction],
@@ -1002,6 +1063,15 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -1063,6 +1133,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -1221,6 +1292,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -1228,6 +1300,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -1296,10 +1369,12 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -1329,10 +1404,12 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -1381,6 +1458,18 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -1406,6 +1495,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -1492,6 +1582,15 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 },
                 "df": Object {
                   "clear": [MockFunction],
+                  "df$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": undefined,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
                   "get": [MockFunction],
                   "set": [MockFunction],
                 },
@@ -1504,6 +1603,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -1877,6 +1977,10 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -1994,6 +2098,26 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "getPerPage": [Function],
               },
             },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
+            },
             "toastNotifications": Object {
               "add": [MockFunction],
               "addDanger": [MockFunction],
@@ -2013,8 +2137,15 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -2031,6 +2162,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
+              "getUserProvidedWithScope": [MockFunction],
               "isCustom": [MockFunction],
               "isDeclared": [MockFunction],
               "isDefault": [MockFunction],
@@ -2084,6 +2216,15 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -2145,6 +2286,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -2303,6 +2445,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -2310,6 +2453,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -2378,10 +2522,12 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -2411,10 +2557,12 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -2463,6 +2611,18 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -2488,6 +2648,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -2574,6 +2735,15 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 },
                 "df": Object {
                   "clear": [MockFunction],
+                  "df$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": undefined,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
                   "get": [MockFunction],
                   "set": [MockFunction],
                 },
@@ -2586,6 +2756,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -2959,6 +3130,10 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -3076,6 +3251,26 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "getPerPage": [Function],
               },
             },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
+            },
             "toastNotifications": Object {
               "add": [MockFunction],
               "addDanger": [MockFunction],
@@ -3095,8 +3290,15 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -3113,6 +3315,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
+              "getUserProvidedWithScope": [MockFunction],
               "isCustom": [MockFunction],
               "isDeclared": [MockFunction],
               "isDefault": [MockFunction],
@@ -3166,6 +3369,15 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -3227,6 +3439,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -3385,6 +3598,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -3392,6 +3606,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -3460,10 +3675,12 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -3493,10 +3710,12 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -3545,6 +3764,18 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -3570,6 +3801,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -3656,6 +3888,15 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 },
                 "df": Object {
                   "clear": [MockFunction],
+                  "df$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": undefined,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
                   "get": [MockFunction],
                   "set": [MockFunction],
                 },
@@ -3668,6 +3909,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -4041,6 +4283,10 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -4158,6 +4404,26 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "getPerPage": [Function],
               },
             },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
+            },
             "toastNotifications": Object {
               "add": [MockFunction],
               "addDanger": [MockFunction],
@@ -4177,8 +4443,15 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -4195,6 +4468,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
+              "getUserProvidedWithScope": [MockFunction],
               "isCustom": [MockFunction],
               "isDeclared": [MockFunction],
               "isDefault": [MockFunction],
@@ -4248,6 +4522,15 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -4309,6 +4592,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -4467,6 +4751,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -4474,6 +4759,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -4542,10 +4828,12 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -4575,10 +4863,12 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -4627,6 +4917,18 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -4652,6 +4954,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -4738,6 +5041,15 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 },
                 "df": Object {
                   "clear": [MockFunction],
+                  "df$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": undefined,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
                   "get": [MockFunction],
                   "set": [MockFunction],
                 },
@@ -4750,6 +5062,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -5123,6 +5436,10 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -5240,6 +5557,26 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "getPerPage": [Function],
               },
             },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
+            },
             "toastNotifications": Object {
               "add": [MockFunction],
               "addDanger": [MockFunction],
@@ -5259,8 +5596,15 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -5277,6 +5621,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
+              "getUserProvidedWithScope": [MockFunction],
               "isCustom": [MockFunction],
               "isDeclared": [MockFunction],
               "isDefault": [MockFunction],
@@ -5330,6 +5675,15 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -5391,6 +5745,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -5549,6 +5904,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -5556,6 +5912,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
                 "getAllSearchCommands": [MockFunction],
+                "unregisterSearchCommand": [MockFunction],
               },
               "logos": Object {
                 "AnimatedMark": Object {
@@ -5624,10 +5981,12 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
+                "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
+                "registerPrimaryHeaderRight": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -5657,10 +6016,12 @@ exports[`Dashboard top nav render with all components 1`] = `
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
               "setIsVisible": [MockFunction],
+              "useUpdatedHeader": false,
             },
             "dashboard": Object {
               "getAttributeService": [MockFunction],
@@ -5709,6 +6070,18 @@ exports[`Dashboard top nav render with all components 1`] = `
                   },
                 },
               },
+              "dataViews": Object {
+                "clearCache": [MockFunction],
+                "create": [MockFunction],
+                "createField": [MockFunction],
+                "createFieldList": [MockFunction],
+                "ensureDefaultDataView": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "getDefault": [MockFunction],
+                "make": [Function],
+                "saveToCache": [MockFunction],
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -5734,6 +6107,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "ensureDefaultIndexPattern": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "getByTitle": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
@@ -5820,6 +6194,15 @@ exports[`Dashboard top nav render with all components 1`] = `
                 },
                 "df": Object {
                   "clear": [MockFunction],
+                  "df$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": undefined,
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
                   "get": [MockFunction],
                   "set": [MockFunction],
                 },
@@ -5832,6 +6215,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DatasetSelect": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "SuggestionsComponent": [MockFunction],
@@ -6205,6 +6589,10 @@ exports[`Dashboard top nav render with all components 1`] = `
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
+                  "workspace": Object {
+                    "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                    "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                  },
                 },
               },
             },
@@ -6322,6 +6710,26 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "getPerPage": [Function],
               },
             },
+            "scopedHistory": Object {
+              "action": "PUSH",
+              "block": [MockFunction],
+              "createHref": [MockFunction],
+              "createSubHistory": [MockFunction],
+              "go": [MockFunction],
+              "goBack": [MockFunction],
+              "goForward": [MockFunction],
+              "length": 1,
+              "listen": [MockFunction],
+              "location": Object {
+                "hash": "",
+                "key": undefined,
+                "pathname": "/",
+                "search": "",
+                "state": undefined,
+              },
+              "push": [MockFunction],
+              "replace": [MockFunction],
+            },
             "toastNotifications": Object {
               "add": [MockFunction],
               "addDanger": [MockFunction],
@@ -6341,8 +6749,15 @@ exports[`Dashboard top nav render with all components 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -6359,6 +6774,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
+              "getUserProvidedWithScope": [MockFunction],
               "isCustom": [MockFunction],
               "isDeclared": [MockFunction],
               "isDefault": [MockFunction],
@@ -6412,6 +6828,15 @@ exports[`Dashboard top nav render with all components 1`] = `
               "initialized$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": false,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
+              "workspaceError$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": "",
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -6472,6 +6897,7 @@ exports[`Dashboard top nav render with all components 1`] = `
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
             showDataSourceMenu={false}
+            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={true}
             showQueryBar={false}

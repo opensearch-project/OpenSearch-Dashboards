@@ -125,6 +125,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
   private getCreateMenuItems(): ReactElement[] {
     return [...this.props.getAllFactories()]
       .filter(
+        // @ts-expect-error TS2801 TODO(ts-error): fixme
         (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
       )
       .map((factory) => (

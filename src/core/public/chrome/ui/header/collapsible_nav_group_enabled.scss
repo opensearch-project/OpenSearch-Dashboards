@@ -1,4 +1,9 @@
 .context-nav-wrapper {
+  top: var(--global-banner-height, 0);
+  height: calc(100% - var(--global-banner-height, 0));
+
+  // TODO: Remove this after https://github.com/opensearch-project/oui/issues/1622 is resolved
+  z-index: $ouiZHeader - 3 !important;
   border: none !important;
   border-top-right-radius: $euiSizeL;
   background-color: $euiSideNavBackgroundColor;
@@ -135,7 +140,7 @@
   }
 
   .searchBarIcon {
-    position: fixed;
+    position: relative;
     top: $ouiHeaderChildSize;
     left: 0;
   }

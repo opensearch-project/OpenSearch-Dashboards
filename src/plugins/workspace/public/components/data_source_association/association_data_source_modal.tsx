@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
+  EuiBadgeGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import { i18n } from '@osd/i18n';
@@ -31,6 +32,8 @@ import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../..
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
 import { ConnectionTypeIcon } from '../workspace_form/connection_type_icon';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+import './association_data_source_modal.scss';
 
 const ConnectionIcon = ({
   connection: { connectionType, type },
@@ -84,46 +87,90 @@ const renderOption = (option: DataSourceModalOption) => {
   return label;
 };
 
+const getOpenSearchRelatedConnectionsBadges = (
+  relatedCrossClusterConnections: DataSourceConnection[] | undefined,
+  relatedDirectConnections: DataSourceConnection[] | undefined,
+  mode: AssociationDataSourceModalMode
+) => {
+  return (
+    <EuiBadgeGroup>
+      {mode !== AssociationDataSourceModalMode.DirectQueryConnections &&
+        relatedCrossClusterConnections &&
+        relatedCrossClusterConnections.length > 0 && (
+          <EuiBadge>
+            {i18n.translate('workspace.form.selectDataSource.crossClusterOptionBadge', {
+              defaultMessage: '+ {relatedConnections} Cross cluster',
+              values: {
+                relatedConnections: relatedCrossClusterConnections.length,
+              },
+            })}
+          </EuiBadge>
+        )}
+      {mode === AssociationDataSourceModalMode.DirectQueryConnections &&
+        relatedDirectConnections &&
+        relatedDirectConnections.length > 0 && (
+          <EuiBadge>
+            {i18n.translate('workspace.form.selectDataSource.directQueryOptionBadge', {
+              defaultMessage: '+ {relatedConnections} Direct query',
+              values: {
+                relatedConnections: relatedDirectConnections.length,
+              },
+            })}
+          </EuiBadge>
+        )}
+    </EuiBadgeGroup>
+  );
+};
+
 const convertConnectionToOption = ({
   connection,
   selectedConnectionIds,
   logos,
+  mode,
 }: {
   connection: DataSourceConnection;
   selectedConnectionIds: string[];
   logos: Logos;
-}) => ({
-  label: connection.name,
-  key: connection.id,
-  description: connection.description,
-  append:
-    connection.relatedConnections && connection.relatedConnections.length > 0 ? (
-      <EuiBadge>
-        {i18n.translate('workspace.form.selectDataSource.optionBadge', {
-          defaultMessage: '+ {relatedConnections} related',
-          values: {
-            relatedConnections: connection.relatedConnections.length,
-          },
-        })}
-      </EuiBadge>
-    ) : undefined,
-  disabled: connection.connectionType === DataSourceConnectionType.DirectQueryConnection,
-  checked:
-    connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
-    selectedConnectionIds.includes(connection.id)
-      ? ('on' as const)
-      : undefined,
-  prepend:
-    connection.connectionType === DataSourceConnectionType.DirectQueryConnection ? (
-      <>
-        <div style={{ width: 16 }} />
+  mode: AssociationDataSourceModalMode;
+}) => {
+  const relatedCrossClusterConnections = connection.relatedConnections?.filter(
+    (relatedConnection) => relatedConnection.type === DataSourceEngineType.OpenSearchCrossCluster
+  );
+
+  const relatedDirectConnections = connection.relatedConnections?.filter(
+    (relatedConnection) =>
+      relatedConnection.connectionType === DataSourceConnectionType.DirectQueryConnection
+  );
+
+  return {
+    label: connection.name,
+    key: connection.id,
+    description: connection.description,
+    append: getOpenSearchRelatedConnectionsBadges(
+      relatedCrossClusterConnections,
+      relatedDirectConnections,
+      mode
+    ),
+    disabled: !!(
+      connection.connectionType === DataSourceConnectionType.DirectQueryConnection ||
+      connection?.parentId
+    ),
+    checked:
+      connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
+      selectedConnectionIds.includes(connection.id) &&
+      !connection?.parentId
+        ? ('on' as const)
+        : undefined,
+    prepend: connection?.parentId ? (
+      <div className="aligned-child-logo">
         <ConnectionIcon connection={connection} logos={logos} />
-      </>
+      </div>
     ) : (
       <ConnectionIcon connection={connection} logos={logos} />
     ),
-  parentId: connection.parentId,
-});
+    parentId: connection.parentId,
+  };
+};
 
 const convertConnectionsToOptions = ({
   connections,
@@ -131,12 +178,14 @@ const convertConnectionsToOptions = ({
   selectedConnectionIds,
   excludedConnectionIds,
   logos,
+  mode,
 }: {
   connections: DataSourceConnection[];
   excludedConnectionIds: string[];
   showDirectQueryConnections: boolean;
   selectedConnectionIds: string[];
   logos: Logos;
+  mode: AssociationDataSourceModalMode;
 }) => {
   return connections
     .flatMap((connection) => {
@@ -154,18 +203,18 @@ const convertConnectionsToOptions = ({
         return [];
       }
 
-      if (showDirectQueryConnections) {
-        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
-          return [];
-        }
-        return [
-          connection,
-          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
-        ];
+      if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
+        return showDirectQueryConnections ? [] : [connection];
       }
-      return [connection];
+
+      return [
+        connection,
+        ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
+      ];
     })
-    .map((connection) => convertConnectionToOption({ connection, selectedConnectionIds, logos }));
+    .map((connection) =>
+      convertConnectionToOption({ connection, selectedConnectionIds, logos, mode })
+    );
 };
 
 export interface AssociationDataSourceModalProps {
@@ -230,8 +279,10 @@ export const AssociationDataSourceModalContent = ({
 
   useEffect(() => {
     setIsLoading(true);
-    getDataSourcesList(savedObjects.client, ['*'])
-      .then((dataSourcesList) => fetchDataSourceConnections(dataSourcesList, http, notifications))
+    getDataSourcesList(savedObjects.client)
+      .then((dataSourcesList) =>
+        fetchDataSourceConnections(dataSourcesList, http, notifications, mode)
+      )
       .then((connections) => {
         setAllConnections(connections);
       })
@@ -248,6 +299,7 @@ export const AssociationDataSourceModalContent = ({
         selectedConnectionIds,
         showDirectQueryConnections: mode === AssociationDataSourceModalMode.DirectQueryConnections,
         logos,
+        mode,
       })
     );
   }, [allConnections, excludedConnectionIds, selectedConnectionIds, mode, logos]);
@@ -287,6 +339,7 @@ export const AssociationDataSourceModalContent = ({
               'workspace.detail.dataSources.associateModal.searchPlaceholder',
               { defaultMessage: 'Search' }
             ),
+            compressed: true,
           }}
           options={options}
           onChange={handleSelectionChange}
@@ -305,8 +358,8 @@ export const AssociationDataSourceModalContent = ({
       <EuiModalFooter>
         <EuiSmallButton onClick={closeModal}>
           <FormattedMessage
-            id="workspace.detail.dataSources.associateModal.close.button"
-            defaultMessage="Close"
+            id="workspace.detail.dataSources.associateModal.cancel.button"
+            defaultMessage="Cancel"
           />
         </EuiSmallButton>
         <EuiSmallButton

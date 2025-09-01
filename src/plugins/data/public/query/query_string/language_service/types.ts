@@ -5,6 +5,8 @@
 
 import { ISearchInterceptor } from '../../../search';
 import {
+  Filter,
+  OSD_FIELD_TYPES,
   Query,
   QueryEditorExtensionConfig,
   QueryStringContract,
@@ -51,8 +53,10 @@ export interface LanguageConfig {
     bodyProps: any
   ) => EditorInstance<any, any, any>;
   fields?: {
+    sortable?: boolean;
     filterable?: boolean;
     visualizable?: boolean;
+    formatter?: (value: any, type: OSD_FIELD_TYPES) => any;
   };
   showDocLinks?: boolean;
   docLink?: {
@@ -63,4 +67,7 @@ export interface LanguageConfig {
   supportedAppNames?: string[];
   hideDatePicker?: boolean;
   sampleQueries?: SampleQuery[];
+  addFiltersToQuery?: (query: string, filters: Filter[]) => string;
+  /** Add filters to the natural language prompt. */
+  addFiltersToPrompt?: (prompt: string, filters: Filter[]) => string;
 }

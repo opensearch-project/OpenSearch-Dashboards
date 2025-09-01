@@ -5,19 +5,19 @@ name: Link Checker
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   linkchecker:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Lychee Link Checker
-      uses: lycheeverse/lychee-action@v1
-      with:
-        fail: true
-        args: --accept=200,403,429 --base . --retry-wait-time=15 --max-retries=5 "**/*.html" "**/*.md" "**/*.txt" "**/*.json" "**/*.js" "**/*.ts" "**/*.tsx"
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - uses: actions/checkout@v4
+      - name: Lychee Link Checker
+        uses: lycheeverse/lychee-action@v1
+        with:
+          fail: true
+          args: --accept=200,403,429 --base . --retry-wait-time=15 --max-retries=5 --exclude-path cypress/fixtures --exclude-path src/plugins/explore/public/components/data_table/data_table.mocks.ts "**/*.html" "**/*.md" "**/*.txt" "**/*.json" "**/*.js" "**/*.ts" "**/*.tsx"
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

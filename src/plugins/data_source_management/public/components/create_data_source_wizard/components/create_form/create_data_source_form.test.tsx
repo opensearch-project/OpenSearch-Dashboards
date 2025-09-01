@@ -74,6 +74,7 @@ describe('Datasource Management: Create Datasource form', () => {
   beforeEach(() => {
     component = mount(
       wrapWithIntl(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <CreateDataSourceForm
           handleTestConnection={mockTestConnectionHandler}
           handleSubmit={mockSubmitHandler}
@@ -158,6 +159,29 @@ describe('Datasource Management: Create Datasource form', () => {
     findTestSubject(component, 'createDataSourceButton').simulate('click');
     expect(mockTestConnectionHandler).toHaveBeenCalled();
     expect(mockSubmitHandler).toHaveBeenCalled(); // should call submit as all fields are valid
+  });
+
+  /* Endpoint */
+  test('should pass trimmed endpoint when testing and creating data source', () => {
+    /* set form fields */
+    setAuthTypeValue(authTypeIdentifier, AuthType.UsernamePasswordType);
+    changeTextFieldValue(titleIdentifier, 'test');
+    changeTextFieldValue(descriptionIdentifier, 'test');
+    changeTextFieldValue(endpointIdentifier, '       https://testTrimEndpoint.com       ');
+    changeTextFieldValue(usernameIdentifier, 'test123');
+    changeTextFieldValue(passwordIdentifier, 'test123');
+    findTestSubject(component, 'createDataSourceTestConnectionButton').simulate('click');
+    findTestSubject(component, 'createDataSourceButton').simulate('click');
+    expect(mockTestConnectionHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        endpoint: 'https://testTrimEndpoint.com',
+      })
+    );
+    expect(mockSubmitHandler).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        endpoint: 'https://testTrimEndpoint.com',
+      })
+    );
   });
 
   /* No Auth - Username & Password */
@@ -265,6 +289,7 @@ describe('Datasource Management: Create Datasource form with different authType 
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -304,6 +329,7 @@ describe('Datasource Management: Create Datasource form with different authType 
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -343,6 +369,7 @@ describe('Datasource Management: Create Datasource form with different authType 
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -406,6 +433,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -459,6 +487,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -506,6 +535,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
       component = mount(
         wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <CreateDataSourceForm
             handleTestConnection={mockTestConnectionHandler}
             handleSubmit={mockSubmitHandler}
@@ -546,6 +576,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
 
     component = mount(
       wrapWithIntl(
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         <CreateDataSourceForm
           handleTestConnection={mockTestConnectionHandler}
           handleSubmit={mockSubmitHandler}

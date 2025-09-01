@@ -30,8 +30,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
-// @ts-expect-error
-import { saveAs } from '@elastic/filesaver';
+import { saveAs } from 'file-saver';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eui';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';

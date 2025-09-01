@@ -12,8 +12,8 @@
     "build": "../../../../scripts/use_node ../../../../scripts/remove.js './target' && tsc"
   },
   "devDependencies": {
-    "@elastic/eui": "npm:@opensearch-project/oui@1.17.0",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.21.0",
     "react": "^16.14.0",
-    "typescript": "4.0.2"
+    "typescript": "4.5.5"
   }
 }

@@ -42,10 +42,15 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       signal,
       body: {
         pollQueryResultsParams: request.params?.pollQueryResultsParams,
+        timeRange: request.params?.body?.timeRange,
       },
     };
 
-    return fetch(context, this.queryService.queryString.getQuery()).pipe(
+    // Use query from request if available, otherwise fall back to queryStringManager
+    const query =
+      request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
+
+    return fetch(context, query).pipe(
       catchError((error) => {
         return throwError(error);
       })
@@ -62,6 +67,16 @@ export class SQLSearchInterceptor extends SearchInterceptor {
         .getDatasetService()
         .getType(datasetType);
       strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
+
+      if (datasetTypeConfig?.languageOverrides?.SQL?.hideDatePicker === false) {
+        request.params = {
+          ...request.params,
+          body: {
+            ...request.params.body,
+            timeRange: this.queryService.timefilter.timefilter.getTime(),
+          },
+        };
+      }
     }
 
     return this.runSearch(request, options.abortSignal, strategy);

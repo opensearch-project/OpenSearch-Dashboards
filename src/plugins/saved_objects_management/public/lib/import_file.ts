@@ -48,9 +48,11 @@ export async function importFile(
   formData.append('file', file);
   const query = createNewCopies ? { createNewCopies } : { overwrite };
   if (selectedDataSourceId) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     query.dataSourceId = selectedDataSourceId;
   }
   if (dataSourceEnabled) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     query.dataSourceEnabled = dataSourceEnabled;
   }
   return await http.post<ImportResponse>('/api/saved_objects/_import', {

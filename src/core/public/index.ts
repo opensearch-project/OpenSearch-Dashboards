@@ -102,6 +102,7 @@ import {
 } from './context';
 import { Branding } from '../types';
 import { WorkspacesStart, WorkspacesSetup } from './workspace';
+import { KeyboardShortcutSetup, KeyboardShortcutStart } from './keyboard_shortcut';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -110,13 +111,17 @@ export { CoreContext, CoreSystem } from './core_system';
 export {
   DEFAULT_APP_CATEGORIES,
   WORKSPACE_TYPE,
+  WORKSPACE_USE_CASE_PREFIX,
   cleanWorkspaceId,
+  isNavGroupInFeatureConfigs,
+  getUseCaseFeatureConfig,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
   SEARCH_USE_CASE_ID,
   ESSENTIAL_USE_CASE_ID,
   OBSERVABILITY_USE_CASE_ID,
   SECURITY_ANALYTICS_USE_CASE_ID,
+  ENABLE_AI_FEATURES,
 } from '../utils';
 export {
   AppCategory,
@@ -134,6 +139,8 @@ export {
   WorkspaceAttributeWithPermission,
   UiSettingScope,
   PermissionModeId,
+  WorkspacePermissionMode,
+  WorkspaceFindOptions,
 } from '../types';
 
 export {
@@ -282,6 +289,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link WorkspacesSetup} */
   workspaces: WorkspacesSetup;
+  /** {@link KeyboardShortcutsSetup} */
+  keyboardShortcut: KeyboardShortcutSetup;
 }
 
 /**
@@ -338,6 +347,8 @@ export interface CoreStart {
   };
   /** {@link WorkspacesStart} */
   workspaces: WorkspacesStart;
+  /** {@link KeyboardShortcutStart} */
+  keyboardShortcut: KeyboardShortcutStart;
 }
 
 export {
@@ -404,9 +415,18 @@ export {
   WorkspacesStart,
   WorkspacesSetup,
   WorkspacesService,
+  WorkspaceError,
   WorkspaceObject,
   IWorkspaceClient,
   IWorkspaceResponse,
 } from './workspace';
 
+export {
+  KeyboardShortcutSetup,
+  KeyboardShortcutStart,
+  ShortcutDefinition,
+} from './keyboard_shortcut';
+
 export { debounce } from './utils';
+
+export { searchNavigationLinks, GlobalSearchPageItem, renderNavGroupElement } from './chrome';

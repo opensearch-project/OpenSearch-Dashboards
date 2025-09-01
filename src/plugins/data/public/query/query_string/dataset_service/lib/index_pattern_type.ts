@@ -31,11 +31,13 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
   toDataset: (path) => {
     const pattern = path[path.length - 1];
     const patternMeta = pattern.meta as DataStructureCustomMeta;
+
     return {
       id: pattern.id,
       title: pattern.title,
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
+      isRemoteDataset: pattern?.title?.includes(':') ?? false,
       dataSource: pattern.parent
         ? {
             id: pattern.parent.id,
@@ -66,12 +68,10 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (dataset): string[] => {
-    if (dataset.dataSource?.type === 'OpenSearch Serverless') {
-      return ['kuery', 'lucene'];
-    }
     return ['kuery', 'lucene', 'PPL', 'SQL'];
   },
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   getSampleQueries: (dataset: Dataset, language: string) => {
     switch (language) {
       case 'PPL':

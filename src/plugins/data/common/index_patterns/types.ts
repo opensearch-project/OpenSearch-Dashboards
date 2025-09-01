@@ -40,6 +40,8 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 export interface IIndexPattern {
   fields: IFieldType[];
   title: string;
+  displayName?: string;
+  description?: string;
   id?: string;
   type?: string;
   timeFieldName?: string;
@@ -55,6 +57,8 @@ export interface IndexPatternAttributes {
   type: string;
   fields: string;
   title: string;
+  displayName?: string;
+  description?: string;
   typeMeta: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -181,6 +185,15 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
+
+  /**
+   * @experimental These fields are experimental and are subject to change
+   * TODO: Refactor and move them into DataViewField
+   */
+  suggestions?: {
+    values?: string[]; // fetched from the dataset
+    topValues?: string[]; // computed from the query result
+  };
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;
@@ -194,6 +207,8 @@ export interface IndexPatternSpec {
   id?: string;
   version?: string;
   title?: string;
+  displayName?: string;
+  description?: string;
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];

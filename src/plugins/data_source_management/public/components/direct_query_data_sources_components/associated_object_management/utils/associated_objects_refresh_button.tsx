@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiSmallButton } from '@elastic/eui';
 import React from 'react';
 import { ASSC_OBJ_REFRESH_BTN } from './associated_objects_tab_utils';
 
@@ -18,8 +18,13 @@ export const AssociatedObjectsRefreshButton: React.FC<AssociatedObjectsRefreshBu
   const { isLoading, onClick } = props;
 
   return (
-    <EuiButton iconType="refresh" onClick={onClick} isLoading={isLoading} isDisabled={isLoading}>
+    <EuiSmallButton
+      iconType="refresh"
+      onClick={onClick}
+      isLoading={isLoading}
+      isDisabled={isLoading}
+    >
       {ASSC_OBJ_REFRESH_BTN}
-    </EuiButton>
+    </EuiSmallButton>
   );
 };

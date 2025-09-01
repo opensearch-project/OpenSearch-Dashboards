@@ -30,6 +30,8 @@
 
 import { monaco } from '@osd/monaco';
 import { IFieldType, IndexPattern } from '../../../common/index_patterns';
+import { DataView as Dataset } from '../../../common/data_views';
+
 import { IDataPluginServices } from '../../types';
 
 export enum QuerySuggestionTypes {
@@ -47,7 +49,8 @@ export type QuerySuggestionGetFn = (
 /** @public **/
 export interface QuerySuggestionGetFnArgs {
   language: string;
-  indexPattern: IndexPattern | undefined;
+  indexPattern: IndexPattern | Dataset | undefined;
+  datasetType?: string;
   query: string;
   selectionStart: number;
   selectionEnd: number;
@@ -55,6 +58,7 @@ export interface QuerySuggestionGetFnArgs {
   boolFilter?: any;
   position?: monaco.Position;
   services?: IDataPluginServices;
+  baseLanguage?: string; // Used to enrich the Prompt mode Suggestions with Commands from base language
 }
 
 /** @public **/
@@ -65,6 +69,9 @@ export interface QuerySuggestionBasic {
   start: number;
   text: string;
   cursorIndex?: number;
+  sortText?: string;
+  documentation?: string;
+  insertText?: string;
 }
 
 /** @public **/
@@ -82,6 +89,7 @@ export interface MonacoCompatibleQuerySuggestion
   insertTextRules?: monaco.languages.CompletionItemInsertTextRule;
   replacePosition?: monaco.Range;
   sortText?: string;
+  documentation?: string;
 }
 
 /** @public **/

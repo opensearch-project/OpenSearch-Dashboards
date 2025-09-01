@@ -9,7 +9,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiHorizontalRule,
-  EuiButton,
+  EuiSmallButton,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
@@ -108,12 +108,12 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             data-test-subj="createButton"
             onClick={() => setMode(mode === 'view' ? 'edit' : 'view')}
           >
             {mode === 'view' ? 'Edit' : 'Cancel'}
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

@@ -20,6 +20,10 @@ describe('isActiveNavLink', () => {
     expect(isActiveNavLink('data-explorer', 'discover')).toBe(true);
   });
 
+  it('should return true if the appId is "data-explorer" and linkId is "explore"', () => {
+    expect(isActiveNavLink('data-explorer', 'explore')).toBe(true);
+  });
+
   it('should return false if the appId and linkId do not match', () => {
     expect(isActiveNavLink('dashboard', 'discover')).toBe(false);
   });
@@ -100,9 +104,27 @@ describe('createRecentNavLink', () => {
       },
       mockNavLinks,
       mockBasePath,
-      mockedNavigateToUrl
+      mockedNavigateToUrl,
+      true
     );
 
     expect(recentLink.href).toEqual('http://localhost/test/w/foo/app/foo');
+  });
+
+  it('create a recent link when workspace disabled', () => {
+    const recentLink = createRecentNavLink(
+      {
+        id: 'foo',
+        label: 'foo',
+        link: '/app/foo',
+        workspaceId: 'foo',
+      },
+      mockNavLinks,
+      mockBasePath,
+      mockedNavigateToUrl,
+      false
+    );
+
+    expect(recentLink.href).toEqual('http://localhost/test/app/foo');
   });
 });

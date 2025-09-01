@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { searchPages } from './search_pages_command';
+import { workspaceSearchPages } from './search_pages_command';
 import { WorkspaceUseCase } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
-import { NavGroupItemInMap, WorkspaceObject } from 'opensearch-dashboards/public';
+import { ChromeNavLink, NavGroupItemInMap, WorkspaceObject } from 'opensearch-dashboards/public';
 
-describe('<SearchPagesCommand />', () => {
+describe('<workspaceSearchPagesCommand />', () => {
   const registeredUseCases = new BehaviorSubject([
     {
       id: 'foo',
@@ -26,7 +26,7 @@ describe('<SearchPagesCommand />', () => {
     features: ['use-case-foo-group'],
   };
 
-  const navGroup: Record<string, NavGroupItemInMap> = {
+  const navGroup: Record<string, NavGroupItemInMap & { navLinks: ChromeNavLink[] }> = {
     'foo-group': {
       id: 'foo-group',
       title: 'Foo Group',
@@ -35,15 +35,21 @@ describe('<SearchPagesCommand />', () => {
         {
           id: 'foo-group-link1',
           title: 'Foo Group Link 1',
+          baseUrl: 'link1',
+          href: 'link1',
         },
         {
           id: 'foo-group-link2',
           title: 'Foo Group Link 2',
+          baseUrl: 'link2',
+          href: 'link2',
         },
         {
           id: 'foo-group-link3',
           title: 'Foo Group Link 3',
           hidden: true,
+          baseUrl: 'link3',
+          href: 'link3',
         },
       ],
     },
@@ -55,10 +61,14 @@ describe('<SearchPagesCommand />', () => {
         {
           id: 'dataAdministration-link1',
           title: 'Data Administration Link 1',
+          baseUrl: 'link1',
+          href: 'link1',
         },
         {
-          id: 'dataAdministration-link1',
+          id: 'dataAdministration-link2',
           title: 'Data Administration Link 2',
+          baseUrl: 'link2',
+          href: 'link2',
         },
       ],
     },
@@ -70,10 +80,14 @@ describe('<SearchPagesCommand />', () => {
         {
           id: 'settingsAndSetup-link1',
           title: 'Settings and Setup Link 1',
+          baseUrl: 'link1',
+          href: 'link1',
         },
         {
-          id: 'settingsAndSetup-link1',
+          id: 'settingsAndSetup-link2',
           title: 'Settings and Setup Link 2',
+          baseUrl: 'link2',
+          href: 'link2',
         },
       ],
     },
@@ -97,29 +111,131 @@ describe('<SearchPagesCommand />', () => {
 
   const callbackFn = jest.fn();
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('search return empty result', async () => {
-    const searchResult = await searchPages('bar', registeredUseCases, coreStartMock, callbackFn);
+    const searchResult = await workspaceSearchPages(
+      'bar',
+      registeredUseCases,
+      coreStartMock,
+      callbackFn
+    );
 
     expect(searchResult).toHaveLength(0);
   });
 
   it('search return matched result', async () => {
-    const searchResult = await searchPages('foo', registeredUseCases, coreStartMock, callbackFn);
+    const searchResult = await workspaceSearchPages(
+      'foo',
+      registeredUseCases,
+      coreStartMock,
+      callbackFn
+    );
 
     expect(searchResult).toHaveLength(2);
   });
 
   it('search return pages out of workspace', async () => {
-    let searchResult = await searchPages('Settings', registeredUseCases, coreStartMock, callbackFn);
+    let searchResult = await workspaceSearchPages(
+      'Settings',
+      registeredUseCases,
+      coreStartMock,
+      callbackFn
+    );
 
     expect(searchResult).toHaveLength(2);
 
-    searchResult = await searchPages(
+    searchResult = await workspaceSearchPages(
       'Administration',
       registeredUseCases,
       coreStartMock,
       callbackFn
     );
     expect(searchResult).toHaveLength(2);
+  });
+
+  it('search click callback with non system link should navigate correctly', async () => {
+    const searchResult = await workspaceSearchPages(
+      'foo',
+      registeredUseCases,
+      coreStartMock,
+      callbackFn
+    );
+
+    (searchResult[0] as any).props?.onCallback({
+      navGroup: {
+        type: 'non-system',
+      },
+      href: 'test-link',
+      id: 'test',
+    });
+
+    expect(coreStartMock.application.navigateToApp).toBeCalledWith('test');
+  });
+
+  it('search click callback with system link should use window assign correctly', async () => {
+    const mockAssign = jest.fn();
+
+    Object.defineProperty(window, 'location', {
+      value: { assign: mockAssign },
+      writable: true,
+    });
+
+    const testUrl = 'http://localhost:5601/test';
+
+    const searchResult = await workspaceSearchPages(
+      'Settings',
+      registeredUseCases,
+      coreStartMock,
+      callbackFn
+    );
+
+    (searchResult[0] as any).props?.onCallback({
+      navGroup: {
+        type: 'system',
+      },
+      href: testUrl,
+      id: 'test',
+    });
+
+    expect(coreStartMock.application.navigateToApp).not.toBeCalled();
+    expect(window.location.assign).toBeCalledWith(testUrl);
+  });
+
+  it('search click callback with system link and basePath should use window assign correctly', async () => {
+    const mockAssign = jest.fn();
+
+    const originalBasePath = coreStartMock.http.basePath;
+    const basePath = '/foo';
+    coreStartMock.http.basePath.basePath = basePath;
+
+    Object.defineProperty(window, 'location', {
+      value: { assign: mockAssign },
+      writable: true,
+    });
+
+    const testUrl = `http://localhost:5601${basePath}/app/test`;
+
+    const searchResult = await workspaceSearchPages(
+      'Settings',
+      registeredUseCases,
+      coreStartMock,
+      callbackFn
+    );
+
+    (searchResult[0] as any).props?.onCallback({
+      navGroup: {
+        type: 'system',
+      },
+      href: testUrl,
+      id: 'test',
+    });
+
+    expect(coreStartMock.application.navigateToApp).not.toBeCalled();
+    expect(window.location.assign).toBeCalledWith(testUrl);
+
+    coreStartMock.http.basePath.basePath = originalBasePath;
   });
 });

@@ -72,6 +72,7 @@ function mockProps() {
     navControlsRight$: new BehaviorSubject([]),
     navControlsExpandedCenter$: new BehaviorSubject([]),
     navControlsExpandedRight$: new BehaviorSubject([]),
+    navControlsPrimaryHeaderRight$: new BehaviorSubject([]),
     basePath: http.basePath,
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
@@ -226,7 +227,7 @@ describe('Header', () => {
     expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeFalsy();
     expect(component.find('HeaderBadge').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerLeftControl"]').exists()).toBeFalsy();
-    expect(component.find('HeaderNavControls').exists()).toBeFalsy();
+    expect(component.find('HeaderNavControls')).toHaveLength(1);
     expect(component.find('[data-test-subj="headerCenterControl"]').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
     expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
@@ -271,5 +272,55 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     component.find(EuiHeaderSectionItemButton).first().simulate('click');
     expect(props.onIsLockedUpdate).toBeCalledWith(true);
+  });
+
+  describe('banner plugin integration', () => {
+    it('renders banner container when banner is present', () => {
+      const props = {
+        ...mockProps(),
+        globalBanner$: new BehaviorSubject({
+          component: 'test-banner',
+        }),
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      // Check that the header has the correct class
+      expect(component.find('.headerGlobalNav--withBanner').exists()).toBeTruthy();
+    });
+
+    it('does not render banner container when banner is not present', () => {
+      const props = {
+        ...mockProps(),
+        // No banner content
+        globalBanner$: new BehaviorSubject(undefined),
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('.globalBanner').exists()).toBeFalsy();
+    });
+
+    it('does not render banner container when globalBanner$ is not provided', () => {
+      const props = {
+        ...mockProps(),
+        // No globalBanner$ property
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('.globalBanner').exists()).toBeFalsy();
+    });
+
+    it('renders banner container when useUpdatedHeader is true', () => {
+      const props = {
+        ...mockProps(),
+        useUpdatedHeader: true,
+        // Add a mock globalBanner$ observable to simulate a banner being present
+        globalBanner$: new BehaviorSubject({
+          component: 'test-banner',
+        }),
+      };
+
+      const component = mountWithIntl(<Header {...props} />);
+      expect(component.find('.globalBanner').exists()).toBeTruthy();
+    });
   });
 });

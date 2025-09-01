@@ -1,2 +1,0 @@
-fix:
-- [Workspace]Disable "Save changes" button on character limit exceeded ([#8153](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8153))

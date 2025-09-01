@@ -87,6 +87,7 @@ export class CreateIndexPatternWizard extends Component<
 > {
   static contextType = contextType;
 
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: IndexPatternManagmentContextValue;
 
   dataSourceEnabled: boolean;
@@ -166,28 +167,51 @@ export class CreateIndexPatternWizard extends Component<
       />
     );
 
-    // query local and remote indices, updating state independently
-    ensureMinimumTime(
-      this.catchAndWarn(
-        getIndices({ http, getIndexTags, pattern: '*', searchClient, dataSourceId }),
-
-        [],
-        indicesFailMsg
-      )
-    ).then((allIndices: MatchedItem[]) =>
-      this.setState({ allIndices, isInitiallyLoadingIndices: false })
+    // Immediately fetch and show local indices
+    const localIndicesPromise = this.catchAndWarn(
+      getIndices({ http, getIndexTags, pattern: '*', searchClient, dataSourceId }),
+      [],
+      indicesFailMsg
     );
 
-    this.catchAndWarn(
-      // if we get an error from remote cluster query, supply fallback value that allows user entry.
-      // ['a'] is fallback value
-      getIndices({ http, getIndexTags, pattern: '*:*', searchClient, dataSourceId }),
+    // Start fetching remote indices in parallel if available
+    const remoteIndicesPromise = dataSourceRef?.relatedConnections?.length
+      ? this.catchAndWarn(
+          Promise.all(
+            dataSourceRef.relatedConnections.map((connection) =>
+              getIndices({
+                http,
+                getIndexTags,
+                pattern: `${connection.title}:*`,
+                searchClient,
+                dataSourceId,
+              })
+            )
+          ).then((results) => results.flat()), // Flatten the array before passing to catchAndWarn
+          ['a'],
+          clustersFailMsg
+        )
+      : Promise.resolve([]);
 
-      ['a'],
-      clustersFailMsg
-    ).then((remoteIndices: string[] | MatchedItem[]) =>
-      this.setState({ remoteClustersExist: !!remoteIndices.length })
-    );
+    // Show local indices first
+    const localIndices = await ensureMinimumTime(localIndicesPromise);
+    this.setState({
+      allIndices: localIndices,
+      isInitiallyLoadingIndices: false,
+    });
+
+    // Then append remote indices when they arrive
+    const remoteResults = await remoteIndicesPromise;
+    const remoteIndices = remoteResults
+      .flat()
+      .filter((item): item is MatchedItem => typeof item !== 'string');
+
+    if (remoteIndices.length) {
+      this.setState((prevState) => ({
+        allIndices: [...prevState.allIndices, ...remoteIndices],
+        remoteClustersExist: true,
+      }));
+    }
   };
 
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {

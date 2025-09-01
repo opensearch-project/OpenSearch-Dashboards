@@ -20,10 +20,12 @@ export const AdvancedSelector = ({
   services,
   onSelect,
   onCancel,
+  supportedTypes,
 }: {
   services: IDataPluginServices;
   onSelect: (query: Partial<Query>) => void;
   onCancel: () => void;
+  supportedTypes?: string[];
 }) => {
   const queryString = getQueryService().queryString;
 
@@ -66,6 +68,7 @@ export const AdvancedSelector = ({
       setPath={setPath}
       onNext={(dataset) => setSelectedDataset(dataset)}
       onCancel={onCancel}
+      supportedTypes={supportedTypes}
     />
   );
 };

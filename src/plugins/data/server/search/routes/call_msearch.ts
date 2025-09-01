@@ -32,7 +32,12 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { ApiResponse } from '@opensearch-project/opensearch';
 import { SearchResponse } from 'elasticsearch';
-import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
+import {
+  IUiSettingsClient,
+  IScopedClusterClient,
+  SharedGlobalConfig,
+  OpenSearchClient,
+} from 'src/core/server';
 
 import { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
 import { shimHitsTotal } from './shim_hits_total';
@@ -56,20 +61,15 @@ export function convertRequestBody(
   }, '');
 }
 
-interface CallMsearchDependencies {
-  opensearchClient: IScopedClusterClient;
+interface CallMsearchWithOpenSearchClientDependencies {
+  opensearchClient: OpenSearchClient;
   globalConfig$: Observable<SharedGlobalConfig>;
   uiSettings: IUiSettingsClient;
 }
 
-/**
- * Helper for the `/internal/_msearch` route, exported separately here
- * so that it can be reused elsewhere in the data plugin on the server,
- * e.g. SearchSource
- *
- * @internal
- */
-export function getCallMsearch(dependencies: CallMsearchDependencies) {
+export function getCallMsearchWithOpenSearchClient(
+  dependencies: CallMsearchWithOpenSearchClientDependencies
+) {
   return async (params: {
     body: MsearchRequestBody;
     signal?: AbortSignal;
@@ -90,8 +90,9 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     const body = convertRequestBody(params.body, timeout);
 
     const promise = shimAbortSignal(
-      opensearchClient.asCurrentUser.msearch(
+      opensearchClient.msearch(
         {
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           body,
         },
         {
@@ -100,6 +101,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
       ),
       params.signal
     );
+    // @ts-expect-error TS2352 TODO(ts-error): fixme
     const response = (await promise) as ApiResponse<{ responses: Array<SearchResponse<any>> }>;
 
     return {
@@ -111,4 +113,24 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
       },
     };
   };
+}
+
+interface CallMsearchDependencies {
+  opensearchClient: IScopedClusterClient;
+  globalConfig$: Observable<SharedGlobalConfig>;
+  uiSettings: IUiSettingsClient;
+}
+
+/**
+ * Helper for the `/internal/_msearch` route, exported separately here
+ * so that it can be reused elsewhere in the data plugin on the server,
+ * e.g. SearchSource
+ *
+ * @internal
+ */
+export function getCallMsearch(dependencies: CallMsearchDependencies) {
+  return getCallMsearchWithOpenSearchClient({
+    ...dependencies,
+    opensearchClient: dependencies.opensearchClient.asCurrentUser,
+  });
 }

@@ -8,20 +8,28 @@ import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
 import { monaco } from '@osd/monaco';
+import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryStringContract } from '../../query';
 import { findCursorTokenIndex } from './cursor';
 import { GeneralErrorListener } from './general_error_listerner';
 import { createParser } from '../opensearch_sql/parse';
 import { AutocompleteResultBase, KeywordSuggestion } from './types';
 import { ParsingSubject } from './types';
-import { quotesRegex } from './constants';
+import { quotesRegex, SuggestionItemDetailsTags } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
-import { QuerySuggestion } from '../../autocomplete';
+import { IDataPluginServices } from '../../types';
+import { DEFAULT_DATA, IFieldType, UI_SETTINGS } from '../../../common';
+import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
+import { getDataViews } from '../../services';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
   title: string;
 }
+
+export const removePotentialBackticks = (str: string): string => {
+  return str.replace(/^`?|\`?$/g, ''); // removes backticks only if they exist at the beginning and end
+};
 
 // Function to get raw suggestion data
 export const getRawSuggestionData$ = (
@@ -46,11 +54,11 @@ export const getRawSuggestionData$ = (
     })
   );
 
-const fetchFromAPI = async (api: any, body: string) => {
+const fetchFromAPI = async (http: HttpSetup, body: string) => {
   try {
-    return await api.http.fetch({
+    return await http.fetch({
       method: 'POST',
-      path: '/api/enhancements/search/sql',
+      path: `/api/enhancements/search/_sql`,
       body,
     });
   } catch (err) {
@@ -63,7 +71,7 @@ const fetchFromAPI = async (api: any, body: string) => {
 export const fetchData = (
   tables: string[],
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
-  api: any,
+  http: HttpSetup,
   queryString: QueryStringContract
 ) => {
   return new Promise((resolve, reject) => {
@@ -72,14 +80,14 @@ export const fetchData = (
       ({ dataSourceId, title }) => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table, dataSourceId, title));
-          return fetchFromAPI(api, body);
+          return fetchFromAPI(http, body);
         });
         return Promise.all(requests);
       },
       () => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table));
-          return fetchFromAPI(api, body);
+          return fetchFromAPI(http, body);
         });
         return Promise.all(requests);
       }
@@ -93,48 +101,181 @@ export const fetchData = (
   });
 };
 
-// Specific fetch function for table schemas
-// TODO: remove this after using data set table schema fetcher
-export const fetchTableSchemas = (tables: string[], api: any, queryString: QueryStringContract) => {
-  return fetchData(
-    tables,
-    (table, dataSourceId, title) => ({
-      query: { query: `DESCRIBE TABLES LIKE ${table}`, format: 'jdbc' },
-      df: {
-        meta: {
-          queryConfig: {
-            dataSourceId: dataSourceId || undefined,
-            title: title || undefined,
-          },
-        },
-      },
-    }),
-    api,
-    queryString
+// TODO: Pass in a Query Object instead of indexPattern object
+export const fetchColumnValues = async (
+  table: string,
+  column: string,
+  services: IDataPluginServices,
+  indexPattern: IndexPattern,
+  datasetType: string | undefined,
+  skipTimeFilter?: boolean
+): Promise<any[]> => {
+  const fieldInOsd = indexPattern.fields.getByName(column);
+
+  if (!fieldInOsd?.isSuggestionAvailable()) {
+    return [];
+  }
+
+  // For Boolean fields directly return the values
+  if (fieldInOsd?.type === 'boolean') {
+    return ['true', 'false'];
+  }
+
+  // Return cached Autocomplete Results if available
+  if (fieldInOsd?.spec.suggestions?.values && fieldInOsd?.spec.suggestions?.values.length > 0) {
+    return fieldInOsd.spec.suggestions.values;
+  }
+
+  // Return topQueryValues if available and fire async API call to update the cache for subsequent calls
+  if (
+    fieldInOsd?.spec.suggestions?.topValues &&
+    fieldInOsd?.spec.suggestions?.topValues.length > 0
+  ) {
+    // Fire async API call to update cache in non-blocking manner
+    updateFieldValuesAsync(
+      table,
+      column,
+      services,
+      indexPattern,
+      datasetType,
+      fieldInOsd,
+      skipTimeFilter
+    );
+    return fieldInOsd.spec.suggestions.topValues;
+  }
+
+  // Fire a synchronous query to fetch values
+  await updateFieldValuesAsync(
+    table,
+    column,
+    services,
+    indexPattern,
+    datasetType,
+    fieldInOsd,
+    skipTimeFilter
   );
+
+  // Return the results of synchronous calls
+  return fieldInOsd?.spec.suggestions?.values ?? [];
 };
 
-export const fetchFieldSuggestions = (
+// Non-blocking async function to update field values in background
+const updateFieldValuesAsync = async (
+  table: string,
+  column: string,
+  services: IDataPluginServices,
   indexPattern: IndexPattern,
-  modifyInsertText?: (input: string) => string
+  datasetType: string | undefined,
+  fieldInOsd: IndexPatternField | undefined,
+  skipTimeFilter?: boolean
+): Promise<void> => {
+  try {
+    // Check if conditions allow API call
+    if (!datasetType || !Object.values(DEFAULT_DATA.SET_TYPES).includes(datasetType)) {
+      return;
+    }
+    if (
+      !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
+      !fieldInOsd ||
+      !indexPattern
+    ) {
+      return;
+    }
+
+    const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
+
+    const dataView = await getDataViews().get(indexPattern.id!);
+    const dataset = await getDataViews().convertToDataset(dataView);
+
+    const searchSource = await services.data.search.searchSource.create();
+    searchSource.setFields({
+      index: dataView,
+      query: {
+        query: `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`,
+        language: 'PPL',
+        dataset,
+      },
+      skipTimeFilter,
+    });
+
+    const response = await searchSource.fetch();
+
+    // Extract field values from response
+    const values = response.hits.hits.map((hit) => hit._source?.[column]);
+
+    if (values) {
+      // Update the field with fresh API values
+      if (!fieldInOsd.spec.suggestions) {
+        fieldInOsd.spec.suggestions = {};
+      }
+      fieldInOsd.spec.suggestions.values = values;
+
+      // Save the updated IndexPattern to cache
+      getDataViews().saveToCache(indexPattern.id!, indexPattern as any);
+    }
+  } catch (error) {
+    // Silently failing here not blocking the user
+  }
+};
+
+export const formatValuesToSuggestions = <T extends { toString(): string | null } | null>(
+  values: T[], // generic for any value type
+  modifyInsertText?: (input: T) => string
+) => {
+  const valueSuggestions: MonacoCompatibleQuerySuggestion[] = values
+    .filter((val) => val !== null) // Only using the notNull values
+    .map((val: T, i) => {
+      return {
+        text: val?.toString() || '',
+        type: monaco.languages.CompletionItemKind.Value,
+        detail: SuggestionItemDetailsTags.Value,
+        sortText: (i + 1).toString().padStart(values.length.toString().length + 1, '0'), // keeps the order of sorted values
+        ...(modifyInsertText && { insertText: modifyInsertText(val) }),
+      };
+    });
+
+  return valueSuggestions;
+};
+
+export const formatFieldsToSuggestions = (
+  indexPattern: IndexPattern,
+  modifyInsertText?: (input: string) => string,
+  sortTextImportance?: string
 ) => {
   const filteredFields = indexPattern.fields.filter(
     (idxField: IndexPatternField) => !idxField?.subType
   ); // filter removed .keyword fields
 
-  const fieldSuggestions: QuerySuggestion[] = filteredFields.map((field) => {
+  const fieldSuggestions: MonacoCompatibleQuerySuggestion[] = filteredFields.map((field) => {
     return {
       text: field.name,
       type: monaco.languages.CompletionItemKind.Field,
       detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
       ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+      ...(sortTextImportance && { sortText: sortTextImportance }),
     };
   });
 
   return fieldSuggestions;
 };
 
-export const parseQuery = <
+export const formatAvailableFieldsToSuggestions = (
+  availableFields: IFieldType[],
+  modifyInsertText?: (input: string) => string,
+  sortTextImportanceFunction?: (input: string) => string
+) => {
+  return availableFields.map((field) => {
+    return {
+      text: field.name,
+      type: monaco.languages.CompletionItemKind.Field,
+      detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
+      ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+      ...(sortTextImportanceFunction && { sortText: sortTextImportanceFunction(field.name) }),
+    };
+  });
+};
+
+const singleParseQuery = <
   A extends AutocompleteResultBase,
   L extends LexerType,
   P extends ParserType
@@ -149,7 +290,8 @@ export const parseQuery = <
   query,
   cursor,
   context,
-}: ParsingSubject<A, L, P>) => {
+  skipSymbolicKeywords,
+}: ParsingSubject<A, L, P>): A => {
   const parser = createParser(Lexer, Parser, query);
   const { tokenStream } = parser;
   const errorListener = new GeneralErrorListener(tokenDictionary.SPACE);
@@ -173,13 +315,17 @@ export const parseQuery = <
   tokens.forEach((_, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
-
-    if (!literalName) {
+    let symbolicName;
+    if (!skipSymbolicKeywords) {
+      symbolicName = parser.vocabulary.getSymbolicName(tokenType);
+    }
+    if (!literalName && skipSymbolicKeywords) {
       return;
     }
 
     suggestKeywords.push({
-      value: literalName,
+      value: literalName || '',
+      symbolicName: symbolicName || '',
       id: tokenType,
     });
   });
@@ -191,3 +337,144 @@ export const parseQuery = <
 
   return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
 };
+
+export const parseQuery = <
+  A extends AutocompleteResultBase,
+  L extends LexerType,
+  P extends ParserType
+>({
+  Lexer,
+  Parser,
+  tokenDictionary,
+  ignoredTokens,
+  rulesToVisit,
+  getParseTree,
+  enrichAutocompleteResult,
+  query,
+  cursor,
+  context,
+  skipSymbolicKeywords = true, // Set it to False to include Keywords(are defined as regex patterns) which don't have a literalName but have a SymbolicName
+}: ParsingSubject<A, L, P>): AutocompleteResultBase => {
+  const result = singleParseQuery({
+    Lexer,
+    Parser,
+    tokenDictionary,
+    ignoredTokens,
+    rulesToVisit,
+    getParseTree,
+    enrichAutocompleteResult,
+    query,
+    cursor,
+    context,
+    skipSymbolicKeywords,
+  });
+
+  if (!result.rerunWithoutRules) {
+    return result;
+  }
+
+  // go through each rule in list and run a singleParseQuery without it, combining results
+  result.rerunWithoutRules.forEach((rule) => {
+    const modifiedRulesToVisit = new Set(rulesToVisit);
+    modifiedRulesToVisit.delete(rule);
+
+    const nextResult = singleParseQuery({
+      Lexer,
+      Parser,
+      tokenDictionary,
+      ignoredTokens,
+      rulesToVisit: modifiedRulesToVisit,
+      getParseTree,
+      enrichAutocompleteResult,
+      query,
+      cursor,
+      context,
+      skipSymbolicKeywords,
+    });
+
+    // combine results from result and nextResult
+    // the combination logic is as follows:
+    // Array: it will combine the results of the array
+    // Boolean: we're operating under the assumption that it is a flag, so it needs to
+    //    be kept 'on' in the combined result
+    // Undefined: we're looking at the type in the initial result, so we default to the
+    //    latter result
+    // Any other type: we know this field isn't undefined, but the combination behavior
+    //    is not significant yet, so we default to the initial result. More types could
+    //    be added later if needed, but this is kept unobtrusive.
+    for (const [field, value] of Object.entries(result)) {
+      if (field === 'suggestColumns') {
+        // combine tables inside of suggestColumns
+        if (result.suggestColumns || nextResult.suggestColumns) {
+          result.suggestColumns = {
+            tables: [
+              ...(result.suggestColumns?.tables ?? []),
+              ...(nextResult.suggestColumns?.tables ?? []),
+            ],
+          };
+        }
+        continue;
+      }
+
+      if (field === 'suggestKeywords') {
+        // combine suggestKeywords arrays with smarter deduplication
+        const currentKeywords = result.suggestKeywords ?? [];
+        const nextKeywords = nextResult.suggestKeywords ?? [];
+
+        // Create a Map to handle deduplication by id, preferring existing entries
+        const keywordMap = new Map<number, KeywordSuggestion>();
+
+        // Add current keywords first (they take precedence)
+        currentKeywords.forEach((keyword) => {
+          if (keyword?.id !== undefined) {
+            keywordMap.set(keyword.id, keyword);
+          }
+        });
+
+        // Add next keywords only if they don't already exist
+        nextKeywords.forEach((keyword) => {
+          if (keyword?.id !== undefined && !keywordMap.has(keyword.id)) {
+            keywordMap.set(keyword.id, keyword);
+          }
+        });
+
+        result.suggestKeywords = Array.from(keywordMap.values());
+        continue;
+      }
+
+      switch (typeof value) {
+        case 'boolean':
+          // if a boolean is true, keep overall result true
+          result[field as keyof A] ||= nextResult[field as keyof A];
+          break;
+        case 'undefined':
+          // use the latter result
+          result[field as keyof A] = nextResult[field as keyof A];
+          break;
+        case 'object':
+          if (Array.isArray(value)) {
+            // combine arrays
+            const combined = [
+              ...(((result[field as keyof A] as unknown) as any[]) ?? []),
+              ...(((nextResult[field as keyof A] as unknown) as any[]) ?? []),
+            ];
+            // ES6 magic to filter out duplicate objects based on id field
+            ((result[field as keyof A] as unknown) as any[]) = combined.filter(
+              (item, index, self) => index === self.findIndex((other) => other.id === item.id)
+            );
+            break;
+          }
+        default:
+          // use the initial result
+          break;
+      }
+    }
+  });
+
+  return result;
+};
+
+function escapeIdentifier(name: string) {
+  // Escape backticks inside name by doubling them
+  return '`' + name.replace(/`/g, '``') + '`';
+}

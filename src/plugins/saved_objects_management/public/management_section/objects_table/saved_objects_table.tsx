@@ -30,23 +30,22 @@
 
 import React, { Component } from 'react';
 import { debounce } from 'lodash';
-// @ts-expect-error
-import { saveAs } from '@elastic/filesaver';
+import { saveAs } from 'file-saver';
 import {
   EuiSpacer,
   Query,
   EuiInMemoryTable,
   EuiIcon,
-  EuiConfirmModal,
+  EuiButtonEmpty,
+  EuiModal,
   EuiLoadingSpinner,
   EuiOverlayMask,
-  EUI_MODAL_CONFIRM_BUTTON,
   EuiCompressedCheckboxGroup,
   EuiToolTip,
   EuiPageContent,
   EuiCompressedSwitch,
-  EuiModal,
   EuiModalHeader,
+  EuiButton,
   EuiModalBody,
   EuiModalFooter,
   EuiSmallButtonEmpty,
@@ -74,6 +73,7 @@ import {
   SavedObjectsImportError,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -109,8 +109,7 @@ import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { DuplicateObject } from '../types';
 import { formatWorkspaceIdParams } from '../../utils';
 import { NavigationPublicPluginStart } from '../../../../navigation/public';
-import { WorkspaceObject } from '../../../../workspaces/public';
-
+import { WorkspaceObject } from '../../../../../core/public';
 interface ExportAllOption {
   id: string;
   label: string;
@@ -167,6 +166,7 @@ export interface SavedObjectsTableState {
   failedCopies: SavedObjectsImportError[];
   successfulCopies: SavedObjectsImportSuccess[];
   targetWorkspaceName: string;
+  targetWorkspace: string;
 }
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
@@ -202,6 +202,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       currentWorkspace: this.props.workspaces.currentWorkspace$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
       workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
@@ -209,6 +210,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       failedCopies: [],
       successfulCopies: [],
       targetWorkspaceName: '',
+      targetWorkspace: '',
     };
   }
 
@@ -372,6 +374,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const workspace = this.props.workspaces;
     this.currentWorkspaceSubscription = workspace.currentWorkspace$.subscribe((newValue) =>
       this.setState({
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         currentWorkspace: newValue,
       })
     );
@@ -761,14 +764,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { notifications, workspaces, useUpdatedUX } = this.props;
     const workspaceClient = workspaces.client$.getValue();
 
-    const showErrorNotification = (text?: string) => {
+    const showErrorNotification = () => {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
           defaultMessage:
             'Unable to copy {useUpdatedUX, select, true {{errorCount, plural, one {# asset} other {# assets}}} other {{errorCount, plural, one {# saved object} other {# saved objects}}}}.',
           values: { errorCount: savedObjects.length, useUpdatedUX },
         }),
-        ...(text && { text }),
       });
     };
     if (!workspaceClient) {
@@ -782,16 +784,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         targetWorkspace,
         includeReferencesDeep
       );
-      if (result?.error) {
-        showErrorNotification(result.error);
-      } else {
-        this.setState({
-          isShowingDuplicateResultFlyout: true,
-          failedCopies: result?.errors || [],
-          successfulCopies: result?.successCount > 0 ? result.successResults : [],
-          targetWorkspaceName,
-        });
-      }
+      this.setState({
+        isShowingDuplicateResultFlyout: true,
+        failedCopies: result?.errors || [],
+        successfulCopies: result?.successResults || [],
+        targetWorkspace,
+        targetWorkspaceName,
+      });
     } catch (e) {
       showErrorNotification();
     } finally {
@@ -830,11 +829,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       targetWorkspaceName,
       failedCopies,
       successfulCopies,
+      targetWorkspace,
     } = this.state;
+    const { applications, http } = this.props;
 
     if (!isShowingDuplicateResultFlyout) {
       return null;
     }
+
+    const dataSourceUrlForTargetWorkspace = formatUrlWithWorkspaceId(
+      applications.getUrlForApp('dataSources', {
+        absolute: false,
+      }),
+      targetWorkspace,
+      http.basePath
+    );
 
     return (
       <DuplicateResultFlyout
@@ -842,6 +851,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         failedCopies={failedCopies}
         successfulCopies={successfulCopies}
         onClose={this.hideDuplicateResultFlyout}
+        onCopy={this.onDuplicate}
+        targetWorkspace={targetWorkspace}
+        useUpdatedUX={this.props.useUpdatedUX}
+        dataSourceUrlForTargetWorkspace={dataSourceUrlForTargetWorkspace}
       />
     );
   }
@@ -890,80 +903,91 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       };
 
       modal = (
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-              defaultMessage="Delete saved objects"
+        <EuiModal onClose={onCancel} maxWidth="50vw">
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
+                defaultMessage="Delete assets"
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+                  defaultMessage="This action will delete the following assets:"
+                />
+              </p>
+            </EuiText>
+            <EuiInMemoryTable
+              items={selectedSavedObjects}
+              columns={[
+                {
+                  field: 'type',
+                  name: i18n.translate(
+                    'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
+                    { defaultMessage: 'Type' }
+                  ),
+                  width: '50px',
+                  render: (type, object) => (
+                    <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+                      <EuiIcon type={object.meta.icon || 'apps'} />
+                    </EuiToolTip>
+                  ),
+                },
+                {
+                  field: 'meta.title',
+                  name: i18n.translate(
+                    'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
+                    { defaultMessage: 'Title' }
+                  ),
+                },
+                {
+                  field: 'id',
+                  name: i18n.translate(
+                    'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
+                    { defaultMessage: 'ID' }
+                  ),
+                },
+              ]}
+              pagination={true}
+              sorting={false}
             />
-          }
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          buttonColor="danger"
-          cancelButtonText={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            isDeleting ? (
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={onCancel}>
               <FormattedMessage
-                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
-                defaultMessage="Deleting…"
+                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+                defaultMessage="Cancel"
               />
-            ) : (
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            )
-          }
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        >
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-                defaultMessage="This action will delete the following saved objects:"
-              />
-            </p>
-          </EuiText>
-          <EuiInMemoryTable
-            items={selectedSavedObjects}
-            columns={[
-              {
-                field: 'type',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
-                  { defaultMessage: 'Type' }
-                ),
-                width: '50px',
-                render: (type, object) => (
-                  <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                    <EuiIcon type={object.meta.icon || 'apps'} />
-                  </EuiToolTip>
-                ),
-              },
-              {
-                field: 'id',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
-                  { defaultMessage: 'Id' }
-                ),
-              },
-              {
-                field: 'meta.title',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
-                  { defaultMessage: 'Title' }
-                ),
-              },
-            ]}
-            pagination={true}
-            sorting={false}
-          />
-        </EuiConfirmModal>
+            </EuiButtonEmpty>
+
+            <EuiButton
+              type="submit"
+              onClick={onConfirm}
+              fill
+              color="danger"
+              data-test-subj="confirmModalConfirmButton"
+              disabled={!!isDeleting}
+            >
+              {isDeleting ? (
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
+                  defaultMessage="Deleting…"
+                />
+              ) : (
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+                  defaultMessage="Delete"
+                />
+              )}
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       );
     }
 
@@ -1174,7 +1198,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         searchThreshold: 1,
       });
     }
-
     return (
       <EuiPageContent horizontalPosition="center" paddingSize={useUpdatedUX ? 'm' : undefined}>
         {this.renderFlyout()}
@@ -1193,11 +1216,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           useUpdatedUX={useUpdatedUX}
           navigationUI={navigationUI}
           applications={applications}
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           currentWorkspaceName={currentWorkspace?.name}
           showImportButton={!workspaceEnabled || !!currentWorkspace}
         />
         {!useUpdatedUX && <EuiSpacer size="xs" />}
         <RedirectAppLinks application={applications}>
+          {/* @ts-expect-error TS2741 TODO(ts-error): fixme */}
           <Table
             basePath={http.basePath}
             itemId={'id'}
@@ -1209,6 +1234,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onTableChange={this.onTableChange}
             filters={filters}
             onExport={this.onExport}
+            // @ts-expect-error TS2532 TODO(ts-error): fixme
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
             onDuplicate={() =>

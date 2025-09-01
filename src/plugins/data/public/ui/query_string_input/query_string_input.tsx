@@ -350,6 +350,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     if (!this.inputRef) {
       return;
     }
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { type, text, start, end, cursorIndex } = suggestion;
 
     this.handleNestedFieldSyntaxNotification(suggestion);
@@ -469,7 +470,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
+    // Update local storage
     this.services.storage.set('userQueryLanguage', language);
+    this.services.data.query.queryString.getInitialQueryByLanguage(language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -638,6 +641,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
             <div
               role="search"
               className="euiFormControlLayout__childrenWrapper osdQueryBar__textareaWrap"
+              data-test-subj="queryBarInputContainer"
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiCompressedTextArea

@@ -139,6 +139,8 @@ export default {
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '@opensearch-project/opensearch/aws':
       '<rootDir>/node_modules/@opensearch-project/opensearch/lib/aws',
+    '@opensearch-project/opensearch/lib/(.*)':
+      '<rootDir>/node_modules/@opensearch-project/opensearch/lib/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
     '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
@@ -157,6 +159,7 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/src/dev/jest/setup/mocks.js',
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
+    '<rootDir>/src/dev/jest/setup/monaco_mock.js',
   ],
   coverageDirectory: '<rootDir>/target/opensearch-dashboards-coverage/jest',
   coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],
@@ -185,7 +188,7 @@ export default {
   transformIgnorePatterns: [
     // ignore all node_modules except those which require babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|weak-lru-cache|ordered-binary|d3-color|axios))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-color|axios|@smithy|@aws-crypto|@aws-sdk|uuid))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [

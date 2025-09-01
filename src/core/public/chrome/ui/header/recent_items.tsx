@@ -45,6 +45,7 @@ export interface Props {
   buttonSize?: EuiHeaderSectionItemButtonProps['size'];
   http: HttpStart;
   loadingCount$: Rx.Observable<number>;
+  workspaceEnabled?: boolean;
 }
 
 interface SavedObjectMetadata {
@@ -72,7 +73,12 @@ const bulkGetDetail = (savedObjects: Array<Pick<SavedObject, 'type' | 'id'>>, ht
         .get<SavedObjectWithMetadata>(
           `/api/opensearch-dashboards/management/saved_objects/${encodeURIComponent(
             obj.type
-          )}/${encodeURIComponent(obj.id)}`
+          )}/${encodeURIComponent(obj.id)}`,
+          {
+            prependOptions: {
+              withoutClientBasePath: true,
+            },
+          }
         )
         .catch((error) => ({
           id: obj.id,
@@ -112,6 +118,7 @@ export const RecentItems = ({
   buttonSize = 's',
   http,
   loadingCount$,
+  workspaceEnabled,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPreferencesPopoverOpen, setIsPreferencesPopoverOpen] = useState(false);
@@ -135,16 +142,18 @@ export const RecentItems = ({
       ownFocus={false}
       panelPaddingSize="s"
       button={
-        <EuiButtonEmpty
-          data-test-subj="preferencesSettingButton"
-          flush="left"
+        <EuiButtonIcon
           color="primary"
+          size="xs"
           onClick={() => {
             setIsPreferencesPopoverOpen((IsPreferencesPopoverOpe) => !IsPreferencesPopoverOpe);
           }}
-        >
-          Preferences
-        </EuiButtonEmpty>
+          iconType="managementApp"
+          data-test-subj="preferencesSettingButton"
+          aria-label={i18n.translate('core.header.recent.preferences.buttonAriaLabel', {
+            defaultMessage: 'Preferences setting',
+          })}
+        />
       }
       isOpen={isPreferencesPopoverOpen}
       anchorPosition="downLeft"
@@ -152,7 +161,11 @@ export const RecentItems = ({
         setIsPreferencesPopoverOpen(false);
       }}
     >
-      <EuiPopoverTitle>Preferences</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        {i18n.translate('core.header.recent.preferences.title', {
+          defaultMessage: 'Preferences',
+        })}
+      </EuiPopoverTitle>
       <EuiRadioGroup
         options={recentsRadios}
         idSelected={recentsRadioIdSelected}
@@ -162,7 +175,13 @@ export const RecentItems = ({
         }}
         name="radio group"
         legend={{
-          children: <span>Recents</span>,
+          children: (
+            <span>
+              {i18n.translate('core.header.recent.preferences.legend', {
+                defaultMessage: 'Recents',
+              })}
+            </span>
+          ),
         }}
       />
     </EuiPopover>
@@ -208,50 +227,45 @@ export const RecentItems = ({
 
   useEffect(() => {
     const savedObjects = recentlyAccessedItems
-      .filter((item) => item.meta?.type)
+      .filter(
+        (item) =>
+          item.meta?.type &&
+          (!item.workspaceId ||
+            // If the workspace id is existing but the workspace is deleted, filter the item
+            (item.workspaceId &&
+              !!workspaceList.find((workspace) => workspace.id === item.workspaceId)))
+      )
       .map((item) => ({
         type: item.meta?.type || '',
         id: item.id,
       }));
-
     if (savedObjects.length) {
       bulkGetDetail(savedObjects, http).then((res) => {
-        const filteredNavLinks = navLinks.filter((link) => !link.hidden);
-        const formatDetailedSavedObjects = res.map((obj) => {
-          const recentAccessItem = recentlyAccessedItems.find(
-            (item) => item.id === obj.id
-          ) as ChromeRecentlyAccessedHistoryItem;
+        const formatDetailedSavedObjects = res
+          .filter((obj) => !obj.error) // filter out saved objects has errors
+          .map((obj) => {
+            const recentAccessItem = recentlyAccessedItems.find(
+              (item) => item.id === obj.id
+            ) as ChromeRecentlyAccessedHistoryItem;
 
-          const findWorkspace = workspaceList.find(
-            (workspace) => workspace.id === recentAccessItem.workspaceId
-          );
-          return {
-            ...recentAccessItem,
-            ...obj,
-            ...recentAccessItem.meta,
-            updatedAt: moment(obj?.updated_at).valueOf(),
-            workspaceName: findWorkspace?.name,
-            link: createRecentNavLink(recentAccessItem, filteredNavLinks, basePath, navigateToUrl)
-              .href,
-          };
-        });
-        // here I write this argument to avoid Unnecessary re-rendering
-        if (JSON.stringify(formatDetailedSavedObjects) !== JSON.stringify(detailedSavedObjects)) {
-          setDetailedSavedObjects(formatDetailedSavedObjects);
-        }
+            const findWorkspace = workspaceList.find(
+              (workspace) => workspace.id === recentAccessItem.workspaceId
+            );
+
+            return {
+              ...recentAccessItem,
+              ...obj,
+              ...recentAccessItem.meta,
+              updatedAt: moment(obj?.updated_at).valueOf(),
+              workspaceName: findWorkspace?.name,
+            };
+          });
+        setDetailedSavedObjects(formatDetailedSavedObjects);
       });
     }
-  }, [
-    navLinks,
-    basePath,
-    navigateToUrl,
-    recentlyAccessedItems,
-    http,
-    workspaceList,
-    detailedSavedObjects,
-  ]);
+  }, [recentlyAccessedItems, http, workspaceList]);
 
-  const selectedRecentsItems = useMemo(() => {
+  const selectedRecentItems = useMemo(() => {
     return detailedSavedObjects.slice(0, Number(recentsRadioIdSelected));
   }, [detailedSavedObjects, recentsRadioIdSelected]);
 
@@ -268,12 +282,13 @@ export const RecentItems = ({
       panelPaddingSize="m"
     >
       {renderBreadcrumbs}
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiPanel
         hasShadow={false}
         hasBorder={false}
         paddingSize="none"
-        style={{ maxHeight: '35vh', overflow: 'auto' }}
+        style={{ maxHeight: '35vh' }}
+        className="euiYScrollWithShadows"
       >
         <EuiTitle size="xxs">
           <h4>
@@ -283,11 +298,21 @@ export const RecentItems = ({
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {selectedRecentsItems.length > 0 ? (
+        {selectedRecentItems.length > 0 ? (
           <EuiListGroup flush={true} gutterSize="s">
-            {selectedRecentsItems.map((item) => (
+            {selectedRecentItems.map((item) => (
               <EuiListGroupItem
-                onClick={() => handleItemClick(item.link)}
+                onClick={() =>
+                  handleItemClick(
+                    createRecentNavLink(
+                      item,
+                      navLinks.filter((link) => !link.hidden),
+                      basePath,
+                      navigateToUrl,
+                      !!workspaceEnabled
+                    ).href
+                  )
+                }
                 key={item.link}
                 style={{ padding: '1px' }}
                 label={
@@ -295,8 +320,9 @@ export const RecentItems = ({
                     <EuiIcon
                       style={{ marginRight: widthForRightMargin }}
                       type={item.meta.icon || 'apps'}
+                      color="text"
                     />
-                    {item.label}
+                    {item.label + ' '}
                     {item.workspaceName ? (
                       <EuiTextColor color="subdued">({item.workspaceName})</EuiTextColor>
                     ) : null}
@@ -309,10 +335,12 @@ export const RecentItems = ({
           </EuiListGroup>
         ) : (
           <EuiText color="subdued" size="s">
-            No recently viewed items
+            {i18n.translate('core.header.recent.no.recents', {
+              defaultMessage: 'No recently viewed items',
+            })}
           </EuiText>
         )}
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
       </EuiPanel>
       {preferencePopover}
     </EuiPopover>

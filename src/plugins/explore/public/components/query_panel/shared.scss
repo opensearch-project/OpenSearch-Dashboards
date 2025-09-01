@@ -1,0 +1,21 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@mixin exploreQueryPanelButton {
+  &__buttonTextWrapper {
+    align-items: center;
+    display: flex;
+    gap: $ouiSizeXS;
+  }
+}
+
+@mixin exploreQueryPanelVerticalSeparator {
+  &__verticalSeparator {
+    width: 1px;
+    height: $ouiSize;
+    background: $euiColorLightShade;
+    margin: $ouiSizeXS $ouiSizeXXS;
+  }
+}

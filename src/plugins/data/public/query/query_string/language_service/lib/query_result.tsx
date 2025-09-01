@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import './_recent_query.scss';
 import { EuiButtonEmpty, EuiPopover, EuiText, EuiPopoverTitle } from '@elastic/eui';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -22,8 +22,18 @@ export interface QueryStatus {
   status: ResultStatus;
   body?: {
     error?: {
+      error?: string;
+      message?: {
+        error?:
+          | string
+          | {
+              reason?: string;
+              details: string;
+              type?: string;
+            };
+        status?: number;
+      };
       statusCode?: number;
-      message?: string;
     };
   };
   elapsedMs?: number;
@@ -53,30 +63,65 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     const interval = setInterval(updateElapsedTime, 1000);
 
     return () => {
-      clearInterval(interval);
+      clearInterval((interval as unknown) as NodeJS.Timeout);
       setElapsedTime(0);
     };
   }, [props.queryStatus.startTime]);
 
-  if (elapsedTime > BUFFER_TIME) {
-    if (props.queryStatus.status === ResultStatus.LOADING) {
-      const time = Math.floor(elapsedTime / 1000);
-      return (
-        <EuiButtonEmpty
-          color="text"
-          size="xs"
-          onClick={() => {}}
-          isLoading
-          data-test-subj="queryResultLoading"
-        >
-          {i18n.translate('data.query.languageService.queryResults.loadTime', {
+  const displayErrorMessage = useMemo(() => {
+    const error = props.queryStatus.body?.error;
+    const reason =
+      typeof error?.message?.error === 'object' ? error.message.error.reason : undefined;
+
+    if (reason) {
+      return reason;
+    }
+
+    const message = error?.message;
+
+    if (message == null) {
+      if (typeof error === 'string') {
+        return error;
+      }
+
+      if (typeof error === 'object') {
+        return JSON.stringify(error);
+      }
+
+      return `Unknown Error: ${String(error)}`;
+    }
+
+    // For async search strategy, expecting message.error to be string
+    if (typeof message.error === 'string') {
+      return message.error;
+    }
+
+    // For normal search strategy, expecting message.error to be object
+    if (message.error?.details) {
+      return message.error.details;
+    }
+
+    // For normal search strategy, expecting message.error to be object
+    if (typeof message === 'string') {
+      return message;
+    }
+
+    if (typeof message === 'object') {
+      return JSON.stringify(message);
+    }
+
+    return `Unknown Error: ${String(message)}`;
+  }, [props.queryStatus.body?.error]);
+
+  if (props.queryStatus.status === ResultStatus.LOADING) {
+    const time = Math.floor(elapsedTime / 1000);
+    const loadingText =
+      elapsedTime > BUFFER_TIME
+        ? i18n.translate('data.query.languageService.queryResults.loadTime', {
             defaultMessage: 'Loading {time} s',
             values: { time },
-          })}
-        </EuiButtonEmpty>
-      );
-    }
-    const time = Math.floor(elapsedTime / 1000);
+          })
+        : '';
     return (
       <EuiButtonEmpty
         color="text"
@@ -86,10 +131,9 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
         data-test-subj="queryResultLoading"
         className="editor__footerItem"
       >
-        {i18n.translate('data.query.languageService.queryResults.loadTime', {
-          defaultMessage: 'Loading {time} s',
-          values: { time },
-        })}
+        <EuiText size="xs" color="subdued" data-test-subj="queryResultLoadingMsg">
+          {loadingText}
+        </EuiText>
       </EuiButtonEmpty>
     );
   }
@@ -130,7 +174,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     );
   }
 
-  if (!props.queryStatus.body || !props.queryStatus.body.error) {
+  if (props.queryStatus.status === ResultStatus.UNINITIALIZED || !props.queryStatus.body?.error) {
     return null;
   }
 
@@ -146,7 +190,12 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
           className="editor__footerItem"
           color="danger"
         >
-          <EuiText size="xs" color="danger" className="editor__footerItem">
+          <EuiText
+            size="xs"
+            color="danger"
+            className="editor__footerItem"
+            data-test-subj="editorFooterItem"
+          >
             {i18n.translate('data.query.languageService.queryResults.error', {
               defaultMessage: `Error`,
             })}
@@ -160,7 +209,11 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       data-test-subj="queryResultError"
     >
       <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
-      <div style={{ width: '250px' }} className="eui-textBreakWord">
+      <div
+        style={{ width: '250px', maxHeight: '250px', overflowY: 'auto' }}
+        className="eui-textBreakWord"
+        data-test-subj="textBreakWord"
+      >
         <EuiText size="s">
           <p>
             <strong>
@@ -168,7 +221,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
                 defaultMessage: `Message:`,
               })}
             </strong>{' '}
-            {props.queryStatus.body.error.message}
+            {displayErrorMessage}
           </p>
         </EuiText>
       </div>

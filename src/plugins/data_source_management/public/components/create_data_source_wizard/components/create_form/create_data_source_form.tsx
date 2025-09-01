@@ -80,6 +80,7 @@ export class CreateDataSourceForm extends React.Component<
   CreateDataSourceState
 > {
   static contextType = contextType;
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: DataSourceManagementContextValue;
 
   authOptions: Array<EuiSuperSelectOption<string>> = [];
@@ -106,6 +107,7 @@ export class CreateDataSourceForm extends React.Component<
       description: '',
       endpoint: '',
       auth: {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: initialSelectedAuthMethod?.name,
         credentials: {
           ...initialSelectedAuthMethod?.credentialFormField,
@@ -201,6 +203,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   validateUsername = () => {
+    // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.username?.trim().length;
     this.setState({
       formErrorsByField: {
@@ -223,6 +226,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   validatePassword = () => {
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.password;
     this.setState({
       formErrorsByField: {
@@ -245,6 +249,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   validateRegion = () => {
+    // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.region?.trim().length;
     this.setState({
       formErrorsByField: {
@@ -267,6 +272,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   validateAccessKey = () => {
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.accessKey;
     this.setState({
       formErrorsByField: {
@@ -289,6 +295,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   validateSecretKey = () => {
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.secretKey;
     this.setState({
       formErrorsByField: {
@@ -329,14 +336,20 @@ export class CreateDataSourceForm extends React.Component<
       credentials = {};
     } else if (authType === AuthType.UsernamePasswordType) {
       credentials = {
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         username: this.state.auth.credentials.username,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         password: this.state.auth.credentials.password,
       } as UsernamePasswordTypedContent;
     } else if (authType === AuthType.SigV4) {
       credentials = {
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         region: this.state.auth.credentials.region,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         accessKey: this.state.auth.credentials.accessKey,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         secretKey: this.state.auth.credentials.secretKey,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         service: this.state.auth.credentials.service || SigV4ServiceName.OpenSearch,
       } as SigV4Content;
     } else {
@@ -348,10 +361,11 @@ export class CreateDataSourceForm extends React.Component<
       );
     }
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     return {
       title: this.state.title,
       description: this.state.description,
-      endpoint: this.state.endpoint,
+      endpoint: this.state.endpoint.trim(),
       auth: { ...this.state.auth, credentials },
     };
   };
@@ -423,6 +437,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
+                // @ts-expect-error TS2322, TS2532 TODO(ts-error): fixme
                 value={this.state.auth.credentials.username || ''}
                 onChange={this.onChangeUsername}
                 onBlur={this.validateUsername}
@@ -445,6 +460,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 type={'dual'}
+                // @ts-expect-error TS2322, TS2532 TODO(ts-error): fixme
                 value={this.state.auth.credentials.password || ''}
                 onChange={this.onChangePassword}
                 onBlur={this.validatePassword}
@@ -472,6 +488,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
+                // @ts-expect-error TS2322, TS2532 TODO(ts-error): fixme
                 value={this.state.auth.credentials.region || ''}
                 onChange={this.onChangeRegion}
                 onBlur={this.validateRegion}
@@ -485,7 +502,9 @@ export class CreateDataSourceForm extends React.Component<
             >
               <EuiCompressedSuperSelect
                 options={sigV4ServiceOptions}
+                // @ts-expect-error TS2769, TS2532 TODO(ts-error): fixme
                 valueOfSelected={this.state.auth.credentials.service}
+                // @ts-expect-error TS2345 TODO(ts-error): fixme
                 onChange={(value) => this.onChangeSigV4ServiceName(value)}
                 name="ServiceName"
                 data-test-subj="createDataSourceFormSigV4ServiceTypeSelect"
@@ -507,6 +526,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 type={'dual'}
+                // @ts-expect-error TS2322, TS2532 TODO(ts-error): fixme
                 value={this.state.auth.credentials.accessKey || ''}
                 onChange={this.onChangeAccessKey}
                 onBlur={this.validateAccessKey}
@@ -530,6 +550,7 @@ export class CreateDataSourceForm extends React.Component<
                   }
                 )}
                 type={'dual'}
+                // @ts-expect-error TS2322, TS2532 TODO(ts-error): fixme
                 value={this.state.auth.credentials.secretKey || ''}
                 onChange={this.onChangeSecretKey}
                 onBlur={this.validateSecretKey}
@@ -672,6 +693,7 @@ export class CreateDataSourceForm extends React.Component<
               <EuiCompressedSuperSelect
                 options={this.authOptions}
                 valueOfSelected={this.state.auth.type}
+                // @ts-expect-error TS2345 TODO(ts-error): fixme
                 onChange={(value) => this.onChangeAuthType(value)}
                 disabled={this.authOptions.length <= 1}
                 name="Credential"
@@ -680,6 +702,7 @@ export class CreateDataSourceForm extends React.Component<
             </EuiCompressedFormRow>
 
             {/* Create New credentials */}
+            {/* @ts-expect-error TS2345 TODO(ts-error): fixme */}
             {this.renderCreateNewCredentialsForm(this.state.auth.type)}
 
             <EuiSpacer size="xl" />

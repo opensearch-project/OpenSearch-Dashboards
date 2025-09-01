@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CharStream, CommonTokenStream, Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
-import { getCurrentStatement, shouldSuggestTemplates, createParser } from './parse'; // Update the path
-import { CursorPosition, LexerConstructor, ParserConstructor } from '../shared/types';
+import { getCurrentStatement, shouldSuggestTemplates } from './parse'; // Update the path
+import { CursorPosition } from '../shared/types';
 import { getCursorIndex } from '../shared/cursor';
 
 jest.mock('../shared/cursor', () => ({

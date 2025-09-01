@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AssociatedObjectsRefreshButton renders correctly 1`] = `
-<EuiButton
+<EuiSmallButton
   iconType="refresh"
   isDisabled={false}
   isLoading={false}
   onClick={[MockFunction]}
 >
   Refresh
-</EuiButton>
+</EuiSmallButton>
 `;

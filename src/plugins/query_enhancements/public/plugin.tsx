@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import { DataStorage } from '../../data/common';
+import { DataStorage, OSD_FIELD_TYPES } from '../../data/common';
 import {
   createEditor,
   DefaultInput,
@@ -17,13 +19,15 @@ import { s3TypeConfig } from './datasets';
 import { createQueryAssistExtension } from './query_assist';
 import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
-import { setData, setStorage } from './services';
+import { setData, setStorage, setUiActions } from './services';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
+import { PPLFilterUtils } from './search/filters';
+import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
 
 export class QueryEnhancementsPlugin
   implements
@@ -35,6 +39,11 @@ export class QueryEnhancementsPlugin
     > {
   private readonly storage: DataStorage;
   private readonly config: ConfigSchema;
+  private isQuerySummaryCollapsed$ = new BehaviorSubject<boolean>(false);
+  private resultSummaryEnabled$ = new BehaviorSubject<boolean>(false);
+  private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(false);
+  private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  private appIdSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -46,6 +55,7 @@ export class QueryEnhancementsPlugin
     { data, usageCollection }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
+    const { currentAppId$ } = this;
 
     // Define controls once for each language and register language configurations outside of `getUpdates$`
     const pplControls = [pplLanguageReference('PPL')];
@@ -62,8 +72,30 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title} | head 10`,
-      fields: { filterable: false, visualizable: false },
+      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      addFiltersToQuery: PPLFilterUtils.addFiltersToQuery,
+      addFiltersToPrompt: NaturalLanguageFilterUtils.addFiltersToPrompt,
+      fields: {
+        sortable: false,
+        get filterable() {
+          const currentAppId = currentAppId$.getValue();
+          // PPL filters are only supported in explore and dashboards, return
+          // undefined to use `filterable` value from field definitions.
+          if (currentAppId?.startsWith('explore/') || currentAppId === 'dashboards')
+            return undefined;
+          return false;
+        },
+        visualizable: false,
+        formatter: (value: string, type: OSD_FIELD_TYPES) => {
+          switch (type) {
+            case OSD_FIELD_TYPES.DATE:
+              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // PPL date fields need special formatting in order for discover table formatter to render in the correct time zone
+
+            default:
+              return value;
+          }
+        },
+      },
       docLink: {
         title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
           defaultMessage: 'PPL documentation',
@@ -72,8 +104,8 @@ export class QueryEnhancementsPlugin
       },
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
-      editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
+      editorSupportedAppNames: ['discover', 'explore'],
+      supportedAppNames: ['discover', 'data-explorer', 'explore'],
       sampleQueries: [
         {
           title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
@@ -129,7 +161,7 @@ export class QueryEnhancementsPlugin
       }),
       getQueryString: (currentQuery: Query) =>
         `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
-      fields: { filterable: false, visualizable: false },
+      fields: { sortable: false, filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
           defaultMessage: 'SQL documentation',
@@ -182,13 +214,15 @@ export class QueryEnhancementsPlugin
       ],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
-
     data.__enhance({
       editor: {
         queryEditorExtension: createQueryAssistExtension(
           core,
           data,
           this.config.queryAssist,
+          this.isQuerySummaryCollapsed$,
+          this.isSummaryAgentAvailable$,
+          this.resultSummaryEnabled$,
           usageCollection
         ),
       },
@@ -196,17 +230,30 @@ export class QueryEnhancementsPlugin
 
     queryString.getDatasetService().registerType(s3TypeConfig);
 
-    return {};
+    return {
+      isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,
+      resultSummaryEnabled$: this.resultSummaryEnabled$,
+      isSummaryAgentAvailable$: this.isSummaryAgentAvailable$,
+    };
   }
 
   public start(
     core: CoreStart,
-    deps: QueryEnhancementsPluginStartDependencies
+    { data, uiActions }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
     setStorage(this.storage);
-    setData(deps.data);
+    setData(data);
+    setUiActions(uiActions);
+    this.appIdSubscription = core.application.currentAppId$.subscribe((appId) => {
+      this.currentAppId$.next(appId);
+    });
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.appIdSubscription) {
+      this.appIdSubscription.unsubscribe();
+    }
+  }
 }

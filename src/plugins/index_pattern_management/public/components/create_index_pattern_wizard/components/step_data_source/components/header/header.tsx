@@ -29,9 +29,15 @@ import { getDataSources } from '../../../../../../components/utils';
 import { DataSourceTableItem, StepInfo } from '../../../../types';
 import { LoadingState } from '../../../loading_state';
 import * as pluginManifest from '../../../../../../../opensearch_dashboards.json';
+import { populateRemoteClusterConnectionForDatasources } from '../../../../lib/get_remote_connections';
 
 interface HeaderProps {
-  onDataSourceSelected: (id: string, type: string, title: string) => void;
+  onDataSourceSelected: (
+    id: string,
+    type: string,
+    title: string,
+    relatedConnections?: DataSourceTableItem[]
+  ) => void;
   dataSourceRef: DataSourceRef;
   goToNextStep: (dataSourceRef: DataSourceRef) => void;
   isNextStepDisabled: boolean;
@@ -58,6 +64,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
   const {
     savedObjects,
     notifications: { toasts },
+    http,
   } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
 
   useEffectOnce(() => {
@@ -67,13 +74,14 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
   const fetchDataSources = () => {
     setIsLoading(true);
     getDataSources(savedObjects.client)
-      .then((fetchedDataSources: DataSourceTableItem[]) => {
+      .then(async (fetchedDataSources: DataSourceTableItem[]) => {
         setIsLoading(false);
 
         if (fetchedDataSources?.length) {
           // filter out data sources which does NOT have the required backend plugins installed
           if (pluginManifest.hasOwnProperty('requiredOSDataSourcePlugins')) {
             fetchedDataSources = fetchedDataSources.filter((dataSource) =>
+              // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
               pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
                 dataSource.installedplugins.includes(plugin)
               )
@@ -89,7 +97,14 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
               )
             );
           }
-          setDataSources(fetchedDataSources);
+
+          // enrich the fetched datasource with remote connections
+          const enrichedfetchedDataSources = await populateRemoteClusterConnectionForDatasources(
+            fetchedDataSources,
+            http
+          );
+
+          setDataSources(enrichedfetchedDataSources);
         }
       })
       .catch(() => {
@@ -106,19 +121,43 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
 
   const onSelectedDataSource = (options: DataSourceTableItem[]) => {
     const selectedDataSource = options.find(({ checked }) => checked);
-    setDataSources(options);
+
+    // remove any previous selected sub data source and add the newly selected one
+    const newOptions = [];
+
+    for (const option of options) {
+      if (!option.disabled) {
+        // Add the main option to the list
+        newOptions.push({ ...option });
+
+        // If the option is the selected data source, add its related connections just below it
+        if (
+          option.id === selectedDataSource?.id &&
+          selectedDataSource?.relatedDataSourceConnection
+        ) {
+          selectedDataSource.relatedDataSourceConnection.forEach((connection) => {
+            newOptions.push({ ...connection });
+          });
+        }
+      }
+    }
+
+    setDataSources(newOptions);
     onDataSourceSelected(
       selectedDataSource!.id,
       selectedDataSource!.type,
-      selectedDataSource!.title
+      selectedDataSource!.title,
+      selectedDataSource?.relatedDataSourceConnection
     );
   };
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onChangeDefaultChecked = (e) => {
     setDefaultChecked(e.target.checked);
     setDataSourceChecked(!e.target.checked);
   };
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onChangeDataSourceChecked = (e) => {
     setDataSourceChecked(e.target.checked);
     setDefaultChecked(!e.target.checked);
@@ -196,6 +235,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
                 ),
               }}
               singleSelection={'always'}
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
               options={dataSources}
               onChange={(newOptions) => onSelectedDataSource(newOptions)}
             >

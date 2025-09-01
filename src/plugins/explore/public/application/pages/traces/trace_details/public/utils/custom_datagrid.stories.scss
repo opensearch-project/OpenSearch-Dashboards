@@ -1,0 +1,13 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Define the EUI variables needed by custom_datagrid.scss
+// stylelint-disable @osd/stylelint/no_restricted_values
+$euiColorEmptyShade: #fff;
+$euiColorEmptyShadeHover: rgba(255, 255, 255, 70%);
+// stylelint-enable @osd/stylelint/no_restricted_values
+
+// Import the original SCSS file
+@import "./custom_datagrid";

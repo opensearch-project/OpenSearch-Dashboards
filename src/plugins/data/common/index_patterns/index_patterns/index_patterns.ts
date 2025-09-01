@@ -63,6 +63,7 @@ const savedObjectType = 'index-pattern';
 
 export interface IndexPatternSavedObjectAttrs {
   title: string;
+  displayName?: string;
 }
 
 interface IndexPatternsServiceDeps {
@@ -109,7 +110,8 @@ export class IndexPatternsService {
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
       uiSettings,
       onRedirectNoIndexPattern,
-      canUpdateUiSetting
+      canUpdateUiSetting,
+      savedObjectsClient
     );
   }
 
@@ -402,6 +404,8 @@ export class IndexPatternsService {
       version,
       attributes: {
         title,
+        displayName,
+        description,
         timeFieldName,
         intervalName,
         fields,
@@ -424,6 +428,8 @@ export class IndexPatternsService {
       id,
       version,
       title,
+      displayName,
+      description,
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -538,7 +544,6 @@ export class IndexPatternsService {
    * Get an index pattern by title if cached
    * @param id
    */
-
   getByTitle = (title: string, ignoreErrors: boolean = false): IndexPattern => {
     const indexPattern = indexPatternCache.getByTitle(title);
     if (!indexPattern && !ignoreErrors) {
@@ -746,6 +751,10 @@ export class IndexPatternsService {
   async delete(indexPatternId: string) {
     indexPatternCache.clear(indexPatternId);
     return this.savedObjectsClient.delete('index-pattern', indexPatternId);
+  }
+
+  isLongNumeralsSupported() {
+    return this.config.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS);
   }
 }
 

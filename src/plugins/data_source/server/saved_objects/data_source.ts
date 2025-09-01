@@ -16,7 +16,7 @@ export const dataSource: SavedObjectsType = {
   namespaceType: 'agnostic',
   hidden: false,
   management: {
-    icon: 'apps', // todo: pending ux #2034
+    icon: 'database',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {

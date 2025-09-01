@@ -58,12 +58,14 @@ export interface LegacyFetchHandlers {
   callMsearch: (params: {
     body: MsearchRequestBody;
     signal: AbortSignal;
+    dataSourceId?: string;
   }) => Promise<MsearchResponse>;
   loadingCount$: BehaviorSubject<number>;
 }
 
 export interface SearchStrategySearchParams extends FetchHandlers {
   searchRequests: SearchRequest[];
+  dataSourceId?: string;
 }
 
 // @deprecated

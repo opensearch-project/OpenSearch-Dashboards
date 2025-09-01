@@ -45,6 +45,7 @@ run(
       'ignore-unused': ignoreUnused = false,
       'ignore-malformed': ignoreMalformed = false,
       'include-config': includeConfig,
+      update: update = false,
       path,
       source,
       target,
@@ -80,12 +81,20 @@ run(
       typeof ignoreUnused !== 'boolean' ||
       typeof ignoreMissing !== 'boolean' ||
       typeof ignoreMalformed !== 'boolean' ||
+      typeof update !== 'boolean' ||
       typeof dryRun !== 'boolean'
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} --ignore-incompatible, --ignore-unused, --ignore-malformed, --ignore-missing, and --dry-run can't have values`
+        )} --ignore-incompatible, --ignore-unused, --ignore-malformed, --ignore-missing, --update, and --dry-run can't have values`
+      );
+    }
+
+    // ToDo: allow updating existing translations spread across folders
+    if (update && !target) {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} --update cannot be used without a --target`
       );
     }
 
@@ -115,6 +124,7 @@ run(
               ignoreUnused,
               ignoreMissing,
               ignoreMalformed,
+              update,
               config,
               log,
             });

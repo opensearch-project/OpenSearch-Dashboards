@@ -418,6 +418,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
         "visualize": Object {
           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
         },
+        "workspace": Object {
+          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+        },
       },
     }
   }
@@ -446,10 +450,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
       "get": [Function],
       "get$": [Function],
       "getAll": [Function],
-      "getRegistered": [Function],
+      "getDefault": [MockFunction],
       "getSaved$": [Function],
       "getUpdate$": [Function],
       "getUpdateErrors$": [Function],
+      "getUserProvidedWithScope": [Function],
       "isCustom": [Function],
       "isDeclared": [Function],
       "isDefault": [Function],
@@ -557,6 +562,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test custom string setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:customstring:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -578,6 +584,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test number setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:number:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -599,6 +606,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test readonly string setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:readonlystring:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -620,6 +628,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test string setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:string:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -645,6 +654,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test array setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:array:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -666,6 +676,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test boolean setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:boolean:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -702,7 +713,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
       }
       categoryCounts={
         Object {
-          "category": 12,
+          "category": 13,
           "opensearch": 2,
         }
       }
@@ -1073,6 +1084,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
             "visualize": Object {
               "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
             },
+            "workspace": Object {
+              "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+              "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+            },
           },
         }
       }
@@ -1092,6 +1107,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test custom string setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:customstring:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1113,6 +1129,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test image setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:image:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1136,6 +1153,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "An overridden json",
               "isCustom": false,
               "isOverridden": true,
+              "isPermissionControlled": false,
               "name": "test:isOverridden:json",
               "optionLabels": undefined,
               "options": undefined,
@@ -1157,6 +1175,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "An overridden number",
               "isCustom": false,
               "isOverridden": true,
+              "isPermissionControlled": false,
               "name": "test:isOverridden:number",
               "optionLabels": undefined,
               "options": undefined,
@@ -1178,6 +1197,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test overridden select setting",
               "isCustom": false,
               "isOverridden": true,
+              "isPermissionControlled": false,
               "name": "test:isOverridden:select",
               "optionLabels": undefined,
               "options": Array [
@@ -1203,7 +1223,30 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "An overridden string",
               "isCustom": false,
               "isOverridden": true,
+              "isPermissionControlled": false,
               "name": "test:isOverridden:string",
+              "optionLabels": undefined,
+              "options": undefined,
+              "preferBrowserSetting": undefined,
+              "readonly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "validation": undefined,
+              "value": undefined,
+            },
+            Object {
+              "ariaName": "An permission controlled string",
+              "category": Array [
+                "category",
+              ],
+              "defVal": "foo",
+              "deprecation": undefined,
+              "description": "Description for permission controlled string",
+              "displayName": "An permission controlled string",
+              "isCustom": false,
+              "isOverridden": true,
+              "isPermissionControlled": false,
+              "name": "test:isPermissionControlled:string",
               "optionLabels": undefined,
               "options": undefined,
               "preferBrowserSetting": undefined,
@@ -1224,6 +1267,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test json setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:json:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1245,6 +1289,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test markdown setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:markdown:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1266,6 +1311,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test number setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:number:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1287,6 +1333,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test readonly string setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:readonlystring:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1308,6 +1355,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test select setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:select:setting",
               "optionLabels": undefined,
               "options": Array [
@@ -1333,6 +1381,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test string setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:string:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1358,6 +1407,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test array setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:array:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1379,6 +1429,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test boolean setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:boolean:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1419,6 +1470,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test custom string setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:customstring:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1440,6 +1492,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test number setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:number:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1461,6 +1514,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test readonly string setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:readonlystring:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1482,6 +1536,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test string setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:string:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1507,6 +1562,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test array setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:array:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1528,6 +1584,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "displayName": "Test boolean setting",
               "isCustom": false,
               "isOverridden": false,
+              "isPermissionControlled": false,
               "name": "test:boolean:setting",
               "optionLabels": undefined,
               "options": undefined,
@@ -1599,11 +1656,11 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                                         />
                                       </em>
                                     </EuiLink>,
-                                    "settingsCount": 8,
+                                    "settingsCount": 9,
                                   }
                                 }
                               >
-                                Search terms are hiding 8 settings 
+                                Search terms are hiding 9 settings 
                                 <EuiLink
                                   onClick={[Function]}
                                 >
@@ -2007,6 +2064,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                        },
                       },
                     }
                   }
@@ -2025,6 +2086,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       "displayName": "Test custom string setting",
                       "isCustom": false,
                       "isOverridden": false,
+                      "isPermissionControlled": false,
                       "name": "test:customstring:setting",
                       "optionLabels": undefined,
                       "options": undefined,
@@ -2419,6 +2481,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                        },
                       },
                     }
                   }
@@ -2437,6 +2503,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       "displayName": "Test number setting",
                       "isCustom": false,
                       "isOverridden": false,
+                      "isPermissionControlled": false,
                       "name": "test:number:setting",
                       "optionLabels": undefined,
                       "options": undefined,
@@ -2831,6 +2898,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                        },
                       },
                     }
                   }
@@ -2849,6 +2920,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       "displayName": "Test readonly string setting",
                       "isCustom": false,
                       "isOverridden": false,
+                      "isPermissionControlled": false,
                       "name": "test:readonlystring:setting",
                       "optionLabels": undefined,
                       "options": undefined,
@@ -3243,6 +3315,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                        },
                       },
                     }
                   }
@@ -3261,6 +3337,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       "displayName": "Test string setting",
                       "isCustom": false,
                       "isOverridden": false,
+                      "isPermissionControlled": false,
                       "name": "test:string:setting",
                       "optionLabels": undefined,
                       "options": undefined,
@@ -3710,6 +3787,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                        },
                       },
                     }
                   }
@@ -3730,6 +3811,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       "displayName": "Test array setting",
                       "isCustom": false,
                       "isOverridden": false,
+                      "isPermissionControlled": false,
                       "name": "test:array:setting",
                       "optionLabels": undefined,
                       "options": undefined,
@@ -4124,6 +4206,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         "visualize": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
+                        "workspace": Object {
+                          "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
+                          "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
+                        },
                       },
                     }
                   }
@@ -4142,6 +4228,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       "displayName": "Test boolean setting",
                       "isCustom": false,
                       "isOverridden": false,
+                      "isPermissionControlled": false,
                       "name": "test:boolean:setting",
                       "optionLabels": undefined,
                       "options": undefined,

@@ -3,16 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LanguageConfig } from './types';
+import { EditorEnhancements, LanguageConfig } from './types';
 import { getDQLLanguageConfig, getLuceneLanguageConfig } from './lib';
 import { ISearchInterceptor } from '../../../search';
-import {
-  createEditor,
-  DQLBody,
-  QueryEditorExtensionConfig,
-  SingleLineInput,
-  UiEnhancements,
-} from '../../../ui';
+import { createEditor, DQLBody, QueryEditorExtensionConfig, SingleLineInput } from '../../../ui';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
 import { dqlLanguageReference } from './lib/dql_language_reference';
 import { luceneLanguageReference } from './lib/lucene_language_reference';
@@ -29,7 +23,7 @@ export class LanguageService {
     this.queryEditorExtensionMap = {};
   }
 
-  public __enhance = (enhancements: UiEnhancements) => {
+  public __enhance = (enhancements: EditorEnhancements) => {
     if (enhancements.queryEditorExtension) {
       this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
         enhancements.queryEditorExtension;

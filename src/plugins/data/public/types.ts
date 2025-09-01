@@ -36,6 +36,7 @@ import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { EditorEnhancements, QuerySetup, QueryStart } from './query';
+import { DataViewsContract } from './data_views';
 import { IndexPatternsContract } from './index_patterns';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
@@ -66,7 +67,7 @@ export interface DataPublicPluginSetup {
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
   /**
-   * @internal
+   * @experimental
    */
   __enhance: (enhancements: DataPublicPluginEnhancements) => void;
 }
@@ -94,10 +95,16 @@ export interface DataPublicPluginStart {
    */
   autocomplete: AutocompleteStart;
   /**
+   * @deprecated
    * index patterns service
    * {@link IndexPatternsContract}
    */
   indexPatterns: IndexPatternsContract;
+  /**
+   * data views service
+   * {@link DataViewwsContract}
+   */
+  dataViews: DataViewsContract;
   /**
    * search service
    * {@link ISearchStart}

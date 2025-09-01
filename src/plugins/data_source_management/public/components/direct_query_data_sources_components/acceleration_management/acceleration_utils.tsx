@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiHealth } from '@elastic/eui';
+import { EuiHealth, EuiSmallButton } from '@elastic/eui';
 import React from 'react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DATA_SOURCE_TYPES } from '../../../../framework/constants';
 import { CachedAcceleration, RenderAccelerationFlyoutParams } from '../../../../framework/types';
 import {
@@ -103,7 +104,7 @@ export const CreateAccelerationFlyoutButton = ({
   dataSourceMDSId?: string;
 }) => {
   return (
-    <EuiButton
+    <EuiSmallButton
       onClick={() =>
         renderCreateAccelerationFlyout({
           dataSourceName,
@@ -114,7 +115,7 @@ export const CreateAccelerationFlyoutButton = ({
       fill
     >
       Create acceleration
-    </EuiButton>
+    </EuiSmallButton>
   );
 };
 

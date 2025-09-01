@@ -1,0 +1,15 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Adjusts the banner's bottom margin to reduce the gap between the banner and the dashboard content below it.
+.directQuerySync {
+  &__banner {
+    margin-bottom: -$euiSize;
+  }
+
+  &__link {
+    margin-left: $euiSizeXS;
+  }
+}

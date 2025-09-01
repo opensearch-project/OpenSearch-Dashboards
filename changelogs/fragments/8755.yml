@@ -1,2 +1,0 @@
-fix:
-- Fix time field wrapping overlap on language change in Discover table ([#8755](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8755))

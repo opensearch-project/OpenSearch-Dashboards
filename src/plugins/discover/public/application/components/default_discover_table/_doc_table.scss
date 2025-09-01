@@ -128,6 +128,19 @@ doc-table {
 }
 
 .osd-table {
+  border-collapse: separate;
+
+  tr:first-child td {
+    border-top: none;
+  }
+
+  thead {
+    position: sticky;
+    top: 0;
+    background-color: $euiColorEmptyShade;
+    z-index: 1;
+  }
+
   // sub tables should not have a leading border
   .table .table {
     margin-bottom: 0;

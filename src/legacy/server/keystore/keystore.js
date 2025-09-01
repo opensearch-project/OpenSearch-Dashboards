@@ -95,7 +95,7 @@ export class Keystore {
 
   load() {
     try {
-      const keystore = readFileSync(this.path);
+      const keystore = readFileSync(this.path, 'utf8');
       const [, data] = keystore.toString().split(':');
 
       this.data = JSON.parse(Keystore.decrypt(data, this.password));

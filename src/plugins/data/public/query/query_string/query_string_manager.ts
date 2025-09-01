@@ -45,6 +45,7 @@ export class QueryStringManager {
   private queryHistory: QueryHistory;
   private datasetService!: DatasetServiceContract;
   private languageService!: LanguageServiceContract;
+  private currentAppId: string | undefined;
 
   constructor(
     private readonly storage: DataStorage,
@@ -57,10 +58,36 @@ export class QueryStringManager {
     this.queryHistory = createHistory({ storage: this.sessionStorage });
     this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
+    try {
+      const application = getApplication();
+      if (application && application.currentAppId$) {
+        application.currentAppId$.subscribe((appId) => {
+          this.currentAppId = appId;
+        });
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Could not subscribe to application.currentAppId$');
+    }
   }
 
   private getDefaultQueryString() {
     return this.storage.get('userQueryString') || '';
+  }
+
+  private getInitialDatasetQueryString(query: Query) {
+    const { language, dataset } = query;
+
+    const languageConfig = this.languageService.getLanguage(language);
+    let typeConfig;
+
+    if (dataset) {
+      typeConfig = this.datasetService.getType(dataset.type);
+    }
+
+    return (
+      typeConfig?.getInitialQueryString?.(query) ?? (languageConfig?.getQueryString(query) || '')
+    );
   }
 
   public getDefaultQuery(): Query {
@@ -79,13 +106,11 @@ export class QueryStringManager {
       defaultDataset &&
       this.languageService
     ) {
-      const language = this.languageService.getLanguage(defaultLanguageId);
       const newQuery = { ...query, dataset: defaultDataset };
-      const newQueryString = language?.getQueryString(newQuery) || '';
 
       return {
         ...newQuery,
-        query: newQueryString,
+        query: this.getInitialDatasetQueryString(newQuery),
       };
     }
 
@@ -152,10 +177,16 @@ export class QueryStringManager {
    * Updates the query.
    * @param {Query} query
    */
-  public setQuery = (query: Partial<Query>) => {
+  public setQuery = (
+    query: Partial<Query>,
+    force: boolean = false,
+    mergeCurrentQuery: boolean = true
+  ) => {
     const curQuery = this.query$.getValue();
-    let newQuery = { ...curQuery, ...query };
-    if (!isEqual(curQuery, newQuery)) {
+    let newQuery = mergeCurrentQuery ? { ...curQuery, ...query } : (query as Query);
+    // If the current query is different from the new query, or the user explicitly set force to true,
+    // then proceed with updating the query.
+    if (!isEqual(curQuery, newQuery) || force) {
       // Check if dataset changed and if new dataset has language restrictions
       if (newQuery.dataset && !isEqual(curQuery.dataset, newQuery.dataset)) {
         // Get supported languages for the dataset
@@ -198,7 +229,9 @@ export class QueryStringManager {
    * Resets the query to the default one.
    */
   public clearQuery = () => {
-    this.setQuery(this.getDefaultQuery());
+    const force = false;
+    const mergeCurrentQuery = false;
+    this.setQuery(this.getDefaultQuery(), force, mergeCurrentQuery);
   };
 
   // Todo: update this function to use the Query object when it is udpated, Query object should include time range and dataset
@@ -244,13 +277,12 @@ export class QueryStringManager {
 
     // Both language and dataset provided - generate fresh query
     if (language && dataset) {
-      const languageService = this.languageService.getLanguage(language);
       const newQuery = {
         language,
         dataset,
         query: '',
       };
-      newQuery.query = languageService?.getQueryString(newQuery) || '';
+      newQuery.query = this.getInitialDatasetQueryString(newQuery);
       return newQuery;
     }
 
@@ -274,12 +306,12 @@ export class QueryStringManager {
    */
   public getInitialQueryByLanguage = (languageId: string) => {
     const curQuery = this.query$.getValue();
-    const language = this.languageService.getLanguage(languageId);
     const newQuery = {
       ...curQuery,
       language: languageId,
     };
-    const queryString = language?.getQueryString(newQuery) || '';
+
+    const queryString = this.getInitialDatasetQueryString(newQuery);
     this.languageService.setUserQueryString(queryString);
 
     return {
@@ -296,17 +328,15 @@ export class QueryStringManager {
     const curQuery = this.query$.getValue();
     // Use dataset's preferred language or fallback to current language
     const languageId = newDataset.language || curQuery.language;
-    const language = this.languageService.getLanguage(languageId);
     const newQuery = {
       ...curQuery,
       language: languageId,
       dataset: newDataset,
     };
-    const queryString = language?.getQueryString(newQuery) || '';
 
     return {
       ...newQuery,
-      query: queryString,
+      query: this.getInitialDatasetQueryString(newQuery),
     };
   };
 
@@ -331,20 +361,15 @@ export class QueryStringManager {
     return this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
   }
 
-  private getCurrentAppId = () => {
-    let appId;
+  private getCurrentAppId(): string | undefined {
     try {
-      const application = getApplication();
-      if (application) {
-        application.currentAppId$.subscribe((val) => (appId = val)).unsubscribe();
-      }
+      return this.currentAppId;
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.log('Application Not available.');
+      console.error('Application Not available.');
     }
-
-    return appId;
-  };
+    return undefined;
+  }
 }
 
 const showWarning = (

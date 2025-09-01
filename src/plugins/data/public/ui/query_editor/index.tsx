@@ -26,9 +26,11 @@ export const QueryEditor = (props: QueryEditorProps) => (
 export type { QueryEditorProps };
 
 export {
+  ACTION_BAR_BUTTONS_CONTAINER_ID,
   QueryEditorExtensions,
   QueryEditorExtensionDependencies,
   QueryEditorExtensionConfig,
 } from './query_editor_extensions';
 
 export { createEditor, DefaultInput, DQLBody, SingleLineInput } from './editors';
+export { getEffectiveLanguageForAutoComplete } from './utils';

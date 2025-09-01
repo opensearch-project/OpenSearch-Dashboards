@@ -1,0 +1,26 @@
+{
+  "id": "explore",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "charts",
+    "data",
+    "embeddable",
+    "home",
+    "inspector",
+    "navigation",
+    "opensearchDashboardsLegacy",
+    "savedObjects",
+    "uiActions",
+    "urlForwarding",
+    "usageCollection",
+    "visualizations",
+    "expressions",
+    "dashboard"
+  ],
+  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "dashboard"],
+  "optionalPlugins": ["home", "share"],
+  "configPath": ["explore"]
+}

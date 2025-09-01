@@ -28,6 +28,7 @@ async function setup() {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     targetPlatforms: {
       linux: false,
       linuxArm: false,

@@ -16,10 +16,10 @@ import {
   EuiBasicTableColumn,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { of } from 'rxjs';
 import React, { useCallback, useState, useRef } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce, useObservable } from 'react-use';
-import { of } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TopNavControlComponentData } from 'src/plugins/navigation/public';
@@ -41,6 +41,10 @@ import {
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
+import './data_source_table.scss';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+import { UiSettingScope } from '../../../../../core/public';
+import { useDataSourceUpdater } from './use_data_source_updater';
 
 /* Table config */
 const pagination = {
@@ -70,10 +74,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const { HeaderControl } = navigation.ui;
   const workspaceClient = useObservable(workspaces.client$);
   const DataSourceAssociation = workspaceClient?.ui().DataSourceAssociation;
-  const defaultDataSourceIdRef = useRef(
-    uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)
-  );
-  const defaultDataSourceId = useObservable(defaultDataSourceIdRef.current);
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
   /* Component state variables */
@@ -86,18 +86,47 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
   const canAssociateDataSource = !!currentWorkspace && isDashboardAdmin;
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, React.ReactNode>
+  >({});
+
+  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>(null);
+  const defaultDataSourceIdRef = useRef<string | null>(null);
+  defaultDataSourceIdRef.current = defaultDataSourceId;
+
+  const loadDefaultDataSourceId = useCallback(async () => {
+    try {
+      const scope = !!workspaces.currentWorkspace$.getValue()
+        ? UiSettingScope.WORKSPACE
+        : UiSettingScope.GLOBAL;
+
+      const id = await uiSettings.getUserProvidedWithScope<string | null>(
+        DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+        scope
+      );
+      setDefaultDataSourceId(id);
+    } catch (error) {
+      notifications.toasts.addWarning(error.message);
+    }
+  }, [uiSettings, workspaces.currentWorkspace$, notifications.toasts]);
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
-    /* Browser - Page Title */
     chrome.docTitle.change(
       i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourcesTitle', {
         defaultMessage: 'Data Sources',
       })
     );
 
-    /* fetch data sources*/
-    fetchDataSources();
+    // Create an asyncto await fetchDataSources
+    (async () => {
+      try {
+        await fetchDataSources();
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+    loadDefaultDataSourceId();
   });
 
   const associateDataSourceButton = DataSourceAssociation && [
@@ -105,7 +134,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       renderComponent: (
         <DataSourceAssociation
           excludedDataSourceIds={dataSources.map((ds) => ds.id)}
-          onComplete={() => fetchDataSources()}
+          onComplete={() => handleDataSourceUpdated()}
         />
       ),
     } as TopNavControlComponentData,
@@ -119,30 +148,61 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     [notifications.toasts]
   );
 
-  const fetchDataSources = useCallback(() => {
+  const toggleDetails = (item: DataSourceTableItem) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[item.id]) {
+      delete itemIdToExpandedRowMapValues[item.id];
+    } else {
+      itemIdToExpandedRowMapValues[item.id] = (
+        <EuiInMemoryTable
+          items={item?.relatedConnections ?? []}
+          itemId="id"
+          columns={columns}
+          className="data-source-expanded-table"
+          rowProps={{
+            className: 'data-source-table-expanded-row',
+          }}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
+
+  const fetchDataSources = useCallback(async () => {
     setIsLoading(true);
-    return getDataSources(savedObjects.client)
-      .then((response: DataSourceTableItem[]) => {
-        return fetchDataSourceConnections(response, http, notifications, false);
-      })
-      .then((finalData) => {
-        setDataSources(finalData);
-      })
-      .catch(() => {
-        setDataSources([]);
-        handleDisplayToastMessage({
-          message: i18n.translate(
-            'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
-            {
-              defaultMessage: 'Error occurred while fetching the records for Data sources.',
-            }
-          ),
-        });
-      })
-      .finally(() => {
-        setIsLoading(false);
+    try {
+      const response = await getDataSources(savedObjects.client);
+      const finalData = await fetchDataSourceConnections(
+        response,
+        http,
+        notifications,
+        false,
+        false,
+        true
+      );
+      setDataSources(finalData);
+      return finalData;
+    } catch (error) {
+      setDataSources([]);
+      handleDisplayToastMessage({
+        message: i18n.translate('dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg', {
+          defaultMessage: 'Error occurred while fetching the records for Data sources.',
+        }),
       });
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
   }, [handleDisplayToastMessage, http, notifications, savedObjects.client]);
+
+  const { handleDataSourceUpdated } = useDataSourceUpdater({
+    fetchDataSources,
+    defaultDataSourceIdRef,
+    uiSettings,
+    loadDefaultDataSourceId,
+    notifications,
+    currentWorkspace,
+  });
 
   const onDissociate = useCallback(
     async (item: DataSourceTableItem | DataSourceTableItem[]) => {
@@ -163,7 +223,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           await fetchDataSources();
           setSelectedDataSources([]);
           if (payload.some((p) => p.id === defaultDataSourceId)) {
-            setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+            await setFirstDataSourceAsDefault(
+              savedObjects.client,
+              uiSettings,
+              true,
+              UiSettingScope.WORKSPACE
+            );
+            await loadDefaultDataSourceId();
           }
         }
       }
@@ -173,9 +239,10 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       defaultDataSourceId,
       fetchDataSources,
       overlays,
+      workspaceClient,
       savedObjects.client,
       uiSettings,
-      workspaceClient,
+      loadDefaultDataSourceId,
     ]
   );
 
@@ -252,31 +319,47 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   /* Table columns */
   const columns: Array<EuiBasicTableColumn<DataSourceTableItem>> = [
     {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      render: (item: DataSourceTableItem) =>
+        item?.relatedConnections?.length ? (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item)}
+            data-test-subj="expandCollapseButton"
+            aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          />
+        ) : null,
+    },
+    {
       field: 'title',
       name: i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourceField', {
         defaultMessage: 'Data source',
       }),
-      render: (
-        name: string,
-        index: {
-          id: string;
-          tags?: Array<{
-            key: string;
-            name: string;
-          }>;
-        }
-      ) => (
-        <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)} flush="left">
-            {name}
-          </EuiButtonEmpty>
-          {index.id === defaultDataSourceId ? (
-            <EuiBadge iconType="starFilled" iconSide="left">
-              Default
-            </EuiBadge>
-          ) : null}
-        </>
-      ),
+      render: (name: string, item: DataSourceTableItem) => {
+        return (
+          <>
+            <EuiButtonEmpty
+              size="xs"
+              {...reactRouterNavigate(history, `${item.id}`)}
+              className={
+                item.type === DataSourceEngineType.OpenSearchCrossCluster
+                  ? 'data-source-table-expanded-row_title'
+                  : ''
+              }
+              flush="left"
+            >
+              {name}
+            </EuiButtonEmpty>
+            {item.id === defaultDataSourceId ? (
+              <EuiBadge iconType="starFilled" iconSide="left">
+                Default
+              </EuiBadge>
+            ) : null}
+          </>
+        );
+      },
       dataType: 'string' as const,
       sortable: ({ title }: { title: string }) => title,
     },
@@ -297,16 +380,22 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         show: false,
       },
       dataType: 'string' as const,
-      sortable: ({ description }: { description: string }) => description,
+      sortable: ({ description }: { description?: string }) => description,
+      render: (description?: string) =>
+        !!description && description.length > 0 ? description : <EuiText>&mdash;</EuiText>,
     },
     {
       field: 'relatedConnections',
       name: i18n.translate('dataSourcesManagement.dataSourcesTable.relatedConnectionsField', {
         defaultMessage: 'Related connections',
       }),
-      align: 'right',
       truncateText: true,
-      render: (relatedConnections: DataSourceTableItem[]) => relatedConnections?.length,
+      render: (relatedConnections: DataSourceTableItem[]) =>
+        relatedConnections && relatedConnections.length > 0 ? (
+          relatedConnections.length
+        ) : (
+          <EuiText>&mdash;</EuiText>
+        ),
     },
   ];
 
@@ -389,7 +478,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     try {
       for (const dataSource of selectedDataSources) {
         if (defaultDataSourceId === dataSource.id) {
-          await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+          await setFirstDataSourceAsDefault(
+            savedObjects.client,
+            uiSettings,
+            true,
+            currentWorkspace ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
+          );
+          await loadDefaultDataSourceId();
           break;
         }
       }
@@ -426,6 +521,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         <EuiInMemoryTable
           allowNeutralSort={false}
           itemId="id"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isExpandable={true}
           isSelectable={true}
           selection={selection}
           items={dataSources}
@@ -434,6 +531,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           sorting={sorting}
           search={search}
           loading={isLoading}
+          className="data-source-table"
         />
       </>
     );
@@ -512,7 +610,12 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
             })}
             iconType="flag"
             onClick={async () => {
-              await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, item.id);
+              await uiSettings.set(
+                DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+                item.id,
+                UiSettingScope.WORKSPACE
+              );
+              setDefaultDataSourceId(item.id);
             }}
           />
         );

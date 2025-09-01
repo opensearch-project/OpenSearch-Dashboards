@@ -29,6 +29,7 @@
  */
 
 import { Assign } from '@osd/utility-types';
+import { DataView } from '../../data_views/data_views/data_view';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import {
   AggConfigSerialized,
@@ -92,7 +93,7 @@ export interface AggsCommonSetup {
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
-    indexPattern: IndexPattern,
+    indexPattern: IndexPattern | DataView,
     configStates?: CreateAggConfigParams[],
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;

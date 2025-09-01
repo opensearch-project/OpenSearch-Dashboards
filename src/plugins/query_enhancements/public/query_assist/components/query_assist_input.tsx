@@ -4,7 +4,6 @@
  */
 
 import { EuiFieldText, EuiIcon, EuiOutsideClickDetector, EuiPortal } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { PersistedLog, QuerySuggestionTypes } from '../../../../data/public';
 import assistantMark from '../../assets/sparkle_mark.svg';
@@ -20,6 +19,7 @@ interface QueryAssistInputProps {
   selectedIndex?: string;
   previousQuestion?: string;
   error?: AgentError;
+  placeholder?: string;
 }
 
 export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
@@ -85,22 +85,12 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
           disabled={props.isDisabled}
           onClick={() => setIsSuggestionsVisible(true)}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={() => setIsSuggestionsVisible(true)}
-          placeholder={
-            props.previousQuestion ||
-            (props.selectedIndex
-              ? i18n.translate('queryEnhancements.queryAssist.input.placeholderWithIndex', {
-                  defaultMessage:
-                    'Ask a natural language question about {selectedIndex} to generate a query',
-                  values: { selectedIndex: props.selectedIndex },
-                })
-              : i18n.translate('queryEnhancements.queryAssist.input.placeholderWithoutIndex', {
-                  defaultMessage: 'Select an index to ask a question',
-                }))
-          }
+          onKeyDown={(e) => setIsSuggestionsVisible(e.key !== 'Enter')}
+          placeholder={props.placeholder}
           prepend={<EuiIcon type={assistantMark} />}
           append={<WarningBadge error={props.error} />}
           fullWidth
+          compressed
         />
         <EuiPortal>
           <SuggestionsComponent

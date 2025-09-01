@@ -106,7 +106,7 @@ const TableRowUI = ({
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
-        if (!fieldInfo?.filterable) {
+        if (fieldInfo?.filterable === false) {
           return (
             <td
               key={colName}
@@ -141,9 +141,17 @@ const TableRowUI = ({
 
   const expandedTableRow = (
     <tr key={'x' + row._id}>
-      <td className="osdDocTable__detailsParent" colSpan={columns.length + 1}>
+      <td
+        className="osdDocTable__detailsParent"
+        colSpan={columns.length + 1}
+        data-test-subj="osdDocTableDetailsParent"
+      >
         <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false} className="osdDocTable__detailsIconContainer">
+          <EuiFlexItem
+            grow={false}
+            className="osdDocTable__detailsIconContainer"
+            data-test-subj="osdDocTableDetailsIconContainer"
+          >
             <EuiIcon type="folderOpen" />
           </EuiFlexItem>
           <EuiFlexItem>

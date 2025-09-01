@@ -6,7 +6,9 @@ on:
     branches: ['**']
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
       - '.lycheeignore'
+      - 'CODEOWNERS'
       - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:
@@ -35,8 +37,18 @@ env:
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
+  CYPRESS_MEMORY_LIMIT: '12288'
+  CYPRESS_CACHE_FOLDER: '${{ github.workspace }}/.cypress-cache'
+  # Optimize Chrome
+  CYPRESS_CHROME_ARGS: >-
+    --disable-dev-shm-usage
+    --no-sandbox
+    --disable-gpu
+    --disable-software-rasterizer
+    --js-flags="--max-old-space-size=12288"
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
+  OSD_OPTIMIZER_MAX_WORKERS: 12
+  NODE_OPTIONS: '--max-old-space-size=12288 --max-semi-space-size=128 --dns-result-order=ipv4first'
   COMMENT_TAG: '[MANUAL CYPRESS TEST RUN RESULTS]'
   COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
   COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'
@@ -77,28 +89,75 @@ jobs:
           - group: 9
             config: standard
             test_location: ftr
-          # Query enhanced tests
-          - group: 10
+          # Dashboard tests with query enhanced - group 1
+          - group: 10Fast
             config: query_enhanced
-            test_location: ftr
-          # Dashboard tests
+            test_location: source
+          # Dashboard tests with query enhanced - group 1 but slow tests
+          - group: 10Slow
+            config: query_enhanced
+            test_location: source
+          # Dashboard tests with no query enhanced
           - group: 11
             config: dashboard
             test_location: source
+          # Dashboard tests with query enhanced - group 2
+          - group: 12
+            config: query_enhanced
+            test_location: source
+          # Dashboard tests with query enhanced - group 3
+          - group: 13
+            config: query_enhanced
+            test_location: source
+          # Dashboard tests with query enhanced - group 4
+          - group: 14
+            config: query_enhanced
+            test_location: source
+          # Dashboard tests with query enhanced - group 5
+          - group: 15
+            config: query_enhanced
+            test_location: source
+          # Explore tests - group 1
+          - group: 10Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 2
+          - group: 12Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 3
+          - group: 13Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 4
+          - group: 14Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 5
+          - group: 15Explore
+            config: explore
+            test_location: source
+
+          - group: 16Explore
+            config: explore
+            test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
+      options: '--user 1001 --shm-size=4g'
     env:
       START_CMD: ${{ matrix.config == 'query_enhanced' &&
-        'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --opensearch.ignoreVersionMismatch=true' ||
+        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true' ||
+        matrix.config == 'explore' &&
+        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true' ||
         matrix.config == 'dashboard' &&
         'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true' ||
         'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false' }}
-      OPENSEARCH_SNAPSHOT_CMD: ${{ matrix.config == 'query_enhanced' &&
-        '/bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"' ||
+      OPENSEARCH_SNAPSHOT_CMD:
+        ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore') &&
+        '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
         matrix.config == 'dashboard' &&
-        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' ||
-        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' }}
+        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' ||
+        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' }}
       # prevents extra Cypress installation progress messages
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
@@ -126,34 +185,36 @@ jobs:
           echo "SOURCE_BRANCH=${{ steps.get_pr_info.outputs.head_ref }}" >> $GITHUB_ENV
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: ${{ env.SOURCE_REPO }}
           ref: '${{ env.SOURCE_BRANCH }}'
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
         run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
+            npm uninstall -g yarn
+            npm i -g yarn@^1.22.10
+            yarn config set network-timeout 1000000 -g
 
       - name: Run bootstrap
         run: yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
-
+    
       - name: Checkout FT repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: ${{ env.FTR_PATH }}
           repository: ${{ env.TEST_REPO }}
           ref: '${{ env.TEST_BRANCH }}'
+          clean: true
 
       - name: Setup spec files by input
         if: ${{ inputs.specs != '' }}
@@ -172,29 +233,25 @@ jobs:
             FORMATTED_SPEC+="cypress/integration/core-opensearch-dashboards/opensearch-dashboards/${i},"
           done
           echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
+          echo "SPEC=${FORMATTED_SPEC}"
 
       # Setup spec files for Dashboards in-house cypress tests
       - name: Setup spec files for Dashboards tests
         if: ${{ inputs.specs == '' && matrix.test_location == 'source' }}
         shell: bash
         run: |
-          IFS="," read -a SPEC_ARRAY <<< $(yarn --silent osd:ciGroup${{ matrix.group }})
-          DASHBOARDS_SPEC=''
-          for i in "${SPEC_ARRAY[@]}"; do
-          DASHBOARDS_SPEC+="cypress/integration/core_opensearch_dashboards/${i},"
-          done
+          DASHBOARDS_SPEC="$(yarn --silent osd:ciGroup${{ matrix.group }})"
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
+          echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 
       - name: Get Cypress version
-        if: ${{ matrix.test_location == 'ftr' }}
         id: cypress_version
         run: |
           echo "name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
 
       - name: Cache Cypress
-        if: ${{ matrix.test_location == 'ftr' }}
         id: cache-cypress
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.cache/Cypress
           key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json') }}
@@ -204,9 +261,9 @@ jobs:
       - run: npx cypress cache path
 
       # Run tests based on configuration
-      - name: Run FT repo tests with no query enhancements
-        if: matrix.test_location == 'ftr' && matrix.config == 'standard'
-        uses: cypress-io/github-action@v2
+      - name: Run FT repo tests
+        if: matrix.test_location == 'ftr'
+        uses: cypress-io/github-action@v6
         with:
           working-directory: ${{ env.FTR_PATH }}
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
@@ -214,39 +271,30 @@ jobs:
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       - name: Download OpenSearch
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
           url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
 
       - name: Extract OpenSearch
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
           tar -xzf opensearch-*.tar.gz
           rm -f opensearch-*.tar.gz
         shell: bash
 
       - name: Remove security plugin
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
         shell: bash
 
       - name: Run OpenSearch
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
-          /bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"
+          /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"
           sleep 30
         shell: bash
-
-      - name: Run FT repo tests with query enhancements
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
-        uses: cypress-io/github-action@v2
-        with:
-          working-directory: ${{ env.FTR_PATH }}
-          start: ${{ env.START_CMD }}
-          wait-on: 'http://localhost:9200, http://localhost:5601'
-          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       # Clear Cypress Cache before running Dashboards tests
       - name: Clear Cypress Cache
@@ -254,8 +302,17 @@ jobs:
         run: npx cypress cache clear
 
       # Run Dashboards Cypress tests within the source repo
-      - name: Run Dashboards Cypress tests
-        if: matrix.test_location == 'source'
+      - name: Run Dashboards Cypress tests with query enhancements
+        if: matrix.test_location == 'source' && (matrix.config == 'query_enhanced' || matrix.config == 'explore')
+        uses: cypress-io/github-action@v6
+        with:
+          install-command: npx cypress install --force
+          start: ${{ env.START_CMD }}
+          wait-on: 'http://localhost:9200, http://localhost:5601'
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
+
+      - name: Run Dashboards Cypress tests without query enhancements
+        if: matrix.test_location == 'source' && matrix.config == 'dashboard'
         uses: cypress-io/github-action@v6
         with:
           install-command: npx cypress install --force
@@ -263,54 +320,46 @@ jobs:
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
-      # Screenshots are only captured on failure, will change this once we do visual regression tests
-      - name: Upload FT repo screenshots
-        uses: actions/upload-artifact@v3
-        if: failure() && matrix.test_location == 'ftr'
-        with:
-          name: ftr-cypress-screenshots
-          path: ${{ env.FTR_PATH }}/cypress/screenshots
-          retention-days: 1
-
-      - name: Upload FT repo videos
-        uses: actions/upload-artifact@v3
+      - name: Compress FT repo artifacts
         if: always() && matrix.test_location == 'ftr'
-        with:
-          name: ftr-cypress-videos
-          path: ${{ env.FTR_PATH }}/cypress/videos
-          retention-days: 1
+        run: |
+          mkdir -p ftr-artifacts
+          for dir in screenshots videos results; do
+            if [ -d "${{ env.FTR_PATH }}/cypress/$dir" ]; then
+              cp -r "${{ env.FTR_PATH }}/cypress/$dir" ftr-artifacts/
+            fi
+          done
+          tar -czf ftr-cypress-artifacts-${{ matrix.group }}.tar.gz -C ftr-artifacts .
+        shell: bash
 
-      - name: Upload FT repo results
-        uses: actions/upload-artifact@v3
+      - name: Upload FT repo artifacts
         if: always() && matrix.test_location == 'ftr'
+        uses: actions/upload-artifact@v4
         with:
-          name: ftr-cypress-results
-          path: ${{ env.FTR_PATH }}/cypress/results
+          name: ftr-cypress-artifacts-${{ matrix.group }}
+          path: ftr-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
 
-      - name: Upload Dashboards screenshots
-        if: failure() && matrix.test_location == 'source'
-        uses: actions/upload-artifact@v3
-        with:
-          name: dashboards-cypress-screenshots
-          path: cypress/screenshots
-          retention-days: 1
-
-      - name: Upload Dashboards repo videos
-        uses: actions/upload-artifact@v3
+      - name: Compress Dashboards repo artifacts
         if: always() && matrix.test_location == 'source'
-        with:
-          name: dashboards-cypress-videos
-          path: cypress/videos
-          retention-days: 1
+        run: |
+          mkdir -p dashboard-artifacts
+            for dir in screenshots videos results; do
+              if [ -d "cypress/$dir" ]; then
+                cp -r "cypress/$dir" dashboard-artifacts/
+              fi
+          done
+          tar -czf dashboards-cypress-artifacts-${{ matrix.group }}.tar.gz -C dashboard-artifacts .
+        shell: bash
 
-      - name: Upload Dashboards repo results
-        uses: actions/upload-artifact@v3
+      - name: Upload Dashboards repo artifacts
         if: always() && matrix.test_location == 'source'
+        uses: actions/upload-artifact@v4
         with:
-          name: dashboards-cypress-results
-          path: cypress/results
+          name: dashboards-cypress-artifacts-${{ matrix.group }}
+          path: dashboards-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
+          overwrite: true
 
   add-comment:
     needs: [cypress-tests]
@@ -346,6 +395,6 @@ jobs:
             '${{ env.SPEC }}'
             ```
 
-            #### Link to results: 
+            #### Link to results:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           edit-mode: replace

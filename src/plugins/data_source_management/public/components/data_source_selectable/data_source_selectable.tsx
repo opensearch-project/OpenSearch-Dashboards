@@ -18,6 +18,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
+  UiSettingScope,
 } from 'opensearch-dashboards/public';
 import {
   getDataSourcesWithFields,
@@ -48,10 +49,12 @@ interface DataSourceSelectableProps {
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  scope: UiSettingScope;
   application?: ApplicationStart;
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   uiSettings?: IUiSettingsClient;
+  onManageDataSource?: () => void;
 }
 
 interface DataSourceSelectableState extends DataSourceBaseState {
@@ -212,8 +215,9 @@ export class DataSourceSelectable extends React.Component<
         });
         return;
       }
-
-      const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
+      // // for data source selectable, get default data source from server
+      const defaultDataSource =
+        (await getDefaultDataSourceId(this.props.uiSettings, this.props.scope)) ?? null;
 
       if (this.props.selectedOption?.length) {
         this.handleSelectedOption(dataSourceOptions, defaultDataSource);
@@ -260,6 +264,7 @@ export class DataSourceSelectable extends React.Component<
       return (
         <NoDataSource
           application={this.props.application}
+          onManageDataSource={this.props.onManageDataSource}
           incompatibleDataSourcesExist={this.state.incompatibleDataSourcesExist}
         />
       );
@@ -293,6 +298,7 @@ export class DataSourceSelectable extends React.Component<
         data-test-subj={'dataSourceSelectableContextMenuPopover'}
       >
         <DataSourceDropDownHeader
+          onManageDataSource={this.props.onManageDataSource}
           totalDataSourceCount={this.state.dataSourceOptions.length}
           application={this.props.application}
         />

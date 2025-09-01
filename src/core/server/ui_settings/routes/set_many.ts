@@ -42,7 +42,12 @@ const validate = {
   query: schema.object(
     {
       scope: schema.maybe(
-        schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
+        schema.oneOf([
+          schema.literal(UiSettingScope.GLOBAL),
+          schema.literal(UiSettingScope.USER),
+          schema.literal(UiSettingScope.WORKSPACE),
+          schema.literal(UiSettingScope.DASHBOARD_ADMIN),
+        ])
       ),
     },
     { unknowns: 'allow' }

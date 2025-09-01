@@ -17,7 +17,7 @@ describe('DataSourceColumn', () => {
 
   beforeEach(() => {
     savedObjectPromise = Promise.resolve({ client: {} });
-    dataSourceColumn = new DataSourceColumn(savedObjectPromise);
+    dataSourceColumn = new DataSourceColumn(savedObjectPromise, false);
   });
 
   it('should render null when referenceId is not provided', () => {
@@ -57,6 +57,7 @@ describe('DataSourceColumn', () => {
     ];
     const getDataSourcesMock = jest.fn(() => Promise.resolve(dataSources));
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     jest.spyOn(utils, 'getDataSources').mockImplementation(getDataSourcesMock);
 
     await dataSourceColumn.loadData();
@@ -65,5 +66,18 @@ describe('DataSourceColumn', () => {
         dataSources.map((dataSource) => [dataSource.id, dataSource])
       )
     );
+  });
+
+  it('should render EuiLink with font-weight equal 400 when useUpdatedUX equal true', () => {
+    dataSourceColumn = new DataSourceColumn(savedObjectPromise, true);
+    const dataSources = [
+      { id: '1', title: 'DataSource 1' },
+      { id: '2', title: 'DataSource 2' },
+    ];
+    dataSourceColumn.data = new Map<string, DataSourceTableItem>(
+      dataSources.map((dataSource) => [dataSource.id, dataSource])
+    );
+    const wrapper = mount(<>{dataSourceColumn.euiColumn.render('1')}</>);
+    expect(wrapper.find(EuiLink).prop('style')).toEqual({ fontWeight: 'normal' });
   });
 });

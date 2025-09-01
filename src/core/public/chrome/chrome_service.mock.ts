@@ -50,6 +50,7 @@ const createSetupContractMock = () => {
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
     getHeaderComponent: jest.fn(),
+    useUpdatedHeader: false,
     navLinks: {
       getNavLinks$: jest.fn(),
       has: jest.fn(),
@@ -75,10 +76,12 @@ const createStartContractMock = () => {
       registerCenter: jest.fn(),
       registerRight: jest.fn(),
       registerLeftBottom: jest.fn(),
+      registerPrimaryHeaderRight: jest.fn(),
       getLeft$: jest.fn(),
       getCenter$: jest.fn(),
       getRight$: jest.fn(),
       getLeftBottom$: jest.fn(),
+      getPrimaryHeaderRight$: jest.fn(),
     },
     navGroup: {
       getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
@@ -88,6 +91,7 @@ const createStartContractMock = () => {
     },
     globalSearch: {
       getAllSearchCommands: jest.fn(() => []),
+      unregisterSearchCommand: jest.fn(),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),
@@ -109,6 +113,8 @@ const createStartContractMock = () => {
     getIsNavDrawerLocked$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
+    getGlobalBanner$: jest.fn(),
+    setGlobalBanner: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
@@ -119,6 +125,7 @@ const createStartContractMock = () => {
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
+  startContract.getGlobalBanner$.mockReturnValue(new BehaviorSubject(undefined));
   return startContract;
 };
 

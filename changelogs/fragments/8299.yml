@@ -1,2 +1,0 @@
-fix:
-- Expose datasets and data_frames directories for specific imports ([#8299](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8299))

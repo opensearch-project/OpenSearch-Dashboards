@@ -2540,6 +2540,17 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  navControlsPrimaryHeaderRight$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -2893,6 +2904,7 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
 >
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -8005,7 +8017,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                   Object {
                                     "aria-label": "dashboard, type: opensearchDashboards",
                                     "data-test-subj": "collapsibleNavAppLink--recent",
-                                    "href": "http://localhost/test/",
+                                    "href": "http://localhost/",
                                     "label": "dashboard",
                                     "onClick": [Function],
                                     "title": "dashboard, type: opensearchDashboards",
@@ -8028,7 +8040,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                   aria-label="dashboard, type: opensearchDashboards"
                                   color="subdued"
                                   data-test-subj="collapsibleNavAppLink--recent"
-                                  href="http://localhost/test/"
+                                  href="http://localhost/"
                                   key="title-0"
                                   label="dashboard"
                                   onClick={[Function]}
@@ -8044,7 +8056,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                       aria-label="dashboard, type: opensearchDashboards"
                                       className="euiListGroupItem__button"
                                       data-test-subj="collapsibleNavAppLink--recent"
-                                      href="http://localhost/test/"
+                                      href="http://localhost/"
                                       onClick={[Function]}
                                       rel="noreferrer"
                                       title="dashboard, type: opensearchDashboards"
@@ -9653,6 +9665,55 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
       "thrownError": null,
     }
   }
+  navControlsPrimaryHeaderRight$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -9994,6 +10055,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
     }
   }
 >
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -10026,6 +10088,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
               className="newAppTopNavExpander navToggleInLargeScreen eui-hideFor--xs eui-hideFor--s eui-hideFor--m"
               data-test-subj="toggleNavButton"
               onClick={[Function]}
+              style={Object {}}
             >
               <EuiButtonEmpty
                 aria-controls="mockId"
@@ -10066,6 +10129,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                 color="text"
                 data-test-subj="toggleNavButton"
                 onClick={[Function]}
+                style={Object {}}
               >
                 <button
                   aria-controls="mockId"
@@ -10076,6 +10140,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                   data-test-subj="toggleNavButton"
                   disabled={false}
                   onClick={[Function]}
+                  style={Object {}}
                   type="button"
                 >
                   <EuiButtonContent
@@ -10739,7 +10804,67 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
             >
               <div
                 className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--right"
-              />
+              >
+                <EuiHeaderSectionItem
+                  border="none"
+                >
+                  <div
+                    className="euiHeaderSectionItem"
+                  >
+                    <HeaderNavControls
+                      navControls$={
+                        BehaviorSubject {
+                          "_isScalar": false,
+                          "_value": Array [],
+                          "closed": false,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [
+                            Subscriber {
+                              "_parentOrParents": null,
+                              "_subscriptions": Array [
+                                SubjectSubscription {
+                                  "_parentOrParents": [Circular],
+                                  "_subscriptions": null,
+                                  "closed": false,
+                                  "subject": [Circular],
+                                  "subscriber": [Circular],
+                                },
+                              ],
+                              "closed": false,
+                              "destination": SafeSubscriber {
+                                "_complete": undefined,
+                                "_context": [Circular],
+                                "_error": undefined,
+                                "_next": [Function],
+                                "_parentOrParents": null,
+                                "_parentSubscriber": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "destination": Object {
+                                  "closed": true,
+                                  "complete": [Function],
+                                  "error": [Function],
+                                  "next": [Function],
+                                },
+                                "isStopped": false,
+                                "syncErrorThrowable": false,
+                                "syncErrorThrown": false,
+                                "syncErrorValue": null,
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": true,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                          ],
+                          "thrownError": null,
+                        }
+                      }
+                    />
+                  </div>
+                </EuiHeaderSectionItem>
+              </div>
             </EuiHeaderSection>
           </div>
         </EuiHeader>
@@ -13544,6 +13669,17 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  navControlsPrimaryHeaderRight$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -13847,6 +13983,7 @@ exports[`Header renders condensed header 1`] = `
     }
   }
 >
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -18999,6 +19136,55 @@ exports[`Header renders page header with application title 1`] = `
       "thrownError": null,
     }
   }
+  navControlsPrimaryHeaderRight$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -19340,6 +19526,7 @@ exports[`Header renders page header with application title 1`] = `
     }
   }
 >
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -19347,22 +19534,18 @@ exports[`Header renders page header with application title 1`] = `
     <div
       id="globalHeaderBars"
     >
-      <div>
+      <div
+        style={
+          Object {
+            "paddingRight": 640,
+          }
+        }
+      >
         <EuiHeader
           className="primaryHeader newTopNavHeader"
-          style={
-            Object {
-              "paddingRight": 640,
-            }
-          }
         >
           <div
             className="euiHeader euiHeader--default euiHeader--static primaryHeader newTopNavHeader"
-            style={
-              Object {
-                "paddingRight": 640,
-              }
-            }
           >
             <EuiHeaderSectionItemButton
               aria-controls="mockId"
@@ -19372,6 +19555,7 @@ exports[`Header renders page header with application title 1`] = `
               className="newPageTopNavExpander navToggleInLargeScreen eui-hideFor--xs eui-hideFor--s eui-hideFor--m"
               data-test-subj="toggleNavButton"
               onClick={[Function]}
+              style={Object {}}
             >
               <EuiButtonEmpty
                 aria-controls="mockId"
@@ -19412,6 +19596,7 @@ exports[`Header renders page header with application title 1`] = `
                 color="text"
                 data-test-subj="toggleNavButton"
                 onClick={[Function]}
+                style={Object {}}
               >
                 <button
                   aria-controls="mockId"
@@ -19422,6 +19607,7 @@ exports[`Header renders page header with application title 1`] = `
                   data-test-subj="toggleNavButton"
                   disabled={false}
                   onClick={[Function]}
+                  style={Object {}}
                   type="button"
                 >
                   <EuiButtonContent
@@ -20451,6 +20637,65 @@ exports[`Header renders page header with application title 1`] = `
                 </EuiSimplifiedBreadcrumbs>
               </EuiHeaderBreadcrumbs>
             </HeaderBreadcrumbs>
+            <EuiHeaderSectionItem
+              border="none"
+            >
+              <div
+                className="euiHeaderSectionItem"
+              >
+                <HeaderNavControls
+                  navControls$={
+                    BehaviorSubject {
+                      "_isScalar": false,
+                      "_value": Array [],
+                      "closed": false,
+                      "hasError": false,
+                      "isStopped": false,
+                      "observers": Array [
+                        Subscriber {
+                          "_parentOrParents": null,
+                          "_subscriptions": Array [
+                            SubjectSubscription {
+                              "_parentOrParents": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "subject": [Circular],
+                              "subscriber": [Circular],
+                            },
+                          ],
+                          "closed": false,
+                          "destination": SafeSubscriber {
+                            "_complete": undefined,
+                            "_context": [Circular],
+                            "_error": undefined,
+                            "_next": [Function],
+                            "_parentOrParents": null,
+                            "_parentSubscriber": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "destination": Object {
+                              "closed": true,
+                              "complete": [Function],
+                              "error": [Function],
+                              "next": [Function],
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": false,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": true,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                      ],
+                      "thrownError": null,
+                    }
+                  }
+                />
+              </div>
+            </EuiHeaderSectionItem>
           </div>
         </EuiHeader>
         <EuiHeader
@@ -23472,6 +23717,17 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
       "thrownError": null,
     }
   }
+  navControlsPrimaryHeaderRight$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -23775,6 +24031,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
     }
   }
 >
+  <HeaderBanner />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"

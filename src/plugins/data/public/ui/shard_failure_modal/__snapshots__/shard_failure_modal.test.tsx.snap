@@ -41,6 +41,7 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
           "name": "Shard failures",
         }
       }
+      preserveTabContent={false}
       tabs={
         Array [
           Object {

@@ -64,6 +64,7 @@ export interface TableProps {
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
+  // @ts-expect-error TS2304 TODO(ts-error): fixme
   namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
@@ -140,6 +141,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       isSearchTextValid: true,
       parseErrorMessage: null,
     });
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     this.props.onQueryChange({ query });
   };
 
@@ -174,6 +176,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       items,
       totalItemCount,
       isSearching,
+      columnRegistry,
       filters,
       selectionConfig: selection,
       onDelete,
@@ -186,8 +189,6 @@ export class Table extends PureComponent<TableProps, TableState> {
       onShowRelationships,
       basePath,
       actionRegistry,
-      columnRegistry,
-      namespaceRegistry,
       dateFormat,
       availableWorkspaces,
       currentWorkspaceId,

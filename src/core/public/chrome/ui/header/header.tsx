@@ -46,7 +46,7 @@ import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
 import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -61,11 +61,16 @@ import { WorkspaceObject, WorkspacesStart } from '../../../../public/workspace';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { useObservableValue } from '../../../utils';
-import { getOsdSidecarPaddingStyle, ISidecarConfig } from '../../../overlays';
+import {
+  getOsdSidecarPaddingStyle,
+  ISidecarConfig,
+  getSidecarLeftNavStyle,
+} from '../../../overlays';
 import {
   ChromeBranding,
   ChromeBreadcrumbEnricher,
   ChromeHelpExtension,
+  ChromeGlobalBanner,
 } from '../../chrome_service';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { OnIsLockedUpdate } from './';
@@ -82,6 +87,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
 import { GlobalSearchCommand } from '../../global_search';
+import { HeaderBanner } from './header_banner';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -108,6 +114,7 @@ export interface HeaderProps {
   navControlsExpandedCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsExpandedRight$: Observable<readonly ChromeNavControl[]>;
   navControlsLeftBottom$: Observable<readonly ChromeNavControl[]>;
+  navControlsPrimaryHeaderRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -124,6 +131,7 @@ export interface HeaderProps {
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
   globalSearchCommands?: GlobalSearchCommand[];
+  globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
 }
 
 const hasValue = (value: any) => {
@@ -158,6 +166,7 @@ export function Header({
   const [isNavOpenState, setIsNavOpenState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
+  const globalBanner = useObservable(observables.globalBanner$ || of(undefined), undefined);
 
   const currentLeftControls = useObservableValue(application.currentLeftControls$);
   const navControlsLeft = useObservable(observables.navControlsLeft$);
@@ -177,6 +186,10 @@ export function Header({
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
+  }, [sidecarConfig]);
+
+  const sidecarLeftNavStyle = useMemo(() => {
+    return getSidecarLeftNavStyle(sidecarConfig);
   }, [sidecarConfig]);
 
   const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
@@ -201,7 +214,10 @@ export function Header({
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
-  const className = classnames('hide-for-sharing', 'headerGlobalNav');
+
+  const className = classnames('hide-for-sharing', 'headerGlobalNav', {
+    'headerGlobalNav--withBanner': !!globalBanner,
+  });
   const { useExpandedHeader = true } = branding;
   const useApplicationHeader = headerVariant === HeaderVariant.APPLICATION;
 
@@ -320,6 +336,8 @@ export function Header({
           ? null
           : renderNavToggleWithExtraProps({
               className: 'navToggleInLargeScreen eui-hideFor--xs eui-hideFor--s eui-hideFor--m',
+              // Nav toggle button has a fixed position and its left size is 0 be default, it should have a left size if sidecar is docked to left.
+              style: sidecarLeftNavStyle,
             })}
         {renderNavToggleWithExtraProps({
           flush: 'both',
@@ -501,7 +519,13 @@ export function Header({
         renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
         loadingCount$={observables.loadingCount$}
+        workspaceEnabled={application.capabilities.workspaces.enabled}
       />
+    </EuiHeaderSectionItem>
+  );
+  const renderPrimaryHeaderRight = () => (
+    <EuiHeaderSectionItem border="none">
+      <HeaderNavControls navControls$={observables.navControlsPrimaryHeaderRight$} />
     </EuiHeaderSectionItem>
   );
 
@@ -547,13 +571,15 @@ export function Header({
   );
 
   const renderPageHeader = () => (
-    <div>
-      <EuiHeader className="primaryHeader newTopNavHeader" style={sidecarPaddingStyle}>
+    <div style={sidecarPaddingStyle}>
+      <EuiHeader className="primaryHeader newTopNavHeader">
         {renderNavToggle()}
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
         {renderBreadcrumbs(false, false)}
+
+        {renderPrimaryHeaderRight()}
       </EuiHeader>
 
       {/* Secondary header */}
@@ -623,7 +649,10 @@ export function Header({
           {renderRecentItems()}
           {actionMenu}
         </EuiHeaderSection>
-        <EuiHeaderSection side="right">{rightControls}</EuiHeaderSection>
+        <EuiHeaderSection side="right">
+          {rightControls}
+          {renderPrimaryHeaderRight()}
+        </EuiHeaderSection>
       </EuiHeader>
       <div id="applicationHeaderFilterBar" />
     </div>
@@ -635,6 +664,7 @@ export function Header({
 
   return (
     <>
+      <HeaderBanner globalBanner={globalBanner} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}
@@ -689,6 +719,7 @@ export function Header({
             }}
             customNavLink$={observables.customNavLink$}
             logos={logos}
+            workspaceEnabled={application.capabilities.workspaces.enabled}
           />
         )}
       </header>

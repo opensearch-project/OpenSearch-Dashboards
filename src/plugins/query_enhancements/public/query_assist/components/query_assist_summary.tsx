@@ -6,12 +6,12 @@ import {
   EuiSplitPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiMarkdownFormat,
   EuiText,
-  EuiIcon,
   EuiIconTip,
   EuiSmallButtonIcon,
-  EuiSpacer,
   EuiCopy,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
@@ -19,16 +19,12 @@ import { i18n } from '@osd/i18n';
 import { IDataFrame } from 'src/plugins/data/common';
 import { v4 as uuidv4 } from 'uuid';
 import { isEmpty } from 'lodash';
-import { merge, of } from 'rxjs';
-import { filter, distinctUntilChanged, mergeMap } from 'rxjs/operators';
+import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { HttpSetup } from 'opensearch-dashboards/public';
-import { useQueryAssist } from '../hooks';
+import { QueryAssistState, useQueryAssist } from '../hooks';
 import { DataPublicPluginSetup, QueryEditorExtensionDependencies } from '../../../../data/public';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { CoreSetup } from '../../../../../core/public';
-import { QueryAssistContextType } from '../../../common/query_assist';
-import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
-import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
 import { FeedbackStatus } from '../../../common/query_assist';
 
 export interface QueryContext {
@@ -43,6 +39,7 @@ interface QueryAssistSummaryProps {
   usageCollection?: UsageCollectionSetup;
   dependencies: QueryEditorExtensionDependencies;
   core: CoreSetup;
+  brandingLabel?: string;
 }
 
 export const convertResult = (body: IDataFrame) => {
@@ -71,7 +68,42 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const [feedback, setFeedback] = useState(FeedbackStatus.NONE);
   const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
-  const { question$, isQueryAssistCollapsed } = useQueryAssist();
+  const {
+    queryState,
+    isQuerySummaryCollapsed,
+    isSummaryAgentAvailable,
+    updateQueryState,
+  } = useQueryAssist();
+
+  const [results, setResults] = useState<any[]>([]);
+  // the question and answer used last time to generate summary
+  const lastUsedQueryStateRef = useRef<QueryAssistState | undefined>();
+  // the current question and generated answer
+  const currentQueryStateRef = useRef<QueryAssistState>(queryState);
+
+  // The generated query has been modified
+  const isQueryDirty =
+    queryState.generatedQuery &&
+    queryState.generatedQuery !== props.data.query.queryString.getQuery().query;
+
+  // It can generate summary when
+  // 1. it has the current generated query(answer)
+  // 2. user didn't run a different query other than the generated one
+  // 3. there are search results
+  const canGenerateSummary =
+    Boolean(results.length) && Boolean(queryState.generatedQuery) && !isQueryDirty;
+
+  // Generate summary can be auto triggered only when first time generating the query
+  const shouldAutoTrigger = !lastUsedQueryStateRef.current;
+  const queryChanged = lastUsedQueryStateRef.current?.generatedQuery !== queryState.generatedQuery;
+
+  // Display a message in the panel to indicate that clicking
+  // "Generate summary" button is needed to generate the summary
+  const manualTriggerVisible = !shouldAutoTrigger && canGenerateSummary && queryChanged;
+
+  // The visibility of panel action buttons: thumbs up/down and copy to clipboard buttons
+  const actionButtonVisible = summary && !loading && !isQueryDirty && !manualTriggerVisible;
+
   const METRIC_APP = `query-assist`;
   const afterFeedbackTip = i18n.translate('queryEnhancements.queryAssist.summary.afterFeedback', {
     defaultMessage:
@@ -117,13 +149,44 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     return () => subscription.unsubscribe();
   }, [query.queryString]);
 
+  useEffect(() => {
+    return () => {
+      // reset the state when unmount, so when navigating away and
+      // back to discover, it won't use stale state
+      updateQueryState({ question: '', generatedQuery: '' });
+    };
+  }, [updateQueryState]);
+
+  useEffect(() => {
+    const subscription = search.df.df$
+      .pipe(
+        distinctUntilChanged(),
+        filter((value) => !isEmpty(value) && !isEmpty(value?.fields))
+      )
+      .subscribe((df) => {
+        if (df && currentQueryStateRef.current.question) {
+          setResults(convertResult(df));
+        }
+      });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [search.df.df$]);
+
   const fetchSummary = useCallback(
     async (queryContext: QueryContext) => {
-      if (isEmpty(queryContext?.queryResults)) return;
-      setLoading(true);
       setSummary('');
+      if (isEmpty(queryContext?.queryResults)) return;
+      if (isQuerySummaryCollapsed) return;
+      setLoading(true);
       setFeedback(FeedbackStatus.NONE);
-      const SUCCESS_METRIC = 'fetch_summary_success';
+
+      lastUsedQueryStateRef.current = {
+        question: queryContext.question,
+        generatedQuery: queryContext.query,
+      };
+
+      const SUCCESS_METRIC = 'generated';
       try {
         const actualSampleSize = Math.min(sampleSize, queryContext?.queryResults?.length);
         const dataString = JSON.stringify(queryContext?.queryResults?.slice(0, actualSampleSize));
@@ -149,55 +212,19 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         setLoading(false);
       }
     },
-    [props.http, reportCountMetric, errorPrompt]
+    [props.http, reportCountMetric, errorPrompt, isQuerySummaryCollapsed]
   );
 
   useEffect(() => {
-    let dataStack: Array<string | IDataFrame | undefined> = [];
-    const subscription = merge(
-      question$.pipe(
-        filter((value) => !isEmpty(value)),
-        mergeMap((value) => of({ type: QueryAssistContextType.QUESTION as const, data: value }))
-      ),
-      query.queryString.getUpdates$().pipe(
-        filter((value) => !isEmpty(value)),
-        mergeMap((value) => of({ type: QueryAssistContextType.QUERY as const, data: value }))
-      ),
-      search.df?.df$?.pipe(
-        distinctUntilChanged(),
-        filter((value) => !isEmpty(value) && !isEmpty(value?.fields)),
-        mergeMap((value) => of({ type: QueryAssistContextType.DATA as const, data: value }))
-      )
-    ).subscribe((value) => {
-      // to ensure we only trigger summary when user hits the query assist button with natural language input
-      switch (value.type) {
-        case QueryAssistContextType.QUESTION:
-          dataStack = [value.data];
-          break;
-        case QueryAssistContextType.QUERY:
-          if (dataStack.length === 1) {
-            dataStack.push(value.data.query as string);
-          }
-          break;
-        case QueryAssistContextType.DATA:
-          if (dataStack.length === 2) {
-            dataStack.push(value.data);
-            fetchSummary({
-              question: dataStack[0] as string,
-              query: dataStack[1] as string,
-              queryResults: convertResult(dataStack[2] as IDataFrame),
-            });
-            dataStack = [];
-          }
-          break;
-        default:
-          break;
-      }
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [question$, query.queryString, search.df?.df$, fetchSummary]);
+    currentQueryStateRef.current = queryState;
+  }, [queryState]);
+
+  useEffect(() => {
+    const { question, generatedQuery } = currentQueryStateRef.current;
+    if (shouldAutoTrigger && canGenerateSummary) {
+      fetchSummary({ question, query: generatedQuery, queryResults: results });
+    }
+  }, [shouldAutoTrigger, results, canGenerateSummary, fetchSummary]);
 
   useEffect(() => {
     props.core.getStartServices().then(([coreStart, depsStart]) => {
@@ -216,9 +243,90 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     [feedback, reportMetric]
   );
 
-  if (props.dependencies.isCollapsed || isQueryAssistCollapsed || !isEnabledByCapability)
+  const getPanelMessage = useCallback(() => {
+    if (loading) {
+      return (
+        <EuiText size="s" data-test-subj="queryAssist_summary_loading">
+          {i18n.translate('queryEnhancements.queryAssist.summary.generating', {
+            defaultMessage: 'Generating response...',
+          })}
+        </EuiText>
+      );
+    }
+
+    if (isQueryDirty) {
+      return (
+        <EuiText size="s" data-test-subj="queryAssist_summary_unavailable">
+          {i18n.translate('queryEnhancements.queryAssist.summary.unavaialble', {
+            defaultMessage: 'Summary unavaialble for custom PPL queries.',
+          })}
+        </EuiText>
+      );
+    }
+
+    if (manualTriggerVisible) {
+      return (
+        <EuiText size="s" data-test-subj="queryAssist_summary_click_to_generate">
+          {i18n.translate('queryEnhancements.queryAssist.summary.clickToGenerate', {
+            defaultMessage: 'Select the "Generate summary" button to generate summaries',
+          })}
+        </EuiText>
+      );
+    }
+
+    if (!queryState.question) {
+      return (
+        <EuiText size="s" data-test-subj="queryAssist_summary_empty_text">
+          {i18n.translate('queryEnhancements.queryAssist.summary.placeholder', {
+            defaultMessage: 'Ask a question to generate summary',
+          })}
+        </EuiText>
+      );
+    }
+
+    if (!canGenerateSummary) {
+      return (
+        <EuiText size="s" data-test-subj="queryAssist_summary_can_not_generate">
+          {i18n.translate('queryEnhancements.queryAssist.summary.canNotGenerate', {
+            defaultMessage: 'Summary unavailable, please check if there were results or errors.',
+          })}
+        </EuiText>
+      );
+    }
+
+    if (summary) {
+      return (
+        <EuiText size="s" data-test-subj="queryAssist_summary_result">
+          <EuiMarkdownFormat>{summary}</EuiMarkdownFormat>
+        </EuiText>
+      );
+    }
+
+    return (
+      <EuiText size="s" data-test-subj="queryAssist_summary_empty_text">
+        {i18n.translate('queryEnhancements.queryAssist.summary.placeholder', {
+          defaultMessage: 'Ask a question to generate summary',
+        })}
+      </EuiText>
+    );
+  }, [
+    loading,
+    manualTriggerVisible,
+    isQueryDirty,
+    summary,
+    canGenerateSummary,
+    queryState.question,
+  ]);
+
+  if (
+    props.dependencies.isCollapsed ||
+    isQuerySummaryCollapsed ||
+    !isEnabledByCapability ||
+    !isSummaryAgentAvailable
+  ) {
     return null;
-  const isDarkMode = props.core.uiSettings.get('theme:darkMode');
+  }
+
   return (
     <EuiSplitPanel.Outer
       className="queryAssist queryAssist__summary"
@@ -229,109 +337,109 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       <EuiSplitPanel.Inner className={'queryAssist queryAssist__summary_banner'}>
         <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type={isDarkMode ? sparkleSolidSvg : sparkleHollowSvg} size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>
+                {`${props.brandingLabel} `}
                 {i18n.translate('queryEnhancements.queryAssist.summary.panelTitle', {
-                  defaultMessage: 'Response',
+                  defaultMessage: 'Summary',
                 })}
               </strong>
             </EuiText>
           </EuiFlexItem>
-          {summary && !loading && (
-            <EuiFlexItem grow={true} data-test-subj="queryAssist_summary_buttons">
-              <EuiFlexGroup alignItems={'center'} justifyContent={'flexEnd'} gutterSize={'xs'}>
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    type={'iInCircle'}
-                    content={`Summary based on first ${sampleSize} records`}
-                    aria-label={i18n.translate('queryEnhancements.queryAssist.summary.sampletip', {
-                      defaultMessage: 'Summary based on first {sampleSize} records',
-                      values: { sampleSize },
-                    })}
-                  />
-                </EuiFlexItem>
-                {feedback !== FeedbackStatus.THUMB_DOWN && (
+          <EuiFlexItem grow={true} data-test-subj="queryAssist_summary_buttons">
+            <EuiFlexGroup alignItems={'center'} justifyContent={'flexEnd'} gutterSize={'xs'}>
+              {actionButtonVisible && (
+                <>
                   <EuiFlexItem grow={false}>
-                    <EuiSmallButtonIcon
-                      aria-label="feedback thumbs up"
-                      color={feedback === FeedbackStatus.THUMB_UP ? 'subdued' : 'text'}
-                      iconType="thumbsUp"
-                      title={
-                        !feedback
-                          ? i18n.translate('queryEnhancements.queryAssist.summary.goodResponse', {
-                              defaultMessage: `Good response`,
-                            })
-                          : afterFeedbackTip
-                      }
-                      onClick={() => onFeedback(true)}
-                      data-test-subj="queryAssist_summary_buttons_thumbup"
+                    <EuiIconTip
+                      type={'iInCircle'}
+                      content={`Summary based on first ${sampleSize} records`}
+                      aria-label={i18n.translate(
+                        'queryEnhancements.queryAssist.summary.sampletip',
+                        {
+                          defaultMessage: 'Summary based on first {sampleSize} records',
+                          values: { sampleSize },
+                        }
+                      )}
                     />
                   </EuiFlexItem>
-                )}
-                {feedback !== FeedbackStatus.THUMB_UP && (
-                  <EuiFlexItem grow={false}>
-                    <EuiSmallButtonIcon
-                      aria-label="feedback thumbs down"
-                      color={feedback === FeedbackStatus.THUMB_DOWN ? 'subdued' : 'text'}
-                      title={
-                        !feedback
-                          ? i18n.translate('queryEnhancements.queryAssist.summary.badResponse', {
-                              defaultMessage: `Bad response`,
-                            })
-                          : afterFeedbackTip
-                      }
-                      iconType="thumbsDown"
-                      onClick={() => onFeedback(false)}
-                      data-test-subj="queryAssist_summary_buttons_thumbdown"
-                    />
-                  </EuiFlexItem>
-                )}
-                <EuiSpacer size="m" style={{ borderLeft: '1px solid #D3DAE6', height: '20px' }} />
-                <EuiFlexItem grow={false}>
-                  <EuiCopy textToCopy={summary ?? ''}>
-                    {(copy) => (
+                  {feedback !== FeedbackStatus.THUMB_DOWN && (
+                    <EuiFlexItem grow={false}>
                       <EuiSmallButtonIcon
-                        aria-label="Copy to clipboard"
-                        title={i18n.translate('queryEnhancements.queryAssist.summary.copy', {
-                          defaultMessage: `Copy to clipboard`,
-                        })}
-                        onClick={copy}
-                        color="text"
-                        iconType="copy"
-                        data-test-subj="queryAssist_summary_buttons_copy"
+                        aria-label="feedback thumbs up"
+                        color={feedback === FeedbackStatus.THUMB_UP ? 'subdued' : 'text'}
+                        iconType="thumbsUp"
+                        title={
+                          !feedback
+                            ? i18n.translate('queryEnhancements.queryAssist.summary.goodResponse', {
+                                defaultMessage: `Good response`,
+                              })
+                            : afterFeedbackTip
+                        }
+                        onClick={() => onFeedback(true)}
+                        data-test-subj="queryAssist_summary_buttons_thumbup"
                       />
-                    )}
-                  </EuiCopy>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+                    </EuiFlexItem>
+                  )}
+                  {feedback !== FeedbackStatus.THUMB_UP && (
+                    <EuiFlexItem grow={false}>
+                      <EuiSmallButtonIcon
+                        aria-label="feedback thumbs down"
+                        color={feedback === FeedbackStatus.THUMB_DOWN ? 'subdued' : 'text'}
+                        title={
+                          !feedback
+                            ? i18n.translate('queryEnhancements.queryAssist.summary.badResponse', {
+                                defaultMessage: `Bad response`,
+                              })
+                            : afterFeedbackTip
+                        }
+                        iconType="thumbsDown"
+                        onClick={() => onFeedback(false)}
+                        data-test-subj="queryAssist_summary_buttons_thumbdown"
+                      />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiCopy textToCopy={summary ?? ''}>
+                      {(copy) => (
+                        <EuiSmallButtonIcon
+                          aria-label="Copy to clipboard"
+                          title={i18n.translate('queryEnhancements.queryAssist.summary.copy', {
+                            defaultMessage: `Copy to clipboard`,
+                          })}
+                          onClick={copy}
+                          color="text"
+                          iconType="copy"
+                          data-test-subj="queryAssist_summary_buttons_copy"
+                        />
+                      )}
+                    </EuiCopy>
+                  </EuiFlexItem>
+                </>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiSmallButtonEmpty
+                  isDisabled={!canGenerateSummary}
+                  isLoading={loading}
+                  onClick={() =>
+                    fetchSummary({
+                      question: queryState.question,
+                      query: queryState.generatedQuery,
+                      queryResults: results,
+                    })
+                  }
+                  data-test-subj="queryAssist_summary_buttons_generate"
+                >
+                  {i18n.translate('queryEnhancements.queryAssist.summary.generateSummary', {
+                    defaultMessage: 'Generate summary',
+                  })}
+                </EuiSmallButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner paddingSize={'s'}>
-        {!summary && !loading && (
-          <EuiText size="s" data-test-subj="queryAssist_summary_empty_text">
-            {i18n.translate('queryEnhancements.queryAssist.summary.placeholder', {
-              defaultMessage: `Ask a question to generate summary.`,
-            })}
-          </EuiText>
-        )}
-        {loading && (
-          <EuiText size="s" data-test-subj="queryAssist_summary_loading">
-            {i18n.translate('queryEnhancements.queryAssist.summary.generating', {
-              defaultMessage: `Generating response...`,
-            })}
-          </EuiText>
-        )}
-        {summary && !loading && (
-          <EuiText size="s" data-test-subj="queryAssist_summary_result">
-            {summary}
-          </EuiText>
-        )}
-      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner paddingSize={'s'}>{getPanelMessage()}</EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );
 };

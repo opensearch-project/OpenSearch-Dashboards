@@ -3,23 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthStatus } from '../../../core/server';
 import {
   httpServerMock,
-  httpServiceMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '../../../core/server/mocks';
+import { UiSettingScope } from '../../../core/server';
 import {
   generateRandomId,
-  getOSDAdminConfigFromYMLConfig,
   updateDashboardAdminStateForRequest,
   transferCurrentUserInPermissions,
   getDataSourcesList,
   checkAndSetDefaultDataSource,
 } from './utils';
 import { getWorkspaceState } from '../../../core/server/utils';
-import { Observable, of } from 'rxjs';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
 import { OSD_ADMIN_WILDCARD_MATCH_ALL } from '../common/constants';
 
@@ -97,27 +94,6 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });
 
-  it('should get correct admin config when admin config is enabled ', async () => {
-    const globalConfig$: Observable<any> = of({
-      opensearchDashboards: {
-        dashboardAdmin: {
-          groups: ['group1', 'group2'],
-          users: ['user1', 'user2'],
-        },
-      },
-    });
-    const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
-    expect(groups).toEqual(['group1', 'group2']);
-    expect(users).toEqual(['user1', 'user2']);
-  });
-
-  it('should get [] when admin config is not enabled', async () => {
-    const globalConfig$: Observable<any> = of({});
-    const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
-    expect(groups).toEqual([]);
-    expect(users).toEqual([]);
-  });
-
   it('should transfer current user placeholder in permissions', () => {
     expect(transferCurrentUserInPermissions('foo', undefined)).toBeUndefined();
     expect(
@@ -174,7 +150,8 @@ describe('workspace utils', () => {
     await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
     expect(uiSettingsClient.set).toHaveBeenCalledWith(
       DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
-      dataSources[0]
+      dataSources[0],
+      UiSettingScope.WORKSPACE
     );
   });
 
@@ -197,7 +174,8 @@ describe('workspace utils', () => {
     await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, true);
     expect(uiSettingsClient.set).toHaveBeenCalledWith(
       DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
-      dataSources[0]
+      dataSources[0],
+      UiSettingScope.WORKSPACE
     );
   });
 
@@ -210,7 +188,8 @@ describe('workspace utils', () => {
     await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, true);
     expect(uiSettingsClient.set).toHaveBeenCalledWith(
       DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
-      undefined
+      undefined,
+      UiSettingScope.WORKSPACE
     );
   });
 });

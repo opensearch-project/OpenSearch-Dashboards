@@ -124,7 +124,7 @@ import { handleQueryResults } from '../../utils/helpers';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
-  'dateFormat:tz',
+  UI_SETTINGS.DATE_FORMAT_TIMEZONE,
   UI_SETTINGS.COURIER_BATCH_SEARCHES,
   UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE,
   UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
@@ -352,16 +352,16 @@ export class SearchSource {
 
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
+    const indexPattern = this.getField('index');
 
     let response;
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
+      searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
       response = await this.legacyFetch(searchRequest, options);
     } else if (this.isUnsupportedRequest(searchRequest)) {
       response = await this.fetchExternalSearch(searchRequest, options);
     } else {
-      const indexPattern = this.getField('index');
       searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
-
       response = await this.fetchSearch(searchRequest, options);
     }
 
@@ -444,7 +444,14 @@ export class SearchSource {
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
           const dataFrameResponse = response as IDataFrameDefaultResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+          return onResponse(
+            searchRequest,
+            convertResult({
+              response: response as IDataFrameResponse,
+              fields: this.getFields(),
+              options,
+            })
+          );
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
           const startTime = Date.now();
@@ -477,7 +484,14 @@ export class SearchSource {
           (results as any).took = elapsedMs;
 
           await this.setDataFrame((results as QuerySuccessStatusResponse).body as IDataFrame);
-          return onResponse(searchRequest, convertResult(results as IDataFrameResponse));
+          return onResponse(
+            searchRequest,
+            convertResult({
+              response: results as IDataFrameResponse,
+              fields: this.getFields(),
+              options,
+            })
+          );
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
           const dataFrameError = response as IDataFrameError;

@@ -40,9 +40,10 @@ import { reactRouterNavigate } from '../../../../../../../opensearch_dashboards_
 interface HeaderProps extends RouteComponentProps {
   indexPatternId: string;
   history: ScopedHistory;
+  useUpdatedUX: boolean;
 }
 
-export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
+export const Header = withRouter(({ indexPatternId, history, useUpdatedUX }: HeaderProps) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiTitle size="s">
@@ -66,6 +67,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
 
     <EuiFlexItem grow={false}>
       <EuiSmallButton
+        {...(useUpdatedUX ? { iconType: 'plusInCircle' } : {})}
         data-test-subj="addScriptedFieldLink"
         {...reactRouterNavigate(history, `patterns/${indexPatternId}/create-field/`)}
       >

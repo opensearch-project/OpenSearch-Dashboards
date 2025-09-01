@@ -156,6 +156,7 @@ export class HomePublicPlugin
         injectedMetadata: coreStart.injectedMetadata,
         dataSource,
         sectionTypes: this.sectionTypeService,
+        workspaces: core.workspaces,
         ...homeOpenSearchDashboardsServices,
       });
     };
@@ -196,7 +197,7 @@ export class HomePublicPlugin
         mount: async (params: AppMountParameters) => {
           const [
             coreStart,
-            { contentManagement: contentManagementStart },
+            { contentManagement: contentManagementStart, navigation },
           ] = await core.getStartServices();
           setCommonService();
 
@@ -204,7 +205,8 @@ export class HomePublicPlugin
           return await renderSearchUseCaseOverviewApp(
             params.element,
             coreStart,
-            contentManagementStart
+            contentManagementStart,
+            navigation
           );
         },
       });
@@ -214,7 +216,18 @@ export class HomePublicPlugin
         {
           id: SEARCH_OVERVIEW_PAGE_ID,
           order: -1,
-          showInAllNavGroup: true,
+        },
+      ]);
+
+      // add search overview to all nav group
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+        {
+          id: SEARCH_OVERVIEW_PAGE_ID,
+          order: -1,
+          category: {
+            id: DEFAULT_NAV_GROUPS.search.id,
+            label: DEFAULT_NAV_GROUPS.search.title,
+          },
         },
       ]);
     }
@@ -224,6 +237,9 @@ export class HomePublicPlugin
       id: IMPORT_SAMPLE_DATA_APP_ID,
       title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
         defaultMessage: 'Add sample data',
+      }),
+      description: i18n.translate('home.tutorialDirectory.featureCatalogueDescription', {
+        defaultMessage: 'Get started with sample data, visualizations, and dashboards.',
       }),
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.default
@@ -244,6 +260,15 @@ export class HomePublicPlugin
         });
       },
     });
+
+    core.getStartServices().then(([coreStart]) => {
+      if (!coreStart.application.capabilities.workspaces.enabled) {
+        core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+          { id: IMPORT_SAMPLE_DATA_APP_ID },
+        ]);
+      }
+    });
+
     urlForwarding.forwardApp('home', 'home');
 
     const featureCatalogue = { ...this.featuresCatalogueRegistry.setup() };

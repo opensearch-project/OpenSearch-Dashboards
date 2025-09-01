@@ -4,8 +4,8 @@
  */
 
 import { Client as LegacyClient, ConfigOptions } from 'elasticsearch';
-import { Config } from 'aws-sdk';
 import { get } from 'lodash';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import HttpAmazonESConnector from './http_aws_es/connector';
 import {
   Headers,
@@ -109,6 +109,7 @@ const getQueryClient = async (
   dataSourceAttr: DataSourceAttributes,
   cryptography: CryptographyServiceSetup,
   { endpoint, clientParams, options }: LegacyClientCallAPIParams,
+  // @ts-expect-error TS2304 TODO(ts-error): fixme
   addClientToPool: (endpoint: string, authType: AuthType, client: Client | LegacyClient) => void,
   config: DataSourcePluginConfigType,
   registeredSchema: any[],
@@ -241,9 +242,10 @@ const getAWSClient = (credential: SigV4Content, clientOptions: ConfigOptions): L
   const { region } = credential;
   const client = new LegacyClient({
     connectionClass: HttpAmazonESConnector,
-    awsConfig: new Config({
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
+    awsConfig: {
       region,
-    }),
+    },
     ...clientOptions,
   });
   return client;

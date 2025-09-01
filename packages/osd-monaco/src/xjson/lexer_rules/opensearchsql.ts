@@ -134,18 +134,22 @@ export const lexerRules = {
       [new RegExp(operators.join('|')), 'operator'],
       [/[0-9]+(\.[0-9]+)?/, 'number'],
       [/'([^'\\]|\\.)*$/, 'string.invalid'], // non-terminated string
-      [/'/, 'string', '@string'],
-      [/"/, 'string', '@string'],
+      [/'/, 'string', '@stringSingle'],
+      [/"/, 'string', '@stringDouble'],
     ],
     whitespace: [
       [/[ \t\r\n]+/, 'white'],
       [/\/\*/, 'comment', '@comment'],
       [/--.*$/, 'comment'],
     ],
-    string: [
+    stringSingle: [
       [/[^'\\]+/, 'string'],
       [/\\./, 'string.escape'],
       [/'/, 'string', '@pop'],
+    ],
+    stringDouble: [
+      [/[^"\\]+/, 'string'],
+      [/\\./, 'string.escape'],
       [/"/, 'string', '@pop'],
     ],
     comment: [

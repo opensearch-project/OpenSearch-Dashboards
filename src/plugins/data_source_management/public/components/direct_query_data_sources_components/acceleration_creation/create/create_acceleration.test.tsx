@@ -26,6 +26,7 @@ const mockNotifications = {
   toasts: {
     addWarning: jest.fn(),
     addSuccess: jest.fn(),
+    addDanger: jest.fn(),
   },
 };
 
@@ -66,18 +67,21 @@ describe('CreateAcceleration', () => {
   });
 
   it('renders correctly', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper = shallow(<CreateAcceleration {...defaultProps} />);
     expect(wrapper.find(EuiFlyout).exists()).toBeTruthy();
     expect(wrapper.find(EuiForm).exists()).toBeTruthy();
   });
 
   it('calls resetFlyout when cancel button is clicked', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper = shallow(<CreateAcceleration {...defaultProps} />);
     wrapper.find(EuiButtonEmpty).simulate('click');
     expect(defaultProps.resetFlyout).toHaveBeenCalled();
   });
 
   it('initializes with correct form data', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper = shallow(<CreateAcceleration {...defaultProps} />);
     const accelerationDataSelector = wrapper.find('AccelerationDataSourceSelector');
     expect(accelerationDataSelector.prop('accelerationFormData')).toEqual(
@@ -91,6 +95,7 @@ describe('CreateAcceleration', () => {
 
   it('loads table columns when mounted', async () => {
     await act(async () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       mount(<CreateAcceleration {...defaultProps} />);
     });
     expect(CatalogCacheManager.getTable).toHaveBeenCalledWith(
@@ -107,6 +112,7 @@ describe('CreateAcceleration', () => {
       columns: null,
     }));
     await act(async () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       mount(<CreateAcceleration {...defaultProps} />);
     });
     expect(startLoadingMock).toHaveBeenCalledWith({
@@ -118,6 +124,7 @@ describe('CreateAcceleration', () => {
   });
 
   it('renders CreateAccelerationButton with correct props', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper = shallow(<CreateAcceleration {...defaultProps} />);
     const createAccelerationButton = wrapper.find('CreateAccelerationButton');
     expect(createAccelerationButton.props()).toMatchObject({

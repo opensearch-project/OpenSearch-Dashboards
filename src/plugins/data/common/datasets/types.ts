@@ -117,6 +117,8 @@ export interface DataStructure {
   title: string;
   /** The type of the data structure */
   type: string;
+  /** Optional description of the data structure */
+  description?: string;
   /** Optional reference to the parent data structure */
   parent?: DataStructure;
   /** Optional array of child data structures */
@@ -127,6 +129,7 @@ export interface DataStructure {
   columnHeader?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
+  remoteConnections?: string[];
 }
 
 /**
@@ -247,6 +250,15 @@ export interface Dataset extends BaseDataset {
   timeFieldName?: string;
   /** Optional language to default to from the language selector */
   language?: string;
+  /** Optional reference to the source dataset. Example usage is for indexed views to store the
+   * reference to the table dataset
+   */
+  sourceDatasetRef?: {
+    id: string;
+    type: string;
+  };
+  /** Optional parameter to indicate if the dataset is from a remote cluster(Cross Cluster search) */
+  isRemoteDataset?: boolean;
 }
 
 export interface DatasetField {

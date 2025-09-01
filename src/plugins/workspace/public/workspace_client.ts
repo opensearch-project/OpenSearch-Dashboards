@@ -12,8 +12,10 @@ import {
   WorkspacesSetup,
   IWorkspaceClient,
   IWorkspaceResponse as IResponse,
+  SavedObjectsImportResponse,
+  WorkspaceFindOptions,
+  WorkspacePermissionMode,
 } from '../../../core/public';
-import { WorkspacePermissionMode } from '../common/constants';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
 
@@ -24,16 +26,6 @@ const join = (...uriComponents: Array<string | undefined>) =>
     .filter((comp): comp is string => Boolean(comp))
     .map(encodeURIComponent)
     .join('/');
-
-interface WorkspaceFindOptions {
-  page?: number;
-  perPage?: number;
-  search?: string;
-  searchFields?: string[];
-  sortField?: string;
-  sortOrder?: string;
-  permissionModes?: WorkspacePermissionMode[];
-}
 
 /**
  * Workspaces is OpenSearchDashboards's visualize mechanism allowing admins to
@@ -145,8 +137,10 @@ export class WorkspaceClient implements IWorkspaceClient {
   /**
    * This method will check if a valid workspace can be found by the given workspace id,
    * If so, perform a side effect of updating the core.workspace.currentWorkspaceId$.
+   * If not, trigger the workspace client-sider error.
    *
    * @param id workspace id
+   * @param workspaceError$ a stream to emit workspace error
    * @returns {Promise<IResponse<null>>} result for this operation
    */
   public async enterWorkspace(id: string): Promise<IResponse<null>> {
@@ -158,6 +152,7 @@ export class WorkspaceClient implements IWorkspaceClient {
         result: null,
       };
     } else {
+      this.workspaces.workspaceError$.next(workspaceResp.error!);
       return workspaceResp;
     }
   }
@@ -328,13 +323,13 @@ export class WorkspaceClient implements IWorkspaceClient {
    * @param {Array<{ id: string; type: string }>} objects
    * @param {string} targetWorkspace
    * @param {boolean} includeReferencesDeep
-   * @returns {Promise<IResponse<any>>} result for this operation
+   * @returns {Promise<SavedObjectsImportResponse>} result for this operation
    */
   public async copy(
     objects: Array<{ id: string; type: string }>,
     targetWorkspace: string,
     includeReferencesDeep: boolean = true
-  ): Promise<IResponse<any>> {
+  ): Promise<SavedObjectsImportResponse> {
     const path = this.getPath('_duplicate_saved_objects');
     const body = {
       objects,
@@ -342,7 +337,7 @@ export class WorkspaceClient implements IWorkspaceClient {
       includeReferencesDeep,
     };
 
-    const result = await this.safeFetch(path, {
+    const result = await this.http.fetch<SavedObjectsImportResponse>(path, {
       method: 'POST',
       body: JSON.stringify(body),
     });

@@ -37,7 +37,14 @@ import {
   OpenSearchDashboardsReactContextValue,
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import { Filter, IIndexPattern, Query, TimeRange, UI_SETTINGS } from '../../../common';
+import {
+  Filter,
+  IDataView as IDataset,
+  IIndexPattern,
+  Query,
+  TimeRange,
+  UI_SETTINGS,
+} from '../../../common';
 import { SavedQuery, SavedQueryAttributes, TimeHistoryContract, QueryStatus } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { FilterBar } from '../filter_bar/filter_bar';
@@ -45,7 +52,6 @@ import { QueryEditorTopRow } from '../query_editor';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { FilterOptions } from '../filter_bar/filter_options';
-import { getUseNewSavedQueriesUI } from '../../services';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
@@ -58,7 +64,7 @@ interface SearchBarInjectedDeps {
 }
 
 export interface SearchBarOwnProps {
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IIndexPattern[] | IDataset[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
@@ -132,7 +138,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     let nextQuery = null;
-    if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
+    if (nextProps.query && nextProps.query.query !== prevState.query?.query) {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
@@ -285,11 +291,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
-
     const query = cloneDeep(this.state.query);
-    if (getUseNewSavedQueriesUI() && !savedQueryMeta.shouldIncludeDataSource) {
-      delete query.dataset;
-    }
+    delete query.dataset;
 
     const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
@@ -455,6 +458,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           <FilterOptions
             filters={this.props.filters!}
             onFiltersUpdated={this.props.onFiltersUpdated}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             intl={this.props.intl}
             indexPatterns={this.props.indexPatterns!}
             showSaveQuery={this.props.showSaveQuery}
@@ -493,6 +497,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           >
             <FilterBar
               className="globalFilterGroup__filterBar"
+              data-test-subj="globalFilterGroupFilterBar"
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}

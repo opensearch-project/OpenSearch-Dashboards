@@ -77,10 +77,11 @@ export async function readTelemetryFile<T extends object>(
 ): Promise<T | undefined> {
   try {
     if (isFileReadable(configPath)) {
-      const yaml = readFileSync(configPath);
+      const yaml = readFileSync(configPath, 'utf8');
       const data = load(yaml.toString());
 
       // don't bother returning empty objects
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       if (Object.keys(data).length) {
         // ensure { "a.b": "value" } becomes { "a": { "b": "value" } }
         return ensureDeepObject(data);

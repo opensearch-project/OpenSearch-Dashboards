@@ -7,11 +7,13 @@ import { getWorker } from './worker_store';
 
 // @ts-ignore
 window.MonacoEnvironment = {
-  getWorker: (module: string, languageId: string) => {
-    const workerSrc = getWorker(languageId);
+  getWorker: (_: string, label: string) => {
+    const workerSrc = getWorker(label);
     if (workerSrc) {
       const blob = new Blob([workerSrc], { type: 'application/javascript' });
-      return new Worker(URL.createObjectURL(blob));
+      const worker = new Worker(URL.createObjectURL(blob));
+      return worker;
     }
+    throw new Error(`No worker available for language: ${label}`);
   },
 };

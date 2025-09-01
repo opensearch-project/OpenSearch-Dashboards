@@ -1,2 +1,0 @@
-refactor:
-- Move the render of query extension control buttons to extension component ([#8334](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8334))

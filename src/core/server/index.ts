@@ -361,6 +361,7 @@ export {
   StringValidationRegexString,
   CURRENT_USER_PLACEHOLDER,
   UiSettingScope,
+  CURRENT_WORKSPACE_PLACEHOLDER,
 } from './ui_settings';
 
 export {
@@ -372,12 +373,20 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { AppCategory, WorkspaceAttribute, PermissionModeId } from '../types';
+export {
+  AppCategory,
+  WorkspaceAttribute,
+  PermissionModeId,
+  WorkspaceFindOptions,
+  WorkspacePermissionMode,
+} from '../types';
 export {
   DEFAULT_APP_CATEGORIES,
   WORKSPACE_TYPE,
   DEFAULT_NAV_GROUPS,
   WORKSPACE_PATH_PREFIX,
+  WORKSPACE_USE_CASE_PREFIX,
+  getUseCaseFeatureConfig,
 } from '../utils';
 
 export {

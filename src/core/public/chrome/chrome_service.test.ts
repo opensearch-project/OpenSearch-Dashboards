@@ -164,6 +164,24 @@ describe('setup', () => {
       '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
     );
   });
+
+  it('should register page search', () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const chrome = new ChromeService({ browserSupportsCsp: true });
+
+    const registerSearchCommandSpy = jest.fn();
+    jest.spyOn((chrome as any).globalSearch, 'setup').mockReturnValue({
+      registerSearchCommand: registerSearchCommandSpy,
+    });
+
+    chrome.setup({ uiSettings });
+
+    expect(registerSearchCommandSpy).toHaveBeenCalledWith({
+      id: 'pagesSearch',
+      type: 'PAGES',
+      run: expect.any(Function),
+    });
+  });
 });
 
 describe('start', () => {
@@ -203,6 +221,13 @@ describe('start', () => {
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
+    });
+
+    it('renders the Header component correctly', async () => {
+      const { chrome } = await start();
+      const headerComponent = shallow(React.createElement(() => chrome.getHeaderComponent()));
+      // Verify that the Header component renders without errors
+      expect(headerComponent).toBeDefined();
     });
   });
 

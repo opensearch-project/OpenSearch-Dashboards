@@ -15,6 +15,16 @@ import { ISearchStrategy } from '../../../data/server';
 import { API } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
+import { registerResourceRoutes } from './resources';
+
+/**
+ * Coerce status code to 503 for 500 errors from dependency services. Only use
+ * this function to handle errors throw by other services, and not from OSD.
+ */
+export const coerceStatusCode = (statusCode: number) => {
+  if (statusCode === 500) return 503;
+  return statusCode || 503;
+};
 
 /**
  * @experimental
@@ -77,6 +87,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
                 sessionId: schema.maybe(schema.string()),
               })
             ),
+            timeRange: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           }),
         },
       },
@@ -92,7 +103,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
             error = err;
           }
           return res.custom({
-            statusCode: error.status,
+            statusCode: coerceStatusCode(error.status || err.status),
             body: err.message,
           });
         }
@@ -126,4 +137,5 @@ export function defineRoutes(
   });
   registerDataSourceConnectionsRoutes(router, client);
   registerQueryAssistRoutes(router);
+  registerResourceRoutes(router);
 }

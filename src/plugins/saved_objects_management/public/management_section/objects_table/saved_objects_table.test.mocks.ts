@@ -29,7 +29,7 @@
  */
 
 export const saveAsMock = jest.fn();
-jest.doMock('@elastic/filesaver', () => ({
+jest.doMock('file-saver', () => ({
   saveAs: saveAsMock,
 }));
 

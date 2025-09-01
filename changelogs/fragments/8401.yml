@@ -1,2 +1,0 @@
-fix:
-- Fix unprefixed i18n identifiers in dashboard plugin ([#8401](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8401))

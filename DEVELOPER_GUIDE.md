@@ -132,13 +132,58 @@ $ yarn osd clean
 
 ### Run OpenSearch
 
-OpenSearch Dashboards requires a running version of OpenSearch to connect to. In a separate terminal you can run the latest snapshot built using:
+OpenSearch Dashboards requires a running version of OpenSearch to connect to. You can choose to run OpenSearch locally yourself or point to an existing cluster.
+
+#### Run a local OpenSearch cluster 
+
+In a separate terminal you can run the latest snapshot built using:
 
 _(Linux, Windows, Darwin (MacOS) only - for others, you'll need to [set up using Docker](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/docs/docker-dev/docker-dev-setup-manual.md) or [run OpenSearch from a tarball](#alternative---run-opensearch-from-tarball) instead)_
 
 ```bash
 $ yarn opensearch snapshot
 ```
+
+#### Alternative - Connect to an external OpenSearch cluster
+
+Instead of running OpenSearch locally, you can point OpenSearch Dashboards to an existing OpenSearch cluster:
+
+1. Clone the security dashboards plugin inside your OpenSearch Dashboards plugins folder and bootstrap:
+```bash
+$ cd plugins
+$ git clone https://github.com/opensearch-project/security-dashboards-plugin.git
+$ cd ..
+$ yarn osd bootstrap --single-version=loose
+```
+2. Create a configuration directory outside your repository to avoid accidentally committing credentials. For example:
+```bash
+$ mkdir -p /configs/me
+$ mkdir -p /configs/prod
+```
+3. Create `opensearch_dashboards.yml` file(s) in your config directories. Here's an example config:
+```yaml
+opensearch.hosts: ["https://your-opensearch-host"]
+opensearch.username: 'admin' 
+opensearch.password: 'your-password'
+opensearch.ignoreVersionMismatch: true
+opensearch.ssl.verificationMode: none
+opensearch.requestHeadersWhitelist: [authorization]
+opensearch_security.multitenancy.enabled: false
+opensearch_security.readonly_mode.roles: [kibana_read_only]
+opensearch_security.cookie.secure: false
+```
+4. Set the `OSD_PATH_CONF` environment variable to point to your config directory:
+```bash
+$ export OSD_PATH_CONF=/absolute/path/to/configs/me
+```
+
+This approach allows you to:
+- Develop against a production-like environment
+- Avoid running resource-intensive local clusters
+- Maintain different configurations for different environments
+- Keep sensitive credentials out of your repository
+
+Note: Make sure your OpenSearch cluster is accessible and credentials are valid before starting OpenSearch Dashboards.
 
 ### Run OpenSearch Dashboards
 
@@ -185,6 +230,11 @@ $ wsl -d docker-desktop
 $ sysctl -w vm.max_map_count=262144
 ```
 
+#### Debugging
+You can debug the OpenSearch Dashboards server by
+1. Attaching your debugger client to the debug port on port `9229`. If you're using VSCode, you can use the `attach-to-server` debug configuration provided.
+2. Running `yarn debug`. This will start the OpenSearch Dashboards development server with a debug port open on port `9229`.
+
 ### Next Steps
 
 Now that you have a development environment to play with, there are a number of different paths you may take next.
@@ -220,7 +270,7 @@ $ yarn start --run-examples
 
 #### Join the discussion
 
-See the [communication guide](COMMUNICATION.md)for information on how to join our slack workspace, forum, or developer office hours.
+See the [communication guide](COMMUNICATION.md) for information on how to join our slack workspace, forum, or developer office hours.
 
 ## Alternative development installations
 
@@ -329,7 +379,7 @@ You could pass one or multiple flags. If you don't pass any flag, `yarn build-pl
 Currently, the supported flags for this script are:
 
 - `darwin` (builds Darwin x64)
-- `linux` (builds Linux x64)
+- `linux` (builds Linux x64) **Note:** This build relies on the `dart-sass-embeddable` module, which uses `glibc`. Some Linux distributions (such as Alpine Linux) use `musl` instead of `glibc` and are not compatible with this build. If you are using a musl-based distro, consider building on a glibc-based environment (for example, using a Docker image based on Debian or CentOS) to avoid compatibility issues.
 - `linux-arm` (builds Linux ARM64).
 - `windows` (builds Windows x64)
 
@@ -1021,6 +1071,10 @@ Name action functions in the form of a strong verb and passed properties in the 
 <sort-button onClick={action.sort}/>
 <pagerButton onPageNext={action.turnToNextPage} />
 ```
+
+#### Storybook
+
+OpenSearch Dashboards supports creating [Storybook](https://storybook.js.org/) for React components. New UI components should have a corresponding storybook component. See [osd-storybook](/packages/osd-storybook) for details.
 
 ### API endpoints
 

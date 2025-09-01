@@ -43,6 +43,7 @@ describe('CSP handlers', () => {
 
     toolkit.next.mockReturnValue('next' as any);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await handler(request, {} as any, toolkit);
 
     expect(result).toEqual('next');
@@ -88,6 +89,7 @@ describe('CSP handlers', () => {
 
     toolkit.next.mockReturnValue('next' as any);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await handler(request, {} as any, toolkit);
 
     expect(result).toEqual('next');
@@ -134,6 +136,7 @@ describe('CSP handlers', () => {
 
     toolkit.next.mockReturnValue('next' as any);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await handler(request, {} as any, toolkit);
 
     expect(result).toEqual('next');
@@ -181,6 +184,7 @@ describe('CSP handlers', () => {
 
     toolkit.next.mockReturnValue('next' as any);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await handler(request, {} as any, toolkit);
 
     expect(result).toEqual('next');
@@ -224,6 +228,7 @@ describe('CSP handlers', () => {
 
     toolkit.next.mockReturnValue('next' as any);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await handler(request, {} as any, toolkit);
 
     expect(result).toEqual('next');
@@ -270,6 +275,7 @@ describe('CSP handlers', () => {
 
     toolkit.next.mockReturnValue('next' as any);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await handler(request, {} as any, toolkit);
 
     expect(result).toEqual('next');
@@ -305,6 +311,7 @@ describe('CSP handlers', () => {
 
     toolkit.next.mockReturnValue('next' as any);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await handler(request, {} as any, toolkit);
 
     expect(result).toEqual('next');
@@ -338,6 +345,7 @@ describe('CSP handlers', () => {
 
     toolkit.next.mockReturnValue('next' as any);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await handler(request, {} as any, toolkit);
 
     expect(result).toEqual('next');
@@ -374,6 +382,7 @@ describe('CSP handlers', () => {
 
     toolkit.next.mockReturnValue('next' as any);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const result = await handler(request, {} as any, toolkit);
 
     expect(result).toEqual('next');

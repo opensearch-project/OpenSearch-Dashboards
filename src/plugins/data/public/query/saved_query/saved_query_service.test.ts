@@ -457,7 +457,7 @@ describe('saved query service', () => {
       );
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         page: 1,
-        perPage: 0,
+        perPage: 1,
         type: 'query',
       });
     });

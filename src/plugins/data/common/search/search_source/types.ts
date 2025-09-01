@@ -29,7 +29,7 @@
  */
 
 import { NameList } from 'elasticsearch';
-import { Filter, IDataFrame, IndexPattern, Query } from '../..';
+import { Filter, IDataFrame, DataView, IndexPattern, Query } from '../..';
 import { SearchSource } from './search_source';
 
 /**
@@ -99,11 +99,12 @@ export interface SearchSourceFields {
   /**
    * {@link IndexPatternService}
    */
-  index?: IndexPattern;
+  index?: IndexPattern | DataView;
   searchAfter?: OpenSearchQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
   df?: IDataFrame;
+  skipTimeFilter?: boolean;
 }
 
 export interface SearchSourceOptions {

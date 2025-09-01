@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { EuiListGroupItem, EuiConfirmModal, EuiIconTip } from '@elastic/eui';
 
 import React, { Fragment, useState } from 'react';
@@ -76,7 +77,7 @@ export const SavedQueryListItem = ({
   });
 
   const label = (
-    <span className="osdSavedQueryListItem__label">
+    <span className="osdSavedQueryListItem__label" data-test-subj="osdSavedQueryListItemLabel">
       <span className="osdSavedQueryListItem__labelText">{savedQuery.attributes.title}</span>{' '}
       {savedQuery.attributes.description && (
         <EuiIconTip

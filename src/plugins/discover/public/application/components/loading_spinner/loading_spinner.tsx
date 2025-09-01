@@ -35,7 +35,13 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 export function LoadingSpinner() {
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} color="transparent" className="discoverNoResults">
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      color="transparent"
+      className="discoverNoResults"
+      data-test-subj="discoverNoResults"
+    >
       <EuiEmptyPrompt
         icon={<EuiLoadingSpinner data-test-subj="loadingSpinner" size="xl" />}
         title={

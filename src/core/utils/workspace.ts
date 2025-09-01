@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WORKSPACE_PATH_PREFIX } from './constants';
+import { WORKSPACE_PATH_PREFIX, WORKSPACE_USE_CASE_PREFIX } from './constants';
 import { IBasePath } from '../public';
 
 export const getWorkspaceIdFromUrl = (url: string, basePath: string): string => {
@@ -21,12 +21,19 @@ export const cleanWorkspaceId = (path: string) => {
   return path.replace(/^\/w\/([^\/]*)/, '');
 };
 
-export const formatUrlWithWorkspaceId = (url: string, workspaceId: string, basePath: IBasePath) => {
+export const formatUrlWithWorkspaceId = (
+  url: string,
+  workspaceId: string,
+  basePath: IBasePath,
+  urlWithoutClientBasePath = false
+) => {
   const newUrl = new URL(url, window.location.href);
   /**
    * Patch workspace id into path
    */
-  newUrl.pathname = basePath.remove(newUrl.pathname);
+  newUrl.pathname = basePath.remove(newUrl.pathname, {
+    withoutClientBasePath: urlWithoutClientBasePath,
+  });
 
   if (workspaceId) {
     newUrl.pathname = `${WORKSPACE_PATH_PREFIX}/${workspaceId}${newUrl.pathname}`;
@@ -40,3 +47,9 @@ export const formatUrlWithWorkspaceId = (url: string, workspaceId: string, baseP
 
   return newUrl.toString();
 };
+
+export const getUseCaseFeatureConfig = (useCaseId: string) =>
+  `${WORKSPACE_USE_CASE_PREFIX}${useCaseId}`;
+
+export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
+  featureConfigs.includes(getUseCaseFeatureConfig(navGroupId));

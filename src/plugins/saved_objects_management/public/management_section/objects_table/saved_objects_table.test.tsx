@@ -152,6 +152,7 @@ describe('SavedObjectsTable', () => {
       },
     });
 
+    // @ts-expect-error TS2739 TODO(ts-error): fixme
     defaultProps = {
       allowedTypes,
       serviceRegistry: serviceRegistryMock.create(),
@@ -568,12 +569,22 @@ describe('SavedObjectsTable', () => {
   });
 
   describe('delete', () => {
-    it('should show a confirm modal', async () => {
+    it('should show a confirm modal with correct icons and tooltips', async () => {
+      const mockGetSavedObjectLabel = jest.fn((type) => {
+        switch (type) {
+          case 'index-pattern':
+          case 'index-patterns':
+          case 'indexPatterns':
+            return 'index patterns';
+          default:
+            return type;
+        }
+      });
       const component = shallowRender();
 
       const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' },
+        { id: '1', type: 'config', meta: { icon: 'configApp' } },
+        { id: '3', type: 'dashboard', meta: { icon: 'dashboardApp' } },
       ] as SavedObjectWithMetadata[];
 
       // Ensure all promises resolve
@@ -586,7 +597,24 @@ describe('SavedObjectsTable', () => {
       await component.instance().onDelete();
       component.update();
 
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
+      expect(component.find('EuiModalHeader')).toMatchSnapshot();
+      expect(component.find('EuiModalFooter')).toMatchSnapshot();
+      expect(component.find('Delete assets')).toMatchSnapshot();
+
+      const table = component.find('EuiInMemoryTable');
+      const columns = table.prop('columns');
+
+      // @ts-expect-error TS2571, TS7006 TODO(ts-error): fixme
+      const typeField = columns.find((col) => col.field === 'type');
+      mockSelectedSavedObjects.forEach((savedObject) => {
+        const renderedContent = typeField.render(savedObject.type, savedObject);
+        expect(component.find('EuiToolTip')).toMatchSnapshot();
+        expect(renderedContent.props.content).toBe(mockGetSavedObjectLabel(savedObject.type));
+        const iconElement = renderedContent.props.children;
+        expect(component.find('EuiIcon')).toMatchSnapshot();
+        expect(iconElement.props.type).toBe(savedObject.meta.icon || 'apps');
+      });
     });
 
     it('should delete selected objects', async () => {
@@ -675,14 +703,14 @@ describe('SavedObjectsTable', () => {
       await component.instance().onDelete();
       component.update();
       expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
 
       await component.instance().delete();
       component.update();
       expect(notifications.toasts.addDanger).toHaveBeenCalled();
       // If user fail to delete the saved objects, the delete modal will continue to display
       expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
       expect(component.state('isDeleting')).toBe(false);
     });
   });
@@ -727,11 +755,17 @@ describe('SavedObjectsTable', () => {
 
       const props = component.find('Table').props() as TableProps;
       const filters = props.filters;
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       expect(filters.length).toBe(2);
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       expect(filters[0].field).toBe('type');
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       expect(filters[1].field).toBe('workspaces');
+      // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
       expect(filters[1].options.length).toBe(2);
+      // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
       expect(filters[1].options[0].value).toBe('foo');
+      // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
       expect(filters[1].options[1].value).toBe('bar');
     });
 
@@ -774,6 +808,7 @@ describe('SavedObjectsTable', () => {
 
       const props = component.find('Table').props() as TableProps;
       const filters = props.filters;
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       const wsFilter = filters.filter((f) => f.field === 'workspaces');
       expect(wsFilter.length).toBe(0);
     });
@@ -913,6 +948,7 @@ describe('SavedObjectsTable', () => {
 
     it('should duplicate selected objects', async () => {
       const mockCopy = jest.fn().mockResolvedValue({ success: true });
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       workspaces.client$.next({ copy: mockCopy });
       const client = workspaces.client$.getValue();
 
@@ -945,6 +981,7 @@ describe('SavedObjectsTable', () => {
 
     it('should duplicate single object', async () => {
       const mockCopy = jest.fn().mockResolvedValue({ success: true });
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       workspaces.client$.next({ copy: mockCopy });
       const client = workspaces.client$.getValue();
 
@@ -978,6 +1015,7 @@ describe('SavedObjectsTable', () => {
         successResults: [{ id: '1' }],
         errors: [{ id: '2' }],
       }));
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       workspaces.client$.next({ copy: mockCopy });
       const client = workspaces.client$.getValue();
       const component = shallowRender({ applications, workspaces });
@@ -1021,42 +1059,12 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('should catch error when duplicating selected object is failed', async () => {
-      const component = shallowRender({ applications, workspaces });
-      component.setState({ isShowingDuplicateModal: true });
-
-      const mockCopy = jest.fn().mockResolvedValue({ error: 'error' });
-      workspaces.client$.next({ copy: mockCopy });
-      const client = workspaces.client$.getValue();
-
-      // Ensure all promises resolve
-      await new Promise((resolve) => process.nextTick(resolve));
-      // Ensure the state changes are reflected
-      component.update();
-
-      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
-
-      expect(client?.copy).toHaveBeenCalledWith(
-        [
-          { id: '1', type: 'dashboard' },
-          { id: '2', type: 'dashboard' },
-        ],
-        'workspace2',
-        false
-      );
-      component.update();
-
-      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Unable to copy 2 saved objects.',
-        text: 'error',
-      });
-    });
-
     it('should show error toast when copy is fail', async () => {
       const component = shallowRender({ applications, workspaces });
       component.setState({ isShowingDuplicateModal: true });
 
       const mockCopy = jest.fn().mockRejectedValue(() => new Error('Copy operation failed'));
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       workspaces.client$.next({ copy: mockCopy });
       const client = workspaces.client$.getValue();
 

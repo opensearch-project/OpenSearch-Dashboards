@@ -197,6 +197,50 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
         return detailsRow.findByTestSubject('~docViewer');
       });
     }
+
+    /**
+     * Clicks to remove a specified column from the data grid.
+     *
+     * @param {string} columnName - The name of the column to be removed.
+     */
+    async clickRemoveColumn(columnName: string) {
+      await testSubjects.click(`docTableRemoveHeader-${columnName}`);
+    }
+
+    /**
+     * Extracts the text from a cell in the docTable.
+     *
+     * Given a cell represented by a Cheerio object, this function navigates its nested structure
+     * to extract the contained text.
+     *
+     * @param {any} cCell - The Cheerio representation of the cell from which text needs to be extracted.
+     * @returns {string} The extracted text from the cell.
+     */
+    getTextFromCell(cCell: any): string {
+      // navigate the nested structure and get the text
+      return cCell.children().first().children().text();
+    }
+
+    /**
+     * Retrieves the values from a docTable.
+     *
+     * The function fetches values present in a docTable and gives the text back as an array
+     *
+     * @returns {Promise<string[]>} A promise resolving to a 1D array of table values.
+     */
+    async getDocTableValues(): Promise<string[]> {
+      const table = await testSubjects.find('docTable');
+      const $ = await table.parseDomContent();
+      const cellsArr = $.findTestSubjects('docTableField').toArray();
+      const rows: string[] = [];
+
+      for (const cell of cellsArr) {
+        const cCell = $(cell);
+        rows.push(this.getTextFromCell(cCell));
+      }
+
+      return Promise.resolve(rows);
+    }
   }
 
   return new DocTable();

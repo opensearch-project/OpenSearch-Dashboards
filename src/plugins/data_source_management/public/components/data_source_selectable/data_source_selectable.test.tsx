@@ -4,8 +4,9 @@
  */
 
 import { ShallowWrapper, shallow, mount } from 'enzyme';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { i18n } from '@osd/i18n';
-import { SavedObjectsClientContract } from '../../../../../core/public';
+import { SavedObjectsClientContract, UiSettingScope } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { DataSourceSelectable } from './data_source_selectable';
@@ -13,10 +14,15 @@ import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
+// @ts-expect-error TS6192 TODO(ts-error): fixme
 import {
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   NO_DATASOURCES_CONNECTED_MESSAGE,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   CONNECT_DATASOURCES_MESSAGE,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   ADD_COMPATIBLE_DATASOURCES_MESSAGE,
 } from '../constants';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
@@ -54,6 +60,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -74,6 +81,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -94,6 +102,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -113,6 +122,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -137,6 +147,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -144,6 +155,7 @@ describe('DataSourceSelectable', () => {
 
     const containerInstance = container.instance();
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     containerInstance.onChange([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toBeCalledTimes(1);
     expect(containerInstance.state).toEqual({
@@ -167,6 +179,7 @@ describe('DataSourceSelectable', () => {
       incompatibleDataSourcesExist: false,
     });
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     expect(containerInstance.state).toEqual({
       componentId: mockGeneratedComponentId,
@@ -206,6 +219,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
         selectedOption={[{ id: 'test2', label: 'test2' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -224,6 +238,7 @@ describe('DataSourceSelectable', () => {
         notifications={toasts}
         onSelectedDataSources={onSelectedDataSource}
         disabled={false}
+        scope={UiSettingScope.GLOBAL}
         hideLocalCluster={false}
         fullWidth={false}
         selectedOption={[{ id: 'test2' }]}
@@ -243,8 +258,10 @@ describe('DataSourceSelectable', () => {
         notifications={toasts}
         onSelectedDataSources={onSelectedDataSource}
         disabled={false}
+        scope={UiSettingScope.GLOBAL}
         hideLocalCluster={false}
         fullWidth={false}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         selectedOption={[{ id: undefined }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -265,6 +282,8 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         selectedOption={[{}]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -276,6 +295,7 @@ describe('DataSourceSelectable', () => {
   });
   it(`should display a warning when selectedOption[0] is missing id but has a label`, async () => {
     const onSelectedDataSource = jest.fn();
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const container = render(
       <DataSourceSelectable
         savedObjectsClient={client}
@@ -284,6 +304,8 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         selectedOption={[{ label: 'test-label' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
@@ -301,7 +323,9 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         selectedOption={[{ label: '' }]}
+        scope={UiSettingScope.GLOBAL}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -319,6 +343,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
         selectedOption={[]}
       />
     );
@@ -336,6 +361,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
         selectedOption={[{ id: 'test2' }]}
       />
     );
@@ -383,6 +409,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -402,6 +429,7 @@ describe('DataSourceSelectable', () => {
       incompatibleDataSourcesExist: false,
     });
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     expect(containerInstance.state).toEqual({
       componentId: mockGeneratedComponentId,
@@ -464,6 +492,7 @@ describe('DataSourceSelectable', () => {
           disabled={false}
           hideLocalCluster={true}
           fullWidth={false}
+          scope={UiSettingScope.GLOBAL}
           selectedOption={selectedOption}
           dataSourceFilter={(ds) => false}
         />
@@ -495,6 +524,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        scope={UiSettingScope.GLOBAL}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );

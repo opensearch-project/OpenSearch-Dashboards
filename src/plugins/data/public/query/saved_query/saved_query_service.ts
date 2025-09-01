@@ -38,6 +38,8 @@ import { UI_SETTINGS } from '../../../common';
 
 type SerializedSavedQueryAttributes = SavedObjectAttributes & SavedQueryAttributes;
 
+const unregisteredLangServiceApps = ['explore'];
+
 export const createSavedQueryService = (
   savedObjectsClient: SavedObjectsClientContract,
   coreStartServices: { application: CoreStart['application']; uiSettings: CoreStart['uiSettings'] },
@@ -136,8 +138,15 @@ export const createSavedQueryService = (
     const currentAppId = (await application?.currentAppId$?.pipe(first()).toPromise()) ?? undefined;
     const languageService = queryStringManager?.getLanguageService();
 
-    // Filtering saved queries based on language supported by cirrent application
-    if (currentAppId && languageService) {
+    // Filtering saved queries based on language supported by current application
+    // Skip filtering for apps not using lang service eg. explore new editor
+    if (
+      currentAppId &&
+      languageService &&
+      !unregisteredLangServiceApps.some((unregisteredApp) =>
+        currentAppId.startsWith(unregisteredApp)
+      )
+    ) {
       queries = queries.filter((query) => {
         const languageId = query.attributes.query.language;
         return (
@@ -207,7 +216,8 @@ export const createSavedQueryService = (
   const getSavedQueryCount = async (): Promise<number> => {
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
-      perPage: 0,
+      // ToDo: Revert this back to `0` when Neo reports the count correctly irrespective of perPage.
+      perPage: 1,
       page: 1,
     });
     return response.total;

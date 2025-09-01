@@ -1,2 +1,0 @@
-fix:
-- Ensure save query loaded properly from asset ([#8707](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8707))

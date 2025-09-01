@@ -75,11 +75,11 @@ describe('findDataSourceIdbyName()', () => {
 
 describe('extractDataSourceNamesInVegaSpec()', () => {
   const loadHJSONStringFromFile = (filepath: string) => {
-    return readFileSync(join(__dirname, filepath)).toString();
+    return readFileSync(join(__dirname, filepath), 'utf8').toString();
   };
 
   const loadJSONFromFile = (filepath: string) => {
-    return JSON.parse(readFileSync(join(__dirname, filepath)).toString());
+    return JSON.parse(readFileSync(join(__dirname, filepath), 'utf8').toString());
   };
 
   // JSON test cases

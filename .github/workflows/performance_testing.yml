@@ -1,0 +1,68 @@
+name: Performance Testing
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.test.ts'
+      - '**/*.test.js'
+      - '**/__tests__/**'
+      - '.github/workflows/**'
+      - 'docs/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  bundle-analyzer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+
+      - name: Update Limit and bundle size variation
+        run: node scripts/build_opensearch_dashboards_platform_plugins --update-limits
+
+      - name: Check and upload bundle size variations
+        id: check_bundle_size
+        run: |
+          if [ -f packages/osd-optimizer/limits_delta.yml ]; then
+            echo "Bundle size changes detected."
+            echo "bundle_size_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No bundle size variations detected."
+            echo "bundle_size_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload limits_delta.yml as artifact
+        if: steps.check_bundle_size.outputs.bundle_size_changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-size-delta
+          path: packages/osd-optimizer/limits_delta.yml
+
+      - name: Fail the CI if bundle size exceeded
+        if: steps.check_bundle_size.outputs.bundle_size_changed == 'true'
+        run: |
+          echo "❌ Bundle size exceeded threshold. Failing the job."
+          exit 1

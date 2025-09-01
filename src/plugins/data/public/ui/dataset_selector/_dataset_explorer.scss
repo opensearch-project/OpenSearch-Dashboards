@@ -9,12 +9,14 @@
   height: 100%;
   max-height: calc(100vh - 200px);
   overflow-x: auto;
+  overflow-y: hidden;
   border: $euiBorderThin;
 
   &__column {
     display: grid;
     grid-template-rows: auto 1fr;
     border-right: $euiBorderThin;
+    overflow-y: hidden;
 
     &--empty,
     &--leaf {
@@ -33,6 +35,8 @@
   }
 
   .datasetTable {
+    overflow-y: auto;
+
     &__loadMore {
       text-align: center;
       padding: $euiSizeS;

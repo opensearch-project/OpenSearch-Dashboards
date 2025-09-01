@@ -11,13 +11,14 @@ import {
 } from './register_default_collaborator_types';
 import { WorkspaceCollaboratorTypesService } from './services';
 import { fireEvent, render } from '@testing-library/react';
+import { AddCollaboratorsModalProps } from './components/add_collaborators_modal';
 
 jest.mock('../../../plugins/opensearch_dashboards_react/public', () => ({
   toMountPoint: jest.fn(),
 }));
 
 jest.mock('./components/add_collaborators_modal', () => ({
-  AddCollaboratorsModal: ({ onClose, onAddCollaborators }) => (
+  AddCollaboratorsModal: ({ onClose, onAddCollaborators }: AddCollaboratorsModalProps) => (
     <div>
       <button
         onClick={() => {

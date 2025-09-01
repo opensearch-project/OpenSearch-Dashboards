@@ -80,7 +80,6 @@ const dataSourcesList = [
     },
   },
 ];
-
 const dataSourceConnectionsList = [
   {
     id: 'id1',
@@ -105,6 +104,7 @@ const dataSourceConnectionsList = [
 ];
 
 const mockCoreStart = coreMock.createStart();
+
 jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passedDataSources) => {
   return dataSourceConnectionsList.filter(({ id }) =>
     passedDataSources.some((dataSource) => dataSource.id === id)
@@ -172,6 +172,7 @@ const WorkspaceCreator = ({
 
   return (
     <Provider>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <WorkspaceCreatorComponent {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );
@@ -201,11 +202,11 @@ describe('WorkspaceCreator', () => {
   });
 
   afterAll(() => {
-    window.location = location;
+    window.location = location as Location;
   });
 
   it('should not create workspace when name is empty', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId, getByText } = render(<WorkspaceCreator />);
 
     // Ensure workspace create form rendered
     await waitFor(() => {
@@ -219,6 +220,7 @@ describe('WorkspaceCreator', () => {
       },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(getByText('Name is required. Enter a name.')).toBeInTheDocument();
     expect(workspaceClientCreate).not.toHaveBeenCalled();
   });
 
@@ -413,6 +415,7 @@ describe('WorkspaceCreator', () => {
     });
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspace-creator-dqc-assign-button'));
+
     await waitFor(() => {
       expect(
         getByText(
@@ -520,8 +523,8 @@ describe('WorkspaceCreator', () => {
     jest.useRealTimers();
   });
 
-  it('should redirect to workspace setting collaborators page if permission enabled', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+  it('should redirect to workspace setting collaborators page if jump to collaborators checked', async () => {
+    const { getByTestId } = render(<WorkspaceCreator isDashboardAdmin />);
     const navigateToCollaboratorsMock = jest.fn();
     jest
       .spyOn(workspaceUtilsExports, 'navigateToAppWithinWorkspace')
@@ -535,6 +538,7 @@ describe('WorkspaceCreator', () => {
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
     });
+    fireEvent.click(getByTestId('jumpToCollaboratorsCheckbox'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     jest.useFakeTimers();
     jest.runAllTimers();
@@ -544,6 +548,26 @@ describe('WorkspaceCreator', () => {
         'successResult',
         'workspace_collaborators'
       );
+    });
+    jest.useRealTimers();
+  });
+
+  it('should redirect to workspace use case landing page if jump to collaborators not checked', async () => {
+    const { getByTestId } = render(<WorkspaceCreator isDashboardAdmin />);
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    jest.useFakeTimers();
+    jest.runAllTimers();
+    await waitFor(() => {
+      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
     });
     jest.useRealTimers();
   });

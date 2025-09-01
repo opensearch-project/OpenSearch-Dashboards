@@ -2,333 +2,419 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { fireEvent, render, screen } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
-import { coreMock } from '../../../../../core/public/mocks';
+
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { CoreSetup } from 'opensearch-dashboards/public';
+import { DataPublicPluginSetup, QueryEditorExtensionDependencies } from 'src/plugins/data/public';
 import { BehaviorSubject } from 'rxjs';
-import { QueryAssistSummary, convertResult } from './query_assist_summary';
-import { useQueryAssist } from '../hooks';
-import { IDataFrame, Query } from '../../../../data/common';
-import { FeedbackStatus as FEEDBACK } from '../../../common/query_assist';
+import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
 
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useState: jest.fn((value) => [value, () => null]),
-  useRef: jest.fn(() => ({ current: null })),
-}));
+import { convertResult, QueryAssistSummary } from './query_assist_summary';
+import { QueryAssistContext, QueryAssistContextValue } from '../hooks';
+import { DATA_FRAME_TYPES, IDataFrame } from '../../../../data/common';
+import { coreMock } from '../../../../../core/public/mocks';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-jest.mock('../hooks', () => ({
-  useQueryAssist: jest.fn(),
-}));
+jest.useFakeTimers();
 
 describe('query assist summary', () => {
-  const PPL = 'ppl';
-  const question = 'Are there any errors in my logs?';
-  const dataFrame = {
-    fields: [{ name: 'name', values: ['value'] }],
-    size: 1,
-  };
-  const emptyDataFrame = {
-    fields: [],
-    size: 0,
+  const defaultCoreSetupMock = coreMock.createSetup();
+  const defaultDataSetupMock = dataPluginMock.createSetupContract();
+  const defaultUsageCollectionSetupMock = usageCollectionPluginMock.createSetupContract();
+  const defaultDependenciesMock = {
+    language: 'PPL',
+    onSelectLanguage: jest.fn(),
+    // query editor is not collapsed
+    isCollapsed: false,
+    setIsCollapsed: jest.fn(),
+    query: {
+      query: '',
+      language: '',
+    },
   };
 
-  const coreSetupMock = coreMock.createSetup({});
-  const httpMock = coreSetupMock.http;
-  const data$ = new BehaviorSubject<IDataFrame | undefined>(undefined);
-  const question$ = new BehaviorSubject<string>('');
-  const query$ = new BehaviorSubject<Query | undefined>(undefined);
-  const reportUiStatsMock = jest.fn();
-  const setSummary = jest.fn();
-  const setLoading = jest.fn();
-  const setFeedback = jest.fn();
-  const setIsAssistantEnabledByCapability = jest.fn();
-  const getQuery = jest.fn();
-  const dataMock = {
-    query: {
-      queryString: {
-        getUpdates$: () => query$,
-        getQuery,
-      },
-    },
-    search: {
-      df: {
-        df$: data$,
-      },
-    },
+  const defaultCoreStartMock = coreMock.createStart();
+  defaultCoreStartMock.application.capabilities = {
+    ...defaultCoreStartMock.application.capabilities,
+    // assistant is turned on
+    assistant: { enabled: true },
+  };
+  defaultCoreSetupMock.getStartServices.mockResolvedValue([defaultCoreStartMock, {}, {}]);
+
+  const renderQueryAssistSummary = (
+    props: Partial<QueryAssistContextValue>,
+    deps?: {
+      coreSetup?: CoreSetup;
+      dataSetup?: DataPublicPluginSetup;
+      dependencies?: QueryEditorExtensionDependencies;
+      usageCollection?: UsageCollectionSetup;
+    }
+  ) => {
+    const mocks = {
+      coreSetup: defaultCoreSetupMock,
+      dataSetup: defaultDataSetupMock,
+      dependencies: defaultDependenciesMock,
+      usageCollection: defaultUsageCollectionSetupMock,
+      ...deps,
+    };
+    const defaults: QueryAssistContextValue = {
+      // query assist is not collapsed
+      isQuerySummaryCollapsed: false,
+      isSummaryAgentAvailable: true,
+      queryState: { question: '', generatedQuery: '' },
+      updateQueryState: jest.fn(),
+    };
+    const component = render(
+      <QueryAssistContext.Provider value={{ ...defaults, ...props }}>
+        <QueryAssistSummary
+          data={mocks.dataSetup}
+          http={mocks.coreSetup.http}
+          dependencies={mocks.dependencies}
+          core={mocks.coreSetup}
+          usageCollection={mocks.usageCollection}
+        />
+      </QueryAssistContext.Provider>
+    );
+    return (rerenderProps: Partial<QueryAssistContextValue>) => {
+      component.rerender(
+        <QueryAssistContext.Provider value={{ ...defaults, ...props, ...rerenderProps }}>
+          <QueryAssistSummary
+            data={mocks.dataSetup}
+            http={mocks.coreSetup.http}
+            dependencies={mocks.dependencies}
+            core={mocks.coreSetup}
+          />
+        </QueryAssistContext.Provider>
+      );
+    };
+  };
+
+  const setupInitScreen = async () => {
+    let rerender: (props: Partial<QueryAssistContextValue>) => any = jest.fn();
+    const ppl = 'source=test | stats COUNT() as count';
+    const question = 'test question';
+    const summary = 'mock summary response';
+    const dataFrame: IDataFrame = {
+      type: DATA_FRAME_TYPES.DEFAULT,
+      name: '73823750-90ec-11ef-8789-dd56e6283d4c',
+      size: 3,
+      fields: [
+        {
+          name: 'count',
+          type: 'integer',
+          values: [1483, 79, 48],
+        },
+        {
+          name: 'response',
+          type: 'string',
+          values: ['200', '404', '503'],
+        },
+      ],
+    };
+    const coreSetup = coreMock.createSetup();
+    // mock fetchSummary so the http request takes 1s to response
+    coreSetup.http.post.mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve(summary), 1000))
+    );
+    // use defaultCoreSetupMock make to make sure assist capability is turned on
+    coreSetup.getStartServices.mockResolvedValue([defaultCoreStartMock, {}, {}]);
+
+    const dataSetup = dataPluginMock.createSetupContract();
+    dataSetup.search.df.df$ = new BehaviorSubject<IDataFrame | undefined>(undefined);
+    dataSetup.query.queryString.getQuery = jest
+      .fn()
+      .mockReturnValue({ query: ppl, language: 'PPL' });
+
+    const usageCollection = usageCollectionPluginMock.createSetupContract();
+
+    await act(async () => {
+      rerender = renderQueryAssistSummary(
+        {
+          // ppl is generated
+          queryState: { question, generatedQuery: ppl },
+        },
+        { dataSetup, coreSetup, usageCollection }
+      );
+    });
+    return {
+      usageCollection,
+      coreSetup,
+      rerender,
+      dataSetup,
+      ppl,
+      dataFrame,
+      question,
+      summary,
+    };
   };
 
   afterEach(() => {
-    data$.next(undefined);
-    question$.next('');
-    query$.next(undefined);
-    jest.clearAllMocks();
+    jest.clearAllTimers();
   });
 
-  const usageCollectionMock = {
-    reportUiStats: reportUiStatsMock,
-    METRIC_TYPE: {
-      CLICK: 'click',
-    },
-  };
-  const props: ComponentProps<typeof QueryAssistSummary> = {
-    data: dataMock,
-    http: httpMock,
-    usageCollection: usageCollectionMock,
-    dependencies: {
-      isCollapsed: false,
-      isSummaryCollapsed: false,
-    },
-    core: coreSetupMock,
-  };
-
-  const LOADING = {
-    YES: true,
-    NO: false,
-  };
-  const COLLAPSED = {
-    YES: true,
-    NO: false,
-  };
-
-  const renderQueryAssistSummary = (isCollapsed: boolean) => {
-    const component = render(
-      <div>
-        <QueryAssistSummary
-          {...props}
-          dependencies={{
-            ...props.dependencies,
-            isCollapsed,
-          }}
-        />
-      </div>
-    );
-    return component;
-  };
-
-  const sleep = (ms) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
-  const WAIT_TIME = 100;
-
-  const mockUseState = (
-    summary,
-    loading,
-    feedback,
-    isAssistantEnabledByCapability = true,
-    isQueryAssistCollapsed = COLLAPSED.NO
-  ) => {
-    React.useState.mockImplementationOnce(() => [summary, setSummary]);
-    React.useState.mockImplementationOnce(() => [loading, setLoading]);
-    React.useState.mockImplementationOnce(() => [feedback, setFeedback]);
-    React.useState.mockImplementationOnce(() => [
-      isAssistantEnabledByCapability,
-      setIsAssistantEnabledByCapability,
-    ]);
-    useQueryAssist.mockImplementationOnce(() => ({
-      question: 'question',
-      question$,
-      isQueryAssistCollapsed,
-    }));
-  };
-
-  const defaultUseStateMock = () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NONE);
-  };
-
-  it('should not show if collapsed is true', () => {
-    defaultUseStateMock();
-    renderQueryAssistSummary(COLLAPSED.YES);
-    const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
-    expect(summaryPanels).toHaveLength(0);
-  });
-
-  it('should not show if assistant is disabled by capability', () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NONE, false);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
-    expect(summaryPanels).toHaveLength(0);
-  });
-
-  it('should not show if query assistant is collapsed', () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NONE, true, COLLAPSED.YES);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
-    expect(summaryPanels).toHaveLength(0);
-  });
-
-  it('should show if collapsed is false', () => {
-    defaultUseStateMock();
-    renderQueryAssistSummary(COLLAPSED.NO);
+  it('should show summary component', async () => {
+    await act(async () => {
+      renderQueryAssistSummary({});
+    });
     const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
     expect(summaryPanels).toHaveLength(1);
   });
 
-  it('should display loading view if loading state is true', () => {
-    mockUseState(null, LOADING.YES, FEEDBACK.NONE);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
-    expect(screen.queryAllByTestId('queryAssist_summary_result')).toHaveLength(0);
-    expect(screen.queryAllByTestId('queryAssist_summary_empty_text')).toHaveLength(0);
+  it('should not show if collapsed is true', async () => {
+    await act(async () => {
+      renderQueryAssistSummary(
+        {},
+        { dependencies: { ...defaultDependenciesMock, isCollapsed: true } }
+      );
+    });
+    const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
+    expect(summaryPanels).toHaveLength(0);
   });
 
-  it('should display loading view if loading state is true even with summary', () => {
-    mockUseState('summary', LOADING.YES, FEEDBACK.NONE);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
-    expect(screen.queryAllByTestId('queryAssist_summary_result')).toHaveLength(0);
-    expect(screen.queryAllByTestId('queryAssist_summary_empty_text')).toHaveLength(0);
+  it('should not show if assistant is disabled by capability', async () => {
+    const coreSetupAssistDisabledMock = coreMock.createSetup();
+    const coreStartAssistDisabledMock = coreMock.createStart();
+    coreStartAssistDisabledMock.application.capabilities = {
+      ...coreStartAssistDisabledMock.application.capabilities,
+      // assistant is turned off
+      assistant: { enabled: false },
+    };
+    coreSetupAssistDisabledMock.getStartServices.mockResolvedValue([
+      coreStartAssistDisabledMock,
+      {},
+      {},
+    ]);
+    await act(async () => {
+      renderQueryAssistSummary({}, { coreSetup: coreSetupAssistDisabledMock });
+    });
+    const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
+    expect(summaryPanels).toHaveLength(0);
   });
 
-  it('should display initial view if loading state is false and no summary', () => {
-    defaultUseStateMock();
-    renderQueryAssistSummary(COLLAPSED.NO);
+  it('should not show if query assistant is collapsed', async () => {
+    await act(async () => {
+      renderQueryAssistSummary({ isQuerySummaryCollapsed: true });
+    });
+    const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
+    expect(summaryPanels).toHaveLength(0);
+  });
+
+  it('should load the summary automatically only the first time ppl query was generated', async () => {
+    const { coreSetup, dataSetup, rerender, dataFrame, summary } = await setupInitScreen();
+    await act(async () => {
+      // ppl query returned results
+      dataSetup.search.df.df$.next(dataFrame);
+    });
+
+    await waitFor(() => {
+      // the generate summary request is sent only once
+      expect(coreSetup.http.post).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
+    });
+
+    // after 1s, the fetch summary request respond
+    jest.advanceTimersByTime(1000);
+    await waitFor(() => {
+      // the summary result is displayed
+      expect(screen.getByText(summary)).toBeInTheDocument();
+    });
+
+    // ppl query is generated another time
+    const anotherPPL = 'source=another_test | stats COUNT() as count';
+    dataSetup.query.queryString.getQuery = jest
+      .fn()
+      .mockReturnValue({ query: anotherPPL, language: 'PPL' });
+
+    await act(async () => {
+      rerender({ queryState: { question: 'another question', generatedQuery: anotherPPL } });
+      // ppl query returned results
+      dataSetup.search.df.df$.next({
+        type: DATA_FRAME_TYPES.DEFAULT,
+        name: '73823750-90ec-11ef-8789-dd56e6283d4c',
+        size: 2,
+        fields: [
+          {
+            name: 'count',
+            type: 'integer',
+            values: [1483, 79],
+          },
+          {
+            name: 'response',
+            type: 'string',
+            values: ['200', '404'],
+          },
+        ],
+      });
+    });
+    await waitFor(() => {
+      // The generate summary request should not be called the second time because the second time
+      // ppl query generated should not auto-trigger the summarization
+      expect(coreSetup.http.post).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('queryAssist_summary_click_to_generate')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('queryAssist_summary_buttons_generate'));
+    await waitFor(() => {
+      // Clicking "generate summary" should trigger the request summary call
+      expect(coreSetup.http.post).toHaveBeenCalledTimes(2);
+      expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
+    });
+    // after 1s, the fetch summary request respond
+    jest.advanceTimersByTime(1000);
+    await waitFor(() => {
+      // the summary result is displayed
+      expect(screen.getByText(summary)).toBeInTheDocument();
+    });
+  });
+
+  it('should display initial view', async () => {
+    await act(async () => {
+      renderQueryAssistSummary({});
+    });
     expect(screen.getByTestId('queryAssist_summary_empty_text')).toBeInTheDocument();
-    expect(screen.queryAllByTestId('queryAssist_summary_result')).toHaveLength(0);
-    expect(screen.queryAllByTestId('queryAssist_summary_loading')).toHaveLength(0);
-  });
-
-  it('should display summary result', () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
-    expect(screen.getByTestId('queryAssist_summary_result')).toHaveTextContent('summary');
-    expect(screen.queryAllByTestId('queryAssist_summary_empty_text')).toHaveLength(0);
-    expect(screen.queryAllByTestId('queryAssist_summary_loading')).toHaveLength(0);
+    expect(screen.getByTestId('queryAssist_summary_buttons_generate')).toBeDisabled();
   });
 
   it('should report metric for thumbup click', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
-    await screen.getByTestId('queryAssist_summary_buttons_thumbup');
+    const { usageCollection, dataSetup, dataFrame, summary } = await setupInitScreen();
+    await act(async () => {
+      // ppl query returned results
+      dataSetup.search.df.df$.next(dataFrame);
+    });
+    // after 1s, the fetch summary request respond
+    jest.advanceTimersByTime(1000);
+    await waitFor(() => {
+      // the summary result is displayed
+      expect(screen.getByText(summary)).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByTestId('queryAssist_summary_buttons_thumbup'));
-    expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.THUMB_UP);
-    expect(reportUiStatsMock).toHaveBeenCalledWith(
+    expect(usageCollection.reportUiStats).toHaveBeenCalledWith(
       'query-assist',
       'click',
       expect.stringMatching(/^thumbup/)
     );
+    // After clicking thumb up, only thumb up button will be visible
+    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbup')).toBeInTheDocument();
+    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbdown')).not.toBeInTheDocument();
   });
 
   it('should report metric for thumbdown click', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
-    await screen.getByTestId('queryAssist_summary_buttons_thumbdown');
+    const { usageCollection, dataSetup, dataFrame, summary } = await setupInitScreen();
+    await act(async () => {
+      // ppl query returned results
+      dataSetup.search.df.df$.next(dataFrame);
+    });
+    // after 1s, the fetch summary request respond
+    jest.advanceTimersByTime(1000);
+    await waitFor(() => {
+      // the summary result is displayed
+      expect(screen.getByText(summary)).toBeInTheDocument();
+    });
     fireEvent.click(screen.getByTestId('queryAssist_summary_buttons_thumbdown'));
-    expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.THUMB_DOWN);
-    expect(reportUiStatsMock).toHaveBeenCalledWith(
+    expect(usageCollection.reportUiStats).toHaveBeenCalledWith(
       'query-assist',
       'click',
       expect.stringMatching(/^thumbdown/)
     );
-  });
-
-  it('should hide thumbdown button if thumbup button is clicked', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_UP);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
-    await screen.getByTestId('queryAssist_summary_buttons_thumbup');
-    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbdown')).not.toBeInTheDocument();
-  });
-
-  it('should hide thumbup button if thumbdown button is clicked', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_DOWN);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
-    await screen.getByTestId('queryAssist_summary_buttons_thumbdown');
+    // After clicking thumb down, only thumb down button will be visible
+    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbdown')).toBeInTheDocument();
     expect(screen.queryByTestId('queryAssist_summary_buttons_thumbup')).not.toBeInTheDocument();
   });
 
-  it('should not fetch summary if data is empty', async () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NONE);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    question$.next(question);
-    query$.next({ query: PPL, language: 'PPL' });
-    data$.next(emptyDataFrame);
-    expect(httpMock.post).toBeCalledTimes(0);
+  it('should not display empty screen if result is empty', async () => {
+    const firstPPL = 'source=test | stats COUNT() as count';
+    const dataSetup = dataPluginMock.createSetupContract();
+    dataSetup.search.df.df$ = new BehaviorSubject<IDataFrame | undefined>(undefined);
+    dataSetup.query.queryString.getQuery = jest
+      .fn()
+      .mockReturnValue({ query: firstPPL, language: 'PPL' });
+
+    await act(async () => {
+      renderQueryAssistSummary(
+        {
+          queryState: { question: 'test question', generatedQuery: firstPPL },
+        },
+        { dataSetup }
+      );
+      // ppl query returned empty results
+      dataSetup.search.df.df$.next({
+        type: DATA_FRAME_TYPES.DEFAULT,
+        name: '73823750-90ec-11ef-8789-dd56e6283d4c',
+        size: 0,
+        fields: [],
+      });
+    });
+    expect(screen.getByTestId('queryAssist_summary_can_not_generate')).toBeInTheDocument();
+    expect(defaultCoreSetupMock.http.post).not.toHaveBeenCalled();
   });
 
-  it('should fetch summary with expected payload and response', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
-    const RESPONSE_TEXT = 'response';
-    httpMock.post.mockResolvedValue(RESPONSE_TEXT);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    question$.next(question);
-    query$.next({ query: PPL, language: 'PPL' });
-    data$.next(dataFrame as IDataFrame);
-    await sleep(WAIT_TIME);
-    expect(httpMock.post).toBeCalledWith('/api/assistant/data2summary', {
+  it('should fetch summary with expected payload', async () => {
+    const { coreSetup, question, ppl, dataFrame, dataSetup } = await setupInitScreen();
+    await act(async () => {
+      // ppl query returned results
+      dataSetup.search.df.df$.next(dataFrame);
+    });
+    expect(coreSetup.http.post).toBeCalledWith('/api/assistant/data2summary', {
       body: JSON.stringify({
         sample_data: `'${JSON.stringify(convertResult(dataFrame))}'`,
-        sample_count: 1,
-        total_count: 1,
+        sample_count: 3,
+        total_count: 3,
         question,
-        ppl: PPL,
+        ppl,
       }),
       query: {
         dataSourceId: undefined,
       },
     });
-    expect(setSummary).toHaveBeenNthCalledWith(1, '');
-    expect(setSummary).toHaveBeenNthCalledWith(2, RESPONSE_TEXT);
-    expect(setLoading).toHaveBeenNthCalledWith(1, true);
-    expect(setLoading).toHaveBeenNthCalledWith(2, false);
   });
 
   it('should handle fetch summary error', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
-    httpMock.post.mockRejectedValueOnce({});
-    renderQueryAssistSummary(COLLAPSED.NO);
-    question$.next(question);
-    query$.next({ query: PPL, language: 'PPL' });
-    data$.next(dataFrame as IDataFrame);
-    await sleep(WAIT_TIME);
-    expect(setSummary).toBeCalledTimes(2);
-    expect(setLoading).toHaveBeenNthCalledWith(1, true);
-    expect(setLoading).toHaveBeenNthCalledWith(2, false);
-  });
+    const { coreSetup, dataFrame, dataSetup } = await setupInitScreen();
+    coreSetup.http.post.mockRejectedValueOnce({});
 
-  it('should not update queryResults if subscription changed not in order', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
-    const RESPONSE_TEXT = 'response';
-    httpMock.post.mockResolvedValue(RESPONSE_TEXT);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    data$.next(dataFrame as IDataFrame);
-    question$.next(question);
-    query$.next({ query: PPL, language: 'PPL' });
-    await sleep(WAIT_TIME);
-    expect(httpMock.post).toHaveBeenCalledTimes(0);
-  });
+    await act(async () => {
+      // ppl query returned results
+      dataSetup.search.df.df$.next(dataFrame);
+    });
 
-  it('should update queryResults if subscriptions changed in order', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
-    const RESPONSE_TEXT = 'response';
-    httpMock.post.mockResolvedValue(RESPONSE_TEXT);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    question$.next(question);
-    query$.next({ query: PPL, language: 'PPL' });
-    data$.next(dataFrame as IDataFrame);
-    await sleep(WAIT_TIME);
-    expect(httpMock.post).toHaveBeenCalledTimes(1);
-    data$.next(undefined);
-    question$.next(question);
-    query$.next({ query: PPL, language: 'PPL' });
-    data$.next(dataFrame as IDataFrame);
-    await sleep(WAIT_TIME);
-    expect(httpMock.post).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(
+        screen.queryByText('I am unable to respond to this query. Try another question.')
+      ).toBeInTheDocument();
+    });
   });
 
   it('should reset feedback state if re-fetch summary', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_UP);
-    const RESPONSE_TEXT = 'response';
-    httpMock.post.mockResolvedValue(RESPONSE_TEXT);
-    renderQueryAssistSummary(COLLAPSED.NO);
-    question$.next(question);
-    query$.next({ query: PPL, language: 'PPL' });
-    data$.next(dataFrame as IDataFrame);
-    await sleep(WAIT_TIME);
-    expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.NONE);
+    const { dataSetup, dataFrame, summary } = await setupInitScreen();
+    await act(async () => {
+      // ppl query returned results
+      dataSetup.search.df.df$.next(dataFrame);
+    });
+    // after 1s, the fetch summary request respond
+    jest.advanceTimersByTime(1000);
+    await waitFor(() => {
+      // the summary result is displayed
+      expect(screen.getByText(summary)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('queryAssist_summary_buttons_thumbdown'));
+    // After clicking thumb down, only thumb down button will be visible
+    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbdown')).toBeInTheDocument();
+    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbup')).not.toBeInTheDocument();
+
+    // Click generate summary
+    fireEvent.click(screen.getByTestId('queryAssist_summary_buttons_generate'));
+    // after 1s, the fetch summary request respond
+    jest.advanceTimersByTime(1000);
+    await waitFor(() => {
+      // the summary result is displayed
+      expect(screen.getByText(summary)).toBeInTheDocument();
+    });
+    // both thumb up/down should be visible
+    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbdown')).toBeInTheDocument();
+    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbup')).toBeInTheDocument();
   });
 });

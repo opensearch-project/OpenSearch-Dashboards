@@ -71,6 +71,7 @@ import {
   GlobalSearchServiceSetupContract,
   GlobalSearchServiceStartContract,
 } from './global_search';
+import { searchPages } from './ui/global_search/search_pages_command';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -106,6 +107,14 @@ export interface ChromeHelpExtension {
    * Custom content to occur below the list of links
    */
   content?: (element: HTMLDivElement) => () => void;
+}
+
+/** @public */
+export interface ChromeGlobalBanner {
+  /**
+   * React component to render as the global banner
+   */
+  component: React.ReactNode;
 }
 
 interface ConstructorParams {
@@ -145,6 +154,9 @@ export class ChromeService {
   private useUpdatedHeader = false;
   private updatedHeaderSubscription: Subscription | undefined;
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
+  private navGroupStart?: ChromeNavGroupServiceStartContract;
+  private applicationStart?: InternalApplicationStart;
+  private globalBanner$ = new BehaviorSubject<ChromeGlobalBanner | undefined>(undefined);
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -211,6 +223,14 @@ export class ChromeService {
   public setup({ uiSettings }: SetupDeps): ChromeSetup {
     const navGroup = this.navGroup.setup({ uiSettings });
     const globalSearch = this.globalSearch.setup();
+
+    globalSearch.registerSearchCommand({
+      id: 'pagesSearch',
+      type: 'PAGES',
+      run: async (query: string, callback: () => void) =>
+        searchPages(query, this.navGroupStart, this.applicationStart, callback),
+    });
+
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
         if (this.collapsibleNavHeaderRender) {
@@ -260,7 +280,7 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const recentlyAccessed = await this.recentlyAccessed.start({ http, workspaces });
+    const recentlyAccessed = await this.recentlyAccessed.start({ http, workspaces, application });
     const docTitle = this.docTitle.start({ document: window.document });
     const navGroup = await this.navGroup.start({
       navLinks,
@@ -268,6 +288,8 @@ export class ChromeService {
       breadcrumbsEnricher$,
       workspaces,
     });
+    this.navGroupStart = navGroup;
+    this.applicationStart = application;
 
     const globalSearch = this.globalSearch.start();
 
@@ -363,6 +385,7 @@ export class ChromeService {
       logos,
       navGroup,
       globalSearch,
+      useUpdatedHeader: this.useUpdatedHeader,
 
       getHeaderComponent: () => (
         <Header
@@ -391,6 +414,7 @@ export class ChromeService {
           navControlsExpandedCenter$={navControls.getExpandedCenter$()}
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           navControlsLeftBottom$={navControls.getLeftBottom$()}
+          navControlsPrimaryHeaderRight$={navControls.getPrimaryHeaderRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
@@ -406,6 +430,7 @@ export class ChromeService {
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
           globalSearchCommands={globalSearch.getAllSearchCommands()}
+          globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
         />
       ),
 
@@ -469,6 +494,12 @@ export class ChromeService {
 
       setCustomNavLink: (customNavLink?: ChromeNavLink) => {
         customNavLink$.next(customNavLink);
+      },
+
+      getGlobalBanner$: () => this.globalBanner$.pipe(takeUntil(this.stop$)),
+
+      setGlobalBanner: (banner?: ChromeGlobalBanner) => {
+        this.globalBanner$.next(banner);
       },
     };
   }
@@ -646,6 +677,16 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
+
+  /**
+   * Get an observable of the current global banner
+   */
+  getGlobalBanner$(): Observable<ChromeGlobalBanner | undefined>;
+
+  /**
+   * Set or unset the global banner component
+   */
+  setGlobalBanner(banner?: ChromeGlobalBanner): void;
 }
 
 /** @internal */
@@ -655,4 +696,10 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getHeaderComponent(): JSX.Element;
+
+  /**
+   * Whether to use the updated header UI
+   * @internal
+   */
+  useUpdatedHeader: boolean;
 }

@@ -3,24 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus, ChromeNavLink, NavGroupType, PublicAppInfo } from '../../../core/public';
+import { AppNavLinkStatus, NavGroupType, PublicAppInfo } from '../../../core/public';
 import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
   isFeatureIdInsideUseCase,
-  isNavGroupInFeatureConfigs,
   getDataSourcesList,
   convertNavGroupToWorkspaceUseCase,
   isEqualWorkspaceUseCase,
   prependWorkspaceToBreadcrumbs,
   getIsOnlyAllowEssentialUseCase,
   mergeDataSourcesWithConnections,
+  fetchDataSourceConnections,
   getUseCaseUrl,
+  fetchRemoteClusterConnections,
 } from './utils';
-import { WorkspaceAvailability } from '../../../core/public';
+import { WORKSPACE_USE_CASE_PREFIX, WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { USE_CASE_PREFIX } from '../common/constants';
+import { AssociationDataSourceModalMode } from '../common/constants';
 import {
   SigV4ServiceName,
   DataSourceEngineType,
@@ -30,7 +31,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
-import { DataSourceConnectionType } from '../common/types';
+import { DataSource, DataSourceConnectionType } from '../common/types';
 
 const startMock = coreMock.createStart();
 const STATIC_USE_CASES = createMockedRegisteredUseCases();
@@ -361,22 +362,6 @@ describe('workspace utils: isFeatureIdInsideUseCase', () => {
   });
 });
 
-describe('workspace utils: isNavGroupInFeatureConfigs', () => {
-  it('should return false if nav group not in feature configs', () => {
-    expect(
-      isNavGroupInFeatureConfigs('dataAdministration', [
-        'use-case-observability',
-        'use-case-search',
-      ])
-    ).toBe(false);
-  });
-  it('should return true if nav group in feature configs', () => {
-    expect(
-      isNavGroupInFeatureConfigs('observability', ['use-case-observability', 'use-case-search'])
-    ).toBe(true);
-  });
-});
-
 describe('workspace utils: getDataSourcesList', () => {
   const mockedSavedObjectClient = startMock.savedObjects.client;
 
@@ -415,6 +400,32 @@ describe('workspace utils: getDataSourcesList', () => {
         workspaces: [],
       },
     ]);
+  });
+
+  it('should call client.find with { withoutClientBasePath: true }', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [],
+    });
+
+    await getDataSourcesList(mockedSavedObjectClient, ['workspace-1']);
+
+    expect(mockedSavedObjectClient.find).toHaveBeenCalledWith(
+      {
+        type: [DATA_SOURCE_SAVED_OBJECT_TYPE, DATA_CONNECTION_SAVED_OBJECT_TYPE],
+        fields: [
+          'id',
+          'title',
+          'auth',
+          'description',
+          'dataSourceEngineType',
+          'type',
+          'connectionId',
+        ],
+        perPage: 10000,
+        workspaces: ['workspace-1'],
+      },
+      { withoutClientBasePath: true }
+    );
   });
 
   it('should return title for data source object and connectionId as title for data connection object', async () => {
@@ -676,7 +687,7 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
   const workspace = {
     id: 'workspace-1',
     name: 'test workspace 1',
-    features: [`${USE_CASE_PREFIX}search`],
+    features: [`${WORKSPACE_USE_CASE_PREFIX}search`],
   };
 
   it('should not enrich breadcrumbs when out a workspace', async () => {
@@ -764,7 +775,11 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
         connectionType: DataSourceConnectionType.DirectQueryConnection,
       },
     ];
-    const result = mergeDataSourcesWithConnections(dataSources, directQueryConnections);
+    const result = mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      AssociationDataSourceModalMode.DirectQueryConnections
+    );
     expect(result).toStrictEqual([
       {
         connectionType: 1,
@@ -804,7 +819,52 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
     ]);
   });
 
-  it('should not merge data sources or data connections if no direct query connections', () => {
+  it('should return only OpenSearch connections when mode is OpenSearchConnections', () => {
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+      },
+      {
+        id: 'idc2',
+        title: 'title2',
+        type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+      },
+    ];
+    const directQueryConnections = [
+      {
+        id: 'id3',
+        title: 'title3',
+        name: 'name1',
+        parentId: 'id1',
+        description: 'direct_query_connections_1',
+        type: 'Amazon S3',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+      },
+    ];
+    const result = mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      AssociationDataSourceModalMode.OpenSearchConnections
+    );
+    expect(result).toStrictEqual([
+      {
+        connectionType: 0,
+        description: '',
+        id: 'id1',
+        name: 'title1',
+        relatedConnections: [],
+        type: 'OpenSearch',
+      },
+    ]);
+  });
+
+  it('should not merge data sources if no direct query connections', () => {
     const dataSources = [
       {
         id: 'id1',
@@ -822,7 +882,11 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
       },
     ];
 
-    const result = mergeDataSourcesWithConnections(dataSources, []);
+    const result = mergeDataSourcesWithConnections(
+      dataSources,
+      [],
+      AssociationDataSourceModalMode.DirectQueryConnections
+    );
     expect(result).toStrictEqual([
       {
         connectionType: 0,
@@ -841,6 +905,74 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
       },
     ]);
   });
+
+  it('should return OpenSearch connections with remote cluster connections when mode is OpenSearchConnections', () => {
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+      },
+      {
+        id: 'idc2',
+        title: 'title2',
+        type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+      },
+    ];
+    const directQueryConnections = [
+      {
+        id: 'id3',
+        title: 'title3',
+        name: 'name1',
+        parentId: 'id1',
+        description: 'direct_query_connections_1',
+        type: 'Amazon S3',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+      },
+    ];
+    const remoteClusterConnections = [
+      {
+        id: 'id1-connectionAlias1',
+        title: 'connectionAlias1',
+        name: 'connectionAlias1',
+        type: DataSourceEngineType.OpenSearchCrossCluster,
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+        description: 'OpenSearch (Cross cluster connection)',
+        parentId: 'id1',
+      },
+    ];
+
+    const result = mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      AssociationDataSourceModalMode.OpenSearchConnections,
+      remoteClusterConnections
+    );
+    expect(result).toStrictEqual([
+      {
+        connectionType: 0,
+        description: '',
+        id: 'id1',
+        name: 'title1',
+        relatedConnections: [
+          {
+            id: 'id1-connectionAlias1',
+            title: 'connectionAlias1',
+            name: 'connectionAlias1',
+            type: DataSourceEngineType.OpenSearchCrossCluster,
+            connectionType: DataSourceConnectionType.OpenSearchConnection,
+            description: 'OpenSearch (Cross cluster connection)',
+            parentId: 'id1',
+          },
+        ],
+        type: 'OpenSearch',
+      },
+    ]);
+  });
 });
 
 describe('workspace utils: getUseCaseUrl', () => {
@@ -854,5 +986,214 @@ describe('workspace utils: getUseCaseUrl', () => {
     startMock.application.getUrlForApp.mockImplementation((id) => `http://localhost/${id}`);
     const url = getUseCaseUrl(undefined, 'foo', startMock.application, startMock.http);
     expect(url).toEqual('http://localhost/w/foo/workspace_detail');
+  });
+});
+
+describe('workspace utils: fetchDataSourceConnections', () => {
+  it('should successfully retrieve direct query connections and merge direct query connections with data source ', async () => {
+    const coreStart = coreMock.createStart();
+    const httpMock = coreStart.http;
+    const notificationsMock = coreStart.notifications;
+    httpMock.get.mockResolvedValue([
+      { name: 'Connection A', description: 'Test A', connector: 'S3GLUE' },
+    ]);
+
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      },
+    ];
+    const result = await fetchDataSourceConnections(
+      dataSources,
+      httpMock,
+      notificationsMock,
+      AssociationDataSourceModalMode.DirectQueryConnections
+    );
+    expect(result).toEqual([
+      {
+        id: 'id1-Connection A',
+        name: 'Connection A',
+        type: 'Amazon S3',
+        connectionType: 1,
+        description: 'Test A',
+        parentId: 'id1',
+      },
+      {
+        id: 'id1',
+        type: 'OpenSearch',
+        connectionType: 0,
+        name: 'title1',
+        description: '',
+        relatedConnections: [
+          {
+            id: 'id1-Connection A',
+            name: 'Connection A',
+            type: 'Amazon S3',
+            connectionType: 1,
+            description: 'Test A',
+            parentId: 'id1',
+          },
+        ],
+      },
+    ]);
+    expect(httpMock.get).toHaveBeenCalledWith(
+      expect.stringContaining('dataSourceMDSId=id1'),
+      expect.objectContaining({ prependOptions: { withoutClientBasePath: true } })
+    );
+    expect(notificationsMock.toasts.addDanger).not.toHaveBeenCalled();
+  });
+  it('should not retrieve direct query connections if mode is opensearch connection', async () => {
+    const coreStart = coreMock.createStart();
+    const httpMock = coreStart.http;
+    const notificationsMock = coreStart.notifications;
+
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      },
+    ];
+    const result = await fetchDataSourceConnections(
+      dataSources,
+      httpMock,
+      notificationsMock,
+      AssociationDataSourceModalMode.OpenSearchConnections
+    );
+    expect(result).toEqual([
+      {
+        id: 'id1',
+        type: 'OpenSearch',
+        connectionType: 0,
+        name: 'title1',
+        description: '',
+        relatedConnections: [],
+      },
+    ]);
+    expect(httpMock.get).not.toHaveBeenCalledWith(expect.stringContaining('dataSourceMDSId=id1'));
+    expect(notificationsMock.toasts.addDanger).not.toHaveBeenCalled();
+  });
+});
+
+describe('workspace utils: fetchRemoteClusterConnections', () => {
+  it('should successfully retrieve remote cluster connections for valid data sources', async () => {
+    const coreStart = coreMock.createStart();
+    const httpMock = coreStart.http;
+
+    httpMock.get.mockResolvedValueOnce([
+      {
+        connectionAlias: 'connectionAlias1',
+      },
+    ]);
+
+    httpMock.get.mockResolvedValueOnce([
+      {
+        connectionAlias: 'connectionAlias2',
+      },
+    ]);
+
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        dataSourceEngineType: DataSourceEngineType.OpenSearch,
+        description: '',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      },
+      {
+        id: 'id2',
+        title: 'title2',
+        dataSourceEngineType: DataSourceEngineType.Elasticsearch,
+        description: '',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      },
+    ];
+
+    const result = await fetchRemoteClusterConnections(dataSources, httpMock);
+
+    expect(result).toEqual([
+      {
+        id: 'id1-connectionAlias1',
+        title: 'connectionAlias1',
+        name: 'connectionAlias1',
+        type: DataSourceEngineType.OpenSearchCrossCluster,
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+        description: 'OpenSearch (Cross cluster connection)',
+        parentId: 'id1',
+      },
+      {
+        id: 'id2-connectionAlias2',
+        title: 'connectionAlias2',
+        name: 'connectionAlias2',
+        type: DataSourceEngineType.OpenSearchCrossCluster,
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+        description: 'OpenSearch (Cross cluster connection)',
+        parentId: 'id2',
+      },
+    ]);
+    expect(httpMock.get).toHaveBeenCalledWith(
+      expect.stringContaining('/api/enhancements/remote_cluster/list'),
+      expect.objectContaining({
+        query: { dataSourceId: 'id1' },
+      })
+    );
+    expect(httpMock.get).toHaveBeenCalledWith(
+      expect.stringContaining('/api/enhancements/remote_cluster/list'),
+      expect.objectContaining({
+        query: { dataSourceId: 'id2' },
+      })
+    );
+  });
+
+  it('should return an empty array if no valid data sources are provided', async () => {
+    const coreStart = coreMock.createStart();
+    const httpMock = coreStart.http;
+
+    const dataSources = ([
+      {
+        id: 'id1',
+        title: 'title1',
+        dataSourceEngineType: 'InvalidEngineType' as DataSourceEngineType,
+        description: '',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      },
+    ] as unknown) as DataSource[]; // force InvalidEngineType to be a valid type
+
+    const result = await fetchRemoteClusterConnections(dataSources, httpMock);
+
+    expect(result).toEqual([]);
+    expect(httpMock.get).not.toHaveBeenCalled();
+  });
+
+  it('should handle errors gracefully and return an empty array', async () => {
+    const coreStart = coreMock.createStart();
+    const httpMock = coreStart.http;
+    httpMock.get.mockRejectedValueOnce(new Error('Network error'));
+
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        dataSourceEngineType: DataSourceEngineType.OpenSearch,
+        description: '',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      },
+    ];
+
+    const result = await fetchRemoteClusterConnections(dataSources, httpMock);
+
+    expect(result).toEqual([]);
+    expect(httpMock.get).toHaveBeenCalledWith(
+      expect.stringContaining('/api/enhancements/remote_cluster/list'),
+      expect.objectContaining({
+        query: { dataSourceId: 'id1' },
+      })
+    );
   });
 });

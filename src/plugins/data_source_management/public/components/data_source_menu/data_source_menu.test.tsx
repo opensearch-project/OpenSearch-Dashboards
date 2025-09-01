@@ -4,28 +4,38 @@
  */
 
 import { ShallowWrapper, shallow } from 'enzyme';
-import { SavedObjectsClientContract } from '../../../../../core/public';
-import { applicationServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
+import { SavedObjectsClientContract, UiSettingScope } from '../../../../../core/public';
+import {
+  applicationServiceMock,
+  notificationServiceMock,
+  coreMock,
+} from '../../../../../core/public/mocks';
 import React from 'react';
 import { DataSourceMenu } from './data_source_menu';
 import { render } from '@testing-library/react';
 import { DataSourceComponentType } from './types';
 import * as utils from '../utils';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
+import { mockManagementPlugin } from '../../mocks';
+
+const onManageDataSourceMock = jest.fn();
 
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-
+  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
   const dataSourceSelection = new DataSourceSelectionService();
+  const { workspaces } = coreMock.createSetup();
 
   beforeEach(() => {
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
+    mockedContext.workspaces.currentWorkspaceId$.getValue = jest.fn().mockReturnValue(undefined);
   });
 
   it('should render data source selectable only with local cluster not hidden', () => {
@@ -38,6 +48,8 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -54,6 +66,8 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -68,6 +82,8 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -81,6 +97,8 @@ describe('DataSourceMenu', () => {
           fullWidth: true,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -96,6 +114,8 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test', label: 'test-label' }],
         }}
+        onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -111,6 +131,8 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test' }],
         }}
+        onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(component).toMatchSnapshot();
@@ -127,6 +149,8 @@ describe('DataSourceMenu', () => {
           notifications,
           displayAllCompatibleDataSources: true,
         }}
+        onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(container).toMatchSnapshot();
@@ -135,12 +159,14 @@ describe('DataSourceMenu', () => {
   it('should render nothing', () => {
     const container = render(
       <DataSourceMenu
-        componentType={''}
+        componentType={'' as DataSourceComponentType}
         componentConfig={{
           fullWidth: true,
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(container).toMatchSnapshot();
@@ -155,6 +181,8 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        onManageDataSource={onManageDataSourceMock}
+        scope={UiSettingScope.GLOBAL}
       />
     );
     expect(container).toMatchSnapshot();

@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiModalBody,
   EuiModalFooter,
@@ -22,7 +23,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import moment from 'moment';
-import { BaseDataset, DATA_STRUCTURE_META_TYPES, DataStructure } from '../../../common';
+import {
+  BaseDataset,
+  DATA_STRUCTURE_META_TYPES,
+  DataStructure,
+  DataStructureCustomMeta,
+} from '../../../common';
 import { DataStructureFetchOptions, QueryStringContract } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { DatasetTable } from './dataset_table';
@@ -34,6 +40,7 @@ export const DatasetExplorer = ({
   setPath,
   onNext,
   onCancel,
+  supportedTypes,
 }: {
   services: IDataPluginServices;
   queryString: QueryStringContract;
@@ -41,11 +48,31 @@ export const DatasetExplorer = ({
   setPath: (path: DataStructure[]) => void;
   onNext: (dataset: BaseDataset) => void;
   onCancel: () => void;
+  supportedTypes?: string[];
 }) => {
   const uiSettings = services.uiSettings;
   const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const datasetService = queryString.getDatasetService();
+
+  useEffect(() => {
+    const availableTypes = path[0]?.children;
+    // Prevents the ability to set the supported types to an empty array and causing no option
+    const shouldFilter = availableTypes && supportedTypes?.length;
+
+    if (shouldFilter) {
+      const filteredTypes = availableTypes.filter((type) => supportedTypes!.includes(type.id));
+      if (filteredTypes.length !== availableTypes.length) {
+        setPath([
+          {
+            ...path[0],
+            children: filteredTypes,
+          },
+          ...path.slice(1),
+        ]);
+      }
+    }
+  }, [path, supportedTypes, setPath]);
 
   const fetchNextDataStructure = async (
     nextPath: DataStructure[],
@@ -152,6 +179,7 @@ export const DatasetExplorer = ({
       <EuiModalBody>
         <div
           className="datasetExplorer"
+          data-test-subj="datasetExplorerWindow"
           style={{
             gridTemplateColumns: `repeat(${
               columnCount - 1
@@ -168,7 +196,11 @@ export const DatasetExplorer = ({
                   isFinal ? ' datasetExplorer__column--leaf' : ''
                 }`}
               >
-                <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+                <EuiTitle
+                  size="xxs"
+                  className="datasetExplorer__columnTitle"
+                  data-test-subj="datasetExplorerColumnTitle"
+                >
                   <h3>{current.columnHeader}</h3>
                 </EuiTitle>
                 {current.multiSelect ? (
@@ -209,6 +241,7 @@ export const DatasetExplorer = ({
                     })}
                     height="full"
                     className="datasetExplorer__selectable"
+                    data-test-subj="datasetExplorerSelectable"
                   >
                     {(list, search) => (
                       <>
@@ -251,23 +284,37 @@ export const DatasetExplorer = ({
 };
 
 const EmptyColumn = () => (
-  <div className="datasetExplorer__column datasetExplorer__column--empty" />
+  <div
+    className="datasetExplorer__column datasetExplorer__column--empty"
+    data-test-subj="datasetExplorerEmptyColumn"
+  />
 );
 
 const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
   isLoading ? (
-    <div className="datasetExplorer__column">
-      <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+    <div className="datasetExplorer__column" data-test-subj="datasetExplorerLoadingColumn">
+      <EuiTitle
+        size="xxs"
+        className="datasetExplorer__columnTitle"
+        data-test-subj="datasetExplorerLoadingColumnTitle"
+      >
         <h3>...</h3>
       </EuiTitle>
-      <EuiSelectable options={[]} singleSelection className="datasetExplorer__selectable" isLoading>
+      <EuiSelectable
+        options={[]}
+        singleSelection
+        className="datasetExplorer__selectable"
+        isLoading
+        data-test-subj="datasetExplorerSelectable"
+      >
         {(list) => <>{list}</>}
       </EuiSelectable>
     </div>
   ) : (
     <EmptyColumn />
   );
-const appendIcon = (item: DataStructure) => {
+
+const getMetaIcon = (item: DataStructure) => {
   if (item.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE) {
     return (
       <EuiToolTip content={item.meta.tooltip}>
@@ -287,6 +334,33 @@ const appendIcon = (item: DataStructure) => {
   }
 
   return null;
+};
+
+const appendIcon = (item: DataStructure) => {
+  const metaIcon = getMetaIcon(item);
+
+  const additionalIcons = (item.meta as DataStructureCustomMeta)?.additionalAppendIcons?.map(
+    (icon: { tooltip: string; type: string }) => {
+      return (
+        <EuiFlexItem grow={false} key={icon.tooltip}>
+          <EuiIconTip key={icon.tooltip} content={icon.tooltip} type={icon.type} />
+        </EuiFlexItem>
+      );
+    }
+  );
+
+  return (
+    <EuiToolTip>
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={true}>
+        {additionalIcons}
+        {metaIcon && (
+          <EuiFlexItem grow={false} key="metaIcon">
+            {metaIcon}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
 };
 
 const isChecked = (

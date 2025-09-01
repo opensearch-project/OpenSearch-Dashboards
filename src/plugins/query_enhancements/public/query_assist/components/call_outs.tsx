@@ -32,7 +32,7 @@ const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
     }
     size="s"
     color="warning"
-    iconType="iInCircle"
+    iconType="help"
     dismissible
     onDismiss={props.onDismiss}
   />
@@ -68,7 +68,7 @@ const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
     }
     size="s"
     color="warning"
-    iconType="iInCircle"
+    iconType="help"
     dismissible
     onDismiss={props.onDismiss}
   />

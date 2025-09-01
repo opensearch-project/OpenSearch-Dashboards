@@ -46,9 +46,6 @@
 # Set the value to true to disable the welcome screen
 #home.disableWelcomeScreen: false
 
-# Set the value to true to disable the new theme introduction modal
-#home.disableNewThemeModal: false
-
 # Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
 # This settings should be used for large clusters or for clusters with ingest heavy nodes.
 # It allows Dashboards to only healthcheck using the local OpenSearch node rather than fan out requests across all nodes.
@@ -353,6 +350,10 @@
 #   overrides:
 #     "home:useNewHomePage": true
 
+# Set a maximum number of workspaces
+# by default, there is no limit.
+# workspace.maximum_workspaces: 100
+
 # Optional settings to specify saved object types to be deleted during migration.
 # This feature can help address compatibility issues that may arise during the migration of saved objects, such as types defined by legacy applications.
 # Please note, using this feature carries a risk. Deleting saved objects during migration could potentially lead to unintended data loss. Use with caution.
@@ -363,18 +364,27 @@
 # This publishes the Application Usage and UI Metrics into the saved object, which can be accessed by /api/stats?extended=true&legacy=true&exclude_usage=false
 # usageCollection.uiMetric.enabled: false
 
-# Set the value to true to enable enhancements for the data plugin
-# data.enhancements.enabled: false
-
 # Set the value to true to enable dynamic config service to obtain configs from a config store. By default, it's disabled
 # dynamic_config_service.enabled: false
 
+# Set the value to true to enable direct data import from a file
+# data_importer.enabled: false
+
 # Set the backend roles in groups or users, whoever has the backend roles or exactly match the user ids defined in this config will be regard as dashboard admin.
 # Dashboard admin will have the access to all the workspaces(workspace.enabled: true) and objects inside OpenSearch Dashboards.
-# The default config is [], and no one will be dashboard admin. 
+# The default config is [], and no one will be dashboard admin.
 # If the user config is set to wildcard ["*"], anyone will be dashboard admin.
 # opensearchDashboards.dashboardAdmin.groups: ["dashboard_admin"]
 # opensearchDashboards.dashboardAdmin.users: ["dashboard_admin"]
 
 # Set the value to true to enable the new UI for savedQueries in Discover
 # data.savedQueriesNewUI.enabled: true
+
+# Set the value to true to enable the banner plugin
+# banner.enabled: true
+
+# Set the content of the banner
+# banner.content: "This is an important announcement for all users. [Learn more](https://opensearch.org) about OpenSearch."
+
+# Set the value to true to enable the keyboard shortcuts
+# opensearchDashboards.keyboardShortcuts.enabled: true

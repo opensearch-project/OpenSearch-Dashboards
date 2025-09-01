@@ -37,10 +37,11 @@ import { track } from './track';
 
 // @ts-ignore
 import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
+import { UI_SETTINGS } from '../../../../../data/common';
 
 export const useSendCurrentRequestToOpenSearch = (dataSourceId?: string) => {
   const {
-    services: { history, settings, notifications, trackUiMetric, http },
+    services: { history, settings, notifications, trackUiMetric, http, uiSettings },
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
@@ -64,7 +65,14 @@ export const useSendCurrentRequestToOpenSearch = (dataSourceId?: string) => {
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
-      const results = await sendRequestToOpenSearch({ http, requests, dataSourceId });
+      const withLongNumeralsSupport = await uiSettings.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS);
+
+      const results = await sendRequestToOpenSearch({
+        http,
+        requests,
+        dataSourceId,
+        withLongNumeralsSupport,
+      });
 
       results.forEach(({ request: { path, method, data } }) => {
         try {
@@ -85,6 +93,7 @@ export const useSendCurrentRequestToOpenSearch = (dataSourceId?: string) => {
         // or templates may have changed, so we'll need to update this data. Assume that if
         // the user disables polling they're trying to optimize performance or otherwise
         // preserve resources, so they won't want this request sent either.
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete(), dataSourceId);
       }
 
@@ -112,5 +121,14 @@ export const useSendCurrentRequestToOpenSearch = (dataSourceId?: string) => {
         });
       }
     }
-  }, [dispatch, http, dataSourceId, settings, notifications.toasts, trackUiMetric, history]);
+  }, [
+    dispatch,
+    http,
+    dataSourceId,
+    settings,
+    notifications.toasts,
+    trackUiMetric,
+    history,
+    uiSettings,
+  ]);
 };

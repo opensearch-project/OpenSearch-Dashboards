@@ -30,8 +30,9 @@
 
 import path from 'path';
 import { statSync } from 'fs';
+import semver from 'semver';
 
-import { versionSatisfies, cleanVersion } from '../../legacy/utils/version';
+import { cleanVersion } from '../../legacy/utils/version';
 
 export function existingInstall(settings, logger) {
   try {
@@ -46,7 +47,7 @@ export function existingInstall(settings, logger) {
   }
 }
 
-export function assertVersion(settings) {
+export function assertVersion(settings, logger) {
   if (!settings.plugins[0].opensearchDashboardsVersion) {
     throw new Error(
       `Plugin opensearch_dashboards.json is missing both a version property (required) and a opensearchDashboardsVersion property (optional).`
@@ -55,9 +56,40 @@ export function assertVersion(settings) {
 
   const actual = cleanVersion(settings.plugins[0].opensearchDashboardsVersion);
   const expected = cleanVersion(settings.version);
-  if (!versionSatisfies(actual, expected)) {
+
+  if (actual === 'opensearchDashboards') {
+    return;
+  }
+
+  const actualVersion = semver.parse(actual);
+  const expectedVersion = semver.parse(expected);
+
+  if (!actualVersion || !expectedVersion) {
     throw new Error(
-      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]`
+      `Invalid version format. Plugin: ${actual}, OpenSearch Dashboards: ${expected}`
     );
+  }
+
+  const mode = settings.singleVersion;
+
+  switch (mode) {
+    case 'strict':
+      if (!semver.eq(actualVersion, expectedVersion)) {
+        throw new Error(
+          `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with OpenSearch Dashboards [${expected}]. Strict mode requires exact version match.`
+        );
+      }
+      break;
+
+    case 'ignore':
+      if (actualVersion.major !== expectedVersion.major) {
+        logger.log(
+          `WARNING: Plugin ${settings.plugins[0].id} [${actual}] major version differs from OpenSearch Dashboards [${expected}]. Plugin may not function correctly.`
+        );
+      }
+      break;
+
+    default:
+      throw new Error(`Invalid single-version mode: ${mode}. Use 'strict' or 'ignore'.`);
   }
 }

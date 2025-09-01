@@ -32,6 +32,17 @@ describe('DevtoolSearchCommand', () => {
     expect(searchResult).toHaveLength(0);
   });
 
+  it('searchForDevTools matches category', async () => {
+    const searchResult = await searchForDevTools('dev', {
+      devTools: devToolsFn,
+      title: 'Dev tools',
+      uiActionsApi: uiActionsApiFn,
+    });
+
+    // match all sub apps
+    expect(searchResult).toHaveLength(2);
+  });
+
   it('searchForDevTools with match tool', async () => {
     const searchResult = await searchForDevTools('console', {
       devTools: devToolsFn,
@@ -56,7 +67,11 @@ describe('DevtoolSearchCommand', () => {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  Dev tools
+                  <EuiHighlight
+                    search="console"
+                  >
+                    Dev tools
+                  </EuiHighlight>
                 </EuiFlexItem>
               </EuiFlexGroup>,
             },
@@ -78,6 +93,7 @@ describe('DevtoolSearchCommand', () => {
 
 describe('<DevToolItem />', () => {
   const uiActionsStartMock = uiActionsPluginMock.createStartContract();
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   uiActionsStartMock.getTrigger.mockReturnValue({
     id: '',
     exec: jest.fn(),

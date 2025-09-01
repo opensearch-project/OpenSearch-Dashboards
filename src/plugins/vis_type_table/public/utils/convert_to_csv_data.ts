@@ -29,8 +29,7 @@
  */
 
 import { isObject } from 'lodash';
-// @ts-ignore
-import { saveAs } from '@elastic/filesaver';
+import { saveAs } from 'file-saver';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import { OpenSearchDashboardsDatatable } from '../../../expressions/public';

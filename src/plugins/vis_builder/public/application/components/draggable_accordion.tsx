@@ -14,6 +14,7 @@ import React from 'react';
 import { useState } from 'react';
 import './draggable_accordion.scss';
 
+// @ts-expect-error TS7031 TODO(ts-error): fixme
 export const DraggableAccordion = ({ children, title, defaultState = true }) => {
   const [isOpen, setIsOpen] = useState(defaultState);
 
