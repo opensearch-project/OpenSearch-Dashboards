@@ -1,0 +1,173 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldNumber,
+  EuiButtonIcon,
+  EuiButton,
+  EuiSpacer,
+  EuiColorPicker,
+} from '@elastic/eui';
+import { ThresholdRangeValue } from '../types';
+import { useDebouncedValue, useDebouncedNumericValue } from '../utils/use_debounced_value';
+
+export interface RangeProps {
+  index: number;
+  value: ThresholdRangeValue;
+  onChange: (index: number, value: ThresholdRangeValue) => void;
+  onDelete: (index: number) => void;
+}
+
+export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }) => {
+  const [thresholdValue, setThresholdValue] = useDebouncedNumericValue(value.value, (val) =>
+    onChange(index, { ...value, value: val })
+  );
+
+  const [color, setDebouncedColor] = useDebouncedValue<string>(
+    value.color,
+    (val) => onChange(index, { ...value, color: val }),
+    300
+  );
+
+  const handleDeleteRange = () => {
+    onDelete(index);
+  };
+
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+      <EuiFlexItem>
+        <EuiColorPicker
+          color={color}
+          onChange={setDebouncedColor}
+          data-test-subj="exploreVisThresholdColor"
+          compressed
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={true}>
+        <EuiFieldNumber
+          compressed
+          min={0}
+          value={thresholdValue}
+          onChange={(e) => setThresholdValue((e.target as HTMLInputElement).value)}
+          placeholder="Value"
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          size="xs"
+          iconType="trash"
+          aria-label="Delete"
+          color="danger"
+          onClick={handleDeleteRange}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export interface GaugeCustomRangeProps {
+  thresholdValues?: ThresholdRangeValue[];
+  onThresholdValuesChange: (ranges: ThresholdRangeValue[]) => void;
+  baseColor: string;
+  onBaseColorChange: (color: string) => void;
+}
+
+export const GaugeCustomRange: React.FC<GaugeCustomRangeProps> = ({
+  thresholdValues,
+  onThresholdValuesChange,
+  baseColor,
+  onBaseColorChange,
+}) => {
+  const [ranges, setRanges] = useState<ThresholdRangeValue[]>(thresholdValues || []);
+
+  const handleRangeChange = (index: number, value: ThresholdRangeValue) => {
+    const updated = [...ranges];
+    updated[index] = value;
+    const sorted = updated.sort((a, b) => a.value - b.value);
+    setRanges(sorted);
+    onThresholdValuesChange(sorted);
+  };
+
+  const handleAddRange = () => {
+    const curRangeLength = ranges.length;
+    const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 10 : 0;
+    const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength) };
+
+    const updated = [...ranges, newRange];
+    const sorted = updated.sort((a, b) => a.value - b.value);
+    setRanges(sorted);
+    onThresholdValuesChange(sorted);
+  };
+
+  const getNextColor = (rangesLength: number): string => {
+    const colors = ['#54B399', '#FFA800', '#DB0000', '#6092C0', '#D36086', '#9170B8'];
+    const index = rangesLength % colors.length;
+    return colors[index];
+  };
+
+  const handleDeleteRange = (index: number) => {
+    const updated = ranges.filter((_, i) => i !== index);
+    setRanges(updated);
+    onThresholdValuesChange(updated);
+  };
+
+  const [localBaseColor, setLocalBaseColor] = useDebouncedValue<string>(
+    baseColor,
+    (val) => onBaseColorChange(val),
+    300
+  );
+
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiButton onClick={handleAddRange} fullWidth size="s">
+        + Add threshold
+      </EuiButton>
+      <EuiSpacer size="s" />
+      {/* dummy placeholder for base range */}
+      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+        <EuiFlexItem>
+          <EuiColorPicker
+            color={localBaseColor}
+            onChange={setLocalBaseColor}
+            data-test-subj="exploreVisThresholdColor"
+            compressed
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={true}>
+          <EuiFieldNumber compressed value={undefined} placeholder="Base" disabled />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            size="xs"
+            iconType="trash"
+            aria-label="Delete"
+            color="danger"
+            // base threshold should not be deleted
+            isDisabled={true}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {ranges.map((range, index) => {
+        return (
+          <Range
+            key={index}
+            index={index}
+            value={range}
+            onChange={handleRangeChange}
+            onDelete={handleDeleteRange}
+          />
+        );
+      })}
+    </>
+  );
+};

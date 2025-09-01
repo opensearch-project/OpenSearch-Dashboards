@@ -209,6 +209,10 @@ export interface RangeValue {
   min?: number;
   max?: number;
 }
+export interface ThresholdRangeValue {
+  value: number;
+  color: string;
+}
 
 export enum AggregationType {
   SUM = 'sum',
