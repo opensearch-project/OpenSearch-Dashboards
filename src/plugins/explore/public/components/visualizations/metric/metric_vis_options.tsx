@@ -17,6 +17,7 @@ import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { FontSizeInputField } from '../utils/font_size_input_field';
+import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
 
 export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
 
@@ -102,6 +103,14 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                 onChange={(val) => onStyleChange({ titleSize: val })}
                 data-test-subj="titleFontSizeInput"
               />
+              <FontSizeInputField
+                label={i18n.translate('explore.vis.metric.percentageFontSize', {
+                  defaultMessage: 'Percentage size',
+                })}
+                value={styleOptions.percentageSize}
+                onChange={(val) => onStyleChange({ percentageSize: val })}
+                data-test-subj="percentageFontSizeInput"
+              />
             </StyleAccordion>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -149,6 +158,12 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   </EuiFormRow>
                 </>
               )}
+              <PercentageSelector
+                percentageColor={styleOptions.percentageColor ?? 'standard'}
+                showPercentage={styleOptions.showPercentage ?? false}
+                onPercentageColorChange={(color) => updateStyleOption('percentageColor', color)}
+                onShowPercentageToggle={(show) => updateStyleOption('showPercentage', show)}
+              />
               <EuiFormRow>
                 <EuiSwitch
                   compressed

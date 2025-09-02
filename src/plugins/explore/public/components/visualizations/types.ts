@@ -219,3 +219,5 @@ export enum LabelAggregationType {
 }
 
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
+
+export type PercentageColor = 'standard' | 'inverted';
