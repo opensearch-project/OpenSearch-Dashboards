@@ -15,20 +15,25 @@ import { ThresholdRangeValue } from '../types';
 
 export function mergeCustomRangesWithBase(
   minBase: number,
+  maxBase: number,
   baseColor: string,
   thresholdValues?: ThresholdRangeValue[]
 ) {
-  const insertIndex = thresholdValues?.findIndex((range) => range.value > minBase);
+  const filteredThresholds = thresholdValues?.filter(
+    (range) => range.value >= minBase && range.value <= maxBase
+  );
+  const insertIndex = filteredThresholds?.findIndex((range) => range.value > minBase);
 
-  // Return base range if no threshold exist or minBase exceeds all threshold values
-  if (!thresholdValues?.length || insertIndex === -1) return [{ value: minBase, color: baseColor }];
+  // Return base range if no threshold exist or minBase exceeds all threshold values or minBase exceeds maxBase
+  if (!filteredThresholds?.length || insertIndex === -1)
+    return [{ value: minBase, color: baseColor }];
 
   // Return existing thresholds if minBase already exists as a threshold
-  const hasValue = thresholdValues.some((range) => range.value === minBase);
-  if (hasValue) return thresholdValues;
+  const hasValue = filteredThresholds.some((range) => range.value === minBase);
+  if (hasValue) return filteredThresholds;
 
   // Insert base range and exclude thresholds below minBase
-  return [{ value: minBase, color: baseColor }, ...thresholdValues.slice(insertIndex)];
+  return [{ value: minBase, color: baseColor }, ...filteredThresholds.slice(insertIndex)];
 }
 
 /**
@@ -42,9 +47,9 @@ export function locateRange(mergedRanges: ThresholdRangeValue[], targetValue: nu
   if (targetValue < mergedRanges[0].value) return -1;
 
   // Iterate through ranges to find where target value belongs
-  for (let i = 0; i < mergedRanges.length; i++) {
+  for (let i = 0; i < mergedRanges.length - 1; i++) {
     const currentValue = mergedRanges[i].value || 0;
-    const nextValue = i < mergedRanges.length - 1 ? mergedRanges[i + 1].value : Infinity;
+    const nextValue = mergedRanges[i + 1].value;
     if (targetValue >= currentValue && targetValue < nextValue) {
       return i;
     }

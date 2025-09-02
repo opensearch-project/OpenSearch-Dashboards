@@ -13,7 +13,7 @@ import {
 describe('gauge_chart_utils', () => {
   describe('mergeCustomRangesWithBase', () => {
     it('returns base range when no thresholds exist', () => {
-      const result = mergeCustomRangesWithBase(0, '#blue', []);
+      const result = mergeCustomRangesWithBase(0, 10, '#blue', []);
       expect(result).toEqual([{ value: 0, color: '#blue' }]);
     });
 
@@ -22,7 +22,7 @@ describe('gauge_chart_utils', () => {
         { value: 10, color: '#red' },
         { value: 20, color: '#green' },
       ];
-      const result = mergeCustomRangesWithBase(30, '#blue', thresholds);
+      const result = mergeCustomRangesWithBase(30, 40, '#blue', thresholds);
       expect(result).toEqual([{ value: 30, color: '#blue' }]);
     });
 
@@ -31,7 +31,7 @@ describe('gauge_chart_utils', () => {
         { value: 0, color: '#red' },
         { value: 20, color: '#green' },
       ];
-      const result = mergeCustomRangesWithBase(0, '#blue', thresholds);
+      const result = mergeCustomRangesWithBase(0, 30, '#blue', thresholds);
       expect(result).toEqual(thresholds);
     });
 
@@ -40,11 +40,20 @@ describe('gauge_chart_utils', () => {
         { value: 5, color: '#red' },
         { value: 15, color: '#green' },
       ];
-      const result = mergeCustomRangesWithBase(10, '#blue', thresholds);
+      const result = mergeCustomRangesWithBase(10, 20, '#blue', thresholds);
       expect(result).toEqual([
         { value: 10, color: '#blue' },
         { value: 15, color: '#green' },
       ]);
+    });
+
+    it('includes thresholds below maxBase', () => {
+      const thresholds = [
+        { value: 5, color: '#red' },
+        { value: 15, color: '#green' },
+      ];
+      const result = mergeCustomRangesWithBase(10, 12, '#blue', thresholds);
+      expect(result).toEqual([{ value: 10, color: '#blue' }]);
     });
   });
 

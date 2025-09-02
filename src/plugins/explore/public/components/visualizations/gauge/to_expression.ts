@@ -45,6 +45,7 @@ export const createGauge = (
 
   const mergedRanges = mergeCustomRangesWithBase(
     minBase,
+    maxBase,
     styleOptions.baseColor || '#9EE9FA',
     styleOptions.thresholdValues
   );
