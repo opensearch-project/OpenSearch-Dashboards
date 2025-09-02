@@ -1,2 +1,2 @@
-maintenance:
--  Replace Bluebird direct usage with native Promise API ([#8318](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8318))
+feat:
+- Replace Bluebird usage with native Promise ([#8318](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8318))
