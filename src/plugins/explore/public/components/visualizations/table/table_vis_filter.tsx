@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiSelect,
   EuiSelectOption,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { VisColumn } from '../types';
@@ -231,6 +232,7 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
         fullWidth
         style={{ marginBottom: '8px' }}
       />
+      <EuiSpacer size="xs" />
       <EuiPanel
         paddingSize="s"
         style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '8px' }}

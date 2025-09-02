@@ -132,15 +132,6 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     return false;
   };
 
-  // const filteredRows = useMemo(() => {
-  //   return rows.filter((row) =>
-  //     Object.entries(filters).every(([columnId, config]) => {
-  //       const value = row[columnId];
-  //       return config.values.includes(value);
-  //     })
-  //   );
-  // }, [rows, filters]);
-
   const filteredRows = useMemo(() => {
     return rows.filter((row) =>
       Object.entries(filters).every(([columnId, config]) => {
@@ -149,6 +140,53 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
       })
     );
   }, [rows, filters]);
+
+  const normalizedFooterCalcs = useMemo(() => {
+    const raw = styleOptions?.footerCalculations || [];
+    return (raw as any[]).map((c) =>
+      'fields' in c ? c : { fields: c.field ? [String(c.field)] : [], calculation: c.calculation }
+    ) as Array<{ fields: string[]; calculation: 'total' | 'last' | 'average' | 'min' | 'max' }>;
+  }, [styleOptions?.footerCalculations]);
+
+  const footerValues = useMemo(() => {
+    if (!styleOptions?.showFooter || !normalizedFooterCalcs.length) return undefined;
+
+    const footer: Record<string, any> = {};
+
+    const getNumericSeries = (field: string) =>
+      filteredRows.map((row) => row[field]).filter((v) => typeof v === 'number' && !isNaN(v));
+
+    normalizedFooterCalcs.forEach(({ fields, calculation }) => {
+      fields.forEach((field) => {
+        const values = getNumericSeries(field);
+        if (values.length === 0) {
+          footer[field] = '-';
+          return;
+        }
+
+        switch (calculation) {
+          case 'total':
+            footer[field] = values.reduce((sum, v) => sum + v, 0);
+            break;
+          case 'average':
+            footer[field] = values.reduce((sum, v) => sum + v, 0) / values.length;
+            break;
+          case 'min':
+            footer[field] = Math.min(...values);
+            break;
+          case 'max':
+            footer[field] = Math.max(...values);
+            break;
+          case 'last':
+            footer[field] = values[values.length - 1];
+            break;
+          default:
+            footer[field] = '-';
+        }
+      });
+    });
+    return footer;
+  }, [filteredRows, styleOptions?.showFooter, normalizedFooterCalcs]);
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
@@ -160,6 +198,15 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     };
   }, [filteredRows, styleOptions?.globalAlignment]);
 
+  const renderFooterCellValue = useMemo(() => {
+    if (!footerValues) return undefined;
+    return ({ columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+      const alignment = styleOptions?.globalAlignment || 'auto';
+      setCellProps?.({ style: { textAlign: alignment === 'auto' ? 'left' : alignment } });
+      return footerValues[columnId] ?? '-';
+    };
+  }, [footerValues, styleOptions?.globalAlignment]);
+
   return (
     <EuiDataGrid
       aria-label="Table visualization"
@@ -168,6 +215,7 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
       rowCount={filteredRows.length}
       pagination={{ ...pagination, onChangePage, onChangeItemsPerPage, pageSize }}
       renderCellValue={renderCellValue}
+      renderFooterCellValue={renderFooterCellValue}
       toolbarVisibility={{ showFullScreenSelector: false }}
       gridStyle={{ rowHover: 'highlight' }}
       leadingControlColumns={[]}
