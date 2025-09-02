@@ -911,7 +911,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🛠 Maintenance
 
  - Update oui to 1.12 ([#7865](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7865))
- - Replace `bluebird` library usage entirely in OpenSearch-Dashboard project with native Promise API. ([#8318](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8318))
 
 ### 🪛 Refactoring
 
