@@ -19,6 +19,7 @@ import {
   TraceHit,
 } from '../../../application/pages/traces/trace_details/public/traces/ppl_to_trace_hits';
 import { generateColorMap } from '../../../application/pages/traces/trace_details/public/traces/generate_color_map';
+import { navigateToTraceDetailsWithSpan } from '../../data_table/table_cell/trace_utils/trace_utils';
 
 const extractTraceIdFromHit = (hit: any): string | null => {
   for (const path of TRACE_ID_FIELD_PATHS) {
@@ -119,6 +120,20 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
     }
   }, [transformedHits]);
 
+  // Navigation handler for span clicks in embedded mode
+  const handleSpanClickNavigation = React.useCallback(
+    (spanId: string) => {
+      if (traceInfo) {
+        navigateToTraceDetailsWithSpan({
+          traceId: traceInfo.traceId,
+          spanId,
+          dataset: traceInfo.dataset,
+        });
+      }
+    },
+    [traceInfo]
+  );
+
   // Load trace data when component mounts
   React.useEffect(() => {
     const fetchData = async () => {
@@ -206,9 +221,7 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
           payloadData={JSON.stringify(transformedHits)}
           isGanttChartLoading={false}
           colorMap={colorMap}
-          onSpanSelect={(spanId) => {
-            setSelectedSpanId(spanId);
-          }}
+          onSpanSelect={handleSpanClickNavigation}
           selectedSpanId={selectedSpanId || traceInfo.spanId || undefined}
           activeView="timeline"
           isEmbedded={true}
