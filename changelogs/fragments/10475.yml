@@ -1,0 +1,2 @@
+chore:
+- Remove `mocha`-related codebase ([#10475](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10475))
