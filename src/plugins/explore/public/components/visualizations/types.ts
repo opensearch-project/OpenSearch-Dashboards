@@ -160,9 +160,10 @@ export enum AxisRole {
   SIZE = 'size',
   Y_SECOND = 'y2',
   Value = 'value',
+  Time = 'time',
 }
 
-// for heatmap the axies can serve as value axis or category axis in 2 scienrios
+// for heatmap the axes can serve as value axis or category axis in 2 scenarios
 
 export interface Grid {
   showLines: boolean;

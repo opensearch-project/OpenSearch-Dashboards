@@ -1,0 +1,2 @@
+test:
+- Discover:Traces + Trace Details Sanity testing ([#10448](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10448))
