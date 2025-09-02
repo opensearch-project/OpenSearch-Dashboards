@@ -247,10 +247,3 @@ curl -sSL "https://dl.google.com/linux/linux_signing_key.pub" | sudo apt-key add
 # Install/Downgrade Chrome
 sudo apt-get install -y --allow-downgrades /tmp/chrome.deb
 ```
-
-# Misc
-
-Although Jest is the standard for this project, there are a few Mocha tests that still exist. You can run these tests by running:
-`yarn test:mocha`
-
-However, these tests will eventually be migrated; please avoid writing new Mocha tests. For further questions or to check the status, please see this [issue](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/215).

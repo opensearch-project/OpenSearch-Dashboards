@@ -4,7 +4,6 @@
     "tsBuildInfoFile": "../build/tsbuildinfo/test",
     "types": [
       "node",
-      "mocha",
       "flot"
     ]
   },

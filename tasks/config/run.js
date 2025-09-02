@@ -110,18 +110,6 @@ module.exports = function () {
       args: ['scripts/mocha'],
     },
 
-    // used by the test:mochaCoverage task
-    mochaCoverage: {
-      cmd: YARN,
-      args: [
-        'nyc',
-        '--reporter=html',
-        '--report-dir=./target/opensearch-dashboards-coverage/mocha',
-        NODE,
-        'scripts/mocha',
-      ],
-    },
-
     verifyNotice: {
       options: {
         wait: true,

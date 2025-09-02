@@ -29,7 +29,6 @@
  */
 
 import { postSnapshot } from '@percy/sdk-utils';
-import { Test } from 'mocha';
 
 import { testSubjSelector } from '@osd/test-subj-selector';
 
@@ -42,6 +41,10 @@ import { takePercySnapshot, takePercySnapshotWithAgent } from './take_percy_snap
 export const DEFAULT_OPTIONS = {
   widths: [1200],
 };
+
+interface Test {
+  fullTitle: () => string;
+}
 
 export interface SnapshotOptions {
   /**
