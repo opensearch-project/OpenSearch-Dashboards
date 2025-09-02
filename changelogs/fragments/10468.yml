@@ -1,2 +1,2 @@
 chore:
-- remove usage of deprecated supertest-as-promised development dependency ([#10468](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10468))
+- Remove usage of deprecated supertest-as-promised dev dep ([#10468](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10468))
