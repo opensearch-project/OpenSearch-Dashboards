@@ -10,6 +10,7 @@ import { StyleControlsProps } from '../utils/use_visualization_types';
 import { TableChartStyleControls } from './table_vis_config';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { TableFooterStyleControls } from './table_vis_footer';
 
 export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyleControls>;
 
@@ -63,52 +64,63 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
   ];
 
   return (
-    <StyleAccordion
-      id="tableSection"
-      accordionLabel={i18n.translate('explore.stylePanel.table.tableSection', {
-        defaultMessage: 'Table',
-      })}
-      initialIsOpen={true}
-      data-test-subj="visTable"
-    >
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.table.pageSize', {
-          defaultMessage: 'Max rows per page',
+    <>
+      <StyleAccordion
+        id="tableSection"
+        accordionLabel={i18n.translate('explore.stylePanel.table.tableSection', {
+          defaultMessage: 'Table',
         })}
+        initialIsOpen={true}
+        data-test-subj="visTable"
       >
-        <EuiFieldNumber
-          compressed
-          value={localPageSize}
-          onChange={(e) => handlePageSizeChange(e.target.value)}
-          data-test-subj="visTablePageSizeInput"
-          min={1}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.table.globalAlignment', {
-          defaultMessage: 'Cell alignment',
-        })}
-      >
-        <EuiSelect
-          compressed
-          options={alignmentOptions}
-          value={styleOptions.globalAlignment || 'auto'}
-          onChange={onGlobalAlignmentChange}
-          onMouseUp={(e) => e.stopPropagation()}
-          data-test-subj="visTableGlobalAlignment"
-        />
-      </EuiFormRow>
-      <EuiFormRow>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.stylePanel.table.columnFilter', {
-            defaultMessage: 'Column filters',
+        <EuiFormRow
+          label={i18n.translate('explore.stylePanel.table.pageSize', {
+            defaultMessage: 'Max rows per page',
           })}
-          checked={styleOptions.showColumnFilter || false}
-          onChange={(e) => onShowColumnFilterChange(e.target.checked)}
-          data-test-subj="visTableColumnFilter"
-        />
-      </EuiFormRow>
-    </StyleAccordion>
+        >
+          <EuiFieldNumber
+            compressed
+            value={localPageSize}
+            onChange={(e) => handlePageSizeChange(e.target.value)}
+            data-test-subj="visTablePageSizeInput"
+            min={1}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('explore.stylePanel.table.globalAlignment', {
+            defaultMessage: 'Cell alignment',
+          })}
+        >
+          <EuiSelect
+            compressed
+            options={alignmentOptions}
+            value={styleOptions.globalAlignment || 'auto'}
+            onChange={onGlobalAlignmentChange}
+            onMouseUp={(e) => e.stopPropagation()}
+            data-test-subj="visTableGlobalAlignment"
+          />
+        </EuiFormRow>
+        <EuiFormRow>
+          <EuiSwitch
+            compressed
+            label={i18n.translate('explore.stylePanel.table.columnFilter', {
+              defaultMessage: 'Column filters',
+            })}
+            checked={styleOptions.showColumnFilter || false}
+            onChange={(e) => onShowColumnFilterChange(e.target.checked)}
+            data-test-subj="visTableColumnFilter"
+          />
+        </EuiFormRow>
+      </StyleAccordion>
+      <TableFooterStyleControls
+        styleOptions={styleOptions}
+        onStyleChange={onStyleChange}
+        numericalColumns={numericalColumns}
+        categoricalColumns={categoricalColumns}
+        dateColumns={dateColumns}
+        axisColumnMappings={axisColumnMappings}
+        updateVisualization={updateVisualization}
+      />
+    </>
   );
 };
