@@ -122,6 +122,12 @@ export const getAggregationType = () => [
     value: AggregationType.MAX,
   },
   {
+    text: i18n.translate('explore.vis.aggregationn.type.min', {
+      defaultMessage: 'Min',
+    }),
+    value: AggregationType.MIN,
+  },
+  {
     text: i18n.translate('explore.vis.aggregationn.type.count', {
       defaultMessage: 'Count',
     }),

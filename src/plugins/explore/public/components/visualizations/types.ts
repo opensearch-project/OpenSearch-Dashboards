@@ -214,6 +214,7 @@ export enum AggregationType {
   SUM = 'sum',
   MEAN = 'mean',
   MAX = 'max',
+  MIN = 'min',
   COUNT = 'count',
   NONE = 'none',
 }
