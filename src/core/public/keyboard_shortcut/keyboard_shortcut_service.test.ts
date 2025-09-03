@@ -720,6 +720,214 @@ describe('KeyboardShortcutService', () => {
     });
   });
 
+  describe('Sequence Handling', () => {
+    it('should register and execute sequence shortcuts', () => {
+      const start = service.start();
+      const sequenceShortcut: ShortcutDefinition = {
+        id: 'go-discover',
+        pluginId: 'discover',
+        name: 'Go to Discover',
+        category: 'navigation',
+        keys: 'g d',
+        execute: mockExecute,
+      };
+
+      start.register(sequenceShortcut);
+
+      const event1 = new KeyboardEvent('keydown', {
+        key: 'g',
+        code: 'KeyG',
+        bubbles: true,
+      });
+      document.dispatchEvent(event1);
+      expect(mockExecute).not.toHaveBeenCalled();
+
+      const event2 = new KeyboardEvent('keydown', {
+        key: 'd',
+        code: 'KeyD',
+        bubbles: true,
+      });
+      jest.spyOn(event2, 'preventDefault');
+      document.dispatchEvent(event2);
+
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+      expect(event2.preventDefault).toHaveBeenCalled();
+    });
+
+    it('should execute last registered sequence on conflict', () => {
+      const start = service.start();
+      const sequence1: ShortcutDefinition = {
+        id: 'go-discover',
+        pluginId: 'discover',
+        name: 'Go to Discover',
+        category: 'navigation',
+        keys: 'g d',
+        execute: mockExecute,
+      };
+      const sequence2: ShortcutDefinition = {
+        id: 'go-dashboard',
+        pluginId: 'dashboard',
+        name: 'Go to Dashboard',
+        category: 'navigation',
+        keys: 'g d',
+        execute: mockExecute2,
+      };
+
+      start.register(sequence1);
+      start.register(sequence2);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', code: 'KeyD' }));
+
+      expect(mockExecute2).toHaveBeenCalledTimes(1);
+      expect(mockExecute).not.toHaveBeenCalled();
+    });
+
+    it('should handle sequence timeout', () => {
+      jest.useFakeTimers();
+
+      const start = service.start();
+      const sequenceShortcut: ShortcutDefinition = {
+        id: 'go-discover',
+        pluginId: 'discover',
+        name: 'Go to Discover',
+        category: 'navigation',
+        keys: 'g d',
+        execute: mockExecute,
+      };
+
+      start.register(sequenceShortcut);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+
+      jest.advanceTimersByTime(1100);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', code: 'KeyD' }));
+
+      expect(mockExecute).not.toHaveBeenCalled();
+
+      jest.useRealTimers();
+    });
+
+    it('should handle failed sequence and start new sequence', () => {
+      const start = service.start();
+      const sequenceShortcut: ShortcutDefinition = {
+        id: 'go-discover',
+        pluginId: 'discover',
+        name: 'Go to Discover',
+        category: 'navigation',
+        keys: 'g d',
+        execute: mockExecute,
+      };
+
+      start.register(sequenceShortcut);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'x', code: 'KeyX' }));
+      expect(mockExecute).not.toHaveBeenCalled();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', code: 'KeyD' }));
+
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw error when trying to register invalid sequence', () => {
+      const start = service.start();
+      const invalidSequence: ShortcutDefinition = {
+        id: 'invalid',
+        pluginId: 'test',
+        name: 'Invalid Sequence',
+        category: 'test',
+        keys: 'x d',
+        execute: mockExecute,
+      };
+
+      expect(() => start.register(invalidSequence)).toThrow(
+        'Invalid sequence prefix: "x". Allowed prefixes: g'
+      );
+    });
+
+    it('should throw error when trying to register single prefix key', () => {
+      const start = service.start();
+      const singlePrefix: ShortcutDefinition = {
+        id: 'invalid-single',
+        pluginId: 'test',
+        name: 'Invalid Single',
+        category: 'test',
+        keys: 'g',
+        execute: mockExecute,
+      };
+
+      expect(() => start.register(singlePrefix)).toThrow(
+        'Cannot register single key "g" as it\'s reserved for sequences.'
+      );
+    });
+
+    it('should handle sequences and regular shortcuts together', () => {
+      const start = service.start();
+      const regularShortcut: ShortcutDefinition = {
+        id: 'save',
+        pluginId: 'editor',
+        name: 'Save',
+        category: 'editing',
+        keys: 'cmd+s',
+        execute: mockExecute,
+      };
+      const sequenceShortcut: ShortcutDefinition = {
+        id: 'go-discover',
+        pluginId: 'discover',
+        name: 'Go to Discover',
+        category: 'navigation',
+        keys: 'g d',
+        execute: mockExecute2,
+      };
+
+      start.register(regularShortcut);
+      start.register(sequenceShortcut);
+
+      const saveEvent = new KeyboardEvent('keydown', {
+        key: 's',
+        code: 'KeyS',
+        ctrlKey: true,
+      });
+      document.dispatchEvent(saveEvent);
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', code: 'KeyD' }));
+      expect(mockExecute2).toHaveBeenCalledTimes(1);
+    });
+
+    it('should log error when sequence execution fails', () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const start = service.start();
+      const failingSequence: ShortcutDefinition = {
+        id: 'failing-sequence',
+        pluginId: 'test',
+        name: 'Failing Sequence',
+        category: 'test',
+        keys: 'g f',
+        execute: jest.fn().mockImplementation(() => {
+          throw new Error('Sequence execution failed');
+        }),
+      };
+
+      start.register(failingSequence);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', code: 'KeyF' }));
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error executing shortcut failing-sequence from plugin test:',
+        expect.any(Error)
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+  });
+
   describe('Keyboard Event Handling', () => {
     it('should execute shortcut when matching key is pressed', () => {
       const start = service.start();

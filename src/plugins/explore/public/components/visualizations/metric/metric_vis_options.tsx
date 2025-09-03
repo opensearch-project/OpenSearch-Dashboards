@@ -6,23 +6,17 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiRange,
-  EuiSelect,
-  EuiSwitch,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { MetricChartStyleControls } from './metric_vis_config';
 import { RangeValue, ColorSchemas, AxisRole } from '../types';
 import { CustomRange } from '../style_panel/custom_ranges';
 import { DebouncedText } from '../style_panel/utils';
-import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { getColorSchemas } from '../utils/collections';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
+import { FontSizeInputField } from '../utils/font_size_input_field';
 
 export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
 
@@ -44,16 +38,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  const [fontSize, handleFontSize] = useDebouncedNumericValue(
-    styleOptions.fontSize,
-    (val) => onStyleChange({ fontSize: val }),
-    {
-      min: 10,
-      max: 100,
-      defaultValue: 60,
-    }
-  );
-
   const colorSchemas = getColorSchemas();
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
@@ -74,6 +58,52 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
+          <EuiFlexItem>
+            <StyleAccordion
+              id="metricValueOptions"
+              accordionLabel={i18n.translate('explore.stylePanel.tabs.metricValueOptions', {
+                defaultMessage: 'Value options',
+              })}
+              initialIsOpen={false}
+            >
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.calculation', {
+                  defaultMessage: 'Calculation',
+                })}
+              >
+                <ValueCalculationSelector
+                  selectedValue={styleOptions.valueCalculation}
+                  onChange={(value) => updateStyleOption('valueCalculation', value)}
+                />
+              </EuiFormRow>
+            </StyleAccordion>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StyleAccordion
+              id="metricTextStyles"
+              accordionLabel={i18n.translate('explore.stylePanel.tabs.metricTextSize', {
+                defaultMessage: 'Text size',
+              })}
+              initialIsOpen={false}
+            >
+              <FontSizeInputField
+                label={i18n.translate('explore.vis.metric.valueFontSize', {
+                  defaultMessage: 'Value size',
+                })}
+                value={styleOptions.fontSize}
+                onChange={(val) => onStyleChange({ fontSize: val })}
+                data-test-subj="valueFontSizeInput"
+              />
+              <FontSizeInputField
+                label={i18n.translate('explore.vis.metric.titleFontSize', {
+                  defaultMessage: 'Title size',
+                })}
+                value={styleOptions.titleSize}
+                onChange={(val) => onStyleChange({ titleSize: val })}
+                data-test-subj="titleFontSizeInput"
+              />
+            </StyleAccordion>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StyleAccordion
               id="metricSection"
@@ -82,25 +112,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               })}
               initialIsOpen={true}
             >
-              <EuiFormRow
-                label={i18n.translate('explore.vis.metric.fontSize', {
-                  defaultMessage: 'Font size',
-                })}
-              >
-                <EuiRange
-                  compressed
-                  value={fontSize}
-                  onChange={(e) => handleFontSize((e.target as HTMLInputElement).value)}
-                  min={10}
-                  max={100}
-                  step={1}
-                  showLabels
-                  showValue
-                  aria-label={i18n.translate('explore.vis.metric.fontSize', {
-                    defaultMessage: 'Font size',
-                  })}
-                />
-              </EuiFormRow>
               <EuiFormRow>
                 <EuiSwitch
                   compressed
@@ -151,18 +162,16 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               </EuiFormRow>
 
               {styleOptions.showTitle && (
-                <EuiFormRow>
-                  <DebouncedText
-                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
-                    placeholder={i18n.translate('explore.vis.metric.title', {
-                      defaultMessage: 'Title',
-                    })}
-                    onChange={(text) => updateStyleOption('title', text)}
-                    label={i18n.translate('explore.vis.metric.title', {
-                      defaultMessage: 'Title',
-                    })}
-                  />
-                </EuiFormRow>
+                <DebouncedText
+                  value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
+                  placeholder={i18n.translate('explore.vis.metric.title', {
+                    defaultMessage: 'Title',
+                  })}
+                  onChange={(text) => updateStyleOption('title', text)}
+                  label={i18n.translate('explore.vis.metric.title', {
+                    defaultMessage: 'Title',
+                  })}
+                />
               )}
             </StyleAccordion>
           </EuiFlexItem>

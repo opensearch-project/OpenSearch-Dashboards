@@ -56,9 +56,10 @@ const isOnTracesFlavor = (): boolean => {
 };
 
 // Trace Details view component for the doc viewer accordion - Timeline only
-export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
+export function TraceDetailsView({ hit }: DocViewRenderProps) {
   const [transformedHits, setTransformedHits] = useState<TraceHit[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>(undefined);
 
   const {
     services: { data, chrome },
@@ -205,8 +206,10 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
           payloadData={JSON.stringify(transformedHits)}
           isGanttChartLoading={false}
           colorMap={colorMap}
-          onSpanSelect={undefined}
-          selectedSpanId={traceInfo.spanId || undefined}
+          onSpanSelect={(spanId) => {
+            setSelectedSpanId(spanId);
+          }}
+          selectedSpanId={selectedSpanId || traceInfo.spanId || undefined}
           activeView="timeline"
           isEmbedded={true}
         />

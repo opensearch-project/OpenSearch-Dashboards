@@ -31,7 +31,7 @@ describe('createMetrictmapeConfig', () => {
     // Verify basic controls
     expect(defaults.showTitle).toBe(true);
     expect(defaults.title).toBe('');
-    expect(defaults.fontSize).toBe(60);
+    expect(defaults.fontSize).toBe(undefined);
     expect(defaults.useColor).toBe(false);
     expect(defaults.colorSchema).toBe(ColorSchemas.BLUES);
   });

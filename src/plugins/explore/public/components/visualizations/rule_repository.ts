@@ -79,6 +79,7 @@ const oneMetricOneDateRule: VisualizationRule = {
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
     { ...CHART_METADATA.bar, priority: 60 },
+    { ...CHART_METADATA.metric, priority: 40 },
   ],
   toSpec: (
     transformedData,
@@ -111,6 +112,15 @@ const oneMetricOneDateRule: VisualizationRule = {
         return createTimeBarChart(
           transformedData,
           numericalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
+      case 'metric':
+        return createSingleMetric(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
           dateColumns,
           styleOptions,
           axisColumnMappings
@@ -509,20 +519,8 @@ const oneMetricRule: VisualizationRule = {
   id: 'one-metric',
   name: 'one metric',
   description: 'Metric for one metric',
-  matches: (numerical, categorical, date) => {
-    if (numerical.length < 1 || numerical[0].validValuesCount !== 1) {
-      return 'NOT_MATCH';
-    }
-    if (
-      numerical.length === 1 &&
-      date.length === 0 &&
-      categorical.length === 0 &&
-      numerical[0].validValuesCount === 1
-    ) {
-      return 'EXACT_MATCH';
-    }
-    return 'COMPATIBLE_MATCH';
-  },
+  matches: (numerical, categorical, date) =>
+    compare([1, 0, 0], [numerical.length, categorical.length, date.length]),
   chartTypes: [{ ...CHART_METADATA.metric, priority: 100 }],
   toSpec: (
     transformedData,
@@ -533,14 +531,26 @@ const oneMetricRule: VisualizationRule = {
     chartType = 'metric',
     axisColumnMappings
   ) => {
-    return createSingleMetric(
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styleOptions,
-      axisColumnMappings
-    );
+    switch (chartType) {
+      case 'metric':
+        return createSingleMetric(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
+      default:
+        return createSingleMetric(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
+    }
   },
 };
 

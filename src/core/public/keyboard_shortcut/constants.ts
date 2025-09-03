@@ -87,6 +87,12 @@ export const ALLOWED_KEYS = [
 export const SEQUENCE_PREFIX = new Set(['g']);
 
 /**
+ * Default timeout in milliseconds for sequence key combinations.
+ * If the second key is not pressed within this time, the sequence is reset.
+ */
+export const SEQUENCE_TIMEOUT_MS = 1000;
+
+/**
  * Valid modifier combinations in their canonical order.
  *
  * Each combination is listed in canonical order to ensure consistent normalization
