@@ -9,14 +9,16 @@ import React from 'react';
 import dompurify from 'dompurify';
 import { PatternItem } from './patterns_table';
 import { isValidFiniteNumber } from './utils/utils';
+import { PatternsFlyoutRecord } from './patterns_table_flyout/patterns_table_flyout';
 
 export const patternsTableColumns = (
-  openPatternsTableFlyout: (record: any) => void
+  openPatternsTableFlyout: (record: PatternsFlyoutRecord) => void
 ): Array<EuiBasicTableColumn<PatternItem>> => [
   {
     field: 'flyout',
     width: '40px', // roughly size of the EuiButtonIcon
-    render: (record: any) => {
+    name: <></>, // intentionally empty
+    render: (record: PatternsFlyoutRecord) => {
       return <EuiButtonIcon iconType={'inspect'} onClick={() => openPatternsTableFlyout(record)} />;
     },
   },
