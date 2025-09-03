@@ -184,14 +184,6 @@ export function Header({
   const currentBadgeControls = useObservableValue(application.currentBadgeControls$);
   const observableBadge = useObservable(observables.badge$);
 
-  // eslint-disable-next-line no-console
-  console.log(currentActionMenu, 'currentActionMenu');
-  // const currentSavedSearch = useSelector((state) => state.savedSearch);
-  // const currentDataView = useSelector((state) => state.dataView);
-
-  // const discoverLabel = currentDataView?.type || currentDataView?.name;
-  // const savedSearchName = currentSavedSearch?.title;
-
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
@@ -653,7 +645,7 @@ export function Header({
     <div>
       <EuiHeader className="primaryApplicationHeader newTopNavHeader" style={sidecarPaddingStyle}>
         {renderNavToggle()}
-        <EuiHeaderSection side="left" grow={true} style={{ alignItems: 'center' }}>
+        <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
           <EuiFlexItem grow={false}>{renderBreadcrumbs(false, true)}</EuiFlexItem>
           {actionMenu}

@@ -255,14 +255,16 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
                   <EuiFlexGroup alignItems="stretch" gutterSize="none">
-                    <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                      <EuiTitle size="xs">
-                        <h1 style={{ fontSize: '0.875rem' }}>{screenTitle}</h1>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false} className="osdTopNavMenu">
-                      {renderMenu(menuClassName)}
-                    </EuiFlexItem>
+                    <div style={{ display: 'flex' }}>
+                      <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
+                        <EuiTitle size="xs">
+                          <h1 style={{ fontSize: '0.875rem' }}>{screenTitle}</h1>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false} className="osdTopNavMenu">
+                        {renderMenu(menuClassName)}
+                      </EuiFlexItem>
+                    </div>
                     <EuiFlexItem className="globalDatePicker">
                       <div ref={datePickerRef} />
                       {!showDatePicker && props.customSubmitButton && (

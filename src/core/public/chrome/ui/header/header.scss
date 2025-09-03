@@ -5,7 +5,7 @@
 
 .newTopNavHeader {
   z-index: 1000;
-  padding: 0 $euiSize $euiSizeS;
+  padding: 0 $euiSizeS $euiSizeS;
   box-shadow: none;
   border-bottom: none;
   background: none;
@@ -25,18 +25,52 @@
   }
 
   .headerAppActionMenu {
+
+    display: flex;
+    flex-wrap: nowrap;
+
+    .osdTopNavMenuScreenTitle,
+    .osdTopNavMenuGroupedActions {
+      flex: 0 1 auto;
+      white-space: nowrap;
+      margin-right: $euiSizeS;
+    }
+
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    & > .euiFlexGroup {
+    &>.euiFlexGroup {
+      // display: flex;
+      // flex-wrap: wrap;
       gap: $euiSizeS;
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    & > .euiHeaderLinks > .euiHeaderLinks__list {
+    &>.euiHeaderLinks>.euiHeaderLinks__list {
       gap: $euiSizeS;
 
-      & > * {
+      &>* {
         margin: 0;
       }
+    }
+  }
+
+  @include euiBreakpoint("xs", "s") {
+    .headerAppActionMenu {
+      flex-wrap: wrap;
+
+      // .euiFlexItem {
+      //   width: auto !important;
+      //   flex-basis: auto !important;
+      // }
+
+      .globalDatePicker {
+        flex-basis: 100%;
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+
+    &>.euiHeaderSection {
+      align-items: baseline;
     }
   }
 
@@ -45,15 +79,16 @@
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > .euiHeaderSection {
+  &>.euiHeaderSection {
     gap: $euiSizeS;
+    align-items: center;
 
     &:only-child {
       width: 100%;
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    & > .euiHeaderSectionItem:empty {
+    &>.euiHeaderSectionItem:empty {
       display: none;
     }
   }
@@ -63,7 +98,14 @@
   .euiHeaderSectionItem:not(:has(>:not(:empty))) {
     display: none;
   }
+
+  @include euiBreakpoint("xs", "s") {
+    &>.euiHeaderSection {
+      align-items: baseline;
+    }
+  }
 }
+
 
 .headerGlobalNav:has(.newTopNavHeader:not(.primaryApplicationHeader)) {
   margin-bottom: -1 * $euiSizeS;
@@ -75,13 +117,15 @@
 }
 
 .primaryApplicationHeader {
+
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .euiHeaderSection > .euiHeaderSectionItem {
+  .euiHeaderSection>.euiHeaderSectionItem {
     align-items: stretch;
   }
 
   .headerAppActionMenuSection {
     flex-grow: 1;
+    width: min-content;
   }
 
   .headerAppActionMenu {
@@ -121,8 +165,9 @@
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
     .euiHeaderSection--left,
     .euiHeaderSection--right {
+
       // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-      .euiFlexGroup--responsive > .euiFlexItem {
+      .euiFlexGroup--responsive>.euiFlexItem {
         margin: $euiSizeXS 0 !important; // set as !important in eui
       }
     }
@@ -143,6 +188,7 @@
 
 // Make badges/health statuses line-height match buttons so its vertically centered
 .leftSecondaryPageHeaderFlexGroup {
+
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   .euiBadge,
   .euiHealth {

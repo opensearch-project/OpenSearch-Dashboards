@@ -87,32 +87,49 @@ export function HeaderBreadcrumbs({
 
   const remainingCrumbs = useUpdatedHeader ? crumbs.slice(0, -1) : crumbs;
 
-  if (hideTrailingSeparator) {
-    return (
-      <EuiSimplifiedBreadcrumbs
-        breadcrumbs={crumbs}
-        hideLastBreadCrumb={!renderFullLength}
-        max={10}
-        data-test-subj="breadcrumbs"
-        hideTrailingSeparator
-        disableTrailingLink
-        truncate={true}
-        responsive={{
-          xs: 1,
-          s: 1,
-          m: 1,
-          l: 2,
-        }}
-      />
-    );
-  } else {
-    return (
-      <EuiHeaderBreadcrumbs
-        breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
-        max={10}
-        data-test-subj="breadcrumbs"
-        simplify={!!useUpdatedHeader}
-      />
-    );
-  }
+  return (
+    <EuiSimplifiedBreadcrumbs
+      breadcrumbs={crumbs}
+      hideLastBreadCrumb={!renderFullLength}
+      max={4}
+      data-test-subj="breadcrumbs"
+      disableTrailingLink
+      truncate={true}
+      responsive={{
+        xs: 1,
+        s: 1,
+        m: 1,
+        l: 4,
+      }}
+    />
+  );
+
+  // if (hideTrailingSeparator) {
+  //   return (
+  //     <EuiSimplifiedBreadcrumbs
+  //       breadcrumbs={crumbs}
+  //       hideLastBreadCrumb={!renderFullLength}
+  //       max={10}
+  //       data-test-subj="breadcrumbs"
+  //       hideTrailingSeparator
+  //       disableTrailingLink
+  //       truncate={true}
+  //       responsive={{
+  //         xs: 1,
+  //         s: 1,
+  //         m: 1,
+  //         l: 2,
+  //       }}
+  //     />
+  //   );
+  // } else {
+  //   return (
+  //     <EuiHeaderBreadcrumbs
+  //       breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
+  //       max={10}
+  //       data-test-subj="breadcrumbs"
+  //       simplify={!!useUpdatedHeader}
+  //     />
+  //   );
+  // }
 }
