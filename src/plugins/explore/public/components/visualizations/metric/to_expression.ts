@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { defaultMetricChartStyles, MetricChartStyleControls } from './metric_vis_config';
+import {
+  DefaultMetricChartStyleControls,
+  defaultMetricChartStyles,
+  MetricChartStyleControls,
+} from './metric_vis_config';
 import {
   VisColumn,
   RangeValue,
@@ -25,7 +29,7 @@ export const createSingleMetric = (
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const colorPalette = getColors();
-  const styles: MetricChartStyleControls = { ...defaultMetricChartStyles, ...styleOptions };
+  const styles: DefaultMetricChartStyleControls = { ...defaultMetricChartStyles, ...styleOptions };
   // Only contains one and the only one value
   const valueColumn = axisColumnMappings?.[AxisRole.Value];
   const numericField = valueColumn?.column;

@@ -9,11 +9,11 @@ describe('calculateValue', () => {
   const testValues = [5, 10, 3, 8, 5, 12];
 
   it('returns undefined for empty array', () => {
-    expect(calculateValue([])).toBeUndefined();
+    expect(calculateValue([], 'last')).toBeUndefined();
   });
 
   it('returns undefined for undefined values', () => {
-    expect(calculateValue(undefined as any)).toBeUndefined();
+    expect(calculateValue(undefined as any, 'last')).toBeUndefined();
   });
 
   it('calculates first value correctly', () => {
@@ -91,7 +91,7 @@ describe('calculateValue', () => {
   });
 
   it('defaults to last value when calculation method is not provided', () => {
-    expect(calculateValue(testValues)).toBe(12);
+    expect(calculateValue(testValues, 'last')).toBe(12);
   });
 
   it('handles single value arrays correctly', () => {

@@ -25,7 +25,13 @@ export interface MetricChartStyleControls {
   customRanges?: RangeValue[];
 }
 
-export const defaultMetricChartStyles: MetricChartStyleControls = {
+// TODO: refactor other type of chart to ensure the default style control object is properly typed
+export type DefaultMetricChartStyleControls = MetricChartStyleControls &
+  Required<
+    Pick<MetricChartStyleControls, 'showPercentage' | 'percentageColor' | 'valueCalculation'>
+  >;
+
+export const defaultMetricChartStyles: DefaultMetricChartStyleControls = {
   showTitle: true,
   title: '',
   useColor: false,

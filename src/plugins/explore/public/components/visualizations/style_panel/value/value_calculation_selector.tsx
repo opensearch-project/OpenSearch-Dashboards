@@ -124,12 +124,12 @@ const VALUE_CALCULATION_OPTIONS: Array<{
 ];
 
 export interface ValueCalculationSelectorProps {
-  selectedValue?: CalculationMethod;
+  selectedValue: CalculationMethod;
   onChange?: (value: CalculationMethod) => void;
 }
 
 export const ValueCalculationSelector = ({
-  selectedValue = 'last',
+  selectedValue,
   onChange = () => {},
 }: ValueCalculationSelectorProps) => {
   const options = useMemo(

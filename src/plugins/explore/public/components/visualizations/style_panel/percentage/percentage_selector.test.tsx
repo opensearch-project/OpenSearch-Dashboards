@@ -82,7 +82,7 @@ describe('PercentageSelector', () => {
         {...{ ...defaultProps, showPercentage: true, percentageColor: 'inverted' }}
       />
     );
-    expect(screen.getByDisplayValue('inverted')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Inverted')).toBeInTheDocument();
   });
 
   it('calls onPercentageColorChange when a different color is selected', () => {

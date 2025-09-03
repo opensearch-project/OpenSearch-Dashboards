@@ -7,7 +7,7 @@ import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch, EuiFormRow } from '@elastic/eui';
-import { MetricChartStyleControls } from './metric_vis_config';
+import { defaultMetricChartStyles, MetricChartStyleControls } from './metric_vis_config';
 import { RangeValue, ColorSchemas, AxisRole } from '../types';
 import { CustomRange } from '../style_panel/custom_ranges';
 import { DebouncedText } from '../style_panel/utils';
@@ -73,7 +73,9 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                 })}
               >
                 <ValueCalculationSelector
-                  selectedValue={styleOptions.valueCalculation}
+                  selectedValue={
+                    styleOptions.valueCalculation ?? defaultMetricChartStyles.valueCalculation
+                  }
                   onChange={(value) => updateStyleOption('valueCalculation', value)}
                 />
               </EuiFormRow>
@@ -159,8 +161,14 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                 </>
               )}
               <PercentageSelector
-                percentageColor={styleOptions.percentageColor ?? 'standard'}
-                showPercentage={styleOptions.showPercentage ?? false}
+                percentageColor={
+                  styleOptions.percentageColor ??
+                  defaultMetricChartStyles.percentageColor ??
+                  'standard'
+                }
+                showPercentage={
+                  styleOptions.showPercentage ?? defaultMetricChartStyles.showPercentage ?? false
+                }
                 onPercentageColorChange={(color) => updateStyleOption('percentageColor', color)}
                 onShowPercentageToggle={(show) => updateStyleOption('showPercentage', show)}
               />

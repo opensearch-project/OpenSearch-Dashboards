@@ -28,7 +28,7 @@ export type CalculationMethod =
  */
 export const calculateValue = (
   values: any[],
-  calculationMethod: CalculationMethod = 'last'
+  calculationMethod: CalculationMethod
 ): number | undefined => {
   if (!values || values.length === 0) {
     return undefined;
