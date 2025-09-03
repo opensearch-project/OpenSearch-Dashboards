@@ -19,21 +19,17 @@ export function mergeCustomRangesWithBase(
   baseColor: string,
   thresholdValues?: ThresholdRangeValue[]
 ) {
-  const filteredThresholds = thresholdValues?.filter(
-    (range) => range.value >= minBase && range.value <= maxBase
-  );
-  const insertIndex = filteredThresholds?.findIndex((range) => range.value > minBase);
-
-  // Return base range if no threshold exist or minBase exceeds all threshold values or minBase exceeds maxBase
-  if (!filteredThresholds?.length || insertIndex === -1)
-    return [{ value: minBase, color: baseColor }];
+  // only display threhold ranges under the max base and above min base
+  const validThresholds =
+    thresholdValues?.filter((range) => range.value >= minBase && range.value <= maxBase) || [];
 
   // Return existing thresholds if minBase already exists as a threshold
-  const hasValue = filteredThresholds.some((range) => range.value === minBase);
-  if (hasValue) return filteredThresholds;
+  if (validThresholds.some((range) => range.value === minBase)) {
+    return validThresholds;
+  }
 
-  // Insert base range and exclude thresholds below minBase
-  return [{ value: minBase, color: baseColor }, ...filteredThresholds.slice(insertIndex)];
+  const aboveMin = validThresholds.filter((range) => range.value > minBase);
+  return [{ value: minBase, color: baseColor }, ...aboveMin];
 }
 
 /**
@@ -63,11 +59,8 @@ export function generateRanges(mergedRanges: ThresholdRangeValue[], maxValue: nu
 
   for (let i = 0; i < mergedRanges.length; i++) {
     const currentValue = mergedRanges[i].value;
-    // only display threhold ranges under the max base
-    if (currentValue >= maxValue) return ranges;
 
-    const nextValue =
-      i < mergedRanges.length - 1 ? Math.min(mergedRanges[i + 1].value, maxValue) : maxValue;
+    const nextValue = i < mergedRanges.length - 1 ? mergedRanges[i + 1].value : maxValue;
 
     ranges.push({ min: currentValue, max: nextValue, color: mergedRanges[i].color });
   }

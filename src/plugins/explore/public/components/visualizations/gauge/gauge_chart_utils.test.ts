@@ -93,19 +93,6 @@ describe('gauge_chart_utils', () => {
         { min: 20, max: 30, color: '#green' },
       ]);
     });
-
-    it('stops at maxValue when threshold exceeds it', () => {
-      const result = generateRanges(mergedRanges, 15);
-      expect(result).toEqual([
-        { min: 5, max: 10, color: '#blue' },
-        { min: 10, max: 15, color: '#red' },
-      ]);
-    });
-
-    it('returns empty array when first threshold exceeds maxValue', () => {
-      const result = generateRanges(mergedRanges, 1);
-      expect(result).toEqual([]);
-    });
   });
 
   describe('generateArcExpression', () => {
