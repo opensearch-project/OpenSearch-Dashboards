@@ -46,6 +46,7 @@ export const createPieSpec = (
       innerRadius: styleOptions.exclusive?.donut ? { expr: '7*stepSize' } : 0,
       radius: { expr: '9*stepSize' },
       tooltip: styleOptions?.tooltipOptions?.mode === 'all',
+      padAngle: styleOptions.exclusive?.donut ? 0.01 : 0,
     },
     encoding: {
       opacity: {
