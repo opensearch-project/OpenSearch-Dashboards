@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
 import { patternsTableColumns } from './patterns_table_columns';
-import { usePatternsFlyout } from './patterns_table_flyout/patterns_flyout_context';
+import { usePatternsFlyoutContext } from './patterns_table_flyout/patterns_flyout_context';
 
 export interface PatternsTableProps {
   items: PatternItem[];
@@ -19,7 +19,7 @@ export interface PatternItem {
 }
 
 export const PatternsTable = ({ items }: PatternsTableProps) => {
-  const { openPatternsTableFlyout } = usePatternsFlyout();
+  const { openPatternsTableFlyout } = usePatternsFlyoutContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 

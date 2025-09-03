@@ -10,7 +10,7 @@ import { PatternsTableFlyout, PatternsFlyoutRecord } from './patterns_table_flyo
 import * as patternsFlyoutContext from './patterns_flyout_context';
 
 jest.mock('./patterns_flyout_context', () => ({
-  usePatternsFlyout: jest.fn(),
+  usePatternsFlyoutContext: jest.fn(),
 }));
 
 describe('PatternsTableFlyout', () => {
@@ -27,7 +27,7 @@ describe('PatternsTableFlyout', () => {
       sample: ['INFO [main] Starting application', 'INFO [main] Stopping application'],
     };
 
-    jest.spyOn(patternsFlyoutContext, 'usePatternsFlyout').mockReturnValue({
+    jest.spyOn(patternsFlyoutContext, 'usePatternsFlyoutContext').mockReturnValue({
       patternsFlyoutData: mockRecord,
       closePatternsTableFlyout: mockClosePatternsTableFlyout,
       isFlyoutOpen: true,
@@ -55,7 +55,7 @@ describe('PatternsTableFlyout', () => {
   });
 
   it('should render error message when no pattern data is available', () => {
-    jest.spyOn(patternsFlyoutContext, 'usePatternsFlyout').mockReturnValue({
+    jest.spyOn(patternsFlyoutContext, 'usePatternsFlyoutContext').mockReturnValue({
       patternsFlyoutData: undefined,
       closePatternsTableFlyout: mockClosePatternsTableFlyout,
       isFlyoutOpen: true,
@@ -80,7 +80,7 @@ describe('PatternsTableFlyout', () => {
       sample: [],
     };
 
-    jest.spyOn(patternsFlyoutContext, 'usePatternsFlyout').mockReturnValue({
+    jest.spyOn(patternsFlyoutContext, 'usePatternsFlyoutContext').mockReturnValue({
       patternsFlyoutData: mockRecord,
       closePatternsTableFlyout: mockClosePatternsTableFlyout,
       isFlyoutOpen: true,
@@ -111,7 +111,7 @@ describe('PatternsTableFlyout', () => {
       sample: ['INFO [main] Starting application'],
     };
 
-    jest.spyOn(patternsFlyoutContext, 'usePatternsFlyout').mockReturnValue({
+    jest.spyOn(patternsFlyoutContext, 'usePatternsFlyoutContext').mockReturnValue({
       patternsFlyoutData: mockRecord,
       closePatternsTableFlyout: mockClosePatternsTableFlyout,
       isFlyoutOpen: true,

@@ -19,7 +19,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { usePatternsFlyout } from './patterns_flyout_context';
+import { usePatternsFlyoutContext } from './patterns_flyout_context';
 
 export interface PatternsFlyoutRecord {
   pattern: string;
@@ -28,7 +28,7 @@ export interface PatternsFlyoutRecord {
 }
 
 export const PatternsTableFlyout = () => {
-  const { patternsFlyoutData: record, closePatternsTableFlyout } = usePatternsFlyout();
+  const { patternsFlyoutData: record, closePatternsTableFlyout } = usePatternsFlyoutContext();
 
   return (
     <EuiFlyout onClose={closePatternsTableFlyout}>

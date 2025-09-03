@@ -19,11 +19,11 @@ import {
 import { PatternsTableFlyout } from './patterns_table_flyout/patterns_table_flyout';
 import {
   PatternsFlyoutProvider,
-  usePatternsFlyout,
+  usePatternsFlyoutContext,
 } from './patterns_table_flyout/patterns_flyout_context';
 
 const PatternsContainerContent = () => {
-  const { isFlyoutOpen } = usePatternsFlyout();
+  const { isFlyoutOpen } = usePatternsFlyoutContext();
 
   /**
    * Fetching the hits from the patterns query, and processing them for the table

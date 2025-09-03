@@ -57,10 +57,10 @@ export const PatternsFlyoutProvider: React.FC<{ children: ReactNode }> = ({ chil
   );
 };
 
-export const usePatternsFlyout = (): PatternsFlyoutContextType => {
+export const usePatternsFlyoutContext = (): PatternsFlyoutContextType => {
   const context = useContext(PatternsFlyoutContext);
   if (context === undefined) {
-    throw new Error('usePatternsFlyout must be used within a PatternsFlyoutProvider');
+    throw new Error('usePatternsFlyoutContext must be used within a PatternsFlyoutProvider');
   }
   return context;
 };

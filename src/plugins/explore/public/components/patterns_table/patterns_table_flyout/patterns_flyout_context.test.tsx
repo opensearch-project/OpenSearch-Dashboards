@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { PatternsFlyoutProvider, usePatternsFlyout } from './patterns_flyout_context';
+import { PatternsFlyoutProvider, usePatternsFlyoutContext } from './patterns_flyout_context';
 import { PatternsFlyoutRecord } from './patterns_table_flyout';
 
 jest.mock('../utils/utils', () => ({
@@ -18,7 +18,7 @@ const TestComponent: React.FC = () => {
     patternsFlyoutData,
     openPatternsTableFlyout,
     closePatternsTableFlyout,
-  } = usePatternsFlyout();
+  } = usePatternsFlyoutContext();
 
   const validRecord: PatternsFlyoutRecord = {
     pattern: 'test-pattern',
@@ -59,7 +59,7 @@ const TestComponent: React.FC = () => {
 
 const ComponentWithoutProvider: React.FC = () => {
   try {
-    usePatternsFlyout();
+    usePatternsFlyoutContext();
     return <div>Should not render</div>;
   } catch (e) {
     return <div data-test-subj="error-message">{(e as Error).message}</div>;
@@ -112,11 +112,11 @@ describe('PatternsFlyoutContext', () => {
     });
   });
 
-  describe('usePatternsFlyout', () => {
+  describe('usePatternsFlyoutContext', () => {
     it('should throw error when used outside of provider', () => {
       render(<ComponentWithoutProvider />);
       expect(screen.getByTestId('error-message')).toHaveTextContent(
-        'usePatternsFlyout must be used within a PatternsFlyoutProvider'
+        'usePatternsFlyoutContext must be used within a PatternsFlyoutProvider'
       );
     });
   });
