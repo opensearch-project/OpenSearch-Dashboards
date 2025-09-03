@@ -202,7 +202,43 @@ describe('Line Chart Utils', () => {
       expect(applyAxisStyling(baseAxis, undefined as any, 'category')).toBe(baseAxis);
     });
 
-    it('should apply category axis styling', () => {
+    it('should apply category axis styling with fallback title and orientation', () => {
+      const styles: Partial<LineChartStyleControls> = {
+        categoryAxes: [
+          {
+            id: 'CategoryAxis-1',
+            type: 'category' as const,
+            title: {},
+            position: Positions.BOTTOM,
+            show: true,
+            grid: {
+              showLines: false,
+            },
+            labels: {
+              show: true,
+              filter: true,
+              rotate: 0,
+              truncate: 100,
+            },
+          },
+        ],
+      };
+
+      const result = applyAxisStyling(baseAxis, styles, 'category', [], [], dateColumns);
+      expect(result).toMatchObject({
+        title: 'Original Title',
+        orient: Positions.BOTTOM,
+        labelAngle: 0,
+        labelLimit: 100,
+        grid: false,
+        labels: true,
+        labelOverlap: 'greedy',
+        labelFlush: false,
+        format: { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' },
+      });
+    });
+
+    it('should apply category axis styling with date format for date columns', () => {
       const styles: Partial<LineChartStyleControls> = {
         categoryAxes: [
           {
@@ -224,7 +260,7 @@ describe('Line Chart Utils', () => {
         ],
       };
 
-      const result = applyAxisStyling(baseAxis, styles, 'category');
+      const result = applyAxisStyling(baseAxis, styles, 'category', [], [], dateColumns);
       expect(result).toMatchObject({
         title: 'Custom Category Title',
         orient: Positions.TOP,
@@ -232,6 +268,9 @@ describe('Line Chart Utils', () => {
         labelLimit: 50,
         grid: true,
         labels: true,
+        labelOverlap: 'greedy',
+        labelFlush: false,
+        format: { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' }, // Date format applied
       });
     });
 
@@ -407,6 +446,86 @@ describe('Line Chart Utils', () => {
       );
       expect(rightResult.orient).toBe(Positions.RIGHT);
       expect(rightResult.title).toBe('Right Axis');
+    });
+
+    it('should handle Rule 2 with insufficient value axes', () => {
+      const styles: Partial<LineChartStyleControls> = {
+        valueAxes: [
+          {
+            id: 'ValueAxis-1',
+            name: 'LeftAxis-1',
+            type: 'value' as const,
+            position: Positions.LEFT,
+            show: true,
+            labels: {
+              show: true,
+              filter: false,
+              rotate: 0,
+              truncate: 100,
+            },
+            grid: {
+              showLines: true,
+            },
+            title: {
+              text: 'Left Axis',
+            },
+          },
+        ],
+      };
+
+      const leftResult = applyAxisStyling(
+        baseAxis,
+        styles,
+        'value',
+        numericalColumns,
+        [],
+        dateColumns,
+        ValueAxisPosition.Left
+      );
+      expect(leftResult.orient).toBe(Positions.LEFT);
+      expect(leftResult.title).toBe('Original Title');
+
+      const rightResult = applyAxisStyling(
+        baseAxis,
+        styles,
+        'value',
+        numericalColumns,
+        [],
+        dateColumns,
+        ValueAxisPosition.Right
+      );
+      expect(rightResult.orient).toBe(Positions.RIGHT);
+      expect(rightResult.title).toBe('Original Title');
+    });
+
+    it('should handle Rule 2 with no value axes', () => {
+      const styles: Partial<LineChartStyleControls> = {
+        valueAxes: [],
+      };
+
+      const leftResult = applyAxisStyling(
+        baseAxis,
+        styles,
+        'value',
+        numericalColumns,
+        [],
+        dateColumns,
+        ValueAxisPosition.Left
+      );
+      expect(leftResult.orient).toBe(Positions.LEFT);
+      expect(leftResult.title).toBe('Original Title');
+
+      const rightResult = applyAxisStyling(
+        baseAxis,
+        styles,
+        'value',
+        numericalColumns,
+        [],
+        dateColumns,
+        ValueAxisPosition.Right
+      );
+      expect(rightResult.orient).toBe(Positions.RIGHT);
+      expect(rightResult.title).toBe('Original Title');
     });
   });
 });
