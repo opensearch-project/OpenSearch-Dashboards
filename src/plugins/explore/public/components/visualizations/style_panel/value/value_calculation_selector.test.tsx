@@ -15,12 +15,12 @@ describe('ValueCalculationSelector', () => {
   });
 
   it('renders without crashing', () => {
-    const { container } = render(<ValueCalculationSelector />);
+    const { container } = render(<ValueCalculationSelector selectedValue="last" />);
     expect(container).toBeInTheDocument();
   });
 
   it('renders with default value', () => {
-    render(<ValueCalculationSelector />);
+    render(<ValueCalculationSelector selectedValue="last" />);
     // The default value is 'last'
     expect(screen.getByText('Last')).toBeInTheDocument();
   });
@@ -50,7 +50,7 @@ describe('ValueCalculationSelector', () => {
   });
 
   it('renders all calculation options in the dropdown', async () => {
-    render(<ValueCalculationSelector />);
+    render(<ValueCalculationSelector selectedValue="last" />);
 
     // Open the dropdown
     const dropdown = screen.getByText('Last');
@@ -71,7 +71,7 @@ describe('ValueCalculationSelector', () => {
   });
 
   it('displays the correct description for each option', async () => {
-    render(<ValueCalculationSelector />);
+    render(<ValueCalculationSelector selectedValue="last" />);
 
     // Open the dropdown
     const dropdown = screen.getByText('Last');
