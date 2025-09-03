@@ -1,0 +1,10 @@
+{
+  "id": "contextProvider",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["uiActions", "data", "embeddable"],
+  "optionalPlugins": ["dashboard", "discover"],
+  "requiredBundles": ["opensearchDashboardsReact"]
+}
