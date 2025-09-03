@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useCallback } from 'react';
 import { IndexPattern } from 'src/plugins/data/public';
-import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -53,8 +52,26 @@ const TopNav = ({
 
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { TopNavMenu, HeaderControl } = services.navigation.ui;
-  const { dashboardConfig, setHeaderActionMenu } = services;
+  const { dashboardConfig, setHeaderActionMenu, keyboardShortcut } = services;
   const { setAppRightControls } = services.application;
+
+  // Memoized callback for toggling dashboard edit mode
+  const handleToggleDashboardEdit = useCallback(() => {
+    const editButton = document.querySelector('[data-test-subj="dashboardEditSwitch"]');
+    if (editButton) {
+      (editButton as HTMLElement).click();
+    }
+  }, []);
+
+  // Register dashboard edit mode keyboard shortcut
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'toggle_dashboard_edit',
+    pluginId: 'dashboard',
+    name: 'Toggle Edit Mode',
+    category: 'Panel / Layout',
+    keys: 'shift+e',
+    execute: handleToggleDashboardEdit,
+  });
 
   const showActionsInGroup = services.uiSettings.get('home:useNewHomePage');
 

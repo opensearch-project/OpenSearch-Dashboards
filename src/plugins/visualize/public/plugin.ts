@@ -316,21 +316,6 @@ export class VisualizePlugin
           core.application.navigateToApp('visualize');
         },
       });
-
-      // Register visualization sidebar toggle shortcut
-      core.keyboardShortcut.register({
-        id: 'toggle_vis_sidebar',
-        name: 'Toggle Visualization Sidebar',
-        pluginId: 'visualize',
-        category: 'Panel / layout',
-        keys: 'shift+s',
-        execute: () => {
-          const sidebarButton = document.querySelector('[data-test-subj="collapseSideBarButton"]');
-          if (sidebarButton) {
-            (sidebarButton as HTMLElement).click();
-          }
-        },
-      });
     }
 
     if (plugins.share) {

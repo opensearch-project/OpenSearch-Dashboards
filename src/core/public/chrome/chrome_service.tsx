@@ -295,20 +295,27 @@ export class ChromeService {
 
     const globalSearch = this.globalSearch.start();
 
+    // Function for toggling left navigation
+    const handleToggleLeftNavbar = () => {
+      const navButton = document.querySelector('[data-test-subj="collapsibleNavShrinkButton"]');
+      const toggleNavButton = document.querySelector('[data-test-subj="toggleNavButton"]');
+
+      if (navButton) {
+        (navButton as HTMLElement).click();
+      } else if (toggleNavButton) {
+        (toggleNavButton as HTMLElement).click();
+      }
+    };
+
     // Register global navigation toggle keyboard shortcut
     if (keyboardShortcut) {
       keyboardShortcut.register({
-        id: 'toogle_left_navbar',
+        id: 'toggle_left_navbar',
         pluginId: 'core',
-        name: 'Toogle Left Navbar',
+        name: 'Toggle Left Navbar',
         category: 'Panel / Layout',
         keys: 'shift+b',
-        execute: () => {
-          const navButton = document.querySelector('[data-test-subj="collapsibleNavShrinkButton"]');
-          if (navButton) {
-            (navButton as HTMLElement).click();
-          }
-        },
+        execute: handleToggleLeftNavbar,
       });
     }
 

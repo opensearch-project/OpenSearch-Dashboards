@@ -103,7 +103,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     keyboardShortcut,
   } = opensearchDashboards.services;
 
-  // Memoized callback for opening date picker
   const handleOpenDatePicker = useCallback(() => {
     const selectors = [
       '[data-test-subj="superDatePickerstartDatePopoverButton"]',
@@ -118,11 +117,13 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     }
   }, []);
 
-  // Memoized callback for refreshing query
-  const handleRefreshResult = useCallback(() => {
-    const refreshButton = document.querySelector('[data-test-subj="querySubmitButton"]');
-    if (refreshButton) {
-      (refreshButton as HTMLElement).click();
+  const handleFocusQueryBar = useCallback(() => {
+    const queryInput = document.querySelector(
+      '[data-test-subj="queryInput"]'
+    ) as HTMLTextAreaElement;
+    if (queryInput) {
+      queryInput.focus();
+      return;
     }
   }, []);
 
@@ -130,8 +131,8 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     id: 'date_picker',
     pluginId: 'data',
     name: 'Open Date Picker',
-    category: 'Date Controls',
-    keys: 'shift+t',
+    category: 'Search',
+    keys: 'shift+d',
     execute: handleOpenDatePicker,
   });
 
@@ -139,11 +140,20 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     id: 'refresh_query',
     pluginId: 'data',
     name: 'Refresh Results',
-    category: 'Data Actions',
-    keys: 'shift+r',
+    category: 'Data actions',
+    keys: 'r',
     execute: () => {
       onClickSubmitButton({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
     },
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'focus_query_bar',
+    pluginId: 'data',
+    name: 'Focus Query Bar',
+    category: 'Search',
+    keys: 'shift+q',
+    execute: handleFocusQueryBar,
   });
 
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;

@@ -34,7 +34,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       chrome: { setHeaderVariant },
       data,
       core,
-      keyboardShortcut,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
   const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
@@ -54,24 +53,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
     [refetch$]
   );
   const [rows, setRows] = useState<OpenSearchSearchHit[] | undefined>(undefined);
-
-  // Memoized callback for downloading CSV
-  const handleDownloadCsv = useCallback(() => {
-    const csvButton = document.querySelector('[data-test-subj="dscDownloadCsvButton"]');
-    if (csvButton && !csvButton.hasAttribute('disabled')) {
-      (csvButton as HTMLElement).click();
-    }
-  }, []);
-
-  // Register keyboard shortcut for downloading CSV
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'download_csv',
-    pluginId: 'discover',
-    name: 'Export Results as CSV',
-    category: 'Data Actions',
-    keys: 'shift+e',
-    execute: handleDownloadCsv,
-  });
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {

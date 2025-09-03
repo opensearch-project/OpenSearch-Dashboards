@@ -75,7 +75,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
 
-  // Memoized callback for opening date picker
   const handleOpenDatePicker = useCallback(() => {
     const selectors = [
       '[data-test-subj="superDatePickerstartDatePopoverButton"]',
@@ -90,11 +89,40 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     }
   }, []);
 
-  // Memoized callback for refreshing query
-  const handleRefreshResult = useCallback(() => {
-    const refreshButton = document.querySelector('[data-test-subj="querySubmitButton"]');
-    if (refreshButton) {
-      (refreshButton as HTMLElement).click();
+  // Memoized callback for focusing query bar
+  const handleFocusQueryBar = useCallback(() => {
+    // Monaco-based query editor
+    const queryEditorInput = document.querySelector('[data-test-subj="osdQueryEditorInput"]');
+    if (queryEditorInput) {
+      // Look for Monaco editor within the query editor container
+      const monacoEditor = queryEditorInput.querySelector(
+        '.monaco-editor textarea'
+      ) as HTMLTextAreaElement;
+      if (monacoEditor) {
+        monacoEditor.focus();
+        return;
+      }
+    }
+  }, []);
+
+  const handleDownloadCsv = useCallback(() => {
+    const csvButton = document.querySelector('[data-test-subj="dscDownloadCsvButton"]');
+    if (csvButton && !csvButton.hasAttribute('disabled')) {
+      (csvButton as HTMLElement).click();
+    }
+  }, []);
+
+  const handleOpenSearch = useCallback(() => {
+    const openButton = document.querySelector('[data-test-subj="discoverOpenButton"]');
+    if (openButton && !openButton.hasAttribute('disabled')) {
+      (openButton as HTMLElement).click();
+    }
+  }, []);
+
+  const handleSave = useCallback(() => {
+    const saveButton = document.querySelector('[data-test-subj="discoverSaveButton"]');
+    if (saveButton && !saveButton.hasAttribute('disabled')) {
+      (saveButton as HTMLElement).click();
     }
   }, []);
 
@@ -102,20 +130,56 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     id: 'open_date_picker',
     pluginId: 'data',
     name: 'Open Date Picker',
-    category: 'Date Controls',
-    keys: 'shift+t',
+    category: 'Search',
+    keys: 'shift+d',
     execute: handleOpenDatePicker,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'open_search',
+    pluginId: 'data',
+    name: 'Open Search',
+    category: 'Search',
+    keys: 'shift+s',
+    execute: handleOpenSearch,
   });
 
   keyboardShortcut?.useKeyboardShortcut({
     id: 'refresh_query',
     pluginId: 'data',
     name: 'Refresh Results',
-    category: 'Data Actions',
-    keys: 'shift+r',
+    category: 'Data actions',
+    keys: 'r',
     execute: () => {
       onClickSubmitButton({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
     },
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'focus_query_bar',
+    pluginId: 'data',
+    name: 'Focus Query Bar',
+    category: 'Search',
+    keys: 'shift+q',
+    execute: handleFocusQueryBar,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'download_csv',
+    pluginId: 'discover',
+    name: 'Download Results as CSV',
+    category: 'Data Actions',
+    keys: 'd',
+    execute: handleDownloadCsv,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'save_search',
+    pluginId: 'discover',
+    name: 'Save Search',
+    category: 'editing / save',
+    keys: 'cmd+s',
+    execute: handleSave,
   });
 
   const queryLanguage = props.query && props.query.language;
