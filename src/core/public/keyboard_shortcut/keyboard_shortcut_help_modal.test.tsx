@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { KeyboardShortcutHelp } from './keyboard_shortcut_help';
+import { KeyboardShortcutHelpModal } from './keyboard_shortcut_help_modal';
 import { ShortcutDefinition } from './types';
 
 jest.mock('./key_parser', () => ({
@@ -43,7 +43,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </IntlProvider>
 );
 
-describe('KeyboardShortcutHelp', () => {
+describe('KeyboardShortcutHelpModal', () => {
   const mockShortcuts: ShortcutDefinition[] = [
     {
       id: 'save',
@@ -104,7 +104,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />
@@ -119,7 +119,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />
@@ -134,7 +134,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />
@@ -153,7 +153,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />
@@ -174,7 +174,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />
@@ -197,7 +197,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />
@@ -222,7 +222,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp trigger={trigger} keyboardShortcutService={undefined} />
+          <KeyboardShortcutHelpModal trigger={trigger} keyboardShortcutService={undefined} />
         </TestWrapper>
       );
 
@@ -248,7 +248,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp trigger={trigger} keyboardShortcutService={errorService} />
+          <KeyboardShortcutHelpModal trigger={trigger} keyboardShortcutService={errorService} />
         </TestWrapper>
       );
 
@@ -266,7 +266,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />
@@ -297,7 +297,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />
@@ -322,7 +322,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />
@@ -353,7 +353,7 @@ describe('KeyboardShortcutHelp', () => {
 
       render(
         <TestWrapper>
-          <KeyboardShortcutHelp
+          <KeyboardShortcutHelpModal
             trigger={trigger}
             keyboardShortcutService={mockKeyboardShortcutService}
           />

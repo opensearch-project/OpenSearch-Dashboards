@@ -30,7 +30,7 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 
 import {
@@ -94,7 +94,57 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
+  const {
+    uiSettings,
+    notifications,
+    storage,
+    appName,
+    docLinks,
+    keyboardShortcut,
+  } = opensearchDashboards.services;
+
+  // Memoized callback for opening date picker
+  const handleOpenDatePicker = useCallback(() => {
+    const selectors = [
+      '[data-test-subj="superDatePickerstartDatePopoverButton"]',
+      '[data-test-subj="superDatePickerShowDatesButton"]',
+    ];
+    for (const selector of selectors) {
+      const element = document.querySelector(selector);
+      if (element) {
+        (element as HTMLElement).click();
+        break;
+      }
+    }
+  }, []);
+
+  // Memoized callback for refreshing query
+  const handleRefreshResult = useCallback(() => {
+    const refreshButton = document.querySelector('[data-test-subj="querySubmitButton"]');
+    if (refreshButton) {
+      (refreshButton as HTMLElement).click();
+    }
+  }, []);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'date_picker',
+    pluginId: 'data',
+    name: 'Open Date Picker',
+    category: 'Date Controls',
+    keys: 'shift+t',
+    execute: handleOpenDatePicker,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'refresh_query',
+    pluginId: 'data',
+    name: 'Refresh Results',
+    category: 'Data Actions',
+    keys: 'shift+r',
+    execute: () => {
+      onClickSubmitButton({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
+    },
+  });
 
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
 

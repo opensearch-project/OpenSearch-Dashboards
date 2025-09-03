@@ -597,7 +597,7 @@ export class DashboardPlugin
           if (!isInitialized || !currentWorkspace) {
             return;
           }
-          core.application.navigateToApp('dashboard');
+          core.application.navigateToApp('dashboards');
         },
       });
     }

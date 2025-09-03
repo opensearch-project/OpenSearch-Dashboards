@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
 import { DashboardTopNav } from '../components/dashboard_top_nav';
@@ -18,7 +18,7 @@ import { HeaderVariant } from '../../../../../core/public';
 export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
-  const { chrome, uiSettings } = services;
+  const { chrome, uiSettings, keyboardShortcut } = services;
   const { setHeaderVariant } = chrome;
   const isChromeVisible = useChromeVisibility({ chrome });
   const [eventEmitter] = useState(new EventEmitter());
@@ -54,6 +54,25 @@ export const DashboardEditor = () => {
       setHeaderVariant?.();
     };
   }, [setHeaderVariant, showActionsInGroup]);
+
+  // Memoized callback for full-screen action
+  const handleFullScreen = useCallback(() => {
+    // Find and click the full-screen button
+    const fullScreenButton = document.querySelector('[data-test-subj="dashboardFullScreenMode"]');
+    if (fullScreenButton) {
+      (fullScreenButton as HTMLElement).click();
+    }
+  }, []);
+
+  // Register full-screen keyboard shortcut using the hook
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'dashboard_fullscreen',
+    pluginId: 'dashboard',
+    name: 'Toggle Full-Screen Results Table',
+    category: 'Panel / Layout',
+    keys: 'shift+f',
+    execute: handleFullScreen,
+  });
 
   return (
     <div>

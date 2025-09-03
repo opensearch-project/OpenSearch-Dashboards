@@ -68,14 +68,14 @@ const groupShortcutsByCategory = (shortcuts: ShortcutItem[]): Record<string, Sho
   }, {} as Record<string, ShortcutItem[]>);
 };
 
-interface KeyboardShortcutHelpProps {
+interface KeyboardShortcutHelpModalProps {
   trigger?: React.ReactElement;
   keyboardShortcutService?:
     | KeyboardShortcutService
     | { getAllShortcuts: () => ShortcutDefinition[] };
 }
 
-export const KeyboardShortcutHelp: React.FC<KeyboardShortcutHelpProps> = ({
+export const KeyboardShortcutHelpModal: React.FC<KeyboardShortcutHelpModalProps> = ({
   trigger,
   keyboardShortcutService,
 }) => {

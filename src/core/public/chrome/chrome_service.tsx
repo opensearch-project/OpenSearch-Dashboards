@@ -134,6 +134,7 @@ export interface StartDeps {
   uiSettings: IUiSettingsClient;
   overlays: OverlayStart;
   workspaces: WorkspacesStart;
+  keyboardShortcut: any; // KeyboardShortcutStart - avoiding circular import
 }
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;
@@ -255,6 +256,7 @@ export class ChromeService {
     uiSettings,
     overlays,
     workspaces,
+    keyboardShortcut,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.initHeaderVariant(application);
@@ -292,6 +294,23 @@ export class ChromeService {
     this.applicationStart = application;
 
     const globalSearch = this.globalSearch.start();
+
+    // Register global navigation toggle keyboard shortcut
+    if (keyboardShortcut) {
+      keyboardShortcut.register({
+        id: 'toogle_left_navbar',
+        pluginId: 'core',
+        name: 'Toogle Left Navbar',
+        category: 'Panel / Layout',
+        keys: 'shift+b',
+        execute: () => {
+          const navButton = document.querySelector('[data-test-subj="collapsibleNavShrinkButton"]');
+          if (navButton) {
+            (navButton as HTMLElement).click();
+          }
+        },
+      });
+    }
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {

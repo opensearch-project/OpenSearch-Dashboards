@@ -191,6 +191,23 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
 
   public start(core: CoreStart, { uiActions }: DevToolsStartDependencies) {
     this.uiActionsStart = uiActions;
+
+    // Register keyboard shortcut for opening Developer Tools
+    if (core.keyboardShortcut) {
+      core.keyboardShortcut.register({
+        id: 'toggle_dev_tools',
+        pluginId: 'dev_tools',
+        name: 'Toggle Global Dev Console',
+        category: 'navigation',
+        keys: 'shift+`',
+        execute: () => {
+          const devToolsButton = document.querySelector('[data-test-subj="openDevToolsModal"]');
+          if (devToolsButton) {
+            (devToolsButton as HTMLElement).click();
+          }
+        },
+      });
+    }
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.chrome.navControls.registerLeftBottom({
         order: 4,

@@ -233,6 +233,9 @@ export class CoreSystem {
       });
       const workspaces = this.workspaces.start();
       const application = await this.application.start({ http, overlays, workspaces });
+      const keyboardShortcut = this.keyboardShortcut.start({
+        enabled: injectedMetadata.getKeyboardShortcuts().enabled,
+      });
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -242,9 +245,7 @@ export class CoreSystem {
         uiSettings,
         overlays,
         workspaces,
-      });
-      const keyboardShortcut = this.keyboardShortcut.start({
-        enabled: injectedMetadata.getKeyboardShortcuts().enabled,
+        keyboardShortcut,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
