@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
@@ -42,6 +43,10 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
   const [localCalculations, setLocalCalculations] = useState<
     Array<{ fields: string[]; calculation: 'total' | 'last' | 'average' | 'min' | 'max' }>
   >((styleOptions.footerCalculations || []).map(toNew));
+
+  useEffect(() => {
+    setLocalCalculations((styleOptions.footerCalculations || []).map(toNew));
+  }, [styleOptions.footerCalculations]);
 
   const updateStyleOption = useCallback(
     <K extends keyof TableChartStyleControls>(key: K, value: TableChartStyleControls[K]) => {
@@ -87,6 +92,15 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
         .filter((v): v is string => typeof v === 'string');
       const next = [...localCalculations];
       next[index] = { ...next[index], fields };
+      syncToParent(next);
+    },
+    [localCalculations, syncToParent]
+  );
+
+  const onRemoveCalculation = useCallback(
+    (index: number) => {
+      const next = [...localCalculations];
+      next.splice(index, 1);
       syncToParent(next);
     },
     [localCalculations, syncToParent]
@@ -157,7 +171,7 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
           {localCalculations.map((calc, index) => (
             <>
               <EuiFlexGroup key={index} alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={3}>
+                <EuiFlexItem grow={false}>
                   <EuiComboBox
                     compressed
                     options={getFieldOptionsForIndex(index)}
@@ -172,7 +186,7 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
                     isClearable={true}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={3}>
+                <EuiFlexItem grow={false}>
                   <EuiSelect
                     compressed
                     options={calculationOptions}
@@ -186,11 +200,21 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
                     data-test-subj={`visTableFooterCalculation-${index}`}
                   />
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    aria-label="Delete Calculation"
+                    onClick={() => onRemoveCalculation(index)}
+                    data-test-subj={`visTableFooterDelete-${index}`}
+                  />
+                </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiSpacer size="m" />
             </>
           ))}
           {canAddCalculation && (
-            <EuiFormRow>
+            <>
               <EuiButton
                 size="s"
                 onClick={onAddCalculation}
@@ -200,7 +224,8 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
                   defaultMessage: 'Add Calculation',
                 })}
               </EuiButton>
-            </EuiFormRow>
+              <EuiSpacer size="m" />
+            </>
           )}
         </>
       )}

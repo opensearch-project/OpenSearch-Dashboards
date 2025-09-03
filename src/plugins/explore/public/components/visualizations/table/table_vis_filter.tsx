@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
+  EuiFieldNumber,
   EuiFieldText,
   EuiIcon,
   EuiPanel,
@@ -44,7 +45,7 @@ export const TableColumnHeader = ({
   setFilters,
   uniques,
 }: TableColumnHeaderProps) => {
-  if (!showColumnFilter) {
+  if (!showColumnFilter || col.schema === 'date') {
     return (
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {col.name}
@@ -127,53 +128,47 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
 }) => {
   const [localOperator, setLocalOperator] = useState<string>(currentFilter.operator || 'contains');
   const [localSearch, setLocalSearch] = useState<string>(currentFilter.search || '');
+  const [localUniqueSearch, setLocalUniqueSearch] = useState<string>('');
   const [localSelected, setLocalSelected] = useState<Set<any>>(new Set(currentFilter.values));
 
-  const operatorOptions: EuiSelectOption[] = [
-    { value: 'contains', text: 'contains' },
-    { value: '=', text: '=' },
-    { value: '!=', text: '!=' },
-    { value: '>', text: '>' },
-    { value: '>=', text: '>=' },
-    { value: '<', text: '<' },
-    { value: '<=', text: '<=' },
-    { value: 'expression', text: 'expression' },
-  ];
+  const operatorOptions: EuiSelectOption[] = useMemo(() => {
+    if (col.schema === 'numerical') {
+      return [
+        { value: '=', text: '=' },
+        { value: '!=', text: '!=' },
+        { value: '>', text: '>' },
+        { value: '>=', text: '>=' },
+        { value: '<', text: '<' },
+        { value: '<=', text: '<=' },
+      ];
+    } else if (col.schema === 'categorical') {
+      return [{ value: 'contains', text: 'contains' }];
+    }
+    return [];
+  }, [col.schema]);
+
+  const showUniqueValues = useMemo(() => {
+    if (col.schema === 'categorical') {
+      return localOperator === 'contains';
+    } else if (col.schema === 'numerical') {
+      return localOperator === '=' || localOperator === '!=';
+    }
+    return false;
+  }, [col.schema, localOperator]);
+
+  const showInput = useMemo(() => {
+    if (col.schema === 'numerical') {
+      return ['>', '>=', '<', '<='].includes(localOperator);
+    }
+    return false;
+  }, [col.schema, localOperator]);
 
   const filteredUniques = useMemo(() => {
-    const search = localSearch.trim();
-    if (!search && localOperator !== 'expression') return uniques;
-    return uniques.filter((u) => {
-      const us = String(u).toLowerCase();
-      const ss = search.toLowerCase();
-      switch (localOperator) {
-        case 'contains':
-          return us.includes(ss);
-        case '=':
-          return u === search;
-        case '!=':
-          return u !== search;
-        case '>':
-          return Number.isFinite(Number(u)) && Number(u) > Number(search);
-        case '>=':
-          return Number.isFinite(Number(u)) && Number(u) >= Number(search);
-        case '<':
-          return Number.isFinite(Number(u)) && Number(u) < Number(search);
-        case '<=':
-          return Number.isFinite(Number(u)) && Number(u) <= Number(search);
-        case 'expression':
-          try {
-            const expr = search.replace(/\$/g, 'u');
-            const func = new Function('u', `return ${expr};`);
-            return func(u);
-          } catch {
-            return false;
-          }
-        default:
-          return false;
-      }
-    });
-  }, [uniques, localOperator, localSearch]);
+    if (!showUniqueValues) return uniques;
+    const search = localUniqueSearch.trim().toLowerCase();
+    if (!search) return uniques;
+    return uniques.filter((u) => String(u).toLowerCase().includes(search));
+  }, [uniques, showUniqueValues, localUniqueSearch]);
 
   const handleToggleValue = (value: any, checked: boolean) => {
     setLocalSelected((prev) => {
@@ -201,7 +196,8 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
     });
   };
 
-  const isSelectAllChecked = filteredUniques.every((u) => localSelected.has(u));
+  const isSelectAllChecked =
+    filteredUniques.length > 0 && filteredUniques.every((u) => localSelected.has(u));
 
   const handleApply = () => {
     onApply({
@@ -210,6 +206,12 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
       search: localSearch,
     });
   };
+
+  useEffect(() => {
+    if (col.schema === 'numerical' && (localOperator === '=' || localOperator === '!=')) {
+      setLocalSelected(new Set(currentFilter.values));
+    }
+  }, [col.schema, localOperator, currentFilter.values]);
 
   return (
     <div style={{ padding: '8px' }}>
@@ -223,37 +225,50 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
           value={localOperator}
           onChange={(e) => setLocalOperator(e.target.value)}
         />
-      </div>
-      <EuiFieldText
-        compressed
-        placeholder="Filter unique values"
-        value={localSearch}
-        onChange={(e) => setLocalSearch(e.target.value)}
-        fullWidth
-        style={{ marginBottom: '8px' }}
-      />
-      <EuiSpacer size="xs" />
-      <EuiPanel
-        paddingSize="s"
-        style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '8px' }}
-      >
-        {filteredUniques.map((u) => (
-          <EuiCheckbox
-            key={String(u)}
-            id={String(u)}
-            label={String(u)}
-            checked={localSelected.has(u)}
-            onChange={(e) => handleToggleValue(u, e.target.checked)}
+        {showInput && (
+          <EuiFieldNumber
+            compressed
+            placeholder="Enter value"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            style={{ marginLeft: '8px' }}
           />
-        ))}
-      </EuiPanel>
-      <EuiCheckbox
-        id="selectAll"
-        label="Select All"
-        checked={isSelectAllChecked}
-        onChange={(e) => handleSelectAll(e.target.checked)}
-        style={{ marginBottom: '8px' }}
-      />
+        )}
+      </div>
+      {showUniqueValues && (
+        <>
+          <EuiFieldText
+            compressed
+            placeholder="Filter unique values"
+            value={localUniqueSearch}
+            onChange={(e) => setLocalUniqueSearch(e.target.value)}
+            fullWidth
+            style={{ marginBottom: '8px' }}
+          />
+          <EuiSpacer size="xs" />
+          <EuiPanel
+            paddingSize="s"
+            style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '8px' }}
+          >
+            {filteredUniques.map((u) => (
+              <EuiCheckbox
+                key={String(u)}
+                id={String(u)}
+                label={String(u)}
+                checked={localSelected.has(u)}
+                onChange={(e) => handleToggleValue(u, e.target.checked)}
+              />
+            ))}
+          </EuiPanel>
+          <EuiCheckbox
+            id="selectAll"
+            label="Select All"
+            checked={isSelectAllChecked}
+            onChange={(e) => handleSelectAll(e.target.checked)}
+            style={{ marginBottom: '8px' }}
+          />
+        </>
+      )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <EuiButtonEmpty onClick={onClear} style={{ marginRight: '8px' }}>
           Clear filter

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import { VisColumn } from '../types';
 import { TableChartStyleControls } from './table_vis_config';
@@ -74,6 +74,12 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
       })),
     [setPagination]
   );
+
+  useEffect(() => {
+    if (!styleOptions?.showColumnFilter) {
+      setFilters({});
+    }
+  }, [styleOptions?.showColumnFilter]);
 
   const matchesFilter = (value: any, config: FilterConfig) => {
     const op = config.operator || 'contains';
