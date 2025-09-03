@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Override app-wrapper min-height to prevent scroll bar
+/* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+.app-wrapper {
+  min-height: 60vh !important;
+}
+
 .exploreTraceView {
   &__loadingContainer {
     display: flex;
@@ -12,7 +18,7 @@
   }
 
   &__resizableContainer {
-    height: calc(100vh - 150px);
+    height: calc(100vh - 170px);
   }
 
   &__mainPanel {
