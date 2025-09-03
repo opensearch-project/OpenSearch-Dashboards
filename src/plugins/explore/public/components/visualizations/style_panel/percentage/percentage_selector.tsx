@@ -39,7 +39,7 @@ export const PercentageSelector = (props: Props) => {
           label={i18n.translate('explore.vis.metric.showPercentage', {
             defaultMessage: 'Show percentage',
           })}
-          checked={props.showPercentage ?? false}
+          checked={props.showPercentage}
           onChange={(e) => props.onShowPercentageToggle(e.target.checked)}
         />
       </EuiFormRow>

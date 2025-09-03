@@ -162,12 +162,10 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               )}
               <PercentageSelector
                 percentageColor={
-                  styleOptions.percentageColor ??
-                  defaultMetricChartStyles.percentageColor ??
-                  'standard'
+                  styleOptions.percentageColor ?? defaultMetricChartStyles.percentageColor
                 }
                 showPercentage={
-                  styleOptions.showPercentage ?? defaultMetricChartStyles.showPercentage ?? false
+                  styleOptions.showPercentage ?? defaultMetricChartStyles.showPercentage
                 }
                 onPercentageColorChange={(color) => updateStyleOption('percentageColor', color)}
                 onShowPercentageToggle={(show) => updateStyleOption('showPercentage', show)}
