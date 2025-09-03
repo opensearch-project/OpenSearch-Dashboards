@@ -1,0 +1,26 @@
+.table-column-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .header-text {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.column-filter-content {
+  padding: 8px;
+
+  .unique-values-panel {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 8px;
+  }
+}
+
+.filter-popover {
+  width: 300px;
+}
