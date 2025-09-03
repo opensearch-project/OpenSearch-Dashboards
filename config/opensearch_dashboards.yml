@@ -401,3 +401,6 @@
 # workspace.enabled: false
 
 # explore.enabled: false
+
+# Enable Chat Plugin
+# chat.enabled: true

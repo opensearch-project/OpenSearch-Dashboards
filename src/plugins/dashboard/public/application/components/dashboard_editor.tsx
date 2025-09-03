@@ -39,6 +39,35 @@ export const DashboardEditor = () => {
     dashboard,
   });
 
+  // Notify the plugin when dashboard container is available
+  useEffect(() => {
+    if (currentContainer && (window as any).dashboardPlugin) {
+      console.log('🔗 Dashboard: Setting current container in plugin');
+      (window as any).dashboardPlugin.setCurrentDashboardContainer(currentContainer);
+      
+      // Wait for embeddables to load before triggering context refresh
+      const checkEmbeddables = () => {
+        const childCount = currentContainer.getChildIds().length;
+        console.log(`🔍 Dashboard: Checking embeddables, current count: ${childCount}`);
+        
+        if (childCount > 0) {
+          console.log('✅ Dashboard: Embeddables loaded, triggering context refresh');
+          if ((window as any).contextProvider) {
+            // Force a fresh context capture instead of returning cached context
+            console.log('🔄 Dashboard: Forcing fresh context capture...');
+            (window as any).contextProvider.refreshCurrentContext();
+          }
+        } else {
+          // Check again in 500ms
+          setTimeout(checkEmbeddables, 500);
+        }
+      };
+      
+      // Start checking after a short delay
+      setTimeout(checkEmbeddables, 100);
+    }
+  }, [currentContainer]);
+
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates({
     services,
     eventEmitter,
