@@ -6,12 +6,12 @@
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useEffectOnce } from 'react-use';
 import { BarChartStyleControls } from './bar_vis_config';
 import { AggregationType, TimeUnit, BucketOptions } from '../types';
 import { getAggregationType, getTimeUnits } from '../utils/collections';
 import { useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { defaultBarChartStyles } from './bar_vis_config';
 
 interface BucketOptionsPanelProps {
   styles: BarChartStyleControls['bucket'];
@@ -40,17 +40,6 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
   const labelType = useMemo(() => getAggregationType(), []);
   const timeUnits = useMemo(() => getTimeUnits(), []);
 
-  // initialize old save object with default bucket options
-  useEffectOnce(() => {
-    if (!styles) {
-      const defaultBucket: BucketOptions = {
-        aggregationType: AggregationType.SUM,
-        bucketTimeUnit: TimeUnit.AUTO,
-      };
-      onChange({ ...defaultBucket });
-    }
-  });
-
   return (
     <StyleAccordion
       id="bucketSection"
@@ -68,7 +57,7 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
         >
           <EuiSelect
             compressed
-            value={styles?.aggregationType}
+            value={styles?.aggregationType ?? defaultBarChartStyles.bucket?.aggregationType}
             onChange={(e) =>
               updateBucketOption('aggregationType', e.target.value as AggregationType)
             }
@@ -85,7 +74,7 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
         >
           <EuiSelect
             compressed
-            value={styles?.bucketTimeUnit}
+            value={styles?.bucketTimeUnit ?? defaultBarChartStyles.bucket?.bucketTimeUnit}
             onChange={(e) => updateBucketOption('bucketTimeUnit', e.target.value as TimeUnit)}
             options={timeUnits}
           />

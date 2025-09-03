@@ -12,7 +12,7 @@ import {
   TimeUnit,
   AggregationType,
 } from '../types';
-import { BarChartStyleControls } from './bar_vis_config';
+import { BarChartStyleControls, defaultBarChartStyles } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold/utils';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 
@@ -36,13 +36,15 @@ export const createBarSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
+  styleOptions: Partial<BarChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
     throw new Error('Bar chart requires at least one numerical column and one categorical column');
   }
+
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
@@ -131,13 +133,15 @@ export const createTimeBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
+  styleOptions: Partial<BarChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || dateColumns.length === 0) {
     throw new Error('Time bar chart requires at least one numerical column and one date column');
   }
+
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
@@ -225,7 +229,7 @@ export const createGroupedTimeBarChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
+  styleOptions: Partial<BarChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -238,6 +242,8 @@ export const createGroupedTimeBarChart = (
       'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
     );
   }
+
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
@@ -331,7 +337,7 @@ export const createFacetedTimeBarChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
+  styleOptions: Partial<BarChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -341,6 +347,7 @@ export const createFacetedTimeBarChart = (
     );
   }
 
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
@@ -451,7 +458,7 @@ export const createStackedBarSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
+  styleOptions: Partial<BarChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -460,6 +467,8 @@ export const createStackedBarSpec = (
       'Stacked bar chart requires at least one numerical column and two categorical columns'
     );
   }
+
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
@@ -545,7 +554,7 @@ export const createStackedBarSpec = (
 export const createNumericalHistogramBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
+  styleOptions: Partial<BarChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -553,6 +562,7 @@ export const createNumericalHistogramBarChart = (
     throw new Error('Histogram bar chart requires at least two numerical column');
   }
 
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];
@@ -631,13 +641,15 @@ export const createNumericalHistogramBarChart = (
 export const createSingleBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
+  styleOptions: Partial<BarChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length < 1) {
     throw new Error('Histogram bar chart requires at least one numerical column');
   }
+
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];
