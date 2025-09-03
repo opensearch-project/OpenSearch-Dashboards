@@ -7,8 +7,11 @@ import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  DEFAULT_NAV_GROUPS,
   Plugin,
   PluginInitializerContext,
+  WorkspaceAvailability,
 } from '../../../core/public';
 import {
   DataImporterPluginSetup,
@@ -16,7 +19,7 @@ import {
   DataImporterPluginStart,
   DataImporterPluginStartDependencies,
 } from './types';
-import { PLUGIN_ID, PLUGIN_NAME_AS_TITLE } from '../common';
+import { PLUGIN_ID, PLUGIN_DESCRIPTION, PLUGIN_NAME_AS_TITLE } from '../common';
 import { ConfigSchema } from '../config';
 
 export class DataImporterPlugin
@@ -34,6 +37,8 @@ export class DataImporterPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME_AS_TITLE,
+      description: PLUGIN_DESCRIPTION,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -49,6 +54,14 @@ export class DataImporterPlugin
         );
       },
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.dataAdministration, [
+      {
+        id: PLUGIN_ID,
+        category: DEFAULT_APP_CATEGORIES.manageData,
+        order: 450,
+      },
+    ]);
 
     return {};
   }
