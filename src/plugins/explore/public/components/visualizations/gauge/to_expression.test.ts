@@ -8,13 +8,13 @@ import { VisColumn, VisFieldType, AxisRole } from '../types';
 import { defaultGaugeChartStyles } from './gauge_vis_config';
 
 jest.mock('./gauge_chart_utils', () => ({
-  mergeCustomRangesWithBase: jest.fn(() => [{ value: 0, color: '#9EE9FA' }]),
-  locateRange: jest.fn(() => 0),
+  mergeThresholdsWithBase: jest.fn(() => [{ value: 0, color: '#9EE9FA' }]),
+  locateThreshold: jest.fn(() => ({ value: 0, color: '#9EE9FA' })),
   generateRanges: jest.fn(() => [{ min: 0, max: 100, color: '#9EE9FA' }]),
-  generateArcExpression: jest.fn(() => ({ type: 'arc' })),
+  generateArcExpression: jest.fn(() => ({ mark: { type: 'arc' } })),
 }));
 
-jest.mock('../utils/utils', () => ({
+jest.mock('../utils/calculation', () => ({
   calculateValue: jest.fn(() => 50),
 }));
 
@@ -44,11 +44,10 @@ describe('createGauge', () => {
       mockAxisColumnMappings
     );
 
-    expect(spec.$schema).toBe('https://vega.github.io/schema/vega/v5.json');
+    expect(spec.$schema).toBe('https://vega.github.io/schema/vega-lite/v5.json');
     expect(spec.autosize).toEqual({ type: 'fit', contains: 'padding' });
-    expect(spec.signals).toBeDefined();
-    expect(spec.scales).toBeDefined();
-    expect(spec.marks).toBeDefined();
+    expect(spec.params).toBeDefined();
+    expect(spec.layer).toBeDefined();
   });
 
   it('uses custom min and max values', () => {
@@ -67,8 +66,8 @@ describe('createGauge', () => {
       mockAxisColumnMappings
     );
 
-    expect(spec.signals.find((s) => s.name === 'minValue')?.value).toBe(10);
-    expect(spec.signals.find((s) => s.name === 'maxValue')?.value).toBe(200);
+    expect(spec.params.find((p) => p.name === 'minValue')?.value).toBe(10);
+    expect(spec.params.find((p) => p.name === 'maxValue')?.value).toBe(200);
   });
 
   it('includes title when showTitle is true', () => {
@@ -87,15 +86,17 @@ describe('createGauge', () => {
       mockAxisColumnMappings
     );
 
-    const titleMark = spec.marks.find((m: any) => m.name === 'gaugeTitle');
-    expect(titleMark).toBeDefined();
-    expect((titleMark?.encode.update as any).text.value).toBe('Custom Gauge Title');
+    const titleLayer = spec.layer.find(
+      (l: any) => l.encoding?.text?.value === 'Custom Gauge Title'
+    );
+    expect(titleLayer).toBeDefined();
   });
 
   it('excludes title when showTitle is false', () => {
     const customStyles = {
       ...defaultGaugeChartStyles,
       showTitle: false,
+      title: 'myTitle',
     };
 
     const spec = createGauge(
@@ -107,13 +108,18 @@ describe('createGauge', () => {
       mockAxisColumnMappings
     );
 
-    const titleMark = spec.marks.find((m: any) => m.name === 'gaugeTitle');
-    expect(titleMark).toBeUndefined();
+    const titleLayer = spec.layer.find(
+      (l: any) =>
+        l.encoding?.text &&
+        typeof l.encoding.text.value === 'string' &&
+        l.encoding.text.value === 'myTitle'
+    );
+    expect(titleLayer).toBeUndefined();
   });
 
   it('uses fallback values when no axis mappings provided', () => {
     const spec = createGauge(mockData, [mockNumericalColumn], [], [], defaultGaugeChartStyles);
 
-    expect(spec.signals.find((s) => s.name === 'mainValue')?.value).toBe(50);
+    expect(spec.params.find((p) => p.name === 'mainValue')?.value).toBe(50);
   });
 });

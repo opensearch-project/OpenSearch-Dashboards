@@ -6,15 +6,15 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThresholdCustomValues } from './threshold_custom_values';
-import { ThresholdRangeValue } from '../types';
+import { Threshold } from '../types';
 
 describe('ThresholdCustomValues component', () => {
-  const setup = (initialRanges: ThresholdRangeValue[] = []) => {
+  const setup = (initialRanges: Threshold[] = []) => {
     const handleChange = jest.fn();
     const handleBaseColorChange = jest.fn();
     render(
       <ThresholdCustomValues
-        thresholdValues={initialRanges}
+        thresholds={initialRanges}
         onThresholdValuesChange={handleChange}
         baseColor="#23A7C5"
         onBaseColorChange={handleBaseColorChange}

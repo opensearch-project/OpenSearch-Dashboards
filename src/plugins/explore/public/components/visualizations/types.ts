@@ -209,7 +209,7 @@ export interface RangeValue {
   min?: number;
   max?: number;
 }
-export interface ThresholdRangeValue {
+export interface Threshold {
   value: number;
   color: string;
 }

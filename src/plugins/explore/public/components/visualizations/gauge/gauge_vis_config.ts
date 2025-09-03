@@ -6,7 +6,8 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { GaugeVisStyleControls } from './gauge_vis_options';
-import { ThresholdRangeValue, AxisRole, VisFieldType } from '../types';
+import { Threshold, AxisRole, VisFieldType } from '../types';
+import { CalculationMethod } from '../utils/calculation';
 
 export interface GaugeChartStyleControls {
   showTitle: boolean;
@@ -14,14 +15,14 @@ export interface GaugeChartStyleControls {
   min?: number;
   max?: number;
   baseColor: string;
-  thresholdValues: ThresholdRangeValue[];
-  valueCalculation: string;
+  thresholds: Threshold[];
+  valueCalculation: CalculationMethod;
 }
 
 export const defaultGaugeChartStyles: GaugeChartStyleControls = {
   showTitle: true,
   title: '',
-  thresholdValues: [],
+  thresholds: [],
   baseColor: '#9EE9FA',
   valueCalculation: 'last',
 };

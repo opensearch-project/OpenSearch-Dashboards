@@ -30,7 +30,7 @@ describe('createGaugeConfig', () => {
     // Verify basic controls
     expect(defaults.showTitle).toBe(true);
     expect(defaults.title).toBe('');
-    expect(defaults.thresholdValues).toStrictEqual([]);
+    expect(defaults.thresholds).toStrictEqual([]);
     expect(defaults.baseColor).toBe('#9EE9FA');
     expect(defaults.valueCalculation).toBe('last');
   });
@@ -43,7 +43,7 @@ describe('createGaugeConfig', () => {
       styleOptions: {
         showTitle: true,
         title: '',
-        thresholdValues: [],
+        thresholds: [],
         baseColor: '#9EE9FA',
         valueCalculation: 'last',
       },

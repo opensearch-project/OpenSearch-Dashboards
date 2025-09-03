@@ -31,7 +31,7 @@ export const DebouncedTruncateField: React.FC<{
 };
 
 export const DebouncedTruncateGaugeBaseField: React.FC<{
-  value?: number | undefined;
+  value: number | undefined;
   onChange: (value: number | undefined) => void;
   label: string;
   testId: string;

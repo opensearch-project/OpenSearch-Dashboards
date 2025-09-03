@@ -3,22 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GaugeChartStyleControls } from './gauge_vis_config';
-import { VisColumn, AxisRole, AxisColumnMappings } from '../types';
+import { GaugeChartStyleControls, defaultGaugeChartStyles } from './gauge_vis_config';
+import { VisColumn, AxisRole, AxisColumnMappings, VEGASCHEMA } from '../types';
 import {
-  locateRange,
+  locateThreshold,
   generateRanges,
   generateArcExpression,
-  mergeCustomRangesWithBase,
+  mergeThresholdsWithBase,
 } from './gauge_chart_utils';
-import { calculateValue } from '../utils/utils';
+import { calculateValue } from '../utils/calculation';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<GaugeChartStyleControls>,
+  styles: Partial<GaugeChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   // Only contains one and the only one value
@@ -36,6 +36,8 @@ export const createGauge = (
     maxNumber = Math.max(...numericalValues);
   }
 
+  const styleOptions = { ...defaultGaugeChartStyles, ...styles };
+
   const calculatedValue = calculateValue(numericalValues, styleOptions.valueCalculation);
 
   const targetValue = calculatedValue || 0;
@@ -43,66 +45,54 @@ export const createGauge = (
   const minBase = styleOptions?.min || 0;
   const maxBase = styleOptions?.max || maxNumber;
 
-  const mergedRanges = mergeCustomRangesWithBase(
+  const mergedThresholds = mergeThresholdsWithBase(
     minBase,
     maxBase,
+    // TODO: update to use the color from color palette
     styleOptions.baseColor || '#9EE9FA',
-    styleOptions.thresholdValues
+    styleOptions.thresholds
   );
 
   // Locate which range the target value falls into
-  const locateIndex = locateRange(mergedRanges, targetValue);
+  const targetThreshold = locateThreshold(mergedThresholds, targetValue);
 
-  // if locateIndex is -1 or minBase > targetValue which infers that the threshold value or min base is valid, use default gray color
+  // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color
   const fillColor =
-    locateIndex < 0 || minBase > targetValue ? '#cbd1d6' : mergedRanges[locateIndex].color;
+    !targetThreshold || minBase > targetValue || minBase >= maxBase
+      ? '#cbd1d6'
+      : targetThreshold.color;
 
-  const ranges = generateRanges(mergedRanges, maxBase);
+  const ranges = generateRanges(mergedThresholds, maxBase);
 
-  const signals = [
-    { name: 'centerX', update: 'width/2' },
-    { name: 'centerY', update: 'height/2 + outerRadius/4' },
-    { name: 'radiusRef', update: 'min(width/2, height/2)' },
-    { name: 'outerRadius', update: 'radiusRef * 0.9' },
-    { name: 'innerRadius', update: 'outerRadius - outerRadius * 0.25' },
+  const params = [
+    { name: 'centerX', expr: 'width/2' },
+    { name: 'centerY', expr: 'height/2 + outerRadius/4' },
+    { name: 'radiusRef', expr: 'min(width/2, height/2)' },
+    { name: 'outerRadius', expr: 'radiusRef * 0.9' },
+    { name: 'innerRadius', expr: 'outerRadius - outerRadius * 0.25' },
 
     { name: 'backgroundColor', value: '#cbd1d6' },
     {
       name: 'fillColor',
       value: fillColor,
     },
-
-    { name: 'mainValue', value: targetValue },
-    {
-      name: 'usedValue',
-      update: 'min(max(minValue, mainValue), maxValue)',
-    },
-    { name: 'minValue', value: minBase },
-    { name: 'maxValue', value: maxBase },
     {
       name: 'gapColor',
       value: '#ffffffff',
     },
-    {
-      name: 'ticksColor',
-      value: '#000000',
-    },
-    {
-      name: 'showTicks',
-      value: true,
-    },
-    { name: 'fontFactor', update: '(radiusRef/5)/25' },
     { name: 'fontColor', value: '#666161ff' },
-  ];
 
-  const scales = [
+    { name: 'mainValue', value: targetValue },
     {
-      name: 'gaugeScale',
-      type: 'linear',
-      domain: { signal: '[minValue, maxValue]' },
-      zero: false,
-      range: { signal: '[-PI*0.6, PI*0.6]' },
+      name: 'usedValue',
+      expr: 'min(max(minValue, mainValue), maxValue)',
     },
+    { name: 'minValue', value: minBase },
+    { name: 'maxValue', value: maxBase },
+
+    { name: 'fontFactor', expr: '(radiusRef/5)/25' },
+    { name: 'theta_single_arc', value: -2 },
+    { name: 'theta2_single_arc', value: 2 },
   ];
 
   const rangeArcs = ranges.map((range) => generateArcExpression(range.min, range.max, range.color));
@@ -110,99 +100,83 @@ export const createGauge = (
   const titleLayer = styleOptions.showTitle
     ? [
         {
-          type: 'text',
-          description: 'displayed title',
-          name: 'gaugeTitle',
-          encode: {
-            enter: {
-              x: { signal: 'centerX' },
-              baseline: { value: 'top' },
-              align: { value: 'center' },
-            },
-            update: {
-              text: { value: styleOptions.title || numericName || 'Gauge' },
-              y: { signal: 'centerY', offset: { signal: 'fontFactor*10' } },
-              fontSize: { signal: 'fontFactor * 10' },
-              fill: { signal: 'fontColor' },
-            },
+          mark: {
+            type: 'text',
+            align: 'center',
+            y: { expr: 'centerY' },
+            dy: { expr: 'fontFactor*10' },
+            x: { expr: 'centerX' },
+            fontSize: { expr: 'fontFactor * 10' },
+            fill: { expr: 'fontColor' },
           },
+          encoding: { text: { value: styleOptions.title || numericName || 'Gauge' } },
         },
       ]
     : [];
-  const marks = [
+  const layer = [
     {
-      type: 'arc',
-      name: 'gauge',
-      encode: {
-        enter: {
-          x: { signal: 'centerX' },
-          y: { signal: 'centerY' },
-          startAngle: { signal: '-PI*0.6' },
-          endAngle: { signal: 'PI*0.6' },
-          outerRadius: { signal: 'outerRadius' },
-          innerRadius: { signal: 'innerRadius' },
-          fill: { signal: 'backgroundColor' },
-        },
+      mark: {
+        type: 'arc',
+        y: { expr: 'centerY' },
+        x: { expr: 'centerX' },
+        radius: { expr: 'outerRadius' },
+        radius2: { expr: 'innerRadius' },
+        theta: { expr: 'theta_single_arc' },
+        theta2: { expr: 'theta2_single_arc' },
+        fill: { expr: 'backgroundColor' },
       },
     },
     {
-      type: 'arc',
-      description: 'gap',
-      encode: {
-        enter: {
-          x: { signal: 'centerX' },
-          y: { signal: 'centerY' },
-          startAngle: { signal: '-PI*0.6' },
-          endAngle: { signal: 'PI*0.6' },
-          outerRadius: { signal: 'innerRadius' },
-          innerRadius: { signal: 'innerRadius*0.98' },
-          fill: { signal: 'gapColor' },
-        },
+      mark: {
+        type: 'arc',
+        y: { expr: 'centerY' },
+        x: { expr: 'centerX' },
+        radius: { expr: 'innerRadius' },
+        radius2: { expr: 'innerRadius*0.98' },
+        theta: { expr: 'theta_single_arc' },
+        theta2: { expr: 'theta2_single_arc' },
+        fill: { expr: 'gapColor' },
       },
     },
     {
-      type: 'arc',
-      name: 'value',
-      encode: {
-        enter: { startAngle: { signal: '-PI*0.6' } },
-        update: {
-          x: { signal: 'centerX' },
-          y: { signal: 'centerY' },
-          innerRadius: { signal: 'innerRadius' },
-          outerRadius: { signal: 'outerRadius' },
-          endAngle: { scale: 'gaugeScale', signal: 'usedValue' },
-          fill: { signal: 'fillColor' },
+      mark: {
+        type: 'arc',
+        y: { expr: 'centerY' },
+        x: { expr: 'centerX' },
+        radius: { expr: 'outerRadius' },
+        radius2: { expr: 'innerRadius' },
+        theta: { expr: 'theta_single_arc' },
+        // No need to worry if maxValue === minValue(invalid case); Vega-Lite will handle it as 0.5, and we have already set the color to the default grey.
+        theta2: {
+          expr:
+            'theta_single_arc + (theta2_single_arc - theta_single_arc) * ((usedValue - minValue)/(maxValue - minValue))',
         },
+        fill: { expr: 'fillColor' },
       },
     },
     ...rangeArcs,
     {
-      type: 'text',
-      description: 'displayed main value at the bottom center of the gauge ',
-      name: 'gaugeValue',
-      encode: {
-        enter: {
-          x: { signal: 'centerX' },
-          baseline: { value: 'top' },
-          align: { value: 'center' },
-        },
-        update: {
-          text: { signal: "format(mainValue, '.1f')" },
-          y: { signal: 'centerY', offset: { signal: '-fontFactor*30' } },
-          fontSize: { signal: 'fontFactor * 30' },
-          fill: { signal: 'fillColor' },
-        },
+      mark: {
+        type: 'text',
+        baseline: 'top',
+        align: 'center',
+        y: { expr: 'centerY' },
+        x: { expr: 'centerX' },
+        dy: { expr: '-fontFactor*30' },
+        fontSize: { expr: 'fontFactor * 30' },
+        fill: { expr: 'fillColor' },
       },
+      encoding: { text: { value: { expr: "format(mainValue, '.1f')" } } },
     },
     ...titleLayer,
   ];
 
   const baseSpec = {
-    $schema: 'https://vega.github.io/schema/vega/v5.json',
+    $schema: VEGASCHEMA,
+    params,
+    data: { values: [{}] },
     autosize: { type: 'fit', contains: 'padding' },
-    signals,
-    scales,
-    marks,
+    layer,
   };
 
   return baseSpec;

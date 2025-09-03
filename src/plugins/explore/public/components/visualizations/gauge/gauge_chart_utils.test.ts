@@ -4,16 +4,16 @@
  */
 
 import {
-  mergeCustomRangesWithBase,
-  locateRange,
+  mergeThresholdsWithBase,
+  locateThreshold,
   generateRanges,
   generateArcExpression,
 } from './gauge_chart_utils';
 
 describe('gauge_chart_utils', () => {
-  describe('mergeCustomRangesWithBase', () => {
+  describe('mergeThresholdsWithBase', () => {
     it('returns base range when no thresholds exist', () => {
-      const result = mergeCustomRangesWithBase(0, 10, '#blue', []);
+      const result = mergeThresholdsWithBase(0, 10, '#blue', []);
       expect(result).toEqual([{ value: 0, color: '#blue' }]);
     });
 
@@ -22,7 +22,7 @@ describe('gauge_chart_utils', () => {
         { value: 10, color: '#red' },
         { value: 20, color: '#green' },
       ];
-      const result = mergeCustomRangesWithBase(30, 40, '#blue', thresholds);
+      const result = mergeThresholdsWithBase(30, 40, '#blue', thresholds);
       expect(result).toEqual([{ value: 30, color: '#blue' }]);
     });
 
@@ -31,7 +31,7 @@ describe('gauge_chart_utils', () => {
         { value: 0, color: '#red' },
         { value: 20, color: '#green' },
       ];
-      const result = mergeCustomRangesWithBase(0, 30, '#blue', thresholds);
+      const result = mergeThresholdsWithBase(0, 30, '#blue', thresholds);
       expect(result).toEqual(thresholds);
     });
 
@@ -40,7 +40,7 @@ describe('gauge_chart_utils', () => {
         { value: 5, color: '#red' },
         { value: 15, color: '#green' },
       ];
-      const result = mergeCustomRangesWithBase(10, 20, '#blue', thresholds);
+      const result = mergeThresholdsWithBase(10, 20, '#blue', thresholds);
       expect(result).toEqual([
         { value: 10, color: '#blue' },
         { value: 15, color: '#green' },
@@ -52,12 +52,12 @@ describe('gauge_chart_utils', () => {
         { value: 5, color: '#red' },
         { value: 15, color: '#green' },
       ];
-      const result = mergeCustomRangesWithBase(10, 12, '#blue', thresholds);
+      const result = mergeThresholdsWithBase(10, 12, '#blue', thresholds);
       expect(result).toEqual([{ value: 10, color: '#blue' }]);
     });
   });
 
-  describe('locateRange', () => {
+  describe('locateThreshold', () => {
     const ranges = [
       { value: 5, color: '#blue' },
       { value: 10, color: '#red' },
@@ -65,16 +65,16 @@ describe('gauge_chart_utils', () => {
     ];
 
     it('returns -1 when target is below minimum range', () => {
-      expect(locateRange(ranges, 1)).toBe(-1);
+      expect(locateThreshold(ranges, 1)).toBe(null);
     });
 
     it('returns correct index for target within range', () => {
-      expect(locateRange(ranges, 5)).toBe(0);
-      expect(locateRange(ranges, 15)).toBe(1);
+      expect(locateThreshold(ranges, 5)).toStrictEqual({ value: 5, color: '#blue' });
+      expect(locateThreshold(ranges, 15)).toStrictEqual({ value: 10, color: '#red' });
     });
 
     it('returns last index for target above all ranges', () => {
-      expect(locateRange(ranges, 25)).toBe(2);
+      expect(locateThreshold(ranges, 25)).toStrictEqual({ value: 20, color: '#green' });
     });
   });
 
@@ -93,18 +93,27 @@ describe('gauge_chart_utils', () => {
         { min: 20, max: 30, color: '#green' },
       ]);
     });
+    it('stops at maxValue when threshold exceeds it', () => {
+      const result = generateRanges(mergedRanges, 20);
+      expect(result).toEqual([
+        { min: 5, max: 10, color: '#blue' },
+        { min: 10, max: 20, color: '#red' },
+        { min: 20, max: 20, color: '#green' },
+      ]);
+    });
+
+    it('returns empty array when first threshold exceeds maxValue', () => {
+      const result = generateRanges(mergedRanges, 1);
+      expect(result).toEqual([]);
+    });
   });
 
   describe('generateArcExpression', () => {
     it('generates correct arc expression', () => {
       const result = generateArcExpression(0, 90, '#red');
 
-      expect(result.type).toBe('arc');
-      expect(result.encode.enter.startAngle.signal).toBe('0');
-      expect(result.encode.update.endAngle.signal).toBe('90');
-      expect(result.encode.update.fill.value).toBe('#red');
-      expect(result.encode.update.x.signal).toBe('centerX');
-      expect(result.encode.update.y.signal).toBe('centerY');
+      expect(result.mark.type).toBe('arc');
+      expect(result.mark.fill).toBe('#red');
     });
   });
 });

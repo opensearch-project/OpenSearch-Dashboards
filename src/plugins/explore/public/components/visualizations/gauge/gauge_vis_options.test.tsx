@@ -15,13 +15,11 @@ jest.mock('@osd/i18n', () => ({
 }));
 
 jest.mock('../style_panel/threshold_custom_values', () => ({
-  ThresholdCustomValues: jest.fn(({ thresholdValues, onThresholdValuesChange }) => (
+  ThresholdCustomValues: jest.fn(({ thresholds, onThresholdValuesChange }) => (
     <div data-test-subj="mockGaugeThreshold">
       <button
         data-test-subj="mockAddRange"
-        onClick={() =>
-          onThresholdValuesChange([...thresholdValues, { value: 50, color: '#FF0000' }])
-        }
+        onClick={() => onThresholdValuesChange([...thresholds, { value: 50, color: '#FF0000' }])}
       >
         Add Range
       </button>
@@ -152,7 +150,7 @@ describe('GaugeVisStyleControls', () => {
     fireEvent.click(addRangeButton);
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      thresholdValues: [{ value: 50, color: '#FF0000' }],
+      thresholds: [{ value: 50, color: '#FF0000' }],
     });
   });
 });

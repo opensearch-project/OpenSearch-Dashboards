@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { GaugeChartStyleControls } from './gauge_vis_config';
-import { ThresholdRangeValue, AxisRole } from '../types';
+import { Threshold, AxisRole } from '../types';
 import { ThresholdCustomValues } from '../style_panel/threshold_custom_values';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -117,9 +117,9 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
                 />
 
                 <ThresholdCustomValues
-                  thresholdValues={styleOptions.thresholdValues}
-                  onThresholdValuesChange={(ranges: ThresholdRangeValue[]) => {
-                    updateStyleOption('thresholdValues', ranges);
+                  thresholds={styleOptions.thresholds}
+                  onThresholdValuesChange={(ranges: Threshold[]) => {
+                    updateStyleOption('thresholds', ranges);
                   }}
                   baseColor={styleOptions.baseColor}
                   onBaseColorChange={(color: string) => updateStyleOption('baseColor', color)}

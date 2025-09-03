@@ -13,13 +13,13 @@ import {
   EuiSpacer,
   EuiColorPicker,
 } from '@elastic/eui';
-import { ThresholdRangeValue } from '../types';
+import { Threshold } from '../types';
 import { useDebouncedValue, useDebouncedNumericValue } from '../utils/use_debounced_value';
 
 export interface RangeProps {
   index: number;
-  value: ThresholdRangeValue;
-  onChange: (index: number, value: ThresholdRangeValue) => void;
+  value: Threshold;
+  onChange: (index: number, value: Threshold) => void;
   onDelete: (index: number) => void;
 }
 
@@ -75,21 +75,21 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }
 };
 
 export interface ThresholdCustomValuesProps {
-  thresholdValues: ThresholdRangeValue[];
-  onThresholdValuesChange: (ranges: ThresholdRangeValue[]) => void;
+  thresholds: Threshold[];
+  onThresholdValuesChange: (ranges: Threshold[]) => void;
   baseColor: string;
   onBaseColorChange: (color: string) => void;
 }
 
 export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
-  thresholdValues,
+  thresholds,
   onThresholdValuesChange,
   baseColor,
   onBaseColorChange,
 }) => {
-  const [ranges, setRanges] = useState<ThresholdRangeValue[]>(thresholdValues || []);
+  const [ranges, setRanges] = useState<Threshold[]>(thresholds || []);
 
-  const handleRangeChange = (index: number, value: ThresholdRangeValue) => {
+  const handleRangeChange = (index: number, value: Threshold) => {
     const updated = [...ranges];
     updated[index] = value;
     const sorted = updated.sort((a, b) => a.value - b.value);

@@ -94,5 +94,5 @@ export function useDebouncedNumericValue(
     setDebouncedValue(numValue);
   };
 
-  return [localValue.toString(), handleNumericChange];
+  return [localValue, handleNumericChange];
 }

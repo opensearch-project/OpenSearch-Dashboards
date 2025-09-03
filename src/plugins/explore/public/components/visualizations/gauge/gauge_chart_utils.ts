@@ -3,25 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ThresholdRangeValue } from '../types';
+import { Threshold } from '../types';
 
 /**
  * Merge custom ranges with min base.
  * @param minBase Minimum value for the gauge scale
  * @param baseColor Default color for the base range
- * @param thresholdValues  threshold values with colors
+ * @param thresholds  threshold values with colors
  * @returns Array of merged threshold ranges
  */
 
-export function mergeCustomRangesWithBase(
+export function mergeThresholdsWithBase(
   minBase: number,
   maxBase: number,
   baseColor: string,
-  thresholdValues?: ThresholdRangeValue[]
+  thresholds?: Threshold[]
 ) {
-  // only display threhold ranges under the max base and above min base
+  // only display threshold ranges under the max base and above min base
   const validThresholds =
-    thresholdValues?.filter((range) => range.value >= minBase && range.value <= maxBase) || [];
+    thresholds?.filter((range) => range.value >= minBase && range.value <= maxBase) || [];
 
   // Return existing thresholds if minBase already exists as a threshold
   if (validThresholds.some((range) => range.value === minBase)) {
@@ -34,71 +34,56 @@ export function mergeCustomRangesWithBase(
 
 /**
  * Locate which range the target value falls into
- * @param mergedRanges Array of numeric values that combines thresholds and minBase
+ * @param thresholds Array of numeric values that combines thresholds and minBase
  * @param targetValue The value that will be displayed in gauge
- * @returns Index
+ * @returns threshold
  */
-export function locateRange(mergedRanges: ThresholdRangeValue[], targetValue: number) {
-  // Return -1 if target value is below the minimum range
-  if (targetValue < mergedRanges[0].value) return -1;
+export function locateThreshold(thresholds: Threshold[], targetValue: number): Threshold | null {
+  // Return null if target value is below the minimum range
+  if (targetValue < thresholds[0].value) return null;
 
   // Iterate through ranges to find where target value belongs
-  for (let i = 0; i < mergedRanges.length - 1; i++) {
-    const currentValue = mergedRanges[i].value || 0;
-    const nextValue = mergedRanges[i + 1].value;
+  for (let i = 0; i < thresholds.length - 1; i++) {
+    const currentValue = thresholds[i].value || 0;
+    const nextValue = thresholds[i + 1].value;
     if (targetValue >= currentValue && targetValue < nextValue) {
-      return i;
+      return thresholds[i];
     }
   }
   // Fallback: return the last range index if no match found
-  return mergedRanges.length - 1;
+  return thresholds[thresholds.length - 1];
 }
 
-export function generateRanges(mergedRanges: ThresholdRangeValue[], maxValue: number) {
+export function generateRanges(thresholds: Threshold[], maxValue: number) {
   const ranges = [];
 
-  for (let i = 0; i < mergedRanges.length; i++) {
-    const currentValue = mergedRanges[i].value;
+  for (let i = 0; i < thresholds.length; i++) {
+    const currentValue = thresholds[i].value;
 
-    const nextValue = i < mergedRanges.length - 1 ? mergedRanges[i + 1].value : maxValue;
+    if (currentValue > maxValue) return ranges;
+    const nextValue = i < thresholds.length - 1 ? thresholds[i + 1].value : maxValue;
 
-    ranges.push({ min: currentValue, max: nextValue, color: mergedRanges[i].color });
+    ranges.push({ min: currentValue, max: nextValue, color: thresholds[i].color });
   }
 
   return ranges;
 }
 
-export function generateArcExpression(startAngle: number, endAngle: number, fillColor: string) {
+export function generateArcExpression(startValue: number, endValue: number, fillColor: string) {
   return {
-    type: 'arc',
-    encode: {
-      enter: {
-        startAngle: {
-          scale: 'gaugeScale',
-          signal: `${startAngle}`,
-        },
+    mark: {
+      type: 'arc',
+      y: { expr: 'centerY' },
+      x: { expr: 'centerX' },
+      radius: { expr: 'innerRadius * 0.98' },
+      radius2: { expr: 'innerRadius * 0.95' },
+      theta: {
+        expr: `theta_single_arc + (theta2_single_arc - theta_single_arc) * (( ${startValue} - minValue) / (maxValue - minValue))`,
       },
-      update: {
-        x: {
-          signal: 'centerX',
-        },
-        y: {
-          signal: 'centerY',
-        },
-        innerRadius: {
-          signal: 'innerRadius*0.95',
-        },
-        outerRadius: {
-          signal: 'innerRadius*0.98',
-        },
-        endAngle: {
-          scale: 'gaugeScale',
-          signal: `${endAngle}`,
-        },
-        fill: {
-          value: fillColor,
-        },
+      theta2: {
+        expr: `theta_single_arc + (theta2_single_arc - theta_single_arc) * (( ${endValue} - minValue) / (maxValue - minValue))`,
       },
+      fill: fillColor,
     },
   };
 }
