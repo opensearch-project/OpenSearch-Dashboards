@@ -55,7 +55,8 @@ export const TableColumnHeader = ({
     );
   }
 
-  const currentFilter = filters[col.column] || { values: [], operator: 'contains' };
+  const defaultOperator = col.schema === 'numerical' ? '=' : 'contains';
+  const currentFilter = filters[col.column] || { values: [], operator: defaultOperator };
   const isFilterActive = currentFilter.values.length > 0 || !!currentFilter.search;
 
   return (
@@ -127,7 +128,13 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   onCancel,
   uniques,
 }) => {
-  const [localOperator, setLocalOperator] = useState<string>(currentFilter.operator || 'contains');
+  const numericOps = ['=', '!=', '>', '>=', '<', '<='] as const;
+  const [localOperator, setLocalOperator] = useState<string>(() => {
+    if (col.schema === 'numerical') {
+      return numericOps.includes(currentFilter.operator as any) ? currentFilter.operator : '=';
+    }
+    return 'contains';
+  });
   const [localSearch, setLocalSearch] = useState<string>(currentFilter.search || '');
   const [localUniqueSearch, setLocalUniqueSearch] = useState<string>('');
   const [localSelected, setLocalSelected] = useState<Set<any>>(new Set(currentFilter.values));
