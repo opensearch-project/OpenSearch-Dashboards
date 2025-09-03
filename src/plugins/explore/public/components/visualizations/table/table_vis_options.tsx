@@ -5,7 +5,14 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiSwitch,
+} from '@elastic/eui';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { TableChartStyleControls } from './table_vis_config';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
@@ -65,62 +72,68 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
 
   return (
     <>
-      <StyleAccordion
-        id="tableSection"
-        accordionLabel={i18n.translate('explore.stylePanel.table.tableSection', {
-          defaultMessage: 'Table',
-        })}
-        initialIsOpen={true}
-        data-test-subj="visTable"
-      >
-        <EuiFormRow
-          label={i18n.translate('explore.stylePanel.table.pageSize', {
-            defaultMessage: 'Max rows per page',
-          })}
-        >
-          <EuiFieldNumber
-            compressed
-            value={localPageSize}
-            onChange={(e) => handlePageSizeChange(e.target.value)}
-            data-test-subj="visTablePageSizeInput"
-            min={1}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('explore.stylePanel.table.globalAlignment', {
-            defaultMessage: 'Cell alignment',
-          })}
-        >
-          <EuiSelect
-            compressed
-            options={alignmentOptions}
-            value={styleOptions.globalAlignment || 'auto'}
-            onChange={onGlobalAlignmentChange}
-            onMouseUp={(e) => e.stopPropagation()}
-            data-test-subj="visTableGlobalAlignment"
-          />
-        </EuiFormRow>
-        <EuiFormRow>
-          <EuiSwitch
-            compressed
-            label={i18n.translate('explore.stylePanel.table.columnFilter', {
-              defaultMessage: 'Column filters',
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem>
+          <StyleAccordion
+            id="tableSection"
+            accordionLabel={i18n.translate('explore.stylePanel.table.tableSection', {
+              defaultMessage: 'Table',
             })}
-            checked={styleOptions.showColumnFilter || false}
-            onChange={(e) => onShowColumnFilterChange(e.target.checked)}
-            data-test-subj="visTableColumnFilter"
+            initialIsOpen={true}
+            data-test-subj="visTable"
+          >
+            <EuiFormRow
+              label={i18n.translate('explore.stylePanel.table.pageSize', {
+                defaultMessage: 'Max rows per page',
+              })}
+            >
+              <EuiFieldNumber
+                compressed
+                value={localPageSize}
+                onChange={(e) => handlePageSizeChange(e.target.value)}
+                data-test-subj="visTablePageSizeInput"
+                min={1}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('explore.stylePanel.table.globalAlignment', {
+                defaultMessage: 'Cell alignment',
+              })}
+            >
+              <EuiSelect
+                compressed
+                options={alignmentOptions}
+                value={styleOptions.globalAlignment || 'auto'}
+                onChange={onGlobalAlignmentChange}
+                onMouseUp={(e) => e.stopPropagation()}
+                data-test-subj="visTableGlobalAlignment"
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                compressed
+                label={i18n.translate('explore.stylePanel.table.columnFilter', {
+                  defaultMessage: 'Column filters',
+                })}
+                checked={styleOptions.showColumnFilter || false}
+                onChange={(e) => onShowColumnFilterChange(e.target.checked)}
+                data-test-subj="visTableColumnFilter"
+              />
+            </EuiFormRow>
+          </StyleAccordion>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <TableFooterStyleControls
+            styleOptions={styleOptions}
+            onStyleChange={onStyleChange}
+            numericalColumns={numericalColumns}
+            categoricalColumns={categoricalColumns}
+            dateColumns={dateColumns}
+            axisColumnMappings={axisColumnMappings}
+            updateVisualization={updateVisualization}
           />
-        </EuiFormRow>
-      </StyleAccordion>
-      <TableFooterStyleControls
-        styleOptions={styleOptions}
-        onStyleChange={onStyleChange}
-        numericalColumns={numericalColumns}
-        categoricalColumns={categoricalColumns}
-        dateColumns={dateColumns}
-        axisColumnMappings={axisColumnMappings}
-        updateVisualization={updateVisualization}
-      />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
