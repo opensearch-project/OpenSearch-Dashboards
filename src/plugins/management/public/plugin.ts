@@ -340,10 +340,14 @@ export class ManagementPlugin
         ),
       });
 
-      core.chrome.navControls.registerLeftBottom({
-        order: 5,
-        mount: toMountPoint(React.createElement(KeyboardShortcutIcon, { core })),
-      });
+      // Only register keyboard shortcut icon if there are shortcuts available
+      const hasShortcuts = core.keyboardShortcut?.getAllShortcuts()?.length > 0;
+      if (hasShortcuts) {
+        core.chrome.navControls.registerLeftBottom({
+          order: 5,
+          mount: toMountPoint(React.createElement(KeyboardShortcutIcon, { core })),
+        });
+      }
     }
 
     return {};

@@ -6,7 +6,7 @@
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { KeyboardShortcutHelp, CoreStart } from '../../../../core/public';
+import { KeyboardShortcutHelpModal, CoreStart } from '../../../../core/public';
 
 interface KeyboardShortcutIconProps {
   core?: CoreStart;
@@ -39,7 +39,7 @@ export function KeyboardShortcutIcon({ core }: KeyboardShortcutIconProps) {
   });
 
   return (
-    <KeyboardShortcutHelp
+    <KeyboardShortcutHelpModal
       trigger={<IconWithTooltip />}
       keyboardShortcutService={core?.keyboardShortcut}
     />

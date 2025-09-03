@@ -21,6 +21,7 @@ import { ShortcutDefinition } from './types';
 import { KeyboardShortcutService } from './keyboard_shortcut_service';
 import { KeyStringParser } from './key_parser';
 import { DISPLAY_MAPPINGS } from './constants';
+import { KEYBOARD_KEY_STYLE } from './styles';
 import { useKeyboardShortcut } from './use_keyboard_shortcut';
 
 interface ShortcutItem {
@@ -28,23 +29,6 @@ interface ShortcutItem {
   keys: string;
   category: string;
 }
-
-const KEYBOARD_KEY_STYLE = {
-  display: 'inline-block',
-  padding: '2px 6px',
-  fontSize: '11px',
-  lineHeight: '1.4',
-  color: '#24292f',
-  backgroundColor: '#f6f8fa',
-  border: '1px solid #d0d7de',
-  borderRadius: '6px',
-  boxShadow: 'inset 0 -1px 0 #d0d7de',
-  fontFamily:
-    'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
-  fontWeight: '400',
-  minWidth: '20px',
-  textAlign: 'center' as const,
-};
 
 const LAYOUT_STYLES = {
   twoColumnRow: { display: 'flex', gap: '24px', marginBottom: '16px' },
@@ -68,14 +52,14 @@ const groupShortcutsByCategory = (shortcuts: ShortcutItem[]): Record<string, Sho
   }, {} as Record<string, ShortcutItem[]>);
 };
 
-interface KeyboardShortcutHelpProps {
+interface KeyboardShortcutHelpModalProps {
   trigger?: React.ReactElement;
   keyboardShortcutService?:
     | KeyboardShortcutService
     | { getAllShortcuts: () => ShortcutDefinition[] };
 }
 
-export const KeyboardShortcutHelp: React.FC<KeyboardShortcutHelpProps> = ({
+export const KeyboardShortcutHelpModal: React.FC<KeyboardShortcutHelpModalProps> = ({
   trigger,
   keyboardShortcutService,
 }) => {
