@@ -217,7 +217,7 @@ describe('time_parser_utils', () => {
           'test-index': {
             mappings: {
               created_at: {
-                full_name: 'index.created_at',
+                full_name: 'created_at',
                 mapping: {
                   created_at: {
                     type: 'date',
@@ -225,7 +225,7 @@ describe('time_parser_utils', () => {
                 },
               },
               created_at_alias: {
-                full_name: 'index.created_at_alias',
+                full_name: 'created_at_alias',
                 mapping: {
                   created_at_alias: {
                     type: 'alias',
