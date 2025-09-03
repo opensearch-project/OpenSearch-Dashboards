@@ -10,15 +10,11 @@ import {
   VisColumn,
   VisFieldType,
   TimeUnit,
+  AggregationType,
 } from '../types';
 import { BarChartStyleControls } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold/utils';
-import {
-  applyAxisStyling,
-  getSwappedAxisRole,
-  getSchemaByAxis,
-  getTooltipFormat,
-} from '../utils/utils';
+import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 
 import {
   inferTimeIntervals,
@@ -74,27 +70,19 @@ export const createBarSpec = (
     encoding: {
       // Category axis (X or Y depending on orientation)
       [categoryAxis]: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        ...buildEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
       // Value axis (Y or X depending on orientation)
       [valueAxis]: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
-            field: xAxis?.column,
-            type: getSchemaByAxis(xAxis),
-            title: xAxisStyle?.title?.text || xAxis?.name,
+            ...buildTooltipEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
           },
           {
-            field: yAxis?.column,
-            type: getSchemaByAxis(yAxis),
-            title: yAxisStyle?.title?.text || yAxis?.name,
+            ...buildTooltipEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
           },
         ],
       }),
@@ -156,9 +144,9 @@ export const createTimeBarChart = (
   const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
 
   const interval =
-    styles.bucket?.bucketTimeUnit === TimeUnit.AUTO
+    styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
       ? inferTimeIntervals(transformedData, timeAxis?.column)
-      : styles.bucket?.bucketTimeUnit;
+      : styles?.bucket?.bucketTimeUnit;
 
   const layers: any[] = [];
 
@@ -179,18 +167,18 @@ export const createTimeBarChart = (
     mark: barMark,
     encoding: {
       x: {
-        ...buildEncoding(xAxis, xAxisStyle, interval, styles.bucket?.aggregationType),
+        ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
       },
       y: {
-        ...buildEncoding(yAxis, yAxisStyle, interval, styles.bucket?.aggregationType),
+        ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
-            ...buildTooltipEncoding(xAxis, xAxisStyle, interval, styles.bucket?.aggregationType),
+            ...buildTooltipEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
           },
           {
-            ...buildTooltipEncoding(yAxis, yAxisStyle, interval, styles.bucket?.aggregationType),
+            ...buildTooltipEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
           },
         ],
       }),
@@ -270,6 +258,12 @@ export const createGroupedTimeBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
+  const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
+  const interval =
+    styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeAxis?.column)
+      : styles?.bucket?.bucketTimeUnit;
+
   const spec: any = {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -279,14 +273,10 @@ export const createGroupedTimeBarChart = (
     mark: barMark,
     encoding: {
       x: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
       },
       y: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
       color: {
         field: categoryField,
@@ -301,22 +291,12 @@ export const createGroupedTimeBarChart = (
       // Optional: Add tooltip with all information
       tooltip: [
         {
-          field: xAxis?.column,
-          type: getSchemaByAxis(xAxis),
-          title: xAxisStyle?.title?.text || xAxis?.name,
-          ...(getSchemaByAxis(xAxis) === 'temporal' && {
-            format: getTooltipFormat(transformedData, xAxis?.column),
-          }),
+          ...buildTooltipEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
+        },
+        {
+          ...buildTooltipEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
         },
         { field: categoryField, type: getSchemaByAxis(colorColumn), title: categoryName },
-        {
-          field: yAxis?.column,
-          type: getSchemaByAxis(yAxis),
-          title: yAxisStyle?.title?.text || yAxis?.name,
-          ...(getSchemaByAxis(yAxis) === 'temporal' && {
-            format: getTooltipFormat(transformedData, yAxis?.column),
-          }),
-        },
       ],
     },
   };
@@ -374,6 +354,13 @@ export const createFacetedTimeBarChart = (
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
 
+  const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
+
+  const interval =
+    styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeAxis?.column)
+      : styles?.bucket?.bucketTimeUnit;
+
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
@@ -413,14 +400,10 @@ export const createFacetedTimeBarChart = (
           mark: barMark,
           encoding: {
             x: {
-              field: dateField,
-              type: getSchemaByAxis(xAxis),
-              axis: applyAxisStyling(xAxis, xAxisStyle),
+              ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
             },
             y: {
-              field: metricField,
-              type: getSchemaByAxis(yAxis),
-              axis: applyAxisStyling(yAxis, yAxisStyle),
+              ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
             },
             color: {
               field: category1Field,
@@ -435,20 +418,20 @@ export const createFacetedTimeBarChart = (
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [
                 {
-                  field: metricField,
-                  type: getSchemaByAxis(yAxis),
-                  title: metricName,
-                  ...(getSchemaByAxis(yAxis) === 'temporal' && {
-                    format: getTooltipFormat(transformedData, yAxis?.column),
-                  }),
+                  ...buildTooltipEncoding(
+                    xAxis,
+                    xAxisStyle,
+                    interval,
+                    styles?.bucket?.aggregationType
+                  ),
                 },
                 {
-                  field: dateField,
-                  type: getSchemaByAxis(xAxis),
-                  title: dateName,
-                  ...(getSchemaByAxis(xAxis) === 'temporal' && {
-                    format: getTooltipFormat(transformedData, xAxis?.column),
-                  }),
+                  ...buildTooltipEncoding(
+                    yAxis,
+                    yAxisStyle,
+                    interval,
+                    styles?.bucket?.aggregationType
+                  ),
                 },
                 { field: category1Field, type: 'nominal', title: category1Name },
               ],
@@ -511,16 +494,11 @@ export const createStackedBarSpec = (
     encoding: {
       // Category axis (X or Y depending on orientation)
       [categoryAxis]: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        ...buildEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
       // Value axis (Y or X depending on orientation)
       [valueAxis]: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
-        stack: 'zero', // Can be 'zero', 'normalize', or 'center'
+        ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
       // Color: Second categorical field (stacking)
       color: {
@@ -536,9 +514,13 @@ export const createStackedBarSpec = (
       // Optional: Add tooltip with all information if tooltip mode is not hidden
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: xAxis?.column, type: getSchemaByAxis(xAxis), title: xAxis?.name },
+          {
+            ...buildTooltipEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
+          },
+          {
+            ...buildTooltipEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
+          },
           { field: categoryField2, type: 'nominal', title: categoryName2 },
-          { field: yAxis?.column, type: getSchemaByAxis(yAxis), title: yAxis?.name },
         ],
       }),
     },
@@ -595,12 +577,12 @@ export const createNumericalHistogramBarChart = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        bin: adjustBucketBins(styles.bucket, transformedData, xAxis?.column),
+        bin: adjustBucketBins(styles?.bucket, transformedData, xAxis?.column),
         axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       y: {
         field: yAxis?.column,
-        aggregate: styles.bucket?.aggregationType,
+        aggregate: styles?.bucket?.aggregationType,
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
@@ -609,14 +591,14 @@ export const createNumericalHistogramBarChart = (
           {
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
-            bin: adjustBucketBins(styles.bucket, transformedData, xAxis?.column),
+            bin: adjustBucketBins(styles?.bucket, transformedData, xAxis?.column),
             title: xAxisStyle?.title?.text || xAxis?.name,
           },
           {
             field: yAxis?.column,
             type: getSchemaByAxis(yAxis),
-            aggregate: styles.bucket?.aggregationType,
-            title: yAxisStyle?.title?.text || `${yAxis?.name}(${styles.bucket?.aggregationType})`,
+            aggregate: styles?.bucket?.aggregationType,
+            title: yAxisStyle?.title?.text || `${yAxis?.name}(${styles?.bucket?.aggregationType})`,
           },
         ],
       }),
@@ -680,11 +662,11 @@ export const createSingleBarChart = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        bin: adjustBucketBins(styles.bucket, transformedData, xAxis?.column),
+        bin: adjustBucketBins(styles?.bucket, transformedData, xAxis?.column),
         axis: applyAxisStyling(xAxis, xAxisStyle),
       },
       y: {
-        aggregate: styles.bucket?.aggregationType,
+        aggregate: AggregationType.COUNT,
         type: 'quantitative',
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
@@ -693,12 +675,11 @@ export const createSingleBarChart = (
           {
             field: xAxis?.column,
             type: getSchemaByAxis(xAxis),
-            bin: adjustBucketBins(styles.bucket, transformedData, xAxis?.column),
+            bin: adjustBucketBins(styles?.bucket, transformedData, xAxis?.column),
             title: xAxisStyle?.title?.text || xAxis?.name,
           },
           {
-            type: 'quantitative',
-            aggregate: styles.bucket?.aggregationType,
+            aggregate: AggregationType.COUNT,
             title: yAxisStyle?.title?.text || yAxis?.name,
           },
         ],

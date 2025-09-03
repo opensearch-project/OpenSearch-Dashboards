@@ -43,7 +43,7 @@ describe('bar_vis_config', () => {
           titleName: '',
         },
         bucket: {
-          aggregationType: AggregationType.COUNT,
+          aggregationType: AggregationType.SUM,
           bucketTimeUnit: TimeUnit.AUTO,
         },
       });

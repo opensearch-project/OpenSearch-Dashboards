@@ -298,7 +298,6 @@ describe('bar to_expression', () => {
       // Check encoding
       expect(spec.encoding.x.field).toBe('category');
       expect(spec.encoding.y.field).toBe('count');
-      expect(spec.encoding.y.stack).toBe('zero');
       expect(spec.encoding.color.field).toBe('category2');
     });
 
@@ -847,27 +846,6 @@ describe('bar to_expression', () => {
         'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
       );
     });
-
-    test('falls back to default tooltip format when dateField is missing', () => {
-      const fallbackMapping = {
-        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
-        [AxisRole.Y]: mockNumericalColumn,
-        [AxisRole.COLOR]: mockCategoricalColumn,
-      };
-      const result = createGroupedTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [mockDateColumn],
-        defaultBarChartStyles,
-        fallbackMapping
-      );
-      const tooltip = result.encoding.tooltip;
-      expect(tooltip[0].field).toBeUndefined();
-      expect(tooltip[1].field).toBe('category');
-      expect(tooltip[2].field).toBe('count');
-      expect(tooltip[2].format).toBeUndefined();
-    });
   });
 
   describe('createFacetedTimeBarChart', () => {
@@ -1082,25 +1060,6 @@ describe('bar to_expression', () => {
         'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
       );
     });
-
-    test('falls back to default tooltip format when dateField is missing', () => {
-      const fallbackMapping = {
-        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
-        [AxisRole.Y]: mockNumericalColumn,
-        [AxisRole.COLOR]: mockCategoricalColumn,
-        [AxisRole.FACET]: mockCategoricalColumn2,
-      };
-      const result = createFacetedTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn, mockCategoricalColumn2],
-        [mockDateColumn],
-        defaultBarChartStyles,
-        fallbackMapping
-      );
-      const tooltip = result.spec.layer[0].encoding.tooltip;
-      expect(tooltip[1].format).toBe('%b %d, %Y %H:%M:%S');
-    });
   });
 
   describe('createNumericalHistogramBarChart', () => {
@@ -1135,7 +1094,7 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.x.field).toBe('count');
       expect(mainLayer.encoding.x.type).toBe('quantitative');
       expect(mainLayer.encoding.y.field).toBe('sum');
-      expect(mainLayer.encoding.y.aggregate).toBe('count');
+      expect(mainLayer.encoding.y.aggregate).toBe('sum');
       expect(mainLayer.encoding.y.type).toBe('quantitative');
     });
 
@@ -1184,7 +1143,7 @@ describe('bar to_expression', () => {
       expect(spec.layer[0].encoding.y.aggregate).toBe('count');
     });
 
-    test('applies bucket options correctly', () => {
+    test('applies bucket options correctly, single bar aggregation should only be count', () => {
       const stylesWithBucket = {
         ...defaultBarChartStyles,
         bucket: {
@@ -1201,7 +1160,7 @@ describe('bar to_expression', () => {
       );
 
       expect(spec.layer[0].encoding.x.bin.step).toBe(50);
-      expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
+      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
     });
   });
 });

@@ -524,12 +524,12 @@ describe('BarVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateBucketSize'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      bucket: { bucketTimeUnit: 'auto', aggregationType: 'count', bucketSize: 100 },
+      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum', bucketSize: 100 },
     });
 
     await userEvent.click(screen.getByTestId('mockUpdateBucketCount'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      bucket: { bucketTimeUnit: 'auto', aggregationType: 'count', bucketCount: 20 },
+      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum', bucketCount: 20 },
     });
 
     await userEvent.click(screen.getByTestId('mockUpdateAggregation'));
@@ -567,7 +567,7 @@ describe('BarVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateTimeUnit'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      bucket: { aggregationType: 'count', bucketTimeUnit: 'year' },
+      bucket: { aggregationType: 'sum', bucketTimeUnit: 'year' },
     });
 
     await userEvent.click(screen.getByTestId('mockUpdateAggregation'));

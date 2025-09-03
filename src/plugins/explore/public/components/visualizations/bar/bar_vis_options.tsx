@@ -48,7 +48,9 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
       ? axisColumnMappings[AxisRole.Y] === undefined
         ? 'single'
         : 'num'
-      : 'time';
+      : axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Date
+      ? 'time'
+      : 'cate';
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -72,7 +74,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
         <>
           <EuiFlexItem>
             <BucketOptionsPanel
-              styles={styleOptions.bucket}
+              styles={styleOptions?.bucket}
               bucketType={bucketType}
               onChange={(bucket) => updateStyleOption('bucket', bucket)}
             />

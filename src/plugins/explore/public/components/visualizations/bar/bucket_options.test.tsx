@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BucketOptionsPanel } from './bucket_options';
-import { AggregationType } from '../types';
+import { AggregationType, TimeUnit } from '../types';
 
 jest.mock('../utils/collections', () => ({
   getAggregationType: () => [
@@ -70,5 +70,13 @@ describe('BucketVisOptions', () => {
 
     fireEvent.change(screen.getByPlaceholderText('Auto'), { target: { value: '15' } });
     expect(mockOnChange).toHaveBeenCalledWith({ bucketSize: 15 });
+  });
+
+  it('initialize old save object(bucket styles is undefined) with default bucket options', () => {
+    render(<BucketOptionsPanel styles={undefined} bucketType="time" onChange={mockOnChange} />);
+    expect(mockOnChange).toHaveBeenCalledWith({
+      aggregationType: AggregationType.SUM,
+      bucketTimeUnit: TimeUnit.AUTO,
+    });
   });
 });

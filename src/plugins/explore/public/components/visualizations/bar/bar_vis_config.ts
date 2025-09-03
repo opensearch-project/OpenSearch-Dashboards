@@ -45,7 +45,7 @@ export interface BarChartStyleControls {
   titleOptions: TitleOptions;
 
   // histogram bucket config
-  bucket: BucketOptions;
+  bucket?: BucketOptions;
 }
 
 export const defaultBarChartStyles: BarChartStyleControls = {
@@ -123,7 +123,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
     titleName: '',
   },
   bucket: {
-    aggregationType: AggregationType.COUNT,
+    aggregationType: AggregationType.SUM,
     bucketTimeUnit: TimeUnit.AUTO,
   },
 };

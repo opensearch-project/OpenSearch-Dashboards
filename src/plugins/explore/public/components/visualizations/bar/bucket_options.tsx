@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { useEffectOnce } from 'react-use';
 import { BarChartStyleControls } from './bar_vis_config';
 import { AggregationType, TimeUnit, BucketOptions } from '../types';
 import { getAggregationType, getTimeUnits } from '../utils/collections';
@@ -14,7 +15,7 @@ import { StyleAccordion } from '../style_panel/style_accordion';
 
 interface BucketOptionsPanelProps {
   styles: BarChartStyleControls['bucket'];
-  bucketType: 'time' | 'num' | 'single';
+  bucketType: 'time' | 'num' | 'single' | 'cate';
   onChange: (styles: BarChartStyleControls['bucket']) => void;
 }
 
@@ -38,6 +39,17 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
 
   const labelType = useMemo(() => getAggregationType(), []);
   const timeUnits = useMemo(() => getTimeUnits(), []);
+
+  // initialize old save object with default bucket options
+  useEffectOnce(() => {
+    if (!styles) {
+      const defaultBucket: BucketOptions = {
+        aggregationType: AggregationType.SUM,
+        bucketTimeUnit: TimeUnit.AUTO,
+      };
+      onChange({ ...defaultBucket });
+    }
+  });
 
   return (
     <StyleAccordion
@@ -80,7 +92,7 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
         </EuiFormRow>
       )}
 
-      {bucketType !== 'time' && (
+      {(bucketType === 'num' || bucketType === 'single') && (
         <>
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.bar.bucket.size', {
