@@ -90,17 +90,6 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     const sSearch = (config.search || '').trim();
     const toNum = (v: any) => (v == null || v === '' ? NaN : Number(v));
 
-    if (op === 'expression') {
-      if (!hasSearch) return false;
-      try {
-        const expr = sSearch.replace(/\$/g, 'u');
-        const fn = new Function('u', `return ${expr};`);
-        return !!fn(value);
-      } catch {
-        return false;
-      }
-    }
-
     if (op === 'contains') {
       if (hasSearch) return sVal.toLowerCase().includes(sSearch.toLowerCase());
       if (hasValues) return config.values.includes(value);
@@ -171,21 +160,31 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
         }
 
         switch (calculation) {
-          case 'total':
-            footer[field] = values.reduce((sum, v) => sum + v, 0);
+          case 'total': {
+            const val = values.reduce((sum, v) => sum + v, 0);
+            footer[field] = `Total: ${val}`;
             break;
-          case 'average':
-            footer[field] = values.reduce((sum, v) => sum + v, 0) / values.length;
+          }
+          case 'average': {
+            const val = values.reduce((sum, v) => sum + v, 0) / values.length;
+            footer[field] = `Average: ${val}`;
             break;
-          case 'min':
-            footer[field] = Math.min(...values);
+          }
+          case 'min': {
+            const val = Math.min(...values);
+            footer[field] = `Min: ${val}`;
             break;
-          case 'max':
-            footer[field] = Math.max(...values);
+          }
+          case 'max': {
+            const val = Math.max(...values);
+            footer[field] = `Max: ${val}`;
             break;
-          case 'last':
-            footer[field] = values[values.length - 1];
+          }
+          case 'last': {
+            const val = values[values.length - 1];
+            footer[field] = `Last: ${val}`;
             break;
+          }
           default:
             footer[field] = '-';
         }

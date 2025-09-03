@@ -12,10 +12,8 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
   EuiFormRow,
   EuiSelect,
-  EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -162,59 +160,59 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
       </EuiFormRow>
       {styleOptions.showFooter && (
         <>
-          <EuiFormLabel>
-            {i18n.translate('explore.stylePanel.table.calculation', {
+          <EuiFormRow
+            label={i18n.translate('explore.stylePanel.table.calculation', {
               defaultMessage: 'Calculation',
             })}
-          </EuiFormLabel>
-          <EuiSpacer size="s" />
-          {localCalculations.map((calc, index) => (
+          >
             <>
-              <EuiFlexGroup key={index} alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiComboBox
-                    compressed
-                    options={getFieldOptionsForIndex(index)}
-                    selectedOptions={calc.fields
-                      .map((field) => ({
-                        value: field,
-                        label: numericalColumns.find((col) => col.column === field)?.name || field,
-                      }))
-                      .filter((option) => option.value !== undefined)}
-                    onChange={(selectedOptions) => onFieldChange(index, selectedOptions)}
-                    data-test-subj={`visTableFooterField-${index}`}
-                    isClearable={true}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSelect
-                    compressed
-                    options={calculationOptions}
-                    value={calc.calculation}
-                    onChange={(e) =>
-                      onCalculationChange(
-                        index,
-                        e.target.value as 'total' | 'last' | 'average' | 'min' | 'max'
-                      )
-                    }
-                    data-test-subj={`visTableFooterCalculation-${index}`}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="trash"
-                    color="danger"
-                    aria-label="Delete Calculation"
-                    onClick={() => onRemoveCalculation(index)}
-                    data-test-subj={`visTableFooterDelete-${index}`}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
+              {localCalculations.map((calc, index) => (
+                <EuiFlexGroup key={index} alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={6}>
+                    <EuiComboBox
+                      compressed
+                      options={getFieldOptionsForIndex(index)}
+                      selectedOptions={calc.fields
+                        .map((field) => ({
+                          value: field,
+                          label:
+                            numericalColumns.find((col) => col.column === field)?.name || field,
+                        }))
+                        .filter((option) => option.value !== undefined)}
+                      onChange={(selectedOptions) => onFieldChange(index, selectedOptions)}
+                      data-test-subj={`visTableFooterField-${index}`}
+                      isClearable={true}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={3}>
+                    <EuiSelect
+                      compressed
+                      options={calculationOptions}
+                      value={calc.calculation}
+                      onChange={(e) =>
+                        onCalculationChange(
+                          index,
+                          e.target.value as 'total' | 'last' | 'average' | 'min' | 'max'
+                        )
+                      }
+                      data-test-subj={`visTableFooterCalculation-${index}`}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={1}>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      aria-label="Delete Calculation"
+                      onClick={() => onRemoveCalculation(index)}
+                      data-test-subj={`visTableFooterDelete-${index}`}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ))}
             </>
-          ))}
+          </EuiFormRow>
           {canAddCalculation && (
-            <>
+            <EuiFormRow>
               <EuiButton
                 size="s"
                 onClick={onAddCalculation}
@@ -224,8 +222,7 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
                   defaultMessage: 'Add Calculation',
                 })}
               </EuiButton>
-              <EuiSpacer size="m" />
-            </>
+            </EuiFormRow>
           )}
         </>
       )}

@@ -10,12 +10,14 @@ import {
   EuiCheckbox,
   EuiFieldNumber,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
   EuiIcon,
   EuiPanel,
   EuiPopover,
   EuiSelect,
   EuiSelectOption,
-  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { VisColumn } from '../types';
@@ -72,7 +74,6 @@ export const TableColumnHeader = ({
               e.stopPropagation();
               setPopoverOpen(!popoverOpen);
             }}
-            style={{ cursor: 'pointer', marginLeft: '4px', marginRight: '4px' }}
             data-test-subj={`visTableFilterIcon-${col.column}`}
           />
         }
@@ -166,9 +167,16 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   const filteredUniques = useMemo(() => {
     if (!showUniqueValues) return uniques;
     const search = localUniqueSearch.trim().toLowerCase();
-    if (!search) return uniques;
-    return uniques.filter((u) => String(u).toLowerCase().includes(search));
-  }, [uniques, showUniqueValues, localUniqueSearch]);
+    const filtered = search
+      ? uniques.filter((u) => String(u).toLowerCase().includes(search))
+      : uniques;
+    if (col.schema === 'categorical') {
+      return filtered.sort((a, b) => String(a).localeCompare(String(b)));
+    } else if (col.schema === 'numerical') {
+      return filtered.sort((a, b) => Number(a) - Number(b));
+    }
+    return filtered;
+  }, [uniques, showUniqueValues, localUniqueSearch, col.schema]);
 
   const handleToggleValue = (value: any, checked: boolean) => {
     setLocalSelected((prev) => {
@@ -215,71 +223,83 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
 
   return (
     <div style={{ padding: '8px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-        <EuiTitle size="xxs">
-          <span>{col.name}</span>
-        </EuiTitle>
-        <EuiSelect
-          compressed
-          options={operatorOptions}
-          value={localOperator}
-          onChange={(e) => setLocalOperator(e.target.value)}
-        />
-        {showInput && (
-          <EuiFieldNumber
-            compressed
-            placeholder="Enter value"
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            style={{ marginLeft: '8px' }}
-          />
-        )}
-      </div>
+      <EuiFormRow>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={3}>
+            <EuiTitle size="xxs">
+              <span>{col.name}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={showInput ? 3 : 7}>
+            <EuiSelect
+              compressed
+              options={operatorOptions}
+              value={localOperator}
+              onChange={(e) => setLocalOperator(e.target.value)}
+            />
+          </EuiFlexItem>
+          {showInput && (
+            <EuiFlexItem grow={4}>
+              <EuiFieldNumber
+                compressed
+                placeholder="Enter value"
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFormRow>
       {showUniqueValues && (
         <>
-          <EuiFieldText
-            compressed
-            placeholder="Filter unique values"
-            value={localUniqueSearch}
-            onChange={(e) => setLocalUniqueSearch(e.target.value)}
-            fullWidth
-            style={{ marginBottom: '8px' }}
-          />
-          <EuiSpacer size="xs" />
-          <EuiPanel
-            paddingSize="s"
-            style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '8px' }}
-          >
-            {filteredUniques.map((u) => (
-              <EuiCheckbox
-                key={String(u)}
-                id={String(u)}
-                label={String(u)}
-                checked={localSelected.has(u)}
-                onChange={(e) => handleToggleValue(u, e.target.checked)}
-              />
-            ))}
-          </EuiPanel>
+          <EuiFormRow>
+            <EuiFieldText
+              compressed
+              placeholder="Filter unique values"
+              value={localUniqueSearch}
+              onChange={(e) => setLocalUniqueSearch(e.target.value)}
+              fullWidth
+            />
+          </EuiFormRow>
+          <EuiFormRow>
+            <EuiPanel
+              paddingSize="s"
+              style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '8px' }}
+            >
+              {filteredUniques.map((u) => (
+                <EuiCheckbox
+                  key={String(u)}
+                  id={String(u)}
+                  label={String(u)}
+                  checked={localSelected.has(u)}
+                  onChange={(e) => handleToggleValue(u, e.target.checked)}
+                />
+              ))}
+            </EuiPanel>
+          </EuiFormRow>
           <EuiCheckbox
             id="selectAll"
             label="Select All"
             checked={isSelectAllChecked}
             onChange={(e) => handleSelectAll(e.target.checked)}
-            style={{ marginBottom: '8px' }}
           />
         </>
       )}
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <EuiButtonEmpty onClick={onClear} style={{ marginRight: '8px' }}>
-          Clear filter
-        </EuiButtonEmpty>
-        <EuiButtonEmpty onClick={onCancel} style={{ marginRight: '8px' }}>
-          Cancel
-        </EuiButtonEmpty>
-        <EuiButton fill size="s" onClick={handleApply}>
-          OK
-        </EuiButton>
-      </div>
+      <EuiFormRow>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiButtonEmpty onClick={onClear}>Clear filter</EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton fill size="s" onClick={handleApply}>
+              OK
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
     </div>
   );
 };
