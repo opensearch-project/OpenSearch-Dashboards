@@ -6,11 +6,11 @@
 import { i18n } from '@osd/i18n';
 import { EuiRange, EuiSwitch, EuiFormRow, EuiSelect } from '@elastic/eui';
 import React from 'react';
-import { ScatterChartStyleControls } from './scatter_vis_config';
+import { defaultScatterChartStyles, ScatterChartStyleControls } from './scatter_vis_config';
 import { PointShape } from '../types';
 import { getPointShapes } from '../utils/collections';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { useDebouncedNumericValue } from '../utils/use_debounced_value';
+import { useDebouncedNumber } from '../utils/use_debounced_value';
 
 interface ScatterVisOptionsProps {
   styles: ScatterChartStyleControls['exclusive'];
@@ -28,9 +28,9 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
     });
   };
 
-  const [pointAngle, handlePointAngle] = useDebouncedNumericValue(
+  const [pointAngle, handlePointAngle] = useDebouncedNumber(
     styles.angle,
-    (val) => onChange({ ...styles, angle: val }),
+    (val) => onChange({ ...styles, angle: val ?? defaultScatterChartStyles.exclusive.angle }),
     {
       min: 0,
       max: 360,
@@ -81,8 +81,10 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
           compressed
           min={0}
           max={360}
-          value={pointAngle}
-          onChange={(e) => handlePointAngle(e.currentTarget.value)}
+          value={pointAngle ?? defaultScatterChartStyles.exclusive.angle}
+          onChange={(e) =>
+            handlePointAngle(e.currentTarget.value ? Number(e.currentTarget.value) : undefined)
+          }
           showInput
         />
       </EuiFormRow>

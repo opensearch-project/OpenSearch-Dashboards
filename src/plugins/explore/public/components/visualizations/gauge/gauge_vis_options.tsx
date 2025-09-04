@@ -21,7 +21,7 @@ import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
-import { DebouncedText } from '../style_panel/utils';
+import { DebouncedFieldText } from '../style_panel/utils';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 
 export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyleControls>;
@@ -125,7 +125,7 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
                 </EuiFormRow>
                 {styleOptions.showTitle && (
                   <EuiFormRow>
-                    <DebouncedText
+                    <DebouncedFieldText
                       value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
                       placeholder={i18n.translate('explore.vis.gauge.title', {
                         defaultMessage: 'Title',

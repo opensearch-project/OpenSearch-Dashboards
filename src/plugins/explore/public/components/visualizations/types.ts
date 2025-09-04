@@ -116,6 +116,7 @@ export interface AxisLabels {
   show: boolean;
   filter: boolean;
   rotate: number;
+  // TODO: make `truncate` optional
   truncate: number;
 }
 

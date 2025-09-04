@@ -10,13 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch, EuiFormRow } from '@el
 import { defaultMetricChartStyles, MetricChartStyleControls } from './metric_vis_config';
 import { RangeValue, ColorSchemas, AxisRole } from '../types';
 import { CustomRange } from '../style_panel/custom_ranges';
-import { DebouncedText } from '../style_panel/utils';
+import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { getColorSchemas } from '../utils/collections';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
-import { FontSizeInputField } from '../utils/font_size_input_field';
 import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
 
 export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
@@ -89,30 +88,42 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               })}
               initialIsOpen={false}
             >
-              <FontSizeInputField
+              <EuiFormRow
                 label={i18n.translate('explore.vis.metric.valueFontSize', {
                   defaultMessage: 'Value size',
                 })}
-                value={styleOptions.fontSize}
-                onChange={(val) => onStyleChange({ fontSize: val })}
-                data-test-subj="valueFontSizeInput"
-              />
-              <FontSizeInputField
+              >
+                <DebouncedFieldNumber
+                  value={styleOptions.fontSize}
+                  onChange={(val) => onStyleChange({ fontSize: val })}
+                  placeholder="auto"
+                  data-test-subj="valueFontSizeInput"
+                />
+              </EuiFormRow>
+              <EuiFormRow
                 label={i18n.translate('explore.vis.metric.titleFontSize', {
                   defaultMessage: 'Title size',
                 })}
-                value={styleOptions.titleSize}
-                onChange={(val) => onStyleChange({ titleSize: val })}
-                data-test-subj="titleFontSizeInput"
-              />
-              <FontSizeInputField
+              >
+                <DebouncedFieldNumber
+                  value={styleOptions.titleSize}
+                  onChange={(val) => onStyleChange({ titleSize: val })}
+                  placeholder="auto"
+                  data-test-subj="titleFontSizeInput"
+                />
+              </EuiFormRow>
+              <EuiFormRow
                 label={i18n.translate('explore.vis.metric.percentageFontSize', {
                   defaultMessage: 'Percentage size',
                 })}
-                value={styleOptions.percentageSize}
-                onChange={(val) => onStyleChange({ percentageSize: val })}
-                data-test-subj="percentageFontSizeInput"
-              />
+              >
+                <DebouncedFieldNumber
+                  value={styleOptions.percentageSize}
+                  onChange={(val) => onStyleChange({ percentageSize: val })}
+                  placeholder="auto"
+                  data-test-subj="percentageFontSizeInput"
+                />
+              </EuiFormRow>
             </StyleAccordion>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -183,16 +194,19 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               </EuiFormRow>
 
               {styleOptions.showTitle && (
-                <DebouncedText
-                  value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
-                  placeholder={i18n.translate('explore.vis.metric.title', {
-                    defaultMessage: 'Title',
-                  })}
-                  onChange={(text) => updateStyleOption('title', text)}
+                <EuiFormRow
                   label={i18n.translate('explore.vis.metric.title', {
                     defaultMessage: 'Title',
                   })}
-                />
+                >
+                  <DebouncedFieldText
+                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
+                    placeholder={i18n.translate('explore.vis.metric.title', {
+                      defaultMessage: 'Title',
+                    })}
+                    onChange={(text) => updateStyleOption('title', text)}
+                  />
+                </EuiFormRow>
               )}
             </StyleAccordion>
           </EuiFlexItem>

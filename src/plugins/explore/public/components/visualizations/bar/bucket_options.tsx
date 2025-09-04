@@ -4,14 +4,14 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiFormRow, EuiSelect, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { BarChartStyleControls } from './bar_vis_config';
 import { AggregationType, TimeUnit, BucketOptions } from '../types';
 import { getAggregationType, getTimeUnits } from '../utils/collections';
-import { useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { defaultBarChartStyles } from './bar_vis_config';
+import { DebouncedFieldNumber } from '../style_panel/utils';
 
 interface BucketOptionsPanelProps {
   styles: BarChartStyleControls['bucket'];
@@ -26,16 +26,6 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
       [key]: value,
     });
   };
-
-  const [localBucketSize, setLocalBucketSize] = useDebouncedValue<number | undefined>(
-    styles?.bucketSize,
-    (val) => updateBucketOption('bucketSize', val)
-  );
-
-  const [localBucketCount, setLocalBucketCount] = useDebouncedValue<number | undefined>(
-    styles?.bucketCount,
-    (val) => updateBucketOption('bucketCount', val)
-  );
 
   const labelType = useMemo(() => getAggregationType(), []);
   const timeUnits = useMemo(() => getTimeUnits(), []);
@@ -88,13 +78,11 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
               defaultMessage: 'Bucket Size',
             })}
           >
-            <EuiFieldNumber
+            <DebouncedFieldNumber
               compressed
-              value={localBucketSize}
-              onChange={(e) =>
-                setLocalBucketSize(e.target.value === '' ? undefined : Number(e.target.value))
-              }
-              placeholder="Auto"
+              value={styles?.bucketSize}
+              placeholder="auto"
+              onChange={(value) => updateBucketOption('bucketSize', value)}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -103,12 +91,10 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
             })}
             helpText="approx bucket count"
           >
-            <EuiFieldNumber
+            <DebouncedFieldNumber
               compressed
-              value={localBucketCount}
-              onChange={(e) =>
-                setLocalBucketCount(e.target.value === '' ? undefined : Number(e.target.value))
-              }
+              value={styles?.bucketCount}
+              onChange={(value) => updateBucketOption('bucketCount', value)}
               placeholder="Default 30"
             />
           </EuiFormRow>
