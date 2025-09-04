@@ -5,6 +5,7 @@
 
 import { LineChartStyleControls } from './line_vis_config';
 import { VisColumn, Positions } from '../types';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Get Vega interpolation from UI lineMode
@@ -31,6 +32,13 @@ type VegaLiteMarkConfig =
       tooltip: boolean;
     }
   | {
+      type: 'area';
+      opacity: number;
+      tooltip: boolean;
+      strokeWidth: number;
+      interpolate: string;
+    }
+  | {
       type: 'point';
       tooltip: boolean;
       size: number;
@@ -48,10 +56,11 @@ type VegaLiteMarkConfig =
  * @param styles The style options
  * @param markType The mark type ('line' or 'bar')
  * @returns The mark configuration object
+ * TODO: refactor this to create chart type specific mark builder instead of having one builder for all
  */
 export const buildMarkConfig = (
   styles: Partial<LineChartStyleControls> | undefined,
-  markType: 'line' | 'bar' = 'line'
+  markType: 'line' | 'bar' | 'area' = 'line'
 ): VegaLiteMarkConfig => {
   // Default values - handle undefined styles object
   const lineStyle = styles?.lineStyle ?? 'both';
@@ -62,8 +71,18 @@ export const buildMarkConfig = (
   if (markType === 'bar') {
     return {
       type: 'bar',
-      opacity: 0.7,
+      opacity: DEFAULT_OPACITY,
       tooltip: showTooltip,
+    };
+  }
+
+  if (markType === 'area') {
+    return {
+      type: 'area',
+      opacity: DEFAULT_OPACITY,
+      tooltip: showTooltip,
+      strokeWidth: lineWidth,
+      interpolate: getVegaInterpolation(lineMode),
     };
   }
 

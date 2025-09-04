@@ -19,6 +19,7 @@ import {
 import { generateColorBySchema, getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
+import { DEFAULT_OPACITY } from '../constants';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -86,7 +87,7 @@ export const createSingleMetric = (
       },
       mark: {
         type: 'area',
-        opacity: 0.3,
+        opacity: DEFAULT_OPACITY,
         color: colorPalette.categories[0],
       },
       encoding: {

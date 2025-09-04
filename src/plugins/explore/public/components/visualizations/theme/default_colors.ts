@@ -11,7 +11,7 @@ export const getColors = () => {
       statusGreen: '#00BD6B',
       statusRed: '#DB0000',
       text: '#FFF',
-      grid: '#F5F7FF',
+      grid: '#27252C',
       categories: [
         '#7598FF',
         '#00A4BD',
@@ -30,7 +30,7 @@ export const getColors = () => {
     statusGreen: '#00BD6B',
     statusRed: '#DB0000',
     text: '#313131',
-    grid: '#27252C',
+    grid: '#F5F7FF',
     categories: [
       '#5C7FFF',
       '#005237',
