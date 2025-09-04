@@ -118,7 +118,7 @@ export class DatasetManagementPlugin
       id: DM_APP_ID,
       title: sectionsHeader,
       description: i18n.translate('datasetManagement.dataset.description', {
-        defaultMessage: 'Manage index patterns to retrieve data from OpenSearch.',
+        defaultMessage: 'Manage datasets to retrieve your data.',
       }),
       status: core.chrome.navGroup.getNavGroupEnabled()
         ? AppStatus.accessible
