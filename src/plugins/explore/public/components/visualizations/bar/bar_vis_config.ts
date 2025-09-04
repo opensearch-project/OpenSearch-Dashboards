@@ -15,6 +15,9 @@ import {
   AxisRole,
   StandardAxes,
   TitleOptions,
+  AggregationType,
+  BucketOptions,
+  TimeUnit,
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 
@@ -40,6 +43,9 @@ export interface BarChartStyleControls {
   switchAxes: boolean;
 
   titleOptions: TitleOptions;
+
+  // histogram bucket config
+  bucket?: BucketOptions;
 }
 
 export const defaultBarChartStyles: BarChartStyleControls = {
@@ -116,6 +122,10 @@ export const defaultBarChartStyles: BarChartStyleControls = {
     show: false,
     titleName: '',
   },
+  bucket: {
+    aggregationType: AggregationType.SUM,
+    bucketTimeUnit: TimeUnit.AUTO,
+  },
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({
@@ -175,6 +185,13 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
         [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
       },
     ],
   },

@@ -232,17 +232,12 @@ export class VisualizationBuilder {
 
     const columns = [...data.numericalColumns, ...data.categoricalColumns, ...data.dateColumns];
 
-    // Metric chart cannot be created from multiple data points
-    const invalidMetricData =
-      columns.length > 0 && columns[0].validValuesCount > 1 && currentChartType === 'metric';
-
     // We cannot apply the current chart type and axes mapping if:
-    // 1. The current chart type is 'metric', but it has multiple data points
-    // 2. It has axes mapping, but the mapping is incompatible with the received data
-    // 3. No current axes mapping
+    // 1. It has axes mapping, but the mapping is incompatible with the received data
+    // 2. No current axes mapping
     // For these cases, we will create auto vis based on the rules. If not auto vis can be created,
     // reset chart type and axes mapping to empty, this will let user to choose.
-    if (invalidMetricData || isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
+    if (isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
       const autoVis = this.createAutoVis(data);
       if (autoVis) {
         const chartTypeConfig = visualizationRegistry.getVisualizationConfig(autoVis.chartType);

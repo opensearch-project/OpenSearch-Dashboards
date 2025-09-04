@@ -329,6 +329,10 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       const hierarchy = buildHierarchy(spans);
       setItems(hierarchy);
       setTotal(hierarchy.length);
+
+      // Auto-expand all spans by default to show the complete tree structure
+      const allSpanIds = gatherAllSpanIds(hierarchy);
+      setExpandedRows(allSpanIds);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error parsing payloadData in SpanDetailTableHierarchy:', error);

@@ -58,6 +58,9 @@ const AXIS_SELECT_LABEL = {
   [AxisRole.Value]: i18n.translate('explore.visualize.axisSelectLabelValue', {
     defaultMessage: 'Value',
   }),
+  [AxisRole.Time]: i18n.translate('explore.visualize.axisSelectLabelTime', {
+    defaultMessage: 'Time',
+  }),
 };
 
 export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({

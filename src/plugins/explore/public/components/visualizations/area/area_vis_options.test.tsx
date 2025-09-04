@@ -64,7 +64,7 @@ jest.mock('../style_panel/legend/legend', () => ({
   )),
 }));
 
-jest.mock('../style_panel/threshold/threshold', () => ({
+jest.mock('../style_panel/threshold_lines/threshold', () => ({
   ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
     <div data-test-subj="threshold-panel">
       <button
