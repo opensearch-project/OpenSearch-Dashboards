@@ -789,7 +789,7 @@ export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEdito
   }
 
   function addMethodAutoCompleteSetToContext(context: any) {
-    context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'].map((m, i) => ({
+    context.autoCompleteSet = ['GET', 'PATCH', 'PUT', 'POST', 'DELETE', 'HEAD'].map((m, i) => ({
       name: m,
       score: -i,
       meta: i18n.translate('console.autocomplete.addMethodMetaText', { defaultMessage: 'method' }),
