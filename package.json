@@ -53,7 +53,6 @@
     "test:jest_integration": "scripts/use_node scripts/jest_integration",
     "test:jest_integration:ci": "scripts/use_node scripts/jest_integration --ci --colors",
     "test:mocha": "scripts/use_node scripts/jest src/dev/mocha",
-    "test:mocha:coverage": "yarn nyc --reporter=text-summary --reporter=lcov --report-dir=./target/opensearch-dashboards-coverage/mocha scripts/use_node scripts/mocha",
     "test:ftr": "scripts/use_node scripts/functional_tests",
     "test:ftr:server": "scripts/use_node scripts/functional_tests_server",
     "test:ftr:runner": "scripts/use_node scripts/functional_test_runner",

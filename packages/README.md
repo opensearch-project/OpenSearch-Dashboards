@@ -52,7 +52,7 @@ Today a package can follow the pattern of having a `__tests__` directory in each
 If a package's tests should be run with Mocha, you'll have to opt-in to run them by appending the package's test file pattern(s) to OpenSearch Dashboards's `src/dev/mocha/run_mocha_cli.js` file. These will then be run by the unit test runner.
 
 * `yarn test` or `yarn grunt test` runs all unit tests.
-* `node scripts/mocha` runs all Mocha tests.
+* `yarn test:mocha` runs all Mocha tests.
 
 ### 2. Jest
 A package can also follow the pattern of having `.test.js` files as siblings of the source code files, and these run by Jest.
