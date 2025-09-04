@@ -11,7 +11,7 @@ import {
   applyAxisStyling,
   ValueAxisPosition,
 } from './line_chart_utils';
-import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
+import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
 import { getTooltipFormat } from '../utils/utils';
 
 /**

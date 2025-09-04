@@ -11,7 +11,8 @@ import { ThresholdLines, ThresholdLineStyle } from '../../types';
 
 export default {
   component: ThresholdOptions,
-  title: 'src/plugins/explore/public/components/visualizations/style_panel/threshold/threshold.tsx',
+  title:
+    'src/plugins/explore/public/components/visualizations/style_panel/threshold_lines/threshold.tsx',
 } as ComponentMeta<typeof ThresholdOptions>;
 
 const mockThreshold = [
