@@ -98,7 +98,7 @@ const TopNav = ({
     }
   }, [currentAppState?.viewMode, keyboardShortcut, handleSave]);
 
-  // Register/unregister save shortcut based on edit mode
+  // Register/unregister add shortcut based on edit mode
   useEffect(() => {
     if (currentAppState?.viewMode === 'edit' && keyboardShortcut) {
       keyboardShortcut.register({
@@ -118,7 +118,7 @@ const TopNav = ({
         });
       };
     }
-  }, [currentAppState?.viewMode, keyboardShortcut, handleSave]);
+  }, [currentAppState?.viewMode, keyboardShortcut, handleAdd]);
 
   // Register dashboard edit mode keyboard shortcut
   keyboardShortcut?.useKeyboardShortcut({
