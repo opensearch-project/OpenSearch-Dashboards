@@ -31,7 +31,6 @@
 import fn from './log';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('log.js', () => {
@@ -42,7 +41,7 @@ describe('log.js', () => {
 
   it('should return the log10 value of every value', () => {
     return invoke(fn, [seriesList]).then((r) => {
-      expect(_.map(r.output.list[4].data, 1)).to.eql([1, 2, 1, 0]);
+      expect(_.map(r.output.list[4].data, 1)).toEqual([1, 2, 1, 0]);
     });
   });
 });

@@ -28,8 +28,6 @@
  * under the License.
  */
 
-const expect = require('chai').expect;
-
 import fn from './graphite';
 
 const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.yml file. You can always enable the default allowlist configuration.`;
@@ -65,8 +63,8 @@ describe('graphite', function () {
       allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
       blockedGraphiteIPs: [],
     }).then(function (result) {
-      expect(result.output.list[0].data[0][1]).to.eql(3);
-      expect(result.output.list[0].data[1][1]).to.eql(14);
+      expect(result.output.list[0].data[0][1]).toEqual(3);
+      expect(result.output.list[0].data[1][1]).toEqual(14);
     });
   });
 
@@ -75,7 +73,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
       blockedGraphiteIPs: [],
     }).then(function (result) {
-      expect(result.output.list[0].data[1][0]).to.eql(2000 * 1000);
+      expect(result.output.list[0].data[1][0]).toEqual(2000 * 1000);
     });
   });
 
@@ -84,7 +82,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
       blockedGraphiteIPs: [],
     }).then(function (result) {
-      expect(result.output.list[0].label).to.eql('__beer__');
+      expect(result.output.list[0].label).toEqual('__beer__');
     });
   });
 
@@ -94,7 +92,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: [],
     }).catch((e) => {
-      expect(e.message).to.eql(MISS_CHECKLIST_MESSAGE);
+      expect(e.message).toEqual(MISS_CHECKLIST_MESSAGE);
     });
   });
 
@@ -104,7 +102,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: [],
     }).catch((e) => {
-      expect(e.message).to.eql(MISS_CHECKLIST_MESSAGE);
+      expect(e.message).toEqual(MISS_CHECKLIST_MESSAGE);
     });
   });
 
@@ -116,7 +114,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
       blockedGraphiteIPs: [],
     }).then((result) => {
-      expect(result.output.list.length).to.eql(1);
+      expect(result.output.list.length).toEqual(1);
     });
   });
 
@@ -126,7 +124,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
       blockedGraphiteIPs: [],
     }).catch((e) => {
-      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+      expect(e.message).toEqual(INVALID_URL_MESSAGE);
     });
   });
 
@@ -136,7 +134,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {
-      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+      expect(e.message).toEqual(INVALID_URL_MESSAGE);
     });
   });
 
@@ -146,7 +144,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {
-      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+      expect(e.message).toEqual(INVALID_URL_MESSAGE);
     });
   });
 
@@ -156,7 +154,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).then((result) => {
-      expect(result.output.list.length).to.eql(1);
+      expect(result.output.list.length).toEqual(1);
     });
   });
 
@@ -166,7 +164,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).then((result) => {
-      expect(result.output.list.length).to.eql(1);
+      expect(result.output.list.length).toEqual(1);
     });
   });
 
@@ -176,7 +174,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {
-      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+      expect(e.message).toEqual(INVALID_URL_MESSAGE);
     });
   });
 
@@ -186,7 +184,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: [],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {
-      expect(e.message).to.includes('maximum redirect reached');
+      expect(e.message).toContain('maximum redirect reached');
     });
   });
 
@@ -198,7 +196,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).then((result) => {
-      expect(result.output.list.length).to.eql(1);
+      expect(result.output.list.length).toEqual(1);
     });
   });
 
@@ -210,7 +208,7 @@ describe('graphite', function () {
       allowedGraphiteUrls: ['http://127.0.0.1'],
       blockedGraphiteIPs: ['127.0.0.0/8'],
     }).catch((e) => {
-      expect(e.message).to.eql(INVALID_URL_MESSAGE);
+      expect(e.message).toEqual(INVALID_URL_MESSAGE);
     });
   });
 });

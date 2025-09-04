@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import moment from 'moment';
 import { preprocessOffset } from './offset_time';
 
@@ -38,29 +37,29 @@ describe('offset', () => {
     const to = moment('2018-01-01T00:15:00.000Z').valueOf();
 
     test('throws error when no number is provided', () => {
-      expect(() => preprocessOffset('timerange', from, to)).to.throwError();
+      expect(() => preprocessOffset('timerange', from, to)).toThrowError();
     });
 
     test('throws error when zero is provided', () => {
-      expect(() => preprocessOffset('timerange:0', from, to)).to.throwError();
+      expect(() => preprocessOffset('timerange:0', from, to)).toThrowError();
     });
 
     test('throws error when factor is larger than zero', () => {
-      expect(() => preprocessOffset('timerange:1', from, to)).to.throwError();
+      expect(() => preprocessOffset('timerange:1', from, to)).toThrowError();
     });
 
     test('throws error with malformed', () => {
-      expect(() => preprocessOffset('timerange:notANumber', from, to)).to.throwError();
+      expect(() => preprocessOffset('timerange:notANumber', from, to)).toThrowError();
     });
 
     test('does not modify offset when value is not requesting relative offset', () => {
       const offset = '-1d';
-      expect(preprocessOffset(offset, from, to)).to.eql(offset);
+      expect(preprocessOffset(offset, from, to)).toEqual(offset);
     });
 
     test('converts offset when value is requesting relative offset with multiplier', () => {
       const offset = 'timerange:-2';
-      expect(preprocessOffset(offset, from, to)).to.eql('-1800s');
+      expect(preprocessOffset(offset, from, to)).toEqual('-1800s');
     });
   });
 });

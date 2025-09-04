@@ -31,7 +31,6 @@
 import fn from './cusum';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('cusum.js', () => {
@@ -42,7 +41,7 @@ describe('cusum.js', () => {
 
   it('progressively adds the numbers in the list', () => {
     return invoke(fn, [seriesList]).then((r) => {
-      expect(_.map(r.output.list[1].data, 1)).to.eql([100, 150, 200, 220]);
+      expect(_.map(r.output.list[1].data, 1)).toEqual([100, 150, 200, 220]);
     });
   });
 });

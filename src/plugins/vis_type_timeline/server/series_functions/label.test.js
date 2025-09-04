@@ -31,7 +31,6 @@
 import fn from './label';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('label.js', () => {
@@ -42,19 +41,19 @@ describe('label.js', () => {
 
   it('changes the label on the series', () => {
     return invoke(fn, [seriesList, 'free beer']).then((r) => {
-      _.each(r.output.list, (series) => expect(series.label).to.equal('free beer'));
+      _.each(r.output.list, (series) => expect(series.label).toEqual('free beer'));
     });
   });
 
   it('can use a regex to capture parts of a series label', () => {
     return invoke(fn, [seriesList, 'beer$1', 'Neg(.*)']).then((r) => {
-      expect(r.output.list[0].label).to.equal('beerative');
+      expect(r.output.list[0].label).toEqual('beerative');
     });
   });
 
   it('can use a regex to capture groups to modify series label', () => {
     return invoke(fn, [seriesList, 'beer$2', '(N)(egative)']).then((r) => {
-      expect(r.output.list[0].label).to.equal('beeregative');
+      expect(r.output.list[0].label).toEqual('beeregative');
     });
   });
 
@@ -64,10 +63,10 @@ describe('label.js', () => {
 
     return Promise.all([
       invoke(fn, [seriesListCopy1, 'beer$1 - $2', '(N)(egative)']).then((r) => {
-        expect(r.output.list[0].label).to.equal('beerN - egative');
+        expect(r.output.list[0].label).toEqual('beerN - egative');
       }),
       invoke(fn, [seriesListCopy2, 'beer$1_$2', '(N)(eg.*)']).then((r) => {
-        expect(r.output.list[0].label).to.equal('beerN_egative');
+        expect(r.output.list[0].label).toEqual('beerN_egative');
       }),
     ]);
   });

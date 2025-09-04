@@ -31,7 +31,6 @@
 import fn from './color';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('color.js', () => {
@@ -43,7 +42,7 @@ describe('color.js', () => {
   it('sets the color, on all series', () => {
     return invoke(fn, [seriesList, '#eee']).then((r) => {
       const colors = _.map(r.output.list, 'color');
-      _.each(colors, (color) => expect(color).to.equal('#eee'));
+      _.each(colors, (color) => expect(color).toEqual('#eee'));
     });
   });
 
@@ -55,18 +54,18 @@ describe('color.js', () => {
     };
     return invoke(fn, [fourLongList, '#000:#333']).then((r) => {
       const colors = _.map(r.output.list, 'color');
-      _.each(colors, (color, i) => expect(color).to.equal(expected[i]));
+      _.each(colors, (color, i) => expect(color).toEqual(expected[i]));
     });
   });
 
   it('should handle more colors than number of series', async () => {
     const colorsArg = '#000:#111:#222:#333:#444:#555';
     const numColors = colorsArg.split(':').length;
-    expect(numColors).to.be.above(seriesList.list.length);
+    expect(numColors).toBeGreaterThan(seriesList.list.length);
 
     const r = await invoke(fn, [seriesList, colorsArg]);
     const seriesColors = _.map(r.output.list, 'color');
-    expect(seriesColors).to.eql(['#000000', '#111111', '#222222', '#333333', '#444444']);
+    expect(seriesColors).toEqual(['#000000', '#111111', '#222222', '#333333', '#444444']);
   });
 
   it('should work with series.length=1 and more colors', async () => {
@@ -78,12 +77,12 @@ describe('color.js', () => {
 
     const r = await invoke(fn, [oneLongList, colorsArg]);
     const seriesColors = _.map(r.output.list, 'color');
-    expect(seriesColors).to.eql(['#000']);
+    expect(seriesColors).toEqual(['#000']);
   });
 
   it('throws if you do not pass a color', () => {
     invoke(fn, [seriesList, '']).catch((e) => {
-      expect(e).to.be.an(Error);
+      expect(e).toBeInstanceOf(Error);
     });
   });
 });

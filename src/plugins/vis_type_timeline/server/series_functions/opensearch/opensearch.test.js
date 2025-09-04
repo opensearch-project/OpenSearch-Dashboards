@@ -37,7 +37,6 @@ import createDateAgg from './lib/create_date_agg';
 import opensearchResponse from '../fixtures/opensearch_response';
 
 import _ from 'lodash';
-import { expect } from 'chai';
 import sinon from 'sinon';
 import invoke from '../helpers/invoke_series_fn.js';
 import { UI_SETTINGS } from '../../../../data/server';
@@ -72,14 +71,14 @@ describe('opensearch', () => {
       return invoke(opensearch, [5], tlConfig)
         .then(expect.fail)
         .catch((e) => {
-          expect(e).to.be.an('error');
+          expect(e).toBeInstanceOf(Error);
         });
     });
 
     it('returns a seriesList', () => {
       tlConfig = stubRequestAndServer({ rawResponse: opensearchResponse });
       return invoke(opensearch, [5], tlConfig).then((r) => {
-        expect(r.output.type).to.eql('seriesList');
+        expect(r.output.type).toEqual('seriesList');
       });
     });
   });
@@ -98,34 +97,34 @@ describe('opensearch', () => {
     });
 
     it('creates a date_histogram with meta.type of time_buckets', () => {
-      expect(agg.time_buckets.meta.type).to.eql('time_buckets');
-      expect(agg.time_buckets.date_histogram).to.be.an('object');
+      expect(agg.time_buckets.meta.type).toEqual('time_buckets');
+      expect(typeof agg.time_buckets.date_histogram).toBe('object');
     });
 
     it('has extended_bounds that match tlConfig', () => {
-      expect(agg.time_buckets.date_histogram.extended_bounds.min).to.equal(tlConfig.time.from);
-      expect(agg.time_buckets.date_histogram.extended_bounds.max).to.equal(tlConfig.time.to);
+      expect(agg.time_buckets.date_histogram.extended_bounds.min).toEqual(tlConfig.time.from);
+      expect(agg.time_buckets.date_histogram.extended_bounds.max).toEqual(tlConfig.time.to);
     });
 
     it('sets the timezone', () => {
-      expect(agg.time_buckets.date_histogram.time_zone).to.equal('Etc/UTC');
+      expect(agg.time_buckets.date_histogram.time_zone).toEqual('Etc/UTC');
     });
 
     it('sets the field', () => {
-      expect(agg.time_buckets.date_histogram.field).to.equal('@timestamp');
+      expect(agg.time_buckets.date_histogram.field).toEqual('@timestamp');
     });
 
     it('sets the interval for calendar_interval correctly', () => {
-      expect(agg.time_buckets.date_histogram).to.have.property('calendar_interval', '1y');
+      expect(agg.time_buckets.date_histogram).toHaveProperty('calendar_interval', '1y');
     });
 
     it('sets the interval for fixed_interval correctly', () => {
       const a = createDateAgg({ timefield: '@timestamp', interval: '24h' }, tlConfig);
-      expect(a.time_buckets.date_histogram).to.have.property('fixed_interval', '24h');
+      expect(a.time_buckets.date_histogram).toHaveProperty('fixed_interval', '24h');
     });
 
     it('sets min_doc_count to 0', () => {
-      expect(agg.time_buckets.date_histogram.min_doc_count).to.equal(0);
+      expect(agg.time_buckets.date_histogram.min_doc_count).toEqual(0);
     });
 
     describe('metric aggs', () => {
@@ -134,9 +133,9 @@ describe('opensearch', () => {
       it('adds a metric agg for each metric', () => {
         config.metric = ['sum:beer', 'avg:bytes', 'percentiles:bytes'];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
-        expect(agg.time_buckets.aggs['sum(beer)']).to.eql({ sum: { field: 'beer' } });
-        expect(agg.time_buckets.aggs['avg(bytes)']).to.eql({ avg: { field: 'bytes' } });
-        expect(agg.time_buckets.aggs['percentiles(bytes)']).to.eql({
+        expect(agg.time_buckets.aggs['sum(beer)']).toEqual({ sum: { field: 'beer' } });
+        expect(agg.time_buckets.aggs['avg(bytes)']).toEqual({ avg: { field: 'bytes' } });
+        expect(agg.time_buckets.aggs['percentiles(bytes)']).toEqual({
           percentiles: { field: 'bytes' },
         });
       });
@@ -151,7 +150,7 @@ describe('opensearch', () => {
           },
         ];
         agg = createDateAgg(config, tlConfig, scriptedFields);
-        expect(agg.time_buckets.aggs['avg(scriptedBytes)']).to.eql({
+        expect(agg.time_buckets.aggs['avg(scriptedBytes)']).toEqual({
           avg: {
             script: {
               source: 'doc["bytes"].value',
@@ -164,8 +163,8 @@ describe('opensearch', () => {
       it('has a special `count` metric that uses a script', () => {
         config.metric = ['count'];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
-        expect(agg.time_buckets.aggs.count.bucket_script).to.be.an('object');
-        expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).to.eql('_count');
+        expect(typeof agg.time_buckets.aggs.count.bucket_script).toBe('object');
+        expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).toEqual('_count');
       });
     });
   });
@@ -188,24 +187,24 @@ describe('opensearch', () => {
       config.index = 'beer';
       const request = fn(config, tlConfig, emptyScriptedFields);
 
-      expect(request.params.index).to.equal('beer');
+      expect(request.params.index).toEqual('beer');
     });
 
     it('always sets body.size to 0', () => {
       const request = fn(config, tlConfig, emptyScriptedFields);
 
-      expect(request.params.body.size).to.equal(0);
+      expect(request.params.body.size).toEqual(0);
     });
 
     it('creates a filters agg that contains each of the queries passed', () => {
       config.q = ['foo', 'bar'];
       const request = fn(config, tlConfig, emptyScriptedFields);
 
-      expect(request.params.body.aggs.q.meta.type).to.equal('split');
+      expect(request.params.body.aggs.q.meta.type).toEqual('split');
 
       const filters = request.params.body.aggs.q.filters.filters;
-      expect(filters.foo.query_string.query).to.eql('foo');
-      expect(filters.bar.query_string.query).to.eql('bar');
+      expect(filters.foo.query_string.query).toEqual('foo');
+      expect(filters.bar.query_string.query).toEqual('bar');
     });
 
     describe('timeouts', () => {
@@ -213,14 +212,14 @@ describe('opensearch', () => {
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields, 30000);
 
-        expect(request.params.timeout).to.equal('30000ms');
+        expect(request.params.timeout).toEqual('30000ms');
       });
 
       it('sets no timeout if opensearch.shardTimeout is set to 0', () => {
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields, 0);
 
-        expect(request.params).to.not.have.property('timeout');
+        expect(request.params).not.toHaveProperty('timeout');
       });
     });
 
@@ -240,7 +239,7 @@ describe('opensearch', () => {
         tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        expect(request.params.ignore_throttled).to.equal(true);
+        expect(request.params.ignore_throttled).toEqual(true);
       });
 
       it('sets no timeout if opensearch.shardTimeout is set to 0', () => {
@@ -248,7 +247,7 @@ describe('opensearch', () => {
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        expect(request.params.ignore_throttled).to.equal(false);
+        expect(request.params.ignore_throttled).toEqual(false);
       });
     });
 
@@ -284,35 +283,35 @@ describe('opensearch', () => {
         config.kibana = true;
         const request = fn(config, tlConfig, emptyScriptedFields);
         const filter = request.params.body.query.bool.filter.bool;
-        expect(filter.must.length).to.eql(1);
-        expect(filter.must_not.length).to.eql(2);
+        expect(filter.must.length).toEqual(1);
+        expect(filter.must_not.length).toEqual(2);
       });
 
       it('does not include filters if config.opensearchDashboards = false', () => {
         config.opensearchDashboards = false;
         config.kibana = true;
         const request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.params.body.query.bool.filter).to.eql(undefined);
+        expect(request.params.body.query.bool.filter).toEqual(undefined);
       });
 
       it('does not include filters if config.kibana = false', () => {
         config.opensearchDashboards = true;
         config.kibana = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.params.body.query.bool.filter).to.eql(undefined);
+        expect(request.params.body.query.bool.filter).toEqual(undefined);
       });
 
       it('does not include filters if config.opensearchDashboards = false and config.kibana = false', () => {
         config.opensearchDashboards = false;
         config.kibana = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.params.body.query.bool.filter).to.eql(undefined);
+        expect(request.params.body.query.bool.filter).toEqual(undefined);
       });
 
       it('adds a time filter to the bool querys must clause', () => {
         let request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.params.body.query.bool.must.length).to.eql(1);
-        expect(request.params.body.query.bool.must[0]).to.eql({
+        expect(request.params.body.query.bool.must.length).toEqual(1);
+        expect(request.params.body.query.bool.must[0]).toEqual({
           range: {
             '@timestamp': {
               format: 'strict_date_optional_time',
@@ -324,7 +323,7 @@ describe('opensearch', () => {
 
         config.opensearchDashboards = true;
         request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.params.body.query.bool.must.length).to.eql(1);
+        expect(request.params.body.query.bool.must.length).toEqual(1);
       });
     });
 
@@ -335,13 +334,13 @@ describe('opensearch', () => {
 
         const aggs = request.params.body.aggs.q.aggs;
 
-        expect(aggs.beer.meta.type).to.eql('split');
-        expect(aggs.beer.terms.field).to.eql('beer');
-        expect(aggs.beer.terms.size).to.eql(5);
+        expect(aggs.beer.meta.type).toEqual('split');
+        expect(aggs.beer.terms.field).toEqual('beer');
+        expect(aggs.beer.terms.size).toEqual(5);
 
-        expect(aggs.beer.aggs.wine.meta.type).to.eql('split');
-        expect(aggs.beer.aggs.wine.terms.field).to.eql('wine');
-        expect(aggs.beer.aggs.wine.terms.size).to.eql(10);
+        expect(aggs.beer.aggs.wine.meta.type).toEqual('split');
+        expect(aggs.beer.aggs.wine.terms.field).toEqual('wine');
+        expect(aggs.beer.aggs.wine.terms.size).toEqual(10);
       });
 
       it('adds scripted terms aggs, in order, under the filters agg', () => {
@@ -362,19 +361,19 @@ describe('opensearch', () => {
 
         const aggs = request.params.body.aggs.q.aggs;
 
-        expect(aggs.scriptedBeer.meta.type).to.eql('split');
-        expect(aggs.scriptedBeer.terms.script).to.eql({
+        expect(aggs.scriptedBeer.meta.type).toEqual('split');
+        expect(aggs.scriptedBeer.terms.script).toEqual({
           source: 'doc["beer"].value',
           lang: 'painless',
         });
-        expect(aggs.scriptedBeer.terms.size).to.eql(5);
+        expect(aggs.scriptedBeer.terms.size).toEqual(5);
 
-        expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).to.eql('split');
-        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).to.eql({
+        expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).toEqual('split');
+        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).toEqual({
           source: 'doc["wine"].value',
           lang: 'painless',
         });
-        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).to.eql(10);
+        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).toEqual(10);
       });
     });
   });
@@ -395,7 +394,7 @@ describe('opensearch', () => {
           { key: 3000, count: { value: 15 } },
         ];
 
-        expect(fn(buckets)).to.eql({
+        expect(fn(buckets)).toEqual({
           count: [
             [1000, 3],
             [2000, 14],
@@ -411,7 +410,7 @@ describe('opensearch', () => {
           { key: 3000, count: { value: 15 }, max: { value: 35 } },
         ];
 
-        expect(fn(buckets)).to.eql({
+        expect(fn(buckets)).toEqual({
           count: [
             [1000, 3],
             [2000, 14],
@@ -441,7 +440,7 @@ describe('opensearch', () => {
           },
         ];
 
-        expect(fn(buckets)).to.eql({
+        expect(fn(buckets)).toEqual({
           'percentiles:50.0': [
             [1000, NaN],
             [2000, 25],
@@ -467,7 +466,7 @@ describe('opensearch', () => {
     });
 
     it('should throw an error', () => {
-      expect(aggResponse.default(opensearchResponse.aggregations, config)).to.eql([
+      expect(aggResponse.default(opensearchResponse.aggregations, config)).toEqual([
         {
           data: [
             [1000, 264],
