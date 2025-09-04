@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import dateMath from '@elastic/datemath';
+
 import {
   EuiSuperUpdateButton,
   EuiCompressedFieldText,
@@ -381,27 +382,31 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   );
 
   const datasetSelector = <>{renderDatasetSelector()}</>;
-
   return (
-    <EuiFlexGroup
-      className={classes}
-      responsive={!!props.showDatePicker}
-      gutterSize="xs"
-      direction="column"
-      justifyContent="flexEnd"
-    >
+    <>
+      {/* Portals for dataset selector and date picker */}
       {props?.datasetSelectorRef?.current &&
         createPortal(datasetSelector, props.datasetSelectorRef.current)}
       {props?.datePickerRef?.current && uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
         ? createPortal(datePicker, props.datePickerRef.current)
-        : datePicker}
-      {renderQueryEditor()}
-      <EuiFlexItem>
-        <EuiFlexGroup responsive={false} gutterSize="s" direction="column">
-          <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
+        : null}
+      {shouldRenderQueryEditor() && (
+        <EuiFlexGroup
+          className={classes}
+          responsive={!!props.showDatePicker}
+          gutterSize="xs"
+          direction="column"
+          justifyContent="flexEnd"
+        >
+          {renderQueryEditor()}
+          <EuiFlexItem>
+            <EuiFlexGroup responsive={false} gutterSize="s" direction="column">
+              <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+    </>
   );
 }
 
