@@ -134,7 +134,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
         + Add threshold
       </EuiButton>
       <EuiSpacer size="s" />
-      {/*  placeholder for base range */}
+      {/*  placeholder for base threshold */}
       <EuiFlexGroup
         alignItems="center"
         justifyContent="center"
