@@ -79,6 +79,9 @@ export class ContextProviderPlugin
       executeAction: this.executeAction.bind(this),
       getAvailableActions: this.getAvailableActions.bind(this),
       triggerTestCapture: this.triggerTestCapture.bind(this),
+      // Plugin registration methods
+      registerContextContributor: this.registerContextContributor.bind(this),
+      unregisterContextContributor: this.unregisterContextContributor.bind(this),
       // Additional testing methods
       testTableRowClick: () => this.testTableRowClick(),
       testEmbeddableHover: () => this.testEmbeddableHover(),
@@ -92,6 +95,8 @@ export class ContextProviderPlugin
       getCurrentContext: this.getCurrentContext.bind(this),
       executeAction: this.executeAction.bind(this),
       getAvailableActions: this.getAvailableActions.bind(this),
+      registerContextContributor: this.registerContextContributor.bind(this),
+      unregisterContextContributor: this.unregisterContextContributor.bind(this),
     };
   }
 
@@ -158,6 +163,20 @@ export class ContextProviderPlugin
       filterType: 'phrase',
       timestamp: Date.now(),
     });
+  }
+
+  private registerContextContributor(contributor: any): void {
+    console.log('📝 Registering context contributor via plugin API:', contributor);
+    if (this.contextCaptureService) {
+      this.contextCaptureService.registerContextContributor(contributor);
+    }
+  }
+
+  private unregisterContextContributor(appId: string): void {
+    console.log('🗑️ Unregistering context contributor via plugin API:', appId);
+    if (this.contextCaptureService) {
+      this.contextCaptureService.unregisterContextContributor(appId);
+    }
   }
 
   public stop() {

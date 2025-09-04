@@ -13,6 +13,7 @@ import {
   ContextProviderStartDeps,
   StaticContext,
   DynamicContext,
+  ContextContributor,
 } from '../types';
 
 export class ContextCaptureService {
@@ -20,6 +21,7 @@ export class ContextCaptureService {
   private dynamicContext$ = new BehaviorSubject<DynamicContext | null>(null);
   private coreStart?: CoreStart;
   private pluginsStart?: ContextProviderStartDeps;
+  private contextContributors = new Map<string, ContextContributor>();
 
   constructor(
     private coreSetup: CoreSetup,
@@ -60,6 +62,16 @@ export class ContextCaptureService {
     this.dynamicContext$.next(dynamicContext);
   }
 
+  public registerContextContributor(contributor: ContextContributor): void {
+    console.log(`📝 Registering context contributor for app: ${contributor.appId}`);
+    this.contextContributors.set(contributor.appId, contributor);
+  }
+
+  public unregisterContextContributor(appId: string): void {
+    console.log(`🗑️ Unregistering context contributor for app: ${appId}`);
+    this.contextContributors.delete(appId);
+  }
+
   private async captureStaticContext(appId: string): Promise<void> {
     console.log(`📊 Capturing static context for app: ${appId}`);
 
@@ -76,16 +88,24 @@ export class ContextCaptureService {
     };
 
     try {
-      // Capture app-specific context
-      switch (appId) {
-        case 'dashboards':
-          contextData = { ...contextData, ...(await this.captureDashboardContext()) };
-          break;
-        case 'discover':
-          contextData = { ...contextData, ...(await this.captureDiscoverContext()) };
-          break;
-        default:
-          contextData.message = `Generic context for app: ${appId}`;
+      // Check if there's a registered context contributor for this app
+      const contributor = this.contextContributors.get(appId);
+      if (contributor) {
+        console.log(`🎯 Using registered context contributor for app: ${appId}`);
+        const contributorContext = await contributor.captureStaticContext();
+        contextData = { ...contextData, ...contributorContext };
+      } else {
+        // Fallback to built-in app-specific context
+        switch (appId) {
+          case 'dashboards':
+            contextData = { ...contextData, ...(await this.captureDashboardContext()) };
+            break;
+          case 'discover':
+            contextData = { ...contextData, ...(await this.captureDiscoverContext()) };
+            break;
+          default:
+            contextData.message = `Generic context for app: ${appId}`;
+        }
       }
 
       // Capture common data context
@@ -126,10 +146,11 @@ export class ContextCaptureService {
         try {
           // Try to get dashboard from saved objects
           const dashboard = await this.coreStart.savedObjects.client.get('dashboard', dashboardId);
+          const attributes = dashboard.attributes as any;
           context.dashboard = {
-            title: dashboard.attributes.title,
-            description: dashboard.attributes.description,
-            panelsJSON: dashboard.attributes.panelsJSON,
+            title: attributes.title,
+            description: attributes.description,
+            panelsJSON: attributes.panelsJSON,
           };
         } catch (error) {
           console.warn('Could not fetch dashboard details:', error);
@@ -198,8 +219,8 @@ export class ContextCaptureService {
       }));
 
       // Capture current query
-      const queryState = this.pluginsStart.data.query.getState();
-      dataContext.query = queryState.query;
+      const currentQuery = this.pluginsStart.data.query.queryString.getQuery();
+      dataContext.query = currentQuery;
 
       return { dataContext };
     } catch (error) {
@@ -300,7 +321,9 @@ export class ContextCaptureService {
   private async refreshData(): Promise<any> {
     console.log('🔄 Refreshing data');
     
-    this.pluginsStart!.data.query.queryString.getUpdates$().next();
+    // Trigger a refresh by updating the query state
+    const currentQuery = this.pluginsStart!.data.query.queryString.getQuery();
+    this.pluginsStart!.data.query.queryString.setQuery(currentQuery, true);
     return { success: true, timestamp: Date.now() };
   }
 

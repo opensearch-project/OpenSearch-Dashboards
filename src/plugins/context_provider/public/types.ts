@@ -34,6 +34,14 @@ export interface DynamicContext {
   data: Record<string, any>;
 }
 
+export interface ContextContributor {
+  appId: string;
+  captureStaticContext(): Promise<Record<string, any>>;
+  captureDynamicContext?(trigger: string, data: any): Record<string, any>;
+  getAvailableActions?(): string[];
+  executeAction?(actionType: string, params: any): Promise<any>;
+}
+
 export interface ContextProviderSetup {
   // Setup interface - empty for now
 }
@@ -43,4 +51,7 @@ export interface ContextProviderStart {
   getCurrentContext(): Promise<StaticContext | null>;
   executeAction(actionType: string, params: any): Promise<any>;
   getAvailableActions(): string[];
+  // Plugin registration methods
+  registerContextContributor(contributor: ContextContributor): void;
+  unregisterContextContributor(appId: string): void;
 }
