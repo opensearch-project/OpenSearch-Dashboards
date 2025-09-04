@@ -189,6 +189,8 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
             style={{
               width: isFullScreen ? '100%' : availableWidth ? `${availableWidth}px` : '100%',
               height: isFullScreen ? '100%' : pagination ? 'auto' : defaultHeight,
+              maxWidth: isFullScreen ? 'none' : '100%',
+              overflow: isFullScreen ? 'visible' : 'hidden',
             }}
           />
           {isTableDataLoading && (

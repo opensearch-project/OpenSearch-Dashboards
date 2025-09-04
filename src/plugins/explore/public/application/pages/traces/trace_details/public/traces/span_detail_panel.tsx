@@ -130,6 +130,13 @@ export function SpanDetailPanel(props: {
     }
   }, [payloadData]);
 
+  // Determine if we need scrollable behavior based on span count
+  const needsScrollableContainer = useMemo(() => {
+    // Apply scrollable behavior for larger datasets (15+ spans)
+    // This threshold ensures small datasets don't get scroll bars
+    return parsedData.length >= 15;
+  }, [parsedData.length]);
+
   const ganttChart = useMemo(() => {
     // Calculate dynamic height based on number of spans
     const calculateGanttHeight = (spanCount: number): number => {
@@ -156,9 +163,8 @@ export function SpanDetailPanel(props: {
         return Math.max(minHeight, calculatedHeight);
       }
 
-      // In non-embedded mode, apply the maximum height constraint
-      const maxHeight = 600;
-      return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
+      // In non-embedded mode, let the CSS container handle the max height constraint
+      return Math.max(minHeight, calculatedHeight);
     };
 
     const chart = (
@@ -213,7 +219,13 @@ export function SpanDetailPanel(props: {
             <>
               <EuiHorizontalRule margin="m" />
 
-              <EuiFlexItem className="exploreSpanDetailPanel__contentContainer">
+              <EuiFlexItem
+                className={`exploreSpanDetailPanel__contentContainer${
+                  needsScrollableContainer
+                    ? ' exploreSpanDetailPanel__contentContainer--scrollable'
+                    : ''
+                }`}
+              >
                 {currentView === 'timeline'
                   ? ganttChart
                   : currentView === 'span_list'

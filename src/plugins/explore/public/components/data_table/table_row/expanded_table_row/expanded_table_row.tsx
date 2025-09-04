@@ -19,7 +19,6 @@ import {
   OpenSearchSearchHit,
 } from '../../../../types/doc_views_types';
 import { DocViewer } from '../../../doc_viewer/doc_viewer';
-import { SpanLink } from './span_link';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../common';
 
@@ -74,11 +73,6 @@ export const ExpandedTableRow: React.FC<ExpandedTableRowProps> = ({
           <EuiFlexItem grow={false}>
             <h4 className="euiTitle euiTitle--xxsmall">{headerText}</h4>
           </EuiFlexItem>
-          {flavorId === ExploreFlavor.Traces && (
-            <EuiFlexItem grow={false}>
-              <SpanLink rowData={row} />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>

@@ -12,6 +12,7 @@ import { MetricChartStyleControls } from './metric_vis_config';
 jest.mock('../utils/utils', () => ({
   generateColorBySchema: jest.fn().mockReturnValue(['#123456', '#789abc', '#def012']),
   calculateValue: jest.fn().mockReturnValue(45),
+  getTooltipFormat: jest.fn().mockReturnValue('%b %d, %Y %H:%M:%S'),
 }));
 
 describe('to_expression', () => {
@@ -188,7 +189,7 @@ describe('to_expression', () => {
       // Verify the result structure still works
       expect(result).toHaveProperty('$schema');
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(1);
+      expect(result.layer).toHaveLength(2);
     });
 
     it('should add sparkLineLayer when date column is provided', () => {
@@ -219,7 +220,6 @@ describe('to_expression', () => {
       // Verify the sparkLineLayer (first layer)
       expect(result.layer[0]).toHaveProperty('mark.type', 'area');
       expect(result.layer[0]).toHaveProperty('mark.opacity', 0.3);
-      expect(result.layer[0]).toHaveProperty('mark.line.size', 1);
       expect(result.layer[0]).toHaveProperty('encoding.x.field', 'date-field');
       expect(result.layer[0]).toHaveProperty('encoding.x.type', 'temporal');
       expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
