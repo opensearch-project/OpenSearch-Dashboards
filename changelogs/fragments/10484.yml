@@ -1,0 +1,2 @@
+feat:
+- Deprecate `chai` and `@osd/expect` usage in tests ([#10484](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10484))
