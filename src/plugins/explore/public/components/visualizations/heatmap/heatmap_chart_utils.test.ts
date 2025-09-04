@@ -10,7 +10,7 @@ import {
   enhanceStyle,
 } from './heatmap_chart_utils';
 import * as utils from './heatmap_chart_utils';
-import { LabelAggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
+import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
 
 import { defaultHeatmapChartStyles, HeatmapLabels } from './heatmap_vis_config';
 import * as colorUtil from '../utils/utils';
@@ -45,7 +45,7 @@ describe('createLabelLayer', () => {
           overwriteColor: true,
           color: 'black',
           rotate: false,
-          type: LabelAggregationType.SUM,
+          type: AggregationType.SUM,
         },
       },
     };
@@ -63,7 +63,7 @@ describe('createLabelLayer', () => {
           overwriteColor: true,
           color: 'black',
           rotate: false,
-          type: LabelAggregationType.SUM,
+          type: AggregationType.SUM,
         },
       },
     };
@@ -100,7 +100,7 @@ describe('createLabelLayer', () => {
       ...defaultHeatmapChartStyles,
       label: {
         show: true,
-        type: LabelAggregationType.SUM,
+        type: AggregationType.SUM,
       },
       exclusive: {
         ...defaultHeatmapChartStyles.exclusive,
@@ -109,13 +109,13 @@ describe('createLabelLayer', () => {
           overwriteColor: true,
           color: 'green',
           rotate: false,
-          type: LabelAggregationType.SUM,
+          type: AggregationType.SUM,
         },
       },
     };
 
     const result = createLabelLayer(styles, false, colorField, xAxis, yAxis);
-    expect(result?.encoding.text).toHaveProperty('aggregate', LabelAggregationType.SUM);
+    expect(result?.encoding.text).toHaveProperty('aggregate', AggregationType.SUM);
   });
 
   it('should not add aggregation if label.type is NONE', () => {
@@ -128,7 +128,7 @@ describe('createLabelLayer', () => {
           overwriteColor: true,
           color: 'blue',
           rotate: false,
-          type: LabelAggregationType.NONE,
+          type: AggregationType.NONE,
         },
       },
     };

@@ -31,7 +31,7 @@ const createMetricVisualization = () => {
   cy.getElementByTestId('exploreVisStylePanel')
     .should('be.visible')
     .within(() => {
-      cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+      cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
     });
   cy.get('[role="option"][aria-selected="true"]')
     .should('be.visible')

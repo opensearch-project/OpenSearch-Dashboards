@@ -339,11 +339,6 @@ export class ManagementPlugin
           })
         ),
       });
-
-      core.chrome.navControls.registerLeftBottom({
-        order: 5,
-        mount: toMountPoint(React.createElement(KeyboardShortcutIcon, { core })),
-      });
     }
 
     return {};

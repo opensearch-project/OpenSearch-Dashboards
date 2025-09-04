@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
