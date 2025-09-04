@@ -10,8 +10,7 @@ import {
   ExpressionFunctionOpenSearchDashboards,
   IExpressionLoaderParams,
 } from '../../../../../expressions/public';
-import { defaultLightTheme } from '../theme/light';
-import { defaultDarkTheme } from '../theme/dark';
+import { defaultTheme } from '../theme/default';
 
 /**
  * Convert the visualization configuration to an expression
@@ -27,17 +26,10 @@ export const toExpression = (
     return '';
   }
 
-  if (darkMode) {
-    spec.config = {
-      ...spec.config,
-      ...defaultDarkTheme,
-    };
-  } else {
-    spec.config = {
-      ...spec.config,
-      ...defaultLightTheme,
-    };
-  }
+  spec.config = {
+    ...spec.config,
+    ...defaultTheme,
+  };
 
   const opensearchDashboards = buildExpressionFunction<ExpressionFunctionOpenSearchDashboards>(
     'opensearchDashboards',

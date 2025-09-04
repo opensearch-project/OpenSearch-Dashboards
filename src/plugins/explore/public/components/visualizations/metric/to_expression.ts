@@ -18,7 +18,7 @@ import {
 } from '../types';
 import { generateColorBySchema, getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
-import { getColors } from '../theme/color_palettes';
+import { getColors } from '../theme/default_colors';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
