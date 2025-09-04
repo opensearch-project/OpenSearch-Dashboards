@@ -14,15 +14,15 @@ export const getColors = () => {
       grid: '#27252C',
       categories: [
         '#7598FF',
-        '#00A4BD',
         '#A669E2',
+        '#FF4B14',
+        '#F90',
         '#006CE0',
+        '#008559',
+        '#EB003B',
+        '#FFE8BD',
         '#00A4BD',
         '#D600BA',
-        '#FF4B14',
-        '#EB003B',
-        '#F90',
-        '#FFE8BD',
       ],
     };
   }
@@ -33,15 +33,15 @@ export const getColors = () => {
     grid: '#F5F7FF',
     categories: [
       '#5C7FFF',
-      '#005237',
       '#A669E2',
+      '#FF4B14',
+      '#F90',
       '#003B8F',
+      '#005237',
+      '#EB003B',
+      '#7A2B00',
       '#00A4BD',
       '#B2008F',
-      '#FF4B14',
-      '#EB003B',
-      '#F90',
-      '#7A2B00',
     ],
   };
 };
