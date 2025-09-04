@@ -55,7 +55,7 @@ export const PatternsTableFlyout = () => {
           <>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <PatternsFlyoutUpdateSearch />
+                <PatternsFlyoutUpdateSearch patternString={record.pattern} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />

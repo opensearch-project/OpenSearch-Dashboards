@@ -26,6 +26,22 @@ export const brainPatternQuery = (queryBase: string, patternsField: string) => {
   return `${queryBase} | patterns \`${patternsField}\` method=brain mode=aggregation | sort - pattern_count`;
 };
 
+export const regexUpdateSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field = '${patternString}'`;
+};
+
+export const brainUpdateSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `${queryBase} | patterns \`${patternsField}\` method=brain | where patterns_field = '${patternString}'`;
+};
+
 // Checks if the value is a valid, finite number. Used for patterns table
 export const isValidFiniteNumber = (val: number) => {
   return !isNaN(val) && isFinite(val);

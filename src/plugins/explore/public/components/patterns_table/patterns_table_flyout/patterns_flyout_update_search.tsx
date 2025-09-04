@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { EuiButton } from '@elastic/eui';
 import { EXPLORE_LOGS_TAB_ID } from '../../../../common';
@@ -17,12 +17,26 @@ import {
 } from '../../../application/utils/state_management/slices';
 import { useSetEditorText } from '../../../application/hooks';
 import { executeQueries } from '../../../application/utils/state_management/actions/query_actions';
+import {
+  selectPatternsField,
+  selectQuery,
+  selectUsingRegexPatterns,
+} from '../../../application/utils/state_management/selectors';
+import { getQueryWithSource } from '../../../application/utils/languages';
+import { brainUpdateSearchPatternQuery, regexUpdateSearchPatternQuery } from '../utils/utils';
 
-export const PatternsFlyoutUpdateSearch = () => {
+export interface PatternsFlyoutUpdateSearchProps {
+  patternString: string;
+}
+
+export const PatternsFlyoutUpdateSearch = ({ patternString }: PatternsFlyoutUpdateSearchProps) => {
   const { closePatternsTableFlyout } = usePatternsFlyoutContext();
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const setEditorText = useSetEditorText();
+  const query = useSelector(selectQuery);
+  const patternsField = useSelector(selectPatternsField);
+  const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
 
   return (
     <EuiButton
@@ -31,7 +45,15 @@ export const PatternsFlyoutUpdateSearch = () => {
       })}
       iconType={'continuityBelow'}
       onClick={() => {
-        const newQuery = 'source = opensearch_dashboards_sample_data_logs | fields agent';
+        if (!patternsField) throw new Error('no patterns field');
+
+        // craft query that will select for all documents with specific pattern
+        const preparedQuery = getQueryWithSource(query);
+        const newQuery = usingRegexPatterns
+          ? regexUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString)
+          : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
+
+        // move to 'logs' flow with 'update search' query
         dispatch(setQueryStringWithHistory(newQuery));
         setEditorText(newQuery);
         dispatch(setActiveTab(EXPLORE_LOGS_TAB_ID));
