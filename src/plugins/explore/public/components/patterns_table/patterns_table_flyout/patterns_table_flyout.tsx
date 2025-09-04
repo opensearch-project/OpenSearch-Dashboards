@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { usePatternsFlyoutContext } from './patterns_flyout_context';
+import { PatternsFlyoutUpdateSearch } from './patterns_flyout_update_search';
 
 export interface PatternsFlyoutRecord {
   pattern: string;
@@ -52,6 +53,12 @@ export const PatternsTableFlyout = () => {
           />
         ) : (
           <>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <PatternsFlyoutUpdateSearch />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
             <EuiPanel>
               <EuiFlexGroup>
                 <EuiFlexItem>

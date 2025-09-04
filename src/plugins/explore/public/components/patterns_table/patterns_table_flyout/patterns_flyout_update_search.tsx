@@ -1,0 +1,47 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import { i18n } from '@osd/i18n';
+import { EuiButton } from '@elastic/eui';
+import { EXPLORE_LOGS_TAB_ID } from '../../../../common';
+import { usePatternsFlyoutContext } from './patterns_flyout_context';
+import { ExploreServices } from '../../../types';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import {
+  setActiveTab,
+  setQueryStringWithHistory,
+} from '../../../application/utils/state_management/slices';
+import { useSetEditorText } from '../../../application/hooks';
+import { executeQueries } from '../../../application/utils/state_management/actions/query_actions';
+
+export const PatternsFlyoutUpdateSearch = () => {
+  const { closePatternsTableFlyout } = usePatternsFlyoutContext();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  const dispatch = useDispatch();
+  const setEditorText = useSetEditorText();
+
+  return (
+    <EuiButton
+      aria-label={i18n.translate('explore.patterns.flyout.updateSearchWithPattern', {
+        defaultMessage: 'Update search with pattern',
+      })}
+      iconType={'continuityBelow'}
+      onClick={() => {
+        const newQuery = 'source = opensearch_dashboards_sample_data_logs | fields agent';
+        dispatch(setQueryStringWithHistory(newQuery));
+        setEditorText(newQuery);
+        dispatch(setActiveTab(EXPLORE_LOGS_TAB_ID));
+        dispatch(executeQueries({ services }));
+        closePatternsTableFlyout();
+      }}
+    >
+      {i18n.translate('explore.patterns.flyout.updateSearch', {
+        defaultMessage: 'Update search',
+      })}
+    </EuiButton>
+  );
+};
