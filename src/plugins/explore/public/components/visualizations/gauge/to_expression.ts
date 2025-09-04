@@ -53,7 +53,7 @@ export const createGauge = (
     styleOptions.thresholds
   );
 
-  // Locate which range the target value falls into
+  // Locate which threshold the target value falls into
   const targetThreshold = locateThreshold(mergedThresholds, targetValue);
 
   // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color

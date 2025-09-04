@@ -14,17 +14,41 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
-jest.mock('../style_panel/threshold_custom_values', () => ({
-  ThresholdCustomValues: jest.fn(({ thresholds, onThresholdValuesChange }) => (
-    <div data-test-subj="mockGaugeThreshold">
-      <button
-        data-test-subj="mockAddRange"
-        onClick={() => onThresholdValuesChange([...thresholds, { value: 50, color: '#FF0000' }])}
-      >
-        Add Range
-      </button>
-    </div>
-  )),
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(
+    ({
+      thresholds,
+      onThresholdValuesChange,
+      min,
+      onMinChange,
+      max,
+      onMaxChange,
+      baseColor,
+      onBaseColorChange,
+    }) => (
+      <>
+        <div data-test-subj="mockGaugeThresholdPanel">
+          <button
+            data-test-subj="mockAddRange"
+            onClick={() =>
+              onThresholdValuesChange([...thresholds, { value: 50, color: '#FF0000' }])
+            }
+          >
+            Add Range
+          </button>
+        </div>
+
+        <input
+          data-test-subj="thresholdMinBase"
+          onChange={(e) => onMinChange(Number(e.target.value))}
+        />
+        <input
+          data-test-subj="thresholdMaxBase"
+          onChange={(e) => onMaxChange(Number(e.target.value))}
+        />
+      </>
+    )
+  ),
 }));
 
 describe('GaugeVisStyleControls', () => {
@@ -107,40 +131,31 @@ describe('GaugeVisStyleControls', () => {
 
   it('renders threshold panel', () => {
     render(<GaugeVisStyleControls {...mockProps} />);
-    expect(screen.getByText('Threshold')).toBeInTheDocument();
-    expect(screen.getByTestId('mockGaugeThreshold')).toBeInTheDocument();
+    expect(screen.getByTestId('mockGaugeThresholdPanel')).toBeInTheDocument();
   });
 
   it('renders min and max inputs', () => {
     render(<GaugeVisStyleControls {...mockProps} />);
-    expect(screen.getByTestId('gaugeMinBase')).toBeInTheDocument();
-    expect(screen.getByTestId('gaugeMaxBase')).toBeInTheDocument();
+    expect(screen.getByTestId('thresholdMinBase')).toBeInTheDocument();
+    expect(screen.getByTestId('thresholdMaxBase')).toBeInTheDocument();
   });
 
-  it('calls onStyleChange when min value is changed', async () => {
+  it('calls onStyleChange when min value is changed', () => {
     render(<GaugeVisStyleControls {...mockProps} />);
 
-    const minInput = screen.getByTestId('gaugeMinBase');
-    await fireEvent.change(minInput, {
-      target: { value: 10 },
-    });
+    const minInput = screen.getByTestId('thresholdMinBase');
+    fireEvent.change(minInput, { target: { value: 50 } });
 
-    await waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({ min: 10 });
-    });
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ min: 50 });
   });
 
-  it('calls onStyleChange when max value is changed', async () => {
+  it('calls onStyleChange when max value is changed', () => {
     render(<GaugeVisStyleControls {...mockProps} />);
 
-    const maxInput = screen.getByTestId('gaugeMaxBase');
-    await fireEvent.change(maxInput, {
-      target: { value: 100 },
-    });
+    const maxInput = screen.getByTestId('thresholdMaxBase');
+    fireEvent.change(maxInput, { target: { value: 50 } });
 
-    await waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({ max: 100 });
-    });
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ max: 50 });
   });
 
   it('calls onStyleChange when custom range is added', () => {

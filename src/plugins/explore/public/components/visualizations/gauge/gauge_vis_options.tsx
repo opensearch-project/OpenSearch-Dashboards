@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import { GaugeChartStyleControls } from './gauge_vis_config';
 import { Threshold, AxisRole } from '../types';
-import { ThresholdCustomValues } from '../style_panel/threshold_custom_values';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
-import { DebouncedText, DebouncedTruncateGaugeBaseField } from '../style_panel/utils';
+import { DebouncedText } from '../style_panel/utils';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 
 export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyleControls>;
@@ -82,6 +82,21 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               </EuiFormRow>
             </StyleAccordion>
           </EuiFlexItem>
+
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholds={styleOptions.thresholds}
+              baseColor={styleOptions.baseColor}
+              min={styleOptions.min}
+              max={styleOptions.max}
+              onThresholdValuesChange={(ranges: Threshold[]) => {
+                updateStyleOption('thresholds', ranges);
+              }}
+              onBaseColorChange={(color: string) => updateStyleOption('baseColor', color)}
+              onMinChange={(value) => updateStyleOption('min', value)}
+              onMaxChange={(value) => updateStyleOption('max', value)}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StyleAccordion
               id="gaugeSection"
@@ -90,42 +105,6 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               })}
               initialIsOpen={true}
             >
-              <EuiSplitPanel.Inner paddingSize="s" color="subdued">
-                <EuiText size="s" style={{ fontWeight: 600 }}>
-                  {i18n.translate('explore.stylePanel.gauge.threshold.splitPanel', {
-                    defaultMessage: 'Threshold',
-                  })}
-                </EuiText>
-                <EuiSpacer size="s" />
-
-                <DebouncedTruncateGaugeBaseField
-                  label={i18n.translate('explore.stylePanel.gauge.base.min', {
-                    defaultMessage: 'Min',
-                  })}
-                  value={styleOptions.min}
-                  onChange={(value) => updateStyleOption('min', value)}
-                  testId={'gaugeMinBase'}
-                />
-
-                <DebouncedTruncateGaugeBaseField
-                  label={i18n.translate('explore.stylePanel.gauge.base.max', {
-                    defaultMessage: 'Max',
-                  })}
-                  value={styleOptions.max}
-                  onChange={(value) => updateStyleOption('max', value)}
-                  testId={'gaugeMaxBase'}
-                />
-
-                <ThresholdCustomValues
-                  thresholds={styleOptions.thresholds}
-                  onThresholdValuesChange={(ranges: Threshold[]) => {
-                    updateStyleOption('thresholds', ranges);
-                  }}
-                  baseColor={styleOptions.baseColor}
-                  onBaseColorChange={(color: string) => updateStyleOption('baseColor', color)}
-                />
-              </EuiSplitPanel.Inner>
-
               <EuiSplitPanel.Inner paddingSize="s" color="subdued">
                 <EuiText size="s" style={{ fontWeight: 600 }}>
                   {i18n.translate('explore.stylePanel.gauge.threshold.title.splitPanel', {

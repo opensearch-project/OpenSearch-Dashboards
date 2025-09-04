@@ -13,29 +13,29 @@ import {
   EuiSpacer,
   EuiColorPicker,
 } from '@elastic/eui';
-import { Threshold } from '../types';
-import { useDebouncedValue, useDebouncedNumericValue } from '../utils/use_debounced_value';
+import { Threshold } from '../../types';
+import { useDebouncedValue, useDebouncedNumericValue } from '../../utils/use_debounced_value';
 
 export interface RangeProps {
-  index: number;
+  id: number;
   value: Threshold;
   onChange: (index: number, value: Threshold) => void;
   onDelete: (index: number) => void;
 }
 
-export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }) => {
+export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) => {
   const [thresholdValue, setThresholdValue] = useDebouncedNumericValue(value.value, (val) =>
-    onChange(index, { ...value, value: val })
+    onChange(id, { ...value, value: val })
   );
 
   const [color, setDebouncedColor] = useDebouncedValue<string>(
     value.color,
-    (val) => onChange(index, { ...value, color: val }),
+    (val) => onChange(id, { ...value, color: val }),
     300
   );
 
   const handleDeleteRange = () => {
-    onDelete(index);
+    onDelete(id);
   };
 
   return (
@@ -43,7 +43,7 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }
       alignItems="center"
       justifyContent="center"
       gutterSize="s"
-      data-test-subj={`exploreVisThreshold-${index}`}
+      data-test-subj={`exploreVisThreshold-${id}`}
     >
       <EuiFlexItem>
         <EuiColorPicker color={color} onChange={setDebouncedColor} compressed />
@@ -56,7 +56,7 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }
           value={thresholdValue}
           onChange={(e) => setThresholdValue((e.target as HTMLInputElement).value)}
           placeholder="Value"
-          data-test-subj={`exploreVisThresholdValue-${index}`}
+          data-test-subj={`exploreVisThresholdValue-${id}`}
         />
       </EuiFlexItem>
 
@@ -67,7 +67,7 @@ export const Range: React.FC<RangeProps> = ({ index, value, onChange, onDelete }
           aria-label="Delete"
           color="danger"
           onClick={handleDeleteRange}
-          data-test-subj={`exploreVisThresholdDeleteButton-${index}`}
+          data-test-subj={`exploreVisThresholdDeleteButton-${id}`}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -109,6 +109,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   };
 
   const getNextColor = (rangesLength: number): string => {
+    // TODO: update to use the colors from color palette
     const colors = ['#54B399', '#FFA800', '#DB0000', '#6092C0', '#D36086', '#9170B8'];
     const index = rangesLength % colors.length;
     return colors[index];
@@ -133,7 +134,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
         + Add threshold
       </EuiButton>
       <EuiSpacer size="s" />
-      {/* dummy placeholder for base range */}
+      {/*  placeholder for base range */}
       <EuiFlexGroup
         alignItems="center"
         justifyContent="center"
@@ -163,7 +164,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
         return (
           <Range
             key={index}
-            index={index}
+            id={index}
             value={range}
             onChange={handleRangeChange}
             onDelete={handleDeleteRange}

@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThresholdCustomValues } from './threshold_custom_values';
-import { Threshold } from '../types';
+import { Threshold } from '../../types';
 
 describe('ThresholdCustomValues component', () => {
   const setup = (initialRanges: Threshold[] = []) => {
