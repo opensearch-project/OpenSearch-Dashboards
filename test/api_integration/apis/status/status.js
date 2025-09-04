@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -40,33 +40,33 @@ export default function ({ getService }) {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(({ body }) => {
-          expect(body.name).to.be.a('string');
-          expect(body.uuid).to.be.a('string');
-          expect(body.version.number).to.be.a('string');
-          expect(body.version.build_hash).to.be.a('string');
-          expect(body.version.build_number).to.be.a('number');
+          expect(typeof body.name).toBe('string');
+          expect(typeof body.uuid).toBe('string');
+          expect(typeof body.version.number).toBe('string');
+          expect(typeof body.version.build_hash).toBe('string');
+          expect(typeof body.version.build_number).toBe('number');
 
-          expect(body.status.overall).to.be.an('object');
-          expect(body.status.overall.state).to.be('green');
+          expect(typeof body.status.overall).toBe('object');
+          expect(typeof body.status.overall.state).toBe('green');
 
-          expect(body.status.statuses).to.be.an('array');
+          expect(Array.isArray(body.status.statuses)).toBe(true);
 
-          expect(body.metrics.collection_interval_in_millis).to.be.a('number');
+          expect(typeof body.metrics.collection_interval_in_millis).toBe('number');
 
-          expect(body.metrics.process.memory.heap.total_in_bytes).to.be.a('number');
-          expect(body.metrics.process.memory.heap.used_in_bytes).to.be.a('number');
-          expect(body.metrics.process.memory.heap.size_limit).to.be.a('number');
+          expect(typeof body.metrics.process.memory.heap.total_in_bytes).toBe('number');
+          expect(typeof body.metrics.process.memory.heap.used_in_bytes).toBe('number');
+          expect(typeof body.metrics.process.memory.heap.size_limit).toBe('number');
 
-          expect(body.metrics.os.load['1m']).to.be.a('number');
-          expect(body.metrics.os.load['5m']).to.be.a('number');
-          expect(body.metrics.os.load['15m']).to.be.a('number');
+          expect(typeof body.metrics.os.load['1m']).toBe('number');
+          expect(typeof body.metrics.os.load['5m']).toBe('number');
+          expect(typeof body.metrics.os.load['15m']).toBe('number');
 
-          expect(body.metrics.response_times.avg_in_millis).not.to.be(null); // ok if undefined
-          expect(body.metrics.response_times.max_in_millis).not.to.be(null); // ok if undefined
+          expect(typeof body.metrics.response_times.avg_in_millis).not.toBe(null); // ok if undefined
+          expect(typeof body.metrics.response_times.max_in_millis).not.toBe(null); // ok if undefined
 
-          expect(body.metrics.requests.total).to.be.a('number');
-          expect(body.metrics.requests.disconnects).to.be.a('number');
-          expect(body.metrics.concurrent_connections).to.be.a('number');
+          expect(typeof body.metrics.requests.total).toBe('number');
+          expect(typeof body.metrics.requests.disconnects).toBe('number');
+          expect(typeof body.metrics.concurrent_connections).toBe('number');
         });
     });
   });

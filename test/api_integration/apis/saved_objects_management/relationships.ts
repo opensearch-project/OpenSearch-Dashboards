@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { schema } from '@osd/config-schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(() => {
           responseSchema.validate(resp.body);
-        }).not.to.throwError();
+        }).not.toThrowError();
       });
 
       it('should work for searches', async () => {
@@ -86,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(relationshipsUrl('search', '960372e0-3224-11e8-a572-ffca06da1357'))
           .expect(200);
 
-        expect(resp.body).to.eql([
+        expect(resp.body).toEqual([
           {
             id: '8963ca30-3224-11e8-a572-ffca06da1357',
             type: 'index-pattern',
@@ -130,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(200);
 
-        expect(resp.body).to.eql([
+        expect(resp.body).toEqual([
           {
             id: '8963ca30-3224-11e8-a572-ffca06da1357',
             type: 'index-pattern',
@@ -183,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(() => {
           responseSchema.validate(resp.body);
-        }).not.to.throwError();
+        }).not.toThrowError();
       });
 
       it('should work for dashboards', async () => {
@@ -191,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357'))
           .expect(200);
 
-        expect(resp.body).to.eql([
+        expect(resp.body).toEqual([
           {
             id: 'add810b0-3224-11e8-a572-ffca06da1357',
             type: 'visualization',
@@ -232,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357', ['search']))
           .expect(200);
 
-        expect(resp.body).to.eql([
+        expect(resp.body).toEqual([
           {
             id: 'add810b0-3224-11e8-a572-ffca06da1357',
             type: 'visualization',
@@ -284,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(() => {
           responseSchema.validate(resp.body);
-        }).not.to.throwError();
+        }).not.toThrowError();
       });
 
       it('should work for visualizations', async () => {
@@ -292,7 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(relationshipsUrl('visualization', 'a42c0580-3224-11e8-a572-ffca06da1357'))
           .expect(200);
 
-        expect(resp.body).to.eql([
+        expect(resp.body).toEqual([
           {
             id: '960372e0-3224-11e8-a572-ffca06da1357',
             type: 'search',
@@ -335,7 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(200);
 
-        expect(resp.body).to.eql([
+        expect(resp.body).toEqual([
           {
             id: '960372e0-3224-11e8-a572-ffca06da1357',
             type: 'search',
@@ -370,7 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(() => {
           responseSchema.validate(resp.body);
-        }).not.to.throwError();
+        }).not.toThrowError();
       });
 
       it('should work for index patterns', async () => {
@@ -378,7 +378,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357'))
           .expect(200);
 
-        expect(resp.body).to.eql([
+        expect(resp.body).toEqual([
           {
             id: '960372e0-3224-11e8-a572-ffca06da1357',
             type: 'search',
@@ -421,7 +421,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(200);
 
-        expect(resp.body).to.eql([
+        expect(resp.body).toEqual([
           {
             id: '960372e0-3224-11e8-a572-ffca06da1357',
             type: 'search',

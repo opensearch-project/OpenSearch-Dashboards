@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
@@ -50,23 +50,23 @@ export default function ({ getService, getPageObjects }) {
       await editor.clearValue();
       await editor.type('10');
       const isApplyEnabled = await PageObjects.visEditor.isApplyEnabled();
-      expect(isApplyEnabled).to.be(true);
+      expect(isApplyEnabled).toBe(true);
       await PageObjects.visEditor.clickGo();
       await renderable.waitForRender();
       const counter = await getCounterValue();
-      expect(counter).to.be('10');
+      expect(counter).toBe('10');
     });
 
     it.skip('should allow changing params from within the vis', async () => {
       await testSubjects.click('counter');
       await renderable.waitForRender();
       const visValue = await getCounterValue();
-      expect(visValue).to.be('11');
+      expect(visValue).toBe('11');
       const editorValue = await testSubjects.getAttribute('counterEditor', 'value');
-      expect(editorValue).to.be('11');
+      expect(editorValue).toBe('11');
       // If changing a param from within the vis it should immediately apply and not bring editor in an unchanged state
       const isApplyEnabled = await PageObjects.visEditor.isApplyEnabled();
-      expect(isApplyEnabled).to.be(false);
+      expect(isApplyEnabled).toBe(false);
     });
   });
 }

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import Bluebird from 'bluebird';
 import { get } from 'lodash';
 
@@ -55,7 +55,7 @@ export default function ({ getService }) {
         })
         .then((response) => {
           const dqlTelemetryDoc = get(response, 'hits.hits[0]._source.dql-telemetry');
-          expect(dqlTelemetryDoc.optInCount).to.be(1);
+          expect(dqlTelemetryDoc.optInCount).toBe(1);
         });
     });
 
@@ -73,7 +73,7 @@ export default function ({ getService }) {
         })
         .then((response) => {
           const dqlTelemetryDoc = get(response, 'hits.hits[0]._source.dql-telemetry');
-          expect(dqlTelemetryDoc.optOutCount).to.be(1);
+          expect(dqlTelemetryDoc.optOutCount).toBe(1);
         });
     });
 
@@ -85,7 +85,7 @@ export default function ({ getService }) {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(({ body }) => {
-          expect(body.success).to.be(true);
+          expect(body.success).toBe(true);
         });
     });
 
@@ -97,7 +97,7 @@ export default function ({ getService }) {
         .expect('Content-Type', /json/)
         .expect(200)
         .then(({ body }) => {
-          expect(body.success).to.be(true);
+          expect(body.success).toBe(true);
         });
     });
 

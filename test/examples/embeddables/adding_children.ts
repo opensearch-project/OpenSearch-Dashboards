@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
@@ -57,7 +57,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.setValue('taskInputField', 'new task');
       await testSubjects.click('createTodoEmbeddable');
       const tasks = await testSubjects.getVisibleTextAll('todoEmbeddableTask');
-      expect(tasks).to.eql(['Goes out on Wednesdays!', 'new task']);
+      expect(tasks).toEqual(['Goes out on Wednesdays!', 'new task']);
     });
 
     it('Can add a child backed off a saved object', async () => {
@@ -68,7 +68,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.moveMouseTo('euiFlyoutCloseButton');
       await flyout.ensureClosed('dashboardAddPanel');
       const tasks = await testSubjects.getVisibleTextAll('todoEmbeddableTask');
-      expect(tasks).to.eql(['Goes out on Wednesdays!', 'new task', 'Take the garbage out']);
+      expect(tasks).toEqual(['Goes out on Wednesdays!', 'new task', 'Take the garbage out']);
     });
   });
 }

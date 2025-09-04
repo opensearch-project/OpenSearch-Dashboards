@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -45,7 +45,7 @@ export default function ({ getService }) {
           .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({});
+            expect(resp.body).toEqual({});
           }));
 
       it('should return generic 404 when deleting an unknown doc', async () =>
@@ -53,7 +53,7 @@ export default function ({ getService }) {
           .delete(`/api/saved_objects/dashboard/not-a-real-id`)
           .expect(404)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               statusCode: 404,
               error: 'Not Found',
               message: 'Saved object [dashboard/not-a-real-id] not found',
@@ -76,7 +76,7 @@ export default function ({ getService }) {
           .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .expect(404)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               statusCode: 404,
               error: 'Not Found',
               message: 'Saved object [dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab] not found',

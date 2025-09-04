@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
@@ -68,9 +68,9 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
-      expect(newPanelCount).to.eql(originalPanelCount);
+      expect(newPanelCount).toEqual(originalPanelCount);
       const titles = await PageObjects.dashboard.getPanelTitles();
-      expect(titles.indexOf(newTitle)).to.not.be(-1);
+      expect(titles.indexOf(newTitle)).not.toBe(-1);
     });
 
     it('redirects via save as button after edit, adding a new panel', async () => {
@@ -85,9 +85,9 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
-      expect(newPanelCount).to.eql(originalPanelCount + 1);
+      expect(newPanelCount).toEqual(originalPanelCount + 1);
       const titles = await PageObjects.dashboard.getPanelTitles();
-      expect(titles.indexOf(newTitle)).to.not.be(-1);
+      expect(titles.indexOf(newTitle)).not.toBe(-1);
     });
 
     it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {

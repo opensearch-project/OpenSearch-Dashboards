@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InspectorProvider({ getService }: FtrProviderContext) {
@@ -51,7 +51,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
     public async expectIsEnabled(): Promise<void> {
       await retry.try(async () => {
         const isEnabled = await this.getIsEnabled();
-        expect(isEnabled).to.be(true);
+        expect(isEnabled).toBe(true);
       });
     }
 
@@ -61,7 +61,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
     public async expectIsNotEnabled(): Promise<void> {
       await retry.try(async () => {
         const isEnabled = await this.getIsEnabled();
-        expect(isEnabled).to.be(false);
+        expect(isEnabled).toBe(false);
       });
     }
 
@@ -103,7 +103,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
     public async expectTableData(expectedData: string[][]): Promise<void> {
       await log.debug(`Inspector.expectTableData(${expectedData.join(',')})`);
       const data = await this.getTableData();
-      expect(data).to.eql(expectedData);
+      expect(data).toEqual(expectedData);
     }
 
     /**
@@ -171,7 +171,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
     public async expectTableHeaders(expected: string[]): Promise<void> {
       await retry.try(async () => {
         const headers = await this.getTableHeaders();
-        expect(headers).to.eql(expected);
+        expect(headers).toEqual(expected);
       });
     }
 

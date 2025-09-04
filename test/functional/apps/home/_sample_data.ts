@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -61,40 +61,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should display registered flights sample data sets', async () => {
       await retry.try(async () => {
         const exists = await PageObjects.home.doesSampleDataSetExist('flights');
-        expect(exists).to.be(true);
+        expect(exists).toBe(true);
       });
     });
 
     it('should display registered logs sample data sets', async () => {
       await retry.try(async () => {
         const exists = await PageObjects.home.doesSampleDataSetExist('logs');
-        expect(exists).to.be(true);
+        expect(exists).toBe(true);
       });
     });
 
     it('should display registered ecommerce sample data sets', async () => {
       await retry.try(async () => {
         const exists = await PageObjects.home.doesSampleDataSetExist('ecommerce');
-        expect(exists).to.be(true);
+        expect(exists).toBe(true);
       });
     });
 
     it('should install flights sample data set', async () => {
       await PageObjects.home.addSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
-      expect(isInstalled).to.be(true);
+      expect(isInstalled).toBe(true);
     });
 
     it('should install logs sample data set', async () => {
       await PageObjects.home.addSampleDataSet('logs');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
-      expect(isInstalled).to.be(true);
+      expect(isInstalled).toBe(true);
     });
 
     it('should install ecommerce sample data set', async () => {
       await PageObjects.home.addSampleDataSet('ecommerce');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
-      expect(isInstalled).to.be(true);
+      expect(isInstalled).toBe(true);
     });
 
     describe('dashboard', () => {
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(18);
+        expect(panelCount).toBe(18);
       });
 
       it('should render visualizations', async () => {
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
         log.debug('Checking vega chart rendered');
         const tsvb = await find.existsByCssSelector('.vgaVis__view');
-        expect(tsvb).to.be(true);
+        expect(tsvb).toBe(true);
       });
 
       it('should launch sample logs data set dashboard', async () => {
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(11);
+        expect(panelCount).toBe(11);
       });
 
       it('should launch sample ecommerce data set dashboard', async () => {
@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(12);
+        expect(panelCount).toBe(12);
       });
     });
 
@@ -174,19 +174,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should uninstall flights sample data set', async () => {
         await PageObjects.home.removeSampleDataSet('flights');
         const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
-        expect(isInstalled).to.be(false);
+        expect(isInstalled).toBe(false);
       });
 
       it('should uninstall logs sample data set', async () => {
         await PageObjects.home.removeSampleDataSet('logs');
         const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
-        expect(isInstalled).to.be(false);
+        expect(isInstalled).toBe(false);
       });
 
       it('should uninstall ecommerce sample data set', async () => {
         await PageObjects.home.removeSampleDataSet('ecommerce');
         const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
-        expect(isInstalled).to.be(false);
+        expect(isInstalled).toBe(false);
       });
     });
   });

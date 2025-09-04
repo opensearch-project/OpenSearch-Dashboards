@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { join } from 'path';
 
 export default function ({ getService }) {
@@ -64,7 +64,7 @@ export default function ({ getService }) {
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               success: true,
               successCount: 0,
             });
@@ -97,7 +97,7 @@ export default function ({ getService }) {
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               success: true,
               successCount: 3,
               successResults: [
@@ -115,7 +115,7 @@ export default function ({ getService }) {
           .field('retries', '[]')
           .expect(400)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               statusCode: 400,
               error: 'Bad Request',
               message: '[request body.file]: expected value of type [Stream] but got [undefined]',
@@ -134,7 +134,7 @@ export default function ({ getService }) {
           .attach('file', fileBuffer, 'export.ndjson')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               success: false,
               successCount: 0,
               errors: [
@@ -161,7 +161,7 @@ export default function ({ getService }) {
           .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
           .expect(400)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               statusCode: 400,
               error: 'Bad Request',
               message: "Can't import more than 10000 objects",
@@ -199,7 +199,7 @@ export default function ({ getService }) {
           .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               success: false,
               successCount: 0,
               errors: [
@@ -236,7 +236,7 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true, successCount: 0 });
+              expect(resp.body).toEqual({ success: true, successCount: 0 });
             });
         });
 
@@ -266,7 +266,7 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 success: true,
                 successCount: 3,
                 successResults: [
@@ -294,7 +294,7 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 success: true,
                 successCount: 1,
                 successResults: [{ ...visualization, overwrite: true }],
@@ -339,7 +339,7 @@ export default function ({ getService }) {
             .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 success: true,
                 successCount: 1,
                 successResults: [
@@ -355,7 +355,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/visualization/1')
             .expect(200)
             .then((resp) => {
-              expect(resp.body.references).to.eql([
+              expect(resp.body.references).toEqual([
                 {
                   name: 'ref_0',
                   type: 'index-pattern',

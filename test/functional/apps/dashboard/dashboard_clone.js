@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
       await retry.try(async () => {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
-        expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
+        expect(panelTitles).toEqual(PageObjects.dashboard.getTestVisualizationNames());
       });
     });
 
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickClone();
 
       const title = await PageObjects.dashboard.getCloneTitle();
-      expect(title).to.be(clonedDashboardName);
+      expect(title).toBe(clonedDashboardName);
     });
 
     it('and warns on duplicate name', async function () {

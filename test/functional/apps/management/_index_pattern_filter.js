@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
@@ -60,9 +60,9 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
-        expect(fieldTypes.length).to.be.above(0);
+        expect(fieldTypes.length).toBeGreaterThan(0);
         for (const fieldType of fieldTypes) {
-          expect(fieldType).to.be('string');
+          expect(fieldType).toBe('string');
         }
       });
 
@@ -70,9 +70,9 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
-        expect(fieldTypes.length).to.be.above(0);
+        expect(fieldTypes.length).toBeGreaterThan(0);
         for (const fieldType of fieldTypes) {
-          expect(fieldType).to.be('number');
+          expect(fieldType).toBe('number');
         }
       });
     });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }) {
           const data = await PageObjects.visChart.getLineChartData('Count');
           log.debug('count data=' + data);
           log.debug('data.length=' + data.length);
-          expect(data).to.eql(expectedChartValues[0]);
+          expect(data).toEqual(expectedChartValues[0]);
         });
 
         await retry.try(async () => {
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }) {
           log.debug('data.length=' + avgMemoryData.length);
           // adjust assertion to make it work on both Chrome & Firefox
           avgMemoryData.map((item, i) => {
-            expect(item - expectedChartValues[1][i]).to.be.lessThan(600001);
+            expect(item - expectedChartValues[1][i]).toBeLessThan(600001);
           });
         });
       });
@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should put secondary axis on the right', async function () {
         const length = await PageObjects.visChart.getRightValueAxes();
-        expect(length).to.be(1);
+        expect(length).toBe(1);
       });
     });
 
@@ -175,7 +175,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.setSeriesType(1, 'histogram');
         await PageObjects.visEditor.clickGo();
         const length = await PageObjects.visChart.getHistogramSeries();
-        expect(length).to.be(1);
+        expect(length).toBe(1);
       });
     });
 
@@ -188,9 +188,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.toggleGridCategoryLines();
         await PageObjects.visEditor.clickGo();
         const gridLines = await PageObjects.visChart.getGridLines();
-        expect(gridLines.length).to.be(9);
+        expect(gridLines.length).toBe(9);
         gridLines.forEach((gridLine) => {
-          expect(gridLine.y).to.be(0);
+          expect(gridLine.y).toBe(0);
         });
       });
 
@@ -199,9 +199,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.toggleGridCategoryLines();
         await PageObjects.visEditor.clickGo();
         const gridLines = await PageObjects.visChart.getGridLines();
-        expect(gridLines.length).to.be(9);
+        expect(gridLines.length).toBe(9);
         gridLines.forEach((gridLine) => {
-          expect(gridLine.x).to.be(0);
+          expect(gridLine.x).toBe(0);
         });
       });
     });
@@ -227,14 +227,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.toggleValuesOnChart();
         await PageObjects.visEditor.clickGo();
         const values = await PageObjects.visChart.getChartValues();
-        expect(values).to.eql(['2,592', '2,373', '1,194', '489', '415']);
+        expect(values).toEqual(['2,592', '2,373', '1,194', '489', '415']);
       });
 
       it('should hide values on bar chart', async () => {
         await PageObjects.visEditor.toggleValuesOnChart();
         await PageObjects.visEditor.clickGo();
         const values = await PageObjects.visChart.getChartValues();
-        expect(values.length).to.be(0);
+        expect(values.length).toBe(0);
       });
     });
 
@@ -254,14 +254,14 @@ export default function ({ getService, getPageObjects }) {
 
       it('should render a custom label when one is set', async function () {
         const title = await PageObjects.visChart.getYAxisTitle();
-        expect(title).to.be(customLabel);
+        expect(title).toBe(customLabel);
       });
 
       it('should render a custom axis title when one is set, overriding the custom label', async function () {
         await PageObjects.visEditor.setAxisTitle(axisTitle);
         await PageObjects.visEditor.clickGo();
         const title = await PageObjects.visChart.getYAxisTitle();
-        expect(title).to.be(axisTitle);
+        expect(title).toBe(axisTitle);
       });
 
       it('should preserve saved axis titles after a vis is saved and reopened', async function () {
@@ -276,7 +276,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickMetricsAndAxes();
         await PageObjects.visEditor.clickYAxisOptions('ValueAxis-1');
         const title = await PageObjects.visChart.getYAxisTitle();
-        expect(title).to.be(axisTitle);
+        expect(title).toBe(axisTitle);
       });
     });
 
@@ -286,7 +286,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show round labels in default timezone', async function () {
         await initChart();
         const labels = await PageObjects.visChart.getXAxisLabels();
-        expect(labels.join()).to.contain(expectedLabels.join());
+        expect(labels.join()).toContain(expectedLabels.join());
       });
 
       it('should show round labels in different timezone', async function () {
@@ -297,7 +297,7 @@ export default function ({ getService, getPageObjects }) {
 
         const labels = await PageObjects.visChart.getXAxisLabels();
 
-        expect(labels.join()).to.contain(expectedLabels.join());
+        expect(labels.join()).toContain(expectedLabels.join());
       });
 
       it('should show different labels in different timezone', async function () {

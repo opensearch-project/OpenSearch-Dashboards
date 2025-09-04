@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 
@@ -47,7 +47,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       log.debug(`DashboardExpect.panelCount(${expectedCount})`);
       await retry.try(async () => {
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(expectedCount);
+        expect(panelCount).toBe(expectedCount);
       });
     }
 
@@ -56,7 +56,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       let notLoaded = await PageObjects.dashboard.getNotLoadedVisualizations(vizList);
       // TODO: Determine issue occasionally preventing 'geo map' from loading
       notLoaded = notLoaded.filter((x) => x !== 'Rendering Test: geo map');
-      expect(notLoaded).to.be.empty();
+      expect(notLoaded).toBe.empty();
     }
 
     async selectedLegendColorCount(color: string, expectedCount: number) {
@@ -66,7 +66,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
           `legendSelectedColor-${color}`,
           findTimeout
         );
-        expect(selectedLegendColor.length).to.be(expectedCount);
+        expect(selectedLegendColor.length).toBe(expectedCount);
       });
     }
 
@@ -74,7 +74,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       log.debug(`DashboardExpect.dataGridTableCellCount(${expectedCount})`);
       await retry.try(async () => {
         const docTableCells = await testSubjects.findAll('dataGridRowCell', findTimeout);
-        expect(docTableCells.length).to.be(expectedCount);
+        expect(docTableCells.length).toBe(expectedCount);
       });
     }
 
@@ -82,7 +82,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       log.debug(`DashboardExpect.fieldSuggestions(${expectedFields})`);
       const fields = await filterBar.getFilterEditorFields();
       expectedFields.forEach((expectedField) => {
-        expect(fields).to.contain(expectedField);
+        expect(fields).toContain(expectedField);
       });
     }
 
@@ -92,7 +92,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
         legendValues.map(async (legend) => {
           await retry.try(async () => {
             const legendValueExists = await testSubjects.exists(`legend-${legend}`);
-            expect(legendValueExists).to.be(true);
+            expect(legendValueExists).toBe(true);
           });
         })
       );
@@ -111,7 +111,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
         texts.forEach((value) => {
           const indexOfValue = elementTexts.indexOf(value);
-          expect(indexOfValue).to.be.greaterThan(-1);
+          expect(indexOfValue).toBe.greaterThan(-1);
           elementTexts.splice(indexOfValue, 1);
         });
       });
@@ -142,7 +142,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
         texts.forEach((value) => {
           const indexOfValue = elementTexts.indexOf(value);
-          expect(indexOfValue).to.be(-1);
+          expect(indexOfValue).toBe(-1);
         });
       });
     }
@@ -159,7 +159,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       log.debug(`DashboardExpect.timelineLegendCount(${expectedCount})`);
       await retry.try(async () => {
         const flotLegendLabels = await testSubjects.findAll('flotLegendLabel', findTimeout);
-        expect(flotLegendLabels.length).to.be(expectedCount);
+        expect(flotLegendLabels.length).toBe(expectedCount);
       });
     }
 
@@ -171,7 +171,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
           return await find.descendantExistsByCssSelector('text', tagCloud);
         })
       );
-      expect(tagCloudsHaveContent.indexOf(false)).to.be.greaterThan(-1);
+      expect(tagCloudsHaveContent.indexOf(false)).toBe.greaterThan(-1);
     }
 
     async tagCloudWithValuesFound(values: string[]) {
@@ -188,7 +188,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
           return true;
         })
       );
-      expect(matches.indexOf(true)).to.be.greaterThan(-1);
+      expect(matches.indexOf(true)).toBe.greaterThan(-1);
     }
 
     async goalAndGuageLabelsExist(labels: string[]) {
@@ -236,7 +236,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       await retry.try(async () => {
         // Need to change it here to find out how many rows there are
         const timeStamps = await dataGrid.getDataGridTableColumn('date');
-        expect(timeStamps.length).to.be(expectedCount);
+        expect(timeStamps.length).toBe(expectedCount);
       });
     }
 
@@ -248,7 +248,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
           'td[data-test-subj="docTableExpandToggleColumn"]',
           findTimeout
         );
-        expect(firstCells.length).to.be(expectedCount);
+        expect(firstCells.length).toBe(expectedCount);
       });
     }
 
@@ -256,7 +256,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
       await retry.try(async () => {
         const seriesElements = await find.allByCssSelector('.series', findTimeout);
-        expect(seriesElements.length).to.be(expectedCount);
+        expect(seriesElements.length).toBe(expectedCount);
       });
     }
 
@@ -264,7 +264,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       log.debug(`DashboardExpect.inputControlItemCount(${expectedCount})`);
       await retry.try(async () => {
         const inputControlItems = await testSubjects.findAll('inputControlItem');
-        expect(inputControlItems.length).to.be(expectedCount);
+        expect(inputControlItems.length).toBe(expectedCount);
       });
     }
 
@@ -272,7 +272,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       log.debug(`DashboardExpect.lineChartPointsCount(${expectedCount})`);
       await retry.try(async () => {
         const points = await find.allByCssSelector('.points', findTimeout);
-        expect(points.length).to.be(expectedCount);
+        expect(points.length).toBe(expectedCount);
       });
     }
 
@@ -280,7 +280,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       log.debug(`DashboardExpect.tsvbTableCellCount(${expectedCount})`);
       await retry.try(async () => {
         const tableCells = await testSubjects.findAll('tvbTableVis__value', findTimeout);
-        expect(tableCells.length).to.be(expectedCount);
+        expect(tableCells.length).toBe(expectedCount);
       });
     }
   })();

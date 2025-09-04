@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -37,7 +37,7 @@ export default function ({ getService }) {
     it('app response sends content security policy headers', async () => {
       const response = await supertest.get('/app/opensearch-dashboards');
 
-      expect(response.headers).to.have.property('content-security-policy');
+      expect(response.headers).toHaveProperty('content-security-policy');
       const header = response.headers['content-security-policy'];
       const parsed = new Map(
         header.split(';').map((rule) => {
@@ -48,7 +48,7 @@ export default function ({ getService }) {
       );
 
       const entries = Array.from(parsed.entries());
-      expect(entries).to.eql([
+      expect(entries).toEqual([
         ['script-src', ["'unsafe-eval'", "'self'"]],
         ['worker-src', ['blob:', "'self'"]],
         ['style-src', ["'unsafe-inline'", "'self'"]],

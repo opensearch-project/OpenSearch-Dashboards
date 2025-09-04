@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -51,15 +51,15 @@ export default function ({ getService }) {
           .then((resp) => {
             // loose uuid validation
             expect(resp.body)
-              .to.have.property('id')
+              .toHaveProperty('id')
               .match(/^[0-9a-f-]{36}$/);
 
             // loose ISO8601 UTC time with milliseconds validation
             expect(resp.body)
-              .to.have.property('updated_at')
+              .toHaveProperty('updated_at')
               .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
 
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               id: resp.body.id,
               type: 'visualization',
               updated_at: resp.body.updated_at,
@@ -82,7 +82,7 @@ export default function ({ getService }) {
           })
           .expect(200);
 
-        expect(resp.body).not.to.have.property('references');
+        expect(resp.body).not.toHaveProperty('references');
       });
 
       it('passes references if they are provided', async () => {
@@ -98,8 +98,8 @@ export default function ({ getService }) {
           })
           .expect(200);
 
-        expect(resp.body).to.have.property('references');
-        expect(resp.body.references).to.eql(references);
+        expect(resp.body).toHaveProperty('references');
+        expect(resp.body.references).toEqual(references);
       });
 
       it('passes empty references array if empty references array is provided', async () => {
@@ -113,8 +113,8 @@ export default function ({ getService }) {
           })
           .expect(200);
 
-        expect(resp.body).to.have.property('references');
-        expect(resp.body.references).to.eql([]);
+        expect(resp.body).toHaveProperty('references');
+        expect(resp.body.references).toEqual([]);
       });
 
       describe('unknown id', () => {

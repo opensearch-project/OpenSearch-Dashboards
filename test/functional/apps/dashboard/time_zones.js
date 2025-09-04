@@ -29,7 +29,7 @@
  */
 
 import path from 'path';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
@@ -70,8 +70,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('Exported dashboard adjusts EST time to UTC', async () => {
       const time = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-      expect(time.start).to.be('Apr 10, 2018 @ 03:00:00.000');
-      expect(time.end).to.be('Apr 10, 2018 @ 04:00:00.000');
+      expect(time.start).toBe('Apr 10, 2018 @ 03:00:00.000');
+      expect(time.end).toBe('Apr 10, 2018 @ 04:00:00.000');
       await pieChart.expectPieSliceCount(4);
     });
 
@@ -82,8 +82,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
       const time = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-      expect(time.start).to.be('Apr 9, 2018 @ 22:00:00.000');
-      expect(time.end).to.be('Apr 9, 2018 @ 23:00:00.000');
+      expect(time.start).toBe('Apr 9, 2018 @ 22:00:00.000');
+      expect(time.end).toBe('Apr 9, 2018 @ 23:00:00.000');
       await pieChart.expectPieSliceCount(4);
     });
   });

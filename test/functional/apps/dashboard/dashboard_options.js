@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
         const titles = await PageObjects.dashboard.getPanelTitles();
-        expect(titles[0]).to.eql('');
+        expect(titles[0]).toEqual('');
       });
     });
 
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
         const titles = await PageObjects.dashboard.getPanelTitles();
-        expect(titles[0]).to.eql(originalTitles[0]);
+        expect(titles[0]).toEqual(originalTitles[0]);
       });
     });
   });

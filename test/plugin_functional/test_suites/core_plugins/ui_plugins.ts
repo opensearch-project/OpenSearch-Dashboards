@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           await browser.execute(() => {
             return window._coreProvider.setup.plugins.core_plugin_b.sayHi();
           })
-        ).to.be('Plugin A said: Hello from Plugin A!');
+        ).toBe('Plugin A said: Hello from Plugin A!');
       });
     });
 
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
             const [coreStart] = await window._coreProvider.setup.core.getStartServices();
             cb(Boolean(coreStart.overlays));
           })
-        ).to.be(true);
+        ).toBe(true);
       });
     });
 
@@ -74,8 +74,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('should attach pluginContext to window.env', async () => {
         const envData: any = await browser.execute('return window.env');
-        expect(envData.mode.dev).to.be(true);
-        expect(envData.packageInfo.version).to.be.a('string');
+        expect(envData.mode.dev).toBe(true);
+        expect(typeof envData.packageInfo.version).toEqual('string');
       });
     });
 
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           await browser.executeAsync(async (cb) => {
             window._coreProvider.start.plugins.core_plugin_b.sendSystemRequest(true).then(cb);
           })
-        ).to.be('/core_plugin_b/system_request says: "System request? true"');
+        ).toBe('/core_plugin_b/system_request says: "System request? true"');
       });
 
       it('should not send osd-system-request header when asSystemRequest: false', async () => {
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           await browser.executeAsync(async (cb) => {
             window._coreProvider.start.plugins.core_plugin_b.sendSystemRequest(false).then(cb);
           })
-        ).to.be('/core_plugin_b/system_request says: "System request? false"');
+        ).toBe('/core_plugin_b/system_request says: "System request? false"');
       });
     });
 
@@ -125,8 +125,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           .get('/plugins/corePluginStaticAssets/assets/chart.svg')
           .expect(200);
 
-        expect(response.header).to.have.property('etag');
-        expect(response.header).to.have.property('last-modified');
+        expect(response.header).toHaveProperty('etag');
+        expect(response.header).toHaveProperty('last-modified');
       });
 
       it('generates the same "etag" & "last-modified" for the same asset', async () => {
@@ -134,14 +134,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           .get('/plugins/corePluginStaticAssets/assets/chart.svg')
           .expect(200);
 
-        expect(firstResponse.header).to.have.property('etag');
+        expect(firstResponse.header).toHaveProperty('etag');
 
         const secondResponse = await supertest
           .get('/plugins/corePluginStaticAssets/assets/chart.svg')
           .expect(200);
 
-        expect(secondResponse.header.etag).to.be(firstResponse.header.etag);
-        expect(secondResponse.header['last-modified']).to.be(firstResponse.header['last-modified']);
+        expect(secondResponse.header.etag).toBe(firstResponse.header.etag);
+        expect(secondResponse.header['last-modified']).toBe(firstResponse.header['last-modified']);
       });
     });
   });

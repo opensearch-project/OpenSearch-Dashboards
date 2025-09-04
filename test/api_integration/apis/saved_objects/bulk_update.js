@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import _ from 'lodash';
 
 export default function ({ getService }) {
@@ -67,9 +67,9 @@ export default function ({ getService }) {
 
         // loose ISO8601 UTC time with milliseconds validation
         expect(firstObject)
-          .to.have.property('updated_at')
+          .toHaveProperty('updated_at')
           .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-        expect(_.omit(firstObject, ['updated_at'])).to.eql({
+        expect(_.omit(firstObject, ['updated_at'])).toEqual({
           id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
           type: 'visualization',
           version: 'WzgsMV0=',
@@ -80,9 +80,9 @@ export default function ({ getService }) {
         });
 
         expect(secondObject)
-          .to.have.property('updated_at')
+          .toHaveProperty('updated_at')
           .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-        expect(_.omit(secondObject, ['updated_at'])).to.eql({
+        expect(_.omit(secondObject, ['updated_at'])).toEqual({
           id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
           type: 'dashboard',
           version: 'WzksMV0=',
@@ -135,8 +135,8 @@ export default function ({ getService }) {
         const {
           saved_objects: [firstUpdatedObject, secondUpdatedObject],
         } = response.body;
-        expect(firstUpdatedObject).to.not.have.property('error');
-        expect(secondUpdatedObject).to.not.have.property('error');
+        expect(firstUpdatedObject).not.toHaveProperty('error');
+        expect(secondUpdatedObject).not.toHaveProperty('error');
 
         const {
           body: {
@@ -153,8 +153,8 @@ export default function ({ getService }) {
           },
         ]);
 
-        expect(visObjectAfterUpdate.references).to.eql(visObject.references);
-        expect(dashObjectAfterUpdate.references).to.eql([
+        expect(visObjectAfterUpdate.references).toEqual(visObject.references);
+        expect(dashObjectAfterUpdate.references).toEqual([
           { id: 'foo', name: 'Foo', type: 'visualization' },
         ]);
       });
@@ -197,7 +197,7 @@ export default function ({ getService }) {
           },
         ]);
 
-        expect(visObjectAfterUpdate.references).to.eql([]);
+        expect(visObjectAfterUpdate.references).toEqual([]);
       });
 
       describe('unknown id', () => {
@@ -238,9 +238,9 @@ export default function ({ getService }) {
           });
 
           expect(updatedObject)
-            .to.have.property('updated_at')
+            .toHaveProperty('updated_at')
             .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-          expect(_.omit(updatedObject, ['updated_at', 'version'])).to.eql({
+          expect(_.omit(updatedObject, ['updated_at', 'version'])).toEqual({
             id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
             type: 'dashboard',
             attributes: {
@@ -287,7 +287,7 @@ export default function ({ getService }) {
           saved_objects: [firstObject, secondObject],
         } = response.body;
 
-        expect(firstObject).to.eql({
+        expect(firstObject).toEqual({
           id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
           type: 'visualization',
           error: {
@@ -297,7 +297,7 @@ export default function ({ getService }) {
           },
         });
 
-        expect(secondObject).to.eql({
+        expect(secondObject).toEqual({
           id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
           type: 'dashboard',
           error: {

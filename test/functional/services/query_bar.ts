@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function QueryBarProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -96,7 +96,7 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async expectQueryLanguageOrFail(lang: 'dql' | 'lucene'): Promise<void> {
       const queryLanguageButton = await testSubjects.find('switchQueryLanguageButton');
-      expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(lang);
+      expect((await queryLanguageButton.getVisibleText()).toLowerCase()).toEqual(lang);
     }
 
     public async getSuggestions() {

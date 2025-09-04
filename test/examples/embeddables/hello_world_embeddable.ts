@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
@@ -45,14 +45,14 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('hello world embeddable render', async () => {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('helloWorldEmbeddable');
-        expect(text).to.be('HELLO WORLD!');
+        expect(text).toBe('HELLO WORLD!');
       });
     });
 
     it('hello world embeddable from factory renders', async () => {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('helloWorldEmbeddableFromFactory');
-        expect(text).to.be('HELLO WORLD!');
+        expect(text).toBe('HELLO WORLD!');
       });
     });
   });

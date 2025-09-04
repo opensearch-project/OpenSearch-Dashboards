@@ -29,7 +29,7 @@
  */
 
 import { unzip } from 'lodash';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const getTestSpec = (expression: string) => `
@@ -75,22 +75,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('initial render', () => {
         it('should have some initial vega spec text', async function () {
           const vegaSpec = await PageObjects.vegaChart.getSpec();
-          expect(vegaSpec).to.contain('{');
-          expect(vegaSpec).to.contain('data');
-          expect(vegaSpec.length).to.be.above(500);
+          expect(vegaSpec).toContain('{');
+          expect(vegaSpec).toContain('data');
+          expect(vegaSpec.length).toBe.above(500);
         });
 
         it('should have view and control containers', async function () {
           const view = await PageObjects.vegaChart.getViewContainer();
-          expect(view).to.be.ok();
+          expect(view).toBe.ok();
           const size = await view.getSize();
-          expect(size).to.have.property('width');
-          expect(size).to.have.property('height');
-          expect(size.width).to.be.above(0);
-          expect(size.height).to.be.above(0);
+          expect(size).toHaveProperty('width');
+          expect(size).toHaveProperty('height');
+          expect(size.width).toBe.above(0);
+          expect(size.height).toBe.above(0);
 
           const controls = await PageObjects.vegaChart.getControlContainer();
-          expect(controls).to.be.ok();
+          expect(controls).toBe.ok();
         });
       });
 
@@ -109,13 +109,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.visEditor.clickGo();
           await PageObjects.visChart.waitForVisualizationRenderingStabilized();
           const fullDataLabels = await PageObjects.vegaChart.getYAxisLabels();
-          expect(fullDataLabels[0]).to.eql('0');
-          expect(fullDataLabels[fullDataLabels.length - 1]).to.eql('1,600');
+          expect(fullDataLabels[0]).toEqual('0');
+          expect(fullDataLabels[fullDataLabels.length - 1]).toEqual('1,600');
           await filterBar.addFilter('@tags.raw', 'is', 'error');
           await PageObjects.visChart.waitForVisualizationRenderingStabilized();
           const filteredDataLabels = await PageObjects.vegaChart.getYAxisLabels();
-          expect(filteredDataLabels[0]).to.eql('0');
-          expect(filteredDataLabels[filteredDataLabels.length - 1]).to.eql('90');
+          expect(filteredDataLabels[0]).toEqual('0');
+          expect(filteredDataLabels[filteredDataLabels.length - 1]).toEqual('90');
         });
       });
     });
@@ -145,7 +145,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await retry.try(async () => {
               const requestStatisticTab = await getFn();
 
-              expect(await requestStatisticTab.isEnabled()).to.be(true);
+              expect(await requestStatisticTab.isEnabled()).toBe(true);
             });
           }
         });
@@ -153,14 +153,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should set the default query name if not given in the schema', async () => {
           const requests = await inspector.getRequestNames();
 
-          expect(requests).to.be('Unnamed request #0');
+          expect(requests).toBe('Unnamed request #0');
         });
 
         it('should log the request statistic', async () => {
           await inspector.openInspectorRequestsView();
           const rawTableData = await inspector.getTableData();
 
-          expect(unzip(rawTableData)[0].join(', ')).to.be(
+          expect(unzip(rawTableData)[0].join(', ')).toBe(
             'Hits, Hits (total), Query time, Request timestamp'
           );
         });
@@ -186,7 +186,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await retry.try(async () => {
               const requestStatisticTab = await getFn();
 
-              expect(await requestStatisticTab.isEnabled()).to.be(true);
+              expect(await requestStatisticTab.isEnabled()).toBe(true);
             });
           }
         });
@@ -197,9 +197,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           const { rows, columns } = await vegaDebugInspectorView.getGridTableData();
 
-          expect(columns.join(', ')).to.be('Signal, Value');
-          expect(rows.length).to.be.greaterThan(0);
-          expect(rows[0].length).to.be(2);
+          expect(columns.join(', ')).toBe('Signal, Value');
+          expect(rows.length).toBe.greaterThan(0);
+          expect(rows[0].length).toBe(2);
         });
 
         it('should contain data on "Signal Values" tab', async () => {
@@ -208,8 +208,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           const { rows, columns } = await vegaDebugInspectorView.getGridTableData();
 
-          expect(columns.length).to.be.greaterThan(0);
-          expect(rows.length).to.be.greaterThan(0);
+          expect(columns.length).toBe.greaterThan(0);
+          expect(rows.length).toBe.greaterThan(0);
         });
 
         it('should be able to copy vega spec to clipboard', async () => {
@@ -218,7 +218,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           const copyCopyToClipboardButton = await vegaDebugInspectorView.getCopyClipboardButton();
 
-          expect(await copyCopyToClipboardButton.isEnabled()).to.be(true);
+          expect(await copyCopyToClipboardButton.isEnabled()).toBe(true);
 
           // The "clipboard-read" permission of the Permissions API must be granted
           if (!(await browser.checkBrowserPermission('clipboard-read'))) {
@@ -231,7 +231,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             (await browser.getClipboardValue()).includes(
               '"$schema": "https://vega.github.io/schema/vega-lite/'
             )
-          ).to.be(true);
+          ).toBe(true);
         });
       });
     });
@@ -256,8 +256,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const currentTimeRange = await PageObjects.timePicker.getTimeConfig();
 
-        expect(currentTimeRange.start).to.be('Jan 1, 2019 @ 00:00:00.000');
-        expect(currentTimeRange.end).to.be('Jan 1, 2020 @ 00:00:00.000');
+        expect(currentTimeRange.start).toBe('Jan 1, 2019 @ 00:00:00.000');
+        expect(currentTimeRange.end).toBe('Jan 1, 2020 @ 00:00:00.000');
       });
 
       it('should set filter by calling "opensearchDashboardsAddFilter" expression', async () => {
@@ -265,30 +265,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           getTestSpec('opensearchDashboardsAddFilter({ query_string: { query: "response:200" }})')
         );
 
-        expect(await filterBar.getFilterCount()).to.be(1);
+        expect(await filterBar.getFilterCount()).toBe(1);
       });
 
       it('should remove filter by calling "opensearchDashboardsRemoveFilter" expression', async () => {
         await filterBar.addFilter('response', 'is', '200');
 
-        expect(await filterBar.getFilterCount()).to.be(1);
+        expect(await filterBar.getFilterCount()).toBe(1);
 
         await fillSpecAndGo(
           getTestSpec('opensearchDashboardsRemoveFilter({ match_phrase: { response: "200" }})')
         );
 
-        expect(await filterBar.getFilterCount()).to.be(0);
+        expect(await filterBar.getFilterCount()).toBe(0);
       });
 
       it('should remove all filters by calling "opensearchDashboardsRemoveAllFilters" expression', async () => {
         await filterBar.addFilter('response', 'is', '200');
         await filterBar.addFilter('response', 'is', '500');
 
-        expect(await filterBar.getFilterCount()).to.be(2);
+        expect(await filterBar.getFilterCount()).toBe(2);
 
         await fillSpecAndGo(getTestSpec('opensearchDashboardsRemoveAllFilters()'));
 
-        expect(await filterBar.getFilterCount()).to.be(0);
+        expect(await filterBar.getFilterCount()).toBe(0);
       });
     });
   });

@@ -37,7 +37,7 @@
 
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchArchiver = getService('opensearchArchiver');
@@ -73,12 +73,12 @@ export default function ({ getService, getPageObjects }) {
         },
       });
       log.debug(JSON.stringify(response));
-      expect(response.result).to.be('updated');
+      expect(response.result).toBe('updated');
       await PageObjects.settings.setFieldFormat('url');
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async function () {
         const message = await PageObjects.common.closeToast();
-        expect(message).to.contain('Unable');
+        expect(message).toContain('Unable');
       });
     });
 
@@ -102,12 +102,12 @@ export default function ({ getService, getPageObjects }) {
         },
       });
       log.debug(JSON.stringify(response));
-      expect(response.result).to.be('updated');
+      expect(response.result).toBe('updated');
       await PageObjects.settings.controlChangeSave();
       await retry.try(async function () {
         //await PageObjects.common.sleep(2000);
         const message = await PageObjects.common.closeToast();
-        expect(message).to.contain('Unable');
+        expect(message).toContain('Unable');
       });
     });
   });

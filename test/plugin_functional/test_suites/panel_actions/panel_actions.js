@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -44,9 +44,9 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.openContextMenu();
       const actionElement = await testSubjects.find('embeddablePanelAction-samplePanelLink');
       const actionElementTag = await actionElement.getTagName();
-      expect(actionElementTag).to.be('a');
+      expect(actionElementTag).toBe('a');
       const actionElementLink = await actionElement.getAttribute('href');
-      expect(actionElementLink).to.be('https://example.com/opensearch-dashboards/test');
+      expect(actionElementLink).toBe('https://example.com/opensearch-dashboards/test');
     });
 
     it('Sample action appears in context menu in view mode', async () => {

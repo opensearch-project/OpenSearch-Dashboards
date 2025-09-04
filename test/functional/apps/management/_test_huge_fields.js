@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchArchiver = getService('opensearchArchiver');
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('test_huge data should have expected number of fields', async function () {
       const tabCount = await PageObjects.settings.getFieldsTabCount();
-      expect(tabCount).to.be(EXPECTED_FIELD_COUNT);
+      expect(tabCount).toBe(EXPECTED_FIELD_COUNT);
     });
 
     after(async () => {

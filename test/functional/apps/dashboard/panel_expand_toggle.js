@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.clickExpandPanelToggle();
       await retry.try(async () => {
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.eql(1);
+        expect(panelCount).toEqual(1);
       });
     });
 
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
       // being a CSS update is causing the UI to change slower than grabbing the panels?
       await retry.try(async () => {
         const panelCountAfterMaxThenMinimize = await PageObjects.dashboard.getPanelCount();
-        expect(panelCountAfterMaxThenMinimize).to.be(panelCount);
+        expect(panelCountAfterMaxThenMinimize).toBe(panelCount);
       });
     });
 
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
       await browser.goBack();
       await retry.try(async () => {
         const panelCountAfterMaxThenMinimize = await PageObjects.dashboard.getPanelCount();
-        expect(panelCountAfterMaxThenMinimize).to.be(panelCount);
+        expect(panelCountAfterMaxThenMinimize).toBe(panelCount);
       });
     });
   });

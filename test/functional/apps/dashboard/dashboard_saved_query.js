@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchArchiver = getService('opensearchArchiver');
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show the saved query management component when there are no saved queries', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
-        expect(descriptionText).to.eql(
+        expect(descriptionText).toEqual(
           'Saved Queries\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
         );
       });
@@ -79,16 +79,16 @@ export default function ({ getService, getPageObjects }) {
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
-        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+        expect(timePickerValues.start).not.toEqual(PageObjects.timePicker.defaultStartTime);
+        expect(timePickerValues.end).not.toEqual(PageObjects.timePicker.defaultEndTime);
       });
 
       it('preserves the currently loaded query when the page is reloaded', async () => {
         await browser.refresh();
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
-        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
-        expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
+        expect(timePickerValues.start).not.toEqual(PageObjects.timePicker.defaultStartTime);
+        expect(timePickerValues.end).not.toEqual(PageObjects.timePicker.defaultEndTime);
+        expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).toBe('OkResponse');
       });
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
@@ -101,9 +101,9 @@ export default function ({ getService, getPageObjects }) {
         );
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        expect(await queryBar.getQueryString()).to.eql('');
+        expect(await queryBar.getQueryString()).toEqual('');
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        expect(await queryBar.getQueryString()).to.eql('response:404');
+        expect(await queryBar.getQueryString()).toEqual('response:404');
       });
 
       it('allows saving the currently loaded query as a new query', async () => {
@@ -119,20 +119,20 @@ export default function ({ getService, getPageObjects }) {
       it('allows deleting the currently loaded saved query in the saved query management component and clears the query', async () => {
         await savedQueryManagementComponent.deleteSavedQuery('OkResponseCopy');
         await savedQueryManagementComponent.savedQueryMissingOrFail('OkResponseCopy');
-        expect(await queryBar.getQueryString()).to.eql('');
+        expect(await queryBar.getQueryString()).toEqual('');
       });
 
       it('resets any changes to a loaded query on reloading the same saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await queryBar.setQuery('response:503');
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        expect(await queryBar.getQueryString()).to.eql('response:404');
+        expect(await queryBar.getQueryString()).toEqual('response:404');
       });
 
       it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        expect(await queryBar.getQueryString()).to.eql('');
+        expect(await queryBar.getQueryString()).toEqual('');
       });
     });
   });

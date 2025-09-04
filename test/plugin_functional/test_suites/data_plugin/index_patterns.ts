@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_provider_plugin/types';
 
@@ -42,21 +42,21 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       const body = await (await supertest.get('/api/index-patterns-plugin/get-all').expect(200))
         .body;
       indexPatternId = body[0];
-      expect(body.length > 0).to.equal(true);
+      expect(body.length > 0).toEqual(true);
     });
 
     it('can get index pattern by id', async () => {
       const body = await (
         await supertest.get(`/api/index-patterns-plugin/get/${indexPatternId}`).expect(200)
       ).body;
-      expect(typeof body.id).to.equal('string');
+      expect(typeof body.id).toEqual('string');
     });
 
     it('can update index pattern', async () => {
       const resp = await supertest
         .get(`/api/index-patterns-plugin/update/${indexPatternId}`)
         .expect(200);
-      expect(resp.body).to.eql({});
+      expect(resp.body).toEqual({});
     });
 
     it('can delete index pattern', async () => {

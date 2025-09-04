@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { WorkspaceAttribute } from 'opensearch-dashboards/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -56,8 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
 
-      expect(result.body.success).equal(true);
-      expect(result.body.result.id).to.be.a('string');
+      expect(result.body.success).toEqual(true);
+      expect(typeof result.body.result.id).toBe('string');
     });
     it('get', async () => {
       const result = await supertest
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const getResult = await supertest.get(`/api/workspaces/${result.body.result.id}`);
-      expect(getResult.body.result.name).equal(testWorkspace.name);
+      expect(getResult.body.result.name).toEqual(testWorkspace.name);
     });
     it('update', async () => {
       const result: any = await supertest
@@ -93,8 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const getResult = await supertest.get(`/api/workspaces/${result.body.result.id}`);
 
-      expect(getResult.body.success).equal(true);
-      expect(getResult.body.result.name).equal('updated');
+      expect(getResult.body.success).toEqual(true);
+      expect(getResult.body.result.name).toEqual('updated');
     });
     it('delete', async () => {
       const result: any = await supertest
@@ -112,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const getResult = await supertest.get(`/api/workspaces/${result.body.result.id}`);
 
-      expect(getResult.body.success).equal(false);
+      expect(getResult.body.success).toEqual(false);
     });
     it('list', async () => {
       await supertest
@@ -141,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .set('osd-xsrf', 'opensearch-dashboards')
         .expect(200);
-      expect(listResult.body.result.total).equal(2);
+      expect(listResult.body.result.total).toEqual(2);
     });
   });
 }

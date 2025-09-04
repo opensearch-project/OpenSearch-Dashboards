@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import path from 'path';
 
 export default function ({ getService, getPageObjects }) {
@@ -67,8 +67,8 @@ export default function ({ getService, getPageObjects }) {
 
       //instead of asserting on count- am asserting on the titles- which is more accurate than count.
       const objects = await PageObjects.savedObjects.getRowTitles();
-      expect(objects.includes('mysavedsearch')).to.be(true);
-      expect(objects.includes('mysavedviz')).to.be(true);
+      expect(objects.includes('mysavedsearch')).toBe(true);
+      expect(objects.includes('mysavedviz')).toBe(true);
     });
   });
 }

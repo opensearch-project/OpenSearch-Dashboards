@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
         );
         await retry.try(async () => {
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(originalPanelCount + 1);
+          expect(panelCount).toEqual(originalPanelCount + 1);
         });
         await PageObjects.dashboard.waitForRenderComplete();
       });
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
 
         await retry.try(async () => {
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(originalPanelCount + 1);
+          expect(panelCount).toEqual(originalPanelCount + 1);
         });
         await PageObjects.dashboard.waitForRenderComplete();
       });
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
       it('saves the saved visualization url to the app link', async () => {
         await PageObjects.header.clickVisualize();
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
+        expect(currentUrl).toContain(VisualizeConstants.EDIT_PATH);
       });
 
       after(async () => {
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
         const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
         await dashboardAddPanel.closeAddPanel();
-        expect(exists).to.be(true);
+        expect(exists).toBe(true);
       });
 
       describe('is false', () => {
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
 
           const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
           await dashboardAddPanel.closeAddPanel();
-          expect(exists).to.be(false);
+          expect(exists).toBe(false);
         });
 
         after(async () => {

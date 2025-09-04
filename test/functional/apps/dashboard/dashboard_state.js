@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
         '#8d4059'
       );
 
-      expect(colorChoiceRetained).to.be(true);
+      expect(colorChoiceRetained).toBe(true);
     });
 
     // TODO: Revert the following changes on the following 3 saved search tests
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.saveDashboard('No local edits');
 
       const inViewMode = await testSubjects.exists('dashboardEditMode');
-      expect(inViewMode).to.be(true);
+      expect(inViewMode).toBe(true);
 
       await PageObjects.header.clickDiscover();
       // add load save search here since discover link won't take it to the save search link
@@ -129,9 +129,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const headers = await PageObjects.discover.getColumnHeaders();
-      expect(headers.length).to.be(3);
-      expect(headers[1]).to.be('bytes');
-      expect(headers[2]).to.be('agent');
+      expect(headers.length).toBe(3);
+      expect(headers[1]).toBe('bytes');
+      expect(headers[2]).toBe('agent');
     });
 
     it('Saved search with column changes will not update when the saved object changes', async () => {
@@ -151,13 +151,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const headers = await PageObjects.discover.getColumnHeaders();
-      expect(headers.length).to.be(2);
-      expect(headers[1]).to.be('agent');
+      expect(headers.length).toBe(2);
+      expect(headers[1]).toBe('agent');
     });
 
     it('Saved search will update when the query is changed in the URL', async () => {
       const currentQuery = await queryBar.getQueryString();
-      expect(currentQuery).to.equal('');
+      expect(currentQuery).toEqual('');
       const currentUrl = await browser.getCurrentUrl();
 
       // due to previous re-open saved search, history is changed.
@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }) {
 
       const headers = await testSubjects.findAll('docTableHeaderField');
       // will be zero because the query inserted in the url doesn't match anything
-      expect(headers.length).to.be(0);
+      expect(headers.length).toBe(0);
     });
 
     // TODO: race condition it seems with the query from previous state
@@ -202,7 +202,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.openInspector();
       const changedTileMapData = await inspector.getTableData();
       await inspector.close();
-      expect(changedTileMapData.length).to.not.equal(tileMapData.length);
+      expect(changedTileMapData.length).not.toEqual(tileMapData.length);
     });
 
     describe('Directly modifying url updates dashboard state', () => {
@@ -211,14 +211,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
 
         const currentQuery = await queryBar.getQueryString();
-        expect(currentQuery).to.equal('');
+        expect(currentQuery).toEqual('');
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
         await browser.get(newUrl.toString(), false);
         const newQuery = await queryBar.getQueryString();
-        expect(newQuery).to.equal('hi');
+        expect(newQuery).toEqual('hi');
       });
 
       it('for panel size parameters', async function () {
@@ -239,10 +239,10 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.waitForRenderComplete();
           // Add a "margin" of error  - because of page margins, it won't be a straight doubling of width.
           const marginOfError = 10;
-          expect(newPanelDimensions[0].width).to.be.lessThan(
+          expect(newPanelDimensions[0].width).toBeLessThan(
             currentPanelDimensions[0].width * 2 + marginOfError
           );
-          expect(newPanelDimensions[0].width).to.be.greaterThan(
+          expect(newPanelDimensions[0].width).toBeGreaterThan(
             currentPanelDimensions[0].width * 2 - marginOfError
           );
         });
@@ -255,7 +255,7 @@ export default function ({ getService, getPageObjects }) {
 
         await retry.try(async () => {
           const newPanelCount = await PageObjects.dashboard.getPanelCount();
-          expect(newPanelCount).to.be(0);
+          expect(newPanelCount).toBe(0);
         });
       });
 
@@ -278,14 +278,14 @@ export default function ({ getService, getPageObjects }) {
               }
             });
 
-            expect(whitePieSliceCounts).to.be(1);
+            expect(whitePieSliceCounts).toBe(1);
           });
         });
 
         it('and updates the pie slice legend color', async function () {
           await retry.try(async () => {
             const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#FFFFFF');
-            expect(colorExists).to.be(true);
+            expect(colorExists).toBe(true);
           });
         });
 
@@ -298,14 +298,14 @@ export default function ({ getService, getPageObjects }) {
           await retry.try(async () => {
             const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
             // The default color that was stored with the visualization before any dashboard overrides.
-            expect(pieSliceStyle.indexOf('rgb(84, 179, 153)')).to.be.greaterThan(0);
+            expect(pieSliceStyle.indexOf('rgb(84, 179, 153)')).toBeGreaterThan(0);
           });
         });
 
         it('resets the legend color as well', async function () {
           await retry.try(async () => {
             const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#54B399');
-            expect(colorExists).to.be(true);
+            expect(colorExists).toBe(true);
           });
         });
       });

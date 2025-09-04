@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
         // the getYAxisLabels helper always returns the labels on the left axis
         const leftLabels = await PageObjects.visChart.getYAxisLabels();
         log.debug(`${leftLabels.length} tick labels on left x axis`);
-        expect(leftLabels.length).to.be.greaterThan(bottomLabels.length * (2 / 3));
+        expect(leftLabels.length).toBeGreaterThan(bottomLabels.length * (2 / 3));
       });
 
       it('should not filter out first label after rotation of the chart', async function () {
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.visEditor.clickGo();
         const bottomLabels = await PageObjects.visChart.getXAxisLabels();
-        expect(bottomLabels.length).to.be(1);
+        expect(bottomLabels.length).toBe(1);
 
         await PageObjects.visEditor.clickMetricsAndAxes();
         await PageObjects.visEditor.selectXAxisPosition('left');
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
 
         // the getYAxisLabels helper always returns the labels on the left axis
         const leftLabels = await PageObjects.visChart.getYAxisLabels();
-        expect(leftLabels.length).to.be(1);
+        expect(leftLabels.length).toBe(1);
       });
     });
 
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.setDateRangeByIndex('1', 'now-2w/w', 'now-1w/w');
         await PageObjects.visEditor.clickGo();
         const bottomLabels = await PageObjects.visChart.getXAxisLabels();
-        expect(bottomLabels.length).to.be(2);
+        expect(bottomLabels.length).toBe(2);
       });
     });
 
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visChart.getBarChartData();
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        expect(data).toEqual(expectedChartValues);
       });
     });
 
@@ -274,7 +274,7 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visChart.getBarChartData();
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        expect(data).toEqual(expectedChartValues);
       });
 
       await PageObjects.visEditor.toggleOpenEditor(2);
@@ -350,7 +350,7 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visChart.getBarChartData();
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        expect(data).toEqual(expectedChartValues);
       });
     });
 
@@ -368,9 +368,9 @@ export default function ({ getService, getPageObjects }) {
         const minLabel = 2;
         const maxLabel = 5000;
         const numberOfLabels = 10;
-        expect(labels.length).to.be.greaterThan(numberOfLabels);
-        expect(labels[0]).to.eql(minLabel);
-        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
+        expect(labels.length).toBeGreaterThan(numberOfLabels);
+        expect(labels[0]).toEqual(minLabel);
+        expect(labels[labels.length - 1]).toBeGreaterThan(maxLabel);
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
@@ -380,9 +380,9 @@ export default function ({ getService, getPageObjects }) {
         const minLabel = 2;
         const maxLabel = 5000;
         const numberOfLabels = 10;
-        expect(labels.length).to.be.greaterThan(numberOfLabels);
-        expect(labels[0]).to.eql(minLabel);
-        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
+        expect(labels.length).toBeGreaterThan(numberOfLabels);
+        expect(labels[0]).toEqual(minLabel);
+        expect(labels[labels.length - 1]).toBeGreaterThan(maxLabel);
       });
 
       it('should show ticks on selecting square root scale', async () => {
@@ -401,7 +401,7 @@ export default function ({ getService, getPageObjects }) {
           '1,400',
           '1,600',
         ];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
 
       it('should show filtered ticks on selecting square root scale', async () => {
@@ -409,7 +409,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
 
       it('should show ticks on selecting linear scale', async () => {
@@ -429,7 +429,7 @@ export default function ({ getService, getPageObjects }) {
           '1,400',
           '1,600',
         ];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
 
       it('should show filtered ticks on selecting linear scale', async () => {
@@ -437,7 +437,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
     });
 
@@ -451,8 +451,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        expect(labels[0]).to.eql('0%');
-        expect(labels[labels.length - 1]).to.eql('100%');
+        expect(labels[0]).toEqual('0%');
+        expect(labels[labels.length - 1]).toEqual('100%');
       });
     });
 
@@ -469,7 +469,7 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedEntries = ['200', '404', '503'];
         const legendEntries = await PageObjects.visChart.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
+        expect(legendEntries).toEqual(expectedEntries);
       });
 
       it('should allow custom sorting of series', async () => {
@@ -479,7 +479,7 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedEntries = ['404', '200', '503'];
         const legendEntries = await PageObjects.visChart.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
+        expect(legendEntries).toEqual(expectedEntries);
       });
 
       it('should correctly filter by legend', async () => {
@@ -487,7 +487,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visChart.waitForVisualization();
         const legendEntries = await PageObjects.visChart.getLegendEntries();
         const expectedEntries = ['200'];
-        expect(legendEntries).to.eql(expectedEntries);
+        expect(legendEntries).toEqual(expectedEntries);
         await filterBar.removeFilter('response.raw');
         await PageObjects.visChart.waitForVisualization();
       });
@@ -528,7 +528,7 @@ export default function ({ getService, getPageObjects }) {
           '404 - win xp',
         ];
         const legendEntries = await PageObjects.visChart.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
+        expect(legendEntries).toEqual(expectedEntries);
       });
 
       it('should show correct series when disabling first agg', async function () {
@@ -539,7 +539,7 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedEntries = ['win 8', 'win xp', 'ios', 'osx', 'win 7'];
         const legendEntries = await PageObjects.visChart.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
+        expect(legendEntries).toEqual(expectedEntries);
       });
     });
 
@@ -555,7 +555,7 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedEntries = ['Derivative of Count'];
         const legendEntries = await PageObjects.visChart.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
+        expect(legendEntries).toEqual(expectedEntries);
       });
 
       it('should show an error if last bucket aggregation is terms', async () => {
@@ -565,7 +565,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.selectField('response.raw');
 
         const errorMessage = await PageObjects.visEditor.getBucketErrorMessage();
-        expect(errorMessage).to.contain('Last bucket aggregation must be "Date Histogram"');
+        expect(errorMessage).toContain('Last bucket aggregation must be "Date Histogram"');
       });
     });
   });

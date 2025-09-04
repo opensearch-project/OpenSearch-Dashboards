@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
       // initial metric of "Count" is selected by default
       return retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getGaugeValue();
-        expect(expectedCount).to.eql(metricValue);
+        expect(expectedCount).toEqual(metricValue);
       });
     });
 
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
 
       await retry.try(async () => {
-        expect(await PageObjects.visChart.getGaugeValue()).to.eql([
+        expect(await PageObjects.visChart.getGaugeValue()).toEqual([
           '2,904',
           'win 8',
           '2,858',
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getGaugeValue();
-        expect(expectedTexts).to.eql(metricValue);
+        expect(expectedTexts).toEqual(metricValue);
       });
     });
 
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function tryingForTime() {
         const expectedTexts = ['57.273%', 'Average bytes'];
         const metricValue = await PageObjects.visChart.getGaugeValue();
-        expect(expectedTexts).to.eql(metricValue);
+        expect(expectedTexts).toEqual(metricValue);
       });
     });
   });

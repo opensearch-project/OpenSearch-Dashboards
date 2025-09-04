@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -46,26 +46,26 @@ export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrP
     it('clicking on newsfeed icon should open you empty newsfeed', async () => {
       await globalNav.clickNewsfeed();
       const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
-      expect(isOpen).to.be(true);
+      expect(isOpen).toBe(true);
 
       const hasNewsfeedEmptyPanel = await PageObjects.newsfeed.openNewsfeedEmptyPanel();
-      expect(hasNewsfeedEmptyPanel).to.be(true);
+      expect(hasNewsfeedEmptyPanel).toBe(true);
     });
 
     it('no red icon', async () => {
       const hasCheckedNews = await PageObjects.newsfeed.getRedButtonSign();
-      expect(hasCheckedNews).to.be(false);
+      expect(hasCheckedNews).toBe(false);
     });
 
     it('shows empty panel due to error response', async () => {
       const objects = await PageObjects.newsfeed.getNewsfeedList();
-      expect(objects).to.eql([]);
+      expect(objects).toEqual([]);
     });
 
     it('clicking on newsfeed icon should close opened newsfeed', async () => {
       await globalNav.clickNewsfeed();
       const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
-      expect(isOpen).to.be(false);
+      expect(isOpen).toBe(false);
     });
   });
 }

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
@@ -66,30 +66,30 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('TODO app state is synced with url, back navigation works', async () => {
         // checking that in initial state checkbox is unchecked and state is synced with url
-        expect(await testSubjects.isChecked('todoCheckbox-0')).to.be(false);
-        expect(await browser.getCurrentUrl()).to.contain('completed:!f');
+        expect(await testSubjects.isChecked('todoCheckbox-0')).toBe(false);
+        expect(await browser.getCurrentUrl()).toContain('completed:!f');
 
         // check the checkbox by clicking the label (clicking checkbox directly fails as it is "no intractable")
         (await find.byCssSelector('label[for="0"]')).click();
 
         // wait for react to update dom and checkbox in checked state
         await retry.tryForTime(1000, async () => {
-          await expect(await testSubjects.isChecked('todoCheckbox-0')).to.be(true);
+          await expect(await testSubjects.isChecked('todoCheckbox-0')).toBe(true);
         });
         // checking that url is updated with checked state
-        expect(await browser.getCurrentUrl()).to.contain('completed:!t');
+        expect(await browser.getCurrentUrl()).toContain('completed:!t');
 
         // checking back and forward button
         await browser.goBack();
-        expect(await browser.getCurrentUrl()).to.contain('completed:!f');
+        expect(await browser.getCurrentUrl()).toContain('completed:!f');
         await retry.tryForTime(1000, async () => {
-          await expect(await testSubjects.isChecked('todoCheckbox-0')).to.be(false);
+          await expect(await testSubjects.isChecked('todoCheckbox-0')).toBe(false);
         });
 
         await browser.goForward();
-        expect(await browser.getCurrentUrl()).to.contain('completed:!t');
+        expect(await browser.getCurrentUrl()).toContain('completed:!t');
         await retry.tryForTime(1000, async () => {
-          await expect(await testSubjects.isChecked('todoCheckbox-0')).to.be(true);
+          await expect(await testSubjects.isChecked('todoCheckbox-0')).toBe(true);
         });
       });
 
@@ -110,9 +110,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       async function expectPathname(absoluteUrl: string, expectedPathname: string) {
         const scoped = await getScopedUrl(absoluteUrl);
         const [pathname, newHash] = scoped.split('#');
-        expect(pathname).to.be(expectedPathname);
+        expect(pathname).toBe(expectedPathname);
         const [, currentHash] = (await browser.getCurrentUrl()).split('#');
-        expect(newHash.replace(/%27/g, "'")).to.be(currentHash.replace(/%27/g, "'"));
+        expect(newHash.replace(/%27/g, "'")).toBe(currentHash.replace(/%27/g, "'"));
       }
 
       /**
@@ -120,10 +120,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
        * @param url - absolute url
        */
       async function getScopedUrl(url: string): Promise<string> {
-        expect(url).to.contain(base);
-        expect(url).to.contain(appId);
+        expect(url).toContain(base);
+        expect(url).toContain(appId);
         const scopedUrl = url.slice(url.indexOf(appId) + appId.length);
-        expect(scopedUrl).not.to.contain(appId); // app id in url only once
+        expect(scopedUrl).not.toContain(appId); // app id in url only once
         return scopedUrl;
       }
     });
@@ -148,29 +148,29 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('TODO app state is synced with url, back navigation works', async () => {
         // checking that in initial state checkbox is unchecked and state is synced with url
-        expect(await testSubjects.isChecked('todoCheckbox-0')).to.be(false);
-        expect(await browser.getCurrentUrl()).to.contain('completed:!f');
+        expect(await testSubjects.isChecked('todoCheckbox-0')).toBe(false);
+        expect(await browser.getCurrentUrl()).toContain('completed:!f');
         // check the checkbox by clicking the label (clicking checkbox directly fails as it is "no intractable")
         (await find.byCssSelector('label[for="0"]')).click();
 
         // wait for react to update dom and checkbox in checked state
         await retry.tryForTime(1000, async () => {
-          await expect(await testSubjects.isChecked('todoCheckbox-0')).to.be(true);
+          await expect(await testSubjects.isChecked('todoCheckbox-0')).toBe(true);
         });
         // checking that url is updated with checked state
-        expect(await browser.getCurrentUrl()).to.contain('completed:!t');
+        expect(await browser.getCurrentUrl()).toContain('completed:!t');
 
         // checking back and forward button
         await browser.goBack();
-        expect(await browser.getCurrentUrl()).to.contain('completed:!f');
+        expect(await browser.getCurrentUrl()).toContain('completed:!f');
         await retry.tryForTime(1000, async () => {
-          await expect(await testSubjects.isChecked('todoCheckbox-0')).to.be(false);
+          await expect(await testSubjects.isChecked('todoCheckbox-0')).toBe(false);
         });
 
         await browser.goForward();
-        expect(await browser.getCurrentUrl()).to.contain('completed:!t');
+        expect(await browser.getCurrentUrl()).toContain('completed:!t');
         await retry.tryForTime(1000, async () => {
-          await expect(await testSubjects.isChecked('todoCheckbox-0')).to.be(true);
+          await expect(await testSubjects.isChecked('todoCheckbox-0')).toBe(true);
         });
       });
 
@@ -194,8 +194,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         const [hashPathname, hashQuery] = hashPath.split('?');
         const [, currentHash] = (await browser.getCurrentUrl()).split('#');
         const [, currentHashQuery] = currentHash.split('?');
-        expect(currentHashQuery.replace(/%27/g, "'")).to.be(hashQuery.replace(/%27/g, "'"));
-        expect(hashPathname).to.be(expectedPathname);
+        expect(currentHashQuery.replace(/%27/g, "'")).toBe(hashQuery.replace(/%27/g, "'"));
+        expect(hashPathname).toBe(expectedPathname);
       }
     });
   });

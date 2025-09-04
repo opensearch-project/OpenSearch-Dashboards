@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
@@ -44,9 +44,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
     it('Shows registered menu items', async () => {
       const ownMenuItem = await testSubjects.find('demoNewButton');
-      expect(await ownMenuItem.getVisibleText()).to.be('New Button');
+      expect(await ownMenuItem.getVisibleText()).toBe('New Button');
       const demoRegisteredNewButton = await testSubjects.find('demoRegisteredNewButton');
-      expect(await demoRegisteredNewButton.getVisibleText()).to.be('Registered Button');
+      expect(await demoRegisteredNewButton.getVisibleText()).toBe('Registered Button');
     });
   });
 }

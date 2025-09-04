@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('createIndexPatternStatusMessage')).to.contain(
+          expect(await testSubjects.getVisibleText('createIndexPatternStatusMessage')).toContain(
             `The index pattern you've entered doesn't match any indices`
           );
         });
@@ -80,13 +80,13 @@ export default function ({ getService, getPageObjects }) {
 
       it('should have index pattern in page header', async function () {
         const patternName = await PageObjects.settings.getIndexPageHeading();
-        expect(patternName).to.be('logstash-*');
+        expect(patternName).toBe('logstash-*');
       });
 
       it('should have index pattern in url', function url() {
         return retry.try(function tryingForTime() {
           return browser.getCurrentUrl().then(function (currentUrl) {
-            expect(currentUrl).to.contain(indexPatternId);
+            expect(currentUrl).toContain(indexPatternId);
           });
         });
       });
@@ -103,11 +103,11 @@ export default function ({ getService, getPageObjects }) {
             'Excluded',
           ];
 
-          expect(headers.length).to.be(expectedHeaders.length);
+          expect(headers.length).toBe(expectedHeaders.length);
 
           const comparedHeaders = headers.map(function compareHead(header, i) {
             return header.getVisibleText().then(function (text) {
-              expect(text).to.be(expectedHeaders[i]);
+              expect(text).toBe(expectedHeaders[i]);
             });
           });
 
@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }) {
       before(function () {
         const expectedAlertText = 'Delete index pattern?';
         return PageObjects.settings.removeIndexPattern().then(function (alertText) {
-          expect(alertText).to.be(expectedAlertText);
+          expect(alertText).toBe(expectedAlertText);
         });
       });
 
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }) {
         return retry.try(function tryingForTime() {
           return browser.getCurrentUrl().then(function (currentUrl) {
             log.debug('currentUrl = ' + currentUrl);
-            expect(currentUrl).to.contain('management/opensearch-dashboards/indexPatterns');
+            expect(currentUrl).toContain('management/opensearch-dashboards/indexPatterns');
           });
         });
       });

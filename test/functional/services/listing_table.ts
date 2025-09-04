@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ListingTableProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -102,7 +102,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
         const elements = await find.allByCssSelector(
           `[data-test-subj^="${prefixMap[appName]}ListingTitleLink"]`
         );
-        expect(elements.length).to.equal(count);
+        expect(elements.length).toEqual(count);
       });
     }
 
@@ -140,7 +140,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
         const links = await testSubjects.findAll(
           `${prefixMap[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
         );
-        expect(links.length).to.equal(count);
+        expect(links.length).toEqual(count);
       });
     }
 

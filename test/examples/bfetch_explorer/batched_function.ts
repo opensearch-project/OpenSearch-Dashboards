@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
       const text = await pre.getVisibleText();
       const json = JSON.parse(text);
 
-      expect(json).to.eql([
+      expect(json).toEqual([
         {
           num: -1,
           error: {
@@ -89,15 +89,15 @@ export default function ({ getService }: FtrProviderContext) {
       const text1 = await pre.getVisibleText();
       const json1 = JSON.parse(text1);
 
-      expect(json1.length > 0).to.be(true);
-      expect(json1.length < 4).to.be(true);
+      expect(json1.length > 0).toBe(true);
+      expect(json1.length < 4).toBe(true);
 
       await new Promise((r) => setTimeout(r, 3500));
 
       const text2 = await pre.getVisibleText();
       const json2 = JSON.parse(text2);
 
-      expect(json2.length).to.be(4);
+      expect(json2.length).toBe(4);
     });
   });
 }

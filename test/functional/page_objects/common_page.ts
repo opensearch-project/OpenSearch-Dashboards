@@ -29,7 +29,7 @@
  */
 
 import { delay } from 'bluebird';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -367,7 +367,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       // the modal is either open or closed
       await retry.try(async () => {
         const actualState = await testSubjects.exists('confirmModalCancelButton');
-        expect(actualState).to.equal(
+        expect(actualState).toEqual(
           state,
           state ? 'Confirm modal should be present' : 'Confirm modal should be hidden'
         );

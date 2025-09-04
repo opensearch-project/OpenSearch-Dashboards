@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
       await PageObjects.dashboard.waitForRenderComplete();
       await browser.goBack();
-      expect(await PageObjects.dashboard.onDashboardLandingPage()).to.be(true);
+      expect(await PageObjects.dashboard.onDashboardLandingPage()).toBe(true);
     });
   });
 }

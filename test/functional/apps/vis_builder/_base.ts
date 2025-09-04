@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // TODO: Remove selenium functional tests since cypress tests exist
@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         PageObjects.visBuilder.index.LOGSTASH_NON_TIME_BASED
       );
 
-      expect(dataSourceValue).to.equal(PageObjects.visBuilder.index.LOGSTASH_NON_TIME_BASED);
+      expect(dataSourceValue).toEqual(PageObjects.visBuilder.index.LOGSTASH_NON_TIME_BASED);
       // TODO: Switch with a datasource with unique fields to test if it exists
     });
 
@@ -32,14 +32,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visBuilder.addField('segment', 'Terms', 'machine.os.raw');
 
       const data = await PageObjects.visChart.getBarChartData();
-      expect(data).to.eql(expectedData);
+      expect(data).toEqual(expectedData);
     });
 
     it('should clear visualization when field is deleted', async () => {
       await PageObjects.visBuilder.removeField('metric', 0);
 
       const isEmptyWorkspace = await PageObjects.visBuilder.isEmptyWorkspace();
-      expect(isEmptyWorkspace).to.be(true);
+      expect(isEmptyWorkspace).toBe(true);
     });
   });
 }

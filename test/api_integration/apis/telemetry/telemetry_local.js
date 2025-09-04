@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import _ from 'lodash';
 
 /*
@@ -77,45 +77,49 @@ export default function ({ getService }) {
         .send({ timeRange, unencrypted: true })
         .expect(200);
 
-      expect(body.length).to.be(1);
+      expect(body.length).toBe(1);
       const stats = body[0];
-      expect(stats.collection).to.be('local');
-      expect(stats.stack_stats.opensearchDashboards.count).to.be.a('number');
-      expect(stats.stack_stats.opensearchDashboards.indices).to.be.a('number');
-      expect(stats.stack_stats.opensearchDashboards.os.platforms[0].platform).to.be.a('string');
-      expect(stats.stack_stats.opensearchDashboards.os.platforms[0].count).to.be(1);
-      expect(stats.stack_stats.opensearchDashboards.os.platformReleases[0].platformRelease).to.be.a(
+      expect(typeof stats.collection).toBe('local');
+      expect(typeof stats.stack_stats.opensearchDashboards.count).toBe('number');
+      expect(typeof stats.stack_stats.opensearchDashboards.indices).toBe('number');
+      expect(typeof stats.stack_stats.opensearchDashboards.os.platforms[0].platform).toBe('string');
+      expect(stats.stack_stats.opensearchDashboards.os.platforms[0].count).toBe(1);
+      expect(
+        typeof stats.stack_stats.opensearchDashboards.os.platformReleases[0].platformRelease
+      ).toBe('string');
+      expect(stats.stack_stats.opensearchDashboards.os.platformReleases[0].count).toBe(1);
+      expect(stats.stack_stats.opensearchDashboards.plugins.telemetry.opt_in_status).toBe(false);
+      expect(typeof stats.stack_stats.opensearchDashboards.plugins.telemetry.usage_fetcher).toBe(
         'string'
       );
-      expect(stats.stack_stats.opensearchDashboards.os.platformReleases[0].count).to.be(1);
-      expect(stats.stack_stats.opensearchDashboards.plugins.telemetry.opt_in_status).to.be(false);
-      expect(stats.stack_stats.opensearchDashboards.plugins.telemetry.usage_fetcher).to.be.a(
+      expect(typeof stats.stack_stats.opensearchDashboards.plugins.stack_management).toBe('object');
+      expect(typeof stats.stack_stats.opensearchDashboards.plugins.ui_metric).toBe('object');
+      expect(typeof stats.stack_stats.opensearchDashboards.plugins.application_usage).toBe(
+        'object'
+      );
+      expect(typeof stats.stack_stats.opensearchDashboards.plugins.dql.defaultQueryLanguage).toBe(
         'string'
       );
-      expect(stats.stack_stats.opensearchDashboards.plugins.stack_management).to.be.an('object');
-      expect(stats.stack_stats.opensearchDashboards.plugins.ui_metric).to.be.an('object');
-      expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).to.be.an('object');
-      expect(stats.stack_stats.opensearchDashboards.plugins.dql.defaultQueryLanguage).to.be.a(
-        'string'
+      expect(typeof stats.stack_stats.opensearchDashboards.plugins['tsvb-validation']).toBe(
+        'object'
       );
-      expect(stats.stack_stats.opensearchDashboards.plugins['tsvb-validation']).to.be.an('object');
-      expect(stats.stack_stats.opensearchDashboards.plugins.localization).to.be.an('object');
-      expect(stats.stack_stats.opensearchDashboards.plugins.csp.strict).to.be(false);
-      expect(stats.stack_stats.opensearchDashboards.plugins.csp.warnLegacyBrowsers).to.be(true);
-      expect(stats.stack_stats.opensearchDashboards.plugins.csp.rulesChangedFromDefault).to.be(
+      expect(typeof stats.stack_stats.opensearchDashboards.plugins.localization).toBe('object');
+      expect(stats.stack_stats.opensearchDashboards.plugins.csp.strict).toBe(false);
+      expect(stats.stack_stats.opensearchDashboards.plugins.csp.warnLegacyBrowsers).toBe(true);
+      expect(stats.stack_stats.opensearchDashboards.plugins.csp.rulesChangedFromDefault).toBe(
         false
       );
 
       // Testing stack_stats.data
-      expect(stats.stack_stats.data).to.be.an('object');
-      expect(stats.stack_stats.data).to.be.an('array');
-      expect(stats.stack_stats.data[0]).to.be.an('object');
-      expect(stats.stack_stats.data[0].pattern_name).to.be('filebeat');
-      expect(stats.stack_stats.data[0].shipper).to.be('filebeat');
-      expect(stats.stack_stats.data[0].index_count).to.be(1);
-      expect(stats.stack_stats.data[0].doc_count).to.be(0);
-      expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);
-      expect(stats.stack_stats.data[0].size_in_bytes).to.be.a('number');
+      expect(typeof stats.stack_stats.data).toBe('object');
+      expect(Array.isArray(stats.stack_stats.data)).toBe(true);
+      expect(typeof stats.stack_stats.data[0]).toBe('object');
+      expect(stats.stack_stats.data[0].pattern_name).toBe('filebeat');
+      expect(stats.stack_stats.data[0].shipper).toBe('filebeat');
+      expect(stats.stack_stats.data[0].index_count).toBe(1);
+      expect(stats.stack_stats.data[0].doc_count).toBe(0);
+      expect(stats.stack_stats.data[0].ecs_index_count).toBe(0);
+      expect(typeof stats.stack_stats.data[0].size_in_bytes).toBe('number');
     });
 
     it('should pull local stats and validate fields', async () => {
@@ -133,7 +137,7 @@ export default function ({ getService }) {
       const stats = body[0];
 
       const actual = flatKeys(stats);
-      expect(actual).to.be.an('array');
+      expect(Array.isArray(actual)).toBe(true);
       const expected = [
         'cluster_name',
         'cluster_stats.cluster_uuid',
@@ -173,7 +177,7 @@ export default function ({ getService }) {
         'version',
       ];
 
-      expect(expected.every((m) => actual.includes(m))).to.be.ok();
+      expect(expected.every((m) => actual.includes(m))).toBeTruthy();
     });
 
     describe('application usage limits', () => {
@@ -215,9 +219,9 @@ export default function ({ getService }) {
             .send({ timeRange, unencrypted: true })
             .expect(200);
 
-          expect(body.length).to.be(1);
+          expect(body.length).toBe(1);
           const stats = body[0];
-          expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).to.eql({
+          expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).toEqual({
             'test-app': {
               clicks_total: 10,
               clicks_7_days: 10,
@@ -266,9 +270,9 @@ export default function ({ getService }) {
             .send({ timeRange, unencrypted: true })
             .expect(200);
 
-          expect(body.length).to.be(1);
+          expect(body.length).toBe(1);
           const stats = body[0];
-          expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).to.eql({
+          expect(stats.stack_stats.opensearchDashboards.plugins.application_usage).toEqual({
             'test-app': {
               clicks_total: 10000,
               clicks_7_days: 10000,

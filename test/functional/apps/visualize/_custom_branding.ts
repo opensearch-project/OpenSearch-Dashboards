@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'osdOverviewPageHeaderLogo',
           'data-test-logo'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+        expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogo.toUpperCase());
       });
 
       it('if enable user control, admin customized dark mode logo for opensearch overview header is not applied', async () => {
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'osdOverviewPageHeaderLogo',
           'data-test-logo'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+        expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogo.toUpperCase());
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.clearAdvancedSettings('theme:enableUserControl');
       });
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'osdOverviewPageHeaderLogo',
           'data-test-logo'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+        expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogoDarkMode.toUpperCase());
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.clearAdvancedSettings('theme:darkMode');
       });
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'welcomeCustomLogo',
           'data-test-image-url'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+        expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogo.toUpperCase());
       });
 
       it('with customized title', async () => {
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'welcomeCustomTitle',
           'data-test-title-message'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedWelcomeMessage.toUpperCase());
+        expect(actualLabel.toUpperCase()).toEqual(expectedWelcomeMessage.toUpperCase());
       });
 
       it('admin customized dark mode logo for home is applied', async () => {
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'welcomeCustomLogo',
           'data-test-image-url'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+        expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogoDarkMode.toUpperCase());
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.clearAdvancedSettings('theme:darkMode');
       });
@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'welcomeCustomLogo',
           'data-test-image-url'
         );
-        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+        expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogo.toUpperCase());
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.clearAdvancedSettings('theme:enableUserControl');
       });
@@ -176,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await globalNav.clickLogo();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          expect(url.includes('/app/home')).to.be(true);
+          expect(url.includes('/app/home')).toBe(true);
         });
 
         it('with customized mark logo button that navigates to home page', async () => {
@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await globalNav.clickHomeButton();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          expect(url.includes('/app/home')).to.be(true);
+          expect(url.includes('/app/home')).toBe(true);
         });
 
         it('with customized mark logo in home dashboard card', async () => {
@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'dashboardCustomLogo',
             'data-test-image-url'
           );
-          expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+          expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogo.toUpperCase());
         });
 
         it('with customized title in home dashboard card', async () => {
@@ -202,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'dashboardCustomTitle',
             'data-test-title'
           );
-          expect(actualLabel.toUpperCase()).to.equal(applicationTitle.toUpperCase());
+          expect(actualLabel.toUpperCase()).toEqual(applicationTitle.toUpperCase());
         });
 
         it('with customized mark logo for opensearch in side menu', async () => {
@@ -212,7 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'collapsibleNavGroup-opensearchDashboards',
             'data-test-opensearch-logo'
           );
-          expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+          expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogo.toUpperCase());
         });
       });
 
@@ -241,7 +241,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await globalNav.clickLogo();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          expect(url.includes('/app/home')).to.be(true);
+          expect(url.includes('/app/home')).toBe(true);
         });
 
         it('with customized mark logo button that navigates to home page', async () => {
@@ -249,7 +249,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await globalNav.clickHomeButton();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          expect(url.includes('/app/home')).to.be(true);
+          expect(url.includes('/app/home')).toBe(true);
         });
 
         it('with customized mark logo in home dashboard card', async () => {
@@ -258,7 +258,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'dashboardCustomLogo',
             'data-test-image-url'
           );
-          expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+          expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogoDarkMode.toUpperCase());
         });
 
         it('with customized mark logo for opensearch in side menu', async () => {
@@ -268,7 +268,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'collapsibleNavGroup-opensearchDashboards',
             'data-test-opensearch-logo'
           );
-          expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+          expect(actualLabel.toUpperCase()).toEqual(expectedMarkLogoDarkMode.toUpperCase());
         });
       });
     });

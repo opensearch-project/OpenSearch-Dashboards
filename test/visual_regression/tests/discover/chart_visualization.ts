@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goBack();
         await retry.try(async function tryingForTime() {
           const actualInterval = await PageObjects.discover.getChartInterval();
-          expect(actualInterval).to.be('Day');
+          expect(actualInterval).toBe('Day');
         });
         await takeSnapshot();
       });
