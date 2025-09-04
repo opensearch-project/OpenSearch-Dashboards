@@ -129,3 +129,14 @@ export const SpanIdLink: React.FC<SpanIdLinkProps> = ({ sanitizedCellValue, rowD
     </EuiToolTip>
   );
 };
+
+export interface TraceNavigationContext {
+  traceId: string;
+  spanId: string;
+  dataset: Dataset;
+}
+
+export const navigateToTraceDetailsWithSpan = (context: TraceNavigationContext): void => {
+  const url = buildTraceDetailsUrl(context.spanId, context.traceId, context.dataset);
+  window.open(url, '_blank');
+};
