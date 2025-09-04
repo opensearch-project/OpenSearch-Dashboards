@@ -163,6 +163,7 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  contextProvider?: import('../../context_provider/public').ContextProviderStart;
 }
 
 export type RegisterDashboardProviderFn = (provider: DashboardProvider) => void;
@@ -215,6 +216,7 @@ export class DashboardPlugin
 
   private dashboardProviders: { [key: string]: DashboardProvider } = {};
   private dashboardUrlGenerator?: DashboardUrlGenerator;
+  private currentDashboardContainer?: import('./application/embeddable/dashboard_container').DashboardContainer;
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
@@ -573,7 +575,32 @@ export class DashboardPlugin
       uiActions,
       data: { indexPatterns, search },
       embeddable,
+      contextProvider,
     } = plugins;
+
+    // Register Dashboard Context Contributor with Context Provider
+    if (contextProvider) {
+      const { DashboardContextContributor } = require('./context_contributor');
+      const dashboardContextContributor = new DashboardContextContributor(
+        () => {
+          console.log('🔍 Dashboard: Getting current container:', {
+            hasContainer: !!this.currentDashboardContainer,
+            containerType: this.currentDashboardContainer?.type,
+            containerId: this.currentDashboardContainer?.id
+          });
+          return this.currentDashboardContainer;
+        },
+        core.savedObjects.client
+      );
+      
+      contextProvider.registerContextContributor(dashboardContextContributor);
+      console.log('📝 Dashboard: Context contributor registered with Context Provider');
+    } else {
+      console.log('⚠️ Dashboard: Context Provider plugin not available, skipping context registration');
+    }
+
+    // Make plugin instance available globally so dashboard components can set the container
+    (window as any).dashboardPlugin = this;
 
     const SavedObjectFinder = getSavedObjectFinder(
       core.savedObjects,
@@ -643,5 +670,19 @@ export class DashboardPlugin
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+  }
+
+  /**
+   * Set the current dashboard container (called from dashboard components)
+   */
+  public setCurrentDashboardContainer(container: import('./application/embeddable/dashboard_container').DashboardContainer): void {
+    console.log('🔗 Dashboard Plugin: Setting current dashboard container:', {
+      containerType: container.type,
+      containerId: container.id,
+      childCount: container.getChildIds().length
+    });
+    this.currentDashboardContainer = container;
+    
+    // Note: Context refresh is now handled by dashboard editor after embeddables load
   }
 }

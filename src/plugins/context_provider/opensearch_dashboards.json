@@ -5,6 +5,6 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["uiActions", "data", "embeddable"],
-  "optionalPlugins": ["dashboard", "discover"],
+  "optionalPlugins": [],
   "requiredBundles": []
 }

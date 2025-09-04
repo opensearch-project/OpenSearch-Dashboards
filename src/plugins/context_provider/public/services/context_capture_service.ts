@@ -43,6 +43,61 @@ export class ContextCaptureService {
         this.captureStaticContext(appId);
       }
     });
+
+    // 🔑 NEW: Monitor URL changes for automatic context refresh
+    this.setupUrlMonitoring();
+  }
+
+  /**
+   * Monitor URL changes to automatically refresh context when parameters change
+   * This handles cases like time range changes, filter updates, etc. within the same app
+   */
+  private setupUrlMonitoring(): void {
+    console.log('🔍 Setting up URL monitoring for automatic context refresh');
+    
+    let lastUrl = window.location.href;
+    let lastHash = window.location.hash;
+    
+    // Monitor both popstate (back/forward) and hashchange events
+    const handleUrlChange = () => {
+      const currentUrl = window.location.href;
+      const currentHash = window.location.hash;
+      
+      if (currentUrl !== lastUrl || currentHash !== lastHash) {
+        console.log('🔄 URL change detected, refreshing context');
+        console.log('  Previous URL:', lastUrl);
+        console.log('  Current URL:', currentUrl);
+        
+        // Get current app and refresh context
+        const currentAppId = window.location.pathname.split('/app/')[1]?.split('/')[0];
+        if (currentAppId) {
+          console.log(`🎯 Auto-refreshing context for app: ${currentAppId}`);
+          this.captureStaticContext(currentAppId);
+        }
+        
+        lastUrl = currentUrl;
+        lastHash = currentHash;
+      }
+    };
+    
+    // Listen for browser navigation events
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    
+    // Also monitor for programmatic URL changes using a polling approach
+    // This catches changes made by OpenSearch Dashboards' URL state management
+    let urlCheckInterval = setInterval(() => {
+      handleUrlChange();
+    }, 1000); // Check every second
+    
+    // Store cleanup function
+    (this as any).urlMonitoringCleanup = () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+      if (urlCheckInterval) {
+        clearInterval(urlCheckInterval);
+      }
+    };
   }
 
   public getStaticContext$(): Observable<StaticContext | null> {
@@ -90,7 +145,7 @@ export class ContextCaptureService {
     try {
       // Check if there's a registered context contributor for this app
       const contributor = this.contextContributors.get(appId);
-      if (contributor) {
+      if (contributor && contributor.captureStaticContext) {
         console.log(`🎯 Using registered context contributor for app: ${appId}`);
         const contributorContext = await contributor.captureStaticContext();
         contextData = { ...contextData, ...contributorContext };
@@ -346,5 +401,20 @@ export class ContextCaptureService {
     });
     
     return { success: true, destination: 'dashboards' };
+  }
+
+  /**
+   * Cleanup method to remove URL monitoring listeners
+   */
+  public stop(): void {
+    console.log('🛑 Context Capture Service Stop');
+    
+    // Cleanup URL monitoring
+    if ((this as any).urlMonitoringCleanup) {
+      (this as any).urlMonitoringCleanup();
+    }
+    
+    // Clear context contributors
+    this.contextContributors.clear();
   }
 }

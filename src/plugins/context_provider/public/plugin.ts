@@ -76,6 +76,7 @@ export class ContextProviderPlugin
     // Make service globally available for testing and chatbot/OSD agent integration
     (window as any).contextProvider = {
       getCurrentContext: this.getCurrentContext.bind(this),
+      refreshCurrentContext: this.refreshCurrentContext.bind(this),
       executeAction: this.executeAction.bind(this),
       getAvailableActions: this.getAvailableActions.bind(this),
       triggerTestCapture: this.triggerTestCapture.bind(this),
@@ -93,6 +94,7 @@ export class ContextProviderPlugin
 
     return {
       getCurrentContext: this.getCurrentContext.bind(this),
+      refreshCurrentContext: this.refreshCurrentContext.bind(this),
       executeAction: this.executeAction.bind(this),
       getAvailableActions: this.getAvailableActions.bind(this),
       registerContextContributor: this.registerContextContributor.bind(this),
@@ -102,6 +104,25 @@ export class ContextProviderPlugin
 
   private async getCurrentContext(): Promise<StaticContext | null> {
     console.log('🔍 Getting current context:', this.currentContext);
+    return this.currentContext;
+  }
+
+  private async refreshCurrentContext(): Promise<StaticContext | null> {
+    console.log('🔄 Forcing fresh context capture...');
+    
+    if (!this.contextCaptureService) {
+      console.warn('Context capture service not available');
+      return this.currentContext;
+    }
+
+    // Get current app ID and force a fresh capture
+    const currentAppId = window.location.pathname.split('/app/')[1]?.split('/')[0];
+    if (currentAppId) {
+      console.log(`🎯 Forcing context refresh for app: ${currentAppId}`);
+      // Force the context capture service to capture fresh context
+      await (this.contextCaptureService as any).captureStaticContext(currentAppId);
+    }
+    
     return this.currentContext;
   }
 
@@ -181,7 +202,13 @@ export class ContextProviderPlugin
 
   public stop() {
     console.log('🛑 Context Provider Plugin Stop');
-    // Cleanup
+    
+    // Cleanup services
+    if (this.contextCaptureService) {
+      this.contextCaptureService.stop();
+    }
+    
+    // Cleanup global API
     delete (window as any).contextProvider;
   }
 }

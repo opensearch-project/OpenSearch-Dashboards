@@ -36,7 +36,18 @@ export interface DynamicContext {
 
 export interface ContextContributor {
   appId: string;
-  captureStaticContext(): Promise<Record<string, any>>;
+  
+  // Option 1: Simple URL-based context (for plugins like Discover, Visualize)
+  urlStateKeys?: string[]; // ['_g', '_a', '_q']
+  parseUrlState?(urlState: Record<string, any>): Record<string, any>;
+  
+  // Option 2: Complex context capture (for plugins like Dashboard with embeddables)
+  captureStaticContext?(): Promise<Record<string, any>>;
+  
+  // UI Actions that should trigger context refresh
+  contextTriggerActions?: string[];
+  
+  // Optional methods for dynamic context and actions
   captureDynamicContext?(trigger: string, data: any): Record<string, any>;
   getAvailableActions?(): string[];
   executeAction?(actionType: string, params: any): Promise<any>;
@@ -49,6 +60,7 @@ export interface ContextProviderSetup {
 export interface ContextProviderStart {
   // Methods that chatbot/OSD agent can call
   getCurrentContext(): Promise<StaticContext | null>;
+  refreshCurrentContext(): Promise<StaticContext | null>;
   executeAction(actionType: string, params: any): Promise<any>;
   getAvailableActions(): string[];
   // Plugin registration methods

@@ -46,7 +46,156 @@ User Question: "Why is this number so high compared to last month?"
 
 **AI Response (with context)**: "The Electronics category showing $2.3M revenue in the West region for the last 30 days is significantly higher than usual. Looking at the trend data, this appears to be driven by a 40% increase in laptop sales during the recent back-to-school promotion. Would you like me to break down the contributing factors or compare with other regions?"
 
-### 1.3 The Context Types in OpenSearch Dashboards
+### 1.3 Static Context Capture Approaches for Different Plugin Types
+
+Based on our implementation experience, OpenSearch Dashboards plugins can be categorized into different types based on their context capture complexity:
+
+#### 1.3.1 Simple URL-Based Context Plugins
+
+**Characteristics:**
+- Context is primarily stored in URL parameters
+- State can be reconstructed from URL parsing
+- Minimal complex internal state management
+
+**Examples:** Discover, Management, Dev Tools
+
+**Context Capture Approach:**
+```typescript
+// Simple URL parsing approach
+export class DiscoverContextContributor implements ContextContributor {
+  appId = 'discover';
+  
+  async captureStaticContext(): Promise<Record<string, any>> {
+    const urlState = this.parseUrlState();
+    return {
+      type: 'discover',
+      indexPattern: urlState.indexPattern,
+      query: urlState.query,
+      filters: urlState.filters,
+      columns: urlState.columns,
+      sort: urlState.sort,
+      timeRange: urlState.timeRange
+    };
+  }
+  
+  private parseUrlState() {
+    // Parse _a and _g parameters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const appState = this.parseAppState(urlParams.get('_a'));
+    const globalState = this.parseGlobalState(urlParams.get('_g'));
+    return { ...appState, ...globalState };
+  }
+}
+```
+
+#### 1.3.2 Complex Embeddable-Based Context Plugins
+
+**Characteristics:**
+- Context involves multiple embeddable components (panels, visualizations)
+- Rich internal state not fully represented in URL
+- Requires deep inspection of embeddable containers and children
+
+**Examples:** Dashboard, Canvas
+
+**Context Capture Approach:**
+```typescript
+// Complex embeddable scanning approach
+export class DashboardContextContributor implements ContextContributor {
+  appId = 'dashboards';
+  
+  async captureStaticContext(): Promise<Record<string, any>> {
+    const container = this.getDashboardContainer();
+    if (!container) return { error: 'No dashboard container' };
+    
+    // Scan all embeddable panels
+    const embeddables = await this.captureAllEmbeddableContexts(container);
+    const dashboardMetadata = await this.getDashboardMetadata();
+    
+    return {
+      type: 'dashboard',
+      dashboard: dashboardMetadata,
+      embeddables: {
+        count: embeddables.length,
+        panels: embeddables
+      },
+      // Container-level state
+      viewMode: container.getInput().viewMode,
+      timeRange: container.getInput().timeRange,
+      filters: container.getInput().filters,
+      query: container.getInput().query
+    };
+  }
+  
+  private async captureAllEmbeddableContexts(container: DashboardContainer) {
+    const childIds = container.getChildIds();
+    const contexts = [];
+    
+    for (const id of childIds) {
+      const embeddable = container.getChild(id);
+      const input = embeddable.getInput();
+      const output = embeddable.getOutput();
+      
+      contexts.push({
+        id,
+        type: embeddable.type,
+        title: embeddable.getTitle(),
+        input: { ...input },
+        output: { ...output },
+        // Panel layout information
+        gridData: container.getInput().panels[id]?.gridData
+      });
+    }
+    
+    return contexts;
+  }
+}
+```
+
+### 1.4 Understanding OpenSearch Dashboards Embeddables
+
+Our investigation revealed key insights about how embeddables work in OpenSearch Dashboards:
+
+#### 1.4.1 Embeddable Input vs Output
+
+**Input Properties (Configuration passed TO embeddable):**
+- `savedObjectId`: Reference to the saved visualization/search
+- `id`: Unique panel identifier
+- `title`: Panel title (may be undefined if using saved object title)
+- Configuration parameters specific to embeddable type
+
+**Output Properties (Runtime data produced BY embeddable):**
+- `loading`: Boolean indicating if embeddable is still loading
+- `error`: Any error that occurred during loading
+- Runtime state and computed values
+
+**Key Discovery:** `visState` and `uiState` are NOT stored in embeddable input/output directly. They are stored in the saved object referenced by `savedObjectId`.
+
+#### 1.4.2 Accessing Visualization State
+
+To get the actual visualization configuration, you need to:
+
+1. **Get the savedObjectId** from embeddable input
+2. **Fetch the saved object** using the saved objects client
+3. **Parse the saved object attributes** to get `visState`, `uiState`, etc.
+
+```typescript
+// Correct approach to get visualization state
+const input = embeddable.getInput();
+const savedObjectId = input.savedObjectId;
+
+if (savedObjectId) {
+  const savedObject = await this.savedObjects.get('visualization', savedObjectId);
+  const visState = JSON.parse(savedObject.attributes.visState);
+  const uiState = JSON.parse(savedObject.attributes.uiState || '{}');
+  
+  // Now you have the actual visualization configuration
+  console.log('Visualization type:', visState.type);
+  console.log('Visualization params:', visState.params);
+  console.log('UI state:', uiState);
+}
+```
+
+### 1.5 The Context Types in OpenSearch Dashboards
 
 Based on our research of OSD's architecture, we can categorize the available context into three types:
 
@@ -61,15 +210,33 @@ Information available when a user loads a page or application:
   "dashboard": {
     "title": "Sales Performance Dashboard",
     "description": "Monthly sales analysis across regions",
-    "panelCount": 6,
-    "panels": [
-      { "type": "visualization", "title": "Revenue by Region", "chartType": "bar" },
-      { "type": "visualization", "title": "Sales Trend", "chartType": "line" },
-      { "type": "search", "title": "Recent Transactions" }
-    ],
+    "embeddables": {
+      "count": 6,
+      "panels": [
+        {
+          "id": "panel_1",
+          "type": "visualization",
+          "title": "Revenue by Region",
+          "input": {
+            "savedObjectId": "vis_123",
+            "id": "panel_1"
+          },
+          "output": {
+            "loading": false,
+            "error": null
+          },
+          "savedObject": {
+            "visState": {
+              "type": "histogram",
+              "params": { "grid": { "categoryLines": false } }
+            },
+            "uiState": {}
+          }
+        }
+      ]
+    },
     "filters": [
-      { "field": "region", "value": "West", "type": "phrase" },
-      { "field": "date", "from": "2024-01-01", "to": "2024-01-31", "type": "range" }
+      { "field": "region", "value": "West", "type": "phrase" }
     ],
     "query": { "language": "kuery", "query": "status:active" },
     "timeRange": { "from": "now-30d", "to": "now" },
