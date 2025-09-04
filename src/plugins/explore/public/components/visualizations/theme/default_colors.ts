@@ -8,7 +8,10 @@ import { darkMode } from '@osd/ui-shared-deps/theme';
 export const getColors = () => {
   if (darkMode) {
     return {
+      statusBlue: '#006CE0',
       statusGreen: '#00BD6B',
+      statusYellow: '#F90',
+      statusOrange: '#FF6A3D',
       statusRed: '#DB0000',
       text: '#FFF',
       grid: '#27252C',
@@ -27,7 +30,10 @@ export const getColors = () => {
     };
   }
   return {
+    statusBlue: '#004A9E',
     statusGreen: '#00BD6B',
+    statusYellow: '#F90',
+    statusOrange: '#FF6A3D',
     statusRed: '#DB0000',
     text: '#313131',
     grid: '#F5F7FF',
