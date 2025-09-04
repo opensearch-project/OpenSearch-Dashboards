@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Shortcuts - OpenSearch Dashboards Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background-color: #ffffff;
+        }
+
+        .header {
+            background-color: #003262;
+            color: white;
+            padding: 2rem 0;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .header .subtitle {
+            font-size: 1.125rem;
+            color: #b3d9ff;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .toc h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #003262;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 0.5rem 0;
+        }
+
+        .toc a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: block;
+            padding: 0.25rem 0;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .toc a:hover {
+            color: #003262;
+            background-color: #e3f2fd;
+            padding-left: 0.5rem;
+        }
+
+        .toc a.active {
+            color: #003262;
+            font-weight: 600;
+            background-color: #e3f2fd;
+            padding-left: 0.5rem;
+        }
+
+        .main-content {
+            min-width: 0;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            color: #003262;
+            font-size: 1.875rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #0066cc;
+        }
+
+        h3 {
+            color: #1a1a1a;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #4a5568;
+            line-height: 1.7;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
+            border-left: 4px solid #0066cc;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 4px rgba(0, 102, 204, 0.1);
+        }
+
+        .info-box strong {
+            color: #003262;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #fef9e7 100%);
+            border-left: 4px solid #ffc107;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 4px rgba(255, 193, 7, 0.1);
+        }
+
+        .warning-box strong {
+            color: #856404;
+        }
+
+        .platform-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e1e5e9;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .platform-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .platform-tab:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .platform-tab.active {
+            color: #003262;
+            background-color: white;
+            border-bottom-color: #0066cc;
+            font-weight: 600;
+        }
+
+        .platform-content {
+            display: none;
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 1.5rem;
+        }
+
+        .platform-content.active {
+            display: block;
+        }
+
+        .shortcut-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .shortcut-table th {
+            background: linear-gradient(135deg, #003262 0%, #004080 100%);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .shortcut-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e1e5e9;
+            vertical-align: top;
+        }
+
+        .shortcut-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .shortcut-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .key {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            color: #495057;
+        }
+
+        .key-combo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .key-combo .plus {
+            margin: 0 0.25rem;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0066cc, #003262);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .code-block pre {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #495057;
+            margin: 0;
+        }
+
+        .breadcrumb {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e1e5e9;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb span {
+            color: #6c757d;
+            margin: 0 0.5rem;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            border-top: 1px solid #e1e5e9;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+
+        .footer a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .shortcut-table {
+                font-size: 0.875rem;
+            }
+
+            .platform-tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="breadcrumb">
+        <a href="https://docs.opensearch.org/latest/">Documentation</a>
+        <span>›</span>
+        <a href="https://docs.opensearch.org/latest/dashboards/">OpenSearch Dashboards</a>
+        <span>›</span>
+        <span>Keyboard Shortcuts</span>
+    </div>
+
+    <header class="header">
+        <div class="header-content">
+            <h1>Keyboard Shortcuts</h1>
+            <p class="subtitle">Comprehensive guide to keyboard shortcuts and customization in OpenSearch Dashboards</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="toc">
+                <h3>On this page</h3>
+                <ul>
+                    <li><a href="#help-modal">Help Modal</a></li>
+                    <li><a href="#default-shortcuts">Default Shortcuts</a></li>
+                    <li><a href="#supported-keys">Supported Keys</a></li>
+                    <li><a href="#customizing">Customizing</a></li>
+                    <li><a href="#categories">Categories</a></li>
+                    <li><a href="#sequences">Multi-Key Sequences</a></li>
+                    <li><a href="#troubleshooting">Troubleshooting</a></li>
+                    <li><a href="#api-reference">API Reference</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section id="help-modal" class="section">
+                <h2>Keyboard Shortcuts Help Modal</h2>
+                <p>OpenSearch Dashboards includes a built-in keyboard shortcuts help modal that displays all available shortcuts organized by category.</p>
+                
+                <div class="info-box">
+                    <strong>Quick Access:</strong> Press <span class="key">?</span> or <span class="key-combo"><span class="key">Shift</span><span class="plus">+</span><span class="key">/</span></span> from anywhere in the application to open the help modal.
+                </div>
+
+                <p>The modal shows shortcuts grouped by categories like "Navigation", "Editing", "Data Actions", etc. Each shortcut displays the key combination and description.</p>
+            </section>
+
+            <section id="default-shortcuts" class="section">
+                <h2>Default Keyboard Shortcuts</h2>
+                
+                <div class="platform-tabs">
+                    <button class="platform-tab active" onclick="showPlatform('mac')">macOS</button>
+                    <button class="platform-tab" onclick="showPlatform('windows')">Windows/Linux</button>
+                </div>
+
+                <div id="mac-content" class="platform-content active">
+                    <h3>Global Shortcuts</h3>
+                    <table class="shortcut-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Command</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="key">?</span></td>
+                                <td>Show Keyboard Shortcuts Help</td>
+                                <td>Opens the help modal with all available shortcuts</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">G</span> <span class="key">B</span></span></td>
+                                <td>Go to Dashboard</td>
+                                <td>Navigate to Dashboard application</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">G</span> <span class="key">V</span></span></td>
+                                <td>Go to Visualize</td>
+                                <td>Navigate to Visualize application</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">G</span> <span class="key">D</span></span></td>
+                                <td>Go to Discover</td>
+                                <td>Navigate to Discover application</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Navigation</h3>
+                    <table class="shortcut-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Command</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">⇧</span><span class="plus">+</span><span class="key">D</span></span></td>
+                                <td>Open Date Picker</td>
+                                <td>Opens the time range selector</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">⇧</span><span class="plus">+</span><span class="key">Q</span></span></td>
+                                <td>Focus Query Bar</td>
+                                <td>Focuses the search query input field</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Data Actions</h3>
+                    <table class="shortcut-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Command</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="key">R</span></td>
+                                <td>Refresh Results</td>
+                                <td>Refreshes the current data view</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key">D</span></td>
+                                <td>Download CSV</td>
+                                <td>Downloads current results as CSV (when available)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Editing & Save</h3>
+                    <table class="shortcut-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Command</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">⌘</span><span class="plus">+</span><span class="key">S</span></span></td>
+                                <td>Save</td>
+                                <td>Saves the current dashboard/visualization (edit mode only)</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">⇧</span><span class="plus">+</span><span class="key">S</span></span></td>
+                                <td>Toggle Sidebar</td>
+                                <td>Shows/hides the visualization sidebar</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="windows-content" class="platform-content">
+                    <h3>Global Shortcuts</h3>
+                    <table class="shortcut-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Command</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="key">?</span></td>
+                                <td>Show Keyboard Shortcuts Help</td>
+                                <td>Opens the help modal with all available shortcuts</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">Shift</span><span class="plus">+</span><span class="key">E</span></span></td>
+                                <td>Toggle Edit Mode</td>
+                                <td>Switches between view and edit modes (Dashboard)</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">G</span> <span class="key">D</span></span></td>
+                                <td>Go to Dashboard</td>
+                                <td>Navigate to Dashboard application</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">G</span> <span class="key">V</span></span></td>
+                                <td>Go to Visualize</td>
+                                <td>Navigate to Visualize application</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">G</span> <span class="key">S</span></span></td>
+                                <td>Go to Discover</td>
+                                <td>Navigate to Discover application</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">G</span> <span class="key">M</span></span></td>
+                                <td>Go to Management</td>
+                                <td>Navigate to Management application</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">G</span> <span class="key">H</span></span></td>
+                                <td>Go to Home</td>
+                                <td>Navigate to Home page</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Navigation</h3>
+                    <table class="shortcut-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Command</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">Shift</span><span class="plus">+</span><span class="key">D</span></span></td>
+                                <td>Open Date Picker</td>
+                                <td>Opens the time range selector</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">Shift</span><span class="plus">+</span><span class="key">Q</span></span></td>
+                                <td>Focus Query Bar</td>
+                                <td>Focuses the search query input field</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Data Actions</h3>
+                    <table class="shortcut-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Command</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="key">R</span></td>
+                                <td>Refresh Results</td>
+                                <td>Refreshes the current data view</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key">D</span></td>
+                                <td>Download CSV</td>
+                                <td>Downloads current results as CSV (when available)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Editing & Save</h3>
+                    <table class="shortcut-table">
+                        <thead>
+                            <tr>
+                                <th>Shortcut</th>
+                                <th>Command</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">Ctrl</span><span class="plus">+</span><span class="key">S</span></span></td>
+                                <td>Save</td>
+                                <td>Saves the current dashboard/visualization (edit mode only)</td>
+                            </tr>
+                            <tr>
+                                <td><span class="key-combo"><span class="key">Shift</span><span class="plus">+</span><span class="key">S</span></span></td>
+                                <td>Toggle Sidebar</td>
+                                <td>Shows/hides the visualization sidebar</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="supported-keys" class="section">
+                <h2>Supported Keys and Modifiers</h2>
+                
+                <h3>Modifier Keys</h3>
+                <p>OpenSearch Dashboards supports the following modifier combinations in canonical order:</p>
+                
+                <table class="shortcut-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Combinations</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Single Modifiers</td>
+                            <td><code>shift+</code>, <code>alt+</code>, <code>cmd+</code></td>
+                            <td><span class="key-combo"><span class="key">Cmd</span><span class="plus">+</span><span class="key">S</span></span></td>
+                        </tr>
+                        <tr>
+                            <td>Double Modifiers</td>
+                            <td><code>alt+shift+</code>, <code>cmd+shift+</code>, <code>cmd+alt+</code></td>
+                            <td><span class="key-combo"><span class="key">Cmd</span><span class="plus">+</span><span class="key">Shift</span><span class="plus">+</span><span class="key">Z</span></span></td>
+                        </tr>
+                        <tr>
+                            <td>Triple Modifiers</td>
+                            <td><code>cmd+alt+shift+</code></td>
+                            <td><span class="key-combo"><span class="key">Cmd</span><span class="plus">+</span><span class="key">Alt</span><span class="plus">+</span><span class="key">Shift</span><span class="plus">+</span><span class="key">I</span></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    <strong>Platform Mapping:</strong> <code>cmd</code> automatically maps to Command (⌘) on macOS and Ctrl on Windows/Linux.
+                </div>
+
+                <h3>Supported Keys</h3>
+                
+                <table class="shortcut-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Keys</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Letters</td>
+                            <td><code>a-z</code></td>
+                            <td>Case-insensitive, normalized to lowercase</td>
+                        </tr>
+                        <tr>
+                            <td>Numbers</td>
+                            <td><code>0-9</code></td>
+                            <td>Main keyboard row only</td>
+                        </tr>
+                        <tr>
+                            <td>Punctuation</td>
+                            <td><code>, - = [ ] ; ' . / \ `</code></td>
+                            <td>Common symbols for shortcuts</td>
+                        </tr>
+                        <tr>
+                            <td>Arrow Keys</td>
+                            <td><code>left, up, right, down</code></td>
+                            <td>Navigation keys</td>
+                        </tr>
+                        <tr>
+                            <td>Special Keys</td>
+                            <td><code>tab, enter, escape, space, backspace, delete</code></td>
+                            <td>Function and control keys</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="customizing" class="section">
+                <h2>Customizing Keyboard Shortcuts</h2>
+                
+                <h3>For Plugin Developers</h3>
+                <p>To register a keyboard shortcut in your plugin:</p>
+
+                <div class="code-block">
+                    <pre><code>import { useOpenSearchDashboards } from '../opensearch_dashboards_react/public';
+
+function MyComponent() {
+  const opensearchDashboards = useOpenSearchDashboards&lt;YourPluginServices&gt;();
+  const { keyboardShortcut } = opensearchDashboards.services;
+
+  // Memoized callback to avoid re-registration
+  const handleAction = useCallback(() => {
+    // Your action logic here
+  }, []);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'my_action',
+    pluginId: 'myPlugin',
+    name: 'My Custom Action',
+    category: 'Custom Actions',
+    keys: 'cmd+shift+m',
+    execute: handleAction,
+  });
+}</code></pre>
+                </div>
+
+                <h3>Conditional Registration</h3>
+                <p>Register shortcuts only when certain conditions are met:</p>
+
+                <div class="code-block">
+                    <pre><code>// Register save shortcut only in edit mode
+useEffect(() => {
+  if (isEditMode && keyboardShortcut) {
+    keyboardShortcut.register({
+      id: 'save_dashboard',
+      pluginId: 'dashboard',
+      name: 'Save Dashboard',
+      category: 'editing',
+      keys: 'cmd+s',
+      execute: handleSave,
+    });
+
+    return () => {
+      keyboardShortcut.unregister({
+        id: 'save_dashboard',
+        pluginId: 'dashboard',
+      });
+    };
+  }
+}, [isEditMode, keyboardShortcut, handleSave]);</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>Important:</strong> Always use memoized callbacks with <code>useCallback</code> to prevent unnecessary re-registrations of shortcuts.
+                </div>
+            </section>
+
+            <section id="categories" class="section">
+                <h2>Keyboard Shortcut Categories</h2>
+                <p>Shortcuts are organized into logical categories for better discoverability:</p>
+
+                <table class="shortcut-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Examples</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Navigation</td>
+                            <td>Moving around the interface</td>
+                            <td>Focus query bar, open date picker</td>
+                        </tr>
+                        <tr>
+                            <td>Search</td>
+                            <td>Query and filtering actions</td>
+                            <td>Execute search, clear filters</td>
+                        </tr>
+                        <tr>
+                            <td>Data Actions</td>
+                            <td>Data manipulation and export</td>
+                            <td>Download CSV, refresh data</td>
+                        </tr>
+                        <tr>
+                            <td>Editing / Save</td>
+                            <td>Content modification and persistence</td>
+                            <td>Save dashboard, save visualization</td>
+                        </tr>
+                        <tr>
+                            <td>Panel / Layout</td>
+                            <td>UI layout and panel management</td>
+                            <td>Toggle edit mode, toggle sidebar</td>
+                        </tr>
+                        <tr>
+                            <td>View</td>
+                            <td>Display and visualization controls</td>
+                            <td>Fullscreen mode, zoom controls</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="sequences" class="section">
+                <h2>Multi-Key Sequences</h2>
+                <p>OpenSearch Dashboards supports GitHub-style multi-key sequences (e.g., <span class="key-combo"><span class="key">G</span> <span class="key">D</span></span>):</p>
+
+                <div class="code-block">
+                    <pre><code>// Example: 'g d' sequence for "go to dashboard"
+keyboardShortcut?.useKeyboardShortcut({
+  id: 'go_to_dashboard',
+  pluginId: 'navigation',
+  name: 'Go to Dashboard',
+  category: 'navigation',
+  keys: 'g d',  // Two separate key presses
+  execute: goToDashboard,
+});</code></pre>
+                </div>
+
+                <h3>Sequence Rules</h3>
+                <ul>
+                    <li>Must be exactly two space-separated keys</li>
+                    <li>First key must be a valid sequence prefix</li>
+                    <li>Second key must be a single letter (a-z)</li>
+                    <li>Timeout of 1000ms between key presses</li>
+                </ul>
+            </section>
+
+            <section id="troubleshooting" class="section">
+                <h2>Troubleshooting</h2>
+                
+                <h3>Common Issues</h3>
+                <table class="shortcut-table">
+                    <thead>
+                        <tr>
+                            <th>Issue</th>
+                            <th>Cause</th>
+                            <th>Solution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Shortcut not working</td>
+                            <td>Wrong context or mode</td>
+                            <td>Check if you're in the correct context (e.g., edit mode for save shortcuts)</td>
+                        </tr>
+                        <tr>
+                            <td>Conflicts</td>
+                            <td>Multiple shortcuts with same key</td>
+                            <td>The last registered shortcut takes precedence</td>
+                        </tr>
+                        <tr>
+                            <td>Disabled in inputs</td>
+                            <td>Focus in text fields</td>
+                            <td>Shortcuts are disabled when focus is in text inputs, textareas, or contenteditable elements</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Best Practices</h3>
+                <ul>
+                    <li>Use memoized callbacks to prevent unnecessary re-registrations</li>
+                    <li>Follow naming conventions for consistent categorization</li>
+                    <li>Test across platforms to ensure modifier keys work correctly</li>
+                    <li>Avoid conflicts with browser shortcuts (e.g., <span class="key-combo"><span class="key">Cmd</span><span class="plus">+</span><span class="key">R</span></span> for refresh)</li>
+                    <li>Provide clear descriptions for the help modal</li>
+                </ul>
+            </section>
+
+            <section id="api-reference" class="section">
+                <h2>API Reference</h2>
+                
+                <h3>ShortcutDefinition Interface</h3>
+                <div class="code-block">
+                    <pre><code>interface ShortcutDefinition {
+  id: string;           // Unique within plugin
+  pluginId: string;     // Plugin namespace
+  name: string;         // Human-readable name
+  category: string;     // Grouping category
+  keys: string;         // Key combination
+  execute: () => void;  // Action function
+}</code></pre>
+                </div>
+
+                <h3>KeyboardShortcutService Methods</h3>
+                <table class="shortcut-table">
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Description</th>
+                            <th>Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>register(shortcut)</code></td>
+                            <td>Register a new shortcut</td>
+                            <td><code>ShortcutDefinition</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>unregister(shortcut)</code></td>
+                            <td>Remove a shortcut</td>
+                            <td><code>Pick&lt;ShortcutDefinition, 'id' | 'pluginId'&gt;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>getAllShortcuts()</code></td>
+                            <td>Get all registered shortcuts</td>
+                            <td>None</td>
+                        </tr>
+                        <tr>
+                            <td><code>useKeyboardShortcut(shortcut)</code></td>
+                            <td>React hook for automatic lifecycle management</td>
+                            <td><code>ShortcutDefinition</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    This keyboard shortcut system provides a powerful, extensible way to enhance user productivity in OpenSearch Dashboards while maintaining consistency and avoiding conflicts across plugins.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>
+                Copyright © OpenSearch Project a Series of LF Projects, LLC<br>
+                For web site terms of use, trademark policy and other project policies please see 
+                <a href="https://lfprojects.org">https://lfprojects.org</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function showPlatform(platform) {
+            // Hide all platform content
+            document.querySelectorAll('.platform-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.platform-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected platform content
+            const contentId = platform === 'mac' ? 'mac-content' : 'windows-content';
+            document.getElementById(contentId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Highlight current section in TOC
+        function highlightCurrentSection() {
+            const sections = document.querySelectorAll('.section');
+            const tocLinks = document.querySelectorAll('.toc a');
+            
+            let currentSection = '';
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 100 && rect.bottom >= 100) {
+                    currentSection = section.id;
+                }
+            });
+            
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + currentSection) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Add scroll listener for TOC highlighting
+        window.addEventListener('scroll', highlightCurrentSection);
+        
+        // Initial highlight
+        highlightCurrentSection();
+    </script>
+</body>
+</html>

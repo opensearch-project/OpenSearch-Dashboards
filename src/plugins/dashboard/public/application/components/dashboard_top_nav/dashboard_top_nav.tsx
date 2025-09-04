@@ -55,13 +55,70 @@ const TopNav = ({
   const { dashboardConfig, setHeaderActionMenu, keyboardShortcut } = services;
   const { setAppRightControls } = services.application;
 
-  // Memoized callback for toggling dashboard edit mode
   const handleToggleDashboardEdit = useCallback(() => {
     const editButton = document.querySelector('[data-test-subj="dashboardEditSwitch"]');
     if (editButton) {
       (editButton as HTMLElement).click();
     }
   }, []);
+
+  const handleSave = useCallback(() => {
+    const saveButton = document.querySelector('[data-test-subj="dashboardSaveMenuItem"]');
+    if (saveButton && !saveButton.hasAttribute('disabled')) {
+      (saveButton as HTMLElement).click();
+    }
+  }, []);
+
+  const handleAdd = useCallback(() => {
+    const addButton = document.querySelector('[data-test-subj="dashboardAddPanelButton"]');
+    if (addButton && !addButton.hasAttribute('disabled')) {
+      (addButton as HTMLElement).click();
+    }
+  }, []);
+
+  // Register/unregister save shortcut based on edit mode
+  useEffect(() => {
+    if (currentAppState?.viewMode === 'edit' && keyboardShortcut) {
+      keyboardShortcut.register({
+        id: 'save_dashboard',
+        pluginId: 'dashboard',
+        name: 'Save Dashboard',
+        category: 'editing / save',
+        keys: 'cmd+s',
+        execute: handleSave,
+      });
+
+      // Cleanup: unregister when leaving edit mode or component unmounts
+      return () => {
+        keyboardShortcut.unregister({
+          id: 'save_dashboard',
+          pluginId: 'dashboard',
+        });
+      };
+    }
+  }, [currentAppState?.viewMode, keyboardShortcut, handleSave]);
+
+  // Register/unregister save shortcut based on edit mode
+  useEffect(() => {
+    if (currentAppState?.viewMode === 'edit' && keyboardShortcut) {
+      keyboardShortcut.register({
+        id: 'add_dashboard',
+        pluginId: 'dashboard',
+        name: 'Add Dashboard',
+        category: 'editing / save',
+        keys: 'shift+a',
+        execute: handleAdd,
+      });
+
+      // Cleanup: unregister when leaving edit mode or component unmounts
+      return () => {
+        keyboardShortcut.unregister({
+          id: 'add_dashboard',
+          pluginId: 'dashboard',
+        });
+      };
+    }
+  }, [currentAppState?.viewMode, keyboardShortcut, handleSave]);
 
   // Register dashboard edit mode keyboard shortcut
   keyboardShortcut?.useKeyboardShortcut({
