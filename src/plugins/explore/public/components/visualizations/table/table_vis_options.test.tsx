@@ -9,9 +9,8 @@ import { TableVisStyleControls, TableVisStyleControlsProps } from './table_vis_o
 import { TableChartStyleControls } from './table_vis_config';
 import { VisColumn, VisFieldType } from '../types';
 
-// Mock the useDebouncedNumericValue hook
 jest.mock('../utils/use_debounced_value', () => ({
-  useDebouncedNumericValue: jest.fn((initialValue, onChange) => {
+  useDebouncedNumber: jest.fn((initialValue, onChange) => {
     return [
       initialValue,
       (value: string) => {

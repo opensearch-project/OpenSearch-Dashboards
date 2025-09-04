@@ -19,7 +19,7 @@ jest.mock('../../utils/use_debounced_value', () => {
       };
       return [value, handleChange];
     }),
-    useDebouncedNumericValue: jest.fn((initialValue, onChange, options) => {
+    useDebouncedNumber: jest.fn((initialValue, onChange, options) => {
       // Use Jest's mock function instead of React.useState
       const value = initialValue;
       const handleChange = (newValue: any) => {

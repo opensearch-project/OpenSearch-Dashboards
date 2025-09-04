@@ -30,6 +30,7 @@ export const createSingleMetric = (
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const colorPalette = getColors();
+  // TODO: refactor other type of charts to have the default styles merged with the styleOptions
   const styles: DefaultMetricChartStyleControls = { ...defaultMetricChartStyles, ...styleOptions };
   // Only contains one and the only one value
   const valueColumn = axisColumnMappings?.[AxisRole.Value];

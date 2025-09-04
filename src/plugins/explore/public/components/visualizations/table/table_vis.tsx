@@ -6,7 +6,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import { VisColumn, VisFieldType } from '../types';
-import { CellTypeConfig, TableChartStyleControls } from './table_vis_config';
+import {
+  defaultTableChartStyles,
+  CellTypeConfig,
+  TableChartStyleControls,
+} from './table_vis_config';
 import { FilterConfig, TableColumnHeader } from './table_vis_filter';
 import { calculateValue } from '../utils/calculation';
 import { CellValue } from './cell_value';
@@ -25,7 +29,7 @@ interface TableVisProps {
 
 export const TableVis = React.memo(
   ({ rows, columns, styleOptions, pageSizeOptions, showStyleSelector }: TableVisProps) => {
-    const pageSize = styleOptions?.pageSize ? styleOptions.pageSize : 10;
+    const pageSize = styleOptions?.pageSize ?? defaultTableChartStyles.pageSize;
     const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ column }) => column));
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
     const [filters, setFilters] = useState<Record<string, FilterConfig>>({});
