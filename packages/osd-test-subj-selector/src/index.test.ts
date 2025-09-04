@@ -29,18 +29,17 @@
  */
 
 import { testSubjSelector } from '.';
-import expect from '@osd/expect';
 
 describe('testSubjSelector()', function () {
   it('converts subjectSelectors to cssSelectors', function () {
-    expect(testSubjSelector('foo bar')).to.eql('[data-test-subj="foo bar"]');
-    expect(testSubjSelector('foo > bar')).to.eql('[data-test-subj="foo"] [data-test-subj="bar"]');
-    expect(testSubjSelector('foo > bar baz')).to.eql(
+    expect(testSubjSelector('foo bar')).toEqual('[data-test-subj="foo bar"]');
+    expect(testSubjSelector('foo > bar')).toEqual('[data-test-subj="foo"] [data-test-subj="bar"]');
+    expect(testSubjSelector('foo > bar baz')).toEqual(
       '[data-test-subj="foo"] [data-test-subj="bar baz"]'
     );
-    expect(testSubjSelector('foo> ~bar')).to.eql('[data-test-subj="foo"] [data-test-subj~="bar"]');
-    expect(testSubjSelector('~ foo')).to.eql('[data-test-subj~="foo"]');
-    expect(testSubjSelector('~foo & ~ bar')).to.eql(
+    expect(testSubjSelector('foo> ~bar')).toEqual('[data-test-subj="foo"] [data-test-subj~="bar"]');
+    expect(testSubjSelector('~ foo')).toEqual('[data-test-subj~="foo"]');
+    expect(testSubjSelector('~foo & ~ bar')).toEqual(
       '[data-test-subj~="foo"][data-test-subj~="bar"]'
     );
   });

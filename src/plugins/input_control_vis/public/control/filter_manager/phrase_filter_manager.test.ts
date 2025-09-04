@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
-
 import { Filter, IndexPattern, FilterManager as QueryFilterManager } from '../../../../data/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
 
@@ -66,28 +64,28 @@ describe('PhraseFilterManager', function () {
 
     test('should create match phrase filter from single value', function () {
       const newFilter = filterManager.createFilter(['ios']);
-      expect(newFilter).to.have.property('meta');
-      expect(newFilter.meta.index).to.be(indexPatternId);
-      expect(newFilter.meta.controlledBy).to.be(controlId);
-      expect(newFilter.meta.key).to.be('field1');
-      expect(newFilter).to.have.property('query');
-      expect(JSON.stringify(newFilter.query, null, '')).to.be('{"match_phrase":{"field1":"ios"}}');
+      expect(newFilter).toHaveProperty('meta');
+      expect(newFilter.meta.index).toBe(indexPatternId);
+      expect(newFilter.meta.controlledBy).toBe(controlId);
+      expect(newFilter.meta.key).toBe('field1');
+      expect(newFilter).toHaveProperty('query');
+      expect(JSON.stringify(newFilter.query, null, '')).toBe('{"match_phrase":{"field1":"ios"}}');
     });
 
     test('should create bool filter from multiple values', function () {
       const newFilter = filterManager.createFilter(['ios', 'win xp']);
-      expect(newFilter).to.have.property('meta');
-      expect(newFilter.meta.index).to.be(indexPatternId);
-      expect(newFilter.meta.controlledBy).to.be(controlId);
-      expect(newFilter.meta.key).to.be('field1');
-      expect(newFilter).to.have.property('query');
+      expect(newFilter).toHaveProperty('meta');
+      expect(newFilter.meta.index).toBe(indexPatternId);
+      expect(newFilter.meta.controlledBy).toBe(controlId);
+      expect(newFilter.meta.key).toBe('field1');
+      expect(newFilter).toHaveProperty('query');
       const query = newFilter.query;
-      expect(query).to.have.property('bool');
-      expect(query.bool.should.length).to.be(2);
-      expect(JSON.stringify(query.bool.should[0], null, '')).to.be(
+      expect(query).toHaveProperty('bool');
+      expect(query.bool.should.length).toBe(2);
+      expect(JSON.stringify(query.bool.should[0], null, '')).toBe(
         '{"match_phrase":{"field1":"ios"}}'
       );
-      expect(JSON.stringify(query.bool.should[1], null, '')).to.be(
+      expect(JSON.stringify(query.bool.should[1], null, '')).toBe(
         '{"match_phrase":{"field1":"win xp"}}'
       );
     });
@@ -141,7 +139,7 @@ describe('PhraseFilterManager', function () {
           },
         },
       ] as Filter[]);
-      expect(filterManager.getValueFromFilterBar()).to.eql(['ios']);
+      expect(filterManager.getValueFromFilterBar()).toEqual(['ios']);
     });
 
     test('should extract value from multiple filters', function () {
@@ -167,7 +165,7 @@ describe('PhraseFilterManager', function () {
           },
         },
       ] as Filter[]);
-      expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
+      expect(filterManager.getValueFromFilterBar()).toEqual(['ios', 'win xp']);
     });
 
     test('should extract value from bool filter', function () {
@@ -191,7 +189,7 @@ describe('PhraseFilterManager', function () {
           },
         },
       ] as Filter[]);
-      expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
+      expect(filterManager.getValueFromFilterBar()).toEqual(['ios', 'win xp']);
     });
 
     test('should return undefined when filter value can not be extracted from OpenSearch Dashboards filter', function () {
@@ -207,7 +205,7 @@ describe('PhraseFilterManager', function () {
           },
         },
       ] as Filter[]);
-      expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
+      expect(filterManager.getValueFromFilterBar()).toEqual(undefined);
     });
   });
 });

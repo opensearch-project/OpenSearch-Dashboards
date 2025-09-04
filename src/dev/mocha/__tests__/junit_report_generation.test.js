@@ -35,7 +35,7 @@ import { fromNode as fcb } from 'bluebird';
 import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { getUniqueJunitReportPath } from '@osd/test';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
@@ -65,7 +65,7 @@ describe('dev/mocha/junit report generation', () => {
     const report = await fcb((cb) => parseString(readFileSync(XML_PATH, 'utf8'), cb));
 
     // test case results are wrapped in <testsuites></testsuites>
-    expect(report).to.eql({
+    expect(report).toEqual({
       testsuites: {
         testsuite: [report.testsuites.testsuite[0]],
       },
@@ -73,9 +73,9 @@ describe('dev/mocha/junit report generation', () => {
 
     // the single <testsuite> element at the root contains summary data for all tests results
     const [testsuite] = report.testsuites.testsuite;
-    expect(testsuite.$.time).to.match(DURATION_REGEX);
-    expect(testsuite.$.timestamp).to.match(ISO_DATE_SEC_REGEX);
-    expect(testsuite).to.eql({
+    expect(testsuite.$.time).toMatch(DURATION_REGEX);
+    expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
+    expect(testsuite).toEqual({
       $: {
         failures: '2',
         skipped: '1',
@@ -88,13 +88,13 @@ describe('dev/mocha/junit report generation', () => {
 
     // there are actually only three tests, but since the hook failed
     // it is reported as a test failure
-    expect(testsuite.testcase).to.have.length(4);
+    expect(testsuite.testcase).toHaveLength(4);
     const [testPass, testFail, beforeEachFail, testSkipped] = testsuite.testcase;
 
     const sharedClassname = testPass.$.classname;
-    expect(sharedClassname).to.match(/^test\.test[^\.]js$/);
-    expect(testPass.$.time).to.match(DURATION_REGEX);
-    expect(testPass).to.eql({
+    expect(sharedClassname).toMatch(/^test\.test[^\.]js$/);
+    expect(testPass.$.time).toMatch(DURATION_REGEX);
+    expect(testPass).toEqual({
       $: {
         classname: sharedClassname,
         name: 'SUITE works',
@@ -104,9 +104,9 @@ describe('dev/mocha/junit report generation', () => {
       'system-out': testPass['system-out'],
     });
 
-    expect(testFail.$.time).to.match(DURATION_REGEX);
-    expect(testFail.failure[0]).to.match(/Error: FORCE_TEST_FAIL\n.+fixtures.project.test.js/);
-    expect(testFail).to.eql({
+    expect(testFail.$.time).toMatch(DURATION_REGEX);
+    expect(testFail.failure[0]).toMatch(/Error: FORCE_TEST_FAIL\n.+fixtures.project.test.js/);
+    expect(testFail).toEqual({
       $: {
         classname: sharedClassname,
         name: 'SUITE fails',
@@ -117,12 +117,10 @@ describe('dev/mocha/junit report generation', () => {
       failure: [testFail.failure[0]],
     });
 
-    expect(beforeEachFail.$.time).to.match(DURATION_REGEX);
-    expect(beforeEachFail.failure).to.have.length(1);
-    expect(beforeEachFail.failure[0]).to.match(
-      /Error: FORCE_HOOK_FAIL\n.+fixtures.project.test.js/
-    );
-    expect(beforeEachFail).to.eql({
+    expect(beforeEachFail.$.time).toMatch(DURATION_REGEX);
+    expect(beforeEachFail.failure).toHaveLength(1);
+    expect(beforeEachFail.failure[0]).toMatch(/Error: FORCE_HOOK_FAIL\n.+fixtures.project.test.js/);
+    expect(beforeEachFail).toEqual({
       $: {
         classname: sharedClassname,
         name: 'SUITE SUB_SUITE "before each" hook: fail hook for "never runs"',
@@ -133,7 +131,7 @@ describe('dev/mocha/junit report generation', () => {
       failure: [beforeEachFail.failure[0]],
     });
 
-    expect(testSkipped).to.eql({
+    expect(testSkipped).toEqual({
       $: {
         classname: sharedClassname,
         name: 'SUITE SUB_SUITE never runs',

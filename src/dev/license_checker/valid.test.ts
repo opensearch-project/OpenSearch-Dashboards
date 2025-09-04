@@ -30,8 +30,6 @@
 
 import { resolve } from 'path';
 
-import expect from '@osd/expect';
-
 import { assertLicensesValid } from './valid';
 
 const ROOT = resolve(__dirname, '../../../');
@@ -53,7 +51,7 @@ describe('tasks/lib/licenses', () => {
           packages: [PACKAGE],
           validLicenses: [...PACKAGE.licenses],
         })
-      ).to.be(undefined);
+      ).toBe(undefined);
     });
 
     it('throw an error when the packages license is invalid', () => {
@@ -62,7 +60,7 @@ describe('tasks/lib/licenses', () => {
           packages: [PACKAGE],
           validLicenses: [`not ${PACKAGE.licenses[0]}`],
         });
-      }).to.throwError(() => PACKAGE.name);
+      }).toThrow(PACKAGE.name);
     });
 
     it('throws an error when the package has no licenses', () => {
@@ -76,7 +74,7 @@ describe('tasks/lib/licenses', () => {
           ],
           validLicenses: [...PACKAGE.licenses],
         });
-      }).to.throwError(() => PACKAGE.name);
+      }).toThrowError(PACKAGE.name);
     });
 
     it('includes the relative path to packages in error message', () => {
@@ -88,8 +86,8 @@ describe('tasks/lib/licenses', () => {
         throw new Error('expected assertLicensesValid() to throw');
       } catch (error: unknown) {
         const { message } = error as Error;
-        expect(message).to.contain(PACKAGE.relative);
-        expect(message).to.not.contain(PACKAGE.directory);
+        expect(message).toContain(PACKAGE.relative);
+        expect(message).not.toContain(PACKAGE.directory);
       }
     });
   });

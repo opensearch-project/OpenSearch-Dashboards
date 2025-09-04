@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
-
 import { RangeFilterManager } from './range_filter_manager';
 import {
   RangeFilter,
@@ -70,12 +68,12 @@ describe('RangeFilterManager', function () {
 
     test('should create range filter from slider value', function () {
       const newFilter = filterManager.createFilter({ min: 1, max: 3 });
-      expect(newFilter).to.have.property('meta');
-      expect(newFilter.meta.index).to.be(indexPatternId);
-      expect(newFilter.meta.controlledBy).to.be(controlId);
-      expect(newFilter.meta.key).to.be('field1');
-      expect(newFilter).to.have.property('range');
-      expect(JSON.stringify(newFilter.range, null, '')).to.be('{"field1":{"gte":1,"lte":3}}');
+      expect(newFilter).toHaveProperty('meta');
+      expect(newFilter.meta.index).toBe(indexPatternId);
+      expect(newFilter.meta.controlledBy).toBe(controlId);
+      expect(newFilter.meta.key).toBe('field1');
+      expect(newFilter).toHaveProperty('range');
+      expect(JSON.stringify(newFilter.range, null, '')).toBe('{"field1":{"gte":1,"lte":3}}');
     });
   });
 
@@ -127,11 +125,11 @@ describe('RangeFilterManager', function () {
         },
       ] as RangeFilter[]);
       const value = filterManager.getValueFromFilterBar();
-      expect(value).to.be.a('object');
-      expect(value).to.have.property('min');
-      expect(value?.min).to.be(1);
-      expect(value).to.have.property('max');
-      expect(value?.max).to.be(3);
+      expect(typeof value).toBe('object');
+      expect(value).toHaveProperty('min');
+      expect(value?.min).toBe(1);
+      expect(value).toHaveProperty('max');
+      expect(value?.max).toBe(3);
     });
 
     test('should return undefined when filter value can not be extracted from OpenSearch Dashboards filter', function () {
@@ -146,7 +144,7 @@ describe('RangeFilterManager', function () {
           meta: {} as RangeFilterMeta,
         },
       ] as RangeFilter[]);
-      expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
+      expect(filterManager.getValueFromFilterBar()).toEqual(undefined);
     });
   });
 });

@@ -28,20 +28,19 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import { getAriaName } from './get_aria_name';
 
 describe('Settings', function () {
   describe('Advanced', function () {
     describe('getAriaName(name)', function () {
       it('should return a space delimited lower-case string with no special characters', function () {
-        expect(getAriaName('doc_table:highlight')).to.be('doc table highlight');
-        expect(getAriaName('foo')).to.be('foo');
+        expect(getAriaName('doc_table:highlight')).toBe('doc table highlight');
+        expect(getAriaName('foo')).toBe('foo');
       });
 
       it('should return an empty string if passed undefined or null', function () {
-        expect(getAriaName()).to.be('');
-        expect(getAriaName(undefined)).to.be('');
+        expect(getAriaName()).toBe('');
+        expect(getAriaName(undefined)).toBe('');
       });
     });
   });

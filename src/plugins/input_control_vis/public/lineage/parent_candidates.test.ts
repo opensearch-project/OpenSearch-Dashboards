@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import { getLineageMap } from './lineage_map';
 import { getParentCandidates } from './parent_candidates';
 import { CONTROL_TYPES, newControl } from '../editor_utils';
@@ -56,14 +55,14 @@ test('creates parent candidates that avoid circular graphs', () => {
     control1.id,
     lineageMap
   );
-  expect([]).to.eql(parentCandidatesForControl1);
+  expect([]).toEqual(parentCandidatesForControl1);
 
   const parentCandidatesForControl2 = getParentCandidates(
     controlParamsList,
     control2.id,
     lineageMap
   );
-  expect([{ value: 1, text: 'fieldName' }]).to.eql(parentCandidatesForControl2);
+  expect([{ value: 1, text: 'fieldName' }]).toEqual(parentCandidatesForControl2);
 
   const parentCandidatesForControl3 = getParentCandidates(
     controlParamsList,
@@ -73,5 +72,5 @@ test('creates parent candidates that avoid circular graphs', () => {
   expect([
     { value: 1, text: 'fieldName' },
     { value: 2, text: 'fieldName' },
-  ]).to.eql(parentCandidatesForControl3);
+  ]).toEqual(parentCandidatesForControl3);
 });

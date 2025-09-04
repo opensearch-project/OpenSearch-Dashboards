@@ -28,19 +28,18 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import { getCategoryName } from './get_category_name';
 
 describe('Settings', function () {
   describe('Advanced', function () {
     describe('getCategoryName(category)', function () {
       it('should capitalize unknown category', function () {
-        expect(getCategoryName('unknown')).to.be('Unknown');
+        expect(getCategoryName('unknown')).toBe('Unknown');
       });
 
       it('should return empty string for no category', function () {
-        expect(getCategoryName()).to.be('');
-        expect(getCategoryName('')).to.be('');
+        expect(getCategoryName()).toBe('');
+        expect(getCategoryName('')).toBe('');
       });
     });
   });

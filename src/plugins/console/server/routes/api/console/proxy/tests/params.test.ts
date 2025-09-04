@@ -33,7 +33,6 @@ import {
   opensearchDashboardsResponseFactory,
 } from '../../../../../../../../core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
-import expect from '@osd/expect';
 
 import { createHandler } from '../create_handler';
 import { coreMock, opensearchServiceMock } from '../../../../../../../../core/server/mocks';
@@ -65,7 +64,7 @@ describe('Console Proxy Route', () => {
             opensearchDashboardsResponseFactory
           );
 
-          expect(status).to.be(403);
+          expect(status).toBe(403);
         });
       });
       describe('one match', () => {
@@ -86,7 +85,7 @@ describe('Console Proxy Route', () => {
             opensearchDashboardsResponseFactory
           );
 
-          expect(status).to.be(200);
+          expect(status).toBe(200);
         });
       });
       describe('all match', () => {
@@ -107,7 +106,7 @@ describe('Console Proxy Route', () => {
             opensearchDashboardsResponseFactory
           );
 
-          expect(status).to.be(200);
+          expect(status).toBe(200);
         });
       });
     });

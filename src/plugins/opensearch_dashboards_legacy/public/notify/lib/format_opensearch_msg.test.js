@@ -29,7 +29,6 @@
  */
 
 import { formatOpenSearchMsg } from './format_opensearch_msg';
-import expect from '@osd/expect';
 
 describe('formatOpenSearchMsg', () => {
   test('should return undefined if passed a basic error', () => {
@@ -37,7 +36,7 @@ describe('formatOpenSearchMsg', () => {
 
     const actual = formatOpenSearchMsg(err);
 
-    expect(actual).to.be(undefined);
+    expect(actual).toBe(undefined);
   });
 
   test('should return undefined if passed a string', () => {
@@ -45,7 +44,7 @@ describe('formatOpenSearchMsg', () => {
 
     const actual = formatOpenSearchMsg(err);
 
-    expect(actual).to.be(undefined);
+    expect(actual).toBe(undefined);
   });
 
   test('should return the root_cause if passed an extended opensearch', () => {
@@ -62,7 +61,7 @@ describe('formatOpenSearchMsg', () => {
 
     const actual = formatOpenSearchMsg(err);
 
-    expect(actual).to.equal('I am the detailed message');
+    expect(actual).toEqual('I am the detailed message');
   });
 
   test('should combine the reason messages if more than one is returned.', () => {
@@ -82,6 +81,6 @@ describe('formatOpenSearchMsg', () => {
 
     const actual = formatOpenSearchMsg(err);
 
-    expect(actual).to.equal('I am the detailed message 1\nI am the detailed message 2');
+    expect(actual).toEqual('I am the detailed message 1\nI am the detailed message 2');
   });
 });
