@@ -42,6 +42,7 @@ export class KeyboardShortcutService {
       register: (shortcut) => this.register(shortcut),
       unregister: (shortcut) => this.unregister(shortcut),
       useKeyboardShortcut: (shortcut) => useKeyboardShortcut(shortcut, this),
+      getAllShortcuts: () => this.getAllShortcuts(),
     };
   }
 
@@ -195,5 +196,16 @@ export class KeyboardShortcutService {
 
   private stopEventListener(): void {
     document.removeEventListener('keydown', this.handleKeyboardEvent, true);
+  }
+
+  public getAllShortcuts(): ShortcutDefinition[] {
+    const allShortcuts: ShortcutDefinition[] = [];
+
+    // Iterate through all shortcuts in the map and collect all shortcuts
+    for (const shortcuts of this.shortcutsMapByKey.values()) {
+      allShortcuts.push(...shortcuts);
+    }
+
+    return allShortcuts;
   }
 }

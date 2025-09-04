@@ -4,6 +4,7 @@
  */
 
 export { KeyboardShortcutService } from './keyboard_shortcut_service';
+export { KeyboardShortcutHelpModal } from './keyboard_shortcut_help_modal';
 export type {
   KeyboardShortcutSetup,
   KeyboardShortcutStart,
