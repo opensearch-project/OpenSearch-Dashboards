@@ -463,10 +463,41 @@ cy.osd.add('cleanupWorkspaceAndDataSourceAndIndices', (workspaceName, indices) =
 cy.osd.add('ensureTopNavExists', () => {
   // Simply check for the existence of either date picker button
   // Cypress will automatically retry this until the timeout
-  return cy.getElementsByTestIds(
-    ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
-    { timeout: 30000 }
-  );
+  // return cy.getElementsByTestIds(
+  //   ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
+  //   { timeout: 30000 }
+  // );
+
+  const MAX_RETRY = 3;
+
+  const getTopNavOrRetry = (attempt = 1) => {
+    const opts = { log: false };
+
+    cy.get('body', opts).then(($body) => {
+      const superDatePickerstartDatePopoverButtonEl = $body.find(
+        '[data-test-subj="superDatePickerstartDatePopoverButton"]'
+      );
+      const superDatePickerShowDatesButton = $body.find(
+        '[data-test-subj="superDatePickerShowDatesButton"]'
+      );
+
+      if (
+        !superDatePickerstartDatePopoverButtonEl.length &&
+        !superDatePickerShowDatesButton.length
+      ) {
+        if (attempt < MAX_RETRY) {
+          cy.log(`Top Nav not found, reloading and retrying... (attempt ${attempt})`);
+          cy.reload();
+          cy.wait(2000, opts);
+          return getTopNavOrRetry(attempt + 1);
+        } else {
+          cy.log(`Failed to find Top Nav after attempting ${MAX_RETRY} times`);
+        }
+      }
+    });
+  };
+
+  return getTopNavOrRetry();
 });
 
 cy.osd.add('setTopNavDate', (start, end, submit = true) => {

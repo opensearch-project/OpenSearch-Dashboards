@@ -35,7 +35,7 @@ describe('Discover Traces', () => {
     };
 
     cy.core
-      .createDataset(resources.workspaceId, resources.dataSourceId, {
+      .createDataset(testResources.workspaceId, testResources.dataSourceId, {
         dataset,
       })
       .then((datasetId) => {
