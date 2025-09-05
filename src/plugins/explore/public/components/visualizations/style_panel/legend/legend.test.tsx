@@ -80,4 +80,24 @@ describe('LegendOptionsPanel', () => {
     );
     expect(container.firstChild).toBeNull();
   });
+
+  it('calls stopPropagation on mouseUp for legend position select', () => {
+    render(
+      <LegendOptionsPanel legendOptions={mockLegend} onLegendOptionsChange={mockOnLegendChange} />
+    );
+
+    const legendPositionSelect = screen.getByTestId('legendPositionSelect');
+    expect(legendPositionSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    legendPositionSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
 });

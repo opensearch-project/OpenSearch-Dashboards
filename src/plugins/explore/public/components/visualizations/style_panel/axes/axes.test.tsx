@@ -967,4 +967,68 @@ describe('AxesOptions', () => {
       ]);
     });
   });
+
+  it('calls stopPropagation on mouseUp for X-axis alignment select', () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    const xAlignmentSelect = screen.getByTestId('xLinesAlignment');
+    expect(xAlignmentSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    xAlignmentSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
+
+  it('calls stopPropagation on mouseUp for Y-axis alignment select (single axis)', () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    const yAlignmentSelect = screen.getByTestId('singleyLinesAlignment');
+    expect(yAlignmentSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    yAlignmentSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
+
+  it('calls stopPropagation on mouseUp for Y-axis alignment select (Rule 2, both axes)', () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const yAlignmentSelects = screen.getAllByTestId('yLinesAlignment');
+    expect(yAlignmentSelects).toHaveLength(2); // Verify both elements exist
+
+    const stopPropagation1 = jest.fn();
+    const stopPropagation2 = jest.fn();
+
+    const mouseUpEvent1 = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent1, 'stopPropagation', { value: stopPropagation1 });
+
+    const mouseUpEvent2 = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent2, 'stopPropagation', { value: stopPropagation2 });
+
+    yAlignmentSelects[0].dispatchEvent(mouseUpEvent1);
+    yAlignmentSelects[1].dispatchEvent(mouseUpEvent2);
+
+    expect(stopPropagation1).toHaveBeenCalled();
+    expect(stopPropagation2).toHaveBeenCalled();
+  });
 });

@@ -57,6 +57,7 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
           options={pointShapes}
           value={styles.pointShape}
           onChange={(e) => updateStyle('pointShape', e.target.value as PointShape)}
+          onMouseUp={(e) => e.stopPropagation()}
         />
       </EuiFormRow>
 
