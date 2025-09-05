@@ -9,6 +9,7 @@ import { RootState } from '../store';
 import { EXPLORE_DEFAULT_LANGUAGE, DEFAULT_TRACE_COLUMNS_SETTING } from '../../../../../common';
 import { ColorSchemas } from '../../../../components/visualizations/types';
 import { EditorMode, QueryExecutionStatus } from '../types';
+import { SignalType } from '../../../../../../data/common';
 import { of } from 'rxjs';
 
 jest.mock('../../../../components/visualizations/metric/metric_vis_config', () => ({
@@ -59,6 +60,15 @@ describe('redux_persistence', () => {
               getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
             },
           },
+        },
+        dataViews: {
+          get: jest.fn(() =>
+            Promise.resolve({
+              id: 'test-dataset',
+              title: 'test-dataset',
+              signalType: SignalType.LOGS,
+            })
+          ),
         },
       },
       uiSettings: {
@@ -476,6 +486,100 @@ describe('redux_persistence', () => {
       expect(result1.meta).toEqual(result2.meta);
       expect(result1.meta.isInitialized).toBe(false);
       expect(result2.meta.isInitialized).toBe(false);
+    });
+  });
+
+  describe('SignalType filtering', () => {
+    it('should accept Traces datasets for Traces flavor', async () => {
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+        data: {
+          ...mockServices.data,
+          dataViews: {
+            get: jest.fn(() => Promise.resolve({ signalType: SignalType.Traces })),
+          },
+        },
+      } as any;
+
+      (tracesServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'test' }] })),
+          toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
+        })),
+      });
+
+      const result = await getPreloadedState(tracesServices);
+      expect(result.query.dataset).toBeDefined();
+    });
+
+    it('should reject non-Traces datasets for Traces flavor', async () => {
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+        data: {
+          ...mockServices.data,
+          dataViews: {
+            get: jest.fn(() => Promise.resolve({ signalType: SignalType.LOGS })),
+          },
+        },
+      } as any;
+
+      (tracesServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'test' }] })),
+          toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
+        })),
+      });
+
+      const result = await getPreloadedState(tracesServices);
+      expect(result.query.dataset).toBeUndefined();
+    });
+
+    it('should accept non-Traces datasets for non-Traces flavor', async () => {
+      const logsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/logs') } },
+        data: {
+          ...mockServices.data,
+          dataViews: {
+            get: jest.fn(() => Promise.resolve({ signalType: SignalType.LOGS })),
+          },
+        },
+      } as any;
+
+      (logsServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'test' }] })),
+          toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
+        })),
+      });
+
+      const result = await getPreloadedState(logsServices);
+      expect(result.query.dataset).toBeDefined();
+    });
+
+    it('should reject Traces datasets for non-Traces flavor', async () => {
+      const logsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/logs') } },
+        data: {
+          ...mockServices.data,
+          dataViews: {
+            get: jest.fn(() => Promise.resolve({ signalType: SignalType.Traces })),
+          },
+        },
+      } as any;
+
+      (logsServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'test' }] })),
+          toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
+        })),
+      });
+
+      const result = await getPreloadedState(logsServices);
+      expect(result.query.dataset).toBeUndefined();
     });
   });
 });

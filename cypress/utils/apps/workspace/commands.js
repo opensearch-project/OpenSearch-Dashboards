@@ -15,11 +15,14 @@ Cypress.Commands.add(
       indexPatternHasTimefield = true,
       dataSource,
       isEnhancement = false,
+      signalType = 'logs',
     } = opts;
 
-    cy.intercept('POST', '/w/*/api/saved_objects/index-pattern').as(
-      'createIndexPatternInterception'
-    );
+    // TODO: use the UI creation flow to add signalType once we have it
+    cy.intercept('POST', '/w/*/api/saved_objects/index-pattern', (req) => {
+      req.body.attributes = { ...req.body.attributes, signalType };
+      req.continue();
+    }).as('createIndexPatternInterception');
 
     // Navigate to Workspace Specific IndexPattern Page
     cy.osd.navigateToWorkSpaceSpecificPage({

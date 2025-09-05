@@ -43,6 +43,7 @@ import {
   IndexPatternFieldMap,
   IndexPatternSpec,
   SavedObjectReference,
+  SignalType,
   SourceFilter,
   TypeMeta,
 } from '../types';
@@ -68,6 +69,7 @@ interface SavedObjectBody {
   fieldFormatMap?: string;
   typeMeta?: string;
   type?: string;
+  signalType?: string;
 }
 
 type FormatFieldFn = (
@@ -100,6 +102,7 @@ export class IndexPattern implements IIndexPattern {
   public sourceFilters?: SourceFilter[];
   public dataSourceRef?: SavedObjectReference;
   public fieldsLoading?: boolean;
+  public signalType?: SignalType;
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
@@ -136,6 +139,7 @@ export class IndexPattern implements IIndexPattern {
     this.description = spec.description;
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
+    this.signalType = spec.signalType;
 
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
@@ -242,6 +246,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       dataSourceRef: this.dataSourceRef,
+      signalType: this.signalType,
     };
   }
 
@@ -382,6 +387,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      signalType: this.signalType,
     };
   }
 

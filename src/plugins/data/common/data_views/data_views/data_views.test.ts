@@ -206,6 +206,7 @@ describe('DataViews', () => {
         fieldFormatMap: '{"field":{}}',
         typeMeta: '{}',
         type: '',
+        signalType: undefined,
       },
       type: 'index-pattern',
       references: [],
@@ -226,6 +227,7 @@ describe('DataViews', () => {
         fieldFormatMap: '{"field":{}}',
         typeMeta: '{}',
         type: '',
+        signalType: undefined,
       },
       type: 'index-pattern',
       references: [

@@ -29,7 +29,7 @@
  */
 
 export { IUiStart, IUiSetup } from './types';
-export { DatasetSelectProps } from './dataset_select';
+export { DatasetSelectProps, DetailedDataset } from './dataset_select';
 export { IndexPatternSelectProps } from './index_pattern_select';
 export { FilterLabel } from './filter_bar';
 export { QueryStringInput, QueryStringInputProps } from './query_string_input';

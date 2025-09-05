@@ -60,6 +60,7 @@ const traceTestSuite = () => {
         indexPatternHasTimefield: true,
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
+        signalType: 'traces',
       });
 
       // Navigate back to traces page
