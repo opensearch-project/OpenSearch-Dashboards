@@ -83,12 +83,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
       );
 
-      setSelectedDataset({
+      const detailedDataset = {
         ...currentDataset,
         description: dataView.description,
         displayName: dataView.displayName,
         signalType: dataView.signalType,
-      } as DetailedDataset);
+      } as DetailedDataset;
+
+      setSelectedDataset(detailedDataset);
     };
     updateSelectedDataset();
   }, [currentDataset, dataViews, datasets]);

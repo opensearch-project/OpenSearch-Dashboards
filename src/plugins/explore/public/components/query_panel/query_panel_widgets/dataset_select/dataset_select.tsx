@@ -110,7 +110,7 @@ export const DatasetSelectWidget = () => {
       if (flavorId === ExploreFlavor.Traces) {
         return detailedDataset.signalType === SignalType.Traces;
       }
-      return true;
+      return detailedDataset.signalType !== SignalType.Traces;
     },
     [flavorId]
   );

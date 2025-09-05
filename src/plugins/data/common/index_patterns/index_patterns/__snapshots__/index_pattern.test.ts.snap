@@ -5,7 +5,6 @@ Object {
   "dataSourceRef": undefined,
   "description": undefined,
   "displayName": undefined,
-  "facetedFields": undefined,
   "fields": Object {
     "@tags": Object {
       "aggregatable": true,
@@ -651,7 +650,6 @@ Object {
   },
   "description": undefined,
   "displayName": undefined,
-  "facetedFields": undefined,
   "fields": Object {
     "@tags": Object {
       "aggregatable": true,
