@@ -36,9 +36,26 @@ export const PatternsFlyoutUpdateSearch = ({ patternString }: PatternsFlyoutUpda
   const setEditorText = useSetEditorText();
   const dispatch = useDispatch();
 
-  const query = useSelector(selectQuery);
-  const patternsField = useSelector(selectPatternsField);
+  const originalQuery = useSelector(selectQuery);
+  const selectedPatternsField = useSelector(selectPatternsField);
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
+
+  // craft query that will select for all documents with specific pattern
+  const createSearchPatternQuery = (patternsField: string) => {
+    const preparedQuery = getQueryWithSource(originalQuery);
+    return usingRegexPatterns
+      ? regexUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString)
+      : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
+  };
+
+  // move to 'logs' flow with 'update search' query
+  const redirectToLogsWithQuery = (query: string) => {
+    dispatch(setQueryStringWithHistory(query)); // sets query to be ran
+    setEditorText(query); // sets the text in the editor
+    dispatch(setActiveTab(EXPLORE_LOGS_TAB_ID)); // moves tab over to logs
+    dispatch(executeQueries({ services }));
+    closePatternsTableFlyout();
+  };
 
   return (
     <EuiButton
@@ -47,20 +64,10 @@ export const PatternsFlyoutUpdateSearch = ({ patternString }: PatternsFlyoutUpda
       })}
       iconType={'continuityBelow'}
       onClick={() => {
-        if (!patternsField) throw new Error('no patterns field');
+        if (!selectedPatternsField) throw new Error('no patterns field');
 
-        // craft query that will select for all documents with specific pattern
-        const preparedQuery = getQueryWithSource(query);
-        const newQuery = usingRegexPatterns
-          ? regexUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString)
-          : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
-
-        // move to 'logs' flow with 'update search' query
-        dispatch(setQueryStringWithHistory(newQuery));
-        setEditorText(newQuery);
-        dispatch(setActiveTab(EXPLORE_LOGS_TAB_ID));
-        dispatch(executeQueries({ services }));
-        closePatternsTableFlyout();
+        const newQuery = createSearchPatternQuery(selectedPatternsField);
+        redirectToLogsWithQuery(newQuery);
       }}
     >
       {i18n.translate('explore.patterns.flyout.updateSearch', {
