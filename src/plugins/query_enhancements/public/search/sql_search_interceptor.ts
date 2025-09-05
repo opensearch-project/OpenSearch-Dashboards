@@ -66,7 +66,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       const datasetTypeConfig = this.queryService.queryString
         .getDatasetService()
         .getType(datasetType);
-      strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
+      strategy = datasetTypeConfig?.getSearchOptions?.(dataset).strategy ?? strategy;
 
       if (datasetTypeConfig?.languageOverrides?.SQL?.hideDatePicker === false) {
         request.params = {
