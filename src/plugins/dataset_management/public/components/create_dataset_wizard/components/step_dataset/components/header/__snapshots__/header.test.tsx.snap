@@ -68,7 +68,7 @@ exports[`Header should mark the input as invalid 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Index pattern name"
-              id="datasetManagement.createDataset.step.indexPatternLabel"
+              id="datasetManagement.createDataset.step.datasetLabel"
               values={Object {}}
             />
           }
@@ -181,7 +181,7 @@ exports[`Header should render normally 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Index pattern name"
-              id="datasetManagement.createDataset.step.indexPatternLabel"
+              id="datasetManagement.createDataset.step.datasetLabel"
               values={Object {}}
             />
           }

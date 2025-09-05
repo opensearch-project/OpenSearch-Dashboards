@@ -3,12 +3,12 @@
 exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
 <div>
   <Table
-    editField={[Function]}
     dataset={
       Object {
         "getNonScriptedFields": [Function],
       }
     }
+    editField={[Function]}
     items={
       Array [
         Object {
@@ -29,12 +29,12 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
 exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
 <div>
   <Table
-    editField={[Function]}
     dataset={
       Object {
         "getNonScriptedFields": [Function],
       }
     }
+    editField={[Function]}
     items={
       Array [
         Object {
@@ -54,12 +54,12 @@ exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
 exports[`IndexedFieldsTable should render normally 1`] = `
 <div>
   <Table
-    editField={[Function]}
     dataset={
       Object {
         "getNonScriptedFields": [Function],
       }
     }
+    editField={[Function]}
     items={
       Array [
         Object {

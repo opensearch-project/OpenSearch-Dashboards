@@ -227,9 +227,9 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
       }
     }
 
-    await this.context.services.data.indexPatterns.setDefault(emptyPattern.id as string);
+    await this.context.services.data.dataViews.setDefault(emptyPattern.id as string);
 
-    this.context.services.data.indexPatterns.clearCache(emptyPattern.id as string);
+    this.context.services.data.dataViews.clearCache(emptyPattern.id as string);
     history.push(`/patterns/${emptyPattern.id}`);
   };
 

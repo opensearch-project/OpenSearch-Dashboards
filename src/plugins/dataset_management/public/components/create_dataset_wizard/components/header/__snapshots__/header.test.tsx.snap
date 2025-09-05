@@ -5,6 +5,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
   locale="en"
 >
   <Header
+    datasetName="test index pattern"
     docLinks={
       Object {
         "links": Object {
@@ -14,7 +15,6 @@ exports[`Header should render a different name, prompt, and beta tag if provided
         },
       }
     }
-    indexPatternName="test index pattern"
     isBeta={true}
     prompt={
       <div>
@@ -162,6 +162,7 @@ exports[`Header should render normally 1`] = `
   locale="en"
 >
   <Header
+    datasetName="test index pattern"
     docLinks={
       Object {
         "links": Object {
@@ -171,7 +172,6 @@ exports[`Header should render normally 1`] = `
         },
       }
     }
-    indexPatternName="test index pattern"
   >
     <div>
       <EuiText
@@ -292,6 +292,7 @@ exports[`Header should render without including system indices 1`] = `
   locale="en"
 >
   <Header
+    datasetName="test index pattern"
     docLinks={
       Object {
         "links": Object {
@@ -301,7 +302,6 @@ exports[`Header should render without including system indices 1`] = `
         },
       }
     }
-    indexPatternName="test index pattern"
   >
     <div>
       <EuiText

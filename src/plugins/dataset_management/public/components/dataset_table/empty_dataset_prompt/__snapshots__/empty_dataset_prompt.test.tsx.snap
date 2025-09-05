@@ -42,7 +42,7 @@ exports[`EmptyDatasetPrompt should render normally 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="OpenSearch Dashboards requires an index pattern to identify which indices you want to explore. An index pattern can point to a specific index, for example, your log data from yesterday, or all indices that contain your log data."
-            id="datasetManagement.emptyDatasetPrompt.indexPatternExplanation"
+            id="datasetManagement.emptyDatasetPrompt.datasetExplanation"
             values={Object {}}
           />
         </p>
@@ -58,7 +58,7 @@ exports[`EmptyDatasetPrompt should render normally 1`] = `
         >
           <FormattedMessage
             defaultMessage="Create index pattern"
-            id="datasetManagement.indexPatternTable.createBtn"
+            id="datasetManagement.datasetTable.createBtn"
             values={Object {}}
           />
         </CreateButton>

@@ -47,7 +47,7 @@ describe('DiscoverPlugin', () => {
     };
 
     setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
-    startMock.application.getUrlForApp.mockReturnValue('/app/indexPatterns');
+    startMock.application.getUrlForApp.mockReturnValue('/app/datasets');
 
     pluginInstance.setup(setupMock, {
       urlForwarding: urlForwardingPluginMock.createSetupContract(),
@@ -56,9 +56,7 @@ describe('DiscoverPlugin', () => {
 
     await applicationRegistration.mount({} as ManagementAppMountParams);
 
-    expect(startMock.application.getUrlForApp).toBeCalledWith('indexPatterns');
-    expect(startMock.application.navigateToUrl).toBeCalledWith(
-      'http://localhost/app/indexPatterns'
-    );
+    expect(startMock.application.getUrlForApp).toBeCalledWith('datasets');
+    expect(startMock.application.navigateToUrl).toBeCalledWith('http://localhost/app/datasets');
   });
 });
