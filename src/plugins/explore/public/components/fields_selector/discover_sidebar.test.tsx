@@ -65,12 +65,27 @@ jest.mock('../../application/legacy/discover/opensearch_dashboards_services', ()
         }
       },
     },
+    core: {
+      application: {
+        currentAppId$: {
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        },
+      },
+    },
   }),
 }));
 
 jest.mock('./lib/get_index_pattern_field_list', () => ({
   getIndexPatternFieldList: jest.fn((dataSet) => dataSet.fields),
 }));
+
+jest.mock('../../helpers/use_flavor_id', () => ({
+  useFlavorId: jest.fn(() => null),
+}));
+
+import { useFlavorId } from '../../helpers/use_flavor_id';
+import { ExploreFlavor } from '../../../common';
+const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
 
 jest.mock('./field_list', () => ({
   FieldList: ({ title, fields, category }: { title: string; fields: any[]; category: string }) => (
@@ -100,6 +115,22 @@ jest.mock('./facet_list', () => ({
 
 function getCompProps(customFields?: any[]): DiscoverSidebarProps {
   const fields = customFields || stubbedLogstashFields();
+
+  // Ensure serviceName field exists for faceted field tests
+  if (!fields.find((f: any) => f.name === 'serviceName')) {
+    fields.push({
+      name: 'serviceName',
+      type: 'string',
+      esTypes: ['keyword'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'Service Name',
+    });
+  }
+
   const dataSet = getStubDataView(
     'logstash-*',
     (cfg: any) => cfg,
@@ -146,6 +177,8 @@ describe('discover sidebar', function () {
     if (spy) {
       spy.mockRestore(); // This works with spyOn
     }
+    // Reset the useFlavorId mock to default
+    mockUseFlavorId.mockReturnValue(null);
   });
 
   it('should render the field header', function () {
@@ -226,5 +259,149 @@ describe('discover sidebar', function () {
     // Check that fields are displayed in the mocked components
     const fieldItems = screen.getAllByTestId('fieldList-field');
     expect(fieldItems.length).toBeGreaterThan(0);
+  });
+
+  it('should render faceted fields when they exist', function () {
+    spy = jest.spyOn(fieldFilter, 'getDefaultFieldFilter').mockReturnValue({
+      missing: false,
+      type: 'any',
+      name: '',
+      aggregatable: null,
+      searchable: null,
+    });
+
+    // Mock flavor to be 'traces' so faceted fields are shown
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
+
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    // Check that faceted fields section is rendered
+    expect(screen.getByTestId('mocked-facet-list')).toBeInTheDocument();
+    expect(screen.getByText('Faceted fields')).toBeInTheDocument();
+
+    // Check that default faceted fields are present
+    const facetedFields = screen.getAllByTestId('facetList-field');
+    expect(facetedFields.length).toBeGreaterThan(0);
+  });
+
+  it('should render additional faceted fields from DataView', function () {
+    spy = jest.spyOn(fieldFilter, 'getDefaultFieldFilter').mockReturnValue({
+      missing: false,
+      type: 'any',
+      name: '',
+      aggregatable: null,
+      searchable: null,
+    });
+
+    // Mock flavor to be 'traces' so faceted fields are shown
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
+
+    // Create a custom data set with additional faceted fields
+    const customFields = stubbedLogstashFields();
+
+    // Add custom fields that we'll mark as faceted
+    customFields.push({
+      name: 'custom.faceted.field1',
+      type: 'string',
+      esTypes: ['keyword'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'Custom Faceted Field 1',
+    });
+
+    customFields.push({
+      name: 'custom.faceted.field2',
+      type: 'string',
+      esTypes: ['keyword'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'Custom Faceted Field 2',
+    });
+
+    const props = getCompProps(customFields);
+
+    // Add additional faceted fields to the data set
+    props.selectedDataSet!.facetedFields = ['custom.faceted.field1', 'custom.faceted.field2'];
+
+    // Add field counts for our custom faceted fields
+    props.fieldCounts['custom.faceted.field1'] = 5;
+    props.fieldCounts['custom.faceted.field2'] = 3;
+
+    render(<DiscoverSidebar {...props} />);
+
+    // Check that faceted fields section is rendered
+    expect(screen.getByTestId('mocked-facet-list')).toBeInTheDocument();
+    expect(screen.getByText('Faceted fields')).toBeInTheDocument();
+
+    // Check that our custom faceted fields are present
+    const facetedFieldElements = screen.getAllByTestId('facetList-field');
+    const facetedFieldNames = facetedFieldElements.map((el) => el.textContent);
+
+    // Should include both default and custom faceted fields
+    expect(facetedFieldNames).toContain('serviceName'); // Default faceted field
+    expect(facetedFieldNames).toContain('custom.faceted.field1'); // Custom faceted field
+    expect(facetedFieldNames).toContain('custom.faceted.field2'); // Custom faceted field
+  });
+
+  it('should handle undefined faceted fields gracefully', function () {
+    spy = jest.spyOn(fieldFilter, 'getDefaultFieldFilter').mockReturnValue({
+      missing: false,
+      type: 'any',
+      name: '',
+      aggregatable: null,
+      searchable: null,
+    });
+
+    // Mock flavor to be 'traces' so faceted fields are shown
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
+
+    const props = getCompProps();
+
+    // Explicitly set facetedFields to undefined
+    props.selectedDataSet!.facetedFields = undefined;
+
+    render(<DiscoverSidebar {...props} />);
+
+    // Should still render faceted fields section with only default faceted fields
+    expect(screen.getByTestId('mocked-facet-list')).toBeInTheDocument();
+    expect(screen.getByText('Faceted fields')).toBeInTheDocument();
+
+    // Should only show default faceted fields (serviceName should be present)
+    const facetedFields = screen.getAllByTestId('facetList-field');
+    expect(facetedFields.length).toBeGreaterThan(0);
+
+    const facetedFieldNames = facetedFields.map((el) => el.textContent);
+    expect(facetedFieldNames).toContain('serviceName');
+  });
+
+  it('should not render faceted fields in non-traces flavor', function () {
+    spy = jest.spyOn(fieldFilter, 'getDefaultFieldFilter').mockReturnValue({
+      missing: false,
+      type: 'any',
+      name: '',
+      aggregatable: null,
+      searchable: null,
+    });
+
+    // Mock flavor to be null so faceted fields are NOT shown
+    mockUseFlavorId.mockReturnValue(null);
+
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    // Check that faceted fields section is NOT rendered
+    expect(screen.queryByTestId('mocked-facet-list')).not.toBeInTheDocument();
+    expect(screen.queryByText('Faceted fields')).not.toBeInTheDocument();
+
+    // Should still have other sections
+    expect(screen.getByTestId('mocked-field-list-selected')).toBeInTheDocument();
+    expect(screen.getByTestId('mocked-field-list-discovered')).toBeInTheDocument();
   });
 });

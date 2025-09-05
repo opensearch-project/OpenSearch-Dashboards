@@ -386,6 +386,7 @@ export class DataViewsService {
         fieldFormatMap,
         typeMeta,
         type,
+        facetedFields,
       },
       references,
     } = savedObject;
@@ -394,6 +395,7 @@ export class DataViewsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: DataViewFieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedFacetedFields = facetedFields ? JSON.parse(facetedFields) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
     this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
@@ -410,6 +412,7 @@ export class DataViewsService {
       typeMeta: parsedTypeMeta,
       type,
       dataSourceRef,
+      facetedFields: parsedFacetedFields,
     };
   };
 

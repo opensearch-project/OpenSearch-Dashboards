@@ -91,7 +91,7 @@ describe('group_fields', function () {
     // Set missing to false to include fields not in fieldCounts
     fieldFilterState.missing = false;
 
-    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState);
+    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "discoveredFields": Array [
@@ -230,7 +230,7 @@ describe('group_fields', function () {
     const fieldFilterState = getDefaultFieldFilter();
     fieldFilterState.missing = false;
 
-    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState);
+    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState, true);
 
     expect(actual.facetedFields).toHaveLength(3);
     expect(actual.facetedFields.map((f) => f.name)).toContain('serviceName\u200b');
@@ -255,5 +255,163 @@ describe('group_fields', function () {
       queryFields: [],
       discoveredFields: [],
     });
+  });
+
+  it('should handle additional faceted fields from DataView', function () {
+    const fields = [
+      {
+        name: 'custom.field1',
+        type: 'string',
+        esTypes: ['keyword'],
+        count: 1,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        displayName: 'Custom Field 1',
+      },
+      {
+        name: 'custom.field2',
+        type: 'string',
+        esTypes: ['keyword'],
+        count: 1,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        displayName: 'Custom Field 2',
+      },
+      {
+        name: 'serviceName',
+        type: 'string',
+        esTypes: ['keyword'],
+        count: 1,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        displayName: 'Service Name',
+      },
+      {
+        name: 'regularField',
+        type: 'string',
+        esTypes: ['text'],
+        count: 1,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        displayName: 'Regular Field',
+      },
+    ];
+
+    const columns: string[] = [];
+    const fieldCounts = {
+      'custom.field1': 1,
+      'custom.field2': 1,
+      serviceName: 1,
+      regularField: 1,
+    };
+
+    const fieldFilterState = getDefaultFieldFilter();
+    fieldFilterState.missing = false;
+
+    // Test with additional faceted fields from DataView
+    const additionalFacetedFields = ['custom.field1', 'custom.field2'];
+    const actual = groupFields(
+      fields as any,
+      columns,
+      fieldCounts,
+      fieldFilterState,
+      true,
+      additionalFacetedFields
+    );
+
+    expect(actual.facetedFields).toHaveLength(3); // serviceName (default) + custom.field1 + custom.field2
+    expect(actual.facetedFields.map((f) => f.name)).toContain('serviceName'); // Default faceted field
+    expect(actual.facetedFields.map((f) => f.name)).toContain('custom.field1'); // Additional faceted field
+    expect(actual.facetedFields.map((f) => f.name)).toContain('custom.field2'); // Additional faceted field
+    expect(actual.queryFields.map((f) => f.name)).toContain('regularField'); // Regular field
+  });
+
+  it('should handle undefined faceted fields parameter', function () {
+    const fields = [
+      {
+        name: 'serviceName',
+        type: 'string',
+        esTypes: ['keyword'],
+        count: 1,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        displayName: 'Service Name',
+      },
+    ];
+
+    const columns: string[] = [];
+    const fieldCounts = { serviceName: 1 };
+    const fieldFilterState = getDefaultFieldFilter();
+    fieldFilterState.missing = false;
+
+    // Test with undefined faceted fields (should default to empty array)
+    const actual = groupFields(
+      fields as any,
+      columns,
+      fieldCounts,
+      fieldFilterState,
+      true,
+      undefined
+    );
+
+    expect(actual.facetedFields).toHaveLength(1); // Only serviceName (default faceted field)
+    expect(actual.facetedFields.map((f) => f.name)).toContain('serviceName');
+  });
+
+  it('should not show faceted fields when showFacetedFields is false', function () {
+    const fields = [
+      {
+        name: 'serviceName',
+        type: 'string',
+        esTypes: ['keyword'],
+        count: 1,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        displayName: 'Service Name',
+      },
+      {
+        name: 'regularField',
+        type: 'string',
+        esTypes: ['text'],
+        count: 1,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        displayName: 'Regular Field',
+      },
+    ];
+
+    const columns: string[] = [];
+    const fieldCounts = { serviceName: 1, regularField: 1 };
+    const fieldFilterState = getDefaultFieldFilter();
+    fieldFilterState.missing = false;
+
+    // Test with showFacetedFields = false
+    const actual = groupFields(
+      fields as any,
+      columns,
+      fieldCounts,
+      fieldFilterState,
+      false,
+      undefined
+    );
+
+    expect(actual.facetedFields).toHaveLength(0); // No faceted fields should be shown
+    expect(actual.queryFields).toHaveLength(2); // Both fields should be in query fields
+    expect(actual.queryFields.map((f) => f.name)).toContain('serviceName');
+    expect(actual.queryFields.map((f) => f.name)).toContain('regularField');
   });
 });
