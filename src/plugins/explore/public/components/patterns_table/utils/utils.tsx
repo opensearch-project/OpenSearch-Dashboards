@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IFieldType } from 'src/plugins/data/common';
+import { IFieldType, Query } from 'src/plugins/data/common';
 import {
   COUNT_FIELD,
   DELIM_START,
@@ -17,6 +17,7 @@ import {
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { ExploreServices } from '../../../types';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
+import { getQueryWithSource } from '../../../application/utils/languages';
 
 // Small functions returning the two pattern queries
 export const regexPatternQuery = (queryBase: string, patternsField: string) => {
@@ -40,6 +41,18 @@ export const brainUpdateSearchPatternQuery = (
   patternString: string
 ) => {
   return `${queryBase} | patterns \`${patternsField}\` method=brain | where patterns_field = '${patternString}'`;
+};
+
+export const createSearchPatternQuery = (
+  query: Query,
+  patternsField: string,
+  usingRegexPatterns: boolean,
+  patternString: string
+) => {
+  const preparedQuery = getQueryWithSource(query);
+  return usingRegexPatterns
+    ? regexUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString)
+    : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
 };
 
 // Checks if the value is a valid, finite number. Used for patterns table
