@@ -32,8 +32,10 @@ export interface PatternsFlyoutUpdateSearchProps {
 export const PatternsFlyoutUpdateSearch = ({ patternString }: PatternsFlyoutUpdateSearchProps) => {
   const { closePatternsTableFlyout } = usePatternsFlyoutContext();
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const dispatch = useDispatch();
+
   const setEditorText = useSetEditorText();
+  const dispatch = useDispatch();
+
   const query = useSelector(selectQuery);
   const patternsField = useSelector(selectPatternsField);
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
