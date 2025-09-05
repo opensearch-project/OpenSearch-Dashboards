@@ -6,6 +6,7 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { TableVisStyleControls } from './table_vis_options';
+import { CalcType } from '../types';
 
 export interface TableChartStyleControls {
   pageSize: number;
@@ -14,7 +15,7 @@ export interface TableChartStyleControls {
   showFooter?: boolean;
   footerCalculations?: Array<{
     fields: string[];
-    calculation: 'total' | 'last' | 'average' | 'min' | 'max';
+    calculation: CalcType;
   }>;
 }
 

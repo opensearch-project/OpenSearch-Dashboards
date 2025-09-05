@@ -12,6 +12,7 @@ import {
   VisColumn,
   AxisColumnMappings,
   AxisSupportedStyles,
+  CalcType,
 } from '../types';
 
 export const applyAxisStyling = (
@@ -271,3 +272,21 @@ export const getTooltipFormat = (
   const timeUnit = inferTimeUnitFromTimestamps(data, field);
   return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
 };
+
+export function calculateValue(values: number[], calculation: CalcType): number | undefined {
+  if (values.length === 0) return undefined;
+  switch (calculation) {
+    case 'total':
+      return values.reduce((sum, v) => sum + v, 0);
+    case 'average':
+      return values.reduce((sum, v) => sum + v, 0) / values.length;
+    case 'min':
+      return Math.min(...values);
+    case 'max':
+      return Math.max(...values);
+    case 'last':
+      return values[values.length - 1];
+    default:
+      return undefined;
+  }
+}

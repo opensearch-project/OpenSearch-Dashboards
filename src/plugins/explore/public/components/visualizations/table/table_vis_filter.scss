@@ -11,16 +11,7 @@
   }
 }
 
-.column-filter-content {
-  padding: 8px;
-
-  .unique-values-panel {
-    max-height: 300px;
-    overflow-y: auto;
-    margin-bottom: 8px;
-  }
-}
-
-.filter-popover {
-  width: 300px;
+.unique-values-panel {
+  max-height: 300px;
+  overflow-y: auto;
 }

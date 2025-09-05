@@ -21,6 +21,13 @@ import { TableFooterStyleControls } from './table_vis_footer';
 
 export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyleControls>;
 
+const alignmentOptions = [
+  { value: 'auto', text: 'Auto' },
+  { value: 'left', text: 'Left' },
+  { value: 'center', text: 'Center' },
+  { value: 'right', text: 'Right' },
+];
+
 export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
   styleOptions,
   onStyleChange,
@@ -62,13 +69,6 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
     styleOptions.pageSize,
     onPageSizeChange
   );
-
-  const alignmentOptions = [
-    { value: 'auto', text: 'Auto' },
-    { value: 'left', text: 'Left' },
-    { value: 'center', text: 'Center' },
-    { value: 'right', text: 'Right' },
-  ];
 
   return (
     <>

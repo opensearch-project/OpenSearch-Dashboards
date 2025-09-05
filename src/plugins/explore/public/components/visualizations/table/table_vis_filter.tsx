@@ -50,11 +50,7 @@ export const TableColumnHeader = ({
   uniques,
 }: TableColumnHeaderProps) => {
   if (!showColumnFilter || col.schema === 'date') {
-    return (
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {col.name}
-      </span>
-    );
+    return <span>{col.name}</span>;
   }
 
   const defaultOperator = col.schema === 'numerical' ? '=' : 'contains';
@@ -118,7 +114,7 @@ interface ColumnFilterContentProps {
   uniques: any[];
 }
 
-const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
+export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   col,
   currentFilter,
   onApply,
@@ -267,7 +263,12 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
             />
           </EuiFormRow>
           <EuiFormRow>
-            <EuiPanel paddingSize="s" className="unique-values-panel">
+            <EuiPanel
+              paddingSize="s"
+              borderRadius="m"
+              hasShadow={false}
+              className="unique-values-panel"
+            >
               {filteredUniques.map((u) => (
                 <EuiCheckbox
                   key={String(u)}
@@ -279,12 +280,15 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
               ))}
             </EuiPanel>
           </EuiFormRow>
-          <EuiCheckbox
-            id="selectAll"
-            label="Select All"
-            checked={isSelectAllChecked}
-            onChange={(e) => handleSelectAll(e.target.checked)}
-          />
+          <EuiFormRow>
+            <EuiCheckbox
+              id="selectAll"
+              label="Select All"
+              checked={isSelectAllChecked}
+              onChange={(e) => handleSelectAll(e.target.checked)}
+              data-test-subj="selectAllCheckbox"
+            />
+          </EuiFormRow>
         </>
       )}
       <EuiFormRow>
