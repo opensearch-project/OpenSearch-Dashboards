@@ -53,6 +53,9 @@ import {
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
 
+// Context Provider Integration
+import { ExploreContextContributor } from './context_contributor';
+
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
 // ============================================================================
@@ -73,6 +76,8 @@ export interface ExplorePluginStart {
   urlGenerator?: UrlGeneratorContract<'EXPLORE_APP_URL_GENERATOR'>;
   savedSearchLoader: SavedExploreLoader;
   savedExploreLoader: SavedExploreLoader;
+  // Context Provider Integration
+  getContextContributor(): ExploreContextContributor | null;
 }
 
 // ============================================================================
@@ -95,6 +100,8 @@ export interface ExploreSetupDependencies {
   usageCollection: UsageCollectionSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   dashboard: DashboardSetup;
+  // Context Provider Integration
+  contextProvider?: any;
 }
 
 /**
@@ -113,6 +120,8 @@ export interface ExploreStartDependencies {
   visualizations: VisualizationsStart;
   expressions: ExpressionsStart;
   dashboard: DashboardStart;
+  // Context Provider Integration
+  contextProvider?: any;
 }
 
 // ============================================================================
