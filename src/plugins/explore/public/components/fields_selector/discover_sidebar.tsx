@@ -19,6 +19,8 @@ import { groupFields } from './lib/group_fields';
 import { DiscoverFieldHeader } from './discover_field_header';
 import { FieldList } from './field_list';
 import { FacetList } from './facet_list';
+import { useFlavorId } from '../../helpers/use_flavor_id';
+import { ExploreFlavor } from '../../../common';
 
 export interface DiscoverSidebarProps {
   /**
@@ -70,6 +72,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     isEnhancementsEnabledOverride,
     onCollapse,
   } = props;
+  const flavorId = useFlavorId();
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const shortDotsEnabled = useMemo(() => {
     const services = getServices();
@@ -93,10 +96,17 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     [hits, selectedDataSet]
   );
 
-  const { facetedFields, selectedFields, queryFields, discoveredFields } = useMemo(
-    () => groupFields(fields as DataViewField[], columns, fieldCounts, fieldFilterState),
-    [fields, columns, fieldCounts, fieldFilterState]
-  );
+  const { facetedFields, selectedFields, queryFields, discoveredFields } = useMemo(() => {
+    const showFacetedFields = flavorId === ExploreFlavor.Traces;
+    return groupFields(
+      fields as DataViewField[],
+      columns,
+      fieldCounts,
+      fieldFilterState,
+      showFacetedFields,
+      selectedDataSet?.facetedFields
+    );
+  }, [flavorId, fields, columns, fieldCounts, fieldFilterState, selectedDataSet?.facetedFields]);
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];

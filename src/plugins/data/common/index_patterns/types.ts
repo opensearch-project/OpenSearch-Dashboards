@@ -46,6 +46,7 @@ export interface IIndexPattern {
   type?: string;
   timeFieldName?: string;
   intervalName?: string | null;
+  facetedFields?: string[];
   getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   getFormatterForField?: (
@@ -64,6 +65,7 @@ export interface IndexPatternAttributes {
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
+  facetedFields?: string;
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
@@ -217,6 +219,7 @@ export interface IndexPatternSpec {
   type?: string;
   dataSourceRef?: SavedObjectReference;
   fieldsLoading?: boolean;
+  facetedFields?: string[];
 }
 
 export interface SourceFilter {
