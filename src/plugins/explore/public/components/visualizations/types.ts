@@ -246,3 +246,5 @@ export enum TimeUnit {
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
 
 export type PercentageColor = 'standard' | 'inverted';
+
+export type CalcType = 'total' | 'last' | 'average' | 'min' | 'max';

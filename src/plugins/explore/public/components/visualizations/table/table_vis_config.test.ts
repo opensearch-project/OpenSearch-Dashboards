@@ -51,6 +51,10 @@ describe('table_vis_config', () => {
 
       expect(defaults).toEqual({
         pageSize: 10,
+        globalAlignment: 'auto',
+        showColumnFilter: false,
+        showFooter: false,
+        footerCalculations: [],
       });
     });
   });

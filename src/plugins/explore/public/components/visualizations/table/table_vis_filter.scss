@@ -1,0 +1,17 @@
+.table-column-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .header-text {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.unique-values-panel {
+  max-height: 300px;
+  overflow-y: auto;
+}

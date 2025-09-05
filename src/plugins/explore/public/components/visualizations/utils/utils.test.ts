@@ -12,6 +12,7 @@ import {
   getSchemaByAxis,
   inferTimeUnitFromTimestamps,
   getTooltipFormat,
+  calculateValue,
 } from './utils';
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
 
@@ -319,5 +320,37 @@ describe('getTooltipFormat', () => {
     const customFallback = '%Y-%m-%d';
     const data = [{ timestamp: '2023-01-01T00:00:00' }];
     expect(getTooltipFormat(data, field, customFallback)).toBe(customFallback);
+  });
+});
+
+describe('calculateValue', () => {
+  const values = [1, 2, 3, 4, 5];
+
+  it('returns undefined for empty array', () => {
+    expect(calculateValue([], 'total')).toBeUndefined();
+  });
+
+  it('calculates total correctly', () => {
+    expect(calculateValue(values, 'total')).toBe(15);
+  });
+
+  it('calculates average correctly', () => {
+    expect(calculateValue(values, 'average')).toBe(3);
+  });
+
+  it('calculates min correctly', () => {
+    expect(calculateValue(values, 'min')).toBe(1);
+  });
+
+  it('calculates max correctly', () => {
+    expect(calculateValue(values, 'max')).toBe(5);
+  });
+
+  it('calculates last correctly', () => {
+    expect(calculateValue(values, 'last')).toBe(5);
+  });
+
+  it('returns undefined for invalid calculation type', () => {
+    expect(calculateValue(values, 'invalid' as any)).toBeUndefined();
   });
 });

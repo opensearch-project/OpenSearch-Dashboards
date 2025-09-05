@@ -6,13 +6,25 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { TableVisStyleControls } from './table_vis_options';
+import { CalcType } from '../types';
 
 export interface TableChartStyleControls {
   pageSize: number;
+  globalAlignment?: 'auto' | 'left' | 'center' | 'right';
+  showColumnFilter?: boolean;
+  showFooter?: boolean;
+  footerCalculations?: Array<{
+    fields: string[];
+    calculation: CalcType;
+  }>;
 }
 
 const defaultTableChartStyles: TableChartStyleControls = {
   pageSize: 10,
+  globalAlignment: 'auto',
+  showColumnFilter: false,
+  showFooter: false,
+  footerCalculations: [],
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({
