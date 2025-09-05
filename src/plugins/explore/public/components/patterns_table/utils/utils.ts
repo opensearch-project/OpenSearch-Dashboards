@@ -55,6 +55,24 @@ export const createSearchPatternQuery = (
     : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
 };
 
+export const createSearchPatternQueryWithSlice = (
+  query: Query,
+  patternsField: string,
+  usingRegexPatterns: boolean,
+  patternString: string,
+  pageSize: number,
+  pageOffset: number
+) => {
+  const searchPatternQuery = createSearchPatternQuery(
+    query,
+    patternsField,
+    usingRegexPatterns,
+    patternString
+  );
+
+  return `${searchPatternQuery} | head ${pageSize} offset ${pageOffset}`;
+};
+
 // Checks if the value is a valid, finite number. Used for patterns table
 export const isValidFiniteNumber = (val: number) => {
   return !isNaN(val) && isFinite(val);
