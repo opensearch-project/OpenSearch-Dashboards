@@ -40,7 +40,7 @@ export const defaultPieChartStyles: PieChartStyleControls = {
   },
   exclusive: {
     donut: true,
-    showValues: true,
+    showValues: false,
     showLabels: false,
     truncate: 100,
   },

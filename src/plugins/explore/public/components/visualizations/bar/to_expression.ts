@@ -22,6 +22,7 @@ import {
   buildTooltipEncoding,
   adjustBucketBins,
 } from './bar_chart_utils';
+import { DEFAULT_OPACITY } from '../constants';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: Partial<BarChartStyleControls>) => {
@@ -68,6 +69,7 @@ export const createBarSpec = (
   }
 
   const mainLayer = {
+    params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: barMark,
     encoding: {
       // Category axis (X or Y depending on orientation)
@@ -88,6 +90,10 @@ export const createBarSpec = (
           },
         ],
       }),
+      fillOpacity: {
+        condition: { param: 'highlight', value: 1, empty: false },
+        value: DEFAULT_OPACITY,
+      },
     },
   };
 
@@ -116,6 +122,7 @@ export const createBarSpec = (
     legend: styles.addLegend
       ? {
           orient: styles.legendPosition?.toLowerCase() || 'right',
+          symbolType: styles.legendShape ?? 'circle',
         }
       : null,
   };
@@ -168,6 +175,7 @@ export const createTimeBarChart = (
   }
 
   const mainLayer = {
+    params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: barMark,
     encoding: {
       x: {
@@ -186,6 +194,10 @@ export const createTimeBarChart = (
           },
         ],
       }),
+      fillOpacity: {
+        condition: { param: 'highlight', value: 1, empty: false },
+        value: DEFAULT_OPACITY,
+      },
     },
   };
 
@@ -264,18 +276,20 @@ export const createGroupedTimeBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
+  const layer = [];
   const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
   const interval =
     styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
       ? inferTimeIntervals(transformedData, timeAxis?.column)
       : styles?.bucket?.bucketTimeUnit;
 
-  const spec: any = {
+  const barLayer: any = {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${yAxis?.name} Over Time by ${categoryName}`
       : undefined,
     data: { values: transformedData },
+    params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: barMark,
     encoding: {
       x: {
@@ -291,6 +305,7 @@ export const createGroupedTimeBarChart = (
           ? {
               title: categoryName,
               orient: styles.legendPosition?.toLowerCase() || 'right',
+              symbolType: styles.legendShape ?? 'circle',
             }
           : null,
       },
@@ -304,8 +319,13 @@ export const createGroupedTimeBarChart = (
         },
         { field: categoryField, type: getSchemaByAxis(colorColumn), title: categoryName },
       ],
+      fillOpacity: {
+        condition: { param: 'highlight', value: 1, empty: false },
+        value: DEFAULT_OPACITY,
+      },
     },
   };
+  layer.push(barLayer);
 
   // Add threshold layer if enabled
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
@@ -315,10 +335,17 @@ export const createGroupedTimeBarChart = (
     barEncodingDefault
   );
   if (thresholdLayer) {
-    spec.layer = [{ mark: barMark, encoding: spec.encoding }, ...thresholdLayer.layer];
-    delete spec.mark;
-    delete spec.encoding;
+    layer.push(...thresholdLayer.layer);
   }
+
+  const spec: any = {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${yAxis?.name} Over Time by ${categoryName}`
+      : undefined,
+    data: { values: transformedData },
+    layer,
+  };
 
   return spec;
 };
@@ -404,6 +431,7 @@ export const createFacetedTimeBarChart = (
     spec: {
       layer: [
         {
+          params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
           mark: barMark,
           encoding: {
             x: {
@@ -419,6 +447,7 @@ export const createFacetedTimeBarChart = (
                 ? {
                     title: category1Name,
                     orient: styles.legendPosition?.toLowerCase() || 'right',
+                    symbolType: styles.legendShape ?? 'circle',
                   }
                 : null,
             },
@@ -443,6 +472,10 @@ export const createFacetedTimeBarChart = (
                 { field: category1Field, type: 'nominal', title: category1Name },
               ],
             }),
+            fillOpacity: {
+              condition: { param: 'highlight', value: 1, empty: false },
+              value: DEFAULT_OPACITY,
+            },
           },
         },
 
@@ -493,12 +526,8 @@ export const createStackedBarSpec = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
-  const spec: any = {
-    $schema: VEGASCHEMA,
-    title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name} and ${categoryName2}`
-      : undefined,
-    data: { values: transformedData },
+  const barLayer = {
+    params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: barMark,
     encoding: {
       // Category axis (X or Y depending on orientation)
@@ -517,6 +546,7 @@ export const createStackedBarSpec = (
           ? {
               title: categoryName2,
               orient: styles.legendPosition?.toLowerCase() || 'bottom',
+              symbolType: styles.legendShape ?? 'circle',
             }
           : null,
       },
@@ -532,8 +562,14 @@ export const createStackedBarSpec = (
           { field: categoryField2, type: 'nominal', title: categoryName2 },
         ],
       }),
+      fillOpacity: {
+        condition: { param: 'highlight', value: 1, empty: false },
+        value: DEFAULT_OPACITY,
+      },
     },
   };
+
+  const layer = [barLayer];
 
   // Add threshold layer if enabled
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
@@ -542,11 +578,19 @@ export const createStackedBarSpec = (
     styles.tooltipOptions?.mode,
     barEncodingDefault
   );
+
   if (thresholdLayer) {
-    spec.layer = [{ mark: barMark, encoding: spec.encoding }, ...thresholdLayer.layer];
-    delete spec.mark;
-    delete spec.encoding;
+    layer.push(...thresholdLayer.layer);
   }
+
+  const spec: any = {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name} and ${categoryName2}`
+      : undefined,
+    data: { values: transformedData },
+    layer,
+  };
 
   return spec;
 };

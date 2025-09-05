@@ -80,31 +80,6 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     onValueAxesChange(updatedAxes);
   };
 
-  const getCategoryAxisDisplayTitle = (axis: CategoryAxis) => {
-    if (axis.title?.text && axis.title.text.trim() !== '') {
-      return axis.title.text;
-    }
-    return (
-      axisColumnMappings[AxisRole.X]?.name ||
-      i18n.translate('explore.vis.gridOptions.categoryFallbackName', {
-        defaultMessage: 'Category',
-      })
-    );
-  };
-  const getValueAxisDisplayTitle = (axis: ValueAxis, index: number) => {
-    if (axis.title?.text && axis.title.text.trim() !== '') {
-      return axis.title.text;
-    }
-    const axisRole = index === 0 ? AxisRole.Y : AxisRole.Y_SECOND;
-    return (
-      axisColumnMappings[axisRole]?.name ||
-      i18n.translate('explore.vis.gridOptions.metricFallbackName', {
-        defaultMessage: 'Metric {index}',
-        values: { index: index + 1 },
-      })
-    );
-  };
-
   // Determine if we're in Rule 2 scenario (2 metrics, 1 date, 0 categories)
   const isRule2 =
     numericalColumns.length === 2 && dateColumns.length === 1 && categoricalColumns.length === 0;
@@ -185,7 +160,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
           {axis.show && (
             <>
               <DebouncedAxisTitle
-                value={getCategoryAxisDisplayTitle(axis)}
+                value={axis.title.text ?? ''}
                 placeholder={i18n.translate('explore.vis.metric.axisName', {
                   defaultMessage: 'Axis name',
                 })}
@@ -348,7 +323,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                 {axis.show && (
                   <>
                     <DebouncedAxisTitle
-                      value={getValueAxisDisplayTitle(axis, index)}
+                      value={axis.title.text ?? ''}
                       placeholder={i18n.translate('explore.vis.metric.axisName', {
                         defaultMessage: 'Axis name',
                       })}
@@ -503,7 +478,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                 {axis.show && (
                   <>
                     <DebouncedAxisTitle
-                      value={getValueAxisDisplayTitle(axis, index)}
+                      value={axis.title.text ?? ''}
                       placeholder={i18n.translate('explore.vis.metric.axisName', {
                         defaultMessage: 'Axis name',
                       })}

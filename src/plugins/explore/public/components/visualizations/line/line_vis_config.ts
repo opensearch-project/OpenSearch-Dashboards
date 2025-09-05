@@ -19,6 +19,8 @@ import {
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
 
+export type LineMode = 'straight' | 'smooth' | 'stepped';
+
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
   addLegend: boolean;
@@ -26,7 +28,7 @@ export interface LineChartStyleControls {
   addTimeMarker: boolean;
 
   lineStyle: LineStyle;
-  lineMode: string;
+  lineMode: LineMode;
   lineWidth: number;
   tooltipOptions: TooltipOptions;
 
@@ -46,7 +48,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
   addTimeMarker: false,
 
   lineStyle: 'both',
-  lineMode: 'smooth',
+  lineMode: 'straight',
   lineWidth: 2,
   tooltipOptions: {
     mode: 'all',
@@ -81,7 +83,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
     },
   ],
@@ -104,7 +106,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
     },
   ],

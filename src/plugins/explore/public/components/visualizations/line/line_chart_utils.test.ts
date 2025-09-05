@@ -40,7 +40,7 @@ describe('Line Chart Utils', () => {
       const result = buildMarkConfig(styles, 'bar');
       expect(result).toEqual({
         type: 'bar',
-        opacity: 0.7,
+        opacity: 0.87,
         tooltip: true,
       });
     });

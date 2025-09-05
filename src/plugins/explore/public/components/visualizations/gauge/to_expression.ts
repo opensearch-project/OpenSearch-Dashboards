@@ -12,6 +12,7 @@ import {
   mergeThresholdsWithBase,
 } from './gauge_chart_utils';
 import { calculateValue } from '../utils/calculation';
+import { getColors } from '../theme/default_colors';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
@@ -21,6 +22,7 @@ export const createGauge = (
   styles: Partial<GaugeChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ) => {
+  const colors = getColors();
   // Only contains one and the only one value
   const valueColumn = axisColumnMappings?.[AxisRole.Value];
   const numericField = valueColumn?.column;
@@ -48,8 +50,7 @@ export const createGauge = (
   const mergedThresholds = mergeThresholdsWithBase(
     minBase,
     maxBase,
-    // TODO: update to use the color from color palette
-    styleOptions.baseColor || '#9EE9FA',
+    styleOptions.baseColor || colors.statusBlue,
     styleOptions.thresholds
   );
 
@@ -76,11 +77,7 @@ export const createGauge = (
       name: 'fillColor',
       value: fillColor,
     },
-    {
-      name: 'gapColor',
-      value: '#ffffffff',
-    },
-    { name: 'fontColor', value: '#666161ff' },
+    { name: 'fontColor', value: colors.text },
 
     { name: 'mainValue', value: targetValue },
     {
@@ -124,18 +121,6 @@ export const createGauge = (
         theta: { expr: 'theta_single_arc' },
         theta2: { expr: 'theta2_single_arc' },
         fill: { expr: 'backgroundColor' },
-      },
-    },
-    {
-      mark: {
-        type: 'arc',
-        y: { expr: 'centerY' },
-        x: { expr: 'centerX' },
-        radius: { expr: 'innerRadius' },
-        radius2: { expr: 'innerRadius*0.98' },
-        theta: { expr: 'theta_single_arc' },
-        theta2: { expr: 'theta2_single_arc' },
-        fill: { expr: 'gapColor' },
       },
     },
     {

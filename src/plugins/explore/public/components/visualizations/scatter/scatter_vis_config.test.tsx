@@ -35,7 +35,7 @@ describe('createScatterConfig', () => {
     // Verify exclusive style
     expect(defaults.exclusive.pointShape).toBe(PointShape.CIRCLE);
     expect(defaults.exclusive.angle).toBe(0);
-    expect(defaults.exclusive.filled).toBe(false);
+    expect(defaults.exclusive.filled).toBe(true);
 
     // Verify axes
     expect(defaults.standardAxes).toHaveLength(2);

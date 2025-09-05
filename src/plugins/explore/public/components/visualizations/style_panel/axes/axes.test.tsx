@@ -442,7 +442,7 @@ describe('AxesOptions', () => {
 
     // Check that the title input has the default value (from the first date or categorical column)
     const titleInput = screen.getAllByRole('textbox')[0];
-    expect(titleInput).toHaveValue('timestamp');
+    expect(titleInput).toHaveValue('');
   });
 
   it('uses default value axis title when title text is empty', () => {
@@ -463,7 +463,7 @@ describe('AxesOptions', () => {
 
     // Check that the title input has the default value (from the first numerical column)
     const titleInput = screen.getAllByRole('textbox')[1];
-    expect(titleInput).toHaveValue('count');
+    expect(titleInput).toHaveValue('');
   });
 
   it('uses default value axis title for second axis when title text is empty', () => {
@@ -501,7 +501,7 @@ describe('AxesOptions', () => {
 
     // Check that the title input for the second axis has the default value (from the second numerical column)
     const titleInput = screen.getAllByRole('textbox')[2];
-    expect(titleInput).toHaveValue('price');
+    expect(titleInput).toHaveValue('');
   });
 
   it('handles Rule 2 scenario with incomplete value axes', () => {
@@ -703,7 +703,7 @@ describe('AxesOptions', () => {
 
     // Check that the title input has the default value "Category"
     const titleInput = screen.getAllByRole('textbox')[0];
-    expect(titleInput).toHaveValue('Category');
+    expect(titleInput).toHaveValue('');
   });
 
   it('displays correct default title for value axis with no columns', () => {
@@ -727,7 +727,7 @@ describe('AxesOptions', () => {
 
     // Check that the title input has the default value "Metric 1"
     const titleInput = screen.getAllByRole('textbox')[1];
-    expect(titleInput).toHaveValue('Metric 1');
+    expect(titleInput).toHaveValue('');
   });
 
   it('handles multiple category axes', () => {

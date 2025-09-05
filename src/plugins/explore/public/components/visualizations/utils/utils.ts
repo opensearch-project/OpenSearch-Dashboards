@@ -24,8 +24,6 @@ export const applyAxisStyling = (
   const fullAxisConfig: any = {
     // Grid settings
     grid: gridEnabled,
-    gridColor: '#E0E0E0',
-    gridOpacity: 0.5,
     labelSeparation: 8,
   };
 
@@ -34,7 +32,7 @@ export const applyAxisStyling = (
   fullAxisConfig.orient = axisStyle?.position;
 
   // Apply title settings
-  fullAxisConfig.title = axisStyle?.title.text || axis?.name;
+  fullAxisConfig.title = axisStyle?.title.text;
 
   // Apply axis visibility
   if (!axisStyle?.show) {
