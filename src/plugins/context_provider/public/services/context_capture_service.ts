@@ -109,17 +109,61 @@ export class ContextCaptureService {
   }
 
   public captureDynamicContext(trigger: string, data: any): void {
-    const dynamicContext: DynamicContext = {
-      trigger,
-      timestamp: Date.now(),
-      data,
-    };
-    this.dynamicContext$.next(dynamicContext);
+    console.log(`⚡ Context Capture: Processing dynamic context for trigger: ${trigger}`);
+    
+    // Find all contributors that are interested in this trigger
+    const interestedContributors = Array.from(this.contextContributors.values())
+      .filter(contributor => contributor.contextTriggerActions?.includes(trigger));
+    
+    console.log(`🎯 Found ${interestedContributors.length} contributors interested in trigger: ${trigger}`);
+    
+    // Route the trigger to each interested contributor
+    interestedContributors.forEach(contributor => {
+      if (contributor.captureDynamicContext) {
+        try {
+          const contributorContext = contributor.captureDynamicContext(trigger, data);
+          
+          const dynamicContext: DynamicContext = {
+            appId: contributor.appId,
+            trigger,
+            timestamp: Date.now(),
+            data: contributorContext,
+          };
+          
+          this.dynamicContext$.next(dynamicContext);
+          console.log(`✅ Dynamic context captured for ${contributor.appId}:`, contributorContext);
+          
+        } catch (error) {
+          console.error(`❌ Error capturing dynamic context for ${contributor.appId}:`, error);
+        }
+      }
+    });
+    
+    // If no contributors are interested, still emit the raw context
+    if (interestedContributors.length === 0) {
+      const dynamicContext: DynamicContext = {
+        trigger,
+        timestamp: Date.now(),
+        data,
+      };
+      this.dynamicContext$.next(dynamicContext);
+      console.log(`📝 No contributors for trigger ${trigger}, emitting raw context`);
+    }
   }
 
   public registerContextContributor(contributor: ContextContributor): void {
     console.log(`📝 Registering context contributor for app: ${contributor.appId}`);
+    console.log(`🔍 DEBUG: Contributor details:`, {
+      appId: contributor.appId,
+      hasStaticCapture: !!contributor.captureStaticContext,
+      hasDynamicCapture: !!contributor.captureDynamicContext,
+      triggerActions: contributor.contextTriggerActions
+    });
+    
     this.contextContributors.set(contributor.appId, contributor);
+    
+    console.log(`✅ Contributor registered. Total contributors: ${this.contextContributors.size}`);
+    console.log(`🔍 DEBUG: All registered contributors:`, Array.from(this.contextContributors.keys()));
   }
 
   public unregisterContextContributor(appId: string): void {
@@ -129,6 +173,8 @@ export class ContextCaptureService {
 
   private async captureStaticContext(appId: string): Promise<void> {
     console.log(`📊 Capturing static context for app: ${appId}`);
+    console.log(`🔍 DEBUG: Registered contributors:`, Array.from(this.contextContributors.keys()));
+    console.log(`🔍 DEBUG: Looking for contributor with appId: ${appId}`);
 
     if (!this.coreStart || !this.pluginsStart) {
       console.warn('Services not available for context capture');
@@ -144,12 +190,35 @@ export class ContextCaptureService {
 
     try {
       // Check if there's a registered context contributor for this app
-      const contributor = this.contextContributors.get(appId);
+      let contributor = this.contextContributors.get(appId);
+      
+      // 🔧 FIX: Handle app ID variations (e.g., 'explore/logs' -> 'explore')
+      if (!contributor && appId.includes('/')) {
+        const baseAppId = appId.split('/')[0];
+        console.log(`🔍 DEBUG: Trying base app ID: ${baseAppId}`);
+        contributor = this.contextContributors.get(baseAppId);
+      }
+      
+      // If still no exact match, check if any contributor can handle this app
+      if (!contributor) {
+        console.log('🔍 DEBUG: Checking contributors with canHandleApp method');
+        for (const [contributorAppId, contributorInstance] of this.contextContributors.entries()) {
+          if (typeof contributorInstance.canHandleApp === 'function' && contributorInstance.canHandleApp(appId)) {
+            console.log(`✅ Found contributor ${contributorAppId} that can handle app: ${appId}`);
+            contributor = contributorInstance;
+            break;
+          }
+        }
+      }
+      
       if (contributor && contributor.captureStaticContext) {
-        console.log(`🎯 Using registered context contributor for app: ${appId}`);
+        console.log(`🎯 Using registered context contributor for app: ${appId} (contributor: ${contributor.appId})`);
         const contributorContext = await contributor.captureStaticContext();
         contextData = { ...contextData, ...contributorContext };
+        console.log(`✅ Contributor context captured:`, contributorContext);
       } else {
+        console.log(`⚠️ No registered contributor found for app: ${appId}`);
+        console.log(`🔍 DEBUG: Available contributors:`, this.contextContributors);
         // Fallback to built-in app-specific context
         switch (appId) {
           case 'dashboards':

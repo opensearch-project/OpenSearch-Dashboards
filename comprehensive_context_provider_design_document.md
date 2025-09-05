@@ -383,6 +383,547 @@ Given the complexity and maintenance burden of the traditional approach, we need
 - Captures rich context without modifying existing components
 - Leverages OSD's existing infrastructure and patterns
 - Provides comprehensive coverage across all applications
+- Supports both URL-based and action-based context capture
+- Allows plugins to define custom context capture logic
+
+## 2. Flexible Context Provider Architecture
+
+### 2.1 Context Capture Flexibility Patterns
+
+Our Context Provider architecture supports multiple context capture patterns to accommodate different plugin needs:
+
+#### 2.1.1 URL-Only Context Capture (Simple Plugins)
+
+**Use Case:** Plugins where all context is reflected in URL parameters
+**Examples:** Discover, Management, Dev Tools
+
+```typescript
+export class SimpleContextContributor implements ContextContributor {
+  appId = 'discover';
+  
+  // Only URL monitoring, no UI Actions needed
+  contextTriggerActions = []; // Empty - no custom actions
+  
+  async captureStaticContext(): Promise<Record<string, any>> {
+    // Parse URL state only
+    const urlState = this.parseUrlState();
+    return {
+      type: 'discover',
+      indexPattern: urlState.indexPattern,
+      query: urlState.query,
+      filters: urlState.filters,
+      timeRange: urlState.timeRange
+    };
+  }
+}
+```
+
+#### 2.1.2 URL + UI Actions Context Capture (Hybrid Plugins)
+
+**Use Case:** Plugins with URL state + transient user interactions not reflected in URL
+**Examples:** Explore (document expansions), Visualize (temporary selections)
+
+```typescript
+export class HybridContextContributor implements ContextContributor {
+  appId = 'explore';
+  
+  // Define specific UI actions to monitor
+  contextTriggerActions = ['DOCUMENT_EXPAND', 'DOCUMENT_COLLAPSE', 'FIELD_FILTER'];
+  
+  // Track transient state not in URL
+  private expandedDocuments = new Set<string>();
+  private selectedFields = new Map<string, any>();
+  
+  async captureStaticContext(): Promise<Record<string, any>> {
+    // Combine URL state + transient action state
+    const urlState = this.parseUrlState();
+    
+    return {
+      type: 'explore',
+      // URL-based context
+      indexPattern: urlState.indexPattern,
+      query: urlState.query,
+      filters: urlState.filters,
+      timeRange: urlState.timeRange,
+      // Action-based context (not in URL)
+      expandedDocuments: Array.from(this.expandedDocuments),
+      selectedFields: Object.fromEntries(this.selectedFields),
+      interactionState: {
+        hasExpandedDocs: this.expandedDocuments.size > 0,
+        activeFieldCount: this.selectedFields.size
+      }
+    };
+  }
+  
+  // Handle UI Actions that update transient state
+  captureDynamicContext(trigger: string, data: any): Record<string, any> {
+    switch (trigger) {
+      case 'DOCUMENT_EXPAND':
+        this.expandedDocuments.add(data.documentId);
+        break;
+      case 'DOCUMENT_COLLAPSE':
+        this.expandedDocuments.delete(data.documentId);
+        break;
+      case 'FIELD_FILTER':
+        this.selectedFields.set(data.fieldName, data.filterValue);
+        break;
+    }
+    
+    return {
+      type: 'explore_dynamic',
+      trigger,
+      timestamp: Date.now(),
+      data,
+      currentState: {
+        expandedDocuments: Array.from(this.expandedDocuments),
+        selectedFields: Object.fromEntries(this.selectedFields)
+      }
+    };
+  }
+}
+```
+
+#### 2.1.3 Complex Embeddable Context Capture (Container Plugins)
+
+**Use Case:** Plugins with complex nested components and embeddable containers
+**Examples:** Dashboard, Canvas
+
+```typescript
+export class ComplexContextContributor implements ContextContributor {
+  appId = 'dashboards';
+  
+  // Monitor embeddable-related actions
+  contextTriggerActions = ['clonePanel', 'deletePanel', 'addPanel', 'replacePanel'];
+  
+  async captureStaticContext(): Promise<Record<string, any>> {
+    const container = this.getDashboardContainer();
+    if (!container) return { error: 'No container' };
+    
+    // Deep embeddable scanning
+    const embeddables = await this.captureAllEmbeddableContexts(container);
+    const dashboardMetadata = await this.getDashboardMetadata();
+    
+    return {
+      type: 'dashboard',
+      dashboard: dashboardMetadata,
+      embeddables: {
+        count: embeddables.length,
+        panels: embeddables
+      },
+      // Container-level state
+      viewMode: container.getInput().viewMode,
+      timeRange: container.getInput().timeRange,
+      filters: container.getInput().filters
+    };
+  }
+}
+```
+
+### 2.2 Context Provider Flexibility Features
+
+#### 2.2.1 Smart URL Monitoring
+
+The Context Provider automatically monitors URL changes and routes to the appropriate plugin contributor:
+
+```typescript
+// Context Provider automatically detects URL changes
+private setupUrlMonitoring(): void {
+  const handleUrlChange = () => {
+    const currentUrl = window.location.href;
+    if (currentUrl !== lastUrl) {
+      console.log('🔄 URL change detected, refreshing context');
+      
+      // Route to appropriate plugin contributor
+      const currentAppId = this.extractAppIdFromUrl();
+      if (currentAppId) {
+        this.captureStaticContext(currentAppId); // Auto-refresh!
+      }
+      
+      lastUrl = currentUrl;
+    }
+  };
+  
+  // Multi-event listening for comprehensive coverage
+  window.addEventListener('popstate', handleUrlChange);
+  window.addEventListener('hashchange', handleUrlChange);
+  setInterval(handleUrlChange, 1000); // Catch programmatic changes
+}
+```
+
+#### 2.2.2 Selective UI Actions Monitoring
+
+Plugins can specify exactly which UI Actions they want to monitor:
+
+```typescript
+// Plugin registers only the actions it cares about
+export class ExploreContextContributor implements ContextContributor {
+  appId = 'explore';
+  
+  // Only monitor document expansion actions
+  contextTriggerActions = ['DOCUMENT_EXPAND', 'DOCUMENT_COLLAPSE'];
+  
+  // Context Provider will only call this for specified actions
+  captureDynamicContext(trigger: string, data: any): Record<string, any> {
+    // Handle only the actions this plugin cares about
+    switch (trigger) {
+      case 'DOCUMENT_EXPAND':
+        return this.handleDocumentExpand(data);
+      case 'DOCUMENT_COLLAPSE':
+        return this.handleDocumentCollapse(data);
+      default:
+        return {}; // Ignore other actions
+    }
+  }
+}
+```
+
+#### 2.2.3 Custom Context State Management
+
+Plugins can maintain their own transient state that's not reflected in URLs:
+
+```typescript
+export class ExploreContextContributor implements ContextContributor {
+  // Private state management
+  private expandedDocuments = new Set<string>();
+  private documentDetails = new Map<string, any>();
+  private lastInteractionTime = Date.now();
+  
+  // Combine URL state + custom state
+  async captureStaticContext(): Promise<Record<string, any>> {
+    const urlContext = this.parseUrlState();
+    const customContext = this.getCustomState();
+    
+    return {
+      ...urlContext,
+      ...customContext,
+      // Metadata about custom state
+      customStateMetadata: {
+        hasCustomState: this.expandedDocuments.size > 0,
+        lastInteraction: this.lastInteractionTime,
+        stateComplexity: 'hybrid' // URL + custom
+      }
+    };
+  }
+  
+  private getCustomState(): Record<string, any> {
+    return {
+      expandedDocuments: Array.from(this.expandedDocuments).map(docId => ({
+        documentId: docId,
+        details: this.documentDetails.get(docId),
+        expandedAt: Date.now()
+      })),
+      interactionSummary: {
+        totalExpanded: this.expandedDocuments.size,
+        hasMultipleExpanded: this.expandedDocuments.size > 1,
+        recentActivity: Date.now() - this.lastInteractionTime < 30000
+      }
+    };
+  }
+}
+```
+
+### 2.3 Plugin Registration and Routing
+
+#### 2.3.1 Automatic Plugin Discovery
+
+```typescript
+// Context Provider automatically routes to registered plugins
+private async captureStaticContext(appId: string): Promise<void> {
+  // Check if there's a registered context contributor for this app
+  const contributor = this.contextContributors.get(appId);
+  
+  if (contributor && contributor.captureStaticContext) {
+    console.log(`🎯 Using registered context contributor for app: ${appId}`);
+    const contributorContext = await contributor.captureStaticContext();
+    contextData = { ...contextData, ...contributorContext };
+  } else {
+    // Fallback to built-in context capture
+    console.log(`⚠️ No registered contributor for ${appId}, using fallback`);
+    contextData = await this.getFallbackContext(appId);
+  }
+}
+```
+
+#### 2.3.2 Dynamic Action Routing
+
+```typescript
+// Context Provider routes UI Actions to interested plugins
+public captureDynamicContext(trigger: string, data: any): void {
+  // Find all plugins that care about this trigger
+  const interestedContributors = Array.from(this.contextContributors.values())
+    .filter(contributor => contributor.contextTriggerActions?.includes(trigger));
+  
+  interestedContributors.forEach(contributor => {
+    if (contributor.captureDynamicContext) {
+      const dynamicContext = contributor.captureDynamicContext(trigger, data);
+      this.dynamicContext$.next({
+        appId: contributor.appId,
+        trigger,
+        timestamp: Date.now(),
+        data: dynamicContext
+      });
+    }
+  });
+}
+```
+
+## 3. Complete Implementation Example: Explore Plugin
+
+### 3.1 Explore Context Contributor (Hybrid Pattern)
+
+The Explore plugin demonstrates the **HYBRID** context capture pattern, combining URL-based state with transient UI actions:
+
+```typescript
+export class ExploreContextContributor implements StatefulContextContributor {
+  appId = 'explore';
+  capturePattern = ContextCapturePattern.HYBRID;
+  
+  // Define UI Actions this contributor monitors
+  contextTriggerActions = [
+    'DOCUMENT_EXPAND',
+    'DOCUMENT_COLLAPSE',
+    'FIELD_FILTER_ADD',
+    'FIELD_FILTER_REMOVE',
+    'TABLE_ROW_SELECT'
+  ];
+  
+  // Transient state management (not in URL)
+  private expandedDocuments = new Map<string, DocumentExpansionContext>();
+  private selectedFields = new Map<string, any>();
+  private lastInteractionTime = Date.now();
+  
+  async captureStaticContext(): Promise<Record<string, any>> {
+    // 1. Parse URL-based context
+    const urlContext = this.parseUrlState();
+    
+    // 2. Get transient state
+    const transientState = this.getTransientState();
+    
+    return {
+      type: 'explore',
+      capturePattern: this.capturePattern,
+      
+      // URL-based context (standard Discover-like state)
+      indexPattern: urlContext.indexPattern,
+      query: urlContext.query,
+      filters: urlContext.filters,
+      timeRange: urlContext.timeRange,
+      
+      // Transient state (not in URL)
+      expandedDocuments: transientState.expandedDocuments,
+      selectedFields: transientState.selectedFields,
+      interactionSummary: transientState.interactionSummary,
+      
+      timestamp: Date.now()
+    };
+  }
+  
+  captureDynamicContext(trigger: string, data: any): Record<string, any> {
+    switch (trigger) {
+      case 'DOCUMENT_EXPAND':
+        return this.handleDocumentExpand(data);
+      case 'DOCUMENT_COLLAPSE':
+        return this.handleDocumentCollapse(data);
+      case 'FIELD_FILTER_ADD':
+        return this.handleFieldFilterAdd(data);
+      // ... other triggers
+    }
+  }
+  
+  private handleDocumentExpand(data: any): Record<string, any> {
+    const documentId = data.documentId || `doc_${Date.now()}`;
+    
+    const expansionContext: DocumentExpansionContext = {
+      documentId,
+      documentData: data.documentData || {},
+      expandedAt: Date.now(),
+      interactionCount: this.interactionCount++
+    };
+    
+    this.expandedDocuments.set(documentId, expansionContext);
+    
+    return {
+      type: 'explore_dynamic',
+      trigger: 'DOCUMENT_EXPAND',
+      timestamp: Date.now(),
+      data: {
+        documentId,
+        totalExpanded: this.expandedDocuments.size,
+        isMultipleExpanded: this.expandedDocuments.size > 1
+      }
+    };
+  }
+}
+```
+
+### 3.2 Plugin Registration
+
+```typescript
+// src/plugins/explore/public/plugin.ts
+export class ExplorePlugin implements Plugin {
+  private contextContributor?: ExploreContextContributor;
+
+  public start(core: CoreStart, plugins: ExploreStartDeps): ExploreStart {
+    // Register context contributor if Context Provider is available
+    if (plugins.contextProvider) {
+      this.contextContributor = new ExploreContextContributor(
+        core.savedObjects.client
+      );
+      
+      // Initialize and register
+      this.contextContributor.initialize();
+      plugins.contextProvider.registerContextContributor(this.contextContributor);
+      
+      // Make globally available for testing
+      (window as any).exploreContextContributor = this.contextContributor;
+    }
+
+    return {
+      getContextContributor: () => this.contextContributor || null
+    };
+  }
+}
+```
+
+### 3.3 Testing the Implementation
+
+#### 3.3.1 Browser Console Testing
+
+```javascript
+// Test document expansion
+window.exploreDemo.simulateDocumentExpansion('doc_001', {
+  '@timestamp': '2024-01-15T10:30:00Z',
+  'host.name': 'web-server-01',
+  'response.keyword': '200'
+});
+
+// Test multiple document expansions
+window.exploreDemo.simulateMultipleDocumentExpansions();
+
+// Test field filtering
+window.exploreDemo.simulateFieldFilter('host.name', 'web-server-01', 'add');
+
+// Run complete demo scenario
+window.exploreDemo.runCompleteExploreDemo();
+
+// Check current context
+window.contextProvider.getCurrentContext().then(context => {
+  console.log('Current context:', context);
+  console.log('Expanded documents:', context.data.expandedDocuments?.length);
+  console.log('Selected fields:', Object.keys(context.data.selectedFields || {}).length);
+});
+```
+
+#### 3.3.2 Expected Context Output
+
+**URL-based Context (always present):**
+```json
+{
+  "type": "explore",
+  "capturePattern": "hybrid",
+  "indexPattern": "logs-*",
+  "query": { "query": "level:ERROR", "language": "kuery" },
+  "filters": [{ "field": "environment", "value": "production" }],
+  "timeRange": { "from": "now-1h", "to": "now" }
+}
+```
+
+**Transient State Context (action-based):**
+```json
+{
+  "expandedDocuments": [
+    {
+      "documentId": "doc_001",
+      "documentData": {
+        "@timestamp": "2024-01-15T10:30:00Z",
+        "host.name": "web-server-01",
+        "response.keyword": "200"
+      },
+      "expandedAt": 1705312200000,
+      "interactionCount": 1
+    },
+    {
+      "documentId": "doc_002",
+      "documentData": { "..." },
+      "expandedAt": 1705312260000,
+      "interactionCount": 2
+    }
+  ],
+  "selectedFields": {
+    "host.name": {
+      "value": "web-server-01",
+      "addedAt": 1705312220000
+    }
+  },
+  "interactionSummary": {
+    "totalExpanded": 2,
+    "totalFieldFilters": 1,
+    "hasMultipleExpanded": true,
+    "lastInteraction": 1705312260000,
+    "recentActivity": true
+  }
+}
+```
+
+### 3.4 Key Benefits Demonstrated
+
+#### 3.4.1 Multiple Expanded Documents Support
+- ✅ **Tracks multiple documents simultaneously**
+- ✅ **Maintains document details and interaction history**
+- ✅ **Provides summary metadata (hasMultipleExpanded, totalExpanded)**
+
+#### 3.4.2 Action-Based Context Capture
+- ✅ **Captures transient state not reflected in URL**
+- ✅ **Routes UI Actions to interested plugins only**
+- ✅ **Maintains state across user interactions**
+
+#### 3.4.3 Flexible Architecture
+- ✅ **URL monitoring for automatic context refresh**
+- ✅ **Plugin autonomy with centralized coordination**
+- ✅ **Supports different context capture patterns per plugin**
+
+#### 3.4.4 Programmatic Actions
+- ✅ **AI can expand/collapse documents programmatically**
+- ✅ **AI can add/remove field filters**
+- ✅ **AI can query current transient state**
+
+### 3.5 Real-World Usage Scenarios
+
+#### 3.5.1 AI Assistant Integration
+
+**User:** "Show me details about the expanded documents"
+
+**AI Response (with context):** "You currently have 2 documents expanded:
+1. Document from web-server-01 at 10:30 AM showing a 200 response
+2. Document from web-server-02 at 10:31 AM showing a 404 response
+
+You've also applied a filter for host.name = 'web-server-01'. Would you like me to collapse the second document or add additional filters based on the error responses?"
+
+#### 3.5.2 Context-Aware Actions
+
+**User:** "Add a filter for all error responses"
+
+**AI Action:**
+```javascript
+// AI can programmatically add filters based on expanded document context
+window.contextProvider.executeAction('ADD_FIELD_FILTER', {
+  fieldName: 'response.keyword',
+  filterValue: ['404', '500']
+});
+```
+
+#### 3.5.3 Multi-Document Analysis
+
+**User:** "Compare the expanded documents"
+
+**AI Response:** "Comparing your 2 expanded documents:
+- **Similarities**: Both from the same time period (10:30-10:31 AM)
+- **Differences**: Different servers (web-server-01 vs web-server-02), different response codes (200 vs 404)
+- **Pattern**: The 404 error on web-server-02 might indicate a service issue
+
+Would you like me to expand more documents from web-server-02 to investigate further?"
+
+This implementation demonstrates the true power and flexibility of the Context Provider architecture - supporting both simple URL-based plugins and complex action-based plugins with rich transient state management.
 - Maintains high performance and low maintenance overhead
 - Works seamlessly across different state management patterns (embeddables, Redux, data services)
 
