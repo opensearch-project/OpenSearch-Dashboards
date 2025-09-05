@@ -19,7 +19,15 @@ export const patternsTableColumns = (
     width: '40px', // roughly size of the EuiButtonIcon
     name: <></>, // intentionally empty
     render: (record: PatternsFlyoutRecord) => {
-      return <EuiButtonIcon iconType={'inspect'} onClick={() => openPatternsTableFlyout(record)} />;
+      return (
+        <EuiButtonIcon
+          aria-label={i18n.translate('explore.patterns.table.column.openPatternTableFlyout', {
+            defaultMessage: 'Open pattern table flyout',
+          })}
+          iconType={'inspect'}
+          onClick={() => openPatternsTableFlyout(record)}
+        />
+      );
     },
   },
   {

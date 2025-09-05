@@ -13,6 +13,12 @@ jest.mock('./patterns_flyout_context', () => ({
   usePatternsFlyoutContext: jest.fn(),
 }));
 
+jest.mock('./patterns_flyout_update_search', () => ({
+  PatternsFlyoutUpdateSearch: ({ patternString }: { patternString: string }) => (
+    <div data-testid="mock-update-search">Update Search: {patternString}</div>
+  ),
+}));
+
 describe('PatternsTableFlyout', () => {
   const mockClosePatternsTableFlyout = jest.fn();
 
