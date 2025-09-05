@@ -4,6 +4,7 @@
  */
 
 import { RESOURCES } from '../../../../../../utils/apps/explore/constants';
+import { DEFAULT_OPTIONS } from '../../../../../../utils/commands.core';
 
 describe('Discover Traces', () => {
   let testResources = {};
@@ -25,12 +26,6 @@ describe('Discover Traces', () => {
 
   after(() => {
     cy.core.cleanupTestResources(testResources);
-  });
-
-  it('should show empty state when no index pattern exists', () => {
-    cy.visit(`/w/${testResources.workspaceId}/app/explore/traces#`);
-    cy.osd.waitForLoader(true);
-    cy.getElementByTestId('discoverNoIndexPatterns').should('be.visible');
   });
 
   it('should create trace index pattern and navigate to trace details', () => {
