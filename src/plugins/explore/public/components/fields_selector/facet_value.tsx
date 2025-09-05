@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButtonIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { Bucket } from './types';
-import { IndexPatternField } from '../../../../data/public';
+import { DataViewField } from '../../../../data/public';
 import { shortenDottedString } from '../../application/legacy/discover/application/helpers';
 import './discover_field.scss';
 
@@ -24,7 +24,7 @@ export interface FacetValueProps {
   /**
    * The facet field
    */
-  field: IndexPatternField;
+  field: DataViewField;
   /**
    * The bucket contains facet field value
    */
@@ -32,7 +32,7 @@ export interface FacetValueProps {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Determines whether the field name is shortened test.sub1.sub2 = t.s.sub2
    */

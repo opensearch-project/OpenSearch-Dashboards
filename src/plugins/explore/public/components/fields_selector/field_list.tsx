@@ -5,7 +5,7 @@
 
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 import React, { useState } from 'react';
-import { IndexPatternField } from '../../../../data/public';
+import { DataViewField } from '../../../../data/public';
 import { DiscoverField } from './discover_field';
 import { DiscoverSidebarProps } from './discover_sidebar';
 import { FieldDetails } from './types';
@@ -13,8 +13,8 @@ import { FieldDetails } from './types';
 interface FieldGroupProps extends DiscoverSidebarProps {
   category: 'query' | 'discovered' | 'selected';
   title: string;
-  fields: IndexPatternField[];
-  getDetailsByField: (field: IndexPatternField) => FieldDetails;
+  fields: DataViewField[];
+  getDetailsByField: (field: DataViewField) => FieldDetails;
   shortDotsEnabled: boolean;
 }
 
@@ -23,7 +23,7 @@ export const FieldList = ({
   title,
   fields,
   columns,
-  selectedIndexPattern,
+  selectedDataSet,
   onAddField,
   onRemoveField,
   onAddFilter,
@@ -32,7 +32,7 @@ export const FieldList = ({
 }: FieldGroupProps) => {
   const [expanded, setExpanded] = useState(true);
 
-  if (!selectedIndexPattern) return null;
+  if (!selectedDataSet) return null;
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="none">
@@ -45,12 +45,12 @@ export const FieldList = ({
         className="exploreSideBar_fieldGroup"
         data-test-subj="dscSideBarFieldGroupButton"
         aria-label={title}
-        isLoading={!!selectedIndexPattern.fieldsLoading}
+        isLoading={!!selectedDataSet.fieldsLoading}
       >
         {title}
       </EuiButtonEmpty>
       {expanded &&
-        fields.map((field: IndexPatternField, index) => {
+        fields.map((field: DataViewField, index) => {
           return (
             <EuiPanel
               data-attr-field={field.name}
@@ -67,7 +67,7 @@ export const FieldList = ({
                 selected={category === 'selected'}
                 field={field}
                 columns={columns}
-                indexPattern={selectedIndexPattern}
+                dataSet={selectedDataSet}
                 onAddField={onAddField}
                 onRemoveField={onRemoveField}
                 onAddFilter={onAddFilter}
