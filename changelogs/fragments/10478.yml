@@ -1,0 +1,2 @@
+fix:
+- Move the Data Importer plugin to Data Administration under settings ([#10478](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10478))

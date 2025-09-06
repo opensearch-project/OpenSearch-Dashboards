@@ -12,7 +12,6 @@ import {
   getSchemaByAxis,
   inferTimeUnitFromTimestamps,
   getTooltipFormat,
-  calculateValue,
 } from './utils';
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
 
@@ -320,104 +319,5 @@ describe('getTooltipFormat', () => {
     const customFallback = '%Y-%m-%d';
     const data = [{ timestamp: '2023-01-01T00:00:00' }];
     expect(getTooltipFormat(data, field, customFallback)).toBe(customFallback);
-  });
-});
-
-describe('calculateValue', () => {
-  const testValues = [5, 10, 3, 8, 5, 12];
-
-  it('returns undefined for empty array', () => {
-    expect(calculateValue([])).toBeUndefined();
-  });
-
-  it('returns undefined for undefined values', () => {
-    expect(calculateValue(undefined as any)).toBeUndefined();
-  });
-
-  it('calculates first value correctly', () => {
-    expect(calculateValue(testValues, 'first')).toBe(5);
-  });
-
-  it('calculates last value correctly', () => {
-    expect(calculateValue(testValues, 'last')).toBe(12);
-  });
-
-  it('calculates min value correctly', () => {
-    expect(calculateValue(testValues, 'min')).toBe(3);
-  });
-
-  it('calculates max value correctly', () => {
-    expect(calculateValue(testValues, 'max')).toBe(12);
-  });
-
-  it('calculates mean value correctly', () => {
-    // (5 + 10 + 3 + 8 + 5 + 12) / 6 = 43 / 6 = 7.166...
-    expect(calculateValue(testValues, 'mean')).toBeCloseTo(7.167, 3);
-  });
-
-  it('calculates median value correctly for odd number of values', () => {
-    expect(calculateValue([5, 10, 3, 8, 5], 'median')).toBe(5);
-  });
-
-  it('calculates median value correctly for even number of values', () => {
-    // Median of [3, 5, 5, 8, 10, 12] is (5 + 8) / 2 = 6.5
-    expect(calculateValue(testValues, 'median')).toBe(6.5);
-  });
-
-  it('calculates variance correctly', () => {
-    // Mean = 7.167
-    // Variance = ((5-7.167)² + (10-7.167)² + (3-7.167)² + (8-7.167)² + (5-7.167)² + (12-7.167)²) / 6
-    // The actual implementation gives 9.81
-    expect(calculateValue(testValues, 'variance')).toBeCloseTo(9.81, 2);
-  });
-
-  it('calculates count correctly', () => {
-    expect(calculateValue(testValues, 'count')).toBe(6);
-  });
-
-  it('calculates distinct count correctly', () => {
-    expect(calculateValue(testValues, 'distinct_count')).toBe(5); // 5 appears twice
-  });
-
-  it('calculates total correctly', () => {
-    expect(calculateValue(testValues, 'total')).toBe(43); // 5 + 10 + 3 + 8 + 5 + 12 = 43
-  });
-
-  it('defaults to last value when calculation method is not recognized', () => {
-    expect(calculateValue(testValues, 'unknown' as any)).toBe(12);
-  });
-
-  it('defaults to last value when calculation method is not provided', () => {
-    expect(calculateValue(testValues)).toBe(12);
-  });
-
-  it('handles single value arrays correctly', () => {
-    const singleValue = [42];
-    expect(calculateValue(singleValue, 'first')).toBe(42);
-    expect(calculateValue(singleValue, 'last')).toBe(42);
-    expect(calculateValue(singleValue, 'min')).toBe(42);
-    expect(calculateValue(singleValue, 'max')).toBe(42);
-    expect(calculateValue(singleValue, 'mean')).toBe(42);
-    expect(calculateValue(singleValue, 'median')).toBe(42);
-    expect(calculateValue(singleValue, 'variance')).toBe(0);
-    expect(calculateValue(singleValue, 'count')).toBe(1);
-    expect(calculateValue(singleValue, 'distinct_count')).toBe(1);
-    expect(calculateValue(singleValue, 'total')).toBe(42);
-  });
-
-  it('handles negative values correctly', () => {
-    const negativeValues = [-5, -10, -3];
-    expect(calculateValue(negativeValues, 'min')).toBe(-10);
-    expect(calculateValue(negativeValues, 'max')).toBe(-3);
-    expect(calculateValue(negativeValues, 'total')).toBe(-18);
-  });
-
-  it('handles zero values correctly', () => {
-    const zeroValues = [0, 0, 0];
-    expect(calculateValue(zeroValues, 'min')).toBe(0);
-    expect(calculateValue(zeroValues, 'max')).toBe(0);
-    expect(calculateValue(zeroValues, 'mean')).toBe(0);
-    expect(calculateValue(zeroValues, 'variance')).toBe(0);
-    expect(calculateValue(zeroValues, 'total')).toBe(0);
   });
 });

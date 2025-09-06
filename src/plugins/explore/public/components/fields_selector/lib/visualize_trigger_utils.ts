@@ -35,7 +35,7 @@ import {
   visualizeGeoFieldTrigger,
 } from '../../../../../ui_actions/public';
 import { getUiActions } from '../../../application/legacy/discover/opensearch_dashboards_services';
-import { IndexPatternField, OSD_FIELD_TYPES } from '../../../../../data/public';
+import { DataViewField, OSD_FIELD_TYPES } from '../../../../../data/public';
 
 function getTriggerConstant(type: string) {
   return type === OSD_FIELD_TYPES.GEO_POINT || type === OSD_FIELD_TYPES.GEO_SHAPE
@@ -64,7 +64,7 @@ async function getCompatibleActions(
 }
 
 export async function getVisualizeHref(
-  field: IndexPatternField,
+  field: DataViewField,
   indexPatternId: string | undefined,
   contextualFields: string[]
 ) {
@@ -88,7 +88,7 @@ export async function getVisualizeHref(
 }
 
 export function triggerVisualizeActions(
-  field: IndexPatternField,
+  field: DataViewField,
   indexPatternId: string | undefined,
   contextualFields: string[]
 ) {
@@ -103,7 +103,7 @@ export function triggerVisualizeActions(
 }
 
 export async function isFieldVisualizable(
-  field: IndexPatternField,
+  field: DataViewField,
   indexPatternId: string | undefined,
   contextualFields: string[]
 ) {

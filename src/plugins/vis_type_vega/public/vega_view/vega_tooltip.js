@@ -69,28 +69,33 @@ export class TooltipHandler {
    * The handler function.
    */
   handler(view, event, item, value) {
-    this.hideTooltip();
-
     // hide tooltip for null, undefined, or empty string values
     if (value == null || value === '') {
+      this.hideTooltip();
       return;
     }
 
-    const el = document.createElement('div');
-    el.setAttribute('id', tooltipId);
-    ['vgaVis__tooltip', 'euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`].forEach(
-      (className) => {
+    let el = document.getElementById(tooltipId);
+    if (!el) {
+      el = document.createElement('div');
+      el.setAttribute('id', tooltipId);
+      [
+        'vgaVis__tooltip',
+        'euiToolTipPopover',
+        'euiToolTip',
+        `euiToolTip--${this.position}`,
+      ].forEach((className) => {
         el.classList.add(className);
-      }
-    );
+      });
+
+      // add to DOM to calculate tooltip size
+      document.body.appendChild(el);
+    }
 
     // Sanitized HTML is created by the tooltip library,
     // with a large number of tests, hence suppressing eslint here.
     // eslint-disable-next-line no-unsanitized/property
     el.innerHTML = createTooltipContent(value, _.escape, 2);
-
-    // add to DOM to calculate tooltip size
-    document.body.appendChild(el);
 
     // if centerOnMark numeric value is smaller than the size of the mark, use mouse [x,y]
     let anchorBounds;

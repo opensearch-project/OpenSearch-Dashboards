@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
@@ -73,7 +73,42 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, storage, appName, data } = opensearchDashboards.services;
+  const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
+
+  // Memoized callback for opening date picker
+  const handleOpenDatePicker = useCallback(() => {
+    const selectors = [
+      '[data-test-subj="superDatePickerstartDatePopoverButton"]',
+      '[data-test-subj="superDatePickerShowDatesButton"]',
+    ];
+    for (const selector of selectors) {
+      const element = document.querySelector(selector);
+      if (element) {
+        (element as HTMLElement).click();
+        break;
+      }
+    }
+  }, []);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'open_date_picker',
+    pluginId: 'data',
+    name: 'Open Date Picker',
+    category: 'Open',
+    keys: 'shift+t',
+    execute: handleOpenDatePicker,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'refresh_query',
+    pluginId: 'data',
+    name: 'Refresh Results',
+    category: 'query',
+    keys: 'shift+r',
+    execute: () => {
+      onClickSubmitButton({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
+    },
+  });
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(

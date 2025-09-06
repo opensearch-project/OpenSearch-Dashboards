@@ -3,14 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import dompurify from 'dompurify';
 import { PatternItem } from './patterns_table';
 import { isValidFiniteNumber } from './utils/utils';
+import { PatternsFlyoutRecord } from './patterns_table_flyout/patterns_table_flyout';
 
-export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
+export const patternsTableColumns = (
+  openPatternsTableFlyout: (record: PatternsFlyoutRecord) => void
+): Array<EuiBasicTableColumn<PatternItem>> => [
+  {
+    field: 'flyout',
+    width: '40px', // roughly size of the EuiButtonIcon
+    name: <></>, // intentionally empty
+    render: (record: PatternsFlyoutRecord) => {
+      return <EuiButtonIcon iconType={'inspect'} onClick={() => openPatternsTableFlyout(record)} />;
+    },
+  },
   {
     field: 'ratio',
     name: i18n.translate('explore.patterns.table.column.eventRatio', {
@@ -27,7 +38,7 @@ export const patternsTableColumns: Array<EuiBasicTableColumn<PatternItem>> = [
   {
     field: 'sample',
     name: i18n.translate('explore.patterns.table.column.sampleLog', {
-      defaultMessage: 'Pattern Sample Log',
+      defaultMessage: 'Pattern',
     }),
     render: (sample: string) => {
       const sanitizedSampleLog = dompurify.sanitize(sample);
