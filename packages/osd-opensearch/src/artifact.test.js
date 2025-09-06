@@ -150,7 +150,7 @@ describe('Artifact', () => {
 
     itif('should throw when an artifact cannot be found for the specified parameters', async () => {
       mockFetchFunction.mockReturnValue(Promise.resolve(new Response('', { status: 404 })));
-      await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
+      expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
         'Snapshots for INVALID_VERSION are not available'
       );
     });
