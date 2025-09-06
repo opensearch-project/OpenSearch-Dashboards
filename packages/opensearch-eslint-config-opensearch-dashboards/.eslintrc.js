@@ -72,6 +72,11 @@ module.exports = {
           to: false,
           disallowedMessage: `Don't import monaco directly, use or add exports to @osd/monaco`
         },
+         {
+          from: 'node-fetch',
+          to: false,
+          disallowedMessage: `Don't use 'node-fetch', use native Fetch API instead`
+        },
       ],
     ],
   },

@@ -31,7 +31,6 @@
 import { parse } from 'query-string';
 import fn from './quandl';
 import moment from 'moment';
-import fetchMock from 'node-fetch';
 
 const parseURL = require('url').parse;
 const tlConfig = require('./fixtures/tl_config')();
@@ -40,23 +39,27 @@ function parseUrlParams(url) {
   return parse(parseURL(url).query, { sort: false });
 }
 
-jest.mock('node-fetch', () =>
-  jest.fn(() =>
-    Promise.resolve({
-      json: function () {
-        return {
-          name: '__beer__',
-          data: [
-            ['2015-01-01', 3],
-            ['2015-01-02', 14],
-            ['2015-01-03', 15.92],
-            ['2015-01-04', 65.35],
-          ],
-        };
-      },
-    })
-  )
+const fetchMock = jest.fn(() =>
+  Promise.resolve({
+    json: function () {
+      return {
+        name: '__beer__',
+        data: [
+          ['2015-01-01', 3],
+          ['2015-01-02', 14],
+          ['2015-01-03', 15.92],
+          ['2015-01-04', 65.35],
+        ],
+      };
+    },
+  })
 );
+
+beforeAll(() => {
+  jest.spyOn(global, 'fetch').mockImplementation(fetchMock);
+});
+
+afterAll(() => jest.restoreAllMocks());
 
 import invoke from './helpers/invoke_series_fn.js';
 

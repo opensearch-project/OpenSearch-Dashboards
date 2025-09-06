@@ -29,10 +29,6 @@
  */
 
 import { ToolingLog } from '@osd/dev-utils';
-jest.mock('node-fetch');
-import fetch from 'node-fetch';
-const { Response } = jest.requireActual('node-fetch');
-
 import { Artifact } from './artifact';
 
 const log = new ToolingLog();
@@ -69,7 +65,9 @@ const createArchive = (params = {}) => {
 };
 
 const mockFetch = (mock) =>
-  fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(mock))));
+  jest
+    .spyOn(global, 'fetch')
+    .mockImplementation(() => Promise.resolve(new Response(JSON.stringify(mock))));
 
 const previousEnvVars = {};
 const ENV_VARS_TO_RESET = [
@@ -95,6 +93,7 @@ afterAll(() => {
 
 beforeEach(() => {
   jest.resetAllMocks();
+  jest.restoreAllMocks();
 
   MOCKS = {
     GA: {

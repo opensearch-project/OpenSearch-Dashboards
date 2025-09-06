@@ -28,8 +28,6 @@
  * under the License.
  */
 
-const fetch = require('node-fetch');
-const AbortController = require('abort-controller');
 const fs = require('fs');
 const { promisify } = require('util');
 const { pipeline, Transform } = require('stream');

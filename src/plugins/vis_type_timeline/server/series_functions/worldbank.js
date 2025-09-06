@@ -30,7 +30,6 @@
 
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
-import fetch from 'node-fetch';
 import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
 
