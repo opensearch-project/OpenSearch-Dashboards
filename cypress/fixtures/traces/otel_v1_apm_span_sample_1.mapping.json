@@ -1,0 +1,27 @@
+{
+  "mappings": {
+    "date_detection": false,
+    "_source": {
+      "enabled": true
+    },
+    "dynamic_templates": [
+      {
+        "strings_as_keywords": {
+          "match_mapping_type": "string",
+          "match": "*",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      }
+    ],
+    "properties": {
+      "startTimeUnixNano": {
+        "type": "date_nanos"
+      },
+      "endTimeUnixNano": {
+        "type": "date_nanos"
+      }
+    }
+  }
+}
