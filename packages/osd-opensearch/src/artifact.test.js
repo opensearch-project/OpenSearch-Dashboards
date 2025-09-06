@@ -64,10 +64,15 @@ const createArchive = (params = {}) => {
   };
 };
 
+const mockFetchFunction = jest.fn();
 const mockFetch = (mock) =>
   jest
     .spyOn(global, 'fetch')
-    .mockImplementation(() => Promise.resolve(new Response(JSON.stringify(mock))));
+    .mockImplementation(
+      mockFetchFunction.mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify(mock)))
+      )
+    );
 
 const previousEnvVars = {};
 const ENV_VARS_TO_RESET = [
@@ -137,14 +142,14 @@ describe('Artifact', () => {
     });
 
     itif('should return artifact metadata for a RC artifact', () => {
-      fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
-      fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
+      mockFetchFunction.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
+      mockFetchFunction.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
       mockFetch(MOCKS.RC);
       artifactTest(3);
     });
 
     itif('should throw when an artifact cannot be found for the specified parameters', async () => {
-      fetch.mockReturnValue(Promise.resolve(new Response('', { status: 404 })));
+      mockFetchFunction.mockReturnValue(Promise.resolve(new Response('', { status: 404 })));
       await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
         'Snapshots for INVALID_VERSION are not available'
       );
