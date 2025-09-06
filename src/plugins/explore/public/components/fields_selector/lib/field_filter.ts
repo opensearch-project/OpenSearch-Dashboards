@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IndexPatternField } from '../../../../../data/public';
+import { DataViewField } from '../../../../../data/public';
 
 export interface FieldFilterState {
   missing: boolean;
@@ -69,7 +69,7 @@ export function setFieldFilterProp(
 }
 
 export function isFieldFiltered(
-  field: IndexPatternField,
+  field: DataViewField,
   filterState: FieldFilterState,
   fieldCounts: Record<string, number>
 ): boolean {

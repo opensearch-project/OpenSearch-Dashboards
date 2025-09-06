@@ -37,7 +37,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { getStubIndexPattern } from '../../../../data/public/test_utils';
+import { getStubDataView } from '../../../../data/public/data_views/data_view.stub';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import * as fieldFilter from './lib/field_filter';
 
@@ -69,7 +69,7 @@ jest.mock('../../application/legacy/discover/opensearch_dashboards_services', ()
 }));
 
 jest.mock('./lib/get_index_pattern_field_list', () => ({
-  getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
+  getIndexPatternFieldList: jest.fn((dataSet) => dataSet.fields),
 }));
 
 jest.mock('./field_list', () => ({
@@ -100,7 +100,7 @@ jest.mock('./facet_list', () => ({
 
 function getCompProps(customFields?: any[]): DiscoverSidebarProps {
   const fields = customFields || stubbedLogstashFields();
-  const indexPattern = getStubIndexPattern(
+  const dataSet = getStubDataView(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
@@ -109,14 +109,14 @@ function getCompProps(customFields?: any[]): DiscoverSidebarProps {
   );
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = _.each(_.cloneDeep(realHits), dataSet.flattenHit) as Array<
     OpenSearchSearchHit<Record<string, any>>
   >;
 
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
-    for (const key of Object.keys(indexPattern.flattenHit(hit))) {
+    for (const key of Object.keys(dataSet.flattenHit(hit))) {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
@@ -133,7 +133,7 @@ function getCompProps(customFields?: any[]): DiscoverSidebarProps {
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    selectedIndexPattern: indexPattern,
+    selectedDataSet: dataSet,
     onReorderFields: jest.fn(),
     isEnhancementsEnabledOverride: false,
   };

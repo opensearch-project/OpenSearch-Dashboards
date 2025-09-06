@@ -145,7 +145,7 @@ describe('field_calculator', function () {
       const extensions = getFieldValues({
         hits,
         field: indexPattern.fields.getByName('extension') as IndexPatternField,
-        indexPattern,
+        dataSet: indexPattern,
       });
       expect(extensions).toBeInstanceOf(Array);
       expect(
@@ -160,7 +160,7 @@ describe('field_calculator', function () {
       const types = getFieldValues({
         hits,
         field: indexPattern.fields.getByName('_type') as IndexPatternField,
-        indexPattern,
+        dataSet: indexPattern,
       });
       expect(types).toBeInstanceOf(Array);
       expect(
@@ -179,7 +179,7 @@ describe('field_calculator', function () {
         hits: _.cloneDeep(realHits),
         field: indexPattern.fields.getByName('extension') as IndexPatternField,
         count: 3,
-        indexPattern,
+        dataSet: indexPattern,
       };
     });
 

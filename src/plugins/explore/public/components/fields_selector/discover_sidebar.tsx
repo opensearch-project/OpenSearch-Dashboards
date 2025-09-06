@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
-import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../data/public';
+import { DataView, DataViewField, UI_SETTINGS } from '../../../../data/public';
 import { getServices } from '../../application/legacy/discover/opensearch_dashboards_services';
 import { DiscoverFieldSearch } from './discover_field_search';
 import './discover_sidebar.scss';
@@ -44,7 +44,7 @@ export interface DiscoverSidebarProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback function when removing a field
    * @param fieldName
@@ -55,9 +55,9 @@ export interface DiscoverSidebarProps {
    */
   onCollapse?: () => void;
   /**
-   * Currently selected index pattern
+   * Currently selected data set
    */
-  selectedIndexPattern?: IndexPattern;
+  selectedDataSet?: DataView;
   isEnhancementsEnabledOverride: boolean;
 }
 
@@ -66,7 +66,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     columns,
     fieldCounts,
     hits,
-    selectedIndexPattern,
+    selectedDataSet,
     isEnhancementsEnabledOverride,
     onCollapse,
   } = props;
@@ -77,8 +77,8 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
   }, []);
 
   const fields = useMemo(() => {
-    return getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
-  }, [selectedIndexPattern, fieldCounts]);
+    return getIndexPatternFieldList(selectedDataSet, fieldCounts);
+  }, [selectedDataSet, fieldCounts]);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -89,12 +89,12 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
   );
 
   const getDetailsByField = useCallback(
-    (ipField: IndexPatternField) => getDetails(ipField, hits, selectedIndexPattern),
-    [hits, selectedIndexPattern]
+    (ipField: DataViewField) => getDetails(ipField, hits, selectedDataSet),
+    [hits, selectedDataSet]
   );
 
   const { facetedFields, selectedFields, queryFields, discoveredFields } = useMemo(
-    () => groupFields(fields, columns, fieldCounts, fieldFilterState),
+    () => groupFields(fields as DataViewField[], columns, fieldCounts, fieldFilterState),
     [fields, columns, fieldCounts, fieldFilterState]
   );
 
@@ -110,7 +110,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     return result;
   }, [fields]);
 
-  if (!selectedIndexPattern || !fields) {
+  if (!selectedDataSet || !fields) {
     return null;
   }
 
@@ -152,7 +152,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
           className="eui-yScroll exploreSideBar_fieldListContainer"
           paddingSize="none"
         >
-          {(fields.length > 0 || selectedIndexPattern.fieldsLoading) && (
+          {(fields.length > 0 || selectedDataSet.fieldsLoading) && (
             <>
               {facetedFields.length > 0 && (
                 <FacetList

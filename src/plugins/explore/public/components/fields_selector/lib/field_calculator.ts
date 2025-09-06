@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { IndexPattern, IndexPatternField } from '../../../../../data/public';
+import { DataView, DataViewField } from '../../../../../data/public';
 import { FieldValueCounts } from '../types';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -37,8 +37,8 @@ const NO_ANALYSIS_TYPES = ['geo_point', 'geo_shape', 'attachment'];
 
 interface FieldValuesParams {
   hits: Array<OpenSearchSearchHit<Record<string, any>>>;
-  field: IndexPatternField;
-  indexPattern: IndexPattern;
+  field: DataViewField;
+  dataSet: DataView;
 }
 
 interface FieldValueCountsParams extends FieldValuesParams {
@@ -46,14 +46,14 @@ interface FieldValueCountsParams extends FieldValuesParams {
   grouped?: boolean;
 }
 
-const getFieldValues = ({ hits, field, indexPattern }: FieldValuesParams) => {
+const getFieldValues = ({ hits, field, dataSet: indexPattern }: FieldValuesParams) => {
   const name = field.name;
   const flattenHit = indexPattern.flattenHit;
   return hits.map((hit) => flattenHit(hit)[name]);
 };
 
 const getFieldValueCounts = (params: FieldValueCountsParams): FieldValueCounts => {
-  const { hits, field, indexPattern, count = 5, grouped = false } = params;
+  const { hits, field, dataSet: indexPattern, count = 5, grouped = false } = params;
   const { type: fieldType } = field;
 
   if (NO_ANALYSIS_TYPES.includes(fieldType)) {
@@ -70,7 +70,7 @@ const getFieldValueCounts = (params: FieldValueCountsParams): FieldValueCounts =
     };
   }
 
-  const allValues = getFieldValues({ hits, field, indexPattern });
+  const allValues = getFieldValues({ hits, field, dataSet: indexPattern });
   const missing = allValues.filter((v) => v === undefined || v === null).length;
 
   try {

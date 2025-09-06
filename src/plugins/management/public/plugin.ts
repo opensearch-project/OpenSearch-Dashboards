@@ -56,6 +56,7 @@ import {
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SettingsIcon } from './components/settings_icon';
+import { KeyboardShortcutIcon } from './components/keyboard_shortcut_icon';
 import {
   fulfillRegistrationLinksToChromeNavLinks,
   LinkItemType,
@@ -338,6 +339,15 @@ export class ManagementPlugin
           })
         ),
       });
+
+      // Only register keyboard shortcut icon if there are shortcuts available
+      const hasShortcuts = core.keyboardShortcut?.getAllShortcuts()?.length > 0;
+      if (hasShortcuts) {
+        core.chrome.navControls.registerLeftBottom({
+          order: 5,
+          mount: toMountPoint(React.createElement(KeyboardShortcutIcon, { core })),
+        });
+      }
     }
 
     return {};
