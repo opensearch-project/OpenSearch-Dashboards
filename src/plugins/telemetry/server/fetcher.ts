@@ -31,8 +31,6 @@
 import moment from 'moment';
 import { Observable, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
-// @ts-ignore
-import fetch from 'node-fetch';
 import {
   TelemetryCollectionManagerPluginStart,
   UsageStatsPayload,
@@ -229,7 +227,7 @@ export class FetcherTask {
     });
   }
 
-  private async sendTelemetry(url: string, cluster: any): Promise<void> {
+  private async sendTelemetry(url: string, cluster: UsageStatsPayload | string): Promise<void> {
     this.logger.debug(`Sending usage stats.`);
     /**
      * send OPTIONS before sending usage data.
@@ -241,7 +239,7 @@ export class FetcherTask {
 
     await fetch(url, {
       method: 'post',
-      body: cluster,
+      body: typeof cluster === 'string' ? cluster : JSON.stringify(cluster),
     });
   }
 }

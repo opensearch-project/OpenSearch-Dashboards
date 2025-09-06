@@ -28,8 +28,6 @@
  * under the License.
  */
 
-// @ts-ignore
-import fetch from 'node-fetch';
 import moment from 'moment';
 
 import { IRouter } from 'opensearch-dashboards/server';
@@ -57,7 +55,7 @@ export async function sendTelemetryOptInStatus(
 
   await fetch(optInStatusUrl, {
     method: 'post',
-    body: optInStatus,
+    body: JSON.stringify(optInStatus),
   });
 }
 

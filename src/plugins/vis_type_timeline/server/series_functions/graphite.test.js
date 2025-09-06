@@ -36,25 +36,31 @@ const MISS_CHECKLIST_MESSAGE = `Please configure on the opensearch_dashboards.ym
 
 const INVALID_URL_MESSAGE = `The Graphite URL provided by you is invalid. Please update your config from OpenSearch Dashboards' Advanced Settings.`;
 
-jest.mock('node-fetch', () => (url) => {
-  if (url.includes('redirect')) {
-    return Promise.reject(new Error('maximum redirect reached at: ' + url));
-  }
-  return Promise.resolve({
-    json: function () {
-      return [
-        {
-          target: '__beer__',
-          datapoints: [
-            [3, 1000],
-            [14, 2000],
-            [1.5, 3000],
-            [92.6535, 4000],
-          ],
-        },
-      ];
-    },
+beforeAll(() => {
+  jest.spyOn(global, 'fetch').mockImplementation((url) => {
+    if (url.includes('redirect')) {
+      return Promise.reject(new Error('maximum redirect reached at: ' + url));
+    }
+    return Promise.resolve({
+      json: function () {
+        return [
+          {
+            target: '__beer__',
+            datapoints: [
+              [3, 1000],
+              [14, 2000],
+              [1.5, 3000],
+              [92.6535, 4000],
+            ],
+          },
+        ];
+      },
+    });
   });
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
 });
 
 import invoke from './helpers/invoke_series_fn.js';

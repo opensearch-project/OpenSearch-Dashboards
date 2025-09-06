@@ -1,0 +1,2 @@
+chore:
+- Deprecate `node-fetch` usage with native Fetch API ([#10493](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10493))

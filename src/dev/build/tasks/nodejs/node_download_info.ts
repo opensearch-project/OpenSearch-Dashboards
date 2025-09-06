@@ -29,8 +29,6 @@
  */
 
 import { basename, resolve } from 'path';
-// @ts-expect-error TS7016 TODO(ts-error): fixme
-import fetch from 'node-fetch';
 import semver from 'semver';
 
 import { Config, Platform } from '../../lib';

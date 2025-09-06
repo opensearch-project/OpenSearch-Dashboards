@@ -29,10 +29,6 @@
  */
 
 import { ToolingLog } from '@osd/dev-utils';
-jest.mock('node-fetch');
-import fetch from 'node-fetch';
-const { Response } = jest.requireActual('node-fetch');
-
 import { Artifact } from './artifact';
 
 const log = new ToolingLog();
@@ -68,8 +64,15 @@ const createArchive = (params = {}) => {
   };
 };
 
+const mockFetchFunction = jest.fn();
 const mockFetch = (mock) =>
-  fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(mock))));
+  jest
+    .spyOn(global, 'fetch')
+    .mockImplementation(
+      mockFetchFunction.mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify(mock)))
+      )
+    );
 
 const previousEnvVars = {};
 const ENV_VARS_TO_RESET = [
@@ -95,6 +98,7 @@ afterAll(() => {
 
 beforeEach(() => {
   jest.resetAllMocks();
+  jest.restoreAllMocks();
 
   MOCKS = {
     GA: {
@@ -138,15 +142,15 @@ describe('Artifact', () => {
     });
 
     itif('should return artifact metadata for a RC artifact', () => {
-      fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
-      fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
+      mockFetchFunction.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
+      mockFetchFunction.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
       mockFetch(MOCKS.RC);
       artifactTest(3);
     });
 
     itif('should throw when an artifact cannot be found for the specified parameters', async () => {
-      fetch.mockReturnValue(Promise.resolve(new Response('', { status: 404 })));
-      await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
+      mockFetchFunction.mockReturnValue(Promise.resolve(new Response('', { status: 404 })));
+      expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
         'Snapshots for INVALID_VERSION are not available'
       );
     });
