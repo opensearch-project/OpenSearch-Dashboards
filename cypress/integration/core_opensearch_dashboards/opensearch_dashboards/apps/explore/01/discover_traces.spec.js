@@ -12,6 +12,9 @@ describe('Discover Traces', () => {
   before(() => {
     cy.core.setupTestResources().then((resources) => {
       testResources = resources;
+      cy.window().then((win) => {
+        win.localStorage.setItem('hasSeenInfoBox_PPL', true);
+      });
       cy.visit(`/w/${testResources.workspaceId}/app/import_sample_data`);
       // Install OTEL sample data if not already present
       cy.get('body').then(($body) => {
@@ -25,6 +28,7 @@ describe('Discover Traces', () => {
   });
 
   after(() => {
+    cy.core.deleteDataset(testResources.traceDatasetId);
     cy.core.cleanupTestResources(testResources);
   });
 
@@ -39,46 +43,40 @@ describe('Discover Traces', () => {
         dataset,
       })
       .then((datasetId) => {
-        testResources.noTimeDatasetId = datasetId;
-        cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+        testResources.traceDatasetId = datasetId;
+        cy.visit(`/w/${testResources.workspaceId}/app/explore/traces#`);
         cy.osd.waitForLoader(true);
         cy.core.waitForDatasetsToLoad();
         cy.wait(5000);
+
+        // Set time range to capture OTEL sample data - last 2 months
+        cy.explore.setRelativeTopNavDate('12', 'Months ago');
+
+        // Verify empty state is no longer visible
+        cy.getElementByTestId('discoverNoIndexPatterns').should('not.exist');
+
+        // Wait for span links and navigate to trace details
+        cy.get('[data-test-subj="spanIdLink"]', { timeout: 30000 }).should('exist');
+
+        // Intercept window.open to capture URL and navigate in same tab
+        cy.window().then((win) => {
+          cy.stub(win, 'open').as('windowOpen');
+        });
+
+        cy.get('[data-test-subj="spanIdLink"]').first().click();
+
+        cy.get('@windowOpen')
+          .should('have.been.called')
+          .then((stub) => {
+            const traceUrl = stub.args[0][0];
+            cy.log(`Navigating to trace details: ${traceUrl}`);
+            cy.visit(traceUrl);
+          });
+
+        // Verify trace details page loaded
+        cy.osd.waitForLoader(true);
+        cy.url().should('include', 'traceDetails');
+        cy.get('button[role="tab"]').contains('Timeline').should('be.visible');
       });
-
-    cy.visit(`/w/${testResources.workspaceId}/app/explore/traces#`);
-    cy.osd.waitForLoader(true);
-
-    // Click on dataset selector to close Syntax options if blocking time-picker
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-
-    // Set time range to capture OTEL sample data - last 2 months
-    cy.explore.setRelativeTopNavDate('12', 'Months ago');
-
-    // Verify empty state is no longer visible
-    cy.getElementByTestId('discoverNoIndexPatterns').should('not.exist');
-
-    // Wait for span links and navigate to trace details
-    cy.get('[data-test-subj="spanIdLink"]', { timeout: 30000 }).should('exist');
-
-    // Intercept window.open to capture URL and navigate in same tab
-    cy.window().then((win) => {
-      cy.stub(win, 'open').as('windowOpen');
-    });
-
-    cy.get('[data-test-subj="spanIdLink"]').first().click();
-
-    cy.get('@windowOpen')
-      .should('have.been.called')
-      .then((stub) => {
-        const traceUrl = stub.args[0][0];
-        cy.log(`Navigating to trace details: ${traceUrl}`);
-        cy.visit(traceUrl);
-      });
-
-    // Verify trace details page loaded
-    cy.osd.waitForLoader(true);
-    cy.url().should('include', 'traceDetails');
-    cy.get('button[role="tab"]').contains('Timeline').should('be.visible');
   });
 });
