@@ -28,26 +28,25 @@
  * under the License.
  */
 
+import { isFunction } from 'lodash';
 const fn = require(`src/plugins/vis_type_timeline/server/lib/load_functions`);
-
-const expect = require('chai').expect;
 
 describe('load_functions.js', () => {
   it('exports a function', () => {
-    expect(fn).to.be.a('function');
+    expect(isFunction(fn)).toBe(true);
   });
 
   it('returns an object with keys named for the javascript files in the directory', () => {
     const fnList = fn('series_functions');
 
-    expect(fnList).to.be.an('object');
-    expect(fnList.sum).to.be.a('object');
+    expect(typeof fnList).toBe('object');
+    expect(typeof fnList.sum).toBe('object');
   });
 
   it('also includes index.js files in direct subdirectories, and names the keys for the directory', () => {
     const fnList = fn('series_functions');
 
-    expect(fnList).to.be.an('object');
-    expect(fnList.es).to.be.a('object');
+    expect(typeof fnList).toBe('object');
+    expect(typeof fnList.es).toBe('object');
   });
 });

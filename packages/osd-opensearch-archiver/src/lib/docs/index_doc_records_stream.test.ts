@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import { delay } from 'bluebird';
 
 import { createListStream, createPromiseFromStreams } from '../streams';
@@ -62,8 +61,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     const records = createPersonDocRecords(1);
     const client = createStubClient([
       async (name, params) => {
-        expect(name).to.be('bulk');
-        expect(params).to.eql({ body: recordsToBulkBody(records) });
+        expect(name).toBe('bulk');
+        expect(params).toEqual({ body: recordsToBulkBody(records) });
         return {
           body: {
             ok: true,
@@ -80,16 +79,16 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     ]);
 
     client.assertNoPendingResponses();
-    expect(progress.getComplete()).to.be(1);
-    expect(progress.getTotal()).to.be(undefined);
+    expect(progress.getComplete()).toBe(1);
+    expect(progress.getTotal()).toBe(undefined);
   });
 
   it('consumes multiple doc records and sends to `_bulk` api together', async () => {
     const records = createPersonDocRecords(10);
     const client = createStubClient([
       async (name, params) => {
-        expect(name).to.be('bulk');
-        expect(params).to.eql({ body: recordsToBulkBody(records.slice(0, 1)) });
+        expect(name).toBe('bulk');
+        expect(params).toEqual({ body: recordsToBulkBody(records.slice(0, 1)) });
         return {
           body: {
             ok: true,
@@ -97,8 +96,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
         };
       },
       async (name, params) => {
-        expect(name).to.be('bulk');
-        expect(params).to.eql({ body: recordsToBulkBody(records.slice(1)) });
+        expect(name).toBe('bulk');
+        expect(params).toEqual({ body: recordsToBulkBody(records.slice(1)) });
         return {
           body: {
             ok: true,
@@ -115,8 +114,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     ]);
 
     client.assertNoPendingResponses();
-    expect(progress.getComplete()).to.be(10);
-    expect(progress.getTotal()).to.be(undefined);
+    expect(progress.getComplete()).toBe(10);
+    expect(progress.getTotal()).toBe(undefined);
   });
 
   it('waits until request is complete before sending more', async () => {
@@ -126,8 +125,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     const delayMs = 1234;
     const client = createStubClient([
       async (name, params) => {
-        expect(name).to.be('bulk');
-        expect(params).to.eql({ body: recordsToBulkBody(records.slice(0, 1)) });
+        expect(name).toBe('bulk');
+        expect(params).toEqual({ body: recordsToBulkBody(records.slice(0, 1)) });
         await delay(delayMs);
         return {
           body: {
@@ -136,9 +135,9 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
         };
       },
       async (name, params) => {
-        expect(name).to.be('bulk');
-        expect(params).to.eql({ body: recordsToBulkBody(records.slice(1)) });
-        expect(Date.now() - start).to.not.be.lessThan(delayMs);
+        expect(name).toBe('bulk');
+        expect(params).toEqual({ body: recordsToBulkBody(records.slice(1)) });
+        expect(Date.now() - start).not.toBeLessThan(delayMs);
         return {
           body: {
             ok: true,
@@ -154,8 +153,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     ]);
 
     client.assertNoPendingResponses();
-    expect(progress.getComplete()).to.be(10);
-    expect(progress.getTotal()).to.be(undefined);
+    expect(progress.getComplete()).toBe(10);
+    expect(progress.getTotal()).toBe(undefined);
   });
 
   it('sends a maximum of 300 documents at a time', async () => {
@@ -163,8 +162,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     const stats = createStubStats();
     const client = createStubClient([
       async (name, params) => {
-        expect(name).to.be('bulk');
-        expect(params.body.length).to.eql(1 * 2);
+        expect(name).toBe('bulk');
+        expect(params.body.length).toEqual(1 * 2);
         return {
           body: {
             ok: true,
@@ -172,8 +171,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
         };
       },
       async (name, params) => {
-        expect(name).to.be('bulk');
-        expect(params.body.length).to.eql(299 * 2);
+        expect(name).toBe('bulk');
+        expect(params.body.length).toEqual(299 * 2);
         return {
           body: {
             ok: true,
@@ -181,8 +180,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
         };
       },
       async (name, params) => {
-        expect(name).to.be('bulk');
-        expect(params.body.length).to.eql(1 * 2);
+        expect(name).toBe('bulk');
+        expect(params.body.length).toEqual(1 * 2);
         return {
           body: {
             ok: true,
@@ -198,8 +197,8 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
     ]);
 
     client.assertNoPendingResponses();
-    expect(progress.getComplete()).to.be(301);
-    expect(progress.getTotal()).to.be(undefined);
+    expect(progress.getComplete()).toBe(301);
+    expect(progress.getTotal()).toBe(undefined);
   });
 
   it('emits an error if any request fails', async () => {
@@ -219,11 +218,11 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
       throw new Error('expected stream to emit error');
     } catch (err) {
       const { message } = err as Error;
-      expect(message).to.match(/"forcedError":\s*true/);
+      expect(message).toMatch(/"forcedError":\s*true/);
     }
 
     client.assertNoPendingResponses();
-    expect(progress.getComplete()).to.be(1);
-    expect(progress.getTotal()).to.be(undefined);
+    expect(progress.getComplete()).toBe(1);
+    expect(progress.getTotal()).toBe(undefined);
   });
 });

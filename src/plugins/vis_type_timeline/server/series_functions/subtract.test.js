@@ -31,7 +31,6 @@
 import fn from './subtract';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('subtract.js', () => {
@@ -46,14 +45,14 @@ describe('subtract.js', () => {
       await invoke(fn, [notSeriesList]);
       expect.fail();
     } catch (e) {
-      expect(e.message).to.eql('input must be a seriesList');
+      expect(e.message).toEqual('input must be a seriesList');
     }
   });
 
   it('it subtracts all series in seriesList to single series when only one argument is supplied', async () => {
     const outputSeries = await invoke(fn, [seriesList]);
-    expect(outputSeries.output.list.length).to.eql(1);
-    expect(_.map(outputSeries.output.list[0].data, 1)).to.eql([
+    expect(outputSeries.output.list.length).toEqual(1);
+    expect(_.map(outputSeries.output.list[0].data, 1)).toEqual([
       -165.1415926535,
       -136,
       19.561,
@@ -63,12 +62,12 @@ describe('subtract.js', () => {
 
   it('it subtracts a number', async () => {
     const outputSeries = await invoke(fn, [seriesList, 2]);
-    expect(_.map(outputSeries.output.list[1].data, 1)).to.eql([98, 48, 48, 18]);
+    expect(_.map(outputSeries.output.list[1].data, 1)).toEqual([98, 48, 48, 18]);
   });
 
   it('it subtracts an array of numbers', async () => {
     const outputSeries = await invoke(fn, [seriesList, [5, 10, 15]]);
-    expect(_.map(outputSeries.output.list[1].data, 1)).to.eql([70, 20, 20, -10]);
+    expect(_.map(outputSeries.output.list[1].data, 1)).toEqual([70, 20, 20, -10]);
   });
 
   it('it subtracts a seriesList with one series', async () => {
@@ -77,15 +76,15 @@ describe('subtract.js', () => {
       list: [_.cloneDeep(seriesList.list[1])],
     };
     const outputSeries = await invoke(fn, [seriesList, seriesListWithOneSeries]);
-    expect(_.map(outputSeries.output.list[1].data, 1)).to.eql([0, 0, 0, 0]);
+    expect(_.map(outputSeries.output.list[1].data, 1)).toEqual([0, 0, 0, 0]);
   });
 
   it('it subtracts a seriesList with multiple series', async () => {
     const outputSeries = await invoke(fn, [seriesList, seriesList]);
-    expect(_.map(outputSeries.output.list[0].data, 1)).to.eql([0, 0, 0, 0]);
-    expect(_.map(outputSeries.output.list[1].data, 1)).to.eql([0, 0, 0, 0]);
-    expect(_.map(outputSeries.output.list[2].data, 1)).to.eql([0, 0, 0, 0]);
-    expect(_.map(outputSeries.output.list[3].data, 1)).to.eql([0, 0, 0, 0]);
-    expect(_.map(outputSeries.output.list[4].data, 1)).to.eql([0, 0, 0, 0]);
+    expect(_.map(outputSeries.output.list[0].data, 1)).toEqual([0, 0, 0, 0]);
+    expect(_.map(outputSeries.output.list[1].data, 1)).toEqual([0, 0, 0, 0]);
+    expect(_.map(outputSeries.output.list[2].data, 1)).toEqual([0, 0, 0, 0]);
+    expect(_.map(outputSeries.output.list[3].data, 1)).toEqual([0, 0, 0, 0]);
+    expect(_.map(outputSeries.output.list[4].data, 1)).toEqual([0, 0, 0, 0]);
   });
 });

@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
-
 import { ToolingLog } from '@osd/dev-utils';
 import { readConfigFile } from './read_config_file';
 import { Config } from './config';
@@ -39,8 +37,8 @@ const log = new ToolingLog();
 describe('readConfigFile()', () => {
   it('reads config from a file, returns an instance of Config class', async () => {
     const config = await readConfigFile(log, require.resolve('./fixtures/config.1'));
-    expect(config).to.be.a(Config);
-    expect(config.get('testFiles')).to.eql(['config.1']);
+    expect(config).toBeInstanceOf(Config);
+    expect(config.get('testFiles')).toEqual(['config.1']);
   });
 
   it('merges setting overrides into log', async () => {
@@ -50,12 +48,12 @@ describe('readConfigFile()', () => {
       },
     });
 
-    expect(config.get('screenshots.directory')).to.be('foo.bar');
+    expect(config.get('screenshots.directory')).toBe('foo.bar');
   });
 
   it('supports loading config files from within config files', async () => {
     const config = await readConfigFile(log, require.resolve('./fixtures/config.2'));
-    expect(config.get('testFiles')).to.eql(['config.1', 'config.2']);
+    expect(config.get('testFiles')).toEqual(['config.1', 'config.2']);
   });
 
   it('throws if settings are invalid', async () => {
@@ -64,7 +62,7 @@ describe('readConfigFile()', () => {
       throw new Error('expected readConfigFile() to fail');
     } catch (err) {
       const { message } = err as Error;
-      expect(message).to.match(/"foo"/);
+      expect(message).toMatch(/"foo"/);
     }
   });
 });

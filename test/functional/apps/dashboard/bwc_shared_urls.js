@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
-        expect(query).to.equal('memory:>220000');
+        expect(query).toEqual('memory:>220000');
 
         await pieChart.expectPieSliceCount(0);
         await dashboardExpect.panelCount(2);
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
-        expect(query).to.equal('memory:>220000');
+        expect(query).toEqual('memory:>220000');
 
         await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
-        expect(query).to.equal('memory:>220000');
+        expect(query).toEqual('memory:>220000');
 
         await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         const newId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
-        expect(newId).to.be.equal(oldId);
+        expect(newId).toEqual(oldId);
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#000000', 5);
       });

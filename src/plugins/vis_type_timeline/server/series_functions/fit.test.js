@@ -30,7 +30,6 @@
 
 const fn = require(`src/plugins/vis_type_timeline/server/series_functions/fit`);
 import moment from 'moment';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 import getSeriesList from './helpers/get_single_series_list';
 import _ from 'lodash';
@@ -46,9 +45,9 @@ describe('fit.js', function () {
       ]);
 
       return invoke(fn, [seriesList, 'carry']).then(function (r) {
-        expect(r.input[0].list[0].data[1][1]).to.equal(null);
-        expect(_.map(r.output.list[0].data, 1)).to.eql([0, 0, 0, 0]);
-        expect(r.output.list[0].data[1][0]).to.not.equal(r.output.list[0].data[0][0]);
+        expect(r.input[0].list[0].data[1][1]).toEqual(null);
+        expect(_.map(r.output.list[0].data, 1)).toEqual([0, 0, 0, 0]);
+        expect(r.output.list[0].data[1][0]).not.toEqual(r.output.list[0].data[0][0]);
       });
     });
 
@@ -62,7 +61,7 @@ describe('fit.js', function () {
       ]);
 
       return invoke(fn, [seriesList, 'carry']).then(function (r) {
-        expect(_.map(r.output.list[0].data, 1)).to.eql([26, 42, 0, 0, 1]);
+        expect(_.map(r.output.list[0].data, 1)).toEqual([26, 42, 0, 0, 1]);
       });
     });
   });
@@ -76,7 +75,7 @@ describe('fit.js', function () {
     ]);
 
     return invoke(fn, [seriesList, 'carry']).then(function (r) {
-      expect(_.map(r.output.list[0].data, 1)).to.eql([null, null, null, null]);
+      expect(_.map(r.output.list[0].data, 1)).toEqual([null, null, null, null]);
     });
   });
 
@@ -90,9 +89,9 @@ describe('fit.js', function () {
       ]);
 
       return invoke(fn, [seriesList, 'carry']).then(function (r) {
-        expect(r.input[0].list[0].data[1][1]).to.equal(null);
-        expect(_.map(r.output.list[0].data, 1)).to.eql([5, 5, 3.4, 171]);
-        expect(r.output.list[0].data[1][0]).to.not.equal(r.output.list[0].data[0][0]);
+        expect(r.input[0].list[0].data[1][1]).toEqual(null);
+        expect(_.map(r.output.list[0].data, 1)).toEqual([5, 5, 3.4, 171]);
+        expect(r.output.list[0].data[1][0]).not.toEqual(r.output.list[0].data[0][0]);
       });
     });
   });
@@ -107,9 +106,9 @@ describe('fit.js', function () {
       ]);
 
       return invoke(fn, [seriesList, 'nearest']).then(function (r) {
-        expect(r.input[0].list[0].data[1][1]).to.equal(null);
-        expect(_.map(r.output.list[0].data, 1)).to.eql([5, 3.4, 3.4, 171]);
-        expect(r.output.list[0].data[1][0]).to.not.equal(r.output.list[0].data[0][0]);
+        expect(r.input[0].list[0].data[1][1]).toEqual(null);
+        expect(_.map(r.output.list[0].data, 1)).toEqual([5, 3.4, 3.4, 171]);
+        expect(r.output.list[0].data[1][0]).not.toEqual(r.output.list[0].data[0][0]);
       });
     });
   });
@@ -125,8 +124,8 @@ describe('fit.js', function () {
       ]);
 
       return invoke(fn, [seriesList, 'average']).then(function (r) {
-        expect(r.input[0].list[0].data[1][1]).to.eql(null);
-        expect(_.map(r.output.list[0].data, 1)).to.eql([10, 20, 30, 40, 50]);
+        expect(r.input[0].list[0].data[1][1]).toEqual(null);
+        expect(_.map(r.output.list[0].data, 1)).toEqual([10, 20, 30, 40, 50]);
       });
     });
   });
@@ -142,7 +141,7 @@ describe('fit.js', function () {
       ]);
 
       return invoke(fn, [seriesList, 'scale']).then(function (r) {
-        expect(_.map(r.output.list[0].data, 1)).to.eql([10, 20, 20, 20, 50]);
+        expect(_.map(r.output.list[0].data, 1)).toEqual([10, 20, 20, 20, 50]);
       });
     });
   });
@@ -158,7 +157,7 @@ describe('fit.js', function () {
       ]);
 
       return invoke(fn, [seriesList, 'none']).then(function (r) {
-        expect(_.map(r.output.list[0].data, 1)).to.eql([10, 40, 50]);
+        expect(_.map(r.output.list[0].data, 1)).toEqual([10, 40, 50]);
       });
     });
   });

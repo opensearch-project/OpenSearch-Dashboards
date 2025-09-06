@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -62,17 +62,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const postPanelTitles = await PageObjects.dashboard.getPanelTitles();
-      expect(postPanelTitles.length).to.equal(initialPanelTitles.length + 1);
+      expect(postPanelTitles.length).toEqual(initialPanelTitles.length + 1);
     });
 
     it('appends a clone title tag', async () => {
       const panelTitles = await PageObjects.dashboard.getPanelTitles();
-      expect(panelTitles[1]).to.equal(PIE_CHART_VIS_NAME + ' (copy)');
+      expect(panelTitles[1]).toEqual(PIE_CHART_VIS_NAME + ' (copy)');
     });
 
     it('retains original panel dimensions', async () => {
       const panelDimensions = await PageObjects.dashboard.getPanelDimensions();
-      expect(panelDimensions[0]).to.eql(panelDimensions[1]);
+      expect(panelDimensions[0]).toEqual(panelDimensions[1]);
     });
 
     it('gives a correct title to the clone of a clone', async () => {
@@ -82,10 +82,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const postPanelTitles = await PageObjects.dashboard.getPanelTitles();
-      expect(postPanelTitles.length).to.equal(initialPanelTitles.length + 1);
-      expect(postPanelTitles[postPanelTitles.length - 1]).to.equal(
-        PIE_CHART_VIS_NAME + ' (copy 1)'
-      );
+      expect(postPanelTitles.length).toEqual(initialPanelTitles.length + 1);
+      expect(postPanelTitles[postPanelTitles.length - 1]).toEqual(PIE_CHART_VIS_NAME + ' (copy 1)');
     });
   });
 }

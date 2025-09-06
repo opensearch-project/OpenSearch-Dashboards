@@ -29,26 +29,25 @@
  */
 
 import { formatMsg } from './format_msg';
-import expect from '@osd/expect';
 
 describe('formatMsg', () => {
   test('should prepend the second argument to result', () => {
     const actual = formatMsg('error message', 'unit_test');
 
-    expect(actual).to.equal('unit_test: error message');
+    expect(actual).toEqual('unit_test: error message');
   });
 
   test('should handle a simple string', () => {
     const actual = formatMsg('error message');
 
-    expect(actual).to.equal('error message');
+    expect(actual).toEqual('error message');
   });
 
   test('should handle a simple Error object', () => {
     const err = new Error('error message');
     const actual = formatMsg(err);
 
-    expect(actual).to.equal('error message');
+    expect(actual).toEqual('error message');
   });
 
   test('should handle a simple Angular $http error object', () => {
@@ -65,7 +64,7 @@ describe('formatMsg', () => {
     };
     const actual = formatMsg(err);
 
-    expect(actual).to.equal(
+    expect(actual).toEqual(
       'Error 403 Forbidden: [security_exception] action [indices:data/read/msearch] is unauthorized for user [user]'
     );
   });
@@ -85,6 +84,6 @@ describe('formatMsg', () => {
 
     const actual = formatMsg(err);
 
-    expect(actual).to.equal('I am the detailed message');
+    expect(actual).toEqual('I am the detailed message');
   });
 });

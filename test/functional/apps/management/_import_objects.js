@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import path from 'path';
 import { keyBy } from 'lodash';
 
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.clickImportDone();
 
         log.debug("check that 'Log Agents' is in table as a visualization");
-        expect(await PageObjects.savedObjects.getObjectTypeByTitle('Log Agents')).to.eql(
+        expect(await PageObjects.savedObjects.getObjectTypeByTitle('Log Agents')).toEqual(
           'visualization'
         );
 
@@ -73,9 +73,9 @@ export default function ({ getService, getPageObjects }) {
         log.debug(
           "check that 'Shared-Item Visualization AreaChart' shows 'logstash-*' as it's Parent"
         );
-        expect(flyout['Shared-Item Visualization AreaChart'].relationship).to.eql('Parent');
+        expect(flyout['Shared-Item Visualization AreaChart'].relationship).toEqual('Parent');
         log.debug("check that 'Log Agents' shows 'logstash-*' as it's Parent");
-        expect(flyout['Log Agents'].relationship).to.eql('Parent');
+        expect(flyout['Log Agents'].relationship).toEqual('Parent');
       });
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.clickImportDone();
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object with index pattern conflict');
-        expect(isSavedObjectImported).to.be(true);
+        expect(isSavedObjectImported).toBe(true);
       });
 
       it('should allow the user to override duplicate saved objects', async function () {
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.clickConfirmOnModal();
 
         const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
-        expect(isSuccessful).to.be(true);
+        expect(isSuccessful).toBe(true);
       });
 
       it('should allow the user to cancel overriding duplicate saved objects', async function () {
@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.clickCancelOnModal();
 
         const isSuccessful = await testSubjects.exists('importSavedObjectsSuccessNoneImported');
-        expect(isSuccessful).to.be(true);
+        expect(isSuccessful).toBe(true);
       });
 
       it('should import saved objects linked to saved searches', async function () {
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
-        expect(isSavedObjectImported).to.be(true);
+        expect(isSavedObjectImported).toBe(true);
       });
 
       it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
-        expect(isSavedObjectImported).to.be(false);
+        expect(isSavedObjectImported).toBe(false);
       });
 
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
@@ -177,7 +177,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
-        expect(isSavedObjectImported).to.be(false);
+        expect(isSavedObjectImported).toBe(false);
       });
 
       it('should import saved objects with index patterns when index patterns already exists', async () => {
@@ -190,7 +190,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');
-        expect(isSavedObjectImported).to.be(true);
+        expect(isSavedObjectImported).toBe(true);
       });
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');
-        expect(isSavedObjectImported).to.be(true);
+        expect(isSavedObjectImported).toBe(true);
       });
     });
 
@@ -234,7 +234,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.clickImportDone();
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('Log Agents');
-        expect(isSavedObjectImported).to.be(true);
+        expect(isSavedObjectImported).toBe(true);
       });
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
@@ -254,7 +254,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.clickImportDone();
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object with index pattern conflict');
-        expect(isSavedObjectImported).to.be(true);
+        expect(isSavedObjectImported).toBe(true);
       });
 
       it('should allow the user to override duplicate saved objects', async function () {
@@ -275,7 +275,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.clickConfirmOnModal();
 
         const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
-        expect(isSuccessful).to.be(true);
+        expect(isSuccessful).toBe(true);
       });
 
       it('should allow the user to cancel overriding duplicate saved objects', async function () {
@@ -296,7 +296,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.clickCancelOnModal();
 
         const isSuccessful = await testSubjects.exists('importSavedObjectsSuccessNoneImported');
-        expect(isSuccessful).to.be(true);
+        expect(isSuccessful).toBe(true);
       });
 
       it('should allow the user to confirm overriding multiple duplicate saved objects', async function () {
@@ -324,7 +324,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.clickConfirmOnModal(false);
 
         const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
-        expect(isSuccessful).to.be(true);
+        expect(isSuccessful).toBe(true);
       });
 
       it('should allow the user to confirm overriding multiple duplicate index patterns', async function () {
@@ -346,7 +346,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.clickConfirmOnModal(false);
 
         const isSuccessful = await testSubjects.exists('importSavedObjectsSuccess');
-        expect(isSuccessful).to.be(true);
+        expect(isSuccessful).toBe(true);
       });
 
       it('should import saved objects linked to saved searches', async function () {
@@ -368,7 +368,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
-        expect(isSavedObjectImported).to.be(true);
+        expect(isSavedObjectImported).toBe(true);
       });
 
       it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
@@ -382,7 +382,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
-        expect(isSavedObjectImported).to.be(false);
+        expect(isSavedObjectImported).toBe(false);
       });
 
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
@@ -413,7 +413,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
-        expect(isSavedObjectImported).to.be(false);
+        expect(isSavedObjectImported).toBe(false);
       });
 
       it('should import saved objects with index patterns when index patterns already exists', async () => {
@@ -427,7 +427,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');
-        expect(isSavedObjectImported).to.be(true);
+        expect(isSavedObjectImported).toBe(true);
       });
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
@@ -446,7 +446,7 @@ export default function ({ getService, getPageObjects }) {
 
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');
-        expect(isSavedObjectImported).to.be(true);
+        expect(isSavedObjectImported).toBe(true);
       });
 
       it('should display an explicit error message when importing object from a higher OpenSearch Dashboards version', async () => {
@@ -458,7 +458,7 @@ export default function ({ getService, getPageObjects }) {
 
         const errorText = await PageObjects.savedObjects.getImportErrorText();
 
-        expect(errorText).to.contain(
+        expect(errorText).toContain(
           `has property "visualization" which belongs to a more recent version of OpenSearch Dashboards [9.15.82]`
         );
       });
@@ -475,7 +475,7 @@ export default function ({ getService, getPageObjects }) {
 
           const errorText = await PageObjects.savedObjects.getImportErrorText();
 
-          expect(errorText).to.contain(`Payload content length greater than maximum allowed`);
+          expect(errorText).toContain(`Payload content length greater than maximum allowed`);
         });
       });
 
@@ -488,7 +488,7 @@ export default function ({ getService, getPageObjects }) {
 
         const errorText = await PageObjects.savedObjects.getImportErrorText();
 
-        expect(errorText).to.contain(`Unexpected token`);
+        expect(errorText).toContain(`Unexpected token`);
       });
     });
   });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export async function getIndexNotFoundError(opensearch) {
   try {
@@ -36,7 +36,7 @@ export async function getIndexNotFoundError(opensearch) {
       index: 'SHOULD NOT EXIST',
     });
   } catch (err) {
-    expect(err).to.have.property('status', 404); // sanity check
+    expect(err).toHaveProperty('status', 404); // sanity check
     return err;
   }
 
@@ -51,7 +51,7 @@ export async function getDocNotFoundError(opensearch) {
       id: '1234',
     });
   } catch (err) {
-    expect(err).to.have.property('status', 404); // sanity check
+    expect(err).toHaveProperty('status', 404); // sanity check
     return err;
   }
 

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -39,7 +39,7 @@ export default function ({ getService }) {
         .get('/')
         .set('cookie', 'test:80=value;test_80=value')
         .then((response) => {
-          expect(response.text).not.to.contain('Invalid cookie header');
+          expect(response.text).not.toContain('Invalid cookie header');
         }));
 
     it(`returns an error if the cookie can't be parsed`, () =>
@@ -48,7 +48,7 @@ export default function ({ getService }) {
         .set('cookie', 'a')
         .expect(400)
         .then((response) => {
-          expect(response.text).to.contain('Invalid cookie header');
+          expect(response.text).toContain('Invalid cookie header');
         }));
   });
 }

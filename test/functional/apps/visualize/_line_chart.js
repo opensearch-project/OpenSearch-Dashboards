@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
         );
         expect(
           Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance
-        ).to.be.ok();
+        ).toBeTruthy();
       }
       log.debug('Done');
     });
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
           );
           expect(
             Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance
-          ).to.be.ok();
+          ).toBeTruthy();
         }
         log.debug('Done');
       });
@@ -175,7 +175,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.pauseAutoRefresh();
 
       // if autorefresh is working, timestamps should be different
-      expect(requestTimestampBefore).not.to.equal(requestTimestampAfter);
+      expect(requestTimestampBefore).not.toEqual(requestTimestampAfter);
     });
 
     it('should be able to save and load', async function () {
@@ -199,9 +199,9 @@ export default function ({ getService, getPageObjects }) {
         const minLabel = 2;
         const maxLabel = 5000;
         const numberOfLabels = 10;
-        expect(labels.length).to.be.greaterThan(numberOfLabels);
-        expect(labels[0]).to.eql(minLabel);
-        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
+        expect(labels.length).toBeGreaterThan(numberOfLabels);
+        expect(labels[0]).toEqual(minLabel);
+        expect(labels[labels.length - 1]).toBeGreaterThan(maxLabel);
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
@@ -211,9 +211,9 @@ export default function ({ getService, getPageObjects }) {
         const minLabel = 2;
         const maxLabel = 5000;
         const numberOfLabels = 10;
-        expect(labels.length).to.be.greaterThan(numberOfLabels);
-        expect(labels[0]).to.eql(minLabel);
-        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
+        expect(labels.length).toBeGreaterThan(numberOfLabels);
+        expect(labels[0]).toEqual(minLabel);
+        expect(labels[labels.length - 1]).toBeGreaterThan(maxLabel);
       });
 
       it('should show ticks on selecting square root scale', async () => {
@@ -222,7 +222,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
 
       it('should show filtered ticks on selecting square root scale', async () => {
@@ -230,7 +230,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
 
       it('should show ticks on selecting linear scale', async () => {
@@ -240,7 +240,7 @@ export default function ({ getService, getPageObjects }) {
         const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
         const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
 
       it('should show filtered ticks on selecting linear scale', async () => {
@@ -248,7 +248,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
     });
 
@@ -277,7 +277,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visEditor.selectAggregation('Date Histogram');
           await PageObjects.visEditor.clickGo();
           const title = await PageObjects.visChart.getYAxisTitle();
-          expect(title).to.be('Serial Diff of Count');
+          expect(title).toBe('Serial Diff of Count');
         });
 
         it('should change y-axis label to custom', async () => {
@@ -285,7 +285,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visEditor.setCustomLabel('Custom', 1);
           await PageObjects.visEditor.clickGo();
           const title = await PageObjects.visChart.getYAxisTitle();
-          expect(title).to.be('Custom');
+          expect(title).toBe('Custom');
         });
 
         it('should have advanced accordion and json input', async () => {
@@ -300,7 +300,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
           await PageObjects.visEditor.clickGo();
           const title = await PageObjects.visChart.getYAxisTitle();
-          expect(title).to.be('Overall Average of Count');
+          expect(title).toBe('Overall Average of Count');
         });
 
         it('should change sub metric custom label and calculate y-axis title', async () => {
@@ -308,7 +308,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visEditor.setCustomLabel('Cats', '1-metric');
           await PageObjects.visEditor.clickGo();
           const title = await PageObjects.visChart.getYAxisTitle();
-          expect(title).to.be('Overall Average of Cats');
+          expect(title).toBe('Overall Average of Cats');
         });
 
         it('should outer custom label', async () => {
@@ -316,7 +316,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visEditor.setCustomLabel('Custom', 1);
           await PageObjects.visEditor.clickGo();
           const title = await PageObjects.visChart.getYAxisTitle();
-          expect(title).to.be('Custom');
+          expect(title).toBe('Custom');
         });
 
         it('should have advanced accordion and json input', async () => {

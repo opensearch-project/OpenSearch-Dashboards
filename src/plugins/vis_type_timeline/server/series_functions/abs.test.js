@@ -31,7 +31,6 @@
 import fn from './abs';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 const seriesList = require('./fixtures/series_list.js')();
 import invoke from './helpers/invoke_series_fn.js';
 
@@ -46,9 +45,9 @@ describe('abs.js', function () {
         return point[1] < 0;
       });
 
-      expect(before.length > 0).to.eql(true);
-      expect(result.output.list[0].data.length > 0).to.eql(true);
-      expect(after.length).to.eql(0);
+      expect(before.length > 0).toEqual(true);
+      expect(result.output.list[0].data.length > 0).toEqual(true);
+      expect(after.length).toEqual(0);
     });
   });
 });
