@@ -301,6 +301,7 @@ cy.explore.add(
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
     cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    cy.osd.waitForSync();
   }
 );
 
@@ -333,6 +334,7 @@ cy.explore.add('deleteSavedQuery', (name) => {
     .click();
 
   cy.getElementByTestId('confirmModalConfirmButton').click();
+  cy.osd.waitForSync();
 });
 
 cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
@@ -443,7 +445,7 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
   }).as('agentConfigRequest');
 
   cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-  cy.get(`[title="${indexPattern}"]`).should('be.visible').click();
+  cy.getElementByTestId(`datasetSelectOption-${indexPattern}`).should('be.visible').click();
 
   // verify that it has been selected
   cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);

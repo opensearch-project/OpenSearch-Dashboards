@@ -34,6 +34,15 @@ export const INDEX_PATTERN_WITH_TIME_1 = 'data_logs_small_time_1*';
 export const INDEX_PATTERN_WITH_NO_TIME_1 = 'data_logs_small_no_time_1*';
 export const INVALID_INDEX = 'index_that_does_not_exist';
 
+export const RESOURCES = {
+  DATASETS: {
+    OTEL_V1_APM_SPAN: {
+      title: 'otel-v1-apm-span-*',
+      timeFieldName: 'endTime',
+    },
+  },
+};
+
 /**
  * The dataset type in Explore
  * @typedef {('INDEXES'|'INDEX_PATTERN')} ExploreDataset

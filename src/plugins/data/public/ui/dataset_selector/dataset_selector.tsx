@@ -147,7 +147,7 @@ export const DatasetSelector = ({
           checked: id === selectedDatasetId ? 'on' : undefined,
           key: id,
           prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
-          'data-test-subj': `datasetOption-${id}`,
+          'data-test-subj': `datasetSelectorOption-${id}`,
         });
       });
       return datasetOptions.length > 1 ? datasetOptions : [];
