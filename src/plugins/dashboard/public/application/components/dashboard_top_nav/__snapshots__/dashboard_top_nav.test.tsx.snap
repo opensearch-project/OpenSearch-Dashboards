@@ -885,6 +885,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getInjectedVar": [MockFunction],
             },
             "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
               "register": [MockFunction],
               "unregister": [MockFunction],
               "useKeyboardShortcut": [MockFunction],
@@ -2043,6 +2044,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getInjectedVar": [MockFunction],
             },
             "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
               "register": [MockFunction],
               "unregister": [MockFunction],
               "useKeyboardShortcut": [MockFunction],
@@ -3201,6 +3203,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getInjectedVar": [MockFunction],
             },
             "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
               "register": [MockFunction],
               "unregister": [MockFunction],
               "useKeyboardShortcut": [MockFunction],
@@ -4359,6 +4362,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getInjectedVar": [MockFunction],
             },
             "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
               "register": [MockFunction],
               "unregister": [MockFunction],
               "useKeyboardShortcut": [MockFunction],
@@ -5517,6 +5521,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getInjectedVar": [MockFunction],
             },
             "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
               "register": [MockFunction],
               "unregister": [MockFunction],
               "useKeyboardShortcut": [MockFunction],
@@ -6675,6 +6680,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getInjectedVar": [MockFunction],
             },
             "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
               "register": [MockFunction],
               "unregister": [MockFunction],
               "useKeyboardShortcut": [MockFunction],
