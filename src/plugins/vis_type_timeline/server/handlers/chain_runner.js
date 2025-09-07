@@ -180,11 +180,11 @@ export default function chainRunner(tlConfig) {
         const functionDef = tlConfig.getFunction(query.function);
         const resolvedDatasource = resolvedDatasources[i];
 
-        if (resolvedDatasource.isRejected()) {
-          if (resolvedDatasource.reason().isBoom) {
-            throw resolvedDatasource.reason();
+        if (resolvedDatasource.status === 'rejected') {
+          if (resolvedDatasource.reason.isBoom) {
+            throw resolvedDatasource.reason;
           } else {
-            throwWithCell(query.cell, resolvedDatasource.reason());
+            throwWithCell(query.cell, resolvedDatasource.reason);
           }
         }
 
