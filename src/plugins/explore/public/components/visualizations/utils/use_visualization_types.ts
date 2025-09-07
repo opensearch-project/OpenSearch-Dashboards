@@ -16,6 +16,7 @@ import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
 import { UpdateVisualizationProps } from '../visualization_container';
 import { TableChartStyleControls } from '../table/table_vis_config';
+import { GaugeChartStyleControls } from '../gauge/gauge_vis_config';
 
 export type ChartType =
   | 'line'
@@ -25,7 +26,8 @@ export type ChartType =
   | 'scatter'
   | 'bar'
   | 'area'
-  | 'table';
+  | 'table'
+  | 'gauge';
 
 export interface ChartStyleControlMap {
   line: LineChartStyleControls;
@@ -36,6 +38,7 @@ export interface ChartStyleControlMap {
   bar: BarChartStyleControls;
   area: AreaChartStyleControls;
   table: TableChartStyleControls;
+  gauge: GaugeChartStyleControls;
 }
 
 export type StyleOptions = ChartStyleControlMap[ChartType];
@@ -48,7 +51,8 @@ type AllChartStyleControls =
   | HeatmapChartStyleControls
   | ScatterChartStyleControls
   | AreaChartStyleControls
-  | TableChartStyleControls;
+  | TableChartStyleControls
+  | GaugeChartStyleControls;
 
 export interface StyleControlsProps<T extends AllChartStyleControls> {
   styleOptions: T;

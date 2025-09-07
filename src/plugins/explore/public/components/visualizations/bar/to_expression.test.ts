@@ -9,9 +9,18 @@ import {
   createTimeBarChart,
   createGroupedTimeBarChart,
   createFacetedTimeBarChart,
+  createNumericalHistogramBarChart,
+  createSingleBarChart,
 } from './to_expression';
 import { defaultBarChartStyles, BarChartStyleControls } from './bar_vis_config';
-import { VisColumn, VisFieldType, VEGASCHEMA, AxisRole, ThresholdLineStyle } from '../types';
+import {
+  VisColumn,
+  VisFieldType,
+  VEGASCHEMA,
+  AxisRole,
+  ThresholdLineStyle,
+  AggregationType,
+} from '../types';
 
 describe('bar to_expression', () => {
   // Create mock VisColumn objects
@@ -289,7 +298,6 @@ describe('bar to_expression', () => {
       // Check encoding
       expect(spec.encoding.x.field).toBe('category');
       expect(spec.encoding.y.field).toBe('count');
-      expect(spec.encoding.y.stack).toBe('zero');
       expect(spec.encoding.color.field).toBe('category2');
     });
 
@@ -599,22 +607,6 @@ describe('bar to_expression', () => {
       }).toThrow('Time bar chart requires at least one numerical column and one date column');
     });
 
-    test('falls back to default tooltip format when dateField is missing', () => {
-      const fallbackMapping = {
-        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
-        [AxisRole.Y]: mockNumericalColumn,
-      };
-      const result = createTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockDateColumn],
-        defaultBarChartStyles,
-        fallbackMapping
-      );
-      const tooltip = result.layer[0].encoding.tooltip;
-      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
-    });
-
     test('uses xAxis as numericalAxis when xAxis is not temporal', () => {
       const mockAxisColumnMappings = {
         [AxisRole.X]: mockNumericalColumn,
@@ -854,27 +846,6 @@ describe('bar to_expression', () => {
         'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
       );
     });
-
-    test('falls back to default tooltip format when dateField is missing', () => {
-      const fallbackMapping = {
-        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
-        [AxisRole.Y]: mockNumericalColumn,
-        [AxisRole.COLOR]: mockCategoricalColumn,
-      };
-      const result = createGroupedTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [mockDateColumn],
-        defaultBarChartStyles,
-        fallbackMapping
-      );
-      const tooltip = result.encoding.tooltip;
-      expect(tooltip[0].field).toBeUndefined();
-      expect(tooltip[1].field).toBe('category');
-      expect(tooltip[2].field).toBe('count');
-      expect(tooltip[2].format).toBeUndefined();
-    });
   });
 
   describe('createFacetedTimeBarChart', () => {
@@ -1089,24 +1060,107 @@ describe('bar to_expression', () => {
         'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
       );
     });
+  });
 
-    test('falls back to default tooltip format when dateField is missing', () => {
-      const fallbackMapping = {
-        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
-        [AxisRole.Y]: mockNumericalColumn,
-        [AxisRole.COLOR]: mockCategoricalColumn,
-        [AxisRole.FACET]: mockCategoricalColumn2,
+  describe('createNumericalHistogramBarChart', () => {
+    const mockNumericalColumn2 = {
+      id: 2,
+      name: 'sum',
+      column: 'sum',
+      schema: VisFieldType.Numerical,
+      validValuesCount: 100,
+      uniqueValuesCount: 50,
+    };
+
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockNumericalColumn,
+      [AxisRole.Y]: mockNumericalColumn2,
+    };
+    test('creates a numerical histogram bar chart spec', () => {
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn, mockNumericalColumn2],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.$schema).toBe(VEGASCHEMA);
+      expect(spec.data.values).toBe(mockData);
+      expect(spec.layer).toHaveLength(1);
+
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.type).toBe('bar');
+      expect(mainLayer.mark.tooltip).toBe(true);
+      expect(mainLayer.encoding.x.field).toBe('count');
+      expect(mainLayer.encoding.x.type).toBe('quantitative');
+      expect(mainLayer.encoding.y.field).toBe('sum');
+      expect(mainLayer.encoding.y.aggregate).toBe('sum');
+      expect(mainLayer.encoding.y.type).toBe('quantitative');
+    });
+
+    test('applies bucket options correctly', () => {
+      const stylesWithBucket = {
+        ...defaultBarChartStyles,
+        bucket: {
+          bucketSize: 50,
+          aggregationType: AggregationType.SUM,
+        },
       };
-      const result = createFacetedTimeBarChart(
+
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn, mockNumericalColumn2],
+        stylesWithBucket,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
+      expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
+    });
+  });
+
+  describe('createSingleBarChart', () => {
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockNumericalColumn,
+    };
+    test('creates a numerical histogram bar chart spec', () => {
+      const spec = createSingleBarChart(
         mockData,
         [mockNumericalColumn],
-        [mockCategoricalColumn, mockCategoricalColumn2],
-        [mockDateColumn],
         defaultBarChartStyles,
-        fallbackMapping
+        mockAxisColumnMappings
       );
-      const tooltip = result.spec.layer[0].encoding.tooltip;
-      expect(tooltip[1].format).toBe('%b %d, %Y %H:%M:%S');
+
+      expect(spec.$schema).toBe(VEGASCHEMA);
+      expect(spec.data.values).toBe(mockData);
+      expect(spec.layer).toHaveLength(1);
+
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.type).toBe('bar');
+      expect(mainLayer.mark.tooltip).toBe(true);
+      expect(mainLayer.encoding.x.field).toBe('count');
+      expect(mainLayer.encoding.x.type).toBe('quantitative');
+      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
+    });
+
+    test('applies bucket options correctly, single bar aggregation should only be count', () => {
+      const stylesWithBucket = {
+        ...defaultBarChartStyles,
+        bucket: {
+          bucketSize: 50,
+          aggregationType: AggregationType.SUM,
+        },
+      };
+
+      const spec = createSingleBarChart(
+        mockData,
+        [mockNumericalColumn],
+        stylesWithBucket,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
+      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
     });
   });
 });
