@@ -105,7 +105,7 @@ export function runRoute(
           savedObjectsClient: context.core.savedObjects.client,
         });
         const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Promise.all(chainRunner.processRequest(request.body));
+        const sheet = await Promise.all(await chainRunner.processRequest(request.body));
 
         return response.ok({
           body: {
