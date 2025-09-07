@@ -5,9 +5,11 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
-import { VisColumn } from '../types';
+import { VisColumn, VisFieldType } from '../types';
 import { TableChartStyleControls } from './table_vis_config';
 import { TableColumnHeader } from './table_vis_filter';
+import { getTextColor } from '../utils/utils';
+import { calculateValue, CalculationMethod } from '../utils/calculation';
 
 interface TableVisProps {
   rows: Array<Record<string, any>>;
@@ -21,45 +23,69 @@ interface FilterConfig {
   search?: string;
 }
 
+interface Calc {
+  fields: string[];
+  calculation: CalculationMethod;
+}
+
 export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisProps) => {
   const pageSize = styleOptions?.pageSize ? styleOptions.pageSize : 10;
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ column }) => column));
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
   const [filters, setFilters] = useState<Record<string, FilterConfig>>({});
-  const [popoverOpen, setPopoverOpen] = useState<string | null>(null);
+  const [popoverOpenColumnId, setPopoverOpenColumnId] = useState<string | null>(null);
 
   const columnUniques = useMemo(() => {
     const uniques: Record<string, Set<any>> = {};
     columns.forEach((col) => (uniques[col.column] = new Set()));
     rows.forEach((row) => {
       columns.forEach((col) => {
-        if (row.hasOwnProperty(col.column)) {
+        const value = row[col.column];
+        if (row.hasOwnProperty(col.column) && value != null && value !== '') {
           uniques[col.column].add(row[col.column]);
         }
       });
     });
     return Object.fromEntries(
-      Object.entries(uniques).map(([key, set]) => [key, Array.from(set).sort()])
+      Object.entries(uniques)
+        .map(([key, set]) => [key, Array.from(set).sort()])
+        .filter(([, arr]) => arr.length > 0)
     );
   }, [columns, rows]);
+
+  const columnTypes = useMemo(() => {
+    const types: Record<string, VisFieldType> = {};
+    columns.forEach((col) => {
+      types[col.column] = col.schema;
+    });
+    return types;
+  }, [columns]);
 
   const dataGridColumns: EuiDataGridColumn[] = useMemo(() => {
     return columns.map((col) => ({
       id: col.column,
       displayAsText: col.name,
+      isExpandable: false,
       display: (
         <TableColumnHeader
           col={col}
           showColumnFilter={styleOptions?.showColumnFilter}
-          popoverOpen={popoverOpen === col.column}
-          setPopoverOpen={(open) => setPopoverOpen(open ? col.column : null)}
+          popoverOpen={popoverOpenColumnId === col.column}
+          setPopoverOpen={(open) => setPopoverOpenColumnId(open ? col.column : null)}
           filters={filters}
           setFilters={setFilters}
           uniques={columnUniques[col.column] || []}
         />
       ),
     }));
-  }, [columns, styleOptions?.showColumnFilter, popoverOpen, filters, columnUniques, setFilters]);
+  }, [
+    columns,
+    styleOptions?.showColumnFilter,
+    popoverOpenColumnId,
+    filters,
+    columnUniques,
+    setFilters,
+  ]);
 
   const onChangePage = useCallback((pageIndex) => setPagination((p) => ({ ...p, pageIndex })), [
     setPagination,
@@ -85,15 +111,14 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     const op = config.operator || 'contains';
     const hasValues = Array.isArray(config.values) && config.values.length > 0;
     const hasSearch = typeof config.search === 'string' && config.search.trim() !== '';
-    const strVal = (v: any) => (v == null ? '' : String(v));
-    const sVal = strVal(value);
+    const sVal = value == null ? '' : String(value);
     const sSearch = (config.search || '').trim();
     const toNum = (v: any) => (v == null || v === '' ? NaN : Number(v));
 
     if (op === 'contains') {
-      if (hasSearch) return sVal.toLowerCase().includes(sSearch.toLowerCase());
-      if (hasValues) return config.values.includes(value);
-      return true;
+      const matchSearch = !hasSearch || sVal.toLowerCase().includes(sSearch.toLowerCase());
+      const matchValues = !hasValues || config.values.includes(value);
+      return matchSearch && matchValues;
     }
 
     if (op === '=' || op === '!=') {
@@ -101,9 +126,11 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
         const hit = config.values.includes(value);
         return op === '=' ? hit : !hit;
       }
-      if (!hasSearch) return false;
-      const eq = value === (isNaN(Number(sSearch)) ? sSearch : Number(sSearch));
-      return op === '=' ? eq : !eq;
+      if (hasSearch) {
+        const eq = value === Number(sSearch);
+        return op === '=' ? eq : !eq;
+      }
+      return true;
     }
 
     if (op === '>' || op === '>=' || op === '<' || op === '<=') {
@@ -124,7 +151,7 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
       }
     }
 
-    return false;
+    return true;
   };
 
   const filteredRows = useMemo(() => {
@@ -136,12 +163,32 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     );
   }, [rows, filters]);
 
-  const normalizedFooterCalcs = useMemo(() => {
-    const raw = styleOptions?.footerCalculations || [];
-    return (raw as any[]).map((c) =>
-      'fields' in c ? c : { fields: c.field ? [String(c.field)] : [], calculation: c.calculation }
-    ) as Array<{ fields: string[]; calculation: 'total' | 'last' | 'average' | 'min' | 'max' }>;
-  }, [styleOptions?.footerCalculations]);
+  const availableFieldSet = useMemo(() => new Set(columns.map((c) => c.column)), [columns]);
+  const normalizedFooterCalcs = useMemo<Calc[]>(() => {
+    const raw = styleOptions?.footerCalculations ?? [];
+
+    const processed: Calc[] = (raw as any[]).map(
+      (c): Calc =>
+        'fields' in c
+          ? {
+              fields: (c.fields ?? [])
+                .filter((f: string | number | null | undefined): f is string | number => f != null)
+                .map(String),
+              calculation: c.calculation as CalculationMethod,
+            }
+          : {
+              fields: c.field != null ? [String(c.field)] : [],
+              calculation: c.calculation as CalculationMethod,
+            }
+    );
+
+    return processed
+      .map((c) => ({
+        ...c,
+        fields: c.fields.filter((f) => availableFieldSet.has(f)),
+      }))
+      .filter((c) => c.fields.length > 0);
+  }, [styleOptions?.footerCalculations, availableFieldSet]);
 
   const footerValues = useMemo(() => {
     if (!styleOptions?.showFooter || !normalizedFooterCalcs.length) return undefined;
@@ -159,72 +206,100 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
           return;
         }
 
-        switch (calculation) {
-          case 'total': {
-            const val = values.reduce((sum, v) => sum + v, 0);
-            footer[field] = `Total: ${val}`;
-            break;
-          }
-          case 'average': {
-            const val = values.reduce((sum, v) => sum + v, 0) / values.length;
-            footer[field] = `Average: ${val}`;
-            break;
-          }
-          case 'min': {
-            const val = Math.min(...values);
-            footer[field] = `Min: ${val}`;
-            break;
-          }
-          case 'max': {
-            const val = Math.max(...values);
-            footer[field] = `Max: ${val}`;
-            break;
-          }
-          case 'last': {
-            const val = values[values.length - 1];
-            footer[field] = `Last: ${val}`;
-            break;
-          }
-          default:
-            footer[field] = '-';
+        const result = calculateValue(values, calculation);
+        if (result == null) {
+          footer[field] = '-';
+        } else {
+          const label = calculation.charAt(0).toUpperCase() + calculation.slice(1);
+          footer[field] = `${label}: ${result}`;
         }
       });
     });
     return footer;
   }, [filteredRows, styleOptions?.showFooter, normalizedFooterCalcs]);
 
-  const renderCellValue = useMemo(() => {
-    return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
-      const alignment = styleOptions?.globalAlignment || 'auto';
-      setCellProps?.({ style: { textAlign: alignment === 'auto' ? 'left' : alignment } });
-      return Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
-        ? (filteredRows as any)[rowIndex][columnId]
-        : null;
-    };
-  }, [filteredRows, styleOptions?.globalAlignment]);
+  const getCellColor = (value: any, columnId: string): string | undefined => {
+    if (columnTypes[columnId] !== 'numerical' || !styleOptions?.thresholds) return undefined;
+    const numValue = Number(value);
+    if (isNaN(numValue)) return undefined;
+
+    const thresholds = [...styleOptions.thresholds].sort((a, b) => b.value - a.value);
+    for (const threshold of thresholds) {
+      if (numValue >= threshold.value) {
+        return threshold.color;
+      }
+    }
+    return styleOptions.baseColor || '#000000';
+  };
+
+  const CellValueRenderer: React.FC<EuiDataGridCellValueElementProps> = ({
+    rowIndex,
+    columnId,
+    setCellProps,
+  }) => {
+    const alignment = styleOptions?.globalAlignment || 'auto';
+    const textAlign =
+      alignment === 'auto' ? (columnTypes[columnId] === 'numerical' ? 'right' : 'left') : alignment;
+    const cellValue = Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
+      ? (filteredRows as any)[rowIndex][columnId]
+      : null;
+    const { cellType, thresholds, baseColor } = styleOptions ?? {};
+
+    useEffect(() => {
+      const cellStyle: React.CSSProperties = { textAlign };
+
+      if (cellType !== 'auto') {
+        const color = getCellColor(cellValue, columnId);
+        if (color) {
+          if (cellType === 'colored_text') {
+            cellStyle.color = color;
+          } else if (cellType === 'colored_background') {
+            cellStyle.backgroundColor = color;
+            cellStyle.color = getTextColor(color);
+          }
+        }
+      }
+
+      setCellProps?.({
+        style: cellStyle,
+      });
+    }, [setCellProps, cellValue, columnId, textAlign, cellType, thresholds, baseColor]);
+
+    return cellValue;
+  };
+
+  const renderCellValue = CellValueRenderer;
 
   const renderFooterCellValue = useMemo(() => {
     if (!footerValues) return undefined;
     return ({ columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
       const alignment = styleOptions?.globalAlignment || 'auto';
-      setCellProps?.({ style: { textAlign: alignment === 'auto' ? 'left' : alignment } });
+      const textAlign =
+        alignment === 'auto'
+          ? columnTypes[columnId] === 'numerical'
+            ? 'right'
+            : 'left'
+          : alignment;
+      setCellProps?.({ style: { textAlign } });
       return footerValues[columnId] ?? '-';
     };
-  }, [footerValues, styleOptions?.globalAlignment]);
+  }, [footerValues, styleOptions?.globalAlignment, columnTypes]);
 
   return (
-    <EuiDataGrid
-      aria-label="Table visualization"
-      columns={dataGridColumns}
-      columnVisibility={{ visibleColumns, setVisibleColumns }}
-      rowCount={filteredRows.length}
-      pagination={{ ...pagination, onChangePage, onChangeItemsPerPage, pageSize }}
-      renderCellValue={renderCellValue}
-      renderFooterCellValue={renderFooterCellValue}
-      toolbarVisibility={{ showFullScreenSelector: false }}
-      gridStyle={{ rowHover: 'highlight' }}
-      leadingControlColumns={[]}
-      trailingControlColumns={[]}
-    />
+    <div className="table-visualization">
+      <EuiDataGrid
+        aria-label="Table visualization"
+        columns={dataGridColumns}
+        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        rowCount={filteredRows.length}
+        pagination={{ ...pagination, onChangePage, onChangeItemsPerPage, pageSize }}
+        renderCellValue={renderCellValue}
+        renderFooterCellValue={renderFooterCellValue}
+        toolbarVisibility={{ showFullScreenSelector: false }}
+        gridStyle={{ rowHover: 'highlight' }}
+        leadingControlColumns={[]}
+        trailingControlColumns={[]}
+      />
+    </div>
   );
 });

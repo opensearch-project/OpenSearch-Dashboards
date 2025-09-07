@@ -3,27 +3,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
   EuiSelect,
+  EuiBadge,
+  EuiPopover,
+  EuiContextMenu,
+  EuiFormRow,
   EuiSwitch,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
 } from '@elastic/eui';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { TableChartStyleControls } from './table_vis_config';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { VisColumn } from '../types';
+import { CalculationMethod } from '../utils/calculation';
 
 export type TableFooterStyleControlsProps = StyleControlsProps<TableChartStyleControls> & {
   numericalColumns?: VisColumn[];
 };
+
+const CALCULATIONS: CalculationMethod[] = ['total', 'last', 'mean', 'min', 'max'];
 
 export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> = ({
   styleOptions,
@@ -34,13 +39,17 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
     'fields' in c
       ? {
           fields: (c.fields || []).filter((f: any) => typeof f === 'string'),
-          calculation: c.calculation,
+          calculation: c.calculation as CalculationMethod,
         }
-      : { fields: c.field ? [String(c.field)] : [], calculation: c.calculation };
+      : {
+          fields: c.field ? [String(c.field)] : [],
+          calculation: c.calculation as CalculationMethod,
+        };
 
   const [localCalculations, setLocalCalculations] = useState<
-    Array<{ fields: string[]; calculation: 'total' | 'last' | 'average' | 'min' | 'max' }>
+    Array<{ fields: string[]; calculation: CalculationMethod }>
   >((styleOptions.footerCalculations || []).map(toNew));
+  const [popoverIndex, setPopoverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setLocalCalculations((styleOptions.footerCalculations || []).map(toNew));
@@ -65,9 +74,7 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
   );
 
   const syncToParent = useCallback(
-    (
-      next: Array<{ fields: string[]; calculation: 'total' | 'last' | 'average' | 'min' | 'max' }>
-    ) => {
+    (next: Array<{ fields: string[]; calculation: CalculationMethod }>) => {
       setLocalCalculations(next);
       updateStyleOption('footerCalculations', next);
     },
@@ -75,7 +82,7 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
   );
 
   const onCalculationChange = useCallback(
-    (index: number, value: 'total' | 'last' | 'average' | 'min' | 'max') => {
+    (index: number, value: CalculationMethod) => {
       const next = [...localCalculations];
       next[index] = { ...next[index], calculation: value };
       syncToParent(next);
@@ -83,14 +90,21 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
     [localCalculations, syncToParent]
   );
 
-  const onFieldChange = useCallback(
-    (index: number, selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const fields = selectedOptions
-        .map((o) => o.value)
-        .filter((v): v is string => typeof v === 'string');
+  const onRemoveField = useCallback(
+    (index: number, field: string) => {
       const next = [...localCalculations];
-      next[index] = { ...next[index], fields };
+      next[index] = { ...next[index], fields: next[index].fields.filter((f) => f !== field) };
       syncToParent(next);
+    },
+    [localCalculations, syncToParent]
+  );
+
+  const onAddField = useCallback(
+    (index: number, field: string) => {
+      const next = [...localCalculations];
+      next[index] = { ...next[index], fields: [...next[index].fields, field] };
+      syncToParent(next);
+      setPopoverIndex(null);
     },
     [localCalculations, syncToParent]
   );
@@ -109,32 +123,75 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
     const available = numericalColumns.map((c) => c.column).filter((c) => !selected.has(c));
     if (available.length === 0) return;
 
-    const next = [...localCalculations, { fields: [available[0]], calculation: 'total' as const }];
+    const usedCalculations = new Set<CalculationMethod>(
+      localCalculations.map((c) => c.calculation)
+    );
+
+    const availableCalculation = CALCULATIONS.find((calc) => !usedCalculations.has(calc)) as
+      | CalculationMethod
+      | undefined;
+
+    if (!availableCalculation) return;
+
+    const next = [
+      ...localCalculations,
+      { fields: [available[0]], calculation: availableCalculation },
+    ];
     syncToParent(next);
   }, [localCalculations, numericalColumns, syncToParent]);
 
-  const calculationOptions = [
-    { value: 'total', text: 'Total' },
-    { value: 'last', text: 'Last' },
-    { value: 'average', text: 'Average' },
-    { value: 'min', text: 'Min' },
-    { value: 'max', text: 'Max' },
-  ];
+  const getCalculationOptionsForIndex = useCallback(
+    (index: number) => {
+      const currentValue = localCalculations[index]?.calculation;
+      const usedByOthers = new Set<CalculationMethod>(
+        localCalculations.filter((_, i) => i !== index).map((c) => c.calculation)
+      );
+      const baseOptions: Array<{ value: CalculationMethod; text: string }> = [
+        { value: 'total', text: 'Total' },
+        { value: 'last', text: 'Last' },
+        { value: 'mean', text: 'Mean' },
+        { value: 'min', text: 'Min' },
+        { value: 'max', text: 'Max' },
+      ];
+      return baseOptions.filter(
+        (opt) => opt.value === currentValue || !usedByOthers.has(opt.value)
+      );
+    },
+    [localCalculations]
+  );
 
   const getFieldOptionsForIndex = (index: number) => {
     const selectedFields = localCalculations
-      .flatMap((calc, i) => (i !== index ? calc.fields : []))
+      .flatMap((calc) => calc.fields)
       .filter((field): field is string => field !== null);
+
     return numericalColumns
       .filter((col) => !selectedFields.includes(col.column))
       .map((col) => ({
-        value: col.column,
+        id: col.column,
         label: col.name || col.column,
       }));
   };
 
-  const canAddCalculation =
-    numericalColumns.length > localCalculations.flatMap((calc) => calc.fields).length;
+  const canAddCalculation = useMemo(() => {
+    const hasFreeField =
+      numericalColumns.length > localCalculations.flatMap((calc) => calc.fields).length;
+    const used = new Set(localCalculations.map((c) => c.calculation));
+    const hasFreeCalc = CALCULATIONS.some((c) => !used.has(c));
+    return hasFreeField && hasFreeCalc;
+  }, [numericalColumns, localCalculations]);
+
+  useEffect(() => {
+    const allowed = new Set(numericalColumns.map((c) => c.column));
+    const next = localCalculations
+      .map((c) => ({ ...c, fields: c.fields.filter((f) => allowed.has(f)) }))
+      .filter((c) => c.fields.length > 0);
+
+    const changed = JSON.stringify(next) !== JSON.stringify(localCalculations);
+    if (changed) {
+      syncToParent(next);
+    }
+  }, [numericalColumns, localCalculations, syncToParent]);
 
   return (
     <StyleAccordion
@@ -145,14 +202,12 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
       initialIsOpen={true}
       data-test-subj="visTableFooter"
     >
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.table.showFooter', {
-          defaultMessage: 'Show Footer',
-        })}
-      >
+      <EuiFormRow>
         <EuiSwitch
           compressed
-          label=""
+          label={i18n.translate('explore.stylePanel.table.showFooter', {
+            defaultMessage: 'Show Footer',
+          })}
           checked={styleOptions.showFooter || false}
           onChange={(e) => onShowFooterChange(e.target.checked)}
           data-test-subj="visTableShowFooter"
@@ -167,50 +222,90 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
           >
             <>
               {localCalculations.map((calc, index) => (
-                <EuiFlexGroup key={index} alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={6}>
-                    <EuiComboBox
-                      compressed
-                      options={getFieldOptionsForIndex(index)}
-                      selectedOptions={calc.fields
-                        .map((field) => ({
-                          value: field,
-                          label:
-                            numericalColumns.find((col) => col.column === field)?.name || field,
-                        }))
-                        .filter((option) => option.value !== undefined)}
-                      onChange={(selectedOptions) => onFieldChange(index, selectedOptions)}
-                      data-test-subj={`visTableFooterField-${index}`}
-                      isClearable={true}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={3}>
-                    <EuiSelect
-                      compressed
-                      options={calculationOptions}
-                      value={calc.calculation}
-                      onChange={(e) =>
-                        onCalculationChange(
-                          index,
-                          e.target.value as 'total' | 'last' | 'average' | 'min' | 'max'
-                        )
-                      }
-                      data-test-subj={`visTableFooterCalculation-${index}`}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={1}>
-                    <EuiButtonIcon
-                      iconType="trash"
-                      color="danger"
-                      aria-label="Delete Calculation"
-                      onClick={() => onRemoveCalculation(index)}
-                      data-test-subj={`visTableFooterDelete-${index}`}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <div key={index}>
+                  <EuiFormRow>
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem>
+                        <EuiSelect
+                          compressed
+                          options={getCalculationOptionsForIndex(index)}
+                          value={calc.calculation}
+                          onChange={(e) =>
+                            onCalculationChange(index, e.target.value as CalculationMethod)
+                          }
+                          data-test-subj={`visTableFooterCalculation-${index}`}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="trash"
+                          color="danger"
+                          aria-label="Delete Calculation"
+                          onClick={() => onRemoveCalculation(index)}
+                          data-test-subj={`visTableFooterDelete-${index}`}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFormRow>
+                  <EuiFormRow>
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup wrap responsive={false} gutterSize="s">
+                          {calc.fields.map((field) => (
+                            <EuiFlexItem key={field}>
+                              <EuiBadge
+                                color="hollow"
+                                iconType="cross"
+                                iconSide="right"
+                                onClick={() => onRemoveField(index, field)}
+                                onClickAriaLabel={`Remove ${field}`}
+                                data-test-subj={`visTableFooterFieldBadge-${index}-${field}`}
+                              >
+                                {numericalColumns.find((col) => col.column === field)?.name ||
+                                  field}
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          ))}
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        {canAddCalculation && (
+                          <EuiPopover
+                            button={
+                              <EuiButtonIcon
+                                iconType="plusInCircle"
+                                aria-label="Add Field"
+                                onClick={() => setPopoverIndex(index)}
+                                data-test-subj={`visTableFooterAddField-${index}`}
+                              />
+                            }
+                            isOpen={popoverIndex === index}
+                            closePopover={() => setPopoverIndex(null)}
+                            panelPaddingSize="s"
+                          >
+                            <EuiContextMenu
+                              initialPanelId={0}
+                              panels={[
+                                {
+                                  id: 0,
+                                  items: getFieldOptionsForIndex(index).map((option) => ({
+                                    name: option.label,
+                                    onClick: () => onAddField(index, option.id),
+                                  })),
+                                },
+                              ]}
+                            />
+                          </EuiPopover>
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFormRow>
+                  {index < localCalculations.length - 1 && <EuiSpacer size="m" />}
+                </div>
               ))}
             </>
           </EuiFormRow>
+
           {canAddCalculation && (
             <EuiFormRow>
               <EuiButton

@@ -269,3 +269,27 @@ export const getTooltipFormat = (
   const timeUnit = inferTimeUnitFromTimestamps(data, field);
   return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
 };
+
+// Function to calculate luminance of a hex color
+export const getLuminance = (hexColor: string): number => {
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+  const linearize = (c: number) => {
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+
+  const rL = linearize(r);
+  const gL = linearize(g);
+  const bL = linearize(b);
+
+  return 0.2126 * rL + 0.7152 * gL + 0.0722 * bL;
+};
+
+export const getTextColor = (backgroundColor: string): string => {
+  const luminance = getLuminance(backgroundColor);
+  // Use white text for dark backgrounds (luminance < 0.5), black for light backgrounds
+  return luminance < 0.5 ? '#FFFFFF' : '#000000';
+};

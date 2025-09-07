@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 import { VisColumn } from '../types';
 
+import './table_vis_filter.scss';
+
 interface FilterConfig {
   values: any[];
   operator: string;
@@ -48,11 +50,7 @@ export const TableColumnHeader = ({
   uniques,
 }: TableColumnHeaderProps) => {
   if (!showColumnFilter || col.schema === 'date') {
-    return (
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {col.name}
-      </span>
-    );
+    return <span>{col.name}</span>;
   }
 
   const defaultOperator = col.schema === 'numerical' ? '=' : 'contains';
@@ -60,12 +58,8 @@ export const TableColumnHeader = ({
   const isFilterActive = currentFilter.values.length > 0 || !!currentFilter.search;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-      <span
-        style={{ flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-      >
-        {col.name}
-      </span>
+    <div className="table-column-header">
+      <span className="header-text">{col.name}</span>
       <EuiPopover
         button={
           <EuiIcon
@@ -83,9 +77,9 @@ export const TableColumnHeader = ({
         panelPaddingSize="s"
       >
         <div
+          className="filter-popover"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
-          style={{ width: '300px' }}
         >
           <ColumnFilterContent
             col={col}
@@ -120,7 +114,7 @@ interface ColumnFilterContentProps {
   uniques: any[];
 }
 
-const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
+export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   col,
   currentFilter,
   onApply,
@@ -229,7 +223,7 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   }, [col.schema, localOperator, currentFilter.values]);
 
   return (
-    <div style={{ padding: '8px' }}>
+    <div className="column-filter-content">
       <EuiFormRow>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={3}>
@@ -271,7 +265,9 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
           <EuiFormRow>
             <EuiPanel
               paddingSize="s"
-              style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '8px' }}
+              borderRadius="m"
+              hasShadow={false}
+              className="unique-values-panel"
             >
               {filteredUniques.map((u) => (
                 <EuiCheckbox
@@ -284,12 +280,15 @@ const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
               ))}
             </EuiPanel>
           </EuiFormRow>
-          <EuiCheckbox
-            id="selectAll"
-            label="Select All"
-            checked={isSelectAllChecked}
-            onChange={(e) => handleSelectAll(e.target.checked)}
-          />
+          <EuiFormRow>
+            <EuiCheckbox
+              id="selectAll"
+              label="Select All"
+              checked={isSelectAllChecked}
+              onChange={(e) => handleSelectAll(e.target.checked)}
+              data-test-subj="selectAllCheckbox"
+            />
+          </EuiFormRow>
         </>
       )}
       <EuiFormRow>

@@ -18,8 +18,47 @@ import { TableChartStyleControls } from './table_vis_config';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { TableFooterStyleControls } from './table_vis_footer';
+import { Threshold } from '../types';
+import { ThresholdCustomValues } from '../style_panel/threshold/threshold_custom_values';
 
 export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyleControls>;
+
+const alignmentOptions = [
+  { value: 'auto', text: 'Auto' },
+  { value: 'left', text: 'Left' },
+  { value: 'center', text: 'Center' },
+  { value: 'right', text: 'Right' },
+];
+
+const cellTypeOptions = [
+  { value: 'auto', text: 'Default (Black Text)' },
+  { value: 'colored_text', text: 'Colored Text' },
+  { value: 'colored_background', text: 'Colored Background' },
+];
+
+const CustomThresholdPanel: React.FC<{
+  thresholds: Threshold[];
+  onThresholdValuesChange: (thresholds: Threshold[]) => void;
+  baseColor: string;
+  onBaseColorChange: (color: string) => void;
+}> = ({ thresholds, onThresholdValuesChange, baseColor, onBaseColorChange }) => {
+  return (
+    <StyleAccordion
+      id="thresholdSection"
+      accordionLabel={i18n.translate('explore.stylePanel.table.threshold', {
+        defaultMessage: 'Threshold',
+      })}
+      initialIsOpen={true}
+    >
+      <ThresholdCustomValues
+        thresholds={thresholds}
+        onThresholdValuesChange={onThresholdValuesChange}
+        baseColor={baseColor}
+        onBaseColorChange={onBaseColorChange}
+      />
+    </StyleAccordion>
+  );
+};
 
 export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
   styleOptions,
@@ -58,17 +97,31 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
     [updateStyleOption]
   );
 
+  const onCellTypeChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      updateStyleOption('cellType', e.target.value as 'colored_text' | 'colored_background');
+    },
+    [updateStyleOption]
+  );
+
+  const onThresholdsChange = useCallback(
+    (thresholds: Threshold[]) => {
+      updateStyleOption('thresholds', thresholds);
+    },
+    [updateStyleOption]
+  );
+
+  const onBaseColorChange = useCallback(
+    (color: string) => {
+      updateStyleOption('baseColor', color);
+    },
+    [updateStyleOption]
+  );
+
   const [localPageSize, handlePageSizeChange] = useDebouncedNumericValue(
     styleOptions.pageSize,
     onPageSizeChange
   );
-
-  const alignmentOptions = [
-    { value: 'auto', text: 'Auto' },
-    { value: 'left', text: 'Left' },
-    { value: 'center', text: 'Center' },
-    { value: 'right', text: 'Right' },
-  ];
 
   return (
     <>
@@ -109,6 +162,20 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
                 data-test-subj="visTableGlobalAlignment"
               />
             </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('explore.stylePanel.table.cellType', {
+                defaultMessage: 'Cell type',
+              })}
+            >
+              <EuiSelect
+                compressed
+                options={cellTypeOptions}
+                value={styleOptions.cellType || 'auto'}
+                onChange={onCellTypeChange}
+                onMouseUp={(e) => e.stopPropagation()}
+                data-test-subj="visTableCellType"
+              />
+            </EuiFormRow>
             <EuiFormRow>
               <EuiSwitch
                 compressed
@@ -121,6 +188,14 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
               />
             </EuiFormRow>
           </StyleAccordion>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CustomThresholdPanel
+            thresholds={styleOptions.thresholds || []}
+            onThresholdValuesChange={onThresholdsChange}
+            baseColor={styleOptions.baseColor || '#000000'}
+            onBaseColorChange={onBaseColorChange}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TableFooterStyleControls

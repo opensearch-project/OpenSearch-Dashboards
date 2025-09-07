@@ -6,6 +6,8 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { TableVisStyleControls } from './table_vis_options';
+import { Threshold } from '../types';
+import { CalculationMethod } from '../utils/calculation';
 
 export interface TableChartStyleControls {
   pageSize: number;
@@ -14,8 +16,11 @@ export interface TableChartStyleControls {
   showFooter?: boolean;
   footerCalculations?: Array<{
     fields: string[];
-    calculation: 'total' | 'last' | 'average' | 'min' | 'max';
+    calculation: CalculationMethod;
   }>;
+  cellType?: 'auto' | 'colored_text' | 'colored_background';
+  thresholds?: Threshold[];
+  baseColor?: string;
 }
 
 const defaultTableChartStyles: TableChartStyleControls = {
@@ -24,6 +29,9 @@ const defaultTableChartStyles: TableChartStyleControls = {
   showColumnFilter: false,
   showFooter: false,
   footerCalculations: [],
+  cellType: 'auto',
+  thresholds: [],
+  baseColor: '#000000',
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({
