@@ -20,13 +20,13 @@ import {
   EuiSelectOption,
   EuiTitle,
 } from '@elastic/eui';
-import { VisColumn } from '../types';
+import { FilterOperator, VisColumn } from '../types';
 
 import './table_vis_filter.scss';
 
-interface FilterConfig {
+export interface FilterConfig {
   values: any[];
-  operator: string;
+  operator: FilterOperator;
   search?: string;
 }
 
@@ -53,7 +53,8 @@ export const TableColumnHeader = ({
     return <span>{col.name}</span>;
   }
 
-  const defaultOperator = col.schema === 'numerical' ? '=' : 'contains';
+  const defaultOperator =
+    col.schema === 'numerical' ? FilterOperator.Equal : FilterOperator.Contains;
   const currentFilter = filters[col.column] || { values: [], operator: defaultOperator };
   const isFilterActive = currentFilter.values.length > 0 || !!currentFilter.search;
 
@@ -122,12 +123,21 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   onCancel,
   uniques,
 }) => {
-  const numericOps = ['=', '!=', '>', '>=', '<', '<='] as const;
-  const [localOperator, setLocalOperator] = useState<string>(() => {
+  const numericOps = [
+    FilterOperator.Equal,
+    FilterOperator.NotEqual,
+    FilterOperator.GreaterThan,
+    FilterOperator.GreaterThanOrEqual,
+    FilterOperator.LessThan,
+    FilterOperator.LessThanOrEqual,
+  ] as const;
+  const [localOperator, setLocalOperator] = useState<FilterOperator>(() => {
     if (col.schema === 'numerical') {
-      return numericOps.includes(currentFilter.operator as any) ? currentFilter.operator : '=';
+      return numericOps.includes(currentFilter.operator as any)
+        ? currentFilter.operator
+        : FilterOperator.Equal;
     }
-    return 'contains';
+    return FilterOperator.Contains;
   });
   const [localSearch, setLocalSearch] = useState<string>(currentFilter.search || '');
   const [localUniqueSearch, setLocalUniqueSearch] = useState<string>('');
@@ -136,31 +146,36 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   const operatorOptions: EuiSelectOption[] = useMemo(() => {
     if (col.schema === 'numerical') {
       return [
-        { value: '=', text: '=' },
-        { value: '!=', text: '!=' },
-        { value: '>', text: '>' },
-        { value: '>=', text: '>=' },
-        { value: '<', text: '<' },
-        { value: '<=', text: '<=' },
+        { value: FilterOperator.Equal, text: '=' },
+        { value: FilterOperator.NotEqual, text: '!=' },
+        { value: FilterOperator.GreaterThan, text: '>' },
+        { value: FilterOperator.GreaterThanOrEqual, text: '>=' },
+        { value: FilterOperator.LessThan, text: '<' },
+        { value: FilterOperator.LessThanOrEqual, text: '<=' },
       ];
     } else if (col.schema === 'categorical') {
-      return [{ value: 'contains', text: 'contains' }];
+      return [{ value: FilterOperator.Contains, text: 'contains' }];
     }
     return [];
   }, [col.schema]);
 
   const showUniqueValues = useMemo(() => {
     if (col.schema === 'categorical') {
-      return localOperator === 'contains';
+      return localOperator === FilterOperator.Contains;
     } else if (col.schema === 'numerical') {
-      return localOperator === '=' || localOperator === '!=';
+      return localOperator === FilterOperator.Equal || localOperator === FilterOperator.NotEqual;
     }
     return false;
   }, [col.schema, localOperator]);
 
   const showInput = useMemo(() => {
     if (col.schema === 'numerical') {
-      return ['>', '>=', '<', '<='].includes(localOperator);
+      return [
+        FilterOperator.GreaterThan,
+        FilterOperator.GreaterThanOrEqual,
+        FilterOperator.LessThan,
+        FilterOperator.LessThanOrEqual,
+      ].includes(localOperator);
     }
     return false;
   }, [col.schema, localOperator]);
@@ -209,15 +224,30 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
     filteredUniques.length > 0 && filteredUniques.every((u) => localSelected.has(u));
 
   const handleApply = () => {
+    const normalizedValues = Array.from(localSelected).map((v) =>
+      col.schema === 'numerical' ? Number(v) : v
+    );
+    const needsInput =
+      col.schema === 'numerical' &&
+      [
+        FilterOperator.GreaterThan,
+        FilterOperator.GreaterThanOrEqual,
+        FilterOperator.LessThan,
+        FilterOperator.LessThanOrEqual,
+      ].includes(localOperator);
+
     onApply({
-      values: Array.from(localSelected),
+      values: normalizedValues,
       operator: localOperator,
-      search: localSearch,
+      search: needsInput ? localSearch : '',
     });
   };
 
   useEffect(() => {
-    if (col.schema === 'numerical' && (localOperator === '=' || localOperator === '!=')) {
+    if (
+      col.schema === 'numerical' &&
+      (localOperator === FilterOperator.Equal || localOperator === FilterOperator.NotEqual)
+    ) {
       setLocalSelected(new Set(currentFilter.values));
     }
   }, [col.schema, localOperator, currentFilter.values]);
@@ -236,7 +266,7 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
               compressed
               options={operatorOptions}
               value={localOperator}
-              onChange={(e) => setLocalOperator(e.target.value)}
+              onChange={(e) => setLocalOperator(e.target.value as FilterOperator)}
             />
           </EuiFlexItem>
           {showInput && (

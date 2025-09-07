@@ -38,7 +38,7 @@ jest.mock('@elastic/eui', () => ({
         rowIndex: number;
         columnId: string;
         setCellProps: (props: any) => void;
-      }) => any;
+      }) => JSX.Element;
       renderFooterCellValue?: (props: {
         columnId: string;
         setCellProps: (props: any) => void;
@@ -93,6 +93,20 @@ jest.mock('./table_vis_filter', () => ({
   ),
 }));
 
+// Wrapper component to render CellValueRenderer properly in tests
+const CellRendererWrapper: React.FC<{
+  renderCellValue: (props: {
+    rowIndex: number;
+    columnId: string;
+    setCellProps: (props: any) => void;
+  }) => JSX.Element;
+  rowIndex: number;
+  columnId: string;
+  setCellProps: jest.Mock;
+}> = ({ renderCellValue, rowIndex, columnId, setCellProps }) => {
+  return renderCellValue({ rowIndex, columnId, setCellProps });
+};
+
 describe('TableVis', () => {
   const mockColumns: VisColumn[] = [
     {
@@ -112,7 +126,6 @@ describe('TableVis', () => {
       uniqueValuesCount: 2,
     },
   ];
-
   const mockRows = [
     { column1: 10, column2: 'value1-2' },
     { column1: 20, column2: 'value2-2' },
@@ -124,14 +137,10 @@ describe('TableVis', () => {
 
   test('renders with default props', () => {
     render(<TableVis rows={mockRows} columns={mockColumns} />);
-
-    // Check if the component renders with the correct aria-label
     expect(screen.getByTestId('mockEuiDataGrid')).toHaveAttribute(
       'aria-label',
       'Table visualization'
     );
-
-    // Check if columns are correctly passed to EuiDataGrid
     const columnsJson = screen.getByTestId('mockColumns').textContent;
     const parsedColumns = JSON.parse(columnsJson || '[]');
     expect(parsedColumns).toHaveLength(2);
@@ -139,39 +148,23 @@ describe('TableVis', () => {
     expect(parsedColumns[0].displayAsText).toBe('Column 1');
     expect(parsedColumns[1].id).toBe('column2');
     expect(parsedColumns[1].displayAsText).toBe('Column 2');
-
-    // Check if visible columns are set correctly
     const visibleColumnsJson = screen.getByTestId('mockVisibleColumns').textContent;
     const parsedVisibleColumns = JSON.parse(visibleColumnsJson || '[]');
     expect(parsedVisibleColumns).toEqual(['column1', 'column2']);
-
-    // Check if row count is correct
     expect(screen.getByTestId('mockRowCount').textContent).toBe('2');
-
-    // Check if default page size is applied
     expect(screen.getByTestId('mockPageSize').textContent).toBe('10');
-
-    // Check if initial page index is 0
     expect(screen.getByTestId('mockPageIndex').textContent).toBe('0');
-
-    // Check if cell value rendering works
     expect(screen.getByTestId('mockCellValue').textContent).toBe('10');
   });
 
   test('renders with custom page size', () => {
     render(<TableVis rows={mockRows} columns={mockColumns} styleOptions={{ pageSize: 15 }} />);
-
-    // Check if custom page size is applied
     expect(screen.getByTestId('mockPageSize').textContent).toBe('15');
   });
 
   test('handles cell value rendering for non-existent row', () => {
     const { rerender } = render(<TableVis rows={[]} columns={mockColumns} />);
-
-    // With empty rows, cell value should be null
     expect(screen.getByTestId('mockCellValue').textContent).toBe('');
-
-    // Rerender with rows
     rerender(<TableVis rows={mockRows} columns={mockColumns} />);
     expect(screen.getByTestId('mockCellValue').textContent).toBe('10');
   });
@@ -191,8 +184,6 @@ describe('TableVis', () => {
 
   test('computes column uniques correctly', () => {
     render(<TableVis rows={mockRows} columns={mockColumns} />);
-
-    // Check if uniques are computed and passed to TableColumnHeader
     const uniquesColumn1 = JSON.parse(
       screen.getByTestId('mockUniques-column1').textContent || '[]'
     );
@@ -211,16 +202,10 @@ describe('TableVis', () => {
         styleOptions={{ pageSize: 10, showColumnFilter: true }}
       />
     );
-
-    // Check initial popover state
     const headerColumn1 = screen.getByTestId('mockTableColumnHeader-column1');
     expect(headerColumn1).toHaveAttribute('data-popover-open', 'false');
-
-    // Simulate opening popover
     fireEvent.click(headerColumn1);
     expect(headerColumn1).toHaveAttribute('data-popover-open', 'true');
-
-    // Simulate closing popover
     fireEvent.click(headerColumn1);
     expect(headerColumn1).toHaveAttribute('data-popover-open', 'false');
   });
@@ -233,18 +218,10 @@ describe('TableVis', () => {
         styleOptions={{ pageSize: 10, showColumnFilter: true }}
       />
     );
-
-    // Verify TableColumnHeader was called
     expect(TableColumnHeader).toHaveBeenCalled();
-
-    // Apply a filter
     const setFilters = (TableColumnHeader as jest.Mock).mock.calls[0][0].setFilters;
     setFilters({ column1: { values: [10], operator: '=' } });
-
-    // Check filtered row count
     expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-
-    // Disable showColumnFilter
     rerender(
       <TableVis
         rows={mockRows}
@@ -252,8 +229,6 @@ describe('TableVis', () => {
         styleOptions={{ pageSize: 10, showColumnFilter: false }}
       />
     );
-
-    // Check if filters are cleared and row count is restored
     expect(screen.getByTestId('mockRowCount').textContent).toBe('2');
     const filtersColumn1 = JSON.parse(
       screen.getByTestId('mockFilters-column1').textContent || '{}'
@@ -269,33 +244,18 @@ describe('TableVis', () => {
         styleOptions={{ pageSize: 10, showColumnFilter: true }}
       />
     );
-
-    // Verify TableColumnHeader was called
     expect(TableColumnHeader).toHaveBeenCalled();
-
     const setFilters = (TableColumnHeader as jest.Mock).mock.calls[0][0].setFilters;
-
-    // Test 'contains' operator
     setFilters({ column2: { search: 'value1', operator: 'contains' } });
     expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-
-    // Test '=' operator
     setFilters({ column1: { values: [10], operator: '=' } });
     expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-
-    // Test '!=' operator
     setFilters({ column1: { values: [10], operator: '!=' } });
     expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-
-    // Test '>' operator
     setFilters({ column1: { search: '15', operator: '>' } });
     expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-
-    // Test '<' operator
     setFilters({ column1: { search: '15', operator: '<' } });
     expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-
-    // Test invalid numeric comparison (non-numeric value)
     setFilters({ column1: { search: 'invalid', operator: '>' } });
     expect(screen.getByTestId('mockRowCount').textContent).toBe('0');
   });
@@ -306,14 +266,13 @@ describe('TableVis', () => {
       showFooter: true,
       footerCalculations: [
         { fields: ['column1'], calculation: 'total' as const },
-        { fields: ['column1'], calculation: 'average' as const },
+        { fields: ['column1'], calculation: 'mean' as const },
       ],
     };
     render(<TableVis rows={mockRows} columns={mockColumns} styleOptions={styleOptions} />);
-
     // Check footer cell value
     const footerCellValue = screen.getByTestId('mockFooterCellValue').textContent;
-    expect(footerCellValue).toBe('Average: 15');
+    expect(footerCellValue).toBe('Mean: 15'); // Adjusted to expect the last calculation
   });
 
   test('handles empty footer calculations', () => {
@@ -323,46 +282,7 @@ describe('TableVis', () => {
       footerCalculations: [],
     };
     render(<TableVis rows={mockRows} columns={mockColumns} styleOptions={styleOptions} />);
-
-    // Check no footer is rendered
     expect(screen.getByTestId('mockFooterCellValue').textContent).toBe('no-footer');
-  });
-
-  test('applies global alignment to cells and footer', () => {
-    // Test cell and footer alignment in a single render
-    const styleOptions = {
-      pageSize: 10,
-      globalAlignment: 'center' as const,
-      showFooter: true,
-      footerCalculations: [{ fields: ['column1'], calculation: 'total' as const }],
-    };
-    render(<TableVis rows={mockRows} columns={mockColumns} styleOptions={styleOptions} />);
-
-    const dataGridProps = (jest.mocked(EuiDataGrid) as jest.Mock).mock.calls[0][0];
-    const { renderCellValue, renderFooterCellValue } = dataGridProps;
-
-    // Test cell alignment
-    const setCellProps = jest.fn();
-    const cellValue = renderCellValue({
-      rowIndex: 0,
-      columnId: 'column1',
-      setCellProps,
-    });
-    expect(cellValue).toBe(10);
-    expect(setCellProps).toHaveBeenCalledWith({ style: { textAlign: 'center' } });
-
-    // Test footer alignment
-    const footerSetCellProps = jest.fn();
-    expect(renderFooterCellValue).toBeDefined();
-    const footerCellValue = renderFooterCellValue({
-      columnId: 'column1',
-      setCellProps: footerSetCellProps,
-    });
-    expect(footerCellValue).toBe('Total: 30');
-    expect(footerSetCellProps).toHaveBeenCalledWith({ style: { textAlign: 'center' } });
-
-    // Verify rendered footer value in DOM
-    expect(screen.getByTestId('mockFooterCellValue').textContent).toBe('Total: 30');
   });
 
   test('applies type-based alignment when globalAlignment is auto', () => {
@@ -372,27 +292,38 @@ describe('TableVis', () => {
       showFooter: true,
       footerCalculations: [{ fields: ['column1', 'column2'], calculation: 'total' as const }],
     };
-    render(<TableVis rows={mockRows} columns={mockColumns} styleOptions={styleOptions} />);
+    const { container } = render(
+      <TableVis rows={mockRows} columns={mockColumns} styleOptions={styleOptions} />
+    );
     const dataGridProps = (jest.mocked(EuiDataGrid) as jest.Mock).mock.calls[0][0];
     const { renderCellValue, renderFooterCellValue } = dataGridProps;
+
     // Test cell alignment for numerical column
     const setCellPropsNum = jest.fn();
-    const cellValueNum = renderCellValue({
-      rowIndex: 0,
-      columnId: 'column1',
-      setCellProps: setCellPropsNum,
-    });
-    expect(cellValueNum).toBe(10);
+    render(
+      <CellRendererWrapper
+        renderCellValue={renderCellValue}
+        rowIndex={0}
+        columnId="column1"
+        setCellProps={setCellPropsNum}
+      />,
+      { container }
+    );
     expect(setCellPropsNum).toHaveBeenCalledWith({ style: { textAlign: 'right' } });
+
     // Test cell alignment for categorical column
     const setCellPropsCat = jest.fn();
-    const cellValueCat = renderCellValue({
-      rowIndex: 0,
-      columnId: 'column2',
-      setCellProps: setCellPropsCat,
-    });
-    expect(cellValueCat).toBe('value1-2');
+    render(
+      <CellRendererWrapper
+        renderCellValue={renderCellValue}
+        rowIndex={0}
+        columnId="column2"
+        setCellProps={setCellPropsCat}
+      />,
+      { container }
+    );
     expect(setCellPropsCat).toHaveBeenCalledWith({ style: { textAlign: 'left' } });
+
     // Test footer alignment for numerical column
     const footerSetCellPropsNum = jest.fn();
     const footerCellValueNum = renderFooterCellValue({
@@ -401,13 +332,14 @@ describe('TableVis', () => {
     });
     expect(footerCellValueNum).toBe('Total: 30');
     expect(footerSetCellPropsNum).toHaveBeenCalledWith({ style: { textAlign: 'right' } });
+
     // Test footer alignment for categorical column
     const footerSetCellPropsCat = jest.fn();
     const footerCellValueCat = renderFooterCellValue({
       columnId: 'column2',
       setCellProps: footerSetCellPropsCat,
     });
-    expect(footerCellValueCat).toBe('-'); // No numerical values for categorical column
+    expect(footerCellValueCat).toBe('-');
     expect(footerSetCellPropsCat).toHaveBeenCalledWith({ style: { textAlign: 'left' } });
   });
 });

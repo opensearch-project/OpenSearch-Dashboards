@@ -5,9 +5,9 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
-import { VisColumn, VisFieldType } from '../types';
+import { FilterOperator, VisColumn, VisFieldType } from '../types';
 import { TableChartStyleControls } from './table_vis_config';
-import { TableColumnHeader } from './table_vis_filter';
+import { FilterConfig, TableColumnHeader } from './table_vis_filter';
 import { getTextColor } from '../utils/utils';
 import { calculateValue, CalculationMethod } from '../utils/calculation';
 
@@ -15,12 +15,6 @@ interface TableVisProps {
   rows: Array<Record<string, any>>;
   columns: VisColumn[];
   styleOptions?: TableChartStyleControls;
-}
-
-interface FilterConfig {
-  values: any[];
-  operator: string;
-  search?: string;
 }
 
 interface Calc {
@@ -87,19 +81,13 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     setFilters,
   ]);
 
-  const onChangePage = useCallback((pageIndex) => setPagination((p) => ({ ...p, pageIndex })), [
-    setPagination,
-  ]);
-
-  const onChangeItemsPerPage = useCallback(
-    (perPage) =>
-      setPagination((p) => ({
-        ...p,
-        pageSize: perPage,
-        pageIndex: 0,
-      })),
-    [setPagination]
-  );
+  const onChangeItemsPerPage = useCallback((newPageSize: number) => {
+    setPagination((p) => ({
+      ...p,
+      pageSize: newPageSize,
+      pageIndex: 0,
+    }));
+  }, []);
 
   useEffect(() => {
     if (!styleOptions?.showColumnFilter) {
@@ -108,45 +96,57 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
   }, [styleOptions?.showColumnFilter]);
 
   const matchesFilter = (value: any, config: FilterConfig) => {
-    const op = config.operator || 'contains';
+    const op = config.operator || FilterOperator.Contains;
     const hasValues = Array.isArray(config.values) && config.values.length > 0;
     const hasSearch = typeof config.search === 'string' && config.search.trim() !== '';
     const sVal = value == null ? '' : String(value);
     const sSearch = (config.search || '').trim();
     const toNum = (v: any) => (v == null || v === '' ? NaN : Number(v));
 
-    if (op === 'contains') {
+    if (op === FilterOperator.Contains) {
       const matchSearch = !hasSearch || sVal.toLowerCase().includes(sSearch.toLowerCase());
       const matchValues = !hasValues || config.values.includes(value);
       return matchSearch && matchValues;
     }
 
-    if (op === '=' || op === '!=') {
+    if (op === FilterOperator.Equal || op === FilterOperator.NotEqual) {
       if (hasValues) {
-        const hit = config.values.includes(value);
-        return op === '=' ? hit : !hit;
+        const numValue = toNum(value);
+        const numValues = config.values
+          .map(toNum)
+          .filter((nv): nv is number => Number.isFinite(nv));
+        const hit = numValues.includes(numValue);
+        return op === FilterOperator.Equal ? hit : !hit;
       }
       if (hasSearch) {
-        const eq = value === Number(sSearch);
-        return op === '=' ? eq : !eq;
+        const numValue = toNum(value);
+        const numSearch = toNum(sSearch);
+        if (!Number.isFinite(numValue) || !Number.isFinite(numSearch)) return false;
+        const eq = numValue === numSearch;
+        return op === FilterOperator.Equal ? eq : !eq;
       }
       return true;
     }
 
-    if (op === '>' || op === '>=' || op === '<' || op === '<=') {
+    if (
+      op === FilterOperator.GreaterThan ||
+      op === FilterOperator.GreaterThanOrEqual ||
+      op === FilterOperator.LessThan ||
+      op === FilterOperator.LessThanOrEqual
+    ) {
       const thresholdStr = hasSearch ? sSearch : hasValues ? String(config.values[0]) : '';
       const nVal = toNum(value);
       const nThr = toNum(thresholdStr);
       if (!Number.isFinite(nVal) || !Number.isFinite(nThr)) return false;
 
       switch (op) {
-        case '>':
+        case FilterOperator.GreaterThan:
           return nVal > nThr;
-        case '>=':
+        case FilterOperator.GreaterThanOrEqual:
           return nVal >= nThr;
-        case '<':
+        case FilterOperator.LessThan:
           return nVal < nThr;
-        case '<=':
+        case FilterOperator.LessThanOrEqual:
           return nVal <= nThr;
       }
     }
@@ -162,6 +162,10 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
       })
     );
   }, [rows, filters]);
+
+  useEffect(() => {
+    setPagination({ pageIndex: 0, pageSize });
+  }, [filteredRows.length, pageSize]);
 
   const availableFieldSet = useMemo(() => new Set(columns.map((c) => c.column)), [columns]);
   const normalizedFooterCalcs = useMemo<Calc[]>(() => {
@@ -285,14 +289,32 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     };
   }, [footerValues, styleOptions?.globalAlignment, columnTypes]);
 
+  const onChangePage = useCallback(
+    (pageIndex: number) => {
+      const maxPageIndex = Math.ceil(filteredRows.length / pagination.pageSize) - 1;
+      const clampedPageIndex = Math.max(0, Math.min(pageIndex, maxPageIndex));
+      setPagination((p) => ({ ...p, pageIndex: clampedPageIndex }));
+    },
+    [pagination.pageSize, filteredRows.length]
+  );
+
+  useEffect(() => {
+    if (!styleOptions?.showColumnFilter) {
+      setFilters({});
+      setPopoverOpenColumnId(null);
+      setPagination({ pageIndex: 0, pageSize });
+    }
+  }, [styleOptions?.showColumnFilter, pageSize]);
+
   return (
     <div className="table-visualization">
       <EuiDataGrid
+        key={`table-vis-${filteredRows.length}-${pagination.pageSize}`}
         aria-label="Table visualization"
         columns={dataGridColumns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         rowCount={filteredRows.length}
-        pagination={{ ...pagination, onChangePage, onChangeItemsPerPage, pageSize }}
+        pagination={{ ...pagination, onChangePage, onChangeItemsPerPage }}
         renderCellValue={renderCellValue}
         renderFooterCellValue={renderFooterCellValue}
         toolbarVisibility={{ showFullScreenSelector: false }}

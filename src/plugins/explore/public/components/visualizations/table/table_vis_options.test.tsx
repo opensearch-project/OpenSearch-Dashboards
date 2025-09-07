@@ -19,6 +19,14 @@ jest.mock('../utils/use_debounced_value', () => ({
       },
     ];
   }),
+  useDebouncedValue: jest.fn((initialValue, onChange, delay) => {
+    return [
+      initialValue,
+      (value: string) => {
+        onChange(value);
+      },
+    ];
+  }),
 }));
 
 describe('TableVisStyleControls', () => {
