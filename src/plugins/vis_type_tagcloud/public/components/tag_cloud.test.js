@@ -34,7 +34,6 @@ import 'jest-canvas-mock';
 
 import { TagCloud } from './tag_cloud';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public';
-import { setTimeout } from 'timers/promises';
 
 describe('tag cloud tests', () => {
   let SVGElementGetBBoxSpyInstance;
