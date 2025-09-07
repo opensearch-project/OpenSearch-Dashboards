@@ -188,7 +188,7 @@ export default function chainRunner(tlConfig) {
           }
         }
 
-        queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value();
+        queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value;
       });
 
       stats.cacheCount = _.keys(queryCache).length;
