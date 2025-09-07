@@ -1,0 +1,2 @@
+test:
+- Add Cypress test data creation for trace exploration ([#10492](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10492))
