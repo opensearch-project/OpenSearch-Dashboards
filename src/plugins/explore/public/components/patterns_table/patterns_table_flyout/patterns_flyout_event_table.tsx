@@ -29,6 +29,8 @@ interface EventTableItem {
   event: string;
 }
 
+const EVENT_TABLE_PAGE_SIZE = 10;
+
 export const PatternsFlyoutEventTable = ({
   patternString,
   totalItemCount,
@@ -71,8 +73,8 @@ export const PatternsFlyoutEventTable = ({
         usingRegexPatterns,
         patternString,
         timeFieldName,
-        10, // select 10 results
-        page * 10
+        EVENT_TABLE_PAGE_SIZE,
+        page * EVENT_TABLE_PAGE_SIZE
       ),
     };
 
@@ -123,7 +125,12 @@ export const PatternsFlyoutEventTable = ({
         },
       ]}
       tableLayout="auto"
-      pagination={{ pageIndex, pageSize: 10, totalItemCount, hidePerPageOptions: true }}
+      pagination={{
+        pageIndex,
+        pageSize: EVENT_TABLE_PAGE_SIZE,
+        totalItemCount,
+        hidePerPageOptions: true,
+      }}
       onChange={({ page: { index } }: CriteriaWithPagination<EventTableItem>) => {
         setPageIndex(index);
         eventResults(index);
