@@ -153,27 +153,15 @@ describe('ppl_resolve_helpers', () => {
     it('resolves service name from resource.attributes.service.name (primary format)', () => {
       const fieldMap = new Map([
         ['resource', [{ attributes: { service: { name: 'primary-service' } } }]],
-        ['attributes', [{ aws: { local: { service: 'fallback-service' } } }]],
         ['serviceName', ['legacy-service']],
       ]);
 
       expect(resolveServiceName(fieldMap, 0)).toBe('primary-service');
     });
 
-    it('falls back to attributes.aws.local.service (secondary format)', () => {
-      const fieldMap = new Map([
-        ['resource', [{}]],
-        ['attributes', [{ aws: { local: { service: 'fallback-service' } } }]],
-        ['serviceName', ['legacy-service']],
-      ]);
-
-      expect(resolveServiceName(fieldMap, 0)).toBe('fallback-service');
-    });
-
     it('falls back to serviceName (legacy format)', () => {
       const fieldMap = new Map([
         ['resource', [{}]],
-        ['attributes', [{}]],
         ['serviceName', ['legacy-service']],
       ]);
 
@@ -181,10 +169,7 @@ describe('ppl_resolve_helpers', () => {
     });
 
     it('returns empty string when no service name found', () => {
-      const fieldMap = new Map([
-        ['resource', [{}]],
-        ['attributes', [{}]],
-      ]);
+      const fieldMap = new Map([['resource', [{}]]]);
 
       expect(resolveServiceName(fieldMap, 0)).toBe('');
     });
@@ -379,26 +364,14 @@ describe('ppl_resolve_helpers', () => {
         const getValueByName = jest
           .fn()
           .mockReturnValueOnce({ attributes: { service: { name: 'primary-service' } } })
-          .mockReturnValueOnce({ aws: { local: { service: 'fallback-service' } } })
           .mockReturnValueOnce('legacy-service');
 
         expect(resolveServiceNameFromDatarows(getValueByName)).toBe('primary-service');
       });
 
-      it('falls back to attributes.aws.local.service', () => {
-        const getValueByName = jest
-          .fn()
-          .mockReturnValueOnce({})
-          .mockReturnValueOnce({ aws: { local: { service: 'fallback-service' } } })
-          .mockReturnValueOnce('legacy-service');
-
-        expect(resolveServiceNameFromDatarows(getValueByName)).toBe('fallback-service');
-      });
-
       it('falls back to serviceName', () => {
         const getValueByName = jest
           .fn()
-          .mockReturnValueOnce({})
           .mockReturnValueOnce({})
           .mockReturnValueOnce('legacy-service');
 
@@ -513,7 +486,6 @@ describe('ppl_resolve_helpers', () => {
     it('resolves from resource.attributes.service.name (primary format)', () => {
       const span = {
         resource: { attributes: { service: { name: 'primary-service' } } },
-        attributes: { aws: { local: { service: 'fallback-service' } } },
         serviceName: 'legacy-service',
       };
 
@@ -523,31 +495,10 @@ describe('ppl_resolve_helpers', () => {
     it('resolves from resource.attributes["service.name"] (alternative primary format)', () => {
       const span = {
         resource: { attributes: { 'service.name': 'alt-primary-service' } },
-        attributes: { aws: { local: { service: 'fallback-service' } } },
         serviceName: 'legacy-service',
       };
 
       expect(resolveServiceNameFromSpan(span)).toBe('alt-primary-service');
-    });
-
-    it('falls back to attributes.aws.local.service (secondary format)', () => {
-      const span = {
-        resource: { attributes: {} },
-        attributes: { aws: { local: { service: 'fallback-service' } } },
-        serviceName: 'legacy-service',
-      };
-
-      expect(resolveServiceNameFromSpan(span)).toBe('fallback-service');
-    });
-
-    it('falls back to attributes["aws.local.service"] (alternative format)', () => {
-      const span = {
-        resource: { attributes: {} },
-        attributes: { 'aws.local.service': 'alt-fallback-service' },
-        serviceName: 'legacy-service',
-      };
-
-      expect(resolveServiceNameFromSpan(span)).toBe('alt-fallback-service');
     });
 
     it('falls back to serviceName (legacy)', () => {
