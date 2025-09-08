@@ -22,8 +22,7 @@ import {
   selectQuery,
   selectUsingRegexPatterns,
 } from '../../../application/utils/state_management/selectors';
-import { getQueryWithSource } from '../../../application/utils/languages';
-import { brainUpdateSearchPatternQuery, regexUpdateSearchPatternQuery } from '../utils/utils';
+import { createSearchPatternQuery } from '../utils/utils';
 
 export interface PatternsFlyoutUpdateSearchProps {
   patternString: string;
@@ -39,14 +38,6 @@ export const PatternsFlyoutUpdateSearch = ({ patternString }: PatternsFlyoutUpda
   const originalQuery = useSelector(selectQuery);
   const selectedPatternsField = useSelector(selectPatternsField);
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
-
-  // craft query that will select for all documents with specific pattern
-  const createSearchPatternQuery = (patternsField: string) => {
-    const preparedQuery = getQueryWithSource(originalQuery);
-    return usingRegexPatterns
-      ? regexUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString)
-      : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
-  };
 
   // move to 'logs' flow with 'update search' query
   const redirectToLogsWithQuery = (query: string) => {
@@ -66,7 +57,13 @@ export const PatternsFlyoutUpdateSearch = ({ patternString }: PatternsFlyoutUpda
       onClick={() => {
         if (!selectedPatternsField) throw new Error('no patterns field');
 
-        const newQuery = createSearchPatternQuery(selectedPatternsField);
+        // craft query that will select for all documents with specific pattern
+        const newQuery = createSearchPatternQuery(
+          originalQuery,
+          selectedPatternsField,
+          usingRegexPatterns,
+          patternString
+        );
         redirectToLogsWithQuery(newQuery);
       }}
     >
