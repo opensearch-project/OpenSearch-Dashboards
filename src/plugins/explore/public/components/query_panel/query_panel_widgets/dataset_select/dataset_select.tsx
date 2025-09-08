@@ -108,9 +108,9 @@ export const DatasetSelectWidget = () => {
   const onFilter = useCallback(
     (detailedDataset: DetailedDataset) => {
       if (flavorId === ExploreFlavor.Traces) {
-        return detailedDataset.signalType === SignalType.Traces;
+        return detailedDataset.signalType === SignalType.TRACES;
       }
-      return detailedDataset.signalType !== SignalType.Traces;
+      return detailedDataset.signalType !== SignalType.TRACES;
     },
     [flavorId]
   );
