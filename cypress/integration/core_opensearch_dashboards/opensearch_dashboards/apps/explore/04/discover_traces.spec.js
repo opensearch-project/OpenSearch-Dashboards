@@ -17,16 +17,17 @@ const workspaceName = getRandomizedWorkspaceName();
 const traceTestSuite = () => {
   describe('Trace Exploration Tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithTraces(workspaceName, [TRACE_INDEX]);
+      cy.explore.setupWorkspaceAndDataSourceWithTraces(workspaceName, [TRACE_INDEX]);
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndTraces(workspaceName, [TRACE_INDEX]);
+      cy.explore.cleanupWorkspaceAndDataSourceAndTraces(workspaceName, [TRACE_INDEX]);
     });
 
     it('should show empty state when no index pattern exists', function () {
-      cy.osd.navigateToTracesViaLogsUrl({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
+        page: 'explore/traces',
         isEnhancement: true,
       });
       cy.getElementByTestId('discoverNoIndexPatterns').should('be.visible');
@@ -46,9 +47,9 @@ const traceTestSuite = () => {
         signalType: 'traces',
       });
 
-      // Navigate to traces page
-      cy.osd.navigateToTracesViaLogsUrl({
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
+        page: 'explore/traces',
         isEnhancement: true,
       });
 

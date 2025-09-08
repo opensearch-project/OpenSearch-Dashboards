@@ -434,37 +434,6 @@ cy.osd.add('cleanupWorkspaceAndDataSourceAndIndices', (workspaceName, indices) =
   }
 });
 
-cy.osd.add('setupWorkspaceAndDataSourceWithTraces', (workspaceName, traceIndices) => {
-  // Load trace test data
-  cy.osd.setupTestData(
-    PATHS.SECONDARY_ENGINE,
-    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.mapping.json`),
-    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.data.ndjson`)
-  );
-
-  // Add data source
-  cy.osd.addDataSource({
-    name: DATASOURCE_NAME,
-    url: PATHS.SECONDARY_ENGINE,
-    authType: 'no_auth',
-  });
-
-  // delete any old workspaces and potentially conflicting one
-  cy.deleteWorkspaceByName(workspaceName);
-  cy.osd.deleteAllOldWorkspaces();
-
-  cy.visit('/app/home');
-  cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
-});
-
-cy.osd.add('cleanupWorkspaceAndDataSourceAndTraces', (workspaceName, traceIndices) => {
-  cy.deleteWorkspaceByName(workspaceName);
-  cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-  for (const index of traceIndices) {
-    cy.osd.deleteIndex(index);
-  }
-});
-
 cy.osd.add('ensureTopNavExists', () => {
   const MAX_RETRY = 3;
 
@@ -616,34 +585,4 @@ cy.osd.add('verifyResultsCount', (count) => {
 cy.osd.add('verifyResultsError', (error) => {
   cy.getElementByTestId('queryResultError').click();
   cy.getElementByTestId('textBreakWord').contains(error);
-});
-
-// TODO: Replace once we have APM datasource
-// Navigate to traces page by getting logs URL and replacing /logs with /traces
-cy.osd.add('navigateToTracesViaLogsUrl', (opts) => {
-  const { workspaceName, isEnhancement = false } = opts;
-
-  // First navigate to logs page to get the URL structure
-  cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName: workspaceName,
-    page: 'explore/logs',
-    isEnhancement: isEnhancement,
-  });
-
-  // Get the current URL and modify it to point to traces
-  cy.url().then((logsUrl) => {
-    // Replace /logs with /traces and remove everything after /traces
-    const baseUrl = logsUrl.replace('/logs', '/traces');
-    const tracesIndex = baseUrl.indexOf('/traces');
-    const tracesUrl = baseUrl.substring(0, tracesIndex + '/traces'.length);
-    cy.log(`Navigating from logs URL: ${logsUrl} to traces URL: ${tracesUrl}`);
-    cy.visit(tracesUrl);
-  });
-
-  cy.osd.waitForLoader(isEnhancement);
-
-  // On a new session, a syntax helper popover appears, which obstructs the typing within the query
-  // editor. Clicking on a random element removes the popover.
-  cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
-  cy.wait(1000);
 });
