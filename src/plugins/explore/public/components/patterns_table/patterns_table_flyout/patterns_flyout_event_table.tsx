@@ -48,6 +48,7 @@ export const PatternsFlyoutEventTable = ({
 
   const [fetchedItems, setFetchedItems] = useState<EventTableItem[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
+  const [tableLoading, setTableLoading] = useState(false);
 
   const eventResults = async (page: number) => {
     /**
@@ -98,9 +99,11 @@ export const PatternsFlyoutEventTable = ({
     });
 
     setFetchedItems(items);
+    setTableLoading(false);
   };
 
   useEffect(() => {
+    setTableLoading(true);
     eventResults(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -132,9 +135,11 @@ export const PatternsFlyoutEventTable = ({
         hidePerPageOptions: true,
       }}
       onChange={({ page: { index } }: CriteriaWithPagination<EventTableItem>) => {
+        setTableLoading(true);
         setPageIndex(index);
         eventResults(index);
       }}
+      loading={tableLoading}
     />
   );
 };
