@@ -20,6 +20,7 @@ import { generateColorBySchema, getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
+import { getUnitById } from '../style_panel/unit/collection';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -52,6 +53,14 @@ export const createSingleMetric = (
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
   const isValidNumber =
     calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
+
+  const selectedUnit = getUnitById(styleOptions?.unitId);
+
+  const targetValue = calculatedValue || 0;
+  const displayValue =
+    selectedUnit && selectedUnit?.display
+      ? selectedUnit?.display(targetValue || 0, selectedUnit?.symbol)
+      : `${Math.round(targetValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`;
 
   function generateColorConditions(field: string, ranges: RangeValue[], color: ColorSchemas) {
     const colors = generateColorBySchema(ranges.length + 1, color);
@@ -118,26 +127,20 @@ export const createSingleMetric = (
 
   const markLayer: any = {
     data: {
-      values: [{ value: calculatedValue ?? '-' }],
+      values: [{ value: displayValue ?? '-' }],
     },
-    transform: [
-      {
-        calculate: "format(datum.value, '.2f')",
-        as: 'formattedValue',
-      },
-    ],
     mark: {
       type: 'text',
       align: 'center',
       baseline: 'middle',
-      fontSize: valueFontSize ? valueFontSize : { expr: '8*textSize' },
+      fontSize: valueFontSize ? valueFontSize : { expr: '6*textSize' },
       dy: valueFontSize ? -valueFontSize / 8 : { expr: '-textSize' },
       color: colorPalette.text,
     },
     encoding: {
       text: {
-        field: isValidNumber ? 'formattedValue' : 'value',
-        type: isValidNumber ? 'quantitative' : 'nominal',
+        field: 'value',
+        type: 'nominal',
       },
     },
   };

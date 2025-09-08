@@ -13,6 +13,7 @@ import {
 } from './gauge_chart_utils';
 import { calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
+import { getUnitById } from '../style_panel/unit/collection';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
@@ -44,6 +45,13 @@ export const createGauge = (
 
   const targetValue = calculatedValue || 0;
 
+  const selectedUnit = getUnitById(styleOptions?.unitId);
+
+  const displayValue =
+    selectedUnit && selectedUnit?.display
+      ? selectedUnit?.display(targetValue, selectedUnit?.symbol)
+      : `${Math.round(targetValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`;
+
   const minBase = styleOptions?.min || 0;
   const maxBase = styleOptions?.max || maxNumber;
 
@@ -69,7 +77,7 @@ export const createGauge = (
     { name: 'centerX', expr: 'width/2' },
     { name: 'centerY', expr: 'height/2 + outerRadius/4' },
     { name: 'radiusRef', expr: 'min(width/2, height/2)' },
-    { name: 'outerRadius', expr: 'radiusRef * 0.9' },
+    { name: 'outerRadius', expr: 'radiusRef * 1.1' },
     { name: 'innerRadius', expr: 'outerRadius - outerRadius * 0.25' },
 
     { name: 'backgroundColor', value: '#cbd1d6' },
@@ -80,6 +88,7 @@ export const createGauge = (
     { name: 'fontColor', value: colors.text },
 
     { name: 'mainValue', value: targetValue },
+    { name: 'displayValue', value: displayValue },
     {
       name: 'usedValue',
       expr: 'min(max(minValue, mainValue), maxValue)',
@@ -147,11 +156,15 @@ export const createGauge = (
         align: 'center',
         y: { expr: 'centerY' },
         x: { expr: 'centerX' },
-        dy: { expr: '-fontFactor*30' },
-        fontSize: { expr: 'fontFactor * 30' },
+        dy: { expr: `-fontFactor*30 * ${selectedUnit?.fontScale ?? 1}` },
+        fontSize: { expr: `fontFactor * 25 * ${selectedUnit?.fontScale ?? 1}` },
         fill: { expr: 'fillColor' },
       },
-      encoding: { text: { value: { expr: "format(mainValue, '.1f')" } } },
+      encoding: {
+        text: {
+          value: { expr: 'displayValue' },
+        },
+      },
     },
     ...titleLayer,
   ];
