@@ -133,8 +133,12 @@ export const createSingleMetric = (
       type: 'text',
       align: 'center',
       baseline: 'middle',
-      fontSize: valueFontSize ? valueFontSize : { expr: '6*textSize' },
-      dy: valueFontSize ? -valueFontSize / 8 : { expr: '-textSize' },
+      fontSize: valueFontSize
+        ? valueFontSize
+        : { expr: `5*textSize * ${selectedUnit?.fontScale ?? 1}` },
+      dy: valueFontSize
+        ? -valueFontSize / 8
+        : { expr: `-textSize* ${selectedUnit?.fontScale ?? 1}` },
       color: colorPalette.text,
     },
     encoding: {

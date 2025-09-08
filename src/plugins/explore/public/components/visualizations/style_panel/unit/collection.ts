@@ -49,13 +49,7 @@ const lengthUnits = [
   { symbol: 'mi', value: 1609.344 }, // 1 mile = 1609.344 meters
 ];
 
-const transformi18n = (name: string) => {
-  return i18n.translate(`explore.stylePanel.unit.${name}`, {
-    defaultMessage: name,
-  });
-};
-
-const shortNumber = (num: number) => {
+export const shortNumber = (num: number) => {
   const units = ['', 'K', 'M', 'B', 'T', 'Q'];
   let unitIndex = 0;
   let n = num;
@@ -72,7 +66,7 @@ const currencyFormat = (num: number, symbol?: string) => {
   return `${symbol ? symbol : ''} ${Math.round(num * 100) / 100}`;
 };
 
-const computing = (
+export const computing = (
   num: number,
   units: Array<{ symbol: string; value: number }>,
   symbol?: string
@@ -91,7 +85,7 @@ const computing = (
   return `${Math.round(displayNum * 100) / 100} ${units[i].symbol}`;
 };
 
-const computingDate = (num: number, symbol?: string) => {
+export const computingDate = (num: number, symbol?: string) => {
   const numDate = new Date(num);
   const utcMillis = Date.now();
 
@@ -110,7 +104,6 @@ const computingDate = (num: number, symbol?: string) => {
           return `${value} ${unit.symbol} ${suffix}`;
         }
       }
-      return '0ms ago';
     default:
       return numDate.toUTCString();
   }
@@ -118,146 +111,174 @@ const computingDate = (num: number, symbol?: string) => {
 
 export const UnitsCollection: Record<string, Unit> = {
   misc: {
-    name: transformi18n('Misc'),
+    name: i18n.translate('explore.stylePanel.unit.misc', { defaultMessage: 'Misc' }),
     units: [
       {
         id: 'number',
-        name: transformi18n('Number'),
+        name: i18n.translate('explore.stylePanel.unit.number', { defaultMessage: 'Number' }),
       },
       {
         id: 'integer',
-        name: transformi18n('Integer'),
+        name: i18n.translate('explore.stylePanel.unit.integer', { defaultMessage: 'Integer' }),
         display: (val: number) => Math.round(val),
       },
       {
         id: 'percentage',
-        name: transformi18n('Percentage'),
+        name: i18n.translate('explore.stylePanel.unit.percentage', {
+          defaultMessage: 'Percentage',
+        }),
         symbol: '%',
       },
-      { id: 'short', name: transformi18n('Short'), display: (val: number) => shortNumber(val) },
+      {
+        id: 'short',
+        name: i18n.translate('explore.stylePanel.unit.short', { defaultMessage: 'Short' }),
+        display: (val: number) => shortNumber(val),
+      },
     ],
   },
 
   // align with grafana
   acceleration: {
-    name: transformi18n('Acceleration'),
+    name: i18n.translate('explore.stylePanel.unit.acceleration', {
+      defaultMessage: 'Acceleration',
+    }),
     units: [
       {
         id: 'meters',
-        name: transformi18n('Meters/sec²'),
+        name: i18n.translate('explore.stylePanel.unit.metersPerSec', {
+          defaultMessage: 'Meters/sec²',
+        }),
         symbol: 'm/sec²',
+        fontScale: 0.8,
       },
       {
         id: 'feet',
-        name: transformi18n('Feet/sec²'),
+        name: i18n.translate('explore.stylePanel.unit.feetPerSec', { defaultMessage: 'Feet/sec²' }),
         symbol: 'f/sec²',
+        fontScale: 0.8,
       },
       {
         id: 'g_unit',
-        name: transformi18n('G unit'),
+        name: i18n.translate('explore.stylePanel.unit.gUnit', { defaultMessage: 'G unit' }),
         symbol: 'g',
       },
     ],
   },
   // align with grafana
   angle: {
-    name: transformi18n('Angle'),
+    name: i18n.translate('explore.stylePanel.unit.angle', { defaultMessage: 'Angle' }),
     units: [
       {
         id: 'degree',
-        name: transformi18n('Degrees (°)'),
+        name: i18n.translate('explore.stylePanel.unit.degrees', { defaultMessage: 'Degrees (°)' }),
         symbol: '°',
       },
       {
         id: 'radian',
-        name: transformi18n('Radians'),
+        name: i18n.translate('explore.stylePanel.unit.radians', { defaultMessage: 'Radians' }),
         symbol: 'rad',
       },
       {
         id: 'grad',
-        name: transformi18n('Gradian'),
+        name: i18n.translate('explore.stylePanel.unit.gradian', { defaultMessage: 'Gradian' }),
         symbol: 'grad',
       },
       {
         id: 'arcmin',
-        name: transformi18n('Arc Minutes'),
+        name: i18n.translate('explore.stylePanel.unit.arcMinutes', {
+          defaultMessage: 'Arc Minutes',
+        }),
         symbol: 'arcmin',
+        fontScale: 0.8,
       },
       {
         id: 'arcsec',
-        name: transformi18n('Arc Seconds'),
+        name: i18n.translate('explore.stylePanel.unit.arcSeconds', {
+          defaultMessage: 'Arc Seconds',
+        }),
         symbol: 'arcsec',
+        fontScale: 0.8,
       },
     ],
   },
 
   // align with grafana
   area: {
-    name: transformi18n('Area'),
+    name: i18n.translate('explore.stylePanel.unit.area', { defaultMessage: 'Area' }),
     units: [
       {
         id: 'square_meters',
-        name: transformi18n('Square Meters (m²)'),
+        name: i18n.translate('explore.stylePanel.unit.squareMeters', {
+          defaultMessage: 'Square Meters (m²)',
+        }),
         symbol: 'm2',
       },
       {
         id: 'square_feet',
-        name: transformi18n('Square Feet (ft²)'),
+        name: i18n.translate('explore.stylePanel.unit.squareFeet', {
+          defaultMessage: 'Square Feet (ft²)',
+        }),
         symbol: 'ft2',
       },
       {
         id: 'square_miles',
-        name: transformi18n('Square Miles (mi²)'),
+        name: i18n.translate('explore.stylePanel.unit.squareMiles', {
+          defaultMessage: 'Square Miles (mi²)',
+        }),
         symbol: 'mi2',
       },
       {
         id: 'acres',
-        name: transformi18n('Acres (ac)'),
+        name: i18n.translate('explore.stylePanel.unit.acres', { defaultMessage: 'Acres (ac)' }),
         symbol: 'ac',
       },
       {
         id: 'hectares',
-        name: transformi18n('Hectares (ha)'),
+        name: i18n.translate('explore.stylePanel.unit.hectares', {
+          defaultMessage: 'Hectares (ha)',
+        }),
         symbol: 'ha',
       },
     ],
   },
   currency: {
-    name: transformi18n('Currency'),
+    name: i18n.translate('explore.stylePanel.unit.currency', { defaultMessage: 'Currency' }),
     units: [
       {
         id: 'dollars',
-        name: transformi18n('Dollars ($)'),
+        name: i18n.translate('explore.stylePanel.unit.dollars', { defaultMessage: 'Dollars ($)' }),
         symbol: '$',
         display: (val, sy) => currencyFormat(val, sy),
       },
       {
         id: 'pounds',
-        name: transformi18n('Pounds (£)'),
+        name: i18n.translate('explore.stylePanel.unit.pounds', { defaultMessage: 'Pounds (£)' }),
         symbol: '£',
         display: (val, sy) => currencyFormat(val, sy),
       },
       {
         id: 'euro',
-        name: transformi18n('Euros (€)'),
+        name: i18n.translate('explore.stylePanel.unit.euro', { defaultMessage: 'Euros (€)' }),
         symbol: '€',
         display: (val, sy) => currencyFormat(val, sy),
       },
       {
         id: 'yuan',
-        name: transformi18n('Chinese Yuan (¥)'),
+        name: i18n.translate('explore.stylePanel.unit.yuan', {
+          defaultMessage: 'Chinese Yuan (¥)',
+        }),
         symbol: '¥',
         display: (val, sy) => currencyFormat(val, sy),
       },
       {
         id: 'yen',
-        name: transformi18n('Yen (¥)'),
+        name: i18n.translate('explore.stylePanel.unit.yen', { defaultMessage: 'Yen (¥)' }),
         symbol: '¥',
         display: (val, sy) => currencyFormat(val, sy),
       },
       {
         id: 'rubles',
-        name: transformi18n('Rubles (₽)'),
+        name: i18n.translate('explore.stylePanel.unit.rubles', { defaultMessage: 'Rubles (₽)' }),
         symbol: '₽',
         display: (val, sy) => currencyFormat(val, sy),
       },
@@ -265,98 +286,120 @@ export const UnitsCollection: Record<string, Unit> = {
   },
 
   temperature: {
-    name: transformi18n('Temperature'),
+    name: i18n.translate('explore.stylePanel.unit.temperature', { defaultMessage: 'Temperature' }),
     units: [
       {
         id: 'celsius',
-        name: transformi18n('Celsius (°C)'),
+        name: i18n.translate('explore.stylePanel.unit.celsius', { defaultMessage: 'Celsius (°C)' }),
         symbol: '°C',
       },
       {
         id: 'fahrenheit',
-        name: transformi18n('Fahrenheit (°F)'),
+        name: i18n.translate('explore.stylePanel.unit.fahrenheit', {
+          defaultMessage: 'Fahrenheit (°F)',
+        }),
         symbol: '°F',
       },
       {
         id: 'kelvin',
-        name: transformi18n('Kelvin (K)'),
+        name: i18n.translate('explore.stylePanel.unit.kelvin', { defaultMessage: 'Kelvin (K)' }),
         symbol: 'K',
       },
     ],
   },
 
   data: {
-    name: transformi18n('Data'),
+    name: i18n.translate('explore.stylePanel.unit.data', { defaultMessage: 'Data' }),
     units: [
       {
         id: 'bits',
-        name: transformi18n('bits(b)'),
+        name: i18n.translate('explore.stylePanel.unit.bits', { defaultMessage: 'bits(b)' }),
         symbol: 'b',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'bytes',
-        name: transformi18n('bytes(B)'),
+        name: i18n.translate('explore.stylePanel.unit.bytes', { defaultMessage: 'bytes(B)' }),
         symbol: 'B',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'kilobytes',
-        name: transformi18n('kilobytes(kB)'),
+        name: i18n.translate('explore.stylePanel.unit.kilobytes', {
+          defaultMessage: 'kilobytes(kB)',
+        }),
         symbol: 'kB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'kibibytes',
-        name: transformi18n('kibibytes(KiB)'),
+        name: i18n.translate('explore.stylePanel.unit.kibibytes', {
+          defaultMessage: 'kibibytes(KiB)',
+        }),
         symbol: 'KiB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'megabytes',
-        name: transformi18n('megabytes(MB)'),
+        name: i18n.translate('explore.stylePanel.unit.megabytes', {
+          defaultMessage: 'megabytes(MB)',
+        }),
         symbol: 'MB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'mebibytes',
-        name: transformi18n('mebibytes(MiB)'),
+        name: i18n.translate('explore.stylePanel.unit.mebibytes', {
+          defaultMessage: 'mebibytes(MiB)',
+        }),
         symbol: 'MiB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'gigabytes',
-        name: transformi18n('gigabytes(GB)'),
+        name: i18n.translate('explore.stylePanel.unit.gigabytes', {
+          defaultMessage: 'gigabytes(GB)',
+        }),
         symbol: 'GB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'gibibytes',
-        name: transformi18n('gibibytes(GiB)'),
+        name: i18n.translate('explore.stylePanel.unit.gibibytes', {
+          defaultMessage: 'gibibytes(GiB)',
+        }),
         symbol: 'GiB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'terabytes',
-        name: transformi18n('terabytes(TB)'),
+        name: i18n.translate('explore.stylePanel.unit.terabytes', {
+          defaultMessage: 'terabytes(TB)',
+        }),
         symbol: 'TB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'tebibytes',
-        name: transformi18n('tebibytes(TiB)'),
+        name: i18n.translate('explore.stylePanel.unit.tebibytes', {
+          defaultMessage: 'tebibytes(TiB)',
+        }),
         symbol: 'TiB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'petabytes',
-        name: transformi18n('petabytes(PB)'),
+        name: i18n.translate('explore.stylePanel.unit.petabytes', {
+          defaultMessage: 'petabytes(PB)',
+        }),
         symbol: 'PB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
       {
         id: 'pebibytes',
-        name: transformi18n('pebibytes(PiB)'),
+        name: i18n.translate('explore.stylePanel.unit.pebibytes', {
+          defaultMessage: 'pebibytes(PiB)',
+        }),
         symbol: 'PiB',
         display: (val, sy) => computing(val, dataUnits, sy),
       },
@@ -364,53 +407,55 @@ export const UnitsCollection: Record<string, Unit> = {
   },
 
   time: {
-    name: transformi18n('Time'),
+    name: i18n.translate('explore.stylePanel.unit.time', { defaultMessage: 'Time' }),
     units: [
       {
         id: 'year',
-        name: transformi18n('Year'),
+        name: i18n.translate('explore.stylePanel.unit.year', { defaultMessage: 'Year' }),
         symbol: 'years',
         display: (val, sy) => computing(val, timeUnits, sy),
       },
       {
         id: 'month',
-        name: transformi18n('Month'),
+        name: i18n.translate('explore.stylePanel.unit.month', { defaultMessage: 'Month' }),
         symbol: 'months',
         display: (val, sy) => computing(val, timeUnits, sy),
       },
       {
         id: 'week',
-        name: transformi18n('Week'),
+        name: i18n.translate('explore.stylePanel.unit.week', { defaultMessage: 'Week' }),
         symbol: 'weeks',
         display: (val, sy) => computing(val, timeUnits, sy),
       },
       {
         id: 'day',
-        name: transformi18n('Day'),
+        name: i18n.translate('explore.stylePanel.unit.day', { defaultMessage: 'Day' }),
         symbol: 'days',
         display: (val, sy) => computing(val, timeUnits, sy),
       },
       {
         id: 'hour',
-        name: transformi18n('Hour'),
+        name: i18n.translate('explore.stylePanel.unit.hour', { defaultMessage: 'Hour' }),
         symbol: 'hours',
         display: (val, sy) => computing(val, timeUnits, sy),
       },
       {
         id: 'minute',
-        name: transformi18n('Minute'),
+        name: i18n.translate('explore.stylePanel.unit.minute', { defaultMessage: 'Minute' }),
         symbol: 'minutes',
         display: (val, sy) => computing(val, timeUnits, sy),
       },
       {
         id: 'second',
-        name: transformi18n('Second'),
+        name: i18n.translate('explore.stylePanel.unit.second', { defaultMessage: 'Second' }),
         symbol: 'seconds',
         display: (val, sy) => computing(val, timeUnits, sy),
       },
       {
         id: 'millisecond',
-        name: transformi18n('Millisecond'),
+        name: i18n.translate('explore.stylePanel.unit.millisecond', {
+          defaultMessage: 'Millisecond',
+        }),
         symbol: 'milliseconds',
         display: (val, sy) => computing(val, timeUnits, sy),
       },
@@ -418,95 +463,107 @@ export const UnitsCollection: Record<string, Unit> = {
   },
 
   date: {
-    name: transformi18n('Date & time'),
+    name: i18n.translate('explore.stylePanel.unit.dateTime', { defaultMessage: 'Date & time' }),
     units: [
       {
         id: 'dateTimeAsIso',
         symbol: 'iso',
-        name: transformi18n('Datetime ISO'),
+        name: i18n.translate('explore.stylePanel.unit.datetimeIso', {
+          defaultMessage: 'Datetime ISO',
+        }),
         display: (val, sy) => computingDate(val, sy),
-        fontScale: 0.5,
+        fontScale: 0.4,
       },
       {
         id: 'dateTimeFromNow',
         symbol: 'fromNow',
-        name: transformi18n('From Now'),
+        name: i18n.translate('explore.stylePanel.unit.fromNow', { defaultMessage: 'From Now' }),
         display: (val, sy) => computingDate(val, sy),
       },
     ],
   },
 
   mass: {
-    name: transformi18n('Mass'),
+    name: i18n.translate('explore.stylePanel.unit.mass', { defaultMessage: 'Mass' }),
     units: [
       {
         id: 'milligram',
-        name: transformi18n('milligram (mg)'),
+        name: i18n.translate('explore.stylePanel.unit.milligram', {
+          defaultMessage: 'milligram (mg)',
+        }),
         symbol: 'mg',
         display: (val, sy) => computing(val, massUnits, sy),
       },
       {
         id: 'gram',
-        name: transformi18n('gram (g)'),
+        name: i18n.translate('explore.stylePanel.unit.gram', { defaultMessage: 'gram (g)' }),
         symbol: 'g',
         display: (val, sy) => computing(val, massUnits, sy),
       },
       {
         id: 'pound_mass',
-        name: transformi18n('pound (lb)'),
+        name: i18n.translate('explore.stylePanel.unit.pound', { defaultMessage: 'pound (lb)' }),
         symbol: 'lb',
         display: (val, sy) => computing(val, massUnits, sy),
       },
       {
         id: 'kilogram',
-        name: transformi18n('kilogram (kg)'),
+        name: i18n.translate('explore.stylePanel.unit.kilogram', {
+          defaultMessage: 'kilogram (kg)',
+        }),
         symbol: 'kg',
         display: (val, sy) => computing(val, massUnits, sy),
       },
       {
         id: 'metric',
-        name: transformi18n('metric ton (t)'),
+        name: i18n.translate('explore.stylePanel.unit.metricTon', {
+          defaultMessage: 'metric ton (t)',
+        }),
         symbol: 't',
         display: (val, sy) => computing(val, massUnits, sy),
       },
     ],
   },
   length: {
-    name: transformi18n('Length'),
+    name: i18n.translate('explore.stylePanel.unit.length', { defaultMessage: 'Length' }),
     units: [
       {
         id: 'millimeter',
-        name: transformi18n('millimeter (mm)'),
+        name: i18n.translate('explore.stylePanel.unit.millimeter', {
+          defaultMessage: 'millimeter (mm)',
+        }),
         symbol: 'mm',
         display: (val, sy) => computing(val, lengthUnits, sy),
       },
       {
         id: 'inch',
-        name: transformi18n('inch (in)'),
+        name: i18n.translate('explore.stylePanel.unit.inch', { defaultMessage: 'inch (in)' }),
         symbol: 'in',
         display: (val, sy) => computing(val, lengthUnits, sy),
       },
       {
         id: 'feet',
-        name: transformi18n('feet (ft)'),
+        name: i18n.translate('explore.stylePanel.unit.feet', { defaultMessage: 'feet (ft)' }),
         symbol: 'ft',
         display: (val, sy) => computing(val, lengthUnits, sy),
       },
       {
         id: 'meter',
-        name: transformi18n('meter (m)'),
+        name: i18n.translate('explore.stylePanel.unit.meter', { defaultMessage: 'meter (m)' }),
         symbol: 'm',
         display: (val, sy) => computing(val, lengthUnits, sy),
       },
       {
         id: 'kilometer',
-        name: transformi18n('kilometer (km)'),
+        name: i18n.translate('explore.stylePanel.unit.kilometer', {
+          defaultMessage: 'kilometer (km)',
+        }),
         symbol: 'km',
         display: (val, sy) => computing(val, lengthUnits, sy),
       },
       {
         id: 'mile',
-        name: transformi18n('mile (mi)'),
+        name: i18n.translate('explore.stylePanel.unit.mile', { defaultMessage: 'mile (mi)' }),
         symbol: 'mi',
         display: (val, sy) => computing(val, lengthUnits, sy),
       },
