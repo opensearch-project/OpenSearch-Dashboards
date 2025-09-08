@@ -37,6 +37,112 @@ describe('UnitsCollection', () => {
     expect(dollarUnit?.display).toBeDefined();
     expect(typeof dollarUnit?.display).toBe('function');
   });
+
+  it('should have all expected currency units', () => {
+    const currencyUnits = UnitsCollection.currency.units;
+    const expectedCurrencies = ['dollars', 'pounds', 'euro', 'yuan', 'yen', 'rubles'];
+
+    expectedCurrencies.forEach((currency) => {
+      const unit = currencyUnits.find((u) => u.id === currency);
+      expect(unit).toBeDefined();
+      expect(unit?.display).toBeDefined();
+      expect(typeof unit?.display).toBe('function');
+    });
+  });
+
+  it('should format currency values using display function', () => {
+    const dollarUnit = getUnitById('dollars');
+    expect(dollarUnit?.display?.(100, '$')).toBe('$ 100');
+
+    const euroUnit = getUnitById('euro');
+    expect(euroUnit?.display?.(50.75, '€')).toBe('€ 50.75');
+
+    const poundUnit = getUnitById('pounds');
+    expect(poundUnit?.display?.(25.99, '£')).toBe('£ 25.99');
+  });
+
+  it('should have correct symbols for each currency', () => {
+    expect(getUnitById('dollars')?.symbol).toBe('$');
+    expect(getUnitById('pounds')?.symbol).toBe('£');
+    expect(getUnitById('euro')?.symbol).toBe('€');
+    expect(getUnitById('yuan')?.symbol).toBe('¥');
+    expect(getUnitById('yen')?.symbol).toBe('¥');
+    expect(getUnitById('rubles')?.symbol).toBe('₽');
+  });
+
+  it('should have all expected data units', () => {
+    const data = UnitsCollection.data.units;
+    const expectedDataUnits = [
+      'bits',
+      'bytes',
+      'kilobytes',
+      'kibibytes',
+      'megabytes',
+      'mebibytes',
+      'gigabytes',
+      'gibibytes',
+      'terabytes',
+      'tebibytes',
+      'petabytes',
+      'pebibytes',
+    ];
+
+    expectedDataUnits.forEach((d) => {
+      const unit = data.find((u) => u.id === d);
+      expect(unit).toBeDefined();
+      expect(unit?.display).toBeDefined();
+      expect(typeof unit?.display).toBe('function');
+    });
+  });
+
+  it('should have all expected time units', () => {
+    const data = UnitsCollection.time.units;
+    const expectedTimeUnits = [
+      'year',
+      'month',
+      'week',
+      'day',
+      'hour',
+      'minute',
+      'second',
+      'millisecond',
+    ];
+
+    expectedTimeUnits.forEach((d) => {
+      const unit = data.find((u) => u.id === d);
+      expect(unit).toBeDefined();
+      expect(unit?.display).toBeDefined();
+      expect(typeof unit?.display).toBe('function');
+    });
+  });
+
+  it('should have all expected mass units', () => {
+    const data = UnitsCollection.mass.units;
+    const expectedMassUnits = ['milligram', 'gram', 'pound_mass', 'kilogram', 'metric'];
+
+    expectedMassUnits.forEach((d) => {
+      const unit = data.find((u) => u.id === d);
+      expect(unit).toBeDefined();
+      expect(unit?.symbol).toBeDefined();
+      expect(typeof unit?.symbol).toBe('string');
+      expect(unit?.display).toBeDefined();
+      expect(typeof unit?.display).toBe('function');
+    });
+  });
+
+  it('should have all expected length units', () => {
+    const data = UnitsCollection.length.units;
+    const expectedLengthUnits = ['millimeter', 'inch', 'feet', 'meter', 'kilometer', 'mile'];
+
+    expectedLengthUnits.forEach((d) => {
+      const unit = data.find((u) => u.id === d);
+      expect(unit).toBeDefined();
+      expect(unit?.symbol).toBeDefined();
+      expect(typeof unit?.symbol).toBe('string');
+      expect(unit?.display).toBeDefined();
+      expect(typeof unit?.display).toBe('function');
+    });
+  });
 });
 
 describe('getUnitById', () => {
@@ -178,7 +284,7 @@ describe('computingDate', () => {
 });
 
 describe('currencyFormat', () => {
-  it('should display currency symbol ', () => {
+  it('should display currency symbol', () => {
     const result = currencyFormat(12, '$');
     expect(result).toBe('$ 12');
   });
@@ -186,6 +292,13 @@ describe('currencyFormat', () => {
   it('should round to 2 decimal places', () => {
     const result = currencyFormat(12.1234, '$');
     expect(result).toBe('$ 12.12');
+  });
+
+  it('should handle different currency symbols', () => {
+    expect(currencyFormat(100, '€')).toBe('€ 100');
+    expect(currencyFormat(50, '£')).toBe('£ 50');
+    expect(currencyFormat(75, '¥')).toBe('¥ 75');
+    expect(currencyFormat(200, '₽')).toBe('₽ 200');
   });
 });
 

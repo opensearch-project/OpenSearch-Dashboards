@@ -68,4 +68,42 @@ describe('UnitPanel', () => {
     expect(screen.getByText('Currency')).toBeInTheDocument();
     expect(screen.getByText('Misc')).toBeInTheDocument();
   });
+
+  describe('Currency units', () => {
+    it('displays currency units when Currency category is selected', () => {
+      render(<UnitPanel onUnitChange={mockOnUnitChange} />);
+      fireEvent.click(screen.getByPlaceholderText('Select a unit'));
+      fireEvent.click(screen.getByText('Currency'));
+
+      expect(screen.getByText('Dollars ($)')).toBeInTheDocument();
+      expect(screen.getByText('Pounds (£)')).toBeInTheDocument();
+      expect(screen.getByText('Euros (€)')).toBeInTheDocument();
+      expect(screen.getByText('Chinese Yuan (¥)')).toBeInTheDocument();
+      expect(screen.getByText('Yen (¥)')).toBeInTheDocument();
+      expect(screen.getByText('Rubles (₽)')).toBeInTheDocument();
+    });
+
+    it('selects dollars currency unit', () => {
+      render(<UnitPanel onUnitChange={mockOnUnitChange} />);
+      fireEvent.click(screen.getByPlaceholderText('Select a unit'));
+      fireEvent.click(screen.getByText('Currency'));
+      fireEvent.click(screen.getByText('Dollars ($)'));
+
+      expect(mockOnUnitChange).toHaveBeenCalledWith('dollars');
+    });
+
+    it('selects euro currency unit', () => {
+      render(<UnitPanel onUnitChange={mockOnUnitChange} />);
+      fireEvent.click(screen.getByPlaceholderText('Select a unit'));
+      fireEvent.click(screen.getByText('Currency'));
+      fireEvent.click(screen.getByText('Euros (€)'));
+
+      expect(mockOnUnitChange).toHaveBeenCalledWith('euro');
+    });
+
+    it('displays selected currency unit name', () => {
+      render(<UnitPanel unit="dollars" onUnitChange={mockOnUnitChange} />);
+      expect(screen.getByDisplayValue('Dollars ($)')).toBeInTheDocument();
+    });
+  });
 });
