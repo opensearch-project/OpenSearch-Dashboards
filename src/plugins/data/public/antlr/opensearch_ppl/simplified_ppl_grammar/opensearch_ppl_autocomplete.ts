@@ -342,10 +342,19 @@ export function enrichAutocompleteResult(
     shouldSuggestConstraints,
     ...suggestionsFromRules
   } = processVisitedRules(rules, cursorTokenIndex, tokenStream);
+
+  const currentToken = tokenStream?.get(cursorTokenIndex);
+  const isInBackQuotes = currentToken?.type === OpenSearchPPLParser.BQUOTA_STRING;
+  const isInQuotes =
+    currentToken?.type === OpenSearchPPLParser.DQUOTA_STRING ||
+    currentToken?.type === OpenSearchPPLParser.SQUOTA_STRING;
+
   const result: OpenSearchPplAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
     suggestColumns: shouldSuggestColumns ? ({} as TableContextSuggestion) : undefined,
+    isInQuote: isInQuotes,
+    isInBackQuote: isInBackQuotes,
   };
   return result;
 }

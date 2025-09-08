@@ -160,9 +160,10 @@ export enum AxisRole {
   SIZE = 'size',
   Y_SECOND = 'y2',
   Value = 'value',
+  Time = 'time',
 }
 
-// for heatmap the axies can serve as value axis or category axis in 2 scienrios
+// for heatmap the axes can serve as value axis or category axis in 2 scenarios
 
 export interface Grid {
   showLines: boolean;
@@ -208,13 +209,40 @@ export interface RangeValue {
   min?: number;
   max?: number;
 }
+export interface Threshold {
+  value: number;
+  color: string;
+}
 
-export enum LabelAggregationType {
+export enum AggregationType {
   SUM = 'sum',
   MEAN = 'mean',
   MAX = 'max',
   MIN = 'min',
+  COUNT = 'count',
   NONE = 'none',
 }
 
+export interface BucketOptions {
+  aggregationType?: AggregationType;
+  // exclusive for time-series histogram
+  bucketTimeUnit?: TimeUnit;
+
+  // exclusive for numerical histogram
+  bucketSize?: number;
+  bucketCount?: number;
+}
+
+export enum TimeUnit {
+  AUTO = 'auto',
+  YEAR = 'year',
+  MONTH = 'yearmonth',
+  DATE = 'yearmonthdate',
+  HOUR = 'yearmonthdatehours',
+  MINUTE = 'yearmonthdatehoursminutes',
+  SECOND = 'yearmonthdatehoursminutesseconds',
+}
+
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
+
+export type PercentageColor = 'standard' | 'inverted';

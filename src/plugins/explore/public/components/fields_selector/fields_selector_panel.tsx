@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { IndexPattern, UI_SETTINGS } from '../../../../data/public';
+import { UI_SETTINGS } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import {
   addColumn,
@@ -99,7 +99,7 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
           })
         );
       }}
-      selectedIndexPattern={(dataset as unknown) as IndexPattern}
+      selectedDataSet={dataset}
       onAddFilter={onAddFilter}
       onCollapse={collapsePanel}
       isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}

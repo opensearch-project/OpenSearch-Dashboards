@@ -19,6 +19,7 @@ import {
   TraceHit,
 } from '../../../application/pages/traces/trace_details/public/traces/ppl_to_trace_hits';
 import { generateColorMap } from '../../../application/pages/traces/trace_details/public/traces/generate_color_map';
+import { navigateToTraceDetailsWithSpan } from '../../data_table/table_cell/trace_utils/trace_utils';
 
 const extractTraceIdFromHit = (hit: any): string | null => {
   for (const path of TRACE_ID_FIELD_PATHS) {
@@ -56,9 +57,10 @@ const isOnTracesFlavor = (): boolean => {
 };
 
 // Trace Details view component for the doc viewer accordion - Timeline only
-export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
+export function TraceDetailsView({ hit }: DocViewRenderProps) {
   const [transformedHits, setTransformedHits] = useState<TraceHit[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>(undefined);
 
   const {
     services: { data, chrome },
@@ -117,6 +119,20 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
       return {};
     }
   }, [transformedHits]);
+
+  // Navigation handler for span clicks in embedded mode
+  const handleSpanClickNavigation = React.useCallback(
+    (spanId: string) => {
+      if (traceInfo) {
+        navigateToTraceDetailsWithSpan({
+          traceId: traceInfo.traceId,
+          spanId,
+          dataset: traceInfo.dataset,
+        });
+      }
+    },
+    [traceInfo]
+  );
 
   // Load trace data when component mounts
   React.useEffect(() => {
@@ -205,8 +221,8 @@ export function TraceDetailsView({ hit, indexPattern }: DocViewRenderProps) {
           payloadData={JSON.stringify(transformedHits)}
           isGanttChartLoading={false}
           colorMap={colorMap}
-          onSpanSelect={undefined}
-          selectedSpanId={traceInfo.spanId || undefined}
+          onSpanSelect={handleSpanClickNavigation}
+          selectedSpanId={selectedSpanId || traceInfo.spanId || undefined}
           activeView="timeline"
           isEmbedded={true}
         />

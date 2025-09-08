@@ -66,7 +66,7 @@ export function useDebouncedNumericValue(
     max?: number;
     defaultValue?: number;
   } = {}
-): [number, (value: string | number) => void] {
+): [string | number, (value: string | number) => void] {
   const { delay = 500, min, max, defaultValue = 0 } = options;
 
   const [localValue, setDebouncedValue] = useDebouncedValue(value, onChange, delay);

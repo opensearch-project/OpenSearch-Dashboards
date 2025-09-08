@@ -175,20 +175,20 @@ export const findDefaultPatternsField = (services: ExploreServices): string => {
 
   if (firstHit && firstHit._source && filteredFields) {
     // Find the field with the longest value
-    let longestField = '';
-    let maxLength = 0;
+    const { longestField } = Object.entries(firstHit._source).reduce(
+      (acc, [field, value]) => {
+        // Check if the field exists in options
+        if (filteredFields.some((option) => option.name === field)) {
+          const valueLength = typeof value === 'string' ? value.length : 0;
 
-    Object.entries(firstHit._source).forEach(([field, value]) => {
-      // Check if the field exists in options
-      if (filteredFields.some((option) => option.name === field)) {
-        const valueLength = typeof value === 'string' ? value.length : 0;
-
-        if (valueLength > maxLength) {
-          maxLength = valueLength;
-          longestField = field;
+          if (valueLength > acc.maxLength) {
+            return { maxLength: valueLength, longestField: field };
+          }
         }
-      }
-    });
+        return acc;
+      },
+      { maxLength: 0, longestField: '' }
+    );
 
     if (longestField) {
       services.store.dispatch(setPatternsField(longestField));

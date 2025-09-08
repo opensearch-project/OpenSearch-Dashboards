@@ -48,7 +48,7 @@ import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { workspacesServiceMock } from './workspace/workspaces_service.mock';
-
+import { keyboardShortcutServiceMock } from './keyboard_shortcut/keyboard_shortcut_service.mock';
 export { applicationServiceMock } from './application/application_service.mock';
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { chromeServiceMock } from './chrome/chrome_service.mock';
@@ -62,6 +62,7 @@ export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { workspacesServiceMock } from './workspace/workspaces_service.mock';
+export { keyboardShortcutServiceMock } from './keyboard_shortcut/keyboard_shortcut_service.mock';
 
 function createCoreSetupMock({
   basePath = '',
@@ -89,6 +90,7 @@ function createCoreSetupMock({
       getBranding: injectedMetadataServiceMock.createSetupContract().getBranding,
     },
     workspaces: workspacesServiceMock.createSetupContract(),
+    keyboardShortcut: keyboardShortcutServiceMock.createSetup(),
   };
 
   return mock;
@@ -111,6 +113,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
     },
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
     workspaces: workspacesServiceMock.createStartContract(),
+    keyboardShortcut: keyboardShortcutServiceMock.createStart(),
   };
 
   return mock;

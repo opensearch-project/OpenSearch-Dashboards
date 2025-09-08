@@ -113,6 +113,7 @@ describe('ResultsActionBar', () => {
   test('should hide add to dashboard button and export button if current tab is patterns', () => {
     const patternsStore = mockStore({
       ui: { activeTabId: 'explore_patterns_tab' },
+      tab: { patterns: { patternsField: 'message' } },
     });
     render(
       <Provider store={patternsStore}>

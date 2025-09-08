@@ -12,15 +12,14 @@ export interface IDiscoverFieldHeaderProps {
 }
 
 export function DiscoverFieldHeader({ onCollapse }: IDiscoverFieldHeaderProps) {
+  const fieldsHeaderText = i18n.translate('explore.discover.fieldChooser.Header', {
+    defaultMessage: 'Fields',
+  });
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs">
       <EuiFlexItem>
         <EuiText size="xs">
-          <h5>
-            {i18n.translate('explore.discover.fieldChooser.Header', {
-              defaultMessage: 'Fields',
-            })}
-          </h5>
+          <h5>{fieldsHeaderText}</h5>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
