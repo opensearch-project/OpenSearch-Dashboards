@@ -5,6 +5,7 @@
 
 import moment from 'moment';
 import { Logger } from 'opensearch-dashboards/server';
+import { OpenSearchClient } from 'src/core/server';
 
 /**
  * Normalize the time string and only accept the specific formats
@@ -102,7 +103,7 @@ export function parseTimeRangeXML(
  */
 export async function getTimestampFieldClusters(
   indexName: string,
-  client: any,
+  client: OpenSearchClient,
   logger: Logger
 ): Promise<string[][]> {
   if (!indexName) {
@@ -196,11 +197,11 @@ export async function getTimestampFieldClusters(
 export async function getOtherTimeFields(
   indexName: string,
   selectedTimeField: string,
-  client: any,
+  client: OpenSearchClient,
   logger: Logger,
   getTimestampFieldClustersFn?: (
     indexName: string,
-    client: any,
+    client: OpenSearchClient,
     logger: Logger
   ) => Promise<string[][]>
 ): Promise<string[]> {
