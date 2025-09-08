@@ -40,7 +40,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 export enum SignalType {
   LOGS = 'logs',
   METRICS = 'metrics',
-  Traces = 'traces',
+  TRACES = 'traces',
 }
 
 export interface IIndexPattern {

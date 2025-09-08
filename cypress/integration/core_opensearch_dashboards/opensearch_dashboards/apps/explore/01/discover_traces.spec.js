@@ -3,23 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DATASOURCE_NAME } from '../../../../../../utils/apps/explore/constants';
+import {
+  DATASOURCE_NAME,
+  TRACE_INDEX_PATTERN,
+  TRACE_TIME_FIELD,
+  TRACE_INDEX,
+} from '../../../../../../utils/apps/explore/constants';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-import { INDEX_WITH_TIME_1 } from '../../../../../../utils/constants';
 
 const workspaceName = getRandomizedWorkspaceName();
-const INDEX_PATTERN_NAME = 'otel-v1-apm-span-*';
-const TIME_FIELD_NAME = 'endTime';
 
 const traceTestSuite = () => {
   describe('Trace Exploration Tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.setupWorkspaceAndDataSourceWithTraces(workspaceName, [TRACE_INDEX]);
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndTraces(workspaceName, [TRACE_INDEX]);
     });
 
     it('should show empty state when no index pattern exists', function () {
@@ -31,39 +33,20 @@ const traceTestSuite = () => {
     });
 
     it('should create trace index pattern and navigate to trace details', function () {
-      // Navigate to sample data page
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        workspaceName: workspaceName,
-        page: 'import_sample_data',
-        isEnhancement: true,
-      });
-      cy.wait(2000);
       cy.osd.grabIdsFromDiscoverPageUrl();
-      cy.url().should('include', 'import_sample_data');
 
-      // Install OTEL sample data if not already present
-      cy.get('body').then(($body) => {
-        if ($body.find('[data-test-subj="addSampleDataSetotel"]').length > 0) {
-          cy.getElementByTestId('addSampleDataSetotel').should('be.visible').click();
-          // Wait for the Remove button to appear, indicating successful installation
-          cy.getElementByTestId('removeSampleDataSetotel', { timeout: 30000 }).should('be.visible');
-        }
-      });
-
-      // Create index pattern for traces
-      cy.wait(2000);
-      cy.log('Creating trace index pattern');
+      // Create index pattern for traces (data is already loaded by setup function)
       cy.createWorkspaceIndexPatterns({
         workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_NAME.replace('*', ''),
-        timefieldName: TIME_FIELD_NAME,
+        indexPattern: TRACE_INDEX_PATTERN.replace('*', ''),
+        timefieldName: TRACE_TIME_FIELD,
         indexPatternHasTimefield: true,
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
         signalType: 'traces',
       });
 
-      // Navigate back to traces page
+      // Navigate to traces page
       cy.osd.navigateToTracesViaLogsUrl({
         workspaceName: workspaceName,
         isEnhancement: true,
@@ -72,8 +55,8 @@ const traceTestSuite = () => {
       // Click on dataset selector to close Syntax options if blocking time-picker
       cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
 
-      // Set time range to capture OTEL sample data - last 2 months
-      cy.explore.setRelativeTopNavDate('12', 'Months ago');
+      // Set time range to capture OTEL sample data
+      cy.explore.setRelativeTopNavDate('3', 'Years ago');
 
       // Verify empty state is no longer visible
       cy.getElementByTestId('discoverNoIndexPatterns').should('not.exist');

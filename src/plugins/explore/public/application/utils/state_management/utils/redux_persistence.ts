@@ -184,7 +184,7 @@ const fetchFirstAvailableDataset = async (
           } else {
             // If requiredSignalType is not specified (i.e., not Traces),
             // dataset should not have signalType equal to Traces
-            if (dataView?.signalType !== SignalType.Traces) {
+            if (dataView?.signalType !== SignalType.TRACES) {
               return dataset;
             }
           }
@@ -209,7 +209,7 @@ const resolveDataset = async (services: ExploreServices): Promise<Dataset | unde
   const currentAppId = await getCurrentAppId(services);
   const flavorFromAppId = getFlavorFromAppId(currentAppId);
   const requiredSignalType =
-    flavorFromAppId === ExploreFlavor.Traces ? SignalType.Traces : undefined;
+    flavorFromAppId === ExploreFlavor.Traces ? SignalType.TRACES : undefined;
 
   // Get existing dataset from QueryStringManager
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
@@ -232,7 +232,7 @@ const resolveDataset = async (services: ExploreServices): Promise<Dataset | unde
       } else {
         // If requiredSignalType is not specified (i.e., not Traces),
         // dataset should not have signalType equal to Traces
-        if (dataView?.signalType !== SignalType.Traces) {
+        if (dataView?.signalType !== SignalType.TRACES) {
           return existingDataset;
         }
       }

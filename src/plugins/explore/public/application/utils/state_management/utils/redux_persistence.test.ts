@@ -497,7 +497,7 @@ describe('redux_persistence', () => {
         data: {
           ...mockServices.data,
           dataViews: {
-            get: jest.fn(() => Promise.resolve({ signalType: SignalType.Traces })),
+            get: jest.fn(() => Promise.resolve({ signalType: SignalType.TRACES })),
           },
         },
       } as any;
@@ -566,7 +566,7 @@ describe('redux_persistence', () => {
         data: {
           ...mockServices.data,
           dataViews: {
-            get: jest.fn(() => Promise.resolve({ signalType: SignalType.Traces })),
+            get: jest.fn(() => Promise.resolve({ signalType: SignalType.TRACES })),
           },
         },
       } as any;
