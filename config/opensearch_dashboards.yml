@@ -393,3 +393,6 @@ workspace.enabled: true
 opensearch.ignoreVersionMismatch: true
 data_source.enabled: true
 data.savedQueriesNewUI.enabled: true
+
+# Enable AI Chatbot Plugin
+aiChatbot.enabled: true

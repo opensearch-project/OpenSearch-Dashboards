@@ -599,6 +599,10 @@ export class DashboardPlugin
       console.log('⚠️ Dashboard: Context Provider plugin not available, skipping context registration');
     }
 
+    // AI Chatbot Integration - Register Test UI Actions
+    console.log('🤖 Dashboard Plugin - Registering AI Chatbot UI Actions');
+    this.registerAIChatbotActions(uiActions);
+
     // Make plugin instance available globally so dashboard components can set the container
     (window as any).dashboardPlugin = this;
 
@@ -684,5 +688,80 @@ export class DashboardPlugin
     this.currentDashboardContainer = container;
     
     // Note: Context refresh is now handled by dashboard editor after embeddables load
+  }
+
+  /**
+   * Register test UI Actions for AI Chatbot integration
+   */
+  private registerAIChatbotActions(uiActions: any) {
+    console.log('🤖 Registering AI Chatbot test UI Actions');
+
+    // Register ADD_FILTER_TRIGGER
+    uiActions.registerTrigger({
+      id: 'ADD_FILTER_TRIGGER',
+      title: 'Add Filter',
+      description: 'Add a filter to the dashboard'
+    });
+
+    uiActions.registerAction({
+      id: 'ADD_FILTER_ACTION',
+      type: 'ADD_FILTER_TRIGGER',
+      getDisplayName: () => 'Add Filter',
+      execute: async (context: any) => {
+        console.log('🎯 ADD_FILTER_ACTION executed:', context);
+        
+        // Show a notification for testing
+        const { notifications } = (window as any).aiChatbotServices?.core || {};
+        if (notifications) {
+          notifications.toasts.addSuccess({
+            title: 'Filter Added',
+            text: `Added filter: ${context.field} = ${context.value}`,
+            'data-test-subj': 'ai-chatbot-filter-success'
+          });
+        } else {
+          // Fallback alert for testing
+          alert(`✅ Filter added: ${context.field} = ${context.value}`);
+        }
+        
+        return Promise.resolve();
+      }
+    });
+
+    uiActions.attachAction('ADD_FILTER_TRIGGER', 'ADD_FILTER_ACTION');
+
+    // Register EXPAND_PANEL_TRIGGER
+    uiActions.registerTrigger({
+      id: 'EXPAND_PANEL_TRIGGER',
+      title: 'Expand Panel',
+      description: 'Expand a dashboard panel to full screen'
+    });
+
+    uiActions.registerAction({
+      id: 'EXPAND_PANEL_ACTION',
+      type: 'EXPAND_PANEL_TRIGGER',
+      getDisplayName: () => 'Expand Panel',
+      execute: async (context: any) => {
+        console.log('🎯 EXPAND_PANEL_ACTION executed:', context);
+        
+        // Show a notification for testing
+        const { notifications } = (window as any).aiChatbotServices?.core || {};
+        if (notifications) {
+          notifications.toasts.addSuccess({
+            title: 'Panel Expanded',
+            text: `Expanded panel: ${context.panelId}`,
+            'data-test-subj': 'ai-chatbot-expand-success'
+          });
+        } else {
+          // Fallback alert for testing
+          alert(`✅ Panel expanded: ${context.panelId}`);
+        }
+        
+        return Promise.resolve();
+      }
+    });
+
+    uiActions.attachAction('EXPAND_PANEL_TRIGGER', 'EXPAND_PANEL_ACTION');
+
+    console.log('✅ AI Chatbot UI Actions registered successfully');
   }
 }
