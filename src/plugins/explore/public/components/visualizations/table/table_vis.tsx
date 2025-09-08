@@ -8,8 +8,8 @@ import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from
 import { FilterOperator, VisColumn, VisFieldType } from '../types';
 import { TableChartStyleControls } from './table_vis_config';
 import { FilterConfig, TableColumnHeader } from './table_vis_filter';
-import { getTextColor } from '../utils/utils';
 import { calculateValue, CalculationMethod } from '../utils/calculation';
+import { CellValue } from './cell_value';
 
 interface TableVisProps {
   rows: Array<Record<string, any>>;
@@ -21,6 +21,63 @@ interface Calc {
   fields: string[];
   calculation: CalculationMethod;
 }
+
+const matchesFilter = (value: any, config: FilterConfig) => {
+  const op = config.operator || FilterOperator.Contains;
+  const hasValues = Array.isArray(config.values) && config.values.length > 0;
+  const hasSearch = typeof config.search === 'string' && config.search.trim() !== '';
+  const sVal = value == null ? '' : String(value);
+  const sSearch = (config.search || '').trim();
+  const toNum = (v: any) => (v == null || v === '' ? NaN : Number(v));
+
+  if (op === FilterOperator.Contains) {
+    const matchSearch = !hasSearch || sVal.toLowerCase().includes(sSearch.toLowerCase());
+    const matchValues = !hasValues || config.values.includes(value);
+    return matchSearch && matchValues;
+  }
+
+  if (op === FilterOperator.Equal || op === FilterOperator.NotEqual) {
+    if (hasValues) {
+      const numValue = toNum(value);
+      const numValues = config.values.map(toNum).filter((nv): nv is number => Number.isFinite(nv));
+      const hit = numValues.includes(numValue);
+      return op === FilterOperator.Equal ? hit : !hit;
+    }
+    if (hasSearch) {
+      const numValue = toNum(value);
+      const numSearch = toNum(sSearch);
+      if (!Number.isFinite(numValue) || !Number.isFinite(numSearch)) return false;
+      const eq = numValue === numSearch;
+      return op === FilterOperator.Equal ? eq : !eq;
+    }
+    return true;
+  }
+
+  if (
+    op === FilterOperator.GreaterThan ||
+    op === FilterOperator.GreaterThanOrEqual ||
+    op === FilterOperator.LessThan ||
+    op === FilterOperator.LessThanOrEqual
+  ) {
+    const thresholdStr = hasSearch ? sSearch : hasValues ? String(config.values[0]) : '';
+    const nVal = toNum(value);
+    const nThr = toNum(thresholdStr);
+    if (!Number.isFinite(nVal) || !Number.isFinite(nThr)) return false;
+
+    switch (op) {
+      case FilterOperator.GreaterThan:
+        return nVal > nThr;
+      case FilterOperator.GreaterThanOrEqual:
+        return nVal >= nThr;
+      case FilterOperator.LessThan:
+        return nVal < nThr;
+      case FilterOperator.LessThanOrEqual:
+        return nVal <= nThr;
+    }
+  }
+
+  return true;
+};
 
 export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisProps) => {
   const pageSize = styleOptions?.pageSize ? styleOptions.pageSize : 10;
@@ -59,7 +116,6 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     return columns.map((col) => ({
       id: col.column,
       displayAsText: col.name,
-      isExpandable: false,
       display: (
         <TableColumnHeader
           col={col}
@@ -94,65 +150,6 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
       setFilters({});
     }
   }, [styleOptions?.showColumnFilter]);
-
-  const matchesFilter = (value: any, config: FilterConfig) => {
-    const op = config.operator || FilterOperator.Contains;
-    const hasValues = Array.isArray(config.values) && config.values.length > 0;
-    const hasSearch = typeof config.search === 'string' && config.search.trim() !== '';
-    const sVal = value == null ? '' : String(value);
-    const sSearch = (config.search || '').trim();
-    const toNum = (v: any) => (v == null || v === '' ? NaN : Number(v));
-
-    if (op === FilterOperator.Contains) {
-      const matchSearch = !hasSearch || sVal.toLowerCase().includes(sSearch.toLowerCase());
-      const matchValues = !hasValues || config.values.includes(value);
-      return matchSearch && matchValues;
-    }
-
-    if (op === FilterOperator.Equal || op === FilterOperator.NotEqual) {
-      if (hasValues) {
-        const numValue = toNum(value);
-        const numValues = config.values
-          .map(toNum)
-          .filter((nv): nv is number => Number.isFinite(nv));
-        const hit = numValues.includes(numValue);
-        return op === FilterOperator.Equal ? hit : !hit;
-      }
-      if (hasSearch) {
-        const numValue = toNum(value);
-        const numSearch = toNum(sSearch);
-        if (!Number.isFinite(numValue) || !Number.isFinite(numSearch)) return false;
-        const eq = numValue === numSearch;
-        return op === FilterOperator.Equal ? eq : !eq;
-      }
-      return true;
-    }
-
-    if (
-      op === FilterOperator.GreaterThan ||
-      op === FilterOperator.GreaterThanOrEqual ||
-      op === FilterOperator.LessThan ||
-      op === FilterOperator.LessThanOrEqual
-    ) {
-      const thresholdStr = hasSearch ? sSearch : hasValues ? String(config.values[0]) : '';
-      const nVal = toNum(value);
-      const nThr = toNum(thresholdStr);
-      if (!Number.isFinite(nVal) || !Number.isFinite(nThr)) return false;
-
-      switch (op) {
-        case FilterOperator.GreaterThan:
-          return nVal > nThr;
-        case FilterOperator.GreaterThanOrEqual:
-          return nVal >= nThr;
-        case FilterOperator.LessThan:
-          return nVal < nThr;
-        case FilterOperator.LessThanOrEqual:
-          return nVal <= nThr;
-      }
-    }
-
-    return true;
-  };
 
   const filteredRows = useMemo(() => {
     return rows.filter((row) =>
@@ -222,61 +219,25 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     return footer;
   }, [filteredRows, styleOptions?.showFooter, normalizedFooterCalcs]);
 
-  const getCellColor = (value: any, columnId: string): string | undefined => {
-    if (columnTypes[columnId] !== 'numerical' || !styleOptions?.thresholds) return undefined;
-    const numValue = Number(value);
-    if (isNaN(numValue)) return undefined;
+  const getCellColor = useCallback(
+    (value: any, columnId: string): string | undefined => {
+      if (columnTypes[columnId] !== 'numerical' || !styleOptions?.thresholds) return undefined;
+      const numValue = Number(value);
+      if (isNaN(numValue)) return undefined;
 
-    const thresholds = [...styleOptions.thresholds].sort((a, b) => b.value - a.value);
-    for (const threshold of thresholds) {
-      if (numValue >= threshold.value) {
-        return threshold.color;
-      }
-    }
-    return styleOptions.baseColor || '#000000';
-  };
-
-  const CellValueRenderer: React.FC<EuiDataGridCellValueElementProps> = ({
-    rowIndex,
-    columnId,
-    setCellProps,
-  }) => {
-    const alignment = styleOptions?.globalAlignment || 'auto';
-    const textAlign =
-      alignment === 'auto' ? (columnTypes[columnId] === 'numerical' ? 'right' : 'left') : alignment;
-    const cellValue = Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
-      ? (filteredRows as any)[rowIndex][columnId]
-      : null;
-    const { cellType, thresholds, baseColor } = styleOptions ?? {};
-
-    useEffect(() => {
-      const cellStyle: React.CSSProperties = { textAlign };
-
-      if (cellType !== 'auto') {
-        const color = getCellColor(cellValue, columnId);
-        if (color) {
-          if (cellType === 'colored_text') {
-            cellStyle.color = color;
-          } else if (cellType === 'colored_background') {
-            cellStyle.backgroundColor = color;
-            cellStyle.color = getTextColor(color);
-          }
+      const thresholds = [...styleOptions.thresholds].sort((a, b) => b.value - a.value);
+      for (const threshold of thresholds) {
+        if (numValue >= threshold.value) {
+          return threshold.color;
         }
       }
+      return styleOptions.baseColor || '#000000';
+    },
+    [columnTypes, styleOptions?.baseColor, styleOptions?.thresholds]
+  );
 
-      setCellProps?.({
-        style: cellStyle,
-      });
-    }, [setCellProps, cellValue, columnId, textAlign, cellType, thresholds, baseColor]);
-
-    return cellValue;
-  };
-
-  const renderCellValue = CellValueRenderer;
-
-  const renderFooterCellValue = useMemo(() => {
-    if (!footerValues) return undefined;
-    return ({ columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+  const renderCellValue = useCallback(
+    ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
       const alignment = styleOptions?.globalAlignment || 'auto';
       const textAlign =
         alignment === 'auto'
@@ -284,10 +245,41 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
             ? 'right'
             : 'left'
           : alignment;
-      setCellProps?.({ style: { textAlign } });
-      return footerValues[columnId] ?? '-';
-    };
-  }, [footerValues, styleOptions?.globalAlignment, columnTypes]);
+      const cellValue = Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
+        ? (filteredRows as any)[rowIndex][columnId]
+        : null;
+      return (
+        <CellValue
+          setCellProps={setCellProps}
+          textAlign={textAlign}
+          value={cellValue}
+          colorMode={styleOptions?.cellType ?? 'auto'}
+          color={getCellColor(cellValue, columnId)}
+        />
+      );
+    },
+    [columnTypes, filteredRows, getCellColor, styleOptions?.cellType, styleOptions?.globalAlignment]
+  );
+
+  const renderFooterCellValue = useCallback(
+    ({ columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+      const alignment = styleOptions?.globalAlignment || 'auto';
+      const textAlign =
+        alignment === 'auto'
+          ? columnTypes[columnId] === 'numerical'
+            ? 'right'
+            : 'left'
+          : alignment;
+      return (
+        <CellValue
+          setCellProps={setCellProps}
+          value={footerValues?.[columnId] ?? '-'}
+          textAlign={textAlign}
+        />
+      );
+    },
+    [columnTypes, footerValues, styleOptions?.globalAlignment]
+  );
 
   const onChangePage = useCallback(
     (pageIndex: number) => {
@@ -316,7 +308,7 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
         rowCount={filteredRows.length}
         pagination={{ ...pagination, onChangePage, onChangeItemsPerPage }}
         renderCellValue={renderCellValue}
-        renderFooterCellValue={renderFooterCellValue}
+        renderFooterCellValue={styleOptions?.showFooter ? renderFooterCellValue : undefined}
         toolbarVisibility={{ showFullScreenSelector: false }}
         gridStyle={{ rowHover: 'highlight' }}
         leadingControlColumns={[]}
