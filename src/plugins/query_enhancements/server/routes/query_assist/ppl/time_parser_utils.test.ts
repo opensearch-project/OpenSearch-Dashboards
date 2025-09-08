@@ -46,8 +46,8 @@ describe('time_parser_utils', () => {
       expect(normTimeString('invalid-date')).toBeNull();
     });
 
-    it('should handle single digit month and day', () => {
-      expect(normTimeString('2023-1-5 9:5:3')).toBe('2023-01-05 09:05:03');
+    it('should return null for single digit month and day', () => {
+      expect(normTimeString('2023-1-5 9:5:3')).toBeNull();
     });
 
     it('should handle time without seconds', () => {

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment';
 import { Logger } from 'opensearch-dashboards/server';
 
 /**
@@ -14,25 +15,28 @@ export function normTimeString(timeString: string): string | null {
   if (!timeString) {
     return null;
   }
+  // we need to remove all timezone suffixes and view it as a pure time string
+  const sanitizedTimeString = timeString.replace(/(?:Z|[+-]\d{2}(?::?\d{2})?)$/i, '');
+  const FORMATS = [
+    'YYYY-MM-DD HH:mm',
+    'YYYY-MM-DD HH:mm:ss',
+    'YYYY-MM-DD HH:mm:ss.SSS',
+    'YYYY-MM-DD HH:mm',
+    'YYYY/MM/DD HH:mm:ss',
+    'YYYY/MM/DD HH:mm:ss.SSS',
+    'YYYY/MM/DD HH:mm',
+    'YYYY-MM-DD[T]HH:mm:ss',
+    'YYYY-MM-DD[T]HH:mm:ss.SSS',
+    'YYYY-MM-DD[T]HH:mm',
+    'YYYY/MM/DD[T]HH:mm:ss',
+    'YYYY/MM/DD[T]HH:mm:ss.SSS',
+  ];
 
-  const dateTimeRegex = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?.*$/;
-  const match = timeString.match(dateTimeRegex);
-
-  if (!match) {
+  const m = moment(sanitizedTimeString, FORMATS, true);
+  if (!m.isValid()) {
     return null;
   }
-
-  const [, year, month, day, hour, minute, second = '00'] = match;
-
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const YYYY = year;
-  const MM = pad(parseInt(month, 10));
-  const DD = pad(parseInt(day, 10));
-  const hh = pad(parseInt(hour, 10));
-  const mm = pad(parseInt(minute, 10));
-  const ss = pad(parseInt(second, 10));
-
-  return `${YYYY}-${MM}-${DD} ${hh}:${mm}:${ss}`;
+  return m.format('YYYY-MM-DD HH:mm:ss');
 }
 
 /**
