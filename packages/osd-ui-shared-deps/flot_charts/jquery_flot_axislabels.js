@@ -22,6 +22,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import dompurify from 'dompurify';
+
 (function ($) {
   var options = {
     axisLabels: {
@@ -149,17 +151,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   };
 
   HtmlAxisLabel.prototype.draw = function (box) {
-    const sanitizedAxisName = DOMPurify.sanitize(this.axisName, {
-      ALLOWED_TAGS: [],
-      ALLOWED_ATTR: [],
-    }).replace(/[^a-zA-Z0-9_-]/g, '');
+    const sanitizedAxisName = dompurify
+      .sanitize(this.axisName, {
+        ALLOWED_TAGS: [],
+        ALLOWED_ATTR: [],
+      })
+      .replace(/[^a-zA-Z0-9_-]/g, '');
 
     this.plot
       .getPlaceholder()
       .find('#' + sanitizedAxisName + 'Label')
       .remove();
 
-    const sanitizedLabel = DOMPurify.sanitize(this.opts.axisLabel);
+    const sanitizedLabel = dompurify.sanitize(this.opts.axisLabel);
 
     this.elem = $('<div>')
       .attr('id', sanitizedAxisName + 'Label')
@@ -258,23 +262,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   };
 
   CssTransformAxisLabel.prototype.draw = function (box) {
+    const sanitizedAxisName = dompurify
+      .sanitize(this.axisName, {
+        ALLOWED_TAGS: [],
+        ALLOWED_ATTR: [],
+      })
+      .replace(/[^a-zA-Z0-9_-]/g, '');
+
     this.plot
       .getPlaceholder()
-      .find('.' + this.axisName + 'Label')
+      .find('.' + sanitizedAxisName + 'Label')
       .remove();
+
     var offsets = this.calculateOffsets(box);
-    this.elem = $(
-      '<div class="axisLabels ' +
-        this.axisName +
-        'Label" style="position:absolute; ' +
-        this.transforms(offsets.degrees, offsets.x, offsets.y) +
-        '">' +
-        this.opts.axisLabel +
-        '</div>'
-    );
+    const sanitizedLabel = dompurify.sanitize(this.opts.axisLabel);
+
+    // Create the element with sanitized values
+    this.elem = $('<div>')
+      .addClass('axisLabels ' + sanitizedAxisName + 'Label')
+      .css('position', 'absolute')
+      .css('transform', this.transforms(offsets.degrees, offsets.x, offsets.y))
+      .html(sanitizedLabel);
+
     if (this.opts.axisLabelColour) {
       this.elem.css('color', this.opts.axisLabelColour);
     }
+
     this.plot.getPlaceholder().append(this.elem);
   };
 
