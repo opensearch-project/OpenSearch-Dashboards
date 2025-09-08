@@ -34,7 +34,7 @@ import { FieldFilterState, isFieldFiltered } from './field_filter';
 // TODO: Use data set defined faceted field
 const FACET_FIELDS = [
   'attributes.service.name',
-  'attributes.aws.local.service',
+  'resource.attributes.service.name',
   'serviceName',
   'attributes.http.status_code',
   'status.code',
