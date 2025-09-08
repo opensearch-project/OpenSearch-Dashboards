@@ -298,6 +298,26 @@ export class VisualizePlugin
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);
 
+    // Register dashboard navigation shortcuts
+    if (core.keyboardShortcut) {
+      core.keyboardShortcut.register({
+        id: 'nav.visualization',
+        name: 'Go to Visualization',
+        pluginId: 'visualize',
+        category: 'navigation',
+        keys: 'g v',
+        execute: () => {
+          // Only enable shortcut when workspace is selected
+          const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+          const isInitialized = core.workspaces.initialized$.getValue();
+          if (!isInitialized || !currentWorkspace) {
+            return;
+          }
+          core.application.navigateToApp('visualize');
+        },
+      });
+    }
+
     if (plugins.share) {
       setShareService(plugins.share);
     }

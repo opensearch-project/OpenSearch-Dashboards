@@ -13,7 +13,7 @@ import {
   AggregationType,
 } from '../types';
 import { BarChartStyleControls, defaultBarChartStyles } from './bar_vis_config';
-import { createThresholdLayer } from '../style_panel/threshold/utils';
+import { createThresholdLayer } from '../style_panel/threshold_lines/utils';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 
 import {

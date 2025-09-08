@@ -1,0 +1,171 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { GaugeVisStyleControls, GaugeVisStyleControlsProps } from './gauge_vis_options';
+import { VisFieldType } from '../types';
+import { defaultGaugeChartStyles } from './gauge_vis_config';
+
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn().mockImplementation((id, { defaultMessage }) => defaultMessage),
+  },
+}));
+
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(
+    ({
+      thresholds,
+      onThresholdValuesChange,
+      min,
+      onMinChange,
+      max,
+      onMaxChange,
+      baseColor,
+      onBaseColorChange,
+    }) => (
+      <>
+        <div data-test-subj="mockGaugeThresholdPanel">
+          <button
+            data-test-subj="mockAddRange"
+            onClick={() =>
+              onThresholdValuesChange([...thresholds, { value: 50, color: '#FF0000' }])
+            }
+          >
+            Add Range
+          </button>
+        </div>
+
+        <input
+          data-test-subj="thresholdMinBase"
+          onChange={(e) => onMinChange(Number(e.target.value))}
+        />
+        <input
+          data-test-subj="thresholdMaxBase"
+          onChange={(e) => onMaxChange(Number(e.target.value))}
+        />
+      </>
+    )
+  ),
+}));
+
+describe('GaugeVisStyleControls', () => {
+  const mockProps: GaugeVisStyleControlsProps = {
+    axisColumnMappings: {
+      value: {
+        id: 1,
+        name: 'value',
+        schema: VisFieldType.Numerical,
+        column: 'field-1',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+    },
+    updateVisualization: jest.fn(),
+    styleOptions: defaultGaugeChartStyles,
+    onStyleChange: jest.fn(),
+    numericalColumns: [
+      {
+        id: 1,
+        name: 'value',
+        schema: VisFieldType.Numerical,
+        column: 'field-1',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+    ],
+    categoricalColumns: [],
+    dateColumns: [],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders the gauge accordion', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+    expect(screen.getByText('Gauge')).toBeInTheDocument();
+  });
+
+  it('renders the show title switch', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+    expect(screen.getByTestId('showTitleSwitch')).toBeInTheDocument();
+  });
+
+  it('calls onStyleChange when show title switch is toggled', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+    const switchButton = screen.getByTestId('showTitleSwitch');
+    fireEvent.click(switchButton);
+
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ showTitle: false });
+  });
+
+  it('renders title input when showTitle is true', () => {
+    const propsWithTitle = {
+      ...mockProps,
+      styleOptions: { ...defaultGaugeChartStyles, showTitle: true },
+    };
+    render(<GaugeVisStyleControls {...propsWithTitle} />);
+
+    expect(screen.getByPlaceholderText('Title')).toBeInTheDocument();
+  });
+
+  it('calls onStyleChange when title is changed', async () => {
+    const propsWithTitle = {
+      ...mockProps,
+      styleOptions: { ...defaultGaugeChartStyles, showTitle: true },
+    };
+    render(<GaugeVisStyleControls {...propsWithTitle} />);
+
+    const titleInput = screen.getByPlaceholderText('Title');
+    await fireEvent.change(titleInput, {
+      target: { value: 'New Title' },
+    });
+
+    await waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({ title: 'New Title' });
+    });
+  });
+
+  it('renders threshold panel', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+    expect(screen.getByTestId('mockGaugeThresholdPanel')).toBeInTheDocument();
+  });
+
+  it('renders min and max inputs', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+    expect(screen.getByTestId('thresholdMinBase')).toBeInTheDocument();
+    expect(screen.getByTestId('thresholdMaxBase')).toBeInTheDocument();
+  });
+
+  it('calls onStyleChange when min value is changed', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+
+    const minInput = screen.getByTestId('thresholdMinBase');
+    fireEvent.change(minInput, { target: { value: 50 } });
+
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ min: 50 });
+  });
+
+  it('calls onStyleChange when max value is changed', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+
+    const maxInput = screen.getByTestId('thresholdMaxBase');
+    fireEvent.change(maxInput, { target: { value: 50 } });
+
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ max: 50 });
+  });
+
+  it('calls onStyleChange when custom range is added', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+
+    const addRangeButton = screen.getByTestId('mockAddRange');
+    fireEvent.click(addRangeButton);
+
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      thresholds: [{ value: 50, color: '#FF0000' }],
+    });
+  });
+});

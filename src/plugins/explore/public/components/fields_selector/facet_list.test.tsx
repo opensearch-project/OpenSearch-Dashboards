@@ -9,8 +9,8 @@ import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { render, screen, fireEvent } from 'test_utils/testing_lib_helpers';
 import { FacetList } from './facet_list';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { IndexPatternField } from '../../../../data/public';
-import { getStubIndexPattern } from '../../../../data/public/test_utils';
+import { DataViewField } from '../../../../data/public';
+import { getStubDataView } from '../../../../data/public/data_views/data_view.stub';
 
 jest.mock('./facet_field', () => ({
   FacetField: ({ field }: { field: any }) => (
@@ -27,7 +27,7 @@ function getProps({
   fields?: any;
   shortDotsEnabled?: boolean;
 } = {}) {
-  const indexPattern = getStubIndexPattern(
+  const dataSet = getStubDataView(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
@@ -36,32 +36,28 @@ function getProps({
   );
 
   const defaultFields = [
-    new IndexPatternField(
-      {
-        name: 'status',
-        type: 'string',
-        esTypes: ['keyword'],
-        count: 5,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'status'
-    ),
-    new IndexPatternField(
-      {
-        name: 'level',
-        type: 'string',
-        esTypes: ['keyword'],
-        count: 3,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'level'
-    ),
+    {
+      name: 'status',
+      type: 'string',
+      esTypes: ['keyword'],
+      count: 5,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'status',
+    } as DataViewField,
+    {
+      name: 'level',
+      type: 'string',
+      esTypes: ['keyword'],
+      count: 3,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'level',
+    } as DataViewField,
   ];
 
   const mockFields = fields !== undefined ? fields : defaultFields;
@@ -69,7 +65,7 @@ function getProps({
   return {
     title,
     fields: mockFields,
-    selectedIndexPattern: indexPattern,
+    selectedDataSet: dataSet,
     onAddFilter: jest.fn(),
     getDetailsByField: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 1 })),
     shortDotsEnabled,
@@ -143,8 +139,8 @@ describe('FacetList', () => {
     expect(toggleButton.querySelector('[data-euiicon-type="arrowRight"]')).toBeInTheDocument();
   });
 
-  it('renders nothing when selectedIndexPattern is null', () => {
-    const props = { ...getProps(), selectedIndexPattern: undefined };
+  it('renders nothing when selectedDataSet is null', () => {
+    const props = { ...getProps(), selectedDataSet: undefined };
     const { container } = render(<FacetList {...props} />);
 
     expect(container.firstChild).toBeNull();

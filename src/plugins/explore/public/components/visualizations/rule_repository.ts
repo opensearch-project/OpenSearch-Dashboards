@@ -38,6 +38,7 @@ import {
   createSingleBarChart,
 } from './bar/to_expression';
 import { CHART_METADATA } from './constants';
+import { createGauge } from './gauge/to_expression';
 
 type RuleMatchIndex = [number, number, number];
 
@@ -525,7 +526,8 @@ const oneMetricRule: VisualizationRule = {
     compare([1, 0, 0], [numerical.length, categorical.length, date.length]),
   chartTypes: [
     { ...CHART_METADATA.metric, priority: 100 },
-    { ...CHART_METADATA.bar, priority: 80 },
+    { ...CHART_METADATA.gauge, priority: 80 },
+    { ...CHART_METADATA.bar, priority: 60 },
   ],
   toSpec: (
     transformedData,
@@ -539,6 +541,15 @@ const oneMetricRule: VisualizationRule = {
     switch (chartType) {
       case 'metric':
         return createSingleMetric(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions,
+          axisColumnMappings
+        );
+      case 'gauge':
+        return createGauge(
           transformedData,
           numericalColumns,
           categoricalColumns,
