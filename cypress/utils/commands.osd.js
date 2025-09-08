@@ -438,8 +438,8 @@ cy.osd.add('setupWorkspaceAndDataSourceWithTraces', (workspaceName, traceIndices
   // Load trace test data
   cy.osd.setupTestData(
     PATHS.SECONDARY_ENGINE,
-    traceIndices.map((index) => `cypress/fixtures/traces/${index}.mapping.json`),
-    traceIndices.map((index) => `cypress/fixtures/traces/${index}.data.ndjson`)
+    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.mapping.json`),
+    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.data.ndjson`)
   );
 
   // Add data source
