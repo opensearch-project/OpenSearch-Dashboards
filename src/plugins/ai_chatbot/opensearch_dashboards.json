@@ -1,0 +1,10 @@
+{
+  "id": "aiChatbot",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "configPath": ["aiChatbot"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["contextProvider", "uiActions", "navigation"],
+  "optionalPlugins": ["dashboard", "discover"]
+}
