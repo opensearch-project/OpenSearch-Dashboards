@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { take } from 'rxjs/operators';
+import { getCurrentAppId, getFlavorFromAppId } from '../../../../helpers/get_flavor_from_app_id';
 import { RootState } from '../store';
 import { AppState, QueryExecutionStatus } from '../types';
 import { ExploreServices } from '../../../../types';
@@ -15,7 +15,7 @@ import {
   TabState,
   UIState,
 } from '../slices';
-import { Dataset, DataStructure } from '../../../../../../data/common';
+import { Dataset, DataStructure, DEFAULT_DATA, SignalType } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import {
   DEFAULT_TRACE_COLUMNS_SETTING,
@@ -139,7 +139,8 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
  * Fetches the first available dataset using the data plugin's dataset service
  */
 const fetchFirstAvailableDataset = async (
-  services: ExploreServices
+  services: ExploreServices,
+  requiredSignalType?: SignalType
 ): Promise<Dataset | undefined> => {
   try {
     const datasetService = services.data?.query?.queryString?.getDatasetService();
@@ -166,7 +167,36 @@ const fetchFirstAvailableDataset = async (
         typeConfig.toDataset([pattern])
       ) ?? [];
 
-    return fetchedDatasets.length > 0 ? fetchedDatasets[0] : undefined;
+    // Filter by SignalType compatibility
+    if (fetchedDatasets.length > 0) {
+      for (const dataset of fetchedDatasets) {
+        try {
+          const dataView = await services.data?.dataViews?.get(
+            dataset.id,
+            dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+          );
+
+          // If requiredSignalType is specified, dataset must match it
+          if (requiredSignalType) {
+            if (dataView?.signalType === requiredSignalType) {
+              return dataset;
+            }
+          } else {
+            // If requiredSignalType is not specified (i.e., not Traces),
+            // dataset should not have signalType equal to Traces
+            if (dataView?.signalType !== SignalType.Traces) {
+              return dataset;
+            }
+          }
+        } catch (error) {
+          // Continue to next dataset if this one fails
+          continue;
+        }
+      }
+      return undefined; // No compatible dataset found
+    }
+
+    return undefined;
   } catch (error) {
     return undefined;
   }
@@ -176,18 +206,44 @@ const fetchFirstAvailableDataset = async (
  * Resolves the dataset to use for the initial query state
  */
 const resolveDataset = async (services: ExploreServices): Promise<Dataset | undefined> => {
-  // First, try to get dataset from QueryStringManager (same as ConnectedDatasetSelector)
+  const currentAppId = await getCurrentAppId(services);
+  const flavorFromAppId = getFlavorFromAppId(currentAppId);
+  const requiredSignalType =
+    flavorFromAppId === ExploreFlavor.Traces ? SignalType.Traces : undefined;
+
+  // Get existing dataset from QueryStringManager
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
   const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
+  const existingDataset = queryStringQuery?.dataset || defaultQuery?.dataset;
 
-  let selectedDataset = queryStringQuery?.dataset || defaultQuery?.dataset;
+  // If we have an existing dataset, validate SignalType compatibility
+  if (existingDataset) {
+    try {
+      const dataView = await services.data?.dataViews?.get(
+        existingDataset.id,
+        existingDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+      );
 
-  // If no dataset found, fetch available datasets and select first one (same as DatasetSelector)
-  if (!selectedDataset) {
-    selectedDataset = await fetchFirstAvailableDataset(services);
+      // If requiredSignalType is specified, dataset must match it
+      if (requiredSignalType) {
+        if (dataView?.signalType === requiredSignalType) {
+          return existingDataset;
+        }
+      } else {
+        // If requiredSignalType is not specified (i.e., not Traces),
+        // dataset should not have signalType equal to Traces
+        if (dataView?.signalType !== SignalType.Traces) {
+          return existingDataset;
+        }
+      }
+    } catch (error) {
+      // Silently continue to fetch a new dataset if validation fails
+      // This is expected behavior when datasets are incompatible with current flavor
+    }
   }
 
-  return selectedDataset;
+  // Fetch first available dataset with required SignalType
+  return await fetchFirstAvailableDataset(services, requiredSignalType);
 };
 
 /**
@@ -309,8 +365,8 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
  */
 export const getPreloadedLegacyState = async (services: ExploreServices): Promise<LegacyState> => {
   // Only return defaults - NO saved object loading (like vis_builder)
-  const currentAppId = await services.core.application.currentAppId$.pipe(take(1)).toPromise();
-  const flavorFromAppId = currentAppId?.split('/')?.[1];
+  const currentAppId = await getCurrentAppId(services);
+  const flavorFromAppId = getFlavorFromAppId(currentAppId);
 
   const defaultColumns =
     flavorFromAppId === ExploreFlavor.Traces

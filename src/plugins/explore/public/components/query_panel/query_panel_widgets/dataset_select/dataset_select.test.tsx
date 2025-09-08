@@ -19,6 +19,7 @@ const mockSetQuery = jest.fn();
 const mockGetQuery = jest.fn();
 const mockToastAddError = jest.fn();
 const mockToastAddWarning = jest.fn();
+const mockUseFlavorId = jest.fn();
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -33,6 +34,8 @@ jest.doMock('react-redux', () => {
     },
   };
 });
+
+let capturedOnFilter: ((dataset: any) => boolean) | undefined;
 
 jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: () => ({
@@ -53,16 +56,28 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
           },
         },
         ui: {
-          DatasetSelect: ({ onSelect }: { onSelect: (dataset: any) => void }) => (
-            <div data-test-subj="dataset-select">
-              <button
-                data-test-subj="dataset-select-button"
-                onClick={() => onSelect({ id: 'test-dataset', type: 'index_pattern' })}
-              >
-                Select Dataset
-              </button>
-            </div>
-          ),
+          DatasetSelect: ({
+            onSelect,
+            onFilter,
+          }: {
+            onSelect: (dataset: any) => void;
+            onFilter?: (dataset: any) => boolean;
+          }) => {
+            capturedOnFilter = onFilter;
+            return (
+              <div data-test-subj="dataset-select">
+                <button
+                  data-test-subj="dataset-select-button"
+                  onClick={() => onSelect({ id: 'test-dataset', type: 'index_pattern' })}
+                >
+                  Select Dataset
+                </button>
+                <div data-test-subj="dataset-filter-prop">
+                  {onFilter ? 'Filter provided' : 'No filter'}
+                </div>
+              </div>
+            );
+          },
         },
         dataViews: {
           get: mockGetDataView,
@@ -105,6 +120,21 @@ jest.doMock('../../../../../../data/common', () => ({
   EMPTY_QUERY: {
     QUERY: '',
   },
+  SignalType: {
+    LOGS: 'logs',
+    METRICS: 'metrics',
+    Traces: 'traces',
+  },
+}));
+
+jest.doMock('../../../../helpers/use_flavor_id', () => ({
+  useFlavorId: () => mockUseFlavorId(),
+}));
+
+jest.doMock('../../../../../common', () => ({
+  ExploreFlavor: {
+    Traces: 'traces',
+  },
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -132,6 +162,7 @@ describe('DatasetSelectWidget', () => {
     jest.clearAllMocks();
     mockGetQuery.mockReturnValue({ query: 'test query', language: 'PPL' });
     mockGetInitialQueryByDataset.mockReturnValue({ query: 'initial query', language: 'PPL' });
+    mockUseFlavorId.mockReturnValue(null);
   });
 
   it('renders the dataset select component', () => {
@@ -186,6 +217,61 @@ describe('DatasetSelectWidget', () => {
         dataset: { id: 'test-dataset', type: 'index_pattern' },
       });
       expect(mockDispatch).toHaveBeenCalledWith(mockSetQueryWithHistory());
+    });
+  });
+
+  it('provides onFilter prop to DatasetSelect', () => {
+    renderWithStore();
+    expect(screen.getByTestId('dataset-filter-prop')).toHaveTextContent('Filter provided');
+  });
+
+  describe('onFilter functionality', () => {
+    beforeEach(() => {
+      capturedOnFilter = undefined;
+    });
+
+    it('accepts Traces datasets for Traces flavor', () => {
+      mockUseFlavorId.mockReturnValue('traces');
+      renderWithStore();
+
+      // Mock a detailed dataset with Traces signal type
+      const tracesDataset = { signalType: 'traces' };
+
+      expect(capturedOnFilter).toBeDefined();
+      expect(capturedOnFilter!(tracesDataset)).toBe(true);
+    });
+
+    it('rejects non-Traces datasets for Traces flavor', () => {
+      mockUseFlavorId.mockReturnValue('traces');
+      renderWithStore();
+
+      // Mock a detailed dataset with Logs signal type
+      const logsDataset = { signalType: 'logs' };
+
+      expect(capturedOnFilter).toBeDefined();
+      expect(capturedOnFilter!(logsDataset)).toBe(false);
+    });
+
+    it('accepts non-Traces datasets for non-Traces flavor', () => {
+      mockUseFlavorId.mockReturnValue('logs');
+      renderWithStore();
+
+      // Mock a detailed dataset with Logs signal type
+      const logsDataset = { signalType: 'logs' };
+
+      expect(capturedOnFilter).toBeDefined();
+      expect(capturedOnFilter!(logsDataset)).toBe(true);
+    });
+
+    it('rejects Traces datasets for non-Traces flavor', () => {
+      mockUseFlavorId.mockReturnValue('logs');
+      renderWithStore();
+
+      // Mock a detailed dataset with Traces signal type
+      const tracesDataset = { signalType: 'traces' };
+
+      expect(capturedOnFilter).toBeDefined();
+      expect(capturedOnFilter!(tracesDataset)).toBe(false);
     });
   });
 });
