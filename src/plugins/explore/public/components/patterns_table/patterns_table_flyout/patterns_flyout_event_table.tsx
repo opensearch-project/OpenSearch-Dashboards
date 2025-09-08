@@ -115,14 +115,16 @@ export const PatternsFlyoutEventTable = ({
         {
           field: 'timestamp',
           name: i18n.translate('explore.patterns.flyout.timeColumnName', {
-            defaultMessage: 'Time',
+            defaultMessage: 'Time ({timeFieldName})',
+            values: { timeFieldName },
           }),
           sortable: false,
         },
         {
           field: 'event',
           name: i18n.translate('explore.patterns.flyout.eventsColumnName', {
-            defaultMessage: 'Event',
+            defaultMessage: 'Event ({patternsField})',
+            values: { patternsField },
           }),
           sortable: false,
         },
