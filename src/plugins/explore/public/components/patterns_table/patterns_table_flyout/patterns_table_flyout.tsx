@@ -102,7 +102,10 @@ export const PatternsTableFlyout = () => {
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <PatternsFlyoutEventTable patternString={record.pattern} />
+              <PatternsFlyoutEventTable
+                patternString={record.pattern}
+                totalItemCount={record.count}
+              />
             </EuiPanel>
           </>
         )}

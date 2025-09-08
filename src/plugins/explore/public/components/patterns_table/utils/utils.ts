@@ -62,6 +62,7 @@ export const createSearchPatternQueryWithSlice = (
   patternsField: string,
   usingRegexPatterns: boolean,
   patternString: string,
+  timeField: string,
   pageSize: number,
   pageOffset: number
 ) => {
@@ -72,7 +73,7 @@ export const createSearchPatternQueryWithSlice = (
     patternString
   );
 
-  return `${searchPatternQuery} | head ${pageSize} from ${pageOffset}`;
+  return `${searchPatternQuery} | sort - ${timeField} | head ${pageSize} from ${pageOffset}`;
 };
 
 // Checks if the value is a valid, finite number. Used for patterns table

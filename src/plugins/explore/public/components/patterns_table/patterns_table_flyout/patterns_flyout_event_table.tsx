@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBasicTable } from '@elastic/eui';
+import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
@@ -12,27 +12,48 @@ import {
   selectDataset,
   selectPatternsField,
   selectQuery,
+  selectUsingRegexPatterns,
 } from '../../../application/utils/state_management/selectors';
 import { ExploreServices } from '../../../types';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { getQueryWithSource } from '../../../application/utils/languages';
 import { createSearchPatternQueryWithSlice } from '../utils/utils';
 
-export const PatternsFlyoutEventTable = ({ patternString }: { patternString: string }) => {
+interface PatternsFlyoutEventTableProps {
+  patternString: string;
+  totalItemCount: number;
+}
+
+interface EventTableItem {
+  timestamp: string;
+  event: string;
+}
+
+export const PatternsFlyoutEventTable = ({
+  patternString,
+  totalItemCount,
+}: PatternsFlyoutEventTableProps) => {
   const dataset = useSelector(selectDataset);
   const query = useSelector(selectQuery);
   const patternsField = useSelector(selectPatternsField);
+  const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
   const { services } = useOpenSearchDashboards<ExploreServices>();
+
   if (!dataset || !patternsField)
     throw new Error('Dataset or patterns field is not appearing for event table');
   const timeFieldName = dataset.timeFieldName;
   if (!timeFieldName) throw new Error('No time field name found in dataset');
 
-  const [fetchedItems, setFetchedItems] = useState<Array<{ timestamp: string; event: string }>>([]);
+  const [fetchedItems, setFetchedItems] = useState<EventTableItem[]>([]);
+  const [pageIndex, setPageIndex] = useState(0);
 
-  const eventResults = async () => {
+  const eventResults = async (page: number) => {
+    /**
+     * Below logic queries similar to how its done in query_actions
+     */
     const searchSource = await services.data.search.searchSource.create();
 
+    // fetch the dataView from the dataset.id, check cache for non-index patterns
     const dataView = await services.data.dataViews.get(
       dataset.id,
       dataset.type !== 'INDEX_PATTERN'
@@ -47,10 +68,11 @@ export const PatternsFlyoutEventTable = ({ patternString }: { patternString: str
       query: createSearchPatternQueryWithSlice(
         querySource,
         patternsField,
-        false,
+        usingRegexPatterns,
         patternString,
-        10,
-        0
+        timeFieldName,
+        10, // select 10 results
+        page * 10
       ),
     };
 
@@ -66,7 +88,7 @@ export const PatternsFlyoutEventTable = ({ patternString }: { patternString: str
     const results = await searchSource.fetch();
     const rows = results.hits.hits;
 
-    const items = rows.map((row) => {
+    const items: EventTableItem[] = rows.map((row) => {
       return {
         timestamp: row._source[timeFieldName],
         event: row._source[patternsField],
@@ -77,7 +99,7 @@ export const PatternsFlyoutEventTable = ({ patternString }: { patternString: str
   };
 
   useEffect(() => {
-    eventResults();
+    eventResults(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -101,6 +123,11 @@ export const PatternsFlyoutEventTable = ({ patternString }: { patternString: str
         },
       ]}
       tableLayout="auto"
+      pagination={{ pageIndex, pageSize: 10, totalItemCount, hidePerPageOptions: true }}
+      onChange={({ page: { index } }: CriteriaWithPagination<EventTableItem>) => {
+        setPageIndex(index);
+        eventResults(index);
+      }}
     />
   );
 };
