@@ -7,11 +7,11 @@ import moment from 'moment';
 import { Logger } from 'opensearch-dashboards/server';
 
 /**
- * Normalize the time string to the format of "yyyy-MM-dd HH:mm:ss"
+ * Normalize the time string and only accept the specific formats
  * @param timeString - The time string to normalize
  * @returns The normalized time string or null if the time string is invalid
  */
-export function normTimeString(timeString: string): string | null {
+export function normTimeString(timeString: string): moment.Moment | null {
   if (!timeString) {
     return null;
   }
@@ -36,7 +36,7 @@ export function normTimeString(timeString: string): string | null {
   if (!m.isValid()) {
     return null;
   }
-  return m.format('YYYY-MM-DD HH:mm:ss');
+  return m;
 }
 
 /**
@@ -77,11 +77,14 @@ export function parseTimeRangeXML(
       return null;
     }
 
-    if (startDate >= endDate) {
+    if (startDate.isAfter(endDate)) {
       return null;
     }
 
-    return { start: startDate, end: endDate };
+    return {
+      start: startDate.format('YYYY-MM-DD HH:mm:ss'),
+      end: endDate.format('YYYY-MM-DD HH:mm:ss'),
+    };
   } catch (error) {
     logger.error(`Error parsing time range input: ${error}`);
     return null;

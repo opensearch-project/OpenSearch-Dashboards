@@ -20,8 +20,12 @@ describe('time_parser_utils', () => {
 
   describe('normTimeString', () => {
     it('should normalize valid time string to yyyy-MM-dd HH:mm:ss format', () => {
-      expect(normTimeString('2023-12-25 10:30:45')).toBe('2023-12-25 10:30:45');
-      expect(normTimeString('2023-12-25T10:30:45Z')).toBe('2023-12-25 10:30:45');
+      expect(normTimeString('2023-12-25 10:30:45')?.format('YYYY-MM-DD HH:mm:ss')).toBe(
+        '2023-12-25 10:30:45'
+      );
+      expect(normTimeString('2023-12-25T10:30:45Z')?.format('YYYY-MM-DD HH:mm:ss')).toBe(
+        '2023-12-25 10:30:45'
+      );
     });
 
     it('should handle date without time', () => {
@@ -29,9 +33,15 @@ describe('time_parser_utils', () => {
     });
 
     it('should handle different date formats', () => {
-      expect(normTimeString('2023/12/25 10:30:45')).toBe('2023-12-25 10:30:45');
-      expect(normTimeString('2023/12/25T10:30:45Z')).toBe('2023-12-25 10:30:45');
-      expect(normTimeString('2023-12-25 10:30:45.123')).toBe('2023-12-25 10:30:45');
+      expect(normTimeString('2023/12/25 10:30:45')?.format('YYYY-MM-DD HH:mm:ss')).toBe(
+        '2023-12-25 10:30:45'
+      );
+      expect(normTimeString('2023/12/25T10:30:45Z')?.format('YYYY-MM-DD HH:mm:ss')).toBe(
+        '2023-12-25 10:30:45'
+      );
+      expect(normTimeString('2023-12-25 10:30:45.123')?.format('YYYY-MM-DD HH:mm:ss')).toBe(
+        '2023-12-25 10:30:45'
+      );
     });
 
     it('should return null for empty string', () => {
@@ -51,8 +61,12 @@ describe('time_parser_utils', () => {
     });
 
     it('should handle time without seconds', () => {
-      expect(normTimeString('2023-12-25 10:30')).toBe('2023-12-25 10:30:00');
-      expect(normTimeString('2023-12-25T10:30Z')).toBe('2023-12-25 10:30:00');
+      expect(normTimeString('2023-12-25 10:30')?.format('YYYY-MM-DD HH:mm:ss')).toBe(
+        '2023-12-25 10:30:00'
+      );
+      expect(normTimeString('2023-12-25T10:30Z')?.format('YYYY-MM-DD HH:mm:ss')).toBe(
+        '2023-12-25 10:30:00'
+      );
     });
 
     it('should return null for unsupported formats', () => {
