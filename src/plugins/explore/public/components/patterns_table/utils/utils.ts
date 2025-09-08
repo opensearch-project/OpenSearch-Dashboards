@@ -23,6 +23,7 @@ import { getQueryWithSource } from '../../../application/utils/languages';
 export const regexPatternQuery = (queryBase: string, patternsField: string) => {
   return `${queryBase} | patterns \`${patternsField}\` | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
 };
+// TODO: change max sample count to 1
 export const brainPatternQuery = (queryBase: string, patternsField: string) => {
   return `${queryBase} | patterns \`${patternsField}\` method=brain mode=aggregation | sort - pattern_count`;
 };
@@ -35,6 +36,7 @@ export const regexUpdateSearchPatternQuery = (
   return `${queryBase} | patterns \`${patternsField}\` | where patterns_field = '${patternString}'`;
 };
 
+// TODO: specify mode=label
 export const brainUpdateSearchPatternQuery = (
   queryBase: string,
   patternsField: string,
@@ -70,7 +72,7 @@ export const createSearchPatternQueryWithSlice = (
     patternString
   );
 
-  return `${searchPatternQuery} | head ${pageSize} offset ${pageOffset}`;
+  return `${searchPatternQuery} | head ${pageSize} from ${pageOffset}`;
 };
 
 // Checks if the value is a valid, finite number. Used for patterns table
