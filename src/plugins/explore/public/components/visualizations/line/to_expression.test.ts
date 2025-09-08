@@ -20,7 +20,7 @@ import {
   AxisColumnMappings,
 } from '../types';
 import * as lineChartUtils from './line_chart_utils';
-import * as thresholdUtils from '../style_panel/threshold/utils';
+import * as thresholdUtils from '../style_panel/threshold_lines/utils';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({
@@ -34,7 +34,7 @@ jest.mock('./line_chart_utils', () => ({
 }));
 
 // Mock the threshold utils
-jest.mock('../style_panel/threshold/utils', () => ({
+jest.mock('../style_panel/threshold_lines/utils', () => ({
   getStrokeDash: jest.fn().mockReturnValue([5, 5]),
   createThresholdLayer: jest.fn().mockReturnValue(null),
 }));

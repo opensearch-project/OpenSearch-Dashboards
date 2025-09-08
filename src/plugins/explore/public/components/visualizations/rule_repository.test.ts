@@ -50,6 +50,10 @@ jest.mock('./scatter/to_expression', () => ({
     .mockReturnValue('three-metric-one-cate-scatter-expression'),
 }));
 
+jest.mock('./gauge/to_expression', () => ({
+  createGauge: jest.fn().mockReturnValue('single-metric-gauge-expression'),
+}));
+
 jest.mock('./metric/to_expression', () => ({
   createSingleMetric: jest.fn().mockReturnValue('single-metric-expression'),
 }));

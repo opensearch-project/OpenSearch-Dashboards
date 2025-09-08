@@ -30,12 +30,34 @@ export const DebouncedTruncateField: React.FC<{
   );
 };
 
+export const DebouncedTruncateGaugeBaseField: React.FC<{
+  value: number | undefined;
+  onChange: (value: number | undefined) => void;
+  label: string;
+  testId: string;
+}> = ({ value, onChange, label, testId }) => {
+  const [localValue, handleChange] = useDebouncedValue(value, onChange);
+
+  return (
+    <EuiFormRow label={label} helpText="Leave empty to calculate based on all values">
+      <EuiFieldNumber
+        compressed
+        min={0}
+        value={localValue}
+        onChange={(e) => handleChange(e.target.value === '' ? undefined : Number(e.target.value))}
+        placeholder="auto"
+        data-test-subj={testId}
+      />
+    </EuiFormRow>
+  );
+};
+
 // Component for a truncate field with debouncing
 export const DebouncedText: React.FC<{
   value: string;
   placeholder: string;
   onChange: (value: string) => void;
-  label: string;
+  label?: string;
   disable?: boolean;
 }> = ({ value, placeholder, onChange, label, disable = false }) => {
   const [localValue, handleChange] = useDebouncedValue(value, onChange, 500);

@@ -16,8 +16,18 @@ import {
   selectResults,
   selectUsingRegexPatterns,
 } from '../../application/utils/state_management/selectors';
+import { PatternsTableFlyout } from './patterns_table_flyout/patterns_table_flyout';
+import {
+  PatternsFlyoutProvider,
+  usePatternsFlyoutContext,
+} from './patterns_table_flyout/patterns_flyout_context';
 
-export const PatternsContainer = () => {
+const PatternsContainerContent = () => {
+  const { isFlyoutOpen } = usePatternsFlyoutContext();
+
+  /**
+   * Fetching the hits from the patterns query, and processing them for the table
+   */
   const { results: patternResults } = useTabResults();
 
   const querySelector = useSelector(selectQuery);
@@ -56,10 +66,28 @@ export const PatternsContainer = () => {
       sample: usingRegexPatterns
         ? row._source[SAMPLE_FIELD][0]
         : highlightLogUsingPattern(row._source[SAMPLE_FIELD][0], row._source[PATTERNS_FIELD]),
+      flyout: {
+        pattern: row._source[PATTERNS_FIELD],
+        count: row._source[COUNT_FIELD],
+        sample: row._source[SAMPLE_FIELD],
+      },
     }));
 
-    return <PatternsTable items={items} />;
+    return (
+      <>
+        {isFlyoutOpen && <PatternsTableFlyout />}
+        <PatternsTable items={items} />
+      </>
+    );
   } catch {
     return <></>;
   }
+};
+
+export const PatternsContainer = () => {
+  return (
+    <PatternsFlyoutProvider>
+      <PatternsContainerContent />
+    </PatternsFlyoutProvider>
+  );
 };
