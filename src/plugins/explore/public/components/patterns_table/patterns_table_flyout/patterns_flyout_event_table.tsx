@@ -40,11 +40,10 @@ export const PatternsFlyoutEventTable = ({
   const patternsField = useSelector(selectPatternsField);
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const timeFieldName = dataset?.timeFieldName;
 
-  if (!dataset || !patternsField)
-    throw new Error('Dataset or patterns field is not appearing for event table');
-  const timeFieldName = dataset.timeFieldName;
-  if (!timeFieldName) throw new Error('No time field name found in dataset');
+  if (!dataset || !patternsField || !timeFieldName)
+    throw new Error('Dataset, patterns field, or time field is not appearing for event table');
 
   const [fetchedItems, setFetchedItems] = useState<EventTableItem[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
