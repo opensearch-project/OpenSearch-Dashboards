@@ -16,7 +16,7 @@ jest.mock('@osd/i18n', () => ({
 
 jest.mock('../style_panel/unit/unit_panel', () => ({
   UnitPanel: jest.fn(({ unitId, onUnitChange }) => (
-    <div data-test-subj="mockGaugeUnitPanel">
+    <div data-test-subj="mockMetricUnitPanel">
       <select data-test-subj="changeUnit" onClick={() => onUnitChange('number')}>
         <option value="number">Number</option>
       </select>
@@ -223,7 +223,7 @@ describe('MetricVisStyleControls', () => {
 
   it('renders unit panel', () => {
     render(<MetricVisStyleControls {...mockProps} />);
-    expect(screen.getByTestId('mockGaugeUnitPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('mockMetricUnitPanel')).toBeInTheDocument();
   });
 
   it('calls onStyleChange when unit is changed', () => {

@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { UnitsCollection, getUnitById, shortNumber, computingDate } from './collection';
+import {
+  UnitsCollection,
+  getUnitById,
+  shortNumber,
+  computingDate,
+  currencyFormat,
+  computing,
+  dataUnits,
+} from './collection';
 
 // Mock Date.now for consistent testing
 const mockDateNow = jest.spyOn(Date, 'now');
@@ -49,7 +57,7 @@ describe('getUnitById', () => {
   });
 });
 
-describe('shortNumber function', () => {
+describe('shortNumber', () => {
   it('should format numbers less than 1000', () => {
     expect(shortNumber(0)).toBe('0 ');
     expect(shortNumber(123)).toBe('123 ');
@@ -88,7 +96,7 @@ describe('shortNumber function', () => {
   });
 });
 
-describe('computingDate function', () => {
+describe('computingDate', () => {
   describe('ISO format', () => {
     it('should format timestamp as ISO string', () => {
       const result = computingDate(1640995200000, 'iso');
@@ -166,5 +174,24 @@ describe('computingDate function', () => {
       const result = computingDate(1640995200000, undefined);
       expect(result).toBe('Sat, 01 Jan 2022 00:00:00 GMT');
     });
+  });
+});
+
+describe('currencyFormat', () => {
+  it('should display currency symbol ', () => {
+    const result = currencyFormat(12, '$');
+    expect(result).toBe('$ 12');
+  });
+
+  it('should round to 2 decimal places', () => {
+    const result = currencyFormat(12.1234, '$');
+    expect(result).toBe('$ 12.12');
+  });
+});
+
+describe('computing', () => {
+  it('should compute the decent unit with the base unit', () => {
+    const result = computing(1000, dataUnits, 'B');
+    expect(result).toBe('1 kB');
   });
 });

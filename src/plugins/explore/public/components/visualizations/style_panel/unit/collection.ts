@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { Unit, UnitItem } from '../../types';
 
-const dataUnits = [
+export const dataUnits = [
   { symbol: 'b', value: 1 }, // 1 bit
   { symbol: 'B', value: 8 }, // 1 byte = 8 bits
   { symbol: 'kB', value: 8 * 1000 }, // 1 kB = 1000 bytes = 1000*8 bits
@@ -21,7 +21,7 @@ const dataUnits = [
   { symbol: 'PiB', value: 8 * 1024 ** 5 }, // 1 PiB = 1024^5 bytes
 ];
 
-const timeUnits = [
+export const timeUnits = [
   { symbol: 'milliseconds', value: 1 },
   { symbol: 'seconds', value: 1000 }, // 1 second = 1000 milliseconds
   { symbol: 'minutes', value: 60 * 1000 }, // 1 minute = 60 seconds
@@ -32,7 +32,7 @@ const timeUnits = [
   { symbol: 'years', value: 365 * 24 * 60 * 60 * 1000 }, // 1 year = 365 days
 ];
 
-const massUnits = [
+export const massUnits = [
   { symbol: 'mg', value: 0.001 }, // 1 milligram = 0.001 grams
   { symbol: 'g', value: 1 }, // 1 gram = 1 gram
   { symbol: 'lb', value: 453.59237 }, // 1 pound = 453.59237 grams
@@ -40,7 +40,7 @@ const massUnits = [
   { symbol: 't', value: 1000000 }, // 1 metric ton = 1,000,000 grams
 ];
 
-const lengthUnits = [
+export const lengthUnits = [
   { symbol: 'mm', value: 0.001 }, // 1 millimeter = 0.001 meters
   { symbol: 'in', value: 0.0254 }, // 1 inch = 0.0254 meters
   { symbol: 'ft', value: 0.3048 }, // 1 foot = 0.3048 meters
@@ -62,7 +62,7 @@ export const shortNumber = (num: number) => {
   return `${Math.round(n * 100) / 100} ${units[unitIndex]}`;
 };
 
-const currencyFormat = (num: number, symbol?: string) => {
+export const currencyFormat = (num: number, symbol?: string) => {
   return `${symbol ? symbol : ''} ${Math.round(num * 100) / 100}`;
 };
 
