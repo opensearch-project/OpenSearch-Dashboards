@@ -32,10 +32,7 @@ export const createGauge = (
   let numericalValues: number[] = [];
   let maxNumber: number = 0;
   if (numericField) {
-    numericalValues = transformedData
-      .map((d) => Number(d[numericField]))
-      .filter((n) => !Number.isNaN(n));
-
+    numericalValues = transformedData.map((d) => d[numericField]);
     maxNumber = Math.max(...numericalValues);
   }
 
@@ -43,14 +40,18 @@ export const createGauge = (
 
   const calculatedValue = calculateValue(numericalValues, styleOptions.valueCalculation);
 
+  const isValidNumber =
+    calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
+
   const targetValue = calculatedValue || 0;
 
   const selectedUnit = getUnitById(styleOptions?.unitId);
 
-  const displayValue =
-    selectedUnit && selectedUnit?.display
-      ? selectedUnit?.display(targetValue, selectedUnit?.symbol)
-      : `${Math.round(targetValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`;
+  const displayValue = isValidNumber
+    ? selectedUnit && selectedUnit?.display
+      ? selectedUnit?.display(calculatedValue, selectedUnit?.symbol)
+      : `${Math.round(calculatedValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`
+    : '-';
 
   const minBase = styleOptions?.min || 0;
   const maxBase = styleOptions?.max || maxNumber;

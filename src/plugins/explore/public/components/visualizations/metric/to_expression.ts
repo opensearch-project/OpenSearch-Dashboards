@@ -56,11 +56,11 @@ export const createSingleMetric = (
 
   const selectedUnit = getUnitById(styleOptions?.unitId);
 
-  const targetValue = calculatedValue || 0;
-  const displayValue =
-    selectedUnit && selectedUnit?.display
-      ? selectedUnit?.display(targetValue || 0, selectedUnit?.symbol)
-      : `${Math.round(targetValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`;
+  const displayValue = isValidNumber
+    ? selectedUnit && selectedUnit?.display
+      ? selectedUnit?.display(calculatedValue, selectedUnit?.symbol)
+      : `${Math.round(calculatedValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`
+    : '-';
 
   function generateColorConditions(field: string, ranges: RangeValue[], color: ColorSchemas) {
     const colors = generateColorBySchema(ranges.length + 1, color);
