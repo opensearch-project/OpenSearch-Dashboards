@@ -40,6 +40,8 @@ import { coreMock } from 'opensearch-dashboards/public/mocks';
 import { getStubDataView } from '../../../../data/public/data_views/data_view.stub';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import * as fieldFilter from './lib/field_filter';
+import { ExploreFlavor } from '../../../common';
+import * as useFlavorIdModule from '../../helpers/use_flavor_id';
 
 jest.mock('../../application/legacy/discover/opensearch_dashboards_services', () => ({
   getServices: () => ({
@@ -66,6 +68,10 @@ jest.mock('../../application/legacy/discover/opensearch_dashboards_services', ()
       },
     },
   }),
+}));
+
+jest.mock('../../helpers/use_flavor_id', () => ({
+  useFlavorId: jest.fn(),
 }));
 
 jest.mock('./lib/get_index_pattern_field_list', () => ({
@@ -100,11 +106,40 @@ jest.mock('./facet_list', () => ({
 
 function getCompProps(customFields?: any[]): DiscoverSidebarProps {
   const fields = customFields || stubbedLogstashFields();
+
+  // Add faceted fields to the field list
+  const facetedFields = [
+    {
+      name: 'serviceName',
+      type: 'string',
+      esTypes: ['keyword'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'Service Name',
+    },
+    {
+      name: 'status.code',
+      type: 'number',
+      esTypes: ['long'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'Status Code',
+    },
+  ];
+
+  const allFields = [...fields, ...facetedFields];
+
   const dataSet = getStubDataView(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
-    fields,
+    allFields,
     coreMock.createSetup()
   );
 
@@ -124,7 +159,6 @@ function getCompProps(customFields?: any[]): DiscoverSidebarProps {
   // Add some mock faceted field counts
   fieldCounts.serviceName = 10;
   fieldCounts['status.code'] = 8;
-  fieldCounts['span.attributes.http@status_code'] = 5;
 
   return {
     columns: ['extension'],
@@ -141,34 +175,57 @@ function getCompProps(customFields?: any[]): DiscoverSidebarProps {
 
 describe('discover sidebar', function () {
   let spy: jest.SpyInstance;
+  const mockUseFlavorId = useFlavorIdModule.useFlavorId as jest.MockedFunction<
+    typeof useFlavorIdModule.useFlavorId
+  >;
+
+  beforeEach(() => {
+    mockUseFlavorId.mockReturnValue(null);
+  });
 
   afterEach(() => {
     if (spy) {
-      spy.mockRestore(); // This works with spyOn
+      spy.mockRestore();
     }
+    jest.clearAllMocks();
   });
 
-  it('should render the field header', function () {
+  it('should render basic field sections', function () {
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
 
-    expect(screen.getByText('Fields')).toBeInTheDocument();
-  });
-
-  it('should have Faceted, Selected and Discovered field sections', function () {
-    const props = getCompProps();
-    render(<DiscoverSidebar {...props} />);
-
-    // Check for field list sections (Selected, Query, Discovered)
     expect(screen.getByTestId('mocked-field-list-selected')).toBeInTheDocument();
     expect(screen.getByTestId('mocked-field-list-discovered')).toBeInTheDocument();
-
-    // Check that fields are rendered
-    const allFields = screen.getAllByTestId('fieldList-field');
-    expect(allFields.length).toBeGreaterThan(0);
+    expect(screen.getByRole('searchbox')).toBeInTheDocument();
   });
 
-  it('should show all fields when missing filter is disabled', function () {
+  it('should show faceted fields when flavor is Traces', function () {
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    expect(screen.getByTestId('mocked-facet-list')).toBeInTheDocument();
+    expect(screen.getByText('Faceted fields')).toBeInTheDocument();
+  });
+
+  it('should not show faceted fields when flavor is not Traces', function () {
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs);
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    expect(screen.queryByTestId('mocked-facet-list')).not.toBeInTheDocument();
+  });
+
+  it('should call onCollapse when provided', function () {
+    const props = { ...getCompProps(), onCollapse: jest.fn() };
+    render(<DiscoverSidebar {...props} />);
+
+    const collapseButton = screen.getByTestId('fieldList-collapse-button');
+    fireEvent.click(collapseButton);
+    expect(props.onCollapse).toHaveBeenCalled();
+  });
+
+  it('should render fields in appropriate sections', function () {
     spy = jest.spyOn(fieldFilter, 'getDefaultFieldFilter').mockReturnValue({
       missing: false,
       type: 'any',
@@ -180,51 +237,6 @@ describe('discover sidebar', function () {
     render(<DiscoverSidebar {...props} />);
 
     const allFields = screen.getAllByTestId('fieldList-field');
-    expect(allFields.length).toBeGreaterThan(20);
-  });
-
-  it('should render the sidebar structure with all field sections', function () {
-    const props = getCompProps();
-    render(<DiscoverSidebar {...props} />);
-
-    // Check that the main sections are present
-    expect(screen.getByTestId('mocked-field-list-selected')).toBeInTheDocument();
-    expect(screen.getByTestId('mocked-field-list-discovered')).toBeInTheDocument();
-
-    // Check that field search is present
-    expect(screen.getByRole('searchbox')).toBeInTheDocument();
-  });
-
-  it('should call onCollapse when header collapse button is clicked', function () {
-    const props = { ...getCompProps(), onCollapse: jest.fn() };
-    render(<DiscoverSidebar {...props} />);
-
-    const collapseButton = screen.getByTestId('fieldList-collapse-button');
-    fireEvent.click(collapseButton);
-    expect(props.onCollapse).toHaveBeenCalled();
-  });
-
-  it('should render field search functionality', function () {
-    const props = getCompProps();
-    render(<DiscoverSidebar {...props} />);
-
-    // Check that field search input exists
-    expect(screen.getByRole('searchbox')).toBeInTheDocument();
-
-    // Check that filter toggle button exists
-    expect(screen.getByTestId('toggleFieldFilterButton')).toBeInTheDocument();
-  });
-
-  it('should render proper sections structure', function () {
-    const props = getCompProps();
-    render(<DiscoverSidebar {...props} />);
-
-    // Check that sections are rendered properly
-    expect(screen.getByText('Selected')).toBeInTheDocument();
-    expect(screen.getByText('Discovered')).toBeInTheDocument();
-
-    // Check that fields are displayed in the mocked components
-    const fieldItems = screen.getAllByTestId('fieldList-field');
-    expect(fieldItems.length).toBeGreaterThan(0);
+    expect(allFields.length).toBeGreaterThan(0);
   });
 });

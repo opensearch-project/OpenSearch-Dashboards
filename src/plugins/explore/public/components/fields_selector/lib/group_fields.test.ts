@@ -91,7 +91,7 @@ describe('group_fields', function () {
     // Set missing to false to include fields not in fieldCounts
     fieldFilterState.missing = false;
 
-    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState);
+    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "discoveredFields": Array [
@@ -230,7 +230,7 @@ describe('group_fields', function () {
     const fieldFilterState = getDefaultFieldFilter();
     fieldFilterState.missing = false;
 
-    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState);
+    const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState, true);
 
     expect(actual.facetedFields).toHaveLength(3);
     expect(actual.facetedFields.map((f) => f.name)).toContain('serviceName\u200b');
