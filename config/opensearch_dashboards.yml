@@ -388,8 +388,3 @@
 
 # Set the value to true to enable the keyboard shortcuts
 # opensearchDashboards.keyboardShortcuts.enabled: true
-
-workspace.enabled: true
-opensearch.ignoreVersionMismatch: true
-data_source.enabled: true
-data.savedQueriesNewUI.enabled: true
