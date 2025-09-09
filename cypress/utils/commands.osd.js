@@ -434,6 +434,37 @@ cy.osd.add('cleanupWorkspaceAndDataSourceAndIndices', (workspaceName, indices) =
   }
 });
 
+cy.osd.add('setupWorkspaceAndDataSourceWithTraces', (workspaceName, traceIndices) => {
+  // Load trace test data
+  cy.osd.setupTestData(
+    PATHS.SECONDARY_ENGINE,
+    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.mapping.json`),
+    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.data.ndjson`)
+  );
+
+  // Add data source
+  cy.osd.addDataSource({
+    name: DATASOURCE_NAME,
+    url: PATHS.SECONDARY_ENGINE,
+    authType: 'no_auth',
+  });
+
+  // delete any old workspaces and potentially conflicting one
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteAllOldWorkspaces();
+
+  cy.visit('/app/home');
+  cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+});
+
+cy.osd.add('cleanupWorkspaceAndDataSourceAndTraces', (workspaceName, traceIndices) => {
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+  for (const index of traceIndices) {
+    cy.osd.deleteIndex(index);
+  }
+});
+
 cy.osd.add('ensureTopNavExists', () => {
   const MAX_RETRY = 3;
 

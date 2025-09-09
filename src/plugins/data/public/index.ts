@@ -70,6 +70,7 @@ export {
   SingleLineInput,
   DatasetSelector,
   DatasetSelectorAppearance,
+  DetailedDataset,
 } from './ui';
 
 import {

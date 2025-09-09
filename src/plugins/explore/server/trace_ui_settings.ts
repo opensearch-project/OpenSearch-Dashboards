@@ -19,7 +19,7 @@ export const traceUiSettings: Record<string, UiSettingsParams> = {
       'status.code',
       'attributes.http.status_code',
       'attributes.service.name',
-      'attributes.aws.local.service',
+      'resource.attributes.service.name',
       'serviceName',
       'name',
       'durationNano',
