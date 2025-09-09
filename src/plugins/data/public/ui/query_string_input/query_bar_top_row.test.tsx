@@ -36,6 +36,7 @@ import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 
 import { QueryBarTopRow } from './';
+import { DATA_DOM_SELECTORS } from '../../constants';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
@@ -359,7 +360,7 @@ describe('QueryBarTopRowTopRow', () => {
       };
 
       (document.querySelector as jest.Mock).mockImplementation((selector) => {
-        if (selector === '[data-test-subj="superDatePickerstartDatePopoverButton"]') {
+        if (selector === DATA_DOM_SELECTORS.DATE_PICKER_START_BUTTON) {
           return mockDatePickerButton;
         }
         return null;
@@ -388,7 +389,7 @@ describe('QueryBarTopRowTopRow', () => {
       };
 
       (document.querySelector as jest.Mock).mockImplementation((selector) => {
-        if (selector === '[data-test-subj="queryInput"]') {
+        if (selector === DATA_DOM_SELECTORS.QUERY_INPUT) {
           return mockQueryInput;
         }
         return null;

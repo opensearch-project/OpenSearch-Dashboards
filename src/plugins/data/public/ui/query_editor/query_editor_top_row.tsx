@@ -24,6 +24,7 @@ import {
   Query,
   TimeHistoryContract,
   TimeRange,
+  DATA_DOM_SELECTORS,
 } from '../..';
 import {
   useOpenSearchDashboards,
@@ -77,8 +78,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
   const handleOpenDatePicker = useCallback(() => {
     const selectors = [
-      '[data-test-subj="superDatePickerstartDatePopoverButton"]',
-      '[data-test-subj="superDatePickerShowDatesButton"]',
+      DATA_DOM_SELECTORS.DATE_PICKER_START_BUTTON,
+      DATA_DOM_SELECTORS.DATE_PICKER_SHOW_DATES_BUTTON,
     ];
     for (const selector of selectors) {
       const element = document.querySelector(selector);
@@ -92,7 +93,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   // Memoized callback for focusing query bar
   const handleFocusQueryBar = useCallback(() => {
     // Monaco-based query editor
-    const queryEditorInput = document.querySelector('[data-test-subj="exploreQueryPanelEditor"]');
+    const queryEditorInput = document.querySelector(DATA_DOM_SELECTORS.QUERY_EDITOR_INPUT);
     if (queryEditorInput) {
       // Look for Monaco editor within the query editor container
       const monacoEditor = queryEditorInput.querySelector(

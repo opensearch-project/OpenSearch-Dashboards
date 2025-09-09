@@ -14,6 +14,9 @@ import { getNavActions } from '../../utils/get_nav_actions';
 import { DashboardContainer } from '../../embeddable';
 import { Dashboard } from '../../../dashboard';
 import { TopNavMenuItemRenderType, TopNavControlData } from '../../../../../navigation/public';
+import { TopNavIds } from './top_nav';
+import { ViewMode } from '../../../../../embeddable/public';
+import { DASHBOARD_DOM_SELECTORS } from '../../../constants';
 
 interface DashboardTopNavProps {
   isChromeVisible: boolean;
@@ -55,22 +58,35 @@ const TopNav = ({
   const { dashboardConfig, setHeaderActionMenu, keyboardShortcut } = services;
   const { setAppRightControls } = services.application;
 
+  // Get nav actions for direct function calls
+  const keyboardNavActions = getNavActions(
+    appState,
+    savedDashboardInstance,
+    services,
+    dashboard,
+    dashboardIdFromUrl,
+    currentContainer
+  );
+
   const handleToggleDashboardEdit = useCallback(() => {
-    const editButton = document.querySelector('[data-test-subj="dashboardEditSwitch"]');
-    if (editButton) {
-      (editButton as HTMLElement).click();
+    const isEditMode = currentAppState?.viewMode === ViewMode.EDIT;
+    const actionId = isEditMode ? TopNavIds.EXIT_EDIT_MODE : TopNavIds.ENTER_EDIT_MODE;
+    if (keyboardNavActions && keyboardNavActions[actionId]) {
+      keyboardNavActions[actionId]();
     }
-  }, []);
+  }, [keyboardNavActions, currentAppState]);
 
   const handleSave = useCallback(() => {
-    const saveButton = document.querySelector('[data-test-subj="dashboardSaveMenuItem"]');
-    if (saveButton && !saveButton.hasAttribute('disabled')) {
-      (saveButton as HTMLElement).click();
+    if (keyboardNavActions && keyboardNavActions[TopNavIds.SAVE]) {
+      keyboardNavActions[TopNavIds.SAVE]();
     }
-  }, []);
+  }, [keyboardNavActions]);
 
   const handleAdd = useCallback(() => {
-    const addButton = document.querySelector('[data-test-subj="dashboardAddPanelButton"]');
+    // Note: Cannot use navActions[TopNavIds.ADD_EXISTING]() directly because it requires
+    // an anchorElement parameter for popover positioning. Keyboard shortcuts have no
+    // anchor element, so we simulate clicking the actual button to provide proper context.
+    const addButton = document.querySelector(DASHBOARD_DOM_SELECTORS.ADD_PANEL_BUTTON);
     if (addButton && !addButton.hasAttribute('disabled')) {
       (addButton as HTMLElement).click();
     }

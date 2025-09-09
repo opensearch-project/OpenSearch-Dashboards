@@ -55,14 +55,11 @@ export const DashboardEditor = () => {
     };
   }, [setHeaderVariant, showActionsInGroup]);
 
-  // Memoized callback for full-screen action
   const handleFullScreen = useCallback(() => {
-    // Find and click the full-screen button
-    const fullScreenButton = document.querySelector('[data-test-subj="dashboardFullScreenMode"]');
-    if (fullScreenButton) {
-      (fullScreenButton as HTMLElement).click();
+    if (appState) {
+      appState.transitions.set('fullScreenMode', true);
     }
-  }, []);
+  }, [appState]);
 
   // Register full-screen keyboard shortcut using the hook
   keyboardShortcut?.useKeyboardShortcut({

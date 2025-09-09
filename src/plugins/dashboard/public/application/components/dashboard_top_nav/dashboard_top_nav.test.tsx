@@ -36,6 +36,7 @@ import { mount } from 'enzyme';
 import { TopNavMenu, TopNavControls as HeaderControl } from 'src/plugins/navigation/public';
 import { dashboardAppStateStub } from '../../utils/stubs';
 import { ViewMode } from 'src/plugins/embeddable/public';
+import { DASHBOARD_DOM_SELECTORS } from '../../../constants';
 
 let mockURL = '?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))';
 
@@ -168,28 +169,29 @@ describe('Dashboard top nav', () => {
     expect(component).toMatchSnapshot();
   });
 
-  describe('Keyboard Shortcuts', () => {
-    const mockUseKeyboardShortcut = jest.fn();
-    const mockRegister = jest.fn();
-    const mockUnregister = jest.fn();
+  describe('Keyboard Shortcuts Integration', () => {
+    let mockUseKeyboardShortcut: jest.Mock;
+    let mockRegister: jest.Mock;
+    let mockUnregister: jest.Mock;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      mockUseKeyboardShortcut = jest.fn();
+      mockRegister = jest.fn();
+      mockUnregister = jest.fn();
+
+      // Mock document.querySelector for DOM interactions
       Object.defineProperty(document, 'querySelector', {
         value: jest.fn(),
         writable: true,
+        configurable: true,
       });
     });
 
-    function wrapWithMockedKeyboardShortcut(state: DashboardAppState) {
+    function wrapWithKeyboardShortcuts(state: DashboardAppState) {
       const services = {
         ...mockServices,
-        dashboardCapabilities: {
-          saveQuery: true,
-        },
-        navigation: {
-          ui: { TopNavMenu, HeaderControl },
-        },
+        dashboardCapabilities: { saveQuery: true },
+        navigation: { ui: { TopNavMenu, HeaderControl } },
         keyboardShortcut: {
           useKeyboardShortcut: mockUseKeyboardShortcut,
           register: mockRegister,
@@ -199,16 +201,17 @@ describe('Dashboard top nav', () => {
 
       const topNavProps = {
         isChromeVisible: false,
-        savedDashboardInstance: {},
+        savedDashboardInstance: { id: 'test-dashboard', title: 'Test Dashboard' },
         appState: {
           getState: () => state,
-        } as DashboardAppStateContainer,
-        dashboard: {} as Dashboard,
+          transitions: { set: jest.fn(), setDashboard: jest.fn(), setOption: jest.fn() },
+        } as any,
+        dashboard: { save: jest.fn() } as any,
         currentAppState: state,
         isEmbeddableRendered: true,
         currentContainer: {} as DashboardContainer,
         indexPatterns: [],
-        dashboardIdFromUrl: '',
+        dashboardIdFromUrl: 'test-dashboard',
       };
 
       return (
@@ -220,14 +223,13 @@ describe('Dashboard top nav', () => {
       );
     }
 
-    test('registers keyboard shortcuts correctly', async () => {
-      const editModeState = { ...currentState, viewMode: ViewMode.EDIT };
-      const component = mount(wrapWithMockedKeyboardShortcut(editModeState));
-
+    test('registers toggle edit shortcut', async () => {
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.VIEW })
+      );
       await new Promise((resolve) => process.nextTick(resolve));
       component.update();
 
-      // Verify toggle edit shortcut is registered
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
         id: 'toggle_dashboard_edit',
         pluginId: 'dashboard',
@@ -236,8 +238,15 @@ describe('Dashboard top nav', () => {
         keys: 'shift+e',
         execute: expect.any(Function),
       });
+    });
 
-      // Verify save shortcut is registered in edit mode
+    test('registers save and add shortcuts in edit mode', async () => {
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.EDIT })
+      );
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
       expect(mockRegister).toHaveBeenCalledWith({
         id: 'save_dashboard',
         pluginId: 'dashboard',
@@ -246,33 +255,68 @@ describe('Dashboard top nav', () => {
         keys: 'cmd+s',
         execute: expect.any(Function),
       });
+
+      expect(mockRegister).toHaveBeenCalledWith({
+        id: 'add_dashboard',
+        pluginId: 'dashboard',
+        name: 'Add Dashboard',
+        category: 'Data actions',
+        keys: 'a',
+        execute: expect.any(Function),
+      });
     });
 
-    test('executes keyboard shortcuts with DOM interaction', async () => {
-      const mockEditButton = { click: jest.fn() };
-      const mockSaveButton = { click: jest.fn(), hasAttribute: jest.fn(() => false) };
-
-      (document.querySelector as jest.Mock).mockImplementation((selector) => {
-        if (selector === '[data-test-subj="dashboardEditSwitch"]') return mockEditButton;
-        if (selector === '[data-test-subj="dashboardSaveMenuItem"]') return mockSaveButton;
-        return null;
-      });
-
-      const editModeState = { ...currentState, viewMode: ViewMode.EDIT };
-      const component = mount(wrapWithMockedKeyboardShortcut(editModeState));
-
+    test('does not register save/add shortcuts in view mode', async () => {
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.VIEW })
+      );
       await new Promise((resolve) => process.nextTick(resolve));
       component.update();
 
-      const toggleShortcut = mockUseKeyboardShortcut.mock.calls.find(
-        (call) => call[0].keys === 'shift+e'
-      );
-      toggleShortcut[0].execute();
-      expect(mockEditButton.click).toHaveBeenCalled();
+      const saveCall = mockRegister.mock.calls.find((call) => call[0].id === 'save_dashboard');
+      const addCall = mockRegister.mock.calls.find((call) => call[0].id === 'add_dashboard');
 
-      const saveShortcut = mockRegister.mock.calls.find((call) => call[0].keys === 'cmd+s');
-      saveShortcut[0].execute();
-      expect(mockSaveButton.click).toHaveBeenCalled();
+      expect(saveCall).toBeUndefined();
+      expect(addCall).toBeUndefined();
+    });
+
+    test('add panel shortcut uses DOM interaction', async () => {
+      const mockButton = { click: jest.fn(), hasAttribute: jest.fn(() => false) };
+      (document.querySelector as jest.Mock).mockReturnValue(mockButton);
+
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.EDIT })
+      );
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      const addCall = mockRegister.mock.calls.find((call) => call[0].id === 'add_dashboard');
+      expect(addCall).toBeDefined();
+
+      // Execute the add shortcut
+      addCall[0].execute();
+
+      expect(document.querySelector).toHaveBeenCalledWith(DASHBOARD_DOM_SELECTORS.ADD_PANEL_BUTTON);
+      expect(mockButton.click).toHaveBeenCalled();
+    });
+
+    test('cleans up shortcuts on unmount', async () => {
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.EDIT })
+      );
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      component.unmount();
+
+      expect(mockUnregister).toHaveBeenCalledWith({
+        id: 'save_dashboard',
+        pluginId: 'dashboard',
+      });
+      expect(mockUnregister).toHaveBeenCalledWith({
+        id: 'add_dashboard',
+        pluginId: 'dashboard',
+      });
     });
   });
 });

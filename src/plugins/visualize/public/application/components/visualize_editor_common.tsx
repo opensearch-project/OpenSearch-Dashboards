@@ -36,6 +36,7 @@ import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
+import { VISUALIZE_DOM_SELECTORS } from '../../constants';
 import {
   SavedVisInstance,
   VisualizeAppState,
@@ -81,14 +82,14 @@ export const VisualizeEditorCommon = ({
   const { keyboardShortcut } = opensearchDashboards.services;
 
   const handleSidebarToggle = useCallback(() => {
-    const sidebarButton = document.querySelector('[data-test-subj="collapseSideBarButton"]');
+    const sidebarButton = document.querySelector(VISUALIZE_DOM_SELECTORS.SIDEBAR_TOGGLE_BUTTON);
     if (sidebarButton) {
       (sidebarButton as HTMLElement).click();
     }
   }, []);
 
   const handleSave = useCallback(() => {
-    const saveButton = document.querySelector('[data-test-subj="visualizeSaveButton"]');
+    const saveButton = document.querySelector(VISUALIZE_DOM_SELECTORS.SAVE_BUTTON);
     if (saveButton) {
       (saveButton as HTMLElement).click();
     }

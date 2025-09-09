@@ -57,6 +57,7 @@ import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
+import { DATA_DOM_SELECTORS } from '../../constants';
 
 const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
 
@@ -105,8 +106,8 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
   const handleOpenDatePicker = useCallback(() => {
     const selectors = [
-      '[data-test-subj="superDatePickerstartDatePopoverButton"]',
-      '[data-test-subj="superDatePickerShowDatesButton"]',
+      DATA_DOM_SELECTORS.DATE_PICKER_START_BUTTON,
+      DATA_DOM_SELECTORS.DATE_PICKER_SHOW_DATES_BUTTON,
     ];
     for (const selector of selectors) {
       const element = document.querySelector(selector);
@@ -119,7 +120,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
   const handleFocusQueryBar = useCallback(() => {
     const queryInput = document.querySelector(
-      '[data-test-subj="queryInput"]'
+      DATA_DOM_SELECTORS.QUERY_INPUT
     ) as HTMLTextAreaElement;
     if (queryInput) {
       queryInput.focus();

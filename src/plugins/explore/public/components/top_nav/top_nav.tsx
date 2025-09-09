@@ -13,6 +13,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
 import { ExploreServices } from '../../types';
+import { EXPLORE_DOM_SELECTORS } from '../../constants';
 import { useDatasetContext } from '../../application/context';
 import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
@@ -41,7 +42,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const editorRef = useEditorRef();
 
   const handleSaveShortcut = useCallback(() => {
-    const saveButton = document.querySelector('[data-test-subj="discoverSaveButton"]');
+    const saveButton = document.querySelector(EXPLORE_DOM_SELECTORS.SAVE_BUTTON);
     if (saveButton && !saveButton.hasAttribute('disabled')) {
       (saveButton as HTMLElement).click();
     }
@@ -73,7 +74,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   });
 
   const handleShareShortcut = useCallback(() => {
-    const shareButton = document.querySelector('[data-test-subj="shareTopNavButton"]');
+    const shareButton = document.querySelector(EXPLORE_DOM_SELECTORS.SHARE_BUTTON);
     if (shareButton && !shareButton.hasAttribute('disabled')) {
       (shareButton as HTMLElement).click();
     }
