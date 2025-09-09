@@ -25,7 +25,7 @@ export const regexPatternQuery = (queryBase: string, patternsField: string) => {
 };
 
 export const brainPatternQuery = (queryBase: string, patternsField: string) => {
-  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=aggregation max_sample_count=1 | sort - pattern_count`;
+  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
 };
 
 export const regexUpdateSearchPatternQuery = (
