@@ -68,7 +68,7 @@ export const createGauge = (
 
   // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color
   const fillColor =
-    !targetThreshold || minBase > targetValue || minBase >= maxBase
+    !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
       ? '#cbd1d6'
       : targetThreshold.color;
 
