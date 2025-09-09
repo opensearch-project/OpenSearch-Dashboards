@@ -201,10 +201,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
         category: 'navigation',
         keys: 'shift+`',
         execute: () => {
-          const devToolsButton = document.querySelector('[data-test-subj="openDevToolsModal"]');
-          if (devToolsButton) {
-            (devToolsButton as HTMLElement).click();
-          }
+          uiActions.executeTriggerActions(devToolsTrigger.id, {});
         },
       });
     }

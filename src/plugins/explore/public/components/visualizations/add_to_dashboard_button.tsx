@@ -71,8 +71,8 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     id: 'addToDashboard',
     pluginId: 'explore',
     name: 'Add to Dashboard',
-    category: 'Data actions', // or 'editing' depending on your preference
-    keys: 'a', // Choose your preferred key combination
+    category: 'Data actions',
+    keys: 'a',
     execute: handleAddToDashboard,
   });
 
