@@ -45,8 +45,16 @@ export const applyAxisStyling = (
   if (axisStyle?.labels) {
     fullAxisConfig.labels = !!axisStyle.labels.show;
     if (fullAxisConfig.labels) {
-      fullAxisConfig.labelAngle = axisStyle.labels.rotate ?? 0;
-      fullAxisConfig.labelLimit = axisStyle.labels.truncate ?? 100;
+      fullAxisConfig.labelAngle = 0;
+      fullAxisConfig.labelLimit = 100;
+
+      if (axisStyle.labels.rotate !== undefined) {
+        fullAxisConfig.labelAngle = axisStyle.labels.rotate;
+      }
+      if (axisStyle.labels.truncate !== undefined && axisStyle.labels.truncate > 0) {
+        fullAxisConfig.labelLimit = axisStyle.labels.truncate;
+      }
+
       fullAxisConfig.labelOverlap = 'greedy';
       fullAxisConfig.labelFlush = false;
     }
