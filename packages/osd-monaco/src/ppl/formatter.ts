@@ -5,7 +5,7 @@
 
 export function formatPPLQuery(query: string): string {
   // Split by pipes and trim each segment
-  const segments = query.split('|').map((seg) => seg.trim());
+  const segments = query.split('|').map((seg) => seg.replace(/\s+/g, ' ').trim());
 
   // Rejoin with pipes at column 0
   return segments.join('\n| ');
