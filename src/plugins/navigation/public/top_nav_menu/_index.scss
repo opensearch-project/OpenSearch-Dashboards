@@ -8,6 +8,14 @@
   }
 }
 
+.osdTopNavMenuWithScreenTitle {
+  display: flex;
+
+  h1 {
+    font-size: $euiFontSizeS;
+  }
+}
+
 .osdTopNavMenuGroupedActions {
   background-color: $euiPageBackgroundColor;
 
@@ -16,31 +24,31 @@
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > .euiSwitch,
-  & > .euiButton,
-  & > .euiButtonIcon,
-  & > .euiToolTipAnchor > .euiSwitch,
-  & > .euiToolTipAnchor > .euiButton,
-  & > .euiToolTipAnchor > .euiButtonIcon {
+  &>.euiSwitch,
+  &>.euiButton,
+  &>.euiButtonIcon,
+  &>.euiToolTipAnchor>.euiSwitch,
+  &>.euiToolTipAnchor>.euiButton,
+  &>.euiToolTipAnchor>.euiButtonIcon {
     border-radius: 0;
     border: $euiFormInputGroupBorder;
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > :not(:first-child),
-  & > .euiToolTipAnchor:not(:first-child) > .euiSwitch,
-  & > .euiToolTipAnchor:not(:first-child) > .euiButton,
-  & > .euiToolTipAnchor:not(:first-child) > .euiButtonIcon {
+  &> :not(:first-child),
+  &>.euiToolTipAnchor:not(:first-child)>.euiSwitch,
+  &>.euiToolTipAnchor:not(:first-child)>.euiButton,
+  &>.euiToolTipAnchor:not(:first-child)>.euiButtonIcon {
     border-left-width: 0;
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > :not(:last-child),
-  & > .euiToolTipAnchor:not(:last-child) > .euiSwitch,
-  & > .euiToolTipAnchor:not(:last-child) > .euiButton,
-  & > .euiToolTipAnchor:not(:last-child) > .euiButtonIcon {
+  &> :not(:last-child),
+  &>.euiToolTipAnchor:not(:last-child)>.euiSwitch,
+  &>.euiToolTipAnchor:not(:last-child)>.euiButton,
+  &>.euiToolTipAnchor:not(:last-child)>.euiButtonIcon {
     border-bottom-right-radius: 0;
     border-top-right-radius: 0;
 
@@ -48,9 +56,9 @@
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > .osdTopNavGroup-isDisabled:not(:last-child):has(+ .osdTopNavGroup-isDisabled),
-  & > .osdTopNavGroup-isDisabled.euiToolTipAnchor:not(:last-child):has(+ .osdTopNavGroup-isDisabled) > .euiButton,
-  & > .osdTopNavGroup-isDisabled.euiToolTipAnchor:not(:last-child):has(+ .osdTopNavGroup-isDisabled) > .euiButtonIcon {
+  &>.osdTopNavGroup-isDisabled:not(:last-child):has(+ .osdTopNavGroup-isDisabled),
+  &>.osdTopNavGroup-isDisabled.euiToolTipAnchor:not(:last-child):has(+ .osdTopNavGroup-isDisabled)>.euiButton,
+  &>.osdTopNavGroup-isDisabled.euiToolTipAnchor:not(:last-child):has(+ .osdTopNavGroup-isDisabled)>.euiButtonIcon {
     // border-right-color: $euiButtonColorDisabled !important;
   }
 }
@@ -66,6 +74,7 @@
 }
 
 .osdTopNavMenuScreenTitle {
+
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   .euiTitle {
     line-height: $euiFormControlCompressedHeight;

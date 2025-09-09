@@ -647,7 +647,7 @@ export function Header({
         {renderNavToggle()}
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
-          <EuiFlexItem grow={false}>{renderBreadcrumbs(false, true)}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderBreadcrumbs(false, false)}</EuiFlexItem>
           {actionMenu}
         </EuiHeaderSection>
         <EuiHeaderSection side="right">
