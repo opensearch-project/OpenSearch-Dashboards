@@ -45,7 +45,7 @@ const DESIRED_ROWS_LOOKAHEAD = 5 * INFINITE_SCROLLED_PAGE_SIZE;
 const MIN_COLUMN_WIDTH = 80;
 const MIN_LARGE_COLUMN_WIDTH = 400; // Minimum width for large columns to avoid too narrow display
 const LARGE_COLUMN_THRESHOLD = 400; // Threshold to classify large content columns
-const HEADER_BUTTON_SPACE = 32; // Space for action buttons
+const HEADER_BUTTON_SPACE = 64; // Space for action buttons
 const COLUMN_BUFFER = 32; // Padding + margins to prevent overlap
 
 // Types for column width calculation

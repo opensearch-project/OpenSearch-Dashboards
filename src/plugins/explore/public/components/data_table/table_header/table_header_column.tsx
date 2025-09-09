@@ -12,8 +12,8 @@
 import './_table_header.scss';
 
 import { i18n } from '@osd/i18n';
-import React, { ReactNode, useState } from 'react';
-import { EuiSmallButtonIcon, EuiToolTip, EuiPopover, EuiText } from '@elastic/eui';
+import React, { ReactNode } from 'react';
+import { EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
 
 interface Props {
   displayName: ReactNode;
@@ -23,12 +23,35 @@ interface Props {
 }
 
 export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveColumn }: Props) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(name);
+    } catch (err) {
+      const textArea = document.createElement('textarea');
+      textArea.value = name;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+  };
 
-  const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
-  const closePopover = () => setIsPopoverOpen(false);
   // action buttons displayed on the right side of the column name
   const buttons = [
+    // Copy Button
+    {
+      active: true,
+      ariaLabel: i18n.translate('explore.docTable.tableHeader.copyColumnButtonAriaLabel', {
+        defaultMessage: 'Copy {columnName} column name',
+        values: { columnName: name },
+      }),
+      onClick: handleCopyToClipboard,
+      testSubject: `docTableCopyHeader-${name}`,
+      tooltip: i18n.translate('explore.docTable.tableHeader.copyColumnButtonTooltip', {
+        defaultMessage: 'Copy Column Name',
+      }),
+      iconType: 'copy',
+    },
     // Remove Button
     {
       active: isRemoveable && typeof onRemoveColumn === 'function',
@@ -36,7 +59,6 @@ export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveCol
         defaultMessage: 'Remove {columnName} column',
         values: { columnName: name },
       }),
-      className: 'fa fa-remove exploreDocTableHeader__move',
       onClick: () => onRemoveColumn && onRemoveColumn(name),
       testSubject: `docTableRemoveHeader-${name}`,
       tooltip: i18n.translate('explore.docTable.tableHeader.removeColumnButtonTooltip', {
@@ -57,34 +79,9 @@ export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveCol
       })}
     >
       <span data-test-subj={`docTableHeader-${name}`}>
-        <EuiPopover
-          button={
-            <span
-              className="header-text"
-              onClick={togglePopover}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  togglePopover();
-                }
-              }}
-              style={{ cursor: 'pointer' }}
-              tabIndex={0}
-              role="button"
-              aria-label={`Open tooltip for ${name} column`}
-            >
-              {displayName}
-            </span>
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          anchorPosition="upCenter"
-          panelPaddingSize="s"
-        >
-          <EuiText size="s" style={{ maxWidth: '300px', wordBreak: 'break-word' }}>
-            {displayName}
-          </EuiText>
-        </EuiPopover>
+        <EuiToolTip content={displayName} position="top">
+          <span className="header-text">{displayName}</span>
+        </EuiToolTip>
         {buttons
           .filter((button) => button.active)
           .map((button, idx) => (
