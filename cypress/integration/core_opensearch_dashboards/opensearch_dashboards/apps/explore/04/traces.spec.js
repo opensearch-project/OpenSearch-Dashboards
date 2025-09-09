@@ -57,7 +57,7 @@ const traceTestSuite = () => {
       cy.getElementByTestId('docTableHeader-spanId').should('exist');
       cy.getElementByTestId('docTableHeader-status.code').should('exist');
       cy.getElementByTestId('docTableHeader-attributes.http.status_code').should('exist');
-      cy.getElementByTestId('docTableHeader-attributes.aws.local.service').should('exist');
+      cy.getElementByTestId('docTableHeader-resource.attributes.service.name').should('exist');
       cy.getElementByTestId('docTableHeader-name').should('exist');
       cy.getElementByTestId('docTableHeader-durationNano').should('exist');
     });
