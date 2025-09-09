@@ -55,7 +55,7 @@ describe('table_vis_config', () => {
         showColumnFilter: false,
         showFooter: false,
         footerCalculations: [],
-        cellType: 'auto',
+        cellTypes: [],
         thresholds: [],
         baseColor: '#000000',
       });

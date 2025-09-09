@@ -5,79 +5,21 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
-import { FilterOperator, VisColumn, VisFieldType } from '../types';
-import { TableChartStyleControls } from './table_vis_config';
+import { VisColumn, VisFieldType } from '../types';
+import { CellTypeConfig, TableChartStyleControls } from './table_vis_config';
 import { FilterConfig, TableColumnHeader } from './table_vis_filter';
-import { calculateValue, CalculationMethod } from '../utils/calculation';
+import { calculateValue } from '../utils/calculation';
 import { CellValue } from './cell_value';
+import { getThresholdByValue } from '../utils/utils';
+import { matchesFilter } from './table_vis_utils';
+
+import './table_vis.scss';
 
 interface TableVisProps {
   rows: Array<Record<string, any>>;
   columns: VisColumn[];
   styleOptions?: TableChartStyleControls;
 }
-
-interface Calc {
-  fields: string[];
-  calculation: CalculationMethod;
-}
-
-const matchesFilter = (value: any, config: FilterConfig) => {
-  const op = config.operator || FilterOperator.Contains;
-  const hasValues = Array.isArray(config.values) && config.values.length > 0;
-  const hasSearch = typeof config.search === 'string' && config.search.trim() !== '';
-  const sVal = value == null ? '' : String(value);
-  const sSearch = (config.search || '').trim();
-  const toNum = (v: any) => (v == null || v === '' ? NaN : Number(v));
-
-  if (op === FilterOperator.Contains) {
-    const matchSearch = !hasSearch || sVal.toLowerCase().includes(sSearch.toLowerCase());
-    const matchValues = !hasValues || config.values.includes(value);
-    return matchSearch && matchValues;
-  }
-
-  if (op === FilterOperator.Equal || op === FilterOperator.NotEqual) {
-    if (hasValues) {
-      const numValue = toNum(value);
-      const numValues = config.values.map(toNum).filter((nv): nv is number => Number.isFinite(nv));
-      const hit = numValues.includes(numValue);
-      return op === FilterOperator.Equal ? hit : !hit;
-    }
-    if (hasSearch) {
-      const numValue = toNum(value);
-      const numSearch = toNum(sSearch);
-      if (!Number.isFinite(numValue) || !Number.isFinite(numSearch)) return false;
-      const eq = numValue === numSearch;
-      return op === FilterOperator.Equal ? eq : !eq;
-    }
-    return true;
-  }
-
-  if (
-    op === FilterOperator.GreaterThan ||
-    op === FilterOperator.GreaterThanOrEqual ||
-    op === FilterOperator.LessThan ||
-    op === FilterOperator.LessThanOrEqual
-  ) {
-    const thresholdStr = hasSearch ? sSearch : hasValues ? String(config.values[0]) : '';
-    const nVal = toNum(value);
-    const nThr = toNum(thresholdStr);
-    if (!Number.isFinite(nVal) || !Number.isFinite(nThr)) return false;
-
-    switch (op) {
-      case FilterOperator.GreaterThan:
-        return nVal > nThr;
-      case FilterOperator.GreaterThanOrEqual:
-        return nVal >= nThr;
-      case FilterOperator.LessThan:
-        return nVal < nThr;
-      case FilterOperator.LessThanOrEqual:
-        return nVal <= nThr;
-    }
-  }
-
-  return true;
-};
 
 export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisProps) => {
   const pageSize = styleOptions?.pageSize ? styleOptions.pageSize : 10;
@@ -164,80 +106,10 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
     setPagination({ pageIndex: 0, pageSize });
   }, [filteredRows.length, pageSize]);
 
-  const availableFieldSet = useMemo(() => new Set(columns.map((c) => c.column)), [columns]);
-  const normalizedFooterCalcs = useMemo<Calc[]>(() => {
-    const raw = styleOptions?.footerCalculations ?? [];
-
-    const processed: Calc[] = (raw as any[]).map(
-      (c): Calc =>
-        'fields' in c
-          ? {
-              fields: (c.fields ?? [])
-                .filter((f: string | number | null | undefined): f is string | number => f != null)
-                .map(String),
-              calculation: c.calculation as CalculationMethod,
-            }
-          : {
-              fields: c.field != null ? [String(c.field)] : [],
-              calculation: c.calculation as CalculationMethod,
-            }
-    );
-
-    return processed
-      .map((c) => ({
-        ...c,
-        fields: c.fields.filter((f) => availableFieldSet.has(f)),
-      }))
-      .filter((c) => c.fields.length > 0);
-  }, [styleOptions?.footerCalculations, availableFieldSet]);
-
-  const footerValues = useMemo(() => {
-    if (!styleOptions?.showFooter || !normalizedFooterCalcs.length) return undefined;
-
-    const footer: Record<string, any> = {};
-
-    const getNumericSeries = (field: string) =>
-      filteredRows.map((row) => row[field]).filter((v) => typeof v === 'number' && !isNaN(v));
-
-    normalizedFooterCalcs.forEach(({ fields, calculation }) => {
-      fields.forEach((field) => {
-        const values = getNumericSeries(field);
-        if (values.length === 0) {
-          footer[field] = '-';
-          return;
-        }
-
-        const result = calculateValue(values, calculation);
-        if (result == null) {
-          footer[field] = '-';
-        } else {
-          const label = calculation.charAt(0).toUpperCase() + calculation.slice(1);
-          footer[field] = `${label}: ${result}`;
-        }
-      });
-    });
-    return footer;
-  }, [filteredRows, styleOptions?.showFooter, normalizedFooterCalcs]);
-
-  const getCellColor = useCallback(
-    (value: any, columnId: string): string | undefined => {
-      if (columnTypes[columnId] !== 'numerical' || !styleOptions?.thresholds) return undefined;
-      const numValue = Number(value);
-      if (isNaN(numValue)) return undefined;
-
-      const thresholds = [...styleOptions.thresholds].sort((a, b) => b.value - a.value);
-      for (const threshold of thresholds) {
-        if (numValue >= threshold.value) {
-          return threshold.color;
-        }
-      }
-      return styleOptions.baseColor || '#000000';
-    },
-    [columnTypes, styleOptions?.baseColor, styleOptions?.thresholds]
-  );
-
   const renderCellValue = useCallback(
     ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+      const cellTypes: CellTypeConfig[] = styleOptions?.cellTypes || [];
+      const columnCellType = cellTypes.find((ct) => ct.field === columnId)?.type || 'auto';
       const alignment = styleOptions?.globalAlignment || 'auto';
       const textAlign =
         alignment === 'auto'
@@ -248,17 +120,31 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
       const cellValue = Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
         ? (filteredRows as any)[rowIndex][columnId]
         : null;
+      const color =
+        columnCellType !== 'auto'
+          ? getThresholdByValue(cellValue, styleOptions?.thresholds, {
+              defaultColor: styleOptions?.baseColor,
+            })
+          : undefined;
+
       return (
         <CellValue
           setCellProps={setCellProps}
           textAlign={textAlign}
           value={cellValue}
-          colorMode={styleOptions?.cellType ?? 'auto'}
-          color={getCellColor(cellValue, columnId)}
+          colorMode={columnCellType}
+          color={color}
         />
       );
     },
-    [columnTypes, filteredRows, getCellColor, styleOptions?.cellType, styleOptions?.globalAlignment]
+    [
+      columnTypes,
+      filteredRows,
+      styleOptions?.thresholds,
+      styleOptions?.baseColor,
+      styleOptions?.cellTypes,
+      styleOptions?.globalAlignment,
+    ]
   );
 
   const renderFooterCellValue = useCallback(
@@ -270,15 +156,37 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
             ? 'right'
             : 'left'
           : alignment;
-      return (
-        <CellValue
-          setCellProps={setCellProps}
-          value={footerValues?.[columnId] ?? '-'}
-          textAlign={textAlign}
-        />
-      );
+
+      let footerValue = '-';
+      if (styleOptions?.showFooter && styleOptions?.footerCalculations) {
+        const calcForColumn = styleOptions.footerCalculations.find(({ fields }) =>
+          fields?.includes(columnId)
+        );
+        if (calcForColumn) {
+          const values = filteredRows
+            .map((row) => row[columnId])
+            .filter((v) => typeof v === 'number' && !isNaN(v));
+          if (values.length > 0) {
+            const result = calculateValue(values, calcForColumn.calculation);
+            if (result != null) {
+              const label =
+                calcForColumn.calculation.charAt(0).toUpperCase() +
+                calcForColumn.calculation.slice(1);
+              footerValue = `${label}: ${result}`;
+            }
+          }
+        }
+      }
+
+      return <CellValue setCellProps={setCellProps} value={footerValue} textAlign={textAlign} />;
     },
-    [columnTypes, footerValues, styleOptions?.globalAlignment]
+    [
+      columnTypes,
+      filteredRows,
+      styleOptions?.globalAlignment,
+      styleOptions?.showFooter,
+      styleOptions?.footerCalculations,
+    ]
   );
 
   const onChangePage = useCallback(
@@ -299,9 +207,10 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
   }, [styleOptions?.showColumnFilter, pageSize]);
 
   return (
-    <div className="table-visualization">
+    <div className="tableVis">
       <EuiDataGrid
         key={`table-vis-${filteredRows.length}-${pagination.pageSize}`}
+        className="tableVis__dataGrid"
         aria-label="Table visualization"
         columns={dataGridColumns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}

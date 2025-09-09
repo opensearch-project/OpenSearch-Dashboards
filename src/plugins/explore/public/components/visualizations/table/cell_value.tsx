@@ -5,12 +5,13 @@
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { useEffect } from 'react';
-import { getTextColor } from '../utils/utils';
+import { getTextColor } from './table_vis_utils';
+import { ColorMode } from '../types';
 
 type Props = Pick<EuiDataGridCellValueElementProps, 'setCellProps'> & {
   textAlign: 'left' | 'right' | 'center';
   value: any;
-  colorMode?: 'auto' | 'colored_text' | 'colored_background';
+  colorMode?: ColorMode;
   color?: string;
 };
 

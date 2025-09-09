@@ -17,9 +17,10 @@ import { StyleControlsProps } from '../utils/use_visualization_types';
 import { TableChartStyleControls } from './table_vis_config';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { TableFooterStyleControls } from './table_vis_footer';
-import { Threshold } from '../types';
+import { TableFooterOptions } from './table_vis_footer_options';
+import { CellAlignment, Threshold } from '../types';
 import { ThresholdCustomValues } from '../style_panel/threshold/threshold_custom_values';
+import { TableCellTypeOptions } from './table_cell_type_options';
 
 export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyleControls>;
 
@@ -29,36 +30,6 @@ const alignmentOptions = [
   { value: 'center', text: 'Center' },
   { value: 'right', text: 'Right' },
 ];
-
-const cellTypeOptions = [
-  { value: 'auto', text: 'Default (Black Text)' },
-  { value: 'colored_text', text: 'Colored Text' },
-  { value: 'colored_background', text: 'Colored Background' },
-];
-
-const CustomThresholdPanel: React.FC<{
-  thresholds: Threshold[];
-  onThresholdValuesChange: (thresholds: Threshold[]) => void;
-  baseColor: string;
-  onBaseColorChange: (color: string) => void;
-}> = ({ thresholds, onThresholdValuesChange, baseColor, onBaseColorChange }) => {
-  return (
-    <StyleAccordion
-      id="thresholdSection"
-      accordionLabel={i18n.translate('explore.stylePanel.table.threshold', {
-        defaultMessage: 'Threshold',
-      })}
-      initialIsOpen={true}
-    >
-      <ThresholdCustomValues
-        thresholds={thresholds}
-        onThresholdValuesChange={onThresholdValuesChange}
-        baseColor={baseColor}
-        onBaseColorChange={onBaseColorChange}
-      />
-    </StyleAccordion>
-  );
-};
 
 export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
   styleOptions,
@@ -85,7 +56,7 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
 
   const onGlobalAlignmentChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      updateStyleOption('globalAlignment', e.target.value as 'auto' | 'left' | 'center' | 'right');
+      updateStyleOption('globalAlignment', e.target.value as CellAlignment);
     },
     [updateStyleOption]
   );
@@ -93,13 +64,6 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
   const onShowColumnFilterChange = useCallback(
     (checked: boolean) => {
       updateStyleOption('showColumnFilter', checked);
-    },
-    [updateStyleOption]
-  );
-
-  const onCellTypeChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      updateStyleOption('cellType', e.target.value as 'colored_text' | 'colored_background');
     },
     [updateStyleOption]
   );
@@ -124,91 +88,94 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
   );
 
   return (
-    <>
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>
-          <StyleAccordion
-            id="tableSection"
-            accordionLabel={i18n.translate('explore.stylePanel.table.tableSection', {
-              defaultMessage: 'Table',
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>
+        <StyleAccordion
+          id="tableSection"
+          accordionLabel={i18n.translate('explore.stylePanel.table.tableSection', {
+            defaultMessage: 'Table',
+          })}
+          initialIsOpen={true}
+          data-test-subj="visTable"
+        >
+          <EuiFormRow
+            label={i18n.translate('explore.stylePanel.table.pageSize', {
+              defaultMessage: 'Max rows per page',
             })}
-            initialIsOpen={true}
-            data-test-subj="visTable"
           >
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.table.pageSize', {
-                defaultMessage: 'Max rows per page',
+            <EuiFieldNumber
+              compressed
+              value={localPageSize}
+              onChange={(e) => handlePageSizeChange(e.target.value)}
+              data-test-subj="visTablePageSizeInput"
+              min={1}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('explore.stylePanel.table.globalAlignment', {
+              defaultMessage: 'Cell alignment',
+            })}
+          >
+            <EuiSelect
+              compressed
+              options={alignmentOptions}
+              value={styleOptions.globalAlignment || 'auto'}
+              onChange={onGlobalAlignmentChange}
+              onMouseUp={(e) => e.stopPropagation()}
+              data-test-subj="visTableGlobalAlignment"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('explore.stylePanel.table.cellTypes', {
+              defaultMessage: 'Cell types',
+            })}
+          >
+            <TableCellTypeOptions
+              styleOptions={styleOptions}
+              onStyleChange={onStyleChange}
+              numericalColumns={numericalColumns}
+            />
+          </EuiFormRow>
+          <EuiFormRow>
+            <EuiSwitch
+              compressed
+              label={i18n.translate('explore.stylePanel.table.columnFilter', {
+                defaultMessage: 'Column filters',
               })}
-            >
-              <EuiFieldNumber
-                compressed
-                value={localPageSize}
-                onChange={(e) => handlePageSizeChange(e.target.value)}
-                data-test-subj="visTablePageSizeInput"
-                min={1}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.table.globalAlignment', {
-                defaultMessage: 'Cell alignment',
-              })}
-            >
-              <EuiSelect
-                compressed
-                options={alignmentOptions}
-                value={styleOptions.globalAlignment || 'auto'}
-                onChange={onGlobalAlignmentChange}
-                onMouseUp={(e) => e.stopPropagation()}
-                data-test-subj="visTableGlobalAlignment"
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.table.cellType', {
-                defaultMessage: 'Cell type',
-              })}
-            >
-              <EuiSelect
-                compressed
-                options={cellTypeOptions}
-                value={styleOptions.cellType || 'auto'}
-                onChange={onCellTypeChange}
-                onMouseUp={(e) => e.stopPropagation()}
-                data-test-subj="visTableCellType"
-              />
-            </EuiFormRow>
-            <EuiFormRow>
-              <EuiSwitch
-                compressed
-                label={i18n.translate('explore.stylePanel.table.columnFilter', {
-                  defaultMessage: 'Column filters',
-                })}
-                checked={styleOptions.showColumnFilter || false}
-                onChange={(e) => onShowColumnFilterChange(e.target.checked)}
-                data-test-subj="visTableColumnFilter"
-              />
-            </EuiFormRow>
-          </StyleAccordion>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CustomThresholdPanel
+              checked={styleOptions.showColumnFilter || false}
+              onChange={(e) => onShowColumnFilterChange(e.target.checked)}
+              data-test-subj="visTableColumnFilter"
+            />
+          </EuiFormRow>
+        </StyleAccordion>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <StyleAccordion
+          id="thresholdSection"
+          accordionLabel={i18n.translate('explore.stylePanel.table.threshold', {
+            defaultMessage: 'Threshold',
+          })}
+          initialIsOpen={true}
+        >
+          <ThresholdCustomValues
             thresholds={styleOptions.thresholds || []}
             onThresholdValuesChange={onThresholdsChange}
             baseColor={styleOptions.baseColor || '#000000'}
             onBaseColorChange={onBaseColorChange}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TableFooterStyleControls
-            styleOptions={styleOptions}
-            onStyleChange={onStyleChange}
-            numericalColumns={numericalColumns}
-            categoricalColumns={categoricalColumns}
-            dateColumns={dateColumns}
-            axisColumnMappings={axisColumnMappings}
-            updateVisualization={updateVisualization}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+        </StyleAccordion>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TableFooterOptions
+          styleOptions={styleOptions}
+          onStyleChange={onStyleChange}
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          axisColumnMappings={axisColumnMappings}
+          updateVisualization={updateVisualization}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

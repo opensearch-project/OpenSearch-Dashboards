@@ -270,26 +270,43 @@ export const getTooltipFormat = (
   return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
 };
 
-// Function to calculate luminance of a hex color
-export const getLuminance = (hexColor: string): number => {
-  const hex = hexColor.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16) / 255;
-  const g = parseInt(hex.substring(2, 4), 16) / 255;
-  const b = parseInt(hex.substring(4, 6), 16) / 255;
+/**
+ * Determines the color for a value based on a set of thresholds.
+ * @param value - The value to evaluate (e.g., a number, string, or any type that can be converted to a number).
+ * @param thresholds - Array of threshold objects with `value` (number) and `color` (string) properties.
+ * @param options - Optional configuration object.
+ * @param options.isNumeric - Function to determine if the value is valid for threshold comparison (defaults to checking if the value is a number).
+ * @param options.defaultColor - Fallback color if no threshold matches (defaults to '#000000').
+ * @returns The color string for the matching threshold, the default color, or undefined if no color applies.
+ */
+export function getThresholdByValue<T>(
+  value: any,
+  thresholds?: Array<{ value: number; color: string }>,
+  options: {
+    isNumeric?: (value: any) => boolean;
+    defaultColor?: string;
+  } = {}
+): string | undefined {
+  const { isNumeric = (v: any) => !isNaN(Number(v)), defaultColor = '#000000' } = options;
 
-  const linearize = (c: number) => {
-    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  };
+  if (!thresholds || !isNumeric(value)) {
+    return undefined;
+  }
 
-  const rL = linearize(r);
-  const gL = linearize(g);
-  const bL = linearize(b);
+  const numValue = Number(value);
+  if (isNaN(numValue)) {
+    return undefined;
+  }
 
-  return 0.2126 * rL + 0.7152 * gL + 0.0722 * bL;
-};
+  // Sort thresholds in descending order
+  const sortedThresholds = [...thresholds].sort((a, b) => b.value - a.value);
 
-export const getTextColor = (backgroundColor: string): string => {
-  const luminance = getLuminance(backgroundColor);
-  // Use white text for dark backgrounds (luminance < 0.5), black for light backgrounds
-  return luminance < 0.5 ? '#FFFFFF' : '#000000';
-};
+  // Find the first threshold where the value is greater than or equal to the threshold value
+  for (const threshold of sortedThresholds) {
+    if (numValue >= threshold.value) {
+      return threshold.color;
+    }
+  }
+
+  return defaultColor;
+}

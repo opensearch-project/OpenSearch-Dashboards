@@ -25,7 +25,7 @@ import { FilterOperator, VisColumn } from '../types';
 import './table_vis_filter.scss';
 
 export interface FilterConfig {
-  values: any[];
+  values: unknown[];
   operator: FilterOperator;
   search?: string;
 }
@@ -37,7 +37,7 @@ interface TableColumnHeaderProps {
   setPopoverOpen: (open: boolean) => void;
   filters: Record<string, FilterConfig>;
   setFilters: Dispatch<SetStateAction<Record<string, FilterConfig>>>;
-  uniques: any[];
+  uniques: unknown[];
 }
 
 export const TableColumnHeader = ({
@@ -59,8 +59,8 @@ export const TableColumnHeader = ({
   const isFilterActive = currentFilter.values.length > 0 || !!currentFilter.search;
 
   return (
-    <div className="table-column-header">
-      <span className="header-text">{col.name}</span>
+    <div className="visTableColumnHeader">
+      <span className="visTableColumnHeader_text">{col.name}</span>
       <EuiPopover
         button={
           <EuiIcon
@@ -78,7 +78,7 @@ export const TableColumnHeader = ({
         panelPaddingSize="s"
       >
         <div
-          className="filter-popover"
+          className="visTableColumnHeader_filterPopover"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
@@ -253,7 +253,7 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   }, [col.schema, localOperator, currentFilter.values]);
 
   return (
-    <div className="column-filter-content">
+    <>
       <EuiFormRow>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={3}>
@@ -297,7 +297,7 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
               paddingSize="s"
               borderRadius="m"
               hasShadow={false}
-              className="unique-values-panel"
+              className="visTableColumnHeader_uniqueValuesPanel"
             >
               {filteredUniques.map((u) => (
                 <EuiCheckbox
@@ -336,6 +336,6 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-    </div>
+    </>
   );
 };

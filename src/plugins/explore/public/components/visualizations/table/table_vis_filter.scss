@@ -1,9 +1,9 @@
-.table-column-header {
+.visTableColumnHeader {
   display: flex;
   align-items: center;
   width: 100%;
 
-  .header-text {
+  .visTableColumnHeader_text {
     flex-grow: 1;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -11,7 +11,7 @@
   }
 }
 
-.unique-values-panel {
+.visTableColumnHeader_uniqueValuesPanel {
   max-height: 300px;
   overflow-y: auto;
 }

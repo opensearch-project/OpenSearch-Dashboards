@@ -30,30 +30,35 @@ export type TableFooterStyleControlsProps = StyleControlsProps<TableChartStyleCo
 
 const CALCULATIONS: CalculationMethod[] = ['total', 'last', 'mean', 'min', 'max'];
 
-export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> = ({
+interface FooterCalculationInput {
+  field?: unknown;
+  fields?: unknown[];
+  calculation: CalculationMethod;
+}
+
+export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
   styleOptions,
   onStyleChange,
   numericalColumns = [],
 }) => {
-  const toNew = (c: any) =>
-    'fields' in c
-      ? {
-          fields: (c.fields || []).filter((f: any) => typeof f === 'string'),
-          calculation: c.calculation as CalculationMethod,
-        }
-      : {
-          fields: c.field ? [String(c.field)] : [],
-          calculation: c.calculation as CalculationMethod,
-        };
+  const normalizeCalculation = (c: FooterCalculationInput) => {
+    if (c.fields) {
+      return {
+        fields: c.fields.filter((f): f is string => typeof f === 'string'),
+        calculation: c.calculation,
+      };
+    }
+    return {
+      fields: c.field ? [String(c.field)] : [],
+      calculation: c.calculation,
+    };
+  };
 
-  const [localCalculations, setLocalCalculations] = useState<
-    Array<{ fields: string[]; calculation: CalculationMethod }>
-  >((styleOptions.footerCalculations || []).map(toNew));
+  const localCalculations = useMemo(
+    () => (styleOptions.footerCalculations || []).map(normalizeCalculation),
+    [styleOptions.footerCalculations]
+  );
   const [popoverIndex, setPopoverIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    setLocalCalculations((styleOptions.footerCalculations || []).map(toNew));
-  }, [styleOptions.footerCalculations]);
 
   const updateStyleOption = useCallback(
     <K extends keyof TableChartStyleControls>(key: K, value: TableChartStyleControls[K]) => {
@@ -66,7 +71,6 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
     (checked: boolean) => {
       updateStyleOption('showFooter', checked);
       if (!checked) {
-        setLocalCalculations([]);
         updateStyleOption('footerCalculations', []);
       }
     },
@@ -75,7 +79,6 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
 
   const syncToParent = useCallback(
     (next: Array<{ fields: string[]; calculation: CalculationMethod }>) => {
-      setLocalCalculations(next);
       updateStyleOption('footerCalculations', next);
     },
     [updateStyleOption]
@@ -93,7 +96,10 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
   const onRemoveField = useCallback(
     (index: number, field: string) => {
       const next = [...localCalculations];
-      next[index] = { ...next[index], fields: next[index].fields.filter((f) => f !== field) };
+      next[index] = {
+        ...next[index],
+        fields: next[index].fields.filter((f: string) => f !== field),
+      };
       syncToParent(next);
     },
     [localCalculations, syncToParent]
@@ -140,11 +146,11 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
     syncToParent(next);
   }, [localCalculations, numericalColumns, syncToParent]);
 
-  const getCalculationOptionsForIndex = useCallback(
-    (index: number) => {
-      const currentValue = localCalculations[index]?.calculation;
+  const getCalculationOptions = useCallback(
+    (calc: { fields: string[]; calculation: CalculationMethod }) => {
+      const currentValue = calc.calculation;
       const usedByOthers = new Set<CalculationMethod>(
-        localCalculations.filter((_, i) => i !== index).map((c) => c.calculation)
+        localCalculations.filter((c) => c !== calc).map((c) => c.calculation)
       );
       const baseOptions: Array<{ value: CalculationMethod; text: string }> = [
         { value: 'total', text: 'Total' },
@@ -184,7 +190,7 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
   useEffect(() => {
     const allowed = new Set(numericalColumns.map((c) => c.column));
     const next = localCalculations
-      .map((c) => ({ ...c, fields: c.fields.filter((f) => allowed.has(f)) }))
+      .map((c) => ({ ...c, fields: c.fields.filter((f: string) => allowed.has(f)) }))
       .filter((c) => c.fields.length > 0);
 
     const changed = JSON.stringify(next) !== JSON.stringify(localCalculations);
@@ -228,7 +234,7 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
                       <EuiFlexItem>
                         <EuiSelect
                           compressed
-                          options={getCalculationOptionsForIndex(index)}
+                          options={getCalculationOptions(calc)}
                           value={calc.calculation}
                           onChange={(e) =>
                             onCalculationChange(index, e.target.value as CalculationMethod)
@@ -251,7 +257,7 @@ export const TableFooterStyleControls: React.FC<TableFooterStyleControlsProps> =
                     <EuiFlexGroup gutterSize="s" alignItems="center">
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup wrap responsive={false} gutterSize="s">
-                          {calc.fields.map((field) => (
+                          {calc.fields.map((field: string) => (
                             <EuiFlexItem key={field}>
                               <EuiBadge
                                 color="hollow"

@@ -256,3 +256,7 @@ export enum FilterOperator {
   LessThan = '<',
   LessThanOrEqual = '<=',
 }
+
+export type ColorMode = 'auto' | 'colored_text' | 'colored_background';
+
+export type CellAlignment = 'auto' | 'left' | 'center' | 'right';

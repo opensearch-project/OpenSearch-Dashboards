@@ -93,6 +93,14 @@ jest.mock('./table_vis_filter', () => ({
   ),
 }));
 
+// Mock CellValue component to extract text content
+jest.mock('./cell_value', () => ({
+  CellValue: ({ value, setCellProps, textAlign }: any) => {
+    setCellProps({ style: { textAlign } });
+    return <span>{value}</span>;
+  },
+}));
+
 // Wrapper component to render CellValueRenderer properly in tests
 const CellRendererWrapper: React.FC<{
   renderCellValue: (props: {
@@ -264,15 +272,11 @@ describe('TableVis', () => {
     const styleOptions = {
       pageSize: 10,
       showFooter: true,
-      footerCalculations: [
-        { fields: ['column1'], calculation: 'total' as const },
-        { fields: ['column1'], calculation: 'mean' as const },
-      ],
+      footerCalculations: [{ fields: ['column1'], calculation: 'mean' as const }],
     };
     render(<TableVis rows={mockRows} columns={mockColumns} styleOptions={styleOptions} />);
-    // Check footer cell value
-    const footerCellValue = screen.getByTestId('mockFooterCellValue').textContent;
-    expect(footerCellValue).toBe('Mean: 15'); // Adjusted to expect the last calculation
+    const footerCell = screen.getByTestId('mockFooterCellValue');
+    expect(footerCell.textContent).toBe('Mean: 15');
   });
 
   test('handles empty footer calculations', () => {
@@ -282,7 +286,8 @@ describe('TableVis', () => {
       footerCalculations: [],
     };
     render(<TableVis rows={mockRows} columns={mockColumns} styleOptions={styleOptions} />);
-    expect(screen.getByTestId('mockFooterCellValue').textContent).toBe('no-footer');
+    const footerCell = screen.getByTestId('mockFooterCellValue');
+    expect(footerCell.textContent).toBe('-');
   });
 
   test('applies type-based alignment when globalAlignment is auto', () => {
@@ -330,7 +335,8 @@ describe('TableVis', () => {
       columnId: 'column1',
       setCellProps: footerSetCellPropsNum,
     });
-    expect(footerCellValueNum).toBe('Total: 30');
+    const { container: numContainer } = render(footerCellValueNum);
+    expect(numContainer.textContent).toBe('Total: 30');
     expect(footerSetCellPropsNum).toHaveBeenCalledWith({ style: { textAlign: 'right' } });
 
     // Test footer alignment for categorical column
@@ -339,7 +345,8 @@ describe('TableVis', () => {
       columnId: 'column2',
       setCellProps: footerSetCellPropsCat,
     });
-    expect(footerCellValueCat).toBe('-');
+    const { container: catContainer } = render(footerCellValueCat);
+    expect(catContainer.textContent).toBe('-');
     expect(footerSetCellPropsCat).toHaveBeenCalledWith({ style: { textAlign: 'left' } });
   });
 });

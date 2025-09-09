@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TableFooterStyleControls, TableFooterStyleControlsProps } from './table_vis_footer';
+import { TableFooterOptions, TableFooterStyleControlsProps } from './table_vis_footer_options';
 import { TableChartStyleControls } from './table_vis_config';
 import { AxisRole, AxisColumnMappings, VisColumn, VisFieldType } from '../types';
+import { CalculationMethod } from '../utils/calculation';
 
 jest.mock('@osd/i18n', () => ({
   i18n: {
@@ -110,6 +111,25 @@ const makeDefaultStyleOptions = (
   ...overrides,
 });
 
+const TestWrapper: React.FC<{
+  initialProps: TableFooterStyleControlsProps;
+}> = ({ initialProps }) => {
+  const [styleOptions, setStyleOptions] = useState(initialProps.styleOptions);
+
+  const onStyleChange = (changes: Partial<TableChartStyleControls>) => {
+    setStyleOptions((prev) => ({ ...prev, ...changes }));
+    initialProps.onStyleChange(changes);
+  };
+
+  return (
+    <TableFooterOptions
+      {...initialProps}
+      styleOptions={styleOptions}
+      onStyleChange={onStyleChange}
+    />
+  );
+};
+
 const makeProps = (
   overrides?: Partial<TableFooterStyleControlsProps>
 ): TableFooterStyleControlsProps => ({
@@ -123,14 +143,14 @@ const makeProps = (
   ...overrides,
 });
 
-describe('TableFooterStyleControls', () => {
+describe('TableFooterOptions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('renders with footer enabled and shows Add Calculation button when available', () => {
+  test('renders with footer enabled and shows Add Calculation button when available', async () => {
     const props = makeProps();
-    render(<TableFooterStyleControls {...props} />);
+    render(<TestWrapper initialProps={props} />);
 
     expect(screen.getByTestId('visTableFooter')).toBeInTheDocument();
     expect(screen.getByTestId('visTableAddCalculation')).toBeInTheDocument();
@@ -138,7 +158,7 @@ describe('TableFooterStyleControls', () => {
 
   test('toggle Show Footer switch off: should call onStyleChange for showFooter and clear footerCalculations', async () => {
     const props = makeProps();
-    render(<TableFooterStyleControls {...props} />);
+    render(<TestWrapper initialProps={props} />);
 
     const switchEl = screen.getByTestId('visTableShowFooter');
     await userEvent.click(switchEl);
@@ -149,94 +169,114 @@ describe('TableFooterStyleControls', () => {
 
   test('Add Calculation: adds first available field & calculation (total)', async () => {
     const props = makeProps();
-    render(<TableFooterStyleControls {...props} />);
+    render(<TestWrapper initialProps={props} />);
 
     await userEvent.click(screen.getByTestId('visTableAddCalculation'));
 
-    expect(props.onStyleChange).toHaveBeenCalledWith({
-      footerCalculations: [{ fields: ['price'], calculation: 'total' }],
+    await waitFor(() => {
+      expect(props.onStyleChange).toHaveBeenCalledWith({
+        footerCalculations: [{ fields: ['price'], calculation: 'total' as CalculationMethod }],
+      });
     });
   });
 
   test('Change calculation type via select', async () => {
     const props = makeProps();
-    render(<TableFooterStyleControls {...props} />);
+    render(<TestWrapper initialProps={props} />);
 
     await userEvent.click(screen.getByTestId('visTableAddCalculation'));
-    jest.clearAllMocks();
 
-    const select = screen.getByTestId('visTableFooterCalculation-0') as HTMLSelectElement;
-    fireEvent.change(select, { target: { value: 'max' } });
+    await waitFor(() => {
+      const select = screen.getByTestId('visTableFooterCalculation-0') as HTMLSelectElement;
+      fireEvent.change(select, { target: { value: 'max' } });
 
-    expect(props.onStyleChange).toHaveBeenCalledWith({
-      footerCalculations: [{ fields: ['price'], calculation: 'max' }],
+      expect(props.onStyleChange).toHaveBeenCalledWith({
+        footerCalculations: [{ fields: ['price'], calculation: 'max' as CalculationMethod }],
+      });
     });
   });
 
   test('Add a second calculation picks next free calcType and next free field', async () => {
     const props = makeProps();
-    render(<TableFooterStyleControls {...props} />);
+    render(<TestWrapper initialProps={props} />);
 
     await userEvent.click(screen.getByTestId('visTableAddCalculation'));
     await userEvent.click(screen.getByTestId('visTableAddCalculation'));
 
-    const lastCall = (props.onStyleChange as jest.Mock).mock.calls.pop()?.[0];
-    expect(lastCall).toBeTruthy();
-    expect(lastCall.footerCalculations).toHaveLength(2);
-    expect(lastCall.footerCalculations[1].fields).toEqual(['count']);
-    expect(['last', 'average', 'min', 'max']).toContain(lastCall.footerCalculations[1].calculation);
+    await waitFor(() => {
+      const lastCall = (props.onStyleChange as jest.Mock).mock.calls.pop()?.[0];
+      expect(lastCall).toBeTruthy();
+      expect(lastCall.footerCalculations).toHaveLength(2);
+      expect(lastCall.footerCalculations[1].fields).toEqual(['count']);
+      expect(['last', 'mean', 'min', 'max']).toContain(lastCall.footerCalculations[1].calculation);
+    });
   });
 
   test('Calculation options are unique across rows (no duplicated types except current row value)', async () => {
     const props = makeProps();
-    render(<TableFooterStyleControls {...props} />);
+    render(<TestWrapper initialProps={props} />);
 
     await userEvent.click(screen.getByTestId('visTableAddCalculation'));
     await userEvent.click(screen.getByTestId('visTableAddCalculation'));
 
-    const select0 = screen.getByTestId('visTableFooterCalculation-0');
-    const optLastInFirst = within(select0).queryByRole('option', { name: 'Last' });
-    expect(optLastInFirst).toBeNull();
+    await waitFor(() => {
+      const select0 = screen.getByTestId('visTableFooterCalculation-0');
+      const optLastInFirst = within(select0).queryByRole('option', { name: 'Last' });
+      expect(optLastInFirst).toBeNull();
+    });
   });
 
   test('Add field via popover + context menu', async () => {
-    const props = makeProps();
-    render(<TableFooterStyleControls {...props} />);
+    const props = makeProps({
+      styleOptions: makeDefaultStyleOptions({
+        footerCalculations: [{ fields: ['price'], calculation: 'total' as CalculationMethod }],
+      }),
+    });
+    render(<TestWrapper initialProps={props} />);
 
-    await userEvent.click(screen.getByTestId('visTableAddCalculation'));
-    jest.clearAllMocks();
+    await waitFor(() => {
+      expect(screen.getByTestId('visTableFooterFieldBadge-0-price')).toBeInTheDocument();
+      expect(screen.queryByTestId('visTableFooterFieldBadge-0-count')).not.toBeInTheDocument();
+      expect(screen.getByTestId('visTableFooterAddField-0')).toBeInTheDocument();
+    });
 
     await userEvent.click(screen.getByTestId('visTableFooterAddField-0'));
-    const btnCount = screen.getByText('Count');
+    const btnCount = await screen.findByText('Count');
     await userEvent.click(btnCount);
 
-    expect(props.onStyleChange).toHaveBeenCalledWith({
-      footerCalculations: [{ fields: ['price', 'count'], calculation: 'total' }],
+    await waitFor(() => {
+      expect(props.onStyleChange).toHaveBeenCalledWith({
+        footerCalculations: [
+          { fields: ['price', 'count'], calculation: 'total' as CalculationMethod },
+        ],
+      });
     });
   });
 
   test('Remove field by clicking on field badge', async () => {
     const props = makeProps({
       styleOptions: makeDefaultStyleOptions({
-        footerCalculations: [{ fields: ['price', 'count'], calculation: 'total' }],
+        footerCalculations: [
+          { fields: ['price', 'count'], calculation: 'total' as CalculationMethod },
+        ],
       }),
     });
-    render(<TableFooterStyleControls {...props} />);
+    render(<TestWrapper initialProps={props} />);
 
     const badge = screen.getByTestId('visTableFooterFieldBadge-0-count');
     await userEvent.click(badge);
     expect(props.onStyleChange).toHaveBeenCalledWith({
-      footerCalculations: [{ fields: ['price'], calculation: 'total' }],
+      footerCalculations: [{ fields: ['price'], calculation: 'total' as CalculationMethod }],
     });
   });
 
   test('Delete a calculation row', async () => {
     const props = makeProps({
       styleOptions: makeDefaultStyleOptions({
-        footerCalculations: [{ fields: ['price'], calculation: 'total' }],
+        footerCalculations: [{ fields: ['price'], calculation: 'total' as CalculationMethod }],
       }),
     });
-    render(<TableFooterStyleControls {...props} />);
+    render(<TestWrapper initialProps={props} />);
 
     await userEvent.click(screen.getByTestId('visTableFooterDelete-0'));
     expect(props.onStyleChange).toHaveBeenCalledWith({ footerCalculations: [] });
@@ -246,29 +286,36 @@ describe('TableFooterStyleControls', () => {
     const props: TableFooterStyleControlsProps = {
       ...makeProps(),
       numericalColumns: [numericalColumns[0]],
+      styleOptions: makeDefaultStyleOptions({
+        footerCalculations: [
+          { fields: ['price'], calculation: 'total' as CalculationMethod },
+          { fields: ['price'], calculation: 'last' as CalculationMethod },
+          { fields: ['price'], calculation: 'mean' as CalculationMethod },
+          { fields: ['price'], calculation: 'min' as CalculationMethod },
+          { fields: ['price'], calculation: 'max' as CalculationMethod },
+        ],
+      }),
     };
-    render(<TableFooterStyleControls {...props} />);
+    render(<TestWrapper initialProps={props} />);
 
-    expect(screen.getByTestId('visTableAddCalculation')).toBeInTheDocument();
-    await userEvent.click(screen.getByTestId('visTableAddCalculation'));
     expect(screen.queryByTestId('visTableAddCalculation')).not.toBeInTheDocument();
   });
 
   test('Sync on numericalColumns change: removes invalid fields & empty calculations', async () => {
     const props = makeProps({
       styleOptions: makeDefaultStyleOptions({
-        footerCalculations: [{ fields: ['price'], calculation: 'total' }],
+        footerCalculations: [{ fields: ['price'], calculation: 'total' as CalculationMethod }],
       }),
     });
 
-    const { rerender } = render(<TableFooterStyleControls {...props} />);
+    const { rerender } = render(<TestWrapper initialProps={props} />);
 
     const nextProps: TableFooterStyleControlsProps = {
       ...props,
       numericalColumns: [numericalColumns[1]],
     };
 
-    rerender(<TableFooterStyleControls {...nextProps} />);
+    rerender(<TestWrapper initialProps={nextProps} />);
 
     await waitFor(() => {
       expect(props.onStyleChange).toHaveBeenCalledWith({ footerCalculations: [] });
