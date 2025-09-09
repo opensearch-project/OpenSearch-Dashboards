@@ -57,8 +57,17 @@ describe('UnitsCollection', () => {
     const euroUnit = getUnitById('euro');
     expect(euroUnit?.display?.(50.75, '€')).toBe('€ 50.75');
 
+    const yuanUnit = getUnitById('yuan');
+    expect(yuanUnit?.display?.(25.99, '¥')).toBe('¥ 25.99');
+
+    const yenUnit = getUnitById('yen');
+    expect(yenUnit?.display?.(25.99, '¥')).toBe('¥ 25.99');
+
     const poundUnit = getUnitById('pounds');
     expect(poundUnit?.display?.(25.99, '£')).toBe('£ 25.99');
+
+    const rubleUnit = getUnitById('rubles');
+    expect(rubleUnit?.display?.(25.99, '₽')).toBe('₽ 25.99');
   });
 
   it('should have correct symbols for each currency', () => {
@@ -142,6 +151,71 @@ describe('UnitsCollection', () => {
       expect(unit?.display).toBeDefined();
       expect(typeof unit?.display).toBe('function');
     });
+  });
+
+  it('should add proper unit for misc values using display function', () => {
+    const integerUnit = getUnitById('integer');
+    expect(integerUnit?.display?.(100.12)).toBe(100);
+
+    const shortUnit = getUnitById('short');
+    expect(shortUnit?.display?.(1000)).toBe('1 K');
+  });
+
+  it('should add proper unit for data values using display function', () => {
+    const bits = getUnitById('bits');
+    expect(bits?.display?.(100.12, 'b')).toBe('12.52 B');
+
+    const kbits = getUnitById('bytes');
+    expect(kbits?.display?.(100.12, 'B')).toBe('100.12 B');
+
+    const kilobytes = getUnitById('kilobytes');
+    expect(kilobytes?.display?.(100.12, 'kB')).toBe('97.77 KiB');
+
+    const kibibytes = getUnitById('kibibytes');
+    expect(kibibytes?.display?.(100.12, 'KiB')).toBe('100.12 KiB');
+
+    const megabytes = getUnitById('megabytes');
+    expect(megabytes?.display?.(100.12, 'MB')).toBe('95.48 MiB');
+
+    const mebibytes = getUnitById('mebibytes');
+    expect(mebibytes?.display?.(100.12, 'MiB')).toBe('100.12 MiB');
+
+    const gigabytes = getUnitById('gigabytes');
+    expect(gigabytes?.display?.(100.12, 'GB')).toBe('93.24 GiB');
+
+    const gibibytes = getUnitById('gibibytes');
+    expect(gibibytes?.display?.(100.12, 'GiB')).toBe('100.12 GiB');
+
+    const terabytes = getUnitById('terabytes');
+    expect(terabytes?.display?.(100.12, 'TB')).toBe('91.06 TiB');
+
+    const tebibytes = getUnitById('tebibytes');
+    expect(tebibytes?.display?.(100.12, 'TiB')).toBe('100.12 TiB');
+  });
+
+  it('should add proper unit for time values using display function', () => {
+    const year = getUnitById('year');
+    expect(year?.display?.(1000, 'years')).toBe('1000 years');
+
+    const month = getUnitById('month');
+    expect(month?.display?.(1000, 'months')).toBe('82.19 years');
+
+    const week = getUnitById('week');
+    expect(week?.display?.(1000, 'weeks')).toBe('19.18 years');
+
+    const day = getUnitById('day');
+    expect(day?.display?.(1000, 'days')).toBe('2.74 years');
+
+    const hour = getUnitById('hour');
+    expect(hour?.display?.(1000, 'hours')).toBe('1.39 months');
+
+    const minute = getUnitById('minute');
+    expect(minute?.display?.(1000, 'minutes')).toBe('16.67 hours');
+
+    const second = getUnitById('second');
+    expect(second?.display?.(1000, 'seconds')).toBe('16.67 minutes');
+    const millisecond = getUnitById('millisecond');
+    expect(millisecond?.display?.(1000, 'milliseconds')).toBe('1 seconds');
   });
 });
 
@@ -297,6 +371,7 @@ describe('currencyFormat', () => {
   it('should handle different currency symbols', () => {
     expect(currencyFormat(100, '€')).toBe('€ 100');
     expect(currencyFormat(50, '£')).toBe('£ 50');
+    expect(currencyFormat(75, '¥')).toBe('¥ 75');
     expect(currencyFormat(75, '¥')).toBe('¥ 75');
     expect(currencyFormat(200, '₽')).toBe('₽ 200');
   });
