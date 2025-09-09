@@ -194,11 +194,14 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       }
 
       try {
+        // Separate client-side filters from server-side filters
+        const serverFilters = filters.filter((filter) => filter.field !== 'isError');
+
         const response = await pplService.fetchTraceSpans({
           traceId,
           dataset,
           limit: 100,
-          filters,
+          filters: serverFilters,
         });
         setPplQueryData(response);
       } catch (err) {
@@ -219,12 +222,23 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (!pplQueryData) return;
     // Transform the PPL data to trace hits format
     const transformed = transformPPLDataToTraceHits(pplQueryData);
-    const hits = transformed.length > 0 ? transformed : [];
+    let hits = transformed.length > 0 ? transformed : [];
+
+    // Apply client-side filters
+    const clientFilters = spanFilters.filter((filter) => filter.field === 'isError');
+    if (clientFilters.length > 0) {
+      clientFilters.forEach((filter) => {
+        if (filter.field === 'isError' && filter.value === true) {
+          hits = hits.filter((span: TraceHit) => isSpanError(span));
+        }
+      });
+    }
+
     setTransformedHits(hits);
     if (spanFilters.length === 0) {
       setUnfilteredHits(hits);
     }
-  }, [pplQueryData, spanFilters.length]);
+  }, [pplQueryData, spanFilters]);
 
   // Cleanup state sync on unmount
   useEffect(() => {
@@ -274,10 +288,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setVisualizationKey((prev) => prev + 1);
   }, []);
 
-  // Calculate error count
+  // Calculate error count based on unfiltered hits to show total errors in trace
   const errorCount = useMemo(() => {
-    return transformedHits.filter((span: TraceHit) => isSpanError(span)).length;
-  }, [transformedHits]);
+    return unfilteredHits.filter((span: TraceHit) => isSpanError(span)).length;
+  }, [unfilteredHits]);
 
   // Extract services in the order they appear in the data
   const servicesInOrder = useMemo(() => {
@@ -294,13 +308,18 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   const handleErrorFilterClick = () => {
     const newFilters = [...spanFilters];
-    const index = newFilters.findIndex(({ field: filterField }) => 'status.code' === filterField);
-    if (index === -1) {
-      newFilters.push({ field: 'status.code', value: 2 });
-    } else {
-      newFilters.splice(index, 1, { field: 'status.code', value: 2 });
-    }
-    setSpanFiltersWithStorage(newFilters);
+
+    // Remove any existing error-related filters
+    const filteredFilters = newFilters.filter(
+      (filter) =>
+        !(filter.field === 'status.code' && filter.value === 2) &&
+        !(filter.field === 'isError' && filter.value === true)
+    );
+
+    // Add a comprehensive error filter that matches the isSpanError logic
+    filteredFilters.push({ field: 'isError', value: true });
+
+    setSpanFiltersWithStorage(filteredFilters);
   };
 
   // Function to remove a specific filter
@@ -319,6 +338,9 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   // Function to format filter display text
   const getFilterDisplayText = (filter: SpanFilter) => {
     if (filter.field === 'status.code' && filter.value === 2) {
+      return 'Error';
+    }
+    if (filter.field === 'isError' && filter.value === true) {
       return 'Error';
     }
     return `${filter.field}: ${filter.value}`;

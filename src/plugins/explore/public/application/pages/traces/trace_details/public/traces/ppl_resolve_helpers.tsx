@@ -107,11 +107,6 @@ export function resolveServiceName(fieldMap: Map<string, any[]>, index: number):
     return resource.attributes.service.name;
   }
 
-  const attributes = fieldMap.get('attributes')?.[index];
-  if (attributes?.aws?.local?.service) {
-    return attributes.aws.local.service;
-  }
-
   return fieldMap.get('serviceName')?.[index] || '';
 }
 
@@ -187,11 +182,6 @@ export function resolveServiceNameFromDatarows(getValueByName: (name: string) =>
   const resource = getValueByName('resource');
   if (resource?.attributes?.service?.name) {
     return resource.attributes.service.name;
-  }
-
-  const attributes = getValueByName('attributes');
-  if (attributes?.aws?.local?.service) {
-    return attributes.aws.local.service;
   }
 
   return getValueByName('serviceName') || '';
@@ -307,14 +297,6 @@ export function resolveServiceNameFromSpan(span: any): string {
 
   if (span.resource?.attributes?.['service.name']) {
     return span.resource.attributes['service.name'];
-  }
-
-  if (span.attributes?.aws?.local?.service) {
-    return span.attributes.aws.local.service;
-  }
-
-  if (span.attributes?.['aws.local.service']) {
-    return span.attributes['aws.local.service'];
   }
 
   return span.serviceName || span.name || '';

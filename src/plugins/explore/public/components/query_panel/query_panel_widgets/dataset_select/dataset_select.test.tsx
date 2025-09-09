@@ -123,7 +123,7 @@ jest.doMock('../../../../../../data/common', () => ({
   SignalType: {
     LOGS: 'logs',
     METRICS: 'metrics',
-    Traces: 'traces',
+    TRACES: 'traces',
   },
 }));
 

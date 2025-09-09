@@ -116,7 +116,11 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {errorCount > 0 &&
-            !spanFilters.some((filter) => filter.field === 'status.code' && filter.value === 2) && (
+            !spanFilters.some(
+              (filter) =>
+                (filter.field === 'status.code' && filter.value === 2) ||
+                (filter.field === 'isError' && filter.value === true)
+            ) && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={i18n.translate('explore.traceView.tooltip.clickToApplyFilter', {
