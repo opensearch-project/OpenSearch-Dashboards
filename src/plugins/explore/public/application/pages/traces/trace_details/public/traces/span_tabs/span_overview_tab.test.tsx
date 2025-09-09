@@ -187,7 +187,7 @@ describe('SpanOverviewTab', () => {
       expect(screen.queryByText('View errors')).not.toBeInTheDocument();
     });
 
-    it('renders Fault status for error spans with View errors link', () => {
+    it('renders Error status for error spans with View errors link', () => {
       const span = {
         spanId: 'test-span',
         serviceName: 'test-service',
@@ -200,7 +200,7 @@ describe('SpanOverviewTab', () => {
       render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('Span status')).toBeInTheDocument();
-      expect(screen.getByText('Fault')).toBeInTheDocument();
+      expect(screen.getByText('Error')).toBeInTheDocument();
 
       // Should show "View errors" link for error status
       expect(screen.getByText('View errors')).toBeInTheDocument();
@@ -236,7 +236,7 @@ describe('SpanOverviewTab', () => {
 
       render(<SpanOverviewTab selectedSpan={span} />);
 
-      expect(screen.getByText('Fault')).toBeInTheDocument();
+      expect(screen.getByText('Error')).toBeInTheDocument();
       expect(screen.queryByText('View errors')).not.toBeInTheDocument();
     });
   });
@@ -458,9 +458,11 @@ describe('SpanOverviewTab', () => {
 
       render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
-      const badge = screen.getByText('Error');
-      expect(badge).toBeInTheDocument();
-      expect(badge.closest('.euiBadge')).toBeInTheDocument();
+      // Find the Error badge specifically (not the span status Error text)
+      const badges = screen.getAllByText('Error');
+      const errorBadge = badges.find((badge) => badge.closest('.euiBadge'));
+      expect(errorBadge).toBeInTheDocument();
+      expect(errorBadge?.closest('.euiBadge')).toBeInTheDocument();
     });
 
     it('renders Success badge when span has no error and no HTTP status code', () => {

@@ -282,6 +282,16 @@ declare namespace Cypress {
       setRelativeTopNavDate(time: number, timeUnit: string): Chainable<any>;
 
       updateTopNav(options: any): Chainable<any>;
+
+      setupWorkspaceAndDataSourceWithTraces(
+        workspaceName: string,
+        traceIndices: string[]
+      ): Chainable<any>;
+
+      cleanupWorkspaceAndDataSourceAndTraces(
+        workspaceName: string,
+        traceIndices: string[]
+      ): Chainable<any>;
     };
   }
 }
