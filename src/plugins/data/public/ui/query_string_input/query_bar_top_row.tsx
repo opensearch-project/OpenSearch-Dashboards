@@ -152,7 +152,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     pluginId: 'data',
     name: 'Focus Query Bar',
     category: 'Search',
-    keys: 'shift+q',
+    keys: '/',
     execute: handleFocusQueryBar,
   });
 

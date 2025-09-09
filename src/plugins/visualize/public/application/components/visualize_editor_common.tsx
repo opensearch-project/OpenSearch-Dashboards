@@ -80,7 +80,6 @@ export const VisualizeEditorCommon = ({
   const opensearchDashboards = useOpenSearchDashboards<VisualizeServices>();
   const { keyboardShortcut } = opensearchDashboards.services;
 
-  // Memoized callback for sidebar toggle to avoid re-registration on every render
   const handleSidebarToggle = useCallback(() => {
     const sidebarButton = document.querySelector('[data-test-subj="collapseSideBarButton"]');
     if (sidebarButton) {
@@ -100,7 +99,7 @@ export const VisualizeEditorCommon = ({
     pluginId: 'visualize',
     name: 'Toggle Visualization Sidebar',
     category: 'Panel / layout',
-    keys: 'shift+s',
+    keys: 'shift+c',
     execute: handleSidebarToggle,
   });
 

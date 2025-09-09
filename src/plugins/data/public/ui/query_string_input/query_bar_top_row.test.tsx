@@ -49,6 +49,7 @@ const mockTimeHistory = {
   get: () => {
     return [];
   },
+  add: jest.fn(),
 };
 
 startMock.uiSettings.get.mockImplementation((key: string) => {
@@ -114,6 +115,9 @@ function wrapQueryBarTopRowInContext(testProps: any) {
     data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),
+    keyboardShortcut: {
+      useKeyboardShortcut: jest.fn(),
+    },
   };
 
   return (
@@ -270,5 +274,160 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    const mockUseKeyboardShortcut = jest.fn();
+
+    function wrapWithMockedKeyboardShortcut(testProps: any) {
+      const defaultOptions = {
+        screenTitle: 'Another Screen',
+        onSubmit: noop,
+        onChange: noop,
+        intl: null as any,
+      };
+
+      const services = {
+        ...startMock,
+        data: dataPluginMock.createStartContract(),
+        appName: 'discover',
+        storage: createMockStorage(),
+        keyboardShortcut: {
+          useKeyboardShortcut: mockUseKeyboardShortcut,
+        },
+      };
+
+      return (
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <QueryBarTopRow {...defaultOptions} {...testProps} />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+    }
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Mock DOM methods
+      Object.defineProperty(document, 'querySelector', {
+        value: jest.fn(),
+        writable: true,
+      });
+    });
+
+    it('registers keyboard shortcuts', () => {
+      render(
+        wrapWithMockedKeyboardShortcut({
+          query: dqlQuery,
+          indexPatterns: [stubIndexPatternWithFields],
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'date_picker',
+        pluginId: 'data',
+        name: 'Open Date Picker',
+        category: 'Search',
+        keys: 'shift+d',
+        execute: expect.any(Function),
+      });
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'refresh_query',
+        pluginId: 'data',
+        name: 'Refresh Results',
+        category: 'Data actions',
+        keys: 'r',
+        execute: expect.any(Function),
+      });
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'focus_query_bar',
+        pluginId: 'data',
+        name: 'Focus Query Bar',
+        category: 'Search',
+        keys: '/',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('date picker shortcut clicks date picker button', () => {
+      const mockDatePickerButton = {
+        click: jest.fn(),
+      };
+
+      (document.querySelector as jest.Mock).mockImplementation((selector) => {
+        if (selector === '[data-test-subj="superDatePickerstartDatePopoverButton"]') {
+          return mockDatePickerButton;
+        }
+        return null;
+      });
+
+      render(
+        wrapWithMockedKeyboardShortcut({
+          query: dqlQuery,
+          indexPatterns: [stubIndexPatternWithFields],
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      const datePickerShortcut = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].keys === 'shift+d'
+      );
+      datePickerShortcut[0].execute();
+
+      expect(mockDatePickerButton.click).toHaveBeenCalled();
+    });
+
+    it('focus query bar shortcut focuses query input', () => {
+      const mockQueryInput = {
+        focus: jest.fn(),
+      };
+
+      (document.querySelector as jest.Mock).mockImplementation((selector) => {
+        if (selector === '[data-test-subj="queryInput"]') {
+          return mockQueryInput;
+        }
+        return null;
+      });
+
+      render(
+        wrapWithMockedKeyboardShortcut({
+          query: dqlQuery,
+          indexPatterns: [stubIndexPatternWithFields],
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      const focusShortcut = mockUseKeyboardShortcut.mock.calls.find((call) => call[0].keys === '/');
+      focusShortcut[0].execute();
+
+      expect(mockQueryInput.focus).toHaveBeenCalled();
+    });
+
+    it('refresh shortcut calls onSubmit', () => {
+      const mockOnSubmit = jest.fn();
+
+      render(
+        wrapWithMockedKeyboardShortcut({
+          query: dqlQuery,
+          indexPatterns: [stubIndexPatternWithFields],
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      const refreshShortcut = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].keys === 'r'
+      );
+      refreshShortcut[0].execute();
+
+      expect(mockOnSubmit).toHaveBeenCalled();
+    });
   });
 });

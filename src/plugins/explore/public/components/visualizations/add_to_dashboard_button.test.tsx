@@ -19,6 +19,8 @@ const mockToastAdd = jest.fn();
 const mockGetUrlForApp = jest.fn().mockReturnValue('/app/dashboards#/view/123');
 const mockGetTab = jest.fn(() => ({ id: 'mockTab' }));
 
+const mockUseKeyboardShortcut = jest.fn();
+
 const mockServices = {
   core: {
     application: {
@@ -41,6 +43,9 @@ const mockServices = {
   },
   tabRegistry: {
     getTab: mockGetTab,
+  },
+  keyboardShortcut: {
+    useKeyboardShortcut: mockUseKeyboardShortcut,
   },
 };
 
@@ -104,7 +109,12 @@ const store = mockStore({
 describe('SaveAndAddButtonWithModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(new VB.VisualizationBuilder({}));
+    mockUseKeyboardShortcut.mockClear();
+    jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(
+      new VB.VisualizationBuilder({
+        getExpressions: jest.fn(),
+      })
+    );
   });
 
   it('renders the add button and opens modal on click', async () => {
@@ -170,6 +180,47 @@ describe('SaveAndAddButtonWithModal', () => {
           color: 'danger',
         })
       );
+    });
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    it('registers keyboard shortcut correctly', () => {
+      render(
+        <Provider store={store}>
+          <SaveAndAddButtonWithModal dataset={undefined} />
+        </Provider>
+      );
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'addToDashboard',
+        pluginId: 'explore',
+        name: 'Add to Dashboard',
+        category: 'Data actions',
+        keys: 'a',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('keyboard shortcut opens modal', () => {
+      render(
+        <Provider store={store}>
+          <SaveAndAddButtonWithModal dataset={undefined} />
+        </Provider>
+      );
+
+      // Get the execute function from the keyboard shortcut registration
+      const keyboardShortcutCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'addToDashboard'
+      );
+      expect(keyboardShortcutCall).toBeDefined();
+
+      const executeFunction = keyboardShortcutCall[0].execute;
+
+      // Execute the keyboard shortcut
+      executeFunction();
+
+      // Verify modal opens
+      expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
     });
   });
 });

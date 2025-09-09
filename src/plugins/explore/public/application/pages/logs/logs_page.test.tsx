@@ -26,6 +26,8 @@ import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { LogsPage } from './logs_page';
 import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
 
+const mockUseKeyboardShortcut = jest.fn();
+
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
     services: jest.fn(),
@@ -166,6 +168,15 @@ describe('LogsPage', () => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
     exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
+
+    // Add keyboard shortcut service to the mock
+    exploreServicesMock.keyboardShortcut = {
+      useKeyboardShortcut: mockUseKeyboardShortcut,
+      register: jest.fn(),
+      unregister: jest.fn(),
+      getAllShortcuts: jest.fn(),
+    };
+
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({
       services: exploreServicesMock,
     });
@@ -173,6 +184,7 @@ describe('LogsPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseKeyboardShortcut.mockClear();
   });
 
   it('renders without crashing', () => {
@@ -212,5 +224,96 @@ describe('LogsPage', () => {
 
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    it('registers all keyboard shortcuts correctly', () => {
+      const store = createTestStore();
+      render(
+        <TestHarness store={store}>
+          <LogsPage />
+        </TestHarness>
+      );
+
+      // Verify all three keyboard shortcuts are registered
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledTimes(3);
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'switchToLogsTabLogs',
+        pluginId: 'explore',
+        name: 'Switch to Logs Tab',
+        category: 'navigation',
+        keys: 'shift+l',
+        execute: expect.any(Function),
+      });
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'switchToPatternsTabLogs',
+        pluginId: 'explore',
+        name: 'Switch to Patterns Tab',
+        category: 'navigation',
+        keys: 'shift+p',
+        execute: expect.any(Function),
+      });
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'switchToVisualizationTabLogs',
+        pluginId: 'explore',
+        name: 'Switch to Visualization Tab',
+        category: 'navigation',
+        keys: 'shift+v',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('keyboard shortcuts dispatch correct Redux actions', () => {
+      const store = createTestStore();
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      render(
+        <TestHarness store={store}>
+          <LogsPage />
+        </TestHarness>
+      );
+
+      // Get the execute functions from the keyboard shortcut registrations
+      const logsTabCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToLogsTabLogs'
+      );
+      const patternsTabCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToPatternsTabLogs'
+      );
+      const visualizationTabCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToVisualizationTabLogs'
+      );
+
+      expect(logsTabCall).toBeDefined();
+      expect(patternsTabCall).toBeDefined();
+      expect(visualizationTabCall).toBeDefined();
+
+      logsTabCall[0].execute();
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.stringContaining('setActiveTab'),
+          payload: 'logs',
+        })
+      );
+
+      patternsTabCall[0].execute();
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.stringContaining('setActiveTab'),
+          payload: 'explore_patterns_tab',
+        })
+      );
+
+      visualizationTabCall[0].execute();
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.stringContaining('setActiveTab'),
+          payload: 'explore_visualization_tab',
+        })
+      );
+    });
   });
 });

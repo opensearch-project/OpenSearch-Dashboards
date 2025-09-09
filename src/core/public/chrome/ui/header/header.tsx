@@ -61,6 +61,7 @@ import { WorkspaceObject, WorkspacesStart } from '../../../../public/workspace';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { useObservableValue } from '../../../utils';
+import { KeyboardShortcutStart } from '../../../keyboard_shortcut';
 import {
   getOsdSidecarPaddingStyle,
   ISidecarConfig,
@@ -132,6 +133,7 @@ export interface HeaderProps {
   useUpdatedHeader?: boolean;
   globalSearchCommands?: GlobalSearchCommand[];
   globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
+  keyboardShortcut?: KeyboardShortcutStart;
 }
 
 const hasValue = (value: any) => {
@@ -158,6 +160,7 @@ export function Header({
   setCurrentNavGroup,
   useUpdatedHeader,
   globalSearchCommands,
+  keyboardShortcut,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -207,6 +210,22 @@ export function Header({
     },
     [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
   );
+
+  // Function for toggling left navigation
+  const handleToggleLeftNavbar = useCallback(() => {
+    setIsNavOpen(!isNavOpen);
+  }, [setIsNavOpen, isNavOpen]);
+
+  // Register global navigation toggle keyboard shortcut using the hook
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'toggle_left_navbar',
+    pluginId: 'core',
+    name: 'Toggle Left Navbar',
+    category: 'Panel / Layout',
+    keys: 'shift+b',
+    execute: handleToggleLeftNavbar,
+  });
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;

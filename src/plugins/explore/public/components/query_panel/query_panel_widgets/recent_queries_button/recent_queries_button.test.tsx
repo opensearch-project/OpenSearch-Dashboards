@@ -13,6 +13,7 @@ const mockDispatch = jest.fn();
 const mockHandleTimeChange = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
 const mockSetEditorTextWithQuery = jest.fn();
+const mockUseKeyboardShortcut = jest.fn();
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -36,6 +37,12 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
             ]),
           },
         },
+      },
+      keyboardShortcut: {
+        useKeyboardShortcut: mockUseKeyboardShortcut,
+        register: jest.fn(),
+        unregister: jest.fn(),
+        getAllShortcuts: jest.fn(),
       },
     },
   }),
@@ -227,5 +234,103 @@ describe('RecentQueriesButton', () => {
     // Popover should be closed (table hidden)
     table = screen.getByTestId('recent-queries-table');
     expect(table).toHaveStyle({ display: 'none' });
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('registers keyboard shortcut correctly', () => {
+      renderWithStore();
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledTimes(1);
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'open_recent_queries',
+        pluginId: 'explore',
+        name: 'Open Recent Queries',
+        category: 'Search',
+        keys: 'shift+q',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('keyboard shortcut toggles popover when executed', () => {
+      renderWithStore();
+
+      const shortcutCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'open_recent_queries'
+      );
+      expect(shortcutCall).toBeDefined();
+
+      const executeFunction = shortcutCall[0].execute;
+
+      expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
+
+      executeFunction();
+      let table = screen.getByTestId('recent-queries-table');
+      expect(table).toHaveStyle({ display: 'block' });
+
+      executeFunction();
+      table = screen.getByTestId('recent-queries-table');
+      expect(table).toHaveStyle({ display: 'none' });
+    });
+
+    it('keyboard shortcut has correct metadata', () => {
+      renderWithStore();
+
+      const shortcutCall = mockUseKeyboardShortcut.mock.calls[0];
+      const shortcutConfig = shortcutCall[0];
+
+      expect(shortcutConfig.id).toBe('open_recent_queries');
+      expect(shortcutConfig.pluginId).toBe('explore');
+      expect(shortcutConfig.name).toBe('Open Recent Queries');
+      expect(shortcutConfig.category).toBe('Search');
+      expect(shortcutConfig.keys).toBe('shift+q');
+      expect(typeof shortcutConfig.execute).toBe('function');
+    });
+
+    it('keyboard shortcut execute function is the same as button click handler', () => {
+      renderWithStore();
+
+      const button = screen.getByTestId('exploreRecentQueriesButton');
+      const shortcutCall = mockUseKeyboardShortcut.mock.calls[0];
+      const executeFunction = shortcutCall[0].execute;
+
+      expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
+
+      fireEvent.click(button);
+      let table = screen.getByTestId('recent-queries-table');
+      expect(table).toHaveStyle({ display: 'block' });
+
+      executeFunction();
+      table = screen.getByTestId('recent-queries-table');
+      expect(table).toHaveStyle({ display: 'none' });
+
+      executeFunction();
+      table = screen.getByTestId('recent-queries-table');
+      expect(table).toHaveStyle({ display: 'block' });
+    });
+
+    it('keyboard shortcut works independently of button clicks', () => {
+      renderWithStore();
+
+      const shortcutCall = mockUseKeyboardShortcut.mock.calls[0];
+      const executeFunction = shortcutCall[0].execute;
+
+      expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
+
+      executeFunction();
+      let table = screen.getByTestId('recent-queries-table');
+      expect(table).toHaveStyle({ display: 'block' });
+
+      executeFunction();
+      table = screen.getByTestId('recent-queries-table');
+      expect(table).toHaveStyle({ display: 'none' });
+
+      executeFunction();
+      table = screen.getByTestId('recent-queries-table');
+      expect(table).toHaveStyle({ display: 'block' });
+    });
   });
 });

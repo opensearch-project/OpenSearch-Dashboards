@@ -105,8 +105,8 @@ const TopNav = ({
         id: 'add_dashboard',
         pluginId: 'dashboard',
         name: 'Add Dashboard',
-        category: 'editing / save',
-        keys: 'shift+a',
+        category: 'Data actions',
+        keys: 'a',
         execute: handleAdd,
       });
 

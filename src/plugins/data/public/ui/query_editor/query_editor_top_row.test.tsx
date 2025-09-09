@@ -95,6 +95,9 @@ function wrapQueryEditorTopRowInContext(testProps: any) {
     data: dataPlugin,
     appName: 'discover',
     storage: createMockStorage(),
+    keyboardShortcut: {
+      useKeyboardShortcut: jest.fn(),
+    },
   };
 
   return (
@@ -220,5 +223,96 @@ describe('QueryEditorTopRow', () => {
     // The EuiSuperUpdateButton should show 'Update' if isDirty is true
     // (isDirty is true by default in the test context)
     expect(getByText('Update')).toBeInTheDocument();
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    const mockUseKeyboardShortcut = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    function wrapWithMockedKeyboardShortcut(testProps: any) {
+      const defaultOptions = {
+        onSubmit: jest.fn(),
+        onChange: jest.fn(),
+        isDirty: true,
+        screenTitle: 'Another Screen',
+      };
+
+      const mockLanguage: LanguageConfig = {
+        id: 'test-language',
+        title: 'Test Language',
+        search: {} as any,
+        getQueryString: jest.fn(),
+        editor: createEditor(SingleLineInput, SingleLineInput, [], DQLBody),
+        fields: {},
+        showDocLinks: true,
+        editorSupportedAppNames: ['discover'],
+        hideDatePicker: true,
+      };
+      dataPlugin.query.queryString.getLanguageService().registerLanguage(mockLanguage);
+
+      const services = {
+        ...startMock,
+        data: dataPlugin,
+        appName: 'discover',
+        storage: createMockStorage(),
+        keyboardShortcut: {
+          useKeyboardShortcut: mockUseKeyboardShortcut,
+        },
+      };
+
+      return (
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <QueryEditorTopRow {...defaultOptions} {...testProps} />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+    }
+
+    it('registers keyboard shortcuts', async () => {
+      render(wrapWithMockedKeyboardShortcut({}));
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'open_date_picker',
+        pluginId: 'data',
+        name: 'Open Date Picker',
+        category: 'Search',
+        keys: 'shift+d',
+        execute: expect.any(Function),
+      });
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'refresh_query',
+        pluginId: 'data',
+        name: 'Refresh Results',
+        category: 'Data actions',
+        keys: 'r',
+        execute: expect.any(Function),
+      });
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'focus_query_bar',
+        pluginId: 'data',
+        name: 'Focus Query Bar',
+        category: 'Search',
+        keys: '/',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('refresh shortcut calls onSubmit', async () => {
+      const mockOnSubmit = jest.fn();
+      render(wrapWithMockedKeyboardShortcut({ onSubmit: mockOnSubmit }));
+
+      const refreshShortcut = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].keys === 'r'
+      );
+      refreshShortcut[0].execute();
+
+      expect(mockOnSubmit).toHaveBeenCalled();
+    });
   });
 });

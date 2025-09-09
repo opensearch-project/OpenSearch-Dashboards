@@ -296,28 +296,28 @@ export class ChromeService {
     const globalSearch = this.globalSearch.start();
 
     // Function for toggling left navigation
-    const handleToggleLeftNavbar = () => {
-      const navButton = document.querySelector('[data-test-subj="collapsibleNavShrinkButton"]');
-      const toggleNavButton = document.querySelector('[data-test-subj="toggleNavButton"]');
+    // const handleToggleLeftNavbar = () => {
+    //   const navButton = document.querySelector('[data-test-subj="collapsibleNavShrinkButton"]');
+    //   const toggleNavButton = document.querySelector('[data-test-subj="toggleNavButton"]');
 
-      if (navButton) {
-        (navButton as HTMLElement).click();
-      } else if (toggleNavButton) {
-        (toggleNavButton as HTMLElement).click();
-      }
-    };
+    //   if (navButton) {
+    //     (navButton as HTMLElement).click();
+    //   } else if (toggleNavButton) {
+    //     (toggleNavButton as HTMLElement).click();
+    //   }
+    // };
 
-    // Register global navigation toggle keyboard shortcut
-    if (keyboardShortcut) {
-      keyboardShortcut.register({
-        id: 'toggle_left_navbar',
-        pluginId: 'core',
-        name: 'Toggle Left Navbar',
-        category: 'Panel / Layout',
-        keys: 'shift+b',
-        execute: handleToggleLeftNavbar,
-      });
-    }
+    // // Register global navigation toggle keyboard shortcut
+    // if (keyboardShortcut) {
+    //   keyboardShortcut.register({
+    //     id: 'toggle_left_navbar',
+    //     pluginId: 'core',
+    //     name: 'Toggle Left Navbar',
+    //     category: 'Panel / Layout',
+    //     keys: 'shift+b',
+    //     execute: handleToggleLeftNavbar,
+    //   });
+    // }
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -457,6 +457,7 @@ export class ChromeService {
           useUpdatedHeader={this.useUpdatedHeader}
           globalSearchCommands={globalSearch.getAllSearchCommands()}
           globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
+          keyboardShortcut={keyboardShortcut}
         />
       ),
 

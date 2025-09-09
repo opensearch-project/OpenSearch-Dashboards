@@ -26,6 +26,8 @@ import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { TracesPage } from './traces_page';
 import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
 
+const mockUseKeyboardShortcut = jest.fn();
+
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
     services: jest.fn(),
@@ -166,6 +168,15 @@ describe('TracesPage', () => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
     exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
+
+    // Add keyboard shortcut service to the mock
+    exploreServicesMock.keyboardShortcut = {
+      useKeyboardShortcut: mockUseKeyboardShortcut,
+      register: jest.fn(),
+      unregister: jest.fn(),
+      getAllShortcuts: jest.fn(),
+    };
+
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({
       services: exploreServicesMock,
     });
@@ -173,6 +184,7 @@ describe('TracesPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseKeyboardShortcut.mockClear();
   });
 
   it('renders without crashing', () => {
@@ -212,5 +224,128 @@ describe('TracesPage', () => {
 
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    it('registers all keyboard shortcuts correctly', () => {
+      const store = createTestStore();
+      render(
+        <TestHarness store={store}>
+          <TracesPage />
+        </TestHarness>
+      );
+
+      // Verify both keyboard shortcuts are registered
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledTimes(2);
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'switchToPatternsTabTraces',
+        pluginId: 'explore',
+        name: 'Switch to Patterns Tab',
+        category: 'navigation',
+        keys: 'shift+p',
+        execute: expect.any(Function),
+      });
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'switchToVisualizationTabTraces',
+        pluginId: 'explore',
+        name: 'Switch to Visualization Tab',
+        category: 'navigation',
+        keys: 'shift+v',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('keyboard shortcuts dispatch correct Redux actions', () => {
+      const store = createTestStore();
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      render(
+        <TestHarness store={store}>
+          <TracesPage />
+        </TestHarness>
+      );
+
+      // Get the execute functions from the keyboard shortcut registrations
+      const patternsTabCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToPatternsTabTraces'
+      );
+      const visualizationTabCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToVisualizationTabTraces'
+      );
+
+      expect(patternsTabCall).toBeDefined();
+      expect(visualizationTabCall).toBeDefined();
+
+      patternsTabCall[0].execute();
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.stringContaining('setActiveTab'),
+          payload: 'explore_patterns_tab',
+        })
+      );
+
+      visualizationTabCall[0].execute();
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.stringContaining('setActiveTab'),
+          payload: 'explore_visualization_tab',
+        })
+      );
+    });
+
+    it('keyboard shortcuts have unique IDs for traces page', () => {
+      const store = createTestStore();
+      render(
+        <TestHarness store={store}>
+          <TracesPage />
+        </TestHarness>
+      );
+
+      // Verify that the shortcut IDs are specific to traces page
+      const shortcutIds = mockUseKeyboardShortcut.mock.calls.map((call) => call[0].id);
+      expect(shortcutIds).toContain('switchToPatternsTabTraces');
+      expect(shortcutIds).toContain('switchToVisualizationTabTraces');
+
+      // Ensure IDs are unique
+      expect(new Set(shortcutIds).size).toBe(shortcutIds.length);
+    });
+
+    it('keyboard shortcuts use correct key combinations', () => {
+      const store = createTestStore();
+      render(
+        <TestHarness store={store}>
+          <TracesPage />
+        </TestHarness>
+      );
+
+      // Verify key combinations
+      const patternsCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToPatternsTabTraces'
+      );
+      const visualizationCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToVisualizationTabTraces'
+      );
+
+      expect(patternsCall[0].keys).toBe('shift+p');
+      expect(visualizationCall[0].keys).toBe('shift+v');
+    });
+
+    it('keyboard shortcuts have correct metadata', () => {
+      const store = createTestStore();
+      render(
+        <TestHarness store={store}>
+          <TracesPage />
+        </TestHarness>
+      );
+
+      // Verify all shortcuts have correct plugin ID and category
+      mockUseKeyboardShortcut.mock.calls.forEach((call) => {
+        expect(call[0].pluginId).toBe('explore');
+        expect(call[0].category).toBe('navigation');
+        expect(call[0].name).toMatch(/Switch to .* Tab/);
+      });
+    });
   });
 });

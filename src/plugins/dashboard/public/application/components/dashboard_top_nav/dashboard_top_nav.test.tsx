@@ -35,6 +35,7 @@ import { createDashboardServicesMock } from '../../utils/mocks';
 import { mount } from 'enzyme';
 import { TopNavMenu, TopNavControls as HeaderControl } from 'src/plugins/navigation/public';
 import { dashboardAppStateStub } from '../../utils/stubs';
+import { ViewMode } from 'src/plugins/embeddable/public';
 
 let mockURL = '?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))';
 
@@ -165,5 +166,113 @@ describe('Dashboard top nav', () => {
     component.update();
 
     expect(component).toMatchSnapshot();
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    const mockUseKeyboardShortcut = jest.fn();
+    const mockRegister = jest.fn();
+    const mockUnregister = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      Object.defineProperty(document, 'querySelector', {
+        value: jest.fn(),
+        writable: true,
+      });
+    });
+
+    function wrapWithMockedKeyboardShortcut(state: DashboardAppState) {
+      const services = {
+        ...mockServices,
+        dashboardCapabilities: {
+          saveQuery: true,
+        },
+        navigation: {
+          ui: { TopNavMenu, HeaderControl },
+        },
+        keyboardShortcut: {
+          useKeyboardShortcut: mockUseKeyboardShortcut,
+          register: mockRegister,
+          unregister: mockUnregister,
+        },
+      };
+
+      const topNavProps = {
+        isChromeVisible: false,
+        savedDashboardInstance: {},
+        appState: {
+          getState: () => state,
+        } as DashboardAppStateContainer,
+        dashboard: {} as Dashboard,
+        currentAppState: state,
+        isEmbeddableRendered: true,
+        currentContainer: {} as DashboardContainer,
+        indexPatterns: [],
+        dashboardIdFromUrl: '',
+      };
+
+      return (
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <DashboardTopNav {...topNavProps} />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+    }
+
+    test('registers keyboard shortcuts correctly', async () => {
+      const editModeState = { ...currentState, viewMode: ViewMode.EDIT };
+      const component = mount(wrapWithMockedKeyboardShortcut(editModeState));
+
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      // Verify toggle edit shortcut is registered
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'toggle_dashboard_edit',
+        pluginId: 'dashboard',
+        name: 'Toggle Edit Mode',
+        category: 'Panel / Layout',
+        keys: 'shift+e',
+        execute: expect.any(Function),
+      });
+
+      // Verify save shortcut is registered in edit mode
+      expect(mockRegister).toHaveBeenCalledWith({
+        id: 'save_dashboard',
+        pluginId: 'dashboard',
+        name: 'Save Dashboard',
+        category: 'editing / save',
+        keys: 'cmd+s',
+        execute: expect.any(Function),
+      });
+    });
+
+    test('executes keyboard shortcuts with DOM interaction', async () => {
+      const mockEditButton = { click: jest.fn() };
+      const mockSaveButton = { click: jest.fn(), hasAttribute: jest.fn(() => false) };
+
+      (document.querySelector as jest.Mock).mockImplementation((selector) => {
+        if (selector === '[data-test-subj="dashboardEditSwitch"]') return mockEditButton;
+        if (selector === '[data-test-subj="dashboardSaveMenuItem"]') return mockSaveButton;
+        return null;
+      });
+
+      const editModeState = { ...currentState, viewMode: ViewMode.EDIT };
+      const component = mount(wrapWithMockedKeyboardShortcut(editModeState));
+
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      const toggleShortcut = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].keys === 'shift+e'
+      );
+      toggleShortcut[0].execute();
+      expect(mockEditButton.click).toHaveBeenCalled();
+
+      const saveShortcut = mockRegister.mock.calls.find((call) => call[0].keys === 'cmd+s');
+      saveShortcut[0].execute();
+      expect(mockSaveButton.click).toHaveBeenCalled();
+    });
   });
 });

@@ -582,6 +582,26 @@ export class DashboardPlugin
       core.application
     );
 
+    // Register dashboard navigation shortcuts only when workspace is available
+    if (core.keyboardShortcut) {
+      // Check if workspaces are initialized and available
+      const isInitialized = core.workspaces.initialized$.getValue();
+      const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+
+      if (isInitialized && currentWorkspace) {
+        core.keyboardShortcut.register({
+          id: 'nav.dashboard',
+          name: 'Go to Dashboard',
+          pluginId: 'dashboard',
+          category: 'navigation',
+          keys: 'g b',
+          execute: () => {
+            core.application.navigateToApp('dashboards');
+          },
+        });
+      }
+    }
+
     const changeViewAction = new ReplacePanelAction(
       core,
       SavedObjectFinder,

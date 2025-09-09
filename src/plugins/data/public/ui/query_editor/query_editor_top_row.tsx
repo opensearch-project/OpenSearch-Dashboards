@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import React, { useState, useCallback, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
@@ -92,7 +92,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   // Memoized callback for focusing query bar
   const handleFocusQueryBar = useCallback(() => {
     // Monaco-based query editor
-    const queryEditorInput = document.querySelector('[data-test-subj="osdQueryEditorInput"]');
+    const queryEditorInput = document.querySelector('[data-test-subj="exploreQueryPanelEditor"]');
     if (queryEditorInput) {
       // Look for Monaco editor within the query editor container
       const monacoEditor = queryEditorInput.querySelector(
@@ -105,27 +105,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     }
   }, []);
 
-  const handleDownloadCsv = useCallback(() => {
-    const csvButton = document.querySelector('[data-test-subj="dscDownloadCsvButton"]');
-    if (csvButton && !csvButton.hasAttribute('disabled')) {
-      (csvButton as HTMLElement).click();
-    }
-  }, []);
-
-  const handleOpenSearch = useCallback(() => {
-    const openButton = document.querySelector('[data-test-subj="discoverOpenButton"]');
-    if (openButton && !openButton.hasAttribute('disabled')) {
-      (openButton as HTMLElement).click();
-    }
-  }, []);
-
-  const handleSave = useCallback(() => {
-    const saveButton = document.querySelector('[data-test-subj="discoverSaveButton"]');
-    if (saveButton && !saveButton.hasAttribute('disabled')) {
-      (saveButton as HTMLElement).click();
-    }
-  }, []);
-
   keyboardShortcut?.useKeyboardShortcut({
     id: 'open_date_picker',
     pluginId: 'data',
@@ -133,15 +112,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     category: 'Search',
     keys: 'shift+d',
     execute: handleOpenDatePicker,
-  });
-
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'open_search',
-    pluginId: 'data',
-    name: 'Open Search',
-    category: 'Search',
-    keys: 'shift+s',
-    execute: handleOpenSearch,
   });
 
   keyboardShortcut?.useKeyboardShortcut({
@@ -160,26 +130,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     pluginId: 'data',
     name: 'Focus Query Bar',
     category: 'Search',
-    keys: 'shift+q',
+    keys: '/',
     execute: handleFocusQueryBar,
-  });
-
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'download_csv',
-    pluginId: 'discover',
-    name: 'Download Results as CSV',
-    category: 'Data Actions',
-    keys: 'd',
-    execute: handleDownloadCsv,
-  });
-
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'save_search',
-    pluginId: 'discover',
-    name: 'Save Search',
-    category: 'editing / save',
-    keys: 'cmd+s',
-    execute: handleSave,
   });
 
   const queryLanguage = props.query && props.query.language;

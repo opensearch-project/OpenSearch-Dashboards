@@ -12,6 +12,8 @@ import { DownloadCsvFormId } from './constants';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { IndexPattern } from '../../../../../../data/common';
 import { useDiscoverDownloadCsvToasts } from './use_download_csv_toasts';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../../../types';
 
 export interface DiscoverDownloadCsvProps {
   hits?: number;
@@ -21,6 +23,7 @@ export interface DiscoverDownloadCsvProps {
 
 export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownloadCsvProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const { onSuccess, onError, onLoading } = useDiscoverDownloadCsvToasts();
   const { isLoading, downloadCsvForOption } = useDiscoverDownloadCsv({
     rows,
@@ -33,6 +36,23 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
 
   const openPopover = () => setIsPopoverOpen(true);
   const closePopover = () => setIsPopoverOpen(false);
+
+  const handleDownloadCsvShortcut = () => {
+    if (!isLoading) {
+      openPopover();
+    }
+  };
+  const { keyboardShortcut } = services;
+
+  // Register keyboard shortcut
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'download_csv',
+    pluginId: 'explore',
+    name: 'Download CSV',
+    category: 'Data actions',
+    keys: 'e',
+    execute: handleDownloadCsvShortcut,
+  });
 
   const handleDownloadCsvForOption = async (option: DownloadCsvFormId) => {
     closePopover();

@@ -22,6 +22,7 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
+import { getOpenButtonRun } from './top_nav_links/top_nav_open/top_nav_open';
 import { SavedExplore } from '../../saved_explore';
 import { setDateRange } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
@@ -38,6 +39,54 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const clearEditors = useClearEditors();
   const editorRef = useEditorRef();
+
+  const handleSaveShortcut = useCallback(() => {
+    const saveButton = document.querySelector('[data-test-subj="discoverSaveButton"]');
+    if (saveButton && !saveButton.hasAttribute('disabled')) {
+      (saveButton as HTMLElement).click();
+    }
+  }, []);
+
+  // Register keyboard shortcut for save
+  services.keyboardShortcut?.useKeyboardShortcut({
+    id: 'save_search',
+    pluginId: 'explore',
+    name: 'Save Search',
+    category: 'editing / save',
+    keys: 'cmd+s',
+    execute: handleSaveShortcut,
+  });
+
+  const handleOpenShortcut = useCallback(() => {
+    const openButtonRun = getOpenButtonRun(services);
+    openButtonRun({} as HTMLElement);
+  }, [services]);
+
+  // Register keyboard shortcut for open
+  services.keyboardShortcut?.useKeyboardShortcut({
+    id: 'saved_search',
+    pluginId: 'explore',
+    name: 'Saved Search',
+    category: 'Search',
+    keys: 'shift+o',
+    execute: handleOpenShortcut,
+  });
+
+  const handleShareShortcut = useCallback(() => {
+    const shareButton = document.querySelector('[data-test-subj="shareTopNavButton"]');
+    if (shareButton && !shareButton.hasAttribute('disabled')) {
+      (shareButton as HTMLElement).click();
+    }
+  }, []);
+
+  services.keyboardShortcut?.useKeyboardShortcut({
+    id: 'share_search',
+    pluginId: 'explore',
+    name: 'Share Search',
+    category: 'Search',
+    keys: 'shift+s',
+    execute: handleShareShortcut,
+  });
 
   const flavorId = useFlavorId();
   const {
