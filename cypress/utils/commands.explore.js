@@ -6,6 +6,7 @@
 import initCommandNamespace from './command_namespace';
 import { DATASOURCE_NAME } from './apps/explore/constants';
 import { setDatePickerDatesAndSearchIfRelevant } from './apps/explore/shared';
+import { PATHS } from './constants';
 
 /**
  * This file houses all the commands specific to Explore. For commands that are used across the project please move it to the general commands file
@@ -529,4 +530,35 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) =
     .and('contain.text', chartType);
   cy.get('body').click(0, 0);
   cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
+});
+
+cy.explore.add('setupWorkspaceAndDataSourceWithTraces', (workspaceName, traceIndices) => {
+  // Load trace test data
+  cy.osd.setupTestData(
+    PATHS.SECONDARY_ENGINE,
+    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.mapping.json`),
+    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.data.ndjson`)
+  );
+
+  // Add data source
+  cy.osd.addDataSource({
+    name: DATASOURCE_NAME,
+    url: PATHS.SECONDARY_ENGINE,
+    authType: 'no_auth',
+  });
+
+  // delete any old workspaces and potentially conflicting one
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteAllOldWorkspaces();
+
+  cy.visit('/app/home');
+  cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+});
+
+cy.explore.add('cleanupWorkspaceAndDataSourceAndTraces', (workspaceName, traceIndices) => {
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+  for (const index of traceIndices) {
+    cy.osd.deleteIndex(index);
+  }
 });
