@@ -15,7 +15,7 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 const workspaceName = getRandomizedWorkspaceName();
 
 const traceTestSuite = () => {
-  describe('Trace Exploration Tests', () => {
+  describe('Trace Sanity Tests', () => {
     before(() => {
       cy.explore.setupWorkspaceAndDataSourceWithTraces(workspaceName, [TRACE_INDEX]);
     });
@@ -88,4 +88,4 @@ const traceTestSuite = () => {
   });
 };
 
-prepareTestSuite('Discover Traces', traceTestSuite);
+prepareTestSuite('Traces Sanity', traceTestSuite);
