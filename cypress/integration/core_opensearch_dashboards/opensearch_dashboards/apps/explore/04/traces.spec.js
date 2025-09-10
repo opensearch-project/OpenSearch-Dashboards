@@ -473,7 +473,7 @@ const traceTestSuite = () => {
     describe('Filter Functionality', () => {
       it('should show error filter and handle filtering', () => {
         // Error filter button should exist
-        cy.contains('Filter errors').should('be.visible').click();
+        cy.getElementByTestId('error-count-button').should('be.visible').click();
 
         // Verify filter badge appears
         cy.get('[data-test-subj^="filter-badge-"]').should('be.visible');
@@ -489,8 +489,11 @@ const traceTestSuite = () => {
       });
 
       it('should handle service legend modal', () => {
+        // Wait a moment for any URL updates to complete
+        cy.wait(500);
+
         // Service legend button should exist
-        cy.contains('Service legend').should('be.visible').click();
+        cy.getElementByTestId('service-legend-toggle').should('be.visible').click();
 
         // Verify modal opens
         cy.get('.euiModal').should('be.visible');
