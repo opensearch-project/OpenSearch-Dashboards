@@ -48,24 +48,26 @@ export const PatternsFlyoutUpdateSearch = ({ patternString }: PatternsFlyoutUpda
     closePatternsTableFlyout();
   };
 
+  const updateSearchClick = () => {
+    if (!selectedPatternsField) throw new Error('no patterns field');
+
+    // craft query that will select for all documents with specific pattern
+    const newQuery = createSearchPatternQuery(
+      originalQuery,
+      selectedPatternsField,
+      usingRegexPatterns,
+      patternString
+    );
+    redirectToLogsWithQuery(newQuery);
+  };
+
   return (
     <EuiButton
       aria-label={i18n.translate('explore.patterns.flyout.updateSearchWithPattern', {
         defaultMessage: 'Update search with pattern',
       })}
       iconType={'continuityBelow'}
-      onClick={() => {
-        if (!selectedPatternsField) throw new Error('no patterns field');
-
-        // craft query that will select for all documents with specific pattern
-        const newQuery = createSearchPatternQuery(
-          originalQuery,
-          selectedPatternsField,
-          usingRegexPatterns,
-          patternString
-        );
-        redirectToLogsWithQuery(newQuery);
-      }}
+      onClick={updateSearchClick}
     >
       {i18n.translate('explore.patterns.flyout.updateSearch', {
         defaultMessage: 'Update search',
