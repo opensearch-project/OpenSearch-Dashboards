@@ -1,0 +1,17 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.chatSuggestion {
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  border-radius: 15px;
+  border: 1px solid $euiBorderColor;
+  box-shadow: 0 5px 5px 0 rgba(0,0,0,.01),0 2px 3px 0 rgba(0,0,0,.02);
+
+  &__loading {
+    padding: 0;
+    font-size: 0.7rem;
+    border: none;
+  }
+}
