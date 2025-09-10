@@ -19,6 +19,14 @@ describe('TableHeaderColumn', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock clipboard API
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: jest.fn().mockResolvedValue(undefined),
+      },
+    });
+    // Mock document.execCommand for fallback
+    document.execCommand = jest.fn().mockReturnValue(true);
   });
 
   it('renders the column header with display name', () => {
@@ -27,6 +35,14 @@ describe('TableHeaderColumn', () => {
     expect(screen.getByTestId('docTableHeaderField')).toBeInTheDocument();
     expect(screen.getByTestId('docTableHeader-test-column')).toBeInTheDocument();
     expect(screen.getByText('Test Column')).toBeInTheDocument();
+  });
+
+  it('renders copy button for all columns', () => {
+    render(<TableHeaderColumn {...defaultProps} />);
+
+    const copyButton = screen.getByTestId('docTableCopyHeader-test-column');
+    expect(copyButton).toBeInTheDocument();
+    expect(copyButton).toHaveAttribute('aria-label', 'Copy test-column column name');
   });
 
   it('renders remove button when column is removeable and onRemoveColumn is provided', () => {
@@ -59,6 +75,45 @@ describe('TableHeaderColumn', () => {
     expect(mockOnRemoveColumn).toHaveBeenCalledTimes(1);
   });
 
+  it('calls clipboard API when copy button is clicked', async () => {
+    render(<TableHeaderColumn {...defaultProps} />);
+
+    const copyButton = screen.getByTestId('docTableCopyHeader-test-column');
+    fireEvent.click(copyButton);
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('test-column');
+    expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to document.execCommand when clipboard API fails', async () => {
+    // Mock clipboard API to fail
+    navigator.clipboard.writeText = jest.fn().mockRejectedValue(new Error('Clipboard API failed'));
+
+    render(<TableHeaderColumn {...defaultProps} />);
+
+    const copyButton = screen.getByTestId('docTableCopyHeader-test-column');
+    fireEvent.click(copyButton);
+
+    // Wait for the fallback to execute
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(document.execCommand).toHaveBeenCalledWith('copy');
+  });
+
+  it('renders both copy and remove buttons when column is removeable', () => {
+    render(<TableHeaderColumn {...defaultProps} />);
+
+    expect(screen.getByTestId('docTableCopyHeader-test-column')).toBeInTheDocument();
+    expect(screen.getByTestId('docTableRemoveHeader-test-column')).toBeInTheDocument();
+  });
+
+  it('renders only copy button when column is not removeable', () => {
+    render(<TableHeaderColumn {...defaultProps} isRemoveable={false} />);
+
+    expect(screen.getByTestId('docTableCopyHeader-test-column')).toBeInTheDocument();
+    expect(screen.queryByTestId('docTableRemoveHeader-test-column')).not.toBeInTheDocument();
+  });
+
   it('applies correct CSS classes and attributes', () => {
     render(<TableHeaderColumn {...defaultProps} />);
 
@@ -89,6 +144,16 @@ describe('TableHeaderColumn', () => {
 
     // The tooltip content should be accessible via aria-label
     expect(removeButton).toHaveAttribute('aria-label', 'Remove test-column column');
+  });
+
+  it('shows tooltip on copy button hover', () => {
+    render(<TableHeaderColumn {...defaultProps} />);
+
+    const copyButton = screen.getByTestId('docTableCopyHeader-test-column');
+    expect(copyButton).toBeInTheDocument();
+
+    // The tooltip content should be accessible via aria-label
+    expect(copyButton).toHaveAttribute('aria-label', 'Copy test-column column name');
   });
 
   it('renders correct button icon and styling', () => {
