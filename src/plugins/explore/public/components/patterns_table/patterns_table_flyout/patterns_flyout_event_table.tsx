@@ -4,7 +4,7 @@
  */
 
 import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -107,30 +107,34 @@ export const PatternsFlyoutEventTable = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const eventTableColumns = useMemo(() => {
+    return [
+      {
+        field: 'timestamp',
+        name: i18n.translate('explore.patterns.flyout.timeColumnName', {
+          defaultMessage: 'Time ({timeFieldName})',
+          values: { timeFieldName },
+        }),
+        sortable: false,
+      },
+      {
+        field: 'event',
+        name: i18n.translate('explore.patterns.flyout.eventsColumnName', {
+          defaultMessage: 'Event ({patternsField})',
+          values: { patternsField },
+        }),
+        sortable: false,
+      },
+    ];
+  }, [timeFieldName, patternsField]);
+
   return (
     <EuiBasicTable
       aria-label={i18n.translate('explore.patterns.flyout.eventTable', {
         defaultMessage: 'Pattern event table',
       })}
       items={fetchedItems}
-      columns={[
-        {
-          field: 'timestamp',
-          name: i18n.translate('explore.patterns.flyout.timeColumnName', {
-            defaultMessage: 'Time ({timeFieldName})',
-            values: { timeFieldName },
-          }),
-          sortable: false,
-        },
-        {
-          field: 'event',
-          name: i18n.translate('explore.patterns.flyout.eventsColumnName', {
-            defaultMessage: 'Event ({patternsField})',
-            values: { patternsField },
-          }),
-          sortable: false,
-        },
-      ]}
+      columns={eventTableColumns}
       tableLayout="auto"
       pagination={{
         pageIndex,
