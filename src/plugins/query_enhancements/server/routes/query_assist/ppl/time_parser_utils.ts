@@ -6,6 +6,7 @@
 import moment from 'moment';
 import { Logger } from 'opensearch-dashboards/server';
 import { OpenSearchClient } from 'src/core/server';
+import { IndicesGetFieldMappingResponse } from '@opensearch-project/opensearch/api/types';
 
 /**
  * Normalize the time string and only accept the specific formats
@@ -92,6 +93,18 @@ export function parseTimeRangeXML(
   }
 }
 
+interface FieldMappingEntry {
+  full_name: string;
+  mapping?: Record<string, { type?: string; path?: string }>;
+}
+
+function isFieldMappingEntry(value: unknown): value is FieldMappingEntry {
+  if (value === null || typeof value !== 'object') {
+    return false;
+  }
+  return 'full_name' in (value as Record<string, unknown>);
+}
+
 /**
  * Parses the mapping response and aggregates clusters of date fields and their aliases.
  * Each cluster contains the target date field and all its aliases.
@@ -99,7 +112,7 @@ export function parseTimeRangeXML(
  * @param mappingResponse - The raw mapping response from OpenSearch
  * @returns An array of clusters; each cluster is an array of strings where the first element is the target date field, followed by its aliases
  */
-function parseTimestampAliasClusters(mappingResponse: any): string[][] {
+function parseTimestampAliasClusters(mappingResponse: IndicesGetFieldMappingResponse): string[][] {
   const clusterMap: Record<string, Set<string>> = {};
   const dateFields = new Set<string>();
   // Step 1: Find all fields of type 'date' and 'date_nanos'
@@ -108,7 +121,9 @@ function parseTimestampAliasClusters(mappingResponse: any): string[][] {
     const { mappings } = mappingResponse[mappingIndexName];
     for (const fieldKey in mappings) {
       if (!Object.prototype.hasOwnProperty.call(mappings, fieldKey)) continue;
-      const fieldDef = mappings[fieldKey];
+      const fieldDefUnknown = mappings[fieldKey] as unknown;
+      if (!isFieldMappingEntry(fieldDefUnknown)) continue;
+      const fieldDef = fieldDefUnknown;
       const innerMappings = fieldDef.mapping ?? {};
       for (const innerFieldName in innerMappings) {
         if (!Object.prototype.hasOwnProperty.call(innerMappings, innerFieldName)) continue;
@@ -129,7 +144,9 @@ function parseTimestampAliasClusters(mappingResponse: any): string[][] {
     const { mappings } = mappingResponse[mappingIndexName];
     for (const fieldKey in mappings) {
       if (!Object.prototype.hasOwnProperty.call(mappings, fieldKey)) continue;
-      const fieldDef = mappings[fieldKey];
+      const fieldDefUnknown = mappings[fieldKey] as unknown;
+      if (!isFieldMappingEntry(fieldDefUnknown)) continue;
+      const fieldDef = fieldDefUnknown;
       const innerMappings = fieldDef.mapping ?? {};
       for (const innerFieldName in innerMappings) {
         if (!Object.prototype.hasOwnProperty.call(innerMappings, innerFieldName)) continue;
@@ -178,7 +195,7 @@ export async function getTimestampFieldClusters(
       path: `/${encodeURIComponent(indexName)}/_mapping/field/*`,
     });
 
-    return parseTimestampAliasClusters(response.body);
+    return parseTimestampAliasClusters(response.body as IndicesGetFieldMappingResponse);
   } catch (error) {
     logger.error(`Error retrieving timestamp field clusters for index ${indexName}: ${error}`);
     throw error;
