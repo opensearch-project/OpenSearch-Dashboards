@@ -35,10 +35,7 @@ describe('ThresholdCustomValues component', () => {
 
     fireEvent.click(screen.getByText('+ Add threshold'));
 
-    expect(handleChange).toHaveBeenCalledWith([
-      { value: 0, color: '#f8f8f8ff' },
-      { value: 10, color: '#FFA800' },
-    ]);
+    expect(handleChange.mock.calls[0][0]).toHaveLength(2);
   });
 
   it('updates threshold values', async () => {

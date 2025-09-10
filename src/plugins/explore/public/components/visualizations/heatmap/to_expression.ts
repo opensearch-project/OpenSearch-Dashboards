@@ -32,13 +32,13 @@ export const createHeatmapWithBin = (
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
         bin: true,
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: { ...applyAxisStyling(xAxis, xAxisStyle), tickOpacity: 0 },
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
         bin: true,
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: { ...applyAxisStyling(yAxis, yAxisStyle), tickOpacity: 0 },
       },
       color: {
         field: colorField,
@@ -114,13 +114,13 @@ export const createRegularHeatmap = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle, true),
+        axis: { ...applyAxisStyling(xAxis, xAxisStyle, true), tickOpacity: 0 },
         // for regular heatmap, both x and y refer to categorical fields, we shall disable grid line for this case
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle, true),
+        axis: { ...applyAxisStyling(yAxis, yAxisStyle, true), tickOpacity: 0 },
       },
       color: {
         field: colorField,
