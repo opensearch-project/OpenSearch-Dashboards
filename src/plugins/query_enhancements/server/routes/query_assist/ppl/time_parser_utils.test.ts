@@ -7,7 +7,7 @@ import {
   normTimeString,
   parseTimeRangeXML,
   getTimestampFieldClusters,
-  getOtherTimeFields,
+  getUnselectedTimeFields,
 } from './time_parser_utils';
 import { loggingSystemMock } from '../../../../../../core/server/mocks';
 
@@ -357,7 +357,7 @@ describe('time_parser_utils', () => {
     });
   });
 
-  describe('getOtherTimeFields', () => {
+  describe('getUnselectedTimeFields', () => {
     let mockClient: any;
 
     beforeEach(() => {
@@ -374,7 +374,7 @@ describe('time_parser_utils', () => {
         ['updated_at', 'updated_at_alias'],
       ]);
 
-      const result = await getOtherTimeFields(
+      const result = await getUnselectedTimeFields(
         'test-index',
         'created_at',
         mockClient,
@@ -389,7 +389,7 @@ describe('time_parser_utils', () => {
     it('should return empty array when no other time fields exist', async () => {
       const mockGetTimestampFieldClusters = jest.fn().mockResolvedValue([['created_at']]);
 
-      const result = await getOtherTimeFields(
+      const result = await getUnselectedTimeFields(
         'test-index',
         'created_at',
         mockClient,
@@ -406,7 +406,7 @@ describe('time_parser_utils', () => {
         .fn()
         .mockResolvedValue([['created_at', 'created_at_alias'], ['updated_at']]);
 
-      const result = await getOtherTimeFields(
+      const result = await getUnselectedTimeFields(
         'test-index',
         'created_at',
         mockClient,
@@ -422,7 +422,7 @@ describe('time_parser_utils', () => {
       const mockGetTimestampFieldClusters = jest.fn().mockRejectedValue(new Error('API Error'));
 
       await expect(
-        getOtherTimeFields(
+        getUnselectedTimeFields(
           'test-index',
           'created_at',
           mockClient,
@@ -461,7 +461,7 @@ describe('time_parser_utils', () => {
 
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await getOtherTimeFields('test-index', 'created_at', mockClient, logger);
+      const result = await getUnselectedTimeFields('test-index', 'created_at', mockClient, logger);
 
       expect(result).toEqual(['updated_at']);
       expect(mockClient.transport.request).toHaveBeenCalledWith({

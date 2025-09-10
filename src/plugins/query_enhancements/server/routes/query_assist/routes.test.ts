@@ -11,7 +11,7 @@ import { opensearchClientMock } from '../../../../../core/server/opensearch/clie
 import { registerQueryAssistRoutes } from './routes';
 import { API } from '../../../common';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
-import { getOtherTimeFields, parseTimeRangeXML } from './ppl/time_parser_utils';
+import { getUnselectedTimeFields, parseTimeRangeXML } from './ppl/time_parser_utils';
 import { HttpService } from 'opensearch-dashboards/server/http';
 
 // Mock the dependencies
@@ -21,7 +21,9 @@ jest.mock('./ppl/time_parser_utils');
 const mockRequestAgentByConfig = requestAgentByConfig as jest.MockedFunction<
   typeof requestAgentByConfig
 >;
-const mockGetOtherTimeFields = getOtherTimeFields as jest.MockedFunction<typeof getOtherTimeFields>;
+const mockGetUnselectedTimeFields = getUnselectedTimeFields as jest.MockedFunction<
+  typeof getUnselectedTimeFields
+>;
 const mockGetAgentIdByConfig = getAgentIdByConfig as jest.MockedFunction<typeof getAgentIdByConfig>;
 const mockParseTimeRangeXML = parseTimeRangeXML as jest.MockedFunction<typeof parseTimeRangeXML>;
 
@@ -179,7 +181,7 @@ describe('Query Assist Routes', () => {
     beforeEach(() => {
       // Default mock for successful query generation
       mockRequestAgentByConfig.mockResolvedValue(mockQueryResponse);
-      mockGetOtherTimeFields.mockResolvedValue(['timestamp', 'created_at']);
+      mockGetUnselectedTimeFields.mockResolvedValue(['timestamp', 'created_at']);
     });
 
     it('should generate query successfully without time range', async () => {
@@ -244,7 +246,7 @@ describe('Query Assist Routes', () => {
 
       // Verify both agent calls were made
       expect(mockRequestAgentByConfig).toHaveBeenCalledTimes(2);
-      expect(mockGetOtherTimeFields).toHaveBeenCalledWith(
+      expect(mockGetUnselectedTimeFields).toHaveBeenCalledWith(
         'test_index',
         'timestamp',
         expect.any(Object),
@@ -305,8 +307,8 @@ describe('Query Assist Routes', () => {
       });
     });
 
-    it('should handle getOtherTimeFields failure gracefully', async () => {
-      mockGetOtherTimeFields.mockRejectedValue(new Error('Failed to get time fields'));
+    it('should handle getUnselectedTimeFields failure gracefully', async () => {
+      mockGetUnselectedTimeFields.mockRejectedValue(new Error('Failed to get time fields'));
 
       const httpSetup = await testSetup();
       const result = await supertest(httpSetup.server.listener)

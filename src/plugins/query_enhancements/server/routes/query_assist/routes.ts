@@ -10,7 +10,7 @@ import { isResponseError } from '../../..../../../../../core/server/opensearch/c
 import { API, ERROR_DETAILS } from '../../../common';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 import { createResponseBody } from './createResponse';
-import { parseTimeRangeXML, getOtherTimeFields } from './ppl/time_parser_utils';
+import { parseTimeRangeXML, getUnselectedTimeFields } from './ppl/time_parser_utils';
 
 export function registerQueryAssistRoutes(router: IRouter) {
   router.get(
@@ -105,7 +105,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
               : context.core.opensearch.client.asCurrentUser;
 
           try {
-            const otherTimeFields = await getOtherTimeFields(
+            const otherTimeFields = await getUnselectedTimeFields(
               request.body.index,
               String(request.body.time_field),
               client,

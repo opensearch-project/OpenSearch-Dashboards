@@ -194,7 +194,7 @@ export async function getTimestampFieldClusters(
  * @param getTimestampFieldClustersFn - Optional function to get timestamp field clusters (for testing)
  * @returns Promise<string[]> Other time fields
  */
-export async function getOtherTimeFields(
+export async function getUnselectedTimeFields(
   indexName: string,
   selectedTimeField: string,
   client: OpenSearchClient,
