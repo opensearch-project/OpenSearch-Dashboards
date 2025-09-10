@@ -452,26 +452,32 @@ export const verifyMonacoEditorContent = (queryString) => {
   cy.getElementByTestId('exploreQueryPanelEditor')
     .should('be.visible')
     .then(($editor) => {
-      // Try different selectors to get the text content
+      // Get text from all lines in the editor
       let text = '';
 
-      const viewLine = $editor.find('.view-line').first();
-      if (viewLine.length > 0) {
-        text = viewLine.text();
+      const viewLines = $editor.find('.view-line');
+      if (viewLines.length > 0) {
+        // Collect text from all lines
+        const allLinesText = viewLines
+          .toArray()
+          .map((line) => Cypress.$(line).text())
+          .join(' ');
+        text = allLinesText;
       }
 
-      // Sanitize the text by normalizing whitespace characters
-      const sanitizeText = (str) => {
+      // Normalize the text by removing newlines and merging multiple spaces into single space
+      const normalizeText = (str) => {
         return str
-          .replace(/[\s\u00A0\u00B7\u2022\u2023\u25E6\u2043\u2219\u22C5\u30FB\u00B7.·]+/g, ' ')
+          .replace(/\n/g, ' ') // Remove newlines
+          .replace(/[\s\u00A0\u00B7\u2022\u2023\u25E6\u2043\u2219\u22C5\u30FB\u00B7.·]+/g, ' ') // Normalize whitespace characters and merge multiple spaces
           .trim();
       };
 
-      const sanitizedText = sanitizeText(text);
-      const sanitizedQuery = sanitizeText(queryString);
+      const normalizedText = normalizeText(text);
+      const normalizedQuery = normalizeText(queryString);
 
       expect(text).to.not.be.empty;
-      expect(sanitizedText).to.include(sanitizedQuery);
+      expect(normalizedText).to.include(normalizedQuery);
     });
 };
 
