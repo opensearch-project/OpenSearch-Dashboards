@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
+import { CriteriaWithPagination, EuiBasicTable, EuiCallOut } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
@@ -42,6 +42,8 @@ export const PatternsFlyoutEventTable = ({
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const timeFieldName = dataset?.timeFieldName;
 
+  const [fetchError, setFetchError] = useState<unknown | null>(null);
+
   if (!dataset || !patternsField || !timeFieldName)
     throw new Error('Dataset, patterns field, or time field is not appearing for event table');
 
@@ -53,51 +55,55 @@ export const PatternsFlyoutEventTable = ({
     /**
      * Below logic queries similar to how its done in query_actions
      */
-    const searchSource = await services.data.search.searchSource.create();
+    try {
+      const searchSource = await services.data.search.searchSource.create();
 
-    // fetch the dataView from the dataset.id, check cache for non-index patterns
-    const dataView = await services.data.dataViews.get(
-      dataset.id,
-      dataset.type !== 'INDEX_PATTERN'
-    );
-    const filters = services.data.query.filterManager.getFilters();
-    const size = services.uiSettings.get(SAMPLE_SIZE_SETTING);
+      // fetch the dataView from the dataset.id, check cache for non-index patterns
+      const dataView = await services.data.dataViews.get(
+        dataset.id,
+        dataset.type !== 'INDEX_PATTERN'
+      );
+      const filters = services.data.query.filterManager.getFilters();
+      const size = services.uiSettings.get(SAMPLE_SIZE_SETTING);
 
-    const querySource = getQueryWithSource(query);
+      const querySource = getQueryWithSource(query);
 
-    const modifiedQuerySource = {
-      ...querySource,
-      query: createSearchPatternQueryWithSlice(
-        querySource,
-        patternsField,
-        usingRegexPatterns,
-        patternString,
-        timeFieldName,
-        EVENT_TABLE_PAGE_SIZE,
-        page * EVENT_TABLE_PAGE_SIZE
-      ),
-    };
-
-    searchSource.setFields({
-      index: dataView,
-      size,
-      query: modifiedQuerySource,
-      highlightAll: true,
-      version: true,
-      filter: filters,
-    });
-
-    const results = await searchSource.fetch();
-    const rows = results.hits.hits;
-
-    const items: EventTableItem[] = rows.map((row) => {
-      return {
-        timestamp: row._source[timeFieldName],
-        event: row._source[patternsField],
+      const modifiedQuerySource = {
+        ...querySource,
+        query: createSearchPatternQueryWithSlice(
+          querySource,
+          patternsField,
+          usingRegexPatterns,
+          patternString,
+          timeFieldName,
+          EVENT_TABLE_PAGE_SIZE,
+          page * EVENT_TABLE_PAGE_SIZE
+        ),
       };
-    });
 
-    setFetchedItems(items);
+      searchSource.setFields({
+        index: dataView,
+        size,
+        query: modifiedQuerySource,
+        highlightAll: true,
+        version: true,
+        filter: filters,
+      });
+
+      const results = await searchSource.fetch();
+      const rows = results.hits.hits;
+
+      const items: EventTableItem[] = rows.map((row) => {
+        return {
+          timestamp: row._source[timeFieldName],
+          event: row._source[patternsField],
+        };
+      });
+
+      setFetchedItems(items);
+    } catch (error) {
+      setFetchError(error);
+    }
     setTableLoading(false);
   };
 
@@ -128,7 +134,11 @@ export const PatternsFlyoutEventTable = ({
     ];
   }, [timeFieldName, patternsField]);
 
-  return (
+  return fetchError ? (
+    <EuiCallOut title="Error fetching events" color="danger" iconType="alert">
+      {fetchError}
+    </EuiCallOut>
+  ) : (
     <EuiBasicTable
       aria-label={i18n.translate('explore.patterns.flyout.eventTable', {
         defaultMessage: 'Pattern event table',
