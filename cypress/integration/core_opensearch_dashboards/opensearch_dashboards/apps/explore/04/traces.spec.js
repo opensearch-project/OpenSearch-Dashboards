@@ -130,7 +130,9 @@ const traceTestSuite = () => {
       it('should load trace details page with correct structure', () => {
         // Verify page loads with trace ID in title
         cy.url().should('include', 'traceDetails');
-        cy.get('h1').should('contain', 'Trace:');
+        cy.getElementByTestId('headerApplicationTitle').contains(
+          'Trace: 68b0ad76fc05c5a5f5e3738d42b8a735'
+        );
 
         // Verify Timeline tab is active by default
         cy.get('button[role="tab"][aria-selected="true"]').should('contain', 'Timeline');
