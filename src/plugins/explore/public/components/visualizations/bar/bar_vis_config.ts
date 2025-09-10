@@ -25,6 +25,7 @@ export interface BarChartStyleControls {
   // Basic controls
   addLegend: boolean;
   legendPosition: Positions;
+  legendShape?: 'circle' | 'square';
   tooltipOptions: TooltipOptions;
 
   // Bar specific controls
@@ -113,7 +114,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       axisRole: AxisRole.Y,
     },
