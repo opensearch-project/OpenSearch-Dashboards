@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { Threshold } from '../../types';
 import { useDebouncedValue, useDebouncedNumericValue } from '../../utils/use_debounced_value';
+import { getColors } from '../../theme/default_colors';
 
 export interface RangeProps {
   id: number;
@@ -22,6 +23,15 @@ export interface RangeProps {
   onChange: (index: number, value: Threshold) => void;
   onDelete: (index: number) => void;
 }
+
+const colors = getColors();
+const THRESHOLD_COLORS = [
+  colors.statusGreen,
+  colors.statusYellow,
+  colors.statusOrange,
+  colors.statusRed,
+  colors.statusBlue,
+];
 
 export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) => {
   const [thresholdValue, setThresholdValue] = useDebouncedNumericValue(value.value, (val) =>
@@ -46,7 +56,12 @@ export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) =
       data-test-subj={`exploreVisThreshold-${id}`}
     >
       <EuiFlexItem>
-        <EuiColorPicker color={color} onChange={setDebouncedColor} compressed />
+        <EuiColorPicker
+          swatches={THRESHOLD_COLORS}
+          color={color}
+          onChange={setDebouncedColor}
+          compressed
+        />
       </EuiFlexItem>
 
       <EuiFlexItem grow={true}>
@@ -100,7 +115,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   const handleAddRange = () => {
     const curRangeLength = ranges.length;
     const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 10 : 0;
-    const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength) };
+    const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength + 1) };
 
     const updated = [...ranges, newRange];
     const sorted = updated.sort((a, b) => a.value - b.value);
@@ -109,10 +124,8 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   };
 
   const getNextColor = (rangesLength: number): string => {
-    // TODO: update to use the colors from color palette
-    const colors = ['#54B399', '#FFA800', '#DB0000', '#6092C0', '#D36086', '#9170B8'];
-    const index = rangesLength % colors.length;
-    return colors[index];
+    const index = rangesLength % THRESHOLD_COLORS.length;
+    return THRESHOLD_COLORS[index];
   };
 
   const handleDeleteRange = (index: number) => {
@@ -142,7 +155,12 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
         data-test-subj="exploreVisThresholdBaseColor"
       >
         <EuiFlexItem>
-          <EuiColorPicker color={localBaseColor} onChange={setLocalBaseColor} compressed />
+          <EuiColorPicker
+            swatches={THRESHOLD_COLORS}
+            color={localBaseColor}
+            onChange={setLocalBaseColor}
+            compressed
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={true}>

@@ -8,16 +8,17 @@ import React from 'react';
 import { EuiButtonGroup, EuiFormRow, EuiRange, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { LineMode } from './line_vis_config';
 
 export type LineStyle = 'both' | 'line' | 'dots';
 
 interface BasicVisOptionsProps {
   addTimeMarker: boolean;
   lineStyle: LineStyle;
-  lineMode: string;
+  lineMode: LineMode;
   lineWidth: number;
   onAddTimeMarkerChange: (addTimeMarker: boolean) => void;
-  onLineModeChange: (lineMode: string) => void;
+  onLineModeChange: (lineMode: LineMode) => void;
   onLineWidthChange: (lineWidth: number) => void;
   onLineStyleChange: (style: LineStyle) => void;
   shouldShowTimeMarker?: boolean;
@@ -44,7 +45,7 @@ export const LineExclusiveVisOptions = ({
     { min: 1, max: 10, defaultValue: 2 }
   );
 
-  const lineModeOptions = [
+  const lineModeOptions: Array<{ value: LineMode; text: string }> = [
     { value: 'straight', text: 'Straight' },
     { value: 'smooth', text: 'Smooth' },
     { value: 'stepped', text: 'Stepped' },
@@ -116,7 +117,7 @@ export const LineExclusiveVisOptions = ({
             'data-test-subj': `lineMode-${option.value}`,
           }))}
           idSelected={lineMode}
-          onChange={onLineModeChange}
+          onChange={(id) => onLineModeChange(id as LineMode)}
           buttonSize="compressed"
         />
       </EuiFormRow>

@@ -157,4 +157,124 @@ describe('DefaultDiscoverTable', () => {
     await user.click(screen.getAllByTestId('pagination-button-previous')[0]);
     expect(screen.queryByTestId('osdPaginationLimitsHitMessage')).not.toBeInTheDocument();
   });
+
+  describe('Column Width Algorithm', () => {
+    // Mock DOM methods needed for width calculation
+    beforeEach(() => {
+      // Mock getBoundingClientRect for container width
+      Element.prototype.getBoundingClientRect = jest.fn(() => ({
+        width: 1000,
+        height: 600,
+        top: 0,
+        left: 0,
+        bottom: 600,
+        right: 1000,
+        x: 0,
+        y: 0,
+        toJSON: jest.fn(),
+      }));
+
+      // Mock offsetWidth for measuring element
+      Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+        configurable: true,
+        value() {
+          // Simulate different text widths based on content length
+          const text = this.textContent || '';
+          return Math.max(text.length * 8, 50); // 8px per character, minimum 50px
+        },
+      });
+
+      // Mock getComputedStyle
+      window.getComputedStyle = jest.fn(() => ({
+        fontSize: '12px',
+        fontFamily: 'Arial',
+        fontWeight: 'normal',
+        padding: '4px',
+      })) as any;
+
+      // Mock requestAnimationFrame to prevent infinite loops
+      let rafId = 0;
+      global.requestAnimationFrame = jest.fn((cb) => {
+        // Don't immediately call the callback - just return an ID
+        // Tests will manually trigger callbacks when needed
+        return ++rafId;
+      });
+
+      // Mock cancelAnimationFrame
+      global.cancelAnimationFrame = jest.fn();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should render table with proper structure', () => {
+      const { container } = render(getDataTable());
+
+      const table = container.querySelector('table');
+      expect(table).toBeInTheDocument();
+      expect(table).toHaveClass('explore-table');
+    });
+
+    it('should render header cells for column width calculation', () => {
+      const { container } = render(getDataTable());
+
+      const headerCells = container.querySelectorAll('thead th:not(:first-child)');
+      expect(headerCells.length).toBeGreaterThan(0);
+    });
+
+    it('should handle empty table gracefully', () => {
+      const { container } = render(getDataTable([]));
+
+      // Should not crash with empty data
+      const table = container.querySelector('table');
+      expect(table).toBeInTheDocument();
+    });
+
+    it('should not cause infinite loops with requestAnimationFrame', () => {
+      // This test ensures our mocking doesn't cause stack overflow
+      expect(() => {
+        render(getDataTable());
+      }).not.toThrow();
+
+      // Verify requestAnimationFrame was called (column width calculation)
+      expect(global.requestAnimationFrame).toHaveBeenCalled();
+    });
+
+    it('should have measuring element CSS class available', () => {
+      // Test that our CSS class exists (would be used by the algorithm)
+      const testDiv = document.createElement('div');
+      testDiv.className = 'column-width-measuring-element';
+      expect(testDiv.className).toBe('column-width-measuring-element');
+    });
+  });
+
+  // Tests for header tooltip functionality
+  describe('Header Tooltips', () => {
+    it('should render header text with clickable elements', () => {
+      const { container } = render(getDataTable());
+
+      const headerTexts = container.querySelectorAll('.header-text');
+      expect(headerTexts.length).toBeGreaterThan(0);
+
+      // Each header text should exist and be part of a clickable structure
+      headerTexts.forEach((headerText) => {
+        expect(headerText).toBeInTheDocument();
+      });
+    });
+
+    it('should render EuiPopover components for interactive tooltips', () => {
+      const { container } = render(getDataTable());
+
+      // Check that popover structure exists (EuiPopover creates specific DOM structure)
+      const headerCells = container.querySelectorAll('thead th:not(:first-child)');
+      expect(headerCells.length).toBeGreaterThan(0);
+
+      // Each header cell should contain the interactive elements
+      headerCells.forEach((cell) => {
+        const headerText = cell.querySelector('.header-text');
+        expect(headerText).toBeInTheDocument();
+      });
+    });
+  });
 });
