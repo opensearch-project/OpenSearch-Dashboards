@@ -115,7 +115,8 @@ function isFieldMappingEntry(value: unknown): value is FieldMappingEntry {
 function parseTimestampAliasClusters(mappingResponse: IndicesGetFieldMappingResponse): string[][] {
   const clusterMap: Record<string, Set<string>> = {};
   const dateFields = new Set<string>();
-  // Step 1: Find all fields of type 'date' and 'date_nanos'
+  // Step 1: Find all fields of type 'date' and 'date_nanos', and record alias -> target pointers
+  const aliasPointers: Array<[string, string]> = [];
   for (const mappingIndexName in mappingResponse) {
     if (!Object.prototype.hasOwnProperty.call(mappingResponse, mappingIndexName)) continue;
     const { mappings } = mappingResponse[mappingIndexName];
@@ -123,45 +124,32 @@ function parseTimestampAliasClusters(mappingResponse: IndicesGetFieldMappingResp
       if (!Object.prototype.hasOwnProperty.call(mappings, fieldKey)) continue;
       const fieldDefUnknown = mappings[fieldKey] as unknown;
       if (!isFieldMappingEntry(fieldDefUnknown)) continue;
-      const fieldDef = fieldDefUnknown;
-      const innerMappings = fieldDef.mapping ?? {};
+      const fieldMappingEntry = fieldDefUnknown;
+      const innerMappings = fieldMappingEntry.mapping ?? {};
       for (const innerFieldName in innerMappings) {
         if (!Object.prototype.hasOwnProperty.call(innerMappings, innerFieldName)) continue;
-        const def = innerMappings[innerFieldName];
-        if (def.type === 'date' || def.type === 'date_nanos') {
-          dateFields.add(fieldDef.full_name);
+        const innerMappingsEntry = innerMappings[innerFieldName];
+        if (innerMappingsEntry.type === 'date' || innerMappingsEntry.type === 'date_nanos') {
+          dateFields.add(fieldMappingEntry.full_name);
           // Initialize cluster for this date field
-          if (!clusterMap[fieldDef.full_name]) {
-            clusterMap[fieldDef.full_name] = new Set([fieldDef.full_name]);
+          if (!clusterMap[fieldMappingEntry.full_name]) {
+            clusterMap[fieldMappingEntry.full_name] = new Set([fieldMappingEntry.full_name]);
           }
+        }
+        if (innerMappingsEntry.type === 'alias' && typeof innerMappingsEntry.path === 'string') {
+          // Record alias mapping for later processing
+          aliasPointers.push([fieldMappingEntry.full_name, innerMappingsEntry.path]);
         }
       }
     }
   }
-  // Step 2: Find all fields of type 'alias' that point to a date field
-  for (const mappingIndexName in mappingResponse) {
-    if (!Object.prototype.hasOwnProperty.call(mappingResponse, mappingIndexName)) continue;
-    const { mappings } = mappingResponse[mappingIndexName];
-    for (const fieldKey in mappings) {
-      if (!Object.prototype.hasOwnProperty.call(mappings, fieldKey)) continue;
-      const fieldDefUnknown = mappings[fieldKey] as unknown;
-      if (!isFieldMappingEntry(fieldDefUnknown)) continue;
-      const fieldDef = fieldDefUnknown;
-      const innerMappings = fieldDef.mapping ?? {};
-      for (const innerFieldName in innerMappings) {
-        if (!Object.prototype.hasOwnProperty.call(innerMappings, innerFieldName)) continue;
-        const def = innerMappings[innerFieldName];
-        if (def.type === 'alias' && typeof def.path === 'string') {
-          const targetField = def.path;
-          const aliasField = fieldDef.full_name;
-          if (dateFields.has(targetField)) {
-            if (!clusterMap[targetField]) {
-              clusterMap[targetField] = new Set([targetField]);
-            }
-            clusterMap[targetField].add(aliasField);
-          }
-        }
+  // Step 2: Process recorded alias pointers and map them to date fields
+  for (const [aliasField, targetField] of aliasPointers) {
+    if (dateFields.has(targetField)) {
+      if (!clusterMap[targetField]) {
+        clusterMap[targetField] = new Set([targetField]);
       }
+      clusterMap[targetField].add(aliasField);
     }
   }
   // Convert clusters from Set<string> to string[][]
