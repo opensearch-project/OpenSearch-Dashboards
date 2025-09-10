@@ -136,7 +136,7 @@ export const PatternsFlyoutEventTable = ({
 
   return fetchError ? (
     <EuiCallOut title="Error fetching events" color="danger" iconType="alert">
-      {fetchError}
+      {fetchError.toString()}
     </EuiCallOut>
   ) : (
     <EuiBasicTable

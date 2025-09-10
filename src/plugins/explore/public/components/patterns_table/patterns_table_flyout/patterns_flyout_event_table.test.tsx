@@ -195,4 +195,41 @@ describe('PatternsFlyoutEventTable', () => {
 
     consoleErrorSpy.mockRestore();
   });
+
+  it('renders error callout when fetch fails', async () => {
+    const mockError = {
+      message: 'Failed to fetch data',
+      statusCode: 500,
+      body: {
+        error: {
+          type: 'search_phase_execution_exception',
+          reason: 'Error executing search',
+        },
+      },
+      toString() {
+        return `Error: ${this.message} (${this.statusCode})`;
+      },
+    };
+
+    const mockSearchSourceInstance = {
+      setFields: jest.fn().mockReturnThis(),
+      fetch: jest.fn().mockRejectedValue(mockError),
+    };
+
+    mockServices.data.search.searchSource.create.mockResolvedValue(mockSearchSourceInstance);
+
+    render(
+      <PatternsFlyoutEventTable
+        patternString={mockPatternString}
+        totalItemCount={mockTotalItemCount}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Error fetching events')).toBeInTheDocument();
+      expect(screen.getByText(mockError.toString())).toBeInTheDocument();
+    });
+
+    expect(screen.queryByLabelText('Pattern event table')).not.toBeInTheDocument();
+  });
 });
