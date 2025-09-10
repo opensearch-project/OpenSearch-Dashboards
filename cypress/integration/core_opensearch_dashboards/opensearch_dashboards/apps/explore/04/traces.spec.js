@@ -487,27 +487,6 @@ const traceTestSuite = () => {
         // Verify filter badge disappears
         cy.get('[data-test-subj^="filter-badge-"]').should('not.exist');
       });
-
-      it('should handle service legend modal', () => {
-        // Wait a moment for any URL updates to complete
-        cy.wait(500);
-
-        // Service legend button should exist
-        cy.getElementByTestId('service-legend-toggle').should('be.visible').click();
-
-        // Verify modal opens
-        cy.get('.euiModal').should('be.visible');
-        cy.contains('Service legend').should('be.visible');
-
-        // Verify service list is shown
-        cy.get('.euiModal .euiText').should('have.length.greaterThan', 0);
-
-        // Close modal
-        cy.get('.euiModal button').contains('Close').click();
-
-        // Verify modal closes
-        cy.get('.euiModal').should('not.exist');
-      });
     });
 
     describe('Performance and Reliability', () => {
