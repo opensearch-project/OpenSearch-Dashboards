@@ -12,6 +12,7 @@ import {
   VisColumn,
   AxisColumnMappings,
   AxisSupportedStyles,
+  Threshold,
 } from '../types';
 
 export const applyAxisStyling = (
@@ -274,25 +275,12 @@ export const getTooltipFormat = (
  * Determines the color for a value based on a set of thresholds.
  * @param value - The value to evaluate (e.g., a number, string, or any type that can be converted to a number).
  * @param thresholds - Array of threshold objects with `value` (number) and `color` (string) properties.
- * @param options - Optional configuration object.
- * @param options.isNumeric - Function to determine if the value is valid for threshold comparison (defaults to checking if the value is a number).
- * @param options.defaultColor - Fallback color if no threshold matches (defaults to '#000000').
- * @returns The color string for the matching threshold, the default color, or undefined if no color applies.
+ * @returns The matched threshold
  */
 export function getThresholdByValue<T>(
   value: any,
-  thresholds?: Array<{ value: number; color: string }>,
-  options: {
-    isNumeric?: (value: any) => boolean;
-    defaultColor?: string;
-  } = {}
-): string | undefined {
-  const { isNumeric = (v: any) => !isNaN(Number(v)), defaultColor = '#000000' } = options;
-
-  if (!thresholds || !isNumeric(value)) {
-    return undefined;
-  }
-
+  thresholds: Threshold[] = []
+): Threshold | undefined {
   const numValue = Number(value);
   if (isNaN(numValue)) {
     return undefined;
@@ -304,9 +292,9 @@ export function getThresholdByValue<T>(
   // Find the first threshold where the value is greater than or equal to the threshold value
   for (const threshold of sortedThresholds) {
     if (numValue >= threshold.value) {
-      return threshold.color;
+      return threshold;
     }
   }
 
-  return defaultColor;
+  return undefined;
 }

@@ -120,12 +120,20 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
       const cellValue = Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
         ? filteredRows[rowIndex][columnId]
         : null;
-      const color =
-        columnCellType !== 'auto'
-          ? getThresholdByValue(cellValue, styleOptions?.thresholds, {
-              defaultColor: styleOptions?.baseColor,
-            })
-          : undefined;
+
+      let color: string | undefined;
+      if (
+        columnCellType !== 'auto' &&
+        styleOptions?.thresholds &&
+        styleOptions.thresholds.length > 0
+      ) {
+        const threshold = getThresholdByValue(cellValue, styleOptions.thresholds);
+        if (threshold) {
+          color = threshold.color;
+        } else {
+          color = styleOptions.baseColor;
+        }
+      }
 
       return (
         <CellValue
