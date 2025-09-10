@@ -126,14 +126,14 @@ const getLanguageSpecificConfig = (language, config) => {
     case QueryLanguages.PPL.name:
       return {
         initialCommands: [
-          { value: 'source', input: 's' },
+          { value: 'SOURCE', input: 's' },
           { value: '=' },
           { value: getDatasetName('data_logs_small_time_1', config.datasetType) },
           { value: '|' },
-          { value: 'where', input: 'w' },
+          { value: 'WHERE', input: 'w' },
         ],
         editorType: 'exploreQueryPanelEditor',
-        andOperator: 'and',
+        andOperator: 'AND',
       };
     default:
       throw new Error(`Unsupported language: ${language}`);
@@ -345,7 +345,7 @@ export const createQuery = (config, useKeyboard = false) => {
         const dataset = getDatasetName('data_logs_small_time_1', config.datasetType);
         selectSuggestion(dataset, useKeyboard);
         selectSuggestion('|', useKeyboard);
-        selectSuggestion('where', useKeyboard);
+        selectSuggestion('WHERE', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
         selectSuggestion('Development', useKeyboard);
