@@ -61,12 +61,12 @@ export function registerQueryAssistRoutes(router: IRouter) {
            * Current timestamp for the query context, used to infer time-based query ranges.
            * When not provided, will keep BWC and only return query without time range.
            */
-          current_time: schema.maybe(schema.nullable(schema.string())),
+          currentTime: schema.maybe(schema.nullable(schema.string())),
           /**
            * The time field selected by user, when creating index patterns.
            * When not provided, will keep BWC and only return query without time range.
            */
-          time_field: schema.maybe(schema.nullable(schema.string())),
+          timeField: schema.maybe(schema.nullable(schema.string())),
         }),
       },
     },
@@ -96,7 +96,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
 
         // Only execute time range parser if required parameters are provided
         let timeRangePromise: Promise<any> = Promise.resolve(null);
-        if (request.body.current_time && request.body.time_field) {
+        if (request.body.currentTime && request.body.timeField) {
           // Get the client for data source
           const client =
             // @ts-expect-error TS2339 TODO(ts-error): fixme
@@ -105,9 +105,9 @@ export function registerQueryAssistRoutes(router: IRouter) {
               : context.core.opensearch.client.asCurrentUser;
 
           try {
-            const otherTimeFields = await getUnselectedTimeFields(
+            const unselectedTimeFields = await getUnselectedTimeFields(
               request.body.index,
-              String(request.body.time_field),
+              String(request.body.timeField),
               client,
               logger
             );
@@ -119,9 +119,9 @@ export function registerQueryAssistRoutes(router: IRouter) {
               body: {
                 parameters: {
                   question: request.body.question,
-                  current_time_iso: request.body.current_time,
-                  time_field: request.body.time_field,
-                  other_time_fields: JSON.stringify(otherTimeFields).replace(/"/g, "'"),
+                  current_time_iso: request.body.currentTime,
+                  time_field: request.body.timeField,
+                  other_time_fields: JSON.stringify(unselectedTimeFields).replace(/"/g, "'"),
                 },
               },
               dataSourceId: request.body.dataSourceId,

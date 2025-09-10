@@ -231,8 +231,8 @@ describe('Query Assist Routes', () => {
           index: 'test_index',
           question: 'Show me documents from yesterday',
           language: 'PPL',
-          current_time: '2024-01-02T12:00:00Z',
-          time_field: 'timestamp',
+          currentTime: '2024-01-02T12:00:00Z',
+          timeField: 'timestamp',
         })
         .expect(200);
 
@@ -296,8 +296,8 @@ describe('Query Assist Routes', () => {
           index: 'test_index',
           question: 'Show me documents from yesterday',
           language: 'PPL',
-          current_time: '2024-01-02T12:00:00Z',
-          time_field: 'timestamp',
+          currentTime: '2024-01-02T12:00:00Z',
+          timeField: 'timestamp',
         })
         .expect(200);
 
@@ -317,8 +317,8 @@ describe('Query Assist Routes', () => {
           index: 'test_index',
           question: 'Show me documents from yesterday',
           language: 'PPL',
-          current_time: '2024-01-02T12:00:00Z',
-          time_field: 'timestamp',
+          currentTime: '2024-01-02T12:00:00Z',
+          timeField: 'timestamp',
         })
         .expect(200);
 
@@ -356,8 +356,8 @@ describe('Query Assist Routes', () => {
           index: 'test_index',
           question: 'Show me documents from yesterday',
           language: 'PPL',
-          current_time: '2024-01-02T12:00:00Z',
-          time_field: 'timestamp',
+          currentTime: '2024-01-02T12:00:00Z',
+          timeField: 'timestamp',
         })
         .expect(200);
 
