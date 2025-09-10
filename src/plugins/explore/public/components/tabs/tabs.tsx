@@ -51,6 +51,7 @@ export const ExploreTabs = () => {
           executeTabQuery({
             services,
             cacheKey: newTabCacheKey,
+            queryString: newTabCacheKey,
           })
         );
       }
