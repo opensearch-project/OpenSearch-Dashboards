@@ -105,12 +105,12 @@ export function registerQueryAssistRoutes(router: IRouter) {
               : context.core.opensearch.client.asCurrentUser;
 
           try {
-            const unselectedTimeFields = await getUnselectedTimeFields(
-              request.body.index,
-              request.body.timeField,
+            const unselectedTimeFields = await getUnselectedTimeFields({
+              indexName: request.body.index,
+              selectedTimeField: request.body.timeField,
               client,
-              logger
-            );
+              logger,
+            });
 
             // Call the time range parser agent with the retrieved fields
             timeRangePromise = requestAgentByConfig({

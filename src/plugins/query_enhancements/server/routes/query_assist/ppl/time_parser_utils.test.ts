@@ -374,13 +374,13 @@ describe('time_parser_utils', () => {
         ['updated_at', 'updated_at_alias'],
       ]);
 
-      const result = await getUnselectedTimeFields(
-        'test-index',
-        'created_at',
-        mockClient,
+      const result = await getUnselectedTimeFields({
+        indexName: 'test-index',
+        selectedTimeField: 'created_at',
+        client: mockClient,
         logger,
-        mockGetTimestampFieldClusters
-      );
+        getTimestampFieldClustersFn: mockGetTimestampFieldClusters,
+      });
 
       expect(result).toEqual(['updated_at', 'updated_at_alias']);
       expect(mockGetTimestampFieldClusters).toHaveBeenCalledWith('test-index', mockClient, logger);
@@ -389,13 +389,13 @@ describe('time_parser_utils', () => {
     it('should return empty array when no other time fields exist', async () => {
       const mockGetTimestampFieldClusters = jest.fn().mockResolvedValue([['created_at']]);
 
-      const result = await getUnselectedTimeFields(
-        'test-index',
-        'created_at',
-        mockClient,
+      const result = await getUnselectedTimeFields({
+        indexName: 'test-index',
+        selectedTimeField: 'created_at',
+        client: mockClient,
         logger,
-        mockGetTimestampFieldClusters
-      );
+        getTimestampFieldClustersFn: mockGetTimestampFieldClusters,
+      });
 
       expect(result).toEqual([]);
       expect(mockGetTimestampFieldClusters).toHaveBeenCalledWith('test-index', mockClient, logger);
@@ -406,13 +406,13 @@ describe('time_parser_utils', () => {
         .fn()
         .mockResolvedValue([['created_at', 'created_at_alias'], ['updated_at']]);
 
-      const result = await getUnselectedTimeFields(
-        'test-index',
-        'created_at',
-        mockClient,
+      const result = await getUnselectedTimeFields({
+        indexName: 'test-index',
+        selectedTimeField: 'created_at',
+        client: mockClient,
         logger,
-        mockGetTimestampFieldClusters
-      );
+        getTimestampFieldClustersFn: mockGetTimestampFieldClusters,
+      });
 
       expect(result).toEqual(['updated_at']);
       expect(mockGetTimestampFieldClusters).toHaveBeenCalledWith('test-index', mockClient, logger);
@@ -422,13 +422,13 @@ describe('time_parser_utils', () => {
       const mockGetTimestampFieldClusters = jest.fn().mockRejectedValue(new Error('API Error'));
 
       await expect(
-        getUnselectedTimeFields(
-          'test-index',
-          'created_at',
-          mockClient,
+        getUnselectedTimeFields({
+          indexName: 'test-index',
+          selectedTimeField: 'created_at',
+          client: mockClient,
           logger,
-          mockGetTimestampFieldClusters
-        )
+          getTimestampFieldClustersFn: mockGetTimestampFieldClusters,
+        })
       ).rejects.toThrow('API Error');
       expect(mockGetTimestampFieldClusters).toHaveBeenCalledWith('test-index', mockClient, logger);
     });
@@ -461,7 +461,12 @@ describe('time_parser_utils', () => {
 
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await getUnselectedTimeFields('test-index', 'created_at', mockClient, logger);
+      const result = await getUnselectedTimeFields({
+        indexName: 'test-index',
+        selectedTimeField: 'created_at',
+        client: mockClient,
+        logger,
+      });
 
       expect(result).toEqual(['updated_at']);
       expect(mockClient.transport.request).toHaveBeenCalledWith({

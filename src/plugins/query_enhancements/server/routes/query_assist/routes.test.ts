@@ -246,12 +246,12 @@ describe('Query Assist Routes', () => {
 
       // Verify both agent calls were made
       expect(mockRequestAgentByConfig).toHaveBeenCalledTimes(2);
-      expect(mockGetUnselectedTimeFields).toHaveBeenCalledWith(
-        'test_index',
-        'timestamp',
-        expect.any(Object),
-        expect.any(Object)
-      );
+      expect(mockGetUnselectedTimeFields).toHaveBeenCalledWith({
+        indexName: 'test_index',
+        selectedTimeField: 'timestamp',
+        client: expect.any(Object),
+        logger: expect.any(Object),
+      });
     });
 
     it('should handle unsupported language', async () => {

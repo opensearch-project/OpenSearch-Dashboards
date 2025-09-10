@@ -192,24 +192,33 @@ export async function getTimestampFieldClusters(
 
 /**
  * Get all time fields (flattened) in the index except the selected field
- * @param indexName - Index name
- * @param selectedTimeField - The selected time field
- * @param client - OpenSearch client
- * @param logger - Logger
- * @param getTimestampFieldClustersFn - Optional function to get timestamp field clusters (for testing)
+ * @param params - Parameters for retrieving unselected time fields
+ *   - indexName: Index name
+ *   - selectedTimeField: The selected time field
+ *   - client: OpenSearch client
+ *   - logger: Logger
+ *   - getTimestampFieldClustersFn: Optional function to get timestamp field clusters (for testing)
  * @returns Promise<string[]> Other time fields
  */
-export async function getUnselectedTimeFields(
-  indexName: string,
-  selectedTimeField: string,
-  client: OpenSearchClient,
-  logger: Logger,
+export interface GetUnselectedTimeFieldsParams {
+  indexName: string;
+  selectedTimeField: string;
+  client: OpenSearchClient;
+  logger: Logger;
   getTimestampFieldClustersFn?: (
     indexName: string,
     client: OpenSearchClient,
     logger: Logger
-  ) => Promise<string[][]>
-): Promise<string[]> {
+  ) => Promise<string[][]>;
+}
+
+export async function getUnselectedTimeFields({
+  indexName,
+  selectedTimeField,
+  client,
+  logger,
+  getTimestampFieldClustersFn,
+}: GetUnselectedTimeFieldsParams): Promise<string[]> {
   const getClusters = getTimestampFieldClustersFn || getTimestampFieldClusters;
   const allTimeFields = await getClusters(indexName, client, logger);
   return allTimeFields.filter((cluster) => !cluster.includes(selectedTimeField)).flat();
