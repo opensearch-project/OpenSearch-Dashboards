@@ -153,36 +153,45 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
-    HtmlAxisLabel.prototype.draw = function(box) {
-        this.plot.getPlaceholder().find('#' + this.axisName + 'Label').remove();
-        this.elem = $('<div id="' + this.axisName +
-                      'Label" " class="axisLabels" style="position:absolute;">'
-                      + this.opts.axisLabel + '</div>');
-        this.plot.getPlaceholder().append(this.elem);
-        if (this.opts.axisLabelColour) {
-            this.elem.css('color', this.opts.axisLabelColour);
-        }
-        if (this.position == 'top') {
-            this.elem.css('left', box.left + box.width/2 - this.labelWidth/2 +
-                          'px');
-            this.elem.css('top', box.top + 'px');
-        } else if (this.position == 'bottom') {
-            this.elem.css('left', box.left + box.width/2 - this.labelWidth/2 +
-                          'px');
-            this.elem.css('top', box.top + box.height - this.labelHeight +
-                          'px');
-        } else if (this.position == 'left') {
-            this.elem.css('top', box.top + box.height/2 - this.labelHeight/2 +
-                          'px');
-            this.elem.css('left', box.left + 'px');
-        } else if (this.position == 'right') {
-            this.elem.css('top', box.top + box.height/2 - this.labelHeight/2 +
-                          'px');
-            this.elem.css('left', box.left + box.width - this.labelWidth +
-                          'px');
-        }
-    };
+    HtmlAxisLabel.prototype.draw = function (box) {
+      const sanitizedAxisName = dompurify
+        .sanitize(this.axisName, {
+          ALLOWED_TAGS: [],
+          ALLOWED_ATTR: [],
+        })
+        .replace(/[^a-zA-Z0-9_-]/g, '');
 
+      this.plot
+        .getPlaceholder()
+        .find('#' + sanitizedAxisName + 'Label')
+        .remove();
+
+      const sanitizedLabel = dompurify.sanitize(this.opts.axisLabel);
+
+      this.elem = $('<div>')
+        .attr('id', sanitizedAxisName + 'Label')
+        .addClass('axisLabels')
+        .css('position', 'absolute')
+        .html(sanitizedLabel);
+
+      this.plot.getPlaceholder().append(this.elem);
+      if (this.opts.axisLabelColour) {
+        this.elem.css('color', this.opts.axisLabelColour);
+      }
+      if (this.position == 'top') {
+        this.elem.css('left', box.left + box.width / 2 - this.labelWidth / 2 + 'px');
+        this.elem.css('top', box.top + 'px');
+      } else if (this.position == 'bottom') {
+        this.elem.css('left', box.left + box.width / 2 - this.labelWidth / 2 + 'px');
+        this.elem.css('top', box.top + box.height - this.labelHeight + 'px');
+      } else if (this.position == 'left') {
+        this.elem.css('top', box.top + box.height / 2 - this.labelHeight / 2 + 'px');
+        this.elem.css('left', box.left + 'px');
+      } else if (this.position == 'right') {
+        this.elem.css('top', box.top + box.height / 2 - this.labelHeight / 2 + 'px');
+        this.elem.css('left', box.left + box.width - this.labelWidth + 'px');
+      }
+    };
 
     CssTransformAxisLabel.prototype = new HtmlAxisLabel();
     CssTransformAxisLabel.prototype.constructor = CssTransformAxisLabel;
@@ -257,19 +266,35 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return offsets;
     };
 
-    CssTransformAxisLabel.prototype.draw = function(box) {
-        this.plot.getPlaceholder().find("." + this.axisName + "Label").remove();
-        var offsets = this.calculateOffsets(box);
-        this.elem = $('<div class="axisLabels ' + this.axisName +
-                      'Label" style="position:absolute; ' +
-                      this.transforms(offsets.degrees, offsets.x, offsets.y) +
-                      '">' + this.opts.axisLabel + '</div>');
-        if (this.opts.axisLabelColour) {
-            this.elem.css('color', this.opts.axisLabelColour);
-        }
-        this.plot.getPlaceholder().append(this.elem);
-    };
+    CssTransformAxisLabel.prototype.draw = function (box) {
+      const sanitizedAxisName = dompurify
+        .sanitize(this.axisName, {
+          ALLOWED_TAGS: [],
+          ALLOWED_ATTR: [],
+        })
+        .replace(/[^a-zA-Z0-9_-]/g, '');
 
+      this.plot
+        .getPlaceholder()
+        .find('.' + sanitizedAxisName + 'Label')
+        .remove();
+
+      var offsets = this.calculateOffsets(box);
+      const sanitizedLabel = dompurify.sanitize(this.opts.axisLabel);
+
+      // Create the element with sanitized values
+      this.elem = $('<div>')
+        .addClass('axisLabels ' + sanitizedAxisName + 'Label')
+        .css('position', 'absolute')
+        .css('transform', this.transforms(offsets.degrees, offsets.x, offsets.y))
+        .html(sanitizedLabel);
+
+      if (this.opts.axisLabelColour) {
+        this.elem.css('color', this.opts.axisLabelColour);
+      }
+
+      this.plot.getPlaceholder().append(this.elem);
+    };
 
     IeTransformAxisLabel.prototype = new CssTransformAxisLabel();
     IeTransformAxisLabel.prototype.constructor = IeTransformAxisLabel;

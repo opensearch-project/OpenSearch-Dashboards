@@ -198,8 +198,8 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
                     {hasError
-                      ? i18n.translate('explore.spanOverviewTab.fault', {
-                          defaultMessage: 'Fault',
+                      ? i18n.translate('explore.spanOverviewTab.error', {
+                          defaultMessage: 'Error',
                         })
                       : i18n.translate('explore.spanOverviewTab.ok', {
                           defaultMessage: 'OK',
