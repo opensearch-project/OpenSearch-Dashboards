@@ -5,6 +5,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
+import { selectQueryStatusMapByKey } from '../../../../application/utils/state_management/selectors';
 import { RootState } from '../../../../application/utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../application/utils/state_management/types';
 import { CanvasPanel } from '../../../panel/canvas_panel';
@@ -14,7 +15,10 @@ import { LoadingSpinner } from '../../../../application/legacy/discover/applicat
 import { DiscoverNoResults } from '../../../../application/legacy/discover/application/components/no_results/no_results';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
-import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
+import {
+  executeQueries,
+  prepareDataTableCacheKey,
+} from '../../../../application/utils/state_management/actions/query_actions';
 import { DiscoverChartContainer } from '../../../../components/chart/discover_chart_container';
 import { useDatasetContext } from '../../../../application/context';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
@@ -33,8 +37,12 @@ export const BottomRightContainer = () => {
     }
   };
 
+  const query = useSelector((state: RootState) => state.query);
   const status = useSelector((state: RootState) => {
     return state.queryEditor.overallQueryStatus.status || QueryExecutionStatus.UNINITIALIZED;
+  });
+  const dataTableStatus = useSelector((state: RootState) => {
+    return selectQueryStatusMapByKey(state, prepareDataTableCacheKey(query))?.status;
   });
 
   if (dataset == null) {
@@ -69,7 +77,7 @@ export const BottomRightContainer = () => {
     );
   }
 
-  if (status === QueryExecutionStatus.LOADING) {
+  if (status === QueryExecutionStatus.LOADING && dataTableStatus === QueryExecutionStatus.LOADING) {
     return (
       <CanvasPanel>
         <LoadingSpinner />
@@ -77,8 +85,12 @@ export const BottomRightContainer = () => {
     );
   }
 
-  // Errors will be handled individually by each tab
-  if (status === QueryExecutionStatus.READY || status === QueryExecutionStatus.ERROR) {
+  if (
+    dataTableStatus === QueryExecutionStatus.READY ||
+    dataTableStatus === QueryExecutionStatus.ERROR ||
+    status === QueryExecutionStatus.READY ||
+    status === QueryExecutionStatus.ERROR
+  ) {
     return (
       <>
         {flavorId !== ExploreFlavor.Traces && <DiscoverChartContainer />}

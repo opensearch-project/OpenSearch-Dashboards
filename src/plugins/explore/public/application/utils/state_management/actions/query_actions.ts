@@ -64,6 +64,13 @@ export const defaultPrepareQueryString = (query: Query): string => {
 };
 
 /**
+ * Prepare cache key for data table queries (no aggregations)
+ */
+export const prepareDataTableCacheKey = (query: Query): string => {
+  return `datatable:${defaultPrepareQueryString(query)}`;
+};
+
+/**
  * Default results processor for tabs
  * Processes raw hits to calculate field counts and optionally includes histogram data
  * Also updates topQueryValues for string fields to improve autocomplete performance
@@ -182,7 +189,7 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
 };
 
 /**
- * Enhanced executeQueries orchestrator (simplified - no cache logic)
+ * Enhanced executeQueries orchestrator - executes queries independently without blocking
  */
 export const executeQueries = createAsyncThunk<
   void,
@@ -199,6 +206,44 @@ export const executeQueries = createAsyncThunk<
   }
 
   const defaultCacheKey = defaultPrepareQueryString(query);
+  // Use separate cache keys for data table and histogram
+  const dataTableCacheKey = prepareDataTableCacheKey(query);
+  const histogramCacheKey = defaultCacheKey;
+
+  // Check what needs execution for core queries
+  const needsDataTableQuery = !results[dataTableCacheKey];
+  const needsHistogramQuery = !results[histogramCacheKey];
+
+  const promises = [];
+
+  // Execute query without aggregations
+  if (needsDataTableQuery) {
+    promises.push(
+      dispatch(
+        executeDataTableQuery({
+          services,
+          cacheKey: dataTableCacheKey,
+          queryString: defaultPrepareQueryString(query),
+        })
+      )
+    );
+  }
+
+  if (needsHistogramQuery) {
+    const interval = state.legacy?.interval;
+    promises.push(
+      dispatch(
+        executeHistogramQuery({
+          services,
+          cacheKey: histogramCacheKey,
+          queryString: defaultPrepareQueryString(query),
+          interval,
+        })
+      )
+    );
+  }
+
+  // Handle tab queries as before (keeping existing tab logic)
   const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
   let visualizationTabPrepareQuery = defaultPrepareQueryString;
   if (visualizationTab?.prepareQuery) {
@@ -223,7 +268,6 @@ export const executeQueries = createAsyncThunk<
   }
 
   // Check what needs execution
-  const needsDefaultQuery = !results[defaultCacheKey];
   const needsVisualizationTabQuery =
     visualizationTabCacheKey !== defaultCacheKey && !results[visualizationTabCacheKey];
   const needsActiveTabQuery =
@@ -231,29 +275,14 @@ export const executeQueries = createAsyncThunk<
     activeTabCacheKey !== defaultCacheKey &&
     !results[activeTabCacheKey];
 
-  const promises = [];
-
-  // Execute default query for histogram/sidebar
-  if (needsDefaultQuery) {
-    const interval = state.legacy?.interval;
-    promises.push(
-      dispatch(
-        executeHistogramQuery({
-          services,
-          cacheKey: defaultCacheKey,
-          interval, // Pass interval from Redux state
-        })
-      )
-    );
-  }
-
-  // Execute visualization tab query for dynamic tab selection
+  // Execute visualization tab query independently
   if (needsVisualizationTabQuery) {
     promises.push(
       dispatch(
         executeTabQuery({
           services,
           cacheKey: visualizationTabCacheKey,
+          queryString: visualizationTabCacheKey, // For tabs, cache key IS the query string
         })
       )
     );
@@ -266,6 +295,7 @@ export const executeQueries = createAsyncThunk<
         executeTabQuery({
           services,
           cacheKey: activeTabCacheKey,
+          queryString: activeTabCacheKey, // For tabs, cache key IS the query string
         })
       )
     );
@@ -282,6 +312,7 @@ const executeQueryBase = async (
   params: {
     services: ExploreServices;
     cacheKey: string;
+    queryString: string;
     includeHistogram: boolean;
     interval?: string;
     avoidDispatchingError?: (error: any, cacheKey: string) => boolean;
@@ -291,7 +322,14 @@ const executeQueryBase = async (
     dispatch: any;
   }
 ) => {
-  const { services, cacheKey, includeHistogram, interval, avoidDispatchingError } = params;
+  const {
+    services,
+    cacheKey,
+    queryString,
+    includeHistogram,
+    interval,
+    avoidDispatchingError,
+  } = params;
   const { getState, dispatch } = thunkAPI;
 
   if (!services) {
@@ -350,7 +388,7 @@ const executeQueryBase = async (
     const preparedQueryObject = {
       ...query,
       dataset,
-      query: cacheKey,
+      query: queryString,
     };
 
     let searchSource;
@@ -530,6 +568,7 @@ export const executeHistogramQuery = createAsyncThunk<
   {
     services: ExploreServices;
     cacheKey: string;
+    queryString: string;
     interval?: string;
   },
   { state: RootState }
@@ -551,6 +590,7 @@ export const executeTabQuery = createAsyncThunk<
   {
     services: ExploreServices;
     cacheKey: string;
+    queryString: string;
   },
   { state: RootState }
 >('query/executeTabQuery', async (params, thunkAPI) => {
@@ -581,6 +621,28 @@ export const executeTabQuery = createAsyncThunk<
   );
 
   return queryBaseResult;
+});
+
+/**
+ * Execute data table query without aggregations
+ */
+export const executeDataTableQuery = createAsyncThunk<
+  any,
+  {
+    services: ExploreServices;
+    cacheKey: string;
+    queryString: string;
+  },
+  { state: RootState }
+>('query/executeDataTableQuery', async (params, thunkAPI) => {
+  return executeQueryBase(
+    {
+      ...params,
+      includeHistogram: false, // Data table doesn't need histogram
+      interval: undefined, // Data table doesn't need intervals
+    },
+    thunkAPI
+  );
 });
 
 /**
