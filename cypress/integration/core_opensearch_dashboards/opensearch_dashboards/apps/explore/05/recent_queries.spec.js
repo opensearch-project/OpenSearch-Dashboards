@@ -21,6 +21,10 @@ import {
 } from '../../../../../../utils/apps/explore/recent_queries';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
+const normalizeQuery = (queryString) => {
+  return queryString.replace('\n', ' ').replace(/\s+/g, ' ');
+};
+
 const workspace = getRandomizedWorkspaceName();
 const runRecentQueryTests = () => {
   // TODO: Recent queries the way it is written is currently broken beause we are switching languages. we must refactor these test completely.
@@ -120,7 +124,7 @@ const runRecentQueryTests = () => {
             cy.getElementByTestIdLike('row-').each(($row, rowIndex) => {
               const expectedQuery =
                 currentBaseQuery + config.dataset + currentWhereStatement + reverseList[rowIndex];
-              expect($row.text()).to.contain(expectedQuery);
+              expect(normalizeQuery($row.text())).to.contain(expectedQuery);
             });
           });
         });

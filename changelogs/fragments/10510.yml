@@ -1,0 +1,2 @@
+fix:
+- Fix remaining ui settings tests ([#10510](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10510))

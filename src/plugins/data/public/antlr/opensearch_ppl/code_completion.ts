@@ -272,7 +272,7 @@ export const getSimplifiedPPLSuggestions = async ({
         ...literalKeywords.map((sk) => {
           const keywordDetails = PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
           if (keywordDetails && keywordDetails.isFunction) {
-            const functionName = sk.value.toLowerCase();
+            const functionName = sk.value;
             return {
               text: `${functionName}()`,
               type:
@@ -289,24 +289,23 @@ export const getSimplifiedPPLSuggestions = async ({
             };
           } else if (keywordDetails && !keywordDetails.isFunction) {
             return {
-              text: sk.value.toLowerCase(),
+              text: sk.value,
               type:
                 KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
                 monaco.languages.CompletionItemKind.Keyword,
-              insertText: getInsertText(sk.value.toLowerCase(), 'keyword', isInQuotes),
+              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
               detail: keywordDetails.type,
               sortText: keywordDetails.importance,
               documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           } else {
             return {
-              text: sk.value.toLowerCase(),
-              insertText: getInsertText(sk.value.toLowerCase(), 'keyword', isInQuotes),
+              text: sk.value,
+              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
               type: monaco.languages.CompletionItemKind.Keyword,
               detail: SuggestionItemDetailsTags.Keyword,
               // sortText is the only option to sort suggestions, compares strings
-              sortText:
-                PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value.toLowerCase(), // '98' used to devalue every other suggestion
+              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value, // '98' used to devalue every other suggestion
               documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           }

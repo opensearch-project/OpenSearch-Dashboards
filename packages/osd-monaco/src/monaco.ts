@@ -49,5 +49,6 @@ import 'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperation
 import 'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController'; // For autocomplete
 import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hoverContribution'; // For hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints'; // For parameter hints
+import 'monaco-editor/esm/vs/editor/contrib/format/browser/formatActions'; // For document formatting
 
 export { monaco };

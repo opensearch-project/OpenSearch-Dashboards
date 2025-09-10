@@ -49,7 +49,7 @@ describe('line_vis_config', () => {
 
       // Verify line style
       expect(defaults.lineStyle).toBe('both');
-      expect(defaults.lineMode).toBe('smooth');
+      expect(defaults.lineMode).toBe('straight');
       expect(defaults.lineWidth).toBe(2);
 
       // Verify tooltip options
@@ -84,7 +84,7 @@ describe('line_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',
@@ -104,7 +104,7 @@ describe('line_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',
@@ -147,7 +147,7 @@ describe('line_vis_config', () => {
           ],
           addTimeMarker: false,
           lineStyle: 'both' as LineStyle,
-          lineMode: 'smooth',
+          lineMode: 'smooth' as const,
           lineWidth: 1,
           tooltipOptions: { mode: 'all' } as TooltipOptions,
           grid: {} as GridOptions,

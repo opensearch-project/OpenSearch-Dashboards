@@ -9,6 +9,10 @@ const formatDateForUrl = (dateString) => {
   return date.toISOString();
 };
 
+const normalizeQuery = (queryString) => {
+  return queryString.replace('\n', ' ').replace(/\s+/g, ' ');
+};
+
 /**
  * Verifies share URL parameters based on query language
  * @param {string} url Share URL to verify
@@ -37,7 +41,7 @@ export const verifyShareUrl = (url, config, testData, datasourceName, queryStrin
   expect(q).to.include(datasourceName);
   expect(q).to.include(config.dataset);
   expect(q).to.include(config.datasetType);
-  expect(q).to.include(queryString);
+  expect(normalizeQuery(q)).to.include(queryString);
   if (config.language === QueryLanguages.PPL.name) {
     expect(q).to.include(`language:${config.language}`);
   }

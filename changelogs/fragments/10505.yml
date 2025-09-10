@@ -1,0 +1,2 @@
+fix:
+- Capitalize PPL Keywords in suggestions ([#10505](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10505))

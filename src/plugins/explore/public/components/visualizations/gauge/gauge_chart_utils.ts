@@ -76,7 +76,7 @@ export function generateArcExpression(startValue: number, endValue: number, fill
       y: { expr: 'centerY' },
       x: { expr: 'centerX' },
       radius: { expr: 'innerRadius * 0.98' },
-      radius2: { expr: 'innerRadius * 0.95' },
+      radius2: { expr: 'innerRadius * 0.96' },
       theta: {
         expr: `theta_single_arc + (theta2_single_arc - theta_single_arc) * (( ${startValue} - minValue) / (maxValue - minValue))`,
       },

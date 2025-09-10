@@ -48,7 +48,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
   exclusive: {
     pointShape: PointShape.CIRCLE,
     angle: 0,
-    filled: false,
+    filled: true,
   },
   // Standard axes
   standardAxes: [
