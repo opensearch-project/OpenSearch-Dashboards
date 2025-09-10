@@ -39,9 +39,12 @@ export const matchesFilter = (value: any, config: FilterConfig) => {
   const toNum = (v: any) => (v === null || v === '' ? NaN : Number(v));
 
   if (op === FilterOperator.Contains) {
-    const matchSearch = !hasSearch || sVal.toLowerCase().includes(sSearch.toLowerCase());
+    return !hasSearch || sVal.toLowerCase().includes(sSearch.toLowerCase());
+  }
+
+  if (op === FilterOperator.Equals) {
     const matchValues = !hasValues || config.values.includes(value);
-    return matchSearch && matchValues;
+    return matchValues;
   }
 
   if (op === FilterOperator.Equal || op === FilterOperator.NotEqual) {

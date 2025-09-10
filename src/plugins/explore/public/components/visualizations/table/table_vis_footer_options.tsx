@@ -30,34 +30,24 @@ export type TableFooterStyleControlsProps = StyleControlsProps<TableChartStyleCo
 
 const CALCULATIONS: CalculationMethod[] = ['total', 'last', 'mean', 'min', 'max'];
 
-interface FooterCalculationInput {
-  field?: unknown;
-  fields?: unknown[];
+interface FooterCalculation {
+  fields: string[];
   calculation: CalculationMethod;
 }
+
+const baseOptions = CALCULATIONS.map((method) => ({
+  value: method,
+  text: method.charAt(0).toUpperCase() + method.slice(1),
+}));
 
 export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
   styleOptions,
   onStyleChange,
   numericalColumns = [],
 }) => {
-  const normalizeCalculation = (c: FooterCalculationInput) => {
-    if (c.fields) {
-      return {
-        fields: c.fields.filter((f): f is string => typeof f === 'string'),
-        calculation: c.calculation,
-      };
-    }
-    return {
-      fields: c.field ? [String(c.field)] : [],
-      calculation: c.calculation,
-    };
-  };
-
-  const localCalculations = useMemo(
-    () => (styleOptions.footerCalculations || []).map(normalizeCalculation),
-    [styleOptions.footerCalculations]
-  );
+  const localCalculations = useMemo(() => styleOptions.footerCalculations || [], [
+    styleOptions.footerCalculations,
+  ]);
   const [popoverIndex, setPopoverIndex] = useState<number | null>(null);
 
   const updateStyleOption = useCallback(
@@ -70,16 +60,6 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
   const onShowFooterChange = useCallback(
     (checked: boolean) => {
       updateStyleOption('showFooter', checked);
-      if (!checked) {
-        updateStyleOption('footerCalculations', []);
-      }
-    },
-    [updateStyleOption]
-  );
-
-  const syncToParent = useCallback(
-    (next: Array<{ fields: string[]; calculation: CalculationMethod }>) => {
-      updateStyleOption('footerCalculations', next);
     },
     [updateStyleOption]
   );
@@ -88,9 +68,9 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
     (index: number, value: CalculationMethod) => {
       const next = [...localCalculations];
       next[index] = { ...next[index], calculation: value };
-      syncToParent(next);
+      updateStyleOption('footerCalculations', next);
     },
-    [localCalculations, syncToParent]
+    [localCalculations, updateStyleOption]
   );
 
   const onRemoveField = useCallback(
@@ -100,28 +80,28 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
         ...next[index],
         fields: next[index].fields.filter((f: string) => f !== field),
       };
-      syncToParent(next);
+      updateStyleOption('footerCalculations', next);
     },
-    [localCalculations, syncToParent]
+    [localCalculations, updateStyleOption]
   );
 
   const onAddField = useCallback(
     (index: number, field: string) => {
       const next = [...localCalculations];
       next[index] = { ...next[index], fields: [...next[index].fields, field] };
-      syncToParent(next);
+      updateStyleOption('footerCalculations', next);
       setPopoverIndex(null);
     },
-    [localCalculations, syncToParent]
+    [localCalculations, updateStyleOption]
   );
 
   const onRemoveCalculation = useCallback(
     (index: number) => {
       const next = [...localCalculations];
       next.splice(index, 1);
-      syncToParent(next);
+      updateStyleOption('footerCalculations', next);
     },
-    [localCalculations, syncToParent]
+    [localCalculations, updateStyleOption]
   );
 
   const onAddCalculation = useCallback(() => {
@@ -133,9 +113,7 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
       localCalculations.map((c) => c.calculation)
     );
 
-    const availableCalculation = CALCULATIONS.find((calc) => !usedCalculations.has(calc)) as
-      | CalculationMethod
-      | undefined;
+    const availableCalculation = CALCULATIONS.find((calc) => !usedCalculations.has(calc));
 
     if (!availableCalculation) return;
 
@@ -143,41 +121,32 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
       ...localCalculations,
       { fields: [available[0]], calculation: availableCalculation },
     ];
-    syncToParent(next);
-  }, [localCalculations, numericalColumns, syncToParent]);
+    updateStyleOption('footerCalculations', next);
+  }, [localCalculations, numericalColumns, updateStyleOption]);
 
-  const getCalculationOptions = useCallback(
-    (calc: { fields: string[]; calculation: CalculationMethod }) => {
-      const currentValue = calc.calculation;
-      const usedByOthers = new Set<CalculationMethod>(
-        localCalculations.filter((c) => c !== calc).map((c) => c.calculation)
-      );
-      const baseOptions: Array<{ value: CalculationMethod; text: string }> = [
-        { value: 'total', text: 'Total' },
-        { value: 'last', text: 'Last' },
-        { value: 'mean', text: 'Mean' },
-        { value: 'min', text: 'Min' },
-        { value: 'max', text: 'Max' },
-      ];
-      return baseOptions.filter(
-        (opt) => opt.value === currentValue || !usedByOthers.has(opt.value)
-      );
-    },
-    [localCalculations]
-  );
-
-  const getFieldOptionsForIndex = (index: number) => {
-    const selectedFields = localCalculations
-      .flatMap((calc) => calc.fields)
-      .filter((field): field is string => field !== null);
-
-    return numericalColumns
-      .filter((col) => !selectedFields.includes(col.column))
-      .map((col) => ({
-        id: col.column,
-        label: col.name || col.column,
-      }));
+  const getCalculationOptions = (
+    calc: { fields: string[]; calculation: CalculationMethod },
+    localCalc: FooterCalculation[]
+  ) => {
+    const currentValue = calc.calculation;
+    const usedByOthers = new Set<CalculationMethod>(
+      localCalc.filter((c) => c !== calc).map((c) => c.calculation)
+    );
+    return baseOptions.filter((opt) => opt.value === currentValue || !usedByOthers.has(opt.value));
   };
+
+  const fieldOptions = useMemo(() => {
+    const selectedFields = localCalculations.flatMap((c) => c.fields);
+
+    return localCalculations.map((_, index) =>
+      numericalColumns
+        .filter((col) => !selectedFields.includes(col.column))
+        .map((col) => ({
+          name: col.name || col.column,
+          onClick: () => onAddField(index, col.column),
+        }))
+    );
+  }, [localCalculations, numericalColumns, onAddField]);
 
   const canAddCalculation = useMemo(() => {
     const hasFreeField =
@@ -195,9 +164,9 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
 
     const changed = JSON.stringify(next) !== JSON.stringify(localCalculations);
     if (changed) {
-      syncToParent(next);
+      updateStyleOption('footerCalculations', next);
     }
-  }, [numericalColumns, localCalculations, syncToParent]);
+  }, [numericalColumns, localCalculations, updateStyleOption]);
 
   return (
     <StyleAccordion
@@ -234,7 +203,7 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
                       <EuiFlexItem>
                         <EuiSelect
                           compressed
-                          options={getCalculationOptions(calc)}
+                          options={getCalculationOptions(calc, localCalculations)}
                           value={calc.calculation}
                           onChange={(e) =>
                             onCalculationChange(index, e.target.value as CalculationMethod)
@@ -294,10 +263,7 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
                               panels={[
                                 {
                                   id: 0,
-                                  items: getFieldOptionsForIndex(index).map((option) => ({
-                                    name: option.label,
-                                    onClick: () => onAddField(index, option.id),
-                                  })),
+                                  items: fieldOptions[index],
                                 },
                               ]}
                             />

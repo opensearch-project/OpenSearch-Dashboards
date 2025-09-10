@@ -249,6 +249,7 @@ export type PercentageColor = 'standard' | 'inverted';
 
 export enum FilterOperator {
   Contains = 'contains',
+  Equals = 'equals',
   Equal = '=',
   NotEqual = '!=',
   GreaterThan = '>',

@@ -156,7 +156,7 @@ describe('TableFooterOptions', () => {
     expect(screen.getByTestId('visTableAddCalculation')).toBeInTheDocument();
   });
 
-  test('toggle Show Footer switch off: should call onStyleChange for showFooter and clear footerCalculations', async () => {
+  test('toggle Show Footer switch off: should call onStyleChange for showFooter', async () => {
     const props = makeProps();
     render(<TestWrapper initialProps={props} />);
 
@@ -164,7 +164,6 @@ describe('TableFooterOptions', () => {
     await userEvent.click(switchEl);
 
     expect(props.onStyleChange).toHaveBeenCalledWith({ showFooter: false });
-    expect(props.onStyleChange).toHaveBeenCalledWith({ footerCalculations: [] });
   });
 
   test('Add Calculation: adds first available field & calculation (total)', async () => {

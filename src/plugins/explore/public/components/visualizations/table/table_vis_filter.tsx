@@ -115,6 +115,15 @@ interface ColumnFilterContentProps {
   uniques: any[];
 }
 
+const numericOps = [
+  FilterOperator.Equal,
+  FilterOperator.NotEqual,
+  FilterOperator.GreaterThan,
+  FilterOperator.GreaterThanOrEqual,
+  FilterOperator.LessThan,
+  FilterOperator.LessThanOrEqual,
+] as const;
+
 export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   col,
   currentFilter,
@@ -123,14 +132,6 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
   onCancel,
   uniques,
 }) => {
-  const numericOps = [
-    FilterOperator.Equal,
-    FilterOperator.NotEqual,
-    FilterOperator.GreaterThan,
-    FilterOperator.GreaterThanOrEqual,
-    FilterOperator.LessThan,
-    FilterOperator.LessThanOrEqual,
-  ] as const;
   const [localOperator, setLocalOperator] = useState<FilterOperator>(() => {
     if (col.schema === 'numerical') {
       return numericOps.includes(currentFilter.operator as any)
@@ -154,14 +155,17 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
         { value: FilterOperator.LessThanOrEqual, text: '<=' },
       ];
     } else if (col.schema === 'categorical') {
-      return [{ value: FilterOperator.Contains, text: 'contains' }];
+      return [
+        { value: FilterOperator.Contains, text: 'contains' },
+        { value: FilterOperator.Equals, text: 'equals' },
+      ];
     }
     return [];
   }, [col.schema]);
 
   const showUniqueValues = useMemo(() => {
     if (col.schema === 'categorical') {
-      return localOperator === FilterOperator.Contains;
+      return localOperator === FilterOperator.Equals;
     } else if (col.schema === 'numerical') {
       return localOperator === FilterOperator.Equal || localOperator === FilterOperator.NotEqual;
     }
@@ -176,6 +180,8 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
         FilterOperator.LessThan,
         FilterOperator.LessThanOrEqual,
       ].includes(localOperator);
+    } else if (col.schema === 'categorical') {
+      return localOperator === FilterOperator.Contains;
     }
     return false;
   }, [col.schema, localOperator]);
@@ -228,13 +234,14 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
       col.schema === 'numerical' ? Number(v) : v
     );
     const needsInput =
-      col.schema === 'numerical' &&
-      [
-        FilterOperator.GreaterThan,
-        FilterOperator.GreaterThanOrEqual,
-        FilterOperator.LessThan,
-        FilterOperator.LessThanOrEqual,
-      ].includes(localOperator);
+      (col.schema === 'numerical' &&
+        [
+          FilterOperator.GreaterThan,
+          FilterOperator.GreaterThanOrEqual,
+          FilterOperator.LessThan,
+          FilterOperator.LessThanOrEqual,
+        ].includes(localOperator)) ||
+      (col.schema === 'categorical' && localOperator === FilterOperator.Contains);
 
     onApply({
       values: normalizedValues,
@@ -248,6 +255,8 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
       col.schema === 'numerical' &&
       (localOperator === FilterOperator.Equal || localOperator === FilterOperator.NotEqual)
     ) {
+      setLocalSelected(new Set(currentFilter.values));
+    } else if (col.schema === 'categorical' && localOperator === FilterOperator.Equals) {
       setLocalSelected(new Set(currentFilter.values));
     }
   }, [col.schema, localOperator, currentFilter.values]);
@@ -271,12 +280,21 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
           </EuiFlexItem>
           {showInput && (
             <EuiFlexItem grow={4}>
-              <EuiFieldNumber
-                compressed
-                placeholder="Enter value"
-                value={localSearch}
-                onChange={(e) => setLocalSearch(e.target.value)}
-              />
+              {col.schema === 'numerical' ? (
+                <EuiFieldNumber
+                  compressed
+                  placeholder="Enter value"
+                  value={localSearch}
+                  onChange={(e) => setLocalSearch(e.target.value)}
+                />
+              ) : (
+                <EuiFieldText
+                  compressed
+                  placeholder="Enter text to filter"
+                  value={localSearch}
+                  onChange={(e) => setLocalSearch(e.target.value)}
+                />
+              )}
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -292,33 +310,37 @@ export const ColumnFilterContent: React.FC<ColumnFilterContentProps> = ({
               fullWidth
             />
           </EuiFormRow>
-          <EuiFormRow>
-            <EuiPanel
-              paddingSize="s"
-              borderRadius="m"
-              hasShadow={false}
-              className="visTableColumnHeader_uniqueValuesPanel"
-            >
-              {filteredUniques.map((u) => (
+          {filteredUniques.length > 0 && (
+            <>
+              <EuiFormRow>
+                <EuiPanel
+                  paddingSize="s"
+                  borderRadius="m"
+                  hasShadow={false}
+                  className="visTableColumnHeader_uniqueValuesPanel"
+                >
+                  {filteredUniques.map((u) => (
+                    <EuiCheckbox
+                      key={String(u)}
+                      id={String(u)}
+                      label={String(u)}
+                      checked={localSelected.has(u)}
+                      onChange={(e) => handleToggleValue(u, e.target.checked)}
+                    />
+                  ))}
+                </EuiPanel>
+              </EuiFormRow>
+              <EuiFormRow>
                 <EuiCheckbox
-                  key={String(u)}
-                  id={String(u)}
-                  label={String(u)}
-                  checked={localSelected.has(u)}
-                  onChange={(e) => handleToggleValue(u, e.target.checked)}
+                  id="selectAll"
+                  label="Select All"
+                  checked={isSelectAllChecked}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  data-test-subj="selectAllCheckbox"
                 />
-              ))}
-            </EuiPanel>
-          </EuiFormRow>
-          <EuiFormRow>
-            <EuiCheckbox
-              id="selectAll"
-              label="Select All"
-              checked={isSelectAllChecked}
-              onChange={(e) => handleSelectAll(e.target.checked)}
-              data-test-subj="selectAllCheckbox"
-            />
-          </EuiFormRow>
+              </EuiFormRow>
+            </>
+          )}
         </>
       )}
       <EuiFormRow>

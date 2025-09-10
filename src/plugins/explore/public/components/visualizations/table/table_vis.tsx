@@ -118,7 +118,7 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
             : 'left'
           : alignment;
       const cellValue = Object.prototype.hasOwnProperty.call(filteredRows, rowIndex)
-        ? (filteredRows as any)[rowIndex][columnId]
+        ? filteredRows[rowIndex][columnId]
         : null;
       const color =
         columnCellType !== 'auto'
