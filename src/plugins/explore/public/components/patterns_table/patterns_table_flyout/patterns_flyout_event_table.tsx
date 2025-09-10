@@ -109,6 +109,9 @@ export const PatternsFlyoutEventTable = ({
 
   return (
     <EuiBasicTable
+      aria-label={i18n.translate('explore.patterns.flyout.eventTable', {
+        defaultMessage: 'Pattern event table',
+      })}
       items={fetchedItems}
       columns={[
         {
