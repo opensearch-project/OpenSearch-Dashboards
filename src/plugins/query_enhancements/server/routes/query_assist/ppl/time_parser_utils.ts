@@ -116,7 +116,7 @@ export async function getTimestampFieldClusters(
     // Call the mapping API to get all field details
     const response = await client.transport.request({
       method: 'GET',
-      path: `/${indexName}/_mapping/field/*`,
+      path: `/${encodeURIComponent(indexName)}/_mapping/field/*`,
     });
 
     /**
