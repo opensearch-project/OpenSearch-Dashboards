@@ -93,6 +93,65 @@ export function parseTimeRangeXML(
 }
 
 /**
+ * Parses the mapping response and aggregates clusters of date fields and their aliases.
+ * Each cluster contains the target date field and all its aliases.
+ *
+ * @param mappingResponse - The raw mapping response from OpenSearch
+ * @returns An array of clusters; each cluster is an array of strings where the first element is the target date field, followed by its aliases
+ */
+function parseTimestampAliasClusters(mappingResponse: any): string[][] {
+  const clusterMap: Record<string, Set<string>> = {};
+  const dateFields = new Set<string>();
+  // Step 1: Find all fields of type 'date' and 'date_nanos'
+  for (const mappingIndexName in mappingResponse) {
+    if (!Object.prototype.hasOwnProperty.call(mappingResponse, mappingIndexName)) continue;
+    const { mappings } = mappingResponse[mappingIndexName];
+    for (const fieldKey in mappings) {
+      if (!Object.prototype.hasOwnProperty.call(mappings, fieldKey)) continue;
+      const fieldDef = mappings[fieldKey];
+      const innerMappings = fieldDef.mapping ?? {};
+      for (const innerFieldName in innerMappings) {
+        if (!Object.prototype.hasOwnProperty.call(innerMappings, innerFieldName)) continue;
+        const def = innerMappings[innerFieldName];
+        if (def.type === 'date' || def.type === 'date_nanos') {
+          dateFields.add(fieldDef.full_name);
+          // Initialize cluster for this date field
+          if (!clusterMap[fieldDef.full_name]) {
+            clusterMap[fieldDef.full_name] = new Set([fieldDef.full_name]);
+          }
+        }
+      }
+    }
+  }
+  // Step 2: Find all fields of type 'alias' that point to a date field
+  for (const mappingIndexName in mappingResponse) {
+    if (!Object.prototype.hasOwnProperty.call(mappingResponse, mappingIndexName)) continue;
+    const { mappings } = mappingResponse[mappingIndexName];
+    for (const fieldKey in mappings) {
+      if (!Object.prototype.hasOwnProperty.call(mappings, fieldKey)) continue;
+      const fieldDef = mappings[fieldKey];
+      const innerMappings = fieldDef.mapping ?? {};
+      for (const innerFieldName in innerMappings) {
+        if (!Object.prototype.hasOwnProperty.call(innerMappings, innerFieldName)) continue;
+        const def = innerMappings[innerFieldName];
+        if (def.type === 'alias' && typeof def.path === 'string') {
+          const targetField = def.path;
+          const aliasField = fieldDef.full_name;
+          if (dateFields.has(targetField)) {
+            if (!clusterMap[targetField]) {
+              clusterMap[targetField] = new Set([targetField]);
+            }
+            clusterMap[targetField].add(aliasField);
+          }
+        }
+      }
+    }
+  }
+  // Convert clusters from Set<string> to string[][]
+  return Object.values(clusterMap).map((set) => Array.from(set));
+}
+
+/**
  * Retrieves clusters of timestamp fields (date type and their aliases) from an index using the OpenSearch mapping API
  *
  * @param indexName - The name of the index to query
@@ -118,65 +177,6 @@ export async function getTimestampFieldClusters(
       method: 'GET',
       path: `/${encodeURIComponent(indexName)}/_mapping/field/*`,
     });
-
-    /**
-     * Parses the mapping response and aggregates clusters of date fields and their aliases.
-     * Each cluster contains the target date field and all its aliases.
-     *
-     * @param mappingResponse - The raw mapping response from OpenSearch
-     * @returns An array of clusters; each cluster is an array of strings where the first element is the target date field, followed by its aliases
-     */
-    function parseTimestampAliasClusters(mappingResponse: any): string[][] {
-      const clusterMap: Record<string, Set<string>> = {};
-      const dateFields = new Set<string>();
-      // Step 1: Find all fields of type 'date' and 'date_nanos'
-      for (const mappingIndexName in mappingResponse) {
-        if (!Object.prototype.hasOwnProperty.call(mappingResponse, mappingIndexName)) continue;
-        const { mappings } = mappingResponse[mappingIndexName];
-        for (const fieldKey in mappings) {
-          if (!Object.prototype.hasOwnProperty.call(mappings, fieldKey)) continue;
-          const fieldDef = mappings[fieldKey];
-          const innerMappings = fieldDef.mapping ?? {};
-          for (const innerFieldName in innerMappings) {
-            if (!Object.prototype.hasOwnProperty.call(innerMappings, innerFieldName)) continue;
-            const def = innerMappings[innerFieldName];
-            if (def.type === 'date' || def.type === 'date_nanos') {
-              dateFields.add(fieldDef.full_name);
-              // Initialize cluster for this date field
-              if (!clusterMap[fieldDef.full_name]) {
-                clusterMap[fieldDef.full_name] = new Set([fieldDef.full_name]);
-              }
-            }
-          }
-        }
-      }
-      // Step 2: Find all fields of type 'alias' that point to a date field
-      for (const mappingIndexName in mappingResponse) {
-        if (!Object.prototype.hasOwnProperty.call(mappingResponse, mappingIndexName)) continue;
-        const { mappings } = mappingResponse[mappingIndexName];
-        for (const fieldKey in mappings) {
-          if (!Object.prototype.hasOwnProperty.call(mappings, fieldKey)) continue;
-          const fieldDef = mappings[fieldKey];
-          const innerMappings = fieldDef.mapping ?? {};
-          for (const innerFieldName in innerMappings) {
-            if (!Object.prototype.hasOwnProperty.call(innerMappings, innerFieldName)) continue;
-            const def = innerMappings[innerFieldName];
-            if (def.type === 'alias' && typeof def.path === 'string') {
-              const targetField = def.path;
-              const aliasField = fieldDef.full_name;
-              if (dateFields.has(targetField)) {
-                if (!clusterMap[targetField]) {
-                  clusterMap[targetField] = new Set([targetField]);
-                }
-                clusterMap[targetField].add(aliasField);
-              }
-            }
-          }
-        }
-      }
-      // Convert clusters from Set<string> to string[][]
-      return Object.values(clusterMap).map((set) => Array.from(set));
-    }
 
     return parseTimestampAliasClusters(response.body);
   } catch (error) {

@@ -107,7 +107,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
           try {
             const unselectedTimeFields = await getUnselectedTimeFields(
               request.body.index,
-              String(request.body.timeField),
+              request.body.timeField,
               client,
               logger
             );
