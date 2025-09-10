@@ -72,7 +72,9 @@ export const ExploreLogsChart = ({
     dispatch(setInterval(newInterval));
     dispatch(clearResultsByKey(cacheKey));
     dispatch(clearQueryStatusMapByKey(cacheKey));
-    dispatch(executeHistogramQuery({ services, cacheKey, interval: newInterval }));
+    dispatch(
+      executeHistogramQuery({ services, cacheKey, interval: newInterval, queryString: cacheKey })
+    );
   };
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
