@@ -5,14 +5,15 @@
 
 import { IFieldType, Query } from 'src/plugins/data/common';
 import {
+  CALCITE_DELIM_CONTENT,
+  CALCITE_DELIM_END,
   COUNT_FIELD,
+  DELIM_END,
   DELIM_START,
   MARK_END,
   MARK_START,
   PATTERNS_FIELD,
   SAMPLE_FIELD,
-  STD_DELIM_END,
-  UNIQ_DELIM_END,
 } from './constants';
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { ExploreServices } from '../../../types';
@@ -93,18 +94,6 @@ export const isValidFiniteNumber = (val: number) => {
  * and specialized delimiters (e.g., <*IP*>, <*DATETIME*>) to accommodate different types of dynamic content.
  */
 export const highlightLogUsingPattern = (log: string, pattern: string) => {
-  // go start off in the pattern string.
-  // look for a dynamic element, keeping every character before that dynamic element
-  // when we find dynamic element, add the prev chars in the accumulation
-  // add a <mark> to the accumulation.
-
-  // continue on the pattern string, keeping track of every char before next dynam. elem.
-  // when we reach dynam. elem., use the kept track of chars as our window.
-  // on the sample log, from where we left off, slide the window down until it matches.
-  // everything between first pointer and start of window is our dynam. elem. in the sample
-  // add sample dynam elem to accum. and close off with </mark>.
-  // add the contents of our window to the accum.
-
   // continue those last few steps until we reach the end.
 
   // two pointers for the sample log string and the pattern string
@@ -113,6 +102,9 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
 
   // an accumulator: string that we're building w/ <mark>
   let markedPattern = '';
+
+  // detect if this pattern has the format returned from calcite engine
+  let fromCalcite = false;
 
   try {
     while (currPatternPos < pattern.length) {
@@ -123,7 +115,7 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
       const prevPatternPos = currPatternPos;
       for (; currPatternPos < pattern.length; currPatternPos++) {
         // don't need to worry about currPatternPos + 2 going over pattern length, slice will handle it
-        const potentialDelim = pattern.slice(currPatternPos, currPatternPos + 2);
+        const potentialDelim = pattern.slice(currPatternPos, currPatternPos + 1);
 
         if (potentialDelim === DELIM_START) {
           break;
@@ -132,7 +124,7 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
 
       // grab the window of chars in the pattern before the delim. this will be a static element
       const preDelimWindow = pattern.slice(prevPatternPos, currPatternPos);
-      currPatternPos += 2; // found the delim start, stop right in the middle
+      currPatternPos += 1; // found the delim start, stop right in the middle
 
       // move down sample string, and check if the window matches at all
       const prevSampleLogPos = currSampleLogPos;
@@ -150,14 +142,19 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
       const dynamicElement = log.slice(prevSampleLogPos, currSampleLogPos);
 
       // below statement moves the patternPos up to the end of the delim
-      if (pattern[currPatternPos] === STD_DELIM_END) {
-        // standard delimiter, for <*>
+      if (pattern.slice(currPatternPos, currPatternPos + 5) === CALCITE_DELIM_CONTENT) {
+        currPatternPos += 5;
+        // move currPatternPos up until we hit '>'
+        while (currPatternPos < pattern.length && pattern[currPatternPos] !== CALCITE_DELIM_END) {
+          currPatternPos++;
+        }
         currPatternPos += 1;
+        fromCalcite = true;
       } else {
-        // for special delimiters, such as <*IP*> or <*DATETIME*>. ignores content of delim
+        // moves up to account for special delimiters, such as <*IP*> or <*DATETIME*>
         while (
           currPatternPos < pattern.length &&
-          pattern.slice(currPatternPos, currPatternPos + 2) !== UNIQ_DELIM_END
+          pattern.slice(currPatternPos, currPatternPos + 2) !== DELIM_END
         ) {
           currPatternPos++;
         }
