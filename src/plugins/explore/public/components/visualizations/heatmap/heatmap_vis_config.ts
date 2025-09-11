@@ -17,6 +17,7 @@ import {
   AggregationType,
   VisFieldType,
   TitleOptions,
+  ThresholdOptions,
 } from '../types';
 
 export interface HeatmapLabels {
@@ -51,6 +52,7 @@ export interface HeatmapChartStyleControls {
   switchAxes: boolean;
 
   titleOptions: TitleOptions;
+  thresholdOptions?: ThresholdOptions;
 }
 
 export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
@@ -78,6 +80,11 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
       overwriteColor: false,
       color: 'black',
     },
+  },
+
+  thresholdOptions: {
+    baseColor: '#9EE9FA',
+    thresholds: [],
   },
 
   // Standard axes

@@ -6,7 +6,14 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { MetricVisStyleControls } from './metric_vis_options';
-import { RangeValue, ColorSchemas, AxisRole, VisFieldType, PercentageColor } from '../types';
+import {
+  RangeValue,
+  ColorSchemas,
+  AxisRole,
+  VisFieldType,
+  PercentageColor,
+  ThresholdOptions,
+} from '../types';
 import { CalculationMethod } from '../utils/calculation';
 
 export type TextAlignment = 'auto' | 'center';
@@ -19,10 +26,13 @@ export interface MetricChartStyleControls {
   percentageSize?: number;
   useColor: boolean;
   showPercentage?: boolean;
-  colorSchema: ColorSchemas;
+  colorSchema?: ColorSchemas;
   valueCalculation?: CalculationMethod;
   percentageColor?: PercentageColor;
   customRanges?: RangeValue[];
+  thresholdOptions?: ThresholdOptions;
+  min?: number;
+  max?: number;
 }
 
 // TODO: refactor other type of chart to ensure the default style control object is properly typed
@@ -40,7 +50,10 @@ export const defaultMetricChartStyles: DefaultMetricChartStyleControls = {
   colorSchema: ColorSchemas.BLUES,
   valueCalculation: 'last',
   // add default range for metric
-  customRanges: [{ min: 0, max: 100 }],
+  thresholdOptions: {
+    baseColor: '#9EE9FA',
+    thresholds: [],
+  },
 };
 
 export const createMetricConfig = (): VisualizationType<'metric'> => ({

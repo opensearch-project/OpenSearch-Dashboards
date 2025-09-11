@@ -15,9 +15,8 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { ColorSchemas, ScaleType, RangeValue, AggregationType } from '../types';
+import { ColorSchemas, ScaleType, AggregationType } from '../types';
 import { getColorSchemas, getAggregationType } from '../utils/collections';
-import { CustomRange } from '../style_panel/custom_ranges';
 import { useDebouncedNumericValue, useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
@@ -184,26 +183,13 @@ export const HeatmapExclusiveVisOptions = ({
         <EuiSwitch
           compressed
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.useCustomRanges', {
-            defaultMessage: 'Use custom ranges',
+            defaultMessage: 'Use threshold values',
           })}
           disabled={styles.percentageMode || styles.scaleToDataBounds}
           checked={styles.useCustomRanges}
           onChange={(e) => updateExclusiveOption('useCustomRanges', e.target.checked)}
         />
       </EuiFormRow>
-
-      {styles.useCustomRanges && (
-        <>
-          <EuiSpacer size="s" />
-
-          <CustomRange
-            customRanges={styles.customRanges}
-            onCustomRangesChange={(ranges: RangeValue[]) => {
-              updateExclusiveOption('customRanges', ranges);
-            }}
-          />
-        </>
-      )}
     </StyleAccordion>
   );
 };

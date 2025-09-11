@@ -11,8 +11,9 @@ import {
   BucketOptions,
   AggregationType,
 } from '../types';
-
 import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
+import { BarChartStyleControls } from './bar_vis_config';
+import { transformThresholdLinesToThreshold } from '../style_panel/threshold/threshold_utils';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -127,4 +128,60 @@ export const buildTooltipEncoding = (
     encoding.title = axisStyle?.title?.text || `${axis?.name}(${aggregationType})`;
   }
   return encoding;
+};
+
+export const buildThresholdColorEncoding = (
+  numericalField: VisColumn | undefined,
+  styleOptions: Partial<BarChartStyleControls>
+) => {
+  const activeThresholds =
+    styleOptions?.thresholdLines && !styleOptions?.thresholdOptions?.thresholds
+      ? transformThresholdLinesToThreshold(styleOptions?.thresholdLines)
+      : styleOptions?.thresholdOptions?.thresholds ?? [];
+
+  const thresholdWithBase = [
+    { value: 0, color: styleOptions?.thresholdOptions?.baseColor ?? '#9EE9FA' },
+    ...activeThresholds,
+  ];
+
+  const colorDomain = thresholdWithBase.reduce((acc, val) => [...acc, val.value], [] as number[]);
+
+  const colorRange = thresholdWithBase.reduce((acc, val) => [...acc, val.color], [] as string[]);
+
+  // exclusive for single numerical bucket bar
+  if (!numericalField)
+    return {
+      aggregate: AggregationType.COUNT,
+      type: 'quantitative',
+      scale: {
+        type: 'threshold',
+        domain: colorDomain,
+        range: ['#d3d3d3', ...colorRange],
+      },
+      legend: styleOptions.addLegend
+        ? {
+            orient: styleOptions.legendPosition?.toLowerCase() || 'right',
+            title: 'Thresholds',
+          }
+        : null,
+    };
+
+  const colorLayer = {
+    aggregate: styleOptions?.bucket?.aggregationType,
+    field: numericalField?.column,
+    type: 'quantitative',
+    scale: {
+      type: 'threshold',
+      domain: colorDomain,
+      range: ['#d3d3d3', ...colorRange],
+    },
+    legend: styleOptions.addLegend
+      ? {
+          orient: styleOptions.legendPosition?.toLowerCase() || 'right',
+          title: 'Thresholds',
+        }
+      : null,
+  };
+
+  return colorLayer;
 };

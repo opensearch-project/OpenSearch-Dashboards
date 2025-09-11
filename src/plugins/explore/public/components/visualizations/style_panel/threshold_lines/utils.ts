@@ -3,21 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
-import { ThresholdLineStyle, ThresholdLines } from '../../types';
+import { ThresholdLineStyle, ThresholdLines, ThresholdOptions } from '../../types';
+import { transformThresholdLinesToThreshold } from '../../style_panel/threshold/threshold_panel';
 
 /**
  * Get stroke dash array for different line styles
  * @param style The line style ('dashed', 'dot-dashed', or 'full')
  * @returns The stroke dash array or undefined for solid lines
  */
-export const getStrokeDash = (style: string): number[] | undefined => {
+export const getStrokeDash = (style: ThresholdLineStyle): number[] | undefined => {
   switch (style) {
     case ThresholdLineStyle.Dashed:
       return [5, 5];
     case ThresholdLineStyle.DotDashed:
       return [5, 5, 1, 5];
-    case ThresholdLineStyle.Full:
+    case ThresholdLineStyle.Solid:
     default:
       return undefined;
   }
@@ -30,39 +30,36 @@ export const getStrokeDash = (style: string): number[] | undefined => {
  * @returns Array of threshold layer configurations or null if disabled
  */
 export const createThresholdLayer = (
-  thresholdLines: ThresholdLines | undefined,
+  thresholdOptions?: ThresholdOptions,
   tooltipMode: string = 'all',
+  thresholdLines?: ThresholdLines,
   barEncodingDefault?: 'x' | 'y'
 ): any => {
-  if (!thresholdLines || thresholdLines.length === 0) {
+  const activeThresholds =
+    thresholdLines && !thresholdOptions?.thresholds
+      ? transformThresholdLinesToThreshold(thresholdLines)
+      : thresholdOptions?.thresholds ?? [];
+
+  const activeThresholdStyles =
+    thresholdLines && thresholdLines?.length > 0 && !thresholdOptions?.thresholdStyle
+      ? thresholdLines[0].style
+      : thresholdOptions?.thresholdStyle ?? ThresholdLineStyle.Off;
+
+  if (activeThresholdStyles === ThresholdLineStyle.Off || activeThresholds.length === 0) {
     return null;
   }
 
   const encodingChannel = barEncodingDefault ?? 'y';
-  // Filter active thresholds
-  const activeThresholds = thresholdLines.filter((threshold) => threshold.show);
 
-  if (activeThresholds.length === 0) {
-    return null;
-  }
-
-  // Create a layer for each threshold
   const layers = activeThresholds.map((threshold) => {
     const markType = 'rule';
     const markConfig: any = {
       color: threshold.color,
-      strokeWidth: threshold.width,
-      tooltip:
-        tooltipMode !== 'hidden'
-          ? {
-              content: { signal: '' },
-              shared: true,
-            }
-          : false,
+      strokeWidth: 1,
     };
 
     // Apply stroke dash based on threshold style
-    markConfig.strokeDash = getStrokeDash(threshold.style);
+    markConfig.strokeDash = getStrokeDash(activeThresholdStyles);
 
     // Create the base layer
     const layer: any = {
@@ -77,20 +74,6 @@ export const createThresholdLayer = (
         },
       },
     };
-
-    // Add tooltip content if enabled
-    if (tooltipMode !== 'hidden') {
-      const thresholdName = threshold.name ? `${threshold.name}: ` : '';
-
-      layer.encoding.tooltip = {
-        value:
-          thresholdName +
-          i18n.translate('explore.vis.thresholdValue', {
-            defaultMessage: 'Threshold: ',
-          }) +
-          threshold.value,
-      };
-    }
 
     return layer;
   });

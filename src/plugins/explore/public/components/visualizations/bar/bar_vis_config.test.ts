@@ -32,7 +32,7 @@ describe('bar_vis_config', () => {
             id: '1',
             color: '#E7664C',
             show: false,
-            style: ThresholdLineStyle.Full,
+            style: ThresholdLineStyle.Solid,
             value: 10,
             width: 1,
             name: '',
