@@ -59,7 +59,7 @@ describe('line_vis_config', () => {
 
       // Verify threshold settings
       expect(defaults.thresholdOptions).toMatchObject({
-        baseColor: '#9EE9FA',
+        baseColor: '#00BD6B',
         thresholds: [],
         thresholdStyle: ThresholdLineStyle.Solid,
       });
@@ -129,7 +129,7 @@ describe('line_vis_config', () => {
           addLegend: true,
           legendPosition: Positions.RIGHT,
           thresholdOptions: {
-            baseColor: '#9EE9FA',
+            baseColor: '#00BD6B',
             thresholds: [],
             thresholdStyle: ThresholdLineStyle.Solid,
           },

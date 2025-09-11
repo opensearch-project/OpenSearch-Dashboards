@@ -36,7 +36,7 @@ describe('createGaugeConfig', () => {
     expect(defaults.showTitle).toBe(true);
     expect(defaults.title).toBe('');
     expect(defaults.thresholdOptions).toMatchObject({
-      baseColor: '#9EE9FA',
+      baseColor: '#00BD6B',
       thresholds: [],
     });
     expect(defaults.valueCalculation).toBe('last');

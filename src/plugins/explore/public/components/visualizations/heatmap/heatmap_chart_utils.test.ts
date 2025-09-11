@@ -321,7 +321,7 @@ describe('enhanceStyle', () => {
         label: {} as HeatmapLabels,
       },
       thresholdOptions: {
-        baseColor: '#9EE9FA',
+        baseColor: '#00BD6B',
         thresholds: [
           { value: 2, color: '#00FF00' },
           { value: 8, color: '#0000FF' },
@@ -336,7 +336,7 @@ describe('enhanceStyle', () => {
     expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
     expect(markLayer.encoding.color.scale.range).toEqual([
       '#d3d3d3',
-      '#9EE9FA',
+      '#00BD6B',
       '#00FF00',
       '#0000FF',
     ]);
@@ -355,7 +355,7 @@ describe('enhanceStyle', () => {
         label: {} as HeatmapLabels,
       },
       thresholdOptions: {
-        baseColor: '#9EE9FA',
+        baseColor: '#00BD6B',
         thresholds: [
           { value: 2, color: '#00FF00' },
           { value: 8, color: '#0000FF' },
@@ -369,7 +369,7 @@ describe('enhanceStyle', () => {
     expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
     expect(markLayer.encoding.color.scale.range).toEqual([
       '#d3d3d3',
-      '#9EE9FA',
+      '#00BD6B',
       '#00FF00',
       '#0000FF',
     ]);

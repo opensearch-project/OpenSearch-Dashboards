@@ -8,6 +8,7 @@ import { AggregationType, ColorSchemas, VisColumn } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { generateColorBySchema } from '../utils/utils';
 import { transformToThreshold } from '../style_panel/threshold/threshold_utils';
+import { getColors } from '../theme/default_colors';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (
@@ -122,7 +123,7 @@ export const enhanceStyle = (
         : styles?.thresholdOptions?.thresholds || [];
 
     const thresholdWithBase = [
-      { value: 0, color: styles?.thresholdOptions?.baseColor ?? '#9EE9FA' },
+      { value: 0, color: styles?.thresholdOptions?.baseColor ?? getColors().statusGreen },
       ...newThreshold,
     ];
 

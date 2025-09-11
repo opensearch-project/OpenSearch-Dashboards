@@ -96,7 +96,7 @@ describe('to_expression', () => {
     legendPosition: Positions.RIGHT,
     thresholdLines: [],
     thresholdOptions: {
-      baseColor: '#9EE9FA',
+      baseColor: '#00BD6B',
       thresholds: [{ value: 100, color: 'red' }],
       thresholdStyle: ThresholdLineStyle.Solid,
     },

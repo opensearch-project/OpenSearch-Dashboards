@@ -22,6 +22,7 @@ import {
   transformToThreshold,
   transformThresholdLinesToThreshold,
 } from './threshold_utils';
+import { getColors } from '../../theme/default_colors';
 
 export interface ThresholdPanelProps {
   customRanges?: RangeValue[];
@@ -67,7 +68,7 @@ export const ThresholdPanel = ({
     if (colorSchema && !thresholdsOptions?.baseColor) {
       return Colors[colorSchema].baseColor;
     }
-    return thresholdsOptions?.baseColor || '#9EE9FA';
+    return thresholdsOptions?.baseColor || getColors().statusGreen;
   });
 
   const [localThresholdStyle, setLocalThresholdStyle] = useState<ThresholdLineStyle>(() => {

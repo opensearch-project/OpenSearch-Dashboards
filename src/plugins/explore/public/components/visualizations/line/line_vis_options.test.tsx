@@ -266,7 +266,7 @@ describe('LineVisStyleControls', () => {
       lineMode: 'smooth',
       lineWidth: 2,
       thresholdOptions: {
-        baseColor: '#9EE9FA',
+        baseColor: '#00BD6B',
         thresholds: [],
         thresholdStyle: ThresholdLineStyle.Solid,
       },

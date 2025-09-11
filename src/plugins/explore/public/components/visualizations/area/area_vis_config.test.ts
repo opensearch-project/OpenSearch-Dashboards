@@ -25,7 +25,7 @@ describe('area_vis_config', () => {
 
       // Check threshold lines
       expect(defaultAreaChartStyles.thresholdOptions).toMatchObject({
-        baseColor: '#9EE9FA',
+        baseColor: '#00BD6B',
         thresholds: [],
         thresholdStyle: ThresholdLineStyle.Solid,
       });

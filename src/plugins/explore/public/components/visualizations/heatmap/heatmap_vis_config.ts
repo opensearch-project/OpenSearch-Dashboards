@@ -19,6 +19,7 @@ import {
   TitleOptions,
   ThresholdOptions,
 } from '../types';
+import { getColors } from '../theme/default_colors';
 
 export interface HeatmapLabels {
   show: boolean;
@@ -83,7 +84,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
   },
 
   thresholdOptions: {
-    baseColor: '#9EE9FA',
+    baseColor: getColors().statusGreen,
     thresholds: [],
   },
 

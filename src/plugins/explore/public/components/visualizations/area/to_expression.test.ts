@@ -82,7 +82,7 @@ describe('Area Chart to_expression', () => {
       mode: 'all',
     },
     thresholdOptions: {
-      baseColor: '#9EE9FA',
+      baseColor: '#00BD6B',
       thresholds: [],
       thresholdStyle: ThresholdLineStyle.Solid,
     },
@@ -221,7 +221,7 @@ describe('Area Chart to_expression', () => {
       const stylesWithThreshold = {
         ...mockStyles,
         thresholdOptions: {
-          baseColor: '#9EE9FA',
+          baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#E7664C' }],
           thresholdStyle: ThresholdLineStyle.Solid,
         },
@@ -506,7 +506,7 @@ describe('Area Chart to_expression', () => {
       const stylesWithThreshold = {
         ...mockStyles,
         thresholdOptions: {
-          baseColor: '#9EE9FA',
+          baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#E7664C' }],
           thresholdStyle: ThresholdLineStyle.Solid,
         },
@@ -787,7 +787,7 @@ describe('Area Chart to_expression', () => {
       const stylesWithThreshold = {
         ...mockStyles,
         thresholdOptions: {
-          baseColor: '#9EE9FA',
+          baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#E7664C' }],
           thresholdStyle: ThresholdLineStyle.Solid,
         },

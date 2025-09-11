@@ -19,6 +19,7 @@ import {
   ThresholdOptions,
 } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { getColors } from '../theme/default_colors';
 
 // Complete area chart style controls interface
 export interface AreaChartStyleControls {
@@ -52,7 +53,7 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
 
   // Threshold options
   thresholdOptions: {
-    baseColor: '#9EE9FA',
+    baseColor: getColors().statusGreen,
     thresholds: [],
     thresholdStyle: ThresholdLineStyle.Solid,
   },
