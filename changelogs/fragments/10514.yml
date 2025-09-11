@@ -1,0 +1,2 @@
+test:
+- Add Cypress to check for tab switching of vizualization ([#10514](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10514))
