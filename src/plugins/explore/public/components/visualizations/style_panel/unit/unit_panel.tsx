@@ -119,11 +119,11 @@ export const UnitPanel = ({ unit, onUnitChange }: UnitPanelProps) => {
         >
           <div style={{ width: popoverWidth }}>
             <EuiContextMenu
-              data-test-subj="contextMenu"
+              data-test-subj="unit_panel_context_menu"
               size="s"
               initialPanelId={lastPanelId}
               panels={panels}
-              className="full-width-context-menu"
+              className="visPanelUnitPopover"
             />
           </div>
         </EuiPopover>

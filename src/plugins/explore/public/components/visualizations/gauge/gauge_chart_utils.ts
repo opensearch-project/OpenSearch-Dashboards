@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Threshold } from '../types';
+import { Threshold, UnitItem } from '../types';
 
 /**
  * Merge custom ranges with min base.

@@ -20,7 +20,7 @@ import { generateColorBySchema, getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
-import { getUnitById } from '../style_panel/unit/collection';
+import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -56,11 +56,7 @@ export const createSingleMetric = (
 
   const selectedUnit = getUnitById(styleOptions?.unitId);
 
-  const displayValue = isValidNumber
-    ? selectedUnit && selectedUnit?.display
-      ? selectedUnit?.display(calculatedValue, selectedUnit?.symbol)
-      : `${Math.round(calculatedValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`
-    : '-';
+  const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
   function generateColorConditions(field: string, ranges: RangeValue[], color: ColorSchemas) {
     const colors = generateColorBySchema(ranges.length + 1, color);

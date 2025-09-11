@@ -13,7 +13,7 @@ import {
 } from './gauge_chart_utils';
 import { calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
-import { getUnitById } from '../style_panel/unit/collection';
+import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
@@ -47,11 +47,7 @@ export const createGauge = (
 
   const selectedUnit = getUnitById(styleOptions?.unitId);
 
-  const displayValue = isValidNumber
-    ? selectedUnit && selectedUnit?.display
-      ? selectedUnit?.display(calculatedValue, selectedUnit?.symbol)
-      : `${Math.round(calculatedValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`
-    : '-';
+  const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
   const minBase = styleOptions?.min || 0;
   const maxBase = styleOptions?.max || maxNumber;

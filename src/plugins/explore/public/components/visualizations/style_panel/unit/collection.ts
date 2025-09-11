@@ -584,3 +584,18 @@ Object.values(UnitsCollection).forEach((category) => {
 
 // get unit by ID
 export const getUnitById = (id?: string) => (id ? UnitsLookup[id] : undefined);
+
+export function showDisplayValue(
+  isValidNumber: boolean,
+  selectedUnit: UnitItem | undefined,
+  calculatedValue: number | undefined
+) {
+  const displayValue =
+    isValidNumber && calculatedValue
+      ? selectedUnit && selectedUnit?.display
+        ? selectedUnit?.display(calculatedValue, selectedUnit?.symbol)
+        : `${Math.round(calculatedValue * 100) / 100} ${selectedUnit?.symbol ?? ''}`
+      : '-';
+
+  return displayValue;
+}
