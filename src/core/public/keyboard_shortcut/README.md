@@ -12,70 +12,51 @@ The modal shows shortcuts grouped by categories like "Navigation", "Editing", "D
 
 ## Default Keyboard Shortcuts
 
-### macOS
+### macOS/Windows/Linux
 
-#### Global Shortcuts
+#### Navigation
 
 | Shortcut | Command | Description |
 |----------|---------|-------------|
-| `?` | Show Keyboard Shortcuts Help | Opens the help modal with all available shortcuts |
 | `G B` | Go to Dashboard | Navigate to Dashboard application |
 | `G V` | Go to Visualize | Navigate to Visualize application |
 | `G D` | Go to Discover | Navigate to Discover application |
+| `?` | Show this help | Opens the help modal with all available shortcuts |
+| `⌘ L` | Switch to logs tab | Navigate to logs tab in Explore |
+| `⌘ P` | Switch to patterns tab | Navigate to patterns tab in Explore |
+| `⌘ V` | Switch to visualization tab | Navigate to visualization tab in Explore |
 
-#### Navigation
+#### Panel / Layout
 
 | Shortcut | Command | Description |
 |----------|---------|-------------|
-| `⇧+D` | Open Date Picker | Opens the time range selector |
-| `⇧+Q` | Focus Query Bar | Focuses the search query input field |
+| `⌘ B` | Toggle Navbar | Shows/hides the main navigation bar |
+| `⌘ F` | Toggle fields panel | Shows/hides the fields selector panel |
+
+#### Search
+
+| Shortcut | Command | Description |
+|----------|---------|-------------|
+| `⌘ O` | Saved search | Opens saved search dialog |
+| `⌘ D` | Open date picker | Opens the time range selector |
+| `⌘ Q` | Recent queries | Opens recent queries panel |
+| `R` | Refresh results | Refreshes the current data view |
+| `/` | Focus query bar | Focuses the search query input field |
 
 #### Data Actions
 
 | Shortcut | Command | Description |
 |----------|---------|-------------|
-| `R` | Refresh Results | Refreshes the current data view |
-| `D` | Download CSV | Downloads current results as CSV (when available) |
+| `E` | Download CSV | Downloads current results as CSV (when available) |
+| `A` | Add to dashboard | Adds current visualization to dashboard |
+| `⌘ S` | Save discover search | Saves the current discover search |
 
-#### Editing & Save
-
-| Shortcut | Command | Description |
-|----------|---------|-------------|
-| `⌘+S` | Save | Saves the current dashboard/visualization (edit mode only) |
-| `⇧+S` | Toggle Sidebar | Shows/hides the visualization sidebar |
-
-### Windows/Linux
-
-#### Global Shortcuts
+#### Global Dev Tools
 
 | Shortcut | Command | Description |
 |----------|---------|-------------|
-| `?` | Show Keyboard Shortcuts Help | Opens the help modal with all available shortcuts |
-| `G D` | Go to Dashboard | Navigate to Dashboard application |
-| `G V` | Go to Visualize | Navigate to Visualize application |
-| `G B` | Go to Discover | Navigate to Discover application |
+| `~` | Open global dev console | Opens the browser developer console |
 
-
-#### Navigation
-
-| Shortcut | Command | Description |
-|----------|---------|-------------|
-| `Shift+D` | Open Date Picker | Opens the time range selector |
-| `/` | Focus Query Bar | Focuses the search query input field |
-
-#### Data Actions
-
-| Shortcut | Command | Description |
-|----------|---------|-------------|
-| `R` | Refresh Results | Refreshes the current data view |
-| `D` | Download CSV | Downloads current results as CSV (when available) |
-
-#### Editing & Save
-
-| Shortcut | Command | Description |
-|----------|---------|-------------|
-| `Ctrl+S` | Save | Saves the current dashboard/visualization (edit mode only) |
-| `Shift+S` | Toggle Sidebar | Shows/hides the visualization sidebar |
 
 ## Supported Keys and Modifiers
 
@@ -169,7 +150,6 @@ Shortcuts are organized into logical categories for better discoverability:
 | Search | Query and filtering actions | Execute search, clear filters |
 | Data Actions | Data manipulation and export | Download CSV, refresh data |
 | Panel / Layout | UI layout and panel management | Toggle edit mode, toggle sidebar |
-| View | Display and visualization controls | Fullscreen mode, zoom controls |
 
 ## Multi-Key Sequences
 
@@ -237,5 +217,3 @@ interface ShortcutDefinition {
 | `useKeyboardShortcut(shortcut)` | React hook for automatic lifecycle management | `ShortcutDefinition` |
 
 > This keyboard shortcut system provides a powerful, extensible way to enhance user productivity in OpenSearch Dashboards while maintaining consistency and avoiding conflicts across plugins.
-
-
