@@ -211,20 +211,17 @@ export function Header({
     [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
   );
 
-  // Function for toggling left navigation
-  const handleToggleLeftNavbar = useCallback(() => {
+  const handleToggleNavOpen = useCallback(() => {
     setIsNavOpen(!isNavOpen);
   }, [setIsNavOpen, isNavOpen]);
 
-  // Register global navigation toggle keyboard shortcut using the hook
-
   keyboardShortcut?.useKeyboardShortcut({
-    id: 'toggle_left_navbar',
+    id: 'toggle_navbar',
     pluginId: 'core',
-    name: 'Toggle Left Navbar',
+    name: 'Toggle Navbar',
     category: 'Panel / Layout',
     keys: 'shift+b',
-    execute: handleToggleLeftNavbar,
+    execute: handleToggleNavOpen,
   });
 
   if (!isVisible) {
@@ -307,7 +304,7 @@ export function Header({
           aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
             defaultMessage: 'Toggle primary navigation',
           })}
-          onClick={() => setIsNavOpen(!isNavOpen)}
+          onClick={handleToggleNavOpen}
           aria-expanded={isNavOpen}
           aria-pressed={isNavOpen}
           aria-controls={navId}

@@ -307,9 +307,13 @@ export class VisualizePlugin
       if (isInitialized && currentWorkspace) {
         core.keyboardShortcut.register({
           id: 'nav.visualization',
-          name: 'Go to Visualization',
+          name: i18n.translate('visualize.keyboardShortcut.goToVisualization.name', {
+            defaultMessage: 'Go to visualization',
+          }),
           pluginId: 'visualize',
-          category: 'navigation',
+          category: i18n.translate('visualize.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
           keys: 'g v',
           execute: () => {
             core.application.navigateToApp('visualize');

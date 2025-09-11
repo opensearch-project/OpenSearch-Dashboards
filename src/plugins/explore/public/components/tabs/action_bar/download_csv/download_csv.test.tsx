@@ -7,6 +7,12 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { DiscoverDownloadCsv, DiscoverDownloadCsvProps } from './download_csv';
+
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn((key, options) => options.defaultMessage),
+  },
+}));
 import { OpenSearchSearchHit } from '../../../../application/legacy/discover/application/doc_views/doc_views_types';
 import { IndexPattern } from '../../../../../../data/common';
 import { useDiscoverDownloadCsv } from './use_download_csv';

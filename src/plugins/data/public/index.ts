@@ -628,4 +628,3 @@ export {
 
 export { SavedQueryManagementComponent } from './ui/saved_query_management';
 export { SaveQueryForm, SavedQueryMeta } from './ui/saved_query_form';
-export { DATA_DOM_SELECTORS } from './constants';

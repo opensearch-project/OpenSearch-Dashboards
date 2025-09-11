@@ -241,7 +241,7 @@ export class CoreSystem {
 
       const keyboardShortcut = keyboardShortcutsEnabled
         ? this.keyboardShortcut.start({ enabled: true })
-        : null;
+        : undefined;
       const chrome = await this.chrome.start({
         application,
         docLinks,

@@ -168,7 +168,6 @@ Shortcuts are organized into logical categories for better discoverability:
 | Navigation | Moving around the interface | Focus query bar, open date picker |
 | Search | Query and filtering actions | Execute search, clear filters |
 | Data Actions | Data manipulation and export | Download CSV, refresh data |
-| Editing / Save | Content modification and persistence | Save dashboard, save visualization |
 | Panel / Layout | UI layout and panel management | Toggle edit mode, toggle sidebar |
 | View | Display and visualization controls | Fullscreen mode, zoom controls |
 

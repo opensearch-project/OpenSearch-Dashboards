@@ -197,8 +197,12 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       core.keyboardShortcut.register({
         id: 'toggle_dev_tools',
         pluginId: 'dev_tools',
-        name: 'Toggle Global Dev Console',
-        category: 'navigation',
+        name: i18n.translate('devTools.keyboardShortcut.openDevTools.name', {
+          defaultMessage: 'Open global dev console',
+        }),
+        category: i18n.translate('devTools.keyboardShortcut.category.navigation', {
+          defaultMessage: 'Navigation',
+        }),
         keys: 'shift+`',
         execute: () => {
           uiActions.executeTriggerActions(devToolsTrigger.id, {});

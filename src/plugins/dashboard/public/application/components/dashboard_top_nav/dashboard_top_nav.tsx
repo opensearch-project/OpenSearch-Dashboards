@@ -15,8 +15,8 @@ import { DashboardContainer } from '../../embeddable';
 import { Dashboard } from '../../../dashboard';
 import { TopNavMenuItemRenderType, TopNavControlData } from '../../../../../navigation/public';
 import { TopNavIds } from './top_nav';
-import { ViewMode } from '../../../../../embeddable/public';
-import { DASHBOARD_DOM_SELECTORS } from '../../../constants';
+import { ViewMode, isErrorEmbeddable, openAddPanelFlyout } from '../../../../../embeddable/public';
+import { getSavedObjectFinder } from '../../../../../saved_objects/public';
 
 interface DashboardTopNavProps {
   isChromeVisible: boolean;
@@ -71,35 +71,48 @@ const TopNav = ({
   const handleToggleDashboardEdit = useCallback(() => {
     const isEditMode = currentAppState?.viewMode === ViewMode.EDIT;
     const actionId = isEditMode ? TopNavIds.EXIT_EDIT_MODE : TopNavIds.ENTER_EDIT_MODE;
-    if (keyboardNavActions && keyboardNavActions[actionId]) {
+    if (keyboardNavActions[actionId]) {
       keyboardNavActions[actionId]();
     }
   }, [keyboardNavActions, currentAppState]);
 
   const handleSave = useCallback(() => {
-    if (keyboardNavActions && keyboardNavActions[TopNavIds.SAVE]) {
+    if (keyboardNavActions[TopNavIds.SAVE]) {
       keyboardNavActions[TopNavIds.SAVE]();
     }
   }, [keyboardNavActions]);
 
-  const handleAdd = useCallback(() => {
-    // Note: Cannot use navActions[TopNavIds.ADD_EXISTING]() directly because it requires
-    // an anchorElement parameter for popover positioning. Keyboard shortcuts have no
-    // anchor element, so we simulate clicking the actual button to provide proper context.
-    const addButton = document.querySelector(DASHBOARD_DOM_SELECTORS.ADD_PANEL_BUTTON);
-    if (addButton && !addButton.hasAttribute('disabled')) {
-      (addButton as HTMLElement).click();
+  const handleAddPanel = useCallback(() => {
+    // directly open the add panel flyout
+    if (currentContainer && !isErrorEmbeddable(currentContainer)) {
+      openAddPanelFlyout({
+        embeddable: currentContainer,
+        getAllFactories: services.embeddable.getEmbeddableFactories,
+        getFactory: services.embeddable.getEmbeddableFactory,
+        notifications: services.notifications,
+        overlays: services.overlays,
+        SavedObjectFinder: getSavedObjectFinder(
+          services.savedObjects,
+          services.uiSettings,
+          services.data,
+          services.application
+        ),
+      });
     }
-  }, []);
+  }, [currentContainer, services]);
 
   // Register/unregister save shortcut based on edit mode
   useEffect(() => {
-    if (currentAppState?.viewMode === 'edit' && keyboardShortcut) {
+    if (currentAppState?.viewMode === ViewMode.EDIT && keyboardShortcut) {
       keyboardShortcut.register({
         id: 'save_dashboard',
         pluginId: 'dashboard',
-        name: 'Save Dashboard',
-        category: 'editing / save',
+        name: i18n.translate('dashboard.topNav.saveDashboardShortcut', {
+          defaultMessage: 'Save dashboard',
+        }),
+        category: i18n.translate('dashboard.topNav.editingCategory', {
+          defaultMessage: 'Data actions',
+        }),
         keys: 'cmd+s',
         execute: handleSave,
       });
@@ -116,32 +129,40 @@ const TopNav = ({
 
   // Register/unregister add shortcut based on edit mode
   useEffect(() => {
-    if (currentAppState?.viewMode === 'edit' && keyboardShortcut) {
+    if (currentAppState?.viewMode === ViewMode.EDIT && keyboardShortcut) {
       keyboardShortcut.register({
-        id: 'add_dashboard',
+        id: 'add_panel_to_dashboard',
         pluginId: 'dashboard',
-        name: 'Add Dashboard',
-        category: 'Data actions',
+        name: i18n.translate('dashboard.topNav.addPanelShortcut', {
+          defaultMessage: 'Add panel to dashboard',
+        }),
+        category: i18n.translate('dashboard.topNav.dataActionsCategory', {
+          defaultMessage: 'Data actions',
+        }),
         keys: 'a',
-        execute: handleAdd,
+        execute: handleAddPanel,
       });
 
       // Cleanup: unregister when leaving edit mode or component unmounts
       return () => {
         keyboardShortcut.unregister({
-          id: 'add_dashboard',
+          id: 'add_panel_to_dashboard',
           pluginId: 'dashboard',
         });
       };
     }
-  }, [currentAppState?.viewMode, keyboardShortcut, handleAdd]);
+  }, [currentAppState?.viewMode, keyboardShortcut, handleAddPanel]);
 
   // Register dashboard edit mode keyboard shortcut
   keyboardShortcut?.useKeyboardShortcut({
     id: 'toggle_dashboard_edit',
     pluginId: 'dashboard',
-    name: 'Toggle Edit Mode',
-    category: 'Panel / Layout',
+    name: i18n.translate('dashboard.topNav.toggleEditModeShortcut', {
+      defaultMessage: 'Toggle edit mode',
+    }),
+    category: i18n.translate('dashboard.topNav.panelLayoutCategory', {
+      defaultMessage: 'Panel / layout',
+    }),
     keys: 'shift+e',
     execute: handleToggleDashboardEdit,
   });

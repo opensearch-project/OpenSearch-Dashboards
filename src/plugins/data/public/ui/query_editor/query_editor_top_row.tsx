@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
@@ -24,7 +24,6 @@ import {
   Query,
   TimeHistoryContract,
   TimeRange,
-  DATA_DOM_SELECTORS,
 } from '../..';
 import {
   useOpenSearchDashboards,
@@ -71,68 +70,34 @@ export interface QueryEditorTopRowProps {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
+  const datePickerRef = useRef<EuiSuperDatePicker | null>(null);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
 
   const handleOpenDatePicker = useCallback(() => {
-    const selectors = [
-      DATA_DOM_SELECTORS.DATE_PICKER_START_BUTTON,
-      DATA_DOM_SELECTORS.DATE_PICKER_SHOW_DATES_BUTTON,
-    ];
-    for (const selector of selectors) {
-      const element = document.querySelector(selector);
-      if (element) {
-        (element as HTMLElement).click();
-        break;
-      }
-    }
-  }, []);
-
-  // Memoized callback for focusing query bar
-  const handleFocusQueryBar = useCallback(() => {
-    // Monaco-based query editor
-    const queryEditorInput = document.querySelector(DATA_DOM_SELECTORS.QUERY_EDITOR_INPUT);
-    if (queryEditorInput) {
-      // Look for Monaco editor within the query editor container
-      const monacoEditor = queryEditorInput.querySelector(
-        '.monaco-editor textarea'
-      ) as HTMLTextAreaElement;
-      if (monacoEditor) {
-        monacoEditor.focus();
-        return;
+    if (datePickerRef.current) {
+      const datePicker = datePickerRef.current;
+      if (datePicker.onStartDatePopoverToggle) {
+        datePicker.onStartDatePopoverToggle();
+      } else if (datePicker.onEndDatePopoverToggle) {
+        datePicker.onEndDatePopoverToggle();
       }
     }
   }, []);
 
   keyboardShortcut?.useKeyboardShortcut({
-    id: 'open_date_picker',
+    id: 'date_picker',
     pluginId: 'data',
-    name: 'Open Date Picker',
-    category: 'Search',
+    name: i18n.translate('data.query.queryEditor.openDatePickerShortcut', {
+      defaultMessage: 'Open date picker',
+    }),
+    category: i18n.translate('data.query.queryEditor.searchCategory', {
+      defaultMessage: 'Search',
+    }),
     keys: 'shift+d',
     execute: handleOpenDatePicker,
-  });
-
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'refresh_query',
-    pluginId: 'data',
-    name: 'Refresh Results',
-    category: 'Data actions',
-    keys: 'r',
-    execute: () => {
-      onClickSubmitButton({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
-    },
-  });
-
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'focus_query_bar',
-    pluginId: 'data',
-    name: 'Focus Query Bar',
-    category: 'Search',
-    keys: '/',
-    execute: handleFocusQueryBar,
   });
 
   const queryLanguage = props.query && props.query.language;
@@ -404,6 +369,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     return (
       <EuiFlexItem className={wrapperClasses}>
         <EuiSuperDatePicker
+          ref={datePickerRef}
           start={props.dateRangeFrom}
           end={props.dateRangeTo}
           isPaused={props.isRefreshPaused}

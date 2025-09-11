@@ -7,6 +7,12 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DiscoverFieldHeader } from './discover_field_header';
 
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn((key, options) => options.defaultMessage),
+  },
+}));
+
 const mockUseKeyboardShortcut = jest.fn();
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
@@ -53,7 +59,7 @@ describe('DiscoverFieldHeader', () => {
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
         id: 'ToggleFieldsPanel',
         pluginId: 'explore',
-        name: 'Toggle Fields Panel',
+        name: 'Toggle fields panel',
         category: 'Panel / layout',
         keys: 'shift+f',
         execute: expect.any(Function),
@@ -125,7 +131,7 @@ describe('DiscoverFieldHeader', () => {
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
         id: 'ToggleFieldsPanel',
         pluginId: 'explore',
-        name: 'Toggle Fields Panel',
+        name: 'Toggle fields panel',
         category: 'Panel / layout',
         keys: 'shift+f',
         execute: expect.any(Function),

@@ -95,6 +95,10 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
     data: dataPluginMock.createStartContract(),
     appName: testProps.appName || 'test',
     storage: storage || createMockStorage(),
+    keyboardShortcut: {
+      register: jest.fn(),
+      unregister: jest.fn(),
+    },
   };
 
   return (
@@ -281,5 +285,122 @@ describe('QueryStringInput', () => {
       ['logstash-*'],
       startMock.uiSettings
     );
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    let mockRegister: jest.Mock;
+    let mockUnregister: jest.Mock;
+
+    function wrapWithMockedKeyboardShortcut(testProps: any) {
+      mockRegister = jest.fn();
+      mockUnregister = jest.fn();
+
+      const defaultOptions = {
+        screenTitle: 'Another Screen',
+        intl: null as any,
+      };
+
+      const services = {
+        ...startMock,
+        data: dataPluginMock.createStartContract(),
+        appName: testProps.appName || 'test',
+        storage: createMockStorage(),
+        keyboardShortcut: {
+          register: mockRegister,
+          unregister: mockUnregister,
+        },
+      };
+
+      return (
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <QueryStringInput {...defaultOptions} {...testProps} />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+    }
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('Should register keyboard shortcut on mount', () => {
+      mount(
+        wrapWithMockedKeyboardShortcut({
+          query: dqlQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableAutoFocus: true,
+        })
+      );
+
+      expect(mockRegister).toHaveBeenCalledWith({
+        id: 'focus_query_bar',
+        pluginId: 'data',
+        name: expect.any(String),
+        category: expect.any(String),
+        keys: '/',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('Should unregister keyboard shortcut on unmount', () => {
+      const component = mount(
+        wrapWithMockedKeyboardShortcut({
+          query: dqlQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableAutoFocus: true,
+        })
+      );
+
+      component.unmount();
+
+      expect(mockUnregister).toHaveBeenCalledWith({
+        id: 'focus_query_bar',
+        pluginId: 'data',
+      });
+    });
+
+    it('Should focus input when keyboard shortcut is executed', () => {
+      const component = mount(
+        wrapWithMockedKeyboardShortcut({
+          query: dqlQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableAutoFocus: true,
+        })
+      );
+
+      const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+      const mockFocus = jest.fn();
+      instance.inputRef = { focus: mockFocus } as any;
+
+      // Get the execute function from the register call
+      const executeFunction = mockRegister.mock.calls[0][0].execute;
+      executeFunction();
+
+      expect(mockFocus).toHaveBeenCalled();
+    });
+
+    it('Should handle keyboard shortcut execution when inputRef is null', () => {
+      const component = mount(
+        wrapWithMockedKeyboardShortcut({
+          query: dqlQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableAutoFocus: true,
+        })
+      );
+
+      const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+      instance.inputRef = null;
+
+      // Get the execute function from the register call
+      const executeFunction = mockRegister.mock.calls[0][0].execute;
+
+      // Should not throw an error
+      expect(() => executeFunction()).not.toThrow();
+    });
   });
 });

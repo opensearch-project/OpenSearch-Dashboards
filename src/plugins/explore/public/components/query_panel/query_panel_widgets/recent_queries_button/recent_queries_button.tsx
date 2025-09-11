@@ -33,8 +33,12 @@ export const RecentQueriesButton = () => {
   keyboardShortcut?.useKeyboardShortcut({
     id: 'recent_queries',
     pluginId: 'explore',
-    name: 'Recent Queries',
-    category: 'Search',
+    name: i18n.translate('explore.keyboardShortcut.recentQueries.name', {
+      defaultMessage: 'Recent queries',
+    }),
+    category: i18n.translate('explore.keyboardShortcut.category.search', {
+      defaultMessage: 'Search',
+    }),
     keys: 'shift+q',
     execute: handleTogglePopover,
   });

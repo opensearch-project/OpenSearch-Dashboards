@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_content';
 import { useDiscoverDownloadCsv } from './use_download_csv';
 import { DownloadCsvFormId } from './constants';
@@ -48,8 +49,12 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
   keyboardShortcut?.useKeyboardShortcut({
     id: 'download_csv',
     pluginId: 'explore',
-    name: 'Download CSV',
-    category: 'Data actions',
+    name: i18n.translate('explore.downloadCsv.downloadCsvShortcut', {
+      defaultMessage: 'Download CSV',
+    }),
+    category: i18n.translate('explore.downloadCsv.dataActionsCategory', {
+      defaultMessage: 'Data actions',
+    }),
     keys: 'e',
     execute: handleDownloadCsvShortcut,
   });

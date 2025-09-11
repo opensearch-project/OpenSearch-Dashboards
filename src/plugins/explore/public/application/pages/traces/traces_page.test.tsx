@@ -8,6 +8,7 @@ import { render, screen } from '@testing-library/react';
 import React, { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { discoverPluginMock } from '../../legacy/discover/mocks';
@@ -27,6 +28,15 @@ import { TracesPage } from './traces_page';
 import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
 
 const mockUseKeyboardShortcut = jest.fn();
+
+// Mock i18n translate function
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn(
+      (key: string, options: { defaultMessage: string }) => options.defaultMessage
+    ),
+  },
+}));
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -169,7 +179,6 @@ describe('TracesPage', () => {
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
     exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
 
-    // Add keyboard shortcut service to the mock
     exploreServicesMock.keyboardShortcut = {
       useKeyboardShortcut: mockUseKeyboardShortcut,
       register: jest.fn(),
@@ -235,14 +244,13 @@ describe('TracesPage', () => {
         </TestHarness>
       );
 
-      // Verify both keyboard shortcuts are registered
       expect(mockUseKeyboardShortcut).toHaveBeenCalledTimes(2);
 
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
         id: 'switchToPatternsTabTraces',
         pluginId: 'explore',
-        name: 'Switch to Patterns Tab',
-        category: 'navigation',
+        name: 'Switch to patterns tab',
+        category: 'Navigation',
         keys: 'shift+p',
         execute: expect.any(Function),
       });
@@ -250,8 +258,8 @@ describe('TracesPage', () => {
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
         id: 'switchToVisualizationTabTraces',
         pluginId: 'explore',
-        name: 'Switch to Visualization Tab',
-        category: 'navigation',
+        name: 'Switch to visualization tab',
+        category: 'Navigation',
         keys: 'shift+v',
         execute: expect.any(Function),
       });
@@ -267,7 +275,6 @@ describe('TracesPage', () => {
         </TestHarness>
       );
 
-      // Get the execute functions from the keyboard shortcut registrations
       const patternsTabCall = mockUseKeyboardShortcut.mock.calls.find(
         (call) => call[0].id === 'switchToPatternsTabTraces'
       );
@@ -302,13 +309,10 @@ describe('TracesPage', () => {
           <TracesPage />
         </TestHarness>
       );
-
-      // Verify that the shortcut IDs are specific to traces page
       const shortcutIds = mockUseKeyboardShortcut.mock.calls.map((call) => call[0].id);
       expect(shortcutIds).toContain('switchToPatternsTabTraces');
       expect(shortcutIds).toContain('switchToVisualizationTabTraces');
 
-      // Ensure IDs are unique
       expect(new Set(shortcutIds).size).toBe(shortcutIds.length);
     });
 
@@ -320,7 +324,6 @@ describe('TracesPage', () => {
         </TestHarness>
       );
 
-      // Verify key combinations
       const patternsCall = mockUseKeyboardShortcut.mock.calls.find(
         (call) => call[0].id === 'switchToPatternsTabTraces'
       );
@@ -330,22 +333,6 @@ describe('TracesPage', () => {
 
       expect(patternsCall[0].keys).toBe('shift+p');
       expect(visualizationCall[0].keys).toBe('shift+v');
-    });
-
-    it('keyboard shortcuts have correct metadata', () => {
-      const store = createTestStore();
-      render(
-        <TestHarness store={store}>
-          <TracesPage />
-        </TestHarness>
-      );
-
-      // Verify all shortcuts have correct plugin ID and category
-      mockUseKeyboardShortcut.mock.calls.forEach((call) => {
-        expect(call[0].pluginId).toBe('explore');
-        expect(call[0].category).toBe('navigation');
-        expect(call[0].name).toMatch(/Switch to .* Tab/);
-      });
     });
   });
 });

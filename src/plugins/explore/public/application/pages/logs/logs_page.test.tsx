@@ -8,6 +8,7 @@ import { render, screen } from '@testing-library/react';
 import React, { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { discoverPluginMock } from '../../legacy/discover/mocks';
@@ -27,6 +28,15 @@ import { LogsPage } from './logs_page';
 import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
 
 const mockUseKeyboardShortcut = jest.fn();
+
+// Mock i18n translate function
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn(
+      (key: string, options: { defaultMessage: string }) => options.defaultMessage
+    ),
+  },
+}));
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -169,7 +179,6 @@ describe('LogsPage', () => {
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
     exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
 
-    // Add keyboard shortcut service to the mock
     exploreServicesMock.keyboardShortcut = {
       useKeyboardShortcut: mockUseKeyboardShortcut,
       register: jest.fn(),
@@ -235,14 +244,13 @@ describe('LogsPage', () => {
         </TestHarness>
       );
 
-      // Verify all three keyboard shortcuts are registered
       expect(mockUseKeyboardShortcut).toHaveBeenCalledTimes(3);
 
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
         id: 'switchToLogsTabLogs',
         pluginId: 'explore',
-        name: 'Switch to Logs Tab',
-        category: 'navigation',
+        name: 'Switch to logs tab',
+        category: 'Navigation',
         keys: 'shift+l',
         execute: expect.any(Function),
       });
@@ -250,8 +258,8 @@ describe('LogsPage', () => {
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
         id: 'switchToPatternsTabLogs',
         pluginId: 'explore',
-        name: 'Switch to Patterns Tab',
-        category: 'navigation',
+        name: 'Switch to patterns tab',
+        category: 'Navigation',
         keys: 'shift+p',
         execute: expect.any(Function),
       });
@@ -259,8 +267,8 @@ describe('LogsPage', () => {
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
         id: 'switchToVisualizationTabLogs',
         pluginId: 'explore',
-        name: 'Switch to Visualization Tab',
-        category: 'navigation',
+        name: 'Switch to visualization tab',
+        category: 'Navigation',
         keys: 'shift+v',
         execute: expect.any(Function),
       });
@@ -276,7 +284,6 @@ describe('LogsPage', () => {
         </TestHarness>
       );
 
-      // Get the execute functions from the keyboard shortcut registrations
       const logsTabCall = mockUseKeyboardShortcut.mock.calls.find(
         (call) => call[0].id === 'switchToLogsTabLogs'
       );

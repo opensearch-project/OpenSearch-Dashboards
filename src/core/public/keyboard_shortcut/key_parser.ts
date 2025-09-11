@@ -117,7 +117,7 @@ export class KeyStringParser {
     const normalized = this.normalizeKeyString(keyString);
 
     // Check if this is a special character combination first
-    if (SPECIAL_CHARACTER_MAPPINGS[normalized]) {
+    if (normalized in SPECIAL_CHARACTER_MAPPINGS) {
       return SPECIAL_CHARACTER_MAPPINGS[normalized];
     }
 

@@ -591,9 +591,13 @@ export class DashboardPlugin
       if (isInitialized && currentWorkspace) {
         core.keyboardShortcut.register({
           id: 'nav.dashboard',
-          name: 'Go to Dashboard',
+          name: i18n.translate('dashboard.keyboardShortcut.goToDashboard.name', {
+            defaultMessage: 'Go to dashboard',
+          }),
           pluginId: 'dashboard',
-          category: 'navigation',
+          category: i18n.translate('dashboard.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
           keys: 'g b',
           execute: () => {
             core.application.navigateToApp('dashboards');

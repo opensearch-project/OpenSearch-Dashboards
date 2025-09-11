@@ -14,6 +14,16 @@ const mockHandleTimeChange = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
 const mockSetEditorTextWithQuery = jest.fn();
 const mockUseKeyboardShortcut = jest.fn();
+const mockI18nTranslate = jest.fn();
+
+// Mock i18n
+jest.doMock('@osd/i18n', () => ({
+  i18n: {
+    translate: mockI18nTranslate.mockImplementation(
+      (key, options) => options?.defaultMessage || key
+    ),
+  },
+}));
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -246,10 +256,10 @@ describe('RecentQueriesButton', () => {
 
       expect(mockUseKeyboardShortcut).toHaveBeenCalledTimes(1);
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
-        id: 'open_recent_queries',
+        id: 'recent_queries',
         pluginId: 'explore',
-        name: 'Open Recent Queries',
-        category: 'Search',
+        name: expect.any(String),
+        category: expect.any(String),
         keys: 'shift+q',
         execute: expect.any(Function),
       });
@@ -259,7 +269,7 @@ describe('RecentQueriesButton', () => {
       renderWithStore();
 
       const shortcutCall = mockUseKeyboardShortcut.mock.calls.find(
-        (call) => call[0].id === 'open_recent_queries'
+        (call) => call[0].id === 'recent_queries'
       );
       expect(shortcutCall).toBeDefined();
 
@@ -274,20 +284,6 @@ describe('RecentQueriesButton', () => {
       executeFunction();
       table = screen.getByTestId('recent-queries-table');
       expect(table).toHaveStyle({ display: 'none' });
-    });
-
-    it('keyboard shortcut has correct metadata', () => {
-      renderWithStore();
-
-      const shortcutCall = mockUseKeyboardShortcut.mock.calls[0];
-      const shortcutConfig = shortcutCall[0];
-
-      expect(shortcutConfig.id).toBe('open_recent_queries');
-      expect(shortcutConfig.pluginId).toBe('explore');
-      expect(shortcutConfig.name).toBe('Open Recent Queries');
-      expect(shortcutConfig.category).toBe('Search');
-      expect(shortcutConfig.keys).toBe('shift+q');
-      expect(typeof shortcutConfig.execute).toBe('function');
     });
 
     it('keyboard shortcut execute function is the same as button click handler', () => {

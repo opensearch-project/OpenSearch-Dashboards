@@ -30,7 +30,7 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 
 import {
@@ -57,7 +57,6 @@ import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
-import { DATA_DOM_SELECTORS } from '../../constants';
 
 const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
 
@@ -91,6 +90,7 @@ export interface QueryBarTopRowProps {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function QueryBarTopRow(props: QueryBarTopRowProps) {
+  const datePickerRef = useRef<EuiSuperDatePicker | null>(null);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
@@ -105,34 +105,25 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   } = opensearchDashboards.services;
 
   const handleOpenDatePicker = useCallback(() => {
-    const selectors = [
-      DATA_DOM_SELECTORS.DATE_PICKER_START_BUTTON,
-      DATA_DOM_SELECTORS.DATE_PICKER_SHOW_DATES_BUTTON,
-    ];
-    for (const selector of selectors) {
-      const element = document.querySelector(selector);
-      if (element) {
-        (element as HTMLElement).click();
-        break;
+    if (datePickerRef.current) {
+      const datePicker = datePickerRef.current;
+      if (datePicker.onStartDatePopoverToggle) {
+        datePicker.onStartDatePopoverToggle();
+      } else if (datePicker.onEndDatePopoverToggle) {
+        datePicker.onEndDatePopoverToggle();
       }
-    }
-  }, []);
-
-  const handleFocusQueryBar = useCallback(() => {
-    const queryInput = document.querySelector(
-      DATA_DOM_SELECTORS.QUERY_INPUT
-    ) as HTMLTextAreaElement;
-    if (queryInput) {
-      queryInput.focus();
-      return;
     }
   }, []);
 
   keyboardShortcut?.useKeyboardShortcut({
     id: 'date_picker',
     pluginId: 'data',
-    name: 'Open Date Picker',
-    category: 'Search',
+    name: i18n.translate('data.query.queryBar.openDatePickerShortcut', {
+      defaultMessage: 'Open date picker',
+    }),
+    category: i18n.translate('data.query.queryBar.searchCategory', {
+      defaultMessage: 'Search',
+    }),
     keys: 'shift+d',
     execute: handleOpenDatePicker,
   });
@@ -140,21 +131,16 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   keyboardShortcut?.useKeyboardShortcut({
     id: 'refresh_query',
     pluginId: 'data',
-    name: 'Refresh Results',
-    category: 'Data actions',
+    name: i18n.translate('data.query.queryBar.refreshResultsShortcut', {
+      defaultMessage: 'Refresh results',
+    }),
+    category: i18n.translate('data.query.queryBar.searchCategory', {
+      defaultMessage: 'Search',
+    }),
     keys: 'r',
     execute: () => {
       onClickSubmitButton({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
     },
-  });
-
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'focus_query_bar',
-    pluginId: 'data',
-    name: 'Focus Query Bar',
-    category: 'Search',
-    keys: '/',
-    execute: handleFocusQueryBar,
   });
 
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
@@ -369,6 +355,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     return (
       <EuiFlexItem className={wrapperClasses} grow={false}>
         <EuiSuperDatePicker
+          ref={datePickerRef}
           start={props.dateRangeFrom}
           end={props.dateRangeTo}
           isPaused={props.isRefreshPaused}

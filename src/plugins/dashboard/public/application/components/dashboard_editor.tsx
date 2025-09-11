@@ -6,6 +6,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
+import { i18n } from '@osd/i18n';
 import { DashboardTopNav } from '../components/dashboard_top_nav';
 import { useChromeVisibility } from '../utils/use/use_chrome_visibility';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -61,12 +62,15 @@ export const DashboardEditor = () => {
     }
   }, [appState]);
 
-  // Register full-screen keyboard shortcut using the hook
   keyboardShortcut?.useKeyboardShortcut({
     id: 'dashboard_fullscreen',
     pluginId: 'dashboard',
-    name: 'Toggle Full-Screen Results Table',
-    category: 'Panel / Layout',
+    name: i18n.translate('dashboard.editor.toggleFullScreenShortcut', {
+      defaultMessage: 'Toggle full-screen',
+    }),
+    category: i18n.translate('dashboard.editor.panelLayoutCategory', {
+      defaultMessage: 'Panel / layout',
+    }),
     keys: 'shift+f',
     execute: handleFullScreen,
   });

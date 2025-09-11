@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useDispatch } from 'react-redux';
+import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanel } from '../../../components/query_panel';
@@ -38,8 +39,12 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
   keyboardShortcut?.useKeyboardShortcut({
     id: 'switchToPatternsTabTraces',
     pluginId: 'explore',
-    name: 'Switch to Patterns Tab',
-    category: 'navigation',
+    name: i18n.translate('explore.tracesPage.switchToPatternsTabShortcut', {
+      defaultMessage: 'Switch to patterns tab',
+    }),
+    category: i18n.translate('explore.tracesPage.navigationCategory', {
+      defaultMessage: 'Navigation',
+    }),
     keys: 'shift+p',
     execute: () => dispatch(setActiveTab(EXPLORE_PATTERNS_TAB_ID)),
   });
@@ -47,8 +52,12 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
   keyboardShortcut?.useKeyboardShortcut({
     id: 'switchToVisualizationTabTraces',
     pluginId: 'explore',
-    name: 'Switch to Visualization Tab',
-    category: 'navigation',
+    name: i18n.translate('explore.tracesPage.switchToVisualizationTabShortcut', {
+      defaultMessage: 'Switch to visualization tab',
+    }),
+    category: i18n.translate('explore.tracesPage.navigationCategory', {
+      defaultMessage: 'Navigation',
+    }),
     keys: 'shift+v',
     execute: () => dispatch(setActiveTab(EXPLORE_VISUALIZATION_TAB_ID)),
   });

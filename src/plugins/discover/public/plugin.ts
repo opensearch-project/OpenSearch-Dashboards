@@ -437,9 +437,13 @@ export class DiscoverPlugin
       if (isInitialized && currentWorkspace) {
         core.keyboardShortcut.register({
           id: 'nav.discover',
-          name: 'Go to Discover',
+          name: i18n.translate('discover.keyboardShortcut.goToDiscover.name', {
+            defaultMessage: 'Go to discover',
+          }),
           pluginId: 'discover',
-          category: 'navigation',
+          category: i18n.translate('discover.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
           keys: 'g d',
           execute: () => {
             core.application.navigateToApp('explore/logs');

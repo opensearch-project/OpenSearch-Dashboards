@@ -35,11 +35,14 @@ import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { httpServiceMock } from '../../../http/http_service.mock';
-import { applicationServiceMock, chromeServiceMock } from '../../../mocks';
+import {
+  applicationServiceMock,
+  chromeServiceMock,
+  keyboardShortcutServiceMock,
+} from '../../../mocks';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
 import { WorkspaceObject } from 'src/core/public/workspace';
 import { HeaderVariant } from '../../constants';
-import { keyboardShortcutServiceMock } from '../../../keyboard_shortcut/keyboard_shortcut_service.mock';
 import { Header } from './header';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({

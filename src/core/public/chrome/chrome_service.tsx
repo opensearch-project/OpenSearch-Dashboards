@@ -72,6 +72,7 @@ import {
   GlobalSearchServiceStartContract,
 } from './global_search';
 import { searchPages } from './ui/global_search/search_pages_command';
+import { KeyboardShortcutStart } from '../keyboard_shortcut';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -134,7 +135,7 @@ export interface StartDeps {
   uiSettings: IUiSettingsClient;
   overlays: OverlayStart;
   workspaces: WorkspacesStart;
-  keyboardShortcut: any;
+  keyboardShortcut: KeyboardShortcutStart | undefined;
 }
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;

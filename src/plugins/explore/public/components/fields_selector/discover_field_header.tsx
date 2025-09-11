@@ -25,8 +25,12 @@ export function DiscoverFieldHeader({ onCollapse }: IDiscoverFieldHeaderProps) {
   keyboardShortcut?.useKeyboardShortcut({
     id: 'ToggleFieldsPanel',
     pluginId: 'explore',
-    name: 'Toggle Fields Panel',
-    category: 'Panel / layout',
+    name: i18n.translate('explore.discoverFieldHeader.toggleFieldsPanelShortcut', {
+      defaultMessage: 'Toggle fields panel',
+    }),
+    category: i18n.translate('explore.discoverFieldHeader.panelLayoutCategory', {
+      defaultMessage: 'Panel / layout',
+    }),
     keys: 'shift+f',
     execute: handleCollapseClick,
   });

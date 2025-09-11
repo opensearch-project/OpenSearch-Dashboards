@@ -6,6 +6,12 @@
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
+
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn((key, options) => options.defaultMessage),
+  },
+}));
 import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from '../../helpers/save_explore';
 import { Provider } from 'react-redux';
@@ -194,7 +200,7 @@ describe('SaveAndAddButtonWithModal', () => {
       expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
         id: 'addToDashboard',
         pluginId: 'explore',
-        name: 'Add to Dashboard',
+        name: 'Add to dashboard',
         category: 'Data actions',
         keys: 'a',
         execute: expect.any(Function),

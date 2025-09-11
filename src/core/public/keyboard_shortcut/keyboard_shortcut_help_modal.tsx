@@ -17,6 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { ShortcutDefinition } from './types';
 import { KeyboardShortcutService } from './keyboard_shortcut_service';
 import { KeyStringParser } from './key_parser';
@@ -127,8 +128,12 @@ export const KeyboardShortcutHelpModal: React.FC<KeyboardShortcutHelpModalProps>
     {
       id: 'show_help',
       pluginId: 'core',
-      name: 'Show this help',
-      category: 'navigation',
+      name: i18n.translate('core.keyboardShortcut.showHelp.name', {
+        defaultMessage: 'Show this help',
+      }),
+      category: i18n.translate('core.keyboardShortcut.category.navigation', {
+        defaultMessage: 'Navigation',
+      }),
       keys: 'shift+/',
       execute: showModal,
     },

@@ -29,20 +29,17 @@
  */
 
 import './visualize_editor.scss';
-import React, { RefObject, useCallback } from 'react';
+import React, { RefObject } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
-import { VISUALIZE_DOM_SELECTORS } from '../../constants';
 import {
   SavedVisInstance,
   VisualizeAppState,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
-  VisualizeServices,
 } from '../types';
 
 interface VisualizeEditorCommonProps {
@@ -78,41 +75,6 @@ export const VisualizeEditorCommon = ({
   embeddableId,
   visEditorRef,
 }: VisualizeEditorCommonProps) => {
-  const opensearchDashboards = useOpenSearchDashboards<VisualizeServices>();
-  const { keyboardShortcut } = opensearchDashboards.services;
-
-  const handleSidebarToggle = useCallback(() => {
-    const sidebarButton = document.querySelector(VISUALIZE_DOM_SELECTORS.SIDEBAR_TOGGLE_BUTTON);
-    if (sidebarButton) {
-      (sidebarButton as HTMLElement).click();
-    }
-  }, []);
-
-  const handleSave = useCallback(() => {
-    const saveButton = document.querySelector(VISUALIZE_DOM_SELECTORS.SAVE_BUTTON);
-    if (saveButton) {
-      (saveButton as HTMLElement).click();
-    }
-  }, []);
-
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'toggle_vis_sidebar',
-    pluginId: 'visualize',
-    name: 'Toggle Visualization Sidebar',
-    category: 'Panel / layout',
-    keys: 'shift+c',
-    execute: handleSidebarToggle,
-  });
-
-  keyboardShortcut?.useKeyboardShortcut({
-    id: 'save_visualization',
-    name: 'Save Visualization',
-    pluginId: 'visualize',
-    category: 'Editing / Save',
-    keys: 'cmd+s',
-    execute: handleSave,
-  });
-
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
       {visInstance && appState && currentAppState && (

@@ -70,8 +70,12 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   keyboardShortcut?.useKeyboardShortcut({
     id: 'addToDashboard',
     pluginId: 'explore',
-    name: 'Add to Dashboard',
-    category: 'Data actions',
+    name: i18n.translate('explore.addToDashboard.addToDashboardShortcut', {
+      defaultMessage: 'Add to dashboard',
+    }),
+    category: i18n.translate('explore.addToDashboard.dataActionsCategory', {
+      defaultMessage: 'Data actions',
+    }),
     keys: 'a',
     execute: handleAddToDashboard,
   });
