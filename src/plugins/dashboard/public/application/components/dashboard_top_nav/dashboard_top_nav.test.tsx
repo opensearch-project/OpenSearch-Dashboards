@@ -49,15 +49,26 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-function wrapDashboardTopNavInContext(mockServices: any, currentState: DashboardAppState) {
+function wrapDashboardTopNavInContext(
+  mockServices: any,
+  currentState: DashboardAppState,
+  includeKeyboardShortcut = false
+) {
+  const { keyboardShortcut, ...servicesWithoutKeyboardShortcut } = mockServices;
+
   const services = {
-    ...mockServices,
+    ...servicesWithoutKeyboardShortcut,
     dashboardCapabilities: {
       saveQuery: true,
     },
     navigation: {
       ui: { TopNavMenu, HeaderControl },
     },
+    // Only include keyboard shortcut service when explicitly requested
+    ...(includeKeyboardShortcut &&
+      keyboardShortcut && {
+        keyboardShortcut,
+      }),
   };
 
   const topNavProps = {
@@ -178,7 +189,6 @@ describe('Dashboard top nav', () => {
       mockRegister = jest.fn();
       mockUnregister = jest.fn();
 
-      // Mock document.querySelector for DOM interactions
       Object.defineProperty(document, 'querySelector', {
         value: jest.fn(),
         writable: true,
@@ -282,10 +292,8 @@ describe('Dashboard top nav', () => {
     });
 
     test('add panel shortcut executes successfully', async () => {
-      // Mock the services needed for the add panel functionality
       const mockGetEmbeddableFactories = jest.fn();
       const mockGetEmbeddableFactory = jest.fn();
-      const mockGetSavedObjectFinder = jest.fn();
 
       function wrapWithMockedServices(state: DashboardAppState) {
         const services = {
@@ -345,7 +353,6 @@ describe('Dashboard top nav', () => {
       );
       expect(addCall).toBeDefined();
 
-      // Execute the add shortcut - it should not throw an error
       expect(() => addCall[0].execute()).not.toThrow();
     });
 
