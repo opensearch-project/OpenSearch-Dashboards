@@ -82,11 +82,13 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
 }));
 
 jest.mock('../style_panel/threshold_lines/threshold', () => ({
-  ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
+  ThresholdOptions: jest.fn(({ thresholdsOptions, onChange }) => (
     <div data-test-subj="mockThresholdOptions">
       <button
         data-test-subj="mockUpdateThreshold"
-        onClick={() => onThresholdLinesChange([...thresholdLines, { id: '2', show: true }])}
+        onClick={() =>
+          onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+        }
       >
         Update Threshold
       </button>
@@ -283,7 +285,7 @@ describe('BarVisStyleControls', () => {
     expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockBarExclusiveVisOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
@@ -383,7 +385,10 @@ describe('BarVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      thresholdLines: [...defaultProps.styleOptions.thresholdLines, { id: '2', show: true }],
+      thresholdOptions: {
+        ...defaultProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 

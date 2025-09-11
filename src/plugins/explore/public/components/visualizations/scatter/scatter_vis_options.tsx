@@ -15,6 +15,7 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
 export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
 
@@ -61,6 +62,13 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              showThresholdStyle={true}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               switchAxes={styleOptions.switchAxes}
@@ -77,24 +85,24 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
             />
           </EuiFlexItem>
-          {shouldShowLegend && (
-            <EuiFlexItem grow={false}>
-              <LegendOptionsPanel
-                legendOptions={{
-                  show: styleOptions.addLegend,
-                  position: styleOptions.legendPosition,
-                }}
-                onLegendOptionsChange={(legendOptions) => {
-                  if (legendOptions.show !== undefined) {
-                    updateStyleOption('addLegend', legendOptions.show);
-                  }
-                  if (legendOptions.position !== undefined) {
-                    updateStyleOption('legendPosition', legendOptions.position);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-          )}
+
+          <EuiFlexItem grow={false}>
+            <LegendOptionsPanel
+              legendOptions={{
+                show: styleOptions.addLegend,
+                position: styleOptions.legendPosition,
+              }}
+              onLegendOptionsChange={(legendOptions) => {
+                if (legendOptions.show !== undefined) {
+                  updateStyleOption('addLegend', legendOptions.show);
+                }
+                if (legendOptions.position !== undefined) {
+                  updateStyleOption('legendPosition', legendOptions.position);
+                }
+              }}
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
               titleOptions={styleOptions.titleOptions}

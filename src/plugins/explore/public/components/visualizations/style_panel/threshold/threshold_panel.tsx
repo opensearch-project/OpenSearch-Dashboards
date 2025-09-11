@@ -23,131 +23,6 @@ import {
   transformThresholdLinesToThreshold,
 } from './threshold_utils';
 
-// export const Colors: Record<ColorSchemas, any> = {
-//   [ColorSchemas.BLUES]: {
-//     baseColor: '#9ecae1',
-//     colors: [
-//       '#c6dbef',
-//       '#9ecae1',
-//       '#6baed6',
-//       '#4292c6',
-//       '#2171b5',
-//       '#08519c',
-//       '#08306b',
-//       '#041f45',
-//     ],
-//   },
-
-//   [ColorSchemas.GREENS]: {
-//     baseColor: '#a1d99b',
-//     colors: [
-//       '#c7e9c0',
-//       '#a1d99b',
-//       '#74c476',
-//       '#41ab5d',
-//       '#238b45',
-//       '#006d2c',
-//       '#00441b',
-//       '#003214',
-//     ],
-//   },
-
-//   [ColorSchemas.GREYS]: {
-//     baseColor: '#d9d9d9',
-//     colors: [
-//       '#f0f0f0',
-//       '#d9d9d9',
-//       '#bdbdbd',
-//       '#969696',
-//       '#737373',
-//       '#525252',
-//       '#252525',
-//       '#111111',
-//     ],
-//   },
-
-//   [ColorSchemas.REDS]: {
-//     baseColor: '#fc9272',
-//     colors: [
-//       '#fcbba1',
-//       '#fc9272',
-//       '#fb6a4a',
-//       '#ef3b2c',
-//       '#cb181d',
-//       '#a50f15',
-//       '#67000d',
-//       '#3b0008',
-//     ],
-//   },
-
-//   [ColorSchemas.GREENBLUE]: {
-//     baseColor: '#a8ddb5',
-//     colors: [
-//       '#ccebc5',
-//       '#a8ddb5',
-//       '#7bccc4',
-//       '#4eb3d3',
-//       '#2b8cbe',
-//       '#0868ac',
-//       '#084081',
-//       '#042f5f',
-//     ],
-//   },
-
-//   [ColorSchemas.YELLOWORANGE]: {
-//     baseColor: '#fed976',
-//     colors: [
-//       '#ffffb2',
-//       '#fed976',
-//       '#feb24c',
-//       '#fd8d3c',
-//       '#f03b20',
-//       '#bd0026',
-//       '#800026',
-//       '#4d0019',
-//     ],
-//   },
-// };
-
-// export const transformToThreshold = (ranges: RangeValue[], schema: ColorSchemas) => {
-//   if (ranges.length === 0) {
-//     return [];
-//   } else {
-//     // if min is undefined and max > min, then discard this range
-//     const combinedArray = ranges.reduce<number[]>((acc, val) => {
-//       if (val.min === undefined || (val.max && val.max < val.min)) return acc;
-//       acc.push(val.min);
-//       if (val.max) acc.push(val.max);
-//       return acc;
-//     }, []);
-
-//     const uniqueArray = Array.from(new Set(combinedArray)).sort((a, b) => a - b);
-
-//     const result = uniqueArray.map((num, i) => ({
-//       value: num,
-//       color: Colors[schema].colors[i % 6],
-//     }));
-//     return result;
-//   }
-// };
-
-// export const transformThresholdLinesToThreshold = (
-//   thresholdLines: ThresholdLine[]
-// ): Threshold[] => {
-//   if (thresholdLines.length === 0) {
-//     return [];
-//   } else {
-//     // if min is undefined and max > min, then discard this range
-//     const combinedArray = thresholdLines.map((line) => {
-//       return {
-//         value: line.value,
-//         color: line.color,
-//       };
-//     });
-//     return combinedArray.sort((a, b) => a.value - b.value);
-//   }
-// };
-
 export interface ThresholdPanelProps {
   customRanges?: RangeValue[];
   colorSchema?: ColorSchemas;
@@ -196,7 +71,7 @@ export const ThresholdPanel = ({
   });
 
   const [localThresholdStyle, setLocalThresholdStyle] = useState<ThresholdLineStyle>(() => {
-    if (!thresholdsOptions?.thresholdStyle && thresholdLines && thresholdLines.length > 0) {
+    if (!thresholdsOptions?.thresholdStyle && thresholdLines) {
       return thresholdLines[0].show
         ? thresholdLines[0].style || ThresholdLineStyle.Solid
         : ThresholdLineStyle.Off;
