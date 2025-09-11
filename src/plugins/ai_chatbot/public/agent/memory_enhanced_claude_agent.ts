@@ -87,7 +87,7 @@ export class MemoryEnhancedClaudeAgent {
         try {
           const formattedContextString = formatExploreContext(context as any);
           console.log('🔍 Using formatted Explore context for Claude API');
-          
+
           // Replace the context with the formatted string for Claude to understand
           enhancedContext = {
             ...context,
@@ -521,16 +521,18 @@ export class MemoryEnhancedClaudeAgent {
 
   private handleDeleteAllMemories(): string {
     const sessionCount = this.memoryService.listAllMemories().length;
-    
+
     if (sessionCount <= 1) {
       return '💾 No other memories to delete. Only current session exists.';
     }
 
     const deleted = this.memoryService.deleteAllMemories();
-    
+
     if (deleted) {
       const currentSessionId = this.memoryService.getCurrentSessionId();
-      return `✅ Successfully deleted all other memories!\n\n🗑️ Cleared ${sessionCount - 1} memory sessions\n💾 Current session preserved: ${currentSessionId}\n\n💡 Your current work session and chat history are safe. You can rename this session if needed.`;
+      return `✅ Successfully deleted all other memories!\n\n🗑️ Cleared ${
+        sessionCount - 1
+      } memory sessions\n💾 Current session preserved: ${currentSessionId}\n\n💡 Your current work session and chat history are safe. You can rename this session if needed.`;
     } else {
       return '❌ Failed to delete all memories. Please try again.';
     }
@@ -570,9 +572,9 @@ export class MemoryEnhancedClaudeAgent {
   private isExploreContext(context: ContextData): boolean {
     const contextAny = context as any;
     return (
-      (contextAny.appId === 'explore') ||
+      contextAny.appId === 'explore' ||
       (contextAny.data && contextAny.data.appId && contextAny.data.appId.startsWith('explore')) ||
-      (contextAny.pageType === 'explore') ||
+      contextAny.pageType === 'explore' ||
       (contextAny.currentUrl && contextAny.currentUrl.includes('/app/explore'))
     );
   }

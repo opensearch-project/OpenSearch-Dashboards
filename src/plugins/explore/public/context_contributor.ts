@@ -1,4 +1,9 @@
 /*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -10,17 +15,17 @@ import { SavedObjectsClientContract } from '../../../core/public';
 import {
   StatefulContextContributor,
   ContextCapturePattern,
-  DocumentExpansionContext
+  DocumentExpansionContext,
 } from '../../context_provider/public';
 import { formatExploreContext } from './services/context_formatter';
 
 /**
  * Explore Context Contributor - demonstrates HYBRID context capture pattern
- * 
+ *
  * This combines:
  * 1. URL-based context (index pattern, query, filters, time range)
  * 2. Transient UI action context (document expansions, field selections)
- * 
+ *
  * Key Features:
  * - Tracks multiple expanded documents simultaneously
  * - Captures document details and interaction history
@@ -29,31 +34,29 @@ import { formatExploreContext } from './services/context_formatter';
  */
 export class ExploreContextContributor implements StatefulContextContributor {
   appId = 'explore'; // This should match the app registration
-  
+
   // Also handle explore sub-apps like explore/logs, explore/traces, etc.
   canHandleApp(appId: string): boolean {
     return appId === this.appId || appId.startsWith('explore/');
   }
   capturePattern = ContextCapturePattern.HYBRID;
-  
+
   // Define UI Actions this contributor monitors
   contextTriggerActions = [
     'DOCUMENT_EXPAND',
-    'DOCUMENT_COLLAPSE', 
+    'DOCUMENT_COLLAPSE',
     'FIELD_FILTER_ADD',
     'FIELD_FILTER_REMOVE',
-    'TABLE_ROW_SELECT'
+    'TABLE_ROW_SELECT',
   ];
-  
+
   // Transient state management (not in URL)
   private expandedDocuments = new Map<string, DocumentExpansionContext>();
   private selectedFields = new Map<string, any>();
   private lastInteractionTime = Date.now();
   private interactionCount = 0;
-  
-  constructor(
-    private savedObjects: SavedObjectsClientContract
-  ) {}
+
+  constructor(private savedObjects: SavedObjectsClientContract) {}
 
   /**
    * Initialize the contributor - set up any required state
@@ -68,21 +71,21 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   async captureStaticContext(): Promise<Record<string, any>> {
     console.log('🔍 Explore: Capturing hybrid context (URL + transient state)');
-    
+
     try {
       // 1. Parse URL-based context
       const urlContext = this.parseUrlState();
-      
+
       // 2. Get transient state
       const transientState = this.getTransientState();
-      
+
       // 3. Get metadata about current state
       const stateMetadata = this.getStateMetadata();
-      
+
       const context = {
         type: 'explore',
         capturePattern: this.capturePattern,
-        
+
         // URL-based context (standard Discover-like state)
         indexPattern: urlContext.indexPattern,
         query: urlContext.query,
@@ -90,31 +93,32 @@ export class ExploreContextContributor implements StatefulContextContributor {
         columns: urlContext.columns,
         sort: urlContext.sort,
         timeRange: urlContext.timeRange,
-        
+
         // Transient state (not in URL)
         expandedDocuments: transientState.expandedDocuments,
         selectedFields: transientState.selectedFields,
         interactionSummary: transientState.interactionSummary,
-        
+
         // Context metadata
         metadata: {
           ...stateMetadata,
           urlKeys: Object.keys(urlContext),
-          transientKeys: Object.keys(transientState)
+          transientKeys: Object.keys(transientState),
         },
-        
-        timestamp: Date.now()
+
+        timestamp: Date.now(),
       };
 
-      console.log(`✅ Explore: Context captured with ${this.expandedDocuments.size} expanded documents`);
+      console.log(
+        `✅ Explore: Context captured with ${this.expandedDocuments.size} expanded documents`
+      );
       return context;
-      
     } catch (error) {
       console.error('❌ Explore: Error capturing context:', error);
       return {
         type: 'explore',
         error: error.message,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     }
   }
@@ -130,8 +134,8 @@ export class ExploreContextContributor implements StatefulContextContributor {
         data: {
           ...rawContext,
           url: window.location.href,
-          appId: this.appId
-        }
+          appId: this.appId,
+        },
       };
       return formatExploreContext(contextWithUrl);
     } catch (error) {
@@ -146,11 +150,11 @@ export class ExploreContextContributor implements StatefulContextContributor {
   parseUrlState(): Record<string, any> {
     const urlParams = new URLSearchParams(window.location.search);
     const hash = window.location.hash;
-    
+
     // Parse _a (app state) and _g (global state) parameters
     const appState = this.parseStateParam(urlParams.get('_a'));
     const globalState = this.parseStateParam(urlParams.get('_g'));
-    
+
     return {
       indexPattern: appState?.index || 'unknown',
       query: appState?.query || { query: '', language: 'kuery' },
@@ -161,7 +165,7 @@ export class ExploreContextContributor implements StatefulContextContributor {
       url: window.location.href,
       pathname: window.location.pathname,
       search: window.location.search,
-      hash: hash
+      hash,
     };
   }
 
@@ -170,7 +174,7 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   private parseStateParam(param: string | null): Record<string, any> | null {
     if (!param) return null;
-    
+
     try {
       const decoded = decodeURIComponent(param);
       return JSON.parse(decoded);
@@ -185,10 +189,10 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   captureDynamicContext(trigger: string, data: any): Record<string, any> {
     console.log(`⚡ Explore: Capturing dynamic context for trigger: ${trigger}`, data);
-    
+
     this.lastInteractionTime = Date.now();
     this.interactionCount++;
-    
+
     switch (trigger) {
       case 'DOCUMENT_EXPAND':
         return this.handleDocumentExpand(data);
@@ -206,7 +210,7 @@ export class ExploreContextContributor implements StatefulContextContributor {
           trigger,
           timestamp: Date.now(),
           data,
-          message: `Unhandled trigger: ${trigger}`
+          message: `Unhandled trigger: ${trigger}`,
         };
     }
   }
@@ -216,19 +220,19 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   private handleDocumentExpand(data: any): Record<string, any> {
     const documentId = data.documentId || data.rowId || `doc_${Date.now()}`;
-    
+
     const expansionContext: DocumentExpansionContext = {
       documentId,
       documentData: data.documentData || data.rowData || {},
       expandedAt: Date.now(),
       interactionCount: this.interactionCount,
-      fieldSelections: []
+      fieldSelections: [],
     };
-    
+
     this.expandedDocuments.set(documentId, expansionContext);
-    
+
     console.log(`📄 Document expanded: ${documentId} (Total: ${this.expandedDocuments.size})`);
-    
+
     return {
       type: 'explore_dynamic',
       trigger: 'DOCUMENT_EXPAND',
@@ -237,8 +241,8 @@ export class ExploreContextContributor implements StatefulContextContributor {
         documentId,
         documentData: expansionContext.documentData,
         totalExpanded: this.expandedDocuments.size,
-        isMultipleExpanded: this.expandedDocuments.size > 1
-      }
+        isMultipleExpanded: this.expandedDocuments.size > 1,
+      },
     };
   }
 
@@ -247,12 +251,14 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   private handleDocumentCollapse(data: any): Record<string, any> {
     const documentId = data.documentId || data.rowId;
-    
+
     if (documentId && this.expandedDocuments.has(documentId)) {
       this.expandedDocuments.delete(documentId);
-      console.log(`📄 Document collapsed: ${documentId} (Remaining: ${this.expandedDocuments.size})`);
+      console.log(
+        `📄 Document collapsed: ${documentId} (Remaining: ${this.expandedDocuments.size})`
+      );
     }
-    
+
     return {
       type: 'explore_dynamic',
       trigger: 'DOCUMENT_COLLAPSE',
@@ -260,8 +266,8 @@ export class ExploreContextContributor implements StatefulContextContributor {
       data: {
         documentId,
         totalExpanded: this.expandedDocuments.size,
-        remainingDocuments: Array.from(this.expandedDocuments.keys())
-      }
+        remainingDocuments: Array.from(this.expandedDocuments.keys()),
+      },
     };
   }
 
@@ -271,17 +277,17 @@ export class ExploreContextContributor implements StatefulContextContributor {
   private handleFieldFilterAdd(data: any): Record<string, any> {
     const fieldName = data.fieldName || data.field;
     const filterValue = data.filterValue || data.value;
-    
+
     if (fieldName) {
       this.selectedFields.set(fieldName, {
         value: filterValue,
         addedAt: Date.now(),
-        interactionCount: this.interactionCount
+        interactionCount: this.interactionCount,
       });
-      
+
       console.log(`🔍 Field filter added: ${fieldName} = ${filterValue}`);
     }
-    
+
     return {
       type: 'explore_dynamic',
       trigger: 'FIELD_FILTER_ADD',
@@ -290,8 +296,8 @@ export class ExploreContextContributor implements StatefulContextContributor {
         fieldName,
         filterValue,
         totalFilters: this.selectedFields.size,
-        allFilters: Object.fromEntries(this.selectedFields)
-      }
+        allFilters: Object.fromEntries(this.selectedFields),
+      },
     };
   }
 
@@ -300,12 +306,12 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   private handleFieldFilterRemove(data: any): Record<string, any> {
     const fieldName = data.fieldName || data.field;
-    
+
     if (fieldName && this.selectedFields.has(fieldName)) {
       this.selectedFields.delete(fieldName);
       console.log(`🔍 Field filter removed: ${fieldName}`);
     }
-    
+
     return {
       type: 'explore_dynamic',
       trigger: 'FIELD_FILTER_REMOVE',
@@ -313,8 +319,8 @@ export class ExploreContextContributor implements StatefulContextContributor {
       data: {
         fieldName,
         totalFilters: this.selectedFields.size,
-        remainingFilters: Object.fromEntries(this.selectedFields)
-      }
+        remainingFilters: Object.fromEntries(this.selectedFields),
+      },
     };
   }
 
@@ -324,10 +330,10 @@ export class ExploreContextContributor implements StatefulContextContributor {
   private handleTableRowSelect(data: any): Record<string, any> {
     const rowData = data.rowData || {};
     const rowIndex = data.rowIndex || 0;
-    
+
     // If this row selection leads to expansion, we'll handle it in handleDocumentExpand
     console.log(`📋 Table row selected: index ${rowIndex}`);
-    
+
     return {
       type: 'explore_dynamic',
       trigger: 'TABLE_ROW_SELECT',
@@ -336,32 +342,108 @@ export class ExploreContextContributor implements StatefulContextContributor {
         rowIndex,
         rowData,
         hasExpandedDocs: this.expandedDocuments.size > 0,
-        totalExpanded: this.expandedDocuments.size
-      }
+        totalExpanded: this.expandedDocuments.size,
+      },
     };
   }
 
   /**
-   * Get current transient state
+   * Get current transient state with enhanced document preview
    */
   getTransientState(): Record<string, any> {
+    const documentPreview = this.getDocumentPreview();
+    
     return {
-      expandedDocuments: Array.from(this.expandedDocuments.entries()).map(([id, context]) => ({
-        documentId: id,
-        documentData: context.documentData,
-        expandedAt: context.expandedAt,
-        interactionCount: context.interactionCount,
-        fieldSelections: context.fieldSelections
-      })),
+      // Enhanced document information with LLM-friendly format
+      expandedDocuments: documentPreview.expandedDocuments,
+      
+      // Field filter information
       selectedFields: Object.fromEntries(this.selectedFields),
+      
+      // Interaction summary with context
       interactionSummary: {
         totalExpanded: this.expandedDocuments.size,
         totalFieldFilters: this.selectedFields.size,
         hasMultipleExpanded: this.expandedDocuments.size > 1,
         lastInteraction: this.lastInteractionTime,
         totalInteractions: this.interactionCount,
-        recentActivity: Date.now() - this.lastInteractionTime < 30000
+        recentActivity: Date.now() - this.lastInteractionTime < 30000,
+      },
+      
+      // User activity context for LLM
+      userActivity: {
+        currentFocus: documentPreview.hasCurrentExpansions
+          ? `User is examining ${documentPreview.totalExpanded} expanded document(s)`
+          : 'No documents currently expanded',
+        lastAction: new Date(this.lastInteractionTime).toISOString(),
+        contextNote: documentPreview.contextNote,
+        recentDocuments: documentPreview.expandedDocuments.slice(-3), // Last 3 for context
+      },
+    };
+  }
+
+  /**
+   * Get document preview for LLM consumption
+   * Provides structured summary of expanded documents with trigger context
+   */
+  getDocumentPreview(): Record<string, any> {
+    const expandedDocs = Array.from(this.expandedDocuments.entries()).map(([id, context]) => {
+      // Extract meaningful fields from document data
+      const docData = context.documentData || {};
+      const preview: Record<string, any> = {
+        documentId: id,
+        expandedAt: new Date(context.expandedAt).toISOString(),
+        triggerType: 'DOCUMENT_EXPAND',
+        triggerComment: 'User expanded this document to view detailed content',
+      };
+
+      // Add meaningful document fields for LLM context
+      if (docData._source) {
+        const source = docData._source;
+        
+        // Common log fields
+        if (source.message) preview.message = source.message;
+        if (source.timestamp) preview.timestamp = source.timestamp;
+        if (source.level || source.severity) preview.level = source.level || source.severity;
+        if (source.host) preview.host = source.host;
+        if (source.url) preview.url = source.url;
+        if (source.referer) preview.referer = source.referer;
+        if (source.request) preview.request = source.request;
+        if (source.response) preview.response = source.response;
+        if (source.bytes) preview.bytes = source.bytes;
+        if (source.clientip) preview.clientip = source.clientip;
+        
+        // Add any other significant fields (limit to prevent overwhelming LLM)
+        const otherFields = Object.keys(source)
+          .filter(key => !['message', 'timestamp', 'level', 'severity', 'host', 'url', 'referer', 'request', 'response', 'bytes', 'clientip'].includes(key))
+          .slice(0, 5); // Limit to 5 additional fields
+        
+        if (otherFields.length > 0) {
+          preview.additionalFields = {};
+          otherFields.forEach(field => {
+            preview.additionalFields[field] = source[field];
+          });
+        }
+      } else {
+        // Fallback: use raw document data
+        const significantFields = Object.keys(docData)
+          .filter(key => !key.startsWith('_') && docData[key] !== null && docData[key] !== undefined)
+          .slice(0, 8); // Limit fields for readability
+        
+        significantFields.forEach(field => {
+          preview[field] = docData[field];
+        });
       }
+
+      return preview;
+    });
+
+    return {
+      expandedDocuments: expandedDocs,
+      totalExpanded: this.expandedDocuments.size,
+      hasCurrentExpansions: this.expandedDocuments.size > 0,
+      lastInteraction: new Date(this.lastInteractionTime).toISOString(),
+      contextNote: 'These are documents the user has expanded to examine in detail. This represents their current focus and investigation area.',
     };
   }
 
@@ -395,7 +477,7 @@ export class ExploreContextContributor implements StatefulContextContributor {
     customProperties: Record<string, any>;
   } {
     const hasTransientState = this.expandedDocuments.size > 0 || this.selectedFields.size > 0;
-    
+
     let stateComplexity: 'simple' | 'moderate' | 'complex' = 'simple';
     if (this.expandedDocuments.size > 0 || this.selectedFields.size > 0) {
       stateComplexity = 'moderate';
@@ -403,7 +485,7 @@ export class ExploreContextContributor implements StatefulContextContributor {
     if (this.expandedDocuments.size > 3 || this.selectedFields.size > 5) {
       stateComplexity = 'complex';
     }
-    
+
     return {
       hasTransientState,
       stateComplexity,
@@ -413,8 +495,8 @@ export class ExploreContextContributor implements StatefulContextContributor {
         expandedDocumentCount: this.expandedDocuments.size,
         selectedFieldCount: this.selectedFields.size,
         totalInteractions: this.interactionCount,
-        isActiveSession: Date.now() - this.lastInteractionTime < 300000 // 5 minutes
-      }
+        isActiveSession: Date.now() - this.lastInteractionTime < 300000, // 5 minutes
+      },
     };
   }
 
@@ -429,7 +511,7 @@ export class ExploreContextContributor implements StatefulContextContributor {
       'ADD_FIELD_FILTER',
       'REMOVE_FIELD_FILTER',
       'CLEAR_ALL_FILTERS',
-      'REFRESH_EXPLORE_DATA'
+      'REFRESH_EXPLORE_DATA',
     ];
   }
 
@@ -438,7 +520,7 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   async executeAction(actionType: string, params: any): Promise<any> {
     console.log(`🎯 Explore: Executing action ${actionType}`, params);
-    
+
     switch (actionType) {
       case 'EXPAND_DOCUMENT':
         return this.expandDocument(params);
@@ -467,19 +549,19 @@ export class ExploreContextContributor implements StatefulContextContributor {
     if (!documentId) {
       throw new Error('Document ID required for expansion');
     }
-    
+
     // Simulate document expansion
     this.handleDocumentExpand({
       documentId,
       documentData: params.documentData || {},
-      source: 'programmatic'
+      source: 'programmatic',
     });
-    
+
     return {
       success: true,
       action: 'EXPAND_DOCUMENT',
       documentId,
-      totalExpanded: this.expandedDocuments.size
+      totalExpanded: this.expandedDocuments.size,
     };
   }
 
@@ -491,14 +573,14 @@ export class ExploreContextContributor implements StatefulContextContributor {
     if (!documentId) {
       throw new Error('Document ID required for collapse');
     }
-    
+
     this.handleDocumentCollapse({ documentId, source: 'programmatic' });
-    
+
     return {
       success: true,
       action: 'COLLAPSE_DOCUMENT',
       documentId,
-      totalExpanded: this.expandedDocuments.size
+      totalExpanded: this.expandedDocuments.size,
     };
   }
 
@@ -508,14 +590,14 @@ export class ExploreContextContributor implements StatefulContextContributor {
   private async collapseAllDocuments(): Promise<any> {
     const collapsedCount = this.expandedDocuments.size;
     this.expandedDocuments.clear();
-    
+
     console.log(`📄 All documents collapsed (${collapsedCount} documents)`);
-    
+
     return {
       success: true,
       action: 'COLLAPSE_ALL_DOCUMENTS',
       collapsedCount,
-      totalExpanded: 0
+      totalExpanded: 0,
     };
   }
 
@@ -526,19 +608,19 @@ export class ExploreContextContributor implements StatefulContextContributor {
     if (!params.fieldName || !params.filterValue) {
       throw new Error('Field name and filter value required');
     }
-    
+
     this.handleFieldFilterAdd({
       fieldName: params.fieldName,
       filterValue: params.filterValue,
-      source: 'programmatic'
+      source: 'programmatic',
     });
-    
+
     return {
       success: true,
       action: 'ADD_FIELD_FILTER',
       fieldName: params.fieldName,
       filterValue: params.filterValue,
-      totalFilters: this.selectedFields.size
+      totalFilters: this.selectedFields.size,
     };
   }
 
@@ -549,17 +631,17 @@ export class ExploreContextContributor implements StatefulContextContributor {
     if (!params.fieldName) {
       throw new Error('Field name required for filter removal');
     }
-    
+
     this.handleFieldFilterRemove({
       fieldName: params.fieldName,
-      source: 'programmatic'
+      source: 'programmatic',
     });
-    
+
     return {
       success: true,
       action: 'REMOVE_FIELD_FILTER',
       fieldName: params.fieldName,
-      totalFilters: this.selectedFields.size
+      totalFilters: this.selectedFields.size,
     };
   }
 
@@ -569,14 +651,14 @@ export class ExploreContextContributor implements StatefulContextContributor {
   private async clearAllFilters(): Promise<any> {
     const clearedCount = this.selectedFields.size;
     this.selectedFields.clear();
-    
+
     console.log(`🧹 All field filters cleared (${clearedCount} filters)`);
-    
+
     return {
       success: true,
       action: 'CLEAR_ALL_FILTERS',
       clearedCount,
-      totalFilters: 0
+      totalFilters: 0,
     };
   }
 
@@ -585,15 +667,15 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   private async refreshExploreData(): Promise<any> {
     console.log('🔄 Refreshing Explore data');
-    
+
     // In a real implementation, this would trigger data refresh
     // For now, we'll just update the interaction timestamp
     this.lastInteractionTime = Date.now();
-    
+
     return {
       success: true,
       action: 'REFRESH_EXPLORE_DATA',
-      timestamp: this.lastInteractionTime
+      timestamp: this.lastInteractionTime,
     };
   }
 

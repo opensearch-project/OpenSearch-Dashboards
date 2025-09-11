@@ -5,7 +5,7 @@
 
 /**
  * Explore Context Formatter
- * 
+ *
  * Transforms raw Explore context data into structured, LLM-friendly format
  * Parses OpenSearch Dashboards URL parameters and application state
  */
@@ -104,8 +104,8 @@ export class ExploreURLParser {
   static parseRisonParam(param: string): any {
     try {
       // Decode URL encoding first
-      let decoded = decodeURIComponent(param);
-      
+      const decoded = decodeURIComponent(param);
+
       // Simple RISON to JSON conversion
       const result = this.risonToJson(decoded);
       return result;
@@ -129,7 +129,7 @@ export class ExploreURLParser {
    */
   private static manualExtraction(param: string): any {
     const result: any = {};
-    
+
     // Extract nested dataset and dataSource information
     const dataSourceMatch = param.match(/dataSource:\(([^)]+)\)/);
     if (dataSourceMatch) {
@@ -137,51 +137,54 @@ export class ExploreURLParser {
       const dsIdMatch = dataSourceContent.match(/id:([^,)]+)/);
       const dsTitleMatch = dataSourceContent.match(/title:([^,)]+)/);
       const dsTypeMatch = dataSourceContent.match(/type:([^,)]+)/);
-      
+
       result.dataSource = {
         id: dsIdMatch ? dsIdMatch[1] : '',
         title: dsTitleMatch ? dsTitleMatch[1] : '',
-        type: dsTypeMatch ? dsTypeMatch[1] : ''
+        type: dsTypeMatch ? dsTypeMatch[1] : '',
       };
     }
-    
+
     // Extract dataset information (separate from dataSource)
     const datasetIdMatch = param.match(/id:([^,)]+)/g);
     const datasetTitleMatch = param.match(/title:([^,)]+)/g);
     const datasetTypeMatch = param.match(/type:([^,)]+)/g);
     const timeFieldMatch = param.match(/timeFieldName:([^,)]+)/);
-    
+
     if (datasetTitleMatch && datasetTitleMatch.length > 0) {
       // Get the last title match which should be the dataset title (not dataSource title)
       const lastTitle = datasetTitleMatch[datasetTitleMatch.length - 1];
       const titleValue = lastTitle.replace('title:', '');
-      
+
       result.dataset = {
         id: datasetIdMatch && datasetIdMatch.length > 1 ? datasetIdMatch[1].replace('id:', '') : '',
         title: titleValue,
-        type: datasetTypeMatch && datasetTypeMatch.length > 1 ? datasetTypeMatch[1].replace('type:', '') : 'INDEX_PATTERN',
-        timeFieldName: timeFieldMatch ? timeFieldMatch[1] : undefined
+        type:
+          datasetTypeMatch && datasetTypeMatch.length > 1
+            ? datasetTypeMatch[1].replace('type:', '')
+            : 'INDEX_PATTERN',
+        timeFieldName: timeFieldMatch ? timeFieldMatch[1] : undefined,
       };
     }
-    
+
     // Language
     const langMatch = param.match(/language:(\w+)/);
     if (langMatch) {
       result.language = langMatch[1];
     }
-    
+
     // Query (handle both encoded and decoded)
     const queryMatch = param.match(/query:'([^']+)'/);
     if (queryMatch) {
       result.query = queryMatch[1]; // Already decoded in the logs
     }
-    
+
     // Chart type
     const chartMatch = param.match(/chartType:(\w+)/);
     if (chartMatch) {
       result.chartType = chartMatch[1];
     }
-    
+
     // Axes mapping
     const axesMappingMatch = param.match(/axesMapping:\(([^)]+)\)/);
     if (axesMappingMatch) {
@@ -191,7 +194,7 @@ export class ExploreURLParser {
         result.axesMapping = { value: valueMatch[1] };
       }
     }
-    
+
     // Style options
     const styleMatch = param.match(/styleOptions:\(([^)]+)\)/);
     if (styleMatch) {
@@ -199,13 +202,13 @@ export class ExploreURLParser {
       const colorSchemaMatch = styleContent.match(/colorSchema:(\w+)/);
       const fontSizeMatch = styleContent.match(/fontSize:(\d+)/);
       const showTitleMatch = styleContent.match(/showTitle:!([tf])/);
-      
+
       result.styleOptions = {};
       if (colorSchemaMatch) result.styleOptions.colorSchema = colorSchemaMatch[1];
       if (fontSizeMatch) result.styleOptions.fontSize = parseInt(fontSizeMatch[1]);
       if (showTitleMatch) result.styleOptions.showTitle = showTitleMatch[1] === 't';
     }
-    
+
     // UI state
     const activeTabMatch = param.match(/activeTabId:([^,)]+)/);
     const showHistogramMatch = param.match(/showHistogram:!([tf])/);
@@ -214,7 +217,7 @@ export class ExploreURLParser {
       if (activeTabMatch) result.ui.activeTabId = activeTabMatch[1];
       if (showHistogramMatch) result.ui.showHistogram = showHistogramMatch[1] === 't';
     }
-    
+
     // Legacy state
     const columnsMatch = param.match(/columns:!\(([^)]*)\)/);
     const intervalMatch = param.match(/interval:(\w+)/);
@@ -228,30 +231,30 @@ export class ExploreURLParser {
       if (intervalMatch) result.legacy.interval = intervalMatch[1];
       if (isDirtyMatch) result.legacy.isDirty = isDirtyMatch[1] === 't';
     }
-    
+
     // Time range
     const timeFromMatch = param.match(/from:([^,)]+)/);
     const timeToMatch = param.match(/to:([^,)]+)/);
     if (timeFromMatch && timeToMatch) {
       result.time = { from: timeFromMatch[1], to: timeToMatch[1] };
     }
-    
+
     // Filters
     const filtersMatch = param.match(/filters:!\(\)/);
     if (filtersMatch) {
       result.filters = [];
     }
-    
+
     // Refresh interval
     const pauseMatch = param.match(/pause:!([tf])/);
     const valueMatch = param.match(/value:(\d+)/);
     if (pauseMatch && valueMatch) {
       result.refreshInterval = {
         pause: pauseMatch[1] === 't',
-        value: parseInt(valueMatch[1])
+        value: parseInt(valueMatch[1]),
       };
     }
-    
+
     console.log('🔍 manualExtraction result:', result);
     return result;
   }
@@ -372,7 +375,7 @@ export class ExploreContextFormatter {
   static formatContext(rawContext: any): string {
     const urlParams = this.extractURLParams(rawContext);
     const formattedContext = this.parseContext(rawContext, urlParams);
-    
+
     return this.generateMarkdown(formattedContext);
   }
 
@@ -387,15 +390,15 @@ export class ExploreContextFormatter {
       // Extract hash fragment from URL
       const hashIndex = url.indexOf('#');
       if (hashIndex === -1) return {};
-      
+
       const hash = url.substring(hashIndex + 1);
-      
+
       // Remove leading /? if present
       const cleanHash = hash.startsWith('/?') ? hash.substring(2) : hash;
-      
+
       // Parse URL parameters from hash
       const params = new URLSearchParams(cleanHash);
-      
+
       return {
         _q: params.get('_q') || undefined,
         _a: params.get('_a') || undefined,
@@ -411,38 +414,43 @@ export class ExploreContextFormatter {
   /**
    * Parse context data using URL parameters and raw context
    */
-  private static parseContext(rawContext: any, urlParams: ExploreURLParams): FormattedExploreContext {
+  private static parseContext(
+    rawContext: any,
+    urlParams: ExploreURLParams
+  ): FormattedExploreContext {
     // Determine app flavor from URL or appId
     const appId = rawContext?.data?.appId || rawContext?.appId || '';
     const flavor = this.determineExploreFlavor(appId);
-    
+
     // Parse URL parameters and get both dataset and dataSource
     const parsedData = urlParams._q
       ? ExploreURLParser.parseQueryParams(urlParams._q)
       : { dataset: null, query: { query: '', language: 'PPL' as const } };
-    
+
     const visualization = urlParams._v
       ? ExploreURLParser.parseVisualizationParams(urlParams._v)
       : {};
-    
-    const appState = urlParams._a
-      ? ExploreURLParser.parseAppParams(urlParams._a)
-      : {};
-    
-    const globalState = urlParams._g
-      ? ExploreURLParser.parseGlobalParams(urlParams._g)
-      : {};
+
+    const appState = urlParams._a ? ExploreURLParser.parseAppParams(urlParams._a) : {};
+
+    const globalState = urlParams._g ? ExploreURLParser.parseGlobalParams(urlParams._g) : {};
 
     // Extract additional context from raw data
-    const timeRange = rawContext?.data?.timeRange || globalState.timeRange || {
-      from: 'now-15m',
-      to: 'now',
-    };
+    const timeRange = rawContext?.data?.timeRange ||
+      globalState.timeRange || {
+        from: 'now-15m',
+        to: 'now',
+      };
 
     const filters = rawContext?.data?.filters || globalState.filters || [];
-    
+
     // Generate recommendations based on current state
-    const recommendations = this.generateRecommendations(parsedData.query, parsedData.dataset, visualization, flavor);
+    const recommendations = this.generateRecommendations(
+      parsedData.query,
+      parsedData.dataset,
+      visualization,
+      flavor
+    );
 
     // Create enhanced context with dataSource information
     const enhancedContext = {
@@ -495,17 +503,25 @@ export class ExploreContextFormatter {
 
     // Query recommendations
     if (!query.query.trim()) {
-      recommendations.push(`Start with a basic ${query.language} query like: source = ${dataset?.title || 'your_dataset'} | head 10`);
+      recommendations.push(
+        `Start with a basic ${query.language} query like: source = ${
+          dataset?.title || 'your_dataset'
+        } | head 10`
+      );
     }
 
     // Visualization recommendations
     if (visualization.chartType === 'metric' && !query.query.includes('stats')) {
-      recommendations.push('For metric charts, use aggregation functions like: source = dataset | stats count()');
+      recommendations.push(
+        'For metric charts, use aggregation functions like: source = dataset | stats count()'
+      );
     }
 
     // Dataset recommendations
     if (dataset?.title?.includes('sample_data')) {
-      recommendations.push('You are using sample data - perfect for testing queries and visualizations');
+      recommendations.push(
+        'You are using sample data - perfect for testing queries and visualizations'
+      );
     }
 
     // Flavor-specific recommendations
@@ -553,22 +569,29 @@ export class ExploreContextFormatter {
     if (context.visualization.chartType) {
       sections.push('## 📊 Visualization Configuration');
       sections.push(`chartType: ${context.visualization.chartType}`);
-      
+
       if (context.visualization.axesMapping) {
         Object.entries(context.visualization.axesMapping).forEach(([key, value]) => {
           sections.push(`axesMapping.${key}: ${value}`);
         });
       }
-      
+
       if (context.visualization.styleOptions) {
         const style = context.visualization.styleOptions;
         if (style.colorSchema) sections.push(`styleOptions.colorSchema: ${style.colorSchema}`);
         if (style.fontSize) sections.push(`styleOptions.fontSize: ${style.fontSize}`);
-        if (style.showTitle !== undefined) sections.push(`styleOptions.showTitle: ${style.showTitle ? 'yes' : 'no'}`);
-        if (style.title !== undefined) sections.push(`styleOptions.title: ${style.title || '(empty)'}`);
-        if (style.useColor !== undefined) sections.push(`styleOptions.useColor: ${style.useColor ? 'yes' : 'no'}`);
+        if (style.showTitle !== undefined)
+          sections.push(`styleOptions.showTitle: ${style.showTitle ? 'yes' : 'no'}`);
+        if (style.title !== undefined)
+          sections.push(`styleOptions.title: ${style.title || '(empty)'}`);
+        if (style.useColor !== undefined)
+          sections.push(`styleOptions.useColor: ${style.useColor ? 'yes' : 'no'}`);
         if (style.customRanges?.length) {
-          sections.push(`styleOptions.customRanges: ${style.customRanges.map(r => `${r.min}-${r.max}`).join(', ')}`);
+          sections.push(
+            `styleOptions.customRanges: ${style.customRanges
+              .map((r) => `${r.min}-${r.max}`)
+              .join(', ')}`
+          );
         }
       }
       sections.push('');
@@ -576,7 +599,7 @@ export class ExploreContextFormatter {
 
     // Data Source and Dataset Information
     sections.push('## 📁 Dataset Information');
-    
+
     // Parse the raw context to get dataSource and dataset separately
     const rawContext = context as any;
     if (rawContext.dataSource) {
@@ -584,7 +607,7 @@ export class ExploreContextFormatter {
       sections.push(`dataSource.title: ${rawContext.dataSource.title || ''}`);
       sections.push(`dataSource.type: ${rawContext.dataSource.type || ''}`);
     }
-    
+
     if (context.dataset) {
       sections.push(`dataset.id: ${context.dataset.id || ''}`);
       sections.push(`dataset.title: ${context.dataset.title || ''}`);
@@ -616,7 +639,7 @@ export class ExploreContextFormatter {
     }
     sections.push('');
 
-    // User Actions
+    // User Actions - Enhanced with document preview data
     if (context.userActions.length > 0) {
       sections.push('## 🎯 Recent User Activity');
       context.userActions.forEach((action, index) => {
@@ -627,6 +650,51 @@ export class ExploreContextFormatter {
           sections.push(`recentActivity: ${action.recentActivity ? 'yes' : 'no'}`);
         }
       });
+      sections.push('');
+    }
+
+    // Enhanced User Activity with Document Details
+    const rawContextData = context as any;
+    if (rawContextData.expandedDocuments && rawContextData.expandedDocuments.length > 0) {
+      sections.push('## 📄 Expanded Documents');
+      rawContextData.expandedDocuments.forEach((doc: any, index: number) => {
+        sections.push(`### Document ${index + 1}`);
+        sections.push(`documentId: ${doc.documentId}`);
+        sections.push(`expandedAt: ${doc.expandedAt}`);
+        sections.push(`triggerType: ${doc.triggerType}`);
+        sections.push(`triggerComment: ${doc.triggerComment}`);
+        
+        // Add document content fields
+        if (doc.message) sections.push(`message: ${doc.message}`);
+        if (doc.timestamp) sections.push(`timestamp: ${doc.timestamp}`);
+        if (doc.level) sections.push(`level: ${doc.level}`);
+        if (doc.host) sections.push(`host: ${doc.host}`);
+        if (doc.url) sections.push(`url: ${doc.url}`);
+        if (doc.referer) sections.push(`referer: ${doc.referer}`);
+        if (doc.request) sections.push(`request: ${doc.request}`);
+        if (doc.response) sections.push(`response: ${doc.response}`);
+        if (doc.bytes) sections.push(`bytes: ${doc.bytes}`);
+        if (doc.clientip) sections.push(`clientip: ${doc.clientip}`);
+        
+        // Add additional fields if present
+        if (doc.additionalFields) {
+          Object.entries(doc.additionalFields).forEach(([key, value]) => {
+            sections.push(`${key}: ${value}`);
+          });
+        }
+        
+        sections.push('');
+      });
+    }
+
+    // User Activity Summary
+    if (rawContextData.userActivity) {
+      sections.push('## 👤 User Activity Summary');
+      sections.push(`currentFocus: ${rawContextData.userActivity.currentFocus}`);
+      sections.push(`lastAction: ${rawContextData.userActivity.lastAction}`);
+      if (rawContextData.userActivity.contextNote) {
+        sections.push(`contextNote: ${rawContextData.userActivity.contextNote}`);
+      }
       sections.push('');
     }
 
@@ -644,7 +712,7 @@ export class ExploreContextFormatter {
       'now-24h': 'Last 24 hours',
       'now-7d': 'Last 7 days',
       'now-15w': 'Last 15 weeks',
-      'now': 'now',
+      now: 'now',
     };
 
     const fromDisplay = timeMap[from] || from;
@@ -653,7 +721,7 @@ export class ExploreContextFormatter {
     if (to === 'now') {
       return fromDisplay.replace('Last ', '');
     }
-    
+
     return `${fromDisplay} to ${toDisplay}`;
   }
 }

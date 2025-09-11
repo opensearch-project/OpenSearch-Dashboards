@@ -1,4 +1,9 @@
 /*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -6,8 +11,8 @@
  * compatible open source license.
  */
 
-import { IRouter } from '../../../../core/server';
 import { schema } from '@osd/config-schema';
+import { IRouter } from '../../../../core/server';
 
 export function defineClaudeProxyRoutes(router: IRouter) {
   router.post(
@@ -27,7 +32,7 @@ export function defineClaudeProxyRoutes(router: IRouter) {
 
         // Build system prompt with enhanced context support
         let contextSection = '';
-        
+
         // Use formatted system context if available (from memory-enhanced agent)
         if (userContext?.systemContext) {
           contextSection = `Current Context:\n${userContext.systemContext}`;

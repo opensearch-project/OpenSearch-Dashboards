@@ -522,35 +522,66 @@ export class ExplorePlugin
         if (tableRow) {
           const rowIndex = Array.from(tableRow.parentElement?.children || []).indexOf(tableRow);
           
-          // Extract document data from the row
-          const cells = tableRow.querySelectorAll('td');
-          const documentData: Record<string, any> = {};
+          // Extract document data from the row - look for the actual document content
+          let documentData: Record<string, any> = {};
           
-          cells.forEach((cell, index) => {
-            const fieldName = cell.getAttribute('data-test-subj') || `field_${index}`;
-            const textContent = cell.textContent?.trim() || '';
-            if (textContent && fieldName !== 'docTableExpandToggleColumn') {
-              documentData[fieldName] = textContent;
+          // Try to find the document viewer or expanded content
+          const docViewer = tableRow.querySelector('.osdDocViewer') ||
+                           tableRow.nextElementSibling?.querySelector('.osdDocViewer');
+          
+          if (docViewer) {
+            // Extract from document viewer if available
+            const docViewTable = docViewer.querySelector('.osdDocViewerTable');
+            if (docViewTable) {
+              const rows = docViewTable.querySelectorAll('tr');
+              rows.forEach(row => {
+                const fieldCell = row.querySelector('.osdDocViewer__field');
+                const valueCell = row.querySelector('.osdDocViewer__value');
+                if (fieldCell && valueCell) {
+                  const fieldName = fieldCell.textContent?.trim();
+                  const fieldValue = valueCell.textContent?.trim();
+                  if (fieldName && fieldValue) {
+                    documentData[fieldName] = fieldValue;
+                  }
+                }
+              });
             }
-          });
+          }
           
-          const documentId = `explore_doc_${Date.now()}_${rowIndex}`;
+          // Fallback: extract from table cells if no document viewer found
+          if (Object.keys(documentData).length === 0) {
+            const cells = tableRow.querySelectorAll('td');
+            cells.forEach((cell, index) => {
+              const fieldName = cell.getAttribute('data-test-subj') || `field_${index}`;
+              const textContent = cell.textContent?.trim() || '';
+              if (textContent && fieldName !== 'docTableExpandToggleColumn') {
+                documentData[fieldName] = textContent;
+              }
+            });
+          }
+          
+          // Use a more meaningful document ID based on actual document content
+          const documentId = documentData._id ||
+                           documentData.id ||
+                           `doc_${rowIndex}_${Date.now()}`;
           
           console.log('📄 Document expansion detected:', {
             documentId,
             rowIndex,
-            documentData
+            documentData,
+            documentFields: Object.keys(documentData).length
           });
           
           // Trigger the context capture
           const contextProvider = (window as any).contextProvider;
-          if (contextProvider && contextProvider.captureDynamicContext) {
-            contextProvider.captureDynamicContext('DOCUMENT_EXPAND', {
+          if (contextProvider && contextProvider.triggerTestCapture) {
+            contextProvider.triggerTestCapture('DOCUMENT_EXPAND', {
               documentId,
               rowIndex,
               documentData,
               source: 'ui_detection',
-              timestamp: Date.now()
+              timestamp: Date.now(),
+              expandedFields: Object.keys(documentData).length
             });
           } else {
             console.warn('⚠️ Context Provider not available for dynamic context capture');
