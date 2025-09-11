@@ -59,10 +59,7 @@ export const createTwoMetricScatter = (
   };
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
 
   const baseSpec = {
     $schema: VEGASCHEMA,
@@ -136,10 +133,7 @@ export const createTwoMetricOneCateScatter = (
   };
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
 
   const baseSpec = {
     $schema: VEGASCHEMA,
@@ -227,10 +221,7 @@ export const createThreeMetricOneCateScatter = (
     },
   };
 
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
 
   const baseSpec = {
     $schema: VEGASCHEMA,

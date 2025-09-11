@@ -17,7 +17,7 @@ describe('types', () => {
 
   describe('ThresholdLineStyle', () => {
     it('should define the correct threshold line styles', () => {
-      expect(ThresholdLineStyle.Full).toBe('full');
+      expect(ThresholdLineStyle.Solid).toBe('solid');
       expect(ThresholdLineStyle.Dashed).toBe('dashed');
       expect(ThresholdLineStyle.DotDashed).toBe('dot-dashed');
     });

@@ -31,7 +31,6 @@ export const getStrokeDash = (style: ThresholdLineStyle): number[] | undefined =
  */
 export const createThresholdLayer = (
   thresholdOptions?: ThresholdOptions,
-  tooltipMode: string = 'all',
   thresholdLines?: ThresholdLines,
   barEncodingDefault?: 'x' | 'y'
 ): any => {

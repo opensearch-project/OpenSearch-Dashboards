@@ -94,17 +94,12 @@ describe('to_expression', () => {
   const styleOptions = {
     addLegend: true,
     legendPosition: Positions.RIGHT,
-    thresholdLines: [
-      {
-        id: '1',
-        show: false,
-        value: 100,
-        color: 'red',
-        width: 1,
-        style: ThresholdLineStyle.Dashed,
-        name: '',
-      },
-    ],
+    thresholdLines: [],
+    thresholdOptions: {
+      baseColor: '#9EE9FA',
+      thresholds: [{ value: 100, color: 'red' }],
+      thresholdStyle: ThresholdLineStyle.Solid,
+    },
     tooltipOptions: {
       mode: 'all' as TooltipOptions['mode'],
     },
@@ -156,8 +151,8 @@ describe('to_expression', () => {
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
       expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
-        styleOptions.thresholdLines,
-        styleOptions.tooltipOptions?.mode
+        styleOptions?.thresholdOptions,
+        styleOptions?.thresholdLines
       );
       expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(styleOptions);
     });
@@ -492,8 +487,14 @@ describe('to_expression', () => {
   describe('createFacetedMultiLineChart', () => {
     it('should create a faceted multi-line chart with one metric, one date, and two categorical columns', () => {
       // Enable threshold and time marker for this test
-      styleOptions.thresholdLines[0].show = true;
+      styleOptions.thresholdOptions.thresholdStyle = ThresholdLineStyle.Solid;
       styleOptions.addTimeMarker = true;
+
+      // Mock threshold layer with proper structure
+      const mockThresholdLayer = {
+        layer: [{ mark: { type: 'rule' }, encoding: { y: { datum: 100 } } }],
+      };
+      (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
 
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericColumn1,
@@ -538,7 +539,6 @@ describe('to_expression', () => {
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
-      expect(thresholdUtils.getStrokeDash).toHaveBeenCalled();
     });
 
     it('should handle different title display options', () => {
@@ -667,8 +667,8 @@ describe('to_expression', () => {
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
       expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
-        styleOptions.thresholdLines,
-        styleOptions.tooltipOptions?.mode
+        styleOptions?.thresholdOptions,
+        styleOptions?.thresholdLines
       );
     });
 

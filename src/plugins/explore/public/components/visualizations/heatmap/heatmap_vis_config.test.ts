@@ -6,18 +6,11 @@
 import React from 'react';
 import {
   createHeatmapConfig,
+  defaultHeatmapChartStyles,
   HeatmapChartStyleControls,
-  HeatmapLabels,
 } from './heatmap_vis_config';
 import { HeatmapVisStyleControls } from './heatmap_vis_options';
-import {
-  AggregationType,
-  Positions,
-  ColorSchemas,
-  ScaleType,
-  AxisRole,
-  StandardAxes,
-} from '../types';
+import { AggregationType, Positions, ColorSchemas, ScaleType, AxisRole } from '../types';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({
@@ -49,8 +42,11 @@ describe('createHeatmapeConfig', () => {
     expect(defaults.exclusive.colorScaleType).toBe(ScaleType.LINEAR);
     expect(defaults.exclusive.scaleToDataBounds).toBe(false);
     expect(defaults.exclusive.maxNumberOfColors).toBe(4);
-    expect(defaults.exclusive.useCustomRanges).toBe(false);
-    expect(defaults.exclusive.customRanges).toBeUndefined();
+    expect(defaults.exclusive.useThresholdColor).toBe(false);
+    expect(defaults.thresholdOptions).toMatchObject({
+      baseColor: '#9EE9FA',
+      thresholds: [],
+    });
 
     // Verify label settings
     expect(defaults.exclusive.label).toEqual({
@@ -88,23 +84,7 @@ describe('createHeatmapeConfig', () => {
     const renderFunction = config.ui.style.render;
     // Mock props
     const mockProps = {
-      styleOptions: {
-        switchAxes: false,
-        tooltipOptions: { mode: 'hidden' as const },
-        addLegend: false,
-        legendPosition: Positions.RIGHT,
-        exclusive: {
-          colorSchema: ColorSchemas.BLUES,
-          reverseSchema: false,
-          colorScaleType: ScaleType.LINEAR,
-          scaleToDataBounds: false,
-          percentageMode: false,
-          maxNumberOfColors: 4,
-          useCustomRanges: false,
-          label: {} as HeatmapLabels,
-        },
-        standardAxes: [] as StandardAxes[],
-      } as HeatmapChartStyleControls,
+      styleOptions: defaultHeatmapChartStyles,
       onStyleChange: jest.fn(),
       numericalColumns: [],
       categoricalColumns: [],

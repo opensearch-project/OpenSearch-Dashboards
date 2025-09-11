@@ -81,8 +81,8 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
   ),
 }));
 
-jest.mock('../style_panel/threshold_lines/threshold', () => ({
-  ThresholdOptions: jest.fn(({ thresholdsOptions, onChange }) => (
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
     <div data-test-subj="mockThresholdOptions">
       <button
         data-test-subj="mockUpdateThreshold"

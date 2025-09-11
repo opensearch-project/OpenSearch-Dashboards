@@ -111,9 +111,8 @@ export const enhanceStyle = (
   }
 
   if (
-    styles.exclusive?.useCustomRanges &&
-    ((styles.exclusive?.customRanges && styles.exclusive?.customRanges?.length >= 1) ||
-      (styles.thresholdOptions?.thresholds && styles.thresholdOptions?.thresholds.length > 0))
+    styles.exclusive?.useThresholdColor &&
+    (styles.exclusive?.customRanges || styles.thresholdOptions?.thresholds)
   ) {
     const newThreshold =
       styles.exclusive?.customRanges &&
@@ -134,6 +133,7 @@ export const enhanceStyle = (
     // overwrite color scale type to quantize to map continuous domains to discrete output ranges
     markLayer.encoding.color.scale.type = 'threshold';
     markLayer.encoding.color.scale.domain = colorDomain;
+    // require one more color for values below the first threshold(base)
     markLayer.encoding.color.scale.range = ['#d3d3d3', ...colorRange];
   }
 };

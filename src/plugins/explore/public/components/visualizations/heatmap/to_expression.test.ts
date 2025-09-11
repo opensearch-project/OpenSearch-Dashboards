@@ -70,7 +70,7 @@ const baseStyles = {
     mode: 'all',
   } as TooltipOptions,
   exclusive: {
-    useCustomRanges: false,
+    useThresholdColor: false,
     maxNumberOfColors: 7,
     colorSchema: 'blues',
     colorScaleType: 'linear',
@@ -151,12 +151,12 @@ describe('createHeatmapWithBin', () => {
     expect(customTitleResult.title).toBe('Custom Binned Heatmap');
   });
 
-  it('should disable binning when useCustomRanges is true', () => {
+  it('should disable binning when useThresholdColor is true', () => {
     const styles = {
       ...baseStyles,
       exclusive: {
         ...baseStyles.exclusive,
-        useCustomRanges: true,
+        useThresholdColor: true,
       },
     };
 
@@ -268,12 +268,12 @@ describe('createRegularHeatmap', () => {
     });
   });
 
-  it('should disable binning for color when useCustomRanges is true', () => {
+  it('should disable binning for color when useThresholdColor is true', () => {
     const styles = {
       ...baseStyles,
       exclusive: {
         ...baseStyles.exclusive,
-        useCustomRanges: true,
+        useThresholdColor: true,
       },
     };
 

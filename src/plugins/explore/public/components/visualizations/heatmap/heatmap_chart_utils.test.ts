@@ -162,7 +162,7 @@ describe('addTransform', () => {
       colorScaleType: ScaleType.LINEAR,
       scaleToDataBounds: false,
       maxNumberOfColors: 4,
-      useCustomRanges: false,
+      useThresholdColor: false,
       customRanges: [],
       label: {} as HeatmapLabels,
     },
@@ -216,7 +216,7 @@ describe('setRange', () => {
         colorScaleType: ScaleType.LINEAR,
         scaleToDataBounds: false,
         maxNumberOfColors: 4,
-        useCustomRanges: true,
+        useThresholdColor: true,
         label: {} as HeatmapLabels,
       },
     };
@@ -226,11 +226,11 @@ describe('setRange', () => {
     expect(result).toEqual(mockColors);
   });
 
-  it('returns one color if no customRanges are defined but user turns on useCustomRanges', () => {
+  it('returns one color if no customRanges are defined but user turns on useThresholdColor', () => {
     const styles = {
       exclusive: {
         customRanges: [],
-        useCustomRanges: true,
+        useThresholdColor: true,
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
         reverseSchema: false,
@@ -268,7 +268,7 @@ describe('enhanceStyle', () => {
     const styles = {
       exclusive: {
         customRanges: [],
-        useCustomRanges: true,
+        useThresholdColor: false,
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
         reverseSchema: false,
@@ -291,7 +291,7 @@ describe('enhanceStyle', () => {
     const styles = {
       exclusive: {
         customRanges: [],
-        useCustomRanges: true,
+        useThresholdColor: false,
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
         reverseSchema: false,
@@ -308,10 +308,7 @@ describe('enhanceStyle', () => {
     expect(markLayer.encoding.color.scale.domain).toEqual([5, 15]);
   });
 
-  it('applies customRanges if enabled and sets correct scale and range', () => {
-    const mockRange = ['#ccffcc', '#669966', '#003300'];
-    jest.spyOn(utils, 'setRange').mockReturnValue(mockRange);
-
+  it('applies thresholds if enabled useThresholdColor', () => {
     const styles = {
       exclusive: {
         colorSchema: ColorSchemas.GREENS,
@@ -320,11 +317,14 @@ describe('enhanceStyle', () => {
         colorScaleType: ScaleType.LINEAR,
         scaleToDataBounds: true,
         maxNumberOfColors: 4,
-        useCustomRanges: true,
+        useThresholdColor: true,
         label: {} as HeatmapLabels,
-        customRanges: [
-          { min: 0, max: 5 },
-          { min: 6, max: 10 },
+      },
+      thresholdOptions: {
+        baseColor: '#9EE9FA',
+        thresholds: [
+          { value: 2, color: '#00FF00' },
+          { value: 8, color: '#0000FF' },
         ],
       },
     };
@@ -332,15 +332,17 @@ describe('enhanceStyle', () => {
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
     enhanceStyle(markLayer, styles, transformedData, colorField);
 
-    expect(markLayer.encoding.color.scale.type).toBe('quantize');
-    expect(markLayer.encoding.color.scale.domain).toEqual([0, 10]);
-    expect(markLayer.encoding.color.scale.range).toEqual(mockRange);
+    expect(markLayer.encoding.color.scale.type).toBe('threshold');
+    expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
+    expect(markLayer.encoding.color.scale.range).toEqual([
+      '#d3d3d3',
+      '#9EE9FA',
+      '#00FF00',
+      '#0000FF',
+    ]);
   });
 
-  it('prefers customRanges over scaleToDataBounds when both are enabled', () => {
-    const mockRange = ['#ccffcc', '#003300'];
-    jest.spyOn(utils, 'setRange').mockReturnValue(mockRange);
-
+  it('prefers thresholds over scaleToDataBounds when both are enabled', () => {
     const styles = {
       exclusive: {
         colorSchema: ColorSchemas.GREENS,
@@ -348,18 +350,29 @@ describe('enhanceStyle', () => {
         reverseSchema: false,
         colorScaleType: ScaleType.LINEAR,
         maxNumberOfColors: 4,
-        useCustomRanges: true,
-        customRanges: [{ min: 2, max: 8 }],
+        useThresholdColor: true,
         scaleToDataBounds: true,
         label: {} as HeatmapLabels,
+      },
+      thresholdOptions: {
+        baseColor: '#9EE9FA',
+        thresholds: [
+          { value: 2, color: '#00FF00' },
+          { value: 8, color: '#0000FF' },
+        ],
       },
     };
 
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
     enhanceStyle(markLayer, styles, transformedData, colorField);
 
-    expect(markLayer.encoding.color.scale.domain).toEqual([2, 8]);
-    expect(markLayer.encoding.color.scale.range).toEqual(mockRange);
+    expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
+    expect(markLayer.encoding.color.scale.range).toEqual([
+      '#d3d3d3',
+      '#9EE9FA',
+      '#00FF00',
+      '#0000FF',
+    ]);
   });
 
   it('does nothing if no matching flags are set', () => {

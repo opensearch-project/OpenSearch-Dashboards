@@ -24,7 +24,7 @@ export interface MetricChartStyleControls {
   fontSize?: number;
   titleSize?: number;
   percentageSize?: number;
-  useColor: boolean;
+  useThresholdColor: boolean;
   showPercentage?: boolean;
   colorSchema?: ColorSchemas;
   valueCalculation?: CalculationMethod;
@@ -44,10 +44,9 @@ export type DefaultMetricChartStyleControls = MetricChartStyleControls &
 export const defaultMetricChartStyles: DefaultMetricChartStyleControls = {
   showTitle: true,
   title: '',
-  useColor: false,
+  useThresholdColor: false,
   showPercentage: false,
   percentageColor: 'standard',
-  colorSchema: ColorSchemas.BLUES,
   valueCalculation: 'last',
   // add default range for metric
   thresholdOptions: {

@@ -138,7 +138,7 @@ export const HeatmapExclusiveVisOptions = ({
             defaultMessage: 'Scale to data bounds',
           })}
           checked={styles.scaleToDataBounds}
-          disabled={styles.percentageMode || styles.useCustomRanges}
+          disabled={styles.percentageMode || styles.useThresholdColor}
           onChange={(e) => updateExclusiveOption('scaleToDataBounds', e.target.checked)}
         />
       </EuiFormRow>
@@ -150,7 +150,7 @@ export const HeatmapExclusiveVisOptions = ({
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.percentageMode', {
             defaultMessage: 'Percentage mode',
           })}
-          disabled={styles.useCustomRanges || styles.scaleToDataBounds}
+          disabled={styles.useThresholdColor || styles.scaleToDataBounds}
           checked={styles.percentageMode}
           onChange={(e) => updateExclusiveOption('percentageMode', e.target.checked)}
         />
@@ -164,7 +164,7 @@ export const HeatmapExclusiveVisOptions = ({
         <EuiFieldNumber
           compressed
           min={2}
-          disabled={styles.useCustomRanges}
+          disabled={styles.useThresholdColor}
           placeholder="Max number of colors"
           value={maxNumberOfColors}
           onChange={(e) => handleMaxNumberOfColors(e.target.value)}
@@ -182,12 +182,12 @@ export const HeatmapExclusiveVisOptions = ({
       <EuiFormRow>
         <EuiSwitch
           compressed
-          label={i18n.translate('explore.stylePanel.heatmap.exclusive.useCustomRanges', {
-            defaultMessage: 'Use threshold values',
+          label={i18n.translate('explore.stylePanel.heatmap.exclusive.useThresholdColor', {
+            defaultMessage: 'Use threshold colors',
           })}
           disabled={styles.percentageMode || styles.scaleToDataBounds}
-          checked={styles.useCustomRanges}
-          onChange={(e) => updateExclusiveOption('useCustomRanges', e.target.checked)}
+          checked={styles.useThresholdColor}
+          onChange={(e) => updateExclusiveOption('useThresholdColor', e.target.checked)}
         />
       </EuiFormRow>
     </StyleAccordion>

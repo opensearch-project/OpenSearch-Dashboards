@@ -13,7 +13,6 @@ import {
   ValueAxis,
   Positions,
   VisFieldType,
-  ThresholdLines,
   TooltipOptions,
   AxisRole,
   AxisColumnMappings,
@@ -60,12 +59,14 @@ jest.mock('../style_panel/legend/legend', () => ({
   )),
 }));
 
-jest.mock('../style_panel/threshold_lines/threshold', () => ({
-  ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
     <div data-test-subj="mockThresholdOptions">
       <button
         data-test-subj="mockUpdateThreshold"
-        onClick={() => onThresholdLinesChange([...thresholdLines, { id: '2', show: true }])}
+        onClick={() =>
+          onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+        }
       >
         Update Threshold
       </button>
@@ -184,18 +185,6 @@ jest.mock('../style_panel/title/title', () => ({
 }));
 
 describe('LineVisStyleControls', () => {
-  const defaultThresholdLine = {
-    id: '1',
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-    name: '',
-  };
-
-  const defaultThresholdLines: ThresholdLines = [defaultThresholdLine];
-
   const defaultCategoryAxis: CategoryAxis = {
     id: 'CategoryAxis-1',
     type: 'category',
@@ -276,7 +265,11 @@ describe('LineVisStyleControls', () => {
       lineStyle: 'both' as LineStyle,
       lineMode: 'smooth',
       lineWidth: 2,
-      thresholdLines: defaultThresholdLines,
+      thresholdOptions: {
+        baseColor: '#9EE9FA',
+        thresholds: [],
+        thresholdStyle: ThresholdLineStyle.Solid,
+      },
       tooltipOptions: defaultTooltipOptions,
       categoryAxes: [defaultCategoryAxis],
       valueAxes: [defaultValueAxis],
@@ -392,7 +385,10 @@ describe('LineVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      thresholdLines: [...mockProps.styleOptions.thresholdLines, { id: '2', show: true }],
+      thresholdOptions: {
+        ...mockProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 
