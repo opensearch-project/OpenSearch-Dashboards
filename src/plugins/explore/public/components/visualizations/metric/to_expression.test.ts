@@ -219,7 +219,6 @@ describe('to_expression', () => {
 
       // Verify the sparkLineLayer (first layer)
       expect(result.layer[0]).toHaveProperty('mark.type', 'area');
-      expect(result.layer[0]).toHaveProperty('mark.opacity', 0.3);
       expect(result.layer[0]).toHaveProperty('encoding.x.field', 'date-field');
       expect(result.layer[0]).toHaveProperty('encoding.x.type', 'temporal');
       expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');

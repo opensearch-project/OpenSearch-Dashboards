@@ -19,6 +19,14 @@ jest.mock('../utils/use_debounced_value', () => ({
       },
     ];
   }),
+  useDebouncedValue: jest.fn((initialValue, onChange, delay) => {
+    return [
+      initialValue,
+      (value: string) => {
+        onChange(value);
+      },
+    ];
+  }),
 }));
 
 describe('TableVisStyleControls', () => {
@@ -51,6 +59,8 @@ describe('TableVisStyleControls', () => {
 
   const defaultStyleOptions: TableChartStyleControls = {
     pageSize: 10,
+    globalAlignment: 'auto',
+    showColumnFilter: false,
   };
 
   const mockProps: TableVisStyleControlsProps = {
@@ -74,6 +84,16 @@ describe('TableVisStyleControls', () => {
     const pageSizeInput = screen.getByTestId('visTablePageSizeInput');
     expect(pageSizeInput).toBeInTheDocument();
     expect(pageSizeInput).toHaveValue(10);
+
+    // Check if the global alignment select is rendered with the correct value
+    const globalAlignmentSelect = screen.getByTestId('visTableGlobalAlignment');
+    expect(globalAlignmentSelect).toBeInTheDocument();
+    expect(globalAlignmentSelect).toHaveValue('auto');
+
+    // Check if the column filter switch is rendered with the correct state
+    const columnFilterSwitch = screen.getByTestId('visTableColumnFilter');
+    expect(columnFilterSwitch).toBeInTheDocument();
+    expect(columnFilterSwitch).not.toBeChecked();
   });
 
   test('calls onStyleChange when page size is changed', () => {
@@ -88,6 +108,59 @@ describe('TableVisStyleControls', () => {
 
     // Check if onStyleChange was called with the correct parameters
     expect(onStyleChange).toHaveBeenCalledWith({ pageSize: 20 });
+  });
+
+  test('calls onStyleChange when global alignment is changed', () => {
+    const onStyleChange = jest.fn();
+    render(<TableVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
+
+    // Get the global alignment select
+    const globalAlignmentSelect = screen.getByTestId('visTableGlobalAlignment');
+
+    // Change the global alignment to 'center'
+    fireEvent.change(globalAlignmentSelect, { target: { value: 'center' } });
+
+    // Check if onStyleChange was called with the correct parameters
+    expect(onStyleChange).toHaveBeenCalledWith({ globalAlignment: 'center' });
+  });
+
+  test('calls onStyleChange when column filter switch is toggled', () => {
+    const onStyleChange = jest.fn();
+    render(<TableVisStyleControls {...mockProps} onStyleChange={onStyleChange} />);
+
+    // Get the column filter switch
+    const columnFilterSwitch = screen.getByTestId('visTableColumnFilter');
+
+    // Toggle the column filter switch
+    fireEvent.click(columnFilterSwitch);
+
+    // Check if onStyleChange was called with the correct parameters
+    expect(onStyleChange).toHaveBeenCalledWith({ showColumnFilter: true });
+  });
+
+  test('stops event propagation on mouse up in global alignment select', () => {
+    render(<TableVisStyleControls {...mockProps} />);
+
+    // Get the global alignment select
+    const globalAlignmentSelect = screen.getByTestId('visTableGlobalAlignment');
+
+    // Create a mock for stopPropagation
+    const stopPropagation = jest.fn();
+
+    // Create a MouseEvent with a mocked stopPropagation
+    const mouseEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+
+    // Spy on the stopPropagation method of the event
+    jest.spyOn(mouseEvent, 'stopPropagation').mockImplementation(stopPropagation);
+
+    // Simulate a mouse up event
+    fireEvent(globalAlignmentSelect, mouseEvent);
+
+    // Check if stopPropagation was called
+    expect(stopPropagation).toHaveBeenCalled();
   });
 
   test('handles empty columns gracefully', () => {

@@ -73,7 +73,7 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
         truncate: 100,
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       title: {
         text: '',
@@ -96,7 +96,7 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
         truncate: 100,
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       title: {
         text: '',

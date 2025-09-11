@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IFieldType } from 'src/plugins/data/common';
+import { IFieldType, Query } from 'src/plugins/data/common';
 import {
   COUNT_FIELD,
   DELIM_START,
@@ -17,13 +17,62 @@ import {
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { ExploreServices } from '../../../types';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
+import { getQueryWithSource } from '../../../application/utils/languages';
 
 // Small functions returning the two pattern queries
 export const regexPatternQuery = (queryBase: string, patternsField: string) => {
   return `${queryBase} | patterns \`${patternsField}\` | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
 };
+
 export const brainPatternQuery = (queryBase: string, patternsField: string) => {
-  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=aggregation | sort - pattern_count`;
+  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=aggregation max_sample_count=1 | sort - pattern_count`;
+};
+
+export const regexUpdateSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field = '${patternString}'`;
+};
+
+export const brainUpdateSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field = '${patternString}'`;
+};
+
+export const createSearchPatternQuery = (
+  query: Query,
+  patternsField: string,
+  usingRegexPatterns: boolean,
+  patternString: string
+) => {
+  const preparedQuery = getQueryWithSource(query);
+  return usingRegexPatterns
+    ? regexUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString)
+    : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
+};
+
+export const createSearchPatternQueryWithSlice = (
+  query: Query,
+  patternsField: string,
+  usingRegexPatterns: boolean,
+  patternString: string,
+  timeField: string,
+  pageSize: number,
+  pageOffset: number
+) => {
+  const searchPatternQuery = createSearchPatternQuery(
+    query,
+    patternsField,
+    usingRegexPatterns,
+    patternString
+  );
+
+  return `${searchPatternQuery} | sort - ${timeField} | head ${pageSize} from ${pageOffset}`;
 };
 
 // Checks if the value is a valid, finite number. Used for patterns table

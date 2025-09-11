@@ -137,7 +137,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
               {axis.show && (
                 <>
                   <DebouncedText
-                    value={getTitleByAxisRole(axis)}
+                    value={axis.title.text ?? ''}
                     placeholder="Axis name"
                     onChange={(text) =>
                       updateAxis(index, {

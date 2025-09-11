@@ -4,7 +4,7 @@
  */
 
 import { createTableConfig, TableChartStyleControls } from './table_vis_config';
-import { TableVisStyleControls } from './table_vis_options';
+import { TableVisStyleControls as TableVisStyleControlsComponent } from './table_vis_options';
 
 // Mock the TableVisStyleControls component
 jest.mock('./table_vis_options', () => ({
@@ -41,7 +41,7 @@ describe('table_vis_config', () => {
       };
 
       const renderResult = config.ui.style.render(mockProps);
-      expect(renderResult.type).toBe(TableVisStyleControls);
+      expect(renderResult.type).toBe(TableVisStyleControlsComponent);
       expect(renderResult.props).toEqual(mockProps);
     });
 
@@ -51,6 +51,13 @@ describe('table_vis_config', () => {
 
       expect(defaults).toEqual({
         pageSize: 10,
+        globalAlignment: 'auto',
+        showColumnFilter: false,
+        showFooter: false,
+        footerCalculations: [],
+        cellTypes: [],
+        thresholds: [],
+        baseColor: '#000000',
       });
     });
   });
