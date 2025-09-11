@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
-
+import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import { ChartConfig, VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { TableChartStyleControls } from './table/table_vis_config';
@@ -20,6 +20,7 @@ import { visualizationRegistry } from './visualization_registry';
 interface Props {
   data$: BehaviorSubject<VisData | undefined>;
   visConfig$: BehaviorSubject<ChartConfig | undefined>;
+  showRawTable$: BehaviorSubject<boolean>;
   searchContext?: ExecutionContextSearch;
   ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
 }
@@ -27,6 +28,10 @@ interface Props {
 export const VisualizationRender = (props: Props) => {
   const visualizationData = useObservable(props.data$);
   const visConfig = useObservable(props.visConfig$);
+  const showRawTable = useObservable(props.showRawTable$);
+  const rows = useMemo(() => {
+    return visualizationData?.transformedData ?? [];
+  }, [visualizationData?.transformedData]);
 
   const columns = useMemo(() => {
     return [
@@ -39,6 +44,8 @@ export const VisualizationRender = (props: Props) => {
     visualizationData?.categoricalColumns,
     visualizationData?.dateColumns,
   ]);
+
+  const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ column }) => column));
 
   const spec = useMemo(() => {
     if (!visualizationData) {
@@ -60,6 +67,31 @@ export const VisualizationRender = (props: Props) => {
     );
   }, [columns, visConfig, visualizationData]);
 
+  const dataGridColumns: EuiDataGridColumn[] = useMemo(() => {
+    return columns.map((col) => ({ id: col.column, displayAsText: col.name }));
+  }, [columns]);
+
+  useEffect(() => {
+    if (!showRawTable || !dataGridColumns.length) {
+      setVisibleColumns([]);
+      return;
+    }
+
+    const columnIds = dataGridColumns.map((col) => col.id);
+    setVisibleColumns((prev) => {
+      if (!prev.length || !prev.every((id) => columnIds.includes(id))) {
+        return columnIds;
+      }
+      return prev;
+    });
+  }, [showRawTable, dataGridColumns]);
+
+  const renderCellValue = useMemo(() => {
+    return ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
+      return rows.hasOwnProperty(rowIndex) ? rows[rowIndex][columnId] : null;
+    };
+  }, [rows]);
+
   if (!visualizationData) {
     return null;
   }
@@ -70,6 +102,21 @@ export const VisualizationRender = (props: Props) => {
         styleOptions={visConfig?.styles as TableChartStyleControls}
         rows={visualizationData?.transformedData ?? []}
         columns={columns}
+      />
+    );
+  }
+
+  if (showRawTable) {
+    return (
+      <EuiDataGrid
+        aria-label="Show table view"
+        columns={dataGridColumns}
+        rowCount={rows.length}
+        renderCellValue={renderCellValue}
+        columnVisibility={{
+          visibleColumns,
+          setVisibleColumns,
+        }}
       />
     );
   }
