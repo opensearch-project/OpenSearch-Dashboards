@@ -71,6 +71,11 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   async captureStaticContext(): Promise<Record<string, any>> {
     console.log('🔍 Explore: Capturing hybrid context (URL + transient state)');
+    console.log('🔥 DEBUG: Current expandedDocuments size:', this.expandedDocuments.size);
+    console.log(
+      '🔥 DEBUG: expandedDocuments Map contents:',
+      Array.from(this.expandedDocuments.entries())
+    );
 
     try {
       // 1. Parse URL-based context
@@ -78,6 +83,9 @@ export class ExploreContextContributor implements StatefulContextContributor {
 
       // 2. Get transient state
       const transientState = this.getTransientState();
+      console.log('🔥 DEBUG: transientState keys:', Object.keys(transientState));
+      console.log('🔥 DEBUG: transientState.expandedDocuments:', transientState.expandedDocuments);
+      console.log('🔥 DEBUG: transientState.userActivity:', transientState.userActivity);
 
       // 3. Get metadata about current state
       const stateMetadata = this.getStateMetadata();
@@ -94,10 +102,11 @@ export class ExploreContextContributor implements StatefulContextContributor {
         sort: urlContext.sort,
         timeRange: urlContext.timeRange,
 
-        // Transient state (not in URL)
+        // Transient state (not in URL) - Enhanced with direct access
         expandedDocuments: transientState.expandedDocuments,
         selectedFields: transientState.selectedFields,
         interactionSummary: transientState.interactionSummary,
+        userActivity: transientState.userActivity, // 🔧 FIX: Add userActivity to context
 
         // Context metadata
         metadata: {
@@ -109,6 +118,9 @@ export class ExploreContextContributor implements StatefulContextContributor {
         timestamp: Date.now(),
       };
 
+      console.log('🔥 DEBUG: Final context keys:', Object.keys(context));
+      console.log('🔥 DEBUG: Final context.expandedDocuments:', context.expandedDocuments);
+      console.log('🔥 DEBUG: Final context.userActivity:', context.userActivity);
       console.log(
         `✅ Explore: Context captured with ${this.expandedDocuments.size} expanded documents`
       );
@@ -189,6 +201,8 @@ export class ExploreContextContributor implements StatefulContextContributor {
    */
   captureDynamicContext(trigger: string, data: any): Record<string, any> {
     console.log(`⚡ Explore: Capturing dynamic context for trigger: ${trigger}`, data);
+    console.log(`🔍 DEBUG: Current expanded documents count: ${this.expandedDocuments.size}`);
+    console.log(`🔍 DEBUG: Interaction count: ${this.interactionCount}`);
 
     this.lastInteractionTime = Date.now();
     this.interactionCount++;
@@ -232,6 +246,11 @@ export class ExploreContextContributor implements StatefulContextContributor {
     this.expandedDocuments.set(documentId, expansionContext);
 
     console.log(`📄 Document expanded: ${documentId} (Total: ${this.expandedDocuments.size})`);
+    console.log(`🔍 DEBUG: Document data keys:`, Object.keys(expansionContext.documentData));
+    console.log(
+      `🔍 DEBUG: Document data sample:`,
+      JSON.stringify(expansionContext.documentData, null, 2).substring(0, 500)
+    );
 
     return {
       type: 'explore_dynamic',
@@ -351,15 +370,25 @@ export class ExploreContextContributor implements StatefulContextContributor {
    * Get current transient state with enhanced document preview
    */
   getTransientState(): Record<string, any> {
+    console.log(
+      '🔥 DEBUG: getTransientState called, expandedDocuments.size:',
+      this.expandedDocuments.size
+    );
+
     const documentPreview = this.getDocumentPreview();
-    
-    return {
+    console.log('🔥 DEBUG: documentPreview result:', documentPreview);
+    console.log(
+      '🔥 DEBUG: documentPreview.expandedDocuments length:',
+      documentPreview.expandedDocuments?.length || 0
+    );
+
+    const transientState = {
       // Enhanced document information with LLM-friendly format
       expandedDocuments: documentPreview.expandedDocuments,
-      
+
       // Field filter information
       selectedFields: Object.fromEntries(this.selectedFields),
-      
+
       // Interaction summary with context
       interactionSummary: {
         totalExpanded: this.expandedDocuments.size,
@@ -369,7 +398,7 @@ export class ExploreContextContributor implements StatefulContextContributor {
         totalInteractions: this.interactionCount,
         recentActivity: Date.now() - this.lastInteractionTime < 30000,
       },
-      
+
       // User activity context for LLM
       userActivity: {
         currentFocus: documentPreview.hasCurrentExpansions
@@ -380,6 +409,14 @@ export class ExploreContextContributor implements StatefulContextContributor {
         recentDocuments: documentPreview.expandedDocuments.slice(-3), // Last 3 for context
       },
     };
+
+    console.log('🔥 DEBUG: Final transientState keys:', Object.keys(transientState));
+    console.log(
+      '🔥 DEBUG: Final transientState.expandedDocuments:',
+      transientState.expandedDocuments
+    );
+
+    return transientState;
   }
 
   /**
@@ -387,9 +424,25 @@ export class ExploreContextContributor implements StatefulContextContributor {
    * Provides structured summary of expanded documents with trigger context
    */
   getDocumentPreview(): Record<string, any> {
+    console.log(
+      '🔥 DEBUG: getDocumentPreview called, expandedDocuments.size:',
+      this.expandedDocuments.size
+    );
+    console.log(
+      '🔥 DEBUG: expandedDocuments entries:',
+      Array.from(this.expandedDocuments.entries())
+    );
+
     const expandedDocs = Array.from(this.expandedDocuments.entries()).map(([id, context]) => {
+      console.log('🔥 DEBUG: Processing document:', id);
+      console.log('🔥 DEBUG: Document context:', context);
+
       // Extract meaningful fields from document data
       const docData = context.documentData || {};
+      console.log('🔥 DEBUG: docData keys:', Object.keys(docData));
+      console.log('🔥 DEBUG: docData.docTableField exists:', !!docData.docTableField);
+      console.log('🔥 DEBUG: docData.docTableField value:', docData.docTableField);
+
       const preview: Record<string, any> = {
         documentId: id,
         expandedAt: new Date(context.expandedAt).toISOString(),
@@ -397,10 +450,24 @@ export class ExploreContextContributor implements StatefulContextContributor {
         triggerComment: 'User expanded this document to view detailed content',
       };
 
-      // Add meaningful document fields for LLM context
-      if (docData._source) {
+      // 🔧 FIX: Handle docTableField format from Explore plugin
+      if (docData.docTableField) {
+        console.log('🔥 DEBUG: Found docTableField, parsing...');
+        // Parse the docTableField string which contains formatted log data
+        const docTableField = docData.docTableField;
+        preview.rawDocumentContent = docTableField;
+
+        // Extract key-value pairs from the formatted string
+        const extractedFields = this.parseDocTableField(docTableField);
+        Object.assign(preview, extractedFields);
+
+        console.log('🔍 DEBUG: Parsed docTableField result:', extractedFields);
+        console.log('🔥 DEBUG: Final preview after docTableField parsing:', preview);
+      } else if (docData._source) {
+        console.log('🔥 DEBUG: Using _source format');
+        // Handle standard _source format
         const source = docData._source;
-        
+
         // Common log fields
         if (source.message) preview.message = source.message;
         if (source.timestamp) preview.timestamp = source.timestamp;
@@ -412,25 +479,42 @@ export class ExploreContextContributor implements StatefulContextContributor {
         if (source.response) preview.response = source.response;
         if (source.bytes) preview.bytes = source.bytes;
         if (source.clientip) preview.clientip = source.clientip;
-        
+
         // Add any other significant fields (limit to prevent overwhelming LLM)
         const otherFields = Object.keys(source)
-          .filter(key => !['message', 'timestamp', 'level', 'severity', 'host', 'url', 'referer', 'request', 'response', 'bytes', 'clientip'].includes(key))
+          .filter(
+            (key) =>
+              ![
+                'message',
+                'timestamp',
+                'level',
+                'severity',
+                'host',
+                'url',
+                'referer',
+                'request',
+                'response',
+                'bytes',
+                'clientip',
+              ].includes(key)
+          )
           .slice(0, 5); // Limit to 5 additional fields
-        
+
         if (otherFields.length > 0) {
           preview.additionalFields = {};
-          otherFields.forEach(field => {
+          otherFields.forEach((field) => {
             preview.additionalFields[field] = source[field];
           });
         }
       } else {
         // Fallback: use raw document data
         const significantFields = Object.keys(docData)
-          .filter(key => !key.startsWith('_') && docData[key] !== null && docData[key] !== undefined)
+          .filter(
+            (key) => !key.startsWith('_') && docData[key] !== null && docData[key] !== undefined
+          )
           .slice(0, 8); // Limit fields for readability
-        
-        significantFields.forEach(field => {
+
+        significantFields.forEach((field) => {
           preview[field] = docData[field];
         });
       }
@@ -443,8 +527,86 @@ export class ExploreContextContributor implements StatefulContextContributor {
       totalExpanded: this.expandedDocuments.size,
       hasCurrentExpansions: this.expandedDocuments.size > 0,
       lastInteraction: new Date(this.lastInteractionTime).toISOString(),
-      contextNote: 'These are documents the user has expanded to examine in detail. This represents their current focus and investigation area.',
+      contextNote:
+        'These are documents the user has expanded to examine in detail. This represents their current focus and investigation area.',
     };
+  }
+
+  /**
+   * Parse docTableField string to extract key-value pairs
+   * Format: "referer:http://twitter.com/success/wendy-lawrence request:/opensearch/opensearch-1.0.0.deb agent:Mozilla/5.0..."
+   */
+  private parseDocTableField(docTableField: string): Record<string, any> {
+    console.log('🔥 DEBUG: parseDocTableField called with:', docTableField);
+    const fields: Record<string, any> = {};
+
+    try {
+      // Split by spaces but handle URLs and complex values
+      const parts = docTableField.split(' ');
+      console.log('🔥 DEBUG: Split into parts:', parts.length, 'parts');
+
+      let currentKey = '';
+      let currentValue = '';
+
+      for (const part of parts) {
+        if (part.includes(':') && !part.startsWith('http') && !part.startsWith('https')) {
+          // Save previous key-value pair if exists
+          if (currentKey && currentValue) {
+            fields[currentKey] = currentValue.trim();
+            console.log('🔥 DEBUG: Added field:', currentKey, '=', currentValue.trim());
+          }
+
+          // Start new key-value pair
+          const colonIndex = part.indexOf(':');
+          currentKey = part.substring(0, colonIndex);
+          currentValue = part.substring(colonIndex + 1);
+          console.log('🔥 DEBUG: New key-value pair started:', currentKey, ':', currentValue);
+        } else {
+          // Continue building current value
+          if (currentValue) {
+            currentValue += ' ' + part;
+          } else {
+            currentValue = part;
+          }
+        }
+      }
+
+      // Save the last key-value pair
+      if (currentKey && currentValue) {
+        fields[currentKey] = currentValue.trim();
+        console.log('🔥 DEBUG: Added final field:', currentKey, '=', currentValue.trim());
+      }
+
+      console.log('🔥 DEBUG: Extracted fields before cleanup:', fields);
+
+      // Clean up and format specific fields
+      if (fields.message) {
+        // Extract IP and HTTP request from message if present
+        const messageMatch = fields.message.match(/^(\d+\.\d+\.\d+\.\d+).*?"([^"]+)"/);
+        if (messageMatch) {
+          fields.clientip = messageMatch[1];
+          fields.httpRequest = messageMatch[2];
+          console.log(
+            '🔥 DEBUG: Extracted from message - clientip:',
+            fields.clientip,
+            'httpRequest:',
+            fields.httpRequest
+          );
+        }
+      }
+
+      // Convert numeric fields
+      if (fields.bytes) fields.bytes = parseInt(fields.bytes.replace(/,/g, '')) || fields.bytes;
+      if (fields.response) fields.response = parseInt(fields.response) || fields.response;
+
+      console.log('🔥 DEBUG: Final parsed fields:', fields);
+    } catch (error) {
+      console.warn('Error parsing docTableField:', error);
+      // Fallback: just include the raw content
+      fields.rawContent = docTableField;
+    }
+
+    return fields;
   }
 
   /**

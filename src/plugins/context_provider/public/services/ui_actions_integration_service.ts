@@ -263,8 +263,14 @@ export class UIActionsIntegrationService {
   // Method to manually trigger context capture (for testing)
   public triggerContextCapture(triggerType: string, data: any): void {
     console.log(`🧪 Manually triggering context capture: ${triggerType}`, data);
+    console.log('🔥 DEBUG: contextCaptureCallback exists:', !!this.contextCaptureCallback);
+
     if (this.contextCaptureCallback) {
+      console.log('🔥 DEBUG: Calling contextCaptureCallback');
       this.contextCaptureCallback(triggerType, data);
+      console.log('🔥 DEBUG: contextCaptureCallback called successfully');
+    } else {
+      console.error('🔥 DEBUG: contextCaptureCallback is not set!');
     }
   }
 }

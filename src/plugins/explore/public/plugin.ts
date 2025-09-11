@@ -109,7 +109,10 @@ export class ExplorePlugin
     this.config = this.initializerContext.config.get();
   }
 
-  public setup(core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>, setupDeps: ExploreSetupDependencies): ExplorePluginSetup {
+  public setup(
+    core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
+    setupDeps: ExploreSetupDependencies
+  ): ExplorePluginSetup {
     // Use setupDeps directly instead of destructuring to avoid unused variable warnings
     const visualizationRegistryService = this.visualizationRegistryService;
 
@@ -401,7 +404,7 @@ export class ExplorePlugin
   public start(core: CoreStart, plugins: ExploreStartDependencies): ExplorePluginStart {
     console.log('🚀 Explore Plugin Start - STARTING');
     console.log('🔍 DEBUG: Start dependencies:', Object.keys(plugins));
-    
+
     setUiActions(plugins.uiActions);
     setDashboard(plugins.dashboard);
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
@@ -442,26 +445,24 @@ export class ExplorePlugin
     // Register context contributor if Context Provider is available
     if (plugins.contextProvider) {
       console.log('📝 Registering Explore Context Contributor');
-      
-      this.contextContributor = new ExploreContextContributor(
-        core.savedObjects.client
-      );
-      
+
+      this.contextContributor = new ExploreContextContributor(core.savedObjects.client);
+
       console.log('🔍 DEBUG: Created contributor with appId:', this.contextContributor.appId);
-      
+
       // Initialize the contributor
       this.contextContributor.initialize();
-      
+
       // Register with Context Provider
       plugins.contextProvider.registerContextContributor(this.contextContributor);
-      
+
       console.log('✅ Explore Context Contributor registered successfully');
       console.log('🔍 DEBUG: Contributor registered for appId:', this.contextContributor.appId);
-      
+
       // Make it globally available for testing
       (window as any).exploreContextContributor = this.contextContributor;
       console.log('🌐 Explore Context Contributor available at window.exploreContextContributor');
-      
+
       // Add debugging for document expansion detection
       this.setupDocumentExpansionDetection();
     } else {
@@ -505,91 +506,118 @@ export class ExplorePlugin
    */
   private setupDocumentExpansionDetection(): void {
     console.log('🔍 Setting up document expansion detection for Explore');
-    
+
     // Listen for clicks on document expansion buttons
-    document.addEventListener('click', (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      
-      // Check if click is on a document expansion toggle
-      if (target && (
-        target.getAttribute('data-test-subj') === 'docTableExpandToggleColumn' ||
-        target.closest('[data-test-subj="docTableExpandToggleColumn"]')
-      )) {
-        console.log('🔍 Document expansion toggle clicked!');
-        
-        // Find the table row
-        const tableRow = target.closest('tr');
-        if (tableRow) {
-          const rowIndex = Array.from(tableRow.parentElement?.children || []).indexOf(tableRow);
-          
-          // Extract document data from the row - look for the actual document content
-          let documentData: Record<string, any> = {};
-          
-          // Try to find the document viewer or expanded content
-          const docViewer = tableRow.querySelector('.osdDocViewer') ||
-                           tableRow.nextElementSibling?.querySelector('.osdDocViewer');
-          
-          if (docViewer) {
-            // Extract from document viewer if available
-            const docViewTable = docViewer.querySelector('.osdDocViewerTable');
-            if (docViewTable) {
-              const rows = docViewTable.querySelectorAll('tr');
-              rows.forEach(row => {
-                const fieldCell = row.querySelector('.osdDocViewer__field');
-                const valueCell = row.querySelector('.osdDocViewer__value');
-                if (fieldCell && valueCell) {
-                  const fieldName = fieldCell.textContent?.trim();
-                  const fieldValue = valueCell.textContent?.trim();
-                  if (fieldName && fieldValue) {
-                    documentData[fieldName] = fieldValue;
+    document.addEventListener(
+      'click',
+      (event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+
+        // Check if click is on a document expansion toggle
+        if (
+          target &&
+          (target.getAttribute('data-test-subj') === 'docTableExpandToggleColumn' ||
+            target.closest('[data-test-subj="docTableExpandToggleColumn"]'))
+        ) {
+          console.log('🔍 Document expansion toggle clicked!');
+
+          // Find the table row
+          const tableRow = target.closest('tr');
+          if (tableRow) {
+            const rowIndex = Array.from(tableRow.parentElement?.children || []).indexOf(tableRow);
+
+            // Extract document data from the row - look for the actual document content
+            const documentData: Record<string, any> = {};
+
+            // Try to find the document viewer or expanded content
+            const docViewer =
+              tableRow.querySelector('.osdDocViewer') ||
+              tableRow.nextElementSibling?.querySelector('.osdDocViewer');
+
+            if (docViewer) {
+              // Extract from document viewer if available
+              const docViewTable = docViewer.querySelector('.osdDocViewerTable');
+              if (docViewTable) {
+                const rows = docViewTable.querySelectorAll('tr');
+                rows.forEach((row) => {
+                  const fieldCell = row.querySelector('.osdDocViewer__field');
+                  const valueCell = row.querySelector('.osdDocViewer__value');
+                  if (fieldCell && valueCell) {
+                    const fieldName = fieldCell.textContent?.trim();
+                    const fieldValue = valueCell.textContent?.trim();
+                    if (fieldName && fieldValue) {
+                      documentData[fieldName] = fieldValue;
+                    }
                   }
+                });
+              }
+            }
+
+            // Fallback: extract from table cells if no document viewer found
+            if (Object.keys(documentData).length === 0) {
+              const cells = tableRow.querySelectorAll('td');
+              cells.forEach((cell, index) => {
+                const fieldName = cell.getAttribute('data-test-subj') || `field_${index}`;
+                const textContent = cell.textContent?.trim() || '';
+                if (textContent && fieldName !== 'docTableExpandToggleColumn') {
+                  documentData[fieldName] = textContent;
                 }
               });
             }
-          }
-          
-          // Fallback: extract from table cells if no document viewer found
-          if (Object.keys(documentData).length === 0) {
-            const cells = tableRow.querySelectorAll('td');
-            cells.forEach((cell, index) => {
-              const fieldName = cell.getAttribute('data-test-subj') || `field_${index}`;
-              const textContent = cell.textContent?.trim() || '';
-              if (textContent && fieldName !== 'docTableExpandToggleColumn') {
-                documentData[fieldName] = textContent;
-              }
-            });
-          }
-          
-          // Use a more meaningful document ID based on actual document content
-          const documentId = documentData._id ||
-                           documentData.id ||
-                           `doc_${rowIndex}_${Date.now()}`;
-          
-          console.log('📄 Document expansion detected:', {
-            documentId,
-            rowIndex,
-            documentData,
-            documentFields: Object.keys(documentData).length
-          });
-          
-          // Trigger the context capture
-          const contextProvider = (window as any).contextProvider;
-          if (contextProvider && contextProvider.triggerTestCapture) {
-            contextProvider.triggerTestCapture('DOCUMENT_EXPAND', {
+
+            // Use a more meaningful document ID based on actual document content
+            const documentId =
+              documentData._id || documentData.id || `doc_${rowIndex}_${Date.now()}`;
+
+            console.log('📄 Document expansion detected:', {
               documentId,
               rowIndex,
               documentData,
-              source: 'ui_detection',
-              timestamp: Date.now(),
-              expandedFields: Object.keys(documentData).length
+              documentFields: Object.keys(documentData).length,
             });
-          } else {
-            console.warn('⚠️ Context Provider not available for dynamic context capture');
+
+            // Trigger the context capture
+            console.log('🔥 DEBUG: About to trigger context capture');
+            console.log(
+              '🔥 DEBUG: window.contextProvider exists:',
+              !!(window as any).contextProvider
+            );
+
+            const contextProvider = (window as any).contextProvider;
+            if (contextProvider && contextProvider.triggerTestCapture) {
+              console.log('🔥 DEBUG: Calling triggerTestCapture with data:', {
+                documentId,
+                rowIndex,
+                documentData,
+                source: 'ui_detection',
+                timestamp: Date.now(),
+                expandedFields: Object.keys(documentData).length,
+              });
+
+              contextProvider.triggerTestCapture('DOCUMENT_EXPAND', {
+                documentId,
+                rowIndex,
+                documentData,
+                source: 'ui_detection',
+                timestamp: Date.now(),
+                expandedFields: Object.keys(documentData).length,
+              });
+
+              console.log('🔥 DEBUG: triggerTestCapture called successfully');
+            } else {
+              console.warn('⚠️ Context Provider not available for dynamic context capture');
+              console.log('🔥 DEBUG: contextProvider:', contextProvider);
+              console.log(
+                '🔥 DEBUG: triggerTestCapture method:',
+                contextProvider?.triggerTestCapture
+              );
+            }
           }
         }
-      }
-    }, { capture: true });
-    
+      },
+      { capture: true }
+    );
+
     console.log('✅ Document expansion detection set up');
   }
 

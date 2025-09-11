@@ -1,4 +1,9 @@
 /*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -21,6 +26,14 @@ export function useContextProvider() {
         if (contextProvider && typeof contextProvider.getCurrentContext === 'function') {
           const currentContext = await contextProvider.getCurrentContext();
           console.log('🔄 Context updated for AI Chatbot:', currentContext);
+          console.log(
+            '🔥 DEBUG: AI Chatbot received context with keys:',
+            currentContext?.data ? Object.keys(currentContext.data) : 'no data'
+          );
+          console.log(
+            '🔥 DEBUG: AI Chatbot expandedDocuments count:',
+            currentContext?.data?.expandedDocuments?.length || 0
+          );
           setContext(currentContext);
           setError(null);
         } else {
@@ -28,7 +41,7 @@ export function useContextProvider() {
           setContext({
             pageType: 'unknown',
             currentUrl: window.location.href,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           });
           setError('Context Provider not available');
         }
@@ -38,7 +51,7 @@ export function useContextProvider() {
         setContext({
           pageType: 'error',
           currentUrl: window.location.href,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       } finally {
         setIsLoading(false);
@@ -56,8 +69,14 @@ export function useContextProvider() {
 
     window.addEventListener('contextProviderUpdate', handleContextUpdate);
 
-    // Only update on events, not periodic polling
-    // const interval = setInterval(updateContext, 10000);
+    // 🔧 FIX: Listen for static context updates to refresh AI assistant context
+    const handleStaticContextUpdate = () => {
+      console.log('🔥 DEBUG: Static context update detected, refreshing AI assistant context');
+      setTimeout(updateContext, 50); // Small delay to ensure context is available
+    };
+
+    // Listen for our custom static context update events
+    window.addEventListener('staticContextUpdated', handleStaticContextUpdate);
 
     // Also update on URL changes
     const handleUrlChange = () => {
@@ -68,8 +87,8 @@ export function useContextProvider() {
 
     return () => {
       window.removeEventListener('contextProviderUpdate', handleContextUpdate);
+      window.removeEventListener('staticContextUpdated', handleStaticContextUpdate);
       window.removeEventListener('popstate', handleUrlChange);
-      // clearInterval(interval); // Removed since we're not using periodic polling
     };
   }, []);
 
@@ -80,23 +99,23 @@ export function useContextSummary(context: ContextData | null): string {
   if (!context) return 'No context available';
 
   const parts = [];
-  
+
   if (context.pageType) {
     parts.push(`Page: ${context.pageType}`);
   }
-  
+
   if (context.panels && context.panels.length > 0) {
     parts.push(`${context.panels.length} dashboard panels`);
   }
-  
+
   if (context.expandedDocuments && context.expandedDocuments.length > 0) {
     parts.push(`${context.expandedDocuments.length} expanded documents`);
   }
-  
+
   if (context.filters && context.filters.length > 0) {
     parts.push(`${context.filters.length} active filters`);
   }
-  
+
   if (context.query) {
     parts.push('active query');
   }

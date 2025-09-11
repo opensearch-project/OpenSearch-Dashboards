@@ -69,10 +69,44 @@ export class ContextProviderPlugin
     this.contextCaptureService.getStaticContext$().subscribe((context) => {
       this.currentContext = context;
       console.log('📊 Static Context Updated:', context);
+      console.log('🔥 DEBUG: Static context received with appId:', context?.appId);
+      console.log(
+        '🔥 DEBUG: Static context data keys:',
+        context?.data ? Object.keys(context.data) : 'no data'
+      );
+      console.log(
+        '🔥 DEBUG: expandedDocuments in received context:',
+        context?.data?.expandedDocuments?.length || 0
+      );
     });
 
     this.contextCaptureService.getDynamicContext$().subscribe((context) => {
       console.log('⚡ Dynamic Context Captured:', context);
+      console.log('🔥 DEBUG: Dynamic context appId:', context?.appId);
+      console.log('🔥 DEBUG: Dynamic context trigger:', context?.trigger);
+
+      // 🔧 FIX: Refresh static context after dynamic events to ensure AI assistant sees updates
+      if (context && context.appId) {
+        console.log('🔄 Refreshing static context after dynamic event');
+        console.log('🔥 DEBUG: Current URL pathname:', window.location.pathname);
+
+        setTimeout(() => {
+          // Force a fresh static context capture to include the dynamic changes
+          const currentAppId = window.location.pathname.split('/app/')[1]?.split('/')[0];
+          console.log('🔥 DEBUG: Extracted currentAppId:', currentAppId);
+          console.log('🔥 DEBUG: contextCaptureService exists:', !!this.contextCaptureService);
+
+          if (currentAppId && this.contextCaptureService) {
+            console.log('🔥 DEBUG: Calling captureStaticContext for:', currentAppId);
+            (this.contextCaptureService as any).captureStaticContext(currentAppId);
+            console.log('🔥 DEBUG: captureStaticContext called');
+          } else {
+            console.error('🔥 DEBUG: Cannot refresh static context - missing appId or service');
+          }
+        }, 100); // Small delay to ensure dynamic context is processed
+      } else {
+        console.log('🔥 DEBUG: Not refreshing static context - no appId in dynamic context');
+      }
     });
 
     // Make service globally available for testing and chatbot/OSD agent integration
@@ -111,7 +145,7 @@ export class ContextProviderPlugin
 
   private async refreshCurrentContext(): Promise<StaticContext | null> {
     console.log('🔄 Forcing fresh context capture...');
-    
+
     if (!this.contextCaptureService) {
       console.warn('Context capture service not available');
       return this.currentContext;
@@ -124,7 +158,7 @@ export class ContextProviderPlugin
       // Force the context capture service to capture fresh context
       await (this.contextCaptureService as any).captureStaticContext(currentAppId);
     }
-    
+
     return this.currentContext;
   }
 
@@ -153,8 +187,17 @@ export class ContextProviderPlugin
 
   private triggerTestCapture(triggerType: string, data: any): void {
     console.log('🧪 Triggering test context capture:', triggerType, data);
+    console.log(
+      '🔥 DEBUG: uiActionsIntegrationService exists:',
+      !!this.uiActionsIntegrationService
+    );
+
     if (this.uiActionsIntegrationService) {
+      console.log('🔥 DEBUG: Calling uiActionsIntegrationService.triggerContextCapture');
       this.uiActionsIntegrationService.triggerContextCapture(triggerType, data);
+      console.log('🔥 DEBUG: uiActionsIntegrationService.triggerContextCapture called');
+    } else {
+      console.error('🔥 DEBUG: uiActionsIntegrationService is not available!');
     }
   }
 
@@ -204,12 +247,12 @@ export class ContextProviderPlugin
 
   public stop() {
     console.log('🛑 Context Provider Plugin Stop');
-    
+
     // Cleanup services
     if (this.contextCaptureService) {
       this.contextCaptureService.stop();
     }
-    
+
     // Cleanup global API
     delete (window as any).contextProvider;
   }

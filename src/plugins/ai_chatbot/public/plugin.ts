@@ -44,36 +44,36 @@ export class AIChatbotPlugin
       core,
     };
 
-    let flyoutInstance: any = null;
+    let sidePanelInstance: any = null;
 
     // Add chatbot toggle to chrome
     this.addChatbotToggle(core, () => {
-      if (flyoutInstance) {
-        console.log('🔄 Closing existing flyout instance');
-        flyoutInstance.close();
-        flyoutInstance = null;
+      if (sidePanelInstance) {
+        console.log('🔄 Closing existing side panel instance');
+        sidePanelInstance.close();
+        sidePanelInstance = null;
       } else {
-        console.log('🚀 Opening new flyout instance');
-        this.openChatbotFlyout(core, deps).then((instance) => {
-          flyoutInstance = instance;
+        console.log('🚀 Opening new side panel instance');
+        this.openChatbotSidePanel(core, deps).then((instance) => {
+          sidePanelInstance = instance;
         });
       }
     });
 
     return {
       openChatbot: () => {
-        console.log('🤖 Opening AI Chatbot Flyout');
-        if (!flyoutInstance) {
-          this.openChatbotFlyout(core, deps).then((instance) => {
-            flyoutInstance = instance;
+        console.log('🤖 Opening AI Chatbot Side Panel');
+        if (!sidePanelInstance) {
+          this.openChatbotSidePanel(core, deps).then((instance) => {
+            sidePanelInstance = instance;
           });
         }
       },
       closeChatbot: () => {
-        console.log('🤖 Closing AI Chatbot Flyout');
-        if (flyoutInstance) {
-          flyoutInstance.close();
-          flyoutInstance = null;
+        console.log('🤖 Closing AI Chatbot Side Panel');
+        if (sidePanelInstance) {
+          sidePanelInstance.close();
+          sidePanelInstance = null;
         }
       },
     };
@@ -102,9 +102,9 @@ export class AIChatbotPlugin
     });
   }
 
-  private async openChatbotFlyout(core: CoreStart, deps: AIChatbotStartDependencies) {
-    const { renderChatbotFlyout } = await import('./flyout');
-    return renderChatbotFlyout(core, deps);
+  private async openChatbotSidePanel(core: CoreStart, deps: AIChatbotStartDependencies) {
+    const { renderChatbotSidePanel } = await import('./side_panel');
+    return renderChatbotSidePanel(core, deps);
   }
 
   public stop() {

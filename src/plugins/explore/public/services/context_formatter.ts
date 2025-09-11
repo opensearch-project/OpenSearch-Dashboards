@@ -639,7 +639,7 @@ export class ExploreContextFormatter {
     }
     sections.push('');
 
-    // User Actions - Enhanced with document preview data
+    // User Actions - Enhanced with detailed action information
     if (context.userActions.length > 0) {
       sections.push('## 🎯 Recent User Activity');
       context.userActions.forEach((action, index) => {
@@ -648,8 +648,51 @@ export class ExploreContextFormatter {
           sections.push(`expandedDocuments: ${action.totalExpanded}`);
           sections.push(`fieldFilters: ${action.totalFieldFilters}`);
           sections.push(`recentActivity: ${action.recentActivity ? 'yes' : 'no'}`);
+          sections.push(`lastInteraction: ${new Date(action.lastInteraction).toISOString()}`);
+          sections.push(`hasMultipleExpanded: ${action.hasMultipleExpanded ? 'yes' : 'no'}`);
         }
       });
+      sections.push('');
+    }
+
+    // Enhanced User Activity Details with Action History
+    const activityData = context as any;
+    if (activityData.userActivity) {
+      sections.push('## 👤 User Activity Details');
+      sections.push(`currentFocus: ${activityData.userActivity.currentFocus}`);
+      sections.push(`lastAction: ${activityData.userActivity.lastAction}`);
+      if (activityData.userActivity.contextNote) {
+        sections.push(`contextNote: ${activityData.userActivity.contextNote}`);
+      }
+
+      // Show recent document interactions
+      if (
+        activityData.userActivity.recentDocuments &&
+        activityData.userActivity.recentDocuments.length > 0
+      ) {
+        sections.push('');
+        sections.push('### Recent Document Interactions');
+        activityData.userActivity.recentDocuments.forEach((doc: any, index: number) => {
+          sections.push(`#### Interaction ${index + 1}`);
+          sections.push(`documentId: ${doc.documentId}`);
+          sections.push(`triggerType: ${doc.triggerType}`);
+          sections.push(`triggerTime: ${doc.expandedAt}`);
+          sections.push(`triggerComment: ${doc.triggerComment}`);
+
+          // Add key document fields for context
+          if (doc.message)
+            sections.push(
+              `documentMessage: ${doc.message.substring(0, 100)}${
+                doc.message.length > 100 ? '...' : ''
+              }`
+            );
+          if (doc.timestamp) sections.push(`documentTimestamp: ${doc.timestamp}`);
+          if (doc.level) sections.push(`documentLevel: ${doc.level}`);
+          if (doc.host) sections.push(`documentHost: ${doc.host}`);
+          if (doc.clientip) sections.push(`documentClientIP: ${doc.clientip}`);
+          sections.push('');
+        });
+      }
       sections.push('');
     }
 
@@ -663,7 +706,7 @@ export class ExploreContextFormatter {
         sections.push(`expandedAt: ${doc.expandedAt}`);
         sections.push(`triggerType: ${doc.triggerType}`);
         sections.push(`triggerComment: ${doc.triggerComment}`);
-        
+
         // Add document content fields
         if (doc.message) sections.push(`message: ${doc.message}`);
         if (doc.timestamp) sections.push(`timestamp: ${doc.timestamp}`);
@@ -675,14 +718,14 @@ export class ExploreContextFormatter {
         if (doc.response) sections.push(`response: ${doc.response}`);
         if (doc.bytes) sections.push(`bytes: ${doc.bytes}`);
         if (doc.clientip) sections.push(`clientip: ${doc.clientip}`);
-        
+
         // Add additional fields if present
         if (doc.additionalFields) {
           Object.entries(doc.additionalFields).forEach(([key, value]) => {
             sections.push(`${key}: ${value}`);
           });
         }
-        
+
         sections.push('');
       });
     }
