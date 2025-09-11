@@ -298,24 +298,28 @@ export class VisualizePlugin
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);
 
-    // Register dashboard navigation shortcuts
+    // Register visualization navigation shortcuts only when workspace is available
     if (core.keyboardShortcut) {
-      core.keyboardShortcut.register({
-        id: 'nav.visualization',
-        name: 'Go to Visualization',
-        pluginId: 'visualize',
-        category: 'navigation',
-        keys: 'g v',
-        execute: () => {
-          // Only enable shortcut when workspace is selected
-          const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
-          const isInitialized = core.workspaces.initialized$.getValue();
-          if (!isInitialized || !currentWorkspace) {
-            return;
-          }
-          core.application.navigateToApp('visualize');
-        },
-      });
+      // Check if workspaces are initialized and available
+      const isInitialized = core.workspaces.initialized$.getValue();
+      const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+
+      if (isInitialized && currentWorkspace) {
+        core.keyboardShortcut.register({
+          id: 'nav.visualization',
+          name: i18n.translate('visualize.keyboardShortcut.goToVisualization.name', {
+            defaultMessage: 'Go to visualization',
+          }),
+          pluginId: 'visualize',
+          category: i18n.translate('visualize.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
+          keys: 'g v',
+          execute: () => {
+            core.application.navigateToApp('visualize');
+          },
+        });
+      }
     }
 
     if (plugins.share) {

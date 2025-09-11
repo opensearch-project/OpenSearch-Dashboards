@@ -348,7 +348,7 @@ export interface CoreStart {
   /** {@link WorkspacesStart} */
   workspaces: WorkspacesStart;
   /** {@link KeyboardShortcutStart} */
-  keyboardShortcut: KeyboardShortcutStart;
+  keyboardShortcut?: KeyboardShortcutStart;
 }
 
 export {

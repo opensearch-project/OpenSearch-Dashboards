@@ -41,6 +41,7 @@ import {
 } from '../types';
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig, getNavActions, getLegacyTopNavConfig } from '../utils';
+import { VisualizeTopNavIds } from '../utils/constants';
 import type { IndexPattern } from '../../../../data/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 
@@ -77,7 +78,7 @@ const TopNav = ({
 }: VisualizeTopNavProps) => {
   const { services } = useOpenSearchDashboards<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
-  const { setHeaderActionMenu, visualizeCapabilities } = services;
+  const { setHeaderActionMenu, visualizeCapabilities, keyboardShortcut } = services;
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const openInspector = useCallback(() => {
@@ -111,6 +112,27 @@ const TopNav = ({
     },
     services
   );
+
+  const handleSave = useCallback(() => {
+    if (navActions[VisualizeTopNavIds.SAVE]) {
+      // Create a dummy element for keyboard shortcut calls since saveAction expects an anchorElement
+      const dummyElement = document.createElement('div');
+      navActions[VisualizeTopNavIds.SAVE](dummyElement);
+    }
+  }, [navActions]);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'save_visualization',
+    pluginId: 'visualize',
+    name: i18n.translate('visualize.topNav.saveVisualizationShortcut', {
+      defaultMessage: 'Save visualization',
+    }),
+    category: i18n.translate('visualize.topNav.editingCategory', {
+      defaultMessage: 'Data actions',
+    }),
+    keys: 'cmd+s',
+    execute: handleSave,
+  });
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {

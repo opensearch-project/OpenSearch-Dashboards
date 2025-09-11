@@ -18,13 +18,16 @@ import { KeyboardShortcutService } from './keyboard_shortcut_service';
  *
  * @example
  * ```typescript
+ * import { useOpenSearchDashboards } from '../opensearch_dashboards_react/public';
  *
  * // Static function (memoized)
  * const handleSave = () => {
- *  console.log('Save!');
- *  };
+ *   console.log('Save!');
+ * };
  *
  * function MyComponent() {
+ *   // Use your plugin's specific services type (e.g., VisualizeServices, DashboardServices, etc.)
+ *   const opensearchDashboards = useOpenSearchDashboards<YourPluginServices>();
  *   const { keyboardShortcut } = opensearchDashboards.services;
  *
  *   keyboardShortcut?.useKeyboardShortcut({
@@ -36,6 +39,7 @@ import { KeyboardShortcutService } from './keyboard_shortcut_service';
  *     execute: handleSave
  *   });
  * }
+ * ```
  *
  */
 export function useKeyboardShortcut(

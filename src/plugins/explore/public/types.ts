@@ -11,6 +11,7 @@ import {
   DocLinksStart,
   ToastsStart,
   IUiSettingsClient,
+  KeyboardShortcutStart,
 } from 'opensearch-dashboards/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import {
@@ -169,6 +170,7 @@ export interface ExploreServices {
   expressions: ExpressionsStart;
 
   dashboard: DashboardStart;
+  keyboardShortcut?: KeyboardShortcutStart;
 
   supportedTypes?: string[];
 }

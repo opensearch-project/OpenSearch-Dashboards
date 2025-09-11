@@ -35,7 +35,11 @@ import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { httpServiceMock } from '../../../http/http_service.mock';
-import { applicationServiceMock, chromeServiceMock } from '../../../mocks';
+import {
+  applicationServiceMock,
+  chromeServiceMock,
+  keyboardShortcutServiceMock,
+} from '../../../mocks';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
 import { WorkspaceObject } from 'src/core/public/workspace';
 import { HeaderVariant } from '../../constants';
@@ -321,6 +325,81 @@ describe('Header', () => {
 
       const component = mountWithIntl(<Header {...props} />);
       expect(component.find('.globalBanner').exists()).toBeTruthy();
+    });
+  });
+
+  describe('keyboard shortcuts', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('registers keyboard shortcut for toggle navbar when keyboardShortcut service is provided', () => {
+      const mockKeyboardShortcut = keyboardShortcutServiceMock.createStart();
+      const props = {
+        ...mockProps(),
+        keyboardShortcut: mockKeyboardShortcut,
+      };
+
+      mountWithIntl(<Header {...props} />);
+
+      expect(mockKeyboardShortcut.useKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'toggle_navbar',
+        pluginId: 'core',
+        name: 'Toggle navbar',
+        category: 'Panel / Layout',
+        keys: 'shift+b',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('does not register keyboard shortcut when keyboardShortcut service is not provided', () => {
+      const mockKeyboardShortcut = keyboardShortcutServiceMock.createStart();
+      const props = {
+        ...mockProps(),
+      };
+
+      mountWithIntl(<Header {...props} />);
+
+      expect(mockKeyboardShortcut.useKeyboardShortcut).not.toHaveBeenCalled();
+    });
+
+    it('executes toggle navigation when keyboard shortcut callback is invoked', () => {
+      const mockKeyboardShortcut = keyboardShortcutServiceMock.createStart();
+      const onIsLockedUpdate = jest.fn();
+      const isLocked$ = new BehaviorSubject(false);
+      const props = {
+        ...mockProps(),
+        keyboardShortcut: mockKeyboardShortcut,
+        onIsLockedUpdate,
+        isLocked$,
+        useUpdatedHeader: true,
+      };
+
+      mountWithIntl(<Header {...props} />);
+
+      const shortcutCall = mockKeyboardShortcut.useKeyboardShortcut.mock.calls[0][0];
+      const executeFunction = shortcutCall.execute;
+
+      act(() => {
+        executeFunction();
+      });
+
+      expect(onIsLockedUpdate).toHaveBeenCalledWith(true);
+    });
+
+    it('does not throw error when keyboardShortcut service is undefined', () => {
+      const props = {
+        ...mockProps(),
+        keyboardShortcut: undefined,
+      };
+
+      expect(() => {
+        mountWithIntl(<Header {...props} />);
+      }).not.toThrow();
     });
   });
 });

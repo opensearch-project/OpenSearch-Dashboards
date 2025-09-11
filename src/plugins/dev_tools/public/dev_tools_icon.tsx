@@ -36,8 +36,15 @@ export function DevToolsIcon({
   title: string;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
-
   const [devToolTab, setDevToolTab] = useState('');
+
+  // Use refs to avoid closure issues
+  const modalVisibleRef = useRef(modalVisible);
+  const setModalVisibleRef = useRef(setModalVisible);
+
+  // Update refs when state changes
+  modalVisibleRef.current = modalVisible;
+  setModalVisibleRef.current = setModalVisible;
 
   const createOpenDevToolAction = createAction<typeof DEVTOOL_OPEN_ACTION>({
     type: DEVTOOL_OPEN_ACTION,
@@ -56,17 +63,45 @@ export function DevToolsIcon({
     return () => {};
   }, []);
 
+  const closeModal = useCallback(() => {
+    setModalVisibleRef.current(false);
+  }, []);
+
   useEffect(() => {
     if (modalVisible) {
       document.body.classList.add('noScrollByDevTools');
+
+      // Register ESC shortcut only when modal is open
+      if (core.keyboardShortcut) {
+        core.keyboardShortcut.register({
+          id: 'close_dev_tools_modal',
+          pluginId: 'dev_tools',
+          name: i18n.translate('devTools.keyboardShortcut.closeModal.name', {
+            defaultMessage: 'Close dev tools modal',
+          }),
+          category: i18n.translate('devTools.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
+          keys: 'escape',
+          execute: closeModal,
+        });
+      }
     } else {
       document.body.classList.remove('noScrollByDevTools');
     }
 
     return () => {
       document.body.classList.remove('noScrollByDevTools');
+
+      // Unregister ESC shortcut when modal closes or component unmounts
+      if (core.keyboardShortcut) {
+        core.keyboardShortcut.unregister({
+          id: 'close_dev_tools_modal',
+          pluginId: 'dev_tools',
+        });
+      }
     };
-  }, [modalVisible]);
+  }, [modalVisible, core.keyboardShortcut, closeModal]);
 
   const closeModalVisible = () => {
     setModalVisible(false);

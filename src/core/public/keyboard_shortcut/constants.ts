@@ -181,6 +181,39 @@ export const CODE_TO_KEY_MAPPING: Record<string, string> = {
 };
 
 /**
+ * Special character combinations that should be displayed as their shifted symbols.
+ * Maps key combinations like 'shift+/' to their visual representation '?'.
+ *
+ * @example
+ * // 'shift+/' → '?' (question mark)
+ * // 'shift+`' → '~' (tilde)
+ * // 'shift+1' → '!' (exclamation mark)
+ */
+export const SPECIAL_CHARACTER_MAPPINGS: Record<string, string> = {
+  'shift+/': '?',
+  'shift+`': '~',
+  'shift+1': '!',
+  'shift+2': '@',
+  'shift+3': '#',
+  'shift+4': '$',
+  'shift+5': '%',
+  'shift+6': '^',
+  'shift+7': '&',
+  'shift+8': '*',
+  'shift+9': '(',
+  'shift+0': ')',
+  'shift+-': '_',
+  'shift+=': '+',
+  'shift+[': '{',
+  'shift+]': '}',
+  'shift+\\': '|',
+  'shift+;': ':',
+  "shift+'": '"',
+  'shift+,': '<',
+  'shift+.': '>',
+} as const;
+
+/**
  * Platform-specific display representations for keys.
  * Maps key names to their visual representation for each platform.
  *

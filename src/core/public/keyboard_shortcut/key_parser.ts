@@ -4,7 +4,13 @@
  */
 
 import { VALID_KEY_STRING_REGEX } from './utils';
-import { ALLOWED_KEYS, CODE_TO_KEY_MAPPING, DISPLAY_MAPPINGS, SEQUENCE_PREFIX } from './constants';
+import {
+  ALLOWED_KEYS,
+  CODE_TO_KEY_MAPPING,
+  DISPLAY_MAPPINGS,
+  SEQUENCE_PREFIX,
+  SPECIAL_CHARACTER_MAPPINGS,
+} from './constants';
 
 export class KeyStringParser {
   /**
@@ -109,8 +115,13 @@ export class KeyStringParser {
 
   public getDisplayString(keyString: string): string {
     const normalized = this.normalizeKeyString(keyString);
-    const parts = normalized.split('+');
 
+    // Check if this is a special character combination first
+    if (normalized in SPECIAL_CHARACTER_MAPPINGS) {
+      return SPECIAL_CHARACTER_MAPPINGS[normalized];
+    }
+
+    const parts = normalized.split('+');
     const displayPlatform = this.detectDisplayPlatform();
     const mappings = displayPlatform === 'mac' ? DISPLAY_MAPPINGS.mac : DISPLAY_MAPPINGS.other;
 

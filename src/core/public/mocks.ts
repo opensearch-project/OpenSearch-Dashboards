@@ -49,6 +49,7 @@ import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.m
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { workspacesServiceMock } from './workspace/workspaces_service.mock';
 import { keyboardShortcutServiceMock } from './keyboard_shortcut/keyboard_shortcut_service.mock';
+
 export { applicationServiceMock } from './application/application_service.mock';
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { chromeServiceMock } from './chrome/chrome_service.mock';

@@ -43,6 +43,7 @@ import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 import { overlayServiceMock, workspacesServiceMock } from '../mocks';
 import { HeaderVariant } from './constants';
+import { keyboardShortcutServiceMock } from '../keyboard_shortcut/keyboard_shortcut_service.mock';
 
 class FakeApp implements App {
   public title: string;
@@ -80,6 +81,7 @@ function defaultStartDeps(availableApps?: App[]) {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     workspaces: workspacesServiceMock.createStartContract(),
+    keyboardShortcut: keyboardShortcutServiceMock.createStart(),
     updateApplications: (() => {}) as (applications?: App[]) => void,
   };
 
