@@ -218,8 +218,12 @@ export function Header({
   keyboardShortcut?.useKeyboardShortcut({
     id: 'toggle_navbar',
     pluginId: 'core',
-    name: 'Toggle Navbar',
-    category: 'Panel / Layout',
+    name: i18n.translate('core.chrome.header.toggleNavbar.name', {
+      defaultMessage: 'Toggle navbar',
+    }),
+    category: i18n.translate('core.chrome.header.category.panelLayout', {
+      defaultMessage: 'Panel / Layout',
+    }),
     keys: 'shift+b',
     execute: handleToggleNavOpen,
   });
