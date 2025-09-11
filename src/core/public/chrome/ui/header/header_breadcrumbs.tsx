@@ -88,6 +88,7 @@ export function HeaderBreadcrumbs({
   const remainingCrumbs = useUpdatedHeader ? crumbs.slice(0, -1) : crumbs;
 
   if (hideTrailingSeparator) {
+    // Case 1: Hide trailing separator
     return (
       <EuiSimplifiedBreadcrumbs
         breadcrumbs={crumbs}
@@ -96,16 +97,44 @@ export function HeaderBreadcrumbs({
         data-test-subj="breadcrumbs"
         hideTrailingSeparator
         disableTrailingLink
-      />
-    );
-  } else {
-    return (
-      <EuiHeaderBreadcrumbs
-        breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
-        max={10}
-        data-test-subj="breadcrumbs"
-        simplify={!!useUpdatedHeader}
+        truncate={true}
+        responsive={{
+          xs: 1,
+          s: 1,
+          m: 1,
+          l: 2,
+        }}
       />
     );
   }
+
+  if (useUpdatedHeader) {
+    // Case 2: Updated header, simplified breadcrumbs
+    return (
+      <EuiSimplifiedBreadcrumbs
+        breadcrumbs={crumbs}
+        hideLastBreadCrumb={!renderFullLength}
+        max={5}
+        data-test-subj="breadcrumbs"
+        disableTrailingLink
+        truncate={true}
+        responsive={{
+          xs: 1,
+          s: 1,
+          m: 1,
+          l: 4,
+        }}
+      />
+    );
+  }
+
+  // Case 3: Default, full header breadcrumbs
+  return (
+    <EuiHeaderBreadcrumbs
+      breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
+      max={10}
+      data-test-subj="breadcrumbs"
+      simplify={!!useUpdatedHeader}
+    />
+  );
 }
