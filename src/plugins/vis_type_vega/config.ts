@@ -33,6 +33,7 @@ import { schema, TypeOf } from '@osd/config-schema';
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   enableExternalUrls: schema.boolean({ defaultValue: false }),
+  enableDebug: schema.boolean({ defaultValue: false }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
