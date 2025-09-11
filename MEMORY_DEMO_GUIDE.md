@@ -15,7 +15,9 @@
 - `list memories` - Shows all saved conversation sessions
 - `load mem_001` - Loads specific memory session by ID
 - `manage memory` - Shows current session details and recent memories
+- `save` - Save current chat conversation to persistent memory
 - `"your question" + list top 5 memories` - Shows related memories for context
+- `list full context` - View all 4 parts of context system with complete content
 
 #### **Automatic Features:**
 - ✅ **Auto-save**: All conversations automatically saved to memory

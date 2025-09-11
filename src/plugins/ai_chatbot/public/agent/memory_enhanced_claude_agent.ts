@@ -259,6 +259,7 @@ export class MemoryEnhancedClaudeAgent {
     response += '• list memories - See all memory sessions\n';
     response += '• load <saved memory title> - Switch to different session\n';
     response += '• save - Save current chat to memory\n';
+    response += '• list full context - View all 4 parts of context system\n';
     response += '• Add "list top 5 memories" to questions for context';
 
     return response;
@@ -352,8 +353,8 @@ export class MemoryEnhancedClaudeAgent {
       const recentSaved = savedMemories.slice(-4);
       recentSaved.forEach((memory) => {
         const type = memory.type === 'user_query' ? 'User' : 'Assistant';
-        const preview = memory.content.substring(0, 100);
-        response += `${type}: ${preview}${memory.content.length > 100 ? '...' : ''}\n`;
+        // Show full content without truncation
+        response += `${type}: ${memory.content}\n\n`;
       });
     } else {
       response += 'No saved memories in current session.\n';
@@ -366,8 +367,8 @@ export class MemoryEnhancedClaudeAgent {
       const recentChat = chatHistory.slice(-4); // Last 2 exchanges
       recentChat.forEach((memory) => {
         const type = memory.type === 'user_query' ? 'User' : 'Assistant';
-        const preview = memory.content.substring(0, 100);
-        response += `${type}: ${preview}${memory.content.length > 100 ? '...' : ''}\n`;
+        // Show full content without truncation
+        response += `${type}: ${memory.content}\n\n`;
       });
     } else {
       response += 'No chat history in current session.\n';
