@@ -32,6 +32,7 @@
       - [Build](../src/dev/build/README.md)
       - [I18n](../src/dev/i18n/README.md)
     - plugins
+      - [Ai_chatbot](../src/plugins/ai_chatbot/README.md)
       - [Application_config](../src/plugins/application_config/README.md)
       - [Banner](../src/plugins/banner/README.md)
       - [Bfetch](../src/plugins/bfetch/README.md)
@@ -219,6 +220,7 @@
   - [CONTRIBUTING](../CONTRIBUTING.md)
   - [DEVELOPER_GUIDE](../DEVELOPER_GUIDE.md)
   - [MAINTAINERS](../MAINTAINERS.md)
+  - [MEMORY_DEMO_GUIDE](../MEMORY_DEMO_GUIDE.md)
   - [README](../README.md)
   - [RELEASING](../RELEASING.md)
   - [SECURITY](../SECURITY.md)

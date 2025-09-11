@@ -1,4 +1,9 @@
 /*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -30,10 +35,12 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiIcon,
 } from '@elastic/eui';
 import { CoreStart } from '../../../../core/public';
 import { AIChatbotStartDependencies } from '../types';
 import { ClaudeOSDAgent } from '../agent/claude_agent';
+import { MemoryEnhancedClaudeAgent } from '../agent/memory_enhanced_claude_agent';
 import { useContextProvider, useContextSummary } from '../hooks/use_context_provider';
 import { ContextData } from '../types';
 
@@ -51,17 +58,45 @@ interface ChatbotFlyoutProps {
 }
 
 export function ChatbotFlyout({ core, deps, onClose }: ChatbotFlyoutProps) {
+  console.log('🚀 ChatbotFlyout component initialized at', new Date().toISOString());
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [agent, setAgent] = useState<ClaudeOSDAgent | null>(null);
+  const [agent, setAgent] = useState<MemoryEnhancedClaudeAgent | null>(null);
   const [agentError, setAgentError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string>('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(true);
+  const [showContextDetails, setShowContextDetails] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   const { context, isLoading: contextLoading, error: contextError } = useContextProvider();
   const contextSummary = useContextSummary(context);
+
+  // Simplified button click handler
+  const handleApiKeySubmitClick = React.useCallback(() => {
+    console.log('🚀 Start Assistant button clicked! API Key length:', apiKey.length);
+
+    if (!apiKey.trim()) {
+      setAgentError('Please provide a valid Claude API key');
+      return;
+    }
+
+    if (apiKey.length < 10) {
+      setAgentError('API key seems invalid (too short)');
+      return;
+    }
+
+    try {
+      sessionStorage.setItem('claude-api-key', apiKey);
+      setShowApiKeyInput(false);
+      setAgentError(null);
+      console.log('✅ API key saved and transitioning to chat');
+    } catch (error: any) {
+      console.error('❌ Failed to save API key:', error);
+      setAgentError(`Failed to save API key: ${error.message}`);
+    }
+  }, [apiKey]);
 
   useEffect(() => {
     // Check for stored API key
@@ -75,26 +110,45 @@ export function ChatbotFlyout({ core, deps, onClose }: ChatbotFlyoutProps) {
   useEffect(() => {
     if (apiKey && !showApiKeyInput) {
       try {
-        const newAgent = new ClaudeOSDAgent(apiKey);
-        setAgent(newAgent);
+        console.log(
+          '🤖 Initializing memory-enhanced agent with API key:',
+          apiKey.substring(0, 10) + '...'
+        );
+
+        const baseAgent = new ClaudeOSDAgent(apiKey);
+        const memoryAgent = new MemoryEnhancedClaudeAgent(baseAgent);
+        setAgent(memoryAgent);
         setAgentError(null);
-        
-        // Add welcome message
-        setMessages([{
-          id: '1',
-          role: 'assistant',
-          content: `Hello! I'm your OpenSearch Dashboards AI assistant. I can help you understand your data and interact with your dashboards.
+
+        // Add welcome message with memory features
+        setMessages([
+          {
+            id: '1',
+            role: 'assistant',
+            content: `Hello! I'm your OpenSearch Dashboards AI assistant with memory capabilities!
 
 Current context: ${contextSummary}
 
-Try asking me to:
-- "Add a filter for level ERROR"
-- "What am I looking at?"
-- "Expand panel-123"
-- "Show me document doc-456"`,
-          timestamp: new Date()
-        }]);
-      } catch (error) {
+💾 Memory Commands:
+- "list memories" - See all saved conversations
+- "load session_xxx" - Load specific memory session
+- "manage memory" - View current session details
+- "save" - Save current session
+- Add "list top 5 memories" to any question for related context
+
+🔍 Context Commands:
+- "list system context" - View current page/app context
+- "list memory context" - View conversation history
+- "list full context" - View all 4 context parts (system, memory, history, tools)
+
+💾 Use the save button next to assistant messages to save important conversations to memory!`,
+            timestamp: new Date(),
+          },
+        ]);
+
+        console.log('✅ Memory-enhanced agent initialized successfully');
+      } catch (error: any) {
+        console.error('❌ Failed to initialize agent:', error);
         setAgentError(`Failed to initialize agent: ${error.message}`);
       }
     }
@@ -108,12 +162,7 @@ Try asking me to:
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleApiKeySubmit = () => {
-    if (apiKey.trim()) {
-      sessionStorage.setItem('claude-api-key', apiKey);
-      setShowApiKeyInput(false);
-    }
-  };
+  // Removed duplicate handleApiKeySubmit - using memoized version above
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || !agent || isLoading) return;
@@ -122,34 +171,63 @@ Try asking me to:
       id: Date.now().toString(),
       role: 'user',
       content: inputMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
 
     try {
+      console.log('🤖 Processing message with memory-enhanced agent:', inputMessage);
       const response = await agent.processRequest(inputMessage, context || {});
-      
+
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: response,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error: any) {
+      console.error('❌ Agent processing error:', error);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: `Sorry, I encountered an error: ${error.message}`,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveToMemory = async () => {
+    if (!agent) return;
+
+    try {
+      console.log('💾 Save button clicked - saving current chat to memory');
+      const response = await agent.processRequest('save', context || {});
+
+      const saveMessage: ChatMessage = {
+        id: (Date.now() + 2).toString(),
+        role: 'assistant',
+        content: response,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, saveMessage]);
+    } catch (error: any) {
+      console.error('❌ Save to memory error:', error);
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 2).toString(),
+        role: 'assistant',
+        content: `Sorry, I encountered an error saving to memory: ${error.message}`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     }
   };
 
@@ -161,14 +239,23 @@ Try asking me to:
   };
 
   const renderContextDetails = () => {
-    if (!context) return <EuiText size="s" color="subdued">No context available</EuiText>;
+    if (!context)
+      return (
+        <EuiText size="s" color="subdued">
+          No context available
+        </EuiText>
+      );
 
-    const contextEntries = Object.entries(context).filter(([key, value]) => 
-      value !== null && value !== undefined && value !== ''
+    const contextEntries = Object.entries(context).filter(
+      ([key, value]) => value !== null && value !== undefined && value !== ''
     );
 
     if (contextEntries.length === 0) {
-      return <EuiText size="s" color="subdued">Basic page context</EuiText>;
+      return (
+        <EuiText size="s" color="subdued">
+          Basic page context
+        </EuiText>
+      );
     }
 
     return (
@@ -198,20 +285,24 @@ Try asking me to:
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiCallOut
-            title="Claude API Key Required"
-            color="primary"
-            iconType="iInCircle"
-          >
+          <EuiCallOut title="API Key Required" color="primary" iconType="lock">
             <p>Please provide your Claude API key to use the AI assistant.</p>
           </EuiCallOut>
           <EuiSpacer />
           <EuiTextArea
-            placeholder="Enter your Claude API key..."
+            placeholder="Enter your Claude API key (sk-ant-...)..."
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             rows={3}
           />
+          {agentError && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut title="Error" color="danger" iconType="alert" size="s">
+                <p>{agentError}</p>
+              </EuiCallOut>
+            </>
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -219,7 +310,12 @@ Try asking me to:
               <EuiButton onClick={onClose}>Cancel</EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={handleApiKeySubmit} disabled={!apiKey.trim()}>
+              <EuiButton
+                fill
+                onClick={handleApiKeySubmitClick}
+                disabled={!apiKey.trim()}
+                isLoading={isLoading}
+              >
                 Start Assistant
               </EuiButton>
             </EuiFlexItem>
@@ -238,13 +334,20 @@ Try asking me to:
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiCallOut
-            title="Agent Error"
-            color="danger"
-            iconType="alert"
-          >
+          <EuiCallOut title="Agent Error" color="danger" iconType="alert">
             <p>{agentError}</p>
           </EuiCallOut>
+          <EuiSpacer />
+          <EuiButton
+            onClick={() => {
+              setAgentError(null);
+              setShowApiKeyInput(true);
+              setApiKey('');
+              sessionStorage.removeItem('claude-api-key');
+            }}
+          >
+            Try Again
+          </EuiButton>
         </EuiFlyoutBody>
       </EuiFlyout>
     );
@@ -256,42 +359,68 @@ Try asking me to:
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2>🤖 AI Assistant</h2>
+              <h2>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="discuss" size="l" color="primary" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>AI Assistant</EuiFlexItem>
+                </EuiFlexGroup>
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {contextLoading && <EuiLoadingSpinner size="m" />}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{contextLoading && <EuiLoadingSpinner size="m" />}</EuiFlexItem>
         </EuiFlexGroup>
-        
+
         {contextError && (
           <>
             <EuiSpacer size="s" />
-            <EuiCallOut
-              title="Context Warning"
-              color="warning"
-              iconType="alert"
-              size="s"
-            >
+            <EuiCallOut title="Context Warning" color="warning" iconType="alert" size="s">
               <p>{contextError}</p>
             </EuiCallOut>
           </>
         )}
-        
+
         <EuiSpacer size="s" />
-        <EuiAccordion
-          id="context-details"
-          buttonContent={
-            <EuiText size="s">
-              <strong>Context Details</strong> ({contextSummary})
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued">
+              Context: {contextSummary}
             </EuiText>
-          }
-          paddingSize="s"
-          style={{ border: 'none' }}
-          buttonProps={{ style: { border: 'none', outline: 'none' } }}
-        >
-          {renderContextDetails()}
-        </EuiAccordion>
+            {agent && (
+              <>
+                <EuiSpacer size="xs" />
+                <EuiText size="xs" color="subdued">
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="storage" size="s" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      Memory: {agent.getMemoryService().getSessionSummary()}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiText>
+              </>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType={showContextDetails ? 'arrowUp' : 'arrowDown'}
+              onClick={() => setShowContextDetails(!showContextDetails)}
+              aria-label="Toggle context details"
+              size="s"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        {showContextDetails && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiPanel paddingSize="s" color="subdued">
+              {renderContextDetails()}
+            </EuiPanel>
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -305,12 +434,16 @@ Try asking me to:
                   color={message.role === 'user' ? 'primary' : 'subdued'}
                   style={{
                     marginLeft: message.role === 'user' ? '10%' : '0',
-                    marginRight: message.role === 'user' ? '0' : '10%'
+                    marginRight: message.role === 'user' ? '0' : '10%',
                   }}
                 >
                   <EuiFlexGroup alignItems="flexStart" gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <strong>{message.role === 'user' ? '👤' : '🤖'}</strong>
+                      <EuiIcon
+                        type={message.role === 'user' ? 'user' : 'discuss'}
+                        size="m"
+                        color={message.role === 'user' ? 'subdued' : 'primary'}
+                      />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText size="s">
@@ -319,15 +452,31 @@ Try asking me to:
                         </pre>
                       </EuiText>
                       <EuiSpacer size="xs" />
-                      <EuiText size="xs" color="subdued">
-                        {message.timestamp.toLocaleTimeString()}
-                      </EuiText>
+                      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                        <EuiFlexItem>
+                          <EuiText size="xs" color="subdued">
+                            {message.timestamp.toLocaleTimeString()}
+                          </EuiText>
+                        </EuiFlexItem>
+                        {message.role === 'assistant' && (
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              iconType="save"
+                              size="s"
+                              color="primary"
+                              aria-label="Save to memory"
+                              title="💾 Save to memory"
+                              onClick={handleSaveToMemory}
+                            />
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiPanel>
               </div>
             ))}
-            
+
             {isLoading && (
               <div style={{ textAlign: 'center', padding: '16px' }}>
                 <EuiLoadingSpinner size="l" />
@@ -337,7 +486,7 @@ Try asking me to:
                 </EuiText>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
         </div>
@@ -347,7 +496,7 @@ Try asking me to:
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
             <EuiTextArea
-              placeholder="Ask me about your dashboard or request actions..."
+              placeholder="Ask me about your dashboard, try memory commands like 'list memories', or request actions..."
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -366,6 +515,13 @@ Try asking me to:
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        {/* Memory Commands Hint */}
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued" textAlign="center">
+          💡 Try: "list memories" | "manage memory" | "What happened in my last session? list top 5
+          memories"
+        </EuiText>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

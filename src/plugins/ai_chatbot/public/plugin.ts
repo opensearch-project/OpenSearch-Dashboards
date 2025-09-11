@@ -1,4 +1,9 @@
 /*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -15,8 +20,8 @@ import {
 } from './types';
 
 export class AIChatbotPlugin
-  implements Plugin<AIChatbotSetup, AIChatbotStart, AIChatbotSetupDependencies, AIChatbotStartDependencies> {
-
+  implements
+    Plugin<AIChatbotSetup, AIChatbotStart, AIChatbotSetupDependencies, AIChatbotStartDependencies> {
   public setup(
     core: CoreSetup<AIChatbotStartDependencies, AIChatbotStart>,
     deps: AIChatbotSetupDependencies
@@ -44,10 +49,12 @@ export class AIChatbotPlugin
     // Add chatbot toggle to chrome
     this.addChatbotToggle(core, () => {
       if (flyoutInstance) {
+        console.log('🔄 Closing existing flyout instance');
         flyoutInstance.close();
         flyoutInstance = null;
       } else {
-        this.openChatbotFlyout(core, deps).then(instance => {
+        console.log('🚀 Opening new flyout instance');
+        this.openChatbotFlyout(core, deps).then((instance) => {
           flyoutInstance = instance;
         });
       }
@@ -57,7 +64,7 @@ export class AIChatbotPlugin
       openChatbot: () => {
         console.log('🤖 Opening AI Chatbot Flyout');
         if (!flyoutInstance) {
-          this.openChatbotFlyout(core, deps).then(instance => {
+          this.openChatbotFlyout(core, deps).then((instance) => {
             flyoutInstance = instance;
           });
         }
@@ -78,11 +85,16 @@ export class AIChatbotPlugin
       order: 1000,
       mount: (element) => {
         const button = document.createElement('button');
-        button.innerHTML = '🤖 AI Assistant';
+        button.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 4px; vertical-align: text-bottom;">
+            <path d="M8 2a6 6 0 0 1 6 6v1.5a1.5 1.5 0 0 1-1.5 1.5H11a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h2.5A5.5 5.5 0 0 0 8 2.5 5.5 5.5 0 0 0 2.5 8H5a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H3.5A1.5 1.5 0 0 1 2 10.5V8a6 6 0 0 1 6-6z"/>
+          </svg>
+          AI Assistant
+        `;
         button.className = 'euiButton euiButton--primary euiButton--small';
         button.onclick = onClick;
         element.appendChild(button);
-        
+
         return () => {
           element.removeChild(button);
         };
