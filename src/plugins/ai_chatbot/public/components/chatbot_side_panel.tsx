@@ -54,7 +54,8 @@ interface ChatbotSidePanelProps {
 }
 
 export function ChatbotSidePanel({ core, deps, onClose }: ChatbotSidePanelProps) {
-  console.log('🚀 ChatbotSidePanel component initialized at', new Date().toISOString());
+  // Remove frequent logging to reduce console noise
+  // console.log('🚀 ChatbotSidePanel component initialized at', new Date().toISOString());
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -72,7 +73,7 @@ export function ChatbotSidePanel({ core, deps, onClose }: ChatbotSidePanelProps)
 
   // Simplified button click handler
   const handleApiKeySubmitClick = React.useCallback(() => {
-    console.log('🚀 Start Assistant button clicked! API Key length:', apiKey.length);
+    // Start Assistant button clicked
 
     if (!apiKey.trim()) {
       setAgentError('Please provide a valid Claude API key');
@@ -88,9 +89,9 @@ export function ChatbotSidePanel({ core, deps, onClose }: ChatbotSidePanelProps)
       sessionStorage.setItem('claude-api-key', apiKey);
       setShowApiKeyInput(false);
       setAgentError(null);
-      console.log('✅ API key saved and transitioning to chat');
+      // API key saved and transitioning to chat
     } catch (error: any) {
-      console.error('❌ Failed to save API key:', error);
+      // Failed to save API key
       setAgentError(`Failed to save API key: ${error.message}`);
     }
   }, [apiKey]);
@@ -107,10 +108,7 @@ export function ChatbotSidePanel({ core, deps, onClose }: ChatbotSidePanelProps)
   useEffect(() => {
     if (apiKey && !showApiKeyInput) {
       try {
-        console.log(
-          '🤖 Initializing memory-enhanced agent with API key:',
-          apiKey.substring(0, 10) + '...'
-        );
+        // Initializing memory-enhanced agent with API key
 
         const baseAgent = new ClaudeOSDAgent(apiKey);
         const memoryAgent = new MemoryEnhancedClaudeAgent(baseAgent);
@@ -146,9 +144,9 @@ Current context: ${contextSummary}
           },
         ]);
 
-        console.log('✅ Memory-enhanced agent initialized successfully');
+        // Memory-enhanced agent initialized successfully
       } catch (error: any) {
-        console.error('❌ Failed to initialize agent:', error);
+        // Failed to initialize agent
         setAgentError(`Failed to initialize agent: ${error.message}`);
       }
     }
@@ -177,7 +175,7 @@ Current context: ${contextSummary}
     setIsLoading(true);
 
     try {
-      console.log('🤖 Processing message with memory-enhanced agent:', inputMessage);
+      // Processing message with memory-enhanced agent
       const response = await agent.processRequest(inputMessage, context || {});
 
       const assistantMessage: ChatMessage = {
@@ -189,7 +187,7 @@ Current context: ${contextSummary}
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error: any) {
-      console.error('❌ Agent processing error:', error);
+      // Agent processing error
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -206,7 +204,7 @@ Current context: ${contextSummary}
     if (!agent) return;
 
     try {
-      console.log('💾 Save button clicked - saving current chat to memory');
+      // Save button clicked - saving current chat to memory
       const response = await agent.processRequest('save', context || {});
 
       const saveMessage: ChatMessage = {
@@ -218,7 +216,7 @@ Current context: ${contextSummary}
 
       setMessages((prev) => [...prev, saveMessage]);
     } catch (error: any) {
-      console.error('❌ Save to memory error:', error);
+      // Save to memory error
       const errorMessage: ChatMessage = {
         id: (Date.now() + 2).toString(),
         role: 'assistant',
@@ -348,7 +346,12 @@ Current context: ${contextSummary}
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiTitle size="s">
-                <h3>🤖 AI Assistant Setup</h3>
+                <h3>
+                  <span role="img" aria-label="robot">
+                    🤖
+                  </span>{' '}
+                  AI Assistant Setup
+                </h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -417,7 +420,12 @@ Current context: ${contextSummary}
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiTitle size="s">
-                <h3>🤖 AI Assistant Error</h3>
+                <h3>
+                  <span role="img" aria-label="robot">
+                    🤖
+                  </span>{' '}
+                  AI Assistant Error
+                </h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -648,7 +656,11 @@ Current context: ${contextSummary}
         {/* Memory Commands Hint */}
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued" textAlign="center">
-          💡 Try: "list memories" | "What documents did I expand?" | "list full context"
+          <span role="img" aria-label="lightbulb">
+            💡
+          </span>{' '}
+          Try: &quot;list memories&quot; | &quot;What documents did I expand?&quot; | &quot;list
+          full context&quot;
         </EuiText>
       </div>
     </div>

@@ -23,7 +23,7 @@ export class MemoryEnhancedClaudeAgent {
   }
 
   async processRequest(userMessage: string, context: ContextData): Promise<string> {
-    console.log('🧠 Memory Enhanced Agent processing request:', userMessage);
+    // Memory Enhanced Agent processing request
 
     // Handle memory commands first
     if (userMessage.trim() === 'list memories' || userMessage.trim() === 'list all memories') {
@@ -86,7 +86,7 @@ export class MemoryEnhancedClaudeAgent {
       if (context && this.isExploreContext(context)) {
         try {
           const formattedContextString = formatExploreContext(context as any);
-          console.log('🔍 Using formatted Explore context for Claude API');
+          // Using formatted Explore context for Claude API
 
           // Replace the context with the formatted string for Claude to understand
           enhancedContext = {
@@ -97,7 +97,7 @@ export class MemoryEnhancedClaudeAgent {
             sessionSummary: this.memoryService.getSessionSummary(),
           };
         } catch (error) {
-          console.error('❌ Error formatting context for regular query:', error);
+          // Error formatting context for regular query, using fallback
           // Fallback to original context structure
           enhancedContext = {
             ...context,
@@ -134,7 +134,7 @@ export class MemoryEnhancedClaudeAgent {
 
       return response;
     } catch (error) {
-      console.error('❌ Memory Enhanced Agent error:', error);
+      // Memory Enhanced Agent error, using fallback
 
       // Fallback to original agent if memory enhancement fails
       const response = await this.originalAgent.processRequest(userMessage, context);
@@ -308,7 +308,7 @@ export class MemoryEnhancedClaudeAgent {
       try {
         return formatExploreContext(context as any);
       } catch (error) {
-        console.error('❌ Error formatting Explore context:', error);
+        // Error formatting Explore context, using fallback
         // Fallback to basic formatting
       }
     }
@@ -377,10 +377,23 @@ export class MemoryEnhancedClaudeAgent {
       // Check if this is Explore context and format it properly
       if (this.isExploreContext(context)) {
         try {
-          const formattedContext = formatExploreContext(context as any);
+          // 🔧 FIX: Restructure context to match what the formatter expects
+          const contextAny = context as any;
+          const contextForFormatter = {
+            ...contextAny,
+            data: contextAny.data || contextAny, // Ensure data property exists
+          };
+          console.log('🔥 DEBUG: Calling formatExploreContext with restructured context');
+          console.log('🔥 DEBUG: contextForFormatter keys:', Object.keys(contextForFormatter));
+          console.log(
+            '🔥 DEBUG: contextForFormatter.data keys:',
+            contextForFormatter.data ? Object.keys(contextForFormatter.data) : 'no data'
+          );
+
+          const formattedContext = formatExploreContext(contextForFormatter);
           response += formattedContext + '\n';
         } catch (error) {
-          console.error('❌ Error formatting Explore context:', error);
+          // Error formatting Explore context, using fallback
           // Fallback to basic formatting
           Object.entries(context).forEach(([key, value]) => {
             if (key !== 'memoryContext' && key !== 'chatHistory' && key !== 'sessionSummary') {

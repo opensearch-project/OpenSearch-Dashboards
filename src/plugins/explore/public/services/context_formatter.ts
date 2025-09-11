@@ -110,7 +110,7 @@ export class ExploreURLParser {
       const result = this.risonToJson(decoded);
       return result;
     } catch (error) {
-      console.warn('Failed to parse RISON parameter:', param, error);
+      // Failed to parse RISON parameter
       return null;
     }
   }
@@ -205,7 +205,7 @@ export class ExploreURLParser {
 
       result.styleOptions = {};
       if (colorSchemaMatch) result.styleOptions.colorSchema = colorSchemaMatch[1];
-      if (fontSizeMatch) result.styleOptions.fontSize = parseInt(fontSizeMatch[1]);
+      if (fontSizeMatch) result.styleOptions.fontSize = parseInt(fontSizeMatch[1], 10);
       if (showTitleMatch) result.styleOptions.showTitle = showTitleMatch[1] === 't';
     }
 
@@ -255,7 +255,7 @@ export class ExploreURLParser {
       };
     }
 
-    console.log('🔍 manualExtraction result:', result);
+    // Manual extraction completed
     return result;
   }
 
@@ -290,7 +290,7 @@ export class ExploreURLParser {
 
       return { dataset, query };
     } catch (error) {
-      console.warn('Failed to parse query params:', error);
+      // Failed to parse query params
       return { dataset: null, query: { query: '', language: 'PPL' } };
     }
   }
@@ -309,7 +309,7 @@ export class ExploreURLParser {
         styleOptions: parsed.styleOptions,
       };
     } catch (error) {
-      console.warn('Failed to parse visualization params:', error);
+      // Failed to parse visualization params
       return {};
     }
   }
@@ -331,7 +331,7 @@ export class ExploreURLParser {
         tab: parsed.tab,
       };
     } catch (error) {
-      console.warn('Failed to parse app params:', error);
+      // Failed to parse app params
       return {};
     }
   }
@@ -358,7 +358,7 @@ export class ExploreURLParser {
         refreshInterval: parsed.refreshInterval,
       };
     } catch (error) {
-      console.warn('Failed to parse global params:', error);
+      // Failed to parse global params
       return {};
     }
   }
@@ -406,7 +406,7 @@ export class ExploreContextFormatter {
         _v: params.get('_v') || undefined,
       };
     } catch (error) {
-      console.warn('Failed to extract URL params:', error);
+      // Failed to extract URL params
       return {};
     }
   }
@@ -452,6 +452,9 @@ export class ExploreContextFormatter {
       flavor
     );
 
+    // 🔧 FIX: Preserve raw context data including expandedDocuments and userActivity
+    const contextData = rawContext?.data || rawContext;
+
     // Create enhanced context with dataSource information
     const enhancedContext = {
       appType: appId,
@@ -465,8 +468,14 @@ export class ExploreContextFormatter {
         timeRange,
         filters,
       },
-      userActions: rawContext?.data?.interactionSummary ? [rawContext.data.interactionSummary] : [],
+      userActions: contextData?.interactionSummary ? [contextData.interactionSummary] : [],
       recommendations,
+
+      // 🔧 FIX: Preserve the raw context data for document expansion details
+      expandedDocuments: contextData?.expandedDocuments || [],
+      userActivity: contextData?.userActivity,
+      interactionSummary: contextData?.interactionSummary,
+      selectedFields: contextData?.selectedFields,
     } as any;
 
     // Add dataSource information if available from URL parsing
@@ -476,6 +485,13 @@ export class ExploreContextFormatter {
         enhancedContext.dataSource = qParsed.dataSource;
       }
     }
+
+    console.log('🔥 DEBUG: Enhanced context created with keys:', Object.keys(enhancedContext));
+    console.log(
+      '🔥 DEBUG: Enhanced context expandedDocuments:',
+      enhancedContext.expandedDocuments?.length || 0
+    );
+    console.log('🔥 DEBUG: Enhanced context userActivity:', !!enhancedContext.userActivity);
 
     return enhancedContext;
   }
@@ -696,34 +712,55 @@ export class ExploreContextFormatter {
       sections.push('');
     }
 
-    // Enhanced User Activity with Document Details
+    // Enhanced User Activity with Document Details - Check both top level and data property
     const rawContextData = context as any;
-    if (rawContextData.expandedDocuments && rawContextData.expandedDocuments.length > 0) {
+    const contextData = rawContextData.data || rawContextData;
+
+    console.log('🔥 DEBUG: Context formatter checking for expandedDocuments');
+    console.log('🔥 DEBUG: rawContextData keys:', Object.keys(rawContextData));
+    console.log('🔥 DEBUG: contextData keys:', Object.keys(contextData));
+    console.log('🔥 DEBUG: contextData.expandedDocuments exists:', !!contextData.expandedDocuments);
+    console.log(
+      '🔥 DEBUG: contextData.expandedDocuments length:',
+      contextData.expandedDocuments?.length || 0
+    );
+
+    if (contextData.expandedDocuments && contextData.expandedDocuments.length > 0) {
       sections.push('## 📄 Expanded Documents');
-      rawContextData.expandedDocuments.forEach((doc: any, index: number) => {
+      contextData.expandedDocuments.forEach((doc: any, index: number) => {
         sections.push(`### Document ${index + 1}`);
         sections.push(`documentId: ${doc.documentId}`);
         sections.push(`expandedAt: ${doc.expandedAt}`);
         sections.push(`triggerType: ${doc.triggerType}`);
         sections.push(`triggerComment: ${doc.triggerComment}`);
 
-        // Add document content fields
-        if (doc.message) sections.push(`message: ${doc.message}`);
-        if (doc.timestamp) sections.push(`timestamp: ${doc.timestamp}`);
-        if (doc.level) sections.push(`level: ${doc.level}`);
-        if (doc.host) sections.push(`host: ${doc.host}`);
-        if (doc.url) sections.push(`url: ${doc.url}`);
+        // Add document content fields from parsed docTableField
         if (doc.referer) sections.push(`referer: ${doc.referer}`);
         if (doc.request) sections.push(`request: ${doc.request}`);
-        if (doc.response) sections.push(`response: ${doc.response}`);
+        if (doc.agent) sections.push(`agent: ${doc.agent}`);
+        if (doc.extension) sections.push(`extension: ${doc.extension}`);
+        if (doc.ip) sections.push(`ip: ${doc.ip}`);
+        if (doc.message) sections.push(`message: ${doc.message}`);
+        if (doc.url) sections.push(`url: ${doc.url}`);
+        if (doc.tags) sections.push(`tags: ${doc.tags}`);
         if (doc.bytes) sections.push(`bytes: ${doc.bytes}`);
+        if (doc.response) sections.push(`response: ${doc.response}`);
         if (doc.clientip) sections.push(`clientip: ${doc.clientip}`);
+        if (doc.host) sections.push(`host: ${doc.host}`);
+        if (doc.index) sections.push(`index: ${doc.index}`);
+        if (doc['machine.os']) sections.push(`machine.os: ${doc['machine.os']}`);
+        if (doc['machine.ram']) sections.push(`machine.ram: ${doc['machine.ram']}`);
+        if (doc['geo.src']) sections.push(`geo.src: ${doc['geo.src']}`);
+        if (doc['geo.dest']) sections.push(`geo.dest: ${doc['geo.dest']}`);
+        if (doc['event.dataset']) sections.push(`event.dataset: ${doc['event.dataset']}`);
 
-        // Add additional fields if present
-        if (doc.additionalFields) {
-          Object.entries(doc.additionalFields).forEach(([key, value]) => {
-            sections.push(`${key}: ${value}`);
-          });
+        // Add raw document content for complete context
+        if (doc.rawDocumentContent) {
+          sections.push(
+            `rawDocumentContent: ${doc.rawDocumentContent.substring(0, 200)}${
+              doc.rawDocumentContent.length > 200 ? '...' : ''
+            }`
+          );
         }
 
         sections.push('');
@@ -731,12 +768,12 @@ export class ExploreContextFormatter {
     }
 
     // User Activity Summary
-    if (rawContextData.userActivity) {
+    if (contextData.userActivity) {
       sections.push('## 👤 User Activity Summary');
-      sections.push(`currentFocus: ${rawContextData.userActivity.currentFocus}`);
-      sections.push(`lastAction: ${rawContextData.userActivity.lastAction}`);
-      if (rawContextData.userActivity.contextNote) {
-        sections.push(`contextNote: ${rawContextData.userActivity.contextNote}`);
+      sections.push(`currentFocus: ${contextData.userActivity.currentFocus}`);
+      sections.push(`lastAction: ${contextData.userActivity.lastAction}`);
+      if (contextData.userActivity.contextNote) {
+        sections.push(`contextNote: ${contextData.userActivity.contextNote}`);
       }
       sections.push('');
     }
