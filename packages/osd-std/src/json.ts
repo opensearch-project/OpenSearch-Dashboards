@@ -4,6 +4,7 @@
  */
 
 import JSON11 from 'json11';
+const hexEscapeRegex = /\\x([0-9A-Fa-f]{2})/g;
 
 export const stringify = (
   obj: any,
@@ -52,7 +53,7 @@ export const stringify = (
       quote: '"',
       quoteNames: true,
     });
-    if (temp) text = temp;
+    if (temp) text = temp.replace(hexEscapeRegex, (_, c) => `\\u00${c}`);
   }
 
   return text;
