@@ -31,8 +31,6 @@
 import Stream, { Readable, Writable } from 'stream';
 import { createGunzip } from 'zlib';
 
-import expect from '@osd/expect';
-
 import { createListStream, createPromiseFromStreams, createConcatStream } from '../streams';
 
 import { createFormatArchiveStreams } from './format';
@@ -44,9 +42,9 @@ describe('opensearchArchiver createFormatArchiveStreams', () => {
   describe('{ gzip: false }', () => {
     it('returns an array of streams', () => {
       const streams = createFormatArchiveStreams({ gzip: false });
-      expect(streams).to.be.an('array');
-      expect(streams.length).to.be.greaterThan(0);
-      streams.forEach((s) => expect(s).to.be.a(Stream));
+      expect(Array.isArray(streams)).toBe(true);
+      expect(streams.length).toBeGreaterThan(0);
+      streams.forEach((s) => expect(s).toBeInstanceOf(Stream));
     });
 
     it('streams consume js values and produces buffers', async () => {
@@ -56,8 +54,8 @@ describe('opensearchArchiver createFormatArchiveStreams', () => {
         createConcatStream([]),
       ] as [Readable, ...Writable[]]);
 
-      expect(output.length).to.be.greaterThan(0);
-      output.forEach((b) => expect(b).to.be.a(Buffer));
+      expect(output.length).toBeGreaterThan(0);
+      output.forEach((b) => expect(b).toBeInstanceOf(Buffer));
     });
 
     it('product is pretty-printed JSON separated by two newlines', async () => {
@@ -67,16 +65,16 @@ describe('opensearchArchiver createFormatArchiveStreams', () => {
         createConcatStream(''),
       ] as [Readable, ...Writable[]]);
 
-      expect(json).to.be(INPUT_JSON);
+      expect(json).toBe(INPUT_JSON);
     });
   });
 
   describe('{ gzip: true }', () => {
     it('returns an array of streams', () => {
       const streams = createFormatArchiveStreams({ gzip: true });
-      expect(streams).to.be.an('array');
-      expect(streams.length).to.be.greaterThan(0);
-      streams.forEach((s) => expect(s).to.be.a(Stream));
+      expect(Array.isArray(streams)).toBe(true);
+      expect(streams.length).toBeGreaterThan(0);
+      streams.forEach((s) => expect(s).toBeInstanceOf(Stream));
     });
 
     it('streams consume js values and produces buffers', async () => {
@@ -86,8 +84,8 @@ describe('opensearchArchiver createFormatArchiveStreams', () => {
         createConcatStream([]),
       ] as [Readable, ...Writable[]]);
 
-      expect(output.length).to.be.greaterThan(0);
-      output.forEach((b) => expect(b).to.be.a(Buffer));
+      expect(output.length).toBeGreaterThan(0);
+      output.forEach((b) => expect(b).toBeInstanceOf(Buffer));
     });
 
     it('output can be gunzipped', async () => {
@@ -97,7 +95,7 @@ describe('opensearchArchiver createFormatArchiveStreams', () => {
         createGunzip(),
         createConcatStream(''),
       ] as [Readable, ...Writable[]]);
-      expect(output).to.be(INPUT_JSON);
+      expect(output).toBe(INPUT_JSON);
     });
   });
 
@@ -109,7 +107,7 @@ describe('opensearchArchiver createFormatArchiveStreams', () => {
         createConcatStream(''),
       ] as [Readable, ...Writable[]]);
 
-      expect(json).to.be(INPUT_JSON);
+      expect(json).toBe(INPUT_JSON);
     });
   });
 });

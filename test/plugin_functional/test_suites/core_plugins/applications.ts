@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const deployment = getService('deployment');
 
   const loadingScreenNotShown = async () =>
-    expect(await testSubjects.exists('osdLoadingMessage')).to.be(false);
+    expect(await testSubjects.exists('osdLoadingMessage')).toBe(false);
 
   const getAppWrapperHeight = async () => {
     const wrapper = await find.byClassName('app-wrapper');
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('preserves query parameters across apps', async () => {
       const querySpan = await testSubjects.find('barAppPageBQuery');
-      expect(await querySpan.getVisibleText()).to.eql(`[["query","here"]]`);
+      expect(await querySpan.getVisibleText()).toEqual(`[["query","here"]]`);
     });
 
     it('can use the back button to navigate back to previous app', async () => {
@@ -139,27 +139,27 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('chromeless applications are not visible in apps list', async () => {
-      expect(await appsMenu.linkExists('Chromeless')).to.be(false);
+      expect(await appsMenu.linkExists('Chromeless')).toBe(false);
     });
 
     it('navigating to chromeless application hides chrome', async () => {
       await PageObjects.common.navigateToApp('chromeless');
       await loadingScreenNotShown();
-      expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
+      expect(await testSubjects.exists('headerGlobalNav')).toBe(false);
 
       const wrapperHeight = await getAppWrapperHeight();
       const windowHeight = (await browser.getWindowSize()).height;
-      expect(wrapperHeight).to.eql(windowHeight);
+      expect(wrapperHeight).toEqual(windowHeight);
     });
 
     it('navigating away from chromeless application shows chrome', async () => {
       await PageObjects.common.navigateToApp('foo');
       await loadingScreenNotShown();
-      expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
+      expect(await testSubjects.exists('headerGlobalNav')).toBe(true);
 
       const wrapperHeight = await getAppWrapperHeight();
       const windowHeight = (await browser.getWindowSize()).height;
-      expect(wrapperHeight).to.be.below(windowHeight);
+      expect(wrapperHeight).toBeLessThan(windowHeight);
     });
   });
 }

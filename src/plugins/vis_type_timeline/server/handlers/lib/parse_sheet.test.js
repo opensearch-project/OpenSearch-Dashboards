@@ -30,16 +30,14 @@
 
 const parseSheet = require('./parse_sheet');
 
-const expect = require('chai').expect;
-
 describe('timeline parse_sheet function', function () {
   it(`doesn't split expressions on whitespace`, async function () {
     const data = ['.opensearch() .opensearch(404)'];
     const ast = parseSheet(data);
 
     const expressions = ast[0];
-    expect(expressions.length).to.equal(1);
-    expect(expressions[0].type).to.equal('chain');
+    expect(expressions.length).toEqual(1);
+    expect(expressions[0].type).toEqual('chain');
   });
 
   it('splits expressions on commas', function () {
@@ -47,9 +45,9 @@ describe('timeline parse_sheet function', function () {
     const ast = parseSheet(data);
 
     const expressions = ast[0];
-    expect(expressions.length).to.equal(2);
-    expect(expressions[0].type).to.equal('chain');
-    expect(expressions[1].type).to.equal('chain');
+    expect(expressions.length).toEqual(2);
+    expect(expressions[0].type).toEqual('chain');
+    expect(expressions[1].type).toEqual('chain');
   });
 
   it('splits expressions on newlines', function () {
@@ -57,8 +55,8 @@ describe('timeline parse_sheet function', function () {
     const ast = parseSheet(data);
 
     const expressions = ast[0];
-    expect(expressions.length).to.equal(2);
-    expect(expressions[0].type).to.equal('chain');
-    expect(expressions[1].type).to.equal('chain');
+    expect(expressions.length).toEqual(2);
+    expect(expressions[0].type).toEqual('chain');
+    expect(expressions[1].type).toEqual('chain');
   });
 });

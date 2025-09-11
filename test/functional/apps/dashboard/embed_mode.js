@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('hides the chrome', async () => {
       const globalNavShown = await globalNav.exists();
-      expect(globalNavShown).to.be(true);
+      expect(globalNavShown).toBe(true);
 
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl + '&embed=true';
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         const globalNavHidden = !(await globalNav.exists());
-        expect(globalNavHidden).to.be(true);
+        expect(globalNavHidden).toBe(true);
       });
     });
 

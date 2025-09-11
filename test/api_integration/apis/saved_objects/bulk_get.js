@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -61,7 +61,7 @@ export default function ({ getService }) {
           .send(BULK_REQUESTS)
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               saved_objects: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -112,7 +112,7 @@ export default function ({ getService }) {
                 },
               ],
             });
-            expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+            expect(resp.body.saved_objects[0].migrationVersion).toBeTruthy();
           }));
     });
 
@@ -132,7 +132,7 @@ export default function ({ getService }) {
           .send(BULK_REQUESTS)
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               saved_objects: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',

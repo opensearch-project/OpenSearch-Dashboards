@@ -29,7 +29,6 @@
  */
 
 import sinon from 'sinon';
-import expect from '@osd/expect';
 import { delay } from 'bluebird';
 
 import { createListStream, createPromiseFromStreams, createConcatStream } from '../streams';
@@ -43,9 +42,9 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
     const stats = createStubStats();
     const client = createStubClient([
       (name, params) => {
-        expect(name).to.be('search');
-        expect(params).to.have.property('index', 'logstash-*');
-        expect(params).to.have.property('size', 1000);
+        expect(name).toBe('search');
+        expect(params).toHaveProperty('index', 'logstash-*');
+        expect(params).toHaveProperty('size', 1000);
         return {
           body: {
             hits: {
@@ -63,18 +62,18 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
       createGenerateDocRecordsStream({ client, stats, progress }),
     ]);
 
-    expect(progress.getTotal()).to.be(0);
-    expect(progress.getComplete()).to.be(0);
+    expect(progress.getTotal()).toBe(0);
+    expect(progress.getComplete()).toBe(0);
   });
 
   it('uses a 1 minute scroll timeout', async () => {
     const stats = createStubStats();
     const client = createStubClient([
       (name, params) => {
-        expect(name).to.be('search');
-        expect(params).to.have.property('index', 'logstash-*');
-        expect(params).to.have.property('scroll', '1m');
-        expect(params).to.have.property('rest_total_hits_as_int', true);
+        expect(name).toBe('search');
+        expect(params).toHaveProperty('index', 'logstash-*');
+        expect(params).toHaveProperty('scroll', '1m');
+        expect(params).toHaveProperty('rest_total_hits_as_int', true);
         return {
           body: {
             hits: {
@@ -92,8 +91,8 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
       createGenerateDocRecordsStream({ client, stats, progress }),
     ]);
 
-    expect(progress.getTotal()).to.be(0);
-    expect(progress.getComplete()).to.be(0);
+    expect(progress.getTotal()).toBe(0);
+    expect(progress.getComplete()).toBe(0);
   });
 
   it('consumes index names and scrolls completely before continuing', async () => {
@@ -101,8 +100,8 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
     let checkpoint = Date.now();
     const client = createStubClient([
       async (name, params) => {
-        expect(name).to.be('search');
-        expect(params).to.have.property('index', 'index1');
+        expect(name).toBe('search');
+        expect(params).toHaveProperty('index', 'index1');
         await delay(200);
         return {
           body: {
@@ -112,17 +111,17 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         };
       },
       async (name, params) => {
-        expect(name).to.be('scroll');
-        expect(params).to.have.property('scroll_id', 'index1ScrollId');
-        expect(Date.now() - checkpoint).to.not.be.lessThan(200);
+        expect(name).toBe('scroll');
+        expect(params).toHaveProperty('scroll_id', 'index1ScrollId');
+        expect(Date.now() - checkpoint).not.toBeLessThan(200);
         checkpoint = Date.now();
         await delay(200);
         return { body: { hits: { total: 2, hits: [{ _id: 2, _index: 'foo' }] } } };
       },
       async (name, params) => {
-        expect(name).to.be('search');
-        expect(params).to.have.property('index', 'index2');
-        expect(Date.now() - checkpoint).to.not.be.lessThan(200);
+        expect(name).toBe('search');
+        expect(params).toHaveProperty('index', 'index2');
+        expect(Date.now() - checkpoint).not.toBeLessThan(200);
         checkpoint = Date.now();
         await delay(200);
         return { body: { hits: { total: 0, hits: [] } } };
@@ -136,7 +135,7 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
       createConcatStream([]),
     ]);
 
-    expect(docRecords).to.eql([
+    expect(docRecords).toEqual([
       {
         type: 'doc',
         value: {
@@ -161,7 +160,7 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
       },
     ]);
     sinon.assert.calledTwice(stats.archivedDoc as any);
-    expect(progress.getTotal()).to.be(2);
-    expect(progress.getComplete()).to.be(2);
+    expect(progress.getTotal()).toBe(2);
+    expect(progress.getComplete()).toBe(2);
   });
 });

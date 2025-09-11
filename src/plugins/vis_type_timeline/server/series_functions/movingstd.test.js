@@ -31,7 +31,6 @@
 import fn from './movingstd';
 
 import moment from 'moment';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 import getSeries from './helpers/get_series';
 import getSeriesList from './helpers/get_series_list';
@@ -109,7 +108,8 @@ describe('movingstd.js', () => {
     ];
 
     expectedPoints.forEach((value, index) => {
-      expect(trimmedResultPoints[index]).to.be.within(value - 0.01, value + 0.01);
+      expect(trimmedResultPoints[index]).toBeGreaterThanOrEqual(value - 0.01);
+      expect(trimmedResultPoints[index]).toBeLessThanOrEqual(value + 0.01);
     });
   });
 });

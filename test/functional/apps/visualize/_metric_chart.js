@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
       // initial metric of "Count" is selected by default
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
-        expect(expectedCount).to.eql(metricValue);
+        expect(expectedCount).toEqual(metricValue);
       });
     });
 
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
-        expect(avgMachineRam).to.eql(metricValue);
+        expect(avgMachineRam).toEqual(metricValue);
       });
     });
 
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
-        expect(sumPhpMemory).to.eql(metricValue);
+        expect(sumPhpMemory).toEqual(metricValue);
       });
     });
 
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
         // only comparing the text label!
-        expect(medianBytes[1]).to.eql(metricValue[1]);
+        expect(medianBytes[1]).toEqual(metricValue[1]);
       });
     });
 
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
-        expect(minTimestamp).to.eql(metricValue);
+        expect(minTimestamp).toEqual(metricValue);
       });
     });
 
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
-        expect(maxRelatedContentArticleModifiedTime).to.eql(metricValue);
+        expect(maxRelatedContentArticleModifiedTime).toEqual(metricValue);
       });
     });
 
@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
-        expect(uniqueCountClientip).to.eql(metricValue);
+        expect(uniqueCountClientip).toEqual(metricValue);
       });
     });
 
@@ -172,9 +172,9 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
         // TODO: Restore when inconsistent values are fixed from https://github.com/opensearch-project/OpenSearch/pull/3634
-        // expect(percentileMachineRam).to.eql(metricValue);
-        expect(percentileMachineRam.slice(0, 5)).to.eql(metricValue.slice(0, 5));
-        expect(percentileMachineRam.slice(13, 15)).to.eql(metricValue.slice(13, 15));
+        // expect(percentileMachineRam).toEqual(metricValue);
+        expect(percentileMachineRam.slice(0, 5)).toEqual(metricValue.slice(0, 5));
+        expect(percentileMachineRam.slice(13, 15)).toEqual(metricValue.slice(13, 15));
       });
     });
 
@@ -190,10 +190,10 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
         // The first value is inconsistent between 3.0.0 and 2.x due to OS side change: https://github.com/opensearch-project/OpenSearch/pull/3634
-        expect(percentileRankBytes[0] === '2.029%' || percentileRankBytes[1] === '2.036%').to.eql(
+        expect(percentileRankBytes[0] === '2.029%' || percentileRankBytes[1] === '2.036%').toEqual(
           true
         );
-        expect(percentileRankBytes[1]).to.eql(metricValue[1]);
+        expect(percentileRankBytes[1]).toEqual(metricValue[1]);
       });
     });
 
@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visEditor.clickMetricByIndex(0);
           filterCount = await filterBar.getFilterCount();
         });
-        expect(filterCount).to.equal(0);
+        expect(filterCount).toEqual(0);
       });
 
       it('should allow filtering with buckets', async function () {
@@ -224,7 +224,7 @@ export default function ({ getService, getPageObjects }) {
           filterCount = await filterBar.getFilterCount();
         });
         await filterBar.removeAllFilters();
-        expect(filterCount).to.equal(1);
+        expect(filterCount).toEqual(1);
       });
     });
   });

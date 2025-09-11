@@ -31,8 +31,6 @@
 import fn from './points';
 
 import _ from 'lodash';
-import assert from 'chai';
-const expect = assert.expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('points.js', () => {
@@ -43,31 +41,31 @@ describe('points.js', () => {
 
   it('should set the point radius', () => {
     return invoke(fn, [seriesList, 1]).then((r) => {
-      expect(r.output.list[0].points.radius).to.equal(1);
+      expect(r.output.list[0].points.radius).toEqual(1);
     });
   });
 
   it('should set the point lineWidth', () => {
     return invoke(fn, [seriesList, null, 3]).then((r) => {
-      expect(r.output.list[0].points.lineWidth).to.equal(3);
+      expect(r.output.list[0].points.lineWidth).toEqual(3);
     });
   });
 
   it('should set the point fill', () => {
     return invoke(fn, [seriesList, null, null, 3]).then((r) => {
-      expect(r.output.list[0].points.fill).to.equal(3 / 10);
+      expect(r.output.list[0].points.fill).toEqual(3 / 10);
     });
   });
 
   it('should not set the fill color if fill is not specified', () => {
     return invoke(fn, [seriesList, null, null, null, '#333']).then((r) => {
-      expect(r.output.list[0].points.fillColor).to.equal(undefined);
+      expect(r.output.list[0].points.fillColor).toEqual(undefined);
     });
   });
 
   it('should set the fill color ', () => {
     return invoke(fn, [seriesList, null, null, 10, '#333']).then((r) => {
-      expect(r.output.list[0].points.fillColor).to.equal('#333');
+      expect(r.output.list[0].points.fillColor).toEqual('#333');
     });
   });
 
@@ -76,7 +74,7 @@ describe('points.js', () => {
     _.each(symbols, (symbol) => {
       it(`is ${symbol}`, () => {
         return invoke(fn, [seriesList, null, null, null, null, symbol]).then((r) => {
-          expect(r.output.list[0].points.symbol).to.equal(symbol);
+          expect(r.output.list[0].points.symbol).toEqual(symbol);
         });
       });
     });
@@ -85,7 +83,7 @@ describe('points.js', () => {
       return invoke(fn, [seriesList, null, null, null, null, 'beer'])
         .then(expect.fail)
         .catch((e) => {
-          expect(e).to.be.an('error');
+          expect(e).toBeInstanceOf(Error);
         });
     });
   });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function GlobalNavProvider({ getService }: FtrProviderContext) {
@@ -74,7 +74,7 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
     public async badgeExistsOrFail(expectedLabel: string): Promise<void> {
       await testSubjects.existOrFail('headerBadge');
       const actualLabel = await testSubjects.getAttribute('headerBadge', 'data-test-badge-label');
-      expect(actualLabel.toUpperCase()).to.equal(expectedLabel.toUpperCase());
+      expect(actualLabel.toUpperCase()).toEqual(expectedLabel.toUpperCase());
     }
 
     public async badgeMissingOrFail(): Promise<void> {
@@ -87,7 +87,7 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
         'headerGlobalNav > logo > customLogo',
         'data-test-image-url'
       );
-      expect(actualLabel.toUpperCase()).to.equal(expectedUrl.toUpperCase());
+      expect(actualLabel.toUpperCase()).toEqual(expectedUrl.toUpperCase());
     }
 
     public async homeMarkExistsOrFail(expectedUrl: string): Promise<void> {
@@ -96,7 +96,7 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
         'headerGlobalNav > homeLoader > customMark',
         'data-test-image-url'
       );
-      expect(actualLabel.toUpperCase()).to.equal(expectedUrl.toUpperCase());
+      expect(actualLabel.toUpperCase()).toEqual(expectedUrl.toUpperCase());
     }
   }
 

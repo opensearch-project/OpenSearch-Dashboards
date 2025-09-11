@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { errors as opensearchErrors } from 'elasticsearch';
 import Boom from '@hapi/boom';
 
@@ -81,7 +81,7 @@ export default function ({ getService }) {
 
       it('sets output code to "no_matching_indices"', () => {
         const error = createNoMatchingIndicesError();
-        expect(error.output.payload).to.have.property('code', 'no_matching_indices');
+        expect(error.output.payload).toHaveProperty('code', 'no_matching_indices');
       });
     });
 
@@ -136,10 +136,10 @@ export default function ({ getService }) {
           }
         );
 
-        expect(error).to.not.have.property('isBoom');
+        expect(error).not.toHaveProperty('isBoom');
         const converted = convertOpenSearchError(indices, error);
-        expect(converted).to.have.property('isBoom');
-        expect(converted.output.statusCode).to.be(403);
+        expect(converted).toHaveProperty('isBoom');
+        expect(converted.output.statusCode).toBe(403);
       });
 
       it('handles errors that are already Boom errors', () => {
@@ -149,7 +149,7 @@ export default function ({ getService }) {
 
         const converted = convertOpenSearchError(indices, boomError);
 
-        expect(converted.output.statusCode).to.be(401);
+        expect(converted.output.statusCode).toBe(401);
       });
 
       it('preserves headers from Boom errors', () => {
@@ -160,7 +160,7 @@ export default function ({ getService }) {
         boomError.output.headers['WWW-Authenticate'] = wwwAuthenticate;
         const converted = convertOpenSearchError(indices, boomError);
 
-        expect(converted.output.headers['WWW-Authenticate']).to.be(wwwAuthenticate);
+        expect(converted.output.headers['WWW-Authenticate']).toBe(wwwAuthenticate);
       });
     });
   });

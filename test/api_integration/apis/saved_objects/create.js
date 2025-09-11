@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -51,15 +51,15 @@ export default function ({ getService }) {
           .then((resp) => {
             // loose uuid validation
             expect(resp.body)
-              .to.have.property('id')
+              .toHaveProperty('id')
               .match(/^[0-9a-f-]{36}$/);
 
             // loose ISO8601 UTC time with milliseconds validation
             expect(resp.body)
-              .to.have.property('updated_at')
+              .toHaveProperty('updated_at')
               .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
 
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               id: resp.body.id,
               type: 'visualization',
               migrationVersion: resp.body.migrationVersion,
@@ -71,7 +71,7 @@ export default function ({ getService }) {
               references: [],
               namespaces: ['default'],
             });
-            expect(resp.body.migrationVersion).to.be.ok();
+            expect(resp.body.migrationVersion).toBeTruthy();
           });
       });
     });
@@ -98,15 +98,15 @@ export default function ({ getService }) {
           .then((resp) => {
             // loose uuid validation
             expect(resp.body)
-              .to.have.property('id')
+              .toHaveProperty('id')
               .match(/^[0-9a-f-]{36}$/);
 
             // loose ISO8601 UTC time with milliseconds validation
             expect(resp.body)
-              .to.have.property('updated_at')
+              .toHaveProperty('updated_at')
               .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
 
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               id: resp.body.id,
               type: 'visualization',
               migrationVersion: resp.body.migrationVersion,
@@ -118,10 +118,10 @@ export default function ({ getService }) {
               references: [],
               namespaces: ['default'],
             });
-            expect(resp.body.migrationVersion).to.be.ok();
+            expect(resp.body.migrationVersion).toBeTruthy();
           });
 
-        expect(await opensearch.indices.exists({ index: '.kibana' })).to.be(true);
+        expect(await opensearch.indices.exists({ index: '.kibana' })).toBe(true);
       });
     });
   });

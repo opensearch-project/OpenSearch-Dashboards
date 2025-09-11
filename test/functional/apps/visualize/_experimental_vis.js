@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default ({ getService, getPageObjects }) => {
   const log = getService('log');
@@ -56,7 +56,7 @@ export default ({ getService, getPageObjects }) => {
         await PageObjects.visualize.selectVisSourceIfRequired();
         // Check that the beta banner is there and state that this is beta
         const info = await PageObjects.visualize.getBetaInfo();
-        expect(await info.getVisibleText()).to.contain('beta');
+        expect(await info.getVisibleText()).toContain('beta');
       });
 
       it('should show an notification when creating experimental visualizations', async () => {
@@ -73,14 +73,14 @@ export default ({ getService, getPageObjects }) => {
         await PageObjects.visualize.selectVisSourceIfRequired();
         // Check that the experimental banner is there and state that this is experimental
         const info = await PageObjects.visualize.getExperimentalInfo();
-        expect(await info.getVisibleText()).to.contain('experimental');
+        expect(await info.getVisibleText()).toContain('experimental');
       });
 
       it('should not show that notification for stable visualizations', async () => {
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
-        expect(await PageObjects.visualize.isBetaInfoShown()).to.be(false);
-        expect(await PageObjects.visualize.isExperimentalInfoShown()).to.be(false);
+        expect(await PageObjects.visualize.isBetaInfoShown()).toBe(false);
+        expect(await PageObjects.visualize.isExperimentalInfoShown()).toBe(false);
       });
     });
   });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -60,8 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.setFilterRange(0, '7', '10');
       await visEditor.inputControlSubmit();
       const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
-      expect(controlFilters).to.have.length(1);
-      expect(await controlFilters[0].getVisibleText()).to.equal('hour_of_day: 7 to 10');
+      expect(controlFilters).toHaveLength(1);
+      expect(await controlFilters[0].getVisibleText()).toEqual('hour_of_day: 7 to 10');
     });
 
     it('should add filter with price field', async () => {
@@ -75,8 +75,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.setFilterRange(1, '400', '999');
       await visEditor.inputControlSubmit();
       const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
-      expect(controlFilters).to.have.length(2);
-      expect(await controlFilters[1].getVisibleText()).to.equal('AvgTicketPrice: $400 to $999');
+      expect(controlFilters).toHaveLength(2);
+      expect(await controlFilters[1].getVisibleText()).toEqual('AvgTicketPrice: $400 to $999');
     });
 
     after(async () => {

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
@@ -57,13 +57,13 @@ export default function ({ getService, getPageObjects }) {
 
     it('should display empty widget', async () => {
       const emptyWidgetExists = await testSubjects.exists('emptyDashboardWidget');
-      expect(emptyWidgetExists).to.be(true);
+      expect(emptyWidgetExists).toBe(true);
     });
 
     it('should open add panel when add button is clicked', async () => {
       await testSubjects.click('dashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
-      expect(isAddPanelOpen).to.be(true);
+      expect(isAddPanelOpen).toBe(true);
       await testSubjects.click('euiFlyoutCloseButton');
     });
 

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -50,10 +50,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.openSavedVisualization('Shared-Item Visualization AreaChart');
       await retry.try(async function () {
         const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
-        expect(title).to.eql(expected.title);
-        expect(description).to.eql(expected.description);
+        expect(title).toEqual(expected.title);
+        expect(description).toEqual(expected.description);
         const sharedItemContainers = await PageObjects.common.getSharedItemContainers();
-        expect(sharedItemContainers.length).to.be(1);
+        expect(sharedItemContainers.length).toBe(1);
       });
     });
   });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
@@ -42,7 +42,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.click('emitHelloWorldTrigger');
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('helloWorldActionText');
-        expect(text).to.be('Hello world!');
+        expect(text).toBe('Hello world!');
       });
 
       await testSubjects.click('closeModal');
@@ -56,7 +56,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       });
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('dynamicHelloWorldActionText');
-        expect(text).to.be('Hello Waldo');
+        expect(text).toBe('Hello Waldo');
       });
       await testSubjects.click('closeModal');
     });

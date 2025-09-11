@@ -30,8 +30,6 @@
 
 import { resolve, sep } from 'path';
 
-import expect from '@osd/expect';
-
 import { File } from './file';
 
 const HERE = resolve(__dirname, __filename);
@@ -40,50 +38,50 @@ describe('dev/File', () => {
   describe('constructor', () => {
     it('throws if path is not a string', () => {
       // @ts-ignore to test wrong args
-      expect(() => new File()).to.throwError();
+      expect(() => new File()).toThrowError();
       // @ts-ignore to test wrong args
-      expect(() => new File(1)).to.throwError();
+      expect(() => new File(1)).toThrowError();
       // @ts-ignore to test wrong args
-      expect(() => new File(false)).to.throwError();
+      expect(() => new File(false)).toThrowError();
       // @ts-ignore to test wrong args
-      expect(() => new File(null)).to.throwError();
+      expect(() => new File(null)).toThrowError();
     });
   });
 
   describe('#getRelativePath()', () => {
     it('returns the path relative to the repo root', () => {
       const file = new File(HERE);
-      expect(file.getRelativePath()).to.eql(['src', 'dev', 'file.test.ts'].join(sep));
+      expect(file.getRelativePath()).toEqual(['src', 'dev', 'file.test.ts'].join(sep));
     });
   });
 
   describe('#isJs()', () => {
     it('returns true if extension is .js', () => {
       const file = new File('file.js');
-      expect(file.isJs()).to.eql(true);
+      expect(file.isJs()).toEqual(true);
     });
     it('returns false if extension is .xml', () => {
       const file = new File('file.xml');
-      expect(file.isJs()).to.eql(false);
+      expect(file.isJs()).toEqual(false);
     });
     it('returns false if extension is .css', () => {
       const file = new File('file.css');
-      expect(file.isJs()).to.eql(false);
+      expect(file.isJs()).toEqual(false);
     });
     it('returns false if extension is .html', () => {
       const file = new File('file.html');
-      expect(file.isJs()).to.eql(false);
+      expect(file.isJs()).toEqual(false);
     });
     it('returns false if file has no extension', () => {
       const file = new File('file');
-      expect(file.isJs()).to.eql(false);
+      expect(file.isJs()).toEqual(false);
     });
   });
 
   describe('#getRelativeParentDirs()', () => {
     it('returns the parents of a file, stopping at the repo root, in descending order', () => {
       const file = new File(HERE);
-      expect(file.getRelativeParentDirs()).to.eql([
+      expect(file.getRelativeParentDirs()).toEqual([
         ['src', 'dev'].join(sep), // src/dev
         'src',
       ]);
@@ -93,14 +91,14 @@ describe('dev/File', () => {
   describe('#toString()', () => {
     it('returns the relativePath', () => {
       const file = new File(HERE);
-      expect(file.toString()).to.eql(file.getRelativePath());
+      expect(file.toString()).toEqual(file.getRelativePath());
     });
   });
 
   describe('#toJSON()', () => {
     it('returns the relativePath', () => {
       const file = new File(HERE);
-      expect(file.toJSON()).to.eql(file.getRelativePath());
+      expect(file.toJSON()).toEqual(file.getRelativePath());
     });
   });
 });

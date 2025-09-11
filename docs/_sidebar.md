@@ -123,7 +123,6 @@
     - [Osd dev utils](../packages/osd-dev-utils/README.md)
     - [Osd eslint import resolver opensearch dashboards](../packages/osd-eslint-import-resolver-opensearch-dashboards/README.md)
     - [Osd eslint plugin eslint](../packages/osd-eslint-plugin-eslint/README.md)
-    - [Osd expect](../packages/osd-expect/README.md)
     - [Osd i18n](../packages/osd-i18n/README.md)
     - [Osd logging](../packages/osd-logging/README.md)
     - [Osd monaco](../packages/osd-monaco/README.md)

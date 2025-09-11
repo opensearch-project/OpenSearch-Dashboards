@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { join } from 'path';
 
 export default function ({ getService }) {
@@ -68,7 +68,7 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_import')
             .expect(415)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 415,
                 error: 'Unsupported Media Type',
                 message: 'Unsupported Media Type',
@@ -82,7 +82,7 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 success: false,
                 successCount: 0,
                 errors: [
@@ -101,7 +101,7 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 success: true,
                 successCount: 3,
                 successResults: [
@@ -123,7 +123,7 @@ export default function ({ getService }) {
             .attach('file', fileBuffer, 'export.ndjson')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 success: false,
                 successCount: 0,
                 errors: [
@@ -149,7 +149,7 @@ export default function ({ getService }) {
             .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
             .expect(400)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: "Can't import more than 10000 objects",
@@ -182,7 +182,7 @@ export default function ({ getService }) {
             .attach('file', Buffer.from(objectsToImport.join('\n'), 'utf8'), 'export.ndjson')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 success: false,
                 successCount: 0,
                 errors: [

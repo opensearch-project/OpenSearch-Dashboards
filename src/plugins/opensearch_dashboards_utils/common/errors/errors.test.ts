@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import { DuplicateField, SavedObjectNotFound, OsdError } from './errors';
 
 describe('errors', () => {
@@ -37,15 +36,15 @@ describe('errors', () => {
   errors.forEach((error) => {
     const className = error.constructor.name;
     it(`${className} has a message`, () => {
-      expect(error.message).to.not.be.empty();
+      expect(error.message).toBeTruthy();
     });
 
     it(`${className} has a stack trace`, () => {
-      expect(error.stack).to.not.be.empty();
+      expect(error.stack).toBeTruthy();
     });
 
     it(`${className} is an instance of OsdError`, () => {
-      expect(error instanceof OsdError).to.be(true);
+      expect(error instanceof OsdError).toBe(true);
     });
   });
 });

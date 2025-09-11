@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function OpenSearchChartProvider({ getService }: FtrProviderContext) {
@@ -49,7 +49,7 @@ export function OpenSearchChartProvider({ getService }: FtrProviderContext) {
     public async waitForRenderComplete(dataTestSubj: string) {
       const chart = await testSubjects.find(dataTestSubj);
       const rendered = await chart.findAllByCssSelector('.echChart[data-ech-render-complete=true]');
-      expect(rendered).to.equal(
+      expect(rendered).toEqual(
         1,
         `Rendering for opensearch-chart with data-test-subj='${dataTestSubj}' was not finished in time`
       );
