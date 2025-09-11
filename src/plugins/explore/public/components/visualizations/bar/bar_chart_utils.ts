@@ -134,6 +134,7 @@ export const buildThresholdColorEncoding = (
   numericalField: VisColumn | undefined,
   styleOptions: Partial<BarChartStyleControls>
 ) => {
+  // support old thresholdLines config to be compatible with new thresholds
   const activeThresholds =
     styleOptions?.thresholdLines && !styleOptions?.thresholdOptions?.thresholds
       ? transformThresholdLinesToThreshold(styleOptions?.thresholdLines)

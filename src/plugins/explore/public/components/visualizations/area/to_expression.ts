@@ -6,7 +6,7 @@
 import { AreaChartStyleControls } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
-import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
+import { createThresholdLayer } from '../style_panel/threshold_lines/utils';
 import { getTooltipFormat } from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 

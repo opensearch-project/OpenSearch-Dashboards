@@ -64,28 +64,20 @@ jest.mock('../style_panel/legend/legend', () => ({
   )),
 }));
 
-jest.mock('../style_panel/threshold_lines/threshold', () => ({
-  ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
-    <div data-test-subj="threshold-panel">
-      <button
-        data-test-subj="update-threshold"
-        onClick={() =>
-          onThresholdLinesChange([
-            ...thresholdLines,
-            {
-              id: '2',
-              color: '#000000',
-              show: true,
-              style: 'full',
-              value: 20,
-              width: 1,
-            },
-          ])
-        }
-      >
-        Update Threshold
-      </button>
-    </div>
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
+    <>
+      <div data-test-subj="mockAreaThresholdPanel">
+        <button
+          data-test-subj="mockAddRange"
+          onClick={() =>
+            onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+          }
+        >
+          Add Range
+        </button>
+      </div>
+    </>
   )),
 }));
 
@@ -184,17 +176,12 @@ describe('AreaVisStyleControls', () => {
       addLegend: true,
       legendPosition: Positions.RIGHT,
       addTimeMarker: false,
-      thresholdLines: [
-        {
-          id: '1',
-          color: '#E7664C',
-          show: false,
-          style: ThresholdLineStyle.Full,
-          value: 10,
-          width: 1,
-          name: '',
-        },
-      ],
+      // Threshold options
+      thresholdOptions: {
+        baseColor: '#9EE9FA',
+        thresholds: [],
+        thresholdStyle: ThresholdLineStyle.Solid,
+      },
       tooltipOptions: { mode: 'all' as TooltipOptions['mode'] },
       categoryAxes: [
         {
@@ -280,7 +267,7 @@ describe('AreaVisStyleControls', () => {
     render(<AreaVisStyleControls {...defaultProps} />);
 
     expect(screen.getByTestId('legend-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('threshold-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAreaThresholdPanel')).toBeInTheDocument();
     expect(screen.getByTestId('tooltip-panel')).toBeInTheDocument();
     expect(screen.getByTestId('axes-panel')).toBeInTheDocument();
     expect(screen.getByTestId('title-panel')).toBeInTheDocument();
@@ -368,23 +355,16 @@ describe('AreaVisStyleControls', () => {
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: Positions.TOP });
   });
 
-  test('updates threshold lines correctly', async () => {
+  test('adds threshold lines correctly', async () => {
     render(<AreaVisStyleControls {...defaultProps} />);
 
-    await userEvent.click(screen.getByTestId('update-threshold'));
+    await userEvent.click(screen.getByTestId('mockAddRange'));
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      thresholdLines: [
-        ...defaultProps.styleOptions.thresholdLines,
-        {
-          id: '2',
-          color: '#000000',
-          show: true,
-          style: ThresholdLineStyle.Full,
-          value: 20,
-          width: 1,
-        },
-      ],
+      thresholdOptions: {
+        ...defaultProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 
@@ -464,7 +444,7 @@ describe('AreaVisStyleControls', () => {
     // Only the axes select panel should be rendered
     expect(screen.getByTestId('axes-select-panel')).toBeInTheDocument();
     expect(screen.queryByTestId('legend-panel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('threshold-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockAreaThresholdPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('tooltip-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('axes-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('title-panel')).not.toBeInTheDocument();

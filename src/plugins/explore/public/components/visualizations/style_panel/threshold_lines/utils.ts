@@ -4,7 +4,7 @@
  */
 
 import { ThresholdLineStyle, ThresholdLines, ThresholdOptions } from '../../types';
-import { transformThresholdLinesToThreshold } from '../../style_panel/threshold/threshold_panel';
+import { transformThresholdLinesToThreshold } from '../../style_panel/threshold/threshold_utils';
 
 /**
  * Get stroke dash array for different line styles

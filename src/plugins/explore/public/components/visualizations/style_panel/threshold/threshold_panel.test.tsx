@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThresholdPanel, ThresholdPanelProps } from './threshold_panel';
+import { ColorSchemas, ThresholdLine } from '../../types';
 
 jest.mock('@osd/i18n', () => ({
   i18n: {
@@ -33,7 +34,7 @@ jest.mock('../utils', () => ({
 }));
 
 jest.mock('./threshold_custom_values', () => ({
-  ThresholdCustomValues: ({ onThresholdValuesChange, onBaseColorChange }: any) => (
+  ThresholdCustomValues: ({ thresholds, onThresholdValuesChange, onBaseColorChange }: any) => (
     <div data-test-subj="threshold-custom-values">
       <button
         data-test-subj="add-threshold"
@@ -44,20 +45,20 @@ jest.mock('./threshold_custom_values', () => ({
       <button data-test-subj="change-base-color" onClick={() => onBaseColorChange('#00FF00')}>
         Change Base Color
       </button>
+      <button data-test-subj="migrate-data" onClick={() => onThresholdValuesChange(thresholds)}>
+        Migrate data
+      </button>
     </div>
   ),
 }));
 
 describe('ThresholdPanel', () => {
   const mockProps: ThresholdPanelProps = {
-    thresholds: [],
-    onThresholdValuesChange: jest.fn(),
-    baseColor: '#FFFFFF',
-    onBaseColorChange: jest.fn(),
-    min: 0,
-    max: 100,
-    onMinChange: jest.fn(),
-    onMaxChange: jest.fn(),
+    thresholdsOptions: {
+      thresholds: [],
+      baseColor: '#FFFFFF',
+    },
+    onChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -69,44 +70,75 @@ describe('ThresholdPanel', () => {
     expect(screen.getByText('Threshold')).toBeInTheDocument();
   });
 
-  it('renders min and max inputs', () => {
-    render(<ThresholdPanel {...mockProps} />);
-    expect(screen.getByTestId('thresholdMinBase')).toBeInTheDocument();
-    expect(screen.getByTestId('thresholdMaxBase')).toBeInTheDocument();
-  });
-
-  it('calls onMinChange when min value changes', () => {
-    render(<ThresholdPanel {...mockProps} />);
-    const minInput = screen.getByTestId('thresholdMinBase');
-    fireEvent.change(minInput, { target: { value: '10' } });
-    expect(mockProps.onMinChange).toHaveBeenCalledWith(10);
-  });
-
-  it('calls onMaxChange when max value changes', () => {
-    render(<ThresholdPanel {...mockProps} />);
-    const maxInput = screen.getByTestId('thresholdMaxBase');
-    fireEvent.change(maxInput, { target: { value: '200' } });
-    expect(mockProps.onMaxChange).toHaveBeenCalledWith(200);
-  });
-
   it('renders threshold custom values component', () => {
     render(<ThresholdPanel {...mockProps} />);
     expect(screen.getByTestId('threshold-custom-values')).toBeInTheDocument();
   });
 
-  it('calls onThresholdValuesChange when threshold is added', () => {
+  it('calls onChange when threshold is added', () => {
     render(<ThresholdPanel {...mockProps} />);
     const addButton = screen.getByTestId('add-threshold');
     fireEvent.click(addButton);
-    expect(mockProps.onThresholdValuesChange).toHaveBeenCalledWith([
-      { value: 50, color: '#FF0000' },
-    ]);
+    expect(mockProps.onChange).toHaveBeenCalledWith({
+      thresholds: [{ value: 50, color: '#FF0000' }],
+      baseColor: '#FFFFFF',
+    });
   });
 
-  it('calls onBaseColorChange when base color changes', () => {
+  it('calls onChange when base color changes', () => {
     render(<ThresholdPanel {...mockProps} />);
     const colorButton = screen.getByTestId('change-base-color');
     fireEvent.click(colorButton);
-    expect(mockProps.onBaseColorChange).toHaveBeenCalledWith('#00FF00');
+    expect(mockProps.onChange).toHaveBeenCalledWith({
+      thresholds: [],
+      baseColor: '#00FF00',
+    });
+  });
+
+  it('should able to migrate old custom ranges to thresholds', () => {
+    const oldProps = {
+      customRanges: [
+        { min: 0, max: 50 },
+        { min: 50, max: 100 },
+      ],
+      colorSchema: ColorSchemas.BLUES,
+      thresholdsOptions: undefined,
+      onChange: jest.fn(),
+    };
+
+    render(<ThresholdPanel {...oldProps} />);
+    const migrateButton = screen.getByTestId('migrate-data');
+    fireEvent.click(migrateButton);
+
+    expect(oldProps.onChange).toHaveBeenCalledWith({
+      thresholds: [
+        { value: 0, color: '#c6dbef' },
+        { value: 50, color: '#9ecae1' },
+        { value: 100, color: '#6baed6' },
+      ],
+    });
+  });
+
+  it('should able to migrate old thresholdLines to thresholds', () => {
+    const oldProps = {
+      thresholdLines: [
+        { value: 0, color: '#c6dbef' },
+        { value: 50, color: '#9ecae1' },
+      ] as ThresholdLine[],
+      colorSchema: ColorSchemas.BLUES,
+      thresholdsOptions: undefined,
+      onChange: jest.fn(),
+    };
+
+    render(<ThresholdPanel {...oldProps} />);
+    const migrateButton = screen.getByTestId('migrate-data');
+    fireEvent.click(migrateButton);
+
+    expect(oldProps.onChange).toHaveBeenCalledWith({
+      thresholds: [
+        { value: 0, color: '#c6dbef' },
+        { value: 50, color: '#9ecae1' },
+      ],
+    });
   });
 });

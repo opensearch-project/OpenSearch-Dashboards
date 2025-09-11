@@ -158,23 +158,22 @@ export const Colors: Record<ColorSchemas, any> = {
 export const transformToThreshold = (ranges: RangeValue[], schema: ColorSchemas) => {
   if (ranges.length === 0) {
     return [];
-  } else {
-    // if min is undefined and max > min, then discard this range
-    const combinedArray = ranges.reduce<number[]>((acc, val) => {
-      if (val.min === undefined || (val.max && val.max < val.min)) return acc;
-      acc.push(val.min);
-      if (val.max) acc.push(val.max);
-      return acc;
-    }, []);
-
-    const uniqueArray = Array.from(new Set(combinedArray)).sort((a, b) => a - b);
-
-    const result = uniqueArray.map((num, i) => ({
-      value: num,
-      color: Colors[schema].colors[i % 6],
-    }));
-    return result;
   }
+  // if min is undefined and max > min, then discard this range
+  const combinedArray = ranges.reduce<number[]>((acc, val) => {
+    if (val.min === undefined || (val.max && val.max < val.min)) return acc;
+    acc.push(val.min);
+    if (val.max) acc.push(val.max);
+    return acc;
+  }, []);
+
+  const uniqueArray = Array.from(new Set(combinedArray)).sort((a, b) => a - b);
+
+  const result = uniqueArray.map((num, i) => ({
+    value: num,
+    color: Colors[schema].colors[i % 6],
+  }));
+  return result;
 };
 
 export const transformThresholdLinesToThreshold = (
@@ -182,14 +181,12 @@ export const transformThresholdLinesToThreshold = (
 ): Threshold[] => {
   if (thresholdLines.length === 0) {
     return [];
-  } else {
-    // if min is undefined and max > min, then discard this range
-    const combinedArray = thresholdLines.map((line) => {
-      return {
-        value: line.value,
-        color: line.color,
-      };
-    });
-    return combinedArray.sort((a, b) => a.value - b.value);
   }
+  const combinedArray = thresholdLines.map((line) => {
+    return {
+      value: line.value,
+      color: line.color,
+    };
+  });
+  return combinedArray.sort((a, b) => a.value - b.value);
 };
