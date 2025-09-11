@@ -15,8 +15,9 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { TitleOptionsPanel } from '../style_panel/title/title';
-import { AxisRole, VisFieldType } from '../types';
+import { AxisRole, VisFieldType, Threshold } from '../types';
 import { BucketOptionsPanel } from './bucket_options';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
 
@@ -41,7 +42,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   // Determine if the legend should be shown based on the registration of a COLOR or FACET field
   const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
   const hasFacetMapping = !!axisColumnMappings?.[AxisRole.FACET];
-  const shouldShowLegend = hasColorMapping || hasFacetMapping;
+  // const shouldShowLegend = hasColorMapping || hasFacetMapping;
 
   const bucketType =
     axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Numerical
@@ -80,6 +81,14 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
 
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              thresholdLines={styleOptions.thresholdLines}
+              showThresholdStyle={true}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
@@ -112,33 +121,23 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               }
             />
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
-            <ThresholdOptions
-              thresholdLines={styleOptions.thresholdLines}
-              onThresholdLinesChange={(thresholdLines) =>
-                updateStyleOption('thresholdLines', thresholdLines)
-              }
+            <LegendOptionsPanel
+              legendOptions={{
+                show: styleOptions.addLegend,
+                position: styleOptions.legendPosition,
+              }}
+              onLegendOptionsChange={(legendOptions) => {
+                if (legendOptions.show !== undefined) {
+                  updateStyleOption('addLegend', legendOptions.show);
+                }
+                if (legendOptions.position !== undefined) {
+                  updateStyleOption('legendPosition', legendOptions.position);
+                }
+              }}
             />
           </EuiFlexItem>
-
-          {shouldShowLegend && (
-            <EuiFlexItem grow={false}>
-              <LegendOptionsPanel
-                legendOptions={{
-                  show: styleOptions.addLegend,
-                  position: styleOptions.legendPosition,
-                }}
-                onLegendOptionsChange={(legendOptions) => {
-                  if (legendOptions.show !== undefined) {
-                    updateStyleOption('addLegend', legendOptions.show);
-                  }
-                  if (legendOptions.position !== undefined) {
-                    updateStyleOption('legendPosition', legendOptions.position);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-          )}
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel

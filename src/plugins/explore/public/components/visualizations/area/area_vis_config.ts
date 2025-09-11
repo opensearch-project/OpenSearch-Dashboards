@@ -16,6 +16,7 @@ import {
   AxisRole,
   VisFieldType,
   TitleOptions,
+  ThresholdOptions,
 } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 
@@ -29,13 +30,15 @@ export interface AreaChartStyleControls {
   tooltipOptions: TooltipOptions;
 
   // Threshold and grid
-  thresholdLines: ThresholdLines;
+  thresholdLines?: ThresholdLines;
 
   // Axes configuration
   categoryAxes: CategoryAxis[];
   valueAxes: ValueAxis[];
 
   titleOptions: TitleOptions;
+
+  thresholdOptions?: ThresholdOptions;
 }
 
 const defaultAreaChartStyles: AreaChartStyleControls = {
@@ -47,18 +50,12 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
     mode: 'all',
   },
 
-  // Threshold and grid
-  thresholdLines: [
-    {
-      id: '1',
-      color: '#E7664C',
-      show: false,
-      style: ThresholdLineStyle.Full,
-      value: 10,
-      width: 1,
-      name: '',
-    },
-  ],
+  // Threshold options
+  thresholdOptions: {
+    baseColor: '#9EE9FA',
+    thresholds: [],
+    thresholdStyle: ThresholdLineStyle.Solid,
+  },
 
   // Category axes
   categoryAxes: [

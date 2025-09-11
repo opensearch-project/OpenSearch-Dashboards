@@ -182,26 +182,13 @@ export const HeatmapExclusiveVisOptions = ({
         <EuiSwitch
           compressed
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.useCustomRanges', {
-            defaultMessage: 'Use custom ranges',
+            defaultMessage: 'Use threshold values',
           })}
           disabled={styles.percentageMode || styles.scaleToDataBounds}
           checked={styles.useCustomRanges}
           onChange={(e) => updateExclusiveOption('useCustomRanges', e.target.checked)}
         />
       </EuiFormRow>
-
-      {styles.useCustomRanges && (
-        <>
-          <EuiSpacer size="s" />
-
-          <CustomRange
-            customRanges={styles.customRanges}
-            onCustomRangesChange={(ranges: RangeValue[]) => {
-              updateExclusiveOption('customRanges', ranges);
-            }}
-          />
-        </>
-      )}
     </StyleAccordion>
   );
 };

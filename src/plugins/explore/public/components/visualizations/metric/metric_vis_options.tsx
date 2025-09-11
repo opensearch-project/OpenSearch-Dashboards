@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { defaultMetricChartStyles, MetricChartStyleControls } from './metric_vis_config';
-import { RangeValue, ColorSchemas, AxisRole } from '../types';
+import { RangeValue, ColorSchemas, AxisRole, Threshold } from '../types';
 import { CustomRange } from '../style_panel/custom_ranges';
 import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { getColorSchemas } from '../utils/collections';
@@ -18,6 +18,8 @@ import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
 import { UnitPanel } from '../style_panel/unit/unit_panel';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
 export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
 
@@ -81,11 +83,26 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               </EuiFormRow>
             </StyleAccordion>
           </EuiFlexItem>
-
           <EuiFlexItem>
             <UnitPanel
               unit={styleOptions.unitId}
               onUnitChange={(value) => updateStyleOption('unitId', value)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              customRanges={styleOptions.customRanges}
+              colorSchema={styleOptions.colorSchema}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StandardOptionsPanel
+              min={styleOptions.min}
+              max={styleOptions.max}
+              onMinChange={(value) => updateStyleOption('min', value)}
+              onMaxChange={(value) => updateStyleOption('max', value)}
             />
           </EuiFlexItem>
           <EuiFlexItem>

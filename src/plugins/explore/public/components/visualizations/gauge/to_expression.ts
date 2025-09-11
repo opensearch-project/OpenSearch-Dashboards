@@ -5,13 +5,13 @@
 
 import { GaugeChartStyleControls, defaultGaugeChartStyles } from './gauge_vis_config';
 import { VisColumn, AxisRole, AxisColumnMappings, VEGASCHEMA } from '../types';
+import { generateArcExpression } from './gauge_chart_utils';
+import { calculateValue } from '../utils/calculation';
 import {
   locateThreshold,
   generateRanges,
-  generateArcExpression,
   mergeThresholdsWithBase,
-} from './gauge_chart_utils';
-import { calculateValue } from '../utils/calculation';
+} from '../style_panel/threshold/threshold_utils';
 import { getColors } from '../theme/default_colors';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
@@ -55,8 +55,9 @@ export const createGauge = (
   const mergedThresholds = mergeThresholdsWithBase(
     minBase,
     maxBase,
-    styleOptions.baseColor || colors.statusBlue,
-    styleOptions.thresholds
+    // TODO: update to use the color from color palette
+    styleOptions.thresholdOptions.baseColor || colors.statusBlue,
+    styleOptions.thresholdOptions.thresholds
   );
 
   // Locate which threshold the target value falls into

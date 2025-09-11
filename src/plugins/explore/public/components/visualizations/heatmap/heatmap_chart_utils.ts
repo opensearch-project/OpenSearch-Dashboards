@@ -7,6 +7,7 @@ import type { Encoding } from 'vega-lite/build/src/encoding';
 import { AggregationType, ColorSchemas, VisColumn } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { generateColorBySchema } from '../utils/utils';
+import { transformToThreshold } from '../style_panel/threshold/threshold_utils';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (
@@ -111,22 +112,28 @@ export const enhanceStyle = (
 
   if (
     styles.exclusive?.useCustomRanges &&
-    styles.exclusive?.customRanges?.length &&
-    styles.exclusive?.customRanges?.length >= 1
+    ((styles.exclusive?.customRanges && styles.exclusive?.customRanges?.length >= 1) ||
+      (styles.thresholdOptions?.thresholds && styles.thresholdOptions?.thresholds.length > 0))
   ) {
-    const customRanges = styles.exclusive?.customRanges;
+    const newThreshold =
+      styles.exclusive?.customRanges &&
+      styles.exclusive?.colorSchema &&
+      !styles?.thresholdOptions?.thresholds
+        ? transformToThreshold(styles.exclusive?.customRanges, styles.exclusive?.colorSchema)
+        : styles?.thresholdOptions?.thresholds || [];
 
-    const [min, max] = getDataBound(transformedData, colorField);
+    const thresholdWithBase = [
+      { value: 0, color: styles?.thresholdOptions?.baseColor ?? '#9EE9FA' },
+      ...newThreshold,
+    ];
 
-    // identify min and max to set domain
-    const domainMin = Math.min(...customRanges.map((r) => r.min ?? min));
-    const domainMax = Math.max(...customRanges?.map((r) => r.max ?? max));
+    const colorDomain = thresholdWithBase.reduce((acc, val) => [...acc, val.value], [] as number[]);
+
+    const colorRange = thresholdWithBase.reduce((acc, val) => [...acc, val.color], [] as string[]);
+
     // overwrite color scale type to quantize to map continuous domains to discrete output ranges
-    markLayer.encoding.color.scale.type = 'quantize';
-    markLayer.encoding.color.scale.domain = [domainMin, domainMax];
-
-    const range = setRange(styles);
-
-    markLayer.encoding.color.scale.range = range;
+    markLayer.encoding.color.scale.type = 'threshold';
+    markLayer.encoding.color.scale.domain = colorDomain;
+    markLayer.encoding.color.scale.range = ['#d3d3d3', ...colorRange];
   }
 };

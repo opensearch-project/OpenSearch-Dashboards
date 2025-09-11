@@ -15,12 +15,19 @@ import {
   VEGASCHEMA,
   AxisRole,
   AxisColumnMappings,
+  Threshold,
 } from '../types';
-import { generateColorBySchema, getTooltipFormat } from '../utils/utils';
+import { getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
+import {
+  mergeThresholdsWithBase,
+  locateThreshold,
+  Colors,
+  transformToThreshold,
+} from '../style_panel/threshold/threshold_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -47,8 +54,10 @@ export const createSingleMetric = (
   const percentageSize = styles.percentageSize;
 
   let numericalValues: number[] = [];
+  let maxNumber: number = 0;
   if (numericField) {
     numericalValues = transformedData.map((d) => d[numericField]);
+    maxNumber = Math.max(...numericalValues);
   }
 
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
@@ -59,31 +68,41 @@ export const createSingleMetric = (
 
   const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
-  function generateColorConditions(field: string, ranges: RangeValue[], color: ColorSchemas) {
-    const colors = generateColorBySchema(ranges.length + 1, color);
-    const conditions = [];
+  const minBase = styleOptions?.min || 0;
+  const maxBase = styleOptions?.max || maxNumber;
 
-    for (let i = 0; i < ranges.length; i++) {
-      const r = ranges[i];
+  const targetValue = calculatedValue || 0;
 
-      const minTest = `datum["${field}"] >= ${r.min}`;
-      const maxTest = r.max !== undefined ? ` && datum["${field}"] < ${r.max}` : '';
+  function targetFillColor(
+    ranges?: RangeValue[],
+    colorschema?: ColorSchemas,
+    threshold?: Threshold[],
+    baseColor?: string
+  ) {
+    const newThreshold =
+      ranges && colorschema && !threshold ? transformToThreshold(ranges, colorschema) : threshold;
 
-      conditions.push({
-        test: minTest + maxTest,
-        value: colors[i] || colors[colors.length - 1], // fallback color if not enough
-      });
-    }
-    const last = ranges[ranges.length - 1];
-    if (last.max) {
-      conditions.push({
-        test: `datum["${field}"] >= ${last.max}`,
-        value: colors[colors.length - 1],
-      });
-    }
+    const newBaseColor = !baseColor && colorschema ? Colors[colorschema].baseColor : baseColor;
 
-    return conditions;
+    const mergedThresholds = mergeThresholdsWithBase(minBase, maxBase, newBaseColor, newThreshold);
+
+    // Locate which threshold the target value falls into
+    const targetThreshold = locateThreshold(mergedThresholds, targetValue);
+
+    const fillColor =
+      !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
+        ? colorPalette.text
+        : targetThreshold.color;
+
+    return fillColor;
   }
+
+  const fillColor = targetFillColor(
+    styles.customRanges,
+    styles.colorSchema,
+    styles?.thresholdOptions?.thresholds,
+    styles?.thresholdOptions?.baseColor
+  );
 
   const layer = [];
   if (dateField) {
@@ -142,19 +161,11 @@ export const createSingleMetric = (
       text: {
         field: 'value',
         type: 'nominal',
+        color: fillColor,
       },
     },
   };
   layer.push(markLayer);
-
-  if (styles.useColor && styles.customRanges && styles.customRanges.length > 0) {
-    markLayer.encoding.color = {};
-    markLayer.encoding.color.condition = generateColorConditions(
-      'formattedValue',
-      styles.customRanges,
-      styles.colorSchema
-    );
-  }
 
   if (styles.showTitle) {
     const titleLayer = {

@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -142,7 +143,9 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
     <>
       <EuiSpacer size="s" />
       <EuiButton onClick={handleAddRange} fullWidth size="s">
-        + Add threshold
+        {i18n.translate('explore.stylePanel.thresholdPanel.addThresholdButton', {
+          defaultMessage: '+ Add threshold',
+        })}
       </EuiButton>
       <EuiSpacer size="s" />
       {/*  placeholder for base threshold */}
