@@ -87,11 +87,7 @@ export const createSimpleAreaChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -212,11 +208,7 @@ export const createMultiAreaChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -268,11 +260,7 @@ export const createFacetedMultiAreaChart = (
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
 
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -462,11 +450,7 @@ export const createCategoryAreaChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -577,11 +561,7 @@ export const createStackedAreaChart = (
   };
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
   if (thresholdLayer) {
     spec.layer = [{ mark: spec.mark, encoding: spec.encoding }, ...thresholdLayer.layer];
     delete spec.mark;

@@ -103,7 +103,7 @@ ExclusiveHeatmap.args = {
       colorSchema: ColorSchemas.GREENBLUE,
       reverseSchema: true,
       colorScaleType: ScaleType.LOG,
-      useCustomRanges: true,
+      useThresholdColor: true,
     },
   },
   numericalColumns: mockNumericalColumns,

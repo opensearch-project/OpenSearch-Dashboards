@@ -74,6 +74,7 @@ export const createSingleMetric = (
   const targetValue = calculatedValue || 0;
 
   function targetFillColor(
+    useThresholdColor: boolean,
     ranges?: RangeValue[],
     colorschema?: ColorSchemas,
     threshold?: Threshold[],
@@ -90,7 +91,11 @@ export const createSingleMetric = (
     const targetThreshold = locateThreshold(mergedThresholds, targetValue);
 
     const fillColor =
-      !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
+      !targetThreshold ||
+      minBase > targetValue ||
+      minBase >= maxBase ||
+      !isValidNumber ||
+      !useThresholdColor
         ? colorPalette.text
         : targetThreshold.color;
 
@@ -98,6 +103,7 @@ export const createSingleMetric = (
   }
 
   const fillColor = targetFillColor(
+    styles.useThresholdColor,
     styles.customRanges,
     styles.colorSchema,
     styles?.thresholdOptions?.thresholds,

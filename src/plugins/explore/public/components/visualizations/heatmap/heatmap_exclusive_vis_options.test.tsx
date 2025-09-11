@@ -10,30 +10,6 @@ import {
 } from './heatmap_exclusive_vis_options';
 import { ColorSchemas, ScaleType, AggregationType } from '../types';
 
-// Mock the CustomRange component
-jest.mock('../style_panel/custom_ranges', () => {
-  return {
-    CustomRange: ({
-      customRanges,
-      onCustomRangesChange,
-    }: {
-      customRanges?: Array<{ from?: number; to?: number; color?: string }>;
-      onCustomRangesChange: (ranges: Array<{ from?: number; to?: number; color?: string }>) => void;
-    }) => (
-      <div data-test-subj="custom-ranges">
-        <button
-          data-test-subj="add-range-button"
-          onClick={() =>
-            onCustomRangesChange([...(customRanges || []), { from: 0, to: 10, color: '#000000' }])
-          }
-        >
-          Add Range
-        </button>
-      </div>
-    ),
-  };
-});
-
 describe('HeatmapExclusiveVisOptions', () => {
   const defaultProps = {
     styles: {
@@ -43,7 +19,7 @@ describe('HeatmapExclusiveVisOptions', () => {
       scaleToDataBounds: false,
       percentageMode: false,
       maxNumberOfColors: 4,
-      useCustomRanges: false,
+      useThresholdColor: false,
       label: {
         type: AggregationType.SUM,
         show: false,
@@ -115,12 +91,12 @@ describe('HeatmapExclusiveVisOptions', () => {
     expect(switchEl).toBeDisabled();
   });
 
-  it('disables percentageMode switch when useCustomRanges is true', () => {
+  it('disables percentageMode switch when useThresholdColor is true', () => {
     const props = {
       ...defaultProps,
       styles: {
         ...defaultProps.styles,
-        useCustomRanges: true,
+        useThresholdColor: true,
       },
     };
 
@@ -129,12 +105,12 @@ describe('HeatmapExclusiveVisOptions', () => {
     expect(switchEl).toBeDisabled();
   });
 
-  it('disables maxNumberOfColors input when useCustomRanges is true', () => {
+  it('disables maxNumberOfColors input when useThresholdColor is true', () => {
     const props = {
       ...defaultProps,
       styles: {
         ...defaultProps.styles,
-        useCustomRanges: true,
+        useThresholdColor: true,
       },
     };
 
@@ -165,17 +141,6 @@ describe('HeatmapExclusiveVisOptions', () => {
     });
   });
 
-  it('toggles useCustomRanges and calls onChange', () => {
-    render(<HeatmapExclusiveVisOptions {...defaultProps} />);
-    const useCustomRangesSwitch = screen.getByText('Use custom ranges');
-    fireEvent.click(useCustomRangesSwitch);
-
-    expect(defaultProps.onChange).toHaveBeenCalledWith({
-      ...defaultProps.styles,
-      useCustomRanges: true,
-    });
-  });
-
   it('updates maxNumberOfColors and calls onChange after debounce', async () => {
     render(<HeatmapExclusiveVisOptions {...defaultProps} />);
     const input = screen.getByTestId('visHeatmapMaxNumberOfColors');
@@ -188,58 +153,6 @@ describe('HeatmapExclusiveVisOptions', () => {
         maxNumberOfColors: 10,
       });
     });
-  });
-
-  it('renders CustomRange component when useCustomRanges is true', () => {
-    const props = {
-      ...defaultProps,
-      styles: {
-        ...defaultProps.styles,
-        useCustomRanges: true,
-        customRanges: [],
-      },
-    };
-
-    render(<HeatmapExclusiveVisOptions {...props} />);
-    expect(screen.getByTestId('custom-ranges')).toBeInTheDocument();
-  });
-
-  it('updates customRanges when CustomRange component triggers change', () => {
-    const props = {
-      ...defaultProps,
-      styles: {
-        ...defaultProps.styles,
-        useCustomRanges: true,
-        customRanges: [],
-      },
-    };
-
-    render(<HeatmapExclusiveVisOptions {...props} />);
-    const addRangeButton = screen.getByTestId('add-range-button');
-    fireEvent.click(addRangeButton);
-
-    expect(props.onChange).toHaveBeenCalledWith({
-      ...props.styles,
-      customRanges: [{ from: 0, to: 10, color: '#000000' }],
-    });
-  });
-
-  it('calls stopPropagation on mouseUp for color schema selector', () => {
-    render(<HeatmapExclusiveVisOptions {...defaultProps} />);
-
-    const colorSchemaSelect = screen.getByRole('combobox');
-    expect(colorSchemaSelect).toBeInTheDocument(); // Verify element exists
-
-    const stopPropagation = jest.fn();
-    const mouseUpEvent = new MouseEvent('mouseup', {
-      bubbles: true,
-      cancelable: true,
-    });
-    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
-
-    colorSchemaSelect.dispatchEvent(mouseUpEvent);
-
-    expect(stopPropagation).toHaveBeenCalled();
   });
 });
 

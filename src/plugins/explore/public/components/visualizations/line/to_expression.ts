@@ -86,11 +86,7 @@ export const createSimpleLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -245,11 +241,7 @@ export const createLineBarChart = (
   };
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
   if (thresholdLayer) {
     barWithThresholdLayer.layer.push(thresholdLayer);
   }
@@ -364,11 +356,7 @@ export const createMultiLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -423,11 +411,7 @@ export const createFacetedMultiLineChart = (
   // Create a mark config for the faceted spec
   const facetMarkConfig = buildMarkConfig(styles, 'line');
 
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
 
   return {
     $schema: VEGASCHEMA,
@@ -607,11 +591,7 @@ export const createCategoryLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles.tooltipOptions?.mode,
-    styles?.thresholdLines
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }

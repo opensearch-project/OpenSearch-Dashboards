@@ -93,7 +93,7 @@ jest.mock('./heatmap_exclusive_vis_options', () => ({
           data-test-subj="changeHeatmapUseCustomRanges"
           onClick={() =>
             onChange({
-              useCustomRanges: true,
+              useThresholdColor: true,
             })
           }
         >
@@ -139,6 +139,23 @@ jest.mock('./heatmap_exclusive_vis_options', () => ({
           }
         >
           Overwrite Label Color
+        </button>
+      </div>
+    </>
+  )),
+}));
+
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
+    <>
+      <div data-test-subj="mockAreaThresholdPanel">
+        <button
+          data-test-subj="mockAddRange"
+          onClick={() =>
+            onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+          }
+        >
+          Add Range
         </button>
       </div>
     </>
@@ -337,7 +354,7 @@ describe('HeatmapVisStyleControls', () => {
     fireEvent.click(screen.getByTestId('changeHeatmapUseCustomRanges'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       exclusive: {
-        useCustomRanges: true,
+        useThresholdColor: true,
       },
     });
   });
@@ -428,6 +445,23 @@ describe('HeatmapVisStyleControls', () => {
           titleName: 'New Chart Title',
         },
       });
+    });
+  });
+
+  it('adds threshold correctly', async () => {
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...mockProps} />
+      </Provider>
+    );
+
+    await userEvent.click(screen.getByTestId('mockAddRange'));
+
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      thresholdOptions: {
+        ...mockProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 });

@@ -113,7 +113,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
 
   const handleAddRange = () => {
     const curRangeLength = ranges.length;
-    const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 10 : 0;
+    const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 100 : 0;
     const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength + 1) };
 
     const updated = [...ranges, newRange];

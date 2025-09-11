@@ -34,7 +34,7 @@ export interface ExclusiveHeatmapConfig {
   scaleToDataBounds: boolean;
   percentageMode: boolean;
   maxNumberOfColors: number;
-  useCustomRanges: boolean;
+  useThresholdColor: boolean;
   label: HeatmapLabels;
   customRanges?: RangeValue[];
 }
@@ -72,7 +72,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     scaleToDataBounds: false,
     percentageMode: false,
     maxNumberOfColors: 4,
-    useCustomRanges: false,
+    useThresholdColor: false,
     label: {
       type: AggregationType.SUM,
       show: false,

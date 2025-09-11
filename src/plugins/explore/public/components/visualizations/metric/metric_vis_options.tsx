@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { defaultMetricChartStyles, MetricChartStyleControls } from './metric_vis_config';
 import { RangeValue, ColorSchemas, AxisRole, Threshold } from '../types';
 import { CustomRange } from '../style_panel/custom_ranges';
@@ -40,8 +40,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   ) => {
     onStyleChange({ [key]: value });
   };
-
-  const colorSchemas = getColorSchemas();
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -162,41 +160,13 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               <EuiFormRow>
                 <EuiSwitch
                   compressed
-                  label={i18n.translate('explore.vis.metric.useColor', {
-                    defaultMessage: 'Value color',
+                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
+                    defaultMessage: 'Use threshold colors',
                   })}
-                  checked={styleOptions.useColor}
-                  onChange={(e) => updateStyleOption('useColor', e.target.checked)}
+                  checked={styleOptions.useThresholdColor}
+                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
                 />
               </EuiFormRow>
-              {styleOptions.useColor && (
-                <>
-                  <EuiFormRow
-                    label={i18n.translate('explore.vis.metric.colorSchema', {
-                      defaultMessage: 'Color Schema',
-                    })}
-                  >
-                    <EuiSelect
-                      compressed
-                      options={colorSchemas}
-                      value={styleOptions.colorSchema}
-                      onChange={(e) =>
-                        updateStyleOption('colorSchema', e.target.value as ColorSchemas)
-                      }
-                      onMouseUp={(e) => e.stopPropagation()}
-                      data-test-subj="colorSchemaSelect"
-                    />
-                  </EuiFormRow>
-                  <EuiFormRow>
-                    <CustomRange
-                      customRanges={styleOptions.customRanges}
-                      onCustomRangesChange={(ranges: RangeValue[]) => {
-                        updateStyleOption('customRanges', ranges);
-                      }}
-                    />
-                  </EuiFormRow>
-                </>
-              )}
               <PercentageSelector
                 percentageColor={
                   styleOptions.percentageColor ?? defaultMetricChartStyles.percentageColor

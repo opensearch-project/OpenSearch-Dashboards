@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { GaugeChartStyleControls } from './gauge_vis_config';
-import { Threshold, AxisRole } from '../types';
+import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';

@@ -58,17 +58,11 @@ describe('line_vis_config', () => {
       });
 
       // Verify threshold settings
-      expect(defaults.thresholdLines).toEqual([
-        {
-          id: '1',
-          color: '#E7664C',
-          show: false,
-          style: ThresholdLineStyle.Full,
-          value: 10,
-          width: 1,
-          name: '',
-        },
-      ]);
+      expect(defaults.thresholdOptions).toMatchObject({
+        baseColor: '#9EE9FA',
+        thresholds: [],
+        thresholdStyle: ThresholdLineStyle.Solid,
+      });
 
       // Verify axes
       expect(defaults.categoryAxes).toHaveLength(1);
@@ -134,17 +128,11 @@ describe('line_vis_config', () => {
         styleOptions: {
           addLegend: true,
           legendPosition: Positions.RIGHT,
-          thresholdLines: [
-            {
-              id: '1',
-              show: false,
-              value: 100,
-              color: 'red',
-              width: 1,
-              style: ThresholdLineStyle.Dashed,
-              name: '',
-            },
-          ],
+          thresholdOptions: {
+            baseColor: '#9EE9FA',
+            thresholds: [],
+            thresholdStyle: ThresholdLineStyle.Solid,
+          },
           addTimeMarker: false,
           lineStyle: 'both' as LineStyle,
           lineMode: 'smooth' as const,

@@ -66,6 +66,21 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
+    <div data-test-subj="mockThresholdOptions">
+      <button
+        data-test-subj="mockUpdateThreshold"
+        onClick={() =>
+          onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+        }
+      >
+        Update Threshold
+      </button>
+    </div>
+  )),
+}));
+
 jest.mock('./scatter_exclusive_vis_options', () => ({
   ScatterExclusiveVisOptions: jest.fn(({ onChange }) => (
     <div data-test-subj="scatterExclusiveOptions">
@@ -221,11 +236,11 @@ describe('ScatterVisStyleControls (updated structure)', () => {
         <ScatterVisStyleControls {...mockProps} />
       </Provider>
     );
-
+    expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('scatterExclusiveOptions')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
@@ -390,6 +405,18 @@ describe('ScatterVisStyleControls (updated structure)', () => {
           titleName: 'New Chart Title',
         },
       });
+    });
+  });
+
+  it('calls onStyleChange with correct parameters for threshold options', async () => {
+    render(<ScatterVisStyleControls {...mockProps} />);
+
+    await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      thresholdOptions: {
+        ...mockProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 });

@@ -105,7 +105,7 @@ describe('MetricVisStyleControls', () => {
   it('renders use color switch', () => {
     render(<MetricVisStyleControls {...mockProps} />);
 
-    expect(screen.getByText('Value color')).toBeInTheDocument();
+    expect(screen.getByText('Use threshold colors')).toBeInTheDocument();
   });
 
   it('calls onStyleChange when use color switch is toggled', () => {
@@ -114,23 +114,7 @@ describe('MetricVisStyleControls', () => {
     const colorSwitch = switches.find((sw) => sw.getAttribute('aria-checked') === 'false');
     fireEvent.click(colorSwitch!);
 
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ useColor: true });
-  });
-
-  it('renders color schema select when useColor is true', () => {
-    const propsWithColor = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, useColor: true },
-    };
-    render(<MetricVisStyleControls {...propsWithColor} />);
-
-    expect(screen.getByText('Color Schema')).toBeInTheDocument();
-  });
-
-  it('does not render color schema when useColor is false', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-
-    expect(screen.queryByText('Color Schema')).not.toBeInTheDocument();
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ useThresholdColor: true });
   });
 
   it('does not render style options when no axis mapping is selected', () => {
@@ -159,29 +143,6 @@ describe('MetricVisStyleControls', () => {
     await waitFor(() => {
       expect(mockProps.onStyleChange).toHaveBeenCalledWith({ fontSize: 80 });
     });
-  });
-
-  it('calls onStyleChange when color schema is changed', () => {
-    const propsWithColor = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, useColor: true },
-    };
-    render(<MetricVisStyleControls {...propsWithColor} />);
-    const colorSchemaSelect = screen.getByTestId('colorSchemaSelect');
-    fireEvent.change(colorSchemaSelect, { target: { value: 'greens' } });
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ colorSchema: 'greens' });
-  });
-
-  it('renders custom ranges when useColor is true', () => {
-    const propsWithColor = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, useColor: true },
-    };
-    render(<MetricVisStyleControls {...propsWithColor} />);
-
-    // CustomRange component should be rendered
-    expect(screen.getByText('Color Schema')).toBeInTheDocument();
   });
 
   it('calls onStyleChange when title text is changed', async () => {
