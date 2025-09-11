@@ -337,7 +337,7 @@ describe('Header', () => {
       jest.clearAllMocks();
     });
 
-    it('registers keyboard shortcut for toggle left navbar when keyboardShortcut service is provided', () => {
+    it('registers keyboard shortcut for toggle navbar when keyboardShortcut service is provided', () => {
       const mockKeyboardShortcut = keyboardShortcutServiceMock.createStart();
       const props = {
         ...mockProps(),
@@ -347,9 +347,9 @@ describe('Header', () => {
       mountWithIntl(<Header {...props} />);
 
       expect(mockKeyboardShortcut.useKeyboardShortcut).toHaveBeenCalledWith({
-        id: 'toggle_left_navbar',
+        id: 'toggle_navbar',
         pluginId: 'core',
-        name: 'Toggle Left Navbar',
+        name: 'Toggle navbar',
         category: 'Panel / Layout',
         keys: 'shift+b',
         execute: expect.any(Function),
