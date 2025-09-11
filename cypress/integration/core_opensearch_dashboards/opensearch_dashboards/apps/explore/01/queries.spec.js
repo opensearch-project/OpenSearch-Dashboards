@@ -182,7 +182,7 @@ const queriesTestSuite = () => {
 
         cy.explore.setTopNavDate(START_TIME, START_TIME);
 
-         cy.getElementByTestId('exploreQueryExecutionButton').click();
+        cy.getElementByTestId('exploreQueryExecutionButton').click();
         cy.osd.waitForLoader(true);
         cy.wait(1000);
 
