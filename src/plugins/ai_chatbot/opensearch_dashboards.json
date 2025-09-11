@@ -5,6 +5,6 @@
   "configPath": ["aiChatbot"],
   "server": true,
   "ui": true,
-  "requiredPlugins": ["contextProvider", "uiActions", "navigation"],
+  "requiredPlugins": ["contextProvider", "uiActions", "navigation", "explore"],
   "optionalPlugins": ["dashboard", "discover"]
 }

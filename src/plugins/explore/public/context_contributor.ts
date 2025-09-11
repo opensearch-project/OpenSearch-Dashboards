@@ -7,11 +7,12 @@
  */
 
 import { SavedObjectsClientContract } from '../../../core/public';
-import { 
-  StatefulContextContributor, 
+import {
+  StatefulContextContributor,
   ContextCapturePattern,
-  DocumentExpansionContext 
+  DocumentExpansionContext
 } from '../../context_provider/public';
+import { formatExploreContext } from './services/context_formatter';
 
 /**
  * Explore Context Contributor - demonstrates HYBRID context capture pattern
@@ -115,6 +116,27 @@ export class ExploreContextContributor implements StatefulContextContributor {
         error: error.message,
         timestamp: Date.now()
       };
+    }
+  }
+
+  /**
+   * Get formatted context for LLM consumption
+   */
+  async getFormattedContext(): Promise<string> {
+    try {
+      const rawContext = await this.captureStaticContext();
+      const contextWithUrl = {
+        ...rawContext,
+        data: {
+          ...rawContext,
+          url: window.location.href,
+          appId: this.appId
+        }
+      };
+      return formatExploreContext(contextWithUrl);
+    } catch (error) {
+      console.error('❌ Error formatting Explore context:', error);
+      return `# Explore Context Error\n\nFailed to format context: ${error.message}`;
     }
   }
 

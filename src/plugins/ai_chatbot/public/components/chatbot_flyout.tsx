@@ -134,6 +134,7 @@ Current context: ${contextSummary}
 - "load session_xxx" - Load specific memory session
 - "manage memory" - View current session details
 - "save" - Save current session
+- "delete all memories" - Clear all saved memories, except current one
 - Add "list top 5 memories" to any question for related context
 
 🔍 Context Commands:

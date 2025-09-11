@@ -205,6 +205,39 @@ export class SimpleMemoryService {
     return true;
   }
 
+  deleteAllMemories(): boolean {
+    try {
+      const sessionCount = this.sessions.size;
+      
+      // Keep current session but clear its saved memories
+      const currentSession = this.sessions.get(this.currentSessionId);
+      
+      // Clear all sessions
+      this.sessions.clear();
+      
+      // Restore current session but with empty memories (preserve chat history)
+      if (currentSession) {
+        currentSession.memories = []; // Clear saved memories but keep session structure
+        this.sessions.set(this.currentSessionId, currentSession);
+      } else {
+        // Create new session if current session doesn't exist
+        this.createSession(this.currentSessionId);
+      }
+      
+      // Keep current chat history (don't clear it - user might want to save it)
+      // this.currentChatHistory = []; // Commented out to preserve current work
+      
+      // Update localStorage with only current session
+      this.saveToStorage();
+      
+      console.log(`🗑️ Deleted all memories: ${sessionCount - 1} sessions cleared, current session preserved`);
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to delete all memories:', error);
+      return false;
+    }
+  }
+
   getSessionDetails(sessionId: string): MemorySession | null {
     return this.sessions.get(sessionId) || null;
   }

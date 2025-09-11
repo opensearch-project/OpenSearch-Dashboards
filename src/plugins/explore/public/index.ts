@@ -15,3 +15,4 @@ export function plugin(initializerContext: any) {
 
 export { ExplorePlugin };
 export * from './types';
+export { formatExploreContext } from './services/context_formatter';

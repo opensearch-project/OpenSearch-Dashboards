@@ -13,6 +13,7 @@
 import { ClaudeOSDAgent } from './claude_agent';
 import { SimpleMemoryService, MemoryItem } from '../services/simple_memory_service';
 import { ContextData } from '../types';
+import { formatExploreContext } from '../../../explore/public';
 
 export class MemoryEnhancedClaudeAgent {
   private memoryService: SimpleMemoryService;
@@ -25,7 +26,7 @@ export class MemoryEnhancedClaudeAgent {
     console.log('🧠 Memory Enhanced Agent processing request:', userMessage);
 
     // Handle memory commands first
-    if (userMessage.trim() === 'list memories') {
+    if (userMessage.trim() === 'list memories' || userMessage.trim() === 'list all memories') {
       return this.handleListMemories();
     }
 
@@ -60,6 +61,11 @@ export class MemoryEnhancedClaudeAgent {
       return this.handleSaveSession();
     }
 
+    // Handle delete all memories command (check this BEFORE delete session)
+    if (userMessage.trim() === 'delete all memories') {
+      return this.handleDeleteAllMemories();
+    }
+
     // Handle delete session command
     if (userMessage.startsWith('delete ')) {
       return this.handleDeleteSession(userMessage);
@@ -75,15 +81,42 @@ export class MemoryEnhancedClaudeAgent {
       // 1. Search for relevant memories
       const relevantMemories = this.memoryService.searchMemories(userMessage, 3);
 
-      // 2. Build enhanced context with memory
-      const enhancedContext = {
-        ...context,
-        memoryContext: this.formatMemoriesForContext(relevantMemories),
-        chatHistory: this.memoryService.getCurrentChatHistory().slice(-6), // Last 3 exchanges from current chat
-        sessionSummary: this.memoryService.getSessionSummary(),
-      };
+      // 2. Format system context if it's Explore context
+      let enhancedContext: any;
+      if (context && this.isExploreContext(context)) {
+        try {
+          const formattedContextString = formatExploreContext(context as any);
+          console.log('🔍 Using formatted Explore context for Claude API');
+          
+          // Replace the context with the formatted string for Claude to understand
+          enhancedContext = {
+            ...context,
+            systemContext: formattedContextString,
+            memoryContext: this.formatMemoriesForContext(relevantMemories),
+            chatHistory: this.memoryService.getCurrentChatHistory().slice(-6), // Last 3 exchanges from current chat
+            sessionSummary: this.memoryService.getSessionSummary(),
+          };
+        } catch (error) {
+          console.error('❌ Error formatting context for regular query:', error);
+          // Fallback to original context structure
+          enhancedContext = {
+            ...context,
+            memoryContext: this.formatMemoriesForContext(relevantMemories),
+            chatHistory: this.memoryService.getCurrentChatHistory().slice(-6),
+            sessionSummary: this.memoryService.getSessionSummary(),
+          };
+        }
+      } else {
+        // 3. Build enhanced context with memory for non-Explore contexts
+        enhancedContext = {
+          ...context,
+          memoryContext: this.formatMemoriesForContext(relevantMemories),
+          chatHistory: this.memoryService.getCurrentChatHistory().slice(-6), // Last 3 exchanges from current chat
+          sessionSummary: this.memoryService.getSessionSummary(),
+        };
+      }
 
-      // 3. Enhance the user message with memory context if relevant memories found
+      // 4. Enhance the user message with memory context if relevant memories found
       let enhancedMessage = userMessage;
       if (relevantMemories.length > 0) {
         const memoryContext = relevantMemories
@@ -93,10 +126,10 @@ export class MemoryEnhancedClaudeAgent {
         enhancedMessage = `Context from previous conversations:\n${memoryContext}\n\nCurrent question: ${userMessage}`;
       }
 
-      // 4. Call original agent with enhanced context
+      // 5. Call original agent with enhanced context
       const response = await this.originalAgent.processRequest(enhancedMessage, enhancedContext);
 
-      // 5. Add to chat history (temporary, not saved to memory)
+      // 6. Add to chat history (temporary, not saved to memory)
       this.memoryService.addToChatHistory(userMessage, response, context);
 
       return response;
@@ -266,13 +299,22 @@ export class MemoryEnhancedClaudeAgent {
   }
 
   private handleListSystemContext(context: ContextData): string {
-    let response = '🖥️ System Context:\n\n';
-
     if (!context || Object.keys(context).length === 0) {
-      return response + 'No system context available.';
+      return '🖥️ System Context:\n\nNo system context available.';
     }
 
-    // Format system context nicely
+    // Check if this is Explore context and format it properly
+    if (this.isExploreContext(context)) {
+      try {
+        return formatExploreContext(context as any);
+      } catch (error) {
+        console.error('❌ Error formatting Explore context:', error);
+        // Fallback to basic formatting
+      }
+    }
+
+    // Fallback to basic formatting for non-Explore contexts
+    let response = '🖥️ System Context:\n\n';
     Object.entries(context).forEach(([key, value]) => {
       if (key !== 'memoryContext' && key !== 'conversationHistory' && key !== 'sessionSummary') {
         response += `${key}: `;
@@ -329,19 +371,41 @@ export class MemoryEnhancedClaudeAgent {
   private handleListFullContext(context: ContextData): string {
     let response = '📋 Full Context (4 Parts):\n\n';
 
-    // 1. System Context
+    // 1. System Context - Use formatted context for Explore
     response += '1. System Context\n';
     if (context && Object.keys(context).length > 0) {
-      Object.entries(context).forEach(([key, value]) => {
-        if (key !== 'memoryContext' && key !== 'chatHistory' && key !== 'sessionSummary') {
-          response += `${key}: `;
-          if (typeof value === 'object') {
-            response += `${JSON.stringify(value)}\n`;
-          } else {
-            response += `${value}\n`;
-          }
+      // Check if this is Explore context and format it properly
+      if (this.isExploreContext(context)) {
+        try {
+          const formattedContext = formatExploreContext(context as any);
+          response += formattedContext + '\n';
+        } catch (error) {
+          console.error('❌ Error formatting Explore context:', error);
+          // Fallback to basic formatting
+          Object.entries(context).forEach(([key, value]) => {
+            if (key !== 'memoryContext' && key !== 'chatHistory' && key !== 'sessionSummary') {
+              response += `${key}: `;
+              if (typeof value === 'object') {
+                response += `${JSON.stringify(value)}\n`;
+              } else {
+                response += `${value}\n`;
+              }
+            }
+          });
         }
-      });
+      } else {
+        // Basic formatting for non-Explore contexts
+        Object.entries(context).forEach(([key, value]) => {
+          if (key !== 'memoryContext' && key !== 'chatHistory' && key !== 'sessionSummary') {
+            response += `${key}: `;
+            if (typeof value === 'object') {
+              response += `${JSON.stringify(value)}\n`;
+            } else {
+              response += `${value}\n`;
+            }
+          }
+        });
+      }
     } else {
       response += 'No system context available.\n';
     }
@@ -455,6 +519,23 @@ export class MemoryEnhancedClaudeAgent {
     }
   }
 
+  private handleDeleteAllMemories(): string {
+    const sessionCount = this.memoryService.listAllMemories().length;
+    
+    if (sessionCount <= 1) {
+      return '💾 No other memories to delete. Only current session exists.';
+    }
+
+    const deleted = this.memoryService.deleteAllMemories();
+    
+    if (deleted) {
+      const currentSessionId = this.memoryService.getCurrentSessionId();
+      return `✅ Successfully deleted all other memories!\n\n🗑️ Cleared ${sessionCount - 1} memory sessions\n💾 Current session preserved: ${currentSessionId}\n\n💡 Your current work session and chat history are safe. You can rename this session if needed.`;
+    } else {
+      return '❌ Failed to delete all memories. Please try again.';
+    }
+  }
+
   private formatMemoriesForContext(memories: MemoryItem[]): string {
     if (memories.length === 0) return '';
 
@@ -483,5 +564,16 @@ export class MemoryEnhancedClaudeAgent {
   // Get available tools from original agent
   getAvailableTools() {
     return this.originalAgent.getAvailableTools();
+  }
+
+  // Helper method to check if context is from Explore
+  private isExploreContext(context: ContextData): boolean {
+    const contextAny = context as any;
+    return (
+      (contextAny.appId === 'explore') ||
+      (contextAny.data && contextAny.data.appId && contextAny.data.appId.startsWith('explore')) ||
+      (contextAny.pageType === 'explore') ||
+      (contextAny.currentUrl && contextAny.currentUrl.includes('/app/explore'))
+    );
   }
 }
