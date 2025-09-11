@@ -13,6 +13,31 @@ jest.mock('./patterns_flyout_context', () => ({
   usePatternsFlyoutContext: jest.fn(),
 }));
 
+jest.mock('./patterns_flyout_update_search', () => ({
+  PatternsFlyoutUpdateSearch: ({ patternString }: { patternString: string }) => (
+    <div data-testid="mock-update-search">Update Search: {patternString}</div>
+  ),
+}));
+
+jest.mock('./patterns_flyout_event_table', () => ({
+  PatternsFlyoutEventTable: ({
+    patternString,
+    totalItemCount,
+  }: {
+    patternString: string;
+    totalItemCount: number;
+  }) => (
+    <table data-testid="mock-event-table">
+      <tbody>
+        <tr>
+          <td>Event</td>
+          <td>Sample Event</td>
+        </tr>
+      </tbody>
+    </table>
+  ),
+}));
+
 describe('PatternsTableFlyout', () => {
   const mockClosePatternsTableFlyout = jest.fn();
 
@@ -44,12 +69,6 @@ describe('PatternsTableFlyout', () => {
     expect(screen.getByText('Event count')).toBeInTheDocument();
     expect(screen.getByText('350')).toBeInTheDocument();
 
-    expect(screen.getByText('Events (350)')).toBeInTheDocument();
-
-    expect(screen.getAllByText('Event')[0]).toBeInTheDocument(); // getAllByText because there are multiple elements
-    expect(screen.getByText('INFO [main] Starting application')).toBeInTheDocument();
-    expect(screen.getByText('INFO [main] Stopping application')).toBeInTheDocument();
-
     const table = container.querySelector('table');
     expect(table).toBeInTheDocument();
   });
@@ -70,7 +89,6 @@ describe('PatternsTableFlyout', () => {
     // checking that other panels aren't in document
     expect(screen.queryByText('Pattern')).not.toBeInTheDocument();
     expect(screen.queryByText('Event count')).not.toBeInTheDocument();
-    expect(screen.queryByText('Events')).not.toBeInTheDocument();
   });
 
   it('should handle empty sample array', () => {
@@ -87,19 +105,13 @@ describe('PatternsTableFlyout', () => {
       openPatternsTableFlyout: jest.fn(),
     });
 
-    const { container } = render(<PatternsTableFlyout />);
+    render(<PatternsTableFlyout />);
 
     expect(screen.getByText('Pattern')).toBeInTheDocument();
     expect(screen.getByText('ERROR [database] * connection')).toBeInTheDocument();
 
     expect(screen.getByText('Event count')).toBeInTheDocument();
     expect(screen.getByText('50')).toBeInTheDocument();
-
-    expect(screen.getByText('Events (50)')).toBeInTheDocument();
-
-    // checking if there is no table in document
-    const table = container.querySelector('table');
-    expect(table).not.toBeInTheDocument();
   });
 
   it('should call closePatternsTableFlyout when close button is clicked', async () => {

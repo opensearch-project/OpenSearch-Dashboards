@@ -28,13 +28,13 @@
  * under the License.
  */
 
-import { IndexPatternField } from '../../../../../data/public';
+import { DataViewField } from '../../../../../data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 // TODO: Use data set defined faceted field
 const FACET_FIELDS = [
   'attributes.service.name',
-  'attributes.aws.local.service',
+  'resource.attributes.service.name',
   'serviceName',
   'attributes.http.status_code',
   'status.code',
@@ -47,20 +47,21 @@ function isFacetedField(fieldName: string): fieldName is typeof FACET_FIELDS[num
 }
 
 interface GroupedFields {
-  facetedFields: IndexPatternField[];
-  selectedFields: IndexPatternField[];
-  queryFields: IndexPatternField[];
-  discoveredFields: IndexPatternField[];
+  facetedFields: DataViewField[];
+  selectedFields: DataViewField[];
+  queryFields: DataViewField[];
+  discoveredFields: DataViewField[];
 }
 
 /**
  * group the fields into selected, popular and unpopular, filter by fieldFilterState
  */
 export function groupFields(
-  fields: IndexPatternField[] | null,
+  fields: DataViewField[] | null,
   columns: string[],
   fieldCounts: Record<string, number>,
-  fieldFilterState: FieldFilterState
+  fieldFilterState: FieldFilterState,
+  showFacetedFields: boolean = false
 ): GroupedFields {
   const result: GroupedFields = {
     facetedFields: [],
@@ -77,7 +78,7 @@ export function groupFields(
   // https://github.com/opensearch-project/OpenSearch-Dashboards/blob/d7004dc5b0392477fdd54ac66b29d231975a173b/src/plugins/data/common/index_patterns/fields/field_list.ts
   const fieldsArray = Array.from(fields);
 
-  const compareFn = (a: IndexPatternField, b: IndexPatternField) => {
+  const compareFn = (a: DataViewField, b: DataViewField) => {
     if (!a.displayName) {
       return 0;
     }
@@ -89,7 +90,7 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts) || field.type === '_source') {
       continue;
     }
-    if (isFacetedField(field.name)) {
+    if (showFacetedFields && isFacetedField(field.name)) {
       result.facetedFields.push(field);
     }
     if (columns.includes(field.name)) {
