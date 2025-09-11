@@ -49,6 +49,7 @@ import { defaultPrepareQueryString } from '../application/utils/state_management
 import { convertStringsToMappings } from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
+import { getQueryWithSource } from '../application/utils/languages';
 
 export interface SearchProps {
   description?: string;
@@ -192,9 +193,13 @@ export class ExploreEmbeddable
     const query = this.savedExplore.searchSource.getField('query');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const activeTab = uiState.activeTab;
-    // If the active tab is logs, we need to prepare the query for the logs tab
-    if (activeTab === 'logs' && query) {
-      query.query = defaultPrepareQueryString(query);
+    if (query) {
+      // If the active tab is logs, we need to prepare the query for the logs tab
+      if (activeTab === 'logs') {
+        query.query = defaultPrepareQueryString(query);
+      } else {
+        query.query = getQueryWithSource(query).query;
+      }
     }
     searchSource.setFields({
       index: indexPattern,
