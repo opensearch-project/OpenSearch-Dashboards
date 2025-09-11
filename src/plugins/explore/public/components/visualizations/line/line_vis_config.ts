@@ -19,6 +19,7 @@ import {
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
+import { getColors } from '../theme/default_colors';
 
 export type LineMode = 'straight' | 'smooth' | 'stepped';
 
@@ -58,7 +59,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
 
   // Threshold options
   thresholdOptions: {
-    baseColor: '#9EE9FA',
+    baseColor: getColors().statusGreen,
     thresholds: [],
     thresholdStyle: ThresholdLineStyle.Solid,
   },

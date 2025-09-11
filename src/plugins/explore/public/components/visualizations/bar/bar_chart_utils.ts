@@ -14,6 +14,7 @@ import {
 import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
 import { BarChartStyleControls } from './bar_vis_config';
 import { transformThresholdLinesToThreshold } from '../style_panel/threshold/threshold_utils';
+import { getColors } from '../theme/default_colors';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -141,7 +142,7 @@ export const buildThresholdColorEncoding = (
       : styleOptions?.thresholdOptions?.thresholds ?? [];
 
   const thresholdWithBase = [
-    { value: 0, color: styleOptions?.thresholdOptions?.baseColor ?? '#9EE9FA' },
+    { value: 0, color: styleOptions?.thresholdOptions?.baseColor ?? getColors().statusGreen },
     ...activeThresholds,
   ];
 

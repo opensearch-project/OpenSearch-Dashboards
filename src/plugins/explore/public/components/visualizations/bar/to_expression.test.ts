@@ -228,7 +228,7 @@ describe('bar to_expression', () => {
       const customStyles = {
         ...defaultBarChartStyles,
         thresholdOptions: {
-          baseColor: '#9EE9FA',
+          baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
           thresholdStyle: ThresholdLineStyle.Solid,
         },
@@ -393,7 +393,7 @@ describe('bar to_expression', () => {
       const customStyles = {
         ...defaultBarChartStyles,
         thresholdOptions: {
-          baseColor: '#9EE9FA',
+          baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
           thresholdStyle: ThresholdLineStyle.Solid,
         },
@@ -550,7 +550,7 @@ describe('bar to_expression', () => {
       const customStyles = {
         ...defaultBarChartStyles,
         thresholdOptions: {
-          baseColor: '#9EE9FA',
+          baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
           thresholdStyle: ThresholdLineStyle.Solid,
         },
@@ -754,7 +754,7 @@ describe('bar to_expression', () => {
       const customStyles = {
         ...defaultBarChartStyles,
         thresholdOptions: {
-          baseColor: '#9EE9FA',
+          baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
           thresholdStyle: ThresholdLineStyle.Solid,
         },
@@ -962,7 +962,7 @@ describe('bar to_expression', () => {
       const customStyles = {
         ...defaultBarChartStyles,
         thresholdOptions: {
-          baseColor: '#9EE9FA',
+          baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
           thresholdStyle: ThresholdLineStyle.Solid,
         },

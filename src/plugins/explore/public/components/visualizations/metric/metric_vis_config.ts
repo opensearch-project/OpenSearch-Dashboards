@@ -15,6 +15,7 @@ import {
   ThresholdOptions,
 } from '../types';
 import { CalculationMethod } from '../utils/calculation';
+import { getColors } from '../theme/default_colors';
 
 export type TextAlignment = 'auto' | 'center';
 
@@ -50,7 +51,7 @@ export const defaultMetricChartStyles: DefaultMetricChartStyleControls = {
   valueCalculation: 'last',
   // add default range for metric
   thresholdOptions: {
-    baseColor: '#9EE9FA',
+    baseColor: getColors().statusGreen,
     thresholds: [],
   },
 };

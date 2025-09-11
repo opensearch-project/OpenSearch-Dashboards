@@ -33,7 +33,7 @@ describe('createMetrictmapeConfig', () => {
     expect(defaults.fontSize).toBe(undefined);
     expect(defaults.useThresholdColor).toBe(false);
     expect(defaults.thresholdOptions).toMatchObject({
-      baseColor: '#9EE9FA',
+      baseColor: '#00BD6B',
       thresholds: [],
     });
   });
@@ -48,7 +48,7 @@ describe('createMetrictmapeConfig', () => {
         title: '',
         fontSize: 60,
         useThresholdColor: false,
-        thresholdOptions: { thresholds: [], baseColor: '#9EE9FA' },
+        thresholdOptions: { thresholds: [], baseColor: '#00BD6B' },
       },
       onStyleChange: jest.fn(),
       numericalColumns: [],

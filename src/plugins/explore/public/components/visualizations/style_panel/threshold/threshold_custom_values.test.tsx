@@ -37,7 +37,7 @@ describe('ThresholdCustomValues component', () => {
 
     expect(handleChange).toHaveBeenCalledWith([
       { value: 0, color: '#f8f8f8ff' },
-      { value: 100, color: '#FFA800' },
+      { value: 100, color: '#FF6A3D' },
     ]);
   });
 

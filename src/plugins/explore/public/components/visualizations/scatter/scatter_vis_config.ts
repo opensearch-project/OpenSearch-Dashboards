@@ -17,6 +17,7 @@ import {
   ThresholdLineStyle,
   ThresholdOptions,
 } from '../types';
+import { getColors } from '../theme/default_colors';
 
 export interface ExclusiveScatterConfig {
   pointShape: PointShape;
@@ -55,7 +56,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
   },
   // Threshold options
   thresholdOptions: {
-    baseColor: '#9EE9FA',
+    baseColor: getColors().statusGreen,
     thresholds: [],
     thresholdStyle: ThresholdLineStyle.Solid,
   },

@@ -21,6 +21,7 @@ import {
   ThresholdOptions,
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
+import { getColors } from '../theme/default_colors';
 
 export interface BarChartStyleControls {
   // Basic controls
@@ -74,7 +75,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
 
   // Threshold options
   thresholdOptions: {
-    baseColor: '#9EE9FA',
+    baseColor: getColors().statusGreen,
     thresholds: [],
     thresholdStyle: ThresholdLineStyle.Solid,
   },

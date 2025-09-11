@@ -178,7 +178,7 @@ describe('AreaVisStyleControls', () => {
       addTimeMarker: false,
       // Threshold options
       thresholdOptions: {
-        baseColor: '#9EE9FA',
+        baseColor: '#00BD6B',
         thresholds: [],
         thresholdStyle: ThresholdLineStyle.Solid,
       },
