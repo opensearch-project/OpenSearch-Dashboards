@@ -2,6 +2,7 @@
   "paths": {
     "advancedSettings": "plugins/advanced_settings",
     "apmOss": "plugins/apm_oss",
+    "assistant": "plugins/assistant",
     "banner": "plugins/banner",
     "charts": "plugins/charts",
     "common.ui": "legacy/ui",

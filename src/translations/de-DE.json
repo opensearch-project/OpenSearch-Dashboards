@@ -76,6 +76,13 @@
     }
   },
   "messages": {
+    "assistant.buttonText": "Daten abrufen",
+    "assistant.congratulationsTitle": "Herzlichen Glückwunsch!",
+    "assistant.content": "OpenSearch Dashboards Assistant Plugin ist betriebsbereit. Stellen Sie Ihre Konfiguration im config/opensearch_dashboards.yml ein.",
+    "assistant.dataUpdated": "Daten aktualisiert",
+    "assistant.greetingText": "Hallo vom {name}!",
+    "assistant.helloWorldText": "Hallo Welt!",
+    "assistant.timestampText": "Zeitstempel: {timestamp}",
     "charts.advancedSettings.visualization.colorMappingText": "Ordnet Werte bestimmten Farben in Visualisierungen zu",
     "charts.advancedSettings.visualization.colorMappingTitle": "Farbzuordnung",
     "charts.colormaps.bluesText": "Blautöne",

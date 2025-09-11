@@ -34,6 +34,7 @@
     - plugins
       - [Ai_chatbot](../src/plugins/ai_chatbot/README.md)
       - [Application_config](../src/plugins/application_config/README.md)
+      - [Assistant](../src/plugins/assistant/README.md)
       - [Banner](../src/plugins/banner/README.md)
       - [Bfetch](../src/plugins/bfetch/README.md)
       - [Charts](../src/plugins/charts/README.md)
