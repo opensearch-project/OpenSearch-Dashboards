@@ -5,10 +5,11 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
+import { EuiFormRow } from '@elastic/eui';
 import { ThresholdCustomValues } from './threshold_custom_values';
 import { Threshold } from '../../types';
 import { StyleAccordion } from '../style_accordion';
-import { DebouncedTruncateGaugeBaseField } from '../utils';
+import { DebouncedFieldNumber } from '../utils';
 
 export interface ThresholdPanelProps {
   thresholds: Threshold[];
@@ -38,23 +39,37 @@ export const ThresholdPanel = ({
       })}
       initialIsOpen={true}
     >
-      <DebouncedTruncateGaugeBaseField
+      <EuiFormRow
         label={i18n.translate('explore.stylePanel.threshold.base.min', {
           defaultMessage: 'Min',
         })}
-        value={min}
-        onChange={(value) => onMinChange(value)}
-        testId={'thresholdMinBase'}
-      />
+        helpText={i18n.translate('explore.stylePanel.threshold.base.min.help', {
+          defaultMessage: 'Leave empty to calculate based on all values',
+        })}
+      >
+        <DebouncedFieldNumber
+          data-test-subj="thresholdMinBase"
+          value={min}
+          onChange={(value) => onMinChange(value)}
+          placeholder="auto"
+        />
+      </EuiFormRow>
 
-      <DebouncedTruncateGaugeBaseField
+      <EuiFormRow
         label={i18n.translate('explore.stylePanel.threshold.base.max', {
           defaultMessage: 'Max',
         })}
-        value={max}
-        onChange={(value) => onMaxChange(value)}
-        testId={'thresholdMaxBase'}
-      />
+        helpText={i18n.translate('explore.stylePanel.threshold.base.max.help', {
+          defaultMessage: 'Leave empty to calculate based on all values',
+        })}
+      >
+        <DebouncedFieldNumber
+          data-test-subj="thresholdMaxBase"
+          value={max}
+          onChange={(value) => onMaxChange(value)}
+          placeholder="auto"
+        />
+      </EuiFormRow>
 
       <ThresholdCustomValues
         thresholds={thresholds}

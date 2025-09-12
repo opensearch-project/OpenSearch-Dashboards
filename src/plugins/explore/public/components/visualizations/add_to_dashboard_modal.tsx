@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useState } from 'react';
 import { SavedObjectsClientContract } from 'src/core/public';
-import { DebouncedText } from './style_panel/utils';
+import { DebouncedFieldText } from './style_panel/utils';
 import { OnSaveProps, DashboardInterface } from './add_to_dashboard_button';
 import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
 
@@ -43,9 +43,9 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const [existingDashboard, setExistingDashboard] = useState<DashboardInterface[]>([]);
   const [selectDashboard, setSelectDashboard] = useState<DashboardInterface | null>(null);
   const [newDashboardName, setNewDashboardName] = useState<string>('');
-  const [isLoading, setisLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [isTitleOrDashboardTitleDupilcate, setIsTitleOrDashboardTitleDupilcate] = useState<boolean>(
+  const [isTitleOrDashboardTitleDuplicate, setIsTitleOrDashboardTitleDuplicate] = useState<boolean>(
     false
   );
 
@@ -74,12 +74,12 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
 
   const handleSave = async () => {
     if (isLoading) return;
-    setisLoading(true);
+    setIsLoading(true);
     if (savedExplore) {
       await onConfirm({
         savedExplore,
         newTitle: title,
-        isTitleDuplicateConfirmed: isTitleOrDashboardTitleDupilcate,
+        isTitleDuplicateConfirmed: isTitleOrDashboardTitleDuplicate,
         onTitleDuplicate: handleTitleDuplicate,
         mode: selectedOption,
         selectDashboard,
@@ -89,12 +89,12 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   };
 
   const handleTitleDuplicate = () => {
-    setisLoading(false);
-    setIsTitleOrDashboardTitleDupilcate(true);
+    setIsLoading(false);
+    setIsTitleOrDashboardTitleDuplicate(true);
   };
 
   const renderDuplicateTitleCallout = () => {
-    if (!isTitleOrDashboardTitleDupilcate) {
+    if (!isTitleOrDashboardTitleDuplicate) {
       return null;
     }
 
@@ -196,32 +196,38 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
 
           {selectedOption === 'new' && (
             <EuiFlexItem style={{ width: '100%' }}>
-              <DebouncedText
-                value={newDashboardName}
-                placeholder="Enter dashboard name"
-                onChange={(text) => {
-                  setNewDashboardName(text);
-                }}
+              <EuiFormRow
                 label={i18n.translate('explore.addtoDashboardModal.dashboardName', {
                   defaultMessage: 'Dashboard name',
                 })}
-              />
+              >
+                <DebouncedFieldText
+                  value={newDashboardName}
+                  placeholder="Enter dashboard name"
+                  onChange={(text) => {
+                    setNewDashboardName(text);
+                  }}
+                />
+              </EuiFormRow>
             </EuiFlexItem>
           )}
           {renderDuplicateTitleCallout()}
 
           <EuiFlexItem grow={true} style={{ width: '100%' }}>
-            <DebouncedText
-              value={title}
-              placeholder="Enter save search name"
-              onChange={(text) => {
-                setIsTitleOrDashboardTitleDupilcate(false);
-                setTitle(text);
-              }}
+            <EuiFormRow
               label={i18n.translate('explore.addtoDashboardModal.saveExploreName', {
                 defaultMessage: 'Save search',
               })}
-            />
+            >
+              <DebouncedFieldText
+                value={title}
+                placeholder="Enter save search name"
+                onChange={(text) => {
+                  setIsTitleOrDashboardTitleDuplicate(false);
+                  setTitle(text);
+                }}
+              />
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>

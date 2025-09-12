@@ -7,19 +7,19 @@ import { i18n } from '@osd/i18n';
 import {
   EuiSwitch,
   EuiButtonGroup,
-  EuiFieldNumber,
   EuiColorPicker,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { HeatmapChartStyleControls } from './heatmap_vis_config';
+import { defaultHeatmapChartStyles, HeatmapChartStyleControls } from './heatmap_vis_config';
 import { ColorSchemas, ScaleType, RangeValue, AggregationType } from '../types';
 import { getColorSchemas, getAggregationType } from '../utils/collections';
 import { CustomRange } from '../style_panel/custom_ranges';
-import { useDebouncedNumericValue, useDebouncedValue } from '../utils/use_debounced_value';
+import { useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { DebouncedFieldNumber } from '../style_panel/utils';
 
 interface HeatmapVisOptionsProps {
   styles: HeatmapChartStyleControls['exclusive'];
@@ -48,16 +48,6 @@ export const HeatmapExclusiveVisOptions = ({
     });
   };
   const colorSchemas = useMemo(() => getColorSchemas(), []);
-
-  const [maxNumberOfColors, handleMaxNumberOfColors] = useDebouncedNumericValue(
-    styles.maxNumberOfColors,
-    (val) => onChange({ ...styles, maxNumberOfColors: val }),
-    {
-      min: 2,
-      max: 20,
-      defaultValue: 4,
-    }
-  );
 
   return (
     <StyleAccordion
@@ -162,13 +152,20 @@ export const HeatmapExclusiveVisOptions = ({
           defaultMessage: 'Max number of colors',
         })}
       >
-        <EuiFieldNumber
+        <DebouncedFieldNumber
+          data-test-subj="visHeatmapMaxNumberOfColors"
           compressed
           min={2}
+          max={20}
           disabled={styles.useCustomRanges}
-          placeholder="Max number of colors"
-          value={maxNumberOfColors}
-          onChange={(e) => handleMaxNumberOfColors(e.target.value)}
+          value={styles.maxNumberOfColors}
+          defaultValue={defaultHeatmapChartStyles.exclusive.maxNumberOfColors}
+          onChange={(value) =>
+            onChange({
+              ...styles,
+              maxNumberOfColors: value ?? defaultHeatmapChartStyles.exclusive.maxNumberOfColors,
+            })
+          }
         />
       </EuiFormRow>
 

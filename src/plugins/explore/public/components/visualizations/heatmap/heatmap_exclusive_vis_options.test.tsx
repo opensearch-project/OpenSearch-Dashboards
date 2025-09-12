@@ -139,7 +139,7 @@ describe('HeatmapExclusiveVisOptions', () => {
     };
 
     render(<HeatmapExclusiveVisOptions {...props} />);
-    const input = screen.getByPlaceholderText(/Max number of colors/i);
+    const input = screen.getByTestId('visHeatmapMaxNumberOfColors');
     expect(input).toBeDisabled();
   });
 
@@ -178,7 +178,7 @@ describe('HeatmapExclusiveVisOptions', () => {
 
   it('updates maxNumberOfColors and calls onChange after debounce', async () => {
     render(<HeatmapExclusiveVisOptions {...defaultProps} />);
-    const input = screen.getByPlaceholderText(/Max number of colors/i);
+    const input = screen.getByTestId('visHeatmapMaxNumberOfColors');
 
     fireEvent.change(input, { target: { value: '10' } });
 

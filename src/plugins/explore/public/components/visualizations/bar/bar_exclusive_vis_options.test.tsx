@@ -9,7 +9,7 @@ import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
 
 // Mock the debounced value hook
 jest.mock('../utils/use_debounced_value', () => ({
-  useDebouncedNumericValue: jest.fn((value, onChange, options) => {
+  useDebouncedNumber: jest.fn((value, onChange, options) => {
     return [value, (newValue: string) => onChange(parseFloat(newValue))];
   }),
 }));

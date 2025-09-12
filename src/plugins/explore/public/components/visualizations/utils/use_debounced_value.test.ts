@@ -4,7 +4,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useDebouncedValue, useDebouncedNumericValue } from './use_debounced_value';
+import { useDebouncedValue, useDebouncedNumber } from './use_debounced_value';
 
 // Mock timer functions
 jest.useFakeTimers();
@@ -64,74 +64,145 @@ describe('useDebouncedValue', () => {
     // Value should now be updated
     expect(result.current[0]).toBe('updated');
   });
+});
 
-  describe('useDebouncedNumericValue', () => {
-    it('should handle numeric input correctly', () => {
-      const mockOnChange = jest.fn();
-      const { result } = renderHook(() =>
-        useDebouncedNumericValue(10, mockOnChange, { min: 0, max: 100 })
-      );
+describe('useDebouncedNumber', () => {
+  it('should return the initial value immediately', () => {
+    const mockOnChange = jest.fn();
+    const { result } = renderHook(() => useDebouncedNumber(10, mockOnChange));
+    // The hook returns [value, setter]
+    expect(result.current[0]).toBe(10);
+  });
 
-      // Get the setter function
-      const setValue = result.current[1];
+  it('should apply min constraint to the value', () => {
+    const mockOnChange = jest.fn();
+    const { result } = renderHook(() => useDebouncedNumber(5, mockOnChange, { min: 10, max: 100 }));
 
-      // Set a new value as a string
-      act(() => {
-        setValue('50');
-      });
-
-      // Value should be updated locally immediately
-      expect(result.current[0]).toBe(50);
-
-      // Fast-forward time
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
-
-      // onChange should be called with the parsed number
-      expect(mockOnChange).toHaveBeenCalledWith(50);
+    // Set a value below the min
+    act(() => {
+      result.current[1](5);
     });
 
-    it('should respect min and max bounds', () => {
-      const mockOnChange = jest.fn();
-      const { result } = renderHook(() =>
-        useDebouncedNumericValue(10, mockOnChange, { min: 5, max: 20 })
-      );
-
-      const setValue = result.current[1];
-
-      // Try to set a value below the minimum
-      act(() => {
-        setValue(2);
-      });
-
-      // Value should be clamped to the minimum
-      expect(result.current[0]).toBe(5);
-
-      // Try to set a value above the maximum
-      act(() => {
-        setValue(30);
-      });
-
-      // Value should be clamped to the maximum
-      expect(result.current[0]).toBe(20);
+    // Fast-forward time to trigger the debounce
+    act(() => {
+      jest.advanceTimersByTime(500);
     });
 
-    it('should handle invalid string inputs', () => {
-      const mockOnChange = jest.fn();
-      const { result } = renderHook(() =>
-        useDebouncedNumericValue(10, mockOnChange, { defaultValue: 5 })
-      );
+    // Value should be constrained to min
+    expect(mockOnChange).toHaveBeenCalledWith(10);
+  });
 
-      const setValue = result.current[1];
+  it('should apply max constraint to the value', () => {
+    const mockOnChange = jest.fn();
+    const { result } = renderHook(() =>
+      useDebouncedNumber(150, mockOnChange, { min: 10, max: 100 })
+    );
 
-      // Set an invalid string value
-      act(() => {
-        setValue('not-a-number');
-      });
-
-      // Value should be set to the default value
-      expect(result.current[0]).toBe(5);
+    // Set a value above the max
+    act(() => {
+      result.current[1](150);
     });
+
+    // Fast-forward time to trigger the debounce
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    // Value should be constrained to max
+    expect(mockOnChange).toHaveBeenCalledWith(100);
+  });
+
+  it('should debounce the value changes', () => {
+    const mockOnChange = jest.fn();
+    const { result } = renderHook(() => useDebouncedNumber(10, mockOnChange, { delay: 500 }));
+
+    // Change the value
+    act(() => {
+      result.current[1](20);
+    });
+
+    // Local value should be updated immediately
+    expect(result.current[0]).toBe(20);
+
+    // But onChange should not have been called yet
+    expect(mockOnChange).not.toHaveBeenCalled();
+
+    // Fast-forward time by 300ms (less than the delay)
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    // onChange should still not have been called
+    expect(mockOnChange).not.toHaveBeenCalled();
+
+    // Fast-forward time by another 200ms (to reach the delay)
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    // onChange should now have been called
+    expect(mockOnChange).toHaveBeenCalledWith(20);
+  });
+
+  it('should update the local value when the input value changes', () => {
+    const mockOnChange = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ value }) => useDebouncedNumber(value, mockOnChange),
+      {
+        initialProps: { value: 10 },
+      }
+    );
+
+    // Initial value should be 10
+    expect(result.current[0]).toBe(10);
+
+    // Change the input value
+    rerender({ value: 20 });
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+    // Local value should be updated
+    expect(result.current[0]).toBe(20);
+  });
+
+  it('should handle undefined values', () => {
+    const mockOnChange = jest.fn();
+    const { result } = renderHook(() => useDebouncedNumber(undefined, mockOnChange));
+
+    // Initial value should be undefined
+    expect(result.current[0]).toBeUndefined();
+
+    // Set a value
+    act(() => {
+      result.current[1](30);
+    });
+
+    // Local value should be updated immediately
+    expect(result.current[0]).toBe(30);
+
+    // Fast-forward time to trigger the debounce
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    // onChange should have been called with the new value
+    expect(mockOnChange).toHaveBeenCalledWith(30);
+
+    // Set value back to undefined
+    act(() => {
+      result.current[1](undefined);
+    });
+
+    // Local value should be updated immediately
+    expect(result.current[0]).toBeUndefined();
+
+    // Fast-forward time to trigger the debounce
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    // onChange should have been called with undefined
+    expect(mockOnChange).toHaveBeenCalledWith(undefined);
   });
 });

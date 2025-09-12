@@ -20,8 +20,18 @@ jest.mock('../utils/collections', () => ({
   ],
 }));
 
-jest.mock('../utils/use_debounced_value', () => ({
-  useDebouncedValue: (value: any, callback: any) => [value, callback],
+// Mock the DebouncedFieldNumber component
+jest.mock('../style_panel/utils', () => ({
+  DebouncedFieldNumber: jest.fn(({ value, onChange, placeholder, ...rest }) => (
+    <input
+      type="number"
+      value={value || ''}
+      onChange={(e) => onChange(parseFloat(e.target.value))}
+      placeholder={placeholder}
+      data-test-subj="debouncedFieldNumber"
+      {...rest}
+    />
+  )),
 }));
 
 describe('BucketVisOptions', () => {
@@ -69,7 +79,7 @@ describe('BucketVisOptions', () => {
   it('calls onChange when bucket size changes', () => {
     render(<BucketOptionsPanel styles={{}} bucketType="num" onChange={mockOnChange} />);
 
-    fireEvent.change(screen.getByPlaceholderText('Auto'), { target: { value: '15' } });
+    fireEvent.change(screen.getByPlaceholderText('auto'), { target: { value: '15' } });
     expect(mockOnChange).toHaveBeenCalledWith({ bucketSize: 15 });
   });
 

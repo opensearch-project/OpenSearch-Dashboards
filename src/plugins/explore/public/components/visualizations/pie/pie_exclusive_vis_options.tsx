@@ -6,8 +6,8 @@
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiButtonGroup, EuiSwitch } from '@elastic/eui';
 import React from 'react';
-import { PieChartStyleControls } from './pie_vis_config';
-import { DebouncedTruncateField } from '../style_panel/utils';
+import { defaultPieChartStyles, PieChartStyleControls } from './pie_vis_config';
+import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
 interface PieVisOptionsProps {
   styles: PieChartStyleControls['exclusive'];
@@ -87,13 +87,19 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
         />
       </EuiFormRow>
       {styles.showLabels && (
-        <DebouncedTruncateField
-          value={styles.truncate ?? 100}
-          onChange={(truncateValue) => updateStyle('truncate', truncateValue)}
+        <EuiFormRow
           label={i18n.translate('explore.vis.pie.exclusive.labelTruncate', {
             defaultMessage: 'Truncate after',
           })}
-        />
+        >
+          <DebouncedFieldNumber
+            value={styles.truncate}
+            defaultValue={defaultPieChartStyles.exclusive.truncate}
+            onChange={(truncateValue) =>
+              updateStyle('truncate', truncateValue ?? defaultPieChartStyles.exclusive.truncate)
+            }
+          />
+        </EuiFormRow>
       )}
     </StyleAccordion>
   );

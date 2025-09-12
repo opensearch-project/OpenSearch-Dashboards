@@ -14,8 +14,9 @@ import {
   EuiColorPicker,
 } from '@elastic/eui';
 import { Threshold } from '../../types';
-import { useDebouncedValue, useDebouncedNumericValue } from '../../utils/use_debounced_value';
+import { useDebouncedValue } from '../../utils/use_debounced_value';
 import { getColors } from '../../theme/default_colors';
+import { DebouncedFieldNumber } from '../utils';
 
 export interface RangeProps {
   id: number;
@@ -34,10 +35,6 @@ const THRESHOLD_COLORS = [
 ];
 
 export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) => {
-  const [thresholdValue, setThresholdValue] = useDebouncedNumericValue(value.value, (val) =>
-    onChange(id, { ...value, value: val })
-  );
-
   const [color, setDebouncedColor] = useDebouncedValue<string>(
     value.color,
     (val) => onChange(id, { ...value, color: val }),
@@ -65,11 +62,12 @@ export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) =
       </EuiFlexItem>
 
       <EuiFlexItem grow={true}>
-        <EuiFieldNumber
+        <DebouncedFieldNumber
           compressed
           min={0}
-          value={thresholdValue}
-          onChange={(e) => setThresholdValue((e.target as HTMLInputElement).value)}
+          value={value.value}
+          defaultValue={0}
+          onChange={(val) => onChange(id, { ...value, value: val ?? 0 })}
           placeholder="Value"
           data-test-subj={`exploreVisThresholdValue-${id}`}
         />
@@ -181,7 +179,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
       {ranges.map((range, index) => {
         return (
           <Range
-            key={index}
+            key={`${range.color}-${range.value}-${index}`}
             id={index}
             value={range}
             onChange={handleRangeChange}

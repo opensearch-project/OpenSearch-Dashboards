@@ -23,11 +23,11 @@ jest.mock('../style_accordion', () => ({
 }));
 
 jest.mock('../utils', () => ({
-  DebouncedTruncateGaugeBaseField: ({ label, onChange, testId }: any) => (
+  DebouncedFieldNumber: (props: any) => (
     <input
-      data-test-subj={testId}
-      placeholder={label}
-      onChange={(e) => onChange(Number(e.target.value))}
+      data-test-subj={props['data-test-subj']}
+      placeholder={props.label}
+      onChange={(e) => props.onChange(Number(e.target.value))}
     />
   ),
 }));

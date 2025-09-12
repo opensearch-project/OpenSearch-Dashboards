@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PieChartStyleControls } from './pie_vis_config';
+import { defaultPieChartStyles, PieChartStyleControls } from './pie_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
 
@@ -65,7 +65,9 @@ export const createPieSpec = (
   const labelLayer = {
     mark: {
       type: 'text',
-      limit: styleOptions.exclusive?.truncate ? styleOptions.exclusive?.truncate : 100,
+      limit: styleOptions.exclusive?.truncate
+        ? styleOptions.exclusive?.truncate
+        : defaultPieChartStyles.exclusive.truncate,
       radius: { expr: '12*stepSize' },
     },
     encoding: {
