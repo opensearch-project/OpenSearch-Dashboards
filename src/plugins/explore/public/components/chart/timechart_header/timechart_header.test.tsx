@@ -139,4 +139,30 @@ describe('timechart header', function () {
     });
     expect(props.onChangeInterval).toHaveBeenCalled();
   });
+
+  it('calls stopPropagation on mouseUp for interval selector', () => {
+    component = mountWithIntl(<TimechartHeader {...props} />);
+
+    const intervalSelect = findTestSubject(component, 'discoverIntervalSelect');
+    expect(intervalSelect.exists()).toBe(true); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const stopImmediatePropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+    Object.defineProperty(mouseUpEvent, 'stopImmediatePropagation', {
+      value: stopImmediatePropagation,
+    });
+
+    intervalSelect.simulate('mouseUp', {
+      ...mouseUpEvent,
+      nativeEvent: mouseUpEvent,
+    });
+
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(stopImmediatePropagation).toHaveBeenCalled();
+  });
 });
