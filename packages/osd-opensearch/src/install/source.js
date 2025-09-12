@@ -106,7 +106,7 @@ async function sourceInfo(cwd, license, log = defaultLog) {
   log.info('on %s at %s', chalk.bold(branch), chalk.bold(sha));
   log.info('%s locally modified file(s)', chalk.bold(status.modified.length));
 
-  const etag = crypto.createHash('md5').update(branch);
+  const etag = crypto.createHash('sha256').update(branch);
   etag.update(sha);
 
   // for changed files, use last modified times in hash calculation
@@ -114,7 +114,7 @@ async function sourceInfo(cwd, license, log = defaultLog) {
     etag.update(fs.statSync(path.join(cwd, file.path)).mtime.toString());
   });
 
-  const cwdHash = crypto.createHash('md5').update(cwd).digest('hex').substr(0, 8);
+  const cwdHash = crypto.createHash('sha256').update(cwd).digest('hex').substr(0, 8);
 
   const basename = `${branch}-${task}-${cwdHash}`;
   const filename = `${basename}.${ext}`;
