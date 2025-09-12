@@ -27,17 +27,12 @@ describe('bar_vis_config', () => {
         barBorderColor: '#000000',
 
         // Threshold and grid
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#E7664C',
-            show: false,
-            style: ThresholdLineStyle.Full,
-            value: 10,
-            width: 1,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [],
+          thresholdStyle: ThresholdLineStyle.Solid,
+        },
+
         titleOptions: {
           show: false,
           titleName: '',

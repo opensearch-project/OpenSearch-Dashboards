@@ -15,9 +15,11 @@ import {
   AxisRole,
   VisFieldType,
   TitleOptions,
+  ThresholdOptions,
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
+import { getColors } from '../theme/default_colors';
 
 export type LineMode = 'straight' | 'smooth' | 'stepped';
 
@@ -33,13 +35,14 @@ export interface LineChartStyleControls {
   tooltipOptions: TooltipOptions;
 
   // Threshold and grid
-  thresholdLines: ThresholdLines;
+  thresholdLines?: ThresholdLines;
 
   // Axes configuration
   categoryAxes: CategoryAxis[];
   valueAxes: ValueAxis[];
 
   titleOptions: TitleOptions;
+  thresholdOptions?: ThresholdOptions;
 }
 
 const defaultLineChartStyles: LineChartStyleControls = {
@@ -54,17 +57,12 @@ const defaultLineChartStyles: LineChartStyleControls = {
     mode: 'all',
   },
 
-  thresholdLines: [
-    {
-      id: '1',
-      color: '#E7664C',
-      show: false,
-      style: ThresholdLineStyle.Full,
-      value: 10,
-      width: 1,
-      name: '',
-    },
-  ],
+  // Threshold options
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+    thresholdStyle: ThresholdLineStyle.Solid,
+  },
 
   // Category axes
   categoryAxes: [

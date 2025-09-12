@@ -16,13 +16,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { GaugeChartStyleControls } from './gauge_vis_config';
-import { Threshold, AxisRole } from '../types';
+import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { DebouncedText } from '../style_panel/utils';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
+import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
 export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyleControls>;
 
@@ -85,18 +86,20 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
 
           <EuiFlexItem>
             <ThresholdPanel
-              thresholds={styleOptions.thresholds}
-              baseColor={styleOptions.baseColor}
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <StandardOptionsPanel
               min={styleOptions.min}
               max={styleOptions.max}
-              onThresholdValuesChange={(ranges: Threshold[]) => {
-                updateStyleOption('thresholds', ranges);
-              }}
-              onBaseColorChange={(color: string) => updateStyleOption('baseColor', color)}
               onMinChange={(value) => updateStyleOption('min', value)}
               onMaxChange={(value) => updateStyleOption('max', value)}
             />
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <StyleAccordion
               id="gaugeSection"

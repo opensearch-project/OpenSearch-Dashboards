@@ -41,7 +41,7 @@ describe('to_expression', () => {
     showTitle: true,
     title: 'Test Metric',
     fontSize: 60,
-    useColor: false,
+    useThresholdColor: false,
     colorSchema: ColorSchemas.BLUES,
     valueCalculation: 'last',
   };
@@ -126,50 +126,6 @@ describe('to_expression', () => {
       // Verify only one layer (no title layer)
       expect(result.layer).toHaveLength(1);
       expect(result.layer[0]).toHaveProperty('mark.type', 'text');
-    });
-
-    it('should apply color conditions when useColor is true and customRanges are provided', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Value]: numericColumn,
-      };
-
-      const styleOptions = {
-        ...defaultStyleOptions,
-        useColor: true,
-        colorSchema: ColorSchemas.BLUES,
-        customRanges: [{ min: 0, max: 100 }, { min: 100, max: 200 }, { min: 200 }],
-      };
-
-      const result = createSingleMetric(
-        transformedData,
-        [numericColumn],
-        [],
-        [],
-        styleOptions,
-        mockAxisColumnMappings
-      );
-
-      // Verify color conditions are applied
-      expect(result.layer[0].encoding).toHaveProperty('color');
-      expect(result.layer[0].encoding.color).toHaveProperty('condition');
-      expect(result.layer[0].encoding.color.condition).toHaveLength(3);
-
-      // Verify the color conditions
-      expect(result.layer[0].encoding.color.condition[0]).toHaveProperty(
-        'test',
-        'datum["formattedValue"] >= 0 && datum["formattedValue"] < 100'
-      );
-      expect(result.layer[0].encoding.color.condition[1]).toHaveProperty(
-        'test',
-        'datum["formattedValue"] >= 100 && datum["formattedValue"] < 200'
-      );
-      expect(result.layer[0].encoding.color.condition[2]).toHaveProperty(
-        'test',
-        'datum["formattedValue"] >= 200'
-      );
-
-      // Verify generateColorBySchema was called
-      expect(utils.generateColorBySchema).toHaveBeenCalledWith(4, ColorSchemas.BLUES);
     });
 
     it('should handle empty style options gracefully', () => {

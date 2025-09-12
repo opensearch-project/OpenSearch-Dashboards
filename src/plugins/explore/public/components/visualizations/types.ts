@@ -70,9 +70,10 @@ export enum VisFieldType {
 }
 
 export enum ThresholdLineStyle {
-  Full = 'full',
+  Solid = 'solid',
   Dashed = 'dashed',
   DotDashed = 'dot-dashed',
+  Off = 'off',
 }
 
 export interface ThresholdLine {
@@ -241,6 +242,12 @@ export enum TimeUnit {
   HOUR = 'yearmonthdatehours',
   MINUTE = 'yearmonthdatehoursminutes',
   SECOND = 'yearmonthdatehoursminutesseconds',
+}
+
+export interface ThresholdOptions {
+  thresholds?: Threshold[];
+  baseColor?: string;
+  thresholdStyle?: ThresholdLineStyle;
 }
 
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';

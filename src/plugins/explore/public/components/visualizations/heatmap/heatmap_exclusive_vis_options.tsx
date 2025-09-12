@@ -15,9 +15,8 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { ColorSchemas, ScaleType, RangeValue, AggregationType } from '../types';
+import { ColorSchemas, ScaleType, AggregationType } from '../types';
 import { getColorSchemas, getAggregationType } from '../utils/collections';
-import { CustomRange } from '../style_panel/custom_ranges';
 import { useDebouncedNumericValue, useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
@@ -139,7 +138,7 @@ export const HeatmapExclusiveVisOptions = ({
             defaultMessage: 'Scale to data bounds',
           })}
           checked={styles.scaleToDataBounds}
-          disabled={styles.percentageMode || styles.useCustomRanges}
+          disabled={styles.percentageMode || styles.useThresholdColor}
           onChange={(e) => updateExclusiveOption('scaleToDataBounds', e.target.checked)}
         />
       </EuiFormRow>
@@ -151,7 +150,7 @@ export const HeatmapExclusiveVisOptions = ({
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.percentageMode', {
             defaultMessage: 'Percentage mode',
           })}
-          disabled={styles.useCustomRanges || styles.scaleToDataBounds}
+          disabled={styles.useThresholdColor || styles.scaleToDataBounds}
           checked={styles.percentageMode}
           onChange={(e) => updateExclusiveOption('percentageMode', e.target.checked)}
         />
@@ -165,7 +164,7 @@ export const HeatmapExclusiveVisOptions = ({
         <EuiFieldNumber
           compressed
           min={2}
-          disabled={styles.useCustomRanges}
+          disabled={styles.useThresholdColor}
           placeholder="Max number of colors"
           value={maxNumberOfColors}
           onChange={(e) => handleMaxNumberOfColors(e.target.value)}
@@ -183,27 +182,14 @@ export const HeatmapExclusiveVisOptions = ({
       <EuiFormRow>
         <EuiSwitch
           compressed
-          label={i18n.translate('explore.stylePanel.heatmap.exclusive.useCustomRanges', {
-            defaultMessage: 'Use custom ranges',
+          label={i18n.translate('explore.stylePanel.heatmap.exclusive.useThresholdColor', {
+            defaultMessage: 'Use threshold colors',
           })}
           disabled={styles.percentageMode || styles.scaleToDataBounds}
-          checked={styles.useCustomRanges}
-          onChange={(e) => updateExclusiveOption('useCustomRanges', e.target.checked)}
+          checked={styles.useThresholdColor}
+          onChange={(e) => updateExclusiveOption('useThresholdColor', e.target.checked)}
         />
       </EuiFormRow>
-
-      {styles.useCustomRanges && (
-        <>
-          <EuiSpacer size="s" />
-
-          <CustomRange
-            customRanges={styles.customRanges}
-            onCustomRangesChange={(ranges: RangeValue[]) => {
-              updateExclusiveOption('customRanges', ranges);
-            }}
-          />
-        </>
-      )}
     </StyleAccordion>
   );
 };
