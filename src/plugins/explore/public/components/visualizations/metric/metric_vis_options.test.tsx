@@ -210,4 +210,26 @@ describe('MetricVisStyleControls', () => {
 
     expect(titleInput).toHaveValue('');
   });
+
+  it('calls stopPropagation on mouseUp for color schema select', () => {
+    const propsWithColor = {
+      ...mockProps,
+      styleOptions: { ...defaultMetricChartStyles, useColor: true },
+    };
+    render(<MetricVisStyleControls {...propsWithColor} />);
+
+    const colorSchemaSelect = screen.getByTestId('colorSchemaSelect');
+    expect(colorSchemaSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    colorSchemaSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
 });

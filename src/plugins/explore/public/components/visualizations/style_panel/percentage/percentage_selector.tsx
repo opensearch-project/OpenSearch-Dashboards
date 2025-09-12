@@ -54,6 +54,7 @@ export const PercentageSelector = (props: Props) => {
             options={OPTIONS}
             value={props.percentageColor}
             onChange={(e) => props.onPercentageColorChange(e.target.value as PercentageColor)}
+            onMouseUp={(e) => e.stopPropagation()}
             data-test-subj="percentageColorSelector"
           />
         </EuiFormRow>

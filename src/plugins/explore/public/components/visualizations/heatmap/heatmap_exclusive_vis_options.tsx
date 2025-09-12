@@ -78,6 +78,7 @@ export const HeatmapExclusiveVisOptions = ({
           options={colorSchemas}
           value={styles.colorSchema}
           onChange={(e) => updateExclusiveOption('colorSchema', e.target.value as ColorSchemas)}
+          onMouseUp={(e) => e.stopPropagation()}
         />
       </EuiFormRow>
 
@@ -289,6 +290,7 @@ export const HeatmapLabelVisOptions = ({
                 compressed
                 value={styles.type}
                 onChange={(e) => updateLabelOption('type', e.target.value as AggregationType)}
+                onMouseUp={(e) => e.stopPropagation()}
                 options={labelType}
               />
             </EuiFormRow>

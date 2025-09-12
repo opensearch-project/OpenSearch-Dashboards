@@ -252,6 +252,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                           },
                         });
                       }}
+                      onMouseUp={(e) => e.stopPropagation()}
                       options={[
                         { value: 'horizontal', text: 'Horizontal' },
                         { value: 'vertical', text: 'Vertical' },
@@ -420,6 +421,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                                 },
                               });
                             }}
+                            onMouseUp={(e) => e.stopPropagation()}
                             options={[
                               { value: 'horizontal', text: 'Horizontal' },
                               { value: 'vertical', text: 'Vertical' },
@@ -574,6 +576,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                                 },
                               });
                             }}
+                            onMouseUp={(e) => e.stopPropagation()}
                             options={[
                               { value: 'horizontal', text: 'Horizontal' },
                               { value: 'vertical', text: 'Vertical' },

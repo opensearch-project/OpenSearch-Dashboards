@@ -112,6 +112,7 @@ export const TableCellTypeOptions: React.FC<TableCellTypeOptionsProps> = ({
                 options={getFieldOptions(ct, index)}
                 value={ct.field}
                 onChange={(e) => handleCellTypeFieldChange(index, e.target.value)}
+                onMouseUp={(e) => e.stopPropagation()}
                 data-test-subj={`visTableCellTypeField${index}`}
               />
             </EuiFlexItem>
