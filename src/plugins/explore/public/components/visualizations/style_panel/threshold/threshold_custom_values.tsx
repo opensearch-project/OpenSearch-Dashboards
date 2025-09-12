@@ -142,7 +142,12 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiButton onClick={handleAddRange} fullWidth size="s">
+      <EuiButton
+        data-test-subj="exploreVisAddThreshold"
+        onClick={handleAddRange}
+        fullWidth
+        size="s"
+      >
         {i18n.translate('explore.stylePanel.thresholdPanel.addThresholdButton', {
           defaultMessage: '+ Add threshold',
         })}

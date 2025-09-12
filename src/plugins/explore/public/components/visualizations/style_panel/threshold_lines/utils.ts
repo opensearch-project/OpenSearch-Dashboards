@@ -29,6 +29,8 @@ export const getStrokeDash = (style: ThresholdLineStyle): number[] | undefined =
  * @param tooltipMode The tooltip mode ('all', 'hidden', etc.)
  * @returns Array of threshold layer configurations or null if disabled
  */
+
+// TODO move it to threshold folder in clean-up
 export const createThresholdLayer = (
   thresholdOptions?: ThresholdOptions,
   thresholdLines?: ThresholdLines,

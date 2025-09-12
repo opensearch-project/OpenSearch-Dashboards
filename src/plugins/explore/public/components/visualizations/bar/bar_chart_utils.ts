@@ -158,6 +158,7 @@ export const buildThresholdColorEncoding = (
       scale: {
         type: 'threshold',
         domain: colorDomain,
+        // require one more color for values below the first threshold(base)
         range: ['#d3d3d3', ...colorRange],
       },
       legend: styleOptions.addLegend
