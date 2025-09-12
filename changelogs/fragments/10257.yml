@@ -1,0 +1,2 @@
+feat:
+- Enhance time range parser to support `/api/enhancements/assist/generate` api to parse time range from user question. ([#10257](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10257))

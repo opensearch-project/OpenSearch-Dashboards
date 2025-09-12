@@ -42,7 +42,7 @@ import { i18n } from '@osd/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon } from '../../../../opensearch_dashboards_react/public';
 import { FieldDetails } from './types';
-import { IndexPatternField, IndexPattern } from '../../../../data/public';
+import { DataViewField, DataView } from '../../../../data/public';
 import { shortenDottedString } from '../../application/legacy/discover/application/helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
 import './discover_field.scss';
@@ -55,11 +55,11 @@ export interface DiscoverFieldProps {
   /**
    * The displayed field
    */
-  field: IndexPatternField;
+  field: DataViewField;
   /**
-   * The currently selected index pattern
+   * The currently selected data view
    */
-  indexPattern: IndexPattern;
+  dataSet: DataView;
   /**
    * Callback to add/select the field
    */
@@ -67,7 +67,7 @@ export interface DiscoverFieldProps {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback to remove/deselect a the field
    * @param fieldName
@@ -76,7 +76,7 @@ export interface DiscoverFieldProps {
   /**
    * Retrieve details data for the field
    */
-  getDetails: (field: IndexPatternField) => FieldDetails;
+  getDetails: (field: DataViewField) => FieldDetails;
   /**
    * Determines whether the field is selected
    */
@@ -97,7 +97,7 @@ export const DiscoverField = ({
   onAddField,
   onRemoveField,
   columns,
-  indexPattern,
+  dataSet,
   onAddFilter,
   getDetails,
   useShortDots,
@@ -128,7 +128,7 @@ export const DiscoverField = ({
 
   const [infoIsOpen, setOpen] = useState(false);
 
-  const toggleDisplay = (f: IndexPatternField) => {
+  const toggleDisplay = (f: DataViewField) => {
     if (selected) {
       onRemoveField(f.name);
     } else {
@@ -258,7 +258,7 @@ export const DiscoverField = ({
                 columns={columns}
                 details={getDetails(field)}
                 field={field}
-                indexPattern={indexPattern}
+                dataSet={dataSet}
                 onAddFilter={onAddFilter}
               />
             )}

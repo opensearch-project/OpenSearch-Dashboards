@@ -1,0 +1,2 @@
+feat:
+- Add useKeyboardShortcut hook for registering keyboard shortcuts in React components ([#10455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10455))

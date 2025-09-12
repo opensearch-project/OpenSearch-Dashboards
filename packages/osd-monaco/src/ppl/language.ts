@@ -7,9 +7,9 @@ import { monaco } from '../monaco';
 import { ID, PPL_TOKEN_SETS } from './constants';
 import { registerWorker } from '../worker_store';
 import { PPLWorkerProxyService } from './worker_proxy_service';
-import { getPPLLanguageAnalyzer } from './ppl_language_analyzer';
-// @ts-ignore
+import { getPPLLanguageAnalyzer, PPLValidationResult } from './ppl_language_analyzer';
 import { getPPLDocumentationLink } from './ppl_documentation';
+import { pplOnTypeFormatProvider, pplRangeFormatProvider } from './formatter';
 // @ts-ignore
 import workerSrc from '!!raw-loader!../../target/public/ppl.editor.worker.js';
 
@@ -119,139 +119,125 @@ const setupPPLTokenization = () => {
 };
 
 /**
+ * Process syntax highlighting for PPL models
+ */
+const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
+  // Only process if the model is still set to PPL language
+  if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
+    // Clear any existing PPL markers if language changed
+    monaco.editor.setModelMarkers(model, OWNER, []);
+    return;
+  }
+
+  try {
+    const content = model.getValue();
+
+    // Ensure worker is set up before validation - always call setup as it has internal check
+    pplWorkerProxyService.setup(workerSrc);
+
+    // Get validation result from worker with timeout protection
+    const validationResult = (await pplWorkerProxyService.validate(content)) as PPLValidationResult;
+
+    if (validationResult.errors.length > 0) {
+      // Convert errors to Monaco markers
+      const markers: monaco.editor.IMarkerData[] = validationResult.errors.map((error) => {
+        // Map SyntaxError properties to Monaco marker properties
+        const startLineNumber = error.line || 1;
+        const endLineNumber = error.endLine || error.line || startLineNumber;
+        const startColumn = (error.column || 0) + 1; // Monaco is 1-based, ANTLR is 0-based
+        const endColumn = (error.endColumn || error.column + 1 || startColumn) + 1;
+
+        const safeStartLine = Math.max(1, startLineNumber);
+        const safeEndLine = Math.max(safeStartLine, endLineNumber);
+        const safeStartColumn = Math.max(1, startColumn);
+        const safeEndColumn = Math.max(safeStartColumn, endColumn);
+
+        const docLink = getPPLDocumentationLink(error.message);
+        return {
+          severity: monaco.MarkerSeverity.Error,
+          message: error.message,
+          startLineNumber: safeStartLine,
+          startColumn: safeStartColumn,
+          endLineNumber: safeEndLine,
+          endColumn: safeEndColumn,
+          // Add error code for better categorization
+          code: {
+            value: 'View Documentation',
+            target: monaco.Uri.parse(docLink.url),
+          },
+        };
+      });
+
+      monaco.editor.setModelMarkers(model, OWNER, markers);
+    } else {
+      // Clear markers if no errors
+      monaco.editor.setModelMarkers(model, OWNER, []);
+    }
+  } catch (error) {
+    // Silent error handling - continue without worker-based highlighting
+  }
+};
+
+/**
+ * Set up PPL document range formatting provider
+ */
+const setupPPLFormatter = () => {
+  monaco.languages.registerDocumentRangeFormattingEditProvider(
+    PPL_LANGUAGE_ID,
+    pplRangeFormatProvider
+  );
+  monaco.languages.registerOnTypeFormattingEditProvider(PPL_LANGUAGE_ID, pplOnTypeFormatProvider);
+};
+
+/**
  * Set up syntax highlighting using PPL worker
  */
 const setupPPLSyntaxHighlighting = () => {
-  // Set up the worker
-  pplWorkerProxyService.setup(workerSrc);
+  const disposables: monaco.IDisposable[] = [];
 
-  const allDisposables: monaco.IDisposable[] = [];
-  const modelHandlers = new Map<monaco.editor.IModel, monaco.IDisposable[]>();
-
-  const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
-    // Only process if the model is still set to PPL language
-    if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
-      // Clear any existing PPL markers if language changed
-      monaco.editor.setModelMarkers(model, OWNER, []);
-      return;
-    }
-
-    try {
-      const content = model.getValue();
-
-      // Get validation result from worker
-      const validationResult = await pplWorkerProxyService.validate(content);
-
-      if (validationResult.errors.length > 0) {
-        // Convert errors to Monaco markers
-        const markers: monaco.editor.IMarkerData[] = validationResult.errors.map((error) => {
-          // Handle different error types with safe property access
-          const startLineNumber = (error as any).startLineNumber || (error as any).line || 1;
-          const endLineNumber =
-            (error as any).endLineNumber || (error as any).endLine || startLineNumber;
-          const startColumn = (error as any).startColumn || (error as any).column || 1;
-          const endColumn = (error as any).endColumn || startColumn + 1;
-
-          const safeStartLine = Math.max(1, startLineNumber);
-          const safeEndLine = Math.max(safeStartLine, endLineNumber);
-          const safeStartColumn = Math.max(1, startColumn);
-          const safeEndColumn = Math.max(safeStartColumn, endColumn);
-
-          const docLink = getPPLDocumentationLink(error.message);
-          return {
-            severity: monaco.MarkerSeverity.Error,
-            message: error.message,
-            startLineNumber: safeStartLine,
-            startColumn: safeStartColumn,
-            endLineNumber: safeEndLine,
-            endColumn: safeEndColumn,
-            // Add error code for better categorization
-            code: {
-              value: 'View Documentation',
-              target: monaco.Uri.parse(docLink.url),
-            },
-          };
-        });
-
-        monaco.editor.setModelMarkers(model, OWNER, markers);
-      } else {
-        // Clear markers if no errors
-        monaco.editor.setModelMarkers(model, OWNER, []);
-      }
-    } catch (error) {
-      // Silent error handling - continue without worker-based highlighting
-    }
-  };
-
-  const addModelHandlers = (model: monaco.editor.IModel) => {
-    if (model.getLanguageId() === PPL_LANGUAGE_ID) {
-      const disposables: monaco.IDisposable[] = [];
-
-      // Set up content change listener for syntax highlighting
-      disposables.push(
-        model.onDidChangeContent(async () => {
+  const handleModel = (model: monaco.editor.IModel) => {
+    // Set up content change listener
+    disposables.push(
+      model.onDidChangeContent(async () => {
+        if (model.getLanguageId() === PPL_LANGUAGE_ID) {
           await processSyntaxHighlighting(model);
-        })
-      );
+        }
+      })
+    );
 
-      // Listen to language changes to clean up PPL-specific handling
-      disposables.push(
-        model.onDidChangeLanguage(() => {
-          const currentLanguage = model.getLanguageId();
-          if (currentLanguage !== PPL_LANGUAGE_ID) {
-            // Language changed away from PPL, clean up
-            monaco.editor.setModelMarkers(model, OWNER, []);
-            removeModelHandlers(model);
-          }
-        })
-      );
+    // Set up language change listener
+    disposables.push(
+      model.onDidChangeLanguage(async () => {
+        if (model.getLanguageId() === PPL_LANGUAGE_ID) {
+          await processSyntaxHighlighting(model);
+        } else {
+          monaco.editor.setModelMarkers(model, OWNER, []);
+        }
+      })
+    );
 
-      // Store handlers for this model
-      modelHandlers.set(model, disposables);
-
-      // Process initial syntax highlighting
+    // Process immediately if already PPL
+    if (model.getLanguageId() === PPL_LANGUAGE_ID) {
       processSyntaxHighlighting(model);
     }
   };
 
-  const removeModelHandlers = (model: monaco.editor.IModel) => {
-    const disposables = modelHandlers.get(model);
-    if (disposables) {
-      disposables.forEach((d) => d.dispose());
-      modelHandlers.delete(model);
-    }
-  };
+  // Listen for new models
+  disposables.push(monaco.editor.onDidCreateModel(handleModel));
 
-  const onModelAdd = (model: monaco.editor.IModel) => {
-    addModelHandlers(model);
-  };
-
-  const onModelRemove = (model: monaco.editor.IModel) => {
-    removeModelHandlers(model);
-    // Clear any PPL markers when model is removed
-    monaco.editor.setModelMarkers(model, OWNER, []);
-  };
-
-  // Handle newly created models
-  allDisposables.push(monaco.editor.onDidCreateModel(onModelAdd));
-
-  // Handle model disposal
-  allDisposables.push(monaco.editor.onWillDisposeModel(onModelRemove));
+  // Listen for model disposal to clear markers
+  disposables.push(
+    monaco.editor.onWillDisposeModel((model) => {
+      monaco.editor.setModelMarkers(model, OWNER, []);
+    })
+  );
 
   // Handle existing models
-  const existingModels = monaco.editor.getModels();
-  existingModels.forEach(onModelAdd);
+  monaco.editor.getModels().forEach(handleModel);
 
+  // Return cleanup function
   return () => {
-    // Clean up all model handlers
-    modelHandlers.forEach((disposables, model) => {
-      disposables.forEach((d) => d.dispose());
-      monaco.editor.setModelMarkers(model, OWNER, []);
-    });
-    modelHandlers.clear();
-
-    // Clean up global disposables
-    allDisposables.forEach((d) => d.dispose());
+    disposables.forEach((d) => d.dispose());
     pplWorkerProxyService.stop();
   };
 };
@@ -273,6 +259,9 @@ export const registerPPLLanguage = () => {
 
   // Set up synchronous tokenization
   setupPPLTokenization();
+
+  // Set up PPL formatter
+  setupPPLFormatter();
 
   // Set up syntax highlighting with worker
   const disposeSyntaxHighlighting = setupPPLSyntaxHighlighting();

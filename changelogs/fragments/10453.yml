@@ -1,0 +1,2 @@
+test:
+- Add Cypress Test for Enter key behaviour in Query Editor ([#10453](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10453))

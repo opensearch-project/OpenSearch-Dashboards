@@ -103,6 +103,8 @@ export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase 
   suggestSourcesOrTables?: SourceOrTableSuggestion;
   suggestRenameAs?: boolean;
   suggestFieldsInAggregateFunction?: boolean;
+  isInBackQuote?: boolean;
+  isInQuote?: boolean;
 }
 
 export enum TableOrViewSuggestion {

@@ -4,17 +4,17 @@
  */
 
 import type { Encoding } from 'vega-lite/build/src/encoding';
-import { LabelAggregationType, ColorSchemas, CompleteAxisWithStyle } from '../types';
+import { AggregationType, ColorSchemas, VisColumn } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { generateColorBySchema } from '../utils/utils';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
-export const createlabelLayer = (
+export const createLabelLayer = (
   styles: Partial<HeatmapChartStyleControls>,
   isRegular: boolean,
   colorField: string,
-  xAxis?: CompleteAxisWithStyle,
-  yAxis?: CompleteAxisWithStyle
+  xAxis?: VisColumn,
+  yAxis?: VisColumn
 ) => {
   if (!styles.exclusive?.label?.show) {
     return null;
@@ -29,7 +29,7 @@ export const createlabelLayer = (
 
   if (
     !isRegular &&
-    styles.exclusive?.label.type !== LabelAggregationType.NONE &&
+    styles.exclusive?.label.type !== AggregationType.NONE &&
     styles.exclusive?.label.type
   ) {
     textEncoding.aggregate = styles.exclusive?.label.type;

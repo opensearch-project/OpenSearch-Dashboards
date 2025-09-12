@@ -16,6 +16,7 @@ export const CHART_METADATA: Record<ChartType, ChartMetadata> = {
   metric: { type: 'metric', name: 'Metric', icon: 'visMetric' },
   scatter: { type: 'scatter', name: 'Scatter', icon: '' },
   table: { type: 'table', name: 'Table', icon: 'visTable' },
+  gauge: { type: 'gauge', name: 'Gauge', icon: 'visGauge' },
 };
 
 // Map both OSD_FIELD_TYPES and OPENSEARCH_FIELD_TYPES to VisFieldType
@@ -59,3 +60,5 @@ export const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [PPL_FIELD_TYPES.STRUCT]: VisFieldType.Unknown,
   [PPL_FIELD_TYPES.ARRAY]: VisFieldType.Unknown,
 };
+
+export const DEFAULT_OPACITY = 0.87;

@@ -25,6 +25,7 @@ export const getTopNavLinks = (
     tabState: TabState;
     flavorId: string | null;
     tabDefinition: TabDefinition | undefined;
+    activeTabId: string;
   },
   clearEditors: ReturnType<typeof useClearEditors>,
   savedExplore?: SavedExplore

@@ -31,6 +31,49 @@ import {
 } from './constants';
 import { Documentation } from './ppl_documentation';
 
+// Centralized function to generate appropriate insertion text based on context
+function getInsertText(
+  text: string,
+  type: 'field' | 'value' | 'keyword' | 'function' | 'table',
+  plainInsert: boolean = false,
+  options: {
+    needsBackticks?: boolean;
+    isStringValue?: boolean;
+    hasOptionalParam?: boolean;
+    isSnippet?: boolean;
+  } = {}
+): string {
+  const {
+    needsBackticks = false,
+    isStringValue = false,
+    hasOptionalParam = false,
+    isSnippet = false,
+  } = options;
+
+  if (plainInsert) {
+    return text;
+  } else {
+    // Normal behavior when not in quotes
+    switch (type) {
+      case 'field':
+        return needsBackticks ? `\`${text}\` ` : `${text} `;
+      case 'value':
+        return isStringValue ? `"${text}" ` : `${text} `;
+      case 'keyword':
+        return `${text} `;
+      case 'function':
+        if (isSnippet) {
+          return hasOptionalParam ? `${text}() $0` : `${text}($0)`;
+        }
+        return `${text}()`;
+      case 'table':
+        return `${text} `;
+      default:
+        return `${text} `;
+    }
+  }
+}
+
 export const getDefaultSuggestions = async ({
   selectionStart,
   selectionEnd,
@@ -62,7 +105,7 @@ export const getDefaultSuggestions = async ({
             indexPattern.title,
             suggestions.suggestValuesForColumn,
             services,
-            indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn),
+            indexPattern,
             datasetType
           ).catch(() => []),
           (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
@@ -138,8 +181,10 @@ export const getSimplifiedPPLSuggestions = async ({
       column: column || selectionEnd,
     });
     const finalSuggestions: QuerySuggestion[] = [];
+    const isInQuotes = suggestions.isInQuote || false;
+    const isInBackQuote = suggestions.isInBackQuote || false;
 
-    if (suggestions.suggestColumns) {
+    if (suggestions.suggestColumns && (isInBackQuote || !isInQuotes)) {
       const initialFields = indexPattern.fields;
 
       // Get available fields from symbol table based on current query context
@@ -154,7 +199,13 @@ export const getSimplifiedPPLSuggestions = async ({
       finalSuggestions.push(
         ...formatAvailableFieldsToSuggestions(
           availableFields,
-          (f: string) => (suggestions.suggestFieldsInAggregateFunction ? `${f}` : `${f} `),
+          (f: string) => {
+            if (suggestions.suggestFieldsInAggregateFunction) {
+              return getInsertText(f, 'field', true);
+            }
+            const needsBackticks = f.includes('.') || f.includes('@');
+            return getInsertText(f, 'field', isInBackQuote, { needsBackticks });
+          },
           (f: string) => {
             return f.startsWith('_') ? `99` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
           }
@@ -162,17 +213,20 @@ export const getSimplifiedPPLSuggestions = async ({
       );
     }
 
-    if (suggestions.suggestValuesForColumn) {
+    if (suggestions.suggestValuesForColumn && (isInQuotes || !isInBackQuote)) {
       finalSuggestions.push(
         ...formatValuesToSuggestions(
           await fetchColumnValues(
             indexPattern.title,
             suggestions.suggestValuesForColumn,
             services,
-            indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn),
+            indexPattern,
             datasetType
           ).catch(() => []),
-          (val: any) => (typeof val === 'string' ? `"${val}" ` : `${val} `)
+          (val: any) => {
+            const isStringValue = typeof val === 'string';
+            return getInsertText(val?.toString() || '', 'value', isInQuotes, { isStringValue });
+          }
         )
       );
     }
@@ -182,7 +236,10 @@ export const getSimplifiedPPLSuggestions = async ({
         ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Module,
-          insertText: prop?.optionalParam ? `${af}() $0` : `${af}($0)`,
+          insertText: getInsertText(af, 'function', isInQuotes, {
+            hasOptionalParam: prop?.optionalParam,
+            isSnippet: true,
+          }),
           insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
           sortText: '67',
           detail: SuggestionItemDetailsTags.AggregateFunction,
@@ -194,7 +251,7 @@ export const getSimplifiedPPLSuggestions = async ({
       finalSuggestions.push({
         text: indexPattern.title,
         type: monaco.languages.CompletionItemKind.Struct,
-        insertText: `${indexPattern.title} `,
+        insertText: getInsertText(indexPattern.title, 'table', isInQuotes),
         detail: SuggestionItemDetailsTags.Table,
       });
     }
@@ -202,7 +259,7 @@ export const getSimplifiedPPLSuggestions = async ({
     if (suggestions.suggestRenameAs) {
       finalSuggestions.push({
         text: 'as',
-        insertText: 'as ',
+        insertText: getInsertText('as', 'keyword', isInQuotes),
         type: monaco.languages.CompletionItemKind.Keyword,
         detail: SuggestionItemDetailsTags.Keyword,
       });
@@ -215,15 +272,16 @@ export const getSimplifiedPPLSuggestions = async ({
         ...literalKeywords.map((sk) => {
           const keywordDetails = PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
           if (keywordDetails && keywordDetails.isFunction) {
-            const functionName = sk.value.toLowerCase();
+            const functionName = sk.value;
             return {
               text: `${functionName}()`,
               type:
                 KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
                 monaco.languages.CompletionItemKind.Function,
-              insertText: keywordDetails?.optionalParam
-                ? `${functionName}() $0`
-                : `${functionName}($0)`,
+              insertText: getInsertText(functionName, 'function', isInQuotes, {
+                hasOptionalParam: keywordDetails?.optionalParam,
+                isSnippet: true,
+              }),
               insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
               detail: keywordDetails.type,
               sortText: keywordDetails.importance,
@@ -231,24 +289,23 @@ export const getSimplifiedPPLSuggestions = async ({
             };
           } else if (keywordDetails && !keywordDetails.isFunction) {
             return {
-              text: sk.value.toLowerCase(),
+              text: sk.value,
               type:
                 KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
                 monaco.languages.CompletionItemKind.Keyword,
-              insertText: `${sk.value.toLowerCase()} `,
+              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
               detail: keywordDetails.type,
               sortText: keywordDetails.importance,
               documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           } else {
             return {
-              text: sk.value.toLowerCase(),
-              insertText: `${sk.value.toLowerCase()} `,
+              text: sk.value,
+              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
               type: monaco.languages.CompletionItemKind.Keyword,
               detail: SuggestionItemDetailsTags.Keyword,
               // sortText is the only option to sort suggestions, compares strings
-              sortText:
-                PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value.toLowerCase(), // '98' used to devalue every other suggestion
+              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value, // '98' used to devalue every other suggestion
               documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           }

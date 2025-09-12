@@ -16,6 +16,7 @@ import { ExploreServices } from '../../../types';
 import { BarChartStyleControls } from '../bar/bar_vis_config';
 import { UpdateVisualizationProps } from '../visualization_container';
 import { TableChartStyleControls } from '../table/table_vis_config';
+import { GaugeChartStyleControls } from '../gauge/gauge_vis_config';
 
 export type ChartType =
   | 'line'
@@ -25,7 +26,8 @@ export type ChartType =
   | 'scatter'
   | 'bar'
   | 'area'
-  | 'table';
+  | 'table'
+  | 'gauge';
 
 export interface ChartStyleControlMap {
   line: LineChartStyleControls;
@@ -36,14 +38,12 @@ export interface ChartStyleControlMap {
   bar: BarChartStyleControls;
   area: AreaChartStyleControls;
   table: TableChartStyleControls;
-  // NOTE: Log table does not have style controls.
-  // log is one of chart types?
-  // logs: {};
+  gauge: GaugeChartStyleControls;
 }
 
 export type StyleOptions = ChartStyleControlMap[ChartType];
 
-export type AllChartStyleControls =
+type AllChartStyleControls =
   | LineChartStyleControls
   | PieChartStyleControls
   | BarChartStyleControls
@@ -51,7 +51,8 @@ export type AllChartStyleControls =
   | HeatmapChartStyleControls
   | ScatterChartStyleControls
   | AreaChartStyleControls
-  | TableChartStyleControls;
+  | TableChartStyleControls
+  | GaugeChartStyleControls;
 
 export interface StyleControlsProps<T extends AllChartStyleControls> {
   styleOptions: T;
@@ -65,9 +66,7 @@ export interface StyleControlsProps<T extends AllChartStyleControls> {
   updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
-export interface ChartTypePossibleMapping {
-  mapping: Array<Partial<Record<AxisRole, { type: VisFieldType; index: number }>>>;
-}
+type ChartTypePossibleMapping = Partial<Record<AxisRole, { type: VisFieldType; index: number }>>;
 
 export interface VisualizationType<T extends ChartType> {
   readonly name: string;

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isEqual } from 'lodash';
 import { createLineConfig } from './line/line_vis_config';
 import { createHeatmapConfig } from './heatmap/heatmap_vis_config';
 import { createScatterConfig } from './scatter/scatter_vis_config';
@@ -13,6 +12,7 @@ import { createAreaConfig } from './area/area_vis_config';
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import {
   AxisColumnMappings,
+  AxisRole,
   ChartMetadata,
   ChartTypeMapping,
   VisColumn,
@@ -20,9 +20,10 @@ import {
   VisualizationRule,
 } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
-import { getColumnMatchFromMapping } from './visualization_container_utils';
 import { createTableConfig } from './table/table_vis_config';
 import { ChartType } from './utils/use_visualization_types';
+import { getColumnsByAxesMapping } from './visualization_builder_utils';
+import { createGaugeConfig } from './gauge/gauge_vis_config';
 
 /**
  * Registry for visualization rules and configurations.
@@ -35,52 +36,6 @@ export class VisualizationRegistry {
     this.rules = [...initialRules];
   }
 
-  /**
-   * Get the matching visualization type based on the columns.
-   * Currently every time this is called, it will browse all rules and find the best match.
-   */
-  getVisualizationType(columns: VisColumn[]) {
-    const numericalColumns = columns.filter((column) => column.schema === VisFieldType.Numerical);
-    const categoricalColumns = columns.filter(
-      (column) => column.schema === VisFieldType.Categorical
-    );
-    const dateColumns = columns.filter((column) => column.schema === VisFieldType.Date);
-
-    const bestMatch = this.findBestMatch(numericalColumns, categoricalColumns, dateColumns);
-
-    if (bestMatch) {
-      const mappingObj = this.getDefaultAxesMapping(
-        bestMatch.rule,
-        bestMatch.chartType.type,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns
-      );
-      return {
-        visualizationType: this.getVisualizationConfig(bestMatch.chartType.type),
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        ruleId: bestMatch.rule.id,
-        availableChartTypes: bestMatch.rule.chartTypes,
-        toExpression: bestMatch.rule.toExpression,
-        axisColumnMappings: mappingObj,
-      };
-    }
-
-    // Render empty state for the user to manually select the columns
-    return {
-      visualizationType: undefined,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      ruleId: undefined,
-      availableChartTypes: [],
-      toExpression: undefined,
-      axisColumnMappings: {},
-    };
-  }
-
   getDefaultAxesMapping(
     rule: VisualizationRule,
     chartTypeName: string,
@@ -88,31 +43,41 @@ export class VisualizationRegistry {
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
   ) {
-    const findColumns = (type: VisFieldType) => {
-      switch (type) {
-        case VisFieldType.Numerical:
-          return numericalColumns;
-        case VisFieldType.Categorical:
-          return categoricalColumns;
-        case VisFieldType.Date:
-          return dateColumns;
-        default:
-          return [];
-      }
-    };
+    const availableMappings =
+      this.getVisualizationConfig(chartTypeName)?.ui.availableMappings ?? [];
 
-    const possibleMapping = this.getVisualizationConfig(chartTypeName)?.ui.availableMappings;
-    const currentlyDisplayedMapping = possibleMapping?.find(({ mapping }) =>
-      isEqual(getColumnMatchFromMapping(mapping), rule.matchIndex)
-    );
-    return currentlyDisplayedMapping
-      ? (Object.fromEntries(
-          Object.entries(currentlyDisplayedMapping!.mapping[0]).map(([role, config]) => [
-            role,
-            config && findColumns(config.type)[config.index],
-          ])
-        ) as AxisColumnMappings)
-      : {};
+    for (const mapping of availableMappings) {
+      const mappedNumericalColumns: VisColumn[] = [];
+      const mappedCategoricalColumns: VisColumn[] = [];
+      const mappedDateColumns: VisColumn[] = [];
+      const axesColumnMapping: AxisColumnMappings = {};
+      Object.entries(mapping).forEach(([role, value]) => {
+        if (value.type === VisFieldType.Numerical && numericalColumns[value.index]) {
+          mappedNumericalColumns.push(numericalColumns[value.index]);
+          axesColumnMapping[role as AxisRole] = numericalColumns[value.index];
+        }
+        if (value.type === VisFieldType.Categorical && categoricalColumns[value.index]) {
+          mappedCategoricalColumns.push(categoricalColumns[value.index]);
+          axesColumnMapping[role as AxisRole] = categoricalColumns[value.index];
+        }
+        if (value.type === VisFieldType.Date && dateColumns[value.index]) {
+          mappedDateColumns.push(dateColumns[value.index]);
+          axesColumnMapping[role as AxisRole] = dateColumns[value.index];
+        }
+      });
+      const ruleMatchType = rule.matches(
+        mappedNumericalColumns,
+        mappedCategoricalColumns,
+        mappedDateColumns
+      );
+      if (
+        ruleMatchType === 'EXACT_MATCH' &&
+        Object.keys(axesColumnMapping).length === Object.keys(mapping).length
+      ) {
+        return axesColumnMapping;
+      }
+    }
+    return {};
   }
 
   /**
@@ -134,6 +99,18 @@ export class VisualizationRegistry {
     return availableChartTypes;
   }
 
+  public findRuleByAxesMapping(
+    axesMapping: Partial<Record<string, string>>,
+    allColumns: VisColumn[]
+  ) {
+    const { numericalColumns, categoricalColumns, dateColumns } = getColumnsByAxesMapping(
+      axesMapping,
+      allColumns
+    );
+    const bestMatch = this.findBestMatch(numericalColumns, categoricalColumns, dateColumns);
+    return bestMatch?.rule;
+  }
+
   /**
    * Find the best matching rule and visualization type based on priorities.
    */
@@ -147,14 +124,14 @@ export class VisualizationRegistry {
     let highestPriority = -1;
 
     for (const rule of this.rules) {
-      if (rule.matches(numericalColumns, categoricalColumns, dateColumns)) {
+      if (rule.matches(numericalColumns, categoricalColumns, dateColumns) === 'EXACT_MATCH') {
         // If the rule has a dynamic chart types function, we would handle it here
         // This is a placeholder for future functionality
 
         // Get the highest priority chart type from this rule
         const topChartType = chartType
           ? rule.chartTypes.find((t) => t.type === chartType)
-          : rule.chartTypes[0];
+          : rule.chartTypes[0]; // TODO: we cannot assume rule.chartTypes[0] is the highest priority chart type of this rule
 
         if (topChartType && topChartType.priority > highestPriority) {
           highestPriority = topChartType.priority;
@@ -187,7 +164,8 @@ export class VisualizationRegistry {
         return createAreaConfig();
       case 'table':
         return createTableConfig();
-      // TODO: Add other chart types' configs here
+      case 'gauge':
+        return createGaugeConfig();
       default:
         return;
     }
@@ -227,4 +205,5 @@ export class VisualizationRegistry {
 
 // Note: This singleton instance is kept for backward compatibility.
 // New code should use the VisualizationRegistryService instead.
+// TODO: refactor existing visualizationRegistry to use VisualizationRegistryService
 export const visualizationRegistry = new VisualizationRegistry();

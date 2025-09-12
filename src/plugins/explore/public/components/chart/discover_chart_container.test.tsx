@@ -14,6 +14,12 @@ import {
   queryReducer,
   resultsReducer,
 } from '../../application/utils/state_management/slices';
+import { ExploreFlavor } from '../../../common';
+import { useFlavorId } from '../../helpers/use_flavor_id';
+import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
+
+const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
+const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 
 // Mock the hooks and components
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
@@ -50,10 +56,30 @@ jest.mock('../../application/context/dataset_context/dataset_context', () => ({
   })),
 }));
 
-jest.mock('./chart', () => ({
-  DiscoverChart: ({ chartData }: { chartData: any }) => (
-    <div data-test-subj="discover-chart">Chart with data: {chartData ? 'present' : 'absent'}</div>
+jest.mock('./explore_logs_chart', () => ({
+  ExploreLogsChart: ({ chartData }: { chartData: any }) => (
+    <div data-test-subj="explore-logs-chart">
+      Logs Chart with data: {chartData ? 'present' : 'absent'}
+    </div>
   ),
+}));
+
+jest.mock('./explore_traces_chart', () => ({
+  ExploreTracesChart: ({ requestChartData }: { requestChartData: any }) => (
+    <div data-test-subj="explore-traces-chart">
+      Traces Chart with data: {requestChartData ? 'present' : 'absent'}
+    </div>
+  ),
+}));
+
+jest.mock('../panel/canvas_panel', () => ({
+  CanvasPanel: ({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj="canvas-panel">{children}</div>
+  ),
+}));
+
+jest.mock('../../helpers/use_flavor_id', () => ({
+  useFlavorId: jest.fn(() => 'logs'),
 }));
 
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
@@ -64,6 +90,19 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
   })),
   defaultPrepareQueryString: jest.fn(() => 'test-cache-key'),
 }));
+
+jest.mock(
+  '../../application/utils/state_management/actions/processors/trace_chart_data_processor',
+  () => ({
+    tracesHistogramResultsProcessor: jest.fn(() => ({
+      requestChartData: { values: [], xAxisOrderedValues: [] },
+      errorChartData: { values: [], xAxisOrderedValues: [] },
+      latencyChartData: { values: [], xAxisOrderedValues: [] },
+      bucketInterval: { scale: false, description: '1h' },
+      hits: { total: 10 },
+    })),
+  })
+);
 
 describe('DiscoverChartContainer', () => {
   const createMockStore = (hasResults = true) => {
@@ -113,7 +152,8 @@ describe('DiscoverChartContainer', () => {
     });
   };
 
-  const renderComponent = (hasResults = true) => {
+  const renderComponent = (hasResults = true, flavorId = ExploreFlavor.Logs) => {
+    mockUseFlavorId.mockReturnValue(flavorId);
     const store = createMockStore(hasResults);
     return render(
       <Provider store={store}>
@@ -122,13 +162,73 @@ describe('DiscoverChartContainer', () => {
     );
   };
 
-  it('renders chart when data is available and dataset is time-based', () => {
-    renderComponent(true);
-    expect(screen.getByTestId('discover-chart')).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders logs chart when flavor is logs and data is available', () => {
+    renderComponent(true, ExploreFlavor.Logs);
+    expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
+    expect(screen.queryByTestId('explore-traces-chart')).not.toBeInTheDocument();
+  });
+
+  it('renders traces chart when flavor is traces and data is available', () => {
+    renderComponent(true, ExploreFlavor.Traces);
+    expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('explore-traces-chart')).toBeInTheDocument();
+    expect(screen.queryByTestId('explore-logs-chart')).not.toBeInTheDocument();
   });
 
   it('returns null when no results are available', () => {
-    renderComponent(false);
-    expect(screen.queryByTestId('discover-chart')).not.toBeInTheDocument();
+    const { container } = renderComponent(false);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('returns null when dataset is not time-based', () => {
+    // Mock dataset context to return non-time-based dataset
+    mockUseDatasetContext.mockReturnValue({
+      dataset: {
+        isTimeBased: jest.fn(() => false),
+        timeFieldName: undefined,
+      } as any,
+      isLoading: false,
+      error: null,
+    } as any);
+
+    const { container } = renderComponent(true);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('returns null when logs flavor has no chart data', () => {
+    // Mock histogramResultsProcessor to return null chartData
+    const { histogramResultsProcessor } = jest.requireMock(
+      '../../application/utils/state_management/actions/query_actions'
+    );
+    histogramResultsProcessor.mockReturnValueOnce({
+      chartData: null,
+      bucketInterval: { scale: false, description: '1h' },
+      hits: { total: 10 },
+    });
+
+    const { container } = renderComponent(true, ExploreFlavor.Logs);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('returns null when traces flavor has no request chart data', () => {
+    // Mock tracesHistogramResultsProcessor to return null requestChartData
+    const { tracesHistogramResultsProcessor } = jest.requireMock(
+      '../../application/utils/state_management/actions/processors/trace_chart_data_processor'
+    );
+    tracesHistogramResultsProcessor.mockReturnValueOnce({
+      requestChartData: null,
+      errorChartData: { values: [], xAxisOrderedValues: [] },
+      latencyChartData: { values: [], xAxisOrderedValues: [] },
+      bucketInterval: { scale: false, description: '1h' },
+      hits: { total: 10 },
+    });
+
+    const { container } = renderComponent(true, ExploreFlavor.Traces);
+    expect(container.firstChild).toBeNull();
   });
 });

@@ -15,6 +15,9 @@ import {
   AxisRole,
   StandardAxes,
   TitleOptions,
+  AggregationType,
+  BucketOptions,
+  TimeUnit,
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 
@@ -22,6 +25,7 @@ export interface BarChartStyleControls {
   // Basic controls
   addLegend: boolean;
   legendPosition: Positions;
+  legendShape?: 'circle' | 'square';
   tooltipOptions: TooltipOptions;
 
   // Bar specific controls
@@ -40,6 +44,9 @@ export interface BarChartStyleControls {
   switchAxes: boolean;
 
   titleOptions: TitleOptions;
+
+  // histogram bucket config
+  bucket?: BucketOptions;
 }
 
 export const defaultBarChartStyles: BarChartStyleControls = {
@@ -107,7 +114,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         text: '',
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       axisRole: AxisRole.Y,
     },
@@ -115,6 +122,10 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   titleOptions: {
     show: false,
     titleName: '',
+  },
+  bucket: {
+    aggregationType: AggregationType.SUM,
+    bucketTimeUnit: TimeUnit.AUTO,
   },
 };
 
@@ -129,73 +140,59 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
     },
     availableMappings: [
       {
-        mapping: [
-          // TODO the first one should be default?
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-          },
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
-          },
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
-          },
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
       },
     ],
   },

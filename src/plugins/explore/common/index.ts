@@ -16,7 +16,11 @@ export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
 export const CONTEXT_STEP_SETTING = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
+export const DEFAULT_TRACE_COLUMNS_SETTING = 'explore:defaultTraceColumns';
 export const EXPLORE_DEFAULT_LANGUAGE = 'PPL';
+export const EXPLORE_LOGS_TAB_ID = 'logs';
+export const EXPLORE_PATTERNS_TAB_ID = 'explore_patterns_tab';
+export const EXPLORE_VISUALIZATION_TAB_ID = 'explore_visualization_tab';
 
 export enum ExploreFlavor {
   Logs = 'logs',

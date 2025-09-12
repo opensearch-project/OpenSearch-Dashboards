@@ -11,7 +11,8 @@ import {
   applyAxisStyling,
   ValueAxisPosition,
 } from './line_chart_utils';
-import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
+import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
+import { getTooltipFormat } from '../utils/utils';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -70,7 +71,12 @@ export const createSimpleLineChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: metricField, type: 'quantitative', title: metricName },
         ],
       }),
@@ -171,7 +177,12 @@ export const createLineBarChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: metric1Field, type: 'quantitative', title: metric1Name },
         ],
       }),
@@ -217,7 +228,12 @@ export const createLineBarChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: metric2Field, type: 'quantitative', title: metric2Name },
         ],
       }),
@@ -324,7 +340,12 @@ export const createMultiLineChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: metricField, type: 'quantitative', title: metricName },
           { field: categoryField, type: 'nominal', title: categoryName },
         ],
@@ -448,7 +469,12 @@ export const createFacetedMultiLineChart = (
             },
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [
-                { field: dateField, type: 'temporal', title: dateName },
+                {
+                  field: dateField,
+                  type: 'temporal',
+                  title: dateName,
+                  format: getTooltipFormat(transformedData, dateField),
+                },
                 { field: metricField, type: 'quantitative', title: metricName },
                 { field: category1Field, type: 'nominal', title: category1Name },
               ],

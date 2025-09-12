@@ -139,6 +139,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -250,6 +251,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -881,6 +883,12 @@ exports[`Dashboard top nav render in embed mode 1`] = `
             "injectedMetadata": Object {
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
+            },
+            "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
+              "register": [MockFunction],
+              "unregister": [MockFunction],
+              "useKeyboardShortcut": [MockFunction],
             },
             "navigation": Object {
               "ui": Object {
@@ -1290,6 +1298,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -1401,6 +1410,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -2032,6 +2042,12 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
             "injectedMetadata": Object {
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
+            },
+            "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
+              "register": [MockFunction],
+              "unregister": [MockFunction],
+              "useKeyboardShortcut": [MockFunction],
             },
             "navigation": Object {
               "ui": Object {
@@ -2441,6 +2457,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -2552,6 +2569,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -3183,6 +3201,12 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
             "injectedMetadata": Object {
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
+            },
+            "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
+              "register": [MockFunction],
+              "unregister": [MockFunction],
+              "useKeyboardShortcut": [MockFunction],
             },
             "navigation": Object {
               "ui": Object {
@@ -3592,6 +3616,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -3703,6 +3728,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -4334,6 +4360,12 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
             "injectedMetadata": Object {
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
+            },
+            "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
+              "register": [MockFunction],
+              "unregister": [MockFunction],
+              "useKeyboardShortcut": [MockFunction],
             },
             "navigation": Object {
               "ui": Object {
@@ -4743,6 +4775,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -4854,6 +4887,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -5485,6 +5519,12 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
             "injectedMetadata": Object {
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
+            },
+            "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
+              "register": [MockFunction],
+              "unregister": [MockFunction],
+              "useKeyboardShortcut": [MockFunction],
             },
             "navigation": Object {
               "ui": Object {
@@ -5894,6 +5934,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getBreadcrumbs$": [MockFunction],
               "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
+              "getGlobalBanner$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -6005,6 +6046,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "setBreadcrumbs": [MockFunction],
               "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
+              "setGlobalBanner": [MockFunction],
               "setHeaderVariant": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -6636,6 +6678,12 @@ exports[`Dashboard top nav render with all components 1`] = `
             "injectedMetadata": Object {
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
+            },
+            "keyboardShortcut": Object {
+              "getAllShortcuts": [MockFunction],
+              "register": [MockFunction],
+              "unregister": [MockFunction],
+              "useKeyboardShortcut": [MockFunction],
             },
             "navigation": Object {
               "ui": Object {

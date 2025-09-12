@@ -60,7 +60,6 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <LegendOptionsPanel
-              shouldShowLegend={true}
               legendOptions={{
                 show: styleOptions.addLegend,
                 position: styleOptions.legendPosition,

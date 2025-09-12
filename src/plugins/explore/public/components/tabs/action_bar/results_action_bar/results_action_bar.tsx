@@ -38,6 +38,7 @@ export const DiscoverResultsActionBar = ({
 }: DiscoverResultsActionBarProps) => {
   const currentTab = useSelector(selectActiveTabId);
   const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
+  const shouldShowExportButton = currentTab !== 'explore_patterns_tab';
   const showTabSpecificSettings = currentTab === 'explore_patterns_tab';
 
   return (
@@ -53,7 +54,7 @@ export const DiscoverResultsActionBar = ({
           alignItems="center"
           direction="row"
           gutterSize="none"
-          justifyContent="flexStart"
+          justifyContent="spaceBetween"
         >
           <EuiFlexItem grow={false}>
             <HitsCounter
@@ -76,28 +77,35 @@ export const DiscoverResultsActionBar = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem> */}
-          {dataset && rows?.length ? (
-            <>
-              <EuiFlexItem
-                grow={false}
-                className="explore-results-action-bar__explore-download-csv-flex-item"
+          <EuiFlexItem grow={false}>
+            {dataset && rows?.length ? (
+              <EuiFlexGroup
+                alignItems="center"
+                direction="row"
+                gutterSize="none"
+                justifyContent="flexStart"
               >
-                <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
-              </EuiFlexItem>
-
-              {showTabSpecificSettings && (
-                <EuiFlexItem grow={false}>
-                  <PatternsSettingsPopoverButton />
-                </EuiFlexItem>
-              )}
-
-              {shouldShowAddToDashboardButton && (
-                <EuiFlexItem grow={false}>
-                  <SaveAndAddButtonWithModal dataset={dataset} />
-                </EuiFlexItem>
-              )}
-            </>
-          ) : null}
+                {showTabSpecificSettings && (
+                  <EuiFlexItem grow={false}>
+                    <PatternsSettingsPopoverButton />
+                  </EuiFlexItem>
+                )}
+                {shouldShowExportButton && (
+                  <EuiFlexItem
+                    grow={false}
+                    className="explore-results-action-bar__explore-download-csv-flex-item"
+                  >
+                    <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
+                  </EuiFlexItem>
+                )}
+                {shouldShowAddToDashboardButton && (
+                  <EuiFlexItem grow={false}>
+                    <SaveAndAddButtonWithModal dataset={dataset} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            ) : null}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

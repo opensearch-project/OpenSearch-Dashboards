@@ -40,7 +40,7 @@ export const defaultPieChartStyles: PieChartStyleControls = {
   },
   exclusive: {
     donut: true,
-    showValues: true,
+    showValues: false,
     showLabels: false,
     truncate: 100,
   },
@@ -60,12 +60,8 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
     },
     availableMappings: [
       {
-        mapping: [
-          {
-            [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-          },
-        ],
+        [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
       },
     ],
   },

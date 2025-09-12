@@ -16,10 +16,9 @@ import { isEmpty, isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
-import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
-import { getColumnMatchFromMapping } from '../../visualization_container_utils';
+import { getColumnMatchFromMapping } from '../../visualization_builder_utils';
 
 interface VisColumnOption {
   column: VisColumn;
@@ -59,6 +58,9 @@ const AXIS_SELECT_LABEL = {
   [AxisRole.Value]: i18n.translate('explore.visualize.axisSelectLabelValue', {
     defaultMessage: 'Value',
   }),
+  [AxisRole.Time]: i18n.translate('explore.visualize.axisSelectLabelTime', {
+    defaultMessage: 'Time',
+  }),
 };
 
 export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
@@ -94,8 +96,9 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     }
   }, [currentMapping]);
 
-  const possibleMapping = useMemo(
-    () => visualizationRegistry.getVisualizationConfig(chartType)?.ui.availableMappings!,
+  // All axis mappings of the selected chart type
+  const allMappings = useMemo(
+    () => visualizationRegistry.getVisualizationConfig(chartType)?.ui.availableMappings,
     [chartType, visualizationRegistry]
   );
 
@@ -104,25 +107,19 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     [numericalColumns.length, categoricalColumns.length, dateColumns.length]
   );
 
-  // Filter out those mapping (combination of axes selection) that cannot be satisify
-  // by the combination of fields from the query
-  const availableMappingsFromQuery = useMemo(
-    () =>
-      possibleMapping
-        .filter((obj) => {
-          const [ruleNum, ruleCat, ruleDate] = getColumnMatchFromMapping(obj.mapping);
-          const [currNum, currCat, currDate] = columnsCount;
-          return ruleNum <= currNum && ruleCat <= currCat && ruleDate <= currDate;
-        })
-        .flatMap((selection) => selection.mapping),
-    [columnsCount, possibleMapping]
-  );
+  // Filter available chart mappings based on the data's column types
+  // This ensures we only show mappings that are compatible with the current dataset structure
+  const availableMappings = useMemo(() => {
+    if (!allMappings) {
+      return [];
+    }
 
-  // All available axes to be selected are base on current query
-  const allAxisRolesFromQuery = new Set<AxisRole>();
-  availableMappingsFromQuery.forEach((mapping) => {
-    Object.keys(mapping).forEach((role) => allAxisRolesFromQuery.add(role as AxisRole));
-  });
+    return allMappings.filter((mapping) => {
+      const [ruleNum, ruleCat, ruleDate] = getColumnMatchFromMapping(mapping);
+      const [currNum, currCat, currDate] = columnsCount;
+      return ruleNum <= currNum && ruleCat <= currCat && ruleDate <= currDate;
+    });
+  }, [columnsCount, allMappings]);
 
   const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
 
@@ -135,60 +132,75 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     );
   }, [currentMapping]);
 
-  // Filter out those mapping (combination of axes selection) that no longer be satisify
-  // by the current combination of axes selection
-  const availableMappingsFromSelection = useMemo(
+  // Further filter mappings to only include those that are compatible with the user's current axis selections
+  // This ensures that as users make axis choices, we only show mappings that would work with those choices
+  const remainingMappings = useMemo(
     () =>
-      availableMappingsFromQuery.filter((mapping) => {
+      availableMappings.filter((mapping) => {
         return Object.entries(currentSelections).every(([role, selectedCol]) => {
           if (!selectedCol) return true;
-          const mappingRole = (mapping as any)[role];
+          const mappingRole = mapping[role as AxisRole];
           return mappingRole && mappingRole.type === selectedCol.schema;
         });
       }),
-    [availableMappingsFromQuery, currentSelections]
+    [availableMappings, currentSelections]
   );
 
   // Only displays axis select component base on current selection
   const allAxisRolesFromSelection = new Set<AxisRole>();
-  availableMappingsFromSelection.forEach((mapping) => {
+  remainingMappings.forEach((mapping) => {
     Object.keys(mapping).forEach((role) => allAxisRolesFromSelection.add(role as AxisRole));
   });
 
-  // The one and only one valid mapping base on current selection, will be undefined if current
-  // selection is invalid
-  const currentValidSelection = useMemo(() => {
-    const selectedCount = Object.values(currentSelections).filter(Boolean).length;
-    const mapping = availableMappingsFromSelection.find(
-      (m) => Object.keys(m).length === selectedCount
-    );
-    if (!mapping) return undefined;
-    const possibleSelection = possibleMapping.find((selection) =>
-      selection.mapping.includes(mapping as any)
-    );
-    return possibleSelection
-      ? { mapping, columnMatch: getColumnMatchFromMapping(possibleSelection.mapping) }
-      : undefined;
-  }, [availableMappingsFromSelection, currentSelections, possibleMapping]);
-
   useEffect(() => {
-    if (currentValidSelection) {
-      const ruleToUse = ALL_VISUALIZATION_RULES.find((rule) =>
-        isEqual(rule.matchIndex, currentValidSelection.columnMatch)
+    // Current selected axis mapping
+    const updatedAxes: AxisColumnMappings = {};
+    Object.entries(currentSelections).forEach(([key, value]) => {
+      if (value) {
+        updatedAxes[key as AxisRole] = value;
+      }
+    });
+
+    // Find the mapping based on current selected axis mapping, if found, then current selection is valid
+    const found = remainingMappings.find((m) => {
+      if (Object.keys(m).length === Object.keys(updatedAxes).length) {
+        return Object.keys(m).every(
+          (key) => m[key as AxisRole]?.type === updatedAxes[key as AxisRole]?.schema
+        );
+      }
+      return false;
+    });
+
+    if (found) {
+      // Find a vis rule for the current mapping
+      const ruleToUse = visualizationRegistry.findRuleByAxesMapping(
+        Object.fromEntries(
+          Object.entries(currentSelections)
+            .filter(([, value]) => !!value)
+            .map(([key, value]) => [key, value.name])
+        ),
+        [...numericalColumns, ...categoricalColumns, ...dateColumns]
       );
-
+      // If rule can be found, update visualization with the new axes mapping
+      // Limitation: the current implementation will only call updateVisualization() when the select
+      // mapping is valid and has rule mapped, which means partial selections won't trigger visualization
+      // updates until they form a complete valid mapping configuration.
+      // From the user's perspective, this means no visual feedback is provided during the selection
+      // process until a complete valid configuration is achieved, potentially leading to confusion
+      // about whether their partial selections are having any effect.
       if (ruleToUse) {
-        const updatedAxes: AxisColumnMappings = {};
-        Object.entries(currentSelections).forEach(([key, value]) => {
-          if (value) {
-            updatedAxes[key as AxisRole] = value;
-          }
-        });
-
-        updateVisualization({ rule: ruleToUse, mappings: updatedAxes });
+        updateVisualization({ mappings: updatedAxes });
       }
     }
-  }, [currentValidSelection, updateVisualization, currentSelections]);
+  }, [
+    updateVisualization,
+    currentSelections,
+    remainingMappings,
+    visualizationRegistry,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+  ]);
 
   const findColumns = useMemo(
     () => (type: VisFieldType) => {
@@ -223,33 +235,35 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     }
   };
 
-  if (availableMappingsFromQuery.length === 0) {
+  if (availableMappings.length === 0) {
     return null;
   }
 
-  const getAvailableColumnsForAxis = (axisRole: AxisRole) => {
+  const getAxisOptions = (axisRole: AxisRole) => {
     const availableTypes = new Set<VisFieldType>();
 
     // Get types from current valid mappings
-    availableMappingsFromSelection.forEach((mapping) => {
-      if ((mapping as any)[axisRole]) {
-        availableTypes.add((mapping as any)[axisRole].type);
+    remainingMappings.forEach((mapping) => {
+      const roleColumn = mapping[axisRole];
+      if (roleColumn) {
+        availableTypes.add(roleColumn.type);
       }
     });
 
     // Get types from mappings that would become available if we change this axis
-    availableMappingsFromQuery.forEach((mapping) => {
+    availableMappings.forEach((mapping) => {
       const otherSelections = Object.entries(currentSelections).filter(
         ([role]) => role !== axisRole
       );
       const isCompatible = otherSelections.every(([role, selectedCol]) => {
         if (!selectedCol) return true;
-        const mappingRole = (mapping as any)[role];
+        const mappingRole = mapping[role as AxisRole];
         return mappingRole && mappingRole.type === selectedCol.schema;
       });
 
-      if (isCompatible && (mapping as any)[axisRole]) {
-        availableTypes.add((mapping as any)[axisRole].type);
+      const roleColumn = mapping[axisRole];
+      if (isCompatible && roleColumn) {
+        availableTypes.add(roleColumn.type);
       }
     });
 
@@ -298,7 +312,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
               key={axisRole}
               axisRole={axisRole}
               selectedColumn={currentSelection?.name || ''}
-              allColumnOptions={getAvailableColumnsForAxis(axisRole)}
+              allColumnOptions={getAxisOptions(axisRole)}
               switchAxes={switchAxes}
               inputRef={(input) => (i === 0 ? (firstSelectorInput.current = input) : undefined)}
               onRemove={(role) => {

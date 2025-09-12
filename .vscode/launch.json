@@ -1,11 +1,62 @@
 {
   "version": "0.2.0",
   "configurations": [
-      {
-          "type": "pwa-node",
-          "request": "attach",
-          "name": "attach-to-service",
-          "port": 9229
-      }
+    /**
+     * Attaches a debugger to an already running OSD instance
+     */
+    {
+      "name": "Attach debugger to running Dashboards",
+      "type": "pwa-node",
+      "request": "attach",
+      "port": 9229
+    },
+    /**
+     * Starts the OSD instance only
+     */
+    {
+      "name": "Start Dashboards",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "args": ["start", "--no-base-path"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": [],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    /**
+     * Starts the OpenSearch snapshot server
+     * - Everytime this launch configuration runs, it overwrites your previous data. Thus, if you need to persist data, you can add a configuration in your VSCode workspace to run '${workspaceFolder}/.opensearch/{version}/bin/opensearch'
+     */
+    {
+      "name": "Start OpenSearch cluster snapshot",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "args": ["opensearch", "snapshot"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": [],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "openOnSessionStart"
+    }
+  ],
+  "compounds": [
+    /**
+     * This is the run configuration to startup OSD end-to-end
+     * 1. Starts up OpenSearch Snapshot server
+     * 2. Starts up Dashboards server
+     */
+    {
+      "name": "Start Dashboards with OpenSearch Cluster Snapshot",
+      "configurations": ["Start OpenSearch cluster snapshot", "Start Dashboards"],
+      // If either Dashboards or OpenSearch server is stopped, both servers will be stopped (set this to false to stop an individual server without stopping all servers)
+      "stopAll": true
+    }
   ]
 }

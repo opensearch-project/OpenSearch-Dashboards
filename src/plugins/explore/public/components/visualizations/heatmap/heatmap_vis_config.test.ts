@@ -11,7 +11,7 @@ import {
 } from './heatmap_vis_config';
 import { HeatmapVisStyleControls } from './heatmap_vis_options';
 import {
-  LabelAggregationType,
+  AggregationType,
   Positions,
   ColorSchemas,
   ScaleType,
@@ -58,7 +58,7 @@ describe('createHeatmapeConfig', () => {
       rotate: false,
       overwriteColor: false,
       color: 'black',
-      type: LabelAggregationType.SUM,
+      type: AggregationType.SUM,
     });
 
     // Verify axes
@@ -78,9 +78,9 @@ describe('createHeatmapeConfig', () => {
     expect(config.ui.availableMappings).toBeDefined();
     expect(config.ui.availableMappings).toHaveLength(1);
 
-    expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty(AxisRole.X);
-    expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty(AxisRole.Y);
-    expect(config.ui.availableMappings[0].mapping[0]).toHaveProperty(AxisRole.COLOR);
+    expect(config.ui.availableMappings[0]).toHaveProperty(AxisRole.X);
+    expect(config.ui.availableMappings[0]).toHaveProperty(AxisRole.Y);
+    expect(config.ui.availableMappings[0]).toHaveProperty(AxisRole.COLOR);
   });
 
   it('should render the HeatmapVisStyleControls component with the provided props', () => {

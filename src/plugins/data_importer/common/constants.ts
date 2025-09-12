@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const PLUGIN_NAME_AS_TITLE = 'Data Importer';
+export const PLUGIN_NAME_AS_TITLE = 'Import Data';
+export const PLUGIN_DESCRIPTION =
+  'Import data from files (CSV, JSON, NDJSON) into OpenSearch indexes.';
 export const PLUGIN_ID = 'dataImporter';
 export const PLUGIN_NAME = 'dataImporter';
 

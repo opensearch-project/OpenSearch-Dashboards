@@ -49,7 +49,7 @@ describe('area_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',
@@ -70,7 +70,7 @@ describe('area_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',
@@ -97,48 +97,28 @@ describe('area_vis_config', () => {
           },
           availableMappings: [
             {
-              mapping: [
-                {
-                  [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-                  [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-                },
-              ],
+              [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
             },
             {
-              mapping: [
-                {
-                  [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-                  [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-                  [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-                },
-              ],
+              [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
             },
             {
-              mapping: [
-                {
-                  [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-                  [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-                  [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-                  [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
-                },
-              ],
+              [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+              [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
             },
             {
-              mapping: [
-                {
-                  [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-                  [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-                },
-              ],
+              [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
             },
             {
-              mapping: [
-                {
-                  [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-                  [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-                  [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
-                },
-              ],
+              [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
             },
           ],
         },

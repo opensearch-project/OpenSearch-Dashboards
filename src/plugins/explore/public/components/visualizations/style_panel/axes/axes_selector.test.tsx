@@ -4,26 +4,15 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AxesSelectPanel, AxisSelector } from './axes_selector';
 import { AxisRole, VisColumn, VisFieldType } from '../../types';
 import { ChartType } from '../../utils/use_visualization_types';
-import configureMockStore from 'redux-mock-store';
-
-const mockStore = configureMockStore([]);
-const store = mockStore({
-  tab: {
-    visualizations: {
-      styleOptions: {
-        switchAxes: false,
-      },
-    },
-  },
-});
+import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 
 const mockVisualizationRegistry = {
   getVisualizationConfig: jest.fn(),
+  findRuleByAxesMapping: jest.fn(),
 };
 
 jest.mock('../../utils/use_visualization_types', () => ({
@@ -43,7 +32,7 @@ jest.mock('../../rule_repository', () => ({
   ],
 }));
 
-jest.mock('../../visualization_container_utils', () => {
+jest.mock('../../visualization_builder_utils', () => {
   // Import the constants directly to avoid referencing out-of-scope variables
   const X = 'x';
   const CATEGORICAL = 'categorical';
@@ -118,12 +107,8 @@ describe('AxesSelectPanel', () => {
       ui: {
         availableMappings: [
           {
-            mapping: [
-              {
-                [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-              },
-            ],
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
           },
         ],
       },
@@ -131,11 +116,7 @@ describe('AxesSelectPanel', () => {
   });
 
   it('renders without crashing', () => {
-    const { container } = render(
-      <Provider store={store}>
-        <AxesSelectPanel {...defaultProps} />
-      </Provider>
-    );
+    const { container } = render(<AxesSelectPanel {...defaultProps} />);
     expect(container).toBeInTheDocument();
   });
 
@@ -144,29 +125,17 @@ describe('AxesSelectPanel', () => {
       ui: { availableMappings: [] },
     });
 
-    const { container } = render(
-      <Provider store={store}>
-        <AxesSelectPanel {...defaultProps} />
-      </Provider>
-    );
+    const { container } = render(<AxesSelectPanel {...defaultProps} />);
     expect(container.firstChild).toBeNull();
   });
 
   it('renders Fields accordion', () => {
-    render(
-      <Provider store={store}>
-        <AxesSelectPanel {...defaultProps} />
-      </Provider>
-    );
+    render(<AxesSelectPanel {...defaultProps} />);
     expect(screen.getByText('Fields')).toBeInTheDocument();
   });
 
   it('renders axis selectors for available roles', () => {
-    render(
-      <Provider store={store}>
-        <AxesSelectPanel {...defaultProps} />
-      </Provider>
-    );
+    render(<AxesSelectPanel {...defaultProps} />);
     expect(screen.getByText('X-Axis')).toBeInTheDocument();
     expect(screen.getByText('Y-Axis')).toBeInTheDocument();
   });
@@ -179,12 +148,9 @@ describe('AxesSelectPanel', () => {
         [AxisRole.Y]: mockNumericalColumns[0],
       },
     };
+    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue(ALL_VISUALIZATION_RULES[0]);
 
-    render(
-      <Provider store={store}>
-        <AxesSelectPanel {...propsWithMapping} />
-      </Provider>
-    );
+    render(<AxesSelectPanel {...propsWithMapping} />);
 
     expect(mockUpdateVisualization).toHaveBeenCalled();
   });
@@ -197,11 +163,7 @@ describe('AxesSelectPanel', () => {
       },
     };
 
-    render(
-      <Provider store={store}>
-        <AxesSelectPanel {...propsWithMapping} />
-      </Provider>
-    );
+    render(<AxesSelectPanel {...propsWithMapping} />);
     expect(screen.getByText('category')).toBeInTheDocument();
   });
 
@@ -213,22 +175,14 @@ describe('AxesSelectPanel', () => {
       ui: {
         availableMappings: [
           {
-            mapping: [
-              {
-                [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-              },
-            ],
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
           },
         ],
       },
     });
 
-    render(
-      <Provider store={store}>
-        <AxesSelectPanel {...defaultProps} />
-      </Provider>
-    );
+    render(<AxesSelectPanel {...defaultProps} />);
 
     // X and Y axes should be available
     expect(screen.getByText('X-Axis')).toBeInTheDocument();
@@ -241,16 +195,13 @@ describe('AxesSelectPanel', () => {
       ui: {
         availableMappings: [
           {
-            mapping: [
-              {
-                [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-              },
-            ],
+            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
           },
         ],
       },
     });
+    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue(ALL_VISUALIZATION_RULES[0]);
 
     // Use props with existing mapping to ensure updateVisualization is called
     const propsWithMapping = {
@@ -261,11 +212,7 @@ describe('AxesSelectPanel', () => {
       },
     };
 
-    render(
-      <Provider store={store}>
-        <AxesSelectPanel {...propsWithMapping} />
-      </Provider>
-    );
+    render(<AxesSelectPanel {...propsWithMapping} />);
 
     // Verify that updateVisualization was called
     expect(mockUpdateVisualization).toHaveBeenCalled();
@@ -277,23 +224,15 @@ describe('AxesSelectPanel', () => {
       ui: {
         availableMappings: [
           {
-            mapping: [
-              {
-                [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-                [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-                [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-              },
-            ],
+            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
           },
         ],
       },
     });
 
-    render(
-      <Provider store={store}>
-        <AxesSelectPanel {...defaultProps} />
-      </Provider>
-    );
+    render(<AxesSelectPanel {...defaultProps} />);
 
     // Should render selectors for all three axes
     expect(screen.getByText('X-Axis')).toBeInTheDocument();
@@ -302,11 +241,7 @@ describe('AxesSelectPanel', () => {
   });
 
   it('renders comboboxes for axis selection', () => {
-    render(
-      <Provider store={store}>
-        <AxesSelectPanel {...defaultProps} />
-      </Provider>
-    );
+    render(<AxesSelectPanel {...defaultProps} />);
 
     // Check that comboboxes are rendered
     const comboBoxes = screen.getAllByRole('combobox');
@@ -350,29 +285,17 @@ describe('AxisSelector', () => {
   });
 
   it('renders axis selector with label', () => {
-    render(
-      <Provider store={store}>
-        <AxisSelector {...defaultProps} />
-      </Provider>
-    );
+    render(<AxisSelector {...defaultProps} />);
     expect(screen.getByText('X-Axis')).toBeInTheDocument();
   });
 
   it('displays selected column', () => {
-    render(
-      <Provider store={store}>
-        <AxisSelector {...defaultProps} />
-      </Provider>
-    );
+    render(<AxisSelector {...defaultProps} />);
     expect(screen.getByText('category')).toBeInTheDocument();
   });
 
   it('calls onChange when selection changes', () => {
-    render(
-      <Provider store={store}>
-        <AxisSelector {...defaultProps} />
-      </Provider>
-    );
+    render(<AxisSelector {...defaultProps} />);
 
     const clearButton = screen.getByTestId('comboBoxClearButton');
     fireEvent.click(clearButton);
@@ -381,11 +304,7 @@ describe('AxisSelector', () => {
   });
 
   it('calls onRemove when selection is cleared', () => {
-    render(
-      <Provider store={store}>
-        <AxisSelector {...defaultProps} />
-      </Provider>
-    );
+    render(<AxisSelector {...defaultProps} />);
 
     const clearButton = screen.getByTestId('comboBoxClearButton');
     fireEvent.click(clearButton);
@@ -395,37 +314,21 @@ describe('AxisSelector', () => {
 
   it('renders different axis role labels correctly', () => {
     const yAxisProps = { ...defaultProps, axisRole: AxisRole.Y };
-    const { rerender } = render(
-      <Provider store={store}>
-        <AxisSelector {...yAxisProps} />
-      </Provider>
-    );
+    const { rerender } = render(<AxisSelector {...yAxisProps} />);
     expect(screen.getByText('Y-Axis')).toBeInTheDocument();
 
     const colorAxisProps = { ...defaultProps, axisRole: AxisRole.COLOR };
-    rerender(
-      <Provider store={store}>
-        <AxisSelector {...colorAxisProps} />
-      </Provider>
-    );
+    rerender(<AxisSelector {...colorAxisProps} />);
     expect(screen.getByText('Color')).toBeInTheDocument();
 
     const facetAxisProps = { ...defaultProps, axisRole: AxisRole.FACET };
-    rerender(
-      <Provider store={store}>
-        <AxisSelector {...facetAxisProps} />
-      </Provider>
-    );
+    rerender(<AxisSelector {...facetAxisProps} />);
     expect(screen.getByText('Split Chart By')).toBeInTheDocument();
   });
 
   it('handles empty selected column', () => {
     const propsWithEmptySelection = { ...defaultProps, selectedColumn: '' };
-    render(
-      <Provider store={store}>
-        <AxisSelector {...propsWithEmptySelection} />
-      </Provider>
-    );
+    render(<AxisSelector {...propsWithEmptySelection} />);
 
     const input = screen.getByTestId('comboBoxSearchInput');
     expect(input).toHaveValue('');
@@ -469,11 +372,7 @@ describe('AxisSelector', () => {
       ],
     };
 
-    render(
-      <Provider store={store}>
-        <AxisSelector {...multipleOptionsProps} />
-      </Provider>
-    );
+    render(<AxisSelector {...multipleOptionsProps} />);
 
     // Open the combobox
     const combobox = screen.getByTestId('comboBoxSearchInput');
@@ -491,31 +390,19 @@ describe('AxisSelector', () => {
 
   it('renders with SIZE axis role', () => {
     const sizeAxisProps = { ...defaultProps, axisRole: AxisRole.SIZE };
-    render(
-      <Provider store={store}>
-        <AxisSelector {...sizeAxisProps} />
-      </Provider>
-    );
+    render(<AxisSelector {...sizeAxisProps} />);
     expect(screen.getByText('Size')).toBeInTheDocument();
   });
 
   it('renders with Y_SECOND axis role', () => {
     const secondYAxisProps = { ...defaultProps, axisRole: AxisRole.Y_SECOND };
-    render(
-      <Provider store={store}>
-        <AxisSelector {...secondYAxisProps} />
-      </Provider>
-    );
+    render(<AxisSelector {...secondYAxisProps} />);
     expect(screen.getByText('Y-Axis (2nd)')).toBeInTheDocument();
   });
 
   it('renders with Value axis role', () => {
     const valueAxisProps = { ...defaultProps, axisRole: AxisRole.Value };
-    render(
-      <Provider store={store}>
-        <AxisSelector {...valueAxisProps} />
-      </Provider>
-    );
+    render(<AxisSelector {...valueAxisProps} />);
     expect(screen.getByText('Value')).toBeInTheDocument();
   });
 });

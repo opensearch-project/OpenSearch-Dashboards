@@ -3,24 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
-import { isEmpty, isEqual } from 'lodash';
-import { debounceTime, skip } from 'rxjs/operators';
+import React from 'react';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { isEmpty } from 'lodash';
+import { debounceTime } from 'rxjs/operators';
 
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
-import {
-  convertMappingsToStrings,
-  findRuleByIndex,
-  getColumnMatchFromMapping,
-  isValidMapping,
-} from './visualization_container_utils';
+import { convertMappingsToStrings, isValidMapping } from './visualization_builder_utils';
 import { getServices } from '../../services/services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
-import { VisColumn } from './types';
 import { normalizeResultRows } from './utils/normalize_result_rows';
+import { ChartConfig, VisData } from './visualization_builder.types';
+import { ExecutionContextSearch } from '../../../../expressions/common/';
+import { VisualizationRender } from './visualization_render';
+import { ExpressionsStart } from '../../../../expressions/public';
+import { StylePanelRender } from './style_panel_render';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -28,35 +28,25 @@ interface VisState {
   axesMapping?: Record<string, string>;
 }
 
-export interface VisData {
-  transformedData: Array<Record<string, any>>;
-  dateColumns: VisColumn[];
-  numericalColumns: VisColumn[];
-  categoricalColumns: VisColumn[];
-}
-
-interface ChartConfig {
-  type: ChartType;
-  styles: StyleOptions;
+interface Options {
+  getUrlStateStorage?: () => IOsdUrlStateStorage | undefined;
+  getExpressions: () => ExpressionsStart;
 }
 
 export class VisualizationBuilder {
   private isInitialized = false;
-  private urlStateStorage?: IOsdUrlStateStorage;
+  private getUrlStateStorage: Options['getUrlStateStorage'];
+  private getExpression: Options['getExpressions'];
   private subscriptions = Array<Subscription>();
 
-  // TODO: we also store chart type in styles$, consider to refactor this to get rid of one of them
-  currentChartType$ = new BehaviorSubject<ChartType | undefined>(undefined);
-  styles$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
-  axesMapping$ = new BehaviorSubject<Record<string, string>>({});
+  visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
-  // TODO: refactor to subscribe to changes$ from external
-  changes$: Observable<
-    [ChartType | undefined, ChartConfig | undefined, Record<string, string>]
-  > = of([undefined, undefined, {}]);
 
-  constructor({ urlStateStorage }: { urlStateStorage?: IOsdUrlStateStorage }) {
-    this.urlStateStorage = urlStateStorage;
+  constructor({ getUrlStateStorage, getExpressions }: Options) {
+    if (getUrlStateStorage) {
+      this.getUrlStateStorage = getUrlStateStorage;
+    }
+    this.getExpression = getExpressions;
   }
 
   init() {
@@ -67,44 +57,38 @@ export class VisualizationBuilder {
     let state: VisState = {};
 
     // Read state from url
-    if (this.urlStateStorage) {
-      const urlState = this.urlStateStorage.get<VisState>('_v');
+    const urlStateStorage = this.getUrlStateStorage?.();
+    if (urlStateStorage) {
+      const urlState = urlStateStorage.get<VisState>('_v');
       state = { ...state, ...urlState };
     }
 
     // update visualization state accordingly
     if (state.chartType && isChartType(state.chartType)) {
-      this.setCurrentChartType(state.chartType);
+      const initialVisConfig: ChartConfig = { type: state.chartType };
 
       if (state.styleOptions) {
-        this.setStyles({ styles: state.styleOptions, type: state.chartType });
+        initialVisConfig.styles = state.styleOptions;
       }
 
       if (state.axesMapping) {
-        this.setAxesMapping(state.axesMapping);
+        initialVisConfig.axesMapping = state.axesMapping;
       }
+      this.setVisConfig(initialVisConfig);
     }
 
     // Subscribe to visualization state updates and sync the state to url
     this.subscriptions.push(
-      combineLatest([this.currentChartType$, this.axesMapping$, this.styles$])
+      combineLatest([this.visConfig$])
         .pipe(debounceTime(500))
-        .subscribe(([chartType, axesMapping, styles]) =>
-          this.syncToUrl({ chartType, axesMapping, styleOptions: styles?.styles })
+        .subscribe(([visConfig]) =>
+          this.syncToUrl({
+            chartType: visConfig?.type,
+            axesMapping: visConfig?.axesMapping,
+            styleOptions: visConfig?.styles,
+          })
         ),
-      this.currentChartType$
-        .pipe(skip(1))
-        .subscribe((chartType) =>
-          this.onChartTypeChange(
-            this.data$.value,
-            chartType,
-            this.axesMapping$.value,
-            this.styles$.value
-          )
-        ),
-      this.data$.subscribe((data) =>
-        this.onDataChange(data, this.currentChartType$.value, this.axesMapping$.value)
-      )
+      this.data$.subscribe((data) => this.onDataChange(data))
     );
 
     this.setIsInitialized(true);
@@ -114,36 +98,42 @@ export class VisualizationBuilder {
     this.isInitialized = isInitialized;
   }
 
-  onChartTypeChange(
-    data?: VisData,
-    chartType?: ChartType,
-    axesMapping?: Record<string, string>,
-    currentStyleConfig?: ChartConfig
-  ) {
+  onChartTypeChange(chartType?: ChartType) {
     if (!chartType || !isChartType(chartType)) {
+      this.setVisConfig(undefined);
       return;
     }
 
+    const currentVisConfig = this.visConfig$.value;
+    const newVisConfig: ChartConfig = { type: chartType };
+
     const visConfig = visualizationRegistry.getVisualizationConfig(chartType);
     if (!visConfig) {
+      this.setVisConfig(undefined);
       return;
     }
 
     // Always reset style after changing chart type
-    if (currentStyleConfig?.type !== chartType) {
-      this.setStyles({ styles: visConfig.ui.style.defaults, type: chartType });
+    if (currentVisConfig?.type !== chartType) {
+      newVisConfig.styles = visConfig.ui.style.defaults;
     }
 
-    // Table chart doesn't have axes mapping
+    // Table chart doesn't have axes mapping, but we need to keep current axes mapping, so when switch back to other types
+    // of charts, the axes mapping can be reused
     if (chartType === 'table') {
-      // this.setAxesMapping({});
+      this.setVisConfig({ ...newVisConfig, axesMapping: currentVisConfig?.axesMapping });
       return;
     }
 
     // Reuse current axes mapping for the new chart type if possible
-    const newAxesMapping = this.reuseCurrentAxesMapping(chartType, axesMapping ?? {}, data);
-    if (newAxesMapping) {
-      this.setAxesMapping(newAxesMapping);
+    const newAxesMapping = this.reuseCurrentAxesMapping(
+      chartType,
+      currentVisConfig?.axesMapping ?? {},
+      this.data$.value
+    );
+    if (!isEmpty(newAxesMapping)) {
+      newVisConfig.axesMapping = newAxesMapping;
+      this.setVisConfig(newVisConfig);
       return;
     }
 
@@ -151,13 +141,14 @@ export class VisualizationBuilder {
     // and use the new axes mapping from the matched rule.
     const autoVis = this.createAutoVis(this.data$.value, chartType);
     if (autoVis) {
-      this.setAxesMapping(autoVis.axesMapping);
+      newVisConfig.axesMapping = autoVis.axesMapping;
+      this.setVisConfig(newVisConfig);
       return;
     }
 
     // Lastly, for the given chart type, we cannot reuse current axes mapping, also we cannot find a rule to auto create the chart
     // Reset the axes mapping to empty and let user to choose the fields for the axes mapping
-    this.setAxesMapping({});
+    this.setVisConfig(newVisConfig);
   }
 
   createAutoVis(data?: VisData, chartType?: ChartType) {
@@ -207,43 +198,29 @@ export class VisualizationBuilder {
       return;
     }
 
-    const currentRule = findRuleByIndex(axesMapping, allColumns);
+    const currentRule = visualizationRegistry.findRuleByAxesMapping(axesMapping, allColumns);
     if (!isEmpty(axesMapping) && currentRule) {
-      const isChartTypeInCurrentRule = currentRule.chartTypes.find(
-        (chart) => chart.type === chartType
+      const columnMapping = visualizationRegistry.getDefaultAxesMapping(
+        currentRule,
+        chartType,
+        data?.numericalColumns ?? [],
+        data?.categoricalColumns ?? [],
+        data?.dateColumns ?? []
       );
-      if (isChartTypeInCurrentRule) {
-        const reusedMapping = visConfig.ui.availableMappings.find((obj) =>
-          isEqual(getColumnMatchFromMapping(obj.mapping), currentRule.matchIndex)
-        )?.mapping[0];
-        if (reusedMapping) {
-          const updatedMapping: Record<string, string> = {};
-          const availableAxesMapping = new Map(Object.entries(axesMapping));
-          Object.entries(reusedMapping).forEach(([key, config]) => {
-            const matchingColumn = Array.from(availableAxesMapping.entries()).find(
-              ([role, columnName]) => {
-                const column = allColumns.find((col) => col.name === columnName);
-                const found = column?.schema === config.type;
-                if (found) {
-                  availableAxesMapping.delete(role);
-                  return found;
-                }
-              }
-            );
-            if (matchingColumn) {
-              updatedMapping[key] = matchingColumn[1];
-            }
-          });
-          return updatedMapping;
-        }
-      }
+      const updatedAxesMapping: Record<string, string> = {};
+      Object.entries(columnMapping).forEach(([role, value]) => {
+        updatedAxesMapping[role] = value.name;
+      });
+      return updatedAxesMapping;
     }
   }
 
   /**
    * For the given data, we need to check if the current chart type and axes mapping can be applied
    */
-  onDataChange(data?: VisData, currentChartType?: ChartType, axesMapping?: Record<string, string>) {
+  onDataChange(data?: VisData) {
+    const currentChartType = this.visConfig$.value?.type;
+    const axesMapping = this.visConfig$.value?.axesMapping;
     if (!data) {
       return;
     }
@@ -255,35 +232,34 @@ export class VisualizationBuilder {
 
     const columns = [...data.numericalColumns, ...data.categoricalColumns, ...data.dateColumns];
 
-    // Metric chart cannot be created from multiple data points
-    const invalidMetricData =
-      columns.length > 0 && columns[0].validValuesCount > 1 && currentChartType === 'metric';
-
     // We cannot apply the current chart type and axes mapping if:
-    // 1. The current chart type is 'metric', but it has multiple data points
-    // 2. It has axes mapping, but the mapping is incompatible with the received data
-    // 3. No current axes mapping
+    // 1. It has axes mapping, but the mapping is incompatible with the received data
+    // 2. No current axes mapping
     // For these cases, we will create auto vis based on the rules. If not auto vis can be created,
     // reset chart type and axes mapping to empty, this will let user to choose.
-    if (invalidMetricData || isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
+    if (isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
       const autoVis = this.createAutoVis(data);
       if (autoVis) {
-        const visConfig = visualizationRegistry.getVisualizationConfig(autoVis.chartType);
-        if (visConfig) {
-          this.setCurrentChartType(autoVis.chartType);
-          this.setAxesMapping(autoVis.axesMapping);
-          this.setStyles({ styles: visConfig?.ui.style.defaults, type: autoVis.chartType });
+        const chartTypeConfig = visualizationRegistry.getVisualizationConfig(autoVis.chartType);
+        if (chartTypeConfig) {
+          const newVisConfig: ChartConfig = {
+            type: autoVis.chartType,
+            styles: chartTypeConfig.ui.style.defaults,
+            axesMapping: autoVis.axesMapping,
+          };
+          this.setVisConfig(newVisConfig);
         }
       } else {
-        const visConfig = visualizationRegistry.getVisualizationConfig('table');
-        // Default to show a table if no auto vis created
-        this.setCurrentChartType('table');
-        this.setAxesMapping({});
-        if (visConfig) {
-          this.setStyles({ type: 'table', styles: visConfig?.ui.style.defaults });
-        } else {
-          this.setStyles(undefined);
+        const chartTypeConfig = visualizationRegistry.getVisualizationConfig('table');
+        if (!chartTypeConfig) {
+          this.setVisConfig(undefined);
         }
+        // Default to show a table if no auto vis created
+        const newVisConfig: ChartConfig = {
+          type: 'table',
+          styles: chartTypeConfig?.ui.style.defaults,
+        };
+        this.setVisConfig(newVisConfig);
       }
       return;
     }
@@ -295,9 +271,7 @@ export class VisualizationBuilder {
     }
 
     // All other cases will fallback to reset vis state and let user to choose
-    this.setCurrentChartType(undefined);
-    this.setAxesMapping({});
-    this.setStyles(undefined);
+    this.setVisConfig(undefined);
   }
 
   handleData<T = unknown>(
@@ -314,35 +288,39 @@ export class VisualizationBuilder {
   }
 
   updateStyles(styles?: Partial<StyleOptions>) {
-    const currentStyles = this.styles$.value;
-    if (!currentStyles) {
+    const currentVisConfig = this.visConfig$.value;
+    if (!currentVisConfig) {
       return;
     }
-    if (currentStyles.styles) {
-      this.styles$.next({
-        type: currentStyles.type,
-        styles: { ...currentStyles.styles, ...styles } as StyleOptions,
+    if (currentVisConfig.styles) {
+      this.visConfig$.next({
+        ...currentVisConfig,
+        styles: { ...currentVisConfig.styles, ...styles } as StyleOptions,
       });
     }
   }
 
-  setStyles(styles?: ChartConfig) {
-    this.styles$.next(styles);
+  setVisConfig(config?: ChartConfig) {
+    this.visConfig$.next(config);
   }
 
   setCurrentChartType(chartType?: ChartType) {
-    if (this.currentChartType$.value !== chartType) {
-      this.currentChartType$.next(chartType);
+    if (this.visConfig$.value?.type !== chartType) {
+      this.onChartTypeChange(chartType);
     }
   }
 
   setAxesMapping(mapping: Record<string, string>) {
-    this.axesMapping$.next(mapping);
+    const config = this.visConfig$.value;
+    if (config) {
+      this.visConfig$.next({ ...config, axesMapping: mapping });
+    }
   }
 
   syncToUrl<State>(visState: VisState) {
-    if (this.urlStateStorage) {
-      this.urlStateStorage.set('_v', visState, { replace: true });
+    const urlStateStorage = this.getUrlStateStorage?.();
+    if (urlStateStorage) {
+      urlStateStorage.set('_v', visState, { replace: true });
     }
   }
 
@@ -350,27 +328,45 @@ export class VisualizationBuilder {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
     this.subscriptions = [];
 
-    this.currentChartType$.complete();
-    this.styles$.complete();
-    this.axesMapping$.complete();
+    this.visConfig$.complete();
     this.data$.complete();
   }
 
   reset(): void {
     this.dispose();
 
-    this.currentChartType$ = new BehaviorSubject<ChartType | undefined>(undefined);
-    this.styles$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
-    this.axesMapping$ = new BehaviorSubject<Record<string, string>>({});
+    this.visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
-    this.changes$ = combineLatest([this.currentChartType$, this.styles$, this.axesMapping$]).pipe(
-      debounceTime(500)
-    );
     this.isInitialized = false;
   }
 
   clearUrl() {
     this.syncToUrl({ axesMapping: {}, styleOptions: undefined, chartType: undefined });
+  }
+
+  renderVisualization({ searchContext }: { searchContext?: ExecutionContextSearch }) {
+    const ExpressionRenderer = this.getExpression()?.ReactExpressionRenderer;
+    if (!ExpressionRenderer) {
+      return null;
+    }
+
+    return React.createElement(VisualizationRender, {
+      data$: this.data$,
+      visConfig$: this.visConfig$,
+      searchContext,
+      ExpressionRenderer,
+    });
+  }
+
+  renderStylePanel({ className }: { className?: string }) {
+    return React.createElement(StylePanelRender, {
+      className,
+      data$: this.data$,
+      visConfig$: this.visConfig$,
+      onStyleChange: this.updateStyles.bind(this),
+      onAxesMappingChange: this.setAxesMapping.bind(this),
+      onChartTypeChange: this.setCurrentChartType.bind(this),
+    });
   }
 }
 
@@ -378,9 +374,9 @@ let visualizationBuilder: VisualizationBuilder;
 
 export const getVisualizationBuilder = () => {
   if (!visualizationBuilder) {
-    const services = getServices();
     visualizationBuilder = new VisualizationBuilder({
-      urlStateStorage: services.osdUrlStateStorage,
+      getUrlStateStorage: () => getServices().osdUrlStateStorage,
+      getExpressions: () => getServices().expressions,
     });
   }
   return visualizationBuilder;

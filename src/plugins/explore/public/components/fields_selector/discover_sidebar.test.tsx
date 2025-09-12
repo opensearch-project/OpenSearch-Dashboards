@@ -37,9 +37,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { getStubIndexPattern } from '../../../../data/public/test_utils';
+import { getStubDataView } from '../../../../data/public/data_views/data_view.stub';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import * as fieldFilter from './lib/field_filter';
+import { ExploreFlavor } from '../../../common';
+import * as useFlavorIdModule from '../../helpers/use_flavor_id';
 
 jest.mock('../../application/legacy/discover/opensearch_dashboards_services', () => ({
   getServices: () => ({
@@ -68,31 +70,96 @@ jest.mock('../../application/legacy/discover/opensearch_dashboards_services', ()
   }),
 }));
 
-jest.mock('./lib/get_index_pattern_field_list', () => ({
-  getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
+jest.mock('../../helpers/use_flavor_id', () => ({
+  useFlavorId: jest.fn(),
 }));
 
-function getCompProps(): DiscoverSidebarProps {
-  const indexPattern = getStubIndexPattern(
+jest.mock('./lib/get_index_pattern_field_list', () => ({
+  getIndexPatternFieldList: jest.fn((dataSet) => dataSet.fields),
+}));
+
+jest.mock('./field_list', () => ({
+  FieldList: ({ title, fields, category }: { title: string; fields: any[]; category: string }) => (
+    <div data-test-subj={`mocked-field-list-${category}`}>
+      <h3>{title}</h3>
+      {fields.map((field, index) => (
+        <div key={index} data-test-subj="fieldList-field">
+          {field.name}
+        </div>
+      ))}
+    </div>
+  ),
+}));
+
+jest.mock('./facet_list', () => ({
+  FacetList: ({ title, fields }: { title: string; fields: any[] }) => (
+    <div data-test-subj="mocked-facet-list">
+      <h3>{title}</h3>
+      {fields.map((field, index) => (
+        <div key={index} data-test-subj="facetList-field">
+          {field.name}
+        </div>
+      ))}
+    </div>
+  ),
+}));
+
+function getCompProps(customFields?: any[]): DiscoverSidebarProps {
+  const fields = customFields || stubbedLogstashFields();
+
+  // Add faceted fields to the field list
+  const facetedFields = [
+    {
+      name: 'serviceName',
+      type: 'string',
+      esTypes: ['keyword'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'Service Name',
+    },
+    {
+      name: 'status.code',
+      type: 'number',
+      esTypes: ['long'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'Status Code',
+    },
+  ];
+
+  const allFields = [...fields, ...facetedFields];
+
+  const dataSet = getStubDataView(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
-    stubbedLogstashFields(),
+    allFields,
     coreMock.createSetup()
   );
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = _.each(_.cloneDeep(realHits), dataSet.flattenHit) as Array<
     OpenSearchSearchHit<Record<string, any>>
   >;
 
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
-    for (const key of Object.keys(indexPattern.flattenHit(hit))) {
+    for (const key of Object.keys(dataSet.flattenHit(hit))) {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
+
+  // Add some mock faceted field counts
+  fieldCounts.serviceName = 10;
+  fieldCounts['status.code'] = 8;
+
   return {
     columns: ['extension'],
     fieldCounts,
@@ -100,7 +167,7 @@ function getCompProps(): DiscoverSidebarProps {
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    selectedIndexPattern: indexPattern,
+    selectedDataSet: dataSet,
     onReorderFields: jest.fn(),
     isEnhancementsEnabledOverride: false,
   };
@@ -108,32 +175,57 @@ function getCompProps(): DiscoverSidebarProps {
 
 describe('discover sidebar', function () {
   let spy: jest.SpyInstance;
+  const mockUseFlavorId = useFlavorIdModule.useFlavorId as jest.MockedFunction<
+    typeof useFlavorIdModule.useFlavorId
+  >;
+
+  beforeEach(() => {
+    mockUseFlavorId.mockReturnValue(null);
+  });
 
   afterEach(() => {
     if (spy) {
-      spy.mockRestore(); // This works with spyOn
+      spy.mockRestore();
     }
+    jest.clearAllMocks();
   });
 
-  it('should render the field header', function () {
+  it('should render basic field sections', function () {
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
 
-    expect(screen.getByText('Fields')).toBeInTheDocument();
+    expect(screen.getByTestId('mocked-field-list-selected')).toBeInTheDocument();
+    expect(screen.getByTestId('mocked-field-list-discovered')).toBeInTheDocument();
+    expect(screen.getByRole('searchbox')).toBeInTheDocument();
   });
 
-  it('should have Selected and Discovered field sections', function () {
+  it('should show faceted fields when flavor is Traces', function () {
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
     const props = getCompProps();
     render(<DiscoverSidebar {...props} />);
 
-    const fieldGroups = screen.getAllByTestId('dscSideBarFieldGroupButton');
-    const allFields = screen.getAllByTestId('fieldList-field');
-
-    expect(fieldGroups.length).toBeGreaterThanOrEqual(2);
-    expect(allFields.length).toBeGreaterThan(0);
+    expect(screen.getByTestId('mocked-facet-list')).toBeInTheDocument();
+    expect(screen.getByText('Faceted fields')).toBeInTheDocument();
   });
 
-  it('should show all fields when missing filter is disabled', function () {
+  it('should not show faceted fields when flavor is not Traces', function () {
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs);
+    const props = getCompProps();
+    render(<DiscoverSidebar {...props} />);
+
+    expect(screen.queryByTestId('mocked-facet-list')).not.toBeInTheDocument();
+  });
+
+  it('should call onCollapse when provided', function () {
+    const props = { ...getCompProps(), onCollapse: jest.fn() };
+    render(<DiscoverSidebar {...props} />);
+
+    const collapseButton = screen.getByTestId('fieldList-collapse-button');
+    fireEvent.click(collapseButton);
+    expect(props.onCollapse).toHaveBeenCalled();
+  });
+
+  it('should render fields in appropriate sections', function () {
     spy = jest.spyOn(fieldFilter, 'getDefaultFieldFilter').mockReturnValue({
       missing: false,
       type: 'any',
@@ -145,47 +237,6 @@ describe('discover sidebar', function () {
     render(<DiscoverSidebar {...props} />);
 
     const allFields = screen.getAllByTestId('fieldList-field');
-    expect(allFields.length).toBeGreaterThan(20);
-  });
-
-  it('should allow selecting fields', function () {
-    const props = getCompProps();
-    render(<DiscoverSidebar {...props} />);
-
-    fireEvent.click(screen.getByTestId('fieldToggle-bytes'));
-
-    expect(props.onAddField).toHaveBeenCalledWith('bytes');
-  });
-
-  it('should call onCollapse when header collapse button is clicked', function () {
-    const props = { ...getCompProps(), onCollapse: jest.fn() };
-    render(<DiscoverSidebar {...props} />);
-
-    const collapseButton = screen.getByTestId('fieldList-collapse-button');
-    fireEvent.click(collapseButton);
-    expect(props.onCollapse).toHaveBeenCalled();
-  });
-
-  it('should allow adding filters and show multiple field instances', function () {
-    const props = getCompProps();
-    render(<DiscoverSidebar {...props} />);
-
-    const showDetailsButtons = screen.getAllByTestId('field-extension-showDetails');
-    expect(showDetailsButtons.length).toBeGreaterThanOrEqual(1);
-
-    // Test clicking the first button works
-    fireEvent.click(showDetailsButtons[0]);
-    const plusButtons = screen.getAllByTestId('plus-extension-gif');
-    fireEvent.click(plusButtons[0]);
-    expect(props.onAddFilter).toHaveBeenCalled();
-
-    // If there are multiple buttons, test the second one too
-    if (showDetailsButtons.length > 1) {
-      (props.onAddFilter as jest.Mock).mockClear();
-      fireEvent.click(showDetailsButtons[1]);
-      const updatedPlusButtons = screen.getAllByTestId('plus-extension-gif');
-      fireEvent.click(updatedPlusButtons[1]);
-      expect(props.onAddFilter).toHaveBeenCalled();
-    }
+    expect(allFields.length).toBeGreaterThan(0);
   });
 });

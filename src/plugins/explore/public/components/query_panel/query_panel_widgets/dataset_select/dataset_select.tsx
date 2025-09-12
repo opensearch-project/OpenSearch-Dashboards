@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { DetailedDataset } from '../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../../data/common';
+import { Dataset, DEFAULT_DATA, EMPTY_QUERY, SignalType } from '../../../../../../data/common';
 import { ExploreServices } from '../../../../types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
 import { selectQuery } from '../../../../application/utils/state_management/selectors';
+import { useFlavorId } from '../../../../helpers/use_flavor_id';
+import { ExploreFlavor } from '../../../../../common';
 
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const flavorId = useFlavorId();
   const dispatch = useDispatch();
   const currentQuery = useSelector(selectQuery);
 
@@ -92,5 +96,31 @@ export const DatasetSelectWidget = () => {
     [queryString, dispatch, services]
   );
 
-  return <DatasetSelect onSelect={handleDatasetSelect} appName="explore" />;
+  const supportedTypes = useMemo(() => {
+    return (
+      services.supportedTypes || [
+        DEFAULT_DATA.SET_TYPES.INDEX,
+        DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      ]
+    );
+  }, [services.supportedTypes]);
+
+  const onFilter = useCallback(
+    (detailedDataset: DetailedDataset) => {
+      if (flavorId === ExploreFlavor.Traces) {
+        return detailedDataset.signalType === SignalType.TRACES;
+      }
+      return detailedDataset.signalType !== SignalType.TRACES;
+    },
+    [flavorId]
+  );
+
+  return (
+    <DatasetSelect
+      onSelect={handleDatasetSelect}
+      appName="explore"
+      supportedTypes={supportedTypes}
+      onFilter={onFilter}
+    />
+  );
 };

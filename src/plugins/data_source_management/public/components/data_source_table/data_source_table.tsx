@@ -17,7 +17,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { of } from 'rxjs';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce, useObservable } from 'react-use';
 import { i18n } from '@osd/i18n';
@@ -90,18 +90,20 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     Record<string, React.ReactNode>
   >({});
 
-  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>();
+  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>(null);
+  const defaultDataSourceIdRef = useRef<string | null>(null);
+  defaultDataSourceIdRef.current = defaultDataSourceId;
 
   const loadDefaultDataSourceId = useCallback(async () => {
     try {
       const scope = !!workspaces.currentWorkspace$.getValue()
         ? UiSettingScope.WORKSPACE
         : UiSettingScope.GLOBAL;
+
       const id = await uiSettings.getUserProvidedWithScope<string | null>(
         DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
         scope
       );
-
       setDefaultDataSourceId(id);
     } catch (error) {
       notifications.toasts.addWarning(error.message);
@@ -195,7 +197,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   const { handleDataSourceUpdated } = useDataSourceUpdater({
     fetchDataSources,
-    defaultDataSourceId,
+    defaultDataSourceIdRef,
     uiSettings,
     loadDefaultDataSourceId,
     notifications,

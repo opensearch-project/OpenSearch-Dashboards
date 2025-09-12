@@ -6,7 +6,9 @@
 import { AreaChartStyleControls } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
-import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
+import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
+import { getTooltipFormat } from '../utils/utils';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -30,14 +32,13 @@ export const createSimpleAreaChart = (
   const dateField = xAxisColumn?.column;
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
-
   const layers: any[] = [];
 
   const mainLayer = {
     mark: {
-      ...buildMarkConfig(styles, 'line'),
+      ...buildMarkConfig(styles, 'area'),
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
@@ -71,7 +72,12 @@ export const createSimpleAreaChart = (
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: metricField, type: 'quantitative', title: metricName },
         ],
       }),
@@ -139,9 +145,9 @@ export const createMultiAreaChart = (
 
   const mainLayer = {
     mark: {
-      ...buildMarkConfig(styles, 'line'),
+      ...buildMarkConfig(styles, 'area'),
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
@@ -186,7 +192,12 @@ export const createMultiAreaChart = (
       // Optional: Add tooltip with all information if tooltip mode is not hidden
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: dateField, type: 'temporal', title: dateName },
+          {
+            field: dateField,
+            type: 'temporal',
+            title: dateName,
+            format: getTooltipFormat(transformedData, dateField),
+          },
           { field: categoryField, type: 'nominal', title: categoryName },
           { field: metricField, type: 'quantitative', title: metricName },
         ],
@@ -265,9 +276,9 @@ export const createFacetedMultiAreaChart = (
       layer: [
         {
           mark: {
-            ...buildMarkConfig(styles, 'line'),
+            ...buildMarkConfig(styles, 'area'),
             type: 'area',
-            opacity: styles.areaOpacity || 0.6,
+            opacity: styles.areaOpacity || DEFAULT_OPACITY,
             tooltip: styles.tooltipOptions?.mode !== 'hidden',
           },
           encoding: {
@@ -312,7 +323,12 @@ export const createFacetedMultiAreaChart = (
             // Optional: Add tooltip with all information if tooltip mode is not hidden
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [
-                { field: dateField, type: 'temporal', title: dateName },
+                {
+                  field: dateField,
+                  type: 'temporal',
+                  title: dateName,
+                  format: getTooltipFormat(transformedData, dateField),
+                },
                 { field: category1Field, type: 'nominal', title: category1Name },
                 { field: metricField, type: 'quantitative', title: metricName },
               ],
@@ -408,9 +424,9 @@ export const createCategoryAreaChart = (
 
   const mainLayer = {
     mark: {
-      ...buildMarkConfig(styles, 'line'),
+      ...buildMarkConfig(styles, 'area'),
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {

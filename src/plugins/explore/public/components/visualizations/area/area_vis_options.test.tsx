@@ -40,8 +40,8 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
   )),
 }));
 jest.mock('../style_panel/legend/legend', () => ({
-  LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => (
-    <div data-test-subj="legend-panel" data-show-legend={shouldShowLegend}>
+  LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
+    <div data-test-subj="legend-panel">
       <button
         data-test-subj="toggle-legend"
         onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
@@ -64,7 +64,7 @@ jest.mock('../style_panel/legend/legend', () => ({
   )),
 }));
 
-jest.mock('../style_panel/threshold/threshold', () => ({
+jest.mock('../style_panel/threshold_lines/threshold', () => ({
   ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
     <div data-test-subj="threshold-panel">
       <button
@@ -304,8 +304,7 @@ describe('AreaVisStyleControls', () => {
 
     render(<AreaVisStyleControls {...props} />);
 
-    const legendPanel = screen.getByTestId('legend-panel');
-    expect(legendPanel).toHaveAttribute('data-show-legend', 'true');
+    expect(screen.getByTestId('legend-panel')).toBeInTheDocument();
   });
 
   test('shows legend when FACET mapping is present', () => {
@@ -326,8 +325,7 @@ describe('AreaVisStyleControls', () => {
 
     render(<AreaVisStyleControls {...props} />);
 
-    const legendPanel = screen.getByTestId('legend-panel');
-    expect(legendPanel).toHaveAttribute('data-show-legend', 'true');
+    expect(screen.getByTestId('legend-panel')).toBeInTheDocument();
   });
 
   test('hides legend when no COLOR or FACET mappings are present', () => {

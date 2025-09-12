@@ -48,7 +48,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
   exclusive: {
     pointShape: PointShape.CIRCLE,
     angle: 0,
-    filled: false,
+    filled: true,
   },
   // Standard axes
   standardAxes: [
@@ -108,31 +108,19 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
     },
     availableMappings: [
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
       },
       {
-        mapping: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 2 },
-          },
-        ],
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 2 },
       },
     ],
   },

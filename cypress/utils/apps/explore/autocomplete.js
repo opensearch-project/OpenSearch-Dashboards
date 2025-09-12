@@ -126,14 +126,14 @@ const getLanguageSpecificConfig = (language, config) => {
     case QueryLanguages.PPL.name:
       return {
         initialCommands: [
-          { value: 'source', input: 's' },
+          { value: 'SOURCE', input: 's' },
           { value: '=' },
           { value: getDatasetName('data_logs_small_time_1', config.datasetType) },
           { value: '|' },
-          { value: 'where', input: 'w' },
+          { value: 'WHERE', input: 'w' },
         ],
         editorType: 'exploreQueryPanelEditor',
-        andOperator: 'and',
+        andOperator: 'AND',
       };
     default:
       throw new Error(`Unsupported language: ${language}`);
@@ -244,7 +244,7 @@ export const showSuggestionAndHint = (maxAttempts = 3) => {
 
   const attemptShow = () => {
     attempts++;
-    cy.get('.inputarea').type(' ', { force: true });
+    cy.get('.inputarea').type('source ', { force: true });
 
     return cy.get('.suggest-widget.visible').then(($widget) => {
       const isVisible = $widget.is(':visible');
@@ -305,12 +305,33 @@ export const hideWidgets = (maxAttempts = 3) => {
 };
 
 /**
+ * Types in a query in Monaco editor
+ * @param {String} query - Query String
+ */
+export const setQueryInMonacoEditor = (query) => {
+  const editorType = 'exploreQueryPanelEditor';
+
+  cy.getElementByTestId(editorType)
+    .find('.monaco-editor')
+    .should('be.visible')
+    .should('have.class', 'vs')
+    .wait(1000)
+    .within(() => {
+      cy.get('.inputarea').type(query, {
+        force: true,
+      });
+    });
+};
+
+/**
  * Creates a query using either mouse or keyboard interactions
  * @param {Object} config - Query configuration
  * @param {boolean} useKeyboard - Whether to use keyboard instead of mouse
  */
 export const createQuery = (config, useKeyboard = false) => {
   const editorType = 'exploreQueryPanelEditor';
+
+  setQueryInMonacoEditor('source'); // Setting base Query to source <space> to avoid being stuck in AI mode with space
 
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
@@ -320,15 +341,14 @@ export const createQuery = (config, useKeyboard = false) => {
     .within(() => {
       cy.get('.inputarea').type(' ', { force: true });
       if (config.language === QueryLanguages.PPL.name) {
-        selectSuggestion('source', useKeyboard);
         selectSuggestion('=', useKeyboard);
         const dataset = getDatasetName('data_logs_small_time_1', config.datasetType);
         selectSuggestion(dataset, useKeyboard);
         selectSuggestion('|', useKeyboard);
-        selectSuggestion('where', useKeyboard);
+        selectSuggestion('WHERE', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
-        selectSuggestion('Configuration', useKeyboard);
+        selectSuggestion('Development', useKeyboard);
       }
     });
 };
@@ -372,6 +392,8 @@ export const validateEditorContainsError = () => {
 export const validateImplicitPPLQuery = (config) => {
   const editorType = 'exploreQueryPanelEditor';
 
+  setQueryInMonacoEditor('category = "Application"');
+
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
     .should('be.visible')
@@ -399,11 +421,9 @@ export const validateDocumentationPanelIsOpen = (config) => {
     .should('have.class', 'vs')
     .wait(1000)
     .within(() => {
-      cy.get('.inputarea').type(' ', { force: true });
       if (config.language === QueryLanguages.PPL.name) {
         // Type 'sour' to trigger suggestions with documentation
         cy.get('.inputarea').type('sour', { force: true });
-
         // Wait for suggestion widget to appear
         cy.get('.suggest-widget.visible')
           .should('be.visible')
@@ -432,26 +452,32 @@ export const verifyMonacoEditorContent = (queryString) => {
   cy.getElementByTestId('exploreQueryPanelEditor')
     .should('be.visible')
     .then(($editor) => {
-      // Try different selectors to get the text content
+      // Get text from all lines in the editor
       let text = '';
 
-      const viewLine = $editor.find('.view-line').first();
-      if (viewLine.length > 0) {
-        text = viewLine.text();
+      const viewLines = $editor.find('.view-line');
+      if (viewLines.length > 0) {
+        // Collect text from all lines
+        const allLinesText = viewLines
+          .toArray()
+          .map((line) => Cypress.$(line).text())
+          .join(' ');
+        text = allLinesText;
       }
 
-      // Sanitize the text by normalizing whitespace characters
-      const sanitizeText = (str) => {
+      // Normalize the text by removing newlines and merging multiple spaces into single space
+      const normalizeText = (str) => {
         return str
-          .replace(/[\s\u00A0\u00B7\u2022\u2023\u25E6\u2043\u2219\u22C5\u30FB\u00B7.·]+/g, ' ')
+          .replace(/\n/g, ' ') // Remove newlines
+          .replace(/[\s\u00A0\u00B7\u2022\u2023\u25E6\u2043\u2219\u22C5\u30FB\u00B7.·]+/g, ' ') // Normalize whitespace characters and merge multiple spaces
           .trim();
       };
 
-      const sanitizedText = sanitizeText(text);
-      const sanitizedQuery = sanitizeText(queryString);
+      const normalizedText = normalizeText(text);
+      const normalizedQuery = normalizeText(queryString);
 
       expect(text).to.not.be.empty;
-      expect(sanitizedText).to.include(sanitizedQuery);
+      expect(normalizedText).to.include(normalizedQuery);
     });
 };
 

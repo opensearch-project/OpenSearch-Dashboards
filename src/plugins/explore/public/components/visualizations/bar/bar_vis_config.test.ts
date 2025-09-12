@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { createBarConfig, defaultBarChartStyles } from './bar_vis_config';
-import { Positions, ThresholdLineStyle, AxisRole } from '../types';
+import { Positions, ThresholdLineStyle, AxisRole, AggregationType, TimeUnit } from '../types';
 import { BarVisStyleControls } from './bar_vis_options';
 
 describe('bar_vis_config', () => {
@@ -42,6 +42,10 @@ describe('bar_vis_config', () => {
           show: false,
           titleName: '',
         },
+        bucket: {
+          aggregationType: AggregationType.SUM,
+          bucketTimeUnit: TimeUnit.AUTO,
+        },
       });
 
       // Check axes configuration
@@ -61,7 +65,7 @@ describe('bar_vis_config', () => {
           text: '',
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         axisRole: AxisRole.Y,
       });

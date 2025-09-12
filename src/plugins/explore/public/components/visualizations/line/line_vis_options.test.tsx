@@ -34,36 +34,33 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
     </div>
   )),
 }));
+
 jest.mock('../style_panel/legend/legend', () => ({
-  LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, shouldShowLegend }) => {
-    if (!shouldShowLegend) return null;
-    return (
-      <div data-test-subj="mockLegendOptionsPanel">
-        <button
-          data-test-subj="mockLegendShow"
-          onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
-        >
-          Toggle Legend
-        </button>
-        <button
-          data-test-subj="mockLegendPosition"
-          onClick={() => onLegendOptionsChange({ position: 'bottom' })}
-        >
-          Change Position
-        </button>
-        <button
-          data-test-subj="mockLegendBoth"
-          onClick={() => onLegendOptionsChange({ show: !legendOptions.show, position: 'top' })}
-        >
-          Change Both
-        </button>
-        <div data-test-subj="shouldShowLegend">{shouldShowLegend.toString()}</div>
-      </div>
-    );
-  }),
+  LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
+    <div data-test-subj="mockLegendOptionsPanel">
+      <button
+        data-test-subj="mockLegendShow"
+        onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+      >
+        Toggle Legend
+      </button>
+      <button
+        data-test-subj="mockLegendPosition"
+        onClick={() => onLegendOptionsChange({ position: 'bottom' })}
+      >
+        Change Position
+      </button>
+      <button
+        data-test-subj="mockLegendBoth"
+        onClick={() => onLegendOptionsChange({ show: !legendOptions.show, position: 'top' })}
+      >
+        Change Both
+      </button>
+    </div>
+  )),
 }));
 
-jest.mock('../style_panel/threshold/threshold', () => ({
+jest.mock('../style_panel/threshold_lines/threshold', () => ({
   ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
     <div data-test-subj="mockThresholdOptions">
       <button
@@ -324,7 +321,6 @@ describe('LineVisStyleControls', () => {
     render(<LineVisStyleControls {...propsWithNoLegend} />);
 
     expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('shouldShowLegend')).not.toBeInTheDocument();
   });
 
   test('renders legend panel when COLOR mapping is present', () => {
@@ -339,7 +335,6 @@ describe('LineVisStyleControls', () => {
     render(<LineVisStyleControls {...propsWithColorMapping} />);
 
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
   });
 
   test('renders legend panel when FACET mapping is present', () => {
@@ -354,7 +349,6 @@ describe('LineVisStyleControls', () => {
     render(<LineVisStyleControls {...propsWithFacetMapping} />);
 
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
   });
 
   test('renders legend panel when Y_SECOND mapping is present', () => {
@@ -369,7 +363,6 @@ describe('LineVisStyleControls', () => {
     render(<LineVisStyleControls {...propsWithYSecondMapping} />);
 
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('shouldShowLegend')).toHaveTextContent('true');
   });
 
   test('calls onStyleChange with correct parameters for legend options', async () => {

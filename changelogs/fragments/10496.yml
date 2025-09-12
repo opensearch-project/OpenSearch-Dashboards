@@ -1,0 +1,2 @@
+chore:
+- Remove unnecessary service name fallback ([#10496](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10496))

@@ -38,13 +38,12 @@ describe('VisualizationRegistry', () => {
     mockRule = {
       id: 'test-rule',
       name: 'Test Rule',
-      matchIndex: [1, 0, 1],
       matches: jest.fn(),
       chartTypes: [
         { type: 'line', priority: 100, name: 'Line Chart', icon: '' },
         { type: 'bar', priority: 90, name: 'Bar Chart', icon: '' },
       ],
-      toExpression: jest.fn(),
+      toSpec: jest.fn(),
     };
 
     // Create a new registry instance for each test
@@ -90,7 +89,7 @@ describe('VisualizationRegistry', () => {
 
   describe('getVisualizationType', () => {
     it('should return an object with undefined visualizationType if no rule matches', () => {
-      (mockRule.matches as jest.Mock).mockReturnValue(false);
+      (mockRule.matches as jest.Mock).mockReturnValue('NOT_MATCH');
       registry.registerRule(mockRule);
 
       const columns: VisColumn[] = [
@@ -104,22 +103,13 @@ describe('VisualizationRegistry', () => {
         },
       ];
 
-      const result = registry.getVisualizationType(columns);
-
-      expect(result).toBeDefined();
-      expect(result?.visualizationType).toBeUndefined();
-      expect(result?.ruleId).toBeUndefined();
-      expect(result?.toExpression).toBeUndefined();
-      expect(result?.availableChartTypes).toEqual([]);
-      expect(result?.axisColumnMappings).toEqual({});
-      expect(result?.numericalColumns).toHaveLength(1);
-      expect(result?.categoricalColumns).toHaveLength(0);
-      expect(result?.dateColumns).toHaveLength(0);
+      const result = registry.findBestMatch(columns, [], []);
+      expect(result).toBe(null);
       expect(mockRule.matches).toHaveBeenCalled();
     });
 
     it('should return the visualization type if a rule matches', () => {
-      (mockRule.matches as jest.Mock).mockReturnValue(true);
+      (mockRule.matches as jest.Mock).mockReturnValue('EXACT_MATCH');
       registry.registerRule(mockRule);
 
       const columns: VisColumn[] = [
@@ -149,25 +139,24 @@ describe('VisualizationRegistry', () => {
         },
       ];
 
-      const result = registry.getVisualizationType(columns);
+      const result = registry.findBestMatch(
+        columns.filter((c) => c.schema === VisFieldType.Numerical),
+        columns.filter((c) => c.schema === VisFieldType.Categorical),
+        columns.filter((c) => c.schema === VisFieldType.Date)
+      );
 
       expect(result).toBeDefined();
-      expect(result?.ruleId).toBe('test-rule');
-      expect(result?.visualizationType).toBeDefined();
-      expect(result?.visualizationType?.type).toBe('line');
-      expect(result?.numericalColumns).toHaveLength(1);
-      expect(result?.categoricalColumns).toHaveLength(1);
-      expect(result?.dateColumns).toHaveLength(1);
-      expect(result?.availableChartTypes).toBe(mockRule.chartTypes);
-      expect(result?.toExpression).toBe(mockRule.toExpression);
+      expect(result?.rule.id).toBe('test-rule');
+      expect(result?.chartType.type).toBe('line');
+      expect(result?.rule.chartTypes).toBe(mockRule.chartTypes);
+      expect(result?.rule.toSpec).toBe(mockRule.toSpec);
     });
 
     it('should select the rule with the highest priority chart type', () => {
       const lowPriorityRule = {
         id: 'low-priority-rule',
         name: 'Low Priority Rule',
-        matches: jest.fn().mockReturnValue(true),
-        matchIndex: [],
+        matches: jest.fn().mockReturnValue('EXACT_MATCH'),
         chartTypes: [{ type: 'bar', priority: 50, name: 'Bar Chart', icon: '' }],
         toExpression: jest.fn(),
       };
@@ -175,8 +164,7 @@ describe('VisualizationRegistry', () => {
       const highPriorityRule = {
         id: 'high-priority-rule',
         name: 'High Priority Rule',
-        matches: jest.fn().mockReturnValue(true),
-        matchIndex: [],
+        matches: jest.fn().mockReturnValue('EXACT_MATCH'),
         chartTypes: [{ type: 'line', priority: 100, name: 'Line Chart', icon: '' }],
         toExpression: jest.fn(),
       };
@@ -194,83 +182,9 @@ describe('VisualizationRegistry', () => {
         },
       ];
 
-      const result = registry.getVisualizationType(columns);
+      const result = registry.findBestMatch(columns, [], []);
 
-      expect(result?.ruleId).toBe('high-priority-rule');
-    });
-
-    it('should filter columns by their schema type', () => {
-      (mockRule.matches as jest.Mock).mockReturnValue(true);
-      registry.registerRule(mockRule);
-
-      const columns: VisColumn[] = [
-        {
-          id: 0,
-          name: 'date',
-          schema: VisFieldType.Date,
-          column: 'field-0',
-          validValuesCount: 1,
-          uniqueValuesCount: 1,
-        },
-        {
-          id: 1,
-          name: 'value1',
-          schema: VisFieldType.Numerical,
-          column: 'field-1',
-          validValuesCount: 1,
-          uniqueValuesCount: 1,
-        },
-        {
-          id: 2,
-          name: 'value2',
-          schema: VisFieldType.Numerical,
-          column: 'field-2',
-          validValuesCount: 1,
-          uniqueValuesCount: 1,
-        },
-        {
-          id: 3,
-          name: 'category1',
-          schema: VisFieldType.Categorical,
-          column: 'field-3',
-          validValuesCount: 1,
-          uniqueValuesCount: 1,
-        },
-        {
-          id: 4,
-          name: 'category2',
-          schema: VisFieldType.Categorical,
-          column: 'field-4',
-          validValuesCount: 1,
-          uniqueValuesCount: 1,
-        },
-        {
-          id: 5,
-          name: 'unknown',
-          schema: VisFieldType.Unknown,
-          column: 'field-5',
-          validValuesCount: 1,
-          uniqueValuesCount: 1,
-        },
-      ];
-
-      const result = registry.getVisualizationType(columns);
-      expect(result?.numericalColumns).toHaveLength(2);
-      expect(result?.categoricalColumns).toHaveLength(2);
-      expect(result?.dateColumns).toHaveLength(1);
-
-      // Verify that the matches function was called with the correct column arrays
-      expect(mockRule.matches).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({ id: 1, schema: VisFieldType.Numerical }),
-          expect.objectContaining({ id: 2, schema: VisFieldType.Numerical }),
-        ]),
-        expect.arrayContaining([
-          expect.objectContaining({ id: 3, schema: VisFieldType.Categorical }),
-          expect.objectContaining({ id: 4, schema: VisFieldType.Categorical }),
-        ]),
-        expect.arrayContaining([expect.objectContaining({ id: 0, schema: VisFieldType.Date })])
-      );
+      expect(result?.rule.id).toBe('high-priority-rule');
     });
   });
 

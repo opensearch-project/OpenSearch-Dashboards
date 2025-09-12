@@ -110,16 +110,30 @@ describe('ResultsActionBar', () => {
     expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
   });
 
-  test('should hide add to dashboard button if current tab is patterns', () => {
+  test('should hide add to dashboard button and export button if current tab is patterns', () => {
     const patternsStore = mockStore({
       ui: { activeTabId: 'explore_patterns_tab' },
+      tab: { patterns: { patternsField: 'message' } },
     });
     render(
       <Provider store={patternsStore}>
         <DiscoverResultsActionBar {...props} />
       </Provider>
     );
-    expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverDownloadCsvButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('saveAndAddButtonWithModal')).not.toBeInTheDocument();
+  });
+
+  test('should show export button but hide add to dashboard button for visualization tab', () => {
+    const visualizationStore = mockStore({
+      ui: { activeTabId: 'explore_visualization_tab' },
+    });
+    render(
+      <Provider store={visualizationStore}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
+    expect(screen.getByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
   });
 });

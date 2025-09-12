@@ -14,12 +14,12 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ALL_VISUALIZATION_RULES } from './rule_repository';
 import { VisualizationRule } from './types';
 import { ChartType } from './utils/use_visualization_types';
 import { CHART_METADATA } from './constants';
 import { isChartType } from './utils/is_chart_type';
-import { VisData } from './visualization_builder';
+import { VisData } from './visualization_builder.types';
+import { visualizationRegistry } from './visualization_registry';
 
 interface ChartTypeSelectorProps<T extends ChartType> {
   visualizationData: VisData;
@@ -27,8 +27,7 @@ interface ChartTypeSelectorProps<T extends ChartType> {
   onChartTypeChange?: (chartType: ChartType) => void;
 }
 
-// TODO: rename it, this is chart type selector option, not rule
-interface AvailableRuleOption {
+interface AvailableChartTypeOption {
   value: string;
   inputDisplay: React.ReactNode;
   iconType?: string;
@@ -51,7 +50,7 @@ export const ChartTypeSelector = <T extends ChartType>({
   }, [chartType]);
 
   // Map columns to add value and text fields for select component
-  const { numericalColumns = [], categoricalColumns = [], dateColumns = [] } = visualizationData;
+  const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
 
   // Get icon type based on chart type
   const getChartIconType = (type: string): string => {
@@ -63,7 +62,7 @@ export const ChartTypeSelector = <T extends ChartType>({
 
   // Create base mapping once with all visualization rules
   const baseChartTypeMapping = useMemo(() => {
-    return ALL_VISUALIZATION_RULES.reduce((acc, rule) => {
+    return visualizationRegistry.getRules().reduce((acc, rule) => {
       rule.chartTypes.forEach(({ type, name }) => {
         if (!acc[type]) {
           const iconType = getChartIconType(type);
@@ -74,15 +73,10 @@ export const ChartTypeSelector = <T extends ChartType>({
             rules: [],
           };
         }
-        acc[type].rules.push({
-          id: rule.id,
-          name: rule.name,
-          matchIndex: rule.matchIndex,
-          toExpression: rule.toExpression,
-        });
+        acc[type].rules.push({ ...rule });
       });
       return acc;
-    }, {} as Record<string, AvailableRuleOption>);
+    }, {} as Record<string, AvailableChartTypeOption>);
   }, []); // Only calculate once
 
   // Process chart types to mark unavailable ones as disabled
@@ -91,18 +85,10 @@ export const ChartTypeSelector = <T extends ChartType>({
     const processed = Object.fromEntries(
       Object.entries(baseChartTypeMapping).map(([type, option]) => {
         const filteredRules = option.rules.filter((rule) => {
-          const [numCount, cateCount, dateCount] = rule.matchIndex || [0, 0, 0];
-
-          // Special condition for metric type
-          if (type === CHART_METADATA.metric.type && numericalColumns.length > 0) {
-            return numericalColumns[0].validValuesCount === 1;
+          if (rule.matches?.(numericalColumns, categoricalColumns, dateColumns) === 'NOT_MATCH') {
+            return false;
           }
-
-          return (
-            numericalColumns.length >= numCount &&
-            categoricalColumns.length >= cateCount &&
-            dateColumns.length >= dateCount
-          );
+          return true;
         });
 
         // Mark chart type as disabled if it has no valid rules
@@ -121,7 +107,7 @@ export const ChartTypeSelector = <T extends ChartType>({
     );
 
     return processed;
-  }, [baseChartTypeMapping, numericalColumns, categoricalColumns.length, dateColumns.length]);
+  }, [baseChartTypeMapping, numericalColumns, categoricalColumns, dateColumns]);
 
   const selectOptions = useMemo(() => {
     const allTypes = [

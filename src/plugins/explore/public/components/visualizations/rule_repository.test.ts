@@ -50,6 +50,10 @@ jest.mock('./scatter/to_expression', () => ({
     .mockReturnValue('three-metric-one-cate-scatter-expression'),
 }));
 
+jest.mock('./gauge/to_expression', () => ({
+  createGauge: jest.fn().mockReturnValue('single-metric-gauge-expression'),
+}));
+
 jest.mock('./metric/to_expression', () => ({
   createSingleMetric: jest.fn().mockReturnValue('single-metric-expression'),
 }));
@@ -138,7 +142,7 @@ describe('rule_repository', () => {
 
     it('should match 1 metric and 1 date', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 1);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should not match other combinations', () => {
@@ -146,24 +150,30 @@ describe('rule_repository', () => {
       const test1 = createTestColumns(2, 0, 1);
       expect(
         rule?.matches(test1.numericalColumns, test1.categoricalColumns, test1.dateColumns)
-      ).toBe(false);
+      ).toBe('COMPATIBLE_MATCH');
 
       // 1 metric, 1 category, 1 date
       const test2 = createTestColumns(1, 1, 1);
       expect(
         rule?.matches(test2.numericalColumns, test2.categoricalColumns, test2.dateColumns)
-      ).toBe(false);
+      ).toBe('COMPATIBLE_MATCH');
 
       // 1 metric, 0 categories, 2 dates
       const test3 = createTestColumns(1, 0, 2);
       expect(
         rule?.matches(test3.numericalColumns, test3.categoricalColumns, test3.dateColumns)
-      ).toBe(false);
+      ).toBe('COMPATIBLE_MATCH');
+
+      // 1 metric, 1 categories, 0 date
+      const test4 = createTestColumns(1, 1, 0);
+      expect(
+        rule?.matches(test4.numericalColumns, test4.categoricalColumns, test4.dateColumns)
+      ).toBe('NOT_MATCH');
     });
 
     it('should create a simple line chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 1);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -194,12 +204,12 @@ describe('rule_repository', () => {
 
     it('should match 2 metrics and 1 date', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a line bar chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -230,12 +240,12 @@ describe('rule_repository', () => {
 
     it('should match 1 metric, 1 category, and 1 date', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 1);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a multi line chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 1);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -264,12 +274,12 @@ describe('rule_repository', () => {
 
     it('should match 1 metric, 2 categories, and 1 date', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 1);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a faceted multi line chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 1);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -305,19 +315,21 @@ describe('rule_repository', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
       // Modify one of the columns to have high cardinality
       categoricalColumns[0].uniqueValuesCount = 10;
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should not match with low cardinality', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
       // All columns have low cardinality
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(false);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(
+        'COMPATIBLE_MATCH'
+      );
     });
 
     it('should create a regular heatmap expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
       categoricalColumns[0].uniqueValuesCount = 10;
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -337,7 +349,7 @@ describe('rule_repository', () => {
     it('should create a stacked bar chart expression when chart type is bar', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
       categoricalColumns[0].uniqueValuesCount = 10;
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -368,12 +380,12 @@ describe('rule_repository', () => {
 
     it('should match 1 metric, 1 category, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a pie chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -394,7 +406,7 @@ describe('rule_repository', () => {
 
     it('should create a bar chart expression when chart type is bar', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -416,7 +428,7 @@ describe('rule_repository', () => {
 
     it('should create a pie chart expression when chart type is pie', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -447,12 +459,12 @@ describe('rule_repository', () => {
 
     it('should match 1 metric with validValuesCount=1, 0 categories, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a single metric expression', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -482,12 +494,12 @@ describe('rule_repository', () => {
 
     it('should match 2 metrics, 0 categories, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a scatter chart expression', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -517,12 +529,12 @@ describe('rule_repository', () => {
 
     it('should match 2 metrics, 1 category, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a scatter chart with category expression', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
@@ -552,12 +564,12 @@ describe('rule_repository', () => {
 
     it('should match 3 metrics, 1 category, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(3, 1, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a scatter chart with three metrics and one category expression', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(3, 1, 0);
-      const expression = rule?.toExpression?.(
+      const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,

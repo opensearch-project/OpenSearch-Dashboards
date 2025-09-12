@@ -3,6 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {
+  resolveServiceName,
+  resolveStartTime,
+  resolveEndTime,
+  resolveDuration,
+  resolveInstrumentationScope,
+  resolveServiceNameFromDatarows,
+  resolveStartTimeFromDatarows,
+  resolveEndTimeFromDatarows,
+  resolveDurationFromDatarows,
+  resolveInstrumentationScopeFromDatarows,
+  convertTimestampToNanos,
+  extractStatusCode,
+} from './ppl_resolve_helpers';
+
 export interface TraceHit {
   traceId: string;
   droppedLinksCount: number;
@@ -23,6 +38,11 @@ export interface TraceHit {
   endTime: string;
   durationInNanos: number;
   'status.code': number;
+  startTimeUnixNano?: string;
+  endTimeUnixNano?: string;
+  durationNano?: number;
+  scope?: any;
+  instrumentationScope?: any;
   // Dynamic attributes will be added here
   [key: string]: any;
   // Sort field for ordering
@@ -122,15 +142,20 @@ function transformDatarowsFormat(pplResponse: PPLResponse): TraceHit[] {
         return index !== undefined ? row[index] : undefined;
       };
 
-      // Get original timestamps without formatting to preserve precision
-      const originalStartTime = getValueByName('startTime') || '';
-      const originalEndTime = getValueByName('endTime') || '';
+      const resolvedServiceName = resolveServiceNameFromDatarows(getValueByName);
+      const resolvedStartTime = resolveStartTimeFromDatarows(getValueByName);
+      const resolvedEndTime = resolveEndTimeFromDatarows(getValueByName);
+      const resolvedDuration = resolveDurationFromDatarows(
+        getValueByName,
+        resolvedStartTime,
+        resolvedEndTime
+      );
+      const resolvedInstrumentationScope = resolveInstrumentationScopeFromDatarows(getValueByName);
 
       // Get nested objects
       const traceGroupFields = getValueByName('traceGroupFields') || {};
       const attributes = getValueByName('attributes') || {};
       const resource = getValueByName('resource') || {};
-      const instrumentationScope = getValueByName('instrumentationScope') || {};
 
       const traceHit: TraceHit = {
         traceId: getValueByName('traceId') || '',
@@ -144,29 +169,35 @@ function transformDatarowsFormat(pplResponse: PPLResponse): TraceHit[] {
         schemaUrl: getValueByName('schemaUrl') || '',
 
         // Preserve nested structures for filtering
-        instrumentationScope,
+        instrumentationScope: resolvedInstrumentationScope,
         resource,
 
         traceGroupFields: {
-          endTime: traceGroupFields.endTime || originalEndTime,
-          durationInNanos:
-            traceGroupFields.durationInNanos || getValueByName('durationInNanos') || 0,
+          endTime: traceGroupFields.endTime || resolvedEndTime,
+          durationInNanos: traceGroupFields.durationInNanos || resolvedDuration,
           statusCode: traceGroupFields.statusCode || 0,
         },
         traceGroup: getValueByName('traceGroup') || '',
-        serviceName: getValueByName('serviceName') || '',
+        serviceName: resolvedServiceName,
         parentSpanId: getValueByName('parentSpanId') || '',
         spanId: getValueByName('spanId') || '',
         traceState: getValueByName('traceState') || '',
         name: getValueByName('name') || '',
-        // Keep original high-precision timestamps as strings
-        startTime: originalStartTime,
-        endTime: originalEndTime,
-        durationInNanos: getValueByName('durationInNanos') || 0,
+
+        // Keep resolved high-precision timestamps as strings
+        startTime: resolvedStartTime,
+        endTime: resolvedEndTime,
+        durationInNanos: resolvedDuration,
+
+        startTimeUnixNano: getValueByName('startTimeUnixNano'),
+        endTimeUnixNano: getValueByName('endTimeUnixNano'),
+        durationNano: getValueByName('durationNano'),
+        scope: getValueByName('scope'),
+
         status: getValueByName('status') || { code: 0, message: '' },
         'status.code': extractStatusCode(getValueByName('status')) || 0,
         attributes,
-        sort: [convertTimestampToNanos(originalStartTime)],
+        sort: [convertTimestampToNanos(resolvedStartTime)],
       };
 
       traceHits.push(traceHit);
@@ -196,14 +227,15 @@ function transformFieldsFormat(responseData: any): TraceHit[] {
   // Process each row (span) in the response
   for (let i = 0; i < size; i++) {
     try {
+      const resolvedServiceName = resolveServiceName(fieldMap, i);
+      const resolvedStartTime = resolveStartTime(fieldMap, i);
+      const resolvedEndTime = resolveEndTime(fieldMap, i);
+      const resolvedDuration = resolveDuration(fieldMap, i, resolvedStartTime, resolvedEndTime);
+      const resolvedInstrumentationScope = resolveInstrumentationScope(fieldMap, i);
+
       const traceGroupFields = fieldMap.get('traceGroupFields')?.[i] || {};
       const attributes = fieldMap.get('attributes')?.[i] || {};
       const resource = fieldMap.get('resource')?.[i] || {};
-      const instrumentationScope = fieldMap.get('instrumentationScope')?.[i] || {};
-
-      // Get original timestamps without formatting to preserve precision
-      const originalStartTime = fieldMap.get('startTime')?.[i] || '';
-      const originalEndTime = fieldMap.get('endTime')?.[i] || '';
 
       const traceHit: TraceHit = {
         traceId: fieldMap.get('traceId')?.[i] || '',
@@ -217,29 +249,36 @@ function transformFieldsFormat(responseData: any): TraceHit[] {
         schemaUrl: fieldMap.get('schemaUrl')?.[i] || '',
 
         // Preserve nested structures for filtering
-        instrumentationScope,
+        instrumentationScope: resolvedInstrumentationScope,
         resource,
 
         traceGroupFields: {
-          endTime: traceGroupFields.endTime || originalEndTime,
-          durationInNanos:
-            traceGroupFields.durationInNanos || fieldMap.get('durationInNanos')?.[i] || 0,
+          endTime: traceGroupFields.endTime || resolvedEndTime,
+          durationInNanos: traceGroupFields.durationInNanos || resolvedDuration,
           statusCode: traceGroupFields.statusCode || 0,
         },
         traceGroup: fieldMap.get('traceGroup')?.[i] || '',
-        serviceName: fieldMap.get('serviceName')?.[i] || '',
+        serviceName: resolvedServiceName,
         parentSpanId: fieldMap.get('parentSpanId')?.[i] || '',
         spanId: fieldMap.get('spanId')?.[i] || '',
         traceState: fieldMap.get('traceState')?.[i] || '',
         name: fieldMap.get('name')?.[i] || '',
-        // Keep original high-precision timestamps as strings
-        startTime: originalStartTime,
-        endTime: originalEndTime,
-        durationInNanos: fieldMap.get('durationInNanos')?.[i] || 0,
+
+        // Keep resolved high-precision timestamps as strings
+        startTime: resolvedStartTime,
+        endTime: resolvedEndTime,
+        durationInNanos: resolvedDuration,
+
+        // Add new fields if available
+        startTimeUnixNano: fieldMap.get('startTimeUnixNano')?.[i],
+        endTimeUnixNano: fieldMap.get('endTimeUnixNano')?.[i],
+        durationNano: fieldMap.get('durationNano')?.[i],
+        scope: fieldMap.get('scope')?.[i],
+
         status: fieldMap.get('status')?.[i] || { code: 0, message: '' },
         'status.code': extractStatusCode(fieldMap.get('status')?.[i]) || 0,
         attributes,
-        sort: [convertTimestampToNanos(originalStartTime)],
+        sort: [convertTimestampToNanos(resolvedStartTime)],
       };
 
       traceHits.push(traceHit);
@@ -254,45 +293,4 @@ function transformFieldsFormat(responseData: any): TraceHit[] {
   traceHits.sort((a, b) => a.sort[0] - b.sort[0]);
 
   return traceHits;
-}
-
-function convertTimestampToNanos(timestamp: any): number {
-  if (!timestamp) return 0;
-
-  try {
-    let time: number;
-
-    if (typeof timestamp === 'string') {
-      // Handle high-precision timestamps like "2025-05-29 03:11:25.29217459"
-      const date = new Date(timestamp.replace(' ', 'T') + (timestamp.includes('Z') ? '' : 'Z'));
-      time = date.getTime();
-      if (isNaN(time)) return 0;
-    } else if (typeof timestamp === 'number') {
-      time = new Date(timestamp).getTime();
-      if (isNaN(time)) return 0;
-    } else {
-      time = new Date(timestamp).getTime();
-      if (isNaN(time)) return 0;
-    }
-
-    return time * 1000000; // Convert milliseconds to nanoseconds
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn('Error converting timestamp to nanos:', timestamp, error);
-    return 0;
-  }
-}
-
-function extractStatusCode(status: any): number {
-  if (!status) return 0;
-
-  if (typeof status === 'object' && status.code !== undefined) {
-    return status.code;
-  }
-
-  if (typeof status === 'number') {
-    return status;
-  }
-
-  return 0;
 }

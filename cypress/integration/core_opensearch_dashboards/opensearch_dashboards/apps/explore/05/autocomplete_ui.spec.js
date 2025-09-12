@@ -61,6 +61,8 @@ export const runAutocompleteTests = () => {
 
             const editorType = 'exploreQueryPanelEditor';
 
+            createQuery(config, false); // use mouse
+
             cy.getElementByTestId(editorType)
               .find('.monaco-editor')
               .should('be.visible')
@@ -93,7 +95,7 @@ export const runAutocompleteTests = () => {
 
             cy.osd.waitForLoader(true);
             cy.wait(1000);
-            validateQueryResults('unique_category', 'Configuration');
+            validateQueryResults('unique_category', 'Development');
           });
 
           it('should build query using keyboard shortcuts', () => {
@@ -112,7 +114,7 @@ export const runAutocompleteTests = () => {
 
             cy.osd.waitForLoader(true);
             cy.wait(2000);
-            validateQueryResults('unique_category', 'Configuration');
+            validateQueryResults('unique_category', 'Development');
           });
 
           it('should validate that error markers are shown for invalide query', () => {

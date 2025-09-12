@@ -8,8 +8,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TableRow, TableRowProps } from './table_row';
 
 // Mock the child components
-jest.mock('../table_cell/table_source_cell', () => ({
-  TableSourceCell: ({ isShortDots }: { isShortDots: boolean }) => (
+jest.mock('../table_cell/source_field_table_cell', () => ({
+  SourceFieldTableCell: ({ isShortDots }: { isShortDots: boolean }) => (
     <div data-test-subj="table-source-cell">Source Cell - Short dots: {isShortDots.toString()}</div>
   ),
 }));
@@ -24,9 +24,11 @@ jest.mock('../table_cell/table_cell', () => ({
   }) => <td data-test-subj={`table-cell-${columnId}`}>{sanitizedCellValue}</td>,
 }));
 
-jest.mock('../../doc_viewer/doc_viewer', () => ({
-  DocViewer: ({ renderProps }: { renderProps: any }) => (
-    <div data-test-subj="doc-viewer">Doc Viewer for {renderProps.hit._id}</div>
+jest.mock('./expanded_table_row/expanded_table_row', () => ({
+  ExpandedTableRow: ({ row }: { row: any }) => (
+    <tr data-test-subj="expanded-table-row">
+      <td>Expanded Table Row for {row._id}</td>
+    </tr>
   ),
 }));
 
@@ -99,13 +101,13 @@ describe('TableRow', () => {
 
     const expandButton = screen.getByRole('button');
 
-    // Initially collapsed - check the button's icon type
-    expect(screen.queryByTestId('doc-viewer')).not.toBeInTheDocument();
+    // Initially collapsed
+    expect(screen.queryByTestId('expanded-table-row')).not.toBeInTheDocument();
 
     // Click to expand
     fireEvent.click(expandButton);
-    expect(screen.getByTestId('doc-viewer')).toBeInTheDocument();
-    expect(screen.getByText('Doc Viewer for test-row-1')).toBeInTheDocument();
+    expect(screen.getByTestId('expanded-table-row')).toBeInTheDocument();
+    expect(screen.getByText('Expanded Table Row for test-row-1')).toBeInTheDocument();
   });
 
   it('renders highlighted row when isAnchor is true', () => {
@@ -174,25 +176,25 @@ describe('TableRow', () => {
     expect(screen.getByTestId('table-cell-timestamp')).toBeInTheDocument();
   });
 
-  it('passes correct props to DocViewer when expanded', () => {
+  it('passes correct props to ExpandedTableRow when expanded', () => {
     render(<TableRow {...defaultProps} />);
 
     const expandButton = screen.getByRole('button');
     fireEvent.click(expandButton);
 
-    expect(screen.getByTestId('doc-viewer')).toBeInTheDocument();
-    expect(screen.getByText('Doc Viewer for test-row-1')).toBeInTheDocument();
+    expect(screen.getByTestId('expanded-table-row')).toBeInTheDocument();
+    expect(screen.getByText('Expanded Table Row for test-row-1')).toBeInTheDocument();
   });
 
-  it('calls onClose when filter is applied from DocViewer', () => {
+  it('calls onClose when filter is applied from ExpandedTableRow', () => {
     render(<TableRow {...defaultProps} />);
 
     const expandButton = screen.getByRole('button');
     fireEvent.click(expandButton);
 
-    // The DocViewer is mocked, so we can't directly test the filter callback
+    // The ExpandedTableRow is mocked, so we can't directly test the filter callback
     // but we can verify it renders with the correct structure
-    expect(screen.getByTestId('doc-viewer')).toBeInTheDocument();
+    expect(screen.getByTestId('expanded-table-row')).toBeInTheDocument();
   });
 
   it('handles isShortDots prop correctly', () => {

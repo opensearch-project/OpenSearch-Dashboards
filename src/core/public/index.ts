@@ -102,6 +102,7 @@ import {
 } from './context';
 import { Branding } from '../types';
 import { WorkspacesStart, WorkspacesSetup } from './workspace';
+import { KeyboardShortcutSetup, KeyboardShortcutStart } from './keyboard_shortcut';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -288,6 +289,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link WorkspacesSetup} */
   workspaces: WorkspacesSetup;
+  /** {@link KeyboardShortcutsSetup} */
+  keyboardShortcut: KeyboardShortcutSetup;
 }
 
 /**
@@ -344,6 +347,8 @@ export interface CoreStart {
   };
   /** {@link WorkspacesStart} */
   workspaces: WorkspacesStart;
+  /** {@link KeyboardShortcutStart} */
+  keyboardShortcut: KeyboardShortcutStart;
 }
 
 export {
@@ -415,6 +420,13 @@ export {
   IWorkspaceClient,
   IWorkspaceResponse,
 } from './workspace';
+
+export {
+  KeyboardShortcutSetup,
+  KeyboardShortcutStart,
+  ShortcutDefinition,
+  KeyboardShortcutHelpModal,
+} from './keyboard_shortcut';
 
 export { debounce } from './utils';
 

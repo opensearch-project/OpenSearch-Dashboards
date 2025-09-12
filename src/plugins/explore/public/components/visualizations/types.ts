@@ -7,9 +7,6 @@ import { ChartStyleControlMap } from '../visualizations/utils/use_visualization_
 
 type AxisSupportedChartTypes = 'bar' | 'scatter' | 'heatmap';
 export type AxisSupportedStyles = ChartStyleControlMap[AxisSupportedChartTypes];
-export interface CompleteAxisWithStyle extends Partial<VisColumn> {
-  styles: StandardAxes;
-}
 
 export enum Positions {
   RIGHT = 'right',
@@ -33,15 +30,20 @@ export interface VisualizationRule {
   id: string; // Unique rule identifier
   name: string;
   description?: string;
+  /**
+   * This function checks if the rule can be matched for the given data,
+   * If `NOT_MATCH`, the charts defined by this rule cannot be created with the data
+   * If `EXACT_MATCH`, the charts defined by this rule can be created automatically with the data
+   * If `OVER_MATCH`, the charts defined by this rule can be created but requires to select less fields
+   */
   matches: (
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
-  ) => boolean;
-  matchIndex: number[];
+  ) => 'NOT_MATCH' | 'EXACT_MATCH' | 'COMPATIBLE_MATCH';
   chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
-  // TODO: rename it, the name is inappropriate, it doesn't create expression
-  toExpression?: (
+  // TODO: refactor to access an object of options instead of a list of arguments
+  toSpec?: (
     transformedData: Array<Record<string, any>>,
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
@@ -158,9 +160,10 @@ export enum AxisRole {
   SIZE = 'size',
   Y_SECOND = 'y2',
   Value = 'value',
+  Time = 'time',
 }
 
-// for heatmap the axies can serve as value axis or category axis in 2 scienrios
+// for heatmap the axes can serve as value axis or category axis in 2 scenarios
 
 export interface Grid {
   showLines: boolean;
@@ -206,13 +209,55 @@ export interface RangeValue {
   min?: number;
   max?: number;
 }
+export interface Threshold {
+  value: number;
+  color: string;
+}
 
-export enum LabelAggregationType {
+export enum AggregationType {
   SUM = 'sum',
   MEAN = 'mean',
   MAX = 'max',
   MIN = 'min',
+  COUNT = 'count',
   NONE = 'none',
 }
 
+export interface BucketOptions {
+  aggregationType?: AggregationType;
+  // exclusive for time-series histogram
+  bucketTimeUnit?: TimeUnit;
+
+  // exclusive for numerical histogram
+  bucketSize?: number;
+  bucketCount?: number;
+}
+
+export enum TimeUnit {
+  AUTO = 'auto',
+  YEAR = 'year',
+  MONTH = 'yearmonth',
+  DATE = 'yearmonthdate',
+  HOUR = 'yearmonthdatehours',
+  MINUTE = 'yearmonthdatehoursminutes',
+  SECOND = 'yearmonthdatehoursminutesseconds',
+}
+
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
+
+export type PercentageColor = 'standard' | 'inverted';
+
+export enum FilterOperator {
+  Contains = 'contains',
+  Equals = 'equals',
+  Equal = '=',
+  NotEqual = '!=',
+  GreaterThan = '>',
+  GreaterThanOrEqual = '>=',
+  LessThan = '<',
+  LessThanOrEqual = '<=',
+}
+
+export type ColorMode = 'auto' | 'colored_text' | 'colored_background';
+
+export type CellAlignment = 'auto' | 'left' | 'center' | 'right';

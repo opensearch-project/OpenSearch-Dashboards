@@ -262,6 +262,22 @@ describe('Area Chart to_expression', () => {
       expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 2);
       expect(thresholdLayer).toHaveProperty('mark.strokeDash');
     });
+
+    it('should fallback to default tooltip format when dateField is missing', () => {
+      const incompleteAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: { ...mockDateColumns[0], column: undefined as any },
+      };
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockDateColumns,
+        mockStyles,
+        incompleteAxisColumnMappings
+      );
+      const tooltip = result.layer[0].encoding.tooltip;
+      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+    });
   });
 
   describe('createMultiAreaChart', () => {
@@ -366,6 +382,24 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
       expect(customTitleResult).toHaveProperty('title', 'Custom Multi-Area Chart');
+    });
+
+    it('should fallback to default tooltip format when dateField is missing', () => {
+      const incompleteAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+        [AxisRole.X]: { ...mockDateColumns[0], column: undefined as any },
+      };
+      const result = createMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        mockDateColumns,
+        mockStyles,
+        incompleteAxisColumnMappings
+      );
+      const tooltip = result.layer[0].encoding.tooltip;
+      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
     });
   });
 
@@ -521,6 +555,25 @@ describe('Area Chart to_expression', () => {
       expect(thresholdLayer).toHaveProperty('mark.color', '#E7664C');
       expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 2);
       expect(thresholdLayer).toHaveProperty('mark.strokeDash');
+    });
+
+    it('should fallback to default tooltip format when dateField is missing', () => {
+      const incompleteAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+        [AxisRole.FACET]: mockCategoricalColumns[1],
+        [AxisRole.X]: { ...mockDateColumns[0], column: undefined as any },
+      };
+      const result = createFacetedMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        mockStyles,
+        incompleteAxisColumnMappings
+      );
+      const tooltip = result.spec.layer[0].encoding.tooltip;
+      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
     });
   });
 

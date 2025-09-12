@@ -1,0 +1,2 @@
+chore:
+  - Trace:Details Filter errors button update for additional error fields and filtering ([#10501](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10501))

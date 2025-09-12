@@ -9,9 +9,18 @@ import {
   createTimeBarChart,
   createGroupedTimeBarChart,
   createFacetedTimeBarChart,
+  createNumericalHistogramBarChart,
+  createSingleBarChart,
 } from './to_expression';
 import { defaultBarChartStyles, BarChartStyleControls } from './bar_vis_config';
-import { VisColumn, VisFieldType, VEGASCHEMA, AxisRole, ThresholdLineStyle } from '../types';
+import {
+  VisColumn,
+  VisFieldType,
+  VEGASCHEMA,
+  AxisRole,
+  ThresholdLineStyle,
+  AggregationType,
+} from '../types';
 
 describe('bar to_expression', () => {
   // Create mock VisColumn objects
@@ -286,11 +295,11 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
+      const encoding = spec.layer[0].encoding;
       // Check encoding
-      expect(spec.encoding.x.field).toBe('category');
-      expect(spec.encoding.y.field).toBe('count');
-      expect(spec.encoding.y.stack).toBe('zero');
-      expect(spec.encoding.color.field).toBe('category2');
+      expect(encoding.x.field).toBe('category');
+      expect(encoding.y.field).toBe('count');
+      expect(encoding.color.field).toBe('category2');
     });
 
     test('handles different title display options', () => {
@@ -598,6 +607,36 @@ describe('bar to_expression', () => {
         createTimeBarChart(mockData, [mockNumericalColumn], [], defaultBarChartStyles);
       }).toThrow('Time bar chart requires at least one numerical column and one date column');
     });
+
+    test('uses xAxis as numericalAxis when xAxis is not temporal', () => {
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockNumericalColumn,
+        [AxisRole.Y]: mockDateColumn,
+      };
+
+      const customStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: {
+          show: true,
+          titleName: '',
+        },
+      };
+
+      const spec = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        customStyles,
+        mockAxisColumnMappings
+      );
+
+      // Check title uses xAxis as numericalAxis
+      expect(spec.title).toBe('Count Over Time');
+      expect(spec.layer[0].encoding.x.field).toBe('count');
+      expect(spec.layer[0].encoding.x.type).toBe('quantitative');
+      expect(spec.layer[0].encoding.y.field).toBe('date');
+      expect(spec.layer[0].encoding.y.type).toBe('temporal');
+    });
   });
 
   describe('createGroupedTimeBarChart', () => {
@@ -621,12 +660,13 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
+      const encoding = spec.layer[0].encoding;
       // Check encoding
-      expect(spec.encoding.x.field).toBe('date');
-      expect(spec.encoding.x.type).toBe('temporal');
-      expect(spec.encoding.y.field).toBe('count');
-      expect(spec.encoding.y.type).toBe('quantitative');
-      expect(spec.encoding.color.field).toBe('category');
+      expect(encoding.x.field).toBe('date');
+      expect(encoding.x.type).toBe('temporal');
+      expect(encoding.y.field).toBe('count');
+      expect(encoding.y.type).toBe('quantitative');
+      expect(encoding.color.field).toBe('category');
     });
 
     test('handles different title display options', () => {
@@ -720,11 +760,12 @@ describe('bar to_expression', () => {
         mockAxisColumnMappings
       );
 
+      const mark = spec.layer[0].mark;
       // Check bar styling
-      expect(spec.mark.size).toBe(10); // 0.5 * 20
-      expect(spec.mark.binSpacing).toBe(2); // 0.2 * 10
-      expect(spec.mark.stroke).toBe('#FF0000');
-      expect(spec.mark.strokeWidth).toBe(2);
+      expect(mark.size).toBe(10); // 0.5 * 20
+      expect(mark.binSpacing).toBe(2); // 0.2 * 10
+      expect(mark.stroke).toBe('#FF0000');
+      expect(mark.strokeWidth).toBe(2);
     });
 
     test('adds threshold line when enabled', () => {
@@ -1021,6 +1062,108 @@ describe('bar to_expression', () => {
       }).toThrow(
         'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
       );
+    });
+  });
+
+  describe('createNumericalHistogramBarChart', () => {
+    const mockNumericalColumn2 = {
+      id: 2,
+      name: 'sum',
+      column: 'sum',
+      schema: VisFieldType.Numerical,
+      validValuesCount: 100,
+      uniqueValuesCount: 50,
+    };
+
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockNumericalColumn,
+      [AxisRole.Y]: mockNumericalColumn2,
+    };
+    test('creates a numerical histogram bar chart spec', () => {
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn, mockNumericalColumn2],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.$schema).toBe(VEGASCHEMA);
+      expect(spec.data.values).toBe(mockData);
+      expect(spec.layer).toHaveLength(1);
+
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.type).toBe('bar');
+      expect(mainLayer.mark.tooltip).toBe(true);
+      expect(mainLayer.encoding.x.field).toBe('count');
+      expect(mainLayer.encoding.x.type).toBe('quantitative');
+      expect(mainLayer.encoding.y.field).toBe('sum');
+      expect(mainLayer.encoding.y.aggregate).toBe('sum');
+      expect(mainLayer.encoding.y.type).toBe('quantitative');
+    });
+
+    test('applies bucket options correctly', () => {
+      const stylesWithBucket = {
+        ...defaultBarChartStyles,
+        bucket: {
+          bucketSize: 50,
+          aggregationType: AggregationType.SUM,
+        },
+      };
+
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn, mockNumericalColumn2],
+        stylesWithBucket,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
+      expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
+    });
+  });
+
+  describe('createSingleBarChart', () => {
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockNumericalColumn,
+    };
+    test('creates a numerical histogram bar chart spec', () => {
+      const spec = createSingleBarChart(
+        mockData,
+        [mockNumericalColumn],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.$schema).toBe(VEGASCHEMA);
+      expect(spec.data.values).toBe(mockData);
+      expect(spec.layer).toHaveLength(1);
+
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.type).toBe('bar');
+      expect(mainLayer.mark.tooltip).toBe(true);
+      expect(mainLayer.encoding.x.field).toBe('count');
+      expect(mainLayer.encoding.x.type).toBe('quantitative');
+      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
+    });
+
+    test('applies bucket options correctly, single bar aggregation should only be count', () => {
+      const stylesWithBucket = {
+        ...defaultBarChartStyles,
+        bucket: {
+          bucketSize: 50,
+          aggregationType: AggregationType.SUM,
+        },
+      };
+
+      const spec = createSingleBarChart(
+        mockData,
+        [mockNumericalColumn],
+        stylesWithBucket,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
+      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
     });
   });
 });
