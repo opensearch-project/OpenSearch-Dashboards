@@ -13,6 +13,7 @@ import {
 } from './gauge_chart_utils';
 import { calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
+import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
@@ -31,10 +32,7 @@ export const createGauge = (
   let numericalValues: number[] = [];
   let maxNumber: number = 0;
   if (numericField) {
-    numericalValues = transformedData
-      .map((d) => Number(d[numericField]))
-      .filter((n) => !Number.isNaN(n));
-
+    numericalValues = transformedData.map((d) => d[numericField]);
     maxNumber = Math.max(...numericalValues);
   }
 
@@ -42,7 +40,14 @@ export const createGauge = (
 
   const calculatedValue = calculateValue(numericalValues, styleOptions.valueCalculation);
 
+  const isValidNumber =
+    calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
+
   const targetValue = calculatedValue || 0;
+
+  const selectedUnit = getUnitById(styleOptions?.unitId);
+
+  const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
   const minBase = styleOptions?.min || 0;
   const maxBase = styleOptions?.max || maxNumber;
@@ -59,7 +64,7 @@ export const createGauge = (
 
   // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color
   const fillColor =
-    !targetThreshold || minBase > targetValue || minBase >= maxBase
+    !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
       ? '#cbd1d6'
       : targetThreshold.color;
 
@@ -69,7 +74,7 @@ export const createGauge = (
     { name: 'centerX', expr: 'width/2' },
     { name: 'centerY', expr: 'height/2 + outerRadius/4' },
     { name: 'radiusRef', expr: 'min(width/2, height/2)' },
-    { name: 'outerRadius', expr: 'radiusRef * 0.9' },
+    { name: 'outerRadius', expr: 'radiusRef * 1.1' },
     { name: 'innerRadius', expr: 'outerRadius - outerRadius * 0.25' },
 
     { name: 'backgroundColor', value: '#cbd1d6' },
@@ -80,6 +85,7 @@ export const createGauge = (
     { name: 'fontColor', value: colors.text },
 
     { name: 'mainValue', value: targetValue },
+    { name: 'displayValue', value: displayValue },
     {
       name: 'usedValue',
       expr: 'min(max(minValue, mainValue), maxValue)',
@@ -147,11 +153,15 @@ export const createGauge = (
         align: 'center',
         y: { expr: 'centerY' },
         x: { expr: 'centerX' },
-        dy: { expr: '-fontFactor*30' },
-        fontSize: { expr: 'fontFactor * 30' },
+        dy: { expr: `-fontFactor*30 * ${selectedUnit?.fontScale ?? 1}` },
+        fontSize: { expr: `fontFactor * 25 * ${selectedUnit?.fontScale ?? 1}` },
         fill: { expr: 'fillColor' },
       },
-      encoding: { text: { value: { expr: "format(mainValue, '.1f')" } } },
+      encoding: {
+        text: {
+          value: { expr: 'displayValue' },
+        },
+      },
     },
     ...titleLayer,
   ];

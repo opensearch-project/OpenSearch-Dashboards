@@ -14,6 +14,16 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+jest.mock('../style_panel/unit/unit_panel', () => ({
+  UnitPanel: jest.fn(({ unitId, onUnitChange }) => (
+    <div data-test-subj="mockGaugeUnitPanel">
+      <select data-test-subj="changeUnit" onClick={() => onUnitChange('number')}>
+        <option value="number">Number</option>
+      </select>
+    </div>
+  )),
+}));
+
 jest.mock('../style_panel/threshold/threshold_panel', () => ({
   ThresholdPanel: jest.fn(
     ({
@@ -167,5 +177,17 @@ describe('GaugeVisStyleControls', () => {
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       thresholds: [{ value: 50, color: '#FF0000' }],
     });
+  });
+
+  it('renders unit panel', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+    expect(screen.getByTestId('mockGaugeUnitPanel')).toBeInTheDocument();
+  });
+
+  it('calls onStyleChange when unit is changed', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+    const unitSelect = screen.getByTestId('changeUnit');
+    fireEvent.click(unitSelect);
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ unitId: 'number' });
   });
 });

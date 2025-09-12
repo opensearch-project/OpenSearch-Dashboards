@@ -73,8 +73,8 @@ describe('to_expression', () => {
       // Verify the main layer (text mark)
       expect(result.layer[0]).toHaveProperty('mark.type', 'text');
       expect(result.layer[0]).toHaveProperty('mark.fontSize', 60);
-      expect(result.layer[0]).toHaveProperty('encoding.text.field', 'formattedValue');
-      expect(result.layer[0]).toHaveProperty('encoding.text.type', 'quantitative');
+      expect(result.layer[0]).toHaveProperty('encoding.text.field', 'value');
+      expect(result.layer[0]).toHaveProperty('encoding.text.type', 'nominal');
 
       // Verify the title layer
       expect(result.layer[1]).toHaveProperty('mark.type', 'text');
