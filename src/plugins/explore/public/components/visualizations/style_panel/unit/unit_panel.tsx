@@ -17,17 +17,9 @@ export interface UnitPanelProps {
 
 export const UnitPanel = ({ unit, onUnitChange }: UnitPanelProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const [popoverWidth, setPopoverWidth] = useState(0);
   const [lastPanelId, setLastPanelId] = useState(0);
-  const popoverRef = useRef<HTMLDivElement>(null);
 
   const selectedUnit = getUnitById(unit);
-
-  useEffect(() => {
-    if (popoverRef.current) {
-      setPopoverWidth(popoverRef.current.offsetWidth);
-    }
-  }, []);
 
   const handleChangeUnit = useCallback(
     (item: string | undefined) => {
@@ -115,9 +107,8 @@ export const UnitPanel = ({ unit, onUnitChange }: UnitPanelProps) => {
           panelPaddingSize="none"
           anchorPosition="downLeft"
           hasArrow={false}
-          popoverRef={popoverRef}
         >
-          <div style={{ width: popoverWidth }}>
+          <div style={{ width: 220 }}>
             <EuiContextMenu
               data-test-subj="unit_panel_context_menu"
               size="s"
