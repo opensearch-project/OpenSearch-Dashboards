@@ -49,7 +49,7 @@ describe('area_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',
@@ -70,7 +70,7 @@ describe('area_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',

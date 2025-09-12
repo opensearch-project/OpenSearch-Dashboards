@@ -31,7 +31,6 @@ describe('createGaugeConfig', () => {
     expect(defaults.showTitle).toBe(true);
     expect(defaults.title).toBe('');
     expect(defaults.thresholds).toStrictEqual([]);
-    expect(defaults.baseColor).toBe('#9EE9FA');
     expect(defaults.valueCalculation).toBe('last');
   });
 

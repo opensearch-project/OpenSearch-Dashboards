@@ -177,7 +177,8 @@ describe('to_expression', () => {
       );
 
       // Verify the donut configuration
-      expect(result.layer[0]).toHaveProperty('mark.innerRadius', 30);
+      expect(result.layer[0]).toHaveProperty('mark.innerRadius', { expr: '7*stepSize' });
+      expect(result.layer[0]).toHaveProperty('mark.radius', { expr: '9*stepSize' });
     });
 
     it('should include value layer when showValues is true', () => {
