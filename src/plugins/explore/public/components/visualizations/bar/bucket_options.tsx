@@ -51,6 +51,7 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
             onChange={(e) =>
               updateBucketOption('aggregationType', e.target.value as AggregationType)
             }
+            onMouseUp={(e) => e.stopPropagation()}
             options={labelType}
           />
         </EuiFormRow>
@@ -66,6 +67,7 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
             compressed
             value={styles?.bucketTimeUnit ?? defaultBarChartStyles.bucket?.bucketTimeUnit}
             onChange={(e) => updateBucketOption('bucketTimeUnit', e.target.value as TimeUnit)}
+            onMouseUp={(e) => e.stopPropagation()}
             options={timeUnits}
           />
         </EuiFormRow>

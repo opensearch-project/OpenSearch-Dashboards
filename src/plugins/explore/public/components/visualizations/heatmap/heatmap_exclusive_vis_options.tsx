@@ -287,6 +287,7 @@ export const HeatmapLabelVisOptions = ({
                 compressed
                 value={styles.type}
                 onChange={(e) => updateLabelOption('type', e.target.value as AggregationType)}
+                onMouseUp={(e) => e.stopPropagation()}
                 options={labelType}
               />
             </EuiFormRow>
