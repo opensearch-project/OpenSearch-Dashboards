@@ -58,6 +58,8 @@ describe('table_vis_config', () => {
         cellTypes: [],
         thresholds: [],
         baseColor: '#000000',
+        showStyleSelector: true,
+        pageSizeOptions: [],
       });
     });
   });

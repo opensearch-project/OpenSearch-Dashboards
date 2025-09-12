@@ -223,10 +223,20 @@ export const TableVis = React.memo(({ rows, columns, styleOptions }: TableVisPro
         columns={dataGridColumns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         rowCount={filteredRows.length}
-        pagination={{ ...pagination, onChangePage, onChangeItemsPerPage }}
+        pagination={{
+          ...pagination,
+          onChangePage,
+          onChangeItemsPerPage,
+          ...(styleOptions?.pageSizeOptions
+            ? { pageSizeOptions: styleOptions.pageSizeOptions }
+            : {}),
+        }}
         renderCellValue={renderCellValue}
         renderFooterCellValue={styleOptions?.showFooter ? renderFooterCellValue : undefined}
-        toolbarVisibility={{ showFullScreenSelector: false }}
+        toolbarVisibility={{
+          showFullScreenSelector: false,
+          showStyleSelector: styleOptions?.showStyleSelector,
+        }}
         gridStyle={{ rowHover: 'highlight' }}
         leadingControlColumns={[]}
         trailingControlColumns={[]}

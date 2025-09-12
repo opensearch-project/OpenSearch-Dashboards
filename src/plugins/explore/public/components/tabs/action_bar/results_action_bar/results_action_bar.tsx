@@ -93,9 +93,13 @@ export const DiscoverResultsActionBar = ({
               >
                 {isNonTableChart && dataset && rows?.length ? (
                   <EuiFlexItem grow={false}>
-                    <EuiToolTip content="View raw data table for this visualization">
+                    <EuiToolTip
+                      content={i18n.translate('explore.discover.showRawDataTooltip', {
+                        defaultMessage: 'View raw data table for this visualization',
+                      })}
+                    >
                       <EuiSwitch
-                        label={i18n.translate('explore.explore.discover.showRawData', {
+                        label={i18n.translate('explore.discover.showRawData', {
                           defaultMessage: 'Show raw data',
                         })}
                         checked={!!showRawTable}

@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
-import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import { ChartConfig, VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { TableChartStyleControls } from './table/table_vis_config';
@@ -45,8 +44,6 @@ export const VisualizationRender = (props: Props) => {
     visualizationData?.dateColumns,
   ]);
 
-  const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ column }) => column));
-
   const spec = useMemo(() => {
     if (!visualizationData) {
       return;
@@ -67,31 +64,6 @@ export const VisualizationRender = (props: Props) => {
     );
   }, [columns, visConfig, visualizationData]);
 
-  const dataGridColumns: EuiDataGridColumn[] = useMemo(() => {
-    return columns.map((col) => ({ id: col.column, displayAsText: col.name }));
-  }, [columns]);
-
-  useEffect(() => {
-    if (!showRawTable || !dataGridColumns.length) {
-      setVisibleColumns([]);
-      return;
-    }
-
-    const columnIds = dataGridColumns.map((col) => col.id);
-    setVisibleColumns((prev) => {
-      if (!prev.length || !prev.every((id) => columnIds.includes(id))) {
-        return columnIds;
-      }
-      return prev;
-    });
-  }, [showRawTable, dataGridColumns]);
-
-  const renderCellValue = useMemo(() => {
-    return ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-      return rows.hasOwnProperty(rowIndex) ? rows[rowIndex][columnId] : null;
-    };
-  }, [rows]);
-
   if (!visualizationData) {
     return null;
   }
@@ -99,6 +71,7 @@ export const VisualizationRender = (props: Props) => {
   if (visConfig?.type === 'table') {
     return (
       <TableVis
+        key="table-vis-table"
         styleOptions={visConfig?.styles as TableChartStyleControls}
         rows={visualizationData?.transformedData ?? []}
         columns={columns}
@@ -108,14 +81,17 @@ export const VisualizationRender = (props: Props) => {
 
   if (showRawTable) {
     return (
-      <EuiDataGrid
-        aria-label="Show table view"
-        columns={dataGridColumns}
-        rowCount={rows.length}
-        renderCellValue={renderCellValue}
-        columnVisibility={{
-          visibleColumns,
-          setVisibleColumns,
+      <TableVis
+        key="table-vis-raw"
+        rows={rows}
+        columns={columns}
+        styleOptions={{
+          showColumnFilter: false,
+          showFooter: false,
+          pageSize: 10,
+          globalAlignment: 'left',
+          showStyleSelector: false,
+          pageSizeOptions: [10, 50, 100],
         }}
       />
     );
