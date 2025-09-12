@@ -39,11 +39,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  // Determine if the legend should be shown based on the registration of a COLOR or FACET field
-  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
-  const hasFacetMapping = !!axisColumnMappings?.[AxisRole.FACET];
-  // const shouldShowLegend = hasColorMapping || hasFacetMapping;
-
   const bucketType =
     axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Numerical
       ? axisColumnMappings[AxisRole.Y] === undefined

@@ -53,7 +53,7 @@ export const ThresholdPanel = ({
     });
   };
 
-  // only transform data when user saved old metric config or threshold-lines config
+  // only transform data when user saved old custom ranges config or threshold-lines config
   // and once user makes some updates on threshold, will only focus on threshold
   const [localThreshold, setLocalThreshold] = useState<Threshold[]>(() => {
     if (customRanges && colorSchema && !thresholdsOptions?.thresholds)
