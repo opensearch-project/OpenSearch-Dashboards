@@ -59,7 +59,6 @@ describe('table_vis_config', () => {
         thresholds: [],
         baseColor: '#000000',
         showStyleSelector: true,
-        pageSizeOptions: [],
       });
     });
   });

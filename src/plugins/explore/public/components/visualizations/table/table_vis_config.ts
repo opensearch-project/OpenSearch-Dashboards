@@ -29,7 +29,6 @@ export interface TableChartStyleControls {
   thresholds?: Threshold[];
   baseColor?: string;
   showStyleSelector?: boolean;
-  pageSizeOptions?: number[];
 }
 
 const defaultTableChartStyles: Required<TableChartStyleControls> = {
@@ -42,7 +41,6 @@ const defaultTableChartStyles: Required<TableChartStyleControls> = {
   thresholds: [],
   baseColor: '#000000',
   showStyleSelector: true,
-  pageSizeOptions: [],
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({

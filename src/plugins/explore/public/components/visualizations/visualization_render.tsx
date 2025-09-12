@@ -24,6 +24,16 @@ interface Props {
   ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
 }
 
+const defaultStyleOptions: TableChartStyleControls = {
+  showColumnFilter: false,
+  showFooter: false,
+  pageSize: 10,
+  globalAlignment: 'left',
+  showStyleSelector: false,
+};
+
+const PAGE_SIZE_OPTIONS = [10, 50, 100];
+
 export const VisualizationRender = (props: Props) => {
   const visualizationData = useObservable(props.data$);
   const visConfig = useObservable(props.visConfig$);
@@ -71,7 +81,6 @@ export const VisualizationRender = (props: Props) => {
   if (visConfig?.type === 'table') {
     return (
       <TableVis
-        key="table-vis-table"
         styleOptions={visConfig?.styles as TableChartStyleControls}
         rows={visualizationData?.transformedData ?? []}
         columns={columns}
@@ -82,17 +91,13 @@ export const VisualizationRender = (props: Props) => {
   if (showRawTable) {
     return (
       <TableVis
+        // This key ensures re-rendering when switching to table visualization
+        // from a non-table visualization with the "show raw data" option enabled
         key="table-vis-raw"
         rows={rows}
         columns={columns}
-        styleOptions={{
-          showColumnFilter: false,
-          showFooter: false,
-          pageSize: 10,
-          globalAlignment: 'left',
-          showStyleSelector: false,
-          pageSizeOptions: [10, 50, 100],
-        }}
+        styleOptions={defaultStyleOptions}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
       />
     );
   }
