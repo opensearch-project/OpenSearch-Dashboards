@@ -1,9 +1,0 @@
-{
-  "id": "assistant",
-  "version": "1.0.0",
-  "opensearchDashboardsVersion": "opensearchDashboards",
-  "server": true,
-  "ui": true,
-  "requiredPlugins": ["navigation", "uiActions", "data", "embeddable", "contextProvider"],
-  "optionalPlugins": ["dashboard", "discover"]
-}
