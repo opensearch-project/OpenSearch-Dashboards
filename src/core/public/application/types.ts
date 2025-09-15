@@ -48,6 +48,7 @@ import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';
 import { WorkspacesStart } from '../workspace';
+import { GlobalInteractionInterceptor } from '../global_interaction/global_interaction_interceptor';
 
 /**
  * Accessibility status of an application.
@@ -870,6 +871,12 @@ export interface InternalApplicationStart extends Omit<ApplicationStart, 'regist
 
   // Internal APIs
   getComponent(): JSX.Element | null;
+
+  /**
+   * Global interaction interceptor for capturing all user interactions
+   * @internal
+   */
+  globalInteractionInterceptor?: GlobalInteractionInterceptor;
 
   /**
    * The potential action menu set by the currently mounted app.

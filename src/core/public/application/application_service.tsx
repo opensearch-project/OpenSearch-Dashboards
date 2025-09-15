@@ -60,6 +60,7 @@ import {
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 import { WorkspacesStart } from '../workspace';
+import { GlobalInteractionInterceptor } from '../global_interaction/global_interaction_interceptor';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -124,6 +125,7 @@ export class ApplicationService {
   private readonly appInternalStates = new Map<string, AppInternalState>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
   private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
+  private globalInteractionInterceptor?: GlobalInteractionInterceptor;
 
   // HeaderControls
   private currentLeftControls$ = new BehaviorSubject<MountPoint | undefined>(undefined);
@@ -242,6 +244,43 @@ export class ApplicationService {
 
     this.registrationClosed = true;
     window.addEventListener('beforeunload', this.onBeforeUnload);
+
+    // Initialize Global Interaction Interceptor with delayed UI Actions injection
+    this.globalInteractionInterceptor = new GlobalInteractionInterceptor({
+      getCurrentApp: () => this.currentAppId$.getValue(),
+      contextProvider: (window as any).contextProvider, // Will be available after context provider starts
+      uiActions: undefined, // Will be injected later when UI Actions plugin starts
+    });
+
+    // Start global interaction capture
+    this.globalInteractionInterceptor.start();
+    console.log(
+      '🎯 Global Interaction Interceptor initialized and started (UI Actions will be injected later)'
+    );
+
+    // Make UI Actions injection method globally available for plugins to call
+    (window as any).injectUIActionsToGlobalInterceptor = (uiActions: any) => {
+      if (this.globalInteractionInterceptor) {
+        this.globalInteractionInterceptor.injectUIActions(uiActions);
+        console.log('✅ UI Actions injected into Global Interaction Interceptor');
+      }
+    };
+
+    // Make interaction history globally accessible for testing
+    (window as any).getInteractionHistory = () =>
+      this.globalInteractionInterceptor?.getInteractionHistory();
+    (window as any).getRecentInteractions = (count?: number) =>
+      this.globalInteractionInterceptor?.getRecentInteractions(count);
+    (window as any).getInteractionStats = () =>
+      this.globalInteractionInterceptor?.getHistoryStats();
+    (window as any).clearInteractionHistory = () =>
+      this.globalInteractionInterceptor?.clearHistory();
+
+    console.log('🌐 Global interaction history methods available:');
+    console.log('  - window.getInteractionHistory() - Get all interactions');
+    console.log('  - window.getRecentInteractions(10) - Get recent N interactions');
+    console.log('  - window.getInteractionStats() - Get statistics');
+    console.log('  - window.clearInteractionHistory() - Clear history');
 
     const { capabilities } = await this.capabilities.start({
       appIds: [...this.mounters.keys()],
@@ -414,6 +453,7 @@ export class ApplicationService {
           />
         );
       },
+      globalInteractionInterceptor: this.globalInteractionInterceptor,
     };
   }
 
@@ -550,6 +590,11 @@ export class ApplicationService {
     this.statusUpdaters$.complete();
     this.subscriptions.forEach((sub) => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);
+
+    // Stop global interaction interceptor
+    if (this.globalInteractionInterceptor) {
+      this.globalInteractionInterceptor.stop();
+    }
   }
 }
 

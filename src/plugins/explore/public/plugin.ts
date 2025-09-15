@@ -463,6 +463,9 @@ export class ExplorePlugin
       (window as any).exploreContextContributor = this.contextContributor;
       console.log('🌐 Explore Context Contributor available at window.exploreContextContributor');
 
+      // Register context extraction rules with Global Interaction Interceptor
+      this.registerGlobalInteractionRules(core);
+
       // Add debugging for document expansion detection
       this.setupDocumentExpansionDetection();
     } else {
@@ -619,6 +622,158 @@ export class ExplorePlugin
     );
 
     console.log('✅ Document expansion detection set up');
+  }
+
+  /**
+   * Register context extraction rules with the Global Interaction Interceptor
+   */
+  private registerGlobalInteractionRules(core: CoreStart): void {
+    console.log('🔧 Registering Global Interaction Rules for Explore');
+
+    // Check if Global Interaction Interceptor is available
+    const globalInteractionInterceptor =
+      (core as any).globalInteractionInterceptor || (window as any).globalInteractionInterceptor;
+    if (!globalInteractionInterceptor) {
+      console.warn('⚠️ Global Interaction Interceptor not available');
+      console.log(
+        '🔍 DEBUG: Checked core.globalInteractionInterceptor:',
+        !!(core as any).globalInteractionInterceptor
+      );
+      console.log(
+        '🔍 DEBUG: Checked window.globalInteractionInterceptor:',
+        !!(window as any).globalInteractionInterceptor
+      );
+      return;
+    }
+
+    // Register context extraction rules for Explore-specific elements
+    const exploreRules = [
+      {
+        // Document expansion button
+        selector: '[data-test-subj="docTableExpandToggleColumn"]',
+        contextExtractor: (element: HTMLElement, event: MouseEvent) => {
+          const tableRow = element.closest('tr');
+          if (!tableRow) return null;
+
+          const rowIndex = Array.from(tableRow.parentElement?.children || []).indexOf(tableRow);
+
+          // Extract document data from the row
+          const documentData: Record<string, any> = {};
+
+          // Try to find the document viewer or expanded content
+          const docViewer =
+            tableRow.querySelector('.osdDocViewer') ||
+            tableRow.nextElementSibling?.querySelector('.osdDocViewer');
+
+          if (docViewer) {
+            // Extract from document viewer if available
+            const docViewTable = docViewer.querySelector('.osdDocViewerTable');
+            if (docViewTable) {
+              const rows = docViewTable.querySelectorAll('tr');
+              rows.forEach((row) => {
+                const fieldCell = row.querySelector('.osdDocViewer__field');
+                const valueCell = row.querySelector('.osdDocViewer__value');
+                if (fieldCell && valueCell) {
+                  const fieldName = fieldCell.textContent?.trim();
+                  const fieldValue = valueCell.textContent?.trim();
+                  if (fieldName && fieldValue) {
+                    documentData[fieldName] = fieldValue;
+                  }
+                }
+              });
+            }
+          }
+
+          // Fallback: extract from table cells if no document viewer found
+          if (Object.keys(documentData).length === 0) {
+            const cells = tableRow.querySelectorAll('td');
+            cells.forEach((cell, index) => {
+              const fieldName = cell.getAttribute('data-test-subj') || `field_${index}`;
+              const textContent = cell.textContent?.trim() || '';
+              if (textContent && fieldName !== 'docTableExpandToggleColumn') {
+                documentData[fieldName] = textContent;
+              }
+            });
+          }
+
+          const documentId = documentData._id || documentData.id || `doc_${rowIndex}_${Date.now()}`;
+
+          return {
+            type: 'DOCUMENT_EXPAND',
+            documentId,
+            rowIndex,
+            documentData,
+            expandedFields: Object.keys(documentData).length,
+            timestamp: Date.now(),
+          };
+        },
+      },
+      {
+        // Filter controls
+        selector: '[data-test-subj*="filter"]',
+        contextExtractor: (element: HTMLElement, event: MouseEvent) => {
+          const filterType = element.getAttribute('data-test-subj') || 'unknown_filter';
+          const filterValue = element.textContent?.trim() || '';
+
+          return {
+            type: 'FILTER_ACTION',
+            filterType,
+            filterValue,
+            action: 'click',
+            timestamp: Date.now(),
+          };
+        },
+      },
+      {
+        // Search and query controls
+        selector: '[data-test-subj*="query"], [data-test-subj*="search"]',
+        contextExtractor: (element: HTMLElement, event: MouseEvent) => {
+          const controlType = element.getAttribute('data-test-subj') || 'unknown_control';
+          const inputValue =
+            (element as HTMLInputElement).value || element.textContent?.trim() || '';
+
+          return {
+            type: 'QUERY_ACTION',
+            controlType,
+            inputValue,
+            action: event.type,
+            timestamp: Date.now(),
+          };
+        },
+      },
+      {
+        // Navigation elements
+        selector: '[data-test-subj*="nav"], [data-test-subj*="tab"]',
+        contextExtractor: (element: HTMLElement, event: MouseEvent) => {
+          const navType = element.getAttribute('data-test-subj') || 'unknown_nav';
+          const navText = element.textContent?.trim() || '';
+
+          return {
+            type: 'NAVIGATION',
+            navType,
+            navText,
+            action: 'click',
+            timestamp: Date.now(),
+          };
+        },
+      },
+    ];
+
+    // Register each rule with the Global Interaction Interceptor
+    exploreRules.forEach((rule, index) => {
+      try {
+        globalInteractionInterceptor.registerContextRule(
+          `explore_rule_${index}`,
+          rule.selector,
+          rule.contextExtractor
+        );
+        console.log(`✅ Registered rule ${index}: ${rule.selector}`);
+      } catch (error) {
+        console.error(`❌ Failed to register rule ${index}:`, error);
+      }
+    });
+
+    console.log('✅ Global Interaction Rules registered for Explore');
   }
 
   private registerEmbeddable(

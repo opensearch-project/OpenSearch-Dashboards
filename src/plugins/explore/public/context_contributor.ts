@@ -16,6 +16,7 @@ import {
   StatefulContextContributor,
   ContextCapturePattern,
   DocumentExpansionContext,
+  GlobalInteraction,
 } from '../../context_provider/public';
 import { formatExploreContext } from './services/context_formatter';
 
@@ -844,6 +845,66 @@ export class ExploreContextContributor implements StatefulContextContributor {
   /**
    * Cleanup when contributor is unregistered
    */
+  /**
+   * Handle global interactions routed from Global Interaction Interceptor
+   */
+  handleGlobalInteraction(interaction: GlobalInteraction): void {
+    console.log('🔍 Explore handling global interaction:', interaction);
+    console.log('🔍 Interaction type:', interaction.interactionType);
+    console.log('🔍 Test subject:', interaction.testSubj);
+
+    switch (interaction.interactionType) {
+      case 'DOCUMENT_EXPAND':
+        this.handleDocumentExpand({
+          documentId: interaction.documentId || `doc_${Date.now()}`,
+          documentData: interaction.documentData || {},
+          source: 'global_capture',
+        });
+        break;
+
+      case 'FILTER_ACTION':
+        this.handleFieldFilterAdd({
+          fieldName: interaction.fieldName || 'unknown_field',
+          filterValue: interaction.filterValue || 'unknown_value',
+          source: 'global_capture',
+        });
+        break;
+
+      case 'BUTTON_CLICK':
+        // Handle generic button clicks
+        console.log('🔘 Button clicked:', interaction.buttonText);
+        this.updateTransientState('BUTTON_INTERACTION', {
+          buttonText: interaction.buttonText,
+          testSubj: interaction.testSubj,
+          timestamp: interaction.timestamp,
+        });
+        break;
+
+      case 'NAVIGATION_CLICK':
+        // Handle navigation clicks
+        console.log('🧭 Navigation clicked:', interaction.linkText);
+        this.updateTransientState('NAVIGATION_INTERACTION', {
+          linkText: interaction.linkText,
+          href: interaction.href,
+          testSubj: interaction.testSubj,
+          timestamp: interaction.timestamp,
+        });
+        break;
+
+      default:
+        // Store generic interaction with test subject
+        console.log('📝 Generic interaction captured:', interaction.testSubj);
+        this.updateTransientState('GENERIC_INTERACTION', {
+          type: interaction.type,
+          testSubj: interaction.testSubj,
+          className: interaction.className,
+          tagName: interaction.tagName,
+          text: interaction.text,
+          timestamp: interaction.timestamp,
+        });
+    }
+  }
+
   cleanup(): void {
     console.log('🧹 Explore Context Contributor cleanup');
     this.clearTransientState();

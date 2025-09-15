@@ -33,6 +33,19 @@ export interface DynamicContext {
   data: Record<string, any>;
 }
 
+export interface GlobalInteraction {
+  type: string;
+  app?: string;
+  testSubj?: string;
+  className: string;
+  tagName: string;
+  text?: string;
+  timestamp: number;
+  url: string;
+  interactionType?: string;
+  [key: string]: any;
+}
+
 export interface ContextContributor {
   appId: string;
 
@@ -50,6 +63,9 @@ export interface ContextContributor {
   captureDynamicContext?(trigger: string, data: any): Record<string, any>;
   getAvailableActions?(): string[];
   executeAction?(actionType: string, params: any): Promise<any>;
+
+  // NEW: Handle global interactions
+  handleGlobalInteraction?(interaction: GlobalInteraction): void;
 
   // Optional method to check if this contributor can handle a specific app ID
   canHandleApp?(appId: string): boolean;
@@ -171,4 +187,6 @@ export interface ContextProviderStart {
   // Observable methods for real-time context updates
   getStaticContext$(): Observable<StaticContext | null>;
   getDynamicContext$(): Observable<DynamicContext | null>;
+  // NEW: Global interaction capture
+  captureGlobalInteraction(interaction: GlobalInteraction): void;
 }
