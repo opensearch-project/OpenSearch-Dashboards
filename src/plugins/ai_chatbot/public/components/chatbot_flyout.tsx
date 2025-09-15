@@ -205,6 +205,125 @@ Current context: ${contextSummary}
     }
   };
 
+  const handleGenerateSOP = async () => {
+    if (!agent || isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      console.log('📋 Generate SOP button clicked - building investigation workflow prompt');
+
+      // Get interaction history from Global Interaction Capture
+      const interactionHistory = (window as any).getInteractionHistory?.() || [];
+      console.log('🔍 Retrieved interaction history:', interactionHistory.length, 'interactions');
+
+      // Get current context from Context Provider
+      const currentContext = (await (window as any).contextProvider?.getCurrentContext?.()) || {};
+      console.log('🔍 Retrieved current context:', currentContext);
+
+      // Build SOP generation prompt
+      const sopPrompt = buildSOPPrompt(interactionHistory, currentContext);
+      console.log('📋 Built SOP prompt, length:', sopPrompt.length);
+
+      // Send to LLM
+      const response = await agent.processRequest(sopPrompt, context || {});
+
+      const sopMessage: ChatMessage = {
+        id: (Date.now() + 3).toString(),
+        role: 'assistant',
+        content: response,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, sopMessage]);
+    } catch (error: any) {
+      console.error('❌ SOP generation error:', error);
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 3).toString(),
+        role: 'assistant',
+        content: `Sorry, I encountered an error generating the SOP: ${error.message}`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const buildSOPPrompt = (interactions: any[], context: any): string => {
+    const prompt = `You are an expert at analyzing user investigation workflows and generating Standard Operating Procedures (SOPs).
+
+TASK: Generate a structured SOP based on the user's investigation pattern captured through their interactions with OpenSearch Dashboards.
+
+OUTPUT FORMAT:
+1. **Investigation Summary** - Brief overview of what was investigated
+2. **Step-by-Step Procedure** - Exact queries and actions to reproduce the investigation
+3. **Key Findings** - Important discoveries from the investigation
+4. **Evidence Analysis** - What to look for in expanded documents
+5. **Root Cause Conclusion** - Analysis based on the evidence
+6. **Recommended Actions** - Next steps and preventive measures
+7. **Reproducible Queries** - Copy-paste ready queries for future use
+
+GUIDELINES:
+- Include EXACT queries used (copy-paste ready)
+- Reference specific field names and values found
+- Provide clear step-by-step reproduction steps
+- Make the SOP reusable for similar incidents
+- Focus on actionable insights
+
+---
+
+## USER INVESTIGATION WORKFLOW ANALYSIS
+
+### Investigation Timeline:
+${interactions
+  .map(
+    (interaction: any, index: number) => `
+${index + 1}. [${interaction.timestamp}] ${interaction.type?.toUpperCase() || 'INTERACTION'}
+   - Element: ${interaction.testSubj || interaction.tagName || 'unknown'}
+   - Action: ${interaction.interactionType || interaction.type || 'click'}
+   ${interaction.text ? `- Text: "${interaction.text}"` : ''}
+   ${interaction.buttonText ? `- Button: "${interaction.buttonText}"` : ''}
+   ${interaction.context ? `- Context: ${JSON.stringify(interaction.context, null, 2)}` : ''}
+`
+  )
+  .join('\n')}
+
+### Current Context:
+- App: ${context?.appId || 'unknown'}
+- Index Pattern: ${context?.data?.indexPattern || 'unknown'}
+- Time Range: ${context?.data?.timeRange ? JSON.stringify(context.data.timeRange) : 'unknown'}
+- Active Filters: ${context?.data?.filters ? JSON.stringify(context.data.filters) : 'none'}
+- Query: ${context?.data?.query ? JSON.stringify(context.data.query) : 'none'}
+
+### Expanded Documents:
+${
+  context?.data?.expandedDocuments
+    ?.map(
+      (doc: any, index: number) => `
+Document ${index + 1}:
+- ID: ${doc.documentId || 'unknown'}
+- Error Code: ${doc.error_code || 'N/A'}
+- Response Time: ${doc.response_time_ms || 'N/A'}ms
+- Status: ${doc.status || 'N/A'}
+- Key Fields: ${Object.keys(doc).slice(0, 10).join(', ')}
+`
+    )
+    .join('\n') || 'None expanded'
+}
+
+### Investigation Pattern Recognition:
+Based on the interaction sequence, identify:
+1. What type of investigation was performed?
+2. What was the user trying to discover?
+3. What evidence did they gather?
+4. What conclusions can be drawn?
+
+Generate a comprehensive SOP following the specified format that includes EXACT queries and findings for future reproduction.`;
+
+    return prompt;
+  };
+
   const handleSaveToMemory = async () => {
     if (!agent) return;
 
@@ -506,22 +625,40 @@ Current context: ${contextSummary}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              style={{ height: '100%' }}
-            >
-              Send
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  onClick={handleSendMessage}
+                  disabled={!inputMessage.trim() || isLoading}
+                  style={{ height: '100%' }}
+                  data-test-subj="aiAssistantSendButton"
+                >
+                  Send
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="success"
+                  iconType="documentEdit"
+                  onClick={handleGenerateSOP}
+                  disabled={isLoading}
+                  style={{ height: '100%' }}
+                  data-test-subj="aiAssistantGenerateSOPButton"
+                  title="Generate SOP from your investigation workflow"
+                >
+                  Generate SOP
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
         {/* Memory Commands Hint */}
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued" textAlign="center">
-          💡 Try: "list memories" | "manage memory" | "What happened in my last session? list top 5
-          memories"
+          💡 Try: "list memories" | "manage memory" | 📋 Click "Generate SOP" to create
+          investigation procedures
         </EuiText>
       </EuiFlyoutFooter>
     </EuiFlyout>

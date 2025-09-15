@@ -1,0 +1,116 @@
+{
+  "mappings": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "transaction_id": {
+        "type": "keyword"
+      },
+      "session_id": {
+        "type": "keyword"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "event_type": {
+        "type": "keyword"
+      },
+      "step": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "response_code": {
+        "type": "integer"
+      },
+      "response_time_ms": {
+        "type": "integer"
+      },
+      "error_message": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "error_code": {
+        "type": "keyword"
+      },
+      "payment_gateway": {
+        "type": "keyword"
+      },
+      "amount": {
+        "type": "float"
+      },
+      "currency": {
+        "type": "keyword"
+      },
+      "product_category": {
+        "type": "keyword"
+      },
+      "product_id": {
+        "type": "keyword"
+      },
+      "user_agent": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "ip_address": {
+        "type": "ip"
+      },
+      "geo_location": {
+        "properties": {
+          "country": {
+            "type": "keyword"
+          },
+          "state": {
+            "type": "keyword"
+          },
+          "city": {
+            "type": "keyword"
+          }
+        }
+      },
+      "server_instance": {
+        "type": "keyword"
+      },
+      "load_balancer": {
+        "type": "keyword"
+      },
+      "database_query_time_ms": {
+        "type": "integer"
+      },
+      "cache_hit": {
+        "type": "boolean"
+      },
+      "retry_count": {
+        "type": "integer"
+      },
+      "upstream_service": {
+        "type": "keyword"
+      },
+      "upstream_response_time_ms": {
+        "type": "integer"
+      },
+      "circuit_breaker_state": {
+        "type": "keyword"
+      },
+      "thread_pool_active": {
+        "type": "integer"
+      },
+      "memory_usage_percent": {
+        "type": "integer"
+      },
+      "cpu_usage_percent": {
+        "type": "integer"
+      }
+    }
+  }
+}

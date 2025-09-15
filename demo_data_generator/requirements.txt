@@ -1,0 +1,21 @@
+# Python dependencies for E-commerce Performance Demo Data Generator
+
+# Core data generation libraries
+faker==19.6.2
+numpy==1.24.3
+pandas==2.0.3
+
+# HTTP requests for OpenSearch API calls
+requests==2.31.0
+
+# Date/time utilities
+python-dateutil==2.8.2
+
+# JSON handling (built-in, but listed for completeness)
+# json - built-in module
+
+# Optional: Progress bars for large data generation
+tqdm==4.66.1
+
+# Optional: Configuration file handling
+pyyaml==6.0.1

@@ -1,0 +1,20 @@
+{
+  "total_transactions": 19790,
+  "successful_transactions": 19287,
+  "error_transactions": 503,
+  "overall_error_rate": "2.54%",
+  "error_types": {
+    "DB_CONN_EXHAUSTED": 193,
+    "UPSTREAM_SERVICE_ERROR": 211,
+    "CIRCUIT_BREAKER_OPEN": 70,
+    "MEMORY_EXHAUSTED": 19,
+    "PAYMENT_TIMEOUT": 10
+  },
+  "response_time_stats": {
+    "min": 95,
+    "max": 28000,
+    "avg": 599.1859019706923,
+    "p95": 782.0,
+    "p99": 4500.0
+  }
+}
