@@ -5,16 +5,21 @@
 
 import React from 'react';
 import { DiscoverResultsActionBar, DiscoverResultsActionBarProps } from './results_action_bar';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { Provider } from 'react-redux';
 import configureMockStore from 'redux-mock-store';
+import { BehaviorSubject } from 'rxjs';
+import * as visualizationBuilder from '../../../visualizations/visualization_builder';
+import { ChartConfig } from '../../../visualizations/visualization_builder.types';
 
 const mockStore = configureMockStore([]);
 const initialState = {
   ui: { activeTabId: 'logs' },
 };
 const store = mockStore(initialState);
+
+const mockSetShowRawTable = jest.fn();
 
 jest.mock('../download_csv', () => ({
   DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
@@ -40,17 +45,21 @@ const mockRow1: OpenSearchSearchHit<Record<string, number | string>> = {
   _score: 1,
 };
 
-const mockInspectionHanlder = jest.fn();
+const mockInspectionHandler = jest.fn();
 const props: DiscoverResultsActionBarProps = {
   hits: 5,
   showResetButton: false,
   resetQuery: jest.fn(),
   rows: [mockRow1],
   dataset: {} as any,
-  inspectionHanlder: mockInspectionHanlder,
+  inspectionHanlder: mockInspectionHandler,
 };
 
 describe('ResultsActionBar', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('should render the action bar component', () => {
     render(
       <Provider store={store}>
@@ -76,7 +85,7 @@ describe('ResultsActionBar', () => {
       </Provider>
     );
     expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
+    expect(screen.getByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
   });
 
   test('should not render inspector button as it is commented out', () => {
@@ -85,9 +94,7 @@ describe('ResultsActionBar', () => {
         <DiscoverResultsActionBar {...props} rows={[]} />
       </Provider>
     );
-
-    const openInspectorButton = screen.queryByTestId('openInspectorButton');
-    expect(openInspectorButton).not.toBeInTheDocument();
+    expect(screen.queryByTestId('openInspectorButton')).not.toBeInTheDocument();
   });
 
   test('should hide the download CSV button and add to dashboard button when dataset is not provided', () => {
@@ -135,5 +142,31 @@ describe('ResultsActionBar', () => {
     );
     expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
     expect(screen.getByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
+  });
+
+  test('should render and toggle the show raw data switch for non-table visualizations', () => {
+    const mockGetVisualizationBuilder = jest
+      .spyOn(visualizationBuilder, 'getVisualizationBuilder')
+      .mockReturnValue(({
+        visConfig$: new BehaviorSubject<ChartConfig | undefined>({
+          type: 'bar',
+          styles: undefined,
+          axesMapping: undefined,
+        }),
+        showRawTable$: new BehaviorSubject<boolean>(false),
+        setShowRawTable: mockSetShowRawTable,
+      } as unknown) as visualizationBuilder.VisualizationBuilder);
+
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    const showRawDataSwitch = screen.getByTestId('exploreShowRawDataSwitch');
+    expect(showRawDataSwitch).toBeInTheDocument();
+    fireEvent.click(showRawDataSwitch);
+    expect(mockSetShowRawTable).toHaveBeenCalledWith(true);
+
+    mockGetVisualizationBuilder.mockRestore();
   });
 });
