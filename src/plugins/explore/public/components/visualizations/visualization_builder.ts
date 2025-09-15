@@ -41,6 +41,7 @@ export class VisualizationBuilder {
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
+  showRawTable$ = new BehaviorSubject<boolean>(false);
 
   constructor({ getUrlStateStorage, getExpressions }: Options) {
     if (getUrlStateStorage) {
@@ -94,6 +95,10 @@ export class VisualizationBuilder {
     this.setIsInitialized(true);
   }
 
+  setShowRawTable(on: boolean) {
+    this.showRawTable$.next(on);
+  }
+
   setIsInitialized(isInitialized: boolean) {
     this.isInitialized = isInitialized;
   }
@@ -102,6 +107,10 @@ export class VisualizationBuilder {
     if (!chartType || !isChartType(chartType)) {
       this.setVisConfig(undefined);
       return;
+    }
+
+    if (chartType === 'table' && this.showRawTable$.value) {
+      this.showRawTable$.next(false);
     }
 
     const currentVisConfig = this.visConfig$.value;
@@ -330,6 +339,7 @@ export class VisualizationBuilder {
 
     this.visConfig$.complete();
     this.data$.complete();
+    this.showRawTable$.complete();
   }
 
   reset(): void {
@@ -337,6 +347,7 @@ export class VisualizationBuilder {
 
     this.visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
+    this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isInitialized = false;
   }
 
@@ -353,6 +364,7 @@ export class VisualizationBuilder {
     return React.createElement(VisualizationRender, {
       data$: this.data$,
       visConfig$: this.visConfig$,
+      showRawTable$: this.showRawTable$,
       searchContext,
       ExpressionRenderer,
     });
