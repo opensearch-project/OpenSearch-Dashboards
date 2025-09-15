@@ -20,10 +20,11 @@ interface TableVisProps {
   columns: VisColumn[];
   styleOptions?: TableChartStyleControls;
   pageSizeOptions?: number[];
+  showStyleSelector?: boolean;
 }
 
 export const TableVis = React.memo(
-  ({ rows, columns, styleOptions, pageSizeOptions }: TableVisProps) => {
+  ({ rows, columns, styleOptions, pageSizeOptions, showStyleSelector }: TableVisProps) => {
     const pageSize = styleOptions?.pageSize ? styleOptions.pageSize : 10;
     const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ column }) => column));
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
@@ -235,7 +236,7 @@ export const TableVis = React.memo(
           renderFooterCellValue={styleOptions?.showFooter ? renderFooterCellValue : undefined}
           toolbarVisibility={{
             showFullScreenSelector: false,
-            showStyleSelector: styleOptions?.showStyleSelector,
+            showStyleSelector: showStyleSelector ?? true,
           }}
           gridStyle={{ rowHover: 'highlight' }}
           leadingControlColumns={[]}

@@ -29,7 +29,6 @@ const defaultStyleOptions: TableChartStyleControls = {
   showFooter: false,
   pageSize: 10,
   globalAlignment: 'left',
-  showStyleSelector: false,
 };
 
 const PAGE_SIZE_OPTIONS = [10, 50, 100];
@@ -98,6 +97,7 @@ export const VisualizationRender = (props: Props) => {
         columns={columns}
         styleOptions={defaultStyleOptions}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
+        showStyleSelector={false}
       />
     );
   }

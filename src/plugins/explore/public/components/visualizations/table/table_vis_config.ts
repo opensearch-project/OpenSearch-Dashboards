@@ -28,7 +28,6 @@ export interface TableChartStyleControls {
   cellTypes?: CellTypeConfig[];
   thresholds?: Threshold[];
   baseColor?: string;
-  showStyleSelector?: boolean;
 }
 
 const defaultTableChartStyles: Required<TableChartStyleControls> = {
@@ -40,7 +39,6 @@ const defaultTableChartStyles: Required<TableChartStyleControls> = {
   cellTypes: [],
   thresholds: [],
   baseColor: '#000000',
-  showStyleSelector: true,
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({
