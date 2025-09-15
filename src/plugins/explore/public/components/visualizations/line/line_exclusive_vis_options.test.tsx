@@ -9,7 +9,7 @@ import { LineExclusiveVisOptions, LineStyle } from './line_exclusive_vis_options
 
 // Mock the debounced value hook
 jest.mock('../utils/use_debounced_value', () => ({
-  useDebouncedNumericValue: jest.fn((value, onChange, options) => {
+  useDebouncedNumber: jest.fn((value, onChange, options) => {
     return [value, (newValue: string) => onChange(parseFloat(newValue))];
   }),
 }));
@@ -18,7 +18,7 @@ describe('LineExclusiveVisOptions', () => {
   const defaultProps = {
     addTimeMarker: false,
     lineStyle: 'both' as LineStyle,
-    lineMode: 'straight',
+    lineMode: 'straight' as const,
     lineWidth: 2,
     onAddTimeMarkerChange: jest.fn(),
     onLineModeChange: jest.fn(),

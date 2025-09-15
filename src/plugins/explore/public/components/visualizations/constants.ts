@@ -62,3 +62,4 @@ export const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
 };
 
 export const DEFAULT_OPACITY = 0.87;
+export const AXIS_LABEL_MAX_LENGTH = 100;

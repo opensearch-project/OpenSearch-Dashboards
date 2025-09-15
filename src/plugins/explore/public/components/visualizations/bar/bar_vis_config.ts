@@ -20,6 +20,7 @@ import {
   TimeUnit,
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
+import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 
 export interface BarChartStyleControls {
   // Basic controls
@@ -89,7 +90,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
@@ -108,7 +109,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
