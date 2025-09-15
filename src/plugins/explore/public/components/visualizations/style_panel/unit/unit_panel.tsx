@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFieldText, EuiPopover, EuiContextMenu, EuiFormRow, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiPopover,
+  EuiContextMenu,
+  EuiFormRow,
+  EuiButtonIcon,
+  EuiContextMenuPanelDescriptor,
+} from '@elastic/eui';
 import { UnitsCollection, getUnitById } from './collection';
 import { StyleAccordion } from '../style_accordion';
 import './style.scss';
@@ -30,16 +37,20 @@ export const UnitPanel = ({ unit, onUnitChange }: UnitPanelProps) => {
 
   const inputBoxButton = (
     <EuiFieldText
-      id="input"
+      id="unitPanelInput"
       placeholder="Select a unit"
       value={selectedUnit?.name ?? ''}
       onClick={() => {
         setPopover(!isPopoverOpen);
       }}
       readOnly={true}
+      compressed={true}
       append={
         unit ? (
           <EuiButtonIcon
+            aria-label={i18n.translate('explore.stylePanel.tabs.units.input.trash', {
+              defaultMessage: 'Clear Unit Button',
+            })}
             iconType="trash"
             color="subdued"
             data-test-subj="clearUnitButton"
@@ -49,6 +60,9 @@ export const UnitPanel = ({ unit, onUnitChange }: UnitPanelProps) => {
           />
         ) : (
           <EuiButtonIcon
+            aria-label={i18n.translate('explore.stylePanel.tabs.units.input.openMenu', {
+              defaultMessage: 'Open Menu Button',
+            })}
             color="subdued"
             iconType="arrowDown"
             data-test-subj="openMenuButton"
@@ -62,7 +76,7 @@ export const UnitPanel = ({ unit, onUnitChange }: UnitPanelProps) => {
   );
 
   const panels = useMemo(() => {
-    const all: any[] = [
+    const all: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
         title: 'Units',
@@ -93,14 +107,15 @@ export const UnitPanel = ({ unit, onUnitChange }: UnitPanelProps) => {
 
   return (
     <StyleAccordion
-      id="metricValueOptions"
+      id="unitPanelAccordion"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.units', {
         defaultMessage: 'Units',
       })}
-      initialIsOpen={true}
+      initialIsOpen={false}
     >
-      <EuiFormRow className="full-width-popover">
+      <EuiFormRow fullWidth={true}>
         <EuiPopover
+          display="block"
           button={inputBoxButton}
           isOpen={isPopoverOpen}
           closePopover={() => setPopover(false)}
@@ -108,15 +123,13 @@ export const UnitPanel = ({ unit, onUnitChange }: UnitPanelProps) => {
           anchorPosition="downLeft"
           hasArrow={false}
         >
-          <div style={{ width: 220 }}>
-            <EuiContextMenu
-              data-test-subj="unit_panel_context_menu"
-              size="s"
-              initialPanelId={lastPanelId}
-              panels={panels}
-              className="visPanelUnitPopover"
-            />
-          </div>
+          <EuiContextMenu
+            data-test-subj="unitPanelContextMenu"
+            size="s"
+            initialPanelId={lastPanelId}
+            panels={panels}
+            className="visPanelUnitPopover"
+          />
         </EuiPopover>
       </EuiFormRow>
     </StyleAccordion>

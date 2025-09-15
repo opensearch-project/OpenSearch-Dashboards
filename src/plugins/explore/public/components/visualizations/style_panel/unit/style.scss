@@ -3,19 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
-.full-width-popover {
-  .euiPopover {
-    width: 100%;
-
-    .euiPopover__anchor {
-      display: block;
-    }
-  }
-}
-
 .visPanelUnitPopover {
-  width: 100%;
+  width: 220 px;
   max-height: 260px;
   overflow: auto;
 }

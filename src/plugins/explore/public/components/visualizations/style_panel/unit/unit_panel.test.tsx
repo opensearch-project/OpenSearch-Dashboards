@@ -37,7 +37,7 @@ describe('UnitPanel', () => {
   it('opens popover when input is clicked', () => {
     render(<UnitPanel onUnitChange={mockOnUnitChange} />);
     fireEvent.click(screen.getByPlaceholderText('Select a unit'));
-    expect(screen.getByTestId('unit_panel_context_menu')).toBeInTheDocument();
+    expect(screen.getByTestId('unitPanelContextMenu')).toBeInTheDocument();
   });
 
   it('should show all unit category', () => {
