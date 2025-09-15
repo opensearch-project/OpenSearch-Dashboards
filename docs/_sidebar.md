@@ -10,11 +10,7 @@
     - [Client_management_design](multi-datasource/client_management_design.md)
     - [High_level_design](multi-datasource/high_level_design.md)
     - [User_stories](multi-datasource/user_stories.md)
-  - Onboarding
-    - [Core_framework_architecture](onboarding/core_framework_architecture.md)
-    - [Data_services_api_patterns](onboarding/data_services_api_patterns.md)
-    - [Plugin_system](onboarding/plugin_system.md)
-    - [Ui_framework_and_components](onboarding/ui_framework_and_components.md)
+  - [Onboarding](onboarding/README.md)
   - [Openapi](openapi/README.md)
   - Plugins
     - data
