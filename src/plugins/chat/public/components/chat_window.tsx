@@ -5,30 +5,33 @@
 /* eslint-disable no-console */
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import {
-  EuiPanel,
-  EuiFieldText,
-  EuiButton,
-  EuiText,
-  EuiIcon,
-  EuiButtonIcon,
-  EuiBadge,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPanel, EuiFieldText, EuiText, EuiIcon, EuiButtonIcon, EuiBadge } from '@elastic/eui';
 import { CoreStart } from '../../../../core/public';
-import { ChatMessage } from '../services/chat_service';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatContextManager } from '../services/chat_context_manager';
 import { ContextPills } from './context_pills';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart } from '../../../context_provider/public';
 
-interface ToolCall {
+interface TimelineMessage {
+  type: 'message';
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
+
+interface TimelineToolCall {
+  type: 'tool_call';
   id: string;
   toolName: string;
   status: 'running' | 'completed' | 'error';
   description?: string;
+  result?: string;
+  timestamp: number;
 }
+
+type TimelineItem = TimelineMessage | TimelineToolCall;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ChatWindowProps {}
@@ -39,11 +42,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
     core: CoreStart;
     contextProvider?: ContextProviderStart;
   }>();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
-  const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +66,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, currentStreamingMessage]);
+  }, [timeline, currentStreamingMessage]);
 
   const handleSend = async () => {
     if (!input.trim() || isStreaming) return;
@@ -75,10 +77,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
     setCurrentStreamingMessage('');
 
     try {
-      const { observable, userMessage } = await chatService.sendMessage(messageContent, messages);
+      const { observable, userMessage } = await chatService.sendMessage(
+        messageContent,
+        timeline.filter((item) => item.type === 'message') as any
+      );
 
-      // Add user message immediately
-      setMessages((prev) => [...prev, userMessage]);
+      // Add user message immediately to timeline
+      const timelineUserMessage: TimelineMessage = {
+        type: 'message',
+        id: userMessage.id,
+        role: userMessage.role,
+        content: userMessage.content,
+        timestamp: userMessage.timestamp,
+      };
+      setTimeline((prev) => [...prev, timelineUserMessage]);
 
       // Start a new run group - we'll get the actual runId from the first event
       const timestamp = new Date().toLocaleTimeString();
@@ -107,38 +119,82 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
               break;
             case 'TEXT_MESSAGE_END':
               setCurrentStreamingMessage((currentContent) => {
-                const assistantMessage: ChatMessage = {
+                const assistantMessage: TimelineMessage = {
+                  type: 'message',
                   id: `msg-${Date.now()}`,
                   role: 'assistant',
                   content: currentContent,
-                  timestamp: Date.now(),
+                  timestamp: event.timestamp || Date.now(),
                 };
-                setMessages((prev) => [...prev, assistantMessage]);
+                setTimeline((prev) => [...prev, assistantMessage]);
                 return ''; // Clear the streaming message
               });
               setIsStreaming(false);
               break;
             case 'TOOL_CALL_START':
-              const newToolCall: ToolCall = {
+              const newToolCall: TimelineToolCall = {
+                type: 'tool_call',
                 id: event.toolCallId || `tool-${Date.now()}`,
                 toolName: event.toolCallName || 'Unknown Tool',
                 status: 'running',
                 description: event.description || `Calling ${event.toolCallName}...`,
+                timestamp: event.timestamp || Date.now(),
               };
-              setToolCalls((prev) => [...prev, newToolCall]);
+              setTimeline((prev) => [...prev, newToolCall]);
               break;
             case 'TOOL_CALL_END':
-            case 'TOOL_CALL_RESULT':
-              setToolCalls((prev) =>
-                prev.map((tool) =>
-                  tool.id === event.toolCallId ? { ...tool, status: 'completed' as const } : tool
+              setTimeline((prev) =>
+                prev.map((item) =>
+                  item.type === 'tool_call' && item.id === event.toolCallId
+                    ? {
+                        ...item,
+                        status: 'completed' as const,
+                        timestamp: event.timestamp || item.timestamp,
+                      }
+                    : item
                 )
               );
               break;
+            case 'TOOL_CALL_RESULT':
+              setTimeline((prev) =>
+                prev.map((item) => {
+                  if (item.type === 'tool_call' && item.id === event.toolCallId) {
+                    let resultContent = event.content;
+                    // Try to parse the content if it's JSON stringified
+                    try {
+                      const parsed = JSON.parse(event.content);
+                      if (parsed.content && Array.isArray(parsed.content)) {
+                        // Extract text from content array
+                        resultContent = parsed.content
+                          .filter((contentItem: any) => contentItem.type === 'text')
+                          .map((contentItem: any) => contentItem.text)
+                          .join('\n');
+                      }
+                    } catch {
+                      // If parsing fails, use the raw content
+                      resultContent = event.content;
+                    }
+                    return {
+                      ...item,
+                      status: 'completed' as const,
+                      result: resultContent,
+                      timestamp: event.timestamp || item.timestamp,
+                    };
+                  }
+                  return item;
+                })
+              );
+              break;
             case 'TOOL_CALL_ERROR':
-              setToolCalls((prev) =>
-                prev.map((tool) =>
-                  tool.id === event.toolCallId ? { ...tool, status: 'error' as const } : tool
+              setTimeline((prev) =>
+                prev.map((item) =>
+                  item.type === 'tool_call' && item.id === event.toolCallId
+                    ? {
+                        ...item,
+                        status: 'error' as const,
+                        timestamp: event.timestamp || item.timestamp,
+                      }
+                    : item
                 )
               );
               break;
@@ -181,9 +237,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
 
   const handleNewChat = () => {
     chatService.newThread();
-    setMessages([]);
+    setTimeline([]);
     setCurrentStreamingMessage('');
-    setToolCalls([]);
     setCurrentRunId(null);
     setIsStreaming(false);
     // Refresh context for new chat
@@ -218,9 +273,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
         <ContextPills contextManager={contextManager} />
       </div>
 
-      {/* Messages and Tool Calls Area */}
+      {/* Timeline Area */}
       <div className="chat-messages">
-        {messages.length === 0 && !currentStreamingMessage && toolCalls.length === 0 && (
+        {timeline.length === 0 && !currentStreamingMessage && (
           <div className="empty-state">
             <EuiIcon type="generate" size="xl" />
             <EuiText color="subdued" size="s">
@@ -229,56 +284,76 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
           </div>
         )}
 
-        {messages.map((message) => (
-          <div key={message.id} className="message-row">
-            <div className="message-icon">
-              <EuiIcon
-                type={message.role === 'user' ? 'user' : 'generate'}
-                size="m"
-                color={message.role === 'user' ? 'primary' : 'success'}
-              />
-            </div>
-            <div className="message-content">
-              <EuiPanel paddingSize="s" color={message.role === 'user' ? 'primary' : 'plain'}>
-                <EuiText size="s" style={{ whiteSpace: 'pre-wrap' }}>
-                  {message.content}
-                </EuiText>
-              </EuiPanel>
-            </div>
-          </div>
-        ))}
-
-        {/* Tool Calls */}
-        {toolCalls.map((toolCall) => (
-          <div key={toolCall.id} className="tool-call-row">
-            <div className="tool-call-icon">
-              <EuiIcon type="wrench" size="m" color="accent" />
-            </div>
-            <div className="tool-call-content">
-              <div className="tool-call-info">
-                <EuiText size="s" style={{ fontWeight: 600 }}>
-                  {toolCall.toolName}
-                </EuiText>
-                <EuiBadge
-                  color={
-                    toolCall.status === 'running'
-                      ? 'warning'
-                      : toolCall.status === 'completed'
-                      ? 'success'
-                      : 'danger'
-                  }
-                >
-                  {toolCall.status === 'running' ? 'Running' : toolCall.status}
-                </EuiBadge>
-              </div>
-              {toolCall.description && (
-                <EuiText size="xs" color="subdued">
-                  {toolCall.description}
-                </EuiText>
-              )}
-            </div>
-          </div>
-        ))}
+        {timeline
+          .sort((a, b) => a.timestamp - b.timestamp)
+          .map((item) => {
+            if (item.type === 'message') {
+              return (
+                <div key={item.id} className="message-row">
+                  <div className="message-icon">
+                    <EuiIcon
+                      type={item.role === 'user' ? 'user' : 'generate'}
+                      size="m"
+                      color={item.role === 'user' ? 'primary' : 'success'}
+                    />
+                  </div>
+                  <div className="message-content">
+                    <EuiPanel paddingSize="s" color={item.role === 'user' ? 'primary' : 'plain'}>
+                      <EuiText size="s" style={{ whiteSpace: 'pre-wrap' }}>
+                        {item.content}
+                      </EuiText>
+                    </EuiPanel>
+                  </div>
+                </div>
+              );
+            } else {
+              return (
+                <div key={item.id} className="tool-call-row">
+                  <div className="tool-call-icon">
+                    <EuiIcon type="wrench" size="m" color="accent" />
+                  </div>
+                  <div className="tool-call-content">
+                    <div className="tool-call-info">
+                      <EuiText size="s" style={{ fontWeight: 600 }}>
+                        {item.toolName}
+                      </EuiText>
+                      <EuiBadge
+                        color={
+                          item.status === 'running'
+                            ? 'warning'
+                            : item.status === 'completed'
+                            ? 'success'
+                            : 'danger'
+                        }
+                      >
+                        {item.status === 'running' ? 'Running' : item.status}
+                      </EuiBadge>
+                    </div>
+                    {item.description && (
+                      <EuiText size="xs" color="subdued">
+                        {item.description}
+                      </EuiText>
+                    )}
+                    {item.result && item.status === 'completed' && (
+                      <div style={{ marginTop: '8px' }}>
+                        <EuiText size="xs" style={{ fontWeight: 600, marginBottom: '4px' }}>
+                          Result:
+                        </EuiText>
+                        <EuiPanel paddingSize="s" color="subdued">
+                          <EuiText
+                            size="xs"
+                            style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}
+                          >
+                            {item.result}
+                          </EuiText>
+                        </EuiPanel>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+          })}
 
         {/* Streaming Message */}
         {currentStreamingMessage && (
