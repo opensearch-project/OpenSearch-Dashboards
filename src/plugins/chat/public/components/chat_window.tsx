@@ -44,6 +44,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
   const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
+  const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize context manager
@@ -79,23 +80,33 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
       // Add user message immediately
       setMessages((prev) => [...prev, userMessage]);
 
+      // Start a new run group - we'll get the actual runId from the first event
+      const timestamp = new Date().toLocaleTimeString();
+      console.groupCollapsed(
+        `📊 Chat Run [${timestamp}] - "${messageContent.substring(0, 50)}${
+          messageContent.length > 50 ? '...' : ''
+        }"`
+      );
+      console.log('📤 User message:', messageContent);
+
       // Subscribe to streaming response
       const subscription = observable.subscribe({
         next: (event: any) => {
-          console.log('Received event:', event);
-          console.log('Event type:', event.type);
-          console.log('Full event object:', JSON.stringify(event, null, 2));
+          // Log every event with timestamp and full data
+          const eventTime = new Date().toLocaleTimeString();
+          console.log(`🔄 [${eventTime}] ${event.type}:`, event);
+
+          // Update runId if we get it from the event
+          if (event.runId && event.runId !== currentRunId) {
+            setCurrentRunId(event.runId);
+          }
 
           switch (event.type) {
             case 'TEXT_MESSAGE_CONTENT':
-              console.log('Adding content:', event.delta);
               setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
               break;
             case 'TEXT_MESSAGE_END':
-              console.log('Message ended, finalizing...');
-              // Finalize the assistant message using the current streaming content
               setCurrentStreamingMessage((currentContent) => {
-                console.log('Final content:', currentContent);
                 const assistantMessage: ChatMessage = {
                   id: `msg-${Date.now()}`,
                   role: 'assistant',
@@ -131,33 +142,32 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
                 )
               );
               break;
-            case 'TOOL_CALL_ARGS':
-              // Optionally update tool description with args if needed
-              console.log('Tool call args:', event);
-              break;
             case 'RUN_ERROR':
-              console.error('Chat error:', event.message);
               setIsStreaming(false);
               setCurrentStreamingMessage('');
-              break;
-            default:
-              console.log('Unhandled event type:', event.type);
               break;
           }
         },
         error: (error: any) => {
-          console.error('Chat subscription error:', error);
+          const errorTime = new Date().toLocaleTimeString();
+          console.error(`🚨 [${errorTime}] Subscription error:`, error);
+          console.groupEnd(); // Close the run group
           setIsStreaming(false);
           setCurrentStreamingMessage('');
         },
         complete: () => {
+          const completeTime = new Date().toLocaleTimeString();
+          console.log(`🏁 [${completeTime}] Stream complete`);
+          console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
       });
 
       return () => subscription.unsubscribe();
     } catch (error) {
-      console.error('Failed to send message:', error);
+      const errorTime = new Date().toLocaleTimeString();
+      console.error(`❌ [${errorTime}] Failed to send message:`, error);
+      console.groupEnd(); // Close the run group
       setIsStreaming(false);
     }
   };
@@ -174,6 +184,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
     setMessages([]);
     setCurrentStreamingMessage('');
     setToolCalls([]);
+    setCurrentRunId(null);
     setIsStreaming(false);
     // Refresh context for new chat
     contextManager.refreshContext();
