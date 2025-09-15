@@ -10,7 +10,7 @@ import {
   EuiFlexItem,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiSwitch,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { isEmpty, isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
@@ -282,6 +282,14 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     return allColumns;
   };
 
+  const orderedAxes: AxisRole[] = switchAxes ? [AxisRole.Y, AxisRole.X] : [AxisRole.X, AxisRole.Y];
+
+  const firstSelector: AxisRole = switchAxes ? AxisRole.Y : AxisRole.X;
+
+  const otherAxes = Array.from(allAxisRolesFromSelection).filter(
+    (axis) => axis !== AxisRole.X && axis !== AxisRole.Y
+  );
+
   return (
     <StyleAccordion
       id="axesSelector"
@@ -292,20 +300,50 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     >
       <>
         {showSwitch && (
-          <EuiFormRow>
-            <EuiSwitch
-              label={i18n.translate('explore.vis.axesSwitch.switchAxes', {
-                defaultMessage: 'Switch axes',
-              })}
-              compressed
-              checked={!!switchAxes}
-              onChange={swapAxes}
-              disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
-            />
-          </EuiFormRow>
+          <EuiButtonEmpty
+            disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
+            onClick={swapAxes}
+            data-test-subj="switchAxesButton"
+            style={{ marginLeft: '-9px' }}
+          >
+            {i18n.translate('explore.vis.axesSwitch.switchAxes', {
+              defaultMessage: 'Switch axes',
+            })}
+          </EuiButtonEmpty>
         )}
+        {orderedAxes.map((axisRole, i) => {
+          const currentSelection = currentSelections[axisRole];
+          return (
+            <>
+              <AxisSelector
+                key={axisRole}
+                axisRole={axisRole}
+                selectedColumn={currentSelection?.name || ''}
+                allColumnOptions={getAvailableColumnsForAxis(axisRole)}
+                switchAxes={switchAxes}
+                inputRef={(input) =>
+                  axisRole === firstSelector ? (firstSelectorInput.current = input) : undefined
+                }
+                onRemove={(role) => {
+                  setCurrentSelections((prev) => ({
+                    ...prev,
+                    [role]: undefined,
+                  }));
+                }}
+                onChange={(role, v) => {
+                  const allColumns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
+                  const selectedCol = allColumns.find((col) => col.name === v);
+                  setCurrentSelections((prev) => ({
+                    ...prev,
+                    [role]: selectedCol,
+                  }));
+                }}
+              />
+            </>
+          );
+        })}
 
-        {Array.from(allAxisRolesFromSelection).map((axisRole, i) => {
+        {otherAxes.map((axisRole, i) => {
           const currentSelection = currentSelections[axisRole];
           return (
             <AxisSelector
@@ -314,7 +352,6 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
               selectedColumn={currentSelection?.name || ''}
               allColumnOptions={getAxisOptions(axisRole)}
               switchAxes={switchAxes}
-              inputRef={(input) => (i === 0 ? (firstSelectorInput.current = input) : undefined)}
               onRemove={(role) => {
                 setCurrentSelections((prev) => ({
                   ...prev,

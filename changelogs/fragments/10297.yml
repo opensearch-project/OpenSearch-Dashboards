@@ -1,0 +1,2 @@
+fix:
+- Ensure axis switching follows x and y order and show all fields ([#10297](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10297))

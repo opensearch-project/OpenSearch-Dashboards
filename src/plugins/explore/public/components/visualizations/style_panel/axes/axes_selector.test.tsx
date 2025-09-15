@@ -247,6 +247,64 @@ describe('AxesSelectPanel', () => {
     const comboBoxes = screen.getAllByRole('combobox');
     expect(comboBoxes.length).toBeGreaterThan(0);
   });
+
+  it('should display switchAxes button for bar chart', () => {
+    render(
+      <Provider store={store}>
+        <AxesSelectPanel {...defaultProps} />
+      </Provider>
+    );
+
+    expect(screen.getByTestId('switchAxesButton')).toBeInTheDocument();
+  });
+
+  it('should not display switchAxes button for line chart', () => {
+    const props = { ...defaultProps, chartType: 'line' as ChartType };
+    render(
+      <Provider store={store}>
+        <AxesSelectPanel {...props} />
+      </Provider>
+    );
+
+    expect(screen.queryByTestId('switchAxesButton')).not.toBeInTheDocument();
+  });
+
+  it('should disbale switch axes button when mapping is empty ', async () => {
+    const propsWithoutMapping = {
+      ...defaultProps,
+      currentMapping: {},
+    };
+    render(
+      <Provider store={store}>
+        <AxesSelectPanel {...propsWithoutMapping} />
+      </Provider>
+    );
+    expect(screen.getByTestId('switchAxesButton')).toBeDisabled();
+  });
+  it('should switch axes when click switchAxes button and axis switching follows x and y order ', async () => {
+    const onSwitchAxesMock = jest.fn();
+
+    const propsWithMapping = {
+      ...defaultProps,
+      currentMapping: {
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0],
+      },
+    };
+    render(
+      <Provider store={store}>
+        <AxesSelectPanel {...propsWithMapping} onSwitchAxes={onSwitchAxesMock} />
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('switchAxesButton'));
+    await waitFor(() => {
+      expect(onSwitchAxesMock).toHaveBeenCalled();
+    });
+    const labels = screen.getAllByText(/-Axis$/i).map((el) => el.textContent);
+    expect(labels[0]).toMatch(/^X-Axis$/i);
+    expect(labels[1]).toMatch(/^Y-Axis$/i);
+  });
 });
 
 describe('AxisSelector', () => {
