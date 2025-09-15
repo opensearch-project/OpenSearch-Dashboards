@@ -5,13 +5,20 @@
 /* eslint-disable no-console */
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { EuiPanel, EuiFieldText, EuiText, EuiIcon, EuiButtonIcon, EuiBadge } from '@elastic/eui';
+import { EuiPanel, EuiFieldText, EuiText, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { CoreStart } from '../../../../core/public';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatContextManager } from '../services/chat_context_manager';
 import { ContextPills } from './context_pills';
+import { MessageRow } from './message_row';
+import { ToolCallRow } from './tool_call_row';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart } from '../../../context_provider/public';
+import {
+  EventType,
+  // eslint-disable-next-line prettier/prettier
+  type Event as ChatEvent,
+} from '../../common/events';
 
 interface TimelineMessage {
   type: 'message';
@@ -26,7 +33,6 @@ interface TimelineToolCall {
   id: string;
   toolName: string;
   status: 'running' | 'completed' | 'error';
-  description?: string;
   result?: string;
   timestamp: number;
 }
@@ -103,21 +109,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
-        next: (event: any) => {
+        next: (event: ChatEvent) => {
           // Log every event with timestamp and full data
           const eventTime = new Date().toLocaleTimeString();
           console.log(`🔄 [${eventTime}] ${event.type}:`, event);
 
           // Update runId if we get it from the event
-          if (event.runId && event.runId !== currentRunId) {
+          if ('runId' in event && event.runId && event.runId !== currentRunId) {
             setCurrentRunId(event.runId);
           }
 
           switch (event.type) {
-            case 'TEXT_MESSAGE_CONTENT':
-              setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
+            case EventType.TEXT_MESSAGE_CONTENT:
+              if ('delta' in event) {
+                setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
+              }
               break;
-            case 'TEXT_MESSAGE_END':
+            case EventType.TEXT_MESSAGE_END:
               setCurrentStreamingMessage((currentContent) => {
                 const assistantMessage: TimelineMessage = {
                   type: 'message',
@@ -131,74 +139,66 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
               });
               setIsStreaming(false);
               break;
-            case 'TOOL_CALL_START':
-              const newToolCall: TimelineToolCall = {
-                type: 'tool_call',
-                id: event.toolCallId || `tool-${Date.now()}`,
-                toolName: event.toolCallName || 'Unknown Tool',
-                status: 'running',
-                description: event.description || `Calling ${event.toolCallName}...`,
-                timestamp: event.timestamp || Date.now(),
-              };
-              setTimeline((prev) => [...prev, newToolCall]);
+            case EventType.TOOL_CALL_START:
+              if ('toolCallId' in event && 'toolCallName' in event) {
+                const newToolCall: TimelineToolCall = {
+                  type: 'tool_call',
+                  id: event.toolCallId,
+                  toolName: event.toolCallName,
+                  status: 'running',
+                  timestamp: event.timestamp || Date.now(),
+                };
+                setTimeline((prev) => [...prev, newToolCall]);
+              }
               break;
-            case 'TOOL_CALL_END':
-              setTimeline((prev) =>
-                prev.map((item) =>
-                  item.type === 'tool_call' && item.id === event.toolCallId
-                    ? {
+            case EventType.TOOL_CALL_END:
+              if ('toolCallId' in event) {
+                setTimeline((prev) =>
+                  prev.map((item) =>
+                    item.type === 'tool_call' && item.id === event.toolCallId
+                      ? {
+                          ...item,
+                          status: 'completed' as const,
+                          timestamp: event.timestamp || item.timestamp,
+                        }
+                      : item
+                  )
+                );
+              }
+              break;
+            case EventType.TOOL_CALL_RESULT:
+              if ('toolCallId' in event && 'content' in event) {
+                setTimeline((prev) =>
+                  prev.map((item) => {
+                    if (item.type === 'tool_call' && item.id === event.toolCallId) {
+                      let resultContent = event.content;
+                      // Try to parse the content if it's JSON stringified
+                      try {
+                        const parsed = JSON.parse(event.content);
+                        if (parsed.content && Array.isArray(parsed.content)) {
+                          // Extract text from content array
+                          resultContent = parsed.content
+                            .filter((contentItem: any) => contentItem.type === 'text')
+                            .map((contentItem: any) => contentItem.text)
+                            .join('\n');
+                        }
+                      } catch {
+                        // If parsing fails, use the raw content
+                        resultContent = event.content;
+                      }
+                      return {
                         ...item,
                         status: 'completed' as const,
+                        result: resultContent,
                         timestamp: event.timestamp || item.timestamp,
-                      }
-                    : item
-                )
-              );
-              break;
-            case 'TOOL_CALL_RESULT':
-              setTimeline((prev) =>
-                prev.map((item) => {
-                  if (item.type === 'tool_call' && item.id === event.toolCallId) {
-                    let resultContent = event.content;
-                    // Try to parse the content if it's JSON stringified
-                    try {
-                      const parsed = JSON.parse(event.content);
-                      if (parsed.content && Array.isArray(parsed.content)) {
-                        // Extract text from content array
-                        resultContent = parsed.content
-                          .filter((contentItem: any) => contentItem.type === 'text')
-                          .map((contentItem: any) => contentItem.text)
-                          .join('\n');
-                      }
-                    } catch {
-                      // If parsing fails, use the raw content
-                      resultContent = event.content;
+                      };
                     }
-                    return {
-                      ...item,
-                      status: 'completed' as const,
-                      result: resultContent,
-                      timestamp: event.timestamp || item.timestamp,
-                    };
-                  }
-                  return item;
-                })
-              );
+                    return item;
+                  })
+                );
+              }
               break;
-            case 'TOOL_CALL_ERROR':
-              setTimeline((prev) =>
-                prev.map((item) =>
-                  item.type === 'tool_call' && item.id === event.toolCallId
-                    ? {
-                        ...item,
-                        status: 'error' as const,
-                        timestamp: event.timestamp || item.timestamp,
-                      }
-                    : item
-                )
-              );
-              break;
-            case 'RUN_ERROR':
+            case EventType.RUN_ERROR:
               setIsStreaming(false);
               setCurrentStreamingMessage('');
               break;
@@ -288,88 +288,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
           .sort((a, b) => a.timestamp - b.timestamp)
           .map((item) => {
             if (item.type === 'message') {
-              return (
-                <div key={item.id} className="message-row">
-                  <div className="message-icon">
-                    <EuiIcon
-                      type={item.role === 'user' ? 'user' : 'generate'}
-                      size="m"
-                      color={item.role === 'user' ? 'primary' : 'success'}
-                    />
-                  </div>
-                  <div className="message-content">
-                    <EuiPanel paddingSize="s" color={item.role === 'user' ? 'primary' : 'plain'}>
-                      <EuiText size="s" style={{ whiteSpace: 'pre-wrap' }}>
-                        {item.content}
-                      </EuiText>
-                    </EuiPanel>
-                  </div>
-                </div>
-              );
+              return <MessageRow key={item.id} message={item} />;
             } else {
-              return (
-                <div key={item.id} className="tool-call-row">
-                  <div className="tool-call-icon">
-                    <EuiIcon type="wrench" size="m" color="accent" />
-                  </div>
-                  <div className="tool-call-content">
-                    <div className="tool-call-info">
-                      <EuiText size="s" style={{ fontWeight: 600 }}>
-                        {item.toolName}
-                      </EuiText>
-                      <EuiBadge
-                        color={
-                          item.status === 'running'
-                            ? 'warning'
-                            : item.status === 'completed'
-                            ? 'success'
-                            : 'danger'
-                        }
-                      >
-                        {item.status === 'running' ? 'Running' : item.status}
-                      </EuiBadge>
-                    </div>
-                    {item.description && (
-                      <EuiText size="xs" color="subdued">
-                        {item.description}
-                      </EuiText>
-                    )}
-                    {item.result && item.status === 'completed' && (
-                      <div style={{ marginTop: '8px' }}>
-                        <EuiText size="xs" style={{ fontWeight: 600, marginBottom: '4px' }}>
-                          Result:
-                        </EuiText>
-                        <EuiPanel paddingSize="s" color="subdued">
-                          <EuiText
-                            size="xs"
-                            style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}
-                          >
-                            {item.result}
-                          </EuiText>
-                        </EuiPanel>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
+              return <ToolCallRow key={item.id} toolCall={item} />;
             }
           })}
 
         {/* Streaming Message */}
         {currentStreamingMessage && (
-          <div className="message-row">
-            <div className="message-icon">
-              <EuiIcon type="discuss" size="m" color="success" />
-            </div>
-            <div className="message-content">
-              <EuiPanel paddingSize="s" color="plain">
-                <EuiText size="s" style={{ whiteSpace: 'pre-wrap' }}>
-                  {currentStreamingMessage}
-                  <span className="blinking-cursor">|</span>
-                </EuiText>
-              </EuiPanel>
-            </div>
-          </div>
+          <MessageRow
+            message={{
+              type: 'message',
+              id: 'streaming',
+              role: 'assistant',
+              content: currentStreamingMessage,
+              timestamp: Date.now(),
+            }}
+            isStreaming={true}
+          />
         )}
 
         <div ref={messagesEndRef} />
@@ -442,52 +378,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
           gap: 16px;
         }
 
-        .message-row,
-        .tool-call-row {
-          display: grid;
-          grid-template-columns: auto 1fr;
-          gap: 12px;
-          align-items: start;
-        }
-
-        .message-icon,
-        .tool-call-icon {
-          margin-top: 4px;
-        }
-
-        .message-content {
-          min-width: 0;
-        }
-
-        .tool-call-content {
-          background: #f7f9fc;
-          border: 1px solid #d3dae6;
-          border-radius: 6px;
-          padding: 8px 12px;
-        }
-
-        .tool-call-info {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 4px;
-        }
-
         .chat-input {
           grid-area: input;
           display: grid;
           grid-template-columns: 1fr auto;
           gap: 8px;
           align-items: center;
-        }
-
-        .blinking-cursor {
-          animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
         }
       `}</style>
     </div>

@@ -237,3 +237,29 @@ export type RunFinishedEvent = z.infer<typeof RunFinishedEventSchema>;
 export type RunErrorEvent = z.infer<typeof RunErrorEventSchema>;
 export type StepStartedEvent = z.infer<typeof StepStartedEventSchema>;
 export type StepFinishedEvent = z.infer<typeof StepFinishedEventSchema>;
+
+export type Event =
+  | TextMessageStartEvent
+  | TextMessageContentEvent
+  | TextMessageEndEvent
+  | TextMessageChunkEvent
+  | ThinkingTextMessageStartEvent
+  | ThinkingTextMessageContentEvent
+  | ThinkingTextMessageEndEvent
+  | ToolCallStartEvent
+  | ToolCallArgsEvent
+  | ToolCallEndEvent
+  | ToolCallChunkEvent
+  | ToolCallResultEvent
+  | ThinkingStartEvent
+  | ThinkingEndEvent
+  | StateSnapshotEvent
+  | StateDeltaEvent
+  | MessagesSnapshotEvent
+  | RawEvent
+  | CustomEvent
+  | RunStartedEvent
+  | RunFinishedEvent
+  | RunErrorEvent
+  | StepStartedEvent
+  | StepFinishedEvent;
