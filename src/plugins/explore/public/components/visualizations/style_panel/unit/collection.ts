@@ -137,7 +137,6 @@ export const UnitsCollection: Record<string, Unit> = {
     ],
   },
 
-  // align with grafana
   acceleration: {
     name: i18n.translate('explore.stylePanel.unit.acceleration', {
       defaultMessage: 'Acceleration',
@@ -164,7 +163,7 @@ export const UnitsCollection: Record<string, Unit> = {
       },
     ],
   },
-  // align with grafana
+
   angle: {
     name: i18n.translate('explore.stylePanel.unit.angle', { defaultMessage: 'Angle' }),
     units: [
@@ -202,7 +201,6 @@ export const UnitsCollection: Record<string, Unit> = {
     ],
   },
 
-  // align with grafana
   area: {
     name: i18n.translate('explore.stylePanel.unit.area', { defaultMessage: 'Area' }),
     units: [
