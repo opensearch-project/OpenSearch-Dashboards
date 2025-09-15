@@ -4,12 +4,15 @@
  */
 
 import { AgUiAgent } from './ag_ui_agent';
+import { ChatContextManager } from './chat_context_manager';
+import { ContextItem } from '../types/context';
 
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
+  context?: ContextItem[];
 }
 
 export interface ChatState {
@@ -21,10 +24,15 @@ export interface ChatState {
 export class ChatService {
   private agent: AgUiAgent;
   private threadId: string;
+  private contextManager?: ChatContextManager;
 
   constructor(serverUrl?: string) {
     this.agent = new AgUiAgent(serverUrl);
     this.threadId = this.generateThreadId();
+  }
+
+  public setContextManager(contextManager: ChatContextManager): void {
+    this.contextManager = contextManager;
   }
 
   private generateThreadId(): string {
@@ -46,12 +54,23 @@ export class ChatService {
     observable: any;
     userMessage: ChatMessage;
   }> {
+    // Get current context from context manager
+    const activeContexts = this.contextManager?.getActiveContexts() || [];
+
     const userMessage: ChatMessage = {
       id: this.generateMessageId(),
       role: 'user',
       content,
       timestamp: Date.now(),
+      context: activeContexts,
     };
+
+    // Build context-aware content
+    let contextAwareContent = content;
+    if (activeContexts.length > 0) {
+      const contextSummary = this.buildContextSummary(activeContexts);
+      contextAwareContent = `${content}\n\nContext:\n${contextSummary}`;
+    }
 
     const runInput = {
       threadId: this.threadId,
@@ -63,11 +82,17 @@ export class ChatService {
         })),
         {
           role: 'user',
-          content,
+          content: contextAwareContent,
         },
       ],
       tools: [], // Add tools here if your AG-UI server supports them
-      state: {},
+      state: {
+        context: activeContexts.map((ctx) => ({
+          type: ctx.type,
+          label: ctx.label,
+          data: ctx.data,
+        })),
+      },
     };
 
     const observable = this.agent.runAgent(runInput, {
@@ -102,5 +127,39 @@ export class ChatService {
 
   public newThread(): void {
     this.threadId = this.generateThreadId();
+  }
+
+  private buildContextSummary(contexts: ContextItem[]): string {
+    const summaryParts: string[] = [];
+
+    contexts.forEach((ctx) => {
+      switch (ctx.type) {
+        case 'time_range':
+          summaryParts.push(`Time Range: ${ctx.label}`);
+          break;
+        case 'filters':
+          summaryParts.push(`Filter: ${ctx.label}`);
+          break;
+        case 'query':
+          summaryParts.push(`Query: ${ctx.label}`);
+          break;
+        case 'index_pattern':
+          summaryParts.push(`Index Pattern: ${ctx.label}`);
+          break;
+        case 'dashboard':
+          summaryParts.push(`Dashboard: ${ctx.label}`);
+          break;
+        case 'app_state':
+          summaryParts.push(`Current App: ${ctx.label}`);
+          break;
+        case 'document':
+          summaryParts.push(`Document: ${JSON.stringify(ctx.data).substring(0, 100)}...`);
+          break;
+        default:
+          summaryParts.push(`${ctx.type}: ${ctx.label}`);
+      }
+    });
+
+    return summaryParts.join('\n');
   }
 }

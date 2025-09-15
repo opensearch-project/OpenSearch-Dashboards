@@ -9,13 +9,20 @@ import { CoreStart, MountPoint, SIDECAR_DOCKED_MODE } from '../../../../core/pub
 import { ChatWindow } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { ContextProviderStart } from '../../../context_provider/public';
 
 interface ChatHeaderButtonProps {
   core: CoreStart;
   chatService: ChatService;
+  contextProvider?: ContextProviderStart;
 }
 
-export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({ core, chatService }) => {
+export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
+  core,
+  chatService,
+  contextProvider,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const sideCarRef = useRef<{ close: () => void }>();
   const mountPointRef = useRef<HTMLDivElement>(null);
@@ -93,9 +100,11 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({ core, chatSe
         }}
       >
         <div style={{ height: '100vh', boxSizing: 'border-box' }}>
-          <ChatProvider chatService={chatService}>
-            <ChatWindow />
-          </ChatProvider>
+          <OpenSearchDashboardsContextProvider services={{ core, contextProvider }}>
+            <ChatProvider chatService={chatService}>
+              <ChatWindow />
+            </ChatProvider>
+          </OpenSearchDashboardsContextProvider>
         </div>
       </div>
     </>

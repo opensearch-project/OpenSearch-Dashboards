@@ -43,7 +43,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     };
   }
 
-  public start(core: CoreStart): ChatPluginStart {
+  public start(core: CoreStart, deps: AppPluginStartDependencies): ChatPluginStart {
     // Initialize chat service
     this.chatService = new ChatService();
 
@@ -54,6 +54,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         React.createElement(ChatHeaderButton, {
           core,
           chatService: this.chatService,
+          contextProvider: deps.contextProvider,
         })
       ),
     });

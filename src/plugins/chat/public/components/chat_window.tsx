@@ -4,7 +4,7 @@
  */
 /* eslint-disable no-console */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   EuiPanel,
   EuiFieldText,
@@ -13,9 +13,15 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiBadge,
+  EuiSpacer,
 } from '@elastic/eui';
+import { CoreStart } from '../../../../core/public';
 import { ChatMessage } from '../services/chat_service';
 import { useChatContext } from '../contexts/chat_context';
+import { ChatContextManager } from '../services/chat_context_manager';
+import { ContextPills } from './context_pills';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { ContextProviderStart } from '../../../context_provider/public';
 
 interface ToolCall {
   id: string;
@@ -24,14 +30,32 @@ interface ToolCall {
   description?: string;
 }
 
-export const ChatWindow: React.FC = () => {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface ChatWindowProps {}
+
+export const ChatWindow: React.FC<ChatWindowProps> = () => {
   const { chatService } = useChatContext();
+  const { services } = useOpenSearchDashboards<{
+    core: CoreStart;
+    contextProvider?: ContextProviderStart;
+  }>();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
   const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize context manager
+  const contextManager = useMemo(() => {
+    const manager = new ChatContextManager();
+    if (services.core) {
+      manager.start(services.core, services.contextProvider);
+    }
+    // Set context manager in chat service
+    chatService.setContextManager(manager);
+    return manager;
+  }, [services.core, chatService, services.contextProvider]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -59,6 +83,9 @@ export const ChatWindow: React.FC = () => {
       const subscription = observable.subscribe({
         next: (event: any) => {
           console.log('Received event:', event);
+          console.log('Event type:', event.type);
+          console.log('Full event object:', JSON.stringify(event, null, 2));
+
           switch (event.type) {
             case 'TEXT_MESSAGE_CONTENT':
               console.log('Adding content:', event.delta);
@@ -83,13 +110,14 @@ export const ChatWindow: React.FC = () => {
             case 'TOOL_CALL_START':
               const newToolCall: ToolCall = {
                 id: event.toolCallId || `tool-${Date.now()}`,
-                toolName: event.toolName || 'Unknown Tool',
+                toolName: event.toolCallName || 'Unknown Tool',
                 status: 'running',
-                description: event.description || `Calling ${event.toolName}...`,
+                description: event.description || `Calling ${event.toolCallName}...`,
               };
               setToolCalls((prev) => [...prev, newToolCall]);
               break;
             case 'TOOL_CALL_END':
+            case 'TOOL_CALL_RESULT':
               setToolCalls((prev) =>
                 prev.map((tool) =>
                   tool.id === event.toolCallId ? { ...tool, status: 'completed' as const } : tool
@@ -103,10 +131,17 @@ export const ChatWindow: React.FC = () => {
                 )
               );
               break;
+            case 'TOOL_CALL_ARGS':
+              // Optionally update tool description with args if needed
+              console.log('Tool call args:', event);
+              break;
             case 'RUN_ERROR':
               console.error('Chat error:', event.message);
               setIsStreaming(false);
               setCurrentStreamingMessage('');
+              break;
+            default:
+              console.log('Unhandled event type:', event.type);
               break;
           }
         },
@@ -140,7 +175,16 @@ export const ChatWindow: React.FC = () => {
     setCurrentStreamingMessage('');
     setToolCalls([]);
     setIsStreaming(false);
+    // Refresh context for new chat
+    contextManager.refreshContext();
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      contextManager.stop();
+    };
+  }, [contextManager]);
 
   return (
     <div className="chat-container">
@@ -156,6 +200,11 @@ export const ChatWindow: React.FC = () => {
           aria-label="New chat"
           size="m"
         />
+      </div>
+
+      {/* Context Pills */}
+      <div className="chat-context">
+        <ContextPills contextManager={contextManager} />
       </div>
 
       {/* Messages and Tool Calls Area */}
@@ -251,10 +300,9 @@ export const ChatWindow: React.FC = () => {
           fullWidth
         />
         <EuiButtonIcon
-          iconType="generate"
+          iconType={isStreaming ? 'loading' : 'generate'}
           onClick={handleSend}
-          disabled={!input.trim() || isStreaming}
-          isLoading={isStreaming}
+          disabled={input.trim().length === 0 || isStreaming}
           aria-label="Send message"
           size="m"
           color="primary"
@@ -265,13 +313,14 @@ export const ChatWindow: React.FC = () => {
         .chat-container {
           height: 100%;
           display: grid;
-          grid-template-rows: auto 1fr auto;
+          grid-template-rows: auto auto 1fr auto;
           grid-template-areas:
             "header"
+            "context"
             "messages"
             "input";
           gap: 16px;
-          padding: 16px;
+          padding: 0 8px 8px 0;
         }
 
         .chat-header {
@@ -281,6 +330,12 @@ export const ChatWindow: React.FC = () => {
           align-items: center;
           padding: 8px 0;
           border-bottom: 1px solid #e6e6e6;
+        }
+
+        .chat-context {
+          grid-area: context;
+          border-bottom: 1px solid #e6e6e6;
+          padding-bottom: 8px;
         }
 
         .chat-messages {

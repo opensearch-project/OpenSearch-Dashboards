@@ -144,7 +144,8 @@ Captured from user interactions:
 
 ### Services
 
-1. **ContextCaptureService**: Handles static context capture and action execution
+1. **ContextCaptureService**: Core service that handles static/dynamic context capture, contributor management, and action execution
+   - See [detailed service documentation](./public/services/README.md) for plugin developer integration guide
 2. **UIActionsIntegrationService**: Manages UI Actions triggers and DOM event listeners
 
 ### Integration Points
@@ -155,6 +156,14 @@ Captured from user interactions:
 - **DOM Events**: Listens for table clicks and panel hovers
 
 ## Development
+
+For plugin developers who want to integrate with the context system, see the [ContextCaptureService documentation](./public/services/README.md) which includes:
+
+- How to create and register context contributors
+- Static vs dynamic context capture patterns  
+- Integration examples for different app types
+- Chat UI consumption patterns
+- Advanced usage with stateful contributors
 
 ### Adding New Context Capture
 

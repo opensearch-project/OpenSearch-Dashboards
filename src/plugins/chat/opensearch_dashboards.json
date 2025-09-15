@@ -4,6 +4,6 @@
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "opensearchDashboardsReact"],
+  "requiredPlugins": ["navigation", "opensearchDashboardsReact", "contextProvider"],
   "optionalPlugins": []
 }

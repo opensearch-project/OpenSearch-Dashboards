@@ -3,13 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
- * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- */
+/* eslint-disable no-console */
 
 import { BehaviorSubject, Observable } from 'rxjs';
 import { CoreSetup, CoreStart } from '../../../../core/public';
@@ -20,6 +14,9 @@ import {
   DynamicContext,
   ContextContributor,
 } from '../types';
+
+// Define singleton context types that should only have one instance
+const SINGLETON_CONTEXT_TYPES = new Set(['time_range', 'query', 'index_pattern', 'app_state']);
 
 export class ContextCaptureService {
   private staticContext$ = new BehaviorSubject<StaticContext | null>(null);
@@ -193,6 +190,43 @@ export class ContextCaptureService {
     this.contextContributors.delete(appId);
   }
 
+  /**
+   * Deduplicates context data, ensuring singleton types only have one instance
+   */
+  private deduplicateContext(contextData: Record<string, any>): Record<string, any> {
+    const deduplicated: Record<string, any> = {};
+
+    // Handle singleton context types
+    Object.keys(contextData).forEach((key) => {
+      const contextType = this.inferContextType(key);
+
+      if (contextType && SINGLETON_CONTEXT_TYPES.has(contextType)) {
+        // For singleton types, always replace the existing value
+        deduplicated[key] = contextData[key];
+      } else {
+        // For non-singleton types, preserve the value
+        deduplicated[key] = contextData[key];
+      }
+    });
+
+    return deduplicated;
+  }
+
+  /**
+   * Infers the context type from the key name
+   */
+  private inferContextType(key: string): string | null {
+    if (key === 'timeRange' || key === 'dataContext.timeRange') return 'time_range';
+    if (key === 'query' || key === 'dataContext.query') return 'query';
+    if (key === 'indexPatternId' || key === 'indexPattern') return 'index_pattern';
+    if (key === 'appId' || key === 'appState') return 'app_state';
+    if (key.includes('filter')) return 'filters';
+    if (key.includes('dashboard')) return 'dashboard';
+    if (key.includes('visualization')) return 'visualization';
+    if (key.includes('document')) return 'document';
+    return null;
+  }
+
   private async captureStaticContext(appId: string): Promise<void> {
     console.log(`📊 Capturing static context for app: ${appId}`);
     console.log(`🔍 DEBUG: Registered contributors:`, Array.from(this.contextContributors.keys()));
@@ -281,17 +315,20 @@ export class ContextCaptureService {
       contextData.error = error.message;
     }
 
+    // Apply deduplication
+    const deduplicatedData = this.deduplicateContext(contextData);
+
     const staticContext: StaticContext = {
       appId,
       timestamp: Date.now(),
-      data: contextData,
+      data: deduplicatedData,
     };
 
     console.log('🔥 DEBUG: About to emit new static context');
-    console.log('🔥 DEBUG: Static context data keys:', Object.keys(contextData));
+    console.log('🔥 DEBUG: Static context data keys:', Object.keys(deduplicatedData));
     console.log(
       '🔥 DEBUG: expandedDocuments in static context:',
-      contextData.expandedDocuments?.length || 0
+      deduplicatedData.expandedDocuments?.length || 0
     );
 
     this.staticContext$.next(staticContext);
@@ -300,7 +337,7 @@ export class ContextCaptureService {
     // 🔧 FIX: Emit custom event to notify AI assistant of static context updates
     window.dispatchEvent(
       new CustomEvent('staticContextUpdated', {
-        detail: { appId, timestamp: Date.now(), contextData },
+        detail: { appId, timestamp: Date.now(), contextData: deduplicatedData },
       })
     );
     console.log('🔥 DEBUG: staticContextUpdated event dispatched for AI assistant');

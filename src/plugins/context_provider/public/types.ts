@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
- * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- */
-
+import { Observable } from 'rxjs';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../plugins/embeddable/public';
@@ -42,22 +35,22 @@ export interface DynamicContext {
 
 export interface ContextContributor {
   appId: string;
-  
+
   // Option 1: Simple URL-based context (for plugins like Discover, Visualize)
   urlStateKeys?: string[]; // ['_g', '_a', '_q']
   parseUrlState?(urlState: Record<string, any>): Record<string, any>;
-  
+
   // Option 2: Complex context capture (for plugins like Dashboard with embeddables)
   captureStaticContext?(): Promise<Record<string, any>>;
-  
+
   // UI Actions that should trigger context refresh
   contextTriggerActions?: string[];
-  
+
   // Optional methods for dynamic context and actions
   captureDynamicContext?(trigger: string, data: any): Record<string, any>;
   getAvailableActions?(): string[];
   executeAction?(actionType: string, params: any): Promise<any>;
-  
+
   // Optional method to check if this contributor can handle a specific app ID
   canHandleApp?(appId: string): boolean;
 }
@@ -71,7 +64,7 @@ export enum ContextCapturePattern {
   /** Hybrid: URL state + transient UI actions not in URL */
   HYBRID = 'hybrid',
   /** Complex: Deep embeddable scanning + container management */
-  COMPLEX = 'complex'
+  COMPLEX = 'complex',
 }
 
 /**
@@ -81,16 +74,16 @@ export enum ContextCapturePattern {
 export interface StatefulContextContributor extends ContextContributor {
   /** Context capture pattern this contributor uses */
   capturePattern: ContextCapturePattern;
-  
+
   /** Get current transient state maintained by this contributor */
   getTransientState(): Record<string, any>;
-  
+
   /** Update transient state based on UI actions */
   updateTransientState(trigger: string, data: any): void;
-  
+
   /** Clear all transient state */
   clearTransientState(): void;
-  
+
   /** Get metadata about the current state complexity */
   getStateMetadata(): {
     hasTransientState: boolean;
@@ -98,10 +91,10 @@ export interface StatefulContextContributor extends ContextContributor {
     lastInteraction: number;
     customProperties: Record<string, any>;
   };
-  
+
   /** Optional: Initialize any custom state tracking */
   initialize?(): void;
-  
+
   /** Optional: Cleanup when contributor is unregistered */
   cleanup?(): void;
 }
@@ -137,7 +130,7 @@ export interface FlexibleContextData {
   appId: string;
   type: string;
   timestamp: number;
-  
+
   /** URL-based context (always present) */
   urlContext: {
     pathname: string;
@@ -145,13 +138,13 @@ export interface FlexibleContextData {
     hash: string;
     parsedParams: Record<string, any>;
   };
-  
+
   /** Optional: Transient state not reflected in URL */
   transientState?: Record<string, any>;
-  
+
   /** Optional: Complex embeddable or container state */
   complexState?: Record<string, any>;
-  
+
   /** Metadata about the context capture */
   metadata: {
     capturePattern: ContextCapturePattern;
@@ -161,6 +154,7 @@ export interface FlexibleContextData {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextProviderSetup {
   // Setup interface - empty for now
 }
@@ -174,4 +168,7 @@ export interface ContextProviderStart {
   // Plugin registration methods
   registerContextContributor(contributor: ContextContributor): void;
   unregisterContextContributor(appId: string): void;
+  // Observable methods for real-time context updates
+  getStaticContext$(): Observable<StaticContext | null>;
+  getDynamicContext$(): Observable<DynamicContext | null>;
 }

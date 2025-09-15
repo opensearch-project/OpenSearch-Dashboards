@@ -4,6 +4,7 @@
  */
 
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { ContextProviderStart } from '../../context_provider/public';
 import { ChatService } from './services/chat_service';
 
 export interface ChatPluginSetup {
@@ -16,4 +17,5 @@ export interface ChatPluginStart {
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
+  contextProvider: ContextProviderStart;
 }

@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
- * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- */
-
+/* eslint-disable no-console */
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import {
   ContextProviderSetup,
@@ -135,6 +128,9 @@ export class ContextProviderPlugin
       getAvailableActions: this.getAvailableActions.bind(this),
       registerContextContributor: this.registerContextContributor.bind(this),
       unregisterContextContributor: this.unregisterContextContributor.bind(this),
+      // Expose Observable methods for real-time context updates
+      getStaticContext$: () => this.contextCaptureService!.getStaticContext$(),
+      getDynamicContext$: () => this.contextCaptureService!.getDynamicContext$(),
     };
   }
 
