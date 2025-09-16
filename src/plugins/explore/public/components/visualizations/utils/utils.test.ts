@@ -93,7 +93,7 @@ describe('applyAxisStyling', () => {
     });
     expect(config.labels).toBe(true);
     expect(config.labelAngle).toBe(0);
-    expect(config.labelLimit).toBe(0);
+    expect(config.labelLimit).toBe(100);
   });
 
   it('preserves existing labelAngle and labelLimit when rotate and truncate are provided', () => {

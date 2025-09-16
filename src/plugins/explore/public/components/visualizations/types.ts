@@ -224,6 +224,26 @@ export enum AggregationType {
   NONE = 'none',
 }
 
+export interface BucketOptions {
+  aggregationType?: AggregationType;
+  // exclusive for time-series histogram
+  bucketTimeUnit?: TimeUnit;
+
+  // exclusive for numerical histogram
+  bucketSize?: number;
+  bucketCount?: number;
+}
+
+export enum TimeUnit {
+  AUTO = 'auto',
+  YEAR = 'year',
+  MONTH = 'yearmonth',
+  DATE = 'yearmonthdate',
+  HOUR = 'yearmonthdatehours',
+  MINUTE = 'yearmonthdatehoursminutes',
+  SECOND = 'yearmonthdatehoursminutesseconds',
+}
+
 export interface AxisConfig {
   grid: boolean;
   gridColor?: string;

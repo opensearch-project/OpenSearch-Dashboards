@@ -27,16 +27,9 @@ export const applyAxisStyling = (
     // Grid settings
     grid: gridEnabled,
     labelSeparation: 8,
-    orient: axisStyle?.position, // Apply position
-    title: axisStyle?.title.text || axis?.name, // Apply title settings
+    orient: axisStyle?.position,
+    title: axisStyle?.title.text || axis?.name,
   };
-
-  // Apply position
-
-  fullAxisConfig.orient = axisStyle?.position;
-
-  // Apply title settings
-  fullAxisConfig.title = axisStyle?.title.text;
 
   // Apply axis visibility
   if (!axisStyle?.show) {
@@ -48,14 +41,22 @@ export const applyAxisStyling = (
   }
 
   // Apply label settings
-  const showLabels = axisStyle?.labels?.show ?? true;
-  fullAxisConfig.labels = showLabels;
+  if (axisStyle?.labels) {
+    fullAxisConfig.labels = !!axisStyle.labels.show;
+    if (fullAxisConfig.labels) {
+      fullAxisConfig.labelAngle = 0;
+      fullAxisConfig.labelLimit = 100;
 
-  if (showLabels) {
-    fullAxisConfig.labelAngle = axisStyle?.labels?.rotate ?? fullAxisConfig.labelAngle;
-    fullAxisConfig.labelLimit = axisStyle?.labels?.truncate ?? fullAxisConfig.labelLimit;
-    fullAxisConfig.labelOverlap = 'greedy';
-    fullAxisConfig.labelFlush = false;
+      if (axisStyle.labels.rotate !== undefined) {
+        fullAxisConfig.labelAngle = axisStyle.labels.rotate;
+      }
+      if (axisStyle.labels.truncate !== undefined && axisStyle.labels.truncate > 0) {
+        fullAxisConfig.labelLimit = axisStyle.labels.truncate;
+      }
+
+      fullAxisConfig.labelOverlap = 'greedy';
+      fullAxisConfig.labelFlush = false;
+    }
   }
 
   if (axis?.schema === VisFieldType.Date) {
