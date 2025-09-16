@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './index.scss';
-
 import { ChatPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
