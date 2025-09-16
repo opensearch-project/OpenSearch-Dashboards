@@ -4,15 +4,7 @@
  */
 
 import { Observable } from 'rxjs';
-
-// Temporary types to replace @ag-ui/client imports
-export interface RunAgentInput {
-  threadId: string;
-  runId: string;
-  messages: Array<{ role: string; content: string }>;
-  tools?: any[];
-  state?: any;
-}
+import { RunAgentInput } from '../../common/types';
 
 export interface BaseEvent {
   type: string;
