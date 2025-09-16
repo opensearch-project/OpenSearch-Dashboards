@@ -26,14 +26,15 @@
         margin-bottom: 0;
       }
 
-      pre, code {
+      pre,
+      code {
         font-size: 13px;
       }
 
       blockquote {
         margin: 8px 0;
         padding-left: 12px;
-        border-left: 3px solid #d3dae6;
+        border-left: 3px solid $euiColorLightShade;
       }
     }
   }
