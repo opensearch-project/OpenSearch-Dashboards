@@ -19,6 +19,8 @@
     - discover
       - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
       - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
+    - explore
+      - [Query panel actions](plugins/explore/query-panel-actions.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
