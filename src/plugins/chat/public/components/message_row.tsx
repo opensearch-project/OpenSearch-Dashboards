@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiText, EuiIcon } from '@elastic/eui';
+import { EuiPanel, EuiIcon } from '@elastic/eui';
+import { Markdown } from '../../../opensearch_dashboards_react/public';
 import './message_row.scss';
 
 interface TimelineMessage {
@@ -32,10 +33,10 @@ export const MessageRow: React.FC<MessageRowProps> = ({ message, isStreaming = f
       </div>
       <div className="messageRow__content">
         <EuiPanel paddingSize="s" color={message.role === 'user' ? 'primary' : 'plain'}>
-          <EuiText size="s" style={{ whiteSpace: 'pre-wrap' }}>
-            {message.content}
+          <div className="messageRow__markdown">
+            <Markdown markdown={message.content} openLinksInNewTab={true} />
             {isStreaming && <span className="messageRow__cursor">|</span>}
-          </EuiText>
+          </div>
         </EuiPanel>
       </div>
     </div>

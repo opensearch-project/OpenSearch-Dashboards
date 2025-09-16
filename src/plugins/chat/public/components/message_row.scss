@@ -15,6 +15,28 @@
   &__cursor {
     animation: blink 1s infinite;
   }
+
+  &__markdown {
+    font-size: 14px;
+    line-height: 1.5;
+
+    // Ensure proper spacing for markdown elements
+    .osdMarkdown__body {
+      p:last-child {
+        margin-bottom: 0;
+      }
+
+      pre, code {
+        font-size: 13px;
+      }
+
+      blockquote {
+        margin: 8px 0;
+        padding-left: 12px;
+        border-left: 3px solid #d3dae6;
+      }
+    }
+  }
 }
 
 @keyframes blink {

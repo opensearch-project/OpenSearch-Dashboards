@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiText, EuiIcon, EuiBadge, EuiAccordion } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiIcon, EuiBadge, EuiAccordion, EuiCodeBlock } from '@elastic/eui';
 import './tool_call_row.scss';
 
 interface TimelineToolCall {
@@ -51,9 +51,15 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
               paddingSize="none"
               initialIsOpen={false}
             >
-              <EuiPanel paddingSize="s" color="subdued" className="toolCallRow__resultText">
-                <EuiText size="xs">{toolCall.result}</EuiText>
-              </EuiPanel>
+              <EuiCodeBlock
+                paddingSize="s"
+                fontSize="s"
+                isCopyable
+                className="toolCallRow__resultText"
+                language="json"
+              >
+                {toolCall.result}
+              </EuiCodeBlock>
             </EuiAccordion>
           </div>
         )}
