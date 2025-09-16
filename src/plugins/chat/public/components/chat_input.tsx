@@ -42,6 +42,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         aria-label="Send message"
         size="m"
         color="primary"
+        display="fill"
       />
     </div>
   );

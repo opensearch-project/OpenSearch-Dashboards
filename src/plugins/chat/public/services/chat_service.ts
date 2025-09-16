@@ -5,7 +5,6 @@
 
 import { AgUiAgent } from './ag_ui_agent';
 import { ChatContextManager } from './chat_context_manager';
-import { ContextItem } from '../types/context';
 import { RunAgentInput } from '../../common/types';
 
 export interface ChatMessage {
@@ -13,7 +12,6 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
-  context?: ContextItem[];
 }
 
 export interface ChatState {
@@ -55,23 +53,12 @@ export class ChatService {
     observable: any;
     userMessage: ChatMessage;
   }> {
-    // Get current context from context manager
-    const activeContexts = this.contextManager?.getActiveContexts() || [];
-
     const userMessage: ChatMessage = {
       id: this.generateMessageId(),
       role: 'user',
       content,
       timestamp: Date.now(),
-      context: activeContexts,
     };
-
-    // Build context-aware content
-    let contextAwareContent = content;
-    if (activeContexts.length > 0) {
-      const contextSummary = this.buildContextSummary(activeContexts);
-      contextAwareContent = `${content}\n\nContext:\n${contextSummary}`;
-    }
 
     const runInput: RunAgentInput = {
       threadId: this.threadId,
@@ -85,20 +72,15 @@ export class ChatService {
         {
           id: this.generateMessageId(),
           role: 'user',
-          content: contextAwareContent,
+          content,
         },
       ],
       tools: [], // Add tools here if your AG-UI server supports them
-      context: activeContexts.map((ctx) => ({
-        description: `${ctx.type}: ${ctx.label}`,
-        value: JSON.stringify({
-          type: ctx.type,
-          label: ctx.label,
-          data: ctx.data,
-          timestamp: ctx.timestamp,
-        }),
-      })),
-      state: {},
+      context: [], // Empty array since we're passing context in state
+      state: {
+        staticContext: this.contextManager?.getRawStaticContext() || null,
+        dynamicContext: this.contextManager?.getRawDynamicContext() || null,
+      },
       forwardedProps: {},
     };
 
@@ -134,39 +116,5 @@ export class ChatService {
 
   public newThread(): void {
     this.threadId = this.generateThreadId();
-  }
-
-  private buildContextSummary(contexts: ContextItem[]): string {
-    const summaryParts: string[] = [];
-
-    contexts.forEach((ctx) => {
-      switch (ctx.type) {
-        case 'time_range':
-          summaryParts.push(`Time Range: ${ctx.label}`);
-          break;
-        case 'filters':
-          summaryParts.push(`Filter: ${ctx.label}`);
-          break;
-        case 'query':
-          summaryParts.push(`Query: ${ctx.label}`);
-          break;
-        case 'index_pattern':
-          summaryParts.push(`Index Pattern: ${ctx.label}`);
-          break;
-        case 'dashboard':
-          summaryParts.push(`Dashboard: ${ctx.label}`);
-          break;
-        case 'app_state':
-          summaryParts.push(`Current App: ${ctx.label}`);
-          break;
-        case 'document':
-          summaryParts.push(`Document: ${JSON.stringify(ctx.data).substring(0, 100)}...`);
-          break;
-        default:
-          summaryParts.push(`${ctx.type}: ${ctx.label}`);
-      }
-    });
-
-    return summaryParts.join('\n');
   }
 }

@@ -14,7 +14,7 @@
   &__context {
     grid-area: context;
     border-bottom: 1px solid $euiColorLightShade;
-    padding-bottom: 8px;
+    padding: 8px 0;
   }
 
   &__emptyState {

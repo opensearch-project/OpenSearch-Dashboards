@@ -63,13 +63,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   // Initialize context manager
   const contextManager = useMemo(() => {
     const manager = new ChatContextManager();
-    if (services.core) {
-      manager.start(services.core, services.contextProvider);
-    }
+    manager.start(services.contextProvider);
     // Set context manager in chat service
     chatService.setContextManager(manager);
     return manager;
-  }, [services.core, chatService, services.contextProvider]);
+  }, [chatService, services.contextProvider]);
 
 
   const handleSend = async () => {
