@@ -21,6 +21,14 @@ import {
   setPromptToQueryIsLoading,
 } from '../../../../slices';
 import { runQueryActionCreator } from '../../run_query';
+import {
+  clearResults,
+  clearQueryStatusMap,
+  setQueryExecutionButtonStatus,
+  setActiveTab,
+} from '../../../../slices';
+import { executeQueries } from '../../../query_actions';
+import { detectAndSetOptimalTab } from '../../../detect_optimal_tab';
 
 export const callAgentActionCreator = createAsyncThunk<
   void,
@@ -33,15 +41,24 @@ export const callAgentActionCreator = createAsyncThunk<
   const dataset = services.data.query.queryString.getQuery().dataset;
 
   if (!editorText.length) {
-    services.notifications.toasts.addWarning({
-      title: i18n.translate('explore.queryPanel.missing-prompt-warning-title', {
-        defaultMessage: 'Missing prompt',
+    // Show informative toast
+    services.notifications.toasts.addInfo({
+      title: i18n.translate('explore.queryPanel.using-default-query-title', {
+        defaultMessage: 'Using default query',
       }),
-      text: i18n.translate('explore.queryPanel.missing-prompt-warning-text', {
-        defaultMessage: 'Enter a question to automatically generate a query',
+      text: i18n.translate('explore.queryPanel.using-default-query-text', {
+        defaultMessage: 'No prompt provided, refreshing data with default query',
       }),
-      id: 'missing-prompt-warning',
+      id: 'missing-prompt-info',
     });
+
+    // Execute default query
+    dispatch(clearResults());
+    dispatch(clearQueryStatusMap());
+    await dispatch(executeQueries({ services }));
+    dispatch(setActiveTab(''));
+    await dispatch(detectAndSetOptimalTab({ services }));
+    dispatch(setQueryExecutionButtonStatus('REFRESH'));
     return;
   }
 
