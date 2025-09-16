@@ -94,8 +94,11 @@ describe('VisualizationRender', () => {
   it('returns null when no visualization data is provided', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(undefined);
     const visConfig$ = new BehaviorSubject<ChartConfig | undefined>(mockTableConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
-    const { container } = render(<VisualizationRender data$={data$} visConfig$={visConfig$} />);
+    const { container } = render(
+      <VisualizationRender data$={data$} visConfig$={visConfig$} showRawTable$={showRawTable$} />
+    );
 
     expect(container.firstChild).toBeNull();
   });
@@ -103,8 +106,11 @@ describe('VisualizationRender', () => {
   it('renders table visualization when type is table', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<ChartConfig | undefined>(mockTableConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
-    render(<VisualizationRender data$={data$} visConfig$={visConfig$} />);
+    render(
+      <VisualizationRender data$={data$} visConfig$={visConfig$} showRawTable$={showRawTable$} />
+    );
 
     expect(screen.getByTestId('tableVisualization')).toBeInTheDocument();
   });
@@ -112,11 +118,13 @@ describe('VisualizationRender', () => {
   it('renders expression renderer when there is a selection mapping and ExpressionRenderer is provided', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<ChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
     render(
       <VisualizationRender
         data$={data$}
         visConfig$={visConfig$}
+        showRawTable$={showRawTable$}
         searchContext={mockSearchContext}
         ExpressionRenderer={mockExpressionRenderer}
       />
@@ -128,11 +136,13 @@ describe('VisualizationRender', () => {
   it('returns null when there is a selection mapping but no ExpressionRenderer', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<ChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
     const { container } = render(
       <VisualizationRender
         data$={data$}
         visConfig$={visConfig$}
+        showRawTable$={showRawTable$}
         searchContext={mockSearchContext}
       />
     );
@@ -146,8 +156,11 @@ describe('VisualizationRender', () => {
       ...mockChartConfig,
       axesMapping: undefined,
     });
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
-    render(<VisualizationRender data$={data$} visConfig$={visConfig$} />);
+    render(
+      <VisualizationRender data$={data$} visConfig$={visConfig$} showRawTable$={showRawTable$} />
+    );
 
     expect(screen.getByTestId('visualizationEmptyState')).toBeInTheDocument();
   });

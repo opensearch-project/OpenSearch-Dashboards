@@ -18,6 +18,7 @@ import {
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
+import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 
 export type LineMode = 'straight' | 'smooth' | 'stepped';
 
@@ -42,7 +43,7 @@ export interface LineChartStyleControls {
   titleOptions: TitleOptions;
 }
 
-const defaultLineChartStyles: LineChartStyleControls = {
+export const defaultLineChartStyles: LineChartStyleControls = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
@@ -77,7 +78,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
         show: true,
         filter: true,
         rotate: 0,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
@@ -100,7 +101,7 @@ const defaultLineChartStyles: LineChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',

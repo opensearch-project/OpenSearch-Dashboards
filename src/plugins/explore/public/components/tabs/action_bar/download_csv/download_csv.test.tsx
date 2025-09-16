@@ -7,6 +7,12 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { DiscoverDownloadCsv, DiscoverDownloadCsvProps } from './download_csv';
+
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn((key, options) => options.defaultMessage),
+  },
+}));
 import { OpenSearchSearchHit } from '../../../../application/legacy/discover/application/doc_views/doc_views_types';
 import { IndexPattern } from '../../../../../../data/common';
 import { useDiscoverDownloadCsv } from './use_download_csv';
@@ -22,6 +28,17 @@ jest.mock('./use_download_csv_toasts', () => ({
 
 jest.mock('./use_download_csv', () => ({
   useDiscoverDownloadCsv: jest.fn(),
+}));
+
+const mockUseKeyboardShortcut = jest.fn();
+jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: () => ({
+    services: {
+      keyboardShortcut: {
+        useKeyboardShortcut: mockUseKeyboardShortcut,
+      },
+    },
+  }),
 }));
 
 const mockRow1: OpenSearchSearchHit = {
@@ -64,6 +81,7 @@ describe('DiscoverDownloadCsv', () => {
   afterEach(() => {
     (useDiscoverDownloadCsv as jest.MockedFunction<any>).mockClear();
     mockDownloadCsvForOption.mockClear();
+    mockUseKeyboardShortcut.mockClear();
   });
 
   describe('useDiscoverDownloadCsv().isLoading === false', () => {
@@ -132,6 +150,70 @@ describe('DiscoverDownloadCsv', () => {
       render(<TestHarness indexPattern={mockIndexPattern} />);
       expect(screen.getByTestId('dscDownloadCsvButton')).toBeDisabled();
       fireEvent.click(screen.getByTestId('dscDownloadCsvButton'));
+      expect(screen.queryByTestId('dscDownloadCsvPopoverContent')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    beforeEach(() => {
+      (useDiscoverDownloadCsv as jest.MockedFunction<any>).mockImplementation(() => ({
+        isLoading: false,
+        downloadCsvForOption: mockDownloadCsvForOption,
+      }));
+    });
+
+    it('registers keyboard shortcut correctly', () => {
+      render(<TestHarness />);
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'download_csv',
+        pluginId: 'explore',
+        name: 'Download CSV',
+        category: 'Data actions',
+        keys: 'e',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('keyboard shortcut opens popover when not loading', () => {
+      render(<TestHarness />);
+
+      // Get the execute function from the keyboard shortcut registration
+      const keyboardShortcutCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'download_csv'
+      );
+      expect(keyboardShortcutCall).toBeDefined();
+
+      const executeFunction = keyboardShortcutCall[0].execute;
+
+      // Execute the keyboard shortcut
+      executeFunction();
+
+      // Verify popover opens
+      expect(screen.getByTestId('dscDownloadCsvPopoverContent')).toBeInTheDocument();
+    });
+
+    it('keyboard shortcut does nothing when loading', () => {
+      // Mock loading state
+      (useDiscoverDownloadCsv as jest.MockedFunction<any>).mockImplementation(() => ({
+        isLoading: true,
+        downloadCsvForOption: mockDownloadCsvForOption,
+      }));
+
+      render(<TestHarness />);
+
+      // Get the execute function from the keyboard shortcut registration
+      const keyboardShortcutCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'download_csv'
+      );
+      expect(keyboardShortcutCall).toBeDefined();
+
+      const executeFunction = keyboardShortcutCall[0].execute;
+
+      // Execute the keyboard shortcut
+      executeFunction();
+
+      // Verify popover does not open
       expect(screen.queryByTestId('dscDownloadCsvPopoverContent')).not.toBeInTheDocument();
     });
   });

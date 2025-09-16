@@ -116,6 +116,7 @@ export interface AxisLabels {
   show: boolean;
   filter: boolean;
   rotate: number;
+  // TODO: make `truncate` optional
   truncate: number;
 }
 
@@ -261,3 +262,15 @@ export enum FilterOperator {
 export type ColorMode = 'auto' | 'colored_text' | 'colored_background';
 
 export type CellAlignment = 'auto' | 'left' | 'center' | 'right';
+export interface UnitItem {
+  id: string;
+  name: string;
+  symbol?: string;
+  display?: (value: number, symbol?: string) => any;
+  fontScale?: number;
+}
+
+export interface Unit {
+  name: string;
+  units: UnitItem[];
+}
