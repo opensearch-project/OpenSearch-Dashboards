@@ -6,6 +6,7 @@
 import { AgUiAgent } from './ag_ui_agent';
 import { ChatContextManager } from './chat_context_manager';
 import { ContextItem } from '../types/context';
+import { RunAgentInput } from '../../common/types';
 
 export interface ChatMessage {
   id: string;
@@ -72,27 +73,33 @@ export class ChatService {
       contextAwareContent = `${content}\n\nContext:\n${contextSummary}`;
     }
 
-    const runInput = {
+    const runInput: RunAgentInput = {
       threadId: this.threadId,
       runId: this.generateRunId(),
       messages: [
         ...messages.map((msg) => ({
+          id: msg.id,
           role: msg.role,
           content: msg.content,
         })),
         {
+          id: this.generateMessageId(),
           role: 'user',
           content: contextAwareContent,
         },
       ],
       tools: [], // Add tools here if your AG-UI server supports them
-      state: {
-        context: activeContexts.map((ctx) => ({
+      context: activeContexts.map((ctx) => ({
+        description: `${ctx.type}: ${ctx.label}`,
+        value: JSON.stringify({
           type: ctx.type,
           label: ctx.label,
           data: ctx.data,
-        })),
-      },
+          timestamp: ctx.timestamp,
+        }),
+      })),
+      state: {},
+      forwardedProps: {},
     };
 
     const observable = this.agent.runAgent(runInput, {

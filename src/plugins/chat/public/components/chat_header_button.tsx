@@ -12,6 +12,11 @@ import { ChatService } from '../services/chat_service';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart } from '../../../context_provider/public';
 
+export enum ChatLayoutMode {
+  SIDECAR = 'sidecar',
+  FULLSCREEN = 'fullscreen',
+}
+
 interface ChatHeaderButtonProps {
   core: CoreStart;
   chatService: ChatService;
@@ -24,6 +29,7 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
   contextProvider,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(ChatLayoutMode.SIDECAR);
   const sideCarRef = useRef<{ close: () => void }>();
   const mountPointRef = useRef<HTMLDivElement>(null);
 
@@ -41,17 +47,26 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
       };
     };
 
+    const sidecarConfig =
+      layoutMode === ChatLayoutMode.FULLSCREEN
+        ? {
+            dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
+            paddingSize: window.innerHeight,
+            isHidden: false,
+          }
+        : {
+            dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+            paddingSize: 400,
+            isHidden: false,
+          };
+
     sideCarRef.current = core.overlays.sidecar.open(mountPoint, {
-      className: 'chat-sidecar',
-      config: {
-        dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
-        paddingSize: 400,
-        isHidden: false,
-      },
+      className: `chat-sidecar chat-sidecar--${layoutMode}`,
+      config: sidecarConfig,
     });
 
     setIsOpen(true);
-  }, [core.overlays]);
+  }, [core.overlays, layoutMode]);
 
   const closeSidecar = useCallback(() => {
     if (sideCarRef.current) {
@@ -68,6 +83,31 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
       openSidecar();
     }
   }, [isOpen, openSidecar, closeSidecar]);
+
+  const toggleLayoutMode = useCallback(() => {
+    const newLayoutMode =
+      layoutMode === ChatLayoutMode.SIDECAR ? ChatLayoutMode.FULLSCREEN : ChatLayoutMode.SIDECAR;
+
+    setLayoutMode(newLayoutMode);
+
+    // Update sidecar config dynamically if currently open
+    if (isOpen && sideCarRef.current) {
+      const newSidecarConfig =
+        newLayoutMode === ChatLayoutMode.FULLSCREEN
+          ? {
+              dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
+              paddingSize: window.innerHeight - 50,
+              isHidden: false,
+            }
+          : {
+              dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+              paddingSize: 400,
+              isHidden: false,
+            };
+
+      core.overlays.sidecar.setSidecarConfig(newSidecarConfig);
+    }
+  }, [layoutMode, isOpen, core.overlays.sidecar]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -87,6 +127,7 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
           color={isOpen ? 'primary' : 'text'}
           size="s"
           aria-label="Toggle chat assistant"
+          display="base"
         />
       </EuiToolTip>
 
@@ -99,10 +140,10 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
           display: isOpen ? 'block' : 'none',
         }}
       >
-        <div style={{ height: '100vh', boxSizing: 'border-box' }}>
+        <div style={{ height: '100%', boxSizing: 'border-box' }}>
           <OpenSearchDashboardsContextProvider services={{ core, contextProvider }}>
             <ChatProvider chatService={chatService}>
-              <ChatWindow />
+              <ChatWindow layoutMode={layoutMode} onToggleLayout={toggleLayoutMode} />
             </ChatProvider>
           </OpenSearchDashboardsContextProvider>
         </div>

@@ -19,6 +19,7 @@ import {
   // eslint-disable-next-line prettier/prettier
   type Event as ChatEvent,
 } from '../../common/events';
+import { ChatLayoutMode } from './chat_header_button';
 
 interface TimelineMessage {
   type: 'message';
@@ -39,10 +40,15 @@ interface TimelineToolCall {
 
 type TimelineItem = TimelineMessage | TimelineToolCall;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ChatWindowProps {}
+interface ChatWindowProps {
+  layoutMode?: ChatLayoutMode;
+  onToggleLayout?: () => void;
+}
 
-export const ChatWindow: React.FC<ChatWindowProps> = () => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({
+  layoutMode = ChatLayoutMode.SIDECAR,
+  onToggleLayout,
+}) => {
   const { chatService } = useChatContext();
   const { services } = useOpenSearchDashboards<{
     core: CoreStart;
@@ -228,7 +234,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -253,19 +259,30 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
   }, [contextManager]);
 
   return (
-    <div className="chat-container">
+    <div className={`chat-container chat-container--${layoutMode}`}>
       {/* Chat Header */}
       <div className="chat-header">
         <EuiText size="m">
           <h3>Assistant</h3>
         </EuiText>
-        <EuiButtonIcon
-          iconType="refresh"
-          onClick={handleNewChat}
-          disabled={isStreaming}
-          aria-label="New chat"
-          size="m"
-        />
+        <div className="chat-header-buttons">
+          {onToggleLayout && (
+            <EuiButtonIcon
+              iconType={layoutMode === ChatLayoutMode.FULLSCREEN ? 'minimize' : 'fullScreen'}
+              onClick={onToggleLayout}
+              disabled={isStreaming}
+              aria-label={layoutMode === ChatLayoutMode.FULLSCREEN ? 'Switch to sidecar' : 'Switch to fullscreen'}
+              size="m"
+            />
+          )}
+          <EuiButtonIcon
+            iconType="refresh"
+            onClick={handleNewChat}
+            disabled={isStreaming}
+            aria-label="New chat"
+            size="m"
+          />
+        </div>
       </div>
 
       {/* Context Pills */}
@@ -317,7 +334,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
           placeholder="Type your message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           disabled={isStreaming}
           fullWidth
         />
@@ -345,6 +362,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
           padding: 0 8px 8px 0;
         }
 
+        /* Fullscreen layout adjustments */
+        .chat-container--fullscreen {
+          padding: 16px 24px;
+          gap: 20px;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
         .chat-header {
           grid-area: header;
           display: flex;
@@ -352,6 +377,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
           align-items: center;
           padding: 8px 0;
           border-bottom: 1px solid #e6e6e6;
+        }
+
+        .chat-header-buttons {
+          display: flex;
+          gap: 8px;
+          align-items: center;
         }
 
         .chat-context {
@@ -369,6 +400,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
           padding: 8px 0;
         }
 
+        /* Fullscreen message styling */
+        .chat-container--fullscreen .chat-messages {
+          gap: 16px;
+          padding: 16px 0;
+        }
+
         .empty-state {
           display: flex;
           flex-direction: column;
@@ -384,6 +421,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = () => {
           grid-template-columns: 1fr auto;
           gap: 8px;
           align-items: center;
+        }
+
+        /* Fullscreen input styling */
+        .chat-container--fullscreen .chat-input {
+          gap: 12px;
         }
       `}</style>
     </div>
