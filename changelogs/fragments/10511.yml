@@ -1,0 +1,2 @@
+fix:
+- Do not expose `VEGA_DEBUG` object to `window` by default ([#10511](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10511))
