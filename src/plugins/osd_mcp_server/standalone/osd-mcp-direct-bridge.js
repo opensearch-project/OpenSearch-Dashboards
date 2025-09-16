@@ -188,16 +188,28 @@ class DirectMCPBridge {
   async forwardToRemote(message) {
     return new Promise((resolve, reject) => {
       if (!this.ssh) {
+        console.error('❌ SSH connection not available');
         reject(new Error('Not connected to remote server'));
         return;
       }
 
+      console.error('🔧 Forwarding MCP request:', JSON.stringify(message));
+
       // Send to remote server
-      this.ssh.stdin.write(JSON.stringify(message) + '\n');
+      try {
+        this.ssh.stdin.write(JSON.stringify(message) + '\n');
+        console.error('✅ Request sent to remote server via SSH');
+      } catch (error) {
+        console.error('❌ Failed to write to SSH stdin:', error);
+        reject(error);
+        return;
+      }
 
       let responseBuffer = '';
       const responseHandler = (data) => {
-        responseBuffer += data.toString();
+        const dataStr = data.toString();
+        console.error('📥 Received data from remote:', dataStr);
+        responseBuffer += dataStr;
 
         // Look for complete JSON responses
         const lines = responseBuffer.split('\n');
@@ -206,13 +218,15 @@ class DirectMCPBridge {
           if (line.trim()) {
             try {
               const response = JSON.parse(line.trim());
+              console.error('📤 Parsed JSON response:', JSON.stringify(response));
               if (response.id) {
                 this.ssh.stdout.removeListener('data', responseHandler);
+                console.error('✅ Returning response for ID:', response.id);
                 resolve(response);
                 return;
               }
             } catch (error) {
-              // Ignore non-JSON lines
+              console.error('⚠️ Non-JSON line received:', line.trim());
             }
           }
         }
@@ -220,11 +234,12 @@ class DirectMCPBridge {
 
       this.ssh.stdout.on('data', responseHandler);
 
-      // Timeout after 10 seconds
+      // Timeout after 30 seconds (increased)
       setTimeout(() => {
+        console.error('⏰ Request timeout after 30 seconds');
         this.ssh.stdout.removeListener('data', responseHandler);
         reject(new Error('Request timeout'));
-      }, 10000);
+      }, 30000);
     });
   }
 }
