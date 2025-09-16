@@ -1,0 +1,2 @@
+fix:
+- Add units panel for gauge and metric ([#10497](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10497))

@@ -20,6 +20,7 @@ import { generateColorBySchema, getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
+import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -53,6 +54,10 @@ export const createSingleMetric = (
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
   const isValidNumber =
     calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
+
+  const selectedUnit = getUnitById(styleOptions?.unitId);
+
+  const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
   function generateColorConditions(field: string, ranges: RangeValue[], color: ColorSchemas) {
     const colors = generateColorBySchema(ranges.length + 1, color);
@@ -119,26 +124,24 @@ export const createSingleMetric = (
 
   const markLayer: any = {
     data: {
-      values: [{ value: calculatedValue ?? '-' }],
+      values: [{ value: displayValue ?? '-' }],
     },
-    transform: [
-      {
-        calculate: "format(datum.value, '.2f')",
-        as: 'formattedValue',
-      },
-    ],
     mark: {
       type: 'text',
       align: 'center',
       baseline: 'middle',
-      fontSize: valueFontSize ? valueFontSize : { expr: '8*textSize' },
-      dy: valueFontSize ? -valueFontSize / 8 : { expr: '-textSize' },
+      fontSize: valueFontSize
+        ? valueFontSize
+        : { expr: `5*textSize * ${selectedUnit?.fontScale ?? 1}` },
+      dy: valueFontSize
+        ? -valueFontSize / 8
+        : { expr: `-textSize* ${selectedUnit?.fontScale ?? 1}` },
       color: colorPalette.text,
     },
     encoding: {
       text: {
-        field: isValidNumber ? 'formattedValue' : 'value',
-        type: isValidNumber ? 'quantitative' : 'nominal',
+        field: 'value',
+        type: 'nominal',
       },
     },
   };

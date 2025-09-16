@@ -23,6 +23,7 @@ import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { DebouncedFieldText } from '../style_panel/utils';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
+import { UnitPanel } from '../style_panel/unit/unit_panel';
 
 export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyleControls>;
 
@@ -82,7 +83,12 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               </EuiFormRow>
             </StyleAccordion>
           </EuiFlexItem>
-
+          <EuiFlexItem>
+            <UnitPanel
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+            />
+          </EuiFlexItem>
           <EuiFlexItem>
             <ThresholdPanel
               thresholds={styleOptions.thresholds}

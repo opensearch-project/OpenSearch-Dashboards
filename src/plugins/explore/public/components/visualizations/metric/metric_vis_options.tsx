@@ -17,6 +17,7 @@ import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
+import { UnitPanel } from '../style_panel/unit/unit_panel';
 
 export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
 
@@ -79,6 +80,13 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                 />
               </EuiFormRow>
             </StyleAccordion>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <UnitPanel
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <StyleAccordion
