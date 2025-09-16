@@ -194,7 +194,7 @@ export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
       if (staticChildren.length > 0) {
         items.push({
           id: 'static-context',
-          icon: <EuiToken iconType="documents" color="primary" />,
+          icon: <EuiToken iconType="documents" color="euiColorVis1" />,
           label: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
@@ -263,7 +263,7 @@ export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
       if (dynamicChildren.length > 0) {
         items.push({
           id: 'dynamic-context',
-          icon: <EuiToken iconType="bolt" color="accent" />,
+          icon: <EuiToken iconType="bolt" color="euiColorVis2" />,
           label: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
