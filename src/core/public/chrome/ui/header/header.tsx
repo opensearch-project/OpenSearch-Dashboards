@@ -64,6 +64,7 @@ import { useObservableValue } from '../../../utils';
 import { KeyboardShortcutStart } from '../../../keyboard_shortcut';
 import {
   getOsdSidecarPaddingStyle,
+  getOsdSidecarPaddingStyleForHeader,
   ISidecarConfig,
   getSidecarLeftNavStyle,
 } from '../../../overlays';
@@ -189,6 +190,10 @@ export function Header({
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
+  }, [sidecarConfig]);
+
+  const sidecarPaddingStyleForHeader = useMemo(() => {
+    return getOsdSidecarPaddingStyleForHeader(sidecarConfig);
   }, [sidecarConfig]);
 
   const sidecarLeftNavStyle = useMemo(() => {
@@ -663,7 +668,10 @@ export function Header({
 
   const renderApplicationHeader = () => (
     <div>
-      <EuiHeader className="primaryApplicationHeader newTopNavHeader" style={sidecarPaddingStyle}>
+      <EuiHeader
+        className="primaryApplicationHeader newTopNavHeader"
+        style={sidecarPaddingStyleForHeader}
+      >
         {renderNavToggle()}
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}

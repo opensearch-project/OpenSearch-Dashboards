@@ -36,6 +36,22 @@ export const getOsdSidecarPaddingStyle = (config: ISidecarConfig | undefined) =>
   return {};
 };
 
+export const getOsdSidecarPaddingStyleForHeader = (config: ISidecarConfig | undefined) => {
+  if (
+    !config?.isHidden &&
+    (config?.dockedMode === SIDECAR_DOCKED_MODE.LEFT ||
+      config?.dockedMode === SIDECAR_DOCKED_MODE.RIGHT)
+  ) {
+    const { dockedMode, paddingSize } = config;
+    // Reduce padding by 8px for newTopNavHeader to match other elements
+    const adjustedPaddingSize = paddingSize + 8;
+    return {
+      [`padding${dockedMode === SIDECAR_DOCKED_MODE.LEFT ? 'Left' : 'Right'}`]: adjustedPaddingSize,
+    };
+  }
+  return {};
+};
+
 export const getSidecarLeftNavStyle = (config: ISidecarConfig | undefined) => {
   // Only left style is required for left nav
   if (!config?.isHidden && config?.dockedMode === SIDECAR_DOCKED_MODE.LEFT) {
