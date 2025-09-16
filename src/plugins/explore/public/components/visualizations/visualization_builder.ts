@@ -10,12 +10,11 @@ import { debounceTime, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
 import { convertMappingsToStrings, isValidMapping } from './visualization_builder_utils';
-import { getServices } from '../../services/services';
+import { getExpressions as getExpressionsService, getServices } from '../../services/services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
-import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
-import { normalizeResultRows } from './utils/normalize_result_rows';
+import { getColumnStats, getDataColumns } from './utils/normalize_result_rows';
 import { ChartConfig, VisData } from './visualization_builder.types';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { VisualizationRender } from './visualization_render';
@@ -23,7 +22,7 @@ import { ExpressionsStart } from '../../../../expressions/public';
 import { StylePanelRender } from './style_panel_render';
 import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
-import { RenderChartConfig } from './types';
+import { RenderChartConfig, VisFieldType } from './types';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -33,7 +32,7 @@ interface VisState {
 
 interface Options {
   getUrlStateStorage?: () => IOsdUrlStateStorage | undefined;
-  getExpressions: () => ExpressionsStart;
+  getExpressions?: () => ExpressionsStart;
 }
 
 export class VisualizationBuilder {
@@ -127,7 +126,7 @@ export class VisualizationBuilder {
 
     // Always reset style after changing chart type
     if (currentVisConfig?.type !== chartType) {
-      newVisConfig.styles = visConfig.ui.style.defaults;
+      newVisConfig.styles = undefined;
     }
 
     // Table chart doesn't have axes mapping, but we need to keep current axes mapping, so when switch back to other types
@@ -250,13 +249,12 @@ export class VisualizationBuilder {
     // For these cases, we will create auto vis based on the rules. If not auto vis can be created,
     // reset chart type and axes mapping to empty, this will let user to choose.
     if (isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
-      const autoVis = this.createAutoVis(data);
+      const autoVis = this.createAutoVis(data, currentChartType);
       if (autoVis) {
         const chartTypeConfig = visualizationRegistry.getVisualizationConfig(autoVis.chartType);
         if (chartTypeConfig) {
           const newVisConfig: ChartConfig = {
             type: autoVis.chartType,
-            styles: chartTypeConfig.ui.style.defaults,
             axesMapping: autoVis.axesMapping,
           };
           this.setVisConfig(newVisConfig);
@@ -269,7 +267,6 @@ export class VisualizationBuilder {
         // Default to show a table if no auto vis created
         const newVisConfig: ChartConfig = {
           type: 'table',
-          styles: chartTypeConfig?.ui.style.defaults,
         };
         this.setVisConfig(newVisConfig);
       }
@@ -287,15 +284,13 @@ export class VisualizationBuilder {
   }
 
   handleData<T = unknown>(
-    rows: Array<OpenSearchSearchHit<T>>,
-    schema: Array<{ type?: string; name?: string }>
+    rows: Array<Record<string, any>>,
+    typeHints?: Record<string, VisFieldType>
   ) {
-    const {
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-    } = normalizeResultRows(rows, schema);
+    const { numericalColumns, categoricalColumns, dateColumns, transformedData } = getColumnStats(
+      getDataColumns(rows, typeHints),
+      rows
+    );
     this.data$.next({ transformedData, numericalColumns, categoricalColumns, dateColumns });
   }
 
@@ -374,8 +369,8 @@ export class VisualizationBuilder {
     );
   }
 
-  renderVisualization({ searchContext }: { searchContext?: ExecutionContextSearch }) {
-    const ExpressionRenderer = this.getExpression()?.ReactExpressionRenderer;
+  renderVisualization({ searchContext }: { searchContext?: ExecutionContextSearch } = {}) {
+    const ExpressionRenderer = this.getExpression?.()?.ReactExpressionRenderer;
     if (!ExpressionRenderer) {
       return null;
     }
@@ -407,7 +402,7 @@ export const getVisualizationBuilder = () => {
   if (!visualizationBuilder) {
     visualizationBuilder = new VisualizationBuilder({
       getUrlStateStorage: () => getServices().osdUrlStateStorage,
-      getExpressions: () => getServices().expressions,
+      getExpressions: () => getExpressionsService(),
     });
   }
   return visualizationBuilder;

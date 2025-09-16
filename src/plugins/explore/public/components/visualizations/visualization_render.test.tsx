@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { VisualizationRender } from './visualization_render';
-import { VisData, ChartConfig } from './visualization_builder.types';
+import { VisData } from './visualization_builder.types';
 import { VisFieldType, Positions, RenderChartConfig } from './types';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { defaultBarChartStyles } from './bar/bar_vis_config';

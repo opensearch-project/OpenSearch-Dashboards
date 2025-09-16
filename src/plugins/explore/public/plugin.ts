@@ -69,7 +69,8 @@ import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
-import { setServices } from './services/services';
+import { setExpressions, setServices } from './services/services';
+import { Visualization } from './components/visualizations/visualization';
 
 export class ExplorePlugin
   implements
@@ -445,6 +446,9 @@ export class ExplorePlugin
       },
       visualizationRegistry: visualizationRegistryService,
       queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
+      ui: {
+        Visualization,
+      },
     };
   }
 
@@ -456,6 +460,7 @@ export class ExplorePlugin
 
     if (plugins.expressions) {
       setExpressionLoader(plugins.expressions.ExpressionLoader);
+      setExpressions(plugins.expressions);
     }
 
     this.initializeServices = () => {
