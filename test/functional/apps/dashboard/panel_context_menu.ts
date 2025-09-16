@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
 
       const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
-      expect(isContextMenuIconVisible).to.equal(true);
+      expect(isContextMenuIconVisible).toEqual(true);
 
       await dashboardPanelActions.expectExistsEditPanelAction();
       await dashboardPanelActions.expectExistsClonePanelAction();
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
+        expect(currentUrl).toContain(VisualizeConstants.EDIT_PATH);
       });
 
       it('deletes the visualization when delete link is clicked', async () => {
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.removePanel();
 
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(0);
+        expect(panelCount).toBe(0);
         // need to find the correct save
         await PageObjects.dashboard.saveDashboard(dashboardName);
       });
@@ -144,14 +144,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should be one panel on dashboard', async () => {
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(1);
+        expect(panelCount).toBe(1);
       });
 
       it('opens a saved search when edit link is clicked', async () => {
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const queryName = await PageObjects.discover.getCurrentQueryName();
-        expect(queryName).to.be(searchName);
+        expect(queryName).toBe(searchName);
       });
 
       it('deletes the saved search when delete link is clicked', async () => {
@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.removePanel();
 
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(0);
+        expect(panelCount).toBe(0);
       });
     });
 

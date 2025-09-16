@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
@@ -52,7 +52,7 @@ export default function ({
           'returns_opensearch_dashboards_context',
           'opensearchDashboards'
         ).getResponse();
-        expect(result).to.have.property('type', 'opensearch_dashboards_context');
+        expect(result).toHaveProperty('type', 'opensearch_dashboards_context');
       });
 
       it('correctly sets timeRange', async () => {
@@ -62,7 +62,7 @@ export default function ({
           {},
           { timeRange: 'test' }
         ).getResponse();
-        expect(result).to.have.property('timeRange', 'test');
+        expect(result).toHaveProperty('timeRange', 'test');
       });
     });
 

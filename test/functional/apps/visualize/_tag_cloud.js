@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
     it('should show correct tag cloud data', async function () {
       const data = await PageObjects.tagCloud.getTextTag();
       log.debug(data);
-      expect(data).to.eql([
+      expect(data).toEqual([
         '32,212,254,720',
         '21,474,836,480',
         '20,401,094,656',
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
       // Give d3 tag cloud some time to rearrange tags
       await PageObjects.common.sleep(1000);
       const isDisplayed = await editorSidebar.isDisplayed();
-      expect(isDisplayed).to.be(false);
+      expect(isDisplayed).toBe(false);
       await PageObjects.visEditor.clickEditorSidebarCollapse();
     });
 
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.sleep(1000);
       const data = await PageObjects.tagCloud.getTextTag();
       log.debug(data);
-      expect(data).to.eql([
+      expect(data).toEqual([
         '32,212,254,720',
         '21,474,836,480',
         '20,401,094,656',
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }) {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.sleep(1000);
       const data = await PageObjects.tagCloud.getTextTag();
-      expect(data).to.eql([
+      expect(data).toEqual([
         '32,212,254,720',
         '21,474,836,480',
         '20,401,094,656',
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
     it('should show the tags and relative size', function () {
       return PageObjects.tagCloud.getTextSizes().then(function (results) {
         log.debug('results here ' + results);
-        expect(results).to.eql(['72px', '63px', '25px', '32px', '18px']);
+        expect(results).toEqual(['72px', '63px', '25px', '32px', '18px']);
       });
     });
 
@@ -190,14 +190,14 @@ export default function ({ getService, getPageObjects }) {
       it('should format tags with field formatter', async function () {
         const data = await PageObjects.tagCloud.getTextTag();
         log.debug(data);
-        expect(data).to.eql(['30GB', '20GB', '19GB', '18GB', '17GB']);
+        expect(data).toEqual(['30GB', '20GB', '19GB', '18GB', '17GB']);
       });
 
       it('should apply filter with unformatted value', async function () {
         await PageObjects.tagCloud.selectTagCloudTag('30GB');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const data = await PageObjects.tagCloud.getTextTag();
-        expect(data).to.eql(['30GB']);
+        expect(data).toEqual(['30GB']);
       });
     });
   });

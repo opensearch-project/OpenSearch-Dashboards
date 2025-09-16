@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
@@ -44,9 +44,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('todo embeddable renders', async () => {
       await retry.try(async () => {
         const title = await testSubjects.getVisibleText('todoEmbeddableTitle');
-        expect(title).to.be('Trash');
+        expect(title).toBe('Trash');
         const task = await testSubjects.getVisibleText('todoEmbeddableTask');
-        expect(task).to.be('Take out the trash');
+        expect(task).toBe('Take out the trash');
       });
     });
 
@@ -57,9 +57,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
       await retry.try(async () => {
         const title = await testSubjects.getVisibleText('todoEmbeddableTitle');
-        expect(title).to.be('Learn');
+        expect(title).toBe('Learn');
         const task = await testSubjects.getVisibleText('todoEmbeddableTask');
-        expect(task).to.be('read a book');
+        expect(task).toBe('read a book');
       });
     });
   });

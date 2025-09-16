@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }) {
         const panelTitleAfterMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
         const position2 = await panelTitleAfterMove.getPosition();
 
-        expect(position1.y).to.be.greaterThan(position2.y);
+        expect(position1.y).toBeGreaterThan(position2.y);
       });
     });
   });

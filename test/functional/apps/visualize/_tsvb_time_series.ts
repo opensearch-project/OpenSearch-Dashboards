@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should show the correct count in the legend', async () => {
         await retry.try(async () => {
           const actualCount = await visualBuilder.getRhythmChartLegendValue();
-          expect(actualCount).to.be('156');
+          expect(actualCount).toBe('156');
         });
       });
 
@@ -65,14 +65,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.enterOffsetSeries('2h');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('293');
+        expect(actualCount).toBe('293');
       });
 
       it('should show the correct count in the legend with -2h offset', async () => {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.enterOffsetSeries('-2h');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
+        expect(actualCount).toBe('53');
       });
 
       it('should open color picker, deactivate panel and clone series', async () => {
@@ -87,8 +87,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.cloneSeries();
         const legend = await visualBuilder.getLegendItems();
         const series = await visualBuilder.getSeries();
-        expect(legend.length).to.be(2);
-        expect(series.length).to.be(2);
+        expect(legend.length).toBe(2);
+        expect(series.length).toBe(2);
       });
 
       it('should show the correct count in the legend with custom numeric formatter', async () => {
@@ -98,7 +98,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.enterSeriesTemplate('$ {{value}}');
         await retry.try(async () => {
           const actualCount = await visualBuilder.getRhythmChartLegendValue();
-          expect(actualCount).to.be(expectedLegendValue);
+          expect(actualCount).toBe(expectedLegendValue);
         });
       });
 
@@ -108,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('Percent');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be(expectedLegendValue);
+        expect(actualCount).toBe(expectedLegendValue);
       });
 
       it('should show the correct count in the legend with bytes formatter', async () => {
@@ -117,7 +117,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('Bytes');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be(expectedLegendValue);
+        expect(actualCount).toBe(expectedLegendValue);
       });
 
       it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
@@ -125,17 +125,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.changeDataFormatter('Duration');
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
         const actualCountDefault = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCountDefault).to.be('a few seconds');
+        expect(actualCountDefault).toBe('a few seconds');
 
         log.debug(`to: 'Human readable', from: 'Seconds'`);
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Seconds' });
         const actualCountSec = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCountSec).to.be('3 minutes');
+        expect(actualCountSec).toBe('3 minutes');
 
         log.debug(`to: 'Human readable', from: 'Minutes'`);
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Minutes' });
         const actualCountMin = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCountMin).to.be('3 hours');
+        expect(actualCountMin).toBe('3 hours');
       });
 
       describe('Dark mode', () => {
@@ -149,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.clickPanelOptions('timeSeries');
           await visualBuilder.setBackgroundColor('#FFFFFF');
 
-          expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
+          expect(await visualBuilder.checkTimeSeriesIsLight()).toBe(true);
         });
 
         after(async () => {

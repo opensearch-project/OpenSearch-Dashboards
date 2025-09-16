@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import moment from 'moment';
 import { getOpenSearchProxyConfig } from './opensearch_proxy_config';
 import https from 'https';
@@ -53,7 +52,7 @@ describe('plugins/console', function () {
         ...getDefaultOpenSearchConfig(),
         requestTimeout: moment.duration(value),
       });
-      expect(proxyConfig.timeout).to.be(value);
+      expect(proxyConfig.timeout).toBe(value);
     });
 
     it(`uses https.Agent when url's protocol is https`, function () {
@@ -61,12 +60,12 @@ describe('plugins/console', function () {
         ...getDefaultOpenSearchConfig(),
         hosts: ['https://localhost:9200'],
       });
-      expect(agent).to.be.a(https.Agent);
+      expect(agent).toBeInstanceOf(https.Agent);
     });
 
     it(`uses http.Agent when url's protocol is http`, function () {
       const { agent } = getOpenSearchProxyConfig(getDefaultOpenSearchConfig());
-      expect(agent).to.be.a(http.Agent);
+      expect(agent).toBeInstanceOf(http.Agent);
     });
 
     describe('ssl', function () {
@@ -80,9 +79,9 @@ describe('plugins/console', function () {
           ...config,
           ssl: { ...config.ssl, verificationMode: 'none' },
         });
-        expect(agent).to.be.a(https.Agent);
+        expect(agent).toBeInstanceOf(https.Agent);
         if (agent instanceof https.Agent) {
-          expect(agent.options.rejectUnauthorized).to.be(false);
+          expect(agent.options.rejectUnauthorized).toBe(false);
         }
       });
 
@@ -91,9 +90,9 @@ describe('plugins/console', function () {
           ...config,
           ssl: { ...config.ssl, verificationMode: 'certificate' },
         });
-        expect(agent).to.be.a(https.Agent);
+        expect(agent).toBeInstanceOf(https.Agent);
         if (agent instanceof https.Agent) {
-          expect(agent.options.rejectUnauthorized).to.be(true);
+          expect(agent.options.rejectUnauthorized).toBe(true);
         }
       });
 
@@ -109,13 +108,11 @@ describe('plugins/console', function () {
           },
         };
 
-        expect(agent).to.be.a(https.Agent);
+        expect(agent).toBeInstanceOf(https.Agent);
         if (agent instanceof https.Agent) {
-          expect(agent.options.checkServerIdentity)
-            .withArgs('right.com', cert)
-            .to.not.throwException();
+          expect(agent.options.checkServerIdentity).toBeDefined();
           const result = agent.options.checkServerIdentity?.('right.com', cert as PeerCertificate);
-          expect(result).to.be(undefined);
+          expect(result).toBe(undefined);
         }
       });
 
@@ -125,9 +122,9 @@ describe('plugins/console', function () {
           ssl: { ...config.ssl, verificationMode: 'full' },
         });
 
-        expect(agent).to.be.a(https.Agent);
+        expect(agent).toBeInstanceOf(https.Agent);
         if (agent instanceof https.Agent) {
-          expect(agent.options.rejectUnauthorized).to.be(true);
+          expect(agent.options.rejectUnauthorized).toBe(true);
         }
       });
 
@@ -137,9 +134,9 @@ describe('plugins/console', function () {
           ssl: { ...config.ssl, verificationMode: 'full' },
         });
 
-        expect(agent).to.be.a(https.Agent);
+        expect(agent).toBeInstanceOf(https.Agent);
         if (agent instanceof https.Agent) {
-          expect(agent.options.checkServerIdentity).to.be(undefined);
+          expect(agent.options.checkServerIdentity).toBe(undefined);
         }
       });
 
@@ -149,9 +146,9 @@ describe('plugins/console', function () {
           ssl: { ...config.ssl, certificateAuthorities: ['content-of-some-path'] },
         });
 
-        expect(agent).to.be.a(https.Agent);
+        expect(agent).toBeInstanceOf(https.Agent);
         if (agent instanceof https.Agent) {
-          expect(agent.options.ca).to.contain('content-of-some-path');
+          expect(agent.options.ca).toContain('content-of-some-path');
         }
       });
 
@@ -167,10 +164,10 @@ describe('plugins/console', function () {
             },
           });
 
-          expect(agent).to.be.a(https.Agent);
+          expect(agent).toBeInstanceOf(https.Agent);
           if (agent instanceof https.Agent) {
-            expect(agent.options.cert).to.be(undefined);
-            expect(agent.options.key).to.be(undefined);
+            expect(agent.options.cert).toBe(undefined);
+            expect(agent.options.key).toBe(undefined);
           }
         });
 
@@ -186,9 +183,9 @@ describe('plugins/console', function () {
             },
           });
 
-          expect(agent).to.be.a(https.Agent);
+          expect(agent).toBeInstanceOf(https.Agent);
           if (agent instanceof https.Agent) {
-            expect(agent.options.passphrase).to.be(undefined);
+            expect(agent.options.passphrase).toBe(undefined);
           }
         });
       });
@@ -205,10 +202,10 @@ describe('plugins/console', function () {
             },
           });
 
-          expect(agent).to.be.a(https.Agent);
+          expect(agent).toBeInstanceOf(https.Agent);
           if (agent instanceof https.Agent) {
-            expect(agent.options.cert).to.be('content-of-some-path');
-            expect(agent.options.key).to.be('content-of-another-path');
+            expect(agent.options.cert).toBe('content-of-some-path');
+            expect(agent.options.key).toBe('content-of-another-path');
           }
         });
 
@@ -224,9 +221,9 @@ describe('plugins/console', function () {
             },
           });
 
-          expect(agent).to.be.a(https.Agent);
+          expect(agent).toBeInstanceOf(https.Agent);
           if (agent instanceof https.Agent) {
-            expect(agent.options.passphrase).to.be('secret');
+            expect(agent.options.passphrase).toBe('secret');
           }
         });
 
@@ -241,10 +238,10 @@ describe('plugins/console', function () {
             },
           });
 
-          expect(agent).to.be.a(https.Agent);
+          expect(agent).toBeInstanceOf(https.Agent);
           if (agent instanceof https.Agent) {
-            expect(agent.options.cert).to.be(undefined);
-            expect(agent.options.key).to.be(undefined);
+            expect(agent.options.cert).toBe(undefined);
+            expect(agent.options.key).toBe(undefined);
           }
         });
 
@@ -259,10 +256,10 @@ describe('plugins/console', function () {
             },
           });
 
-          expect(agent).to.be.a(https.Agent);
+          expect(agent).toBeInstanceOf(https.Agent);
           if (agent instanceof https.Agent) {
-            expect(agent.options.cert).to.be(undefined);
-            expect(agent.options.key).to.be(undefined);
+            expect(agent.options.cert).toBe(undefined);
+            expect(agent.options.key).toBe(undefined);
           }
         });
       });

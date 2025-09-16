@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
     it('should show 4 color ranges as default colorNumbers param', async function () {
       const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
-      expect(legends).to.eql(expectedLegends);
+      expect(legends).toEqual(expectedLegends);
     });
 
     it('should show 6 color ranges if changed on options', async function () {
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
         '1,067 - 1,334',
         '1,334 - 1,600',
       ];
-      expect(legends).to.eql(expectedLegends);
+      expect(legends).toEqual(expectedLegends);
     });
     it('should show 6 custom color ranges', async function () {
       await PageObjects.visEditor.clickOptionsTab();
@@ -147,7 +147,7 @@ export default function ({ getService, getPageObjects }) {
         '650 - 720',
         '800 - 905',
       ];
-      expect(legends).to.eql(expectedLegends);
+      expect(legends).toEqual(expectedLegends);
     });
   });
 }

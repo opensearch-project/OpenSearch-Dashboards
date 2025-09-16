@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
         await (await testSubjects.find('createIndexPatternButton')).click();
         const btn = await PageObjects.settings.getCreateIndexPatternGoToStep2Button();
         const isEnabled = await btn.isEnabled();
-        expect(isEnabled).not.to.be.ok();
+        expect(isEnabled).not.toBeTruthy();
       });
 
       it('is enabled once an index pattern with matching indices has been entered', async function () {
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.sleep(1000);
         const btn = await PageObjects.settings.getCreateIndexPatternGoToStep2Button();
         const isEnabled = await btn.isEnabled();
-        expect(isEnabled).to.be.ok();
+        expect(isEnabled).toBeTruthy();
       });
     });
 

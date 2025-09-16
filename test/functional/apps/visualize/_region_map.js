@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   describe('vector map', function () {
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }) {
           ['ID', '489'],
           ['BR', '415'],
         ];
-        expect(actualData).to.eql(expectedData);
+        expect(actualData).toEqual(expectedData);
 
         await inspector.close();
       });
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
           .toArray()
           .map((option) => $(option).text());
 
-        expect(optionsText.includes('road_map')).to.be(true);
+        expect(optionsText.includes('road_map')).toBe(true);
       });
     });
   });

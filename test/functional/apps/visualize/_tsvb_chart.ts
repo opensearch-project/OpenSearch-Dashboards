@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct data', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
-        expect(value).to.eql('156');
+        expect(value).toEqual('156');
       });
 
       it('should show correct data with Math Aggregation', async () => {
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.fillInVariable();
         await PageObjects.visualBuilder.fillInExpression('params.test + 1');
         const value = await PageObjects.visualBuilder.getMetricValue();
-        expect(value).to.eql('157');
+        expect(value).toEqual('157');
       });
 
       it('should populate fields for basic functions', async () => {
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.setFieldForAggregation('machine.ram');
         const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
 
-        expect(isFieldForAggregationValid).to.be(true);
+        expect(isFieldForAggregationValid).toBe(true);
       });
     });
 
@@ -105,9 +105,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should verify gauge label and count display', async () => {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
-        expect(labelString).to.be('Count');
+        expect(labelString).toBe('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
-        expect(gaugeCount).to.be('156');
+        expect(gaugeCount).toBe('156');
       });
     });
 
@@ -121,9 +121,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should verify topN label and count display', async () => {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
-        expect(labelString).to.be('Count');
+        expect(labelString).toBe('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
-        expect(gaugeCount).to.be('156');
+        expect(gaugeCount).toBe('156');
       });
     });
 
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should be able to switch between index patterns', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
-        expect(value).to.eql('156');
+        expect(value).toEqual('156');
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
         const toTime = 'Oct 28, 2018 @ 23:59:59.999';
@@ -156,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        expect(newValue).to.eql('10');
+        expect(newValue).toEqual('10');
       });
     });
 
@@ -209,28 +209,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.setMetricsGroupByTerms('extension.raw');
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const legendItems1 = await PageObjects.visualBuilder.getLegendItemsContent();
-        expect(legendItems1).to.eql(finalLegendItems);
+        expect(legendItems1).toEqual(finalLegendItems);
 
         log.debug('Go back in browser history');
         await browser.goBack();
         const isTermsSelected = await PageObjects.visualBuilder.checkSelectedMetricsGroupByValue(
           'Terms'
         );
-        expect(isTermsSelected).to.be(true);
+        expect(isTermsSelected).toBe(true);
 
         log.debug('Go back in browser history');
         await browser.goBack();
         await PageObjects.visualBuilder.checkSelectedMetricsGroupByValue('Everything');
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const legendItems2 = await PageObjects.visualBuilder.getLegendItemsContent();
-        expect(legendItems2).to.eql(initialLegendItems);
+        expect(legendItems2).toEqual(initialLegendItems);
 
         log.debug('Go forward twice in browser history');
         await browser.goForward();
         await browser.goForward();
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const legendItems3 = await PageObjects.visualBuilder.getLegendItemsContent();
-        expect(legendItems3).to.eql(finalLegendItems);
+        expect(legendItems3).toEqual(finalLegendItems);
       });
     });
   });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickOpenSearchDashboardsSettings();
       await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
       const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
-      expect(advancedSetting).to.be('America/Phoenix');
+      expect(advancedSetting).toBe('America/Phoenix');
     });
 
     describe('state:storeInSessionStorage', () => {
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
           'state:storeInSessionStorage'
         );
-        expect(storeInSessionStorage).to.be(null);
+        expect(storeInSessionStorage).toBe(null);
       });
 
       it('when false, dashboard state is unhashed', async function () {
@@ -85,8 +85,8 @@ export default function ({ getService, getPageObjects }) {
 
         // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
         // which is less than 20 characters.
-        expect(globalState.length).to.be.greaterThan(20);
-        expect(appState.length).to.be.greaterThan(20);
+        expect(globalState.length).toBeGreaterThan(20);
+        expect(appState.length).toBeGreaterThan(20);
       });
 
       it('setting to true change is preserved', async function () {
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }) {
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
           'state:storeInSessionStorage'
         );
-        expect(storeInSessionStorage).to.be('true');
+        expect(storeInSessionStorage).toBe('true');
       });
 
       it('when true, dashboard state is hashed', async function () {
@@ -107,8 +107,8 @@ export default function ({ getService, getPageObjects }) {
 
         // We don't have to be exact, just need to ensure it's less than the unhashed version, which will be
         // greater than 20 characters with the default state plus a time.
-        expect(globalState.length).to.be.lessThan(20);
-        expect(appState.length).to.be.lessThan(20);
+        expect(globalState.length).toBeLessThan(20);
+        expect(appState.length).toBeLessThan(20);
       });
 
       it("changing 'state:storeInSessionStorage' also takes effect without full page reload", async () => {
@@ -120,8 +120,8 @@ export default function ({ getService, getPageObjects }) {
         const [globalState, appState] = await getStateFromUrl();
         // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
         // which is less than 20 characters.
-        expect(globalState.length).to.be.greaterThan(20);
-        expect(appState.length).to.be.greaterThan(20);
+        expect(globalState.length).toBeGreaterThan(20);
+        expect(appState.length).toBeGreaterThan(20);
       });
     });
 
