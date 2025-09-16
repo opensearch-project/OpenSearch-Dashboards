@@ -169,6 +169,7 @@ export const DataImporterPluginApp = ({
             selectedDataSourceId: dataSourceId,
           });
           setIsLoadingPreview(false);
+
           if (response) {
             setFilePreviewData(response);
             notifications.toasts.addSuccess(
