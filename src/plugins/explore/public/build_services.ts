@@ -15,13 +15,15 @@ import { getHistory } from './application/legacy/discover/opensearch_dashboards_
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { VisualizationRegistryService } from './services/visualization_registry_service';
 import { AppStore } from './application/utils/state_management/store';
+import { QueryPanelActionsRegistryService } from './services/query_panel_actions_registry';
 
 export function buildServices(
   core: CoreStart,
   plugins: ExploreStartDependencies,
   context: PluginInitializerContext,
   tabRegistry: TabRegistryService,
-  visualizationRegistry: VisualizationRegistryService
+  visualizationRegistry: VisualizationRegistryService,
+  queryPanelActionsRegistry: QueryPanelActionsRegistryService
 ): ExploreServices {
   const config = context.config.get<ConfigSchema>();
   const supportedTypes = config.supportedTypes;
@@ -86,6 +88,7 @@ export function buildServices(
     // Explore-specific services
     tabRegistry,
     visualizationRegistry,
+    queryPanelActionsRegistry,
     expressions: plugins.expressions,
 
     dashboard: plugins.dashboard,
