@@ -61,6 +61,7 @@ import { WorkspaceObject, WorkspacesStart } from '../../../../public/workspace';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { useObservableValue } from '../../../utils';
+import { KeyboardShortcutStart } from '../../../keyboard_shortcut';
 import {
   getOsdSidecarPaddingStyle,
   ISidecarConfig,
@@ -132,6 +133,7 @@ export interface HeaderProps {
   useUpdatedHeader?: boolean;
   globalSearchCommands?: GlobalSearchCommand[];
   globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
+  keyboardShortcut?: KeyboardShortcutStart;
 }
 
 const hasValue = (value: any) => {
@@ -158,6 +160,7 @@ export function Header({
   setCurrentNavGroup,
   useUpdatedHeader,
   globalSearchCommands,
+  keyboardShortcut,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -207,6 +210,23 @@ export function Header({
     },
     [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
   );
+
+  const handleToggleNavOpen = useCallback(() => {
+    setIsNavOpen(!isNavOpen);
+  }, [setIsNavOpen, isNavOpen]);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'toggle_navbar',
+    pluginId: 'core',
+    name: i18n.translate('core.chrome.header.toggleNavbar.name', {
+      defaultMessage: 'Toggle navbar',
+    }),
+    category: i18n.translate('core.chrome.header.category.panelLayout', {
+      defaultMessage: 'Panel / Layout',
+    }),
+    keys: 'shift+b',
+    execute: handleToggleNavOpen,
+  });
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
@@ -288,7 +308,7 @@ export function Header({
           aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
             defaultMessage: 'Toggle primary navigation',
           })}
-          onClick={() => setIsNavOpen(!isNavOpen)}
+          onClick={handleToggleNavOpen}
           aria-expanded={isNavOpen}
           aria-pressed={isNavOpen}
           aria-controls={navId}

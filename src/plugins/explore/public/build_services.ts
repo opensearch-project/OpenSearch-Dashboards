@@ -89,6 +89,7 @@ export function buildServices(
     expressions: plugins.expressions,
 
     dashboard: plugins.dashboard,
+    keyboardShortcut: core.keyboardShortcut,
 
     // Add supportedTypes from config
     supportedTypes,
