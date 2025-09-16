@@ -29,7 +29,7 @@
  */
 
 import { Container, isErrorEmbeddable } from '../../../..';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { setTimeout } from 'timers/promises';
 import { CustomizePanelTitleAction } from './customize_panel_action';
 import {
   ContactCardEmbeddable,
@@ -81,7 +81,7 @@ test('Updates the embeddable title when given', async () => {
   expect(embeddable.getInput().title).toBeUndefined();
   expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
   await customizePanelAction.execute({ embeddable });
-  await nextTick();
+  await setTimeout();
   expect(embeddable.getTitle()).toBe('What is up?');
   expect(embeddable.getInput().title).toBe('What is up?');
 
@@ -103,7 +103,7 @@ test('Empty string results in an empty title', async () => {
   expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
 
   await customizePanelAction.execute({ embeddable });
-  await nextTick();
+  await setTimeout();
   expect(embeddable.getTitle()).toBe('');
 });
 
@@ -113,12 +113,12 @@ test('Undefined title results in the original title', async () => {
   expect(embeddable.getInput().title).toBeUndefined();
   expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
   await customizePanelAction.execute({ embeddable });
-  await nextTick();
+  await setTimeout();
   expect(embeddable.getTitle()).toBe('hi');
 
   await new CustomizePanelTitleAction(() => Promise.resolve({ title: undefined })).execute({
     embeddable,
   });
-  await nextTick();
+  await setTimeout();
   expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
 });

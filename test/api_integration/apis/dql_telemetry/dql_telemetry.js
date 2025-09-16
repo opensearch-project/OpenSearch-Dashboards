@@ -29,7 +29,6 @@
  */
 
 import expect from '@osd/expect';
-import Bluebird from 'bluebird';
 import { get } from 'lodash';
 
 export default function ({ getService }) {
@@ -102,7 +101,7 @@ export default function ({ getService }) {
     });
 
     it('should only accept literal boolean values for the opt_in POST body param', function () {
-      return Bluebird.all([
+      return Promise.all([
         supertest
           .post('/api/opensearch-dashboards/dql_opt_in_stats')
           .set('content-type', 'application/json')
