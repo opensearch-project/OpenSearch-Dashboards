@@ -5,20 +5,27 @@
  */
 
 const { spawn } = require('child_process');
-const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
-const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
-const {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} = require('@modelcontextprotocol/sdk/types.js');
+const path = require('path');
+const { Server } = require('@modelcontextprotocol/sdk/server');
+const { StdioServerTransport } = require(path.join(
+  __dirname,
+  'node_modules/@modelcontextprotocol/sdk/dist/cjs/server/stdio.js'
+));
+const { CallToolRequestSchema, ListToolsRequestSchema } = require(path.join(
+  __dirname,
+  'node_modules/@modelcontextprotocol/sdk/dist/cjs/types.js'
+));
 
 class DirectMCPBridge {
   constructor() {
     this.sshHost = process.env.OSD_SSH_HOST || 'ubuntu@35.86.147.162';
-    this.sshKey = process.env.OSD_SSH_KEY || '~/.ssh/osd-dev.pem';
+    // Expand tilde to home directory
+    const sshKeyPath = process.env.OSD_SSH_KEY || '~/.ssh/osd-dev.pem';
+    this.sshKey = sshKeyPath.replace('~', require('os').homedir());
 
     console.error('🌉 Starting Direct MCP Bridge...');
     console.error(`🔗 Connecting to EC2 via SSH: ${this.sshHost}`);
+    console.error(`🔑 Using SSH key: ${this.sshKey}`);
 
     this.setupMCPServer();
   }
@@ -53,7 +60,7 @@ class DirectMCPBridge {
 
   async connectToRemoteServer() {
     return new Promise((resolve, reject) => {
-      // Create SSH connection that pipes to the manually running MCP server
+      // Create SSH connection that directly executes the MCP server
       const sshCommand = [
         'ssh',
         '-i',
@@ -66,14 +73,49 @@ class DirectMCPBridge {
         'LogLevel=ERROR',
         '-T', // Disable pseudo-terminal allocation
         this.sshHost,
+        `cd /home/ubuntu/OpenSearch-Dashboards && exec node src/plugins/osd_mcp_server/standalone/osd-mcp-simple.js`,
       ];
 
       this.ssh = spawn(sshCommand[0], sshCommand.slice(1), {
         stdio: ['pipe', 'pipe', 'pipe'],
       });
 
+      let initBuffer = '';
+      let isConnected = false;
+
+      this.ssh.stdout.on('data', (data) => {
+        const output = data.toString();
+
+        // Check for MCP server startup messages
+        if (!isConnected && output.includes('OpenSearch Dashboards MCP Server is running')) {
+          isConnected = true;
+          console.error('✅ Connected to remote MCP server');
+          resolve();
+        }
+
+        // Store data for response handling after connection
+        if (isConnected) {
+          this.handleRemoteData(output);
+        } else {
+          initBuffer += output;
+          if (initBuffer.includes('OpenSearch Dashboards MCP Server is running')) {
+            isConnected = true;
+            console.error('✅ Connected to remote MCP server');
+            resolve();
+          }
+        }
+      });
+
       this.ssh.stderr.on('data', (data) => {
-        console.error(`SSH Debug: ${data.toString()}`);
+        const errorOutput = data.toString();
+        console.error(`SSH Debug: ${errorOutput}`);
+
+        // Also check stderr for startup messages (MCP server logs to stderr)
+        if (!isConnected && errorOutput.includes('OpenSearch Dashboards MCP Server is running')) {
+          isConnected = true;
+          console.error('✅ Connected to remote MCP server');
+          resolve();
+        }
       });
 
       this.ssh.on('close', (code) => {
@@ -86,9 +128,21 @@ class DirectMCPBridge {
         reject(error);
       });
 
-      // Connection is ready immediately for pipe mode
-      resolve();
+      // Timeout after 10 seconds
+      setTimeout(() => {
+        if (!isConnected) {
+          reject(new Error('Connection timeout - could not connect to remote MCP server'));
+        }
+      }, 10000);
     });
+  }
+
+  handleRemoteData(data) {
+    // Store incoming data for response processing
+    if (!this.responseBuffer) {
+      this.responseBuffer = '';
+    }
+    this.responseBuffer += data;
   }
 
   setupMCPHandlers() {
