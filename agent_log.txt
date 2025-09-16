@@ -1,0 +1,924 @@
+ananzh@842f5784f691 AI-Agents % npm run start:ag-ui react
+
+> ai-agent-scripts@1.0.0 start:ag-ui
+> ts-node src/main-ag-ui.ts react
+
+[dotenv@17.2.1] injecting env (6) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[2025-09-16T18:23:42.157Z] INFO: 🚀 Starting react AG UI Server
+🚀 Starting react AG UI Server...
+
+[2025-09-16T18:23:42.157Z] INFO: 📋 Loaded MCP config from /Users/ananzh/AI-Agents/configuration/mcp-config.json {
+  "configPath": "/Users/ananzh/AI-Agents/configuration/mcp-config.json",
+  "serverCount": 2
+}
+📋 Loaded MCP config from /Users/ananzh/AI-Agents/configuration/mcp-config.json
+[2025-09-16T18:23:42.160Z] INFO: ReAct Agent initialized {
+  "region": "us-west-2",
+  "hasAwsAccessKey": true,
+  "hasAwsSecretKey": true,
+  "hasAwsProfile": true,
+  "hasAwsSessionToken": true
+}
+[2025-09-16T18:23:42.160Z] INFO: Using LangGraphAGUIAdapter for ReactAgent with enhanced graph tracking
+[2025-09-16T18:23:42.161Z] INFO: Initializing react AG UI Server
+[2025-09-16T18:23:42.161Z] INFO: Initializing react AG UI Adapter
+[2025-09-16T18:23:42.161Z] INFO: Using custom system prompt from file {
+  "path": "./prompts/observability.md"
+}
+[2025-09-16T18:23:42.161Z] INFO: Initializing ReAct Agent {
+  "serverCount": 2,
+  "servers": [
+    "opensearch-mcp-server",
+    "osd-mcp-server"
+  ]
+}
+[2025-09-16T18:23:42.161Z] INFO: Connecting to MCP server: opensearch-mcp-server
+[2025-09-16T18:23:42.162Z] INFO: Attempting to connect to local MCP server: opensearch-mcp-server {
+  "command": "uvx",
+  "args": [
+    "opensearch-mcp-server-py",
+    "--mode",
+    "multi",
+    "--config",
+    "./configuration/opensearch-config.yml"
+  ],
+  "env": {}
+}
+2025-09-16 11:23:42,705 - mcp_server_opensearch - INFO - Starting MCP server...
+2025-09-16 11:23:42,706 - root - INFO - Total clusters found in config file: 2
+2025-09-16 11:23:42,804 - opensearch.client - INFO - [BASIC AUTH] Using basic authentication: admin
+2025-09-16 11:23:43,171 - opensearch - INFO - HEAD https://search-osd-ops-5hblcotzha5dabpom7vvhfaktm.aos.us-east-1.on.aws:443/ [status:200 request:0.367s]
+2025-09-16 11:23:43,180 - opensearch.client - INFO - [BASIC AUTH] Using basic authentication: admin
+2025-09-16 11:23:43,701 - opensearch - INFO - HEAD https://search-explore-backend-7c3b2ex7igsby32h2fme6pcmee.aos.us-west-2.on.aws:443/ [status:200 request:0.520s]
+2025-09-16 11:23:43,701 - root - INFO - Loaded clusters: ['osd-ops', 'explore-backend']
+2025-09-16 11:23:44,433 - root - INFO - Enabled tools: ['ListIndexTool', 'IndexMappingTool', 'SearchIndexTool', 'GetShardsTool', 'GetClusterStateTool', 'GetSegmentsTool', 'CatNodesTool', 'GetIndexInfoTool', 'GetIndexStatsTool', 'GetQueryInsightsTool', 'GetNodesHotThreadsTool', 'GetAllocationTool', 'GetLongRunningTasksTool', 'GetNodesTool', 'ClusterHealthTool', 'CountTool', 'MsearchTool', 'ExplainTool']
+2025-09-16 11:23:44,440 - mcp.server.lowlevel.server - INFO - Processing request of type ListToolsRequest
+[2025-09-16T18:23:44.441Z] INFO: Loaded 18 tools from opensearch-mcp-server
+[2025-09-16T18:23:44.441Z] INFO: Successfully connected to local MCP server: opensearch-mcp-server
+[2025-09-16T18:23:44.441Z] INFO: Connected to opensearch-mcp-server, available tools: 18
+[2025-09-16T18:23:44.441Z] INFO: Connecting to MCP server: osd-mcp-server
+[2025-09-16T18:23:44.442Z] INFO: Attempting to connect to local MCP server: osd-mcp-server {
+  "command": "node",
+  "args": [
+    "/Users/ananzh/osd-mcp-server/osd-mcp-remote.js"
+  ],
+  "env": {
+    "OSD_SSH_HOST": "ubuntu@35.86.147.162",
+    "OSD_SSH_KEY": "~/.ssh/osd-dev.pem"
+  }
+}
+🌉 Starting MCP Bridge...
+🔗 Connecting to EC2 via SSH: ubuntu@35.86.147.162
+✅ SSH bridge established
+📡 MCP Bridge is running on stdio
+[2025-09-16T18:23:45.951Z] INFO: Loaded 0 tools from osd-mcp-server
+[2025-09-16T18:23:45.953Z] INFO: Successfully connected to local MCP server: osd-mcp-server
+[2025-09-16T18:23:45.954Z] INFO: Connected to osd-mcp-server, available tools: 0
+[2025-09-16T18:23:45.955Z] INFO: Using enhanced custom system prompt with dynamic content
+[2025-09-16T18:23:46.027Z] INFO: ReAct Agent initialization complete {
+  "totalTools": 18
+}
+[2025-09-16T18:23:46.028Z] INFO: react AG UI Adapter initialized
+[2025-09-16T18:23:46.030Z] INFO: react AG UI Server initialized
+[2025-09-16T18:23:46.040Z] INFO: AI Agent AG UI HTTP Server started {
+  "host": "localhost",
+  "port": 3000,
+  "httpEndpoint": "http://localhost:3000"
+}
+🚀 AI Agent AG UI Server running at http://localhost:3000
+[2025-09-16T18:25:53.078Z] INFO: POST / {
+  "method": "POST",
+  "path": "/",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+}
+[2025-09-16T18:25:53.079Z] INFO: Running agent via SSE streaming {
+  "threadId": "thread-1758047107547-382dg0zcj",
+  "runId": "run-1758047153050-620j02s3c",
+  "messageCount": 1
+}
+[2025-09-16T18:25:53.107Z] INFO: Running react agent with AG UI input {
+  "threadId": "thread-1758047107547-382dg0zcj",
+  "runId": "run-1758047153050-620j02s3c",
+  "messageCount": 1,
+  "toolCount": 0
+}
+[2025-09-16T18:25:53.118Z] INFO: Processing input {
+  "messageCount": 1,
+  "iterations": 0,
+  "maxIterations": 10
+}
+[2025-09-16T18:25:53.120Z] INFO: 📥 callModelNode: Starting {
+  "iterations": 0,
+  "maxIterations": 10,
+  "messageCount": 1,
+  "lastMessageRole": "user",
+  "lastMessageContent": "[{\"text\":\"Run \\\"source = opensearch_dashboards_sample_data_logs | stats count()\\\"\\n\\nContext:\\nTime "
+}
+[2025-09-16T18:25:53.120Z] INFO: 🔧 Tool configuration decision {
+  "hasToolResultsInHistory": false,
+  "iterations": 0,
+  "maxIterations": 10,
+  "atMaxIterations": false,
+  "shouldDisableTools": false,
+  "toolCount": 18
+}
+[2025-09-16T18:25:53.120Z] INFO: LLM Request Messages (detailed) {
+  "messageCount": 1,
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Run \"source = opensearch_dashboards_sample_data_logs | stats count()\"\n\nContext:\nTime Range: now-15m to now\nQuery: Empty query\nCurrent App: explore"
+        }
+      ]
+    }
+  ]
+}
+@aws-sdk/credential-provider-node - defaultProvider::fromEnv WARNING:
+    Multiple credential sources detected: 
+    Both AWS_PROFILE and the pair AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY static credentials are set.
+    This SDK will proceed with the AWS_PROFILE value.
+    
+    However, a future version may change this behavior to prefer the ENV static credentials.
+    Please ensure that your environment only sets either the AWS_PROFILE or the
+    AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY pair.
+
+[2025-09-16T18:25:58.285Z] INFO: 📤 LLM Response from Bedrock {
+  "contentBlocksCount": 2,
+  "contentBlocks": {
+    "message": {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "I'll run that query for you using the OpenSearch query DSL format. Let me search for logs data and get the count."
+        },
+        {
+          "toolUse": {
+            "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+            "name": "opensearch-mcp-server__Super_Searcher",
+            "input": {
+              "index": "opensearch_dashboards_sample_data_logs",
+              "query": {
+                "size": 0,
+                "aggs": {
+                  "total_count": {
+                    "value_count": {
+                      "field": "_id"
+                    }
+                  }
+                },
+                "query": {
+                  "range": {
+                    "@timestamp": {
+                      "gte": "now-15m",
+                      "lte": "now"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "textContent": "I'll run that query for you using the OpenSearch query DSL format. Let me search for logs data and get the count."
+    },
+    "toolCalls": [
+      {
+        "toolName": "opensearch-mcp-server__Super_Searcher",
+        "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+        "input": {
+          "index": "opensearch_dashboards_sample_data_logs",
+          "query": {
+            "size": 0,
+            "aggs": {
+              "total_count": {
+                "value_count": {
+                  "field": "_id"
+                }
+              }
+            },
+            "query": {
+              "range": {
+                "@timestamp": {
+                  "gte": "now-15m",
+                  "lte": "now"
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+[2025-09-16T18:25:58.297Z] INFO: Executing tools {
+  "toolCallsCount": 1,
+  "toolNames": [
+    "opensearch-mcp-server__Super_Searcher"
+  ],
+  "currentIterations": 0,
+  "maxIterations": 10
+}
+[2025-09-16T18:25:58.298Z] INFO: Tool execution started {
+  "toolName": "opensearch-mcp-server__Super_Searcher",
+  "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+  "input": {
+    "index": "opensearch_dashboards_sample_data_logs",
+    "query": {
+      "size": 0,
+      "aggs": {
+        "total_count": {
+          "value_count": {
+            "field": "_id"
+          }
+        }
+      },
+      "query": {
+        "range": {
+          "@timestamp": {
+            "gte": "now-15m",
+            "lte": "now"
+          }
+        }
+      }
+    }
+  }
+}
+[2025-09-16T18:25:58.327Z] INFO: Auto-injected default OpenSearch cluster parameter (failsafe) {
+  "toolName": "Super_Searcher",
+  "clusterName": "osd-ops"
+}
+[2025-09-16T18:25:58.327Z] INFO: Executing tool Super_Searcher on opensearch-mcp-server {
+  "input": {
+    "index": "opensearch_dashboards_sample_data_logs",
+    "query": {
+      "size": 0,
+      "aggs": {
+        "total_count": {
+          "value_count": {
+            "field": "_id"
+          }
+        }
+      },
+      "query": {
+        "range": {
+          "@timestamp": {
+            "gte": "now-15m",
+            "lte": "now"
+          }
+        }
+      }
+    },
+    "opensearch_cluster_name": "osd-ops"
+  }
+}
+2025-09-16 11:25:58,331 - mcp.server.lowlevel.server - INFO - Processing request of type CallToolRequest
+2025-09-16 11:25:58,339 - opensearch.client - INFO - [BASIC AUTH] Using basic authentication: admin
+2025-09-16 11:25:58,723 - opensearch - INFO - GET https://search-osd-ops-5hblcotzha5dabpom7vvhfaktm.aos.us-east-1.on.aws:443/ [status:200 request:0.384s]
+2025-09-16 11:25:58,742 - opensearch.client - INFO - [BASIC AUTH] Using basic authentication: admin
+2025-09-16 11:25:59,079 - opensearch - INFO - POST https://search-osd-ops-5hblcotzha5dabpom7vvhfaktm.aos.us-east-1.on.aws:443/opensearch_dashboards_sample_data_logs/_search [status:200 request:0.335s]
+[2025-09-16T18:25:59.088Z] INFO: Tool Super_Searcher executed successfully on opensearch-mcp-server {
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Search results from opensearch_dashboards_sample_data_logs:\n{\n  \"took\": 9,\n  \"timed_out\": false,\n  \"_shards\": {\n    \"total\": 1,\n    \"successful\": 1,\n    \"skipped\": 0,\n    \"failed\": 0\n  },\n  \"hits\": {\n    \"total\": {\n      \"value\": 2,\n      \"relation\": \"eq\"\n    },\n    \"max_score\": null,\n    \"hits\": []\n  },\n  \"aggregations\": {\n    \"total_count\": {\n      \"value\": 2\n    }\n  }\n}"
+      }
+    ],
+    "isError": false
+  }
+}
+[2025-09-16T18:25:59.090Z] INFO: Tool execution completed {
+  "toolName": "opensearch-mcp-server__Super_Searcher",
+  "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+  "resultType": "object",
+  "resultKeys": [
+    "content",
+    "isError"
+  ]
+}
+[2025-09-16T18:25:59.095Z] INFO: All tools executed {
+  "toolResultsCount": 1,
+  "successfulTools": 1,
+  "failedTools": 0,
+  "previousIterations": 0,
+  "newIterations": 1,
+  "maxIterations": 10,
+  "shouldContinue": true,
+  "willContinue": true
+}
+[2025-09-16T18:25:59.100Z] INFO: 🔄 Graph Decision: executeTools -> next node {
+  "iterations": 1,
+  "maxIterations": 10,
+  "shouldContinue": true,
+  "willContinue": true,
+  "messageCount": 3,
+  "lastMessageRole": "user",
+  "hasToolResults": true,
+  "nextNode": "callModel"
+}
+[2025-09-16T18:25:59.104Z] INFO: 📥 callModelNode: Starting {
+  "iterations": 1,
+  "maxIterations": 10,
+  "messageCount": 3,
+  "lastMessageRole": "user",
+  "lastMessageContent": "[{\"toolResult\":{\"toolUseId\":\"tooluse_PMMcSqYuRj2QSU0-4jap5A\",\"content\":[{\"text\":\"{\\\"content\\\":[{\\\"ty"
+}
+[2025-09-16T18:25:59.104Z] INFO: 🔧 Tool configuration decision {
+  "hasToolResultsInHistory": true,
+  "iterations": 1,
+  "maxIterations": 10,
+  "atMaxIterations": false,
+  "shouldDisableTools": false,
+  "toolCount": 18
+}
+[2025-09-16T18:25:59.105Z] INFO: LLM Request Messages (detailed) {
+  "messageCount": 3,
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Run \"source = opensearch_dashboards_sample_data_logs | stats count()\"\n\nContext:\nTime Range: now-15m to now\nQuery: Empty query\nCurrent App: explore"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "I'll run that query for you using the OpenSearch query DSL format. Let me search for logs data and get the count."
+        },
+        {
+          "toolUse": {
+            "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+            "name": "opensearch-mcp-server__Super_Searcher",
+            "input": {
+              "index": "opensearch_dashboards_sample_data_logs",
+              "query": {
+                "size": 0,
+                "aggs": {
+                  "total_count": {
+                    "value_count": {
+                      "field": "_id"
+                    }
+                  }
+                },
+                "query": {
+                  "range": {
+                    "@timestamp": {
+                      "gte": "now-15m",
+                      "lte": "now"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "toolResult": {
+            "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+            "content": [
+              {
+                "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Search results from opensearch_dashboards_sample_data_logs:\\n{\\n  \\\"took\\\": 9,\\n  \\\"timed_out\\\": false,\\n  \\\"_shards\\\": {\\n    \\\"total\\\": 1,\\n    \\\"successful\\\": 1,\\n    \\\"skipped\\\": 0,\\n    \\\"failed\\\": 0\\n  },\\n  \\\"hits\\\": {\\n    \\\"total\\\": {\\n      \\\"value\\\": 2,\\n      \\\"relation\\\": \\\"eq\\\"\\n    },\\n    \\\"max_score\\\": null,\\n    \\\"hits\\\": []\\n  },\\n  \\\"aggregations\\\": {\\n    \\\"total_count\\\": {\\n      \\\"value\\\": 2\\n    }\\n  }\\n}\"}],\"isError\":false}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+[2025-09-16T18:26:02.039Z] INFO: 📤 LLM Response from Bedrock {
+  "contentBlocksCount": 1,
+  "contentBlocks": {
+    "message": {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "The query returned **2 log entries** from the opensearch_dashboards_sample_data_logs index in the last 15 minutes."
+        }
+      ],
+      "textContent": "The query returned **2 log entries** from the opensearch_dashboards_sample_data_logs index in the last 15 minutes."
+    },
+    "toolCalls": []
+  }
+}
+[2025-09-16T18:26:02.042Z] INFO: 📝 Final response: Adding assistant message without tool calls {
+  "previousMessageCount": 3,
+  "iterations": 1,
+  "hasToolCalls": false
+}
+[2025-09-16T18:26:02.051Z] INFO: Executing tools {
+  "toolCallsCount": 1,
+  "toolNames": [
+    "opensearch-mcp-server__Super_Searcher"
+  ],
+  "currentIterations": 1,
+  "maxIterations": 10
+}
+[2025-09-16T18:26:02.052Z] WARN: All tool calls have already been executed, skipping redundant execution {
+  "attemptedToolCallIds": [
+    "tooluse_PMMcSqYuRj2QSU0-4jap5A"
+  ],
+  "previouslyExecutedToolIds": [
+    "tooluse_PMMcSqYuRj2QSU0-4jap5A"
+  ],
+  "iterations": 1
+}
+[2025-09-16T18:26:02.054Z] INFO: 🔄 Graph Decision: executeTools -> next node {
+  "iterations": 1,
+  "maxIterations": 10,
+  "shouldContinue": false,
+  "willContinue": false,
+  "messageCount": 4,
+  "lastMessageRole": "assistant",
+  "hasToolResults": true,
+  "nextNode": "generateResponse"
+}
+[2025-09-16T18:27:16.914Z] INFO: POST / {
+  "method": "POST",
+  "path": "/",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+}
+[2025-09-16T18:27:16.916Z] INFO: Running agent via SSE streaming {
+  "threadId": "thread-1758047107547-382dg0zcj",
+  "runId": "run-1758047236894-lponcg6yx",
+  "messageCount": 5
+}
+[2025-09-16T18:27:16.919Z] INFO: Running react agent with AG UI input {
+  "threadId": "thread-1758047107547-382dg0zcj",
+  "runId": "run-1758047236894-lponcg6yx",
+  "messageCount": 5,
+  "toolCount": 0
+}
+[2025-09-16T18:27:16.935Z] INFO: Processing input {
+  "messageCount": 5,
+  "iterations": 0,
+  "maxIterations": 10
+}
+[2025-09-16T18:27:16.939Z] INFO: 📥 callModelNode: Starting {
+  "iterations": 0,
+  "maxIterations": 10,
+  "messageCount": 5,
+  "lastMessageRole": "user",
+  "lastMessageContent": "[{\"text\":\"Execute this query: source = opensearch_dashboards_sample_data_logs | stats count()\\n\\nCon"
+}
+[2025-09-16T18:27:16.940Z] INFO: 🔧 Tool configuration decision {
+  "hasToolResultsInHistory": true,
+  "iterations": 0,
+  "maxIterations": 10,
+  "atMaxIterations": false,
+  "shouldDisableTools": false,
+  "toolCount": 18
+}
+[2025-09-16T18:27:16.940Z] INFO: LLM Request Messages (detailed) {
+  "messageCount": 5,
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Run \"source = opensearch_dashboards_sample_data_logs | stats count()\"\n\nContext:\nTime Range: now-15m to now\nQuery: Empty query\nCurrent App: explore"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "I'll run that query for you using the OpenSearch query DSL format. Let me search for logs data and get the count."
+        },
+        {
+          "toolUse": {
+            "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+            "name": "opensearch-mcp-server__Super_Searcher",
+            "input": {
+              "index": "opensearch_dashboards_sample_data_logs",
+              "query": {
+                "size": 0,
+                "aggs": {
+                  "total_count": {
+                    "value_count": {
+                      "field": "_id"
+                    }
+                  }
+                },
+                "query": {
+                  "range": {
+                    "@timestamp": {
+                      "gte": "now-15m",
+                      "lte": "now"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "toolResult": {
+            "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+            "content": [
+              {
+                "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Search results from opensearch_dashboards_sample_data_logs:\\n{\\n  \\\"took\\\": 9,\\n  \\\"timed_out\\\": false,\\n  \\\"_shards\\\": {\\n    \\\"total\\\": 1,\\n    \\\"successful\\\": 1,\\n    \\\"skipped\\\": 0,\\n    \\\"failed\\\": 0\\n  },\\n  \\\"hits\\\": {\\n    \\\"total\\\": {\\n      \\\"value\\\": 2,\\n      \\\"relation\\\": \\\"eq\\\"\\n    },\\n    \\\"max_score\\\": null,\\n    \\\"hits\\\": []\\n  },\\n  \\\"aggregations\\\": {\\n    \\\"total_count\\\": {\\n      \\\"value\\\": 2\\n    }\\n  }\\n}\"}],\"isError\":false}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "The query returned **2 log entries** from the opensearch_dashboards_sample_data_logs index in the last 15 minutes."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Execute this query: source = opensearch_dashboards_sample_data_logs | stats count()\n\nContext:\nTime Range: now-15m to now\nQuery: Empty query\nCurrent App: explore"
+        }
+      ]
+    }
+  ]
+}
+[2025-09-16T18:27:20.052Z] INFO: 📤 LLM Response from Bedrock {
+  "contentBlocksCount": 1,
+  "contentBlocks": {
+    "message": {
+      "role": "assistant",
+      "content": [
+        {
+          "toolUse": {
+            "toolUseId": "tooluse_4tK5omkzS7-DqyKuCRCsHQ",
+            "name": "opensearch-mcp-server__Super_Searcher",
+            "input": {
+              "index": "opensearch_dashboards_sample_data_logs",
+              "query": {
+                "size": 0,
+                "aggs": {
+                  "count": {
+                    "value_count": {
+                      "field": "_id"
+                    }
+                  }
+                },
+                "query": {
+                  "range": {
+                    "@timestamp": {
+                      "gte": "now-15m",
+                      "lte": "now"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "textContent": ""
+    },
+    "toolCalls": [
+      {
+        "toolName": "opensearch-mcp-server__Super_Searcher",
+        "toolUseId": "tooluse_4tK5omkzS7-DqyKuCRCsHQ",
+        "input": {
+          "index": "opensearch_dashboards_sample_data_logs",
+          "query": {
+            "size": 0,
+            "aggs": {
+              "count": {
+                "value_count": {
+                  "field": "_id"
+                }
+              }
+            },
+            "query": {
+              "range": {
+                "@timestamp": {
+                  "gte": "now-15m",
+                  "lte": "now"
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+[2025-09-16T18:27:20.063Z] INFO: Executing tools {
+  "toolCallsCount": 2,
+  "toolNames": [
+    "opensearch-mcp-server__Super_Searcher",
+    "opensearch-mcp-server__Super_Searcher"
+  ],
+  "currentIterations": 0,
+  "maxIterations": 10
+}
+[2025-09-16T18:27:20.064Z] INFO: Tool execution started {
+  "toolName": "opensearch-mcp-server__Super_Searcher",
+  "toolUseId": "tooluse_4tK5omkzS7-DqyKuCRCsHQ",
+  "input": {
+    "index": "opensearch_dashboards_sample_data_logs",
+    "query": {
+      "size": 0,
+      "aggs": {
+        "count": {
+          "value_count": {
+            "field": "_id"
+          }
+        }
+      },
+      "query": {
+        "range": {
+          "@timestamp": {
+            "gte": "now-15m",
+            "lte": "now"
+          }
+        }
+      }
+    }
+  }
+}
+[2025-09-16T18:27:20.070Z] INFO: Auto-injected default OpenSearch cluster parameter (failsafe) {
+  "toolName": "Super_Searcher",
+  "clusterName": "osd-ops"
+}
+[2025-09-16T18:27:20.071Z] INFO: Executing tool Super_Searcher on opensearch-mcp-server {
+  "input": {
+    "index": "opensearch_dashboards_sample_data_logs",
+    "query": {
+      "size": 0,
+      "aggs": {
+        "count": {
+          "value_count": {
+            "field": "_id"
+          }
+        }
+      },
+      "query": {
+        "range": {
+          "@timestamp": {
+            "gte": "now-15m",
+            "lte": "now"
+          }
+        }
+      }
+    },
+    "opensearch_cluster_name": "osd-ops"
+  }
+}
+2025-09-16 11:27:20,076 - mcp.server.lowlevel.server - INFO - Processing request of type CallToolRequest
+2025-09-16 11:27:20,091 - opensearch.client - INFO - [BASIC AUTH] Using basic authentication: admin
+2025-09-16 11:27:20,470 - opensearch - INFO - GET https://search-osd-ops-5hblcotzha5dabpom7vvhfaktm.aos.us-east-1.on.aws:443/ [status:200 request:0.378s]
+2025-09-16 11:27:20,493 - opensearch.client - INFO - [BASIC AUTH] Using basic authentication: admin
+2025-09-16 11:27:20,811 - opensearch - INFO - POST https://search-osd-ops-5hblcotzha5dabpom7vvhfaktm.aos.us-east-1.on.aws:443/opensearch_dashboards_sample_data_logs/_search [status:200 request:0.317s]
+[2025-09-16T18:27:20.815Z] INFO: Tool Super_Searcher executed successfully on opensearch-mcp-server {
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Search results from opensearch_dashboards_sample_data_logs:\n{\n  \"took\": 2,\n  \"timed_out\": false,\n  \"_shards\": {\n    \"total\": 1,\n    \"successful\": 1,\n    \"skipped\": 0,\n    \"failed\": 0\n  },\n  \"hits\": {\n    \"total\": {\n      \"value\": 3,\n      \"relation\": \"eq\"\n    },\n    \"max_score\": null,\n    \"hits\": []\n  },\n  \"aggregations\": {\n    \"count\": {\n      \"value\": 3\n    }\n  }\n}"
+      }
+    ],
+    "isError": false
+  }
+}
+[2025-09-16T18:27:20.816Z] INFO: Tool execution completed {
+  "toolName": "opensearch-mcp-server__Super_Searcher",
+  "toolUseId": "tooluse_4tK5omkzS7-DqyKuCRCsHQ",
+  "resultType": "object",
+  "resultKeys": [
+    "content",
+    "isError"
+  ]
+}
+[2025-09-16T18:27:20.820Z] INFO: All tools executed {
+  "toolResultsCount": 1,
+  "successfulTools": 1,
+  "failedTools": 0,
+  "previousIterations": 0,
+  "newIterations": 1,
+  "maxIterations": 10,
+  "shouldContinue": true,
+  "willContinue": true
+}
+[2025-09-16T18:27:20.823Z] INFO: 🔄 Graph Decision: executeTools -> next node {
+  "iterations": 1,
+  "maxIterations": 10,
+  "shouldContinue": true,
+  "willContinue": true,
+  "messageCount": 7,
+  "lastMessageRole": "user",
+  "hasToolResults": true,
+  "nextNode": "callModel"
+}
+[2025-09-16T18:27:20.827Z] INFO: 📥 callModelNode: Starting {
+  "iterations": 1,
+  "maxIterations": 10,
+  "messageCount": 7,
+  "lastMessageRole": "user",
+  "lastMessageContent": "[{\"toolResult\":{\"toolUseId\":\"tooluse_4tK5omkzS7-DqyKuCRCsHQ\",\"content\":[{\"text\":\"{\\\"content\\\":[{\\\"ty"
+}
+[2025-09-16T18:27:20.827Z] INFO: 🔧 Tool configuration decision {
+  "hasToolResultsInHistory": true,
+  "iterations": 1,
+  "maxIterations": 10,
+  "atMaxIterations": false,
+  "shouldDisableTools": false,
+  "toolCount": 18
+}
+[2025-09-16T18:27:20.828Z] INFO: LLM Request Messages (detailed) {
+  "messageCount": 7,
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Run \"source = opensearch_dashboards_sample_data_logs | stats count()\"\n\nContext:\nTime Range: now-15m to now\nQuery: Empty query\nCurrent App: explore"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "I'll run that query for you using the OpenSearch query DSL format. Let me search for logs data and get the count."
+        },
+        {
+          "toolUse": {
+            "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+            "name": "opensearch-mcp-server__Super_Searcher",
+            "input": {
+              "index": "opensearch_dashboards_sample_data_logs",
+              "query": {
+                "size": 0,
+                "aggs": {
+                  "total_count": {
+                    "value_count": {
+                      "field": "_id"
+                    }
+                  }
+                },
+                "query": {
+                  "range": {
+                    "@timestamp": {
+                      "gte": "now-15m",
+                      "lte": "now"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "toolResult": {
+            "toolUseId": "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+            "content": [
+              {
+                "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Search results from opensearch_dashboards_sample_data_logs:\\n{\\n  \\\"took\\\": 9,\\n  \\\"timed_out\\\": false,\\n  \\\"_shards\\\": {\\n    \\\"total\\\": 1,\\n    \\\"successful\\\": 1,\\n    \\\"skipped\\\": 0,\\n    \\\"failed\\\": 0\\n  },\\n  \\\"hits\\\": {\\n    \\\"total\\\": {\\n      \\\"value\\\": 2,\\n      \\\"relation\\\": \\\"eq\\\"\\n    },\\n    \\\"max_score\\\": null,\\n    \\\"hits\\\": []\\n  },\\n  \\\"aggregations\\\": {\\n    \\\"total_count\\\": {\\n      \\\"value\\\": 2\\n    }\\n  }\\n}\"}],\"isError\":false}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "The query returned **2 log entries** from the opensearch_dashboards_sample_data_logs index in the last 15 minutes."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Execute this query: source = opensearch_dashboards_sample_data_logs | stats count()\n\nContext:\nTime Range: now-15m to now\nQuery: Empty query\nCurrent App: explore"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "toolUse": {
+            "toolUseId": "tooluse_4tK5omkzS7-DqyKuCRCsHQ",
+            "name": "opensearch-mcp-server__Super_Searcher",
+            "input": {
+              "index": "opensearch_dashboards_sample_data_logs",
+              "query": {
+                "size": 0,
+                "aggs": {
+                  "count": {
+                    "value_count": {
+                      "field": "_id"
+                    }
+                  }
+                },
+                "query": {
+                  "range": {
+                    "@timestamp": {
+                      "gte": "now-15m",
+                      "lte": "now"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "toolResult": {
+            "toolUseId": "tooluse_4tK5omkzS7-DqyKuCRCsHQ",
+            "content": [
+              {
+                "text": "{\"content\":[{\"type\":\"text\",\"text\":\"Search results from opensearch_dashboards_sample_data_logs:\\n{\\n  \\\"took\\\": 2,\\n  \\\"timed_out\\\": false,\\n  \\\"_shards\\\": {\\n    \\\"total\\\": 1,\\n    \\\"successful\\\": 1,\\n    \\\"skipped\\\": 0,\\n    \\\"failed\\\": 0\\n  },\\n  \\\"hits\\\": {\\n    \\\"total\\\": {\\n      \\\"value\\\": 3,\\n      \\\"relation\\\": \\\"eq\\\"\\n    },\\n    \\\"max_score\\\": null,\\n    \\\"hits\\\": []\\n  },\\n  \\\"aggregations\\\": {\\n    \\\"count\\\": {\\n      \\\"value\\\": 3\\n    }\\n  }\\n}\"}],\"isError\":false}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+[2025-09-16T18:27:23.445Z] INFO: 📤 LLM Response from Bedrock {
+  "contentBlocksCount": 1,
+  "contentBlocks": {
+    "message": {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "The query returned **3 log entries** from the opensearch_dashboards_sample_data_logs index in the last 15 minutes."
+        }
+      ],
+      "textContent": "The query returned **3 log entries** from the opensearch_dashboards_sample_data_logs index in the last 15 minutes."
+    },
+    "toolCalls": []
+  }
+}
+[2025-09-16T18:27:23.447Z] INFO: 📝 Final response: Adding assistant message without tool calls {
+  "previousMessageCount": 7,
+  "iterations": 1,
+  "hasToolCalls": false
+}
+[2025-09-16T18:27:23.453Z] INFO: Executing tools {
+  "toolCallsCount": 2,
+  "toolNames": [
+    "opensearch-mcp-server__Super_Searcher",
+    "opensearch-mcp-server__Super_Searcher"
+  ],
+  "currentIterations": 1,
+  "maxIterations": 10
+}
+[2025-09-16T18:27:23.454Z] WARN: All tool calls have already been executed, skipping redundant execution {
+  "attemptedToolCallIds": [
+    "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+    "tooluse_4tK5omkzS7-DqyKuCRCsHQ"
+  ],
+  "previouslyExecutedToolIds": [
+    "tooluse_PMMcSqYuRj2QSU0-4jap5A",
+    "tooluse_4tK5omkzS7-DqyKuCRCsHQ"
+  ],
+  "iterations": 1
+}
+[2025-09-16T18:27:23.456Z] INFO: 🔄 Graph Decision: executeTools -> next node {
+  "iterations": 1,
+  "maxIterations": 10,
+  "shouldContinue": false,
+  "willContinue": false,
+  "messageCount": 8,
+  "lastMessageRole": "assistant",
+  "hasToolResults": true,
+  "nextNode": "generateResponse"
+}
+

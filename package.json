@@ -315,7 +315,8 @@
     "use-sync-external-store": "^1.5.0",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "@modelcontextprotocol/sdk": "^1.18.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",

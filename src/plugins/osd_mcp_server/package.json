@@ -1,0 +1,20 @@
+{
+  "name": "@osd/plugin-osd-mcp-server",
+  "version": "1.0.0",
+  "main": "./target/public/index.js",
+  "opensearchDashboards": {
+    "version": "opensearchDashboards",
+    "templateVersion": "1.0.0"
+  },
+  "scripts": {
+    "build": "plugin-helpers build",
+    "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "osd": "node ../../scripts/osd"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.18.0"
+  },
+  "devDependencies": {
+    "@osd/plugin-helpers": "link:../../packages/osd-plugin-helpers"
+  }
+}

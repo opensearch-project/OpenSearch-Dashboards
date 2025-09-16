@@ -1,4 +1,9 @@
 /*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -22,92 +27,28 @@ export class ClaudeOSDAgent {
   private initializeTools(): AgentTool[] {
     return [
       {
-        name: 'add_filter',
-        description: 'Add a filter to the current dashboard or explore view',
-        parameters: {
-          type: 'object',
-          properties: {
-            field: { type: 'string', description: 'Field name to filter on (e.g., level, service, message)' },
-            value: { type: 'string', description: 'Value to filter for (e.g., ERROR, auth-service)' },
-            operation: { type: 'string', enum: ['is', 'is_not', 'exists'], description: 'Filter operation' }
-          },
-          required: ['field', 'value']
-        },
-        execute: this.addFilter.bind(this)
-      },
-      {
-        name: 'expand_panel',
-        description: 'Expand a dashboard panel to full screen view',
-        parameters: {
-          type: 'object',
-          properties: {
-            panelId: { type: 'string', description: 'ID of the panel to expand' }
-          },
-          required: ['panelId']
-        },
-        execute: this.expandPanel.bind(this)
-      },
-      {
         name: 'expand_document',
         description: 'Expand a document in the explore logs view to see full details',
         parameters: {
           type: 'object',
           properties: {
-            documentId: { type: 'string', description: 'ID of document to expand' }
+            documentId: { type: 'string', description: 'ID of document to expand' },
           },
-          required: ['documentId']
+          required: ['documentId'],
         },
-        execute: this.expandDocument.bind(this)
-      }
+        execute: this.expandDocument.bind(this),
+      },
     ];
-  }
-
-  private async addFilter(params: { field: string; value: string; operation?: string }): Promise<string> {
-    try {
-      console.log(`🔧 Agent executing: Add filter ${params.field}=${params.value}`);
-      
-      if (this.uiActions) {
-        await this.uiActions.executeTriggerActions('ADD_FILTER_TRIGGER', {
-          field: params.field,
-          value: params.value,
-          operation: params.operation || 'is'
-        });
-        return `✅ Added filter: ${params.field} = ${params.value}`;
-      } else {
-        return `❌ UI Actions not available. Make sure you're on a dashboard or explore page.`;
-      }
-    } catch (error) {
-      console.error('❌ Error adding filter:', error);
-      return `❌ Error adding filter: ${error.message}`;
-    }
-  }
-
-  private async expandPanel(params: { panelId: string }): Promise<string> {
-    try {
-      console.log(`🔧 Agent executing: Expand panel ${params.panelId}`);
-      
-      if (this.uiActions) {
-        await this.uiActions.executeTriggerActions('EXPAND_PANEL_TRIGGER', {
-          panelId: params.panelId
-        });
-        return `✅ Expanded panel: ${params.panelId}`;
-      } else {
-        return `❌ UI Actions not available. Make sure you're on a dashboard page.`;
-      }
-    } catch (error) {
-      console.error('❌ Error expanding panel:', error);
-      return `❌ Error expanding panel: ${error.message}`;
-    }
   }
 
   private async expandDocument(params: { documentId: string }): Promise<string> {
     try {
       console.log(`🔧 Agent executing: Expand document ${params.documentId}`);
-      
+
       if (this.uiActions) {
         await this.uiActions.executeTriggerActions('EXPLORE_DOCUMENT_EXPAND_TRIGGER', {
           documentId: params.documentId,
-          action: 'expand'
+          action: 'expand',
         });
         return `✅ Expanded document: ${params.documentId}`;
       } else {
@@ -125,14 +66,14 @@ export class ClaudeOSDAgent {
       console.log('📋 Current context:', context);
 
       const response = await this.callClaudeAPI(userMessage, context);
-      
+
       // Parse response for tool calls
       const toolCalls = this.parseToolCalls(response);
-      
+
       if (toolCalls.length > 0) {
         const results = [];
         for (const toolCall of toolCalls) {
-          const tool = this.tools.find(t => t.name === toolCall.name);
+          const tool = this.tools.find((t) => t.name === toolCall.name);
           if (tool) {
             const result = await tool.execute(toolCall.parameters);
             results.push(result);
@@ -160,7 +101,7 @@ export class ClaudeOSDAgent {
       },
       body: JSON.stringify({
         message: userMessage,
-        context: context,
+        context,
         apiKey: this.apiKey,
       }),
     });

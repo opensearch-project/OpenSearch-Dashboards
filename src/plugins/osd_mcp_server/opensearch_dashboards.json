@@ -1,0 +1,11 @@
+{
+  "id": "osdMcpServer",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": false,
+  "configPath": ["osdMcpServer"],
+  "requiredPlugins": ["explore", "uiActions"],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}

@@ -74,6 +74,9 @@ import { setServices } from './services/services';
 // Context Provider Integration
 import { ExploreContextContributor } from './context_contributor';
 
+// UI Actions Integration
+import { registerExploreUIActions } from './ui_actions/explore_ui_actions';
+
 export class ExplorePlugin
   implements
     Plugin<
@@ -287,6 +290,33 @@ export class ExplorePlugin
         services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
         setServices(services);
 
+        // Make services globally available for MCP integration
+        (global as any).exploreServices = services;
+        console.log('🌐 Explore services made globally available for MCP integration');
+
+        // Make Redux actions globally available for MCP integration
+        const setupReduxActions = async () => {
+          try {
+            const { setQueryStringWithHistory, setQueryState } = await import(
+              './application/utils/state_management/slices/query/query_slice'
+            );
+            const { executeQueries } = await import(
+              './application/utils/state_management/actions/query_actions'
+            );
+
+            (global as any).exploreReduxActions = {
+              setQueryStringWithHistory,
+              setQueryState,
+              executeQueries,
+            };
+            console.log('🌐 Explore Redux actions made globally available for MCP integration');
+          } catch (error) {
+            console.warn('⚠️ Failed to expose Redux actions globally:', error);
+          }
+        };
+
+        setupReduxActions();
+
         appMounted();
 
         // Call renderApp with params, services, and store
@@ -388,6 +418,11 @@ export class ExplorePlugin
     } else {
       console.log('⚠️ Context Provider not available during setup');
     }
+
+    // Register UI Actions for explore
+    console.log('🔧 Registering Explore UI Actions');
+    registerExploreUIActions(setupDeps.uiActions);
+    console.log('✅ Explore UI Actions registered');
 
     return {
       docViews: {
