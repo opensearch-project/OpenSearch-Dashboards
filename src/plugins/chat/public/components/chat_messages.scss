@@ -1,0 +1,28 @@
+.chatMessages {
+  grid-area: messages;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+
+  &--fullscreen {
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  &__context {
+    grid-area: context;
+    border-bottom: 1px solid $euiColorLightShade;
+    padding-bottom: 8px;
+  }
+
+  &__emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+  }
+}

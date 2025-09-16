@@ -1,0 +1,14 @@
+.chatHeader {
+  grid-area: header;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid $euiColorLightShade;
+
+  &__buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+}

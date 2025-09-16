@@ -4,14 +4,10 @@
  */
 /* eslint-disable no-console */
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { EuiPanel, EuiFieldText, EuiText, EuiIcon, EuiButtonIcon } from '@elastic/eui';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CoreStart } from '../../../../core/public';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatContextManager } from '../services/chat_context_manager';
-import { ContextPills } from './context_pills';
-import { MessageRow } from './message_row';
-import { ToolCallRow } from './tool_call_row';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart } from '../../../context_provider/public';
 import {
@@ -20,6 +16,10 @@ import {
   type Event as ChatEvent,
 } from '../../common/events';
 import { ChatLayoutMode } from './chat_header_button';
+import { ChatContainer } from './chat_container';
+import { ChatHeader } from './chat_header';
+import { ChatMessages } from './chat_messages';
+import { ChatInput } from './chat_input';
 
 interface TimelineMessage {
   type: 'message';
@@ -59,7 +59,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize context manager
   const contextManager = useMemo(() => {
@@ -72,13 +71,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     return manager;
   }, [services.core, chatService, services.contextProvider]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [timeline, currentStreamingMessage]);
 
   const handleSend = async () => {
     if (!input.trim() || isStreaming) return;
@@ -259,175 +251,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [contextManager]);
 
   return (
-    <div className={`chat-container chat-container--${layoutMode}`}>
-      {/* Chat Header */}
-      <div className="chat-header">
-        <EuiText size="m">
-          <h3>Assistant</h3>
-        </EuiText>
-        <div className="chat-header-buttons">
-          {onToggleLayout && (
-            <EuiButtonIcon
-              iconType={layoutMode === ChatLayoutMode.FULLSCREEN ? 'minimize' : 'fullScreen'}
-              onClick={onToggleLayout}
-              disabled={isStreaming}
-              aria-label={layoutMode === ChatLayoutMode.FULLSCREEN ? 'Switch to sidecar' : 'Switch to fullscreen'}
-              size="m"
-            />
-          )}
-          <EuiButtonIcon
-            iconType="refresh"
-            onClick={handleNewChat}
-            disabled={isStreaming}
-            aria-label="New chat"
-            size="m"
-          />
-        </div>
-      </div>
+    <ChatContainer layoutMode={layoutMode}>
+      <ChatHeader
+        layoutMode={layoutMode}
+        isStreaming={isStreaming}
+        onToggleLayout={onToggleLayout}
+        onNewChat={handleNewChat}
+      />
 
-      {/* Context Pills */}
-      <div className="chat-context">
-        <ContextPills contextManager={contextManager} />
-      </div>
+      <ChatMessages
+        layoutMode={layoutMode}
+        timeline={timeline}
+        currentStreamingMessage={currentStreamingMessage}
+        contextManager={contextManager}
+      />
 
-      {/* Timeline Area */}
-      <div className="chat-messages">
-        {timeline.length === 0 && !currentStreamingMessage && (
-          <div className="empty-state">
-            <EuiIcon type="generate" size="xl" />
-            <EuiText color="subdued" size="s">
-              <p>Start a conversation with your AI assistant</p>
-            </EuiText>
-          </div>
-        )}
-
-        {timeline
-          .sort((a, b) => a.timestamp - b.timestamp)
-          .map((item) => {
-            if (item.type === 'message') {
-              return <MessageRow key={item.id} message={item} />;
-            } else {
-              return <ToolCallRow key={item.id} toolCall={item} />;
-            }
-          })}
-
-        {/* Streaming Message */}
-        {currentStreamingMessage && (
-          <MessageRow
-            message={{
-              type: 'message',
-              id: 'streaming',
-              role: 'assistant',
-              content: currentStreamingMessage,
-              timestamp: Date.now(),
-            }}
-            isStreaming={true}
-          />
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input Area */}
-      <div className="chat-input">
-        <EuiFieldText
-          placeholder="Type your message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={isStreaming}
-          fullWidth
-        />
-        <EuiButtonIcon
-          iconType={isStreaming ? 'loading' : 'generate'}
-          onClick={handleSend}
-          disabled={input.trim().length === 0 || isStreaming}
-          aria-label="Send message"
-          size="m"
-          color="primary"
-        />
-      </div>
-
-      <style>{`
-        .chat-container {
-          height: 100%;
-          display: grid;
-          grid-template-rows: auto auto 1fr auto;
-          grid-template-areas:
-            "header"
-            "context"
-            "messages"
-            "input";
-          gap: 16px;
-          padding: 0 8px 8px 0;
-        }
-
-        /* Fullscreen layout adjustments */
-        .chat-container--fullscreen {
-          padding: 16px 24px;
-          gap: 20px;
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        .chat-header {
-          grid-area: header;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 8px 0;
-          border-bottom: 1px solid #e6e6e6;
-        }
-
-        .chat-header-buttons {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-        }
-
-        .chat-context {
-          grid-area: context;
-          border-bottom: 1px solid #e6e6e6;
-          padding-bottom: 8px;
-        }
-
-        .chat-messages {
-          grid-area: messages;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          padding: 8px 0;
-        }
-
-        /* Fullscreen message styling */
-        .chat-container--fullscreen .chat-messages {
-          gap: 16px;
-          padding: 16px 0;
-        }
-
-        .empty-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          gap: 16px;
-        }
-
-        .chat-input {
-          grid-area: input;
-          display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 8px;
-          align-items: center;
-        }
-
-        /* Fullscreen input styling */
-        .chat-container--fullscreen .chat-input {
-          gap: 12px;
-        }
-      `}</style>
-    </div>
+      <ChatInput
+        layoutMode={layoutMode}
+        input={input}
+        isStreaming={isStreaming}
+        onInputChange={setInput}
+        onSend={handleSend}
+        onKeyDown={handleKeyDown}
+      />
+    </ChatContainer>
   );
 };
