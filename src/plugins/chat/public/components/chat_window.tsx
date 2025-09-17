@@ -143,7 +143,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               setCurrentStreamingMessage((currentContent) => {
                 const assistantMessage: TimelineMessage = {
                   type: 'message',
-                  id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  id: 'messageId' in event && event.messageId ? event.messageId : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                   role: 'assistant',
                   content: currentContent,
                   timestamp: event.timestamp || Date.now(),
@@ -173,7 +173,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   status: 'running',
                   timestamp: event.timestamp || Date.now(),
                 };
-                setTimeline((prev) => [...prev, newToolCall]);
+                setTimeline((prev) => {
+                  // Check if tool call with this ID already exists
+                  const existingIndex = prev.findIndex(item => item.id === newToolCall.id);
+                  if (existingIndex !== -1) {
+                    // Update existing tool call instead of adding duplicate
+                    const updated = [...prev];
+                    updated[existingIndex] = newToolCall;
+                    return updated;
+                  }
+                  // Add new tool call
+                  return [...prev, newToolCall];
+                });
               }
               break;
             case EventType.TOOL_CALL_END:

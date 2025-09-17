@@ -34,11 +34,11 @@ export class AgUiAgent {
       this.sseBuffer = ''; // Reset buffer for new request
 
       // Emit RUN_STARTED event
-      observer.next({
-        type: EventType.RUN_STARTED,
-        threadId: input.threadId,
-        runId: input.runId,
-      } as any);
+      // observer.next({
+      //   type: EventType.RUN_STARTED,
+      //   threadId: input.threadId,
+      //   runId: input.runId,
+      // } as any);
 
       // Make request to AG-UI server
       fetch(this.serverUrl, {
@@ -88,11 +88,11 @@ export class AgUiAgent {
             }
 
             // Emit RUN_FINISHED event
-            observer.next({
-              type: EventType.RUN_FINISHED,
-              threadId: input.threadId,
-              runId: input.runId,
-            } as any);
+            // observer.next({
+            //   type: EventType.RUN_FINISHED,
+            //   threadId: input.threadId,
+            //   runId: input.runId,
+            // } as any);
 
             observer.complete();
           } finally {
