@@ -60,6 +60,14 @@ export class ChatService {
       timestamp: Date.now(),
     };
 
+    // Get assistant contexts from the store
+    let assistantContexts: Array<{ description: string; value: any }> = [];
+    const contextStore = (window as any).assistantContextStore;
+    if (contextStore) {
+      // Get contexts with 'chat' category for backend
+      assistantContexts = contextStore.getBackendFormattedContexts('chat');
+    }
+
     const runInput: RunAgentInput = {
       threadId: this.threadId,
       runId: this.generateRunId(),
@@ -79,7 +87,7 @@ export class ChatService {
         },
       ],
       tools: [], // Add tools here if your AG-UI server supports them
-      context: [], // Empty array since we're passing context in state
+      context: assistantContexts, // Include assistant contexts
       state: {
         staticContext: this.contextManager?.getRawStaticContext() || null,
         dynamicContext: this.contextManager?.getRawDynamicContext() || null,

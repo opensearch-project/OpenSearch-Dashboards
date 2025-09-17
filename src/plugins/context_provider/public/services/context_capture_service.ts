@@ -14,7 +14,9 @@ import {
   DynamicContext,
   ContextContributor,
   GlobalInteraction,
+  AssistantContextStore,
 } from '../types';
+import { AssistantContextStoreImpl } from './assistant_context_store';
 
 // Define singleton context types that should only have one instance
 const SINGLETON_CONTEXT_TYPES = new Set(['time_range', 'query', 'index_pattern', 'app_state']);
@@ -25,8 +27,11 @@ export class ContextCaptureService {
   private coreStart?: CoreStart;
   private pluginsStart?: ContextProviderStartDeps;
   private contextContributors = new Map<string, ContextContributor>();
+  private assistantContextStore: AssistantContextStore;
 
-  constructor(private coreSetup: CoreSetup, private pluginsSetup: ContextProviderSetupDeps) {}
+  constructor(private coreSetup: CoreSetup, private pluginsSetup: ContextProviderSetupDeps) {
+    this.assistantContextStore = new AssistantContextStoreImpl();
+  }
 
   public setup(): void {
     console.log('🔧 Context Capture Service Setup');
@@ -36,6 +41,9 @@ export class ContextCaptureService {
     console.log('🚀 Context Capture Service Start');
     this.coreStart = core;
     this.pluginsStart = plugins;
+
+    // Make assistant context store globally available for hooks
+    (window as any).assistantContextStore = this.assistantContextStore;
 
     // Subscribe to application changes
     core.application.currentAppId$.subscribe((appId) => {
@@ -601,6 +609,13 @@ export class ContextCaptureService {
   }
 
   /**
+   * Get the assistant context store
+   */
+  public getAssistantContextStore(): AssistantContextStore {
+    return this.assistantContextStore;
+  }
+
+  /**
    * Cleanup method to remove URL monitoring listeners
    */
   public stop(): void {
@@ -613,5 +628,9 @@ export class ContextCaptureService {
 
     // Clear context contributors
     this.contextContributors.clear();
+
+    // Clear assistant context store and remove from window
+    this.assistantContextStore.clearAll();
+    delete (window as any).assistantContextStore;
   }
 }

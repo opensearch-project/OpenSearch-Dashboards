@@ -139,6 +139,29 @@ export interface EmbeddableInteractionContext {
 }
 
 /**
+ * Context for text selection tracking
+ */
+export interface TextSelectionContext {
+  selectedText: string;
+  selectionRange: {
+    startOffset: number;
+    endOffset: number;
+    startContainer: string;
+    endContainer: string;
+  };
+  contextMetadata: {
+    appId?: string;
+    url: string;
+    pathname: string;
+    elementTagName?: string;
+    elementClass?: string;
+    elementId?: string;
+    elementTextContent?: string;
+  };
+  timestamp: number;
+}
+
+/**
  * Flexible context data structure that can accommodate different plugin patterns
  */
 export interface FlexibleContextData {
@@ -175,6 +198,31 @@ export interface ContextProviderSetup {
   // Setup interface - empty for now
 }
 
+// Assistant Context System Types
+export interface AssistantContextOptions {
+  description: string; // Sent to backend
+  value: any; // Sent to backend
+  label: string; // UI display only
+  categories?: string[]; // Categories for filtering (e.g., ['chat', 'explore'])
+  id?: string; // Optional unique ID
+}
+
+export interface ContextEntry extends AssistantContextOptions {
+  id: string; // Always has ID (generated if not provided)
+  timestamp: number; // When context was registered
+  source?: string; // Optional source identifier
+}
+
+export interface AssistantContextStore {
+  addContext(options: AssistantContextOptions): string;
+  removeContext(id: string): void;
+  getContextsByCategory(category: string): ContextEntry[];
+  getAllContexts(): ContextEntry[];
+  clearCategory(category: string): void;
+  clearAll(): void;
+  subscribe(callback: (contexts: ContextEntry[]) => void): () => void;
+}
+
 export interface ContextProviderStart {
   // Methods that chatbot/OSD agent can call
   getCurrentContext(): Promise<StaticContext | null>;
@@ -189,4 +237,6 @@ export interface ContextProviderStart {
   getDynamicContext$(): Observable<DynamicContext | null>;
   // NEW: Global interaction capture
   captureGlobalInteraction(interaction: GlobalInteraction): void;
+  // Assistant Context System
+  getAssistantContextStore(): AssistantContextStore;
 }

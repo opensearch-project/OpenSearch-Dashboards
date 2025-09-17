@@ -10,7 +10,7 @@ import { ChatWindow } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
-import { ContextProviderStart } from '../../../context_provider/public';
+import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
 
 export enum ChatLayoutMode {
   SIDECAR = 'sidecar',
@@ -120,6 +120,9 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
 
   return (
     <>
+      {/* Text selection monitor - always active when chat UI is rendered */}
+      <TextSelectionMonitor />
+
       <EuiToolTip content="Open Chat Assistant">
         <EuiButtonIcon
           iconType="generate"

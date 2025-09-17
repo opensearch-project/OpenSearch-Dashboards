@@ -144,6 +144,8 @@ export class ContextProviderPlugin
       getStaticContext$: () => this.contextCaptureService!.getStaticContext$(),
       getDynamicContext$: () => this.contextCaptureService!.getDynamicContext$(),
       captureGlobalInteraction: this.captureGlobalInteraction.bind(this),
+      // Assistant Context System
+      getAssistantContextStore: () => this.contextCaptureService!.getAssistantContextStore(),
     };
   }
 

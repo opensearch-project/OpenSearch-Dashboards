@@ -1,4 +1,9 @@
 /*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -14,3 +19,6 @@ export function plugin() {
 
 export { ContextProviderPlugin };
 export * from './types';
+export { useAssistantContext } from './hooks/use_assistant_context';
+export { useTextSelection } from './hooks/use_text_selection';
+export { TextSelectionMonitor } from './components/text_selection_monitor';

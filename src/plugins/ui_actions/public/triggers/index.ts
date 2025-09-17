@@ -39,3 +39,4 @@ export * from './visualize_geo_field_trigger';
 export * from './external_action_trigger';
 export * from './default_trigger';
 export * from './abort_data_query_trigger';
+export * from './text_selection_trigger';
