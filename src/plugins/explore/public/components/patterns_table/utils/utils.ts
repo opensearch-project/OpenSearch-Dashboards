@@ -103,9 +103,6 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
   // an accumulator: string that we're building w/ <mark>
   let markedPattern = '';
 
-  // detect if this pattern has the format returned from calcite engine
-  let fromCalcite = false;
-
   try {
     while (currPatternPos < pattern.length) {
       // on a new cycle, in the pattern we have a big static element, in the sample we have dynamic then static
@@ -149,7 +146,6 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
           currPatternPos++;
         }
         currPatternPos += 1;
-        fromCalcite = true;
       } else {
         // moves up to account for special delimiters, such as <*IP*> or <*DATETIME*>
         while (
