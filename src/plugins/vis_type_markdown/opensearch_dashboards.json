@@ -1,8 +1,0 @@
-{
-    "id": "visTypeMarkdown",
-    "version": "opensearchDashboards",
-    "ui": true,
-    "server": true,
-    "requiredPlugins": ["expressions", "visualizations"],
-    "requiredBundles": ["opensearchDashboardsReact", "charts", "visualizations", "expressions", "visDefaultEditor"]
-}

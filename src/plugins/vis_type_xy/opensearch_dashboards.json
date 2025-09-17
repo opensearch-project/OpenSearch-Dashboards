@@ -1,7 +1,0 @@
-{
-  "id": "visTypeXy",
-  "version": "opensearchDashboards",
-  "server": true,
-  "ui": true,
-  "requiredPlugins": ["charts", "expressions", "visualizations"]
-}

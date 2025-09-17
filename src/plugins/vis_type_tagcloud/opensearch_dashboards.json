@@ -1,8 +1,0 @@
-{
-  "id": "visTypeTagcloud",
-  "version": "opensearchDashboards",
-  "ui": true,
-  "server": true,
-  "requiredPlugins": ["data", "expressions", "visualizations", "charts"],
-  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "visDefaultEditor"]
-}
