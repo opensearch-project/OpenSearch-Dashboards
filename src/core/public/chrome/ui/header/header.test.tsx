@@ -240,7 +240,7 @@ describe('Header', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders application header without title and breadcrumbs', () => {
+  it('renders application header without title', () => {
     const branding = {
       useExpandedHeader: false,
     };
@@ -256,7 +256,7 @@ describe('Header', () => {
     };
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeFalsy();
-    expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
     expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('RecentItems').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
