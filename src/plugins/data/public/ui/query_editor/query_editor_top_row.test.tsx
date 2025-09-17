@@ -95,6 +95,9 @@ function wrapQueryEditorTopRowInContext(testProps: any) {
     data: dataPlugin,
     appName: 'discover',
     storage: createMockStorage(),
+    keyboardShortcut: {
+      useKeyboardShortcut: jest.fn(),
+    },
   };
 
   return (
@@ -220,5 +223,158 @@ describe('QueryEditorTopRow', () => {
     // The EuiSuperUpdateButton should show 'Update' if isDirty is true
     // (isDirty is true by default in the test context)
     expect(getByText('Update')).toBeInTheDocument();
+  });
+
+  describe('Date Picker Keyboard Shortcut', () => {
+    it('Should register date picker keyboard shortcut when component mounts', async () => {
+      const mockUseKeyboardShortcut = jest.fn();
+      const services = {
+        ...startMock,
+        data: dataPlugin,
+        appName: 'discover',
+        storage: createMockStorage(),
+        keyboardShortcut: {
+          useKeyboardShortcut: mockUseKeyboardShortcut,
+        },
+      };
+
+      const TestComponent = () => (
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <QueryEditorTopRow
+              onSubmit={jest.fn()}
+              onChange={jest.fn()}
+              isDirty={true}
+              screenTitle="Test Screen"
+              showDatePicker={true}
+            />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+
+      render(<TestComponent />);
+
+      await waitFor(() => {
+        expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+          id: 'date_picker',
+          pluginId: 'data',
+          name: 'Open date picker',
+          category: 'Search',
+          keys: 'shift+d',
+          execute: expect.any(Function),
+        });
+      });
+    });
+
+    it('Should not register keyboard shortcut when showDatePicker is false', async () => {
+      const mockUseKeyboardShortcut = jest.fn();
+      const services = {
+        ...startMock,
+        data: dataPlugin,
+        appName: 'discover',
+        storage: createMockStorage(),
+        keyboardShortcut: {
+          useKeyboardShortcut: mockUseKeyboardShortcut,
+        },
+      };
+
+      const TestComponent = () => (
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <QueryEditorTopRow
+              onSubmit={jest.fn()}
+              onChange={jest.fn()}
+              isDirty={true}
+              screenTitle="Test Screen"
+              showDatePicker={false}
+            />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+
+      render(<TestComponent />);
+
+      await waitFor(() => {
+        expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+          id: 'date_picker',
+          pluginId: 'data',
+          name: 'Open date picker',
+          category: 'Search',
+          keys: 'shift+d',
+          execute: expect.any(Function),
+        });
+      });
+    });
+
+    it('Should handle keyboard shortcut execution when date picker ref is null', async () => {
+      const mockUseKeyboardShortcut = jest.fn();
+      let capturedExecuteFunction: (() => void) | null = null;
+
+      mockUseKeyboardShortcut.mockImplementation((config: any) => {
+        capturedExecuteFunction = config.execute;
+      });
+
+      const services = {
+        ...startMock,
+        data: dataPlugin,
+        appName: 'discover',
+        storage: createMockStorage(),
+        keyboardShortcut: {
+          useKeyboardShortcut: mockUseKeyboardShortcut,
+        },
+      };
+
+      const TestComponent = () => (
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <QueryEditorTopRow
+              onSubmit={jest.fn()}
+              onChange={jest.fn()}
+              isDirty={true}
+              screenTitle="Test Screen"
+              showDatePicker={true}
+            />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+
+      render(<TestComponent />);
+
+      await waitFor(() => {
+        expect(capturedExecuteFunction).toBeDefined();
+      });
+
+      expect(() => {
+        capturedExecuteFunction?.();
+      }).not.toThrow();
+    });
+
+    it('Should not register keyboard shortcut when keyboardShortcut service is not available', async () => {
+      const services = {
+        ...startMock,
+        data: dataPlugin,
+        appName: 'discover',
+        storage: createMockStorage(),
+        keyboardShortcut: undefined,
+      };
+
+      const TestComponent = () => (
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <QueryEditorTopRow
+              onSubmit={jest.fn()}
+              onChange={jest.fn()}
+              isDirty={true}
+              screenTitle="Test Screen"
+              showDatePicker={true}
+            />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+
+      expect(() => {
+        render(<TestComponent />);
+      }).not.toThrow();
+    });
   });
 });

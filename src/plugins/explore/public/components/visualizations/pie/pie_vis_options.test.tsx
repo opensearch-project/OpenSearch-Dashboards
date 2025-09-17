@@ -90,7 +90,7 @@ describe('PieVisStyleControls', () => {
     const showValuesSwitch = screen.getByTestId('showValuesSwtich');
     fireEvent.click(showValuesSwitch);
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      exclusive: { ...mockProps.styleOptions.exclusive, showValues: false },
+      exclusive: { ...mockProps.styleOptions.exclusive, showValues: true },
     });
   });
 

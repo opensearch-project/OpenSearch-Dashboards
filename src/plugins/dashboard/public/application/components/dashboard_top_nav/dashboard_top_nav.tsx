@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useCallback } from 'react';
 import { IndexPattern } from 'src/plugins/data/public';
-import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -15,6 +14,9 @@ import { getNavActions } from '../../utils/get_nav_actions';
 import { DashboardContainer } from '../../embeddable';
 import { Dashboard } from '../../../dashboard';
 import { TopNavMenuItemRenderType, TopNavControlData } from '../../../../../navigation/public';
+import { TopNavIds } from './top_nav';
+import { ViewMode, isErrorEmbeddable, openAddPanelFlyout } from '../../../../../embeddable/public';
+import { getSavedObjectFinder } from '../../../../../saved_objects/public';
 
 interface DashboardTopNavProps {
   isChromeVisible: boolean;
@@ -53,8 +55,117 @@ const TopNav = ({
 
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { TopNavMenu, HeaderControl } = services.navigation.ui;
-  const { dashboardConfig, setHeaderActionMenu } = services;
+  const { dashboardConfig, setHeaderActionMenu, keyboardShortcut } = services;
   const { setAppRightControls } = services.application;
+
+  // Get nav actions for direct function calls
+  const keyboardNavActions = getNavActions(
+    appState,
+    savedDashboardInstance,
+    services,
+    dashboard,
+    dashboardIdFromUrl,
+    currentContainer
+  );
+
+  const handleToggleDashboardEdit = useCallback(() => {
+    const isEditMode = currentAppState?.viewMode === ViewMode.EDIT;
+    const actionId = isEditMode ? TopNavIds.EXIT_EDIT_MODE : TopNavIds.ENTER_EDIT_MODE;
+    if (keyboardNavActions[actionId]) {
+      keyboardNavActions[actionId]();
+    }
+  }, [keyboardNavActions, currentAppState]);
+
+  const handleSave = useCallback(() => {
+    if (keyboardNavActions[TopNavIds.SAVE]) {
+      keyboardNavActions[TopNavIds.SAVE]();
+    }
+  }, [keyboardNavActions]);
+
+  const handleAddPanel = useCallback(() => {
+    // directly open the add panel flyout
+    if (currentContainer && !isErrorEmbeddable(currentContainer)) {
+      openAddPanelFlyout({
+        embeddable: currentContainer,
+        getAllFactories: services.embeddable.getEmbeddableFactories,
+        getFactory: services.embeddable.getEmbeddableFactory,
+        notifications: services.notifications,
+        overlays: services.overlays,
+        SavedObjectFinder: getSavedObjectFinder(
+          services.savedObjects,
+          services.uiSettings,
+          services.data,
+          services.application
+        ),
+      });
+    }
+  }, [currentContainer, services]);
+
+  // Register/unregister save shortcut based on edit mode
+  useEffect(() => {
+    if (currentAppState?.viewMode === ViewMode.EDIT && keyboardShortcut) {
+      keyboardShortcut.register({
+        id: 'save_dashboard',
+        pluginId: 'dashboard',
+        name: i18n.translate('dashboard.topNav.saveDashboardShortcut', {
+          defaultMessage: 'Save dashboard',
+        }),
+        category: i18n.translate('dashboard.topNav.editingCategory', {
+          defaultMessage: 'Data actions',
+        }),
+        keys: 'cmd+s',
+        execute: handleSave,
+      });
+
+      // Cleanup: unregister when leaving edit mode or component unmounts
+      return () => {
+        keyboardShortcut.unregister({
+          id: 'save_dashboard',
+          pluginId: 'dashboard',
+        });
+      };
+    }
+  }, [currentAppState?.viewMode, keyboardShortcut, handleSave]);
+
+  // Register/unregister add shortcut based on edit mode
+  useEffect(() => {
+    if (currentAppState?.viewMode === ViewMode.EDIT && keyboardShortcut) {
+      keyboardShortcut.register({
+        id: 'add_panel_to_dashboard',
+        pluginId: 'dashboard',
+        name: i18n.translate('dashboard.topNav.addPanelShortcut', {
+          defaultMessage: 'Add panel to dashboard',
+        }),
+        category: i18n.translate('dashboard.topNav.dataActionsCategory', {
+          defaultMessage: 'Data actions',
+        }),
+        keys: 'a',
+        execute: handleAddPanel,
+      });
+
+      // Cleanup: unregister when leaving edit mode or component unmounts
+      return () => {
+        keyboardShortcut.unregister({
+          id: 'add_panel_to_dashboard',
+          pluginId: 'dashboard',
+        });
+      };
+    }
+  }, [currentAppState?.viewMode, keyboardShortcut, handleAddPanel]);
+
+  // Register dashboard edit mode keyboard shortcut
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'toggle_dashboard_edit',
+    pluginId: 'dashboard',
+    name: i18n.translate('dashboard.topNav.toggleEditModeShortcut', {
+      defaultMessage: 'Toggle edit mode',
+    }),
+    category: i18n.translate('dashboard.topNav.panelLayoutCategory', {
+      defaultMessage: 'Panel / layout',
+    }),
+    keys: 'shift+e',
+    execute: handleToggleDashboardEdit,
+  });
 
   const showActionsInGroup = services.uiSettings.get('home:useNewHomePage');
 

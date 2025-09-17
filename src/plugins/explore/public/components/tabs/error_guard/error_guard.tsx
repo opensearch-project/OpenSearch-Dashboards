@@ -41,7 +41,7 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
         <EuiTitle size="l">
           <h1>{error.message.reason || errorDefaultTitle}</h1>
         </EuiTitle>
-        <div className="exploreErrorPanel__errorsSection">
+        <div className="exploreErrorGuard__errorsSection">
           <ErrorCodeBlock title={detailsText} text={error.message.details} />
           {error.message.type ? (
             <ErrorCodeBlock title={typeText} text={error.message.type} />

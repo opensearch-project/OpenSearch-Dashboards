@@ -24,17 +24,14 @@ const store = mockStore({
 
 // Mock the debounced components
 jest.mock('../../style_panel/utils', () => ({
-  DebouncedTruncateField: ({
+  DebouncedFieldNumber: ({
     value,
     onChange,
-    label,
   }: {
     value: number;
     onChange: (val: number) => void;
-    label: string;
   }) => (
     <div>
-      <label htmlFor="truncate-field">{label}</label>
       <input
         id="truncate-field"
         type="number"
@@ -44,19 +41,16 @@ jest.mock('../../style_panel/utils', () => ({
       />
     </div>
   ),
-  DebouncedText: ({
+  DebouncedFieldText: ({
     value,
     onChange,
-    label,
     placeholder,
   }: {
     value: string;
     onChange: (val: string) => void;
-    label: string;
     placeholder?: string;
   }) => (
     <div>
-      <label htmlFor="text-field">{label}</label>
       <input
         id="text-field"
         type="text"

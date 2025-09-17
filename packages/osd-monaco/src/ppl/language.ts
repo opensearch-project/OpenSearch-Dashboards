@@ -8,8 +8,8 @@ import { ID, PPL_TOKEN_SETS } from './constants';
 import { registerWorker } from '../worker_store';
 import { PPLWorkerProxyService } from './worker_proxy_service';
 import { getPPLLanguageAnalyzer, PPLValidationResult } from './ppl_language_analyzer';
-// @ts-ignore
 import { getPPLDocumentationLink } from './ppl_documentation';
+import { pplOnTypeFormatProvider, pplRangeFormatProvider } from './formatter';
 // @ts-ignore
 import workerSrc from '!!raw-loader!../../target/public/ppl.editor.worker.js';
 
@@ -179,6 +179,17 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
 };
 
 /**
+ * Set up PPL document range formatting provider
+ */
+const setupPPLFormatter = () => {
+  monaco.languages.registerDocumentRangeFormattingEditProvider(
+    PPL_LANGUAGE_ID,
+    pplRangeFormatProvider
+  );
+  monaco.languages.registerOnTypeFormattingEditProvider(PPL_LANGUAGE_ID, pplOnTypeFormatProvider);
+};
+
+/**
  * Set up syntax highlighting using PPL worker
  */
 const setupPPLSyntaxHighlighting = () => {
@@ -248,6 +259,9 @@ export const registerPPLLanguage = () => {
 
   // Set up synchronous tokenization
   setupPPLTokenization();
+
+  // Set up PPL formatter
+  setupPPLFormatter();
 
   // Set up syntax highlighting with worker
   const disposeSyntaxHighlighting = setupPPLSyntaxHighlighting();

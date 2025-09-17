@@ -34,7 +34,7 @@ import { FieldFilterState, isFieldFiltered } from './field_filter';
 // TODO: Use data set defined faceted field
 const FACET_FIELDS = [
   'attributes.service.name',
-  'attributes.aws.local.service',
+  'resource.attributes.service.name',
   'serviceName',
   'attributes.http.status_code',
   'status.code',
@@ -60,7 +60,8 @@ export function groupFields(
   fields: DataViewField[] | null,
   columns: string[],
   fieldCounts: Record<string, number>,
-  fieldFilterState: FieldFilterState
+  fieldFilterState: FieldFilterState,
+  showFacetedFields: boolean = false
 ): GroupedFields {
   const result: GroupedFields = {
     facetedFields: [],
@@ -89,7 +90,7 @@ export function groupFields(
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts) || field.type === '_source') {
       continue;
     }
-    if (isFacetedField(field.name)) {
+    if (showFacetedFields && isFacetedField(field.name)) {
       result.facetedFields.push(field);
     }
     if (columns.includes(field.name)) {

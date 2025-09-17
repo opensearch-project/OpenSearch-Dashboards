@@ -141,7 +141,7 @@ describe('ppl code_completion', () => {
     it('should suggest source, columns names when query is empty', async () => {
       const result = await getSimpleSuggestions(' ');
       checkSuggestionsContain(result, {
-        text: 'source',
+        text: 'SOURCE',
         type: monaco.languages.CompletionItemKind.Function,
       });
 
@@ -364,7 +364,7 @@ describe('ppl code_completion', () => {
     it('should show the documentations for PPL commands', async () => {
       const results = await getSimpleSuggestions('source = test-index | ');
 
-      const resultField = results.find((result) => result.text === 'where');
+      const resultField = results.find((result) => result.text === 'WHERE');
       expect(resultField?.documentation).not.toBeFalsy();
     });
 
@@ -379,7 +379,7 @@ describe('ppl code_completion', () => {
       const results = await getSimpleSuggestions('source = test-index | stats count() by ');
 
       checkSuggestionsContain(results, {
-        text: 'span()',
+        text: 'SPAN()',
         type: monaco.languages.CompletionItemKind.Module,
       });
     });
@@ -388,22 +388,22 @@ describe('ppl code_completion', () => {
       const results = await getSimpleSuggestions('source = test-index | where ');
 
       checkSuggestionsContain(results, {
-        text: 'match()',
+        text: 'MATCH()',
         type: monaco.languages.CompletionItemKind.Module,
       });
 
       checkSuggestionsContain(results, {
-        text: 'match_phrase()',
+        text: 'MATCH_PHRASE()',
         type: monaco.languages.CompletionItemKind.Module,
       });
 
       checkSuggestionsContain(results, {
-        text: 'match_phrase_prefix()',
+        text: 'MATCH_PHRASE_PREFIX()',
         type: monaco.languages.CompletionItemKind.Module,
       });
 
       checkSuggestionsContain(results, {
-        text: 'match_bool_prefix()',
+        text: 'MATCH_BOOL_PREFIX()',
         type: monaco.languages.CompletionItemKind.Module,
       });
     });

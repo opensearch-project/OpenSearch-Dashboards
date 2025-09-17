@@ -17,6 +17,7 @@ import {
   VisFieldType,
   TitleOptions,
 } from '../types';
+import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 
 // Complete area chart style controls interface
 export interface AreaChartStyleControls {
@@ -70,10 +71,10 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
         show: true,
         filter: true,
         rotate: 0,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       title: {
         text: '',
@@ -93,10 +94,10 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       title: {
         text: '',

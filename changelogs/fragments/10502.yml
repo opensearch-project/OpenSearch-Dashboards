@@ -1,0 +1,3 @@
+fix:
+- Explore embeddable not handle ppl without source ([#10502](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10502))
+- Explore embeddable display name ([#10502](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10502))

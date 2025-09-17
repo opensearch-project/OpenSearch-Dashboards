@@ -8,6 +8,7 @@ import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
 import { getTooltipFormat } from '../utils/utils';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -35,9 +36,9 @@ export const createSimpleAreaChart = (
 
   const mainLayer = {
     mark: {
-      ...buildMarkConfig(styles, 'line'),
+      ...buildMarkConfig(styles, 'area'),
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
@@ -144,9 +145,9 @@ export const createMultiAreaChart = (
 
   const mainLayer = {
     mark: {
-      ...buildMarkConfig(styles, 'line'),
+      ...buildMarkConfig(styles, 'area'),
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
@@ -275,9 +276,9 @@ export const createFacetedMultiAreaChart = (
       layer: [
         {
           mark: {
-            ...buildMarkConfig(styles, 'line'),
+            ...buildMarkConfig(styles, 'area'),
             type: 'area',
-            opacity: styles.areaOpacity || 0.6,
+            opacity: styles.areaOpacity || DEFAULT_OPACITY,
             tooltip: styles.tooltipOptions?.mode !== 'hidden',
           },
           encoding: {
@@ -423,9 +424,9 @@ export const createCategoryAreaChart = (
 
   const mainLayer = {
     mark: {
-      ...buildMarkConfig(styles, 'line'),
+      ...buildMarkConfig(styles, 'area'),
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
