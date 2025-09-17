@@ -22,6 +22,8 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
+import { getOpenButtonRun } from './top_nav_links/top_nav_open/top_nav_open';
+import { getSaveButtonRun } from './top_nav_links/top_nav_save/top_nav_save';
 import { SavedExplore } from '../../saved_explore';
 import { setDateRange } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
@@ -38,6 +40,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const clearEditors = useClearEditors();
   const editorRef = useEditorRef();
+  const { keyboardShortcut } = services;
 
   const flavorId = useFlavorId();
   const {
@@ -161,6 +164,79 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     },
     [dispatch, services, editorRef]
   );
+
+  const handleOpenShortcut = useCallback(() => {
+    const openButtonRun = getOpenButtonRun(services);
+    openButtonRun({} as HTMLElement);
+  }, [services]);
+
+  const handleSaveShortcut = useCallback(() => {
+    if (savedExplore) {
+      const saveButtonRun = getSaveButtonRun(
+        services,
+        startSyncingQueryStateWithUrl,
+        searchContext,
+        {
+          dataset,
+          tabState,
+          flavorId,
+          tabDefinition,
+          activeTabId: uiState.activeTabId,
+        },
+        savedExplore
+      );
+      saveButtonRun({} as HTMLElement);
+    }
+  }, [
+    services,
+    startSyncingQueryStateWithUrl,
+    searchContext,
+    dataset,
+    tabState,
+    flavorId,
+    tabDefinition,
+    uiState.activeTabId,
+    savedExplore,
+  ]);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'saved_search',
+    pluginId: 'explore',
+    name: i18n.translate('explore.topNav.savedSearchShortcut', {
+      defaultMessage: 'Saved search',
+    }),
+    category: i18n.translate('explore.topNav.searchCategory', {
+      defaultMessage: 'Search',
+    }),
+    keys: 'shift+o',
+    execute: handleOpenShortcut,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'save_search',
+    pluginId: 'explore',
+    name: i18n.translate('explore.topNav.saveSearchShortcut', {
+      defaultMessage: 'Save discover search',
+    }),
+    category: i18n.translate('explore.topNav.editingCategory', {
+      defaultMessage: 'Data actions',
+    }),
+    keys: 'cmd+s',
+    execute: handleSaveShortcut,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'refresh_query',
+    pluginId: 'explore',
+    name: i18n.translate('explore.topNav.refreshResultsShortcut', {
+      defaultMessage: 'Refresh results',
+    }),
+    category: i18n.translate('explore.topNav.searchCategory', {
+      defaultMessage: 'Search',
+    }),
+    keys: 'r',
+    execute: () => handleQuerySubmit(),
+  });
 
   const handleCustomButtonClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

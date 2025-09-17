@@ -12,6 +12,7 @@ import {
   VisColumn,
   AxisColumnMappings,
   AxisSupportedStyles,
+  Threshold,
 } from '../types';
 
 export const applyAxisStyling = (
@@ -269,3 +270,31 @@ export const getTooltipFormat = (
   const timeUnit = inferTimeUnitFromTimestamps(data, field);
   return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
 };
+
+/**
+ * Determines the color for a value based on a set of thresholds.
+ * @param value - The value to evaluate (e.g., a number, string, or any type that can be converted to a number).
+ * @param thresholds - Array of threshold objects with `value` (number) and `color` (string) properties.
+ * @returns The matched threshold
+ */
+export function getThresholdByValue<T>(
+  value: any,
+  thresholds: Threshold[] = []
+): Threshold | undefined {
+  const numValue = Number(value);
+  if (isNaN(numValue)) {
+    return undefined;
+  }
+
+  // Sort thresholds in descending order
+  const sortedThresholds = [...thresholds].sort((a, b) => b.value - a.value);
+
+  // Find the first threshold where the value is greater than or equal to the threshold value
+  for (const threshold of sortedThresholds) {
+    if (numValue >= threshold.value) {
+      return threshold;
+    }
+  }
+
+  return undefined;
+}

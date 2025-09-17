@@ -191,6 +191,24 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
 
   public start(core: CoreStart, { uiActions }: DevToolsStartDependencies) {
     this.uiActionsStart = uiActions;
+
+    // Register keyboard shortcut for opening Developer Tools
+    if (core.keyboardShortcut) {
+      core.keyboardShortcut.register({
+        id: 'toggle_dev_tools',
+        pluginId: 'dev_tools',
+        name: i18n.translate('devTools.keyboardShortcut.openDevTools.name', {
+          defaultMessage: 'Open global dev console',
+        }),
+        category: i18n.translate('devTools.keyboardShortcut.category.navigation', {
+          defaultMessage: 'Navigation',
+        }),
+        keys: 'shift+`',
+        execute: () => {
+          uiActions.executeTriggerActions(devToolsTrigger.id, {});
+        },
+      });
+    }
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.chrome.navControls.registerLeftBottom({
         order: 4,

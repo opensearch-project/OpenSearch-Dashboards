@@ -160,6 +160,34 @@ const queriesTestSuite = () => {
           hitCount: '1,263',
         });
       });
+      it('returns to Visualization tab after switching to Logs', () => {
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+        const initialQuery = 'source = ' + config.dataset + ' | stats count()';
+        cy.explore.setQueryEditor(initialQuery);
+
+        cy.getElementByTestId('exploreQueryExecutionButton').click();
+        cy.osd.waitForLoader(true);
+        cy.wait(1000);
+
+        cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
+
+        cy.get('button[role="tab"][aria-selected="true"]')
+          .contains('Visualization')
+          .should('be.visible');
+
+        cy.get('button[role="tab"]').contains('Logs').click();
+        cy.get('button[role="tab"][aria-selected="true"]').contains('Logs').should('be.visible');
+
+        cy.explore.setTopNavDate(START_TIME, START_TIME);
+
+        cy.getElementByTestId('exploreQueryExecutionButton').click();
+        cy.osd.waitForLoader(true);
+        cy.wait(1000);
+
+        cy.get('button[role="tab"].euiTab-isSelected').contains('Visualization');
+      });
     });
   });
 };

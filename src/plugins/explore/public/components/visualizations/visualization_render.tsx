@@ -6,7 +6,6 @@
 import React, { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
-
 import { ChartConfig, VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { TableChartStyleControls } from './table/table_vis_config';
@@ -20,13 +19,27 @@ import { visualizationRegistry } from './visualization_registry';
 interface Props {
   data$: BehaviorSubject<VisData | undefined>;
   visConfig$: BehaviorSubject<ChartConfig | undefined>;
+  showRawTable$: BehaviorSubject<boolean>;
   searchContext?: ExecutionContextSearch;
   ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
 }
 
+const defaultStyleOptions: TableChartStyleControls = {
+  showColumnFilter: false,
+  showFooter: false,
+  pageSize: 10,
+  globalAlignment: 'left',
+};
+
+const PAGE_SIZE_OPTIONS = [10, 50, 100];
+
 export const VisualizationRender = (props: Props) => {
   const visualizationData = useObservable(props.data$);
   const visConfig = useObservable(props.visConfig$);
+  const showRawTable = useObservable(props.showRawTable$);
+  const rows = useMemo(() => {
+    return visualizationData?.transformedData ?? [];
+  }, [visualizationData?.transformedData]);
 
   const columns = useMemo(() => {
     return [
@@ -70,6 +83,21 @@ export const VisualizationRender = (props: Props) => {
         styleOptions={visConfig?.styles as TableChartStyleControls}
         rows={visualizationData?.transformedData ?? []}
         columns={columns}
+      />
+    );
+  }
+
+  if (showRawTable) {
+    return (
+      <TableVis
+        // This key ensures re-rendering when switching to table visualization
+        // from a non-table visualization with the "show raw data" option enabled
+        key="table-vis-raw"
+        rows={rows}
+        columns={columns}
+        styleOptions={defaultStyleOptions}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        showStyleSelector={false}
       />
     );
   }

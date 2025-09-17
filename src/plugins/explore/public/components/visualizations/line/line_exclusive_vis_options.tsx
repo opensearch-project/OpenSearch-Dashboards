@@ -4,11 +4,11 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonGroup, EuiFormRow, EuiRange, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { useDebouncedNumericValue } from '../utils/use_debounced_value';
+import { useDebouncedNumber } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { LineMode } from './line_vis_config';
+import { defaultLineChartStyles, LineMode } from './line_vis_config';
 
 export type LineStyle = 'both' | 'line' | 'dots';
 
@@ -35,14 +35,14 @@ export const LineExclusiveVisOptions = ({
   onLineStyleChange,
   shouldShowTimeMarker = true,
 }: BasicVisOptionsProps) => {
-  // Could import and reuse { getConfigCollections } from '../../../../../vis_type_vislib/public';
-  // That requires adding vis_type_vislib as a dependency to discover, and somehow that throw errors
-
   // Use debounced value for line width
-  const [localLineWidth, handleLineWidthChange] = useDebouncedNumericValue(
+  const [localLineWidth, handleLineWidthChange] = useDebouncedNumber(
     lineWidth,
-    onLineWidthChange,
-    { min: 1, max: 10, defaultValue: 2 }
+    (value) => onLineWidthChange(value ?? defaultLineChartStyles.lineWidth),
+    {
+      min: 1,
+      max: 10,
+    }
   );
 
   const lineModeOptions: Array<{ value: LineMode; text: string }> = [
@@ -129,8 +129,10 @@ export const LineExclusiveVisOptions = ({
       >
         <EuiRange
           compressed
-          value={localLineWidth}
-          onChange={(e) => handleLineWidthChange((e.target as HTMLInputElement).value)}
+          value={localLineWidth ?? defaultLineChartStyles.lineWidth}
+          onChange={(e) =>
+            handleLineWidthChange(e.currentTarget.value ? Number(e.currentTarget.value) : undefined)
+          }
           min={1}
           max={10}
           step={1}

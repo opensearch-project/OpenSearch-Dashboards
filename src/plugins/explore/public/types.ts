@@ -11,6 +11,7 @@ import {
   DocLinksStart,
   ToastsStart,
   IUiSettingsClient,
+  KeyboardShortcutStart,
 } from 'opensearch-dashboards/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import {
@@ -47,6 +48,10 @@ import {
   VisualizationRegistryServiceStart,
 } from './services/visualization_registry_service';
 import { AppStore } from './application/utils/state_management/store';
+import {
+  QueryPanelActionsRegistryService,
+  QueryPanelActionsRegistryServiceSetup,
+} from './services/query_panel_actions_registry';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -54,6 +59,7 @@ import { AppStore } from './application/utils/state_management/store';
 
 export interface ExplorePluginSetup {
   visualizationRegistry: VisualizationRegistryServiceSetup;
+  queryPanelActionsRegistry: QueryPanelActionsRegistryServiceSetup;
   docViews: {
     addDocView: (docViewSpec: unknown) => void;
   };
@@ -166,9 +172,11 @@ export interface ExploreServices {
   // Explore-specific services
   tabRegistry: TabRegistryService;
   visualizationRegistry: VisualizationRegistryService;
+  queryPanelActionsRegistry: QueryPanelActionsRegistryService;
   expressions: ExpressionsStart;
 
   dashboard: DashboardStart;
+  keyboardShortcut?: KeyboardShortcutStart;
 
   supportedTypes?: string[];
 }

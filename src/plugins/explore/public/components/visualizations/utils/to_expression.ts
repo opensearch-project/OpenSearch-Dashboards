@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { darkMode } from '@osd/ui-shared-deps/theme';
 import {
   buildExpression,
   buildExpressionFunction,
