@@ -69,10 +69,13 @@ export class ChatService {
           role: msg.role,
           content: msg.content,
         })),
+        // IMPORTANT: Reuse the same userMessage so we don't create a second
+        // synthetic user entry (which was causing duplicate user prompts
+        // to appear / be sent to the agent).
         {
-          id: this.generateMessageId(),
-          role: 'user',
-          content,
+          id: userMessage.id,
+          role: userMessage.role,
+          content: userMessage.content,
         },
       ],
       tools: [], // Add tools here if your AG-UI server supports them

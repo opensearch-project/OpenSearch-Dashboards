@@ -22,6 +22,7 @@ export enum EventType {
 export class AgUiAgent {
   private serverUrl: string;
   private abortController?: AbortController;
+  private sseBuffer: string = '';
 
   constructor(serverUrl: string = 'http://localhost:3000') {
     this.serverUrl = serverUrl;
@@ -30,6 +31,7 @@ export class AgUiAgent {
   public runAgent(input: RunAgentInput, handlers?: any): Observable<BaseEvent> {
     return new Observable<BaseEvent>((observer) => {
       this.abortController = new AbortController();
+      this.sseBuffer = ''; // Reset buffer for new request
 
       // Emit RUN_STARTED event
       observer.next({
@@ -63,11 +65,16 @@ export class AgUiAgent {
               const { done, value } = await reader.read();
               if (done) break;
 
-              // Parse Server-Sent Events
+              // Parse Server-Sent Events with proper buffering
               const chunk = new TextDecoder().decode(value);
-              const lines = chunk.split('\n');
+              const allData = this.sseBuffer + chunk;
+              const lines = allData.split('\n');
 
-              for (const line of lines) {
+              // Keep the last incomplete line in buffer
+              this.sseBuffer = lines[lines.length - 1];
+              const completeLines = lines.slice(0, -1);
+
+              for (const line of completeLines) {
                 if (line.startsWith('data: ')) {
                   try {
                     const data = JSON.parse(line.slice(6));

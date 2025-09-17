@@ -59,6 +59,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+  const [processedEventIds, setProcessedEventIds] = useState<Set<string>>(new Set());
 
   // Initialize context manager
   const contextManager = useMemo(() => {
@@ -77,6 +78,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     setInput('');
     setIsStreaming(true);
     setCurrentStreamingMessage('');
+    setProcessedEventIds(new Set()); // Reset processed events for new message
 
     try {
       const { observable, userMessage } = await chatService.sendMessage(
@@ -110,6 +112,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           const eventTime = new Date().toLocaleTimeString();
           console.log(`🔄 [${eventTime}] ${event.type}:`, event);
 
+          // Event deduplication - create a unique event identifier
+          const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(event).substring(0, 100)}`;
+          if (processedEventIds.has(eventId)) {
+            console.log(`🔄 [${eventTime}] Skipping duplicate event:`, event.type);
+            return; // Skip duplicate event
+          }
+          setProcessedEventIds(prev => new Set(prev).add(eventId));
+
           // Update runId if we get it from the event
           if ('runId' in event && event.runId && event.runId !== currentRunId) {
             setCurrentRunId(event.runId);
@@ -125,12 +135,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               setCurrentStreamingMessage((currentContent) => {
                 const assistantMessage: TimelineMessage = {
                   type: 'message',
-                  id: `msg-${Date.now()}`,
+                  id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                   role: 'assistant',
                   content: currentContent,
                   timestamp: event.timestamp || Date.now(),
                 };
-                setTimeline((prev) => [...prev, assistantMessage]);
+
+                // Add deduplication check before adding to timeline
+                setTimeline((prev) => {
+                  // Check if message with same content already exists recently (within 1 second)
+                  const isDuplicate = prev.some(
+                    item => item.type === 'message' &&
+                    item.role === 'assistant' &&
+                    item.content === currentContent &&
+                    Math.abs(item.timestamp - (event.timestamp || Date.now())) < 1000
+                  );
+                  return isDuplicate ? prev : [...prev, assistantMessage];
+                });
                 return ''; // Clear the streaming message
               });
               setIsStreaming(false);
@@ -237,6 +258,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     setCurrentStreamingMessage('');
     setCurrentRunId(null);
     setIsStreaming(false);
+    setProcessedEventIds(new Set()); // Reset processed events for new chat
     // Refresh context for new chat
     contextManager.refreshContext();
   };

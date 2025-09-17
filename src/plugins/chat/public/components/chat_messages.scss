@@ -15,6 +15,9 @@
     grid-area: context;
     border-bottom: 1px solid $euiColorLightShade;
     padding: 8px 0;
+    overflow-x: auto;
+    max-width: 100%;
+    min-height: 0;
   }
 
   &__emptyState {
