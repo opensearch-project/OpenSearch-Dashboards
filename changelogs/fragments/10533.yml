@@ -1,0 +1,2 @@
+fix:
+- Use the parsedInt for width and height in data.UrlFormat. ([#10533](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10533))
