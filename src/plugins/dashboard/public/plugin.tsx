@@ -28,6 +28,9 @@
  * under the License.
  */
 
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -581,22 +584,21 @@ export class DashboardPlugin
     // Register Dashboard Context Contributor with Context Provider
     if (contextProvider) {
       const { DashboardContextContributor } = require('./context_contributor');
-      const dashboardContextContributor = new DashboardContextContributor(
-        () => {
-          console.log('🔍 Dashboard: Getting current container:', {
-            hasContainer: !!this.currentDashboardContainer,
-            containerType: this.currentDashboardContainer?.type,
-            containerId: this.currentDashboardContainer?.id
-          });
-          return this.currentDashboardContainer;
-        },
-        core.savedObjects.client
-      );
-      
+      const dashboardContextContributor = new DashboardContextContributor(() => {
+        console.log('🔍 Dashboard: Getting current container:', {
+          hasContainer: !!this.currentDashboardContainer,
+          containerType: this.currentDashboardContainer?.type,
+          containerId: this.currentDashboardContainer?.id,
+        });
+        return this.currentDashboardContainer;
+      }, core.savedObjects.client);
+
       contextProvider.registerContextContributor(dashboardContextContributor);
       console.log('📝 Dashboard: Context contributor registered with Context Provider');
     } else {
-      console.log('⚠️ Dashboard: Context Provider plugin not available, skipping context registration');
+      console.log(
+        '⚠️ Dashboard: Context Provider plugin not available, skipping context registration'
+      );
     }
 
     // AI Chatbot Integration - Register Test UI Actions
@@ -703,14 +705,16 @@ export class DashboardPlugin
   /**
    * Set the current dashboard container (called from dashboard components)
    */
-  public setCurrentDashboardContainer(container: import('./application/embeddable/dashboard_container').DashboardContainer): void {
+  public setCurrentDashboardContainer(
+    container: import('./application/embeddable/dashboard_container').DashboardContainer
+  ): void {
     console.log('🔗 Dashboard Plugin: Setting current dashboard container:', {
       containerType: container.type,
       containerId: container.id,
-      childCount: container.getChildIds().length
+      childCount: container.getChildIds().length,
     });
     this.currentDashboardContainer = container;
-    
+
     // Note: Context refresh is now handled by dashboard editor after embeddables load
   }
 
@@ -724,7 +728,7 @@ export class DashboardPlugin
     uiActions.registerTrigger({
       id: 'ADD_FILTER_TRIGGER',
       title: 'Add Filter',
-      description: 'Add a filter to the dashboard'
+      description: 'Add a filter to the dashboard',
     });
 
     uiActions.registerAction({
@@ -733,22 +737,22 @@ export class DashboardPlugin
       getDisplayName: () => 'Add Filter',
       execute: async (context: any) => {
         console.log('🎯 ADD_FILTER_ACTION executed:', context);
-        
+
         // Show a notification for testing
         const { notifications } = (window as any).aiChatbotServices?.core || {};
         if (notifications) {
           notifications.toasts.addSuccess({
             title: 'Filter Added',
             text: `Added filter: ${context.field} = ${context.value}`,
-            'data-test-subj': 'ai-chatbot-filter-success'
+            'data-test-subj': 'ai-chatbot-filter-success',
           });
         } else {
           // Fallback alert for testing
           alert(`✅ Filter added: ${context.field} = ${context.value}`);
         }
-        
+
         return Promise.resolve();
-      }
+      },
     });
 
     uiActions.attachAction('ADD_FILTER_TRIGGER', 'ADD_FILTER_ACTION');
@@ -757,7 +761,7 @@ export class DashboardPlugin
     uiActions.registerTrigger({
       id: 'EXPAND_PANEL_TRIGGER',
       title: 'Expand Panel',
-      description: 'Expand a dashboard panel to full screen'
+      description: 'Expand a dashboard panel to full screen',
     });
 
     uiActions.registerAction({
@@ -766,22 +770,22 @@ export class DashboardPlugin
       getDisplayName: () => 'Expand Panel',
       execute: async (context: any) => {
         console.log('🎯 EXPAND_PANEL_ACTION executed:', context);
-        
+
         // Show a notification for testing
         const { notifications } = (window as any).aiChatbotServices?.core || {};
         if (notifications) {
           notifications.toasts.addSuccess({
             title: 'Panel Expanded',
             text: `Expanded panel: ${context.panelId}`,
-            'data-test-subj': 'ai-chatbot-expand-success'
+            'data-test-subj': 'ai-chatbot-expand-success',
           });
         } else {
           // Fallback alert for testing
           alert(`✅ Panel expanded: ${context.panelId}`);
         }
-        
+
         return Promise.resolve();
-      }
+      },
     });
 
     uiActions.attachAction('EXPAND_PANEL_TRIGGER', 'EXPAND_PANEL_ACTION');

@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-console */
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -44,12 +45,12 @@ export const DashboardEditor = () => {
     if (currentContainer && (window as any).dashboardPlugin) {
       console.log('🔗 Dashboard: Setting current container in plugin');
       (window as any).dashboardPlugin.setCurrentDashboardContainer(currentContainer);
-      
+
       // Wait for embeddables to load before triggering context refresh
       const checkEmbeddables = () => {
         const childCount = currentContainer.getChildIds().length;
         console.log(`🔍 Dashboard: Checking embeddables, current count: ${childCount}`);
-        
+
         if (childCount > 0) {
           console.log('✅ Dashboard: Embeddables loaded, triggering context refresh');
           if ((window as any).contextProvider) {
@@ -62,7 +63,7 @@ export const DashboardEditor = () => {
           setTimeout(checkEmbeddables, 500);
         }
       };
-      
+
       // Start checking after a short delay
       setTimeout(checkEmbeddables, 100);
     }
