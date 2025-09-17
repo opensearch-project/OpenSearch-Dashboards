@@ -332,6 +332,7 @@ function findLastNonSpaceOperatorToken(
   for (let i = currentIndex - 1; i >= 0; i--) {
     const token = tokenStream.get(i);
     if (
+      token &&
       token.type !== OpenSearchPPLParser.SPACE &&
       token.type !== OpenSearchPPLParser.EOF &&
       !operatorsToInclude.includes(token.type)
