@@ -6,7 +6,7 @@
 import { ScatterChartStyleControls } from './scatter_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
-import { createThresholdLayer } from '../style_panel/threshold_lines/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { buildThresholdColorEncoding } from '../bar/bar_chart_utils';
 
 export const createTwoMetricScatter = (

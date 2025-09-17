@@ -13,7 +13,7 @@ import {
   AggregationType,
 } from '../types';
 import { BarChartStyleControls, defaultBarChartStyles } from './bar_vis_config';
-import { createThresholdLayer } from '../style_panel/threshold_lines/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 
 import {
@@ -59,7 +59,6 @@ export const createBarSpec = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    opacity: 0.8,
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
   configureBarSizeAndSpacing(barMark, styles);
@@ -108,11 +107,7 @@ export const createBarSpec = (
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles?.thresholdLines,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -217,11 +212,7 @@ export const createTimeBarChart = (
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles?.thresholdLines,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -339,11 +330,7 @@ export const createGroupedTimeBarChart = (
 
   // Add threshold layer if enabled
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles?.thresholdLines,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layer.push(...thresholdLayer.layer);
   }
@@ -421,11 +408,7 @@ export const createFacetedTimeBarChart = (
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles?.thresholdLines,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
 
   return {
     $schema: VEGASCHEMA,
@@ -585,11 +568,7 @@ export const createStackedBarSpec = (
 
   // Add threshold layer if enabled
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles?.thresholdLines,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
 
   if (thresholdLayer) {
     layer.push(...thresholdLayer.layer);
@@ -679,11 +658,7 @@ export const createNumericalHistogramBarChart = (
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles?.thresholdLines,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -766,11 +741,7 @@ export const createSingleBarChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles?.thresholdOptions,
-    styles?.thresholdLines,
-    'y'
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, 'y');
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }

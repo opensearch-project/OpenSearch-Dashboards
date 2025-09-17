@@ -53,9 +53,6 @@ export interface BarChartStyleControls {
   // histogram bucket config
   bucket?: BucketOptions;
 
-  // TODO: apply standard Options to bar later
-  min?: number;
-  max?: number;
   thresholdOptions?: ThresholdOptions;
 }
 

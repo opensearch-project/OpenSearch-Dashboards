@@ -6,7 +6,7 @@
 import { AreaChartStyleControls } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
-import { createThresholdLayer } from '../style_panel/threshold_lines/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { getTooltipFormat } from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 
@@ -87,7 +87,7 @@ export const createSimpleAreaChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -208,7 +208,7 @@ export const createMultiAreaChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -260,7 +260,7 @@ export const createFacetedMultiAreaChart = (
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
 
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -450,7 +450,7 @@ export const createCategoryAreaChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -561,7 +561,7 @@ export const createStackedAreaChart = (
   };
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     spec.layer = [{ mark: spec.mark, encoding: spec.encoding }, ...thresholdLayer.layer];
     delete spec.mark;

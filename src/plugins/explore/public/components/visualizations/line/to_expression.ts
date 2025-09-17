@@ -11,7 +11,7 @@ import {
   applyAxisStyling,
   ValueAxisPosition,
 } from './line_chart_utils';
-import { createThresholdLayer } from '../style_panel/threshold_lines/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { getTooltipFormat } from '../utils/utils';
 
 /**
@@ -86,7 +86,7 @@ export const createSimpleLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -241,7 +241,7 @@ export const createLineBarChart = (
   };
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     barWithThresholdLayer.layer.push(thresholdLayer);
   }
@@ -356,7 +356,7 @@ export const createMultiLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -411,7 +411,7 @@ export const createFacetedMultiLineChart = (
   // Create a mark config for the faceted spec
   const facetMarkConfig = buildMarkConfig(styles, 'line');
 
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
 
   return {
     $schema: VEGASCHEMA,
@@ -591,7 +591,7 @@ export const createCategoryLineChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, styles?.thresholdLines);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }

@@ -20,7 +20,7 @@ import {
   AxisColumnMappings,
 } from '../types';
 import * as lineChartUtils from './line_chart_utils';
-import * as thresholdUtils from '../style_panel/threshold_lines/utils';
+import * as thresholdUtils from '../style_panel/threshold/threshold_utils';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({
@@ -34,7 +34,7 @@ jest.mock('./line_chart_utils', () => ({
 }));
 
 // Mock the threshold utils
-jest.mock('../style_panel/threshold_lines/utils', () => ({
+jest.mock('../style_panel/threshold/threshold_utils', () => ({
   getStrokeDash: jest.fn().mockReturnValue([5, 5]),
   createThresholdLayer: jest.fn().mockReturnValue(null),
 }));
@@ -151,8 +151,7 @@ describe('to_expression', () => {
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
       expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
-        styleOptions?.thresholdOptions,
-        styleOptions?.thresholdLines
+        styleOptions?.thresholdOptions
       );
       expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(styleOptions);
     });
@@ -667,8 +666,7 @@ describe('to_expression', () => {
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
       expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
-        styleOptions?.thresholdOptions,
-        styleOptions?.thresholdLines
+        styleOptions?.thresholdOptions
       );
     });
 
