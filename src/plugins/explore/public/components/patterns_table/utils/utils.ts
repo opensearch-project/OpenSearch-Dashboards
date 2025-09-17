@@ -66,14 +66,17 @@ export const createSearchPatternQueryWithSlice = (
   pageSize: number,
   pageOffset: number
 ) => {
-  const searchPatternQuery = createSearchPatternQuery(
-    query,
-    patternsField,
-    usingRegexPatterns,
-    patternString
-  );
+  // TODO: switch this logic back to adding onto the createSearchPatternQuery
+  // when we don't need a patterns clause to lock in the pattern type
 
-  return `${searchPatternQuery} | sort - ${timeField} | head ${pageSize} from ${pageOffset}`;
+  const preparedQuery = getQueryWithSource(query);
+  return usingRegexPatterns
+    ? `${regexUpdateSearchPatternQuery(
+        preparedQuery.query,
+        patternsField,
+        patternString
+      )} | sort - ${timeField} | head ${pageSize} from ${pageOffset}`
+    : `${preparedQuery.query} | patterns \`${patternsField}\` method=brain mode=label | fields patterns_field, ${timeField}, ${patternsField} | where patterns_field = '${patternString}' | sort - ${timeField} | head ${pageSize} from ${pageOffset}`;
 };
 
 // Checks if the value is a valid, finite number. Used for patterns table
