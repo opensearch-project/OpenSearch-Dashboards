@@ -64,7 +64,7 @@ describe('utils', () => {
     });
   });
 
-  describe('highlightLogUsingPattern', () => {
+  describe('highlightLogUsingPattern - with V2', () => {
     it('dynamic element inside', () => {
       expect(
         highlightLogUsingPattern(
@@ -123,6 +123,72 @@ describe('utils', () => {
         highlightLogUsingPattern(
           '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /opensearch/opensearch-1.0.0.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
           '<*IP*> - - [<*DATETIME*>] "GET <*> HTTP/<*><*>" 200 <*> "-" "Mozilla/<*><*> (<*>; Linux <*>_<*>; rv:<*><*><*>) Gecko/<*> Firefox/<*><*><*>"'
+        )
+      ).toStrictEqual(
+        '<mark>223.87.60.27</mark> - - [<mark>2018-07-22T00:39:02.912Z</mark>] "GET <mark>/opensearch/opensearch-1.0.0.deb_1</mark> HTTP/<mark>1.1</mark>" 200 <mark>6219</mark> "-" "Mozilla/<mark>5.0</mark> (<mark>X11</mark>; Linux <mark>x86</mark>_<mark>64</mark>; rv:<mark>6.0a1</mark>) Gecko/<mark>20110421</mark> Firefox/<mark>6.0a1</mark>"'
+      );
+    });
+  });
+
+  describe('highlightLogUsingPattern - with Calcite', () => {
+    it('dynamic element inside', () => {
+      expect(
+        highlightLogUsingPattern(
+          '[Log] Gecko GET/something 172.198.1.1',
+          '[Log] <token1> GET/<token2> 172.198.1.1'
+        )
+      ).toStrictEqual('[Log] <mark>Gecko</mark> GET/<mark>something</mark> 172.198.1.1');
+    });
+
+    it('dynamic element in front', () => {
+      expect(
+        highlightLogUsingPattern(
+          '[Log] Gecko GET/something 172.198.1.1',
+          '<token1> <token2> GET/<token3> 172.198.1.1'
+        )
+      ).toStrictEqual(
+        '<mark>[Log]</mark> <mark>Gecko</mark> GET/<mark>something</mark> 172.198.1.1'
+      );
+    });
+
+    it('dynamic element in front with special delim', () => {
+      expect(
+        highlightLogUsingPattern(
+          '[Log] Gecko GET/something 172.198.1.1',
+          '<token1> <token2> GET/<token3> 172.198.1.1'
+        )
+      ).toStrictEqual(
+        '<mark>[Log]</mark> <mark>Gecko</mark> GET/<mark>something</mark> 172.198.1.1'
+      );
+    });
+
+    it('dynamic element at the end', () => {
+      expect(
+        highlightLogUsingPattern(
+          '[Log] Gecko GET/something 172.198.1.1',
+          '[Log] <token1> GET/<token2> 172.198.<token3>'
+        )
+      ).toStrictEqual(
+        '[Log] <mark>Gecko</mark> GET/<mark>something</mark> 172.198.<mark>1.1</mark>'
+      );
+    });
+
+    it('dynamic element at the end with special delim', () => {
+      expect(
+        highlightLogUsingPattern(
+          '[Log] Gecko GET/something 172.198.1.1',
+          '[Log] <token1> GET/<token2> <token3>'
+        )
+      ).toStrictEqual(
+        '[Log] <mark>Gecko</mark> GET/<mark>something</mark> <mark>172.198.1.1</mark>'
+      );
+    });
+
+    it('dynamic elements at the front and back', () => {
+      expect(
+        highlightLogUsingPattern(
+          '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /opensearch/opensearch-1.0.0.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
+          '<token1> - - [<token2>] "GET <token3> HTTP/<token4><token5>" 200 <token6> "-" "Mozilla/<token7><token8> (<token9>; Linux <token10>_<token11>; rv:<token12><token13><token14>) Gecko/<token15> Firefox/<token16><token17><token18>"'
         )
       ).toStrictEqual(
         '<mark>223.87.60.27</mark> - - [<mark>2018-07-22T00:39:02.912Z</mark>] "GET <mark>/opensearch/opensearch-1.0.0.deb_1</mark> HTTP/<mark>1.1</mark>" 200 <mark>6219</mark> "-" "Mozilla/<mark>5.0</mark> (<mark>X11</mark>; Linux <mark>x86</mark>_<mark>64</mark>; rv:<mark>6.0a1</mark>) Gecko/<mark>20110421</mark> Firefox/<mark>6.0a1</mark>"'

@@ -9,9 +9,10 @@ export const COUNT_FIELD = 'pattern_count';
 export const SAMPLE_FIELD = 'sample_logs';
 
 // used to highlight sections in the sample log column of table
-export const DELIM_START = '<*';
-export const STD_DELIM_END = '>';
-export const UNIQ_DELIM_END = '*>';
+export const DELIM_START = '<';
+export const DELIM_END = '*>';
+export const CALCITE_DELIM_CONTENT = 'token';
+export const CALCITE_DELIM_END = '>';
 export const MARK_START = '<mark>';
 export const MARK_END = '</mark>';
 
