@@ -265,6 +265,26 @@ describe('visualization_container_utils', () => {
       expect(visConfig$.value).toBeUndefined();
     });
 
+    it('transforms gauge chart with thresholds and basecolor', () => {
+      const config: ChartConfig = {
+        type: 'gauge',
+        styles: {
+          thresholds: [{ value: 10, color: '#red' }],
+          baseColor: '#9ecae1',
+        } as ChartStyleControlMap['gauge'],
+      };
+
+      adaptLegacyData(visConfig$, config);
+
+      expect(visConfig$.value?.styles).toMatchObject({
+        thresholdOptions: {
+          baseColor: '#9ecae1',
+          thresholds: [{ value: 10, color: '#red' }],
+          useThresholdColor: false,
+        },
+      });
+    });
+
     it('transforms metric chart with colorSchema', () => {
       const config: ChartConfig = {
         type: 'metric',

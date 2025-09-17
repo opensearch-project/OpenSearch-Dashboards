@@ -6,7 +6,7 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { GaugeVisStyleControls } from './gauge_vis_options';
-import { ThresholdOptions, AxisRole, VisFieldType, UnitItem } from '../types';
+import { ThresholdOptions, AxisRole, VisFieldType, Threshold } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 
@@ -16,6 +16,14 @@ export interface GaugeChartStyleControls {
   min?: number;
   max?: number;
 
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
+  baseColor?: string;
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
+  thresholds?: Threshold[];
   valueCalculation: CalculationMethod;
   unitId?: string;
   thresholdOptions: ThresholdOptions;

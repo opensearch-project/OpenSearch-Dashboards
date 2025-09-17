@@ -158,6 +158,24 @@ export const adaptLegacyData = (
       };
     }
   }
+  if (transformedConfig.type === 'gauge') {
+    const styles = config.styles as ChartStyleControlMap['gauge'] | undefined;
+    const { thresholdOptions, thresholds, baseColor } = styles || {};
+
+    if (!thresholdOptions) {
+      transformedConfig = {
+        ...transformedConfig,
+        styles: {
+          ...transformedConfig.styles,
+          thresholdOptions: {
+            thresholds,
+            baseColor,
+            useThresholdColor: false,
+          },
+        } as StyleOptions,
+      };
+    }
+  }
 
   visConfig$.next(transformedConfig);
 };
