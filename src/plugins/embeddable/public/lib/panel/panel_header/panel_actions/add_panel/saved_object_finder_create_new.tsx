@@ -28,47 +28,33 @@
  * under the License.
  */
 
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement } from 'react';
 import { EuiSmallButton } from '@elastic/eui';
-import { EuiContextMenuPanel } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { ApplicationStart } from 'src/core/public';
 
 interface Props {
   menuItems: ReactElement[];
+  application: ApplicationStart;
+  onClose: () => void;
 }
 
-export function SavedObjectFinderCreateNew({ menuItems }: Props) {
-  const [isCreateMenuOpen, setCreateMenuOpen] = useState(false);
-  const toggleCreateMenu = () => {
-    setCreateMenuOpen(!isCreateMenuOpen);
-  };
-  const closeCreateMenu = () => {
-    setCreateMenuOpen(false);
-  };
+export function SavedObjectFinderCreateNew({ menuItems, application, onClose }: Props) {
   return (
-    <EuiPopover
-      id="createNew"
-      button={
-        <EuiSmallButton
-          data-test-subj="createNew"
-          iconType="plus"
-          iconSide="left"
-          onClick={toggleCreateMenu}
-          fill
-        >
-          <FormattedMessage
-            id="embeddableApi.addPanel.createNewDefaultOption"
-            defaultMessage="Create new"
-          />
-        </EuiSmallButton>
-      }
-      isOpen={isCreateMenuOpen}
-      closePopover={closeCreateMenu}
-      panelPaddingSize="none"
-      anchorPosition="downRight"
+    <EuiSmallButton
+      data-test-subj="createNew"
+      iconType="plus"
+      iconSide="left"
+      onClick={() => {
+        onClose();
+        application.navigateToApp('explore');
+      }}
+      fill
     >
-      <EuiContextMenuPanel items={menuItems} size="s" />
-    </EuiPopover>
+      <FormattedMessage
+        id="embeddableApi.addPanel.createNewDefaultOption"
+        defaultMessage="Create new"
+      />
+    </EuiSmallButton>
   );
 }

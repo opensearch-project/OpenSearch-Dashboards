@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { NotificationsStart, OverlayStart } from 'src/core/public';
+import { NotificationsStart, OverlayStart, ApplicationStart } from 'src/core/public';
 import { EmbeddableStart } from '../../../../../plugin';
 import { toMountPoint } from '../../../../../../../opensearch_dashboards_react/public';
 import { IContainer } from '../../../../containers';
@@ -42,6 +42,7 @@ export async function openAddPanelFlyout(options: {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
+  application: ApplicationStart;
 }) {
   const {
     embeddable,
@@ -50,6 +51,7 @@ export async function openAddPanelFlyout(options: {
     overlays,
     notifications,
     SavedObjectFinder,
+    application,
   } = options;
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
@@ -64,6 +66,7 @@ export async function openAddPanelFlyout(options: {
         getAllFactories={getAllFactories}
         notifications={notifications}
         SavedObjectFinder={SavedObjectFinder}
+        application={application}
       />
     ),
     {

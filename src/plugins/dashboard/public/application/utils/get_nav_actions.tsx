@@ -186,6 +186,7 @@ export const getNavActions = (
                 services.data,
                 services.application
               ),
+              application: services.application,
             });
           },
         });
@@ -206,6 +207,7 @@ export const getNavActions = (
             services.data,
             services.application
           ),
+          application: services.application,
         });
       }
     };

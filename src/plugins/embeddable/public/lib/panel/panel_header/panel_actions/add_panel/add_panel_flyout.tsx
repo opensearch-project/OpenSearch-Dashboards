@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { ReactElement } from 'react';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup, ApplicationStart } from 'src/core/public';
 
 import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiText } from '@elastic/eui';
 
@@ -48,6 +48,7 @@ interface Props {
   getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
+  application: ApplicationStart;
 }
 
 interface State {
@@ -157,7 +158,11 @@ export class AddPanelFlyout extends React.Component<Props, State> {
           defaultMessage: 'No matching objects found.',
         })}
       >
-        <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+        <SavedObjectFinderCreateNew
+          menuItems={this.getCreateMenuItems()}
+          application={this.props.application}
+          onClose={this.props.onClose}
+        />
       </SavedObjectFinder>
     );
 
