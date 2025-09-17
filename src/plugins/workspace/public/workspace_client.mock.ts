@@ -31,6 +31,7 @@ export const createMockWorkspaceClient = (): jest.Mocked<
   ui: jest.fn(),
   enterWorkspace: jest.fn(),
   init: jest.fn(),
+  batchDelete: jest.fn(),
 });
 
 export const workspaceClientMock = createMockWorkspaceClient();

@@ -287,3 +287,87 @@ describe('#WorkspaceClient', () => {
     expect(workspaceMock.workspaceList$.getValue()).toEqual([]);
   });
 });
+
+describe('WorkspaceClient.batchDelete', () => {
+  it('should delete all workspaces successfully', async () => {
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    httpSetupMock.fetch
+      .mockResolvedValueOnce({ success: true })
+      .mockResolvedValueOnce({ success: true });
+
+    const result = await workspaceClient.batchDelete(['foo', 'bar']);
+
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/foo', {
+      method: 'DELETE',
+    });
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/bar', {
+      method: 'DELETE',
+    });
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+      method: 'POST',
+      body: JSON.stringify({
+        perPage: 999,
+      }),
+    });
+    expect(result).toEqual({ success: 2, fail: 0, failedIds: [] });
+  });
+
+  it('should handle partial failures', async () => {
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    httpSetupMock.fetch
+      .mockResolvedValueOnce({ success: true })
+      .mockResolvedValueOnce({ success: false });
+
+    const result = await workspaceClient.batchDelete(['foo', 'bar']);
+
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/foo', {
+      method: 'DELETE',
+    });
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/bar', {
+      method: 'DELETE',
+    });
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+      method: 'POST',
+      body: JSON.stringify({
+        perPage: 999,
+      }),
+    });
+    expect(result).toEqual({ success: 1, fail: 1, failedIds: ['bar'] });
+  });
+
+  it('should handle all failures', async () => {
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    httpSetupMock.fetch
+      .mockResolvedValueOnce({ success: false })
+      .mockResolvedValueOnce({ success: false });
+
+    const result = await workspaceClient.batchDelete(['foo', 'bar']);
+
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/foo', {
+      method: 'DELETE',
+    });
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/bar', {
+      method: 'DELETE',
+    });
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+      method: 'POST',
+      body: JSON.stringify({
+        perPage: 999,
+      }),
+    });
+    expect(result).toEqual({ success: 0, fail: 2, failedIds: ['foo', 'bar'] });
+  });
+
+  it('should handle empty input', async () => {
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    const result = await workspaceClient.batchDelete([]);
+
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+      method: 'POST',
+      body: JSON.stringify({
+        perPage: 999,
+      }),
+    });
+    expect(result).toEqual({ success: 0, fail: 0, failedIds: [] });
+  });
+});
