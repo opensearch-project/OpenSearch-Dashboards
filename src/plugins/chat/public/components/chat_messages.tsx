@@ -45,6 +45,7 @@ interface ChatMessagesProps {
   layoutMode: ChatLayoutMode;
   timeline: TimelineItem[];
   currentStreamingMessage: string;
+  isStreaming: boolean;
   contextManager: ChatContextManager;
 }
 
@@ -52,6 +53,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   layoutMode,
   timeline,
   currentStreamingMessage,
+  isStreaming,
   contextManager,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -116,6 +118,20 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             }
             return null;
           })}
+
+        {/* Loading indicator - waiting for agent response */}
+        {isStreaming && currentStreamingMessage === '' && (
+          <div className="chatMessages__loadingIndicator">
+            <div className="messageRow">
+              <div className="messageRow__icon">
+                <EuiIcon type="discuss" size="m" color="success" />
+              </div>
+              <div className="messageRow__content">
+                <div className="chatMessages__thinkingText">Thinking...</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Streaming Message */}
         {currentStreamingMessage && (

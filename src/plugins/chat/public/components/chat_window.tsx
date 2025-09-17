@@ -301,6 +301,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         layoutMode={layoutMode}
         timeline={timeline}
         currentStreamingMessage={currentStreamingMessage}
+        isStreaming={isStreaming}
         contextManager={contextManager}
       />
 
