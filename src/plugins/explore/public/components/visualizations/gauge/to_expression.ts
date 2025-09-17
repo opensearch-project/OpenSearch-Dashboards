@@ -12,6 +12,8 @@ import {
   mergeThresholdsWithBase,
 } from './gauge_chart_utils';
 import { calculateValue } from '../utils/calculation';
+import { getColors } from '../theme/default_colors';
+import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
@@ -21,6 +23,7 @@ export const createGauge = (
   styles: Partial<GaugeChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ) => {
+  const colors = getColors();
   // Only contains one and the only one value
   const valueColumn = axisColumnMappings?.[AxisRole.Value];
   const numericField = valueColumn?.column;
@@ -29,10 +32,7 @@ export const createGauge = (
   let numericalValues: number[] = [];
   let maxNumber: number = 0;
   if (numericField) {
-    numericalValues = transformedData
-      .map((d) => Number(d[numericField]))
-      .filter((n) => !Number.isNaN(n));
-
+    numericalValues = transformedData.map((d) => d[numericField]);
     maxNumber = Math.max(...numericalValues);
   }
 
@@ -40,7 +40,14 @@ export const createGauge = (
 
   const calculatedValue = calculateValue(numericalValues, styleOptions.valueCalculation);
 
+  const isValidNumber =
+    calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
+
   const targetValue = calculatedValue || 0;
+
+  const selectedUnit = getUnitById(styleOptions?.unitId);
+
+  const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
   const minBase = styleOptions?.min || 0;
   const maxBase = styleOptions?.max || maxNumber;
@@ -48,8 +55,7 @@ export const createGauge = (
   const mergedThresholds = mergeThresholdsWithBase(
     minBase,
     maxBase,
-    // TODO: update to use the color from color palette
-    styleOptions.baseColor || '#9EE9FA',
+    styleOptions.baseColor || colors.statusBlue,
     styleOptions.thresholds
   );
 
@@ -58,7 +64,7 @@ export const createGauge = (
 
   // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color
   const fillColor =
-    !targetThreshold || minBase > targetValue || minBase >= maxBase
+    !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
       ? '#cbd1d6'
       : targetThreshold.color;
 
@@ -68,7 +74,7 @@ export const createGauge = (
     { name: 'centerX', expr: 'width/2' },
     { name: 'centerY', expr: 'height/2 + outerRadius/4' },
     { name: 'radiusRef', expr: 'min(width/2, height/2)' },
-    { name: 'outerRadius', expr: 'radiusRef * 0.9' },
+    { name: 'outerRadius', expr: 'radiusRef * 1.1' },
     { name: 'innerRadius', expr: 'outerRadius - outerRadius * 0.25' },
 
     { name: 'backgroundColor', value: '#cbd1d6' },
@@ -76,13 +82,10 @@ export const createGauge = (
       name: 'fillColor',
       value: fillColor,
     },
-    {
-      name: 'gapColor',
-      value: '#ffffffff',
-    },
-    { name: 'fontColor', value: '#666161ff' },
+    { name: 'fontColor', value: colors.text },
 
     { name: 'mainValue', value: targetValue },
+    { name: 'displayValue', value: displayValue },
     {
       name: 'usedValue',
       expr: 'min(max(minValue, mainValue), maxValue)',
@@ -131,18 +134,6 @@ export const createGauge = (
         type: 'arc',
         y: { expr: 'centerY' },
         x: { expr: 'centerX' },
-        radius: { expr: 'innerRadius' },
-        radius2: { expr: 'innerRadius*0.98' },
-        theta: { expr: 'theta_single_arc' },
-        theta2: { expr: 'theta2_single_arc' },
-        fill: { expr: 'gapColor' },
-      },
-    },
-    {
-      mark: {
-        type: 'arc',
-        y: { expr: 'centerY' },
-        x: { expr: 'centerX' },
         radius: { expr: 'outerRadius' },
         radius2: { expr: 'innerRadius' },
         theta: { expr: 'theta_single_arc' },
@@ -162,11 +153,15 @@ export const createGauge = (
         align: 'center',
         y: { expr: 'centerY' },
         x: { expr: 'centerX' },
-        dy: { expr: '-fontFactor*30' },
-        fontSize: { expr: 'fontFactor * 30' },
+        dy: { expr: `-fontFactor*30 * ${selectedUnit?.fontScale ?? 1}` },
+        fontSize: { expr: `fontFactor * 25 * ${selectedUnit?.fontScale ?? 1}` },
         fill: { expr: 'fillColor' },
       },
-      encoding: { text: { value: { expr: "format(mainValue, '.1f')" } } },
+      encoding: {
+        text: {
+          value: { expr: 'displayValue' },
+        },
+      },
     },
     ...titleLayer,
   ];

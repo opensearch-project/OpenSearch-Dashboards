@@ -34,7 +34,7 @@ describe('createPieConfig', () => {
     expect(defaults.legendPosition).toBe(Positions.RIGHT);
     // Verify exclusive style
     expect(defaults.exclusive.donut).toBe(true);
-    expect(defaults.exclusive.showValues).toBe(true);
+    expect(defaults.exclusive.showValues).toBe(false);
     expect(defaults.exclusive.showLabels).toBe(false);
     expect(defaults.exclusive.truncate).toBe(100);
 
