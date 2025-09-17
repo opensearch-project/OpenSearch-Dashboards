@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OpenSearchPPLParser } from '@osd/antlr-grammar';
+import { SimplifiedOpenSearchPPLParser as OpenSearchPPLParser } from '@osd/antlr-grammar';
 import { monaco } from '@osd/monaco';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 
@@ -29,11 +29,11 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
   // OPERATORS - Highest priority
   [
     OpenSearchPPLParser.PIPE,
-    { importance: '0', type: SuggestionItemDetailsTags.Operator, isFunction: false },
+    { importance: '1', type: SuggestionItemDetailsTags.Operator, isFunction: false },
   ],
   [
     OpenSearchPPLParser.EQUAL,
-    { importance: '1', type: SuggestionItemDetailsTags.Operator, isFunction: false },
+    { importance: '0', type: SuggestionItemDetailsTags.Operator, isFunction: false },
   ],
   [
     OpenSearchPPLParser.COMMA,
@@ -205,6 +205,86 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
     OpenSearchPPLParser.PATTERNS,
     { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
   ],
+  [
+    OpenSearchPPLParser.EXPLAIN,
+    { importance: '21', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.FIELD,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.TABLE,
+    { importance: '2', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.EVENTSTATS,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.BIN,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.SPATH,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.REGEX,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.REX,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.SED,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.PUNCT,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.PATTERN,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.NEW_FIELD,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.FILLNULL,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.FLATTEN,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.TRENDLINE,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.TIMECHART,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.APPENDCOL,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.EXPAND,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.SIMPLE_PATTERN,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.BRAIN,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
 
   // COMMAND ASSIST KEYWORDS
   [
@@ -233,6 +313,50 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
   ],
   [
     OpenSearchPPLParser.DATASOURCES,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.USING,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.WITH,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.SIMPLE,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.STANDARD,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.COST,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.EXTENDED,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.OVERRIDE,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.OVERWRITE,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.ASC,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.A,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.D,
     { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
   ],
 
@@ -271,7 +395,7 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
   ],
   [
     OpenSearchPPLParser.IN,
-    { importance: '5', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+    { importance: '5', type: SuggestionItemDetailsTags.Operator, isFunction: false },
   ],
   [
     OpenSearchPPLParser.LIKE,
@@ -526,25 +650,7 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
     },
   ],
   [
-    OpenSearchPPLParser.EARLIEST_TIME,
-    {
-      importance: '61',
-      type: SuggestionItemDetailsTags.AggregateFunction,
-      isFunction: true,
-      optionalParam: false,
-    },
-  ],
-  [
     OpenSearchPPLParser.LATEST,
-    {
-      importance: '61',
-      type: SuggestionItemDetailsTags.AggregateFunction,
-      isFunction: true,
-      optionalParam: false,
-    },
-  ],
-  [
-    OpenSearchPPLParser.LATEST_TIME,
     {
       importance: '61',
       type: SuggestionItemDetailsTags.AggregateFunction,
@@ -664,15 +770,6 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
   ],
   [
     OpenSearchPPLParser.LOG,
-    {
-      importance: '7',
-      type: SuggestionItemDetailsTags.Function,
-      isFunction: true,
-      optionalParam: false,
-    },
-  ],
-  [
-    OpenSearchPPLParser.LOG2,
     {
       importance: '7',
       type: SuggestionItemDetailsTags.Function,
@@ -1404,6 +1501,28 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
     },
   ],
 
+  // SPAN KEYWORDS
+  [
+    OpenSearchPPLParser.BINS,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.MINSPAN,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.START,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.END,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.ALIGNTIME,
+    { importance: '4', type: SuggestionItemDetailsTags.Keyword, isFunction: false },
+  ],
+
   // DATA TYPES
   [
     OpenSearchPPLParser.INT,
@@ -1449,6 +1568,92 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
   ],
   [
     OpenSearchPPLParser.NUM,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+
+  // TIME UNITS
+  [
+    OpenSearchPPLParser.MS,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.S,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.M,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.H,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.W,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.Q,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.Y,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.SEC,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.SECS,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.SECONDS,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.MINS,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.MINUTES,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.HR,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.HRS,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.HOURS,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.DAYS,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.MON,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.MONTHS,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.US,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.CS,
+    { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.DS,
     { importance: '95', type: SuggestionItemDetailsTags.Type, isFunction: false },
   ],
 
@@ -1547,12 +1752,92 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
     OpenSearchPPLParser.ANOMALY_SCORE_THRESHOLD,
     { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
   ],
+  [
+    OpenSearchPPLParser.VARIABLE_COUNT_THRESHOLD,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.FREQUENCY_THRESHOLD_PERCENTAGE,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.METHOD,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.MAX_SAMPLE_COUNT,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.MAX_MATCH,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.OFFSET_FIELD,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.BUFFER_LIMIT,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.LABEL,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.AGGREGATION,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.BUCKET_NULLABLE,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.APPEND,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.COUNTFIELD,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.SHOWCOUNT,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.LIMIT,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.USEOTHER,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.INPUT,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.OUTPUT,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.PATH,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.SMA,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
+  [
+    OpenSearchPPLParser.WMA,
+    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+  ],
 ]);
 
 export const SUPPORTED_NON_LITERAL_KEYWORDS = new Map<
   number,
   { insertText: string; label: string; sortText: string }
->([[OpenSearchPPLParser.SQUOTA_STRING, { insertText: `'$1'`, label: "''", sortText: '0' }]]);
+>([[OpenSearchPPLParser.SQUOTA_STRING, { insertText: `'$1'`, label: "''", sortText: '97' }]]);
 
 // The icons for CompletionItemKind aren't configurable
 // Therefore we are mapping them into different CompletionItemKind for them to have different icons

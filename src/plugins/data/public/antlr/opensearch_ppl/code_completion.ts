@@ -10,6 +10,7 @@
  */
 
 import { monaco } from '@osd/monaco';
+import { SimplifiedOpenSearchPPLLexer } from '@osd/antlr-grammar';
 import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
 import {
   fetchColumnValues,
@@ -30,7 +31,6 @@ import {
   KEYWORD_ITEM_KIND_MAP,
 } from './constants';
 import { Documentation } from './ppl_documentation';
-
 // Centralized function to generate appropriate insertion text based on context
 function getInsertText(
   text: string,
@@ -263,6 +263,23 @@ export const getSimplifiedPPLSuggestions = async ({
         type: monaco.languages.CompletionItemKind.Keyword,
         detail: SuggestionItemDetailsTags.Keyword,
       });
+    }
+
+    // Handle single quote suggestions when suggestSingleQuotes flag is set
+    if (suggestions.suggestSingleQuotes) {
+      const singleQuoteDetails = SUPPORTED_NON_LITERAL_KEYWORDS.get(
+        SimplifiedOpenSearchPPLLexer.SQUOTA_STRING
+      );
+      if (singleQuoteDetails) {
+        finalSuggestions.push({
+          text: singleQuoteDetails.label,
+          insertText: singleQuoteDetails.insertText,
+          type: monaco.languages.CompletionItemKind.Keyword,
+          detail: SuggestionItemDetailsTags.Keyword,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+          sortText: singleQuoteDetails.sortText,
+        });
+      }
     }
 
     // Fill in PPL keywords
