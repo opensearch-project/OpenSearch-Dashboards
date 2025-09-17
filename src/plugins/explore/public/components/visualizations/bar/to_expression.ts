@@ -86,7 +86,7 @@ export const createBarSpec = (
       [valueAxis]: {
         ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
-      color: colorEncodingLayer,
+      color: styleOptions?.thresholdOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -195,7 +195,7 @@ export const createTimeBarChart = (
       y: {
         ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
-      color: colorEncodingLayer,
+      color: styleOptions?.thresholdOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -655,7 +655,7 @@ export const createNumericalHistogramBarChart = (
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
-      color: colorEncodingLayer,
+      color: styleOptions?.thresholdOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -745,7 +745,7 @@ export const createSingleBarChart = (
         type: 'quantitative',
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
-      color: colorEncodingLayer,
+      color: styleOptions?.thresholdOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {

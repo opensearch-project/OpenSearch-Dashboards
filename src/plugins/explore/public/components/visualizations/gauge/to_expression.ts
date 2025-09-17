@@ -12,7 +12,7 @@ import {
   generateRanges,
   mergeThresholdsWithBase,
 } from '../style_panel/threshold/threshold_utils';
-import { getColors } from '../theme/default_colors';
+import { getColors, DEFAULTGREY } from '../theme/default_colors';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createGauge = (
@@ -66,7 +66,7 @@ export const createGauge = (
   // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color
   const fillColor =
     !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
-      ? '#cbd1d6'
+      ? DEFAULTGREY
       : targetThreshold.color;
 
   const ranges = generateRanges(mergedThresholds, maxBase);
@@ -156,7 +156,11 @@ export const createGauge = (
         x: { expr: 'centerX' },
         dy: { expr: `-fontFactor*30 * ${selectedUnit?.fontScale ?? 1}` },
         fontSize: { expr: `fontFactor * 25 * ${selectedUnit?.fontScale ?? 1}` },
-        fill: { expr: 'fillColor' },
+        fill: {
+          expr: `${
+            styleOptions?.thresholdOptions?.useThresholdColor ?? false
+          } ? fontColor : fillColor`,
+        },
       },
       encoding: {
         text: {

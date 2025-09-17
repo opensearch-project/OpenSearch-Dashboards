@@ -14,7 +14,7 @@ import {
   VisColumn,
   VisFieldType,
   VEGASCHEMA,
-  ThresholdLineStyle,
+  ThresholdMode,
   Positions,
   AxisRole,
   AxisColumnMappings,
@@ -84,7 +84,7 @@ describe('Area Chart to_expression', () => {
     thresholdOptions: {
       baseColor: '#00BD6B',
       thresholds: [],
-      thresholdStyle: ThresholdLineStyle.Solid,
+      thresholdStyle: ThresholdMode.Solid,
     },
     titleOptions: {
       show: true,
@@ -223,7 +223,7 @@ describe('Area Chart to_expression', () => {
         thresholdOptions: {
           baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#E7664C' }],
-          thresholdStyle: ThresholdLineStyle.Solid,
+          thresholdStyle: ThresholdMode.Solid,
         },
       };
 
@@ -508,7 +508,7 @@ describe('Area Chart to_expression', () => {
         thresholdOptions: {
           baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#E7664C' }],
-          thresholdStyle: ThresholdLineStyle.Solid,
+          thresholdStyle: ThresholdMode.Solid,
         },
       };
 
@@ -789,7 +789,7 @@ describe('Area Chart to_expression', () => {
         thresholdOptions: {
           baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#E7664C' }],
-          thresholdStyle: ThresholdLineStyle.Solid,
+          thresholdStyle: ThresholdMode.Solid,
         },
       };
 

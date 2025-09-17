@@ -91,8 +91,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
-              customRanges={styleOptions.customRanges}
-              colorSchema={styleOptions.colorSchema}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -157,16 +155,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               })}
               initialIsOpen={true}
             >
-              <EuiFormRow>
-                <EuiSwitch
-                  compressed
-                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
-                    defaultMessage: 'Use threshold colors',
-                  })}
-                  checked={styleOptions.useThresholdColor}
-                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
-                />
-              </EuiFormRow>
               <PercentageSelector
                 percentageColor={
                   styleOptions.percentageColor ?? defaultMetricChartStyles.percentageColor

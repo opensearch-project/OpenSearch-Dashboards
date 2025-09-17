@@ -19,7 +19,6 @@ describe('HeatmapExclusiveVisOptions', () => {
       scaleToDataBounds: false,
       percentageMode: false,
       maxNumberOfColors: 4,
-      useThresholdColor: false,
       label: {
         type: AggregationType.SUM,
         show: false,
@@ -30,6 +29,7 @@ describe('HeatmapExclusiveVisOptions', () => {
     },
     shouldShowType: true,
     onChange: jest.fn(),
+    useThresholdColor: false,
   };
 
   beforeEach(() => {
@@ -96,8 +96,8 @@ describe('HeatmapExclusiveVisOptions', () => {
       ...defaultProps,
       styles: {
         ...defaultProps.styles,
-        useThresholdColor: true,
       },
+      useThresholdColor: true,
     };
 
     render(<HeatmapExclusiveVisOptions {...props} />);
@@ -110,8 +110,8 @@ describe('HeatmapExclusiveVisOptions', () => {
       ...defaultProps,
       styles: {
         ...defaultProps.styles,
-        useThresholdColor: true,
       },
+      useThresholdColor: true,
     };
 
     render(<HeatmapExclusiveVisOptions {...props} />);
@@ -158,7 +158,6 @@ describe('HeatmapExclusiveVisOptions', () => {
 
 describe('HeatmapLabelVisOptions', () => {
   const defaultProps = {
-    shouldShowType: true,
     styles: {
       type: AggregationType.SUM,
       show: false,
@@ -191,22 +190,6 @@ describe('HeatmapLabelVisOptions', () => {
       ...defaultProps.styles,
       show: true,
     });
-  });
-
-  it('should show AggregationType when shouldShowType is true', () => {
-    const props = {
-      shouldShowType: true,
-      styles: {
-        type: AggregationType.SUM,
-        show: true,
-        rotate: false,
-        overwriteColor: false,
-        color: 'black',
-      },
-      onChange: jest.fn(),
-    };
-    render(<HeatmapLabelVisOptions {...props} />);
-    expect(screen.getByText('Type')).toBeInTheDocument();
   });
 
   it('toggles rotate label and calls onChange', () => {
@@ -270,39 +253,5 @@ describe('HeatmapLabelVisOptions', () => {
         color: '#ff0000',
       });
     });
-  });
-
-  it('changes label type and calls onChange', () => {
-    const props = {
-      ...defaultProps,
-      styles: {
-        ...defaultProps.styles,
-        show: true,
-        type: AggregationType.SUM,
-      },
-    };
-
-    render(<HeatmapLabelVisOptions {...props} />);
-    const typeSelect = screen.getByRole('combobox');
-    fireEvent.change(typeSelect, { target: { value: AggregationType.MEAN } });
-
-    expect(props.onChange).toHaveBeenCalledWith({
-      ...props.styles,
-      type: AggregationType.MEAN,
-    });
-  });
-
-  it('does not show label type when shouldShowType is false', () => {
-    const props = {
-      ...defaultProps,
-      shouldShowType: false,
-      styles: {
-        ...defaultProps.styles,
-        show: true,
-      },
-    };
-
-    render(<HeatmapLabelVisOptions {...props} />);
-    expect(screen.queryByText('Type')).not.toBeInTheDocument();
   });
 });

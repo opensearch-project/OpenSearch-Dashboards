@@ -4,7 +4,7 @@
  */
 
 import { createThresholdLayer } from './utils';
-import { ThresholdLineStyle } from '../../types';
+import { ThresholdMode } from '../../types';
 
 describe('createThresholdLayer', () => {
   const mockThresholds = [
@@ -12,7 +12,7 @@ describe('createThresholdLayer', () => {
       id: '1',
       color: '#54B399',
       show: true,
-      style: ThresholdLineStyle.Full,
+      style: ThresholdMode.Full,
       value: 42,
       width: 2,
       name: 'Test Threshold',
@@ -21,7 +21,7 @@ describe('createThresholdLayer', () => {
       id: '2',
       color: '#DB0000',
       show: false,
-      style: ThresholdLineStyle.Dashed,
+      style: ThresholdMode.Dashed,
       value: 100,
       width: 1,
       name: 'Hidden Threshold',

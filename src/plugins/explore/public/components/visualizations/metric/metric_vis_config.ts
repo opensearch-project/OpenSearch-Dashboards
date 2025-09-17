@@ -26,11 +26,20 @@ export interface MetricChartStyleControls {
   fontSize?: number;
   titleSize?: number;
   percentageSize?: number;
-  useThresholdColor: boolean;
+  /**
+   * @deprecated - use useThresholdColor instead
+   */
+  useColor?: boolean;
   showPercentage?: boolean;
+  /**
+   * @deprecated - use global thresholdOptions
+   */
   colorSchema?: ColorSchemas;
   valueCalculation?: CalculationMethod;
   percentageColor?: PercentageColor;
+  /**
+   * @deprecated - use global thresholdOptions instead
+   */
   customRanges?: RangeValue[];
   unitId?: string;
   thresholdOptions?: ThresholdOptions;
@@ -47,14 +56,17 @@ export type DefaultMetricChartStyleControls = MetricChartStyleControls &
 export const defaultMetricChartStyles: DefaultMetricChartStyleControls = {
   showTitle: true,
   title: '',
-  useThresholdColor: false,
   showPercentage: false,
   percentageColor: 'standard',
   valueCalculation: 'last',
+  // useColor: true,
+  colorSchema: ColorSchemas.GREENS,
+  // customRanges: [{ min: 10, max: 100 }],
   // add default range for metric
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
+    useThresholdColor: false,
   },
 };
 

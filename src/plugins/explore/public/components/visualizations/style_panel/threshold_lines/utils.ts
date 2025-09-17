@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ThresholdLineStyle, ThresholdLines, ThresholdOptions } from '../../types';
+import { ThresholdMode, ThresholdLines, ThresholdOptions } from '../../types';
 import { transformThresholdLinesToThreshold } from '../../style_panel/threshold/threshold_utils';
 
 /**
@@ -11,13 +11,13 @@ import { transformThresholdLinesToThreshold } from '../../style_panel/threshold/
  * @param style The line style ('dashed', 'dot-dashed', or 'full')
  * @returns The stroke dash array or undefined for solid lines
  */
-export const getStrokeDash = (style: ThresholdLineStyle): number[] | undefined => {
+export const getStrokeDash = (style: ThresholdMode): number[] | undefined => {
   switch (style) {
-    case ThresholdLineStyle.Dashed:
+    case ThresholdMode.Dashed:
       return [5, 5];
-    case ThresholdLineStyle.DotDashed:
+    case ThresholdMode.DotDashed:
       return [5, 5, 1, 5];
-    case ThresholdLineStyle.Solid:
+    case ThresholdMode.Solid:
     default:
       return undefined;
   }
@@ -36,17 +36,10 @@ export const createThresholdLayer = (
   thresholdLines?: ThresholdLines,
   barEncodingDefault?: 'x' | 'y'
 ): any => {
-  const activeThresholds =
-    thresholdLines && !thresholdOptions?.thresholds
-      ? transformThresholdLinesToThreshold(thresholdLines)
-      : thresholdOptions?.thresholds ?? [];
+  const activeThresholds = thresholdOptions?.thresholds ?? [];
+  const activeThresholdStyles = thresholdOptions?.thresholdStyle ?? ThresholdMode.Off;
 
-  const activeThresholdStyles =
-    thresholdLines && thresholdLines?.length > 0 && !thresholdOptions?.thresholdStyle
-      ? thresholdLines[0].style
-      : thresholdOptions?.thresholdStyle ?? ThresholdLineStyle.Off;
-
-  if (activeThresholdStyles === ThresholdLineStyle.Off || activeThresholds.length === 0) {
+  if (activeThresholdStyles === ThresholdMode.Off || activeThresholds.length === 0) {
     return null;
   }
 

@@ -5,7 +5,8 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { DebouncedTruncateGaugeBaseField } from '../utils';
+import { EuiFormRow } from '@elastic/eui';
+import { DebouncedFieldNumber } from '../utils';
 
 export interface MinMaxControlsProps {
   min?: number;
@@ -17,23 +18,37 @@ export interface MinMaxControlsProps {
 export const MinMaxControls = ({ min, max, onMaxChange, onMinChange }: MinMaxControlsProps) => {
   return (
     <>
-      <DebouncedTruncateGaugeBaseField
+      <EuiFormRow
         label={i18n.translate('explore.stylePanel.threshold.base.min', {
           defaultMessage: 'Min',
         })}
-        value={min}
-        onChange={(value) => onMinChange(value)}
-        testId={'thresholdMinBase'}
-      />
+        helpText={i18n.translate('explore.stylePanel.threshold.base.min.help', {
+          defaultMessage: 'Leave empty to calculate based on all values',
+        })}
+      >
+        <DebouncedFieldNumber
+          value={min}
+          onChange={(value) => onMinChange(value)}
+          placeholder="auto"
+          data-test-subj="thresholdMinBase"
+        />
+      </EuiFormRow>
 
-      <DebouncedTruncateGaugeBaseField
+      <EuiFormRow
         label={i18n.translate('explore.stylePanel.threshold.base.max', {
           defaultMessage: 'Max',
         })}
-        value={max}
-        onChange={(value) => onMaxChange(value)}
-        testId={'thresholdMaxBase'}
-      />
+        helpText={i18n.translate('explore.stylePanel.threshold.base.max.help', {
+          defaultMessage: 'Leave empty to calculate based on all values',
+        })}
+      >
+        <DebouncedFieldNumber
+          value={max}
+          onChange={(value) => onMaxChange(value)}
+          placeholder="auto"
+          data-test-subj="thresholdMaxBase"
+        />
+      </EuiFormRow>
     </>
   );
 };

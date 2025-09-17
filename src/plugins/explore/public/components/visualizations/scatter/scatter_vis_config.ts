@@ -14,7 +14,7 @@ import {
   TooltipOptions,
   VisFieldType,
   TitleOptions,
-  ThresholdLineStyle,
+  ThresholdMode,
   ThresholdOptions,
 } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
@@ -59,7 +59,8 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
-    thresholdStyle: ThresholdLineStyle.Solid,
+    thresholdStyle: ThresholdMode.Solid,
+    useThresholdColor: false,
   },
   // Standard axes
   standardAxes: [

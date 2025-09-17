@@ -155,8 +155,8 @@ export const Colors: Record<ColorSchemas, any> = {
   },
 };
 
-export const transformToThreshold = (ranges: RangeValue[], schema: ColorSchemas) => {
-  if (ranges.length === 0) {
+export const transformToThreshold = (schema: ColorSchemas, ranges?: RangeValue[]) => {
+  if (!ranges || ranges.length === 0) {
     return [];
   }
   // if min is undefined and max > min, then discard this range

@@ -8,26 +8,13 @@ import {
   defaultMetricChartStyles,
   MetricChartStyleControls,
 } from './metric_vis_config';
-import {
-  VisColumn,
-  RangeValue,
-  ColorSchemas,
-  VEGASCHEMA,
-  AxisRole,
-  AxisColumnMappings,
-  Threshold,
-} from '../types';
+import { VisColumn, VEGASCHEMA, AxisRole, AxisColumnMappings, Threshold } from '../types';
 import { getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
-import {
-  mergeThresholdsWithBase,
-  locateThreshold,
-  Colors,
-  transformToThreshold,
-} from '../style_panel/threshold/threshold_utils';
+import { mergeThresholdsWithBase, locateThreshold } from '../style_panel/threshold/threshold_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -75,15 +62,12 @@ export const createSingleMetric = (
 
   function targetFillColor(
     useThresholdColor: boolean,
-    ranges?: RangeValue[],
-    colorschema?: ColorSchemas,
     threshold?: Threshold[],
     baseColor?: string
   ) {
-    const newThreshold =
-      ranges && colorschema && !threshold ? transformToThreshold(ranges, colorschema) : threshold;
+    const newThreshold = threshold ?? [];
 
-    const newBaseColor = !baseColor && colorschema ? Colors[colorschema].baseColor : baseColor;
+    const newBaseColor = baseColor ?? getColors().statusGreen;
 
     const mergedThresholds = mergeThresholdsWithBase(minBase, maxBase, newBaseColor, newThreshold);
 
@@ -91,21 +75,19 @@ export const createSingleMetric = (
     const targetThreshold = locateThreshold(mergedThresholds, targetValue);
 
     const fillColor =
-      !targetThreshold ||
-      minBase > targetValue ||
-      minBase >= maxBase ||
-      !isValidNumber ||
-      !useThresholdColor
-        ? colorPalette.text
-        : targetThreshold.color;
+      targetThreshold &&
+      minBase <= targetValue &&
+      minBase < maxBase &&
+      isValidNumber &&
+      useThresholdColor
+        ? targetThreshold.color
+        : colorPalette.text;
 
     return fillColor;
   }
 
   const fillColor = targetFillColor(
-    styles.useThresholdColor,
-    styles.customRanges,
-    styles.colorSchema,
+    styles?.thresholdOptions?.useThresholdColor ?? false,
     styles?.thresholdOptions?.thresholds,
     styles?.thresholdOptions?.baseColor
   );
@@ -161,13 +143,12 @@ export const createSingleMetric = (
       dy: valueFontSize
         ? -valueFontSize / 8
         : { expr: `-textSize* ${selectedUnit?.fontScale ?? 1}` },
-      color: colorPalette.text,
+      color: fillColor,
     },
     encoding: {
       text: {
         field: 'value',
         type: 'nominal',
-        color: fillColor,
       },
     },
   };

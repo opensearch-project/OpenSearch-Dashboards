@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import {
   CategoryAxis,
-  ThresholdLineStyle,
+  ThresholdMode,
   ValueAxis,
   Positions,
   VisFieldType,
@@ -268,7 +268,7 @@ describe('LineVisStyleControls', () => {
       thresholdOptions: {
         baseColor: '#00BD6B',
         thresholds: [],
-        thresholdStyle: ThresholdLineStyle.Solid,
+        thresholdStyle: ThresholdMode.Solid,
       },
       tooltipOptions: defaultTooltipOptions,
       categoryAxes: [defaultCategoryAxis],

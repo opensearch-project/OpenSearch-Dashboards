@@ -9,7 +9,7 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import {
   Positions,
   ThresholdLines,
-  ThresholdLineStyle,
+  ThresholdMode,
   TooltipOptions,
   VisFieldType,
   AxisRole,
@@ -39,7 +39,9 @@ export interface BarChartStyleControls {
   barBorderWidth: number;
   barBorderColor: string;
 
-  // Threshold and grid
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
   thresholdLines?: ThresholdLines;
   // Axes configuration
   standardAxes: StandardAxes[];
@@ -78,7 +80,8 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
-    thresholdStyle: ThresholdLineStyle.Solid,
+    thresholdStyle: ThresholdMode.Off,
+    useThresholdColor: false,
   },
 
   standardAxes: [

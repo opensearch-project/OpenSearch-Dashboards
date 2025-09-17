@@ -18,7 +18,7 @@ import {
   VisFieldType,
   VEGASCHEMA,
   AxisRole,
-  ThresholdLineStyle,
+  ThresholdMode,
   AggregationType,
 } from '../types';
 
@@ -230,7 +230,7 @@ describe('bar to_expression', () => {
         thresholdOptions: {
           baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
-          thresholdStyle: ThresholdLineStyle.Solid,
+          thresholdStyle: ThresholdMode.Solid,
         },
       };
 
@@ -395,7 +395,7 @@ describe('bar to_expression', () => {
         thresholdOptions: {
           baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
-          thresholdStyle: ThresholdLineStyle.Solid,
+          thresholdStyle: ThresholdMode.Solid,
         },
       };
 
@@ -552,7 +552,7 @@ describe('bar to_expression', () => {
         thresholdOptions: {
           baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
-          thresholdStyle: ThresholdLineStyle.Solid,
+          thresholdStyle: ThresholdMode.Solid,
         },
       };
 
@@ -756,7 +756,7 @@ describe('bar to_expression', () => {
         thresholdOptions: {
           baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
-          thresholdStyle: ThresholdLineStyle.Solid,
+          thresholdStyle: ThresholdMode.Solid,
         },
       };
 
@@ -964,7 +964,7 @@ describe('bar to_expression', () => {
         thresholdOptions: {
           baseColor: '#00BD6B',
           thresholds: [{ value: 15, color: '#00FF00' }],
-          thresholdStyle: ThresholdLineStyle.Solid,
+          thresholdStyle: ThresholdMode.Solid,
         },
       };
 

@@ -14,9 +14,8 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { defaultHeatmapChartStyles, HeatmapChartStyleControls } from './heatmap_vis_config';
-import { ColorSchemas, ScaleType, RangeValue, AggregationType } from '../types';
-import { getColorSchemas, getAggregationType } from '../utils/collections';
-import { CustomRange } from '../style_panel/custom_ranges';
+import { ColorSchemas, ScaleType } from '../types';
+import { getColorSchemas } from '../utils/collections';
 import { useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { DebouncedFieldNumber } from '../style_panel/utils';
@@ -24,11 +23,10 @@ import { DebouncedFieldNumber } from '../style_panel/utils';
 interface HeatmapVisOptionsProps {
   styles: HeatmapChartStyleControls['exclusive'];
   onChange: (styles: HeatmapChartStyleControls['exclusive']) => void;
-  shouldShowType: boolean;
+  useThresholdColor: boolean;
 }
 
 interface HeatmapLabelVisOptionsProps {
-  shouldShowType: boolean;
   styles: HeatmapChartStyleControls['exclusive']['label'];
   onChange: (styles: HeatmapChartStyleControls['exclusive']['label']) => void;
 }
@@ -36,7 +34,7 @@ interface HeatmapLabelVisOptionsProps {
 export const HeatmapExclusiveVisOptions = ({
   styles,
   onChange,
-  shouldShowType,
+  useThresholdColor,
 }: HeatmapVisOptionsProps) => {
   const updateExclusiveOption = <K extends keyof HeatmapChartStyleControls['exclusive']>(
     key: K,
@@ -130,7 +128,7 @@ export const HeatmapExclusiveVisOptions = ({
             defaultMessage: 'Scale to data bounds',
           })}
           checked={styles.scaleToDataBounds}
-          disabled={styles.percentageMode || styles.useThresholdColor}
+          disabled={styles.percentageMode || useThresholdColor}
           onChange={(e) => updateExclusiveOption('scaleToDataBounds', e.target.checked)}
         />
       </EuiFormRow>
@@ -142,7 +140,7 @@ export const HeatmapExclusiveVisOptions = ({
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.percentageMode', {
             defaultMessage: 'Percentage mode',
           })}
-          disabled={styles.useThresholdColor || styles.scaleToDataBounds}
+          disabled={useThresholdColor || styles.scaleToDataBounds}
           checked={styles.percentageMode}
           onChange={(e) => updateExclusiveOption('percentageMode', e.target.checked)}
         />
@@ -158,7 +156,7 @@ export const HeatmapExclusiveVisOptions = ({
           compressed
           min={2}
           max={20}
-          disabled={styles.useThresholdColor}
+          disabled={useThresholdColor}
           value={styles.maxNumberOfColors}
           defaultValue={defaultHeatmapChartStyles.exclusive.maxNumberOfColors}
           onChange={(value) =>
@@ -175,29 +173,12 @@ export const HeatmapExclusiveVisOptions = ({
         onChange={(changes) => {
           updateExclusiveOption('label', changes);
         }}
-        shouldShowType={shouldShowType}
       />
-
-      <EuiFormRow>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.stylePanel.heatmap.exclusive.useThresholdColor', {
-            defaultMessage: 'Use threshold colors',
-          })}
-          disabled={styles.percentageMode || styles.scaleToDataBounds}
-          checked={styles.useThresholdColor}
-          onChange={(e) => updateExclusiveOption('useThresholdColor', e.target.checked)}
-        />
-      </EuiFormRow>
     </StyleAccordion>
   );
 };
 
-export const HeatmapLabelVisOptions = ({
-  styles,
-  onChange,
-  shouldShowType,
-}: HeatmapLabelVisOptionsProps) => {
+export const HeatmapLabelVisOptions = ({ styles, onChange }: HeatmapLabelVisOptionsProps) => {
   const updateLabelOption = <K extends keyof HeatmapChartStyleControls['exclusive']['label']>(
     key: K,
     value: HeatmapChartStyleControls['exclusive']['label'][K]
@@ -214,7 +195,6 @@ export const HeatmapLabelVisOptions = ({
     300
   );
 
-  const labelType = useMemo(() => getAggregationType(), []);
   return (
     <>
       <EuiFormRow>
@@ -261,22 +241,6 @@ export const HeatmapLabelVisOptions = ({
               })}
             >
               <EuiColorPicker compressed onChange={setDebouncedColor} color={color} />
-            </EuiFormRow>
-          )}
-
-          {shouldShowType && (
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.heatmap.label.type', {
-                defaultMessage: 'Type',
-              })}
-            >
-              <EuiSelect
-                compressed
-                value={styles.type}
-                onChange={(e) => updateLabelOption('type', e.target.value as AggregationType)}
-                onMouseUp={(e) => e.stopPropagation()}
-                options={labelType}
-              />
             </EuiFormRow>
           )}
         </>

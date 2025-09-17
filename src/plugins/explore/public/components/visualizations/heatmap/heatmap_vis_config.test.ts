@@ -42,10 +42,10 @@ describe('createHeatmapeConfig', () => {
     expect(defaults.exclusive.colorScaleType).toBe(ScaleType.LINEAR);
     expect(defaults.exclusive.scaleToDataBounds).toBe(false);
     expect(defaults.exclusive.maxNumberOfColors).toBe(4);
-    expect(defaults.exclusive.useThresholdColor).toBe(false);
     expect(defaults.thresholdOptions).toMatchObject({
       baseColor: '#00BD6B',
       thresholds: [],
+      useThresholdColor: false,
     });
 
     // Verify label settings

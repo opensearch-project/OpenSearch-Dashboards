@@ -24,7 +24,11 @@ export interface GaugeChartStyleControls {
 export const defaultGaugeChartStyles: GaugeChartStyleControls = {
   showTitle: true,
   title: '',
-  thresholdOptions: { thresholds: [], baseColor: getColors().statusGreen },
+  thresholdOptions: {
+    thresholds: [],
+    baseColor: getColors().statusGreen,
+    useThresholdColor: false,
+  },
   valueCalculation: 'last',
 };
 

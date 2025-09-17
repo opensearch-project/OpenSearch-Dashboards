@@ -9,7 +9,7 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import {
   CategoryAxis,
   ThresholdLines,
-  ThresholdLineStyle,
+  ThresholdMode,
   ValueAxis,
   Positions,
   TooltipOptions,
@@ -30,7 +30,9 @@ export interface AreaChartStyleControls {
   areaOpacity?: number;
   tooltipOptions: TooltipOptions;
 
-  // Threshold and grid
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
   thresholdLines?: ThresholdLines;
 
   // Axes configuration
@@ -55,7 +57,7 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
-    thresholdStyle: ThresholdLineStyle.Solid,
+    thresholdStyle: ThresholdMode.Off,
   },
 
   // Category axes

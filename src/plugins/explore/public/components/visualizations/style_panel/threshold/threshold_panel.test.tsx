@@ -6,7 +6,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThresholdPanel, ThresholdPanelProps } from './threshold_panel';
-import { ColorSchemas, ThresholdLine } from '../../types';
 
 jest.mock('@osd/i18n', () => ({
   i18n: {
@@ -67,7 +66,7 @@ describe('ThresholdPanel', () => {
 
   it('renders threshold accordion', () => {
     render(<ThresholdPanel {...mockProps} />);
-    expect(screen.getByText('Threshold')).toBeInTheDocument();
+    expect(screen.getByText('Thresholds')).toBeInTheDocument();
   });
 
   it('renders threshold custom values component', () => {
@@ -92,53 +91,6 @@ describe('ThresholdPanel', () => {
     expect(mockProps.onChange).toHaveBeenCalledWith({
       thresholds: [],
       baseColor: '#00FF00',
-    });
-  });
-
-  it('should able to migrate old custom ranges to thresholds', () => {
-    const oldProps = {
-      customRanges: [
-        { min: 0, max: 50 },
-        { min: 50, max: 100 },
-      ],
-      colorSchema: ColorSchemas.BLUES,
-      thresholdsOptions: undefined,
-      onChange: jest.fn(),
-    };
-
-    render(<ThresholdPanel {...oldProps} />);
-    const migrateButton = screen.getByTestId('migrate-data');
-    fireEvent.click(migrateButton);
-
-    expect(oldProps.onChange).toHaveBeenCalledWith({
-      thresholds: [
-        { value: 0, color: '#c6dbef' },
-        { value: 50, color: '#9ecae1' },
-        { value: 100, color: '#6baed6' },
-      ],
-    });
-  });
-
-  it('should able to migrate old thresholdLines to thresholds', () => {
-    const oldProps = {
-      thresholdLines: [
-        { value: 0, color: '#c6dbef' },
-        { value: 50, color: '#9ecae1' },
-      ] as ThresholdLine[],
-      colorSchema: ColorSchemas.BLUES,
-      thresholdsOptions: undefined,
-      onChange: jest.fn(),
-    };
-
-    render(<ThresholdPanel {...oldProps} />);
-    const migrateButton = screen.getByTestId('migrate-data');
-    fireEvent.click(migrateButton);
-
-    expect(oldProps.onChange).toHaveBeenCalledWith({
-      thresholds: [
-        { value: 0, color: '#c6dbef' },
-        { value: 50, color: '#9ecae1' },
-      ],
     });
   });
 });

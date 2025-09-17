@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { ThresholdOptions } from './threshold';
-import { ThresholdLines, ThresholdLineStyle } from '../../types';
+import { ThresholdLines, ThresholdMode } from '../../types';
 
 export default {
   component: ThresholdOptions,
@@ -20,7 +20,7 @@ const mockThreshold = [
     id: '1',
     color: '#54B399',
     show: true,
-    style: ThresholdLineStyle.DotDashed,
+    style: ThresholdMode.DotDashed,
     value: 50,
     width: 1,
     name: 'Threshold 1',

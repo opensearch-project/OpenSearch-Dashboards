@@ -14,7 +14,7 @@ import {
 import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
 import { BarChartStyleControls } from './bar_vis_config';
 import { transformThresholdLinesToThreshold } from '../style_panel/threshold/threshold_utils';
-import { getColors } from '../theme/default_colors';
+import { getColors, DEFAULTGREY } from '../theme/default_colors';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -136,10 +136,8 @@ export const buildThresholdColorEncoding = (
   styleOptions: Partial<BarChartStyleControls>
 ) => {
   // support old thresholdLines config to be compatible with new thresholds
-  const activeThresholds =
-    styleOptions?.thresholdLines && !styleOptions?.thresholdOptions?.thresholds
-      ? transformThresholdLinesToThreshold(styleOptions?.thresholdLines)
-      : styleOptions?.thresholdOptions?.thresholds ?? [];
+
+  const activeThresholds = styleOptions?.thresholdOptions?.thresholds ?? [];
 
   const thresholdWithBase = [
     { value: 0, color: styleOptions?.thresholdOptions?.baseColor ?? getColors().statusGreen },
@@ -159,7 +157,7 @@ export const buildThresholdColorEncoding = (
         type: 'threshold',
         domain: colorDomain,
         // require one more color for values below the first threshold(base)
-        range: ['#d3d3d3', ...colorRange],
+        range: [DEFAULTGREY, ...colorRange],
       },
       legend: styleOptions.addLegend
         ? {
@@ -176,7 +174,7 @@ export const buildThresholdColorEncoding = (
     scale: {
       type: 'threshold',
       domain: colorDomain,
-      range: ['#d3d3d3', ...colorRange],
+      range: [DEFAULTGREY, ...colorRange],
     },
     legend: styleOptions.addLegend
       ? {

@@ -9,8 +9,12 @@ import {
   isValidMapping,
   getColumnMatchFromMapping,
   getColumnsByAxesMapping,
+  adaptLegacyData,
 } from './visualization_builder_utils';
-import { AxisRole, VisColumn, VisFieldType } from './types';
+import { AxisRole, VisColumn, VisFieldType, ThresholdMode, ColorSchemas } from './types';
+import { BehaviorSubject } from 'rxjs';
+import { ChartConfig } from './visualization_builder.types';
+import { ChartStyleControlMap } from './utils/use_visualization_types';
 
 jest.mock('./rule_repository', () => ({
   ALL_VISUALIZATION_RULES: [
@@ -21,6 +25,30 @@ jest.mock('./rule_repository', () => ({
       id: 'rule2',
     },
   ],
+}));
+
+jest.mock('./style_panel/threshold/threshold_utils', () => ({
+  Colors: {
+    ['blues']: {
+      baseColor: '#9ecae1',
+      colors: [
+        '#c6dbef',
+        '#9ecae1',
+        '#6baed6',
+        '#4292c6',
+        '#2171b5',
+        '#08519c',
+        '#08306b',
+        '#041f45',
+      ],
+    },
+  },
+  transformToThreshold: jest.fn(() => [{ value: 10, color: '#red' }]),
+  transformThresholdLinesToThreshold: jest.fn(() => [{ value: 20, color: '#blue' }]),
+}));
+
+jest.mock('./theme/default_colors', () => ({
+  getColors: jest.fn(() => ({ statusGreen: '#green' })),
 }));
 
 describe('visualization_container_utils', () => {
@@ -222,6 +250,136 @@ describe('visualization_container_utils', () => {
       expect(result.numericalColumns).toContainEqual(extendedColumns[3]); // average
       expect(result.categoricalColumns).toEqual([extendedColumns[1]]);
       expect(result.dateColumns).toEqual([]);
+    });
+  });
+
+  describe('adaptLegacyData', () => {
+    let visConfig$: BehaviorSubject<ChartConfig | undefined>;
+
+    beforeEach(() => {
+      visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
+    });
+
+    it('handles undefined config', () => {
+      adaptLegacyData(visConfig$, undefined);
+      expect(visConfig$.value).toBeUndefined();
+    });
+
+    it('transforms metric chart with colorSchema', () => {
+      const config: ChartConfig = {
+        type: 'metric',
+        styles: {
+          colorSchema: ColorSchemas.BLUES,
+          customRanges: [{ min: 0, max: 100 }],
+          useColor: true,
+        } as ChartStyleControlMap['metric'],
+      };
+
+      adaptLegacyData(visConfig$, config);
+
+      expect(visConfig$.value?.styles).toMatchObject({
+        thresholdOptions: {
+          baseColor: '#9ecae1',
+          thresholds: [{ value: 10, color: '#red' }],
+          useThresholdColor: true,
+        },
+      });
+    });
+
+    it('skips metric transformation when thresholdOptions exists', () => {
+      const config: ChartConfig = {
+        type: 'metric',
+        styles: {
+          colorSchema: ColorSchemas.BLUES,
+          thresholdOptions: { baseColor: '#fffff' },
+        } as ChartStyleControlMap['metric'],
+      };
+
+      adaptLegacyData(visConfig$, config);
+
+      expect(visConfig$.value?.styles).toMatchObject({
+        colorSchema: ColorSchemas.BLUES,
+        thresholdOptions: { baseColor: '#fffff' },
+      });
+    });
+
+    it('transforms heatmap chart with exclusive colorSchema', () => {
+      const config: ChartConfig = {
+        type: 'heatmap',
+        styles: {
+          exclusive: {
+            colorSchema: ColorSchemas.BLUES,
+            customRanges: [{ min: 0, max: 50 }],
+            useCustomRanges: true,
+          },
+        } as ChartStyleControlMap['heatmap'],
+      };
+
+      adaptLegacyData(visConfig$, config);
+
+      expect(visConfig$.value?.styles).toMatchObject({
+        thresholdOptions: {
+          baseColor: '#9ecae1',
+          thresholds: [{ value: 10, color: '#red' }],
+          useThresholdColor: true,
+        },
+      });
+    });
+
+    it('transforms bar chart with thresholdLines', () => {
+      const config: ChartConfig = {
+        type: 'bar',
+        styles: {
+          thresholdLines: [
+            {
+              value: 30,
+              color: '#red',
+              show: true,
+              style: ThresholdMode.Dashed,
+              width: 2,
+            },
+          ],
+        } as ChartStyleControlMap['bar'],
+      };
+
+      adaptLegacyData(visConfig$, config);
+
+      expect(visConfig$.value?.styles).toMatchObject({
+        thresholdOptions: {
+          thresholds: [{ value: 20, color: '#blue' }],
+          baseColor: '#green',
+          thresholdStyle: ThresholdMode.Dashed,
+          useThresholdColor: false,
+        },
+      });
+    });
+
+    it('uses Off style when thresholdLine show is false', () => {
+      const config: ChartConfig = {
+        type: 'line',
+        styles: {
+          thresholdLines: [
+            {
+              value: 30,
+              color: '#red',
+              show: false,
+              style: ThresholdMode.Solid,
+              width: 2,
+            },
+          ],
+        } as ChartStyleControlMap['line'],
+      };
+
+      adaptLegacyData(visConfig$, config);
+
+      expect(visConfig$.value?.styles).toMatchObject({
+        thresholdOptions: {
+          thresholds: [{ value: 20, color: '#blue' }],
+          baseColor: '#green',
+          thresholdStyle: ThresholdMode.Off,
+          useThresholdColor: false,
+        },
+      });
     });
   });
 });

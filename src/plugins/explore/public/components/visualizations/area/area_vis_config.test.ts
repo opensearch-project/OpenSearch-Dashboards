@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { createAreaConfig } from './area_vis_config';
-import { Positions, ThresholdLineStyle, AxisRole, VisFieldType } from '../types';
+import { Positions, ThresholdMode, AxisRole, VisFieldType } from '../types';
 import { AreaVisStyleControls } from './area_vis_options';
 
 describe('area_vis_config', () => {
@@ -27,7 +27,7 @@ describe('area_vis_config', () => {
       expect(defaultAreaChartStyles.thresholdOptions).toMatchObject({
         baseColor: '#00BD6B',
         thresholds: [],
-        thresholdStyle: ThresholdLineStyle.Solid,
+        thresholdStyle: ThresholdMode.Off,
       });
 
       // Check axes configuration

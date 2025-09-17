@@ -51,3 +51,5 @@ export const getColors = () => {
     ],
   };
 };
+
+export const DEFAULTGREY = '#d3d3d3';

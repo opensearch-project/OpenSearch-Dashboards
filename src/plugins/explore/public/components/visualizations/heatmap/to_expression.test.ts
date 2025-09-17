@@ -70,7 +70,6 @@ const baseStyles = {
     mode: 'all',
   } as TooltipOptions,
   exclusive: {
-    useThresholdColor: false,
     maxNumberOfColors: 7,
     colorSchema: 'blues',
     colorScaleType: 'linear',
@@ -156,6 +155,8 @@ describe('createHeatmapWithBin', () => {
       ...baseStyles,
       exclusive: {
         ...baseStyles.exclusive,
+      },
+      thresholdOptions: {
         useThresholdColor: true,
       },
     };
@@ -273,6 +274,8 @@ describe('createRegularHeatmap', () => {
       ...baseStyles,
       exclusive: {
         ...baseStyles.exclusive,
+      },
+      thresholdOptions: {
         useThresholdColor: true,
       },
     };

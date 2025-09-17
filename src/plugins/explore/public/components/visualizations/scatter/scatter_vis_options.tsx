@@ -40,6 +40,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
+  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
@@ -62,6 +63,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
               showThresholdStyle={true}
+              canUseThresholdColor={!hasColorMapping}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

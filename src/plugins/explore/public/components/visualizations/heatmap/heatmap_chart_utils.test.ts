@@ -2,18 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  createLabelLayer,
-  getDataBound,
-  addTransform,
-  setRange,
-  enhanceStyle,
-} from './heatmap_chart_utils';
-import * as utils from './heatmap_chart_utils';
+import { createLabelLayer, getDataBound, addTransform, enhanceStyle } from './heatmap_chart_utils';
 import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
-
+import { DEFAULTGREY } from '../theme/default_colors';
 import { defaultHeatmapChartStyles, HeatmapLabels } from './heatmap_vis_config';
-import * as colorUtil from '../utils/utils';
 
 describe('createLabelLayer', () => {
   const xAxis: VisColumn = {
@@ -162,7 +154,6 @@ describe('addTransform', () => {
       colorScaleType: ScaleType.LINEAR,
       scaleToDataBounds: false,
       maxNumberOfColors: 4,
-      useThresholdColor: false,
       customRanges: [],
       label: {} as HeatmapLabels,
     },
@@ -192,57 +183,6 @@ describe('addTransform', () => {
     );
 
     expect(result).toEqual([]);
-  });
-});
-
-describe('setRange', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('returns correct range of colors based on customRanges and schema', () => {
-    const mockColors = ['#111', '#222', '#333'];
-    jest.spyOn(colorUtil, 'generateColorBySchema').mockReturnValue(mockColors);
-
-    const styles = {
-      exclusive: {
-        customRanges: [
-          { min: 1, max: 5 },
-          { min: 6, max: 10 },
-        ],
-        colorSchema: ColorSchemas.GREENS,
-        percentageMode: true,
-        reverseSchema: false,
-        colorScaleType: ScaleType.LINEAR,
-        scaleToDataBounds: false,
-        maxNumberOfColors: 4,
-        useThresholdColor: true,
-        label: {} as HeatmapLabels,
-      },
-    };
-
-    const result = setRange(styles);
-    expect(colorUtil.generateColorBySchema).toHaveBeenCalledWith(3, ColorSchemas.GREENS);
-    expect(result).toEqual(mockColors);
-  });
-
-  it('returns one color if no customRanges are defined but user turns on useThresholdColor', () => {
-    const styles = {
-      exclusive: {
-        customRanges: [],
-        useThresholdColor: true,
-        colorSchema: ColorSchemas.GREENS,
-        percentageMode: true,
-        reverseSchema: false,
-        colorScaleType: ScaleType.LINEAR,
-        scaleToDataBounds: false,
-        maxNumberOfColors: 4,
-        label: {} as HeatmapLabels,
-      },
-    };
-
-    const result = setRange(styles);
-    expect(result).toEqual(['#ccffcc']);
   });
 });
 
@@ -317,7 +257,6 @@ describe('enhanceStyle', () => {
         colorScaleType: ScaleType.LINEAR,
         scaleToDataBounds: true,
         maxNumberOfColors: 4,
-        useThresholdColor: true,
         label: {} as HeatmapLabels,
       },
       thresholdOptions: {
@@ -326,6 +265,7 @@ describe('enhanceStyle', () => {
           { value: 2, color: '#00FF00' },
           { value: 8, color: '#0000FF' },
         ],
+        useThresholdColor: true,
       },
     };
 
@@ -335,7 +275,7 @@ describe('enhanceStyle', () => {
     expect(markLayer.encoding.color.scale.type).toBe('threshold');
     expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
     expect(markLayer.encoding.color.scale.range).toEqual([
-      '#d3d3d3',
+      DEFAULTGREY,
       '#00BD6B',
       '#00FF00',
       '#0000FF',
@@ -350,7 +290,6 @@ describe('enhanceStyle', () => {
         reverseSchema: false,
         colorScaleType: ScaleType.LINEAR,
         maxNumberOfColors: 4,
-        useThresholdColor: true,
         scaleToDataBounds: true,
         label: {} as HeatmapLabels,
       },
@@ -360,6 +299,7 @@ describe('enhanceStyle', () => {
           { value: 2, color: '#00FF00' },
           { value: 8, color: '#0000FF' },
         ],
+        useThresholdColor: true,
       },
     };
 
@@ -368,7 +308,7 @@ describe('enhanceStyle', () => {
 
     expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
     expect(markLayer.encoding.color.scale.range).toEqual([
-      '#d3d3d3',
+      DEFAULTGREY,
       '#00BD6B',
       '#00FF00',
       '#0000FF',

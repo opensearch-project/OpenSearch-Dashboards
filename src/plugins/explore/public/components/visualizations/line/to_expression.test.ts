@@ -11,7 +11,7 @@ import {
   createCategoryLineChart,
 } from './to_expression';
 import {
-  ThresholdLineStyle,
+  ThresholdMode,
   VisColumn,
   VisFieldType,
   Positions,
@@ -98,7 +98,7 @@ describe('to_expression', () => {
     thresholdOptions: {
       baseColor: '#00BD6B',
       thresholds: [{ value: 100, color: 'red' }],
-      thresholdStyle: ThresholdLineStyle.Solid,
+      thresholdStyle: ThresholdMode.Solid,
     },
     tooltipOptions: {
       mode: 'all' as TooltipOptions['mode'],
@@ -487,7 +487,7 @@ describe('to_expression', () => {
   describe('createFacetedMultiLineChart', () => {
     it('should create a faceted multi-line chart with one metric, one date, and two categorical columns', () => {
       // Enable threshold and time marker for this test
-      styleOptions.thresholdOptions.thresholdStyle = ThresholdLineStyle.Solid;
+      styleOptions.thresholdOptions.thresholdStyle = ThresholdMode.Solid;
       styleOptions.addTimeMarker = true;
 
       // Mock threshold layer with proper structure

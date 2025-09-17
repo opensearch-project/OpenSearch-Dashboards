@@ -10,7 +10,7 @@ import {
   defaultScatterChartStyles,
 } from './scatter_vis_config';
 import { ScatterVisStyleControls } from './scatter_vis_options';
-import { Positions, PointShape, AxisRole, ThresholdLineStyle } from '../types';
+import { Positions, PointShape, AxisRole, ThresholdMode } from '../types';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({
@@ -54,7 +54,7 @@ describe('createScatterConfig', () => {
     expect(defaults.thresholdOptions).toMatchObject({
       baseColor: '#00BD6B',
       thresholds: [],
-      thresholdStyle: ThresholdLineStyle.Solid,
+      thresholdStyle: ThresholdMode.Solid,
     });
   });
   it('should render the ScatterVisStyleControls component with the provided props', () => {

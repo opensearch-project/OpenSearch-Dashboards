@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { AreaVisStyleControls } from './area_vis_options';
 import {
   Positions,
-  ThresholdLineStyle,
+  ThresholdMode,
   VisFieldType,
   TooltipOptions,
   AxisRole,
@@ -180,7 +180,7 @@ describe('AreaVisStyleControls', () => {
       thresholdOptions: {
         baseColor: '#00BD6B',
         thresholds: [],
-        thresholdStyle: ThresholdLineStyle.Solid,
+        thresholdStyle: ThresholdMode.Solid,
       },
       tooltipOptions: { mode: 'all' as TooltipOptions['mode'] },
       categoryAxes: [

@@ -9,13 +9,12 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BarChartStyleControls } from './bar_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
-import { ThresholdOptions } from '../style_panel/threshold_lines/threshold';
 import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { TitleOptionsPanel } from '../style_panel/title/title';
-import { AxisRole, VisFieldType, Threshold } from '../types';
+import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from './bucket_options';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
@@ -52,6 +51,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
 
+  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -80,8 +80,8 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
-              thresholdLines={styleOptions.thresholdLines}
               showThresholdStyle={true}
+              canUseThresholdColor={!hasColorMapping}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -102,6 +102,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               showBarBorder={styleOptions.showBarBorder}
               barBorderWidth={styleOptions.barBorderWidth}
               barBorderColor={styleOptions.barBorderColor}
+              // useThresholdColor={styleOptions?.useThresholdColor}
               onBarSizeModeChange={(barSizeMode) => updateStyleOption('barSizeMode', barSizeMode)}
               onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
               onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}

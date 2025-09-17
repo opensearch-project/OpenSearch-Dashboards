@@ -108,15 +108,6 @@ describe('MetricVisStyleControls', () => {
     expect(screen.getByText('Use threshold colors')).toBeInTheDocument();
   });
 
-  it('calls onStyleChange when use color switch is toggled', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-    const switches = screen.getAllByRole('switch');
-    const colorSwitch = switches.find((sw) => sw.getAttribute('aria-checked') === 'false');
-    fireEvent.click(colorSwitch!);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ useThresholdColor: true });
-  });
-
   it('does not render style options when no axis mapping is selected', () => {
     const propsWithoutMapping = {
       ...mockProps,

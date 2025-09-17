@@ -31,10 +31,10 @@ describe('createMetrictmapeConfig', () => {
     expect(defaults.showTitle).toBe(true);
     expect(defaults.title).toBe('');
     expect(defaults.fontSize).toBe(undefined);
-    expect(defaults.useThresholdColor).toBe(false);
     expect(defaults.thresholdOptions).toMatchObject({
       baseColor: '#00BD6B',
       thresholds: [],
+      useThresholdColor: false,
     });
   });
 

@@ -21,6 +21,7 @@ import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { VisualizationRender } from './visualization_render';
 import { ExpressionsStart } from '../../../../expressions/public';
 import { StylePanelRender } from './style_panel_render';
+import { adaptLegacyData } from './visualization_builder_utils';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -310,7 +311,7 @@ export class VisualizationBuilder {
   }
 
   setVisConfig(config?: ChartConfig) {
-    this.visConfig$.next(config);
+    adaptLegacyData(this.visConfig$, config);
   }
 
   setCurrentChartType(chartType?: ChartType) {

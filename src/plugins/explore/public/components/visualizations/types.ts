@@ -69,7 +69,7 @@ export enum VisFieldType {
   Unknown = 'unknown',
 }
 
-export enum ThresholdLineStyle {
+export enum ThresholdMode {
   Solid = 'solid',
   Dashed = 'dashed',
   DotDashed = 'dot-dashed',
@@ -79,7 +79,7 @@ export enum ThresholdLineStyle {
 export interface ThresholdLine {
   color: string;
   show: boolean;
-  style: ThresholdLineStyle;
+  style: ThresholdMode;
   value: number;
   width: number;
 }
@@ -87,7 +87,7 @@ export interface ThresholdLine {
 export interface ThresholdLine {
   color: string;
   show: boolean;
-  style: ThresholdLineStyle;
+  style: ThresholdMode;
   value: number;
   width: number;
   name?: string;
@@ -267,7 +267,8 @@ export interface AxisConfig {
 export interface ThresholdOptions {
   thresholds?: Threshold[];
   baseColor?: string;
-  thresholdStyle?: ThresholdLineStyle;
+  thresholdStyle?: ThresholdMode;
+  useThresholdColor?: boolean;
 }
 
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';

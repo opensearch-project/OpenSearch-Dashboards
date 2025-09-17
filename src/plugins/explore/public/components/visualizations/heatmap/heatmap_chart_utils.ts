@@ -4,11 +4,10 @@
  */
 
 import type { Encoding } from 'vega-lite/build/src/encoding';
-import { AggregationType, ColorSchemas, VisColumn } from '../types';
+import { AggregationType, VisColumn } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { generateColorBySchema } from '../utils/utils';
-import { transformToThreshold } from '../style_panel/threshold/threshold_utils';
-import { getColors } from '../theme/default_colors';
+
+import { getColors, DEFAULTGREY } from '../theme/default_colors';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (
@@ -83,17 +82,6 @@ export const addTransform = (styles: Partial<HeatmapChartStyleControls>, numeric
   return [];
 };
 
-export const setRange = (styles: Partial<HeatmapChartStyleControls>) => {
-  const ranges = styles?.exclusive?.customRanges ?? [];
-  // we only consider the case when user actually adds a range
-  // in such case, we can ensure range length >=2 to interpolate color
-  const colors = generateColorBySchema(
-    ranges.length + 1,
-    styles?.exclusive?.colorSchema ?? ColorSchemas.BLUES
-  );
-  return colors;
-};
-
 export const enhanceStyle = (
   markLayer: any,
   styles: Partial<HeatmapChartStyleControls>,
@@ -111,30 +99,21 @@ export const enhanceStyle = (
     markLayer.encoding.color.scale.domain = getDataBound(transformedData, colorField);
   }
 
-  if (
-    styles.exclusive?.useThresholdColor &&
-    (styles.exclusive?.customRanges || styles.thresholdOptions?.thresholds)
-  ) {
-    const newThreshold =
-      styles.exclusive?.customRanges &&
-      styles.exclusive?.colorSchema &&
-      !styles?.thresholdOptions?.thresholds
-        ? transformToThreshold(styles.exclusive?.customRanges, styles.exclusive?.colorSchema)
-        : styles?.thresholdOptions?.thresholds || [];
+  if (styles?.thresholdOptions?.useThresholdColor && styles.thresholdOptions?.thresholds) {
+    const newThreshold = styles?.thresholdOptions?.thresholds ?? [];
 
     const thresholdWithBase = [
       { value: 0, color: styles?.thresholdOptions?.baseColor ?? getColors().statusGreen },
       ...newThreshold,
     ];
 
-    const colorDomain = thresholdWithBase.reduce((acc, val) => [...acc, val.value], [] as number[]);
-
-    const colorRange = thresholdWithBase.reduce((acc, val) => [...acc, val.color], [] as string[]);
+    const colorDomain = thresholdWithBase.map<number>((val) => val.value);
+    const colorRange = thresholdWithBase.map<string>((val) => val.color);
 
     // overwrite color scale type to quantize to map continuous domains to discrete output ranges
     markLayer.encoding.color.scale.type = 'threshold';
     markLayer.encoding.color.scale.domain = colorDomain;
     // require one more color for values below the first threshold(base)
-    markLayer.encoding.color.scale.range = ['#d3d3d3', ...colorRange];
+    markLayer.encoding.color.scale.range = [DEFAULTGREY, ...colorRange];
   }
 };

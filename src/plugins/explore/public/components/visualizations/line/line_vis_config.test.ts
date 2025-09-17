@@ -9,7 +9,7 @@ import { LineVisStyleControls } from './line_vis_options';
 import {
   CategoryAxis,
   GridOptions,
-  ThresholdLineStyle,
+  ThresholdMode,
   ValueAxis,
   Positions,
   TooltipOptions,
@@ -61,7 +61,7 @@ describe('line_vis_config', () => {
       expect(defaults.thresholdOptions).toMatchObject({
         baseColor: '#00BD6B',
         thresholds: [],
-        thresholdStyle: ThresholdLineStyle.Solid,
+        thresholdStyle: ThresholdMode.Off,
       });
 
       // Verify axes
@@ -131,7 +131,7 @@ describe('line_vis_config', () => {
           thresholdOptions: {
             baseColor: '#00BD6B',
             thresholds: [],
-            thresholdStyle: ThresholdLineStyle.Solid,
+            thresholdStyle: ThresholdMode.Solid,
           },
           addTimeMarker: false,
           lineStyle: 'both' as LineStyle,
