@@ -8,6 +8,7 @@ import { EuiIcon, EuiText } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
 import { ToolCallRow } from './tool_call_row';
+import { ErrorRow } from './error_row';
 import { ContextTreeView } from './context_tree_view';
 import { ChatContextManager } from '../services/chat_context_manager';
 import { StaticContext, DynamicContext } from '../../../context_provider/public';
@@ -30,7 +31,15 @@ interface TimelineToolCall {
   timestamp: number;
 }
 
-type TimelineItem = TimelineMessage | TimelineToolCall;
+interface TimelineError {
+  type: 'error';
+  id: string;
+  message: string;
+  code?: string;
+  timestamp: number;
+}
+
+type TimelineItem = TimelineMessage | TimelineToolCall | TimelineError;
 
 interface ChatMessagesProps {
   layoutMode: ChatLayoutMode;
@@ -95,10 +104,17 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           .sort((a, b) => a.timestamp - b.timestamp)
           .map((item) => {
             if (item.type === 'message') {
+              // Don't render messages with empty content
+              if (!item.content || item.content.trim() === '') {
+                return null;
+              }
               return <MessageRow key={item.id} message={item} />;
-            } else {
+            } else if (item.type === 'tool_call') {
               return <ToolCallRow key={item.id} toolCall={item} />;
+            } else if (item.type === 'error') {
+              return <ErrorRow key={item.id} error={item} />;
             }
+            return null;
           })}
 
         {/* Streaming Message */}

@@ -38,7 +38,15 @@ interface TimelineToolCall {
   timestamp: number;
 }
 
-type TimelineItem = TimelineMessage | TimelineToolCall;
+interface TimelineError {
+  type: 'error';
+  id: string;
+  message: string;
+  code?: string;
+  timestamp: number;
+}
+
+type TimelineItem = TimelineMessage | TimelineToolCall | TimelineError;
 
 interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
@@ -216,6 +224,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               }
               break;
             case EventType.RUN_ERROR:
+              if ('message' in event) {
+                const errorItem: TimelineError = {
+                  type: 'error',
+                  id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  message: event.message,
+                  code: 'code' in event ? event.code : undefined,
+                  timestamp: event.timestamp || Date.now(),
+                };
+                setTimeline((prev) => [...prev, errorItem]);
+              }
               setIsStreaming(false);
               setCurrentStreamingMessage('');
               break;

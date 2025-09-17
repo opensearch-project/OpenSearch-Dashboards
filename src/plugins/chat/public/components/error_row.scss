@@ -1,0 +1,34 @@
+@import "../../../../../../../src/core/public/styles/core_app";
+
+.errorRow {
+  display: flex;
+  align-items: flex-start;
+  margin: 8px 0;
+  padding: 12px;
+  background-color: $euiColorLightestShade;
+  border: 1px solid $euiColorDanger;
+  border-radius: 6px;
+
+  &__icon {
+    flex-shrink: 0;
+    margin-right: 12px;
+    margin-top: 2px;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  &__message {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
