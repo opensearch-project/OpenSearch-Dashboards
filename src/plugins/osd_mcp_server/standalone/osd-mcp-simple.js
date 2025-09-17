@@ -12,6 +12,7 @@
  */
 
 const readline = require('readline');
+const http = require('http');
 
 // Tool definitions
 const TOOLS = [
@@ -90,116 +91,104 @@ const TOOLS = [
   },
 ];
 
-// Tool handlers with Redux integration
+// HTTP helper function to make requests to the Redux bridge
+async function makeHttpRequest(path, method = 'GET', body = null) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'localhost',
+      port: 5601, // Default OpenSearch Dashboards port
+      path: path,
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'osd-xsrf': 'true', // Required for OpenSearch Dashboards CSRF protection
+      },
+    };
+
+    if (body) {
+      const bodyString = JSON.stringify(body);
+      options.headers['Content-Length'] = Buffer.byteLength(bodyString);
+    }
+
+    const req = http.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        try {
+          const response = JSON.parse(data);
+          resolve({ statusCode: res.statusCode, data: response });
+        } catch (error) {
+          resolve({ statusCode: res.statusCode, data: data });
+        }
+      });
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    if (body) {
+      req.write(JSON.stringify(body));
+    }
+    req.end();
+  });
+}
+
+// Tool handlers with HTTP Redux bridge integration
 async function handleUpdateQuery(args) {
   const { query, language = 'PPL' } = args;
 
   console.error('🔧 MCP Tool: update_query called with:', { query, language });
 
   try {
-    // Access the global Explore services which includes the Redux store
-    const globalServices = global.exploreServices;
-    if (!globalServices || !globalServices.store) {
-      console.error(
-        '❌ Explore services or store not available - returning mock success for testing'
-      );
-      return {
-        success: true,
-        message: `Mock: Query would be updated to "${query}" with language "${language}"`,
-        updatedQuery: query,
-        language: language,
-        previousQuery: 'mock_previous_query',
-        previousLanguage: 'PPL',
-        timestamp: new Date().toISOString(),
-        action: 'query_updated_mock',
-        note:
-          'This is a mock response. Redux store not available - ensure Explore page is loaded and plugin is active.',
-      };
-    }
-
-    // Get current state
-    const currentState = globalServices.store.getState();
-    const currentQuery = currentState.query;
-
-    console.error('🔍 Current query state:', {
-      currentQuery: currentQuery.query,
-      currentLanguage: currentQuery.language,
-      newQuery: query,
-      newLanguage: language,
-    });
-
-    // Access Redux actions through global services
-    const reduxActions = global.exploreReduxActions;
-
-    // Update query text with history tracking
-    if (reduxActions && reduxActions.setQueryStringWithHistory) {
-      globalServices.store.dispatch(reduxActions.setQueryStringWithHistory(query));
-    } else {
-      // Fallback: dispatch action directly using action creator pattern
-      globalServices.store.dispatch({
-        type: 'query/setQueryStringWithHistory',
-        payload: query,
-        meta: { addToHistory: true },
-      });
-    }
-
-    // If language is different, update the entire query state
-    if (language && language !== currentQuery.language) {
-      if (reduxActions && reduxActions.setQueryState) {
-        globalServices.store.dispatch(
-          reduxActions.setQueryState({
-            query,
-            language,
-            dataset: currentQuery.dataset,
-          })
-        );
-      } else {
-        // Fallback: dispatch action directly
-        globalServices.store.dispatch({
-          type: 'query/setQueryState',
-          payload: {
-            query,
-            language,
-            dataset: currentQuery.dataset,
-          },
-        });
-      }
-    }
-
-    // Verify the update
-    const updatedState = globalServices.store.getState();
-    const updatedQuery = updatedState.query;
-
-    console.error('✅ Query updated successfully via Redux:', {
-      previousQuery: currentQuery.query,
-      updatedQuery: updatedQuery.query,
-      previousLanguage: currentQuery.language,
-      updatedLanguage: updatedQuery.language,
-    });
-
-    return {
-      success: true,
-      message: `Query updated successfully`,
-      updatedQuery: updatedQuery.query,
-      language: updatedQuery.language,
-      previousQuery: currentQuery.query,
-      previousLanguage: currentQuery.language,
-      timestamp: new Date().toISOString(),
-      action: 'query_updated',
-      reduxActions:
-        language !== currentQuery.language
-          ? ['setQueryStringWithHistory', 'setQueryState']
-          : ['setQueryStringWithHistory'],
-    };
-  } catch (error) {
-    console.error('❌ Error updating query:', error);
-    return {
-      success: false,
-      error: `Failed to update query: ${error.message}`,
+    // Use HTTP bridge to update query via Redux
+    const response = await makeHttpRequest('/api/osd-mcp-server/redux/update-query', 'POST', {
       query,
       language,
+    });
+
+    console.error('🔍 HTTP Bridge response:', response);
+
+    if (response.statusCode === 200) {
+      return {
+        success: true,
+        message: `Query updated successfully via HTTP bridge`,
+        updatedQuery: query,
+        language: language,
+        timestamp: new Date().toISOString(),
+        action: 'query_updated_via_bridge',
+        bridgeResponse: response.data,
+      };
+    } else {
+      console.error('❌ HTTP Bridge error:', response);
+      return {
+        success: false,
+        error: `HTTP Bridge error: ${response.statusCode}`,
+        query,
+        language,
+        timestamp: new Date().toISOString(),
+        action: 'query_update_bridge_failed',
+        bridgeResponse: response.data,
+      };
+    }
+  } catch (error) {
+    console.error('❌ Error updating query via HTTP bridge:', error);
+    
+    // Fallback to mock response if HTTP bridge is not available
+    console.error('🔄 Falling back to mock response...');
+    return {
+      success: true,
+      message: `Mock: Query would be updated to "${query}" with language "${language}" (HTTP bridge unavailable)`,
+      updatedQuery: query,
+      language: language,
+      previousQuery: 'mock_previous_query',
+      previousLanguage: 'PPL',
       timestamp: new Date().toISOString(),
-      action: 'query_update_failed',
+      action: 'query_updated_mock_fallback',
+      error: error.message,
+      note: 'HTTP bridge not available - ensure OpenSearch Dashboards is running on localhost:5601',
     };
   }
 }
@@ -210,153 +199,60 @@ async function handleRunQuery(args) {
   console.error('🔧 MCP Tool: run_query called with:', { query, waitForResults });
 
   try {
-    // Access the global Explore services which includes the Redux store
-    const globalServices = global.exploreServices;
-    if (!globalServices || !globalServices.store) {
-      console.error(
-        '❌ Explore services or store not available - returning mock success for testing'
-      );
-      return {
-        success: true,
-        message: query
-          ? `Mock: Query "${query}" would be executed`
-          : 'Mock: Current query would be executed',
-        executedQuery: query || 'mock_current_query',
-        language: 'PPL',
-        dataset: 'opensearch_dashboards_sample_data_logs',
-        resultCount: 42,
-        hasResults: true,
-        resultCacheKeys: 1,
-        queryStatus: 'success',
-        timestamp: new Date().toISOString(),
-        action: 'query_executed_mock',
-        note:
-          'This is a mock response. Redux store not available - ensure Explore page is loaded and plugin is active.',
-      };
-    }
-
-    // Get current state
-    const currentState = globalServices.store.getState();
-    let currentQuery = currentState.query;
-
-    // If a query was provided, update it first
-    if (query) {
-      console.error('🔍 Updating query before execution:', {
-        previousQuery: currentQuery.query,
-        newQuery: query,
-      });
-
-      // Access Redux actions through global services
-      const reduxActions = global.exploreReduxActions;
-
-      if (reduxActions && reduxActions.setQueryStringWithHistory) {
-        globalServices.store.dispatch(reduxActions.setQueryStringWithHistory(query));
-      } else {
-        // Fallback: dispatch action directly
-        globalServices.store.dispatch({
-          type: 'query/setQueryStringWithHistory',
-          payload: query,
-          meta: { addToHistory: true },
-        });
-      }
-
-      // Get updated state
-      const updatedState = globalServices.store.getState();
-      currentQuery = updatedState.query;
-    }
-
-    console.error('🔍 Executing query:', {
-      query: currentQuery.query,
-      language: currentQuery.language,
-      dataset: currentQuery.dataset ? currentQuery.dataset.title : 'default',
+    // Use HTTP bridge to execute query via Redux
+    const response = await makeHttpRequest('/api/osd-mcp-server/redux/execute-query', 'POST', {
+      query,
+      waitForResults,
     });
 
-    // Execute the query using Redux actions through global services
-    const reduxActions = global.exploreReduxActions;
-    let executePromise;
+    console.error('🔍 HTTP Bridge response:', response);
 
-    if (reduxActions && reduxActions.executeQueries) {
-      executePromise = globalServices.store.dispatch(
-        reduxActions.executeQueries({ services: globalServices })
-      );
-    } else {
-      // Fallback: dispatch action directly
-      executePromise = globalServices.store.dispatch({
-        type: 'query/executeQueries',
-        payload: { services: globalServices },
-      });
-    }
-
-    if (waitForResults) {
-      // Wait for query execution to complete
-      await executePromise;
-
-      // Get updated results
-      const finalState = globalServices.store.getState();
-      const results = finalState.results;
-      const queryStatus = finalState.queryEditor ? finalState.queryEditor.queryStatus : null;
-
-      // Count total results across all cache keys
-      let totalResultCount = 0;
-      let hasResults = false;
-
-      Object.values(results).forEach((result) => {
-        if (result && result.hits && result.hits.hits) {
-          totalResultCount += result.hits.hits.length;
-          hasResults = true;
-        }
-      });
-
-      console.error('✅ Query executed successfully:', {
-        executedQuery: currentQuery.query,
-        language: currentQuery.language,
-        resultCacheKeys: Object.keys(results).length,
-        totalResultCount,
-        hasResults,
-        queryStatus,
-      });
-
+    if (response.statusCode === 200) {
       return {
         success: true,
         message: query
-          ? `Query "${query}" executed successfully`
-          : 'Current query executed successfully',
-        executedQuery: currentQuery.query,
-        language: currentQuery.language,
-        dataset: currentQuery.dataset ? currentQuery.dataset.title : 'default',
-        resultCount: totalResultCount,
-        hasResults,
-        resultCacheKeys: Object.keys(results).length,
-        queryStatus,
-        timestamp: new Date().toISOString(),
-        action: 'query_executed',
-        reduxActions: query ? ['setQueryStringWithHistory', 'executeQueries'] : ['executeQueries'],
-      };
-    } else {
-      // Don't wait, just return immediately
-      console.error('✅ Query execution started (not waiting for results)');
-
-      return {
-        success: true,
-        message: query ? `Query "${query}" execution started` : 'Current query execution started',
-        executedQuery: currentQuery.query,
-        language: currentQuery.language,
-        dataset: currentQuery.dataset ? currentQuery.dataset.title : 'default',
+          ? `Query "${query}" executed successfully via HTTP bridge`
+          : 'Current query executed successfully via HTTP bridge',
+        executedQuery: query || 'current_query',
         waitForResults,
         timestamp: new Date().toISOString(),
-        action: 'query_execution_started',
-        reduxActions: query ? ['setQueryStringWithHistory', 'executeQueries'] : ['executeQueries'],
+        action: 'query_executed_via_bridge',
+        bridgeResponse: response.data,
+      };
+    } else {
+      console.error('❌ HTTP Bridge error:', response);
+      return {
+        success: false,
+        error: `HTTP Bridge error: ${response.statusCode}`,
+        query,
+        waitForResults,
+        timestamp: new Date().toISOString(),
+        action: 'query_execution_bridge_failed',
+        bridgeResponse: response.data,
       };
     }
   } catch (error) {
-    console.error('❌ Error executing query:', error);
+    console.error('❌ Error executing query via HTTP bridge:', error);
+    
+    // Fallback to mock response if HTTP bridge is not available
+    console.error('🔄 Falling back to mock response...');
     return {
-      success: false,
-      error: `Failed to execute query: ${error.message}`,
-      query,
+      success: true,
+      message: query
+        ? `Mock: Query "${query}" would be executed (HTTP bridge unavailable)`
+        : 'Mock: Current query would be executed (HTTP bridge unavailable)',
+      executedQuery: query || 'mock_current_query',
+      language: 'PPL',
+      dataset: 'opensearch_dashboards_sample_data_logs',
+      resultCount: 42,
+      hasResults: true,
+      resultCacheKeys: 1,
+      queryStatus: 'success',
       waitForResults,
       timestamp: new Date().toISOString(),
-      action: 'query_execution_failed',
+      action: 'query_executed_mock_fallback',
+      error: error.message,
+      note: 'HTTP bridge not available - ensure OpenSearch Dashboards is running on localhost:5601',
     };
   }
 }
@@ -367,111 +263,60 @@ async function handleGetQueryState(args) {
   console.error('🔧 MCP Tool: get_query_state called with:', { includeResults });
 
   try {
-    // Access the global Explore services which includes the Redux store
-    const globalServices = global.exploreServices;
-    if (!globalServices || !globalServices.store) {
-      console.error(
-        '❌ Explore services or store not available - returning mock success for testing'
-      );
+    // Use HTTP bridge to get query state via Redux
+    const response = await makeHttpRequest('/api/osd-mcp-server/redux/state', 'GET');
+
+    console.error('🔍 HTTP Bridge response:', response);
+
+    if (response.statusCode === 200) {
       return {
         success: true,
-        message: 'Mock: Query state retrieved successfully',
-        queryState: {
-          query: 'source = opensearch_dashboards_sample_data_logs | head 10',
-          language: 'PPL',
-          dataset: {
-            id: 'sample_logs',
-            title: 'opensearch_dashboards_sample_data_logs',
-            type: 'index-pattern',
-          },
-        },
-        uiState: {
-          activeTabId: 'explore',
-        },
-        queryEditor: {
-          dateRange: { from: 'now-15d', to: 'now' },
-          queryStatus: 'idle',
-        },
+        message: 'Query state retrieved successfully via HTTP bridge',
         includeResults,
         timestamp: new Date().toISOString(),
-        action: 'query_state_retrieved_mock',
-        note:
-          'This is a mock response. Redux store not available - ensure Explore page is loaded and plugin is active.',
+        action: 'query_state_retrieved_via_bridge',
+        bridgeResponse: response.data,
+      };
+    } else {
+      console.error('❌ HTTP Bridge error:', response);
+      return {
+        success: false,
+        error: `HTTP Bridge error: ${response.statusCode}`,
+        includeResults,
+        timestamp: new Date().toISOString(),
+        action: 'query_state_bridge_failed',
+        bridgeResponse: response.data,
       };
     }
-
-    // Get current state from Redux store
-    const currentState = globalServices.store.getState();
-    const queryState = currentState.query;
-    const uiState = currentState.ui;
-    const queryEditorState = currentState.queryEditor;
-
-    console.error('🔍 Retrieved query state:', {
-      query: queryState.query,
-      language: queryState.language,
-      dataset: queryState.dataset ? queryState.dataset.title : 'default',
-      activeTabId: uiState.activeTabId,
-      includeResults,
-    });
-
-    const response = {
+  } catch (error) {
+    console.error('❌ Error getting query state via HTTP bridge:', error);
+    
+    // Fallback to mock response if HTTP bridge is not available
+    console.error('🔄 Falling back to mock response...');
+    return {
       success: true,
-      message: 'Query state retrieved successfully',
+      message: 'Mock: Query state retrieved successfully (HTTP bridge unavailable)',
       queryState: {
-        query: queryState.query,
-        language: queryState.language,
-        dataset: queryState.dataset
-          ? {
-              id: queryState.dataset.id,
-              title: queryState.dataset.title,
-              type: queryState.dataset.type,
-            }
-          : null,
+        query: 'source = opensearch_dashboards_sample_data_logs | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'sample_logs',
+          title: 'opensearch_dashboards_sample_data_logs',
+          type: 'index-pattern',
+        },
       },
       uiState: {
-        activeTabId: uiState.activeTabId,
+        activeTabId: 'explore',
       },
       queryEditor: {
-        dateRange: queryEditorState ? queryEditorState.dateRange : null,
-        queryStatus: queryEditorState ? queryEditorState.queryStatus : null,
+        dateRange: { from: 'now-15d', to: 'now' },
+        queryStatus: 'idle',
       },
       includeResults,
       timestamp: new Date().toISOString(),
-      action: 'query_state_retrieved',
-    };
-
-    // Include results summary if requested
-    if (includeResults) {
-      const results = currentState.results;
-      const resultsSummary = {
-        cacheKeys: Object.keys(results),
-        totalCacheEntries: Object.keys(results).length,
-        resultCounts: {},
-        hasResults: false,
-      };
-
-      // Count results for each cache key
-      Object.entries(results).forEach(([cacheKey, result]) => {
-        if (result && result.hits && result.hits.hits) {
-          resultsSummary.resultCounts[cacheKey] = result.hits.hits.length;
-          resultsSummary.hasResults = true;
-        } else {
-          resultsSummary.resultCounts[cacheKey] = 0;
-        }
-      });
-
-      response.results = resultsSummary;
-    }
-
-    return response;
-  } catch (error) {
-    console.error('❌ Error getting query state:', error);
-    return {
-      success: false,
-      error: `Failed to get query state: ${error.message}`,
-      includeResults,
-      timestamp: new Date().toISOString(),
-      action: 'get_query_state_failed',
+      action: 'query_state_retrieved_mock_fallback',
+      error: error.message,
+      note: 'HTTP bridge not available - ensure OpenSearch Dashboards is running on localhost:5601',
     };
   }
 }

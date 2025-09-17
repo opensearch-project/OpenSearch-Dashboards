@@ -1,0 +1,181 @@
+## load. chat
+global_interaction_interceptor.ts:163 🔍 DEBUG: Starting context enrichment for: {testSubj: undefined, tagName: 'BUTTON', className: 'euiButtonIcon euiButtonIcon--text euiButtonIcon--small'}
+global_interaction_interceptor.ts:170 🔍 DEBUG: Getting UI Action context...
+global_interaction_interceptor.ts:210 🔍 DEBUG: getUIActionContext called
+global_interaction_interceptor.ts:211 🔍 DEBUG: uiActions available: true
+global_interaction_interceptor.ts:390 🔍 DEBUG: getTriggersForElement - testSubj: null, tagName: BUTTON
+global_interaction_interceptor.ts:409 🔍 DEBUG: Added BUTTON_CLICK_TRIGGER for button element
+global_interaction_interceptor.ts:412 🔍 DEBUG: Final triggers: ['BUTTON_CLICK_TRIGGER']
+global_interaction_interceptor.ts:227 🔍 DEBUG: Found triggers: ['BUTTON_CLICK_TRIGGER']
+global_interaction_interceptor.ts:238 🔍 DEBUG: Processing trigger: BUTTON_CLICK_TRIGGER
+global_interaction_interceptor.ts:240 🔍 DEBUG: Built UI Action context: {element: button.euiButtonIcon.euiButtonIcon--text.euiButtonIcon--small, event: PointerEvent, testSubj: null}
+global_interaction_interceptor.ts:275 ❌ Error executing UI Action for trigger BUTTON_CLICK_TRIGGER: Error: Trigger [triggerId = BUTTON_CLICK_TRIGGER] does not exist.
+    at UiActionsService.getTrigger (ui_actions_service.ts:58:1)
+    at UiActionsService.getTriggerActions (ui_actions_service.ts:119:1)
+    at GlobalInteractionInterceptor.getUIActionContext (global_interaction_interceptor.ts:241:1)
+    at GlobalInteractionInterceptor.enrichWithContext (global_interaction_interceptor.ts:171:1)
+    at HTMLDocument.<anonymous> (global_interaction_interceptor.ts:31:1)
+getUIActionContext @ global_interaction_interceptor.ts:275
+enrichWithContext @ global_interaction_interceptor.ts:171
+(anonymous) @ global_interaction_interceptor.ts:31
+global_interaction_interceptor.ts:282 🔍 DEBUG: Final UI Action context result: null
+global_interaction_interceptor.ts:172 🔍 DEBUG: UI Action context result: null
+global_interaction_interceptor.ts:175 🔍 DEBUG: Getting semantic context...
+global_interaction_interceptor.ts:294 🔍 DEBUG: getSemanticContext called, contextProvider available: true
+global_interaction_interceptor.ts:177 🔍 DEBUG: Semantic context result: undefined
+global_interaction_interceptor.ts:198 🔍 DEBUG: No rich context found, keeping basic interaction
+global_interaction_interceptor.ts:583 🎯 Global Interaction Captured: {type: 'click', testSubj: undefined, className: 'euiButtonIcon euiButtonIcon--text euiButtonIcon--small', tagName: 'BUTTON', text: undefined, …}
+global_interaction_interceptor.ts:604 📊 Interaction History: 5 total interactions
+plugin.ts:217 🎯 Context Provider Plugin received global interaction: {type: 'click', testSubj: undefined, className: 'euiButtonIcon euiButtonIcon--text euiButtonIcon--small', tagName: 'BUTTON', text: undefined, …}
+context_capture_service.ts:146 🎯 Global Interaction Captured by Context Provider: {type: 'click', testSubj: undefined, className: 'euiButtonIcon euiButtonIcon--text euiButtonIcon--small', tagName: 'BUTTON', text: undefined, …}
+context_capture_service.ts:158 ⚠️ No contributor found for app: explore/logs, or contributor doesn't handle global interactions
+plugin.ts:64 ⚡ Dynamic Context Captured: {appId: 'explore/logs', trigger: 'BUTTON_CLICK', timestamp: '2025-09-16T22:19:35.732Z', data: {…}}
+plugin.ts:65 🔥 DEBUG: Dynamic context appId: explore/logs
+plugin.ts:66 🔥 DEBUG: Dynamic context trigger: BUTTON_CLICK
+plugin.ts:70 🔄 Refreshing static context after dynamic event
+plugin.ts:71 🔥 DEBUG: Current URL pathname: /w/LIRzvY/app/explore/logs/
+chat_context_manager.ts:37 ⚡ ChatContextManager: Dynamic context received {appId: 'explore/logs', trigger: 'BUTTON_CLICK', timestamp: '2025-09-16T22:19:35.732Z', data: {…}}
+context_capture_service.ts:169 📡 Global interaction also emitted as dynamic context for backward compatibility
+plugin.ts:76 🔥 DEBUG: Extracted currentAppId: explore
+plugin.ts:77 🔥 DEBUG: contextCaptureService exists: true
+plugin.ts:79 🔥 DEBUG: Calling captureStaticContext for: explore
+context_capture_service.ts:224 📊 Capturing static context for app: explore
+context_capture_service.ts:225 🔍 DEBUG: Registered contributors: (2) ['dashboards', 'explore']
+context_capture_service.ts:226 🔍 DEBUG: Looking for contributor with appId: explore
+context_capture_service.ts:227 🔥 DEBUG: captureStaticContext called with appId: explore
+context_capture_service.ts:262 🎯 Using registered context contributor for app: explore (contributor: explore)
+context_capture_service.ts:263 🔥 DEBUG: About to call contributor.captureStaticContext()
+context_contributor.ts:65 🔍 Explore: Capturing hybrid context (URL + transient state)
+context_contributor.ts:66 🔥 DEBUG: Current expandedDocuments size: 0
+context_contributor.ts:67 🔥 DEBUG: expandedDocuments Map contents: []
+context_contributor.ts:341 🔥 DEBUG: getTransientState called, expandedDocuments.size: 0
+context_contributor.ts:378 🔥 DEBUG: getDocumentPreview called, expandedDocuments.size: 0
+context_contributor.ts:379 🔥 DEBUG: expandedDocuments entries: []
+context_contributor.ts:343 🔥 DEBUG: documentPreview result: {expandedDocuments: Array(0), totalExpanded: 0, hasCurrentExpansions: false, lastInteraction: '2025-09-16T22:19:13.458Z', contextNote: 'These are documents the user has expanded to exami…sents their current focus and investigation area.'}
+context_contributor.ts:344 🔥 DEBUG: documentPreview.expandedDocuments length: 0
+context_contributor.ts:368 🔥 DEBUG: Final transientState keys: (4) ['expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity']
+context_contributor.ts:369 🔥 DEBUG: Final transientState.expandedDocuments: []
+context_contributor.ts:74 🔥 DEBUG: transientState keys: (4) ['expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity']
+context_contributor.ts:75 🔥 DEBUG: transientState.expandedDocuments: []
+context_contributor.ts:76 🔥 DEBUG: transientState.userActivity: {currentFocus: 'No documents currently expanded', lastAction: '2025-09-16T22:19:13.458Z', contextNote: 'These are documents the user has expanded to exami…sents their current focus and investigation area.', recentDocuments: Array(0)}
+context_contributor.ts:105 🔥 DEBUG: Final context keys: (14) ['type', 'capturePattern', 'indexPattern', 'query', 'filters', 'columns', 'sort', 'timeRange', 'expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity', 'metadata', 'timestamp']
+context_contributor.ts:106 🔥 DEBUG: Final context.expandedDocuments: []
+context_contributor.ts:107 🔥 DEBUG: Final context.userActivity: {currentFocus: 'No documents currently expanded', lastAction: '2025-09-16T22:19:13.458Z', contextNote: 'These are documents the user has expanded to exami…sents their current focus and investigation area.', recentDocuments: Array(0)}
+context_contributor.ts:108 ✅ Explore: Context captured with 0 expanded documents
+plugin.ts:81 🔥 DEBUG: captureStaticContext called
+context_capture_service.ts:269 ✅ Contributor context captured: {type: 'explore', capturePattern: 'hybrid', indexPattern: 'unknown', query: {…}, filters: Array(0), …}
+context_capture_service.ts:270 🔥 DEBUG: Context data keys after contributor: (18) ['appId', 'url', 'pathname', 'search', 'type', 'capturePattern', 'indexPattern', 'query', 'filters', 'columns', 'sort', 'timeRange', 'expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity', 'metadata', 'timestamp']
+context_capture_service.ts:271 🔥 DEBUG: expandedDocuments in context: 0
+context_capture_service.ts:315 🔥 DEBUG: About to emit new static context
+context_capture_service.ts:316 🔥 DEBUG: Static context data keys: (19) ['appId', 'url', 'pathname', 'search', 'type', 'capturePattern', 'indexPattern', 'query', 'filters', 'columns', 'sort', 'timeRange', 'expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity', 'metadata', 'timestamp', 'dataContext']
+context_capture_service.ts:317 🔥 DEBUG: expandedDocuments in static context: 0
+plugin.ts:58 📊 Static Context Updated: {appId: 'explore', timestamp: 1758061175836, data: {…}}
+plugin.ts:59 🔥 DEBUG: Static context received with appId: explore
+plugin.ts:60 🔥 DEBUG: Static context data keys: (19) ['appId', 'url', 'pathname', 'search', 'type', 'capturePattern', 'indexPattern', 'query', 'filters', 'columns', 'sort', 'timeRange', 'expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity', 'metadata', 'timestamp', 'dataContext']
+plugin.ts:61 🔥 DEBUG: expandedDocuments in received context: 0
+chat_context_manager.ts:31 📊 ChatContextManager: Static context received {appId: 'explore', timestamp: 1758061175836, data: {…}}
+context_capture_service.ts:319 🔥 DEBUG: Static context emitted successfully
+context_capture_service.ts:329 🔥 DEBUG: staticContextUpdated event dispatched for AI assistant
+
+## type a new query
+DEBUG: Starting context enrichment for: {testSubj: undefined, tagName: 'INPUT', className: 'euiFieldText euiFieldText--fullWidth'}
+global_interaction_interceptor.ts:170 🔍 DEBUG: Getting UI Action context...
+global_interaction_interceptor.ts:210 🔍 DEBUG: getUIActionContext called
+global_interaction_interceptor.ts:211 🔍 DEBUG: uiActions available: true
+global_interaction_interceptor.ts:390 🔍 DEBUG: getTriggersForElement - testSubj: null, tagName: INPUT
+global_interaction_interceptor.ts:412 🔍 DEBUG: Final triggers: []
+global_interaction_interceptor.ts:227 🔍 DEBUG: Found triggers: []
+global_interaction_interceptor.ts:229 🔍 DEBUG: No triggers found for element
+global_interaction_interceptor.ts:172 🔍 DEBUG: UI Action context result: null
+global_interaction_interceptor.ts:175 🔍 DEBUG: Getting semantic context...
+global_interaction_interceptor.ts:294 🔍 DEBUG: getSemanticContext called, contextProvider available: true
+global_interaction_interceptor.ts:177 🔍 DEBUG: Semantic context result: undefined
+global_interaction_interceptor.ts:198 🔍 DEBUG: No rich context found, keeping basic interaction
+global_interaction_interceptor.ts:583 🎯 Global Interaction Captured: {type: 'click', testSubj: undefined, className: 'euiFieldText euiFieldText--fullWidth', tagName: 'INPUT', text: undefined, …}
+global_interaction_interceptor.ts:604 📊 Interaction History: 6 total interactions
+plugin.ts:217 🎯 Context Provider Plugin received global interaction: {type: 'click', testSubj: undefined, className: 'euiFieldText euiFieldText--fullWidth', tagName: 'INPUT', text: undefined, …}
+context_capture_service.ts:146 🎯 Global Interaction Captured by Context Provider: {type: 'click', testSubj: undefined, className: 'euiFieldText euiFieldText--fullWidth', tagName: 'INPUT', text: undefined, …}
+context_capture_service.ts:158 ⚠️ No contributor found for app: explore/logs, or contributor doesn't handle global interactions
+plugin.ts:64 ⚡ Dynamic Context Captured: {appId: 'explore/logs', trigger: 'GLOBAL_CLICK', timestamp: '2025-09-16T22:20:19.693Z', data: {…}}
+plugin.ts:65 🔥 DEBUG: Dynamic context appId: explore/logs
+plugin.ts:66 🔥 DEBUG: Dynamic context trigger: GLOBAL_CLICK
+plugin.ts:70 🔄 Refreshing static context after dynamic event
+plugin.ts:71 🔥 DEBUG: Current URL pathname: /w/LIRzvY/app/explore/logs/
+chat_context_manager.ts:37 ⚡ ChatContextManager: Dynamic context received {appId: 'explore/logs', trigger: 'GLOBAL_CLICK', timestamp: '2025-09-16T22:20:19.693Z', data: {…}}
+context_capture_service.ts:169 📡 Global interaction also emitted as dynamic context for backward compatibility
+plugin.ts:76 🔥 DEBUG: Extracted currentAppId: explore
+plugin.ts:77 🔥 DEBUG: contextCaptureService exists: true
+plugin.ts:79 🔥 DEBUG: Calling captureStaticContext for: explore
+context_capture_service.ts:224 📊 Capturing static context for app: explore
+context_capture_service.ts:225 🔍 DEBUG: Registered contributors: (2) ['dashboards', 'explore']
+context_capture_service.ts:226 🔍 DEBUG: Looking for contributor with appId: explore
+context_capture_service.ts:227 🔥 DEBUG: captureStaticContext called with appId: explore
+context_capture_service.ts:262 🎯 Using registered context contributor for app: explore (contributor: explore)
+context_capture_service.ts:263 🔥 DEBUG: About to call contributor.captureStaticContext()
+context_contributor.ts:65 🔍 Explore: Capturing hybrid context (URL + transient state)
+context_contributor.ts:66 🔥 DEBUG: Current expandedDocuments size: 0
+context_contributor.ts:67 🔥 DEBUG: expandedDocuments Map contents: []
+context_contributor.ts:341 🔥 DEBUG: getTransientState called, expandedDocuments.size: 0
+context_contributor.ts:378 🔥 DEBUG: getDocumentPreview called, expandedDocuments.size: 0
+context_contributor.ts:379 🔥 DEBUG: expandedDocuments entries: []
+context_contributor.ts:343 🔥 DEBUG: documentPreview result: {expandedDocuments: Array(0), totalExpanded: 0, hasCurrentExpansions: false, lastInteraction: '2025-09-16T22:19:13.458Z', contextNote: 'These are documents the user has expanded to exami…sents their current focus and investigation area.'}
+context_contributor.ts:344 🔥 DEBUG: documentPreview.expandedDocuments length: 0
+context_contributor.ts:368 🔥 DEBUG: Final transientState keys: (4) ['expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity']
+context_contributor.ts:369 🔥 DEBUG: Final transientState.expandedDocuments: []
+context_contributor.ts:74 🔥 DEBUG: transientState keys: (4) ['expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity']
+context_contributor.ts:75 🔥 DEBUG: transientState.expandedDocuments: []
+context_contributor.ts:76 🔥 DEBUG: transientState.userActivity: {currentFocus: 'No documents currently expanded', lastAction: '2025-09-16T22:19:13.458Z', contextNote: 'These are documents the user has expanded to exami…sents their current focus and investigation area.', recentDocuments: Array(0)}
+context_contributor.ts:105 🔥 DEBUG: Final context keys: (14) ['type', 'capturePattern', 'indexPattern', 'query', 'filters', 'columns', 'sort', 'timeRange', 'expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity', 'metadata', 'timestamp']
+context_contributor.ts:106 🔥 DEBUG: Final context.expandedDocuments: []
+context_contributor.ts:107 🔥 DEBUG: Final context.userActivity: {currentFocus: 'No documents currently expanded', lastAction: '2025-09-16T22:19:13.458Z', contextNote: 'These are documents the user has expanded to exami…sents their current focus and investigation area.', recentDocuments: Array(0)}
+context_contributor.ts:108 ✅ Explore: Context captured with 0 expanded documents
+plugin.ts:81 🔥 DEBUG: captureStaticContext called
+context_capture_service.ts:269 ✅ Contributor context captured: {type: 'explore', capturePattern: 'hybrid', indexPattern: 'unknown', query: {…}, filters: Array(0), …}
+context_capture_service.ts:270 🔥 DEBUG: Context data keys after contributor: (18) ['appId', 'url', 'pathname', 'search', 'type', 'capturePattern', 'indexPattern', 'query', 'filters', 'columns', 'sort', 'timeRange', 'expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity', 'metadata', 'timestamp']
+context_capture_service.ts:271 🔥 DEBUG: expandedDocuments in context: 0
+context_capture_service.ts:315 🔥 DEBUG: About to emit new static context
+context_capture_service.ts:316 🔥 DEBUG: Static context data keys: (19) ['appId', 'url', 'pathname', 'search', 'type', 'capturePattern', 'indexPattern', 'query', 'filters', 'columns', 'sort', 'timeRange', 'expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity', 'metadata', 'timestamp', 'dataContext']
+context_capture_service.ts:317 🔥 DEBUG: expandedDocuments in static context: 0
+plugin.ts:58 📊 Static Context Updated: {appId: 'explore', timestamp: 1758061219797, data: {…}}
+plugin.ts:59 🔥 DEBUG: Static context received with appId: explore
+plugin.ts:60 🔥 DEBUG: Static context data keys: (19) ['appId', 'url', 'pathname', 'search', 'type', 'capturePattern', 'indexPattern', 'query', 'filters', 'columns', 'sort', 'timeRange', 'expandedDocuments', 'selectedFields', 'interactionSummary', 'userActivity', 'metadata', 'timestamp', 'dataContext']
+plugin.ts:61 🔥 DEBUG: expandedDocuments in received context: 0
+chat_context_manager.ts:31 📊 ChatContextManager: Static context received {appId: 'explore', timestamp: 1758061219797, data: {…}}
+context_capture_service.ts:319 🔥 DEBUG: Static context emitted successfully
+context_capture_service.ts:329 🔥 DEBUG: staticContextUpdated event dispatched for AI assistant
+chat_window.tsx:67 📊 Chat Run [3:20:21 PM] - "Update the query to: source = opensearch_dashboard..."
+📤 User message: Update the query to: source = opensearch_dashboards_sample_data_logs | head 10
+chat_window.tsx:75 🔄 [3:20:21 PM] RUN_STARTED: {type: 'RUN_STARTED', threadId: 'thread-1758061153458-ug00ggtwj', runId: 'run-1758061221871-bjsnm6zwl'}
+chat_window.tsx:75 🔄 [3:20:21 PM] RUN_STARTED: {type: 'RUN_STARTED', threadId: 'thread-1758061153458-ug00ggtwj', runId: 'run-1758061221871-bjsnm6zwl', timestamp: 1758061221933}
+chat_window.tsx:75 🔄 [3:20:21 PM] STATE_SNAPSHOT: {type: 'STATE_SNAPSHOT', snapshot: {…}, timestamp: 1758061221934}
+chat_window.tsx:75 🔄 [3:20:21 PM] STATE_SNAPSHOT: {type: 'STATE_SNAPSHOT', snapshot: {…}, timestamp: 1758061221934}
+chat_window.tsx:75 🔄 [3:20:21 PM] TEXT_MESSAGE_START: {type: 'TEXT_MESSAGE_START', messageId: '96a934ef-a7e7-42dc-b6be-87dd678809d7', role: 'assistant', timestamp: 1758061221935}
+chat_window.tsx:75 🔄 [3:20:24 PM] TEXT_MESSAGE_END: {type: 'TEXT_MESSAGE_END', messageId: '96a934ef-a7e7-42dc-b6be-87dd678809d7', timestamp: 1758061224947}
+chat_window.tsx:75 🔄 [3:20:24 PM] TOOL_CALL_START: {type: 'TOOL_CALL_START', toolCallId: 'tooluse_a2gmi0AiRU2Ztnnw8XuJ1w', toolCallName: 'update_query', timestamp: 1758061224947}
+chat_window.tsx:75 🔄 [3:20:24 PM] TOOL_CALL_ARGS: {type: 'TOOL_CALL_ARGS', toolCallId: 'tooluse_a2gmi0AiRU2Ztnnw8XuJ1w', delta: '{"query":"source = opensearch_dashboards_sample_data_logs | head 10"}', timestamp: 1758061224949}
+chat_window.tsx:75 🔄 [3:20:25 PM] TOOL_CALL_END: {type: 'TOOL_CALL_END', toolCallId: 'tooluse_a2gmi0AiRU2Ztnnw8XuJ1w', timestamp: 1758061225082}
+chat_window.tsx:75 🔄 [3:20:25 PM] TOOL_CALL_RESULT: {type: 'TOOL_CALL_RESULT', toolCallId: 'tooluse_a2gmi0AiRU2Ztnnw8XuJ1w', content: '{"content":[{"type":"text","text":"{\\n  \\"success\\…browser context without HTTP\\"\\n    }\\n  }\\n}"}]}', messageId: '387f6a75-f0bf-4000-bebb-e70899212b66', timestamp: 1758061225083}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_START: {type: 'TEXT_MESSAGE_START', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', role: 'assistant', timestamp: 1758061227277}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: 'Query', timestamp: 1758061227277}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' updated to', timestamp: 1758061227281}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' PP', timestamp: 1758061227286}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: 'L:', timestamp: 1758061227287}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' `', timestamp: 1758061227289}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: 'source = opensearch', timestamp: 1758061227290}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: '_dashboards_', timestamp: 1758061227292}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: 'sample_data_', timestamp: 1758061227315}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: 'logs | head ', timestamp: 1758061227317}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: '10`.', timestamp: 1758061227318}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' This will', timestamp: 1758061227319}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' retrieve', timestamp: 1758061227320}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' the first 10', timestamp: 1758061227320}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' records', timestamp: 1758061227376}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' from the sample', timestamp: 1758061227378}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' web', timestamp: 1758061227380}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: ' logs dataset', timestamp: 1758061227381}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_CONTENT: {type: 'TEXT_MESSAGE_CONTENT', messageId: '0de6b78e-70d8-44e4-b0ae-6a2b53881bb5', delta: '.', timestamp: 1758061227382}
+chat_window.tsx:75 🔄 [3:20:27 PM] TEXT_MESSAGE_END: {type: 'TEXT_MESSAGE_END', messageId: '96a934ef-a7e7-42dc-b6be-87dd678809d7', timestamp: 1758061227409}
+chat_window.tsx:75 🔄 [3:20:27 PM] STATE_SNAPSHOT: {type: 'STATE_SNAPSHOT', snapshot: {…}, timestamp: 1758061227410}
+chat_window.tsx:75 🔄 [3:20:27 PM] RUN_FINISHED: {type: 'RUN_FINISHED', threadId: 'thread-1758061153458-ug00ggtwj', runId: 'run-1758061221871-bjsnm6zwl', timestamp: 1758061227410}
+chat_window.tsx:75 🔄 [3:20:27 PM] RUN_FINISHED: {type: 'RUN_FINISHED', threadId: 'thread-1758061153458-ug00ggtwj', runId: 'run-1758061221871-bjsnm6zwl'}runId: "run-1758061221871-bjsnm6zwl"threadId: "thread-1758061153458-ug00ggtwj"type: "RUN_FINISHED"[[Prototype]]: Object
+chat_window.tsx:165 🏁 [3:20:27 PM] Stream complete

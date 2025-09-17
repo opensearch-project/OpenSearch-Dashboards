@@ -271,9 +271,6 @@ export class ContextCaptureService {
 
   private async captureStaticContext(appId: string): Promise<void> {
     console.log(`📊 Capturing static context for app: ${appId}`);
-    console.log(`🔍 DEBUG: Registered contributors:`, Array.from(this.contextContributors.keys()));
-    console.log(`🔍 DEBUG: Looking for contributor with appId: ${appId}`);
-    console.log('🔥 DEBUG: captureStaticContext called with appId:', appId);
 
     if (!this.coreStart || !this.pluginsStart) {
       console.warn('Services not available for context capture');

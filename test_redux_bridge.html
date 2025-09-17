@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redux Bridge Test</title>
+</head>
+<body>
+    <h1>Redux Bridge Client Test</h1>
+    <p>Open browser console and check for Redux Bridge Client logs</p>
+    
+    <script>
+        console.log('🧪 TEST: Starting Redux Bridge Client test...');
+        
+        // Check if Redux Bridge Client is available
+        setTimeout(() => {
+            console.log('🧪 TEST: Checking window.reduxBridgeClient...');
+            console.log('🧪 TEST: window.reduxBridgeClient =', window.reduxBridgeClient);
+            
+            // Check if global services are available
+            console.log('🧪 TEST: window.exploreServices =', window.exploreServices);
+            
+            if (window.exploreServices && window.exploreServices.store) {
+                console.log('🧪 TEST: Redux store is available!');
+                try {
+                    const state = window.exploreServices.store.getState();
+                    console.log('🧪 TEST: Current query state:', {
+                        query: state.query?.query,
+                        language: state.query?.language,
+                        dataset: state.query?.dataset?.title
+                    });
+                } catch (error) {
+                    console.error('🧪 TEST: Error accessing Redux state:', error);
+                }
+            } else {
+                console.log('🧪 TEST: Redux store not available yet');
+            }
+        }, 2000);
+        
+        // Test manual HTTP request to Redux bridge
+        setTimeout(() => {
+            console.log('🧪 TEST: Testing manual HTTP request to Redux bridge...');
+            
+            fetch('/api/osd-mcp-server/redux/update-query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'osd-xsrf': 'true'
+                },
+                body: JSON.stringify({
+                    query: 'source = test_manual_request | head 3',
+                    language: 'PPL'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('🧪 TEST: Manual HTTP request response:', data);
+            })
+            .catch(error => {
+                console.error('🧪 TEST: Manual HTTP request error:', error);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

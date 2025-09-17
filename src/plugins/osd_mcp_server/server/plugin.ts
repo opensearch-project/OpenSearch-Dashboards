@@ -15,6 +15,7 @@ import {
 import { MCPServer } from './mcp_server';
 import { MCPSSEHandler } from './mcp_sse_handler';
 import { OsdMcpServerConfig } from '../config';
+import { registerReduxBridgeRoutes } from './routes/redux_bridge';
 
 export interface OsdMcpServerPluginSetup {}
 export interface OsdMcpServerPluginStart {}
@@ -273,6 +274,9 @@ export class OsdMcpServerPlugin
         }
       }
     );
+
+    // Register Redux bridge routes
+    registerReduxBridgeRoutes(router);
 
     this.logger.info('OSD MCP Server HTTP routes registered');
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, FC, MutableRefObject, useRef } from 'react';
+import React, { createContext, FC, MutableRefObject, useRef, useEffect } from 'react';
 import type { monaco } from '@osd/monaco';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
@@ -28,6 +28,22 @@ export const EditorContext = createContext<InternalEditorContextValue>({
  */
 export const EditorContextProvider: FC = ({ children }) => {
   const editorRef = useRef<IStandaloneCodeEditor | null>(null);
+
+  // Make editor reference globally available for MCP integration
+  useEffect(() => {
+    if (!(window as any).exploreServices) {
+      (window as any).exploreServices = {};
+    }
+    (window as any).exploreServices.editorRef = editorRef;
+    console.log('🎯 Editor reference made globally available for MCP integration');
+    
+    return () => {
+      // Cleanup on unmount
+      if ((window as any).exploreServices) {
+        delete (window as any).exploreServices.editorRef;
+      }
+    };
+  }, [editorRef]);
 
   return <EditorContext.Provider value={editorRef}>{children}</EditorContext.Provider>;
 };

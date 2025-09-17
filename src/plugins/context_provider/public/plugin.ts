@@ -71,16 +71,12 @@ export class ContextProviderPlugin
     // Subscribe to context updates
     this.contextCaptureService.getStaticContext$().subscribe((context) => {
       this.currentContext = context;
-      console.log('📊 Static Context Updated:', context);
-      console.log('🔥 DEBUG: Static context received with appId:', context?.appId);
-      console.log(
-        '🔥 DEBUG: Static context data keys:',
-        context?.data ? Object.keys(context.data) : 'no data'
-      );
-      console.log(
-        '🔥 DEBUG: expandedDocuments in received context:',
-        context?.data?.expandedDocuments?.length || 0
-      );
+      // Reduced logging - only show essential info
+      console.log('📊 Static Context Updated:', {
+        appId: context?.appId,
+        timestamp: context?.timestamp,
+        expandedDocs: context?.data?.expandedDocuments?.length || 0
+      });
     });
 
     this.contextCaptureService.getDynamicContext$().subscribe((context) => {

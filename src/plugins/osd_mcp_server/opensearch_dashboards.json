@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
-  "ui": false,
+  "ui": true,
   "configPath": ["osdMcpServer"],
   "requiredPlugins": ["explore", "uiActions"],
   "optionalPlugins": [],
