@@ -1,0 +1,2 @@
+feat:
+- Add batch delete method, fix deletion error ([#9781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9781))

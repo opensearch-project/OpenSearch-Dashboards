@@ -49,6 +49,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
       chrome,
       notifications,
     },
+    overlays,
   } = useOpenSearchDashboards<{
     CoreStart: CoreStart;
     dataSourceManagement?: DataSourceManagementPluginSetup;
@@ -239,6 +240,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
               );
             }, 1000);
           }}
+          openModal={overlays.openModal}
         />
       )}
       {isEditing && (

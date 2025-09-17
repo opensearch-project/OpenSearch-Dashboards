@@ -7,6 +7,7 @@ import { IconType } from '@elastic/eui';
 import { QueryWithQueryAsString } from '../../application/utils/languages';
 import { QueryResultStatus } from '../../application/utils/state_management/types';
 
+// Please update the doc when updating this
 export interface QueryPanelActionDependencies {
   /**
    * Currently set Query
@@ -18,6 +19,7 @@ export interface QueryPanelActionDependencies {
   resultStatus: QueryResultStatus;
 }
 
+// Please update the doc when updating this
 export interface QueryPanelActionConfig {
   /**
    * The id for the action

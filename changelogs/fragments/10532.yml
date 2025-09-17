@@ -1,0 +1,2 @@
+fix:
+- Fix result table error ui ([#10532](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10532))
