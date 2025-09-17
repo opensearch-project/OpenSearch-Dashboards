@@ -36,7 +36,7 @@ export const EditorContextProvider: FC = ({ children }) => {
     }
     (window as any).exploreServices.editorRef = editorRef;
     console.log('🎯 Editor reference made globally available for MCP integration');
-    
+
     return () => {
       // Cleanup on unmount
       if ((window as any).exploreServices) {

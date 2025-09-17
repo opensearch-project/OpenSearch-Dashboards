@@ -26,9 +26,9 @@ export function registerReduxBridgeRoutes(router: IRouter) {
         // Return and clear pending commands
         const commands = [...pendingCommands];
         pendingCommands.length = 0; // Clear the array
-        
+
         console.log(`📨 Pending Commands: Returning ${commands.length} commands to browser`);
-        
+
         return response.ok({
           body: commands,
         });
@@ -62,7 +62,7 @@ export function registerReduxBridgeRoutes(router: IRouter) {
     async (context, request, response) => {
       try {
         console.log('🔧 Server Redux Bridge - Proxying get_state request to client');
-        
+
         // Return instructions for client-side execution
         return response.ok({
           body: {
@@ -103,11 +103,11 @@ export function registerReduxBridgeRoutes(router: IRouter) {
     async (context, request, response) => {
       try {
         const { query, language = 'PPL' } = request.body as any;
-        
+
         console.log('🎯 SERVER ROUTE HIT: /api/osd-mcp-server/redux/update-query');
         console.log('📥 Request body:', { query, language });
         console.log('🔧 Returning Redux execution instructions...');
-        
+
         // Option D: Return direct Redux execution instructions
         const responseBody = {
           action: 'execute_direct_redux',
@@ -118,15 +118,15 @@ export function registerReduxBridgeRoutes(router: IRouter) {
           directExecution: {
             method: 'updateQueryDirect',
             params: { query, language },
-            description: 'Execute Redux action directly in browser context without HTTP'
-          }
+            description: 'Execute Redux action directly in browser context without HTTP',
+          },
         };
-        
+
         // Add to pending commands queue for polling
         addPendingCommand(responseBody);
-        
+
         console.log('📤 Server response:', responseBody);
-        
+
         return response.ok({
           body: responseBody,
         });
@@ -154,9 +154,9 @@ export function registerReduxBridgeRoutes(router: IRouter) {
     async (context, request, response) => {
       try {
         const { query, waitForResults = true } = request.body as any;
-        
+
         console.log('🔧 Server Redux Bridge - Proxying execute_query request to client');
-        
+
         // Always return instructions for client-side execution (Option C)
         return response.ok({
           body: {

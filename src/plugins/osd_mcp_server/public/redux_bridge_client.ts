@@ -51,7 +51,7 @@ class ReduxBridgeClient {
       const checkServices = () => {
         if (window.exploreServices && window.exploreServices.store) {
           console.log('🔗 Redux Bridge: Global services detected');
-          
+
           // Test Redux store access and log current query
           try {
             const currentState = window.exploreServices.store.getState();
@@ -59,12 +59,12 @@ class ReduxBridgeClient {
             console.log('📊 Current Query State:', {
               query: currentState.query?.query || 'empty',
               language: currentState.query?.language || 'unknown',
-              dataset: currentState.query?.dataset?.title || 'none'
+              dataset: currentState.query?.dataset?.title || 'none',
             });
           } catch (error) {
             console.error('❌ Redux Store Error:', error);
           }
-          
+
           resolve();
         } else {
           setTimeout(checkServices, 1000);
@@ -77,28 +77,28 @@ class ReduxBridgeClient {
   private setupHttpInterception() {
     // Intercept fetch requests to Redux bridge endpoints
     const originalFetch = window.fetch;
-    
+
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
       const url = typeof input === 'string' ? input : input.toString();
-      
+
       // Only log Redux bridge requests to reduce noise (match both /redux/ and /redux endpoints)
       if (url.includes('/api/osd-mcp-server/redux')) {
         console.log('🎯 MCP Redux Request Intercepted:', url);
-        
+
         // Call original fetch to get server response
         const response = await originalFetch(input, init);
         const responseData = await response.json();
-        
+
         console.log('📡 Server Response:', responseData);
-        
+
         // Check if server returned direct Redux execution instructions (Option D)
         if (responseData.action === 'execute_direct_redux') {
           console.log('🎯 Executing Direct Redux Instructions (Option D)...');
-          
+
           // Execute Redux action directly without HTTP overhead
           const executionResult = await this.executeDirectReduxInstruction(responseData);
           console.log('✅ Direct Redux Execution Complete:', executionResult.success);
-          
+
           // Return modified response with execution results
           return new Response(JSON.stringify(executionResult), {
             status: 200,
@@ -108,15 +108,15 @@ class ReduxBridgeClient {
             },
           });
         }
-        
+
         // Fallback: Check if server returned legacy Redux execution instructions
         if (responseData.action === 'execute_redux') {
           console.log('🔧 Executing Legacy Redux Instructions...');
-          
+
           // Execute Redux action and return modified response
           const executionResult = await this.executeReduxInstruction(responseData);
           console.log('✅ Redux Execution Complete:', executionResult.success);
-          
+
           // Return modified response with execution results
           return new Response(JSON.stringify(executionResult), {
             status: 200,
@@ -126,7 +126,7 @@ class ReduxBridgeClient {
             },
           });
         }
-        
+
         // Return original response if no Redux instructions
         return new Response(JSON.stringify(responseData), {
           status: response.status,
@@ -134,7 +134,7 @@ class ReduxBridgeClient {
           headers: response.headers,
         });
       }
-      
+
       // For non-bridge requests, use original fetch
       return originalFetch(input, init);
     };
@@ -144,7 +144,7 @@ class ReduxBridgeClient {
 
   public async executeDirectReduxInstruction(instruction: any): Promise<any> {
     const { type, payload, directExecution } = instruction;
-    
+
     console.log(`🎯 Executing Direct Redux instruction: ${type}`, payload);
     console.log('🎯 Direct execution details:', directExecution);
 
@@ -155,7 +155,7 @@ class ReduxBridgeClient {
         success: false,
         message: 'Global services or store not available in browser context',
         timestamp: new Date().toISOString(),
-        executionType: 'direct_redux'
+        executionType: 'direct_redux',
       };
     }
 
@@ -168,8 +168,8 @@ class ReduxBridgeClient {
           return {
             ...updateResult,
             executionType: 'direct_redux',
-            directExecution: directExecution,
-            message: updateResult.message + ' (Direct Redux - No HTTP overhead)'
+            directExecution,
+            message: updateResult.message + ' (Direct Redux - No HTTP overhead)',
           };
         case 'execute_query':
           console.log('🎯 Direct Redux: Executing query directly via store.dispatch()');
@@ -177,8 +177,8 @@ class ReduxBridgeClient {
           return {
             ...executeResult,
             executionType: 'direct_redux',
-            directExecution: directExecution,
-            message: executeResult.message + ' (Direct Redux - No HTTP overhead)'
+            directExecution,
+            message: executeResult.message + ' (Direct Redux - No HTTP overhead)',
           };
         case 'get_state':
           console.log('🎯 Direct Redux: Getting state directly from store.getState()');
@@ -186,15 +186,15 @@ class ReduxBridgeClient {
           return {
             ...stateResult,
             executionType: 'direct_redux',
-            directExecution: directExecution,
-            message: stateResult.message + ' (Direct Redux - No HTTP overhead)'
+            directExecution,
+            message: stateResult.message + ' (Direct Redux - No HTTP overhead)',
           };
         default:
           return {
             success: false,
             message: `Unknown Direct Redux instruction type: ${type}`,
             timestamp: new Date().toISOString(),
-            executionType: 'direct_redux'
+            executionType: 'direct_redux',
           };
       }
     } catch (error) {
@@ -203,14 +203,14 @@ class ReduxBridgeClient {
         success: false,
         message: `Error executing Direct Redux instruction: ${error.message}`,
         timestamp: new Date().toISOString(),
-        executionType: 'direct_redux'
+        executionType: 'direct_redux',
       };
     }
   }
 
   private async executeReduxInstruction(instruction: ReduxExecutionInstruction): Promise<any> {
     const { type, payload } = instruction;
-    
+
     console.log(`🚀 Executing Redux instruction: ${type}`, payload);
 
     const globalServices = window.exploreServices;
@@ -250,7 +250,7 @@ class ReduxBridgeClient {
 
   private async handleUpdateQuery(payload: any): Promise<any> {
     const { query, language = 'PPL' } = payload;
-    
+
     console.log('🎯 Client Redux - Simulating human typing behavior:', { query, language });
 
     const globalServices = window.exploreServices;
@@ -267,7 +267,7 @@ class ReduxBridgeClient {
 
     // 🎯 CORRECT APPROACH: Use OpenSearch Dashboards' Editor Context System
     console.log('🎯 Using OpenSearch Dashboards Editor Context approach...');
-    
+
     // Try to access the global editor context through window.exploreServices
     const exploreServices = window.exploreServices;
     if (exploreServices && exploreServices.editorRef) {
@@ -282,12 +282,12 @@ class ReduxBridgeClient {
       }
     } else {
       console.log('⚠️ exploreServices.editorRef not found, trying alternative approaches...');
-      
+
       // Alternative 1: Try to find Monaco editor through global registry
       if ((window as any).monaco && (window as any).monaco.editor) {
         const editors = (window as any).monaco.editor.getEditors();
         console.log('🔧 Found Monaco editors:', editors.length);
-        
+
         if (editors.length > 0) {
           const editor = editors[0]; // Use the first editor
           console.log('🎯 Using Monaco editor.setValue()');
@@ -296,30 +296,32 @@ class ReduxBridgeClient {
         }
       } else {
         console.log('⚠️ Monaco not available globally');
-        
+
         // Alternative 2: Try to trigger React onChange through DOM manipulation
         console.log('🔧 Trying DOM-based approach...');
-        const editorContainer = document.querySelector('[data-test-subj="exploreQueryPanelEditor"]');
+        const editorContainer = document.querySelector(
+          '[data-test-subj="exploreQueryPanelEditor"]'
+        );
         if (editorContainer) {
           // Find textarea and trigger change events
           const textarea = editorContainer.querySelector('textarea');
           if (textarea) {
             console.log('🎯 Found textarea, setting value and triggering events');
             textarea.value = query;
-            
+
             // Trigger React synthetic events
             const inputEvent = new Event('input', { bubbles: true });
             const changeEvent = new Event('change', { bubbles: true });
             textarea.dispatchEvent(inputEvent);
             textarea.dispatchEvent(changeEvent);
-            
+
             // Also try focus/blur to trigger React updates
             textarea.focus();
             setTimeout(() => {
               textarea.blur();
               setTimeout(() => textarea.focus(), 50);
             }, 50);
-            
+
             console.log('✅ Textarea value set and events triggered');
           } else {
             console.log('⚠️ No textarea found in editor container');
@@ -368,7 +370,7 @@ class ReduxBridgeClient {
     }
 
     // Wait a moment for state to update
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Verify the update
     const updatedState = globalServices.store.getState();
@@ -381,7 +383,7 @@ class ReduxBridgeClient {
       updatedLanguage: updatedQuery.language,
       queryChanged: currentQuery.query !== updatedQuery.query,
       languageChanged: currentQuery.language !== updatedQuery.language,
-      simulationMethod: 'input_events_plus_redux'
+      simulationMethod: 'input_events_plus_redux',
     });
 
     return {
@@ -393,13 +395,18 @@ class ReduxBridgeClient {
       previousLanguage: currentQuery.language,
       timestamp: new Date().toISOString(),
       simulationMethod: 'input_events_plus_redux',
-      actions: ['input.setValue', 'input.dispatchEvent', 'setQueryStringWithHistory', 'executeQueries'],
+      actions: [
+        'input.setValue',
+        'input.dispatchEvent',
+        'setQueryStringWithHistory',
+        'executeQueries',
+      ],
     };
   }
 
   private async handleExecuteQuery(payload: any): Promise<any> {
     const { query, waitForResults = true } = payload;
-    
+
     console.log('🚀 Client Redux - Executing query:', { query, waitForResults });
 
     const globalServices = window.exploreServices;
@@ -425,7 +432,9 @@ class ReduxBridgeClient {
         console.log('🔧 Client Redux - Dispatching setQueryStringWithHistory for execution');
         globalServices.store.dispatch(reduxActions.setQueryStringWithHistory(query));
       } else {
-        console.log('🔧 Client Redux - Dispatching fallback setQueryStringWithHistory for execution');
+        console.log(
+          '🔧 Client Redux - Dispatching fallback setQueryStringWithHistory for execution'
+        );
         globalServices.store.dispatch({
           type: 'query/setQueryStringWithHistory',
           payload: query,
@@ -492,7 +501,9 @@ class ReduxBridgeClient {
 
       return {
         success: true,
-        message: query ? `Query "${query}" executed successfully` : 'Current query executed successfully',
+        message: query
+          ? `Query "${query}" executed successfully`
+          : 'Current query executed successfully',
         executedQuery: currentQuery.query,
         language: currentQuery.language,
         dataset: currentQuery.dataset ? currentQuery.dataset.title : 'default',
@@ -533,11 +544,13 @@ class ReduxBridgeClient {
       queryState: {
         query: queryState.query,
         language: queryState.language,
-        dataset: queryState.dataset ? {
-          id: queryState.dataset.id,
-          title: queryState.dataset.title,
-          type: queryState.dataset.type,
-        } : null,
+        dataset: queryState.dataset
+          ? {
+              id: queryState.dataset.id,
+              title: queryState.dataset.title,
+              type: queryState.dataset.type,
+            }
+          : null,
       },
       uiState: {
         activeTabId: uiState.activeTabId,
@@ -556,10 +569,10 @@ class ReduxBridgeClient {
 
     // Subscribe to Redux store changes
     let previousState = store.getState();
-    
+
     store.subscribe(() => {
       const currentState = store.getState();
-      
+
       // Check if query state changed
       if (previousState.query !== currentState.query) {
         console.log('🔄 Browser Redux Monitor - Query state changed:', {
@@ -580,7 +593,7 @@ class ReduxBridgeClient {
       if (previousState.results !== currentState.results) {
         const previousResultKeys = Object.keys(previousState.results || {});
         const currentResultKeys = Object.keys(currentState.results || {});
-        
+
         console.log('📊 Browser Redux Monitor - Results state changed:', {
           previousResultKeys,
           currentResultKeys,
@@ -629,7 +642,7 @@ class ReduxBridgeClient {
         queryStatus: state.queryEditor?.overallQueryStatus?.status,
       },
     });
-    
+
     return state;
   }
 }
@@ -645,7 +658,7 @@ class MCPCommandPoller {
 
   start() {
     if (this.isPolling) return;
-    
+
     console.log('🔄 MCP Command Polling: Starting (every 2 seconds)');
     this.isPolling = true;
     this.poll();
@@ -668,51 +681,59 @@ class MCPCommandPoller {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'osd-xsrf': 'true'
-        }
+          'osd-xsrf': 'true',
+        },
       });
 
       if (response.ok) {
         const commands = await response.json();
-        
+
         if (commands && commands.length > 0) {
           console.log('📨 MCP Polling: Found pending commands:', commands.length);
-          
+
           for (const command of commands) {
             // Create a more robust unique ID for this command to prevent duplicates
             const commandPayloadHash = JSON.stringify(command.payload || {}).substring(0, 100);
-            const commandId = `${command.type}_${command.timestamp || Date.now()}_${commandPayloadHash}`;
-            
+            const commandId = `${command.type}_${
+              command.timestamp || Date.now()
+            }_${commandPayloadHash}`;
+
             console.log('🔍 MCP Polling: Processing command:', {
               type: command.type,
               action: command.action,
               commandId: commandId.substring(0, 80) + '...',
-              alreadyProcessed: this.processedCommands.has(commandId)
+              alreadyProcessed: this.processedCommands.has(commandId),
             });
-            
+
             if (this.processedCommands.has(commandId)) {
-              console.log('⚠️ MCP Polling: Skipping duplicate command:', commandId.substring(0, 80) + '...');
+              console.log(
+                '⚠️ MCP Polling: Skipping duplicate command:',
+                commandId.substring(0, 80) + '...'
+              );
               continue;
             }
-            
+
             if (command.action === 'execute_direct_redux') {
               console.log('🎯 MCP Polling: Executing direct Redux command');
               console.log('🎯 MCP Polling: Command details:', {
                 type: command.type,
                 payload: command.payload,
-                timestamp: command.timestamp
+                timestamp: command.timestamp,
               });
-              
+
               // Mark as processed BEFORE execution to prevent race conditions
               this.processedCommands.add(commandId);
-              
+
               // Clean up old processed commands (keep only last 50 to prevent memory leaks)
               if (this.processedCommands.size > 50) {
                 const commandsArray = Array.from(this.processedCommands);
                 this.processedCommands = new Set(commandsArray.slice(-25));
-                console.log('🧹 MCP Polling: Cleaned up processed commands cache, now has:', this.processedCommands.size);
+                console.log(
+                  '🧹 MCP Polling: Cleaned up processed commands cache, now has:',
+                  this.processedCommands.size
+                );
               }
-              
+
               try {
                 await this.reduxBridge.executeDirectReduxInstruction(command);
                 console.log('✅ MCP Polling: Command executed successfully');
@@ -762,7 +783,9 @@ export { reduxBridgeClient, mcpPoller };
 (window as any).mcpPoller = mcpPoller;
 
 console.log('🌐 REDUX BRIDGE CLIENT: Available at window.reduxBridgeClient');
-console.log('🔧 REDUX BRIDGE CLIENT: Use window.reduxBridgeClient.getCurrentState() to inspect Redux state');
+console.log(
+  '🔧 REDUX BRIDGE CLIENT: Use window.reduxBridgeClient.getCurrentState() to inspect Redux state'
+);
 console.log('🎯 REDUX BRIDGE CLIENT: Module loaded and client initialized');
 console.log('🎯 REDUX BRIDGE CLIENT: Ready to intercept /api/osd-mcp-server/redux requests');
 console.log('🔄 MCP POLLER: Available at window.mcpPoller (start/stop polling)');

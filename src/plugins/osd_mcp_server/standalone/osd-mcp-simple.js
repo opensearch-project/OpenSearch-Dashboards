@@ -175,7 +175,7 @@ async function handleUpdateQuery(args) {
     }
   } catch (error) {
     console.error('❌ Error updating query via HTTP bridge:', error);
-    
+
     // Fallback to mock response if HTTP bridge is not available
     console.error('🔄 Falling back to mock response...');
     return {
@@ -233,7 +233,7 @@ async function handleRunQuery(args) {
     }
   } catch (error) {
     console.error('❌ Error executing query via HTTP bridge:', error);
-    
+
     // Fallback to mock response if HTTP bridge is not available
     console.error('🔄 Falling back to mock response...');
     return {
@@ -290,7 +290,7 @@ async function handleGetQueryState(args) {
     }
   } catch (error) {
     console.error('❌ Error getting query state via HTTP bridge:', error);
-    
+
     // Fallback to mock response if HTTP bridge is not available
     console.error('🔄 Falling back to mock response...');
     return {

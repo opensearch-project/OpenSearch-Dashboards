@@ -2,7 +2,7 @@
 
 /**
  * Option 1 (Polling) Complete Test
- * 
+ *
  * This script tests the complete Option 1 implementation:
  * 1. MCP Server adds command to pending queue
  * 2. Browser polls for pending commands
@@ -19,7 +19,7 @@ async function simulateMCPRequest() {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({
       query: 'source = test_polling_mechanism | head 7',
-      language: 'PPL'
+      language: 'PPL',
     });
 
     const options = {
@@ -30,8 +30,8 @@ async function simulateMCPRequest() {
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData),
-        'osd-xsrf': 'true'
-      }
+        'osd-xsrf': 'true',
+      },
     };
 
     console.log('🔧 Step 1: Simulating MCP server request...');
@@ -40,7 +40,7 @@ async function simulateMCPRequest() {
 
     const req = http.request(options, (res) => {
       let data = '';
-      
+
       res.on('data', (chunk) => {
         data += chunk;
       });
@@ -50,11 +50,11 @@ async function simulateMCPRequest() {
           const response = JSON.parse(data);
           console.log('✅ Step 1 Complete: MCP request processed');
           console.log('📥 Response:', JSON.stringify(response, null, 2));
-          
+
           if (response.action === 'execute_direct_redux') {
             console.log('🎯 SUCCESS: Command should be added to pending queue');
           }
-          
+
           resolve(response);
         } catch (error) {
           console.log('📄 Raw response:', data);
@@ -83,8 +83,8 @@ async function checkPendingCommands() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'osd-xsrf': 'true'
-      }
+        'osd-xsrf': 'true',
+      },
     };
 
     console.log('🔧 Step 2: Checking pending commands (simulating browser poll)...');
@@ -92,7 +92,7 @@ async function checkPendingCommands() {
 
     const req = http.request(options, (res) => {
       let data = '';
-      
+
       res.on('data', (chunk) => {
         data += chunk;
       });
@@ -102,7 +102,7 @@ async function checkPendingCommands() {
           const commands = JSON.parse(data);
           console.log('✅ Step 2 Complete: Pending commands retrieved');
           console.log('📥 Pending commands:', JSON.stringify(commands, null, 2));
-          
+
           if (Array.isArray(commands) && commands.length > 0) {
             console.log(`🎯 SUCCESS: Found ${commands.length} pending command(s)`);
             commands.forEach((cmd, index) => {
@@ -111,7 +111,7 @@ async function checkPendingCommands() {
           } else {
             console.log('⚠️ No pending commands found');
           }
-          
+
           resolve(commands);
         } catch (error) {
           console.log('📄 Raw response:', data);
@@ -136,31 +136,31 @@ async function runCompleteTest() {
     console.log('='.repeat(80));
     console.log('🧪 OPTION 1 (POLLING) COMPLETE TEST');
     console.log('='.repeat(80));
-    
+
     // Step 1: Simulate MCP server request
     console.log('\n📋 STEP 1: Simulate MCP Server Request');
     console.log('-'.repeat(50));
     const mcpResponse = await simulateMCPRequest();
-    
+
     // Wait a moment for server processing
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Step 2: Check pending commands
     console.log('\n📋 STEP 2: Check Pending Commands (Browser Poll)');
     console.log('-'.repeat(50));
     const pendingCommands = await checkPendingCommands();
-    
+
     // Results summary
     console.log('\n' + '='.repeat(80));
     console.log('📋 TEST RESULTS SUMMARY');
     console.log('='.repeat(80));
-    
+
     const step1Success = mcpResponse.action === 'execute_direct_redux';
     const step2Success = Array.isArray(pendingCommands) && pendingCommands.length > 0;
-    
+
     console.log(`✅ Step 1 - MCP Request Processing: ${step1Success ? 'PASS' : 'FAIL'}`);
     console.log(`✅ Step 2 - Pending Commands Queue: ${step2Success ? 'PASS' : 'FAIL'}`);
-    
+
     if (step1Success && step2Success) {
       console.log('\n🎉 OPTION 1 (POLLING) INFRASTRUCTURE: WORKING!');
       console.log('\n📝 Next Steps:');
@@ -178,18 +178,17 @@ async function runCompleteTest() {
       console.log('   The browser should pick them up within 2 seconds');
     } else {
       console.log('\n❌ OPTION 1 (POLLING) INFRASTRUCTURE: ISSUES DETECTED');
-      
+
       if (!step1Success) {
         console.log('   - MCP request processing failed');
         console.log('   - Check OSD server logs for errors');
       }
-      
+
       if (!step2Success) {
         console.log('   - Pending commands queue not working');
         console.log('   - Check if /api/osd-mcp-server/pending-commands endpoint exists');
       }
     }
-    
   } catch (error) {
     console.error('\n❌ Test failed:', error.message);
     console.log('\n🔧 Troubleshooting:');

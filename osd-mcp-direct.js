@@ -2,7 +2,7 @@
 
 /**
  * Direct MCP Server - No SSH, direct HTTP to localhost
- * 
+ *
  * Since AG-UI and OSD are both on EC2, we can make direct HTTP requests
  * without SSH complexity.
  */
@@ -161,7 +161,7 @@ async function handleUpdateQuery(args) {
 async function handleRunQuery(args) {
   const { query, waitForResults = true } = args;
   console.error('🔧 MCP Tool: run_query called with:', { query, waitForResults });
-  
+
   // For now, return success (can be implemented later)
   return {
     success: true,
@@ -174,7 +174,7 @@ async function handleRunQuery(args) {
 
 async function handleGetQueryState(args) {
   console.error('🔧 MCP Tool: get_query_state called');
-  
+
   // For now, return mock state (can be implemented later)
   return {
     success: true,

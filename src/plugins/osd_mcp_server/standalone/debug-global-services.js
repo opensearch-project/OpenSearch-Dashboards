@@ -14,7 +14,7 @@ console.log('- global.exploreReduxActions exists:', !!global.exploreReduxActions
 if (global.exploreServices) {
   console.log('✅ exploreServices found!');
   console.log('- store exists:', !!global.exploreServices.store);
-  
+
   if (global.exploreServices.store) {
     console.log('✅ Redux store found!');
     try {
@@ -31,7 +31,9 @@ if (global.exploreServices) {
 } else {
   console.log('❌ exploreServices NOT found');
   console.log('🔍 Available global properties:');
-  console.log(Object.keys(global).filter(key => key.includes('explore') || key.includes('redux')));
+  console.log(
+    Object.keys(global).filter((key) => key.includes('explore') || key.includes('redux'))
+  );
 }
 
 if (global.exploreReduxActions) {

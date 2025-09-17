@@ -2,7 +2,7 @@
 
 /**
  * Manual Redux Bridge Test
- * 
+ *
  * This script tests the Redux Bridge by making direct HTTP requests
  * to the OpenSearch Dashboards server, bypassing the SSH connection issues.
  */
@@ -17,7 +17,7 @@ async function testReduxBridge() {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({
       query: 'source = opensearch_dashboards_sample_data_logs | head 10',
-      language: 'PPL'
+      language: 'PPL',
     });
 
     const options = {
@@ -28,16 +28,19 @@ async function testReduxBridge() {
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData),
-        'osd-xsrf': 'true'
-      }
+        'osd-xsrf': 'true',
+      },
     };
 
-    console.log('🔧 Making HTTP request to:', `http://${options.hostname}:${options.port}${options.path}`);
+    console.log(
+      '🔧 Making HTTP request to:',
+      `http://${options.hostname}:${options.port}${options.path}`
+    );
     console.log('📤 Request payload:', postData);
 
     const req = http.request(options, (res) => {
       let data = '';
-      
+
       console.log('📡 Response status:', res.statusCode);
       console.log('📡 Response headers:', res.headers);
 
@@ -49,7 +52,7 @@ async function testReduxBridge() {
         try {
           const response = JSON.parse(data);
           console.log('✅ Response received:', JSON.stringify(response, null, 2));
-          
+
           if (response.action === 'execute_direct_redux') {
             console.log('🎯 SUCCESS: Server returned "execute_direct_redux" instructions!');
             console.log('🎯 Direct execution details:', response.directExecution);
@@ -63,7 +66,7 @@ async function testReduxBridge() {
           } else {
             console.log('⚠️ Server did not return "execute_direct_redux" action');
           }
-          
+
           resolve(response);
         } catch (error) {
           console.log('📄 Raw response:', data);
@@ -89,14 +92,14 @@ async function runTests() {
     console.log('='.repeat(60));
     console.log('🧪 TEST 1: Direct HTTP Request to Redux Bridge');
     console.log('='.repeat(60));
-    
+
     const response = await testReduxBridge();
-    
+
     console.log('');
     console.log('='.repeat(60));
     console.log('📋 TEST RESULTS SUMMARY');
     console.log('='.repeat(60));
-    
+
     if (response.action === 'execute_direct_redux') {
       console.log('✅ Redux Bridge Server Routes: WORKING');
       console.log('✅ "execute_direct_redux" Response: RECEIVED');
@@ -130,7 +133,6 @@ async function runTests() {
       console.log('❌ Redux Bridge Server Routes: NOT WORKING');
       console.log('❌ Expected "execute_direct_redux", got:', response.action || 'unknown');
     }
-    
   } catch (error) {
     console.error('❌ Test failed:', error.message);
     console.log('');

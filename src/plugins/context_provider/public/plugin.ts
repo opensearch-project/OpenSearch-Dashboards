@@ -75,7 +75,7 @@ export class ContextProviderPlugin
       console.log('📊 Static Context Updated:', {
         appId: context?.appId,
         timestamp: context?.timestamp,
-        expandedDocs: context?.data?.expandedDocuments?.length || 0
+        expandedDocs: context?.data?.expandedDocuments?.length || 0,
       });
     });
 
