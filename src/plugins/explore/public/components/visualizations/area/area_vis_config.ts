@@ -20,25 +20,28 @@ import {
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 
 // Complete area chart style controls interface
-export interface AreaChartStyleControls {
+export interface AreaChartStyleOptions {
   // Basic controls
-  addLegend: boolean;
-  legendPosition: Positions;
-  addTimeMarker: boolean;
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  addTimeMarker?: boolean;
   areaOpacity?: number;
-  tooltipOptions: TooltipOptions;
+  tooltipOptions?: TooltipOptions;
 
   // Threshold and grid
-  thresholdLines: ThresholdLines;
+  thresholdLines?: ThresholdLines;
 
   // Axes configuration
-  categoryAxes: CategoryAxis[];
-  valueAxes: ValueAxis[];
+  categoryAxes?: CategoryAxis[];
+  valueAxes?: ValueAxis[];
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
 }
 
-const defaultAreaChartStyles: AreaChartStyleControls = {
+export type AreaChartStyle = Required<Omit<AreaChartStyleOptions, 'areaOpacity'>> &
+  Pick<AreaChartStyleOptions, 'areaOpacity'>;
+
+const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
   legendPosition: Positions.RIGHT,

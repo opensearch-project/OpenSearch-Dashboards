@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { BarVisStyleControls } from './bar_vis_options';
-import { BarChartStyleControls, defaultBarChartStyles } from './bar_vis_config';
+import { defaultBarChartStyles } from './bar_vis_config';
 import { VisColumn, VisFieldType } from '../types';
 
 export default {
@@ -41,7 +41,7 @@ const mockDateColumns: VisColumn[] = [];
 
 const Template: ComponentStory<typeof BarVisStyleControls> = (args) => {
   // Use state to track changes
-  const [styleOptions, setStyleOptions] = useState<BarChartStyleControls>(args.styleOptions);
+  const [styleOptions, setStyleOptions] = useState(args.styleOptions);
 
   return (
     <div style={{ maxWidth: '800px', padding: '16px' }}>

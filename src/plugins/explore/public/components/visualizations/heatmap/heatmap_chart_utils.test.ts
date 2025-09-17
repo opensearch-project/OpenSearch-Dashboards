@@ -12,7 +12,7 @@ import {
 import * as utils from './heatmap_chart_utils';
 import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
 
-import { defaultHeatmapChartStyles, HeatmapLabels } from './heatmap_vis_config';
+import { defaultHeatmapChartStyles, HeatmapChartStyle, HeatmapLabels } from './heatmap_vis_config';
 import * as colorUtil from '../utils/utils';
 
 describe('createLabelLayer', () => {
@@ -155,6 +155,7 @@ describe('getDataBound', () => {
 
 describe('addTransform', () => {
   const styles = {
+    ...defaultHeatmapChartStyles,
     exclusive: {
       percentageMode: true,
       colorSchema: ColorSchemas.BLUES,
@@ -183,6 +184,7 @@ describe('addTransform', () => {
   it('should return empty array when percentageMode is false', () => {
     const result = addTransform(
       {
+        ...defaultHeatmapChartStyles,
         exclusive: {
           ...styles.exclusive,
           percentageMode: false,
@@ -205,6 +207,7 @@ describe('setRange', () => {
     jest.spyOn(colorUtil, 'generateColorBySchema').mockReturnValue(mockColors);
 
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         customRanges: [
           { min: 1, max: 5 },
@@ -228,6 +231,7 @@ describe('setRange', () => {
 
   it('returns one color if no customRanges are defined but user turns on useCustomRanges', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         customRanges: [],
         useCustomRanges: true,
@@ -266,6 +270,7 @@ describe('enhanceStyle', () => {
 
   it('applies percentageMode settings if enabled and addLegend is true', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         customRanges: [],
         useCustomRanges: true,
@@ -289,6 +294,7 @@ describe('enhanceStyle', () => {
 
   it('applies scaleToDataBounds if enabled', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         customRanges: [],
         useCustomRanges: true,
@@ -313,6 +319,7 @@ describe('enhanceStyle', () => {
     jest.spyOn(utils, 'setRange').mockReturnValue(mockRange);
 
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
@@ -342,6 +349,7 @@ describe('enhanceStyle', () => {
     jest.spyOn(utils, 'setRange').mockReturnValue(mockRange);
 
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
@@ -364,7 +372,7 @@ describe('enhanceStyle', () => {
 
   it('does nothing if no matching flags are set', () => {
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
-    enhanceStyle(markLayer, {}, transformedData, colorField);
+    enhanceStyle(markLayer, ({} as unknown) as HeatmapChartStyle, transformedData, colorField);
 
     expect(markLayer).toEqual(baseMarkLayer);
   });

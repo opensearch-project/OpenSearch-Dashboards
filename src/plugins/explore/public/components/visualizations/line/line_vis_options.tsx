@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { LineChartStyleControls } from './line_vis_config';
+import { LineChartStyle, LineChartStyleOptions } from './line_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { ThresholdOptions } from '../style_panel/threshold_lines/threshold';
@@ -17,7 +17,7 @@ import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
 
-export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
+export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyle>;
 
 export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   styleOptions,
@@ -28,9 +28,9 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof LineChartStyleControls>(
+  const updateStyleOption = <K extends keyof LineChartStyleOptions>(
     key: K,
-    value: LineChartStyleControls[K]
+    value: LineChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };

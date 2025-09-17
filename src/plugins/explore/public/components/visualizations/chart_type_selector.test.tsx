@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { ChartTypeSelector } from './chart_type_selector';
 import { VisColumn, VisFieldType } from './types';
-import { VisData } from './visualization_builder';
+import { VisData } from './visualization_builder.types';
 
 jest.mock('./rule_repository', () => ({
   ALL_VISUALIZATION_RULES: [

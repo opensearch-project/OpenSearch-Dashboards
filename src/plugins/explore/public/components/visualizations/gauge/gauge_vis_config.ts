@@ -6,22 +6,25 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { GaugeVisStyleControls } from './gauge_vis_options';
-import { Threshold, AxisRole, VisFieldType, UnitItem } from '../types';
+import { Threshold, AxisRole, VisFieldType } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 
-export interface GaugeChartStyleControls {
-  showTitle: boolean;
-  title: string;
+export interface GaugeChartStyleOptions {
+  showTitle?: boolean;
+  title?: string;
   min?: number;
   max?: number;
-  baseColor: string;
-  thresholds: Threshold[];
-  valueCalculation: CalculationMethod;
+  baseColor?: string;
+  thresholds?: Threshold[];
+  valueCalculation?: CalculationMethod;
   unitId?: string;
 }
 
-export const defaultGaugeChartStyles: GaugeChartStyleControls = {
+export type GaugeChartStyle = Required<Omit<GaugeChartStyleOptions, 'min' | 'max' | 'unitId'>> &
+  Pick<GaugeChartStyleOptions, 'min' | 'max' | 'unitId'>;
+
+export const defaultGaugeChartStyles: GaugeChartStyle = {
   showTitle: true,
   title: '',
   thresholds: [],

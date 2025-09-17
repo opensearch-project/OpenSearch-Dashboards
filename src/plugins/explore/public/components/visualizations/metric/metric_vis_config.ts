@@ -6,40 +6,32 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { MetricVisStyleControls } from './metric_vis_options';
-import {
-  RangeValue,
-  ColorSchemas,
-  AxisRole,
-  VisFieldType,
-  PercentageColor,
-  UnitItem,
-} from '../types';
+import { RangeValue, ColorSchemas, AxisRole, VisFieldType, PercentageColor } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 
 export type TextAlignment = 'auto' | 'center';
 
-export interface MetricChartStyleControls {
-  showTitle: boolean;
-  title: string;
+export interface MetricChartStyleOptions {
+  showTitle?: boolean;
+  title?: string;
   fontSize?: number;
   titleSize?: number;
   percentageSize?: number;
-  useColor: boolean;
+  useColor?: boolean;
   showPercentage?: boolean;
-  colorSchema: ColorSchemas;
+  colorSchema?: ColorSchemas;
   valueCalculation?: CalculationMethod;
   percentageColor?: PercentageColor;
   customRanges?: RangeValue[];
   unitId?: string;
 }
 
-// TODO: refactor other type of chart to ensure the default style control object is properly typed
-export type DefaultMetricChartStyleControls = MetricChartStyleControls &
-  Required<
-    Pick<MetricChartStyleControls, 'showPercentage' | 'percentageColor' | 'valueCalculation'>
-  >;
+export type MetricChartStyle = Required<
+  Omit<MetricChartStyleOptions, 'fontSize' | 'titleSize' | 'percentageSize' | 'unitId'>
+> &
+  Pick<MetricChartStyleOptions, 'fontSize' | 'titleSize' | 'percentageSize' | 'unitId'>;
 
-export const defaultMetricChartStyles: DefaultMetricChartStyleControls = {
+export const defaultMetricChartStyles: MetricChartStyle = {
   showTitle: true,
   title: '',
   useColor: false,

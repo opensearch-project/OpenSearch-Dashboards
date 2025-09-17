@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BarChartStyleControls } from './bar_vis_config';
+import { BarChartStyle, BarChartStyleOptions } from './bar_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { ThresholdOptions } from '../style_panel/threshold_lines/threshold';
@@ -18,7 +18,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from './bucket_options';
 
-export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
+export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyle>;
 
 export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   styleOptions,
@@ -31,9 +31,9 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof BarChartStyleControls>(
+  const updateStyleOption = <K extends keyof BarChartStyleOptions>(
     key: K,
-    value: BarChartStyleControls[K]
+    value: BarChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };

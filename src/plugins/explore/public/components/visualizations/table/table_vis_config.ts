@@ -19,7 +19,7 @@ export interface Calc {
   calculation: CalculationMethod;
 }
 
-export interface TableChartStyleControls {
+export interface TableChartStyleOptions {
   pageSize?: number;
   globalAlignment?: CellAlignment;
   showColumnFilter?: boolean;
@@ -30,7 +30,9 @@ export interface TableChartStyleControls {
   baseColor?: string;
 }
 
-export const defaultTableChartStyles: Required<TableChartStyleControls> = {
+export type TableChartStyle = Required<TableChartStyleOptions>;
+
+export const defaultTableChartStyles: TableChartStyle = {
   pageSize: 10,
   globalAlignment: 'auto',
   showColumnFilter: false,

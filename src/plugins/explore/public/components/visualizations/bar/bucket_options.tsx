@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { BarChartStyleControls } from './bar_vis_config';
+import { BarChartStyleOptions } from './bar_vis_config';
 import { AggregationType, TimeUnit, BucketOptions } from '../types';
 import { getAggregationType, getTimeUnits } from '../utils/collections';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -14,9 +14,9 @@ import { defaultBarChartStyles } from './bar_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 
 interface BucketOptionsPanelProps {
-  styles: BarChartStyleControls['bucket'];
+  styles: BarChartStyleOptions['bucket'];
   bucketType: 'time' | 'num' | 'single' | 'cate';
-  onChange: (styles: BarChartStyleControls['bucket']) => void;
+  onChange: (styles: BarChartStyleOptions['bucket']) => void;
 }
 
 export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptionsPanelProps) => {

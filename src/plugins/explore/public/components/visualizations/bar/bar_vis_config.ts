@@ -19,38 +19,41 @@ import {
   BucketOptions,
   TimeUnit,
 } from '../types';
-import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
+import { BarVisStyleControls } from './bar_vis_options';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 
-export interface BarChartStyleControls {
+export interface BarChartStyleOptions {
   // Basic controls
-  addLegend: boolean;
-  legendPosition: Positions;
+  addLegend?: boolean;
+  legendPosition?: Positions;
   legendShape?: 'circle' | 'square';
-  tooltipOptions: TooltipOptions;
+  tooltipOptions?: TooltipOptions;
 
   // Bar specific controls
-  barSizeMode: 'auto' | 'manual';
-  barWidth: number;
-  barPadding: number;
-  showBarBorder: boolean;
-  barBorderWidth: number;
-  barBorderColor: string;
+  barSizeMode?: 'auto' | 'manual';
+  barWidth?: number;
+  barPadding?: number;
+  showBarBorder?: boolean;
+  barBorderWidth?: number;
+  barBorderColor?: string;
 
   // Threshold and grid
-  thresholdLines: ThresholdLines;
+  thresholdLines?: ThresholdLines;
   // Axes configuration
-  standardAxes: StandardAxes[];
+  standardAxes?: StandardAxes[];
 
-  switchAxes: boolean;
+  switchAxes?: boolean;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
 
   // histogram bucket config
   bucket?: BucketOptions;
 }
 
-export const defaultBarChartStyles: BarChartStyleControls = {
+export type BarChartStyle = Required<Omit<BarChartStyleOptions, 'legendShape'>> &
+  Pick<BarChartStyleOptions, 'legendShape'>;
+
+export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls
   switchAxes: false,
   addLegend: true,
@@ -136,8 +139,7 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
   ui: {
     style: {
       defaults: defaultBarChartStyles,
-      render: (props) =>
-        React.createElement(BarVisStyleControls, props as BarVisStyleControlsProps),
+      render: (props) => React.createElement(BarVisStyleControls, props),
     },
     availableMappings: [
       {

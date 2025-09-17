@@ -23,27 +23,29 @@ import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 export type LineMode = 'straight' | 'smooth' | 'stepped';
 
 // Complete line chart style controls interface
-export interface LineChartStyleControls {
-  addLegend: boolean;
-  legendPosition: Positions;
-  addTimeMarker: boolean;
+export interface LineChartStyleOptions {
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  addTimeMarker?: boolean;
 
-  lineStyle: LineStyle;
-  lineMode: LineMode;
-  lineWidth: number;
-  tooltipOptions: TooltipOptions;
+  lineStyle?: LineStyle;
+  lineMode?: LineMode;
+  lineWidth?: number;
+  tooltipOptions?: TooltipOptions;
 
   // Threshold and grid
-  thresholdLines: ThresholdLines;
+  thresholdLines?: ThresholdLines;
 
   // Axes configuration
-  categoryAxes: CategoryAxis[];
-  valueAxes: ValueAxis[];
+  categoryAxes?: CategoryAxis[];
+  valueAxes?: ValueAxis[];
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
 }
 
-export const defaultLineChartStyles: LineChartStyleControls = {
+export type LineChartStyle = Required<LineChartStyleOptions>;
+
+export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,

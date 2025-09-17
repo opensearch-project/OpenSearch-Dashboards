@@ -12,6 +12,7 @@ import {
   AxisRole,
   AxisColumnMappings,
 } from '../types';
+import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 
 describe('to_expression', () => {
   // Sample data for testing
@@ -38,7 +39,8 @@ describe('to_expression', () => {
     uniqueValuesCount: 1,
   };
 
-  const defaultStyleOptions = {
+  const defaultStyleOptions: PieChartStyle = {
+    ...defaultPieChartStyles,
     addLegend: true,
     legendPosition: Positions.RIGHT,
     tooltipOptions: {
