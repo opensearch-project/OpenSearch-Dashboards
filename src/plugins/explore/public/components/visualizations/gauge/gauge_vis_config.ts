@@ -10,9 +10,9 @@ import { ThresholdOptions, AxisRole, VisFieldType, Threshold } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 
-export interface GaugeChartStyleControls {
-  showTitle: boolean;
-  title: string;
+export interface GaugeChartStyleOptions {
+  showTitle?: boolean;
+  title?: string;
   min?: number;
   max?: number;
 
@@ -24,13 +24,18 @@ export interface GaugeChartStyleControls {
    * @deprecated - use thresholdOptions instead
    */
   thresholds?: Threshold[];
-  valueCalculation: CalculationMethod;
+  valueCalculation?: CalculationMethod;
   unitId?: string;
   thresholdOptions?: ThresholdOptions;
   useThresholdColor?: boolean;
 }
 
-export const defaultGaugeChartStyles: GaugeChartStyleControls = {
+export type GaugeChartStyle = Required<
+  Omit<GaugeChartStyleOptions, 'min' | 'max' | 'unitId' | 'baseColor' | 'thresholds'>
+> &
+  Pick<GaugeChartStyleOptions, 'min' | 'max' | 'unitId'>;
+
+export const defaultGaugeChartStyles: GaugeChartStyle = {
   showTitle: true,
   title: '',
   thresholdOptions: {

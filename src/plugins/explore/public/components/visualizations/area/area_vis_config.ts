@@ -22,13 +22,13 @@ import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 import { getColors } from '../theme/default_colors';
 
 // Complete area chart style controls interface
-export interface AreaChartStyleControls {
+export interface AreaChartStyleOptions {
   // Basic controls
-  addLegend: boolean;
-  legendPosition: Positions;
-  addTimeMarker: boolean;
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  addTimeMarker?: boolean;
   areaOpacity?: number;
-  tooltipOptions: TooltipOptions;
+  tooltipOptions?: TooltipOptions;
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -36,15 +36,20 @@ export interface AreaChartStyleControls {
   thresholdLines?: ThresholdLines;
 
   // Axes configuration
-  categoryAxes: CategoryAxis[];
-  valueAxes: ValueAxis[];
+  categoryAxes?: CategoryAxis[];
+  valueAxes?: ValueAxis[];
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
 
   thresholdOptions?: ThresholdOptions;
 }
 
-const defaultAreaChartStyles: AreaChartStyleControls = {
+export type AreaChartStyle = Required<
+  Omit<AreaChartStyleOptions, 'areaOpacity' | 'thresholdLines'>
+> &
+  Pick<AreaChartStyleOptions, 'areaOpacity'>;
+
+const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
   legendPosition: Positions.RIGHT,

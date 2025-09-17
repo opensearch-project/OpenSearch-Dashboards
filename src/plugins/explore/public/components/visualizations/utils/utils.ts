@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { mergeWith, isPlainObject } from 'lodash';
 import {
   StandardAxes,
   ColorSchemas,
@@ -15,6 +16,7 @@ import {
   Threshold,
   AxisConfig,
 } from '../types';
+import { ChartStyles, StyleOptions } from './use_visualization_types';
 
 export const applyAxisStyling = (
   axis?: VisColumn,
@@ -296,3 +298,33 @@ export function getThresholdByValue<T>(
 
   return undefined;
 }
+
+export const mergeStyles = (dest: ChartStyles, source: StyleOptions | undefined) => {
+  const copiedDest = { ...dest };
+
+  function customMerge(objValue: any, srcValue: any) {
+    if (isPlainObject(objValue) && isPlainObject(srcValue)) {
+      // Deep merge nested objects
+      const merged = { ...objValue };
+
+      // Iterate through all keys in srcValue
+      Object.keys(srcValue).forEach((key) => {
+        if (isPlainObject(objValue[key]) && isPlainObject(srcValue[key])) {
+          // Recursively merge nested objects
+          merged[key] = customMerge(objValue[key], srcValue[key]);
+        } else if (srcValue[key] !== undefined) {
+          // Only override if srcValue[key] is not undefined
+          merged[key] = srcValue[key];
+        }
+      });
+
+      return merged;
+    }
+
+    // For non-objects or if one of the values is not an object,
+    // return srcValue if it's not undefined, otherwise keep objValue
+    return srcValue !== undefined ? srcValue : objValue;
+  }
+
+  return mergeWith(copiedDest, source, customMerge);
+};

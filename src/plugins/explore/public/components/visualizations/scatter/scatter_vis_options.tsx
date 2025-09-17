@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ScatterChartStyleControls } from './scatter_vis_config';
+import { ScatterChartStyle } from './scatter_vis_config';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -17,7 +17,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
-export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
+export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyle>;
 
 export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = ({
   styleOptions,
@@ -30,9 +30,9 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof ScatterChartStyleControls>(
+  const updateStyleOption = <K extends keyof ScatterChartStyle>(
     key: K,
-    value: ScatterChartStyleControls[K]
+    value: ScatterChartStyle[K]
   ) => {
     onStyleChange({ [key]: value });
   };

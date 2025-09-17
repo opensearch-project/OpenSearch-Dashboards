@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { EuiSwitch, EuiButtonGroup, EuiColorPicker, EuiFormRow, EuiSelect } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { defaultHeatmapChartStyles, HeatmapChartStyleControls } from './heatmap_vis_config';
+import { defaultHeatmapChartStyles, HeatmapChartStyle } from './heatmap_vis_config';
 import { ColorSchemas, ScaleType } from '../types';
 import { getColorSchemas } from '../utils/collections';
 import { useDebouncedValue } from '../utils/use_debounced_value';
@@ -14,15 +14,15 @@ import { StyleAccordion } from '../style_panel/style_accordion';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 
 interface HeatmapVisOptionsProps {
-  styles: HeatmapChartStyleControls['exclusive'];
+  styles: HeatmapChartStyle['exclusive'];
   useThresholdColor?: boolean;
-  onChange: (styles: HeatmapChartStyleControls['exclusive']) => void;
+  onChange: (styles: HeatmapChartStyle['exclusive']) => void;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
 }
 
 interface HeatmapLabelVisOptionsProps {
-  styles: HeatmapChartStyleControls['exclusive']['label'];
-  onChange: (styles: HeatmapChartStyleControls['exclusive']['label']) => void;
+  styles: HeatmapChartStyle['exclusive']['label'];
+  onChange: (styles: HeatmapChartStyle['exclusive']['label']) => void;
 }
 
 export const HeatmapExclusiveVisOptions = ({
@@ -31,9 +31,9 @@ export const HeatmapExclusiveVisOptions = ({
   onChange,
   onUseThresholdColorChange,
 }: HeatmapVisOptionsProps) => {
-  const updateExclusiveOption = <K extends keyof HeatmapChartStyleControls['exclusive']>(
+  const updateExclusiveOption = <K extends keyof HeatmapChartStyle['exclusive']>(
     key: K,
-    value: HeatmapChartStyleControls['exclusive'][K]
+    value: HeatmapChartStyle['exclusive'][K]
   ) => {
     onChange({
       ...styles,
@@ -185,9 +185,9 @@ export const HeatmapExclusiveVisOptions = ({
 };
 
 export const HeatmapLabelVisOptions = ({ styles, onChange }: HeatmapLabelVisOptionsProps) => {
-  const updateLabelOption = <K extends keyof HeatmapChartStyleControls['exclusive']['label']>(
+  const updateLabelOption = <K extends keyof HeatmapChartStyle['exclusive']['label']>(
     key: K,
-    value: HeatmapChartStyleControls['exclusive']['label'][K]
+    value: HeatmapChartStyle['exclusive']['label'][K]
   ) => {
     onChange({
       ...styles,
