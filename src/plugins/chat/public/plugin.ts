@@ -5,7 +5,13 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../core/public';
 import { ChatPluginSetup, ChatPluginStart, AppPluginStartDependencies } from './types';
 import { PLUGIN_NAME } from '../common';
 import { ChatService } from './services/chat_service';
@@ -14,6 +20,8 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
 
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatService: ChatService | undefined;
+
+  constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): ChatPluginSetup {
     // Register an application into the side navigation menu
@@ -44,8 +52,11 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   }
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): ChatPluginStart {
-    // Initialize chat service
-    this.chatService = new ChatService();
+    // Get configuration
+    const config = this.initializerContext.config.get<{ agUiUrl: string }>();
+
+    // Initialize chat service with configured AG-UI URL
+    this.chatService = new ChatService(config.agUiUrl);
 
     // Register chat button in header using toMountPoint
     core.chrome.navControls.registerRight({

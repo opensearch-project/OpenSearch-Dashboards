@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { PluginInitializerContext } from '../../../core/public';
 import { ChatPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, OpenSearch Dashboards Platform `plugin()` initializer.
-export function plugin() {
-  return new ChatPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ChatPlugin(initializerContext);
 }
 export { ChatPluginSetup, ChatPluginStart } from './types';
