@@ -37,6 +37,11 @@ export const AdvancedSelector = ({
       children: queryString
         .getDatasetService()
         .getTypes()
+        .filter(
+          (type) =>
+            type.meta.supportedAppNames === undefined ||
+            type.meta.supportedAppNames.includes(services.appName)
+        )
         .map((type) => {
           return {
             id: type.id,
