@@ -215,8 +215,12 @@ export const findDefaultPatternsField = (services: ExploreServices): string => {
     return field.type === 'string';
   });
 
+  if (!logResults?.hits?.hits?.[0]) {
+    throw new Error('Cannot access hits from logs tab');
+  }
+
   // Get the first hit if available
-  const firstHit = logResults?.hits?.hits?.[0];
+  const firstHit = logResults.hits.hits[0];
 
   if (firstHit && firstHit._source && filteredFields) {
     // Find the field with the longest value

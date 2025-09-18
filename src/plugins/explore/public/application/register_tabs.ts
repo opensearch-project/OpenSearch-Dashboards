@@ -64,7 +64,11 @@ export const registerBuiltInTabs = (
 
       const preparedQuery = getQueryWithSource(query);
       if (!patternsField) {
-        patternsField = findDefaultPatternsField(services);
+        try {
+          patternsField = findDefaultPatternsField(services);
+        } catch {
+          return preparedQuery.query;
+        }
       }
 
       if (state.tab.patterns.usingRegexPatterns)
