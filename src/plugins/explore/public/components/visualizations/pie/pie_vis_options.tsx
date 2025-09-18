@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { PieChartStyle } from './pie_vis_config';
+import { PieChartStyle, PieChartStyleOptions } from './pie_vis_config';
 import { PieExclusiveVisOptions } from './pie_exclusive_vis_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
@@ -27,7 +27,10 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof PieChartStyle>(key: K, value: PieChartStyle[K]) => {
+  const updateStyleOption = <K extends keyof PieChartStyleOptions>(
+    key: K,
+    value: PieChartStyleOptions[K]
+  ) => {
     onStyleChange({ [key]: value });
   };
 

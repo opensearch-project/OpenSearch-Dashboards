@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ScatterChartStyle } from './scatter_vis_config';
+import { ScatterChartStyle, ScatterChartStyleOptions } from './scatter_vis_config';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -30,9 +30,9 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof ScatterChartStyle>(
+  const updateStyleOption = <K extends keyof ScatterChartStyleOptions>(
     key: K,
-    value: ScatterChartStyle[K]
+    value: ScatterChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };
