@@ -1,3 +1,5 @@
+@import "@elastic/eui/src/global_styling/mixins/shadow";
+
 .messageRow {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -10,6 +12,7 @@
 
   &__content {
     min-width: 0;
+    position: relative;
   }
 
   &__cursor {
@@ -37,6 +40,28 @@
         border-left: 3px solid $euiColorLightShade;
       }
     }
+  }
+
+  &__actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    background: transparentize($euiColorEmptyShade, 10%);
+    border-radius: 4px;
+    padding: 2px;
+
+    @include euiSlightShadow;
+
+    &--visible {
+      opacity: 1;
+    }
+  }
+
+  // For user messages, ensure the actions are visible on a blue background
+  &--user &__actions {
+    background: transparentize($euiColorEmptyShade, 5%);
   }
 }
 

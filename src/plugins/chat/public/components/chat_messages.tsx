@@ -47,6 +47,7 @@ interface ChatMessagesProps {
   currentStreamingMessage: string;
   isStreaming: boolean;
   contextManager: ChatContextManager;
+  onResendMessage?: (message: TimelineMessage) => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -55,6 +56,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   currentStreamingMessage,
   isStreaming,
   contextManager,
+  onResendMessage,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [staticContext, setStaticContext] = useState<StaticContext | null>(null);
@@ -110,7 +112,13 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               if (!item.content || item.content.trim() === '') {
                 return null;
               }
-              return <MessageRow key={item.id} message={item} />;
+              return (
+                <MessageRow
+                  key={item.id}
+                  message={item}
+                  onResend={item.role === 'user' ? onResendMessage : undefined}
+                />
+              );
             } else if (item.type === 'tool_call') {
               return <ToolCallRow key={item.id} toolCall={item} />;
             } else if (item.type === 'error') {

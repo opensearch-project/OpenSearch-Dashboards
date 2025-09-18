@@ -281,6 +281,212 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
 
+  const handleResendMessage = async (message: TimelineMessage) => {
+    if (isStreaming) return;
+
+    // Find the index of this message in the timeline
+    const messageIndex = timeline.findIndex(item =>
+      item.type === 'message' && item.id === message.id
+    );
+
+    if (messageIndex === -1) return;
+
+    // Remove this message and everything after it from the timeline
+    const truncatedTimeline = timeline.slice(0, messageIndex);
+    setTimeline(truncatedTimeline);
+
+    // Clear any streaming state and input
+    setCurrentStreamingMessage('');
+    setInput('');
+    setIsStreaming(true);
+    setProcessedEventIds(new Set()); // Reset processed events for new message
+
+    try {
+      const { observable, userMessage } = await chatService.sendMessage(
+        message.content,
+        truncatedTimeline.filter((item) => item.type === 'message') as any
+      );
+
+      // Add user message immediately to timeline
+      const timelineUserMessage: TimelineMessage = {
+        type: 'message',
+        id: userMessage.id,
+        role: userMessage.role,
+        content: userMessage.content,
+        timestamp: userMessage.timestamp,
+      };
+      setTimeline((prev) => [...prev, timelineUserMessage]);
+
+      // Start a new run group - we'll get the actual runId from the first event
+      const timestamp = new Date().toLocaleTimeString();
+      console.groupCollapsed(
+        `📊 Chat Run [${timestamp}] - "${message.content.substring(0, 50)}${
+          message.content.length > 50 ? '...' : ''
+        }"`
+      );
+      console.log('📤 Resent message:', message.content);
+
+      // Subscribe to streaming response (same logic as handleSend)
+      const subscription = observable.subscribe({
+        next: (event: ChatEvent) => {
+          // Log every event with timestamp and full data
+          const eventTime = new Date().toLocaleTimeString();
+          console.log(`🔄 [${eventTime}] ${event.type}:`, event);
+
+          // Event deduplication - create a unique event identifier
+          const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(event).substring(0, 100)}`;
+          if (processedEventIds.has(eventId)) {
+            console.log(`🔄 [${eventTime}] Skipping duplicate event:`, event.type);
+            return; // Skip duplicate event
+          }
+          setProcessedEventIds(prev => new Set(prev).add(eventId));
+
+          // Update runId if we get it from the event
+          if ('runId' in event && event.runId && event.runId !== currentRunId) {
+            setCurrentRunId(event.runId);
+          }
+
+          switch (event.type) {
+            case EventType.TEXT_MESSAGE_CONTENT:
+              if ('delta' in event) {
+                setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
+              }
+              break;
+            case EventType.TEXT_MESSAGE_END:
+              setCurrentStreamingMessage((currentContent) => {
+                const assistantMessage: TimelineMessage = {
+                  type: 'message',
+                  id: 'messageId' in event && event.messageId ? event.messageId : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  role: 'assistant',
+                  content: currentContent,
+                  timestamp: event.timestamp || Date.now(),
+                };
+
+                // Add deduplication check before adding to timeline
+                setTimeline((prev) => {
+                  // Check if message with same content already exists recently (within 1 second)
+                  const isDuplicate = prev.some(
+                    item => item.type === 'message' &&
+                    item.role === 'assistant' &&
+                    item.content === currentContent &&
+                    Math.abs(item.timestamp - (event.timestamp || Date.now())) < 1000
+                  );
+                  return isDuplicate ? prev : [...prev, assistantMessage];
+                });
+                return ''; // Clear the streaming message
+              });
+              setIsStreaming(false);
+              break;
+            case EventType.TOOL_CALL_START:
+              if ('toolCallId' in event && 'toolCallName' in event) {
+                const newToolCall: TimelineToolCall = {
+                  type: 'tool_call',
+                  id: event.toolCallId,
+                  toolName: event.toolCallName,
+                  status: 'running',
+                  timestamp: event.timestamp || Date.now(),
+                };
+                setTimeline((prev) => {
+                  // Check if tool call with this ID already exists
+                  const existingIndex = prev.findIndex(item => item.id === newToolCall.id);
+                  if (existingIndex !== -1) {
+                    // Update existing tool call instead of adding duplicate
+                    const updated = [...prev];
+                    updated[existingIndex] = newToolCall;
+                    return updated;
+                  }
+                  // Add new tool call
+                  return [...prev, newToolCall];
+                });
+              }
+              break;
+            case EventType.TOOL_CALL_END:
+              if ('toolCallId' in event) {
+                setTimeline((prev) =>
+                  prev.map((item) =>
+                    item.type === 'tool_call' && item.id === event.toolCallId
+                      ? {
+                          ...item,
+                          status: 'completed' as const,
+                          timestamp: event.timestamp || item.timestamp,
+                        }
+                      : item
+                  )
+                );
+              }
+              break;
+            case EventType.TOOL_CALL_RESULT:
+              if ('toolCallId' in event && 'content' in event) {
+                setTimeline((prev) =>
+                  prev.map((item) => {
+                    if (item.type === 'tool_call' && item.id === event.toolCallId) {
+                      let resultContent = event.content;
+                      // Try to parse the content if it's JSON stringified
+                      try {
+                        const parsed = JSON.parse(event.content);
+                        if (parsed.content && Array.isArray(parsed.content)) {
+                          // Extract text from content array
+                          resultContent = parsed.content
+                            .filter((contentItem: any) => contentItem.type === 'text')
+                            .map((contentItem: any) => contentItem.text)
+                            .join('\n');
+                        }
+                      } catch {
+                        // If parsing fails, use the raw content
+                        resultContent = event.content;
+                      }
+                      return {
+                        ...item,
+                        status: 'completed' as const,
+                        result: resultContent,
+                        timestamp: event.timestamp || item.timestamp,
+                      };
+                    }
+                    return item;
+                  })
+                );
+              }
+              break;
+            case EventType.RUN_ERROR:
+              if ('message' in event) {
+                const errorItem: TimelineError = {
+                  type: 'error',
+                  id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  message: event.message,
+                  code: 'code' in event ? event.code : undefined,
+                  timestamp: event.timestamp || Date.now(),
+                };
+                setTimeline((prev) => [...prev, errorItem]);
+              }
+              setIsStreaming(false);
+              setCurrentStreamingMessage('');
+              break;
+          }
+        },
+        error: (error: any) => {
+          const errorTime = new Date().toLocaleTimeString();
+          console.error(`🚨 [${errorTime}] Subscription error:`, error);
+          console.groupEnd(); // Close the run group
+          setIsStreaming(false);
+          setCurrentStreamingMessage('');
+        },
+        complete: () => {
+          const completeTime = new Date().toLocaleTimeString();
+          console.log(`🏁 [${completeTime}] Stream complete`);
+          console.groupEnd(); // Close the run group
+          setIsStreaming(false);
+        },
+      });
+
+      return () => subscription.unsubscribe();
+    } catch (error) {
+      const errorTime = new Date().toLocaleTimeString();
+      console.error(`❌ [${errorTime}] Failed to resend message:`, error);
+      console.groupEnd(); // Close the run group
+      setIsStreaming(false);
+    }
+  };
+
   const handleNewChat = () => {
     chatService.newThread();
     setTimeline([]);
@@ -314,6 +520,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         currentStreamingMessage={currentStreamingMessage}
         isStreaming={isStreaming}
         contextManager={contextManager}
+        onResendMessage={handleResendMessage}
       />
 
       <ChatInput
