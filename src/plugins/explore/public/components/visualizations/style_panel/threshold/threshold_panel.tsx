@@ -62,6 +62,7 @@ export const ThresholdPanel = ({
             })}
           >
             <EuiSelect
+              data-test-subj="thresholdModeSelect"
               compressed={true}
               options={options}
               value={thresholdsOptions?.thresholdStyle || ThresholdMode.Off}
