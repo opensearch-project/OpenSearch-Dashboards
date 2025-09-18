@@ -1,0 +1,22 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+@import "../../shared";
+
+// This is for the AI colors
+/* stylelint-disable  @osd/stylelint/no_restricted_values */
+
+.exploreAskAIButton {
+  @include exploreQueryPanelButton;
+
+  &__text {
+    background: linear-gradient(90deg, #06c 0%, #7b68ee 100%);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  &__icon {
+    color: #06c;
+  }
+}

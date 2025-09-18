@@ -14,6 +14,7 @@ import { QueryPanelActions } from './query_panel_actions';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import './query_panel_widgets.scss';
+import { AskAIButton } from './ask_ai_button';
 
 export const QueryPanelWidgets = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -40,6 +41,7 @@ export const QueryPanelWidgets = () => {
 
       {/* Right Section */}
       <div className="exploreQueryPanelWidgets__right">
+        <AskAIButton />
         <LanguageReference />
       </div>
     </div>
