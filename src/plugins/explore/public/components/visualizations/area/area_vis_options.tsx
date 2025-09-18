@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AreaChartStyleControls } from './area_vis_config';
+import { AreaChartStyle, AreaChartStyleOptions } from './area_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { ThresholdOptions } from '../style_panel/threshold_lines/threshold';
@@ -16,7 +16,7 @@ import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
 
-export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyleControls>;
+export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyle>;
 
 export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   styleOptions,
@@ -29,9 +29,9 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof AreaChartStyleControls>(
+  const updateStyleOption = <K extends keyof AreaChartStyleOptions>(
     key: K,
-    value: AreaChartStyleControls[K]
+    value: AreaChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };

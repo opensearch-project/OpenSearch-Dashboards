@@ -23,21 +23,23 @@ export interface ExclusiveScatterConfig {
   filled: boolean;
 }
 // Complete line chart style controls interface
-export interface ScatterChartStyleControls {
+export interface ScatterChartStyleOptions {
   // Basic controls
-  tooltipOptions: TooltipOptions;
-  addLegend: boolean;
-  legendPosition: Positions;
+  tooltipOptions?: TooltipOptions;
+  addLegend?: boolean;
+  legendPosition?: Positions;
   // Axes configuration
-  standardAxes: StandardAxes[];
+  standardAxes?: StandardAxes[];
 
-  exclusive: ExclusiveScatterConfig;
-  switchAxes: boolean;
+  exclusive?: ExclusiveScatterConfig;
+  switchAxes?: boolean;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
 }
 
-export const defaultScatterChartStyles: ScatterChartStyleControls = {
+export type ScatterChartStyle = Required<ScatterChartStyleOptions>;
+
+export const defaultScatterChartStyles: ScatterChartStyle = {
   // Basic controls
   tooltipOptions: {
     mode: 'all',

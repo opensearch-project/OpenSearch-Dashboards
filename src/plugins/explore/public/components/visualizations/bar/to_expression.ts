@@ -12,7 +12,7 @@ import {
   TimeUnit,
   AggregationType,
 } from '../types';
-import { BarChartStyleControls, defaultBarChartStyles } from './bar_vis_config';
+import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold_lines/utils';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 
@@ -25,7 +25,7 @@ import {
 import { DEFAULT_OPACITY } from '../constants';
 
 // Only set size and binSpacing in manual mode
-const configureBarSizeAndSpacing = (barMark: any, styles: Partial<BarChartStyleControls>) => {
+const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
   if (styles.barSizeMode === 'manual') {
     barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
     barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
@@ -37,7 +37,7 @@ export const createBarSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<BarChartStyleControls>,
+  styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -140,7 +140,7 @@ export const createTimeBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<BarChartStyleControls>,
+  styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -241,7 +241,7 @@ export const createGroupedTimeBarChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<BarChartStyleControls>,
+  styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -364,7 +364,7 @@ export const createFacetedTimeBarChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<BarChartStyleControls>,
+  styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -491,7 +491,7 @@ export const createStackedBarSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<BarChartStyleControls>,
+  styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -598,7 +598,7 @@ export const createStackedBarSpec = (
 export const createNumericalHistogramBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
-  styleOptions: Partial<BarChartStyleControls>,
+  styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -685,7 +685,7 @@ export const createNumericalHistogramBarChart = (
 export const createSingleBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
-  styleOptions: Partial<BarChartStyleControls>,
+  styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns

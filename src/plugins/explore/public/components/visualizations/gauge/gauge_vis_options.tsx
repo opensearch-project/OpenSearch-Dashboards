@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { GaugeChartStyleControls } from './gauge_vis_config';
+import { GaugeChartStyle, GaugeChartStyleOptions } from './gauge_vis_config';
 import { Threshold, AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -25,7 +25,7 @@ import { DebouncedFieldText } from '../style_panel/utils';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { UnitPanel } from '../style_panel/unit/unit_panel';
 
-export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyleControls>;
+export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyle>;
 
 export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
   styleOptions,
@@ -38,9 +38,9 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof GaugeChartStyleControls>(
+  const updateStyleOption = <K extends keyof GaugeChartStyleOptions>(
     key: K,
-    value: GaugeChartStyleControls[K]
+    value: GaugeChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };

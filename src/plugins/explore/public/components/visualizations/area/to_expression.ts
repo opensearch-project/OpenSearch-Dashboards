@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AreaChartStyleControls } from './area_vis_config';
+import { AreaChartStyle } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
@@ -22,7 +22,7 @@ export const createSimpleAreaChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
+  styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
@@ -128,7 +128,7 @@ export const createMultiAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
+  styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
@@ -243,7 +243,7 @@ export const createFacetedMultiAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
+  styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
@@ -403,7 +403,7 @@ export const createCategoryAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
+  styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -497,7 +497,7 @@ export const createStackedAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
+  styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns

@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { MetricVisStyleControls } from './metric_vis_options';
-import { MetricChartStyleControls, defaultMetricChartStyles } from './metric_vis_config';
+import { defaultMetricChartStyles } from './metric_vis_config';
 import { VisColumn, VisFieldType } from '../types';
 
 export default {
@@ -28,7 +28,7 @@ const mockNumericalColumns: VisColumn[] = [
 
 const Template: ComponentStory<typeof MetricVisStyleControls> = (args) => {
   // Use state to track changes
-  const [styleOptions, setStyleOptions] = useState<MetricChartStyleControls>(args.styleOptions);
+  const [styleOptions, setStyleOptions] = useState(args.styleOptions);
 
   return (
     <div style={{ maxWidth: '800px', padding: '16px' }}>

@@ -12,10 +12,14 @@ import { TableFooterOptions } from './table_vis_footer_options';
 import { CellAlignment, Threshold } from '../types';
 import { ThresholdCustomValues } from '../style_panel/threshold/threshold_custom_values';
 import { TableCellTypeOptions } from './table_cell_type_options';
-import { defaultTableChartStyles, TableChartStyleControls } from './table_vis_config';
+import {
+  defaultTableChartStyles,
+  TableChartStyle,
+  TableChartStyleOptions,
+} from './table_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 
-export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyleControls>;
+export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyle>;
 
 const alignmentOptions = [
   { value: 'auto', text: 'Auto' },
@@ -34,7 +38,7 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
   updateVisualization,
 }) => {
   const updateStyleOption = useCallback(
-    <K extends keyof TableChartStyleControls>(key: K, value: TableChartStyleControls[K]) => {
+    <K extends keyof TableChartStyleOptions>(key: K, value: TableChartStyleOptions[K]) => {
       onStyleChange({ [key]: value });
     },
     [onStyleChange]

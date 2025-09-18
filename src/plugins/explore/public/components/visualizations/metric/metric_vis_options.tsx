@@ -7,7 +7,11 @@ import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch, EuiFormRow } from '@elastic/eui';
-import { defaultMetricChartStyles, MetricChartStyleControls } from './metric_vis_config';
+import {
+  defaultMetricChartStyles,
+  MetricChartStyle,
+  MetricChartStyleOptions,
+} from './metric_vis_config';
 import { RangeValue, ColorSchemas, AxisRole } from '../types';
 import { CustomRange } from '../style_panel/custom_ranges';
 import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
@@ -19,7 +23,7 @@ import { ValueCalculationSelector } from '../style_panel/value/value_calculation
 import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
 import { UnitPanel } from '../style_panel/unit/unit_panel';
 
-export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
+export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyle>;
 
 export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   styleOptions,
@@ -32,9 +36,9 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof MetricChartStyleControls>(
+  const updateStyleOption = <K extends keyof MetricChartStyleOptions>(
     key: K,
-    value: MetricChartStyleControls[K]
+    value: MetricChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };

@@ -6,7 +6,7 @@
 import { createSingleMetric } from './to_expression';
 import { VisColumn, VisFieldType, ColorSchemas, AxisRole, AxisColumnMappings } from '../types';
 import * as utils from '../utils/utils';
-import { MetricChartStyleControls } from './metric_vis_config';
+import { MetricChartStyle, defaultMetricChartStyles } from './metric_vis_config';
 
 // Mock the utils module
 jest.mock('../utils/utils', () => ({
@@ -37,7 +37,8 @@ describe('to_expression', () => {
     uniqueValuesCount: 2,
   };
 
-  const defaultStyleOptions: Partial<MetricChartStyleControls> = {
+  const defaultStyleOptions: MetricChartStyle = {
+    ...defaultMetricChartStyles,
     showTitle: true,
     title: 'Test Metric',
     fontSize: 60,
@@ -170,26 +171,6 @@ describe('to_expression', () => {
 
       // Verify generateColorBySchema was called
       expect(utils.generateColorBySchema).toHaveBeenCalledWith(4, ColorSchemas.BLUES);
-    });
-
-    it('should handle empty style options gracefully', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Value]: numericColumn,
-      };
-
-      const result = createSingleMetric(
-        transformedData,
-        [numericColumn],
-        [],
-        [],
-        {},
-        mockAxisColumnMappings
-      );
-
-      // Verify the result structure still works
-      expect(result).toHaveProperty('$schema');
-      expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(2);
     });
 
     it('should add sparkLineLayer when date column is provided', () => {
