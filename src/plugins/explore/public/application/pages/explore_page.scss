@@ -33,7 +33,7 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > .euiResizableContainer {
+  &>.euiResizableContainer {
     gap: $euiSizeXS;
   }
 
@@ -62,6 +62,7 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 }
 
 .dscCanvas {
+
   // Ensure proper spacing and layout
   .dscCanvas__queryPanel {
     margin-bottom: $euiSizeS;
@@ -107,7 +108,7 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
       flex-wrap: wrap;
 
       /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
-      & > .euiFlexItem {
+      &>.euiFlexItem {
         width: 100% !important;
 
         &:first-child {
