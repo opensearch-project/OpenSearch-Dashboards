@@ -64,7 +64,7 @@ export const runCreateVisTests = () => {
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
-
+      cy.getElementByTestId('useThresholdColorButton').click();
       cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {

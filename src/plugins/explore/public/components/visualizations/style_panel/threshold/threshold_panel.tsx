@@ -82,6 +82,7 @@ export const ThresholdPanel = ({
               label={i18n.translate('explore.vis.metric.useThresholdColor', {
                 defaultMessage: 'Use threshold colors',
               })}
+              data-test-subj="useThresholdColorButton"
               checked={thresholdsOptions?.useThresholdColor ?? false}
               onChange={(e) => updateThresholdOption('useThresholdColor', e.target.checked)}
             />
