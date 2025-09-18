@@ -254,15 +254,9 @@ describe('visualization_container_utils', () => {
   });
 
   describe('adaptLegacyData', () => {
-    let visConfig$: BehaviorSubject<ChartConfig | undefined>;
-
-    beforeEach(() => {
-      visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
-    });
-
     it('handles undefined config', () => {
-      adaptLegacyData(visConfig$, undefined);
-      expect(visConfig$.value).toBeUndefined();
+      const value = adaptLegacyData(undefined);
+      expect(value).toBeUndefined();
     });
 
     it('transforms gauge chart with thresholds and basecolor', () => {
@@ -274,9 +268,9 @@ describe('visualization_container_utils', () => {
         } as ChartStyleControlMap['gauge'],
       };
 
-      adaptLegacyData(visConfig$, config);
+      const value = adaptLegacyData(config);
 
-      expect(visConfig$.value?.styles).toMatchObject({
+      expect(value?.styles).toMatchObject({
         thresholdOptions: {
           baseColor: '#9ecae1',
           thresholds: [{ value: 10, color: '#red' }],
@@ -295,9 +289,9 @@ describe('visualization_container_utils', () => {
         } as ChartStyleControlMap['metric'],
       };
 
-      adaptLegacyData(visConfig$, config);
+      const value = adaptLegacyData(config);
 
-      expect(visConfig$.value?.styles).toMatchObject({
+      expect(value?.styles).toMatchObject({
         thresholdOptions: {
           baseColor: '#9ecae1',
           thresholds: [{ value: 10, color: '#red' }],
@@ -315,9 +309,9 @@ describe('visualization_container_utils', () => {
         } as ChartStyleControlMap['metric'],
       };
 
-      adaptLegacyData(visConfig$, config);
+      const value = adaptLegacyData(config);
 
-      expect(visConfig$.value?.styles).toMatchObject({
+      expect(value?.styles).toMatchObject({
         colorSchema: ColorSchemas.BLUES,
         thresholdOptions: { baseColor: '#fffff' },
       });
@@ -335,9 +329,9 @@ describe('visualization_container_utils', () => {
         } as ChartStyleControlMap['heatmap'],
       };
 
-      adaptLegacyData(visConfig$, config);
+      const value = adaptLegacyData(config);
 
-      expect(visConfig$.value?.styles).toMatchObject({
+      expect(value?.styles).toMatchObject({
         thresholdOptions: {
           baseColor: '#9ecae1',
           thresholds: [{ value: 10, color: '#red' }],
@@ -362,9 +356,9 @@ describe('visualization_container_utils', () => {
         } as ChartStyleControlMap['bar'],
       };
 
-      adaptLegacyData(visConfig$, config);
+      const value = adaptLegacyData(config);
 
-      expect(visConfig$.value?.styles).toMatchObject({
+      expect(value?.styles).toMatchObject({
         thresholdOptions: {
           thresholds: [{ value: 20, color: '#blue' }],
           baseColor: '#green',
@@ -390,9 +384,9 @@ describe('visualization_container_utils', () => {
         } as ChartStyleControlMap['line'],
       };
 
-      adaptLegacyData(visConfig$, config);
+      const value = adaptLegacyData(config);
 
-      expect(visConfig$.value?.styles).toMatchObject({
+      expect(value?.styles).toMatchObject({
         thresholdOptions: {
           thresholds: [{ value: 20, color: '#blue' }],
           baseColor: '#green',

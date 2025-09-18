@@ -311,7 +311,8 @@ export class VisualizationBuilder {
   }
 
   setVisConfig(config?: ChartConfig) {
-    adaptLegacyData(this.visConfig$, config);
+    const newConfig = adaptLegacyData(config);
+    this.visConfig$.next(newConfig);
   }
 
   setCurrentChartType(chartType?: ChartType) {

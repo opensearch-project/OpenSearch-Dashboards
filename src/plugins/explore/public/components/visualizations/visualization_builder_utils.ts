@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { AxisColumnMappings, VisColumn, VisFieldType, ThresholdMode } from './types';
 import { StyleOptions, ChartStyleControlMap } from './utils/use_visualization_types';
 import { ChartConfig } from './visualization_builder.types';
@@ -77,13 +76,9 @@ export const getColumnMatchFromMapping = (
   ];
 };
 
-export const adaptLegacyData = (
-  visConfig$: BehaviorSubject<ChartConfig | undefined>,
-  config?: ChartConfig
-) => {
+export const adaptLegacyData = (config?: ChartConfig) => {
   if (!config) {
-    visConfig$.next(config);
-    return;
+    return config;
   }
 
   let transformedConfig = { ...config };
@@ -177,5 +172,5 @@ export const adaptLegacyData = (
     }
   }
 
-  visConfig$.next(transformedConfig);
+  return transformedConfig;
 };
