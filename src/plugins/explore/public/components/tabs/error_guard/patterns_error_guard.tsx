@@ -8,24 +8,23 @@ import './error_guard.scss';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiAccordion,
+  EuiCodeBlock,
+  EuiEmptyPrompt,
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiText,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/plugins/data_explorer/public';
-import { ErrorCodeBlock } from './error_code_block';
 import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 
 const detailsText = i18n.translate('explore.patternsErrorPanel.details', {
-  defaultMessage: 'Details (pattern query attempted)',
+  defaultMessage: 'Details',
 });
 const noValidPatternsText = i18n.translate('explore.patternsErrorPanel.noValidPatterns', {
-  defaultMessage: 'No valid pattern found',
+  defaultMessage: 'No valid patterns found',
 });
 
 export interface PatternsErrorGuardProps {
@@ -39,32 +38,27 @@ export const PatternsErrorGuard = ({ registryTab }: PatternsErrorGuardProps) => 
 
   return (
     <EuiErrorBoundary>
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        className="exploreErrorGuard"
-        gutterSize="l"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiAccordion
-            id={'no_valid_patterns'}
-            buttonContent={
-              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={'navInfo'} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText>{noValidPatternsText}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
-            <div className="exploreErrorGuard__errorsSection">
-              <ErrorCodeBlock title={detailsText} text={patternsQuery} />
-            </div>
-          </EuiAccordion>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiEmptyPrompt
+        iconType="editorCodeBlock"
+        iconColor="default"
+        title={
+          <EuiText size="s">
+            <h2>{noValidPatternsText}</h2>
+          </EuiText>
+        }
+        body={
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" textAlign="left">
+                <b>{detailsText}</b>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCodeBlock isCopyable={true}>{patternsQuery}</EuiCodeBlock>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
     </EuiErrorBoundary>
   );
 };
