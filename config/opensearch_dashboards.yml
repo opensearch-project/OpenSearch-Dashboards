@@ -387,4 +387,4 @@
 # banner.content: "This is an important announcement for all users. [Learn more](https://opensearch.org) about OpenSearch."
 
 # Set the value to true to enable the keyboard shortcuts (requires workspace.enabled: true)
-# opensearchDashboards.keyboardShortcuts.enabled: true
+# opensearchDashboards.keyboardShortcuts.enabled: false
