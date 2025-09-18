@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { createGaugeConfig, GaugeChartStyleControls } from './gauge_vis_config';
+import { createGaugeConfig } from './gauge_vis_config';
 import { GaugeVisStyleControls } from './gauge_vis_options';
 import { CalculationMethod } from '../utils/calculation';
 
@@ -27,7 +27,7 @@ describe('createGaugeConfig', () => {
 
   it('should have the correct default style settings', () => {
     const config = createGaugeConfig();
-    const defaults = config.ui.style.defaults as GaugeChartStyleControls;
+    const defaults = config.ui.style.defaults;
     // Verify basic controls
     expect(defaults.showTitle).toBe(true);
     expect(defaults.title).toBe('');

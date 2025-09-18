@@ -6,7 +6,7 @@
 import React from 'react';
 import {
   createHeatmapConfig,
-  HeatmapChartStyleControls,
+  defaultHeatmapChartStyles,
   HeatmapLabels,
 } from './heatmap_vis_config';
 import { HeatmapVisStyleControls } from './heatmap_vis_options';
@@ -38,7 +38,7 @@ describe('createHeatmapeConfig', () => {
 
   it('should have the correct default style settings', () => {
     const config = createHeatmapConfig();
-    const defaults = config.ui.style.defaults as HeatmapChartStyleControls;
+    const defaults = config.ui.style.defaults;
     // Verify basic controls
     expect(defaults.tooltipOptions.mode).toBe('all');
     expect(defaults.addLegend).toBe(true);
@@ -89,6 +89,7 @@ describe('createHeatmapeConfig', () => {
     // Mock props
     const mockProps = {
       styleOptions: {
+        ...defaultHeatmapChartStyles,
         switchAxes: false,
         tooltipOptions: { mode: 'hidden' as const },
         addLegend: false,
@@ -104,7 +105,7 @@ describe('createHeatmapeConfig', () => {
           label: {} as HeatmapLabels,
         },
         standardAxes: [] as StandardAxes[],
-      } as HeatmapChartStyleControls,
+      },
       onStyleChange: jest.fn(),
       numericalColumns: [],
       categoricalColumns: [],
