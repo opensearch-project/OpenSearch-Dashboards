@@ -4,14 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import {
-  EuiSwitch,
-  EuiButtonGroup,
-  EuiColorPicker,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiSwitch, EuiButtonGroup, EuiColorPicker, EuiFormRow, EuiSelect } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { defaultHeatmapChartStyles, HeatmapChartStyleControls } from './heatmap_vis_config';
 import { ColorSchemas, ScaleType } from '../types';
