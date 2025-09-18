@@ -48,7 +48,7 @@
     right: 8px;
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
-    background: transparentize($euiColorEmptyShade, 10%);
+    background: transparentize($euiColorEmptyShade, 0.1);
     border-radius: 4px;
     padding: 2px;
 
@@ -61,7 +61,7 @@
 
   // For user messages, ensure the actions are visible on a blue background
   &--user &__actions {
-    background: transparentize($euiColorEmptyShade, 5%);
+    background: transparentize($euiColorEmptyShade, 0.05);
   }
 }
 
