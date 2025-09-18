@@ -127,7 +127,12 @@ const ExploreDataTableComponent = () => {
       className="explore-table-container eui-xScrollWithShadows"
       ref={containerRef}
     >
-      <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="xs"
+        justifyContent="center"
+        className="explore-table-flex-group"
+      >
         <EuiFlexItem grow={true}>
           <DataTable
             columns={tableColumns}
