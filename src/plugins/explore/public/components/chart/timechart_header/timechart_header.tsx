@@ -188,6 +188,7 @@ export function TimechartHeader({
                   })}
                 value={interval}
                 onChange={handleIntervalChange}
+                onMouseUp={(e) => e.stopPropagation()}
                 prepend={
                   <EuiText
                     className="exploreChart__TimechartHeader__selection__prependText"

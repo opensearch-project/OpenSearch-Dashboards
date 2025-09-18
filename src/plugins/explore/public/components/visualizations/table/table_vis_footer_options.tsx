@@ -208,6 +208,7 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
                           onChange={(e) =>
                             onCalculationChange(index, e.target.value as CalculationMethod)
                           }
+                          onMouseUp={(e) => e.stopPropagation()}
                           data-test-subj={`visTableFooterCalculation-${index}`}
                         />
                       </EuiFlexItem>
