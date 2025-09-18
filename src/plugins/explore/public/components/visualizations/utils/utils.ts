@@ -13,27 +13,23 @@ import {
   AxisColumnMappings,
   AxisSupportedStyles,
   Threshold,
+  AxisConfig,
 } from '../types';
 
 export const applyAxisStyling = (
   axis?: VisColumn,
   axisStyle?: StandardAxes,
   disableGrid?: boolean
-): any => {
+): AxisConfig => {
   const gridEnabled = disableGrid ? false : axisStyle?.grid.showLines ?? true;
 
-  const fullAxisConfig: any = {
+  const fullAxisConfig: AxisConfig = {
     // Grid settings
     grid: gridEnabled,
     labelSeparation: 8,
+    orient: axisStyle?.position,
+    title: axisStyle?.title.text || axis?.name,
   };
-
-  // Apply position
-
-  fullAxisConfig.orient = axisStyle?.position;
-
-  // Apply title settings
-  fullAxisConfig.title = axisStyle?.title.text;
 
   // Apply axis visibility
   if (!axisStyle?.show) {
@@ -46,23 +42,25 @@ export const applyAxisStyling = (
 
   // Apply label settings
   if (axisStyle?.labels) {
-    if (!axisStyle?.labels.show) {
-      fullAxisConfig.labels = false;
-    } else {
-      fullAxisConfig.labels = true;
-      // Apply label rotation/alignment
-      if (axisStyle?.labels.rotate !== undefined) {
-        fullAxisConfig.labelAngle = axisStyle?.labels.rotate;
+    fullAxisConfig.labels = !!axisStyle.labels.show;
+    if (fullAxisConfig.labels) {
+      fullAxisConfig.labelAngle = 0;
+      fullAxisConfig.labelLimit = 100;
+
+      if (axisStyle.labels.rotate !== undefined) {
+        fullAxisConfig.labelAngle = axisStyle.labels.rotate;
+      }
+      if (axisStyle.labels.truncate !== undefined && axisStyle.labels.truncate > 0) {
+        fullAxisConfig.labelLimit = axisStyle.labels.truncate;
       }
 
-      // Apply label truncation
-      if (axisStyle?.labels.truncate !== undefined && axisStyle?.labels.truncate > 0) {
-        fullAxisConfig.labelLimit = axisStyle?.labels.truncate;
-      }
-
-      // Apply label filtering (this controls overlapping labels)
       fullAxisConfig.labelOverlap = 'greedy';
+      fullAxisConfig.labelFlush = false;
     }
+  }
+
+  if (axis?.schema === VisFieldType.Date) {
+    fullAxisConfig.format = { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' };
   }
 
   return fullAxisConfig;
