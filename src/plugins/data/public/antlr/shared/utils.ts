@@ -21,7 +21,6 @@ import { IDataPluginServices } from '../../types';
 import { DEFAULT_DATA, IFieldType, UI_SETTINGS } from '../../../common';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 import { getDataViews } from '../../services';
-import { CompletionErrorStrategy } from './error_handler';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -299,7 +298,6 @@ const singleParseQuery = <
 
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
-  parser.errorHandler = new CompletionErrorStrategy();
   const parseTree = getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);

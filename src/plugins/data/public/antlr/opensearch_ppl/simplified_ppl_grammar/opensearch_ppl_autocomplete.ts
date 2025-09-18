@@ -53,8 +53,7 @@ const fieldRuleList = [
 ];
 
 export function getIgnoredTokens(): number[] {
-  // const tokens = [OpenSearchPPLParser.SPACE, OpenSearchPPLParser.EOF];
-  const tokens = [];
+  const tokens = [OpenSearchPPLParser.AS, OpenSearchPPLParser.IN]; // Add explicitly ignored tokens here
 
   const firstOperatorIndex = OpenSearchPPLParser.MATCH;
   const lastOperatorIndex = OpenSearchPPLParser.ERROR_RECOGNITION;
@@ -110,6 +109,8 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_searchCommand,
   OpenSearchPPLParser.RULE_searchComparisonOperator,
   OpenSearchPPLParser.RULE_comparisonOperator,
+  OpenSearchPPLParser.RULE_positionFunctionName,
+  OpenSearchPPLParser.RULE_sqlLikeJoinType,
 ]);
 
 const isAValidExpressionEndToken = (token: Token | undefined) => {
@@ -140,8 +141,7 @@ export function processVisitedRules(
   for (const [ruleId, rule] of rules) {
     const parentRuleList = rule.ruleList;
     switch (ruleId) {
-      case OpenSearchPPLParser.RULE_singleFieldRelevanceFunctionName:
-      case OpenSearchPPLParser.RULE_multiFieldRelevanceFunctionName:
+      case OpenSearchPPLParser.RULE_sqlLikeJoinType:
       case OpenSearchPPLParser.RULE_positionFunctionName:
       case OpenSearchPPLParser.RULE_integerLiteral:
       case OpenSearchPPLParser.RULE_decimalLiteral:

@@ -244,6 +244,7 @@ export const showSuggestionAndHint = (maxAttempts = 3) => {
 
   const attemptShow = () => {
     attempts++;
+    cy.get('.inputarea').clear();
     cy.get('.inputarea').type('source ', { force: true });
 
     return cy.get('.suggest-widget.visible').then(($widget) => {

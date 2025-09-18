@@ -285,6 +285,10 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
     OpenSearchPPLParser.BRAIN,
     { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
   ],
+  [
+    OpenSearchPPLParser.JOIN,
+    { importance: '3', type: SuggestionItemDetailsTags.Command, isFunction: false },
+  ],
 
   // COMMAND ASSIST KEYWORDS
   [
@@ -1794,7 +1798,7 @@ export const PPL_SUGGESTION_IMPORTANCE = new Map<
   ],
   [
     OpenSearchPPLParser.APPEND,
-    { importance: '97', type: SuggestionItemDetailsTags.Arguments, isFunction: false },
+    { importance: '97', type: SuggestionItemDetailsTags.Command, isFunction: false },
   ],
   [
     OpenSearchPPLParser.COUNTFIELD,
