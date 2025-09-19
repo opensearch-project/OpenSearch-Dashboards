@@ -10,5 +10,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new OsdMcpServerPlugin(initializerContext);
 }
 
-export { OsdMcpServerPluginSetup, OsdMcpServerPluginStart } from './plugin';
+export { OsdMcpServerPluginSetup, OsdMcpServerPluginStart } from './types';
 export { configSchema } from '../config';

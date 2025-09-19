@@ -317,6 +317,235 @@ export class ExplorePlugin
 
         setupReduxActions();
 
+        // Set up MCP Client API for direct tool execution
+        const setupMCPClientAPI = () => {
+          try {
+            const mcpClientAPI = {
+              async updateQuery(query, language) {
+                const globalServices = (global as any).exploreServices;
+                if (!globalServices || !globalServices.store) {
+                  throw new Error(
+                    'Explore services not available. Make sure you are on an Explore page.'
+                  );
+                }
+
+                const { store: exploreStore } = globalServices;
+                const reduxActions = (global as any).exploreReduxActions;
+
+                // Get current state
+                const currentState = exploreStore.getState();
+                const currentQuery = currentState.query;
+
+                // Update query text with history tracking
+                if (reduxActions && reduxActions.setQueryStringWithHistory) {
+                  exploreStore.dispatch(reduxActions.setQueryStringWithHistory(query));
+                } else {
+                  exploreStore.dispatch({
+                    type: 'query/setQueryStringWithHistory',
+                    payload: query,
+                    meta: { addToHistory: true },
+                  });
+                }
+
+                // If language is different, update the entire query state
+                if (language && language !== currentQuery.language) {
+                  if (reduxActions && reduxActions.setQueryState) {
+                    exploreStore.dispatch(
+                      reduxActions.setQueryState({
+                        query,
+                        language,
+                        dataset: currentQuery.dataset,
+                      })
+                    );
+                  } else {
+                    exploreStore.dispatch({
+                      type: 'query/setQueryState',
+                      payload: {
+                        query,
+                        language,
+                        dataset: currentQuery.dataset,
+                      },
+                    });
+                  }
+                }
+
+                // Verify the update
+                const updatedState = exploreStore.getState();
+                const updatedQuery = updatedState.query;
+
+                return {
+                  success: true,
+                  message: `Query updated successfully`,
+                  originalQuery: query,
+                  updatedQuery: updatedQuery.query,
+                  language: updatedQuery.language,
+                  previousQuery: currentQuery.query,
+                  previousLanguage: currentQuery.language,
+                  timestamp: new Date().toISOString(),
+                  action: 'query_updated',
+                  reduxActions:
+                    language !== currentQuery.language
+                      ? ['setQueryStringWithHistory', 'setQueryState']
+                      : ['setQueryStringWithHistory'],
+                };
+              },
+
+              async runQuery(query) {
+                const globalServices = (global as any).exploreServices;
+                if (!globalServices || !globalServices.store) {
+                  throw new Error(
+                    'Explore services not available. Make sure you are on an Explore page.'
+                  );
+                }
+
+                const { store: exploreStore } = globalServices;
+                const reduxActions = (global as any).exploreReduxActions;
+
+                // Get current state
+                let currentQuery = exploreStore.getState().query;
+
+                // If a query was provided, update it first
+                if (query) {
+                  if (reduxActions && reduxActions.setQueryStringWithHistory) {
+                    exploreStore.dispatch(reduxActions.setQueryStringWithHistory(query));
+                  } else {
+                    exploreStore.dispatch({
+                      type: 'query/setQueryStringWithHistory',
+                      payload: query,
+                      meta: { addToHistory: true },
+                    });
+                  }
+
+                  currentQuery = exploreStore.getState().query;
+                }
+
+                // Execute the query
+                let executePromise;
+                if (reduxActions && reduxActions.executeQueries) {
+                  executePromise = exploreStore.dispatch(
+                    reduxActions.executeQueries({ services: globalServices })
+                  );
+                } else {
+                  executePromise = exploreStore.dispatch({
+                    type: 'query/executeQueries',
+                    payload: { services: globalServices },
+                  });
+                }
+
+                // Wait for query execution to complete
+                await executePromise;
+
+                // Get results from updated state
+                const finalState = exploreStore.getState();
+                const results = finalState.results;
+                const queryStatus = finalState.queryEditor?.queryStatus;
+
+                // Count total results
+                let totalResultCount = 0;
+                let hasResults = false;
+
+                Object.values(results).forEach((result) => {
+                  if (result?.hits?.hits) {
+                    totalResultCount += result.hits.hits.length;
+                    hasResults = true;
+                  }
+                });
+
+                return {
+                  success: true,
+                  message: query
+                    ? `Query "${query}" executed successfully`
+                    : 'Current query executed successfully',
+                  executedQuery: currentQuery.query,
+                  language: currentQuery.language,
+                  dataset: currentQuery.dataset?.title || 'default',
+                  resultCount: totalResultCount,
+                  hasResults,
+                  resultCacheKeys: Object.keys(results).length,
+                  queryStatus,
+                  timestamp: new Date().toISOString(),
+                  action: 'query_executed',
+                  reduxActions: query
+                    ? ['setQueryStringWithHistory', 'executeQueries']
+                    : ['executeQueries'],
+                };
+              },
+
+              async getQueryState(includeResults) {
+                const globalServices = (global as any).exploreServices;
+                if (!globalServices || !globalServices.store) {
+                  throw new Error(
+                    'Explore services not available. Make sure you are on an Explore page.'
+                  );
+                }
+
+                const currentState = globalServices.store.getState();
+                const queryState = currentState.query;
+                const uiState = currentState.ui;
+                const queryEditorState = currentState.queryEditor;
+
+                const response = {
+                  success: true,
+                  message: 'Query state retrieved successfully',
+                  queryState: {
+                    query: queryState.query,
+                    language: queryState.language,
+                    dataset: queryState.dataset
+                      ? {
+                          id: queryState.dataset.id,
+                          title: queryState.dataset.title,
+                          type: queryState.dataset.type,
+                        }
+                      : null,
+                  },
+                  uiState: {
+                    activeTabId: uiState.activeTabId,
+                  },
+                  queryEditor: {
+                    dateRange: queryEditorState?.dateRange,
+                    queryStatus: queryEditorState?.queryStatus,
+                  },
+                  includeResults,
+                  timestamp: new Date().toISOString(),
+                  action: 'query_state_retrieved',
+                };
+
+                // Include results summary if requested
+                if (includeResults) {
+                  const results = currentState.results;
+                  const resultsSummary = {
+                    cacheKeys: Object.keys(results),
+                    totalCacheEntries: Object.keys(results).length,
+                    resultCounts: {},
+                    hasResults: false,
+                  };
+
+                  // Count results for each cache key
+                  Object.entries(results).forEach(([cacheKey, result]) => {
+                    if (result?.hits?.hits) {
+                      resultsSummary.resultCounts[cacheKey] = result.hits.hits.length;
+                      resultsSummary.hasResults = true;
+                    } else {
+                      resultsSummary.resultCounts[cacheKey] = 0;
+                    }
+                  });
+
+                  response.results = resultsSummary;
+                }
+
+                return response;
+              },
+            };
+
+            (window as any).mcpClientAPI = mcpClientAPI;
+            console.log('🌐 MCP Client API made globally available');
+          } catch (error) {
+            console.warn('⚠️ Failed to set up MCP Client API:', error);
+          }
+        };
+
+        setupMCPClientAPI();
+
         appMounted();
 
         // Call renderApp with params, services, and store

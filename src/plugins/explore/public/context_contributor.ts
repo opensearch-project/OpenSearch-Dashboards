@@ -119,9 +119,19 @@ export class ExploreContextContributor implements StatefulContextContributor {
         timestamp: Date.now(),
       };
 
-      console.log('🔥 DEBUG: Final context keys:', Object.keys(context));
+      // Set the index pattern globally for MCP tools to access
+      if (context.indexPattern && context.indexPattern !== 'unknown') {
+        (global as any).staticContext = {
+          ...(global as any).staticContext,
+          indexPattern: context.indexPattern,
+        };
+        console.log('🔧 DEBUG: Set global static context with indexPattern:', context.indexPattern);
+      }
+
+      console.log('� DEBUG: Final context keys:', Object.keys(context));
       console.log('🔥 DEBUG: Final context.expandedDocuments:', context.expandedDocuments);
       console.log('🔥 DEBUG: Final context.userActivity:', context.userActivity);
+      console.log('🔥 DEBUG: Final context.indexPattern:', context.indexPattern);
       console.log(
         `✅ Explore: Context captured with ${this.expandedDocuments.size} expanded documents`
       );
@@ -168,9 +178,62 @@ export class ExploreContextContributor implements StatefulContextContributor {
     const appState = this.parseStateParam(urlParams.get('_a'));
     const globalState = this.parseStateParam(urlParams.get('_g'));
 
+    // Also parse _q (query state) which contains dataset information
+    const queryState = this.parseStateParam(urlParams.get('_q'));
+
+    console.log('🔍 DEBUG: URL parsing results:', {
+      appState,
+      globalState,
+      queryState,
+      url: window.location.href,
+    });
+
+    // Extract index pattern from multiple possible sources
+    let indexPattern = 'unknown';
+
+    // Try to get from query state dataset (most reliable for Explore)
+    if (queryState?.dataset?.title) {
+      indexPattern = queryState.dataset.title;
+      console.log('🔍 DEBUG: Found index pattern from queryState.dataset.title:', indexPattern);
+    } else if (queryState?.dataset?.id) {
+      // Extract from dataset ID if title not available
+      const datasetId = queryState.dataset.id;
+      // Dataset ID format: "3mN8Jy_d2303840-7f1d-11f0-9eda-7d8a3aada760_90943e30-9a47-11e8-b64d-95841ca0b247"
+      // Extract the meaningful part after the workspace ID
+      const parts = datasetId.split('_');
+      if (parts.length > 2) {
+        // Try to find a meaningful index name in the parts
+        for (let i = parts.length - 1; i >= 0; i--) {
+          if (
+            parts[i].includes('sample') ||
+            parts[i].includes('logs') ||
+            parts[i].includes('data')
+          ) {
+            indexPattern = parts[i];
+            break;
+          }
+        }
+      }
+      console.log('🔍 DEBUG: Extracted index pattern from dataset ID:', indexPattern);
+    } else if (appState?.index) {
+      indexPattern = appState.index;
+      console.log('🔍 DEBUG: Found index pattern from appState.index:', indexPattern);
+    }
+
+    // If still unknown, try to extract from URL path or hash
+    if (indexPattern === 'unknown') {
+      const urlMatch = window.location.href.match(/title:([^,&)]+)/);
+      if (urlMatch) {
+        indexPattern = decodeURIComponent(urlMatch[1]);
+        console.log('🔍 DEBUG: Extracted index pattern from URL match:', indexPattern);
+      }
+    }
+
+    console.log('🔍 DEBUG: Final index pattern:', indexPattern);
+
     return {
-      indexPattern: appState?.index || 'unknown',
-      query: appState?.query || { query: '', language: 'kuery' },
+      indexPattern,
+      query: queryState?.query || appState?.query || { query: '', language: 'kuery' },
       filters: globalState?.filters || [],
       columns: appState?.columns || ['_source'],
       sort: appState?.sort || [],
@@ -179,6 +242,12 @@ export class ExploreContextContributor implements StatefulContextContributor {
       pathname: window.location.pathname,
       search: window.location.search,
       hash,
+      // Include raw parsed states for debugging
+      rawStates: {
+        appState,
+        globalState,
+        queryState,
+      },
     };
   }
 
