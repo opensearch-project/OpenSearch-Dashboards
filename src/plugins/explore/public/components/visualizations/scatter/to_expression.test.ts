@@ -71,8 +71,10 @@ describe('Scatter Chart to_expression', () => {
   const mockDateColumns: VisColumn[] = [];
 
   const mockStyles: Partial<ScatterChartStyleControls> = {
-    addLegend: true,
-    legendPosition: Positions.RIGHT,
+    legends: [
+      { role: 'color', show: true, position: Positions.RIGHT, title: '' },
+      { role: 'size', show: true, position: Positions.RIGHT, title: '' },
+    ],
     tooltipOptions: {
       mode: 'all',
     },
@@ -413,7 +415,7 @@ describe('Scatter Chart to_expression', () => {
       expect(customTitleResult.title).toBe('Custom Colored Scatter Chart');
     });
 
-    it('should include legend when addLegend is true', () => {
+    it('should include legend when legends[0].show is true', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.X]: mockNumericalColumns[0],
         [AxisRole.Y]: mockNumericalColumns[1],
@@ -435,10 +437,29 @@ describe('Scatter Chart to_expression', () => {
       expect(markLayer.encoding.color.legend).toHaveProperty('orient', Positions.RIGHT);
     });
 
-    it('should not include legend when addLegend is false', () => {
+    it('should not include legend when legends[0].show is false', () => {
       const stylesWithoutLegend = {
         ...mockStyles,
-        addLegend: false,
+        legends: [
+          {
+            ...(mockStyles.legends?.[0] ?? {
+              role: 'color',
+              show: false,
+              position: Positions.RIGHT,
+              title: '',
+            }),
+            show: false,
+          },
+          {
+            ...(mockStyles.legends?.[1] ?? {
+              role: 'size',
+              show: false,
+              position: Positions.RIGHT,
+              title: '',
+            }),
+            show: false,
+          },
+        ],
       };
 
       const mockAxisColumnMappings: AxisColumnMappings = {
@@ -567,7 +588,7 @@ describe('Scatter Chart to_expression', () => {
       expect(customTitleResult.title).toBe('Custom Sized Scatter Chart');
     });
 
-    it('should include size legend when addLegend is true', () => {
+    it('should include size legend when legends[1].show is true', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.X]: mockNumericalColumns[0],
         [AxisRole.Y]: mockNumericalColumns[1],
@@ -585,15 +606,35 @@ describe('Scatter Chart to_expression', () => {
       );
 
       const markLayer = result.layer[0];
+      expect(markLayer.encoding.size).toBeDefined();
       expect(markLayer.encoding.size.legend).toBeDefined();
       expect(markLayer.encoding.size.legend).toHaveProperty('title', 'Size');
       expect(markLayer.encoding.size.legend).toHaveProperty('orient', Positions.RIGHT);
     });
 
-    it('should not include size legend when addLegend is false', () => {
+    it('should not include size legend when legends[1].show is false', () => {
       const stylesWithoutLegend = {
         ...mockStyles,
-        addLegend: false,
+        legends: [
+          {
+            ...(mockStyles.legends?.[0] ?? {
+              role: 'color',
+              show: false,
+              position: Positions.RIGHT,
+              title: '',
+            }),
+            show: false,
+          },
+          {
+            ...(mockStyles.legends?.[1] ?? {
+              role: 'size',
+              show: false,
+              position: Positions.RIGHT,
+              title: '',
+            }),
+            show: false,
+          },
+        ],
       };
 
       const mockAxisColumnMappings: AxisColumnMappings = {
@@ -613,7 +654,7 @@ describe('Scatter Chart to_expression', () => {
       );
 
       const markLayer = result.layer[0];
-      expect(markLayer.encoding.size.legend).toBeNull();
+      expect(markLayer.encoding.size).toBeUndefined();
     });
   });
 });

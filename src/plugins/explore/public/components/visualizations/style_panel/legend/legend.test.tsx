@@ -15,10 +15,14 @@ jest.mock('@osd/i18n', () => ({
 }));
 
 describe('LegendOptionsPanel', () => {
-  const mockLegend = {
-    show: true,
-    position: Positions.BOTTOM,
-  };
+  const mockLegend = [
+    {
+      show: true,
+      position: Positions.BOTTOM,
+      role: 'color',
+      title: '',
+    },
+  ];
 
   const mockOnLegendChange = jest.fn();
 
@@ -46,7 +50,7 @@ describe('LegendOptionsPanel', () => {
     const legendModeSwitch = screen.getByTestId('legendModeSwitch');
 
     fireEvent.click(legendModeSwitch);
-    expect(mockOnLegendChange).toHaveBeenLastCalledWith({
+    expect(mockOnLegendChange).toHaveBeenLastCalledWith(0, {
       show: false,
     });
   });
@@ -59,7 +63,7 @@ describe('LegendOptionsPanel', () => {
     const legendPositionSelect = screen.getByTestId('legendPositionSelect');
 
     fireEvent.change(legendPositionSelect, { target: { value: Positions.RIGHT } });
-    expect(mockOnLegendChange).toHaveBeenLastCalledWith({
+    expect(mockOnLegendChange).toHaveBeenLastCalledWith(0, {
       position: Positions.RIGHT,
     });
   });

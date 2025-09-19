@@ -38,7 +38,7 @@ export interface AreaChartStyleControls {
   titleOptions: TitleOptions;
 }
 
-const defaultAreaChartStyles: AreaChartStyleControls = {
+export const defaultAreaChartStyles: AreaChartStyleControls = {
   // Basic controls
   legends: [{ role: 'color', show: true, position: Positions.RIGHT, title: '' }],
   addTimeMarker: false,

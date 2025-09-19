@@ -43,8 +43,8 @@ describe('line_vis_config', () => {
       const defaults = config.ui.style.defaults as LineChartStyleControls;
 
       // Verify basic controls
-      expect(defaults.addLegend).toBe(true);
-      expect(defaults.legendPosition).toBe(Positions.RIGHT);
+      expect(defaults.legends[0].show).toBe(true);
+      expect(defaults.legends[0].position).toBe(Positions.RIGHT);
       expect(defaults.addTimeMarker).toBe(false);
 
       // Verify line style
@@ -132,8 +132,7 @@ describe('line_vis_config', () => {
       // Mock props
       const mockProps = {
         styleOptions: {
-          addLegend: true,
-          legendPosition: Positions.RIGHT,
+          legends: [{ show: true, position: Positions.RIGHT, role: 'color', title: '' }],
           thresholdLines: [
             {
               id: '1',

@@ -131,6 +131,7 @@ export const LegendOptionsPanel = ({
               options={legendPositionOptions}
               value={legendOptions[0]?.position}
               onChange={(e) => handlePositionChange(e.target.value as Positions)}
+              onMouseUp={(e) => e.stopPropagation()}
               data-test-subj="legendPositionSelect"
             />
           </EuiFormRow>

@@ -25,7 +25,7 @@ jest.mock('react', () => ({
   createElement: jest.fn(),
 }));
 
-describe('createHeatmapeConfig', () => {
+describe('createHeatmapConfig', () => {
   it('should create a heatmap visualization type configuration', () => {
     const config = createHeatmapConfig();
 
@@ -41,8 +41,8 @@ describe('createHeatmapeConfig', () => {
     const defaults = config.ui.style.defaults as HeatmapChartStyleControls;
     // Verify basic controls
     expect(defaults.tooltipOptions.mode).toBe('all');
-    expect(defaults.addLegend).toBe(true);
-    expect(defaults.legendPosition).toBe(Positions.RIGHT);
+    expect(defaults.legends[0].show).toBe(true);
+    expect(defaults.legends[0].position).toBe(Positions.RIGHT);
     // Verify exclusive style
     expect(defaults.exclusive.colorSchema).toBe(ColorSchemas.BLUES);
     expect(defaults.exclusive.reverseSchema).toBe(false);
@@ -72,6 +72,7 @@ describe('createHeatmapeConfig', () => {
     expect(defaults.titleOptions.show).toBe(false);
     expect(defaults.titleOptions.titleName).toBe('');
   });
+
   it('should have available mappings configured', () => {
     const config = createHeatmapConfig();
 
@@ -91,8 +92,14 @@ describe('createHeatmapeConfig', () => {
       styleOptions: {
         switchAxes: false,
         tooltipOptions: { mode: 'hidden' as const },
-        addLegend: false,
-        legendPosition: Positions.RIGHT,
+        legends: [
+          {
+            show: false,
+            position: Positions.RIGHT,
+            title: '',
+            role: 'color',
+          },
+        ],
         exclusive: {
           colorSchema: ColorSchemas.BLUES,
           reverseSchema: false,

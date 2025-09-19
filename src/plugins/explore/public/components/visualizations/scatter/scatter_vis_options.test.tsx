@@ -67,12 +67,13 @@ jest.mock('@osd/i18n', () => ({
 }));
 
 jest.mock('./scatter_exclusive_vis_options', () => ({
-  ScatterExclusiveVisOptions: jest.fn(({ onChange }) => (
+  ScatterExclusiveVisOptions: jest.fn(({ styles, onChange }) => (
     <div data-test-subj="scatterExclusiveOptions">
       <button
         data-test-subj="changeScatterStyle"
         onClick={() =>
           onChange({
+            ...styles,
             pointShape: 'circle',
           })
         }
@@ -84,17 +85,18 @@ jest.mock('./scatter_exclusive_vis_options', () => ({
         data-test-subj="changeScatterFilled"
         onClick={() =>
           onChange({
-            filled: 'true',
+            ...styles,
+            filled: true,
           })
         }
       >
         Update Scatter Filled
       </button>
-
       <button
         data-test-subj="changeScatterAngled"
         onClick={() =>
           onChange({
+            ...styles,
             angle: 180,
           })
         }
@@ -113,13 +115,13 @@ jest.mock('../style_panel/legend/legend', () => {
       <div data-test-subj="mockLegendOptionsPanel">
         <button
           data-test-subj="mockLegendShow"
-          onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+          onClick={() => onLegendOptionsChange(0, { show: !legendOptions[0].show })}
         >
           Toggle Legend
         </button>
         <button
           data-test-subj="mockLegendPosition"
-          onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
+          onClick={() => onLegendOptionsChange(0, { position: PositionsEnum.BOTTOM })}
         >
           Change Position
         </button>
@@ -252,13 +254,31 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     // Test legend show toggle
     fireEvent.click(screen.getByTestId('mockLegendShow'));
     expect(propsWithCategoryColor.onStyleChange).toHaveBeenCalledWith({
-      addLegend: !mockProps.styleOptions.addLegend,
+      legends: [
+        {
+          ...propsWithCategoryColor.styleOptions.legends[0],
+          show: !propsWithCategoryColor.styleOptions.legends[0].show,
+        },
+        {
+          ...propsWithCategoryColor.styleOptions.legends[1],
+          show: !propsWithCategoryColor.styleOptions.legends[1].show,
+        },
+      ],
     });
 
     // Test legend position change
     fireEvent.click(screen.getByTestId('mockLegendPosition'));
     expect(propsWithCategoryColor.onStyleChange).toHaveBeenCalledWith({
-      legendPosition: Positions.BOTTOM,
+      legends: [
+        {
+          ...propsWithCategoryColor.styleOptions.legends[0],
+          position: Positions.BOTTOM,
+        },
+        {
+          ...propsWithCategoryColor.styleOptions.legends[1],
+          position: Positions.BOTTOM,
+        },
+      ],
     });
   });
 
@@ -323,6 +343,7 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     fireEvent.click(screen.getByTestId('changeScatterStyle'));
     expect(onStyleChange).toHaveBeenCalledWith({
       exclusive: {
+        ...updatedProps.styleOptions.exclusive,
         pointShape: 'circle',
       },
     });
@@ -330,13 +351,15 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     fireEvent.click(screen.getByTestId('changeScatterFilled'));
     expect(onStyleChange).toHaveBeenCalledWith({
       exclusive: {
-        filled: 'true',
+        ...updatedProps.styleOptions.exclusive,
+        filled: true,
       },
     });
 
     fireEvent.click(screen.getByTestId('changeScatterAngled'));
     expect(onStyleChange).toHaveBeenCalledWith({
       exclusive: {
+        ...updatedProps.styleOptions.exclusive,
         angle: 180,
       },
     });
@@ -383,7 +406,7 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     const titleInput = screen.getByPlaceholderText('Default title');
     await userEvent.type(titleInput, 'New Chart Title');
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(mockProps.onStyleChange).toHaveBeenCalledWith({
         titleOptions: {
           ...props.styleOptions.titleOptions,

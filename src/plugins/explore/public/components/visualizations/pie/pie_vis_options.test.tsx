@@ -30,6 +30,71 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
   )),
 }));
 
+// Mock the LegendOptionsPanel component
+jest.mock('../style_panel/legend/legend', () => ({
+  LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
+    <div data-test-subj="legend-panel">
+      <div>Legend</div>
+      <button
+        data-test-subj="legendModeSwitch"
+        onClick={() => onLegendOptionsChange(0, { show: !legendOptions[0].show })}
+      >
+        Toggle Legend
+      </button>
+    </div>
+  )),
+}));
+
+// Mock the PieExclusiveVisOptions component
+jest.mock('./pie_exclusive_vis_options', () => ({
+  PieExclusiveVisOptions: jest.fn(({ styles, onChange }) => (
+    <div data-test-subj="pie-exclusive-panel">
+      <button aria-label="Show as">Show as</button>
+      <button
+        data-test-subj="showValuesSwtich"
+        onClick={() => onChange({ ...styles, showValues: !styles.showValues })}
+      >
+        Toggle Show Values
+      </button>
+    </div>
+  )),
+}));
+
+// Mock the TooltipOptionsPanel component
+jest.mock('../style_panel/tooltip/tooltip', () => ({
+  TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
+    <div data-test-subj="tooltip-panel">
+      <button
+        data-test-subj="tooltipModeSwitch"
+        onClick={() =>
+          onTooltipOptionsChange({ mode: tooltipOptions.mode === 'all' ? 'hidden' : 'all' })
+        }
+      >
+        Toggle Tooltip
+      </button>
+    </div>
+  )),
+}));
+
+// Mock the TitleOptionsPanel component
+jest.mock('../style_panel/title/title', () => ({
+  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
+    <div data-test-subj="title-panel">
+      <button
+        data-test-subj="titleModeSwitch"
+        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
+      >
+        Toggle Title
+      </button>
+      <input
+        data-test-subj="titleInput"
+        placeholder="Default title"
+        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
+      />
+    </div>
+  )),
+}));
+
 describe('PieVisStyleControls', () => {
   const numericalColumn = {
     id: 1,
@@ -82,7 +147,14 @@ describe('PieVisStyleControls', () => {
     const switchButton = screen.getByTestId('legendModeSwitch');
     fireEvent.click(switchButton);
 
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      legends: [
+        {
+          ...mockProps.styleOptions.legends[0],
+          show: !mockProps.styleOptions.legends[0].show,
+        },
+      ],
+    });
   });
 
   it('calls onStyleChange when PieExclusiveVisOptions onChange is triggered', () => {
@@ -116,7 +188,7 @@ describe('PieVisStyleControls', () => {
     const titleSwitch = screen.getByTestId('titleModeSwitch');
     await userEvent.click(titleSwitch);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(mockProps.onStyleChange).toHaveBeenCalledWith({
         titleOptions: {
           ...mockProps.styleOptions.titleOptions,
@@ -144,7 +216,7 @@ describe('PieVisStyleControls', () => {
     const titleInput = screen.getByPlaceholderText('Default title');
     await userEvent.type(titleInput, 'New Chart Title');
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(mockProps.onStyleChange).toHaveBeenCalledWith({
         titleOptions: {
           ...props.styleOptions.titleOptions,

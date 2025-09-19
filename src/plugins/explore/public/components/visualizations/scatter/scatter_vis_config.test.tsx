@@ -30,8 +30,10 @@ describe('createScatterConfig', () => {
     const defaults = config.ui.style.defaults as ScatterChartStyleControls;
     // Verify basic controls
     expect(defaults.tooltipOptions.mode).toBe('all');
-    expect(defaults.addLegend).toBe(true);
-    expect(defaults.legendPosition).toBe(Positions.RIGHT);
+    expect(defaults.legends[0].show).toBe(true); // Color legend
+    expect(defaults.legends[0].position).toBe(Positions.RIGHT);
+    expect(defaults.legends[1].show).toBe(true); // Size legend
+    expect(defaults.legends[1].position).toBe(Positions.RIGHT);
     // Verify exclusive style
     expect(defaults.exclusive.pointShape).toBe(PointShape.CIRCLE);
     expect(defaults.exclusive.angle).toBe(0);
@@ -58,14 +60,20 @@ describe('createScatterConfig', () => {
         tooltipOptions: {
           mode: 'hidden' as 'hidden',
         },
-        addLegend: false,
-        legendPosition: Positions.RIGHT,
+        legends: [
+          { role: 'color', show: false, position: Positions.RIGHT, title: '' },
+          { role: 'size', show: false, position: Positions.RIGHT, title: '' },
+        ],
         exclusive: {
           pointShape: PointShape.CIRCLE,
           angle: 0,
           filled: false,
         },
         standardAxes: [] as StandardAxes[],
+        titleOptions: {
+          show: false,
+          titleName: '',
+        },
       } as ScatterChartStyleControls,
       onStyleChange: jest.fn(),
       numericalColumns: [],

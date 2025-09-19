@@ -15,6 +15,7 @@ import {
   AxisRole,
   AxisColumnMappings,
 } from '../types';
+import { defaultAreaChartStyles } from './area_vis_config';
 
 // Mock child components
 jest.mock('../style_panel/axes/axes_selector', () => ({
@@ -39,24 +40,25 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
     </div>
   )),
 }));
+
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
     <div data-test-subj="legend-panel">
       <button
         data-test-subj="toggle-legend"
-        onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+        onClick={() => onLegendOptionsChange(0, { show: !legendOptions[0].show })}
       >
         Toggle Legend
       </button>
       <button
         data-test-subj="change-position"
-        onClick={() => onLegendOptionsChange({ position: 'bottom' })}
+        onClick={() => onLegendOptionsChange(0, { position: 'bottom' })}
       >
         Change Position
       </button>
       <button
         data-test-subj="change-both"
-        onClick={() => onLegendOptionsChange({ show: !legendOptions.show, position: 'top' })}
+        onClick={() => onLegendOptionsChange(0, { show: !legendOptions[0].show, position: 'top' })}
       >
         Change Both
       </button>
@@ -180,68 +182,7 @@ jest.mock('../style_panel/title/title', () => ({
 
 describe('AreaVisStyleControls', () => {
   const defaultProps = {
-    styleOptions: {
-      addLegend: true,
-      legendPosition: Positions.RIGHT,
-      addTimeMarker: false,
-      thresholdLines: [
-        {
-          id: '1',
-          color: '#E7664C',
-          show: false,
-          style: ThresholdLineStyle.Full,
-          value: 10,
-          width: 1,
-          name: '',
-        },
-      ],
-      tooltipOptions: { mode: 'all' as TooltipOptions['mode'] },
-      categoryAxes: [
-        {
-          id: 'CategoryAxis-1',
-          type: 'category' as const,
-          position: Positions.BOTTOM as Positions.TOP | Positions.BOTTOM,
-          show: true,
-          labels: {
-            show: true,
-            filter: true,
-            rotate: 0,
-            truncate: 100,
-          },
-          grid: {
-            showLines: true,
-          },
-          title: {
-            text: '',
-          },
-        },
-      ],
-      valueAxes: [
-        {
-          id: 'ValueAxis-1',
-          name: 'LeftAxis-1',
-          type: 'value' as const,
-          position: Positions.LEFT as Positions.LEFT | Positions.RIGHT,
-          show: true,
-          labels: {
-            show: true,
-            rotate: 0,
-            filter: false,
-            truncate: 100,
-          },
-          grid: {
-            showLines: true,
-          },
-          title: {
-            text: '',
-          },
-        },
-      ],
-      titleOptions: {
-        show: true,
-        titleName: '',
-      },
-    },
+    styleOptions: defaultAreaChartStyles, // Use defaultAreaChartStyles from area_vis_config.ts
     onStyleChange: jest.fn(),
     axisColumnMappings: {
       [AxisRole.X]: {
@@ -348,7 +289,14 @@ describe('AreaVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('toggle-legend'));
 
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      legends: [
+        {
+          ...defaultProps.styleOptions.legends[0],
+          show: !defaultProps.styleOptions.legends[0].show,
+        },
+      ],
+    });
   });
 
   test('updates legend position correctly', async () => {
@@ -356,7 +304,14 @@ describe('AreaVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('change-position'));
 
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: Positions.BOTTOM });
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      legends: [
+        {
+          ...defaultProps.styleOptions.legends[0],
+          position: Positions.BOTTOM,
+        },
+      ],
+    });
   });
 
   test('updates both legend show and position correctly', async () => {
@@ -364,8 +319,15 @@ describe('AreaVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('change-both'));
 
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: Positions.TOP });
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      legends: [
+        {
+          ...defaultProps.styleOptions.legends[0],
+          show: !defaultProps.styleOptions.legends[0].show,
+          position: Positions.TOP,
+        },
+      ],
+    });
   });
 
   test('updates threshold lines correctly', async () => {
@@ -409,7 +371,7 @@ describe('AreaVisStyleControls', () => {
         {
           id: 'new-category',
           type: 'category' as const,
-          position: Positions.BOTTOM as Positions.TOP | Positions.BOTTOM,
+          position: 'bottom',
           show: true,
           labels: {
             show: true,
@@ -437,7 +399,7 @@ describe('AreaVisStyleControls', () => {
           id: 'new-value',
           name: 'NewAxis',
           type: 'value' as const,
-          position: Positions.LEFT as Positions.LEFT | Positions.RIGHT,
+          position: 'left',
           show: true,
           labels: {
             show: true,
@@ -517,7 +479,7 @@ describe('AreaVisStyleControls', () => {
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
       titleOptions: {
         ...defaultProps.styleOptions.titleOptions,
-        show: false,
+        show: !defaultProps.styleOptions.titleOptions.show,
       },
     });
   });

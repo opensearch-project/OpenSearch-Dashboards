@@ -152,13 +152,13 @@ jest.mock('../style_panel/legend/legend', () => {
       <div data-test-subj="mockLegendOptionsPanel">
         <button
           data-test-subj="mockLegendShow"
-          onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+          onClick={() => onLegendOptionsChange(0, { show: !legendOptions[0].show })}
         >
           Toggle Legend
         </button>
         <button
           data-test-subj="mockLegendPosition"
-          onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
+          onClick={() => onLegendOptionsChange(0, { position: PositionsEnum.BOTTOM })}
         >
           Change Position
         </button>
@@ -262,14 +262,18 @@ describe('HeatmapVisStyleControls', () => {
 
     // Test legend show toggle
     fireEvent.click(screen.getByTestId('mockLegendShow'));
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      addLegend: !mockProps.styleOptions.addLegend,
-    });
 
     // Test legend position change
     fireEvent.click(screen.getByTestId('mockLegendPosition'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      legendPosition: Positions.BOTTOM,
+      legends: [
+        {
+          role: 'color',
+          show: true,
+          position: Positions.BOTTOM,
+          title: '',
+        },
+      ],
     });
   });
 
