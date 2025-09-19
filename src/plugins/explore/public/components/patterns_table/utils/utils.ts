@@ -5,14 +5,15 @@
 
 import { IFieldType, Query } from 'src/plugins/data/common';
 import {
+  CALCITE_DELIM_CONTENT,
+  CALCITE_DELIM_END,
   COUNT_FIELD,
+  DELIM_END,
   DELIM_START,
   MARK_END,
   MARK_START,
   PATTERNS_FIELD,
   SAMPLE_FIELD,
-  STD_DELIM_END,
-  UNIQ_DELIM_END,
 } from './constants';
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { ExploreServices } from '../../../types';
@@ -25,7 +26,7 @@ export const regexPatternQuery = (queryBase: string, patternsField: string) => {
 };
 
 export const brainPatternQuery = (queryBase: string, patternsField: string) => {
-  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=aggregation max_sample_count=1 | sort - pattern_count`;
+  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
 };
 
 export const regexUpdateSearchPatternQuery = (
@@ -65,14 +66,17 @@ export const createSearchPatternQueryWithSlice = (
   pageSize: number,
   pageOffset: number
 ) => {
-  const searchPatternQuery = createSearchPatternQuery(
-    query,
-    patternsField,
-    usingRegexPatterns,
-    patternString
-  );
+  // TODO: switch this logic back to adding onto the createSearchPatternQuery
+  // when we don't need a patterns clause to lock in the pattern type
 
-  return `${searchPatternQuery} | sort - ${timeField} | head ${pageSize} from ${pageOffset}`;
+  const preparedQuery = getQueryWithSource(query);
+  return usingRegexPatterns
+    ? `${regexUpdateSearchPatternQuery(
+        preparedQuery.query,
+        patternsField,
+        patternString
+      )} | sort - ${timeField} | head ${pageSize} from ${pageOffset}`
+    : `${preparedQuery.query} | patterns \`${patternsField}\` method=brain mode=label | fields patterns_field, ${timeField}, ${patternsField} | where patterns_field = '${patternString}' | sort - ${timeField} | head ${pageSize} from ${pageOffset}`;
 };
 
 // Checks if the value is a valid, finite number. Used for patterns table
@@ -93,18 +97,6 @@ export const isValidFiniteNumber = (val: number) => {
  * and specialized delimiters (e.g., <*IP*>, <*DATETIME*>) to accommodate different types of dynamic content.
  */
 export const highlightLogUsingPattern = (log: string, pattern: string) => {
-  // go start off in the pattern string.
-  // look for a dynamic element, keeping every character before that dynamic element
-  // when we find dynamic element, add the prev chars in the accumulation
-  // add a <mark> to the accumulation.
-
-  // continue on the pattern string, keeping track of every char before next dynam. elem.
-  // when we reach dynam. elem., use the kept track of chars as our window.
-  // on the sample log, from where we left off, slide the window down until it matches.
-  // everything between first pointer and start of window is our dynam. elem. in the sample
-  // add sample dynam elem to accum. and close off with </mark>.
-  // add the contents of our window to the accum.
-
   // continue those last few steps until we reach the end.
 
   // two pointers for the sample log string and the pattern string
@@ -123,7 +115,7 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
       const prevPatternPos = currPatternPos;
       for (; currPatternPos < pattern.length; currPatternPos++) {
         // don't need to worry about currPatternPos + 2 going over pattern length, slice will handle it
-        const potentialDelim = pattern.slice(currPatternPos, currPatternPos + 2);
+        const potentialDelim = pattern.slice(currPatternPos, currPatternPos + 1);
 
         if (potentialDelim === DELIM_START) {
           break;
@@ -132,7 +124,7 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
 
       // grab the window of chars in the pattern before the delim. this will be a static element
       const preDelimWindow = pattern.slice(prevPatternPos, currPatternPos);
-      currPatternPos += 2; // found the delim start, stop right in the middle
+      currPatternPos += 1; // found the delim start, stop right in the middle
 
       // move down sample string, and check if the window matches at all
       const prevSampleLogPos = currSampleLogPos;
@@ -150,14 +142,18 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
       const dynamicElement = log.slice(prevSampleLogPos, currSampleLogPos);
 
       // below statement moves the patternPos up to the end of the delim
-      if (pattern[currPatternPos] === STD_DELIM_END) {
-        // standard delimiter, for <*>
+      if (pattern.slice(currPatternPos, currPatternPos + 5) === CALCITE_DELIM_CONTENT) {
+        currPatternPos += 5;
+        // move currPatternPos up until we hit '>'
+        while (currPatternPos < pattern.length && pattern[currPatternPos] !== CALCITE_DELIM_END) {
+          currPatternPos++;
+        }
         currPatternPos += 1;
       } else {
-        // for special delimiters, such as <*IP*> or <*DATETIME*>. ignores content of delim
+        // moves up to account for special delimiters, such as <*IP*> or <*DATETIME*>
         while (
           currPatternPos < pattern.length &&
-          pattern.slice(currPatternPos, currPatternPos + 2) !== UNIQ_DELIM_END
+          pattern.slice(currPatternPos, currPatternPos + 2) !== DELIM_END
         ) {
           currPatternPos++;
         }
@@ -219,8 +215,12 @@ export const findDefaultPatternsField = (services: ExploreServices): string => {
     return field.type === 'string';
   });
 
+  if (!logResults?.hits?.hits?.[0]) {
+    throw new Error('Cannot access hits from logs tab');
+  }
+
   // Get the first hit if available
-  const firstHit = logResults?.hits?.hits?.[0];
+  const firstHit = logResults.hits.hits[0];
 
   if (firstHit && firstHit._source && filteredFields) {
     // Find the field with the longest value
