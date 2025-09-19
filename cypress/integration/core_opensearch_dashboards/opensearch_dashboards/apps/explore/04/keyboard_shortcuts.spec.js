@@ -21,9 +21,10 @@ describe('Keyboard Shortcuts Tests', () => {
       // Load sample data
       cy.loadSampleDataForWorkspaceWithEndpoint(endpoint, 'logs', workspaceId);
 
-      //cy.visit(`/w/${workspaceId}/app/dashboards`);
-      cy.visit(`/w/${workspaceId}/app/explore/logs`);
+      cy.visit(`/w/${workspaceId}/app/dashboards`);
+      //cy.visit(`/w/${workspaceId}/app/explore/logs`);
       cy.get('body').should('be.visible');
+      cy.wait(3000);
     });
   });
 
@@ -43,7 +44,6 @@ describe('Keyboard Shortcuts Tests', () => {
 
   describe('Help Modal - dashboard', () => {
     it('should open help modal, verify content, and close properly', () => {
-      cy.wait(10000);
       cy.get('body').type('{shift+/}');
       cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
       cy.wait(1000);
@@ -477,6 +477,51 @@ describe('Keyboard Shortcuts Tests', () => {
       // Clean up
       cy.get('body').type('{esc}');
       cy.getElementByTestId('loadSearchForm').should('not.exist');
+    });
+  });
+
+  describe('Download CSV Shortcut', () => {
+    it('should open download CSV popover when pressing E key', () => {
+      cy.getElementByTestId('collapsibleNavAppLink-import_sample_data').click();
+      cy.wait(1000);
+      cy.getElementByTestId('launchSampleDataSetlogs').click();
+      cy.wait(1000);
+      cy.visit(`/w/${workspaceId}/app/explore/logs`);
+      cy.wait(1000);
+      cy.getElementByTestId('dscDownloadCsvButton').should('be.visible');
+      cy.wait(1000);
+      cy.get('body').type('e');
+      cy.getElementByTestId('dscDownloadCsvPopoverContent').should('be.visible');
+    });
+  });
+
+  describe('Add to Dashboard Shortcut', () => {
+    it('should open add to dashboard modal when pressing A key', () => {
+      cy.get('body').type('a');
+      cy.getElementByTestId('addToDashboardModalTitle')
+        .should('be.visible')
+        .and('contain', 'Save and Add to Dashboard');
+    });
+  });
+
+  describe('Switch to Patterns Tab Shortcut', () => {
+    it('should switch to patterns tab when pressing Shift+P', () => {
+      cy.get('body').type('{shift+p}');
+      cy.get('#explore_patterns_tab').should('have.attr', 'aria-selected', 'true');
+    });
+  });
+
+  describe('Switch to Logs Tab Shortcut', () => {
+    it('should switch to logs tab when pressing Shift+L', () => {
+      cy.get('body').type('{shift+l}');
+      cy.get('#logs').should('have.attr', 'aria-selected', 'true');
+    });
+  });
+
+  describe('Switch to Visualization Tab Shortcut', () => {
+    it('should switch to visualization tab when pressing Shift+V', () => {
+      cy.get('body').type('{shift+v}');
+      cy.get('#explore_visualization_tab').should('have.attr', 'aria-selected', 'true');
     });
   });
 
