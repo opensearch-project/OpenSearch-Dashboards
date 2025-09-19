@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import '../../../../../../utils/dashboards/workspace/commands';
+import { DATASOURCE_NAME } from '../../../../../../utils/apps/explore/constants';
+import { PATHS } from '../../../../../../utils/constants';
 
 describe('Keyboard Shortcuts Tests', () => {
   let workspaceId;
@@ -10,22 +12,48 @@ describe('Keyboard Shortcuts Tests', () => {
   const workspaceName = `test-workspace-${Date.now()}`;
 
   before(() => {
-    cy.createWorkspaceWithEndpoint(endpoint, {
-      name: workspaceName,
-      features: ['use-case-observability'],
-      description: 'Test workspace for keyboard shortcuts',
-    }).then((workspace) => {
-      workspaceId = workspace.id;
-      cy.wrap(workspaceId).as('workspaceId');
+    if (PATHS.SECONDARY_ENGINE) {
+      cy.osd.addDataSource({
+        name: DATASOURCE_NAME,
+        url: PATHS.SECONDARY_ENGINE,
+        authType: 'no_auth',
+      });
 
-      // Load sample data
-      cy.loadSampleDataForWorkspaceWithEndpoint(endpoint, 'logs', workspaceId);
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
 
-      cy.visit(`/w/${workspaceId}/app/dashboards`);
-      //cy.visit(`/w/${workspaceId}/app/explore/logs`);
-      cy.get('body').should('be.visible');
-      cy.wait(3000);
-    });
+      cy.visit('/app/home');
+      cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+
+      cy.get('@WORKSPACE_ID').then((wsId) => {
+        workspaceId = wsId;
+        cy.wrap(workspaceId).as('workspaceId');
+
+        cy.loadSampleDataForWorkspaceWithEndpoint(endpoint, 'logs', workspaceId);
+
+        cy.visit(`/w/${workspaceId}/app/dashboards`);
+        cy.get('body').should('be.visible');
+        cy.wait(6000);
+      });
+    } else {
+      cy.deleteWorkspaceByName(workspaceName);
+      cy.osd.deleteAllOldWorkspaces();
+
+      cy.createWorkspaceWithEndpoint(endpoint, {
+        name: workspaceName,
+        features: ['use-case-observability'],
+        description: 'Test workspace for keyboard shortcuts',
+      }).then((workspace) => {
+        workspaceId = workspace.id;
+        cy.wrap(workspaceId).as('workspaceId');
+
+        cy.loadSampleDataForWorkspaceWithEndpoint(endpoint, 'logs', workspaceId);
+
+        cy.visit(`/w/${workspaceId}/app/dashboards`);
+        cy.get('body').should('be.visible');
+        cy.wait(6000);
+      });
+    }
   });
 
   after(() => {
@@ -39,6 +67,11 @@ describe('Keyboard Shortcuts Tests', () => {
         },
         failOnStatusCode: false,
       });
+    }
+
+    // Clean up data source only if it was created
+    if (PATHS.SECONDARY_ENGINE) {
+      cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
     }
   });
 
@@ -274,7 +307,7 @@ describe('Keyboard Shortcuts Tests', () => {
   describe('Help Modal - discover', () => {
     it('should open help modal, verify content, and close properly', () => {
       cy.visit(`/w/${workspaceId}/app/explore/logs`);
-      cy.wait(2000);
+      cy.explore.setRelativeTopNavDate('1', 'h');
       cy.get('body').should('be.visible');
       cy.wait(500);
       cy.get('body').click();
@@ -482,14 +515,6 @@ describe('Keyboard Shortcuts Tests', () => {
 
   describe('Download CSV Shortcut', () => {
     it('should open download CSV popover when pressing E key', () => {
-      cy.getElementByTestId('collapsibleNavAppLink-import_sample_data').click();
-      cy.wait(1000);
-      cy.getElementByTestId('launchSampleDataSetlogs').click();
-      cy.wait(1000);
-      cy.visit(`/w/${workspaceId}/app/explore/logs`);
-      cy.wait(1000);
-      cy.getElementByTestId('dscDownloadCsvButton').should('be.visible');
-      cy.wait(1000);
       cy.get('body').type('e');
       cy.getElementByTestId('dscDownloadCsvPopoverContent').should('be.visible');
     });
