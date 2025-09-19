@@ -18,6 +18,7 @@ import {
   VisFieldType,
   TitleOptions,
 } from '../types';
+import { LegendOptions } from '../style_panel/legend/legend';
 
 export interface HeatmapLabels {
   show: boolean;
@@ -41,8 +42,7 @@ export interface ExclusiveHeatmapConfig {
 export interface HeatmapChartStyleControls {
   // Basic controls
   tooltipOptions: TooltipOptions;
-  addLegend: boolean;
-  legendPosition: Positions;
+  legends: LegendOptions[];
 
   // Axes configuration
   standardAxes: StandardAxes[];
@@ -59,8 +59,14 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
   tooltipOptions: {
     mode: 'all',
   },
-  addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legends: [
+    {
+      show: true,
+      position: Positions.RIGHT,
+      title: '',
+      role: 'color',
+    },
+  ],
 
   // exclusive
   exclusive: {

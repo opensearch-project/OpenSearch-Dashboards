@@ -18,12 +18,12 @@ import {
   TitleOptions,
 } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { LegendOptions } from '../style_panel/legend/legend';
 
 // Complete area chart style controls interface
 export interface AreaChartStyleControls {
   // Basic controls
-  addLegend: boolean;
-  legendPosition: Positions;
+  legends: LegendOptions[];
   addTimeMarker: boolean;
   areaOpacity?: number;
   tooltipOptions: TooltipOptions;
@@ -40,8 +40,7 @@ export interface AreaChartStyleControls {
 
 const defaultAreaChartStyles: AreaChartStyleControls = {
   // Basic controls
-  addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legends: [{ role: 'color', show: true, position: Positions.RIGHT, title: '' }],
   addTimeMarker: false,
   tooltipOptions: {
     mode: 'all',

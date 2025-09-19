@@ -8,6 +8,7 @@ import { VisualizationType } from '../utils/use_visualization_types';
 
 import { PieVisStyleControls } from './pie_vis_options';
 import { AxisRole, Positions, TitleOptions, TooltipOptions, VisFieldType } from '../types';
+import { LegendOptions } from '../style_panel/legend/legend';
 
 export interface PieExclusiveStyleControl {
   donut: boolean;
@@ -20,8 +21,7 @@ export interface PieExclusiveStyleControl {
 export interface PieChartStyleControls {
   // Basic controls
   addTooltip: boolean;
-  addLegend: boolean;
-  legendPosition: Positions;
+  legends: LegendOptions[];
   tooltipOptions: TooltipOptions;
 
   // Exclusive controls
@@ -33,8 +33,7 @@ export interface PieChartStyleControls {
 export const defaultPieChartStyles: PieChartStyleControls = {
   // Basic controls
   addTooltip: true,
-  addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legends: [{ role: 'color', show: true, position: Positions.RIGHT, title: '' }],
   tooltipOptions: {
     mode: 'all',
   },

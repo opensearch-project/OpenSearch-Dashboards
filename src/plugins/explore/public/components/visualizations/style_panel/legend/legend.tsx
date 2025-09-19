@@ -8,15 +8,18 @@ import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { Positions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
+import { DebouncedFieldText } from '../utils';
 
 export interface LegendOptions {
   show: boolean;
   position: Positions;
+  title?: string;
+  role: string;
 }
 
 export interface LegendOptionsProps {
-  legendOptions: LegendOptions;
-  onLegendOptionsChange: (legendOptions: Partial<LegendOptions>) => void;
+  legendOptions: LegendOptions[];
+  onLegendOptionsChange: (index: number, legendOptions: Partial<LegendOptions>) => void;
 }
 
 export const LegendOptionsPanel = ({
@@ -54,6 +57,18 @@ export const LegendOptionsPanel = ({
     },
   ];
 
+  const handleShowChange = (checked: boolean) => {
+    legendOptions.forEach((_, index) => {
+      onLegendOptionsChange(index, { show: checked });
+    });
+  };
+
+  const handlePositionChange = (position: Positions) => {
+    legendOptions.forEach((_, index) => {
+      onLegendOptionsChange(index, { position });
+    });
+  };
+
   return (
     <StyleAccordion
       id="legendSection"
@@ -67,14 +82,45 @@ export const LegendOptionsPanel = ({
         label={i18n.translate('explore.stylePanel.legend.mode', {
           defaultMessage: 'Show legend',
         })}
-        checked={legendOptions.show}
-        onChange={(e) => onLegendOptionsChange({ show: e.target.checked })}
+        checked={legendOptions[0]?.show}
+        onChange={(e) => handleShowChange(e.target.checked)}
         data-test-subj="legendModeSwitch"
       />
-
-      {legendOptions.show && (
+      {legendOptions[0]?.show && (
         <>
           <EuiSpacer size="s" />
+          {legendOptions.map((legend, index) => (
+            <div key={index}>
+              <EuiFormRow
+                label={
+                  legendOptions.length === 1
+                    ? i18n.translate('explore.vis.legendTitle.simple', {
+                        defaultMessage: 'Title',
+                      })
+                    : i18n.translate('explore.vis.legendTitle', {
+                        defaultMessage: '{role} title',
+                        values: { role: legend.role },
+                      })
+                }
+              >
+                <DebouncedFieldText
+                  value={legend.title ?? ''}
+                  placeholder={
+                    legendOptions.length === 1
+                      ? i18n.translate('explore.vis.legendName.simple', {
+                          defaultMessage: 'Legend name',
+                        })
+                      : i18n.translate('explore.vis.legendName', {
+                          defaultMessage: '{role} legend name',
+                          values: { role: legend.role },
+                        })
+                  }
+                  onChange={(value) => onLegendOptionsChange(index, { title: value })}
+                  data-test-subj={`legendTitleInput-${legend.role}`}
+                />
+              </EuiFormRow>
+            </div>
+          ))}
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.legend.position', {
               defaultMessage: 'Position',
@@ -83,9 +129,8 @@ export const LegendOptionsPanel = ({
             <EuiSelect
               compressed
               options={legendPositionOptions}
-              value={legendOptions.position}
-              onChange={(e) => onLegendOptionsChange({ position: e.target.value as Positions })}
-              onMouseUp={(e) => e.stopPropagation()}
+              value={legendOptions[0]?.position}
+              onChange={(e) => handlePositionChange(e.target.value as Positions)}
               data-test-subj="legendPositionSelect"
             />
           </EuiFormRow>

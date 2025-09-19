@@ -16,6 +16,7 @@ import {
   TitleOptions,
 } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { LegendOptions } from '../style_panel/legend/legend';
 
 export interface ExclusiveScatterConfig {
   pointShape: PointShape;
@@ -26,8 +27,7 @@ export interface ExclusiveScatterConfig {
 export interface ScatterChartStyleControls {
   // Basic controls
   tooltipOptions: TooltipOptions;
-  addLegend: boolean;
-  legendPosition: Positions;
+  legends: LegendOptions[];
   // Axes configuration
   standardAxes: StandardAxes[];
 
@@ -42,8 +42,10 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
   tooltipOptions: {
     mode: 'all',
   },
-  addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legends: [
+    { role: 'color', show: true, position: Positions.RIGHT, title: '' },
+    { role: 'size', show: true, position: Positions.RIGHT, title: '' },
+  ],
 
   // exclusive
   exclusive: {

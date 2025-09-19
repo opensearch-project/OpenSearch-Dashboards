@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { LegendOptions } from '../style_panel/legend/legend';
 import {
   StandardAxes,
   ColorSchemas,
@@ -295,4 +296,11 @@ export function getThresholdByValue<T>(
   }
 
   return undefined;
+}
+
+export function findLegend<T extends { legends?: LegendOptions[] }>(
+  styles: T,
+  role: string
+): LegendOptions | undefined {
+  return styles?.legends?.find((l) => l.role === role);
 }

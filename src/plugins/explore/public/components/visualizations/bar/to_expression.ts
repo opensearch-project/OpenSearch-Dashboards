@@ -14,7 +14,7 @@ import {
 } from '../types';
 import { BarChartStyleControls, defaultBarChartStyles } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold_lines/utils';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis, findLegend } from '../utils/utils';
 
 import {
   inferTimeIntervals,
@@ -118,13 +118,6 @@ export const createBarSpec = (
       : undefined,
     data: { values: transformedData },
     layer: layers,
-    // Add legend configuration if needed, or explicitly set to null if disabled
-    legend: styles.addLegend
-      ? {
-          orient: styles.legendPosition?.toLowerCase() || 'right',
-          symbolType: styles.legendShape ?? 'circle',
-        }
-      : null,
   };
 };
 
@@ -262,6 +255,7 @@ export const createGroupedTimeBarChart = (
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
   const categoryField = colorColumn?.column;
   const categoryName = colorColumn?.name;
+  const colorLegend = findLegend(styles, 'color');
 
   // Configure bar mark
   const barMark: any = {
@@ -301,10 +295,10 @@ export const createGroupedTimeBarChart = (
       color: {
         field: categoryField,
         type: getSchemaByAxis(colorColumn),
-        legend: styles.addLegend
+        legend: colorLegend?.show
           ? {
-              title: categoryName,
-              orient: styles.legendPosition?.toLowerCase() || 'right',
+              title: colorLegend.title || categoryName,
+              orient: colorLegend.position?.toLowerCase() || 'right',
               symbolType: styles.legendShape ?? 'circle',
             }
           : null,
@@ -379,14 +373,12 @@ export const createFacetedTimeBarChart = (
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
 
-  const metricField = yAxis?.column;
-  const dateField = xAxis?.column;
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
   const metricName = yAxisStyle?.title?.text || yAxis?.name;
-  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
+  const colorLegend = findLegend(styles, 'color');
 
   const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
 
@@ -443,10 +435,10 @@ export const createFacetedTimeBarChart = (
             color: {
               field: category1Field,
               type: getSchemaByAxis(colorMapping),
-              legend: styles.addLegend
+              legend: colorLegend?.show
                 ? {
-                    title: category1Name,
-                    orient: styles.legendPosition?.toLowerCase() || 'right',
+                    title: colorLegend.title || category1Name,
+                    orient: colorLegend.position?.toLowerCase() || 'right',
                     symbolType: styles.legendShape ?? 'circle',
                   }
                 : null,
@@ -508,6 +500,7 @@ export const createStackedBarSpec = (
 
   const categoryField2 = colorMapping?.column;
   const categoryName2 = colorMapping?.name;
+  const colorLegend = findLegend(styles, 'color');
 
   // Set up encoding
   const categoryAxis = 'x';
@@ -542,10 +535,10 @@ export const createStackedBarSpec = (
       color: {
         field: categoryField2,
         type: 'nominal',
-        legend: styles.addLegend
+        legend: colorLegend?.show
           ? {
-              title: categoryName2,
-              orient: styles.legendPosition?.toLowerCase() || 'bottom',
+              title: colorLegend.title || categoryName2,
+              orient: colorLegend.position?.toLowerCase() || 'bottom',
               symbolType: styles.legendShape ?? 'circle',
             }
           : null,

@@ -12,7 +12,7 @@ import {
   ValueAxisPosition,
 } from './line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
-import { getTooltipFormat } from '../utils/utils';
+import { findLegend, getTooltipFormat } from '../utils/utils';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -132,6 +132,7 @@ export const createLineBarChart = (
   const metric1Name = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
   const metric2Name = styles.valueAxes?.[1]?.title?.text || secondYAxisMapping?.name;
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
+  const colorLegend = findLegend(styles, 'color');
   const layers: any[] = [];
 
   const barLayer = {
@@ -168,10 +169,10 @@ export const createLineBarChart = (
       },
       color: {
         datum: metric1Name,
-        legend: styles.addLegend
+        legend: colorLegend?.show
           ? {
-              title: 'Metrics',
-              orient: styles.legendPosition,
+              title: colorLegend.title || 'Metrics',
+              orient: colorLegend.position,
             }
           : null,
       },
@@ -219,10 +220,10 @@ export const createLineBarChart = (
       },
       color: {
         datum: metric2Name,
-        legend: styles.addLegend
+        legend: colorLegend?.show
           ? {
-              title: 'Metrics',
-              orient: styles.legendPosition,
+              title: colorLegend.title || 'Metrics',
+              orient: colorLegend.position,
             }
           : null,
       },
@@ -294,6 +295,7 @@ export const createMultiLineChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const categoryName = colorColumn?.name;
+  const colorLegend = findLegend(styles, 'color');
   const layers: any[] = [];
 
   const mainLayer = {
@@ -330,13 +332,12 @@ export const createMultiLineChart = (
       color: {
         field: categoryField,
         type: 'nominal',
-        legend:
-          styles?.addLegend !== false
-            ? {
-                title: categoryName,
-                orient: styles?.legendPosition || Positions.RIGHT,
-              }
-            : null,
+        legend: colorLegend?.show
+          ? {
+              title: colorLegend.title || categoryName,
+              orient: colorLegend.position || Positions.RIGHT,
+            }
+          : null,
       },
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
@@ -407,6 +408,7 @@ export const createFacetedMultiLineChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
+  const colorLegend = findLegend(styles, 'color');
 
   // Create a mark config for the faceted spec
   const facetMarkConfig = buildMarkConfig(styles, 'line');
@@ -459,13 +461,12 @@ export const createFacetedMultiLineChart = (
             color: {
               field: category1Field,
               type: 'nominal',
-              legend:
-                styles?.addLegend !== false
-                  ? {
-                      title: category1Name,
-                      orient: styles?.legendPosition || Positions.RIGHT,
-                    }
-                  : null,
+              legend: colorLegend?.show
+                ? {
+                    title: colorLegend.title || category1Name,
+                    orient: colorLegend.position || Positions.RIGHT,
+                  }
+                : null,
             },
             ...(styles.tooltipOptions?.mode !== 'hidden' && {
               tooltip: [

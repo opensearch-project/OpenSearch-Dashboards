@@ -7,7 +7,7 @@ import { AreaChartStyleControls } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
-import { getTooltipFormat } from '../utils/utils';
+import { findLegend, getTooltipFormat } from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 
 /**
@@ -105,12 +105,6 @@ export const createSimpleAreaChart = (
       : undefined,
     data: { values: transformedData },
     layer: layers,
-    // Add legend configuration if needed, or explicitly set to null if disabled
-    legend: styles.addLegend
-      ? {
-          orient: styles.legendPosition?.toLowerCase() || 'right',
-        }
-      : null,
   };
 };
 
@@ -142,6 +136,7 @@ export const createMultiAreaChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
+  const colorLegend = findLegend(styles, 'color');
 
   const mainLayer = {
     mark: {
@@ -182,10 +177,10 @@ export const createMultiAreaChart = (
       color: {
         field: categoryField,
         type: 'nominal',
-        legend: styles.addLegend
+        legend: colorLegend?.show
           ? {
-              title: categoryName,
-              orient: styles.legendPosition?.toLowerCase() || 'right',
+              title: colorLegend.title || categoryName,
+              orient: colorLegend.position?.toLowerCase() || 'right',
             }
           : null,
       },
@@ -259,6 +254,7 @@ export const createFacetedMultiAreaChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
+  const colorLegend = findLegend(styles, 'color');
 
   return {
     $schema: VEGASCHEMA,
@@ -313,10 +309,10 @@ export const createFacetedMultiAreaChart = (
             color: {
               field: category1Field,
               type: 'nominal',
-              legend: styles.addLegend
+              legend: colorLegend?.show
                 ? {
-                    title: category1Name,
-                    orient: styles.legendPosition?.toLowerCase() || 'right',
+                    title: colorLegend.title || category1Name,
+                    orient: colorLegend.position?.toLowerCase() || 'right',
                   }
                 : null,
             },
@@ -483,12 +479,6 @@ export const createCategoryAreaChart = (
       : undefined,
     data: { values: transformedData },
     layer: layers,
-    // Add legend configuration if needed, or explicitly set to null if disabled
-    legend: styles.addLegend
-      ? {
-          orient: styles.legendPosition?.toLowerCase() || 'right',
-        }
-      : null,
   };
 };
 
@@ -517,6 +507,7 @@ export const createStackedAreaChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
   const categoryName1 = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const categoryName2 = colorMapping?.name;
+  const colorLegend = findLegend(styles, 'color');
 
   const spec: any = {
     $schema: VEGASCHEMA,
@@ -563,10 +554,10 @@ export const createStackedAreaChart = (
       color: {
         field: categoryField2,
         type: 'nominal',
-        legend: styles.addLegend
+        legend: colorLegend?.show
           ? {
-              title: categoryName2,
-              orient: styles.legendPosition?.toLowerCase() || 'bottom',
+              title: colorLegend.title || categoryName2,
+              orient: colorLegend.position?.toLowerCase() || 'bottom',
             }
           : null,
       },
