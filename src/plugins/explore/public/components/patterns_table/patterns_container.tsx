@@ -5,6 +5,8 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { PatternItem, PatternsTable } from './patterns_table';
 import { COUNT_FIELD, PATTERNS_FIELD, SAMPLE_FIELD } from './utils/constants';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
@@ -53,7 +55,11 @@ const PatternsContainerContent = () => {
     const hasAllRequiredFields = requiredFields.every((field) => field in hit._source);
 
     if (!hasAllRequiredFields) {
-      return <></>;
+      // doesn't match normal fields or calcite fields
+      const title = i18n.translate('explore.patterns.schemaUnexpected', {
+        defaultMessage: 'Expected schema not found',
+      });
+      return <EuiCallOut title={title} color="danger" iconType="alert" />;
     }
 
     // Convert rows to pattern items or use default if rows is undefined

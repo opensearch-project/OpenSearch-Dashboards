@@ -60,6 +60,10 @@ jest.mock('./query_panel_actions', () => ({
   ),
 }));
 
+jest.mock('./ask_ai_button', () => ({
+  AskAIButton: () => <div data-test-subj="ask-ai-button">Ask AI Button</div>,
+}));
+
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
 }));
@@ -198,10 +202,12 @@ describe('QueryPanelWidgets', () => {
       const rightSection = container.querySelector('.exploreQueryPanelWidgets__right');
       expect(rightSection).toBeInTheDocument();
 
-      const languageReference = rightSection!.querySelector(
-        '[data-test-subj="language-reference"]'
-      );
-      expect(languageReference).toBeInTheDocument();
+      const childNodes = Array.from(rightSection!.children);
+      const testSubjects = childNodes
+        .filter((node) => node.getAttribute('data-test-subj'))
+        .map((node) => node.getAttribute('data-test-subj'));
+
+      expect(testSubjects).toEqual(['ask-ai-button', 'language-reference']);
     });
   });
 

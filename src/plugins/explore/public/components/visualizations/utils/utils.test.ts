@@ -62,6 +62,49 @@ describe('applyAxisStyling', () => {
     expect(config.ticks).toBe(false);
     expect(config.domain).toBe(false);
   });
+
+  it('disables grid when disableGrid is true', () => {
+    const config = applyAxisStyling(defaultAxis, defaultAxisStyle, true);
+    expect(config.grid).toBe(false);
+  });
+
+  it('disables grid when showLines is false', () => {
+    const config = applyAxisStyling(defaultAxis, {
+      ...defaultAxisStyle,
+      grid: { showLines: false },
+    });
+    expect(config.grid).toBe(false);
+  });
+
+  it('disables labels when labels.show is false', () => {
+    const config = applyAxisStyling(defaultAxis, {
+      ...defaultAxisStyle,
+      labels: { show: false, filter: false, rotate: 0, truncate: 0 },
+    });
+    expect(config.labels).toBe(false);
+    expect(config.labelAngle).toBeUndefined();
+    expect(config.labelLimit).toBeUndefined();
+  });
+
+  it('uses default label settings when labels.show is true with default rotate and truncate', () => {
+    const config = applyAxisStyling(defaultAxis, {
+      ...defaultAxisStyle,
+      labels: { show: true, filter: false, rotate: 0, truncate: 0 },
+    });
+    expect(config.labels).toBe(true);
+    expect(config.labelAngle).toBe(0);
+    expect(config.labelLimit).toBe(100);
+  });
+
+  it('preserves existing labelAngle and labelLimit when rotate and truncate are provided', () => {
+    const config = applyAxisStyling(defaultAxis, {
+      ...defaultAxisStyle,
+      labels: { show: true, filter: false, rotate: 30, truncate: 20 },
+    });
+    expect(config.labels).toBe(true);
+    expect(config.labelAngle).toBe(30);
+    expect(config.labelLimit).toBe(20);
+  });
 });
 
 describe('getAxisByRole', () => {
