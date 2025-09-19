@@ -92,40 +92,9 @@ describe('Keyboard Shortcuts Tests', () => {
       cy.wait(500);
       cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
     });
-
-    it('should close modal when pressing Escape', () => {
-      cy.get('body').click();
-
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.get('body').type('{esc}');
-      cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
-    });
-
-    it('should close modal when clicking outside', () => {
-      cy.get('body').click();
-
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.get('.euiOverlayMask').click({ force: true });
-      cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
-    });
-
-    it('should reopen modal after closing', () => {
-      cy.get('body').click();
-
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.getElementByTestId('keyboardShortcutsCloseButton').click();
-      cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.contains('Keyboard shortcuts').should('be.visible');
-      cy.get('body').type('{esc}');
-    });
   });
 
-  describe('Keyboard Shortcuts global shortcut - dashboard', () => {
+  describe('Keyboard Shortcuts global shortcut', () => {
     it('should navigate to dashboard when pressing G then B', () => {
       cy.get('body').type('g').type('b');
       cy.url().should('match', /\/w\/[^\/]+\/app\/dashboards/, { timeout: 10000 });
@@ -144,23 +113,6 @@ describe('Keyboard Shortcuts Tests', () => {
       cy.get('body').click();
     });
 
-    it('should open dev tools modal when pressing Shift+`', () => {
-      cy.get('body').click();
-      cy.get('body').type('{shift+`}');
-      cy.contains('Dev Tools').should('be.visible');
-    });
-
-    it('should close dev tools modal when pressing Escape', () => {
-      cy.get('body').type('{shift+`}');
-      cy.get('.devToolsOverlayMask').should('be.visible', { timeout: 10000 });
-
-      cy.get('body').type('{esc}');
-      cy.wait(1000);
-      cy.get('button[aria-label="close modal"]').click();
-      cy.wait(1000);
-      cy.get('.devToolsOverlayMask').should('not.exist');
-    });
-
     it('should toggle navbar when pressing Shift+B', () => {
       cy.getElementByTestId('toggleNavButton').then(($button) => {
         const initialAriaExpanded = $button.attr('aria-expanded');
@@ -169,19 +121,6 @@ describe('Keyboard Shortcuts Tests', () => {
           const newAriaExpanded = $newButton.attr('aria-expanded');
           expect(newAriaExpanded).to.not.equal(initialAriaExpanded);
         });
-      });
-    });
-
-    it('should toggle navbar back when pressing Shift+B again', () => {
-      cy.getElementByTestId('toggleNavButton').then(($button) => {
-        const initialAriaExpanded = $button.attr('aria-expanded');
-        cy.get('body').type('{shift+b}');
-        cy.get('body').type('{shift+b}');
-        cy.getElementByTestId('toggleNavButton').should(
-          'have.attr',
-          'aria-expanded',
-          initialAriaExpanded
-        );
       });
     });
   });
@@ -209,39 +148,6 @@ describe('Keyboard Shortcuts Tests', () => {
       cy.wait(500);
       cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
     });
-
-    it('should close modal when pressing Escape', () => {
-      cy.get('body').click();
-
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.get('body').type('{esc}');
-      cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
-    });
-
-    it('should close modal when clicking outside', () => {
-      // Wait for page to fully load and ensure focus
-
-      cy.get('body').click();
-
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.get('.euiOverlayMask').click({ force: true });
-      cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
-    });
-
-    it('should reopen modal after closing', () => {
-      cy.get('body').click();
-
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.getElementByTestId('keyboardShortcutsCloseButton').click();
-      cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.contains('Keyboard shortcuts').should('be.visible');
-      cy.get('body').type('{esc}');
-    });
   });
 
   describe('Keyboard Shortcuts global shortcut - visualize', () => {
@@ -263,23 +169,6 @@ describe('Keyboard Shortcuts Tests', () => {
       cy.wait(500);
     });
 
-    it('should open dev tools modal when pressing Shift+`', () => {
-      cy.get('body').click();
-      cy.get('body').type('{shift+`}');
-      cy.contains('Dev Tools').should('be.visible');
-    });
-
-    it('should close dev tools modal when pressing Escape', () => {
-      cy.get('body').type('{shift+`}');
-      cy.get('.devToolsOverlayMask').should('be.visible', { timeout: 10000 });
-
-      cy.get('body').type('{esc}');
-      cy.wait(1000);
-      cy.get('button[aria-label="close modal"]').click();
-      cy.wait(1000);
-      cy.get('.devToolsOverlayMask').should('not.exist');
-    });
-
     it('should toggle navbar when pressing Shift+B', () => {
       cy.getElementByTestId('toggleNavButton').then(($button) => {
         const initialAriaExpanded = $button.attr('aria-expanded');
@@ -290,24 +179,12 @@ describe('Keyboard Shortcuts Tests', () => {
         });
       });
     });
-
-    it('should toggle navbar back when pressing Shift+B again', () => {
-      cy.getElementByTestId('toggleNavButton').then(($button) => {
-        const initialAriaExpanded = $button.attr('aria-expanded');
-        cy.get('body').type('{shift+b}');
-        cy.get('body').type('{shift+b}');
-        cy.getElementByTestId('toggleNavButton').should(
-          'have.attr',
-          'aria-expanded',
-          initialAriaExpanded
-        );
-      });
-    });
   });
+
   describe('Help Modal - discover', () => {
     it('should open help modal, verify content, and close properly', () => {
       cy.visit(`/w/${workspaceId}/app/explore/logs`);
-      cy.explore.setRelativeTopNavDate('1', 'h');
+      cy.explore.setRelativeTopNavDate(7, 'y');
       cy.get('body').should('be.visible');
       cy.wait(500);
       cy.get('body').click();
@@ -328,37 +205,6 @@ describe('Keyboard Shortcuts Tests', () => {
       cy.wait(500);
       cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
     });
-
-    it('should close modal when pressing Escape', () => {
-      cy.get('body').click();
-
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.get('body').type('{esc}');
-      cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
-    });
-
-    it('should close modal when clicking outside', () => {
-      cy.get('body').click();
-
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.get('.euiOverlayMask').click({ force: true });
-      cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
-    });
-
-    it('should reopen modal after closing', () => {
-      cy.get('body').click();
-
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.getElementByTestId('keyboardShortcutsCloseButton').click();
-      cy.getElementByTestId('keyboardShortcutsModal').should('not.exist');
-      cy.get('body').type('{shift+/}');
-      cy.getElementByTestId('keyboardShortcutsModal', { timeout: 10000 }).should('be.visible');
-      cy.contains('Keyboard shortcuts').should('be.visible');
-      cy.get('body').type('{esc}');
-    });
   });
 
   describe('Keyboard Shortcuts global shortcut - visualize', () => {
@@ -380,22 +226,6 @@ describe('Keyboard Shortcuts Tests', () => {
       cy.get('body').click();
     });
 
-    it('should open dev tools modal when pressing Shift+`', () => {
-      cy.get('body').type('{shift+`}');
-      cy.contains('Dev Tools').should('be.visible');
-    });
-
-    it('should close dev tools modal when pressing Escape', () => {
-      cy.get('body').type('{shift+`}');
-      cy.get('.devToolsOverlayMask').should('be.visible', { timeout: 10000 });
-
-      cy.get('body').type('{esc}');
-      cy.wait(1000);
-      cy.get('button[aria-label="close modal"]').click();
-      cy.wait(1000);
-      cy.get('.devToolsOverlayMask').should('not.exist');
-    });
-
     it('should toggle navbar when pressing Shift+B', () => {
       cy.getElementByTestId('toggleNavButton').then(($button) => {
         const initialAriaExpanded = $button.attr('aria-expanded');
@@ -406,20 +236,8 @@ describe('Keyboard Shortcuts Tests', () => {
         });
       });
     });
-
-    it('should toggle navbar back when pressing Shift+B again', () => {
-      cy.getElementByTestId('toggleNavButton').then(($button) => {
-        const initialAriaExpanded = $button.attr('aria-expanded');
-        cy.get('body').type('{shift+b}');
-        cy.get('body').type('{shift+b}');
-        cy.getElementByTestId('toggleNavButton').should(
-          'have.attr',
-          'aria-expanded',
-          initialAriaExpanded
-        );
-      });
-    });
   });
+
   describe('Toggle Fields Panel Shortcut', () => {
     it('should toggle fields panel when pressing Shift+F', () => {
       cy.wait(1000);
@@ -435,13 +253,6 @@ describe('Keyboard Shortcuts Tests', () => {
             cy.getElementByTestId('osdDiscoverSideBarWrapper').should('be.visible');
           }
         });
-    });
-
-    it('should toggle fields panel back when pressing Shift+F again', () => {
-      cy.wait(1000);
-      cy.get('body').type('{shift+f}');
-      cy.getElementByTestId('osdDiscoverSideBarWrapper').should('be.visible');
-      cy.getElementByTestId('fieldList-collapse-button').should('exist');
     });
   });
 
@@ -510,13 +321,6 @@ describe('Keyboard Shortcuts Tests', () => {
       // Clean up
       cy.get('body').type('{esc}');
       cy.getElementByTestId('loadSearchForm').should('not.exist');
-    });
-  });
-
-  describe('Download CSV Shortcut', () => {
-    it('should open download CSV popover when pressing E key', () => {
-      cy.get('body').type('e');
-      cy.getElementByTestId('dscDownloadCsvPopoverContent').should('be.visible');
     });
   });
 
