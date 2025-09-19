@@ -303,13 +303,18 @@ export class ExplorePlugin
             const { executeQueries } = await import(
               './application/utils/state_management/actions/query_actions'
             );
+            const { callAgentActionCreator } = await import(
+              './application/utils/state_management/actions/query_editor/on_editor_run/call_agent'
+            );
 
             (global as any).exploreReduxActions = {
               setQueryStringWithHistory,
               setQueryState,
               executeQueries,
+              callAgentActionCreator,
             };
             console.log('🌐 Explore Redux actions made globally available for MCP integration');
+            console.log('🤖 callAgentActionCreator now available for MCP integration');
           } catch (error) {
             console.warn('⚠️ Failed to expose Redux actions globally:', error);
           }

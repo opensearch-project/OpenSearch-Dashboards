@@ -10,24 +10,167 @@
 import { schema } from '@osd/config-schema';
 import { IRouter, Logger } from '../../../../core/server';
 import { UpdateQueryTool } from '../tools/explore/update_query_tool';
+import { UpdateQueryDirectTool } from '../tools/explore/update_query_direct_tool';
 import { RunQueryTool } from '../tools/explore/run_query_tool';
 import { GetQueryStateTool } from '../tools/explore/get_query_state_tool';
 import { ExpandDocumentTool } from '../tools/explore/expand_document_tool';
 import { GenerateAndRunQueryTool } from '../tools/explore/generate_and_run_query_tool';
+import { GenerateAndRunQueryToolV2 } from '../tools/explore/generate_and_run_query_tool_v2';
 import { registerReduxBridgeRoutes } from './redux_bridge';
+import { MCPSSEHandler } from '../mcp_sse_handler';
+import { MCPServer } from '../mcp_server';
+
+import { getPendingCommandsArray } from './redux_bridge';
 
 export function defineRoutes(router: IRouter, logger: Logger) {
   // Initialize tool instances
   const updateQueryTool = new UpdateQueryTool(logger);
+  const updateQueryDirectTool = new UpdateQueryDirectTool(logger, getPendingCommandsArray);
   const runQueryTool = new RunQueryTool(logger);
   const getQueryStateTool = new GetQueryStateTool(logger);
   const expandDocumentTool = new ExpandDocumentTool(logger);
   const generateQueryTool = new GenerateAndRunQueryTool(logger);
+  const generateQueryToolV2 = new GenerateAndRunQueryToolV2(
+    logger,
+    updateQueryTool,
+    runQueryTool,
+    getPendingCommandsArray()
+  );
   logger.debug('Setting up MCP server routes');
+
+  // Initialize MCP server and SSE handler
+  const mcpServer = new MCPServer(logger);
+  const sseHandler = new MCPSSEHandler(mcpServer, logger);
 
   // Register Redux bridge routes for MCP client communication
   logger.info('🔗 Registering Redux bridge routes...');
   registerReduxBridgeRoutes(router);
+
+  // MCP SSE endpoint for AI-Agents connection
+  router.get(
+    {
+      path: '/api/osd-mcp-server/mcp-sse',
+      validate: false,
+    },
+    async (context, request, response) => {
+      logger.info('🔌 MCP SSE connection requested from AI-Agents');
+      return await sseHandler.handleSSEConnection(request, response);
+    }
+  );
+
+  // MCP protocol endpoint for AI-Agents tool calls
+  router.post(
+    {
+      path: '/api/osd-mcp-server/mcp',
+      validate: {
+        body: schema.object({
+          method: schema.string(),
+          params: schema.maybe(schema.any()),
+          id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { method, params, id } = request.body;
+
+      logger.info(`🔧 MCP protocol call: ${method}`, { params, id });
+
+      try {
+        if (method === 'tools/call') {
+          const { name, arguments: args } = params;
+          logger.info(`🛠️ MCP Tool called via protocol: ${name}`, args);
+
+          let result;
+          switch (name) {
+            case 'generate_and_run_query':
+            case 'generate_query':
+              logger.info('🤖 Executing generate_and_run_query_tool_v2 via MCP protocol');
+              result = await generateQueryToolV2.execute(args || {});
+              break;
+            case 'update_query_direct':
+              logger.info('🎯 Executing update_query_direct_tool via MCP protocol');
+              result = await updateQueryDirectTool.execute(args || {});
+              break;
+            case 'update_query':
+              result = await updateQueryTool.execute(args || {});
+              break;
+            case 'run_query':
+              result = await runQueryTool.execute(args || {});
+              break;
+            case 'get_query_state':
+              result = await getQueryStateTool.execute(args || {});
+              break;
+            case 'expand_document':
+              result = await expandDocumentTool.execute(args || {});
+              break;
+            default:
+              return response.badRequest({
+                body: `Unknown tool: ${name}`,
+              });
+          }
+
+          logger.info(`✅ MCP Tool ${name} completed successfully`);
+          return response.ok({
+            body: {
+              result,
+              id,
+            },
+          });
+        } else if (method === 'tools/list') {
+          logger.info('📋 MCP Tools list requested');
+          return response.ok({
+            body: {
+              result: {
+                tools: [
+                  {
+                    name: 'generate_and_run_query',
+                    description: generateQueryToolV2.description,
+                    inputSchema: generateQueryToolV2.inputSchema,
+                  },
+                  {
+                    name: 'update_query_direct',
+                    description: updateQueryDirectTool.description,
+                    inputSchema: updateQueryDirectTool.inputSchema,
+                  },
+                  {
+                    name: 'update_query',
+                    description: updateQueryTool.description,
+                    inputSchema: updateQueryTool.inputSchema,
+                  },
+                  {
+                    name: 'run_query',
+                    description: runQueryTool.description,
+                    inputSchema: runQueryTool.inputSchema,
+                  },
+                  {
+                    name: 'get_query_state',
+                    description: getQueryStateTool.description,
+                    inputSchema: getQueryStateTool.inputSchema,
+                  },
+                  {
+                    name: 'expand_document',
+                    description: expandDocumentTool.description,
+                    inputSchema: expandDocumentTool.inputSchema,
+                  },
+                ],
+              },
+              id,
+            },
+          });
+        } else {
+          return response.badRequest({
+            body: `Unknown method: ${method}`,
+          });
+        }
+      } catch (error) {
+        logger.error(`❌ MCP protocol error for ${method}:`, error);
+        return response.customError({
+          statusCode: 500,
+          body: `Internal error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        });
+      }
+    }
+  );
 
   // Health check endpoint
   router.get(
@@ -60,6 +203,7 @@ export function defineRoutes(router: IRouter, logger: Logger) {
           message: 'MCP Server is running as integrated plugin',
           tools: [
             'update_query',
+            'update_query_direct',
             'run_query',
             'get_query_state',
             'expand_document',
@@ -126,7 +270,11 @@ export function defineRoutes(router: IRouter, logger: Logger) {
               break;
 
             case 'generate_query':
-              result = await generateQueryTool.execute(args || {});
+              result = await generateQueryToolV2.execute(args || {});
+              break;
+
+            case 'update_query_direct':
+              result = await updateQueryDirectTool.execute(args || {});
               break;
 
             default:
@@ -178,6 +326,28 @@ export function defineRoutes(router: IRouter, logger: Logger) {
                   },
                 },
                 required: ['query'],
+              },
+            },
+            {
+              name: 'update_query_direct',
+              description:
+                'Generate PPL query from natural language and put it directly in the main query editor (not Generated Query section)',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  question: {
+                    type: 'string',
+                    description:
+                      'Natural language question to convert to PPL query (e.g., "show me HTTP 200 responses")',
+                  },
+                  executeQuery: {
+                    type: 'boolean',
+                    description:
+                      'Whether to execute the generated query immediately (default: true)',
+                    default: true,
+                  },
+                },
+                required: ['question'],
               },
             },
             {

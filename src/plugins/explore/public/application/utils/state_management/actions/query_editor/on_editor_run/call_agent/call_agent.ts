@@ -30,9 +30,26 @@ export const callAgentActionCreator = createAsyncThunk<
   },
   { dispatch: AppDispatch }
 >('queryEditor/callAgent', async ({ services, editorText }, { dispatch }) => {
+  // eslint-disable-next-line no-console
+  console.log('🤖 callAgentActionCreator: Starting execution', {
+    editorText,
+    timestamp: new Date().toISOString(),
+    editorTextLength: editorText?.length,
+  });
+
   const dataset = services.data.query.queryString.getQuery().dataset;
 
+  // eslint-disable-next-line no-console
+  console.log('📊 callAgentActionCreator: Dataset info', {
+    hasDataset: !!dataset,
+    datasetTitle: dataset?.title,
+    datasetId: dataset?.id,
+    dataSourceId: dataset?.dataSource?.id,
+  });
+
   if (!editorText.length) {
+    // eslint-disable-next-line no-console
+    console.log('⚠️ callAgentActionCreator: Empty editorText');
     services.notifications.toasts.addWarning({
       title: i18n.translate('explore.queryPanel.missing-prompt-warning-title', {
         defaultMessage: 'Missing prompt',
@@ -56,6 +73,8 @@ export const callAgentActionCreator = createAsyncThunk<
   }
 
   try {
+    // eslint-disable-next-line no-console
+    console.log('🚀 callAgentActionCreator: Starting API call');
     dispatch(setPromptToQueryIsLoading(true));
     const params: QueryAssistParameters = {
       question: editorText,
@@ -65,6 +84,12 @@ export const callAgentActionCreator = createAsyncThunk<
       dataSourceId: dataset.dataSource?.id,
     };
 
+    // eslint-disable-next-line no-console
+    console.log('📡 callAgentActionCreator: API call parameters', {
+      params,
+      endpoint: '/api/enhancements/assist/generate',
+    });
+
     const response = await services.http.post<QueryAssistResponse>(
       '/api/enhancements/assist/generate',
       {
@@ -72,13 +97,30 @@ export const callAgentActionCreator = createAsyncThunk<
       }
     );
 
+    // eslint-disable-next-line no-console
+    console.log('✅ callAgentActionCreator: API response received', {
+      hasQuery: !!response.query,
+      query: response.query,
+      hasTimeRange: !!response.timeRange,
+      timeRange: response.timeRange,
+    });
+
     if (response.timeRange) {
+      // eslint-disable-next-line no-console
+      console.log('⏰ callAgentActionCreator: Setting time range', response.timeRange);
       services.data.query.timefilter.timefilter.setTime(response.timeRange);
     }
 
+    // eslint-disable-next-line no-console
+    console.log('🏃 callAgentActionCreator: Running query', response.query);
     dispatch(runQueryActionCreator(services, response.query));
 
     // update the lastExecutedPrompt and lastExecutedTranslatedQuery
+    // eslint-disable-next-line no-console
+    console.log('💾 callAgentActionCreator: Updating history', {
+      lastExecutedTranslatedQuery: response.query,
+      lastExecutedPrompt: editorText,
+    });
     dispatch(setLastExecutedTranslatedQuery(response.query));
     dispatch(setLastExecutedPrompt(editorText));
   } catch (error) {
