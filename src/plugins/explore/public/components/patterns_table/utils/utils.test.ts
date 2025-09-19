@@ -251,9 +251,7 @@ describe('utils', () => {
         tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
       } as any;
 
-      expect(() => findDefaultPatternsField(services)).toThrow(
-        'Unexpectedly cannot find a longest default patterns field'
-      );
+      expect(() => findDefaultPatternsField(services)).toThrow('Cannot access hits from logs tab');
       expect(setPatternsField).not.toHaveBeenCalled();
       expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
     });
@@ -277,9 +275,7 @@ describe('utils', () => {
         tabRegistry: { getTab: jest.fn().mockReturnValue({ id: 'logs' }) },
       } as any;
 
-      expect(() => findDefaultPatternsField(services)).toThrow(
-        'Unexpectedly cannot find a longest default patterns field'
-      );
+      expect(() => findDefaultPatternsField(services)).toThrow('Cannot access hits from logs tab');
       expect(setPatternsField).not.toHaveBeenCalled();
       expect(queryActions.defaultPrepareQueryString).toHaveBeenCalledWith(state.query);
     });

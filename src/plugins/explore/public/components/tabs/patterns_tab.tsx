@@ -6,9 +6,6 @@ import React from 'react';
 import { ActionBar } from './action_bar/action_bar';
 import { PatternsContainer } from '../patterns_table/patterns_container';
 
-/**
- * Logs tab component for displaying log entries
- */
 export const PatternsTab = () => {
   return (
     <div className="explore-logs-tab tab-container">
