@@ -26,43 +26,36 @@ export class AIChatbotPlugin
     core: CoreSetup<AIChatbotStartDependencies, AIChatbotStart>,
     deps: AIChatbotSetupDependencies
   ): AIChatbotSetup {
-    console.log('🤖 AI Chatbot Plugin Setup');
-
     return {};
   }
 
   public start(core: CoreStart, deps: AIChatbotStartDependencies): AIChatbotStart {
-    console.log('🚀 AI Chatbot Plugin Start');
-    console.log('🔍 Available plugins:', Object.keys(deps));
-    console.log('🔍 Context Provider available:', !!deps.contextProvider);
-    console.log('🔍 UI Actions available:', !!deps.uiActions);
-
-    // Make services available globally for components
+    // Make services available globally for components (but disabled)
     (window as any).aiChatbotServices = {
       uiActions: deps.uiActions,
       contextProvider: deps.contextProvider,
       core,
+      disabled: true,
     };
 
     let sidePanelInstance: any = null;
 
-    // Add chatbot toggle to chrome
-    this.addChatbotToggle(core, () => {
-      if (sidePanelInstance) {
-        console.log('🔄 Closing existing side panel instance');
-        sidePanelInstance.close();
-        sidePanelInstance = null;
-      } else {
-        console.log('🚀 Opening new side panel instance');
-        this.openChatbotSidePanel(core, deps).then((instance) => {
-          sidePanelInstance = instance;
-        });
-      }
-    });
+    // DISABLED: Add chatbot toggle to chrome
+    // this.addChatbotToggle(core, () => {
+    //   if (sidePanelInstance) {
+    //     console.log('🔄 Closing existing side panel instance');
+    //     sidePanelInstance.close();
+    //     sidePanelInstance = null;
+    //   } else {
+    //     console.log('🚀 Opening new side panel instance');
+    //     this.openChatbotSidePanel(core, deps).then((instance) => {
+    //       sidePanelInstance = instance;
+    //     });
+    //   }
+    // });
 
     return {
       openChatbot: () => {
-        console.log('🤖 Opening AI Chatbot Side Panel');
         if (!sidePanelInstance) {
           this.openChatbotSidePanel(core, deps).then((instance) => {
             sidePanelInstance = instance;
@@ -70,7 +63,6 @@ export class AIChatbotPlugin
         }
       },
       closeChatbot: () => {
-        console.log('🤖 Closing AI Chatbot Side Panel');
         if (sidePanelInstance) {
           sidePanelInstance.close();
           sidePanelInstance = null;
@@ -108,7 +100,6 @@ export class AIChatbotPlugin
   }
 
   public stop() {
-    console.log('🛑 AI Chatbot Plugin Stop');
     delete (window as any).aiChatbotServices;
   }
 }
