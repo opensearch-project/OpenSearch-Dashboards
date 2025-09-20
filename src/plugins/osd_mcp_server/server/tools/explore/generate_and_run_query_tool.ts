@@ -35,7 +35,6 @@ export class GenerateAndRunQueryTool implements MCPTool {
   }
 
   public async execute(input: { question: string; executeQuery?: boolean }): Promise<any> {
-    this.logger.info('🤖 GenerateAndRunQueryTool: Starting execution using callAgentActionCreator');
     this.logger.info('GenerateAndRunQueryTool: Starting execution using callAgentActionCreator', {
       input,
       timestamp: new Date().toISOString(),
@@ -49,82 +48,37 @@ export class GenerateAndRunQueryTool implements MCPTool {
     }
 
     try {
-      // First try to access global services directly (same as update_query)
+      // Access the global Explore services and Redux actions
       const globalServices = (global as any).exploreServices;
       const reduxActions = (global as any).exploreReduxActions;
 
-      this.logger.info('🔍 GenerateAndRunQueryTool: Checking global services availability', {
-        hasGlobalServices: !!globalServices,
-        hasStore: !!globalServices?.store,
-        hasReduxActions: !!reduxActions,
-        hasCallAgentAction: !!reduxActions?.callAgentActionCreator,
-      });
-
       if (!globalServices || !globalServices.store || !reduxActions) {
-        this.logger.info(
-          '⚠️ GenerateAndRunQueryTool: Global services not available, using Redux bridge approach'
-        );
         this.logger.warn(
-          'GenerateAndRunQueryTool: Explore services or Redux actions not available, using Redux bridge'
+          'GenerateAndRunQueryTool: Explore services or Redux actions not available'
         );
-
-        // Use the Redux bridge approach - same as the /api/osd-mcp-server/redux/call-agent endpoint
-        // This will queue the command for client-side execution
-        this.logger.info(
-          '🌉 GenerateAndRunQueryTool: Using Redux bridge for callAgentActionCreator execution'
-        );
-
         return {
-          success: true,
-          message: `Query generation queued for execution from question: "${question}"`,
+          success: false,
+          message: 'Explore services not available. Make sure you are on an Explore page.',
+          error: 'SERVICES_NOT_AVAILABLE',
           question,
-          language: 'PPL',
           timestamp: new Date().toISOString(),
-          action: 'query_generation_queued',
-          method: 'redux_bridge',
-          bridgeResponse: {
-            success: true,
-            message: 'callAgentActionCreator execution queued for client-side processing',
-            executionMethod: 'direct_global_access',
-          },
-          note:
-            'This tool will use callAgentActionCreator directly when global services are available',
-          guidance: {
-            issue: 'Global services not accessible from server-side MCP tool',
-            solution:
-              'Tool should work when you are on the Explore page with proper client-side setup',
-            debugging: {
-              step1: 'Verify you are on the Explore page (not just chat)',
-              step2: 'Check browser console for global service initialization',
-              step3: 'Try refreshing the Explore page',
-            },
-          },
+          action: 'query_generation_failed',
         };
       }
 
-      // Get current dataset from services (EXACT same as call_agent.ts)
-      const dataset = globalServices.data.query.queryString.getQuery().dataset;
+      // Get current dataset from Redux state (same as AI mode does)
+      const currentState = globalServices.store.getState();
+      const dataset = currentState.query?.dataset;
 
-      this.logger.info('📊 GenerateAndRunQueryTool: Dataset info (same source as call_agent.ts)', {
+      this.logger.info('GenerateAndRunQueryTool: Current state info', {
         hasDataset: !!dataset,
         datasetTitle: dataset?.title,
         datasetId: dataset?.id,
         dataSourceId: dataset?.dataSource?.id,
         hasCallAgentAction: !!reduxActions.callAgentActionCreator,
-        datasetSource: 'services.data.query.queryString.getQuery().dataset',
-      });
-
-      this.logger.info('GenerateAndRunQueryTool: Dataset info (same source as call_agent.ts)', {
-        hasDataset: !!dataset,
-        datasetTitle: dataset?.title,
-        datasetId: dataset?.id,
-        dataSourceId: dataset?.dataSource?.id,
-        hasCallAgentAction: !!reduxActions.callAgentActionCreator,
-        datasetSource: 'services.data.query.queryString.getQuery().dataset',
       });
 
       if (!dataset) {
-        this.logger.info('❌ GenerateAndRunQueryTool: No dataset selected');
         return {
           success: false,
           message: 'No dataset selected. Please select a dataset first.',
@@ -144,17 +98,13 @@ export class GenerateAndRunQueryTool implements MCPTool {
         // - History updates (lastExecutedPrompt, lastExecutedTranslatedQuery)
         // - UI state management
         this.logger.info(
-          '🚀 GenerateAndRunQueryTool: Dispatching callAgentActionCreator (same as AI mode)'
-        );
-        this.logger.info(
           'GenerateAndRunQueryTool: Dispatching callAgentActionCreator (same as AI mode)'
         );
 
-        // IMPORTANT: Use the question as editorText (same as AI mode)
         await globalServices.store.dispatch(
           reduxActions.callAgentActionCreator({
             services: globalServices,
-            editorText: question, // This is the key - question from chat, not from editorText
+            editorText: question,
           })
         );
 
@@ -173,14 +123,6 @@ export class GenerateAndRunQueryTool implements MCPTool {
             totalResultCount += result.hits.hits.length;
             hasResults = true;
           }
-        });
-
-        this.logger.info('✅ GenerateAndRunQueryTool: Query generated and executed successfully', {
-          question,
-          generatedQuery: lastExecutedTranslatedQuery,
-          executedQuery,
-          totalResultCount,
-          hasResults,
         });
 
         this.logger.info(
@@ -212,42 +154,21 @@ export class GenerateAndRunQueryTool implements MCPTool {
           timestamp: new Date().toISOString(),
           action: 'query_generated_and_executed',
           method: 'callAgentActionCreator',
-          note: 'Used same flow as AI mode - question from chat instead of editorText',
+          note: 'Used same flow as AI mode - robust and complete',
         };
       } else {
         // Fallback: just generate without executing (less common use case)
-        // Use EXACT same parameters as call_agent.ts QueryAssistParameters
+        // Still use the same API parameters as callAgentActionCreator
         const params = {
-          question, // Use question from chat (same as editorText in call_agent.ts)
-          index: dataset.title, // EXACT same as call_agent.ts
-          language: 'PPL', // EXACT same as call_agent.ts (hardcoded)
-          dataSourceId: dataset.dataSource?.id, // EXACT same as call_agent.ts
+          question,
+          index: dataset.title,
+          language: 'PPL',
+          dataSourceId: dataset.dataSource?.id,
         };
 
-        this.logger.info(
-          '📡 GenerateAndRunQueryTool: Calling API directly with EXACT call_agent.ts params',
-          {
-            params,
-            note: 'Same QueryAssistParameters as call_agent.ts',
-            comparison: {
-              callAgentQuestion: 'editorText',
-              ourQuestion: 'question (from chat)',
-              callAgentIndex: 'dataset.title',
-              ourIndex: 'dataset.title',
-              callAgentLanguage: 'PPL (hardcoded)',
-              ourLanguage: 'PPL (hardcoded)',
-              callAgentDataSourceId: 'dataset.dataSource?.id',
-              ourDataSourceId: 'dataset.dataSource?.id',
-            },
-          }
-        );
-        this.logger.info(
-          'GenerateAndRunQueryTool: Calling API directly with EXACT call_agent.ts params',
-          {
-            params,
-            note: 'Same QueryAssistParameters as call_agent.ts',
-          }
-        );
+        this.logger.info('GenerateAndRunQueryTool: Calling API directly (generate only)', {
+          params,
+        });
 
         const response = await globalServices.http.post('/api/enhancements/assist/generate', {
           body: JSON.stringify(params),
@@ -270,7 +191,6 @@ export class GenerateAndRunQueryTool implements MCPTool {
         };
       }
     } catch (error) {
-      this.logger.error('❌ GenerateAndRunQueryTool: Failed to generate/execute query', error);
       this.logger.error('GenerateAndRunQueryTool: Failed to generate/execute query', error);
       throw new Error(
         `Failed to generate query: ${error instanceof Error ? error.message : 'Unknown error'}`

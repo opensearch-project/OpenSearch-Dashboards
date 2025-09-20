@@ -10,11 +10,6 @@ import { IRouter } from '../../../../core/server';
 // In-memory store for pending MCP commands
 const pendingCommands: any[] = [];
 
-// Export function to get the pending commands array for sharing with tools
-export function getPendingCommandsArray() {
-  return pendingCommands;
-}
-
 /**
  * Redux Bridge Routes - Allows MCP server to communicate with browser Redux store
  *
