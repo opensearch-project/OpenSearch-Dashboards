@@ -1,0 +1,2 @@
+chore:
+- Remove obsolete `yarn` resolution ([#10495](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10495))
