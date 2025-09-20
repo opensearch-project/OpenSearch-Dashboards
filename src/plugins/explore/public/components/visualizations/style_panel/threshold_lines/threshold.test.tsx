@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { ThresholdOptions } from './threshold';
-import { ThresholdLineStyle } from '../../types';
+import { ThresholdMode } from '../../types';
 
 describe('ThresholdOptions', () => {
   const mockThresholdLines = [
@@ -14,7 +14,7 @@ describe('ThresholdOptions', () => {
       id: '1',
       color: '#54B399',
       show: true,
-      style: ThresholdLineStyle.DotDashed,
+      style: ThresholdMode.DotDashed,
       value: 50,
       width: 1,
       name: 'Threshold 1',
@@ -66,7 +66,7 @@ describe('ThresholdOptions', () => {
 
     fireEvent.click(dotButton);
     expect(mockOnThresholdChange).toHaveBeenCalledWith(
-      expect.arrayContaining([expect.objectContaining({ style: ThresholdLineStyle.DotDashed })])
+      expect.arrayContaining([expect.objectContaining({ style: ThresholdMode.DotDashed })])
     );
   });
 

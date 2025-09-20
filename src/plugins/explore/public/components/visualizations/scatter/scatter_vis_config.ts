@@ -14,8 +14,11 @@ import {
   TooltipOptions,
   VisFieldType,
   TitleOptions,
+  ThresholdMode,
+  ThresholdOptions,
 } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { getColors } from '../theme/default_colors';
 
 export interface ExclusiveScatterConfig {
   pointShape: PointShape;
@@ -35,6 +38,7 @@ export interface ScatterChartStyleControls {
   switchAxes: boolean;
 
   titleOptions: TitleOptions;
+  thresholdOptions?: ThresholdOptions;
 }
 
 export const defaultScatterChartStyles: ScatterChartStyleControls = {
@@ -50,6 +54,13 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
     pointShape: PointShape.CIRCLE,
     angle: 0,
     filled: true,
+  },
+  // Threshold options
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+    thresholdStyle: ThresholdMode.Solid,
+    useThresholdColor: false,
   },
   // Standard axes
   standardAxes: [

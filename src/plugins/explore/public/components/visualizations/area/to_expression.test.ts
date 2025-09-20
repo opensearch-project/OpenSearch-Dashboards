@@ -14,7 +14,7 @@ import {
   VisColumn,
   VisFieldType,
   VEGASCHEMA,
-  ThresholdLineStyle,
+  ThresholdMode,
   Positions,
   AxisRole,
   AxisColumnMappings,
@@ -81,17 +81,11 @@ describe('Area Chart to_expression', () => {
     tooltipOptions: {
       mode: 'all',
     },
-    thresholdLines: [
-      {
-        id: '1',
-        color: '#E7664C',
-        show: false,
-        style: ThresholdLineStyle.Full,
-        value: 10,
-        width: 1,
-        name: '',
-      },
-    ],
+    thresholdOptions: {
+      baseColor: '#00BD6B',
+      thresholds: [],
+      thresholdStyle: ThresholdMode.Solid,
+    },
     titleOptions: {
       show: true,
       titleName: '',
@@ -226,17 +220,11 @@ describe('Area Chart to_expression', () => {
     it('should create a simple area chart with threshold line when enabled', () => {
       const stylesWithThreshold = {
         ...mockStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#E7664C',
-            show: true,
-            style: ThresholdLineStyle.Dashed,
-            value: 15,
-            width: 2,
-            name: 'Test Threshold',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#E7664C' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings: AxisColumnMappings = {
@@ -259,7 +247,7 @@ describe('Area Chart to_expression', () => {
       );
       expect(thresholdLayer).toBeDefined();
       expect(thresholdLayer).toHaveProperty('mark.color', '#E7664C');
-      expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 2);
+      expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 1);
       expect(thresholdLayer).toHaveProperty('mark.strokeDash');
     });
 
@@ -517,17 +505,11 @@ describe('Area Chart to_expression', () => {
     it('should add threshold lines to each facet when enabled', () => {
       const stylesWithThreshold = {
         ...mockStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#E7664C',
-            show: true,
-            style: ThresholdLineStyle.Dashed,
-            value: 15,
-            width: 2,
-            name: 'Test Threshold',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#E7664C' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings: AxisColumnMappings = {
@@ -549,11 +531,11 @@ describe('Area Chart to_expression', () => {
       // Verify threshold layer exists in each facet
       expect(result.spec.layer.length).toBeGreaterThan(1);
       const thresholdLayer = result.spec.layer.find(
-        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.y?.value === 15
+        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.y?.datum === 15
       );
       expect(thresholdLayer).toBeDefined();
       expect(thresholdLayer).toHaveProperty('mark.color', '#E7664C');
-      expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 2);
+      expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 1);
       expect(thresholdLayer).toHaveProperty('mark.strokeDash');
     });
 
@@ -804,17 +786,11 @@ describe('Area Chart to_expression', () => {
     it('should add threshold layer when enabled', () => {
       const stylesWithThreshold = {
         ...mockStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#E7664C',
-            show: true,
-            style: ThresholdLineStyle.Dashed,
-            value: 15,
-            width: 2,
-            name: 'Test Threshold',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#E7664C' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings: AxisColumnMappings = {

@@ -9,7 +9,7 @@ import { LineVisStyleControls } from './line_vis_options';
 import {
   CategoryAxis,
   GridOptions,
-  ThresholdLineStyle,
+  ThresholdMode,
   ValueAxis,
   Positions,
   TooltipOptions,
@@ -58,17 +58,11 @@ describe('line_vis_config', () => {
       });
 
       // Verify threshold settings
-      expect(defaults.thresholdLines).toEqual([
-        {
-          id: '1',
-          color: '#E7664C',
-          show: false,
-          style: ThresholdLineStyle.Full,
-          value: 10,
-          width: 1,
-          name: '',
-        },
-      ]);
+      expect(defaults.thresholdOptions).toMatchObject({
+        baseColor: '#00BD6B',
+        thresholds: [],
+        thresholdStyle: ThresholdMode.Off,
+      });
 
       // Verify axes
       expect(defaults.categoryAxes).toHaveLength(1);
@@ -134,17 +128,11 @@ describe('line_vis_config', () => {
         styleOptions: {
           addLegend: true,
           legendPosition: Positions.RIGHT,
-          thresholdLines: [
-            {
-              id: '1',
-              show: false,
-              value: 100,
-              color: 'red',
-              width: 1,
-              style: ThresholdLineStyle.Dashed,
-              name: '',
-            },
-          ],
+          thresholdOptions: {
+            baseColor: '#00BD6B',
+            thresholds: [],
+            thresholdStyle: ThresholdMode.Solid,
+          },
           addTimeMarker: false,
           lineStyle: 'both' as LineStyle,
           lineMode: 'smooth' as const,

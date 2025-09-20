@@ -82,6 +82,8 @@ export const runCreateVisTests = () => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
 
+      // Change threshold mode from default 'Off' to enable threshold functionality
+      cy.getElementByTestId('thresholdModeSelect').should('be.visible').select('Solid lines');
       cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {

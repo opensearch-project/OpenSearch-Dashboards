@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -112,7 +113,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
 
   const handleAddRange = () => {
     const curRangeLength = ranges.length;
-    const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 10 : 0;
+    const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 100 : 0;
     const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength + 1) };
 
     const updated = [...ranges, newRange];
@@ -141,8 +142,15 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiButton onClick={handleAddRange} fullWidth size="s">
-        + Add threshold
+      <EuiButton
+        data-test-subj="exploreVisAddThreshold"
+        onClick={handleAddRange}
+        fullWidth
+        size="s"
+      >
+        {i18n.translate('explore.stylePanel.thresholdPanel.addThresholdButton', {
+          defaultMessage: '+ Add threshold',
+        })}
       </EuiButton>
       <EuiSpacer size="s" />
       {/*  placeholder for base threshold */}
