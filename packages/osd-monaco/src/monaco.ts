@@ -50,5 +50,6 @@ import 'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController'; 
 import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hoverContribution'; // For hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints'; // For parameter hints
 import 'monaco-editor/esm/vs/editor/contrib/format/browser/formatActions'; // For document formatting
+import 'monaco-editor/esm/vs/editor/contrib/comment/browser/comment'; // For comment/uncomment support
 
 export { monaco };
