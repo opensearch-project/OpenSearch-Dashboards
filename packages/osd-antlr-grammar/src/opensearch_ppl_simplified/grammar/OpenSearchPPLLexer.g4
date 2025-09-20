@@ -7,32 +7,35 @@
 lexer grammar OpenSearchPPLLexer;
 
 channels { WHITESPACE, ERRORCHANNEL }
+options { caseInsensitive = true; }
 
-options {
-    caseInsensitive = true;
-}
-
-SPACE:                              [ \t\r\n]+    -> channel(HIDDEN);
-
+SPACE:                              [ \t\r\n]+    -> channel(WHITESPACE);
 
 // COMMAND KEYWORDS
 SEARCH:                             'SEARCH';
 DESCRIBE:                           'DESCRIBE';
 SHOW:                               'SHOW';
+EXPLAIN:                            'EXPLAIN';
 FROM:                               'FROM';
 WHERE:                              'WHERE';
 FIELDS:                             'FIELDS';
+FIELD:                              'FIELD';
+TABLE:                              'TABLE';  // Alias for FIELDS command
 RENAME:                             'RENAME';
 STATS:                              'STATS';
+EVENTSTATS:                         'EVENTSTATS';
 DEDUP:                              'DEDUP';
 SORT:                               'SORT';
 EVAL:                               'EVAL';
 HEAD:                               'HEAD';
+BIN:                                'BIN';
 TOP:                                'TOP';
 RARE:                               'RARE';
 PARSE:                              'PARSE';
-METHOD:                             'METHOD';
+SPATH:                              'SPATH';
 REGEX:                              'REGEX';
+REX:                                'REX';
+SED:                                'SED';
 PUNCT:                              'PUNCT';
 GROK:                               'GROK';
 PATTERN:                            'PATTERN';
@@ -41,24 +44,64 @@ NEW_FIELD:                          'NEW_FIELD';
 KMEANS:                             'KMEANS';
 AD:                                 'AD';
 ML:                                 'ML';
+FILLNULL:                           'FILLNULL';
+FLATTEN:                            'FLATTEN';
+TRENDLINE:                          'TRENDLINE';
+TIMECHART:                          'TIMECHART';
+APPENDCOL:                          'APPENDCOL';
+EXPAND:                             'EXPAND';
+SIMPLE_PATTERN:                     'SIMPLE_PATTERN';
+BRAIN:                              'BRAIN';
+VARIABLE_COUNT_THRESHOLD:           'VARIABLE_COUNT_THRESHOLD';
+FREQUENCY_THRESHOLD_PERCENTAGE:     'FREQUENCY_THRESHOLD_PERCENTAGE';
+METHOD:                             'METHOD';
+MAX_SAMPLE_COUNT:                   'MAX_SAMPLE_COUNT';
+MAX_MATCH:                          'MAX_MATCH';
+OFFSET_FIELD:                       'OFFSET_FIELD';
+BUFFER_LIMIT:                       'BUFFER_LIMIT';
+LABEL:                              'LABEL';
+AGGREGATION:                        'AGGREGATION';
+
+//Native JOIN KEYWORDS
+JOIN:                               'JOIN';
+ON:                                 'ON';
+INNER:                              'INNER';
+OUTER:                              'OUTER';
+FULL:                               'FULL';
+SEMI:                               'SEMI';
+ANTI:                               'ANTI';
+CROSS:                              'CROSS';
+LEFT_HINT:                          'HINT.LEFT';
+RIGHT_HINT:                         'HINT.RIGHT';
 
 // COMMAND ASSIST KEYWORDS
 AS:                                 'AS';
 BY:                                 'BY';
 SOURCE:                             'SOURCE';
 INDEX:                              'INDEX';
+A:                                  'A';
+ASC:                                'ASC';
 D:                                  'D';
 DESC:                               'DESC';
 DATASOURCES:                        'DATASOURCES';
+USING:                              'USING';
+WITH:                               'WITH';
+SIMPLE:                             'SIMPLE';
+STANDARD:                           'STANDARD';
+COST:                               'COST';
+EXTENDED:                           'EXTENDED';
+OVERRIDE:                           'OVERRIDE';
+OVERWRITE:                          'OVERWRITE';
 
-// CLAUSE KEYWORDS
-SORTBY:                             'SORTBY';
-
-// FIELD KEYWORDS
+// SORT FIELD KEYWORDS
+// TODO #3180: Fix broken sort functionality
 AUTO:                               'AUTO';
 STR:                                'STR';
-IP:                                 'IP';
 NUM:                                'NUM';
+
+// TRENDLINE KEYWORDS
+SMA:                                'SMA';
+WMA:                                'WMA';
 
 // ARGUMENT KEYWORDS
 KEEPEMPTY:                          'KEEPEMPTY';
@@ -67,6 +110,7 @@ DEDUP_SPLITVALUES:                  'DEDUP_SPLITVALUES';
 PARTITIONS:                         'PARTITIONS';
 ALLNUM:                             'ALLNUM';
 DELIM:                              'DELIM';
+BUCKET_NULLABLE:                    'BUCKET_NULLABLE';
 CENTROIDS:                          'CENTROIDS';
 ITERATIONS:                         'ITERATIONS';
 DISTANCE_TYPE:                      'DISTANCE_TYPE';
@@ -81,10 +125,23 @@ TIME_FIELD:                         'TIME_FIELD';
 TIME_ZONE:                          'TIME_ZONE';
 TRAINING_DATA_SIZE:                 'TRAINING_DATA_SIZE';
 ANOMALY_SCORE_THRESHOLD:            'ANOMALY_SCORE_THRESHOLD';
+APPEND:                             'APPEND';
+COUNTFIELD:                         'COUNTFIELD';
+SHOWCOUNT:                          'SHOWCOUNT';
+LIMIT:                              'LIMIT';
+USEOTHER:                           'USEOTHER';
+INPUT:                              'INPUT';
+OUTPUT:                             'OUTPUT';
+PATH:                               'PATH';
 
 // COMPARISON FUNCTION KEYWORDS
 CASE:                               'CASE';
+ELSE:                               'ELSE';
 IN:                                 'IN';
+EXISTS:                             'EXISTS';
+
+// Geo IP eval function
+GEOIP:                              'GEOIP';
 
 // LOGICAL KEYWORDS
 NOT:                                'NOT';
@@ -94,6 +151,7 @@ XOR:                                'XOR';
 TRUE:                               'TRUE';
 FALSE:                              'FALSE';
 REGEXP:                             'REGEXP';
+REGEX_MATCH:                        'REGEX_MATCH';
 
 // DATETIME, INTERVAL AND UNIT KEYWORDS
 CONVERT_TZ:                         'CONVERT_TZ';
@@ -141,12 +199,14 @@ LONG:                               'LONG';
 FLOAT:                              'FLOAT';
 STRING:                             'STRING';
 BOOLEAN:                            'BOOLEAN';
+IP:                                 'IP';
 
 // SPECIAL CHARACTERS AND OPERATORS
 PIPE:                               '|';
 COMMA:                              ',';
 DOT:                                '.';
 EQUAL:                              '=';
+DOUBLE_EQUAL:                       '==';
 GREATER:                            '>';
 LESS:                               '<';
 NOT_GREATER:                        '<' '=';
@@ -163,9 +223,12 @@ LT_PRTHS:                           '(';
 RT_PRTHS:                           ')';
 LT_SQR_PRTHS:                       '[';
 RT_SQR_PRTHS:                       ']';
+LT_CURLY:                           '{';
+RT_CURLY:                           '}';
 SINGLE_QUOTE:                       '\'';
 DOUBLE_QUOTE:                       '"';
 BACKTICK:                           '`';
+ARROW:                              '->';
 
 // Operators. Bit
 
@@ -177,6 +240,7 @@ BIT_XOR_OP:                         '^';
 AVG:                                'AVG';
 COUNT:                              'COUNT';
 DISTINCT_COUNT:                     'DISTINCT_COUNT';
+DISTINCT_COUNT_APPROX:              'DISTINCT_COUNT_APPROX';
 ESTDC:                              'ESTDC';
 ESTDC_ERROR:                        'ESTDC_ERROR';
 MAX:                                'MAX';
@@ -193,16 +257,14 @@ VAR_SAMP:                           'VAR_SAMP';
 VAR_POP:                            'VAR_POP';
 STDDEV_SAMP:                        'STDDEV_SAMP';
 STDDEV_POP:                         'STDDEV_POP';
+PERC:                               'PERC';
 PERCENTILE:                         'PERCENTILE';
+PERCENTILE_APPROX:                  'PERCENTILE_APPROX';
+EARLIEST:                           'EARLIEST';
+LATEST:                             'LATEST';
 TAKE:                               'TAKE';
-FIRST:                              'FIRST';
-LAST:                               'LAST';
 LIST:                               'LIST';
 VALUES:                             'VALUES';
-EARLIEST:                           'EARLIEST';
-EARLIEST_TIME:                      'EARLIEST_TIME';
-LATEST:                             'LATEST';
-LATEST_TIME:                        'LATEST_TIME';
 PER_DAY:                            'PER_DAY';
 PER_HOUR:                           'PER_HOUR';
 PER_MINUTE:                         'PER_MINUTE';
@@ -212,7 +274,22 @@ SPARKLINE:                          'SPARKLINE';
 C:                                  'C';
 DC:                                 'DC';
 
+// SCALAR WINDOW FUNCTIONS
+ROW_NUMBER:                         'ROW_NUMBER';
+RANK:                               'RANK';
+DENSE_RANK:                         'DENSE_RANK';
+PERCENT_RANK:                       'PERCENT_RANK';
+CUME_DIST:                          'CUME_DIST';
+FIRST:                              'FIRST';
+LAST:                               'LAST';
+NTH:                                'NTH';
+NTILE:                              'NTILE';
+
 // BASIC FUNCTIONS
+PLUS_FUCTION:                       'ADD';
+MINUS_FUCTION:                      'SUBTRACT';
+STAR_FUNCTION:                      'MULTIPLY';
+DIVIDE_FUNCTION:                    'DIVIDE';
 ABS:                                'ABS';
 CBRT:                               'CBRT';
 CEIL:                               'CEIL';
@@ -221,12 +298,13 @@ CONV:                               'CONV';
 CRC32:                              'CRC32';
 E:                                  'E';
 EXP:                                'EXP';
+EXPM1:                              'EXPM1';
 FLOOR:                              'FLOOR';
 LN:                                 'LN';
 LOG:                                'LOG';
-LOG10:                              'LOG10';
-LOG2:                               'LOG2';
+LOG_WITH_BASE:                      ([0-9]+ ('.' [0-9]+)?)? ('LOG' | 'log') [0-9]+ ('.' [0-9]+)?;
 MOD:                                'MOD';
+MODULUS:                            'MODULUS';
 PI:                                 'PI';
 POSITION:                           'POSITION';
 POW:                                'POW';
@@ -236,6 +314,8 @@ ROUND:                              'ROUND';
 SIGN:                               'SIGN';
 SQRT:                               'SQRT';
 TRUNCATE:                           'TRUNCATE';
+RINT:                               'RINT';
+SIGNUM:                             'SIGNUM';
 
 // TRIGONOMETRIC FUNCTIONS
 ACOS:                               'ACOS';
@@ -243,11 +323,18 @@ ASIN:                               'ASIN';
 ATAN:                               'ATAN';
 ATAN2:                              'ATAN2';
 COS:                                'COS';
+COSH:                               'COSH';
 COT:                                'COT';
 DEGREES:                            'DEGREES';
 RADIANS:                            'RADIANS';
 SIN:                                'SIN';
+SINH:                               'SINH';
 TAN:                                'TAN';
+
+// CRYPTOGRAPHIC FUNCTIONS
+MD5:                                  'MD5';
+SHA1:                                 'SHA1';
+SHA2:                                 'SHA2';
 
 // DATE AND TIME FUNCTIONS
 ADDDATE:                            'ADDDATE';
@@ -301,6 +388,7 @@ UTC_TIME:                           'UTC_TIME';
 UTC_TIMESTAMP:                      'UTC_TIMESTAMP';
 WEEKDAY:                            'WEEKDAY';
 YEARWEEK:                           'YEARWEEK';
+STRFTIME:                           'STRFTIME';
 
 // TEXT FUNCTIONS
 SUBSTR:                             'SUBSTR';
@@ -327,12 +415,40 @@ CAST:                               'CAST';
 LIKE:                               'LIKE';
 ISNULL:                             'ISNULL';
 ISNOTNULL:                          'ISNOTNULL';
+CIDRMATCH:                          'CIDRMATCH';
+BETWEEN:                            'BETWEEN';
+ISPRESENT:                          'ISPRESENT';
+ISEMPTY:                            'ISEMPTY';
+ISBLANK:                            'ISBLANK';
+
+// COLLECTION FUNCTIONS
+ARRAY:                              'ARRAY';
+ARRAY_LENGTH:                       'ARRAY_LENGTH';
+MVJOIN:                             'MVJOIN';
+FORALL:                             'FORALL';
+FILTER:                             'FILTER';
+TRANSFORM:                          'TRANSFORM';
+REDUCE:                             'REDUCE';
+
+// JSON FUNCTIONS
+JSON_VALID:                         'JSON_VALID';
+JSON:                               'JSON';
+JSON_OBJECT:                        'JSON_OBJECT';
+JSON_ARRAY:                         'JSON_ARRAY';
+JSON_ARRAY_LENGTH:                  'JSON_ARRAY_LENGTH';
+JSON_EXTRACT:                       'JSON_EXTRACT';
+JSON_KEYS:                          'JSON_KEYS';
+JSON_SET:                           'JSON_SET';
+JSON_DELETE:                        'JSON_DELETE';
+JSON_APPEND:                        'JSON_APPEND';
+JSON_EXTEND:                        'JSON_EXTEND';
 
 // FLOWCONTROL FUNCTIONS
 IFNULL:                             'IFNULL';
 NULLIF:                             'NULLIF';
 IF:                                 'IF';
 TYPEOF:                             'TYPEOF';
+COALESCE:                           'COALESCE';
 
 // RELEVANCE FUNCTIONS AND PARAMETERS
 MATCH:                              'MATCH';
@@ -377,6 +493,11 @@ ZERO_TERMS_QUERY:                   'ZERO_TERMS_QUERY';
 
 // SPAN KEYWORDS
 SPAN:                               'SPAN';
+BINS:                               'BINS';
+MINSPAN:                            'MINSPAN';
+START:                              'START';
+END:                                'END';
+ALIGNTIME:                          'ALIGNTIME';
 MS:                                 'MS';
 S:                                  'S';
 M:                                  'M';
@@ -385,6 +506,26 @@ W:                                  'W';
 Q:                                  'Q';
 Y:                                  'Y';
 
+// Extended timescale units
+SEC:                                'SEC';
+SECS:                               'SECS';
+SECONDS:                            'SECONDS';
+MINS:                               'MINS';
+MINUTES:                            'MINUTES';
+HR:                                 'HR';
+HRS:                                'HRS';
+HOURS:                              'HOURS';
+DAYS:                               'DAYS';
+MON:                                'MON';
+MONTHS:                             'MONTHS';
+US:                                 'US';
+CS:                                 'CS';
+DS:                                 'DS';
+
+
+// PERCENTILE SHORTCUT FUNCTIONS
+// Must precede ID to avoid conflicts with identifier matching
+PERCENTILE_SHORTCUT:                PERC(INTEGER_LITERAL | DECIMAL_LITERAL) | 'P'(INTEGER_LITERAL | DECIMAL_LITERAL);
 
 // LITERALS AND VALUES
 //STRING_LITERAL:                     DQUOTA_STRING | SQUOTA_STRING | BQUOTA_STRING;
@@ -392,9 +533,10 @@ ID:                                 ID_LITERAL;
 CLUSTER:                            CLUSTER_PREFIX_LITERAL;
 INTEGER_LITERAL:                    DEC_DIGIT+;
 DECIMAL_LITERAL:                    (DEC_DIGIT+)? '.' DEC_DIGIT+;
+FLOAT_LITERAL:                      (DEC_DIGIT+)? '.' DEC_DIGIT+ 'F';
+DOUBLE_LITERAL:                     (DEC_DIGIT+)? '.' DEC_DIGIT+ 'D';
 
 fragment DATE_SUFFIX:               ([\-.][*0-9]+)+;
-fragment ID_LITERAL:                [@*A-Z][*A-Z_\-0-9]*;
 fragment CLUSTER_PREFIX_LITERAL:    [*A-Z]+?[*A-Z_\-0-9]* COLON;
 ID_DATE_SUFFIX:                     CLUSTER_PREFIX_LITERAL? ID_LITERAL DATE_SUFFIX;
 DQUOTA_STRING:                      '"' ( '\\'. | '""' | ~('"'| '\\') )* '"';
@@ -402,5 +544,11 @@ SQUOTA_STRING:                      '\'' ('\\'. | '\'\'' | ~('\'' | '\\'))* '\''
 BQUOTA_STRING:                      '`' ( '\\'. | '``' | ~('`'|'\\'))* '`';
 fragment DEC_DIGIT:                 [0-9];
 
+// Identifiers cannot start with a single '_' since this an OpenSearch reserved
+// metadata field.  Two underscores (or more) is acceptable, such as '__field'.
+fragment ID_LITERAL:                ([@*A-Z_])+?[*A-Z_\-0-9]*;
+
+LINE_COMMENT:                       '//' ('\\\n' | ~[\r\n])* '\r'? '\n'? -> channel(HIDDEN);
+BLOCK_COMMENT:                      '/*' .*? '*/' -> channel(HIDDEN);
 
 ERROR_RECOGNITION:                  .    -> channel(ERRORCHANNEL);
