@@ -104,17 +104,14 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
           {shouldShowLegend && (
             <EuiFlexItem grow={false}>
               <LegendOptionsPanel
-                legendOptions={{
-                  show: styleOptions.addLegend,
-                  position: styleOptions.legendPosition,
-                }}
-                onLegendOptionsChange={(legendOptions) => {
-                  if (legendOptions.show !== undefined) {
-                    updateStyleOption('addLegend', legendOptions.show);
-                  }
-                  if (legendOptions.position !== undefined) {
-                    updateStyleOption('legendPosition', legendOptions.position);
-                  }
+                legendOptions={styleOptions?.legends}
+                onLegendOptionsChange={(index, changed) => {
+                  const updated = [...styleOptions.legends];
+                  updated[index] = {
+                    ...styleOptions.legends[index],
+                    ...changed,
+                  };
+                  updateStyleOption('legends', updated);
                 }}
               />
             </EuiFlexItem>

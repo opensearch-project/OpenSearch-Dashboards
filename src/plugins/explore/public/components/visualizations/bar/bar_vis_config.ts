@@ -21,11 +21,11 @@ import {
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { LegendOptions } from '../style_panel/legend/legend';
 
 export interface BarChartStyleControls {
   // Basic controls
-  addLegend: boolean;
-  legendPosition: Positions;
+  legends: LegendOptions[];
   legendShape?: 'circle' | 'square';
   tooltipOptions: TooltipOptions;
 
@@ -53,8 +53,14 @@ export interface BarChartStyleControls {
 export const defaultBarChartStyles: BarChartStyleControls = {
   // Basic controls
   switchAxes: false,
-  addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legends: [
+    {
+      show: true,
+      position: Positions.RIGHT,
+      title: '',
+      role: 'color',
+    },
+  ],
   tooltipOptions: {
     mode: 'all',
   },

@@ -13,8 +13,14 @@ describe('bar_vis_config', () => {
     test('should have the expected default values', () => {
       expect(defaultBarChartStyles).toMatchObject({
         // Basic controls
-        addLegend: true,
-        legendPosition: Positions.RIGHT,
+        legends: [
+          {
+            show: true,
+            position: Positions.RIGHT,
+            title: '',
+            role: 'color',
+          },
+        ],
         tooltipOptions: {
           mode: 'all',
         },

@@ -74,8 +74,7 @@ describe('Area Chart to_expression', () => {
   ];
 
   const mockStyles: Partial<AreaChartStyleControls> = {
-    addLegend: true,
-    legendPosition: Positions.RIGHT,
+    legends: [{ role: 'color', show: true, position: Positions.RIGHT, title: '' }],
     addTimeMarker: false,
     areaOpacity: 0.6,
     tooltipOptions: {
@@ -127,9 +126,10 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer).toHaveProperty('encoding.x.field', 'date');
       expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
 
-      // Verify legend configuration
-      expect(result).toHaveProperty('legend');
-      expect(result.legend).toHaveProperty('orient', 'right');
+      // Verify tooltip configuration
+      expect(mainLayer.encoding).toHaveProperty('tooltip');
+      expect(Array.isArray(mainLayer.encoding.tooltip)).toBe(true);
+      expect(mainLayer.encoding.tooltip).toHaveLength(2);
     });
 
     it('should handle different title display options', () => {
@@ -312,6 +312,10 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
       expect(mainLayer).toHaveProperty('encoding.color.field', 'category');
 
+      // Verify legend configuration
+      expect(mainLayer.encoding.color).toHaveProperty('legend');
+      expect(mainLayer.encoding.color.legend).toHaveProperty('orient', 'right');
+
       // Verify tooltip configuration
       expect(mainLayer.encoding).toHaveProperty('tooltip');
       expect(Array.isArray(mainLayer.encoding.tooltip)).toBe(true);
@@ -442,6 +446,10 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer).toHaveProperty('encoding.x.field', 'date');
       expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
       expect(mainLayer).toHaveProperty('encoding.color.field', 'category');
+
+      // Verify legend configuration
+      expect(mainLayer.encoding.color).toHaveProperty('legend');
+      expect(mainLayer.encoding.color.legend).toHaveProperty('orient', 'right');
     });
 
     it('should handle different title display options', () => {
@@ -714,6 +722,10 @@ describe('Area Chart to_expression', () => {
       expect(result).toHaveProperty('encoding.y.field', 'value');
       expect(result).toHaveProperty('encoding.y.stack', 'normalize');
       expect(result).toHaveProperty('encoding.color.field', 'category2');
+
+      // Verify legend configuration
+      expect(result.encoding.color).toHaveProperty('legend');
+      expect(result.encoding.color.legend).toHaveProperty('orient', 'right');
 
       // Verify tooltip configuration
       expect(result.encoding).toHaveProperty('tooltip');

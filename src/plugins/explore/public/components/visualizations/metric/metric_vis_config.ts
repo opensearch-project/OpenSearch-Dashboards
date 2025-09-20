@@ -6,14 +6,7 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { MetricVisStyleControls } from './metric_vis_options';
-import {
-  RangeValue,
-  ColorSchemas,
-  AxisRole,
-  VisFieldType,
-  PercentageColor,
-  UnitItem,
-} from '../types';
+import { RangeValue, ColorSchemas, AxisRole, VisFieldType, PercentageColor } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 
 export type TextAlignment = 'auto' | 'center';

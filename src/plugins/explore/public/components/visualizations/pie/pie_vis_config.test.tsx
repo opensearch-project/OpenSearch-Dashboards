@@ -30,8 +30,8 @@ describe('createPieConfig', () => {
     const defaults = config.ui.style.defaults as PieChartStyleControls;
     // Verify basic controls
     expect(defaults.addTooltip).toBe(true);
-    expect(defaults.addLegend).toBe(true);
-    expect(defaults.legendPosition).toBe(Positions.RIGHT);
+    expect(defaults.legends[0].show).toBe(true);
+    expect(defaults.legends[0].position).toBe(Positions.RIGHT);
     // Verify exclusive style
     expect(defaults.exclusive.donut).toBe(true);
     expect(defaults.exclusive.showValues).toBe(false);
@@ -51,8 +51,7 @@ describe('createPieConfig', () => {
       styleOptions: {
         addTooltip: false,
         tooltipOptions: { mode: 'all' as const },
-        addLegend: false,
-        legendPosition: Positions.RIGHT,
+        legends: [{ role: 'color', show: false, position: Positions.RIGHT, title: '' }],
         exclusive: {
           donut: true,
           showValues: true,
@@ -110,8 +109,8 @@ describe('createPieConfig', () => {
   it('should have correct defaultPieChartStyles edge values', () => {
     const defaults = defaultPieChartStyles;
     expect(typeof defaults.addTooltip).toBe('boolean');
-    expect(typeof defaults.addLegend).toBe('boolean');
-    expect(['right', 'left', 'top', 'bottom']).toContain(defaults.legendPosition);
+    expect(typeof defaults.legends[0].show).toBe('boolean');
+    expect(['right', 'left', 'top', 'bottom']).toContain(defaults.legends[0].position);
     expect(defaults.tooltipOptions).toHaveProperty('mode');
     expect(typeof defaults.exclusive.donut).toBe('boolean');
     expect(typeof defaults.exclusive.showValues).toBe('boolean');

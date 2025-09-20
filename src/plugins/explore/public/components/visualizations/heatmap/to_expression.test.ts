@@ -4,7 +4,7 @@
  */
 
 import { createHeatmapWithBin, createRegularHeatmap } from './to_expression';
-import { VisFieldType, VisColumn, TooltipOptions, Positions } from '../types';
+import { VisFieldType, VisColumn, TooltipOptions } from '../types';
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 
 jest.mock('./heatmap_chart_utils', () => ({
@@ -17,6 +17,10 @@ jest.mock('../utils/utils', () => ({
   applyAxisStyling: jest.fn(() => ({ title: 'mockAxis' })),
   getSwappedAxisRole: jest.fn((styles, mappings) => ({ xAxis: mappings.x, yAxis: mappings.y })),
   getSchemaByAxis: jest.fn((axis) => (axis?.schema === 'Numerical' ? 'quantitative' : 'nominal')),
+  findLegend: jest.fn((styles, role) => {
+    const legend = styles.legends?.find((l: any) => l.role === role);
+    return legend || (styles.legends?.length ? { show: true, position: 'right', title: '' } : null);
+  }),
 }));
 
 const mockNumericColumns: VisColumn[] = [
@@ -76,8 +80,18 @@ const baseStyles = {
     colorScaleType: 'linear',
     reverseSchema: false,
   },
-  addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legends: [
+    {
+      show: true,
+      position: 'right',
+      title: '',
+      role: 'color',
+    },
+  ],
+  titleOptions: {
+    show: false,
+    titleName: '',
+  },
 } as HeatmapChartStyleControls;
 
 describe('createHeatmapWithBin', () => {
@@ -164,10 +178,10 @@ describe('createHeatmapWithBin', () => {
     expect(spec.layer[0].encoding.color.bin).toBe(false);
   });
 
-  it('should hide legend when addLegend is false', () => {
+  it('should hide legend when legends array is empty', () => {
     const styles = {
       ...baseStyles,
-      addLegend: false,
+      legends: [],
     };
 
     const spec = createHeatmapWithBin(mockData, mockNumericColumns, styles, mockAxisMappings);

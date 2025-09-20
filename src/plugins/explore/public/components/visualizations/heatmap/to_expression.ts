@@ -5,7 +5,7 @@
 
 import { HeatmapChartStyleControls } from './heatmap_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis, findLegend } from '../utils/utils';
 import { createLabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
 
 export const createHeatmapWithBin = (
@@ -19,6 +19,7 @@ export const createHeatmapWithBin = (
   const colorFieldColumn = axisColumnMappings?.color as any;
   const colorField = colorFieldColumn?.column;
   const colorName = colorFieldColumn?.name;
+  const colorLegend = findLegend(styles, 'color');
 
   const markLayer: any = {
     mark: {
@@ -52,10 +53,10 @@ export const createHeatmapWithBin = (
           scheme: styles.exclusive?.colorSchema,
           reverse: styles.exclusive?.reverseSchema,
         },
-        legend: styles.addLegend
+        legend: colorLegend?.show
           ? {
-              title: colorName || 'Metrics',
-              orient: styles.legendPosition,
+              title: colorLegend.title || colorName,
+              orient: colorLegend.position,
             }
           : null,
       },
@@ -102,6 +103,7 @@ export const createRegularHeatmap = (
   const colorFieldColumn = axisColumnMappings?.color!;
   const colorField = colorFieldColumn?.column;
   const colorName = colorFieldColumn?.name;
+  const colorLegend = findLegend(styles, 'color');
 
   const markLayer: any = {
     mark: {
@@ -134,10 +136,10 @@ export const createRegularHeatmap = (
           scheme: styles.exclusive?.colorSchema,
           reverse: styles.exclusive?.reverseSchema,
         },
-        legend: styles.addLegend
+        legend: colorLegend?.show
           ? {
-              title: colorName || 'Metrics',
-              orient: styles.legendPosition,
+              title: colorLegend.title || colorName,
+              orient: colorLegend.position,
             }
           : null,
       },
