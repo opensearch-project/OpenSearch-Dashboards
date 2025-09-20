@@ -17,10 +17,10 @@ class MCPBridge {
     this.sshHost = process.env.OSD_SSH_HOST || 'ubuntu@35.86.147.162';
     this.sshKey = process.env.OSD_SSH_KEY || '~/.ssh/osd-dev.pem';
     this.osdPath = process.env.OSD_PATH || '/home/ubuntu/OpenSearch-Dashboards';
-
+    
     console.error('🌉 Starting MCP Bridge...');
     console.error(`🔗 Connecting to EC2 via SSH: ${this.sshHost}`);
-
+    
     this.setupMCPServer();
   }
 
@@ -40,14 +40,14 @@ class MCPBridge {
 
     // Set up SSH connection to remote MCP server
     await this.connectToRemoteServer();
-
+    
     // Set up MCP handlers that forward to remote server
     this.setupMCPHandlers();
 
     // Start the MCP server
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-
+    
     console.error('✅ SSH bridge established');
     console.error('📡 MCP Bridge is running on stdio');
   }
@@ -57,20 +57,16 @@ class MCPBridge {
       // Create SSH connection that runs a new instance of the MCP server
       const sshCommand = [
         'ssh',
-        '-i',
-        this.sshKey,
-        '-o',
-        'StrictHostKeyChecking=no',
-        '-o',
-        'UserKnownHostsFile=/dev/null',
-        '-o',
-        'LogLevel=ERROR',
+        '-i', this.sshKey,
+        '-o', 'StrictHostKeyChecking=no',
+        '-o', 'UserKnownHostsFile=/dev/null',
+        '-o', 'LogLevel=ERROR',
         this.sshHost,
-        `cd ${this.osdPath} && node src/plugins/osd_mcp_server/standalone/osd-mcp-stdio.js`,
+        `cd ${this.osdPath} && node src/plugins/osd_mcp_server/standalone/osd-mcp-stdio.js`
       ];
 
       this.ssh = spawn(sshCommand[0], sshCommand.slice(1), {
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: ['pipe', 'pipe', 'pipe']
       });
 
       let initBuffer = '';
@@ -78,14 +74,14 @@ class MCPBridge {
 
       this.ssh.stdout.on('data', (data) => {
         const output = data.toString();
-
+        
         // Check for startup messages to confirm connection
         if (!isConnected && output.includes('OpenSearch Dashboards MCP Server is running')) {
           isConnected = true;
           console.error('✅ Connected to remote MCP server');
           resolve();
         }
-
+        
         // Store data for response handling
         if (isConnected) {
           this.handleRemoteData(output);
@@ -102,7 +98,7 @@ class MCPBridge {
       this.ssh.stderr.on('data', (data) => {
         const errorOutput = data.toString();
         console.error(`SSH Debug: ${errorOutput}`);
-
+        
         // Also check stderr for startup messages (MCP server logs to stderr)
         if (!isConnected && errorOutput.includes('OpenSearch Dashboards MCP Server is running')) {
           isConnected = true;
@@ -149,9 +145,9 @@ class MCPBridge {
         jsonrpc: '2.0',
         id: this.requestId++,
         method: 'tools/list',
-        params: {},
+        params: {}
       });
-
+      
       return response.result || { tools: [] };
     });
 
@@ -161,9 +157,9 @@ class MCPBridge {
         jsonrpc: '2.0',
         id: this.requestId++,
         method: 'tools/call',
-        params: request.params,
+        params: request.params
       });
-
+      
       return response.result || { content: [{ type: 'text', text: 'No response' }] };
     });
   }
@@ -185,7 +181,7 @@ class MCPBridge {
       const handleResponse = () => {
         if (this.responseBuffer) {
           const lines = this.responseBuffer.split('\n');
-
+          
           for (const line of lines) {
             if (line.trim()) {
               try {
@@ -202,7 +198,7 @@ class MCPBridge {
             }
           }
         }
-
+        
         // If no response found, try again in 100ms
         setTimeout(handleResponse, 100);
       };

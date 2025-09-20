@@ -8,9 +8,8 @@ import { MCPTool } from '../../mcp_server';
 
 export class UpdateQueryTool implements MCPTool {
   public readonly name = 'update_query';
-  public readonly description =
-    'Update the PPL/SQL query in OpenSearch Dashboards explore interface';
-
+  public readonly description = 'Update the PPL/SQL query in OpenSearch Dashboards explore interface';
+  
   public readonly inputSchema = {
     type: 'object',
     properties: {
@@ -46,15 +45,13 @@ export class UpdateQueryTool implements MCPTool {
       // Access the global Explore services which includes the Redux store
       const globalServices = (global as any).exploreServices;
       if (!globalServices || !globalServices.store) {
-        this.logger.warn(
-          'UpdateQueryTool: Explore services not available, returning mock response'
-        );
+        this.logger.warn('UpdateQueryTool: Explore services not available, returning mock response');
         return {
           success: false,
           message: 'Explore services not available. Make sure you are on an Explore page.',
           error: 'SERVICES_NOT_AVAILABLE',
           updatedQuery: query,
-          language,
+          language: language,
           timestamp: new Date().toISOString(),
           action: 'query_update_failed',
         };
@@ -73,7 +70,7 @@ export class UpdateQueryTool implements MCPTool {
 
       // Access Redux actions through global services
       const reduxActions = (global as any).exploreReduxActions;
-
+      
       // Update query text with history tracking
       if (reduxActions && reduxActions.setQueryStringWithHistory) {
         globalServices.store.dispatch(reduxActions.setQueryStringWithHistory(query));
@@ -89,13 +86,11 @@ export class UpdateQueryTool implements MCPTool {
       // If language is different, update the entire query state
       if (language && language !== currentQuery.language) {
         if (reduxActions && reduxActions.setQueryState) {
-          globalServices.store.dispatch(
-            reduxActions.setQueryState({
-              query,
-              language,
-              dataset: currentQuery.dataset,
-            })
-          );
+          globalServices.store.dispatch(reduxActions.setQueryState({
+            query,
+            language,
+            dataset: currentQuery.dataset,
+          }));
         } else {
           // Fallback: dispatch action directly
           globalServices.store.dispatch({
@@ -130,16 +125,13 @@ export class UpdateQueryTool implements MCPTool {
         previousLanguage: currentQuery.language,
         timestamp: new Date().toISOString(),
         action: 'query_updated',
-        reduxActions:
-          language !== currentQuery.language
-            ? ['setQueryStringWithHistory', 'setQueryState']
-            : ['setQueryStringWithHistory'],
+        reduxActions: language !== currentQuery.language
+          ? ['setQueryStringWithHistory', 'setQueryState']
+          : ['setQueryStringWithHistory'],
       };
     } catch (error) {
       this.logger.error('UpdateQueryTool: Failed to update query', error);
-      throw new Error(
-        `Failed to update query: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
+      throw new Error(`Failed to update query: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

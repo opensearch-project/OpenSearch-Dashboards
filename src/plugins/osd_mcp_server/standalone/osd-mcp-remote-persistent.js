@@ -2,7 +2,7 @@
 
 /**
  * OpenSearch Dashboards MCP Server - Persistent Remote stdio Transport
- *
+ * 
  * This script runs on the local Mac and maintains a persistent connection
  * to the OSD MCP server running on the EC2 instance via SSH tunnel.
  */
@@ -17,17 +17,17 @@ class PersistentRemoteOSDMCPServer {
     this.sshHost = process.env.OSD_SSH_HOST || 'ubuntu@35.86.147.162';
     this.sshKey = process.env.OSD_SSH_KEY || '~/.ssh/osd-dev.pem';
     this.osdPath = process.env.OSD_PATH || '/home/ubuntu/OpenSearch-Dashboards';
-
+    
     this.sshProcess = null;
     this.isConnected = false;
-
+    
     this.setupMCPServer();
   }
 
   async setupMCPServer() {
     console.error('🌉 Starting OSD MCP Remote Bridge...');
     console.error(`🔗 Connecting to EC2 via SSH: ${this.sshHost}`);
-
+    
     // Create MCP server
     this.server = new Server(
       {
@@ -43,14 +43,18 @@ class PersistentRemoteOSDMCPServer {
 
     // Set up persistent SSH connection
     await this.connectToRemoteServer();
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> ac304b9a894... Revert "[mcp] remove standalone mcp and reset mcp server"
     // Set up MCP handlers
     this.setupMCPHandlers();
 
     // Start the MCP server
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-
+    
     console.error('✅ SSH connection established');
     console.error('📡 MCP Bridge is running on stdio');
   }
@@ -59,37 +63,31 @@ class PersistentRemoteOSDMCPServer {
     return new Promise((resolve, reject) => {
       const sshCommand = [
         'ssh',
-        '-i',
-        this.sshKey,
-        '-o',
-        'StrictHostKeyChecking=no',
-        '-o',
-        'UserKnownHostsFile=/dev/null',
-        '-o',
-        'LogLevel=ERROR',
-        '-o',
-        'ServerAliveInterval=30',
-        '-o',
-        'ServerAliveCountMax=3',
+        '-i', this.sshKey,
+        '-o', 'StrictHostKeyChecking=no',
+        '-o', 'UserKnownHostsFile=/dev/null',
+        '-o', 'LogLevel=ERROR',
+        '-o', 'ServerAliveInterval=30',
+        '-o', 'ServerAliveCountMax=3',
         this.sshHost,
-        `cd ${this.osdPath} && node src/plugins/osd_mcp_server/standalone/osd-mcp-stdio.js`,
+        `cd ${this.osdPath} && node src/plugins/osd_mcp_server/standalone/osd-mcp-stdio.js`
       ];
 
       this.sshProcess = spawn(sshCommand[0], sshCommand.slice(1), {
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: ['pipe', 'pipe', 'pipe']
       });
 
       let initBuffer = '';
-
+      
       this.sshProcess.stdout.on('data', (data) => {
         const output = data.toString();
-
+        
         // Check for startup messages
         if (output.includes('OpenSearch Dashboards MCP Server is running')) {
           this.isConnected = true;
           resolve();
         }
-
+        
         // Handle JSON-RPC responses
         if (this.isConnected) {
           this.handleRemoteResponse(output);
@@ -136,9 +134,9 @@ class PersistentRemoteOSDMCPServer {
         jsonrpc: '2.0',
         id: this.requestId++,
         method: 'tools/list',
-        params: {},
+        params: {}
       });
-
+      
       return response.result || { tools: [] };
     });
 
@@ -148,9 +146,9 @@ class PersistentRemoteOSDMCPServer {
         jsonrpc: '2.0',
         id: this.requestId++,
         method: 'tools/call',
-        params: request.params,
+        params: request.params
       });
-
+      
       return response.result || { content: [{ type: 'text', text: 'No response' }] };
     });
   }
@@ -180,12 +178,12 @@ class PersistentRemoteOSDMCPServer {
 
   handleRemoteResponse(data) {
     const lines = data.split('\n');
-
+    
     for (const line of lines) {
       if (line.trim()) {
         try {
           const response = JSON.parse(line.trim());
-
+          
           if (response.id && this.pendingRequests.has(response.id)) {
             const { resolve } = this.pendingRequests.get(response.id);
             this.pendingRequests.delete(response.id);

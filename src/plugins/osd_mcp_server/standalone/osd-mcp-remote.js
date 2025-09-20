@@ -2,7 +2,7 @@
 
 /**
  * OpenSearch Dashboards MCP Server - Remote stdio Transport
- *
+ * 
  * This script runs on the local Mac and connects to the OSD MCP server
  * running on the EC2 instance via SSH tunnel.
  */
@@ -16,22 +16,22 @@ class RemoteOSDMCPServer {
     this.sshHost = process.env.OSD_SSH_HOST || 'ubuntu@ip-172-31-18-229';
     this.sshKey = process.env.OSD_SSH_KEY || '~/.ssh/id_rsa';
     this.osdPath = process.env.OSD_PATH || '/home/ubuntu/OpenSearch-Dashboards';
-
+    
     this.setupStdio();
   }
 
   setupStdio() {
     // Set up JSON-RPC communication over stdin/stdout
     process.stdin.setEncoding('utf8');
-
+    
     let buffer = '';
     process.stdin.on('data', (chunk) => {
       buffer += chunk;
-
+      
       // Process complete JSON messages
-      const lines = buffer.split('\n');
+      let lines = buffer.split('\n');
       buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
+      
       for (const line of lines) {
         if (line.trim()) {
           try {
@@ -74,20 +74,16 @@ class RemoteOSDMCPServer {
       // Execute the remote MCP server via SSH
       const sshCommand = [
         'ssh',
-        '-i',
-        this.sshKey,
-        '-o',
-        'StrictHostKeyChecking=no',
-        '-o',
-        'UserKnownHostsFile=/dev/null',
-        '-o',
-        'LogLevel=ERROR',
+        '-i', this.sshKey,
+        '-o', 'StrictHostKeyChecking=no',
+        '-o', 'UserKnownHostsFile=/dev/null',
+        '-o', 'LogLevel=ERROR',
         this.sshHost,
-        `cd ${this.osdPath} && node src/plugins/osd_mcp_server/standalone/osd-mcp-stdio.js`,
+        `cd ${this.osdPath} && node src/plugins/osd_mcp_server/standalone/osd-mcp-stdio.js`
       ];
 
       const ssh = spawn(sshCommand[0], sshCommand.slice(1), {
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: ['pipe', 'pipe', 'pipe']
       });
 
       let responseData = '';
@@ -128,7 +124,7 @@ class RemoteOSDMCPServer {
     const response = {
       jsonrpc: '2.0',
       id: id,
-      result: result,
+      result: result
     };
     process.stdout.write(JSON.stringify(response) + '\n');
   }
@@ -140,8 +136,8 @@ class RemoteOSDMCPServer {
       error: {
         code: code,
         message: message,
-        data: data,
-      },
+        data: data
+      }
     };
     process.stdout.write(JSON.stringify(response) + '\n');
   }
