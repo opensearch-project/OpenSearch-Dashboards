@@ -19,6 +19,12 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 
   &__page-body {
     gap: $ouiSizeS;
+
+    // within Explore we do not use the globalQueryEditor
+    // Although this element is empty the way we configure props, it contributes to extra padding
+    & .globalQueryEditor {
+      display: none;
+    }
   }
 
   &__canvas {

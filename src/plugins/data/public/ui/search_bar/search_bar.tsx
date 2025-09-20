@@ -584,7 +584,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {queryBar}
         {queryEditor}
         {!isEnhancementsEnabledOverride && filterBar}
-
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
             formUiType="Modal"
