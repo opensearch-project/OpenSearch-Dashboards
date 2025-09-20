@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable no-console, max-classes-per-file */
+
 /**
  * Redux Bridge Client - Client-side Redux execution
  *
@@ -563,6 +565,130 @@ class ReduxBridgeClient {
     };
   }
 
+  public async executeCallAgentInstruction(instruction: any): Promise<any> {
+    const { payload } = instruction;
+    const { question, language = 'PPL' } = payload;
+
+    console.log(`🤖 Executing callAgentActionCreator instruction with question: "${question}"`);
+
+    const globalServices = window.exploreServices;
+    const reduxActions = window.exploreReduxActions;
+
+    if (!globalServices || !globalServices.store) {
+      console.error('❌ Global services or store not available');
+      return {
+        success: false,
+        message: 'Global services or store not available in browser context',
+        timestamp: new Date().toISOString(),
+        executionType: 'call_agent',
+      };
+    }
+
+    if (!reduxActions || !reduxActions.callAgentActionCreator) {
+      console.error('❌ callAgentActionCreator not available');
+      return {
+        success: false,
+        message: 'callAgentActionCreator not available in browser context',
+        timestamp: new Date().toISOString(),
+        executionType: 'call_agent',
+      };
+    }
+
+    try {
+      // Get current dataset from services (EXACT same as call_agent.ts)
+      const dataset = globalServices.data.query.queryString.getQuery().dataset;
+
+      console.log('📊 callAgentActionCreator: Dataset info (same source as call_agent.ts)', {
+        hasDataset: !!dataset,
+        datasetTitle: dataset?.title,
+        datasetId: dataset?.id,
+        dataSourceId: dataset?.dataSource?.id,
+      });
+
+      if (!dataset) {
+        console.error('❌ callAgentActionCreator: No dataset selected');
+        return {
+          success: false,
+          message: 'No dataset selected. Please select a dataset first.',
+          error: 'NO_DATASET',
+          question,
+          timestamp: new Date().toISOString(),
+          executionType: 'call_agent',
+        };
+      }
+
+      // Execute callAgentActionCreator (same as AI mode)
+      console.log(
+        '🚀 callAgentActionCreator: Dispatching callAgentActionCreator (same as AI mode)'
+      );
+
+      // IMPORTANT: Use the question as editorText (same as AI mode)
+      await globalServices.store.dispatch(
+        reduxActions.callAgentActionCreator({
+          services: globalServices,
+          editorText: question, // This is the key - question from chat, not from editorText
+        })
+      );
+
+      // Get the updated state after execution
+      const updatedState = globalServices.store.getState();
+      const executedQuery = updatedState.query?.query;
+      const results = updatedState.results;
+      const lastExecutedPrompt = updatedState.queryEditor?.lastExecutedPrompt;
+      const lastExecutedTranslatedQuery = updatedState.queryEditor?.lastExecutedTranslatedQuery;
+
+      // Count results (same logic as other tools)
+      let totalResultCount = 0;
+      let hasResults = false;
+      Object.values(results || {}).forEach((result: any) => {
+        if (result?.hits?.hits) {
+          totalResultCount += result.hits.hits.length;
+          hasResults = true;
+        }
+      });
+
+      console.log('✅ callAgentActionCreator: Query generated and executed successfully', {
+        question,
+        generatedQuery: lastExecutedTranslatedQuery,
+        executedQuery,
+        totalResultCount,
+        hasResults,
+      });
+
+      return {
+        success: true,
+        message: `Query generated and executed successfully from question: "${question}"`,
+        question,
+        generatedQuery: lastExecutedTranslatedQuery,
+        executedQuery,
+        dataset: {
+          title: dataset.title,
+          id: dataset.id,
+          dataSourceId: dataset.dataSource?.id,
+        },
+        resultCount: totalResultCount,
+        hasResults,
+        resultCacheKeys: Object.keys(results || {}).length,
+        timestamp: new Date().toISOString(),
+        executionType: 'call_agent',
+        method: 'callAgentActionCreator',
+        note: 'Used same flow as AI mode - question from chat instead of editorText',
+      };
+    } catch (error) {
+      console.error('❌ callAgentActionCreator: Failed to generate/execute query', error);
+      return {
+        success: false,
+        message: `Failed to generate query: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+        question,
+        timestamp: new Date().toISOString(),
+        executionType: 'call_agent',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
   private setupReduxMonitoring() {
     const store = window.exploreServices?.store;
     if (!store) return;
@@ -739,6 +865,35 @@ class MCPCommandPoller {
                 console.log('✅ MCP Polling: Command executed successfully');
               } catch (error) {
                 console.error('❌ MCP Polling: Command execution failed:', error);
+                // Remove from processed commands if execution failed so it can be retried
+                this.processedCommands.delete(commandId);
+              }
+            } else if (command.action === 'execute_call_agent') {
+              console.log('🤖 MCP Polling: Executing callAgentActionCreator command');
+              console.log('🤖 MCP Polling: Command details:', {
+                type: command.type,
+                payload: command.payload,
+                timestamp: command.timestamp,
+              });
+
+              // Mark as processed BEFORE execution to prevent race conditions
+              this.processedCommands.add(commandId);
+
+              // Clean up old processed commands (keep only last 50 to prevent memory leaks)
+              if (this.processedCommands.size > 50) {
+                const commandsArray = Array.from(this.processedCommands);
+                this.processedCommands = new Set(commandsArray.slice(-25));
+                console.log(
+                  '🧹 MCP Polling: Cleaned up processed commands cache, now has:',
+                  this.processedCommands.size
+                );
+              }
+
+              try {
+                await this.reduxBridge.executeCallAgentInstruction(command);
+                console.log('✅ MCP Polling: callAgentActionCreator executed successfully');
+              } catch (error) {
+                console.error('❌ MCP Polling: callAgentActionCreator execution failed:', error);
                 // Remove from processed commands if execution failed so it can be retried
                 this.processedCommands.delete(commandId);
               }

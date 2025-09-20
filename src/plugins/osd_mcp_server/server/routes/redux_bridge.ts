@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable no-console */
+
 import { IRouter } from '../../../../core/server';
 
 // In-memory store for pending MCP commands
@@ -172,6 +174,65 @@ export function registerReduxBridgeRoutes(router: IRouter) {
           statusCode: 500,
           body: {
             message: `Error executing query: ${error.message}`,
+          },
+        });
+      }
+    }
+  );
+
+  // Call Agent via Redux (using callAgentActionCreator)
+  router.post(
+    {
+      path: '/api/osd-mcp-server/redux/call-agent',
+      validate: {
+        body: (value, { ok, badRequest }) => {
+          if (typeof value === 'object' && value !== null) {
+            const body = value as any;
+            if (typeof body.question === 'string') {
+              return ok(body);
+            }
+          }
+          return badRequest('Invalid request body - question is required');
+        },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { question, language = 'PPL' } = request.body as any;
+
+        console.log('🎯 SERVER ROUTE HIT: /api/osd-mcp-server/redux/call-agent');
+        console.log('📥 Request body:', { question, language });
+        console.log('🔧 Returning callAgentActionCreator execution instructions...');
+
+        // Create command for callAgentActionCreator execution
+        const command = {
+          action: 'execute_call_agent',
+          type: 'call_agent',
+          payload: { question, language },
+          timestamp: new Date().toISOString(),
+          message:
+            'callAgentActionCreator execution - query will be generated and executed via AI mode',
+          directExecution: {
+            method: 'callAgentActionCreator',
+            params: { question, language },
+            description:
+              'Execute callAgentActionCreator directly in browser context (same as AI mode)',
+          },
+        };
+
+        // Add to pending commands queue for polling
+        addPendingCommand(command);
+
+        console.log('📤 Server response:', command);
+
+        return response.ok({
+          body: command,
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Error calling agent: ${error.message}`,
           },
         });
       }
