@@ -58,16 +58,51 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     // Initialize chat service with configured AG-UI URL
     this.chatService = new ChatService(config.agUiUrl);
 
-    // Register chat button in header using toMountPoint
+    // Store reference to chat service for use in subscription
+    const chatService = this.chatService;
+
+    // Register chat button in header with conditional visibility
     core.chrome.navControls.registerRight({
       order: 1000,
-      mount: toMountPoint(
-        React.createElement(ChatHeaderButton, {
-          core,
-          chatService: this.chatService,
-          contextProvider: deps.contextProvider,
-        })
-      ),
+      mount: (element) => {
+        let isVisible = false;
+        let unmountComponent: (() => void) | null = null;
+
+        const updateVisibility = (currentAppId: string | undefined) => {
+          const shouldShow = currentAppId && currentAppId.startsWith('explore');
+
+          if (shouldShow && !isVisible) {
+            // Mount the component
+            const mountPoint = toMountPoint(
+              React.createElement(ChatHeaderButton, {
+                core,
+                chatService,
+                contextProvider: deps.contextProvider,
+              })
+            );
+            unmountComponent = mountPoint(element);
+            isVisible = true;
+          } else if (!shouldShow && isVisible) {
+            // Unmount the component
+            if (unmountComponent) {
+              unmountComponent();
+              unmountComponent = null;
+            }
+            isVisible = false;
+          }
+        };
+
+        // Subscribe to app changes
+        const subscription = core.application.currentAppId$.subscribe(updateVisibility);
+
+        // Return cleanup function
+        return () => {
+          subscription.unsubscribe();
+          if (unmountComponent) {
+            unmountComponent();
+          }
+        };
+      },
     });
 
     return {
