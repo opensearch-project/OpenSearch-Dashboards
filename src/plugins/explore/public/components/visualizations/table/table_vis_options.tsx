@@ -14,6 +14,7 @@ import { ThresholdCustomValues } from '../style_panel/threshold/threshold_custom
 import { TableCellTypeOptions } from './table_cell_type_options';
 import { defaultTableChartStyles, TableChartStyleControls } from './table_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
+import { DataLinkOptions } from './data_link_options';
 
 export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyleControls>;
 
@@ -166,6 +167,17 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
           dateColumns={dateColumns}
           axisColumnMappings={axisColumnMappings}
           updateVisualization={updateVisualization}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DataLinkOptions
+          styleOptions={styleOptions}
+          onStyleChange={onStyleChange}
+          axisColumnMappings={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
